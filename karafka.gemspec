@@ -1,0 +1,26 @@
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'rake'
+require 'karafka/version'
+
+Gem::Specification.new do |spec|
+  spec.name          = 'karafka'
+  spec.version       = ::Karafka::VERSION
+  spec.platform      = Gem::Platform::RUBY
+  spec.authors       = ['Maciej Mensfeld', 'Pavlo Vavruk']
+  spec.email         = %w( maciej@mensfeld.pl pavlo.vavruk@gmail.com )
+  spec.homepage      = ''
+  spec.summary       = %q{ Model Event Controller microframework for Ruby and Kafka }
+  spec.description   = %q{ Microframework used to simplify Kafka based Ruby applications }
+
+  spec.add_development_dependency 'bundler'
+  spec.add_development_dependency 'rake'
+  spec.add_dependency 'aspector'
+  spec.add_dependency 'poseidon'
+  spec.add_dependency 'poseidon_cluster'
+  spec.add_dependency 'sidekiq'
+
+  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
+  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.require_paths = %w( lib )
+end
