@@ -1,4 +1,5 @@
 module Karafka
+  # Configurator for setting up delivery details
   class Config
     class << self
       attr_accessor :config

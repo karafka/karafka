@@ -1,5 +1,6 @@
 module Karafka
   module Aspects
+    # Class for handling events around the method
     class AroundAspect < BaseAspect
       around options[:method], interception_arg: true do |interception, proxy, *args, &block|
         options = interception.options

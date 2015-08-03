@@ -1,5 +1,6 @@
 module Karafka
   module Aspects
+    # Class for handling events before the method
     class BeforeAspect < BaseAspect
       before options[:method], interception_arg: true do |interception, *args|
         options = interception.options

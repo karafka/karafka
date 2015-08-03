@@ -1,5 +1,6 @@
 module Karafka
   module Aspects
+    # Class for formatting the message
     class Formatter
       def initialize(options, args, result)
         @options = options

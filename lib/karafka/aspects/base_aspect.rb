@@ -1,5 +1,6 @@
 module Karafka
   module Aspects
+    # Base Aspect class
     class BaseAspect < ::Aspector::Base
       default private_methods: true
 

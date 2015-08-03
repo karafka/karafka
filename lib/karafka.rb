@@ -12,6 +12,7 @@ ENV['KARAFKA_ENV'] ||= 'development'
   karafka/loader
 ).each { |lib| require lib }
 
+# Karafka library
 module Karafka
   def self.config
     Config.config
