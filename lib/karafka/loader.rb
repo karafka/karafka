@@ -8,17 +8,17 @@ module Karafka
     DIRS = %w(
       config/initializers
       lib
-      # app/helpers
-      # app/inputs
-      # app/decorators
-      # app/models/concerns
-      # app/models
-      # app/services
-      # app/presenters
-      # app/controllers
-      # app/workers
-      # app/aspects
-      # app/**
+      app/helpers
+      app/inputs
+      app/decorators
+      app/models/concerns
+      app/models
+      app/services
+      app/presenters
+      app/controllers
+      app/workers
+      app/aspects
+      app/**
     )
 
     # @return [Integer] order for sorting

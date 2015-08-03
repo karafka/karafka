@@ -1,6 +1,13 @@
 module Karafka
   module Aspects
-    # Class for handling events after the method
+    # After method execution aspect
+    # @example Apply after aspect to a method
+    #   WaterDrop::Aspects::AfterAspect.apply(
+    #     ClassName,
+    #     method: :run,
+    #     topic: 'karafka_topic',
+    #     message: ->(result) { "This is result of method run: #{result}" }
+    #   )
     class AfterAspect < BaseAspect
       after options[:method], interception_arg: true do |interception, result, *args|
         options = interception.options

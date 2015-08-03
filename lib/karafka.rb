@@ -14,6 +14,7 @@ ENV['KARAFKA_ENV'] ||= 'development'
 
 # Karafka library
 module Karafka
+  # @return [Karafka::Config] config instance
   def self.config
     Config.config
   end
