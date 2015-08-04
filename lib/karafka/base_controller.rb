@@ -1,9 +1,11 @@
 require 'karafka/concerns/before_action'
+require 'active_support/all'
 # Karafka module namespace
 module Karafka
   # Base controller
   class BaseController
     extend Karafka::Concerns::BeforeAction
+    cattr_accessor :params
 
     def initialize(params)
       # rubocop:disable all
