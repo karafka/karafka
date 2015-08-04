@@ -5,9 +5,9 @@ module Karafka
     # @param context [String, Class] IO class or logfile string path
     # @return [Karafka::Logger] Karafka logger instance
     # @example Creating a new logger
-    #   Karafka::Logger.new(STDOUT)
-    #   Karafka::Logger.new('logfile.log')
-  def initialize(context)
+    # Karafka::Logger.new(STDOUT)
+    # Karafka::Logger.new('logfile.log')
+    def initialize(context)
       super(context)
       @level = (ENV['EVENT_DELEGATOR_LOG_LEVEL'] || ::Logger::ERROR).to_i
     end
