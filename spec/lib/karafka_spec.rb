@@ -27,7 +27,6 @@ RSpec.describe Karafka do
 
     it 'returns NULL logger' do
       allow(Karafka.instance_variable_get(:@logger)) { nil }
-      # expect(Karafka).to receive(:logger).and_return(Karafka::NullLogger)
       expect(Karafka.logger).to eq(Karafka::NullLogger)
     end
 
