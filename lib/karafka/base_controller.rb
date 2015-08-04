@@ -1,5 +1,3 @@
-require 'active_support/all'
-
 require 'karafka/concerns/before_action'
 # Karafka module namespace
 module Karafka
