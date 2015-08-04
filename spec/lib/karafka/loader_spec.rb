@@ -51,4 +51,27 @@ RSpec.describe Karafka::Loader do
       subject.relative_load!(relative_path)
     end
   end
+
+  describe '#load' do
+    subject { described_class.new }
+    let(:relative_path) { '/app/decorators' }
+    let(:lib_path) { '/lib' }
+    let(:app_path) { '/app' }
+
+    before do
+      stub_const('Karafka::Loader::DIRS', %w(lib app))
+      expect(subject).to receive(:load!)
+        .with('/app/decorators/lib')
+        .and_return(double)
+        .ordered
+      expect(subject).to receive(:load!)
+        .with('/app/decorators/app')
+        .and_return(double)
+        .ordered
+    end
+
+    it 'load paths for all DIRS' do
+      subject.load(relative_path)
+    end
+  end
 end

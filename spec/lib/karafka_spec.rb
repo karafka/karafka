@@ -19,4 +19,22 @@ RSpec.describe Karafka do
       it { expect(subject.root.to_path).to eq '/' }
     end
   end
+
+  describe '#logger' do
+    let(:logger) { double }
+    let(:log) { double }
+    let(:set_logger) { double }
+
+    it 'returns NULL logger' do
+      allow(Karafka.instance_variable_get(:@logger)) { nil }
+      # expect(Karafka).to receive(:logger).and_return(Karafka::NullLogger)
+      expect(Karafka.logger).to eq(Karafka::NullLogger)
+    end
+
+    it 'returns set logger' do
+      allow(Karafka.instance_variable_get(:@logger)) { set_logger }
+      expect(Karafka).to receive(:logger).and_return(set_logger)
+      Karafka.logger
+    end
+  end
 end
