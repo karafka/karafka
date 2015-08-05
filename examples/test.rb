@@ -9,15 +9,22 @@ folders_path = File.dirname(__FILE__) + '/karafka/*.rb'
 Dir[folders_path].each { |file| require file }
 
 
-class Facebook2Controller < Karafka::BaseController
-  self.group = :karafka_api3
+class Facebook22Controller < Karafka::BaseController
+  self.group = :karafka_api2
   self.topic = 'karafka_topic4'
+
+  before_action do
+    puts 'BEFORE #14444'
+    params.merge!({ :aaa43 => 4 })
+    true
+  end
 
   def process
     puts "PROCESS PROCESS PROCESS"
     # Karafka::Worker.perform_async(params)
   end
 end
+
 class Facebook2Controller < Karafka::BaseController
   self.group = :karafka_api2
   self.topic = 'karafka_topic3'
@@ -46,32 +53,30 @@ class Facebook2Controller < Karafka::BaseController
     true
   end
 
-  before_action :a, :b
-
-  def a
-    puts 'BEFORE METHOD A'
-    params.merge!({ met: 1 })
-    true
-  end
-
-  def b
-    puts 'BEFORE METHOD B'
-    params.merge!({ met2: 1 })
-    true
-  end
+  # before_action :a, :b
+  #
+  # def a
+  #   puts 'BEFORE METHOD A'
+  #   params.merge!({ met: 1 })
+  #   true
+  # end
+  #
+  # def b
+  #   puts 'BEFORE METHOD B'
+  #   params.merge!({ met2: 1 })
+  #   true
+  # end
 
   def process
     puts "Worker Worker Worker"
-    # Karafka::Worker.perform_async(params)
   end
 end
 
 class Test
   def apply
     Karafka::Consumer.new(
-        :karafka_api2,
-        ['127.0.0.1:9092', '127.0.0.1:9093'],
-        ['127.0.0.1:2181', '127.0.0.1:2181']
+      ['127.0.0.1:9092', '127.0.0.1:9093'],
+      ['127.0.0.1:2181', '127.0.0.1:2181']
     ).receive
 
     # Karafka::App.new(, 'karafka_topic3').call
