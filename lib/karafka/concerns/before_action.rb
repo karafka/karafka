@@ -29,7 +29,7 @@ module Karafka
         alias_method :"original_#{name}", name
 
         define_method name do |*args|
-          result = @@blocks.inject(true) { |a, e| a && e.call } &&
+          result = @@blocks.inject(true) { |a, e| a && instance_eval(&e) } &&
             @@methods.flatten.to_a.inject(true) { |a, e| a && send(e) }
           send :"original_#{name}", *args if result
         end

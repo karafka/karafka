@@ -1,21 +1,22 @@
 require 'karafka/concerns/before_action'
-require 'active_support/all'
-# Karafka module namespace
+# Karafka module namespacegit
 module Karafka
   # Base controller
   class BaseController
     extend Karafka::Concerns::BeforeAction
-    cattr_accessor :params
 
     def initialize(params)
-      # rubocop:disable all
-      @@params = JSON.load(params)
-      # rubocop:enable all
+      @params = JSON.load(params)
     end
 
     # Method which should be redefined for all descendants.
     def process
       fail NotImplementedError
+    end
+
+    # params method to get instance variable of params
+    def params
+      instance_variable_get :@params
     end
 
     class << self

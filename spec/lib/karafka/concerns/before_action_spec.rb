@@ -15,13 +15,14 @@ RSpec.describe Karafka::Concerns::BeforeAction do
         end
 
         def func
+          params.merge!(a: 4)
           true
         end
 
         self
       end
     end
-    let(:params) do
+    let(:parameters) do
       JSON.generate(
         topic:  :testing_api,
         method: :method_name,
@@ -32,7 +33,7 @@ RSpec.describe Karafka::Concerns::BeforeAction do
 
     it 'returns method once before action result is true' do
       dummy_klass.before_action { true }
-      instance = dummy_klass.new(params)
+      instance = dummy_klass.new(parameters)
       expect(instance).to receive(:puts)
         .with('this is process function')
       instance.process
@@ -40,17 +41,22 @@ RSpec.describe Karafka::Concerns::BeforeAction do
 
     it 'does not return method once before action block result is false' do
       dummy_klass.before_action { false }
-      instance = dummy_klass.new(params)
+      instance = dummy_klass.new(parameters)
       expect(instance).not_to receive(:puts)
         .with('this is process function')
       instance.process
     end
 
     it 'does not return method once before action method result is false' do
-      instance = dummy_klass.new(params)
+      instance = dummy_klass.new(parameters)
       allow(instance).to receive(:func) { false }
       expect(instance).not_to receive(:puts)
         .with('this is process function')
+      instance.process
+    end
+
+    it 'has access to params' do
+      instance = dummy_klass.new(parameters)
       instance.process
     end
   end
