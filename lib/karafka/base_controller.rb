@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+require 'karafka/concerns/before_action'
+require 'active_support/all'
+>>>>>>> Change consumer
 # Karafka module namespace
 module Karafka
   # Base controller from which all Karafka controllers should inherit

@@ -11,8 +11,6 @@ module Karafka
         .detect { |klass| klass.topic == topic }
 
       fail 'Topic is undefined' unless controller
-      puts '[][][][][[][][][]['
-      puts controller.inspect
       controller
         .new(message)
         .process

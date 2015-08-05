@@ -15,11 +15,6 @@ RSpec.describe Karafka::Concerns::BeforeAction do
         end
 
         def func
-<<<<<<< HEAD
-          params.merge!(a: 4)
-=======
-          puts params[:message]
->>>>>>> Change consumer
           true
         end
 
@@ -60,12 +55,9 @@ RSpec.describe Karafka::Concerns::BeforeAction do
     end
 
     it 'has access to params' do
-<<<<<<< HEAD
       instance = dummy_klass.new(parameters)
       instance.process
-=======
       dummy_klass.new(parameters)
->>>>>>> Change consumer
     end
   end
 end

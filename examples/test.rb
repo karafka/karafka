@@ -15,7 +15,7 @@ class Facebook22Controller < Karafka::BaseController
 
   before_action do
     puts 'BEFORE #14444'
-    params.merge!({ :aaa43 => 4 })
+    # params.merge!({ :aaa43 => 4 })
     true
   end
 
@@ -31,25 +31,25 @@ class Facebook2Controller < Karafka::BaseController
 
   before_action do
     puts 'BEFORE #1'
-    params.merge!({ rand(99999) => 4 })
+    # params.merge!({ rand(99999) => 4 })
     true
   end
 
   before_action do
     puts 'BEFORE #2'
-    params.merge!({ a: 3 })
+    # params.merge!({ a: 3 })
     true
   end
 
   before_action do
     puts 'BEFORE #3'
-    params.merge!({ b: 2 })
+    # params.merge!({ b: 2 })
     true
   end
 
   before_action do
     puts 'BEFORE #4'
-    params.merge!({ c: 1 })
+    # params.merge!({ c: 1 })
     true
   end
 
