@@ -15,6 +15,7 @@ RSpec.describe Karafka::Concerns::BeforeAction do
         end
 
         def func
+          params.merge!(a: 4)
           true
         end
 
@@ -57,7 +58,6 @@ RSpec.describe Karafka::Concerns::BeforeAction do
     it 'has access to params' do
       instance = dummy_klass.new(parameters)
       instance.process
-      dummy_klass.new(parameters)
     end
   end
 end
