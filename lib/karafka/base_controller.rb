@@ -68,7 +68,7 @@ module Karafka
       terminator: ->(_target, result) { result == false }
 
     def call
-
+      Karafka::BaseWorker.perform { process }
     end
 
     class << self

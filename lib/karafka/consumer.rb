@@ -5,6 +5,9 @@ module Karafka
   class Consumer
     attr_reader :options
 
+    class DuplicatedGroupError < StandardError; end
+    class DuplicatedTopicError < StandardError; end
+
     def initialize(brokers, zookeeper_hosts)
       @brokers = brokers
       @zookeeper_hosts = zookeeper_hosts
@@ -13,24 +16,14 @@ module Karafka
 
     # Receive the messages
     def receive
-      # options = klasses_options
-      groups = consumer_groups
-      loop do
-        groups.map do |g|
-          Poseidon::ConsumerGroup
-            .instance_variable_set(:@metadata,
-              Poseidon::ClusterMetadata
-                .new
-                .tap { |m| m.update g.pool.fetch_metadata([g.topic]) })
-        end
-        fetch(groups)
-      end
+      validate
+      loop { fetch }
     end
 
     private
 
-    def fetch(groups)
-      groups.each do |group|
+    def fetch
+      consumer_groups.each do |group|
         group.fetch do |_partition, bulk|
           break if bulk.empty?
           bulk.each { |m| Karafka::Router.new(group.topic, m.value) }
@@ -41,7 +34,7 @@ module Karafka
 
     def consumer_groups
       groups = []
-      options.map(&:group).uniq.each do |group|
+      options.map(&:group).each do |group|
         topic = options.detect{ |opt| opt.group == group }.topic
         groups << new_consumer_group(group, topic)
       end
@@ -53,7 +46,7 @@ module Karafka
         group,
         @brokers,
         @zookeeper_hosts,
-        topic,
+        topic.to_s,
         socket_timeout_ms: 50_000 # Karafka.config.socket_timeout_ms
       )
     end
@@ -61,6 +54,13 @@ module Karafka
     def klasses_options
       Karafka::BaseController.descendants.map do |klass|
         OpenStruct.new(topic: klass.topic, group: klass.group)
+      end
+    end
+
+    def validate
+      %i(group topic).each do |field|
+        fields = options.map(&field).map(&:to_s)
+        raise Object.const_get("Karafka::Consumer::Duplicated#{field.capitalize}Error") if fields.uniq != fields
       end
     end
   end

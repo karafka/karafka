@@ -171,4 +171,13 @@ RSpec.describe Karafka::BaseController do
       end
     end
   end
+
+  describe '#call' do
+    it 'call process function' do
+      dummmy_class.before_action { true }
+      instance = dummmy_class.new(JSON.generate({}))
+      expect(instance).to receive(:process)
+      instance.call
+    end
+  end
 end

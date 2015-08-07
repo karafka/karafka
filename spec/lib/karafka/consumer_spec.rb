@@ -33,6 +33,7 @@ RSpec.describe Karafka::Consumer do
         .and_return(consumer_group)
       expect(consumer_group).to receive(:fetch)
         .and_yield(double, bulk)
+      expect(consumer_group).to receive(:close)
       expect(bulk).to receive(:empty?)
         .and_return(false)
       expect(bulk).to receive(:each)

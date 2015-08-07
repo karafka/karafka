@@ -13,6 +13,17 @@ class Facebook22Controller < Karafka::BaseController
   self.group = :karafka_api12
   self.topic = 'karafka_topic12'
 
+  before_action {
+    r = rand(50)
+    params.merge!(first_round: r)
+    r > 25
+  }
+
+  before_action {
+    r = rand(50)
+    params.merge!(next_round: r)
+    r > 25
+  }
   def process
     puts "PROCESS PROCESS PROCESS #{params}"
     # Karafka::Worker.perform_async(params)
@@ -21,7 +32,7 @@ end
 
 class Facebook2Controller < Karafka::BaseController
   self.group = :karafka_api11
-  self.topic = 'karafka_topic11'
+  self.topic = :karafka_topic11
 
   def process
     puts "Worker Worker Worker  #{params}"
@@ -31,8 +42,8 @@ end
 class Test
   def apply
     Karafka::Consumer.new(
-      ['127.0.0.1:9092', '127.0.0.1:9093'],
-      ['127.0.0.1:2181', '127.0.0.1:2181']
+      ['127.0.0.1:9093'],
+      ['127.0.0.1:2181']
     ).receive
 
     # Karafka::App.new(, 'karafka_topic3').call

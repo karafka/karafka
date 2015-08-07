@@ -11,7 +11,7 @@ Dir[folders_path].each { |file| require file }
 
 class GGGGGGController < Karafka::BaseController
   self.group = :karafka_api12
-  self.topic = 'karafka_topic12'
+  self.topic = 'karafka_topic15'
 
 
   def process
@@ -22,7 +22,7 @@ end
 
 class Rrrrrrrr2Controller < Karafka::BaseController
   self.group = :karafka_api11
-  self.topic = 'karafka_topic11'
+  self.topic = 'karafka_topic16'
 
 
 
@@ -34,8 +34,8 @@ end
 class Test
   def apply
     Karafka::Consumer.new(
-      ['127.0.0.1:9092', '127.0.0.1:9093'],
-      ['127.0.0.1:2181', '127.0.0.1:2181']
+      ['127.0.0.1:9093'],
+      ['127.0.0.1:2181']
     ).receive
 
     # Karafka::App.new(, 'karafka_topic3').call

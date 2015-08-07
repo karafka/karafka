@@ -18,9 +18,8 @@ RSpec.describe Karafka::Router do
     it 'creates class once exists controller with needed topic' do
       allow(Karafka::BaseController).to receive(:descendants)
         .and_return(classes)
-      # expect(classes).to receive(:detect).and_return(dummy_klass)
       expect(dummy_klass).to receive(:new).with('message').and_return(controller)
-      expect(controller).to receive(:process)
+      expect(controller).to receive(:call)
       described_class.new('A topic', 'message')
     end
 
@@ -29,7 +28,7 @@ RSpec.describe Karafka::Router do
         .and_return(classes)
       expect(classes).to receive(:detect).and_return(nil)
       expect { described_class.new('Not provided topic', 'message') }
-        .to raise_error('Topic is undefined')
+        .to raise_error(Karafka::Router::UndefinedTopicError)
     end
   end
 end

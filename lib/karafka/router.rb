@@ -5,15 +5,17 @@ module Karafka
   class Router
     attr_reader :topic, :message
 
+    class UndefinedTopicError < StandardError; end
+
     def initialize(topic, message)
       controller = Karafka::BaseController
         .descendants
-        .detect { |klass| klass.topic == topic }
+        .detect { |klass| klass.topic.to_s == topic }
 
-      fail 'Topic is undefined' unless controller
+      raise UndefinedTopicError unless controller
       controller
         .new(message)
-        .process
+        .call
     end
   end
 end

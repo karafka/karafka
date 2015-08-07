@@ -34,8 +34,8 @@ end
 class Test
   def apply
     Karafka::Consumer.new(
-      ['127.0.0.1:9092', '127.0.0.1:9093'],
-      ['127.0.0.1:2181', '127.0.0.1:2181']
+      ['127.0.0.1:9093'],
+      ['127.0.0.1:2181']
     ).receive
 
     # Karafka::App.new(, 'karafka_topic3').call
