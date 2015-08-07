@@ -67,6 +67,10 @@ module Karafka
     define_callbacks :call,
       terminator: ->(_target, result) { result == false }
 
+    def call
+
+    end
+
     class << self
       # Kafka group and topic must be defined
       attr_accessor :group, :topic

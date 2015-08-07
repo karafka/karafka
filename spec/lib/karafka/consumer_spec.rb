@@ -31,7 +31,7 @@ RSpec.describe Karafka::Consumer do
       expect(Poseidon::ConsumerGroup).to receive(:new)
         .with(dummy_klass.group, brokers, zookeeper_hosts, dummy_klass.topic, options)
         .and_return(consumer_group)
-      expect(consumer_group).to receive(:fetch_loop)
+      expect(consumer_group).to receive(:fetch)
         .and_yield(double, bulk)
       expect(bulk).to receive(:empty?)
         .and_return(false)

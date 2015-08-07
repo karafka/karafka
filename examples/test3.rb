@@ -9,22 +9,25 @@ folders_path = File.dirname(__FILE__) + '/karafka/*.rb'
 Dir[folders_path].each { |file| require file }
 
 
-class Facebook22Controller < Karafka::BaseController
+class GGGGGGController < Karafka::BaseController
   self.group = :karafka_api12
   self.topic = 'karafka_topic12'
 
+
   def process
-    puts "PROCESS PROCESS PROCESS #{params}"
+    puts "test 3 1 #{params}"
     # Karafka::Worker.perform_async(params)
   end
 end
 
-class Facebook2Controller < Karafka::BaseController
+class Rrrrrrrr2Controller < Karafka::BaseController
   self.group = :karafka_api11
   self.topic = 'karafka_topic11'
 
+
+
   def process
-    puts "Worker Worker Worker  #{params}"
+    puts "test3 2#{params}"
   end
 end
 
