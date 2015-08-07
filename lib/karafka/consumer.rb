@@ -26,7 +26,7 @@ module Karafka
       consumer_groups.each do |group|
         group.fetch do |_partition, bulk|
           break if bulk.empty?
-          bulk.each { |m| Karafka::Router.new(group.topic, m.value) }
+          bulk.each { |m| Karafka::Router.new(group.topic, m.value).forward }
         end
         group.close
       end
@@ -35,7 +35,7 @@ module Karafka
     def consumer_groups
       groups = []
       options.map(&:group).each do |group|
-        topic = options.detect{ |opt| opt.group == group }.topic
+        topic = options.detect { |opt| opt.group == group }.topic
         groups << new_consumer_group(group, topic)
       end
       groups
@@ -60,7 +60,8 @@ module Karafka
     def validate
       %i(group topic).each do |field|
         fields = options.map(&field).map(&:to_s)
-        raise Object.const_get("Karafka::Consumer::Duplicated#{field.capitalize}Error") if fields.uniq != fields
+        error = Object.const_get("Karafka::Consumer::Duplicated#{field.capitalize}Error")
+        fail error if fields.uniq != fields
       end
     end
   end

@@ -20,14 +20,14 @@ RSpec.describe Karafka::Router do
         .and_return(classes)
       expect(dummy_klass).to receive(:new).with('message').and_return(controller)
       expect(controller).to receive(:call)
-      described_class.new('A topic', 'message')
+      described_class.new('A topic', 'message').forward
     end
 
     it 'fails once there are no controllers with needed topic' do
       allow(Karafka::BaseController).to receive(:descendants)
         .and_return(classes)
       expect(classes).to receive(:detect).and_return(nil)
-      expect { described_class.new('Not provided topic', 'message') }
+      expect { described_class.new('Not provided topic', 'message').forward }
         .to raise_error(Karafka::Router::UndefinedTopicError)
     end
   end

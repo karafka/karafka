@@ -8,11 +8,16 @@ module Karafka
     class UndefinedTopicError < StandardError; end
 
     def initialize(topic, message)
+      @topic = topic
+      @message = message
+    end
+
+    def forward
       controller = Karafka::BaseController
         .descendants
         .detect { |klass| klass.topic.to_s == topic }
 
-      raise UndefinedTopicError unless controller
+      fail UndefinedTopicError unless controller
       controller
         .new(message)
         .call
