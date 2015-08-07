@@ -11,7 +11,7 @@ Dir[folders_path].each { |file| require file }
 
 class GGGGGGController < Karafka::BaseController
   self.group = :karafka_api12
-  self.topic = 'karafka_topic15'
+  self.topic = 'karafka_topic12'
 
 
   def process
@@ -22,7 +22,7 @@ end
 
 class Rrrrrrrr2Controller < Karafka::BaseController
   self.group = :karafka_api11
-  self.topic = 'karafka_topic16'
+  self.topic = 'karafka_topic11'
 
 
 

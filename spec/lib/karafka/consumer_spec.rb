@@ -8,7 +8,6 @@ RSpec.describe Karafka::Consumer do
     let(:group_name) { double }
     let(:topic_name) { double }
     let(:consumer_group) { double(topic: 'A topic') }
-    let(:options) { { socket_timeout_ms: 50_000 } }
     let(:bulk) { double }
     let(:message) { double(value: 'value') }
     let(:router) { double }
@@ -31,19 +30,17 @@ RSpec.describe Karafka::Consumer do
         self.topic = 'B topic'
         self.group = 'B group'
         def process
-          'A process'
+          'B process'
         end
         self
       end
     end
 
     it 'creates router for all messages' do
-      # expect(Karafka).to receive_message_chain(:config, :socket_timeout_ms)
-      # .and_return(50_000)
       allow(Karafka::BaseController)
         .to receive(:descendants) { [DummyClass] }
       expect(Poseidon::ConsumerGroup).to receive(:new)
-        .with(dummy_klass.group, brokers, zookeeper_hosts, dummy_klass.topic, options)
+        .with(dummy_klass.group, brokers, zookeeper_hosts, dummy_klass.topic)
         .and_return(consumer_group)
       expect(consumer_group).to receive(:fetch)
         .and_yield(double, bulk)

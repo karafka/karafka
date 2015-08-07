@@ -17,7 +17,10 @@ module Karafka
     # Receive the messages
     def receive
       validate
-      loop { fetch }
+      loop do
+        fetch
+        sleep 1
+      end
     end
 
     private
@@ -41,13 +44,12 @@ module Karafka
       groups
     end
 
-    def new_consumer_group(group, topic)
+    def new_consumer_group(group_name, topic_name)
       Poseidon::ConsumerGroup.new(
-        group,
+        group_name,
         @brokers,
         @zookeeper_hosts,
-        topic.to_s,
-        socket_timeout_ms: 50_000 # Karafka.config.socket_timeout_ms
+        topic_name.to_s
       )
     end
     #
