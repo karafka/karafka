@@ -1,29 +1,67 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::BaseController do
-  let!(:dummmy_class) do
-    # fake class
-    class DummyClass < Karafka::BaseController
-      self
+  context 'instance' do
+    subject { ClassBuilder.inherit(described_class) }
+
+    describe 'initial exceptions' do
+      context 'when kafka group is not defined' do
+        it 'should raise an exception' do
+          expect { subject.new }.to raise_error(described_class::GroupNotDefined)
+        end
+      end
+
+      context 'when kafka topic is not defined' do
+        subject do
+          ClassBuilder.inherit(described_class) do
+            self.group = rand
+          end
+        end
+
+        it 'should raise an exception' do
+          expect { subject.new }.to raise_error(described_class::TopicNotDefined)
+        end
+      end
+
+      context 'when perform method is not defined' do
+        subject do
+          ClassBuilder.inherit(described_class) do
+            self.group = rand
+            self.topic = rand
+          end
+        end
+
+        it 'should raise an exception' do
+          expect { subject.new }.to raise_error(described_class::PerformMethodNotDefined)
+        end
+      end
+
+      context 'when all options are defined' do
+        subject do
+          ClassBuilder.inherit(described_class) do
+            self.group = rand
+            self.topic = rand
+
+            def perform; end
+          end
+        end
+
+        it 'should not raise an exception' do
+          expect { subject.new }.not_to raise_error
+        end
+      end
     end
-  end
-  let!(:another_class) do
-    # fake class
-    class AnotherClass < Karafka::BaseController
-      self
-    end
-  end
-  describe '.descendants' do
-    it 'returns descendants' do
-      expect(described_class.descendants).to match_array([another_class, dummmy_class])
+
+    describe '#call' do
+      pending
     end
   end
 
-  describe '.process' do
-    it 'fails error' do
-      described_class.before_action { true }
-      expect { described_class.new(JSON.generate({})).process }
-        .to raise_error(NotImplementedError)
+  context 'class' do
+    subject { described_class }
+
+    describe '#before_schedule' do
+      pending
     end
   end
 end

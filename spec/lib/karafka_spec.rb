@@ -25,15 +25,27 @@ RSpec.describe Karafka do
     let(:log) { double }
     let(:set_logger) { double }
 
-    it 'returns NULL logger' do
+    it 'returns logger instance' do
       allow(Karafka.instance_variable_get(:@logger)) { nil }
-      expect(Karafka.logger).to eq(Karafka::NullLogger)
+      expect(Karafka.logger).to be_a Karafka::Logger
     end
 
     it 'returns set logger' do
       allow(Karafka.instance_variable_get(:@logger)) { set_logger }
       expect(Karafka).to receive(:logger).and_return(set_logger)
       Karafka.logger
+    end
+  end
+
+  describe '#config' do
+    let(:config) { double }
+
+    it 'should return Config.config instance' do
+      expect(described_class::Config)
+        .to receive(:config)
+        .and_return(config)
+
+      expect(subject.config).to eq config
     end
   end
 end

@@ -1,5 +1,3 @@
-ENV['KARAFKA_ENV'] ||= 'development'
-
 %w(
   rake
   rubygems
@@ -8,9 +6,14 @@ ENV['KARAFKA_ENV'] ||= 'development'
   timeout
   sidekiq
   poseidon
-  aspector
+  logger
+  active_support/callbacks
   karafka/loader
 ).each { |lib| require lib }
+
+ENV['KARAFKA_ENV'] ||= 'development'
+ENV['KARAFKA_LOG_LEVEL'] = ::Logger::WARN.to_s if ENV['KARAFKA_ENV'] == 'production'
+ENV['KARAFKA_LOG_LEVEL'] ||= ::Logger::DEBUG.to_s
 
 # Karafka library
 module Karafka
@@ -19,7 +22,9 @@ module Karafka
 
     # @return [Logger] logger that we want to use
     def logger
-      @logger ||= NullLogger
+      @logger ||= ::Karafka::Logger.new(STDOUT).tap do |logger|
+        logger.level = (ENV['KARAFKA_LOG_LEVEL'] || ::Logger::WARN).to_i
+      end
     end
     # @return [Karafka::Config] config instance
     def config

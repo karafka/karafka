@@ -6,8 +6,7 @@ require 'simplecov'
 require 'rake'
 require 'logger'
 
-ENV['ASPECTOR_LOG_LEVEL'] = ::Logger::WARN.to_s
-ENV['RACK_ENV'] ||= 'test'
+ENV['KARAFKA_ENV'] ||= 'test'
 
 # Don't include unnecessary stuff into rcov
 SimpleCov.start do
@@ -19,6 +18,8 @@ SimpleCov.start do
   add_filter '/config/'
   merge_timeout 600
 end
+
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
   config.disable_monkey_patching!
