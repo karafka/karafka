@@ -10,8 +10,8 @@ Dir[folders_path].each { |file| require file }
 
 
 class Facebook22Controller < Karafka::BaseController
-  self.group = :karafka_api12
-  self.topic = 'karafka_topic12'
+  self.group = :karafka_api14
+  self.topic = 'karafka_topic14'
 
   before_action {
     r = rand(50)
@@ -31,8 +31,8 @@ class Facebook22Controller < Karafka::BaseController
 end
 
 class Facebook2Controller < Karafka::BaseController
-  self.group = :karafka_api11
-  self.topic = :karafka_topic11
+  self.group = :karafka_api13
+  self.topic = :karafka_topic13
 
   def process
     puts "Worker Worker Worker  #{params}"
