@@ -1,17 +1,8 @@
-PATH
-  remote: .
-  specs:
-    karafka (0.1)
-      aspector
-      poseidon
-      poseidon_cluster
-      sidekiq
-
 GIT
-  remote: ssh://git@git.dev.striketech.pl:2222/internal/strike-dev-tools.git
-  revision: ceec0045a144e6f790b9edd19339a5bf8ba79e52
+  remote: git://github.com/polishgeeks/polishgeeks-dev-tools.git
+  revision: 3c2ca45a7711dfff5cfb81fb92267e92474b2fdc
   specs:
-    strike-dev-tools (1.9.0)
+    polishgeeks-dev-tools (1.0.0)
       brakeman
       faker
       haml-lint
@@ -24,17 +15,6 @@ GIT
       simplecov
       timecop
       yard
-
-GIT
-  remote: ssh://git@git.dev.striketech.pl:2222/internal/strike-docs.git
-  revision: fdc871dabe5f230a3f59075b5cf4f5523eb17209
-  specs:
-    strike-docs (1.0.7)
-      haml
-      redcarpet
-      reverse_markdown
-      yard
-      yard-sinatra
 
 GEM
   remote: https://rubygems.org/
@@ -52,8 +32,7 @@ GEM
     adamantium (0.2.0)
       ice_nine (~> 0.11.0)
       memoizable (~> 0.4.0)
-    aspector (0.14.0)
-    ast (2.0.0)
+    ast (2.1.0)
     astrolabe (1.3.1)
       parser (~> 2.2)
     axiom-types (0.1.1)
@@ -70,9 +49,9 @@ GEM
       ruby_parser (~> 3.7.0)
       sass (~> 3.0)
       terminal-table (~> 1.4)
-    bson (3.1.2)
+    bson (3.2.1)
     builder (3.2.2)
-    celluloid (0.16.0)
+    celluloid (0.16.1)
       timers (~> 4.0.0)
     coderay (1.1.0)
     coercible (1.0.0)
@@ -107,15 +86,10 @@ GEM
     i18n (0.7.0)
     ice_nine (0.11.1)
     json (1.8.3)
-    little-plugger (1.1.3)
-    logging (1.8.2)
-      little-plugger (>= 1.1.3)
-      multi_json (>= 1.8.4)
     memoizable (0.4.2)
       thread_safe (~> 0.3, >= 0.3.1)
     method_source (0.8.2)
-    mini_portile (0.6.2)
-    minitest (5.7.0)
+    minitest (5.8.0)
     mongoid (4.0.2)
       activemodel (~> 4.0)
       moped (~> 2.0.0)
@@ -130,16 +104,11 @@ GEM
       connection_pool (~> 2.0)
       optionable (~> 0.2.0)
     multi_json (1.11.2)
-    nokogiri (1.6.6.2)
-      mini_portile (~> 0.6.0)
     optionable (0.2.0)
     origin (2.1.1)
     parser (2.2.2.6)
       ast (>= 1.1, < 3.0)
     poseidon (0.0.5)
-    poseidon_cluster (0.3.2)
-      poseidon (>= 0.0.5, < 0.1.0)
-      zk
     powerpack (0.1.1)
     procto (0.0.2)
     pry (0.10.1)
@@ -148,7 +117,6 @@ GEM
       slop (~> 3.4)
     rainbow (2.0.0)
     rake (10.4.2)
-    redcarpet (3.3.2)
     redis (3.2.1)
     redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
@@ -156,22 +124,20 @@ GEM
       parser (~> 2.2.0.pre.7)
       rainbow (>= 1.99, < 3.0)
       unparser (~> 0.2.2)
-    reverse_markdown (0.8.2)
-      nokogiri
     rspec (3.3.0)
       rspec-core (~> 3.3.0)
       rspec-expectations (~> 3.3.0)
       rspec-mocks (~> 3.3.0)
-    rspec-core (3.3.1)
+    rspec-core (3.3.2)
       rspec-support (~> 3.3.0)
-    rspec-expectations (3.3.0)
+    rspec-expectations (3.3.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.3.0)
-    rspec-mocks (3.3.1)
+    rspec-mocks (3.3.2)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.3.0)
     rspec-support (3.3.0)
-    rubocop (0.32.1)
+    rubocop (0.33.0)
       astrolabe (~> 1.3)
       parser (>= 2.2.2.5, < 3.0)
       powerpack (~> 0.1)
@@ -181,7 +147,7 @@ GEM
     ruby2ruby (2.1.4)
       ruby_parser (~> 3.1)
       sexp_processor (~> 4.0)
-    ruby_parser (3.7.0)
+    ruby_parser (3.7.1)
       sexp_processor (~> 4.1)
     rubycritic (1.2.1)
       flay (= 2.4.0)
@@ -214,7 +180,7 @@ GEM
     terminal-table (1.5.2)
     thread_safe (0.3.5)
     tilt (2.0.1)
-    timecop (0.7.4)
+    timecop (0.8.0)
     timers (4.0.1)
       hitimes
     tzinfo (1.2.2)
@@ -233,20 +199,11 @@ GEM
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
     yard (0.8.7.6)
-    yard-sinatra (1.0.0)
-      yard (~> 0.7)
-    zk (1.9.5)
-      logging (~> 1.8.2)
-      zookeeper (~> 1.4.0)
-    zookeeper (1.4.10)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler
-  karafka!
+  polishgeeks-dev-tools!
   poseidon
-  rake
-  strike-dev-tools!
-  strike-docs!
+  sidekiq

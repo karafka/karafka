@@ -1,7 +1,8 @@
 module Karafka
+  # App class
   class App
-    def run
-      
+    # Method which runs app
+    def call
     end
   end
 end

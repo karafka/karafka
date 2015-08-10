@@ -1,5 +1,3 @@
-ENV['KARAFKA_ENV'] ||= 'development'
-
 %w(
   rake
   rubygems
@@ -8,37 +6,46 @@ ENV['KARAFKA_ENV'] ||= 'development'
   timeout
   sidekiq
   poseidon
-  aspector
+  logger
+  active_support/callbacks
   karafka/loader
 ).each { |lib| require lib }
 
+ENV['KARAFKA_ENV'] ||= 'development'
+ENV['KARAFKA_LOG_LEVEL'] = ::Logger::WARN.to_s if ENV['KARAFKA_ENV'] == 'production'
+ENV['KARAFKA_LOG_LEVEL'] ||= ::Logger::DEBUG.to_s
+
+# Karafka library
 module Karafka
-  def self.config
-    Config.config
-  end
+  class << self
+    attr_writer :logger
 
-  # @return [String] root path of this gem
-  def self.gem_root
-    Pathname.new(File.expand_path('../..', __FILE__))
-  end
+    # @return [Logger] logger that we want to use
+    def logger
+      @logger ||= ::Karafka::Logger.new(STDOUT).tap do |logger|
+        logger.level = (ENV['KARAFKA_LOG_LEVEL'] || ::Logger::WARN).to_i
+      end
+    end
+    # @return [Karafka::Config] config instance
+    def config
+      Config.config
+    end
 
-  # @return [String] app root path
-  def self.root
-    Pathname.new(File.dirname(ENV['BUNDLE_GEMFILE']))
-  end
+    # @return [String] root path of this gem
+    def gem_root
+      Pathname.new(File.expand_path('../..', __FILE__))
+    end
 
-  # @return [String] path to sinatra core root
-  def self.core_root
-    Pathname.new(File.expand_path('../karafka', __FILE__))
+    # @return [String] app root path
+    def root
+      Pathname.new(File.dirname(ENV['BUNDLE_GEMFILE']))
+    end
+
+    # @return [String] path to sinatra core root
+    def core_root
+      Pathname.new(File.expand_path('../karafka', __FILE__))
+    end
   end
 end
 
 Karafka::Loader.new.load!(Karafka.core_root)
-
-Karafka::Config.configure do |config|
-  config.connection_pool_size = 20
-  config.connection_pool_timeout = 1
-  config.kafka_ports = %w( 9092 )
-  config.kafka_host = '172.17.0.7'
-  config.send_events = true
-end
