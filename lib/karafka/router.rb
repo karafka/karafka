@@ -20,14 +20,15 @@ module Karafka
     # topic of descendants of Karafka::BaseController
     # Forwards message to controller inherited from Karafka::BaseController based on it's topic
     def forward
-      controller = Karafka::BaseController
+      descendant = Karafka::BaseController
         .descendants
         .detect { |klass| klass.topic.to_s == topic }
 
-      fail UndefinedTopicError unless controller
-      controller
-        .new(message)
-        .call
+      fail UndefinedTopicError unless descendant
+
+      controller = descendant.new
+      controller.params = JSON.parse(message)
+      controller.call
     end
   end
 end

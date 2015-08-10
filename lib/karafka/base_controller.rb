@@ -91,11 +91,10 @@ module Karafka
     # @raise [Karafka::BaseController::TopicNotDefined] raised if we didn't define kafka topic
     # @raise [Karafka::BaseController::PerformMethodNotDefined] raised if we
     #   didn't define the perform method
-    def initialize(params)
+    def initialize
       fail GroupNotDefined unless self.class.group
       fail TopicNotDefined unless self.class.topic
       fail PerformMethodNotDefined unless self.respond_to?(:perform)
-      @params = JSON.parse(params)
     end
 
     # Executes the default controller flow, runs callbacks and if not halted
