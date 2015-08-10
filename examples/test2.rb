@@ -14,7 +14,7 @@ class GGGGGGController < Karafka::BaseController
   self.topic = 'karafka_topic14'
 
 
-  def process
+  def perform
     puts "WthS #{params}"
     # Karafka::Worker.perform_async(params)
   end
@@ -26,7 +26,7 @@ class Rrrrrrrr2Controller < Karafka::BaseController
 
 
 
-  def process
+  def perform
     puts "Wth FFFFFFFFFFFFFFFFFFF #{params}"
   end
 end
@@ -37,8 +37,6 @@ class Test
       ['127.0.0.1:9093'],
       ['127.0.0.1:2181']
     ).receive
-
-    # Karafka::App.new(, 'karafka_topic3').call
   end
 end
 

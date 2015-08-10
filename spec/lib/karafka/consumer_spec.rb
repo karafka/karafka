@@ -7,7 +7,7 @@ RSpec.describe Karafka::Consumer do
   describe '#receive' do
     let(:group_name) { double }
     let(:topic_name) { double }
-    let(:consumer_group) { double(topic: 'A topic') }
+    let(:consumer_group) { double(topic: :a_topic) }
     let(:bulk) { double }
     let(:message) { double(value: 'value') }
     let(:router) { double }
@@ -15,7 +15,7 @@ RSpec.describe Karafka::Consumer do
     let!(:dummy_klass) do
       # fake class
       class DummyClass < Karafka::BaseController
-        self.topic = 'A topic'
+        self.topic = :a_topic
         self.group = 'A group'
         def process
           'A process'
@@ -40,12 +40,10 @@ RSpec.describe Karafka::Consumer do
       allow(Karafka::BaseController)
         .to receive(:descendants) { [DummyClass] }
       expect(Poseidon::ConsumerGroup).to receive(:new)
-        .with(dummy_klass.group, brokers, zookeeper_hosts, dummy_klass.topic)
+        .with(dummy_klass.group, brokers, zookeeper_hosts, dummy_klass.topic.to_s)
         .and_return(consumer_group)
       expect(consumer_group).to receive(:fetch)
         .and_yield(double, bulk)
-      expect(bulk).to receive(:empty?)
-        .and_return(false)
       expect(bulk).to receive(:each)
         .and_yield(message)
       expect(Karafka::Router).to receive(:new)
@@ -70,7 +68,7 @@ RSpec.describe Karafka::Consumer do
 
   describe '#validate' do
     it 'raises DuplicatedTopicError once there are controllers with same topic' do
-      allow(AnotherClass).to receive(:topic) { 'A topic' }
+      allow(AnotherClass).to receive(:topic) { :a_topic }
       expect { subject.receive }
         .to raise_error(Karafka::Consumer::DuplicatedTopicError)
     end

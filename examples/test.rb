@@ -13,18 +13,18 @@ class Facebook22Controller < Karafka::BaseController
   self.group = :karafka_api14
   self.topic = 'karafka_topic14'
 
-  before_action {
+  before_schedule {
     r = rand(50)
     params.merge!(first_round: r)
     r > 25
   }
 
-  before_action {
+  before_schedule {
     r = rand(50)
     params.merge!(next_round: r)
     r > 25
   }
-  def process
+  def perform
     puts "PROCESS PROCESS PROCESS #{params}"
     # Karafka::Worker.perform_async(params)
   end
@@ -34,7 +34,7 @@ class Facebook2Controller < Karafka::BaseController
   self.group = :karafka_api13
   self.topic = :karafka_topic13
 
-  def process
+  def perform
     puts "Worker Worker Worker  #{params}"
   end
 end
