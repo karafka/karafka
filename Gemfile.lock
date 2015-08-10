@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/polishgeeks/polishgeeks-dev-tools.git
-  revision: 24dcc9f6a254725bd5d714ac75282a2b20a04a45
+  revision: 3c2ca45a7711dfff5cfb81fb92267e92474b2fdc
   specs:
     polishgeeks-dev-tools (1.0.0)
       brakeman
@@ -51,7 +51,7 @@ GEM
       terminal-table (~> 1.4)
     bson (3.2.1)
     builder (3.2.2)
-    celluloid (0.16.0)
+    celluloid (0.16.1)
       timers (~> 4.0.0)
     coderay (1.1.0)
     coercible (1.0.0)

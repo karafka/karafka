@@ -101,8 +101,15 @@ module Karafka
     # will schedule a perform task in sidekiq
     def call
       run_callbacks :call do
-        # Here the enqueuing should happen
+        enqueue
       end
+    end
+
+    private
+
+    # Enqueues the perform method into sidekiq
+    def enqueue
+      # Here the enqueuing should happen
     end
   end
 end
