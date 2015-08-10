@@ -6,6 +6,7 @@
   timeout
   sidekiq
   poseidon
+  poseidon_cluster
   logger
   active_support/callbacks
   karafka/loader

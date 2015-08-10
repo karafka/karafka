@@ -14,17 +14,17 @@ RSpec.describe Karafka::Config do
     end
   end
 
-  describe '#send_events?' do
-    context 'when we dont want to send events' do
-      before { subject.send_events = false }
+  describe '#receive_events?' do
+    context 'when we dont want to receive events' do
+      before { subject.receive_events = false }
 
-      it { expect(subject.send_events?).to eq false }
+      it { expect(subject.receive_events?).to eq false }
     end
 
     context 'whe we want to send events' do
-      before { subject.send_events = true }
+      before { subject.receive_events = true }
 
-      it { expect(subject.send_events?).to eq true }
+      it { expect(subject.receive_events?).to eq true }
     end
   end
 

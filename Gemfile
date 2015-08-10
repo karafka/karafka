@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
 gem 'poseidon'
+gem 'poseidon_cluster'
 gem 'sidekiq'
 gem 'polishgeeks-dev-tools', github: 'polishgeeks/polishgeeks-dev-tools'
