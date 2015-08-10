@@ -20,7 +20,6 @@ db/*.sqlite3
 .redcar/
 .capistrano/
 .sass-cache
-*.yml
 /config/god/sidekiq.rb
 /config/puma.rb
 /coverage.data
