@@ -9,7 +9,7 @@ PolishGeeks::DevTools.setup do |config|
   config.simplecov_threshold = 100
 end
 
-desc 'Self check using strike-dev-tools'
+desc 'Self check using polishgeeks-dev-tools'
 task :check do
   PolishGeeks::DevTools::Runner.new.execute(
     PolishGeeks::DevTools::Logger.new
