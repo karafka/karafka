@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Consumer do
-  subject { described_class.new(brokers, zookeeper_hosts) }
-  let(:brokers) { double }
+  subject { described_class.new }
+  let(:kafka_hosts) { double }
   let(:zookeeper_hosts) { double }
   describe '#receive' do
     let(:group_name) { double }
@@ -37,10 +37,16 @@ RSpec.describe Karafka::Consumer do
     end
 
     it 'creates router for all messages' do
+      allow(Karafka)
+        .to receive_message_chain(:config, :kafka_hosts)
+        .and_return(kafka_hosts)
+      allow(Karafka)
+        .to receive_message_chain(:config, :zookeeper_hosts)
+        .and_return(zookeeper_hosts)
       allow(Karafka::BaseController)
         .to receive(:descendants) { [DummyClass] }
       expect(Poseidon::ConsumerGroup).to receive(:new)
-        .with(dummy_klass.group, brokers, zookeeper_hosts, dummy_klass.topic.to_s)
+        .with(dummy_klass.group, kafka_hosts, zookeeper_hosts, dummy_klass.topic.to_s)
         .and_return(consumer_group)
       expect(consumer_group).to receive(:fetch)
         .and_yield(double, bulk)
@@ -60,6 +66,8 @@ RSpec.describe Karafka::Consumer do
           yield
         end
       end
+      expect(Karafka::BaseController).to receive(:descendants)
+        .and_return([DummyClass, AnotherClass])
       expect(Object).to receive(:loop).once
       expect(subject).to receive(:fetch)
       subject.receive

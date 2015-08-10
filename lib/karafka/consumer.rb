@@ -10,13 +10,12 @@ module Karafka
     #   with the same topic name
     class DuplicatedTopicError < StandardError; end
 
-    def initialize(brokers, zookeeper_hosts)
-      @brokers = brokers
-      @zookeeper_hosts = zookeeper_hosts
+    def initialize
       @options = klasses_options
     end
 
-    # Receive the messages
+    # Validates on topic and group names uniqueness among all descendants of BaseController.
+    # Loop through each consumer group to receive data.
     def receive
       validate
       loop { fetch }
@@ -24,6 +23,9 @@ module Karafka
 
     private
 
+    # Fetch messages from the broker. Round-robins between claimed partitions.
+    # Create Karafka::Router instance, which forwards all messages to
+    # needed controller inherited form Karafka::BaseController.
     def fetch
       consumer_groups.each do |group|
         begin
@@ -38,7 +40,7 @@ module Karafka
       sleep 1
     end
 
-    # Returns all consumer groups
+    # @return [Array<Poseidon::ConsumerGroup>] array of consumer group instances
     def consumer_groups
       groups = []
       @options.each do |option|
@@ -47,20 +49,24 @@ module Karafka
       groups
     end
 
-    # Creates new consumer group.
+    # Creates new consumer group, which processes all partition of the specified topic.
     # Consumer group instances share a common group name,
     #   and each message published to a topic is delivered to one instance
     #   within each subscribing consumer group.
+    # @param group_name [Symbol, String] group name for consumer group
+    # @param topic_name [Symbol, String] topic name for consumer group
+    # @return [Poseidon::ConsumerGroup] consumer group instance
     def new_consumer_group(group_name, topic_name)
       Poseidon::ConsumerGroup.new(
         group_name,
-        @brokers,
-        @zookeeper_hosts,
+        Karafka.config.kafka_hosts,
+        Karafka.config.zookeeper_hosts,
         topic_name.to_s
       )
     end
 
-    # Look through all descendants of base controller, creates array of needed data
+    # Look through all descendants of base controller,
+    #   creates array of data with group and topic names
     # @return [Array<OpenStruct>] Descendants array with it's topic name and group name
     def klasses_options
       Karafka::BaseController.descendants.map do |klass|

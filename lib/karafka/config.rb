@@ -11,6 +11,8 @@ module Karafka
     # @option kafka_ports [Array] the ports of kafka brokers
     # @option kafka_host [String] the host of kafka server
     # @option send_events [Boolean] boolean value to define whether events should be sent
+    # option zookeeper_hosts [Array] zookeeper hosts with ports where zookeeper servers are run
+    # option kafka_hosts [Array] kafka hosts with ports where kafka servers are run
     #
     SETTINGS = %i(
       connection_pool_size
@@ -18,6 +20,8 @@ module Karafka
       kafka_ports
       kafka_host
       send_events
+      zookeeper_hosts
+      kafka_hosts
     )
 
     SETTINGS.each do |attr_name|
