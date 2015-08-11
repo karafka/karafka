@@ -48,6 +48,6 @@ RSpec.describe Karafka::Config do
         .to receive(:freeze)
     end
 
-    it { subject.configure(&block) }
+    it { subject.setup(&block) }
   end
 end

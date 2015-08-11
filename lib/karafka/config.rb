@@ -25,7 +25,7 @@ module Karafka
     end
 
     # Configurating method
-    def self.configure(&block)
+    def self.setup(&block)
       self.config = new
 
       block.call(config)
