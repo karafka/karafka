@@ -1,5 +1,4 @@
 require 'karafka/base_controller'
-# main module namespace
 module Karafka
   # Karafka framework Router for routing incoming events to proper controllers
   class Router

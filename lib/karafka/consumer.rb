@@ -1,5 +1,4 @@
 require 'karafka/router'
-# Main module namespace
 module Karafka
   # Class that receive events
   class Consumer
