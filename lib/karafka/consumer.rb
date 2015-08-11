@@ -11,7 +11,7 @@ module Karafka
     class DuplicatedTopicError < StandardError; end
 
     def initialize
-      @options = klasses_options
+      @options = descendants_options
     end
 
     # Validates on topic and group names uniqueness among all descendants of BaseController.
@@ -68,7 +68,7 @@ module Karafka
     # Look through all descendants of base controller,
     #   creates array of data with group and topic names
     # @return [Array<OpenStruct>] Descendants array with it's topic name and group name
-    def klasses_options
+    def descendants_options
       Karafka::BaseController.descendants.map do |klass|
         OpenStruct.new(topic: klass.topic, group: klass.group)
       end
