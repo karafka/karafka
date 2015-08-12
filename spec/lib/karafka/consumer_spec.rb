@@ -83,6 +83,13 @@ RSpec.describe Karafka::Consumer do
       expect(consumer_group).to receive(:close)
       subject.send(:fetch)
     end
+
+    it 'closes group once we have ZK::Exceptions::OperationTimeOut ' do
+      allow(consumer_group).to receive(:fetch)
+        .and_raise(ZK::Exceptions::OperationTimeOut)
+      expect(consumer_group).to receive(:close)
+      subject.send(:fetch)
+    end
   end
 
   describe '#validate' do
