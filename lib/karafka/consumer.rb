@@ -34,6 +34,8 @@ module Karafka
           group.close
         rescue Poseidon::Connection::ConnectionFailedError
           group.close
+        rescue ZK::Exceptions::OperationTimeOut
+          group.close
         end
       end
       sleep 1
