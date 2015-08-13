@@ -3,7 +3,6 @@ require 'spec_helper'
 RSpec.describe Karafka::Params do
   describe '#parse' do
     let(:options) { { a: '1' } }
-
     context 'params is json' do
       before do
         @parsed_params = described_class.new(options.to_json).parse
