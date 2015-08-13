@@ -26,7 +26,7 @@ module Karafka
           end
         end
       rescue *IGNORED_ERRORS
-        consumer
+        consumer.close
       ensure
         consumer.close
       end
