@@ -48,4 +48,16 @@ RSpec.describe Karafka do
       expect(subject.config).to eq config
     end
   end
+
+  describe '#setup' do
+    before do
+      Karafka.setup do |config|
+        config.zookeeper_hosts = %w( 127.0.0.1:2181 )
+      end
+    end
+
+    it 'sets up the configuration' do
+      expect(Karafka.config.zookeeper_hosts).to eq(['127.0.0.1:2181'])
+    end
+  end
 end

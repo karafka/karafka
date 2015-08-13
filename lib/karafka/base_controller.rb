@@ -109,7 +109,7 @@ module Karafka
 
     # Enqueues the perform method into sidekiq
     def enqueue
-      # Here the enqueuing should happen
+      Karafka::BaseWorker.perform { perform }
     end
   end
 end

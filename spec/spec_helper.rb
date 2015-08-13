@@ -5,6 +5,7 @@ require 'rubygems'
 require 'simplecov'
 require 'rake'
 require 'logger'
+require 'poseidon'
 
 ENV['KARAFKA_ENV'] ||= 'test'
 

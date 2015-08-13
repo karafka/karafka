@@ -6,6 +6,7 @@
   timeout
   sidekiq
   poseidon
+  poseidon_cluster
   logger
   active_support/callbacks
   karafka/loader
@@ -26,9 +27,16 @@ module Karafka
         logger.level = (ENV['KARAFKA_LOG_LEVEL'] || ::Logger::WARN).to_i
       end
     end
+
     # @return [Karafka::Config] config instance
     def config
       Config.config
+    end
+
+    # Sets up the whole configuration
+    # @param [Block] block configuration block
+    def setup(&block)
+      Config.setup(&block)
     end
 
     # @return [String] root path of this gem
