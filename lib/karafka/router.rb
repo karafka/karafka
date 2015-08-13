@@ -26,7 +26,7 @@ module Karafka
       fail UndefinedTopicError unless descendant
 
       controller = descendant.new
-      controller.params = JSON.parse(message)
+      controller.params = Karafka::Params.new(message).parse
       controller.call
     end
   end
