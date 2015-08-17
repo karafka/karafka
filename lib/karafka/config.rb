@@ -10,7 +10,6 @@ module Karafka
     # option kafka_hosts [Array] kafka hosts with ports where kafka servers are run
     #
     SETTINGS = %i(
-      receive_events
       zookeeper_hosts
       kafka_hosts
     )

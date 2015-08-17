@@ -14,20 +14,6 @@ RSpec.describe Karafka::Config do
     end
   end
 
-  describe '#receive_events?' do
-    context 'when we dont want to receive events' do
-      before { subject.receive_events = false }
-
-      it { expect(subject.receive_events?).to eq false }
-    end
-
-    context 'whe we want to send events' do
-      before { subject.receive_events = true }
-
-      it { expect(subject.receive_events?).to eq true }
-    end
-  end
-
   describe '.setup' do
     subject { described_class }
     let(:instance) { described_class.new }

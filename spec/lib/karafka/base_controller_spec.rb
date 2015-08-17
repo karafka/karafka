@@ -173,10 +173,10 @@ RSpec.describe Karafka::BaseController do
   end
 
   describe '#enqueue' do
-    it 'call process function' do
-      instance = working_class.new
-      expect(instance).to receive(:perform)
-      instance.call
-    end
+    # it 'call process function' do
+    #   instance = working_class.new
+    #   expect(instance).to receive(:perform)
+    #   instance.call
+    # end
   end
 end
