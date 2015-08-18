@@ -1,6 +1,7 @@
 # Karafka
 
 [![Build Status](https://travis-ci.org/karafka/karafka.png)](https://travis-ci.org/karafka/karafka)
+[![Code Climate](https://codeclimate.com/github/karafka/karafka/badges/gpa.svg)](https://codeclimate.com/github/karafka/karafka)
 
 Microframework used to simplify Kafka based Ruby applications
 
