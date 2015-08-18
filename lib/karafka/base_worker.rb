@@ -4,6 +4,7 @@ require 'karafka/base_controller'
 require './../../examples/run_test'
 
 Karafka::Loader.new.load!("#{Karafka.root}/app/controllers")
+
 module Karafka
   # Worker wrapper for Sidekiq workers
   class BaseWorker < SidekiqGlass::Worker
@@ -11,16 +12,13 @@ module Karafka
 
     # Perform method
     def execute(*params)
-      topic = params.last.to_sym
-
-      event = Karafka::Connection::Event.new(topic, params.first)
+      event = Karafka::Connection::Event.new(params.last.to_sym, params.first)
       controller = Karafka::Routing::Router.new(event).descendant_controller
 
       controller.perform
     end
-    #
-    # def after_failure(*usernames)
-    #   # AccountsService.new.reset(usernames)
-    # end
+
+    def after_failure(*_params)
+    end
   end
 end

@@ -117,6 +117,12 @@ RSpec.describe Karafka::BaseController do
 
         subject.call
       end
+
+      it 'enqueue perform function' do
+        expect(Karafka::BaseWorker).to receive(:perform_async).with(nil, subject.class.topic)
+
+        subject.call
+      end
     end
   end
 
@@ -170,13 +176,5 @@ RSpec.describe Karafka::BaseController do
         subject.call
       end
     end
-  end
-
-  describe '#enqueue' do
-    # it 'call process function' do
-    #   instance = working_class.new
-    #   expect(instance).to receive(:perform)
-    #   instance.call
-    # end
   end
 end

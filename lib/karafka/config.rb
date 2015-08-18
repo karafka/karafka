@@ -16,11 +16,6 @@ module Karafka
 
     SETTINGS.each do |attr_name|
       attr_accessor attr_name
-
-      # @return [Boolean] is given command enabled
-      define_method :"#{attr_name}?" do
-        public_send(attr_name) == true
-      end
     end
 
     # Configurating method
