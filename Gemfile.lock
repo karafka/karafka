@@ -233,6 +233,3 @@ DEPENDENCIES
   poseidon_cluster
   rake
   sidekiq
-
-BUNDLED WITH
-   1.10.6

@@ -10,6 +10,9 @@
   logger
   active_support/callbacks
   active_support/core_ext/hash/indifferent_access
+).each { |lib| require lib }
+
+%w(
   karafka/loader
 ).each { |lib| require lib }
 
@@ -21,24 +24,6 @@ ENV['KARAFKA_LOG_LEVEL'] ||= ::Logger::DEBUG.to_s
 module Karafka
   class << self
     attr_writer :logger
-
-    # @return [Logger] logger that we want to use
-    def logger
-      @logger ||= ::Karafka::Logger.new(STDOUT).tap do |logger|
-        logger.level = (ENV['KARAFKA_LOG_LEVEL'] || ::Logger::WARN).to_i
-      end
-    end
-
-    # @return [Karafka::Config] config instance
-    def config
-      Config.config
-    end
-
-    # Sets up the whole configuration
-    # @param [Block] block configuration block
-    def setup(&block)
-      Config.setup(&block)
-    end
 
     # @return [String] root path of this gem
     def gem_root

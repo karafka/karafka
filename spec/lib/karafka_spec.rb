@@ -20,44 +20,13 @@ RSpec.describe Karafka do
     end
   end
 
-  describe '#logger' do
-    let(:logger) { double }
-    let(:log) { double }
-    let(:set_logger) { double }
+  describe '.core_root' do
+    context 'when we want to get core root path' do
+      let(:path) { Pathname.new(File.join(Dir.pwd, 'lib', 'karafka')) }
 
-    it 'returns logger instance' do
-      allow(Karafka.instance_variable_get(:@logger)) { nil }
-      expect(Karafka.logger).to be_a Karafka::Logger
-    end
-
-    it 'returns set logger' do
-      allow(Karafka.instance_variable_get(:@logger)) { set_logger }
-      expect(Karafka).to receive(:logger).and_return(set_logger)
-      Karafka.logger
-    end
-  end
-
-  describe '#config' do
-    let(:config) { double }
-
-    it 'should return Config.config instance' do
-      expect(described_class::Config)
-        .to receive(:config)
-        .and_return(config)
-
-      expect(subject.config).to eq config
-    end
-  end
-
-  describe '#setup' do
-    before do
-      Karafka.setup do |config|
-        config.zookeeper_hosts = %w( 127.0.0.1:2181 )
+      it do
+        expect(subject.core_root).to eq path
       end
-    end
-
-    it 'sets up the configuration' do
-      expect(Karafka.config.zookeeper_hosts).to eq(['127.0.0.1:2181'])
     end
   end
 end

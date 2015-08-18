@@ -1,5 +1,5 @@
 require 'spec_helper'
 
 RSpec.describe Karafka do
-  pending
+  it { expect { Karafka::VERSION }.not_to raise_error }
 end

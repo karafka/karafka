@@ -4,6 +4,10 @@
 
 Microframework used to simplify Kafka based Ruby applications
 
+## How it works
+
+Karafka is a microframework to work easier with Kafka incoming events.
+
 ## Setup
 
 Karafka has following configuration options:
@@ -13,36 +17,20 @@ Karafka has following configuration options:
 | zookeeper_hosts         | Array<String> | Zookeeper server hosts         |
 | kafka_hosts             | Array<String> | Kafka server hosts             |
 
-To apply this configuration, you need to use a *setup* method:
+To apply this configuration, you need to use a *setup* method from the Karafka::App class:
 
 ```ruby
-Karafka.setup do |config|
-  config.kafka_hosts = %w( 127.0.0.1:9092 127.0.0.1:9093 )
-  config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
+class App < Karafka::App
+  setup do |config|
+    config.kafka_hosts = %w( 127.0.0.1:9092 127.0.0.1:9093 )
+    config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
+  end
 end
+
 ```
-This configuration can be placed in *config/initializers*.
 
-To has ability to send messages as well you should install
-[WaterDrop](https://github.com/karafka/waterdrop) gem.
-After you should setup it with following options
+## Sending events from Karafka
 
-| Option                  | Value type    | Description                    |
-|-------------------------|---------------|--------------------------------|
-| send_events             | Boolean       | Should we send events to Kafka |
-| kafka_host              | String        | Kafka server host              |
-| kafka_ports             | Array<String> | Kafka server ports             |
-| connection_pool_size    | Integer       | Kafka connection pool size     |
-| connection_pool_timeout | Integer       | Kafka connection pool timeout  |
+To add ability to send events you need add **waterdrop** gem to your Gemfile.
 
-To apply this configuration, you need to use a *setup* method:
-
-```ruby
-WaterDrop.setup do |config|
-  config.send_events = true
-  config.connection_pool_size = 20
-  config.connection_pool_timeout = 1
-  config.kafka_ports = %w( 9092 )
-  config.kafka_host = 'localhost'
-end
-```
+Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to install and use it.

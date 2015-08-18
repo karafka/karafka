@@ -28,7 +28,7 @@ RSpec.describe Karafka::Config do
     end
   end
 
-  describe '.configure' do
+  describe '.setup' do
     subject { described_class }
     let(:instance) { described_class.new }
     let(:block) { -> {} }
