@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Routing::Mapper do
+<<<<<<< HEAD
   subject { described_class }
 
   let(:controller1) do
@@ -107,4 +108,7 @@ RSpec.describe Karafka::Routing::Mapper do
       end
     end
   end
+=======
+  pending
+>>>>>>> merge branch with reorg
 end

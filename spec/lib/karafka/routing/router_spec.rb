@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Routing::Router do
+<<<<<<< HEAD
   let(:topic) { "topic#{rand(1000)}".to_sym }
   let(:event) { double(topic: topic, message: {}.to_json) }
 
@@ -47,4 +48,7 @@ RSpec.describe Karafka::Routing::Router do
       end
     end
   end
+=======
+  pending
+>>>>>>> merge branch with reorg
 end
