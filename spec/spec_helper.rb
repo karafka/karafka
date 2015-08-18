@@ -17,6 +17,7 @@ SimpleCov.start do
   add_filter '/doc/'
   add_filter '/spec/'
   add_filter '/config/'
+  add_filter '/lib/karafka/tasks'
   merge_timeout 600
 end
 

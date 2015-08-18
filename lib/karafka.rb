@@ -11,6 +11,7 @@
   active_support/callbacks
   active_support/core_ext/hash/indifferent_access
   karafka/loader
+  sidekiq_glass
   active_support/core_ext/hash/indifferent_access
 ).each { |lib| require lib }
 

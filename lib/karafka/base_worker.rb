@@ -1,7 +1,4 @@
-require 'sidekiq_glass'
 require 'karafka'
-require 'karafka/base_controller'
-require './../../examples/run_test'
 
 Karafka::Loader.new.load!("#{Karafka.root}/app/controllers")
 

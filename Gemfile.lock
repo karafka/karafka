@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/polishgeeks/polishgeeks-dev-tools.git
-  revision: 3c2ca45a7711dfff5cfb81fb92267e92474b2fdc
+  revision: 6799827c21bb2e066a7f6be28f66d413ff60c69b
   specs:
     polishgeeks-dev-tools (1.0.0)
       brakeman
@@ -77,7 +77,7 @@ GEM
     docile (1.1.5)
     equalizer (0.0.11)
     erubis (2.7.0)
-    faker (1.4.3)
+    faker (1.5.0)
       i18n (~> 0.5)
     fastercsv (1.5.5)
     flay (2.4.0)
@@ -86,7 +86,7 @@ GEM
     flog (4.2.1)
       ruby_parser (~> 3.1, > 3.1.0)
       sexp_processor (~> 4.4)
-    haml (4.0.6)
+    haml (4.0.7)
       tilt
     haml-lint (0.13.0)
       haml (~> 4.0)
@@ -114,7 +114,7 @@ GEM
       mongoid (~> 4.0.0)
       rake
       rspec (~> 3.1)
-    moped (2.0.6)
+    moped (2.0.7)
       bson (~> 3.0)
       connection_pool (~> 2.0)
       optionable (~> 0.2.0)
@@ -182,12 +182,14 @@ GEM
     shoulda-context (1.2.1)
     shoulda-matchers (2.8.0)
       activesupport (>= 3.0.0)
-    sidekiq (3.4.2)
+    sidekiq (3.4.1)
       celluloid (~> 0.16.0)
-      connection_pool (~> 2.2, >= 2.2.0)
-      json (~> 1.0)
-      redis (~> 3.2, >= 3.2.1)
-      redis-namespace (~> 1.5, >= 1.5.2)
+      connection_pool (>= 2.1.1)
+      json
+      redis (>= 3.0.6)
+      redis-namespace (>= 1.3.1)
+    sidekiq-glass (0.1.0)
+      sidekiq (= 3.4.1)
     simplecov (0.10.0)
       docile (~> 1.1.0)
       json (~> 1.8)
@@ -232,4 +234,8 @@ DEPENDENCIES
   poseidon
   poseidon_cluster
   rake
-  sidekiq
+  sidekiq (= 3.4.1)
+  sidekiq-glass
+
+BUNDLED WITH
+   1.10.6
