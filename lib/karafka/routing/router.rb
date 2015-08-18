@@ -30,6 +30,10 @@ module Karafka
         controller.call
       end
 
+      # @raise [Karafka::Topic::NonMatchingTopicError] raised if topic name is not match any
+      # topic of descendants of Karafka::BaseController
+      # Forwards message to controller inherited from Karafka::BaseController based on it's topic
+      # @return controller inherited from Karafka::BaseController instance
       def descendant_controller
         descendant = Karafka::Routing::Mapper.by_topics[@event.topic.to_sym]
 
@@ -37,7 +41,6 @@ module Karafka
 
         controller = descendant.new
         controller.params = @event.message
-
         controller
       end
     end
