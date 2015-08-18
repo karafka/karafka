@@ -7,7 +7,7 @@ module Karafka
   class BaseWorker < SidekiqGlass::Worker
     self.timeout = 300
 
-    # Perform method
+    # @param params [Array] controller params and controller topic
     def execute(*params)
       event = Karafka::Connection::Event.new(params.last.to_sym, params.first)
       controller = Karafka::Routing::Router.new(event).descendant_controller
@@ -15,6 +15,7 @@ module Karafka
       controller.perform
     end
 
+    # @param _params [Array] controller params and controller topic
     def after_failure(*_params)
     end
   end
