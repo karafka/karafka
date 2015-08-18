@@ -25,6 +25,7 @@ PATH
       poseidon
       poseidon_cluster
       sidekiq
+      sidekiq-glass
 
 GEM
   remote: https://rubygems.org/
@@ -235,7 +236,6 @@ DEPENDENCIES
   poseidon_cluster
   rake
   sidekiq (= 3.4.1)
-  sidekiq-glass
 
 BUNDLED WITH
    1.10.6
