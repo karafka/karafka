@@ -16,6 +16,17 @@ module Karafka
         @event = event
       end
 
+      def descendant_controller
+        descendant = Karafka::Routing::Mapper.by_topics[@event.topic.to_sym]
+
+        fail NonMatchingTopicError unless descendant
+
+        controller = descendant.new
+        controller.params = @event.message
+
+        controller
+      end
+
       # @raise [Karafka::Topic::NonMatchingTopicError] raised if topic name is not match any
       # topic of descendants of Karafka::BaseController
       # Forwards message to controller inherited from Karafka::BaseController based on it's topic
@@ -26,7 +37,7 @@ module Karafka
         fail NonMatchingTopicError unless descendant
 
         controller = descendant.new
-        controller.params = JSON.parse(@event.message)
+        controller.params = Karafka::Params.new(@event.message).parse
         controller.call
       end
     end
