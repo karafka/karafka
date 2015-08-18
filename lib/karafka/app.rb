@@ -3,6 +3,7 @@ module Karafka
   class App
     class << self
       attr_writer :logger
+
       # Method which runs app
       def run
         Karafka::Connection::Consumer.new.call
