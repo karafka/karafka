@@ -13,10 +13,11 @@ Karafka is a microframework to work easier with Kafka incoming events.
 
 Karafka has following configuration options:
 
-| Option                  | Value type    | Description                    |
-|-------------------------|---------------|--------------------------------|
-| zookeeper_hosts         | Array<String> | Zookeeper server hosts         |
-| kafka_hosts             | Array<String> | Kafka server hosts             |
+| Option                  | Value type    | Description                        |
+|-------------------------|---------------|------------------------------------|
+| zookeeper_hosts         | Array<String> | Zookeeper server hosts             |
+| kafka_hosts             | Array<String> | Kafka server hosts                 |
+| worker_timeout          | Integer       | How long a task can run in Sidekiq |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class:
 
@@ -25,6 +26,7 @@ class App < Karafka::App
   setup do |config|
     config.kafka_hosts = %w( 127.0.0.1:9092 127.0.0.1:9093 )
     config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
+    config.worker_timeout =  3600 # 1 hour
   end
 end
 

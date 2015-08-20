@@ -12,14 +12,17 @@ Gem::Specification.new do |spec|
   spec.homepage      = ''
   spec.summary       = %q{ Model Event Controller microframework for Ruby and Kafka }
   spec.description   = %q{ Microframework used to simplify Kafka based Ruby applications }
+  spec.license       = 'MIT'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
+
   spec.add_dependency 'aspector'
   spec.add_dependency 'poseidon'
   spec.add_dependency 'poseidon_cluster'
   spec.add_dependency 'sidekiq'
   spec.add_dependency 'activesupport'
+  spec.add_dependency 'sidekiq-glass'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }

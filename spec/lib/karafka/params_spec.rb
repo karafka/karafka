@@ -1,27 +1,36 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Params do
-  describe '#parse' do
-    let(:options) { { a: '1' } }
+  describe '#build' do
+    let(:event) { double(message: message) }
+    let(:random_hash) { { rand.to_s => rand.to_s } }
 
-    context 'params is json' do
-      before do
-        @parsed_params = described_class.new(options.to_json).parse
-      end
+    subject { described_class.build(event) }
 
-      it 'deserializes as JSON' do
-        expect(@parsed_params[:a]).to eq '1'
-      end
+    context 'when we try to build from a hash' do
+      let(:message) { random_hash }
 
-      it 'returns hashWithIndifferentAccess' do
-        expect(@parsed_params[:a]).to eq(@parsed_params['a'])
+      it 'should just create params based on it' do
+        expect(subject).to eq message
       end
     end
 
-    context 'params is string' do
-      it 'deserializes as String' do
-        parsed_params = described_class.new(options.to_s).parse
-        expect(parsed_params).to eq({ a: '1' }.to_s)
+    context 'when we try to build from string' do
+      context 'and it is a vald json string' do
+        let(:message) { random_hash.to_json }
+
+        it 'should parse it and put it to params' do
+          expect(subject).to eq random_hash
+        end
+      end
+
+      context 'and it is not a valid json string' do
+        let(:random_string) { rand.to_s }
+        let(:message) { random_string }
+
+        it 'should create params with message containing that string' do
+          expect(subject).to eq('message' => random_string)
+        end
       end
     end
   end

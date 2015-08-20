@@ -1,9 +1,9 @@
 # Karafka module namespace
 module Karafka
   # Base controller from which all Karafka controllers should inherit
-  # Similar to Rails controllers we can define before_schedule callbacks
+  # Similar to Rails controllers we can define before_enqueue callbacks
   # that will be executed
-  # Note that if before_schedule return false, the chain will be stopped and
+  # Note that if before_enqueue return false, the chain will be stopped and
   # the perform method won't be executed in sidekiq (won't peform_async it)
   # @example Create simple controller
   #   class ExampleController < Karafka::BaseController
@@ -15,12 +15,12 @@ module Karafka
   #     end
   #   end
   #
-  # @example Create a controller with a block before_schedule
+  # @example Create a controller with a block before_enqueue
   #   class ExampleController < Karafka::BaseController
   #     self.group = :kafka_group_name
   #     self.topic = :kafka_topic
   #
-  #     before_schedule do
+  #     before_enqueue do
   #       # Here we should have some checking logic
   #       # If false is returned, won't schedule a perform action
   #     end
@@ -30,12 +30,12 @@ module Karafka
   #     end
   #   end
   #
-  # @example Create a controller with a method before_schedule
+  # @example Create a controller with a method before_enqueue
   #   class ExampleController < Karafka::BaseController
   #     self.group = :kafka_group_name
   #     self.topic = :kafka_topic
   #
-  #     before_schedule :before_method
+  #     before_enqueue :before_method
   #
   #     def perform
   #       # some logic here
@@ -48,10 +48,24 @@ module Karafka
   #       # If false is returned, won't schedule a perform action
   #     end
   #   end
+  #
+  # @example Create a controller with an after_failure action
+  #   class ExampleController < Karafka::BaseController
+  #     self.group = :kafka_group_name
+  #     self.topic = :kafka_topic
+  #
+  #     def perform
+  #       # some logic here
+  #     end
+  #
+  #     def after_failure
+  #       # action taken in case perform fails
+  #     end
+  #   end
   class BaseController
     include ActiveSupport::Callbacks
 
-    attr_accessor :params
+    attr_reader :params
 
     # Raised when we have a controller that does not have a group set
     class GroupNotDefined < StandardError; end
@@ -75,14 +89,14 @@ module Karafka
       # @param method_name [Symbol, String] method name or nil if we plan to provide a block
       # @yield A block with a code that should be executed before scheduling
       # @note If value returned is false, will chalt the chain and not schedlue to Sidekiq
-      # @example Define a block before_schedule callback
-      #   before_schedule do
+      # @example Define a block before_enqueue callback
+      #   before_enqueue do
       #     # logic here
       #   end
       #
-      # @example Define a class name before_schedule callback
-      #   before_schedule :method_name
-      def before_schedule(method_name = nil, &block)
+      # @example Define a class name before_enqueue callback
+      #   before_enqueue :method_name
+      def before_enqueue(method_name = nil, &block)
         set_callback :call, :before, method_name ? method_name : block
       end
     end
@@ -97,6 +111,18 @@ module Karafka
       fail PerformMethodNotDefined unless self.respond_to?(:perform)
     end
 
+    # Assigns parameters hash (Karafka::Params) internally. It also adds some extra
+    #  flavour values to it
+    # @param params [Karafka::Params] params instance
+    def params=(params)
+      @params = params.tap do |param|
+        param.merge!(
+          controller: self.class,
+          topic: self.class.topic
+        )
+      end
+    end
+
     # Executes the default controller flow, runs callbacks and if not halted
     # will schedule a perform task in sidekiq
     def call
@@ -107,9 +133,9 @@ module Karafka
 
     private
 
-    # Enqueues the perform method into sidekiq
+    # Enqueues the execution of perform method into sidekiq worker
     def enqueue
-      Karafka::BaseWorker.perform { perform }
+      Karafka::Worker.perform_async(params)
     end
   end
 end

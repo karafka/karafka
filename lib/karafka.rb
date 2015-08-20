@@ -4,15 +4,13 @@
   bundler
   pathname
   timeout
-  sidekiq
+  logger
   poseidon
   poseidon_cluster
-  logger
+  sidekiq
+  sidekiq_glass
   active_support/callbacks
   active_support/core_ext/hash/indifferent_access
-).each { |lib| require lib }
-
-%w(
   karafka/loader
 ).each { |lib| require lib }
 
@@ -43,3 +41,5 @@ module Karafka
 end
 
 Karafka::Loader.new.load!(Karafka.core_root)
+
+load 'karafka/tasks/worker.rake'

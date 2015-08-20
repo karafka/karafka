@@ -10,18 +10,13 @@ module Karafka
     # option kafka_hosts [Array] kafka hosts with ports where kafka servers are run
     #
     SETTINGS = %i(
-      receive_events
       zookeeper_hosts
       kafka_hosts
+      worker_timeout
     )
 
     SETTINGS.each do |attr_name|
       attr_accessor attr_name
-
-      # @return [Boolean] is given command enabled
-      define_method :"#{attr_name}?" do
-        public_send(attr_name) == true
-      end
     end
 
     # Configurating method

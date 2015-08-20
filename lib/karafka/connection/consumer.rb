@@ -15,7 +15,7 @@ module Karafka
       def fetch
         listeners.each do |listener|
           listener.fetch do |event|
-            Karafka::Routing::Router.new(event).call
+            Karafka::Routing::Router.new(event).build.call
           end
         end
       end
