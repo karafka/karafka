@@ -5,9 +5,39 @@
 
 Microframework used to simplify Kafka based Ruby applications
 
-## How it works
+## How does it work
 
 Karafka is a microframework to work easier with Kafka incoming events.
+
+## Installation
+
+Karafka does not have yet a standard installation shell command. In order to install it, please follow given steps:
+
+Create a directory for your project:
+
+```bash
+mkdir app_dir
+cd app_dir
+```
+
+Create a Gemfile with Karafka:
+
+```bash
+echo "source 'https://rubygems.org'" > Gemfile
+echo "gem 'karafka'" >> Gemfile
+```
+
+Bundle afterwards
+
+```bash
+bundle install
+```
+
+Execute the *karafka:install rake* task:
+
+```bash
+bundle exec rake karafka:install
+```
 
 ## Setup
 
@@ -19,7 +49,7 @@ Karafka has following configuration options:
 | kafka_hosts             | Array<String> | Kafka server hosts                 |
 | worker_timeout          | Integer       | How long a task can run in Sidekiq |
 
-To apply this configuration, you need to use a *setup* method from the Karafka::App class:
+To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
 
 ```ruby
 class App < Karafka::App
@@ -29,8 +59,19 @@ class App < Karafka::App
     config.worker_timeout =  3600 # 1 hour
   end
 end
-
 ```
+
+Note: You can use any library like [Settingslogic](https://github.com/binarylogic/settingslogic) to handle your application configuration.
+
+## Rake tasks
+
+Karafka provides following rake tasks:
+
+| Task                 | Description                               |
+|----------------------|-------------------------------------------|
+| rake karafka:install | Creates whole minimal app structure       |
+| rake karafka:run     | Runs a single Karafka processing instance |
+| rake karafka:sidekiq | Runs a single Sidekiq worker for Karafka  |
 
 ## Sending events from Karafka
 
