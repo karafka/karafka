@@ -28,8 +28,8 @@ module Karafka
           end
         end
       rescue *IGNORED_ERRORS => e
-        Karafka::App.logger.error("An ignored error occur in #{self.class}")
-        Karafka::App.logger.error(e)
+        Karafka.logger.error("An ignored error occur in #{self.class}")
+        Karafka.logger.error(e)
       ensure
         consumer.close
       end

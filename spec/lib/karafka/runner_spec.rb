@@ -27,7 +27,7 @@ RSpec.describe Karafka::Runner do
 
     context 'when everything is ok' do
       it 'should just fetch from the consumer and not log anything' do
-        expect(Karafka::App.logger)
+        expect(Karafka.logger)
           .not_to receive(:fatal)
 
         subject.instance_variable_set(:'@consumer', consumer)
@@ -47,7 +47,7 @@ RSpec.describe Karafka::Runner do
 
         subject.instance_variable_set(:'@consumer', consumer)
 
-        expect(Karafka::App.logger)
+        expect(Karafka.logger)
           .to receive(:fatal)
 
         expect { subject.send(:fetch) }.not_to raise_error

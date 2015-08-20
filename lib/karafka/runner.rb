@@ -19,7 +19,7 @@ module Karafka
     def fetch
       @consumer.fetch
     rescue => e
-      Karafka::App.logger.fatal(e)
+      Karafka.logger.fatal(e)
     end
   end
 end

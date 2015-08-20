@@ -6,7 +6,7 @@ module Karafka
     # @param args [Array] controller params and controller topic
     # @note Arguments are provided in Karafka::BaseController enqueue
     def execute(*args)
-      Karafka::App.logger.info("#{self.class}#execute for #{args}")
+      Karafka.logger.info("#{self.class}#execute for #{args}")
       self.args = args
       controller.perform
     end
@@ -18,11 +18,11 @@ module Karafka
       self.args = args
 
       unless controller.respond_to?(:after_failure)
-        Karafka::App.logger.warn("#{self.class}#after_failure controller missing for #{args}")
+        Karafka.logger.warn("#{self.class}#after_failure controller missing for #{args}")
         return
       end
 
-      Karafka::App.logger.warn("#{self.class}#after_failure for #{args}")
+      Karafka.logger.warn("#{self.class}#after_failure for #{args}")
       controller.after_failure
     end
 

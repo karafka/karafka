@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 0.1.3
+
+- Karafka::App.logger moved to Karafka.logger
+
 ## 0.1.2
 
 - Logging to log/environment.log

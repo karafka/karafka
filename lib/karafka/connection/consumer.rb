@@ -6,10 +6,10 @@ module Karafka
       # @note This should be looped to obtain a constant listening
       def fetch
         listeners.each do |listener|
-          Karafka::App.logger.info("Listening to #{listener.controller}")
+          Karafka.logger.info("Listening to #{listener.controller}")
 
           listener.fetch do |event|
-            Karafka::App.logger.info("Handling event for #{listener.controller} with #{event}")
+            Karafka.logger.info("Handling event for #{listener.controller} with #{event}")
 
             Karafka::Routing::Router.new(event).build.call
           end
