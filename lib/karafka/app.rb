@@ -29,9 +29,13 @@ module Karafka
         after_setup
       end
 
-      # @return [String] app root path
-      def root
-        Karafka.root
+      # Methods that should be delegated to Karafka module
+      %i(
+        root env
+      ).each do |delegated|
+        define_method(delegated) do
+          Karafka.public_send(delegated)
+        end
       end
 
       private

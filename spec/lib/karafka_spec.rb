@@ -29,4 +29,10 @@ RSpec.describe Karafka do
       end
     end
   end
+
+  describe '.env' do
+    it 'should return current env' do
+      expect(subject.env).to eq ENV['KARAFKA_ENV']
+    end
+  end
 end

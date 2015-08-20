@@ -37,9 +37,14 @@ module Karafka
     def core_root
       Pathname.new(File.expand_path('../karafka', __FILE__))
     end
+
+    # @return [String] string with current environment
+    def env
+      ENV['KARAFKA_ENV'] || 'development'
+    end
   end
 end
 
 Karafka::Loader.new.load!(Karafka.core_root)
 
-load 'karafka/tasks/worker.rake'
+load 'karafka/tasks/karafka.rake'

@@ -1,5 +1,4 @@
 require 'bundler'
-require 'bundler/gem_tasks'
 require 'rake'
 require 'polishgeeks-dev-tools'
 

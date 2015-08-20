@@ -1,0 +1,13 @@
+ENV['KARAFKA_ENV'] ||= 'development'
+
+Bundler.require(:default, ENV['KARAFKA_ENV'])
+
+class App < Karafka::App
+  setup do |config|
+    config.kafka_hosts = %w( localhost:9092 )
+    config.zookeeper_hosts = %w( localhost:2181 )
+    config.worker_timeout = 60 # 1 minute
+  end
+end
+
+Karafka::Loader.new.load(App.root)
