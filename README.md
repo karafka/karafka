@@ -43,11 +43,11 @@ bundle exec rake karafka:install
 
 Karafka has following configuration options:
 
-| Option                  | Value type    | Description                        |
-|-------------------------|---------------|------------------------------------|
-| zookeeper_hosts         | Array<String> | Zookeeper server hosts             |
-| kafka_hosts             | Array<String> | Kafka server hosts                 |
-| worker_timeout          | Integer       | How long a task can run in Sidekiq |
+| Option                  | Value type    | Description                                                     |
+|-------------------------|---------------|-----------------------------------------------------------------|
+| zookeeper_hosts         | Array<String> | Zookeeper server hosts                                          |
+| kafka_hosts             | Array<String> | Kafka server hosts                                              |
+| worker_timeout          | Integer       | How long a task can run in Sidekiq before it will be terminated |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
 
