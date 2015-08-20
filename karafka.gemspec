@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.platform      = Gem::Platform::RUBY
   spec.authors       = ['Maciej Mensfeld', 'Pavlo Vavruk']
   spec.email         = %w( maciej@mensfeld.pl pavlo.vavruk@gmail.com )
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/karafka/karafka'
   spec.summary       = %q{ Model Event Controller microframework for Ruby and Kafka }
   spec.description   = %q{ Microframework used to simplify Kafka based Ruby applications }
   spec.license       = 'MIT'
