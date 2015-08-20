@@ -19,8 +19,6 @@ ENV['KARAFKA_ENV'] ||= 'development'
 # Karafka library
 module Karafka
   class << self
-    attr_writer :logger
-
     # @return [String] root path of this gem
     def gem_root
       Pathname.new(File.expand_path('../..', __FILE__))
