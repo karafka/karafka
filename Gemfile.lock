@@ -1,21 +1,3 @@
-GIT
-  remote: git://github.com/polishgeeks/polishgeeks-dev-tools.git
-  revision: 6799827c21bb2e066a7f6be28f66d413ff60c69b
-  specs:
-    polishgeeks-dev-tools (1.0.0)
-      brakeman
-      faker
-      haml-lint
-      mongoid-rspec
-      pry
-      rspec
-      rubocop
-      rubycritic (= 1.2.1)
-      shoulda
-      simplecov
-      timecop
-      yard
-
 PATH
   remote: .
   specs:
@@ -63,7 +45,7 @@ GEM
       terminal-table (~> 1.4)
     bson (3.2.1)
     builder (3.2.2)
-    celluloid (0.16.1)
+    celluloid (0.16.0)
       timers (~> 4.0.0)
     coderay (1.1.0)
     coercible (1.0.0)
@@ -124,6 +106,19 @@ GEM
     origin (2.1.1)
     parser (2.2.2.6)
       ast (>= 1.1, < 3.0)
+    polishgeeks-dev-tools (1.0.0)
+      brakeman
+      faker
+      haml-lint
+      mongoid-rspec
+      pry
+      rspec
+      rubocop
+      rubycritic (= 1.2.1)
+      shoulda
+      simplecov
+      timecop
+      yard
     poseidon (0.0.5)
     poseidon_cluster (0.3.2)
       poseidon (>= 0.0.5, < 0.1.0)
@@ -189,7 +184,8 @@ GEM
       json
       redis (>= 3.0.6)
       redis-namespace (>= 1.3.1)
-    sidekiq-glass (0.1.0)
+    sidekiq-glass (0.1.1)
+      celluloid (= 0.16.0)
       sidekiq (= 3.4.1)
     simplecov (0.10.0)
       docile (~> 1.1.0)
@@ -231,8 +227,5 @@ PLATFORMS
 DEPENDENCIES
   bundler
   karafka!
-  polishgeeks-dev-tools!
-  poseidon
-  poseidon_cluster
+  polishgeeks-dev-tools
   rake
-  sidekiq (= 3.4.1)
