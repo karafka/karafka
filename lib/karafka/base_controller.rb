@@ -97,6 +97,7 @@ module Karafka
       # @example Define a class name before_enqueue callback
       #   before_enqueue :method_name
       def before_enqueue(method_name = nil, &block)
+        Karafka::App.logger.debug("Defining before_enqueue filter with #{block}")
         set_callback :call, :before, method_name ? method_name : block
       end
     end
@@ -135,6 +136,7 @@ module Karafka
 
     # Enqueues the execution of perform method into sidekiq worker
     def enqueue
+      Karafka::App.logger.info("Enqueuing #{self.class} - #{params}")
       Karafka::Worker.perform_async(params)
     end
   end

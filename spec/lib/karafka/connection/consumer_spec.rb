@@ -10,19 +10,6 @@ RSpec.describe Karafka::Connection::Consumer do
     end
   end
 
-  describe '#call' do
-    it 'should loop with the fetch' do
-      expect(subject)
-        .to receive(:loop)
-        .and_yield
-
-      expect(subject)
-        .to receive(:fetch)
-
-      subject.call
-    end
-  end
-
   describe '#fetch' do
     let(:listener) { Karafka::Connection::Listener.new(controller) }
     let(:listeners) { [listener] }
@@ -43,6 +30,11 @@ RSpec.describe Karafka::Connection::Consumer do
         .to receive(:new)
         .with(event)
         .and_return(router)
+
+      expect(listener)
+        .to receive(:controller)
+        .and_return(controller)
+        .at_least(:once)
 
       expect(router)
         .to receive(:build)

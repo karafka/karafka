@@ -6,14 +6,15 @@ module Karafka
 
       # Method which runs app
       def run
-        Karafka::Connection::Consumer.new.call
+        logger.info('Starting Karafka framework')
+        logger.info("Kafka hosts: #{config.kafka_hosts}")
+        logger.info("Zookeeper hosts: #{config.zookeeper_hosts}")
+        Karafka::Runner.new.run
       end
 
       # @return [Logger] logger that we want to use
       def logger
-        @logger ||= ::Karafka::Logger.new(STDOUT).tap do |logger|
-          logger.level = (ENV['KARAFKA_LOG_LEVEL'] || ::Logger::WARN).to_i
-        end
+        @logger ||= ::Karafka::Logger.build
       end
 
       # @return [Karafka::Config] config instance

@@ -15,8 +15,6 @@
 ).each { |lib| require lib }
 
 ENV['KARAFKA_ENV'] ||= 'development'
-ENV['KARAFKA_LOG_LEVEL'] = ::Logger::WARN.to_s if ENV['KARAFKA_ENV'] == 'production'
-ENV['KARAFKA_LOG_LEVEL'] ||= ::Logger::DEBUG.to_s
 
 # Karafka library
 module Karafka

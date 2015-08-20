@@ -7,7 +7,9 @@ app.god
 
 # minimal Rails specific artifacts
 db/*.sqlite3
-/log/*
+/log/development.log
+/log/production.log
+/log/test.log
 /tmp/*
 *.gem
 *.~

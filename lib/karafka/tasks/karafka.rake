@@ -18,7 +18,8 @@ namespace :karafka do
     %w(
       app/models
       app/controllers
-      config/
+      config
+      log
     ).each do |dir|
       FileUtils.mkdir_p dir
     end

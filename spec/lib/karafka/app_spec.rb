@@ -3,10 +3,18 @@ require 'spec_helper'
 RSpec.describe Karafka::App do
   subject { described_class }
 
+  before do
+    @logger = described_class.logger
+  end
+
+  after do
+    described_class.logger = @logger
+  end
+
   describe '#run' do
     it 'should start consuming' do
-      expect_any_instance_of(Karafka::Connection::Consumer)
-        .to receive(:call)
+      expect_any_instance_of(Karafka::Runner)
+        .to receive(:run)
 
       subject.run
     end
@@ -35,12 +43,18 @@ RSpec.describe Karafka::App do
     end
 
     context 'when logger is not provided' do
+      let(:logger) { double }
+
       before do
         subject.instance_variable_set(:'@logger', nil)
       end
 
-      it 'should use a default logger' do
-        expect(subject.logger).to be_a Karafka::Logger
+      it 'should build a default logger' do
+        expect(Karafka::Logger)
+          .to receive(:build)
+          .and_return(logger)
+
+        expect(subject.logger).to eq logger
       end
     end
   end

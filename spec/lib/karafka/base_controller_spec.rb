@@ -148,6 +148,7 @@ RSpec.describe Karafka::BaseController do
         expect(subject)
           .to receive(:params)
           .and_return(params)
+          .at_least(:once)
 
         expect(Karafka::Worker)
           .to receive(:perform_async)

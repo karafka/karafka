@@ -10,6 +10,8 @@ module Karafka
         ZK::Exceptions::OperationTimeOut
       ]
 
+      attr_reader :controller
+
       # @param controller [Karafka::BaseController] a descendant of base controller
       # @return [Karafka::Connection::Listener] listener instance
       def initialize(controller)
@@ -25,8 +27,9 @@ module Karafka
             yield(event(incoming_message))
           end
         end
-      rescue *IGNORED_ERRORS
-        consumer
+      rescue *IGNORED_ERRORS => e
+        Karafka::App.logger.error("An ignored error occur in #{self.class}")
+        Karafka::App.logger.error(e)
       ensure
         consumer.close
       end

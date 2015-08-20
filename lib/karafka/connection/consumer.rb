@@ -2,19 +2,15 @@ module Karafka
   module Connection
     # Class that consumes events for which we listen
     class Consumer
-      # Validates on topic and group names uniqueness among all descendants of BaseController.
-      # Loop through each consumer group to receive data.
-      def call
-        loop { fetch }
-      end
-
-      private
-
       # Performs a single fetch of all listeners one by one
       # @note This should be looped to obtain a constant listening
       def fetch
         listeners.each do |listener|
+          Karafka::App.logger.info("Listening to #{listener.controller}")
+
           listener.fetch do |event|
+            Karafka::App.logger.info("Handling event for #{listener.controller} with #{event}")
+
             Karafka::Routing::Router.new(event).build.call
           end
         end
