@@ -32,3 +32,15 @@ RSpec.configure do |config|
 end
 
 require 'karafka'
+
+# Test setup for the framework
+module Karafka
+  # Configuration for test env
+  class App
+    setup do |config|
+      config.kafka_hosts = ['localhost:9092']
+      config.zookeeper_hosts = ['localhost:2181']
+      config.worker_timeout = 3600
+    end
+  end
+end

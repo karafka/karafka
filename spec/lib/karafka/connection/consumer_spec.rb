@@ -27,6 +27,7 @@ RSpec.describe Karafka::Connection::Consumer do
     let(:listener) { Karafka::Connection::Listener.new(controller) }
     let(:listeners) { [listener] }
     let(:event) { double }
+    let(:built_controller) { double }
     let(:router) { Karafka::Routing::Router.new(event) }
 
     it 'should use fetch on an each listener and route the request' do
@@ -44,6 +45,10 @@ RSpec.describe Karafka::Connection::Consumer do
         .and_return(router)
 
       expect(router)
+        .to receive(:build)
+        .and_return(built_controller)
+
+      expect(built_controller)
         .to receive(:call)
 
       subject.send(:fetch)

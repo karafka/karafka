@@ -20,27 +20,14 @@ module Karafka
       # topic of descendants of Karafka::BaseController
       # Forwards message to controller inherited from Karafka::BaseController based on it's topic
       # and run it
-      def call
+      def build
         descendant = Karafka::Routing::Mapper.by_topics[@event.topic.to_sym]
 
-        fail NonMatchingTopicError unless descendant
+        fail NonMatchingTopicError, @event.topic unless descendant
 
         controller = descendant.new
-        controller.params = Karafka::Params.new(@event.message).parse
-        controller.call
-      end
+        controller.params = Karafka::Params.build(@event)
 
-      # @raise [Karafka::Topic::NonMatchingTopicError] raised if topic name is not match any
-      # topic of descendants of Karafka::BaseController
-      # Forwards message to controller inherited from Karafka::BaseController based on it's topic
-      # @return controller inherited from Karafka::BaseController instance
-      def descendant_controller
-        descendant = Karafka::Routing::Mapper.by_topics[@event.topic.to_sym]
-
-        fail NonMatchingTopicError unless descendant
-
-        controller = descendant.new
-        controller.params = @event.message
         controller
       end
     end

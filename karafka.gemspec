@@ -12,9 +12,11 @@ Gem::Specification.new do |spec|
   spec.homepage      = ''
   spec.summary       = %q{ Model Event Controller microframework for Ruby and Kafka }
   spec.description   = %q{ Microframework used to simplify Kafka based Ruby applications }
+  spec.license       = 'MIT'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
+
   spec.add_dependency 'aspector'
   spec.add_dependency 'poseidon'
   spec.add_dependency 'poseidon_cluster'

@@ -72,20 +72,46 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
-  context 'when we have a block based before_schedule' do
+  describe '#params=' do
+    subject do
+      ClassBuilder.inherit(described_class) do
+        self.group = rand
+        self.topic = rand
+
+        before_enqueue do
+          false
+        end
+
+        def perform; end
+      end.new
+    end
+
+    let(:params) { { rand => rand } }
+
+    it 'should merge controller specific options into params' do
+      subject.params = params
+
+      expected = params.merge(
+        controller: subject.class,
+        topic: subject.class.topic
+      )
+
+      expect(subject.send(:params)).to eq expected
+    end
+  end
+
+  context 'when we have a block based before_enqueue' do
     context 'and it returns false' do
       subject do
         ClassBuilder.inherit(described_class) do
           self.group = rand
           self.topic = rand
 
-          before_schedule do
+          before_enqueue do
             false
           end
 
           def perform; end
-
-          self
         end.new
       end
 
@@ -102,15 +128,15 @@ RSpec.describe Karafka::BaseController do
           self.group = rand
           self.topic = rand
 
-          before_schedule do
+          before_enqueue do
             true
           end
 
           def perform; end
-
-          self
         end.new
       end
+
+      let(:params) { double }
 
       it 'should enqueue' do
         expect(subject).to receive(:enqueue)
@@ -119,29 +145,33 @@ RSpec.describe Karafka::BaseController do
       end
 
       it 'enqueue perform function' do
-        expect(Karafka::BaseWorker).to receive(:perform_async).with(nil, subject.class.topic)
+        expect(subject)
+          .to receive(:params)
+          .and_return(params)
+
+        expect(Karafka::Worker)
+          .to receive(:perform_async)
+          .with(params)
 
         subject.call
       end
     end
   end
 
-  context 'when we have a method based before_schedule' do
+  context 'when we have a method based before_enqueue' do
     context 'and it returns false' do
       subject do
         ClassBuilder.inherit(described_class) do
           self.group = rand
           self.topic = rand
 
-          before_schedule :method
+          before_enqueue :method
 
           def perform; end
 
           def method
             false
           end
-
-          self
         end.new
       end
 
@@ -158,15 +188,13 @@ RSpec.describe Karafka::BaseController do
           self.group = rand
           self.topic = rand
 
-          before_schedule :method
+          before_enqueue :method
 
           def perform; end
 
           def method
             true
           end
-
-          self
         end.new
       end
 

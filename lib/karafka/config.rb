@@ -12,6 +12,7 @@ module Karafka
     SETTINGS = %i(
       zookeeper_hosts
       kafka_hosts
+      worker_timeout
     )
 
     SETTINGS.each do |attr_name|

@@ -25,6 +25,20 @@ module Karafka
       # @param [Block] block configuration block
       def setup(&block)
         Config.setup(&block)
+
+        after_setup
+      end
+
+      # @return [String] app root path
+      def root
+        Karafka.root
+      end
+
+      private
+
+      # Everything that should be initialized after the setup
+      def after_setup
+        Karafka::Worker.timeout = config.worker_timeout
       end
     end
   end
