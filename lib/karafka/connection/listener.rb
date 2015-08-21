@@ -1,6 +1,6 @@
 module Karafka
   module Connection
-    # A single listener that listens to incoming events from a single topic
+    # A single listener that listens to incoming messages from a single topic
     class Listener
       # Errors that we catch and ignore
       # We should not take any action if one of this happens
@@ -18,13 +18,13 @@ module Karafka
         @controller = controller
       end
 
-      # Opens connection, gets events bulk and yields a block for each of the incoming messages
+      # Opens connection, gets messages bulk and yields a block for each of the incoming messages
       # After everything is done, consumer connection is being closed so it cannot be used again
       # @note You cannot use again a closed connection
       def fetch
-        consumer.fetch do |_partition, events_bulk|
-          events_bulk.each do |incoming_message|
-            yield(event(incoming_message))
+        consumer.fetch do |_partition, messages_bulk|
+          messages_bulk.each do |incoming_message|
+            yield(message(incoming_message))
           end
         end
       rescue *IGNORED_ERRORS => e
@@ -36,11 +36,11 @@ module Karafka
 
       private
 
-      # Builds an event that contains a topic and a message value
+      # Builds an message that contains a topic and a message value
       # @param incoming_message [Poseidon::FetchedMessage] a single poseidon message
-      # @return [Karafka::Connection::Event] a single internal event
-      def event(incoming_message)
-        Event.new(@controller.topic, incoming_message.value)
+      # @return [Karafka::Connection::Message] a single internal message
+      def message(incoming_message)
+        Message.new(@controller.topic, incoming_message.value)
       end
 
       # @return [Poseidon::ConsumerGroup] consumer group that listens to a topic

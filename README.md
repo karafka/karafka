@@ -7,7 +7,7 @@ Microframework used to simplify Apache Kafka based Ruby applications development
 
 ## How does it work
 
-Karafka is a microframework to work easier with Kafka incoming events.
+Karafka is a microframework to work easier with Apache Kafka incoming messages.
 
 ## Installation
 
@@ -74,9 +74,9 @@ Karafka provides following rake tasks:
 | rake karafka:sidekiq | Runs a single Sidekiq worker for Karafka  |
 
 
-## Sending events from Karafka
+## Sending messages from Karafka
 
-To add ability to send events you need add **waterdrop** gem to your Gemfile.
+To add ability to send messages you need add **waterdrop** gem to your Gemfile.
 
 Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to install and use it.
 

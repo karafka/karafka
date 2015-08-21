@@ -1,11 +1,11 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Routing::Router do
-  subject { described_class.new(event) }
+  subject { described_class.new(message) }
 
   describe '#build' do
     let(:topic) { "topic#{rand(1000)}".to_sym }
-    let(:event) { double(topic: topic, message: {}.to_json) }
+    let(:message) { double(topic: topic, content: {}.to_json) }
     context 'when there is no controller that matches the topic' do
       before do
         expect(Karafka::Routing::Mapper)

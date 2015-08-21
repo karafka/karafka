@@ -1,7 +1,7 @@
 module Karafka
   # Namespace for all elements related to requests routing
   module Routing
-    # Karafka framework Router for routing incoming events to proper controllers
+    # Karafka framework Router for routing incoming messages to proper controllers
     class Router
       # Raised when router receives topic name which is not provided for any of
       #  controllers(inherited from Karafka::BaseController)
@@ -10,10 +10,10 @@ module Karafka
       # Karafka maintainers
       class NonMatchingTopicError < StandardError; end
 
-      # @param event [Karafka::Connection::Event] single incoming event
+      # @param message [Karafka::Connection::Message] single incoming message
       # @return [Karafka::Router] router instance
-      def initialize(event)
-        @event = event
+      def initialize(message)
+        @message = message
       end
 
       # @raise [Karafka::Topic::NonMatchingTopicError] raised if topic name is not match any
@@ -21,12 +21,12 @@ module Karafka
       # Forwards message to controller inherited from Karafka::BaseController based on it's topic
       # and run it
       def build
-        descendant = Karafka::Routing::Mapper.by_topics[@event.topic.to_sym]
+        descendant = Karafka::Routing::Mapper.by_topics[@message.topic.to_sym]
 
-        fail NonMatchingTopicError, @event.topic unless descendant
+        fail NonMatchingTopicError, @message.topic unless descendant
 
         controller = descendant.new
-        controller.params = Karafka::Params.build(@event)
+        controller.params = Karafka::Params.build(@message)
 
         controller
       end

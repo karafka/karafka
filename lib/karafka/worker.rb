@@ -37,7 +37,7 @@ module Karafka
     # @return [Karafka::Controller] descendant of Karafka::BaseController that matches the topic
     def controller
       @controller ||= Karafka::Routing::Router.new(
-        Karafka::Connection::Event.new(params[:topic], params)
+        Karafka::Connection::Message.new(params[:topic], params)
       ).build
     end
   end

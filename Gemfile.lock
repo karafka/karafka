@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (0.1.3)
+    karafka (0.1.4)
       activesupport
       aspector
       poseidon
@@ -229,3 +229,6 @@ DEPENDENCIES
   karafka!
   polishgeeks-dev-tools
   rake
+
+BUNDLED WITH
+   1.10.6

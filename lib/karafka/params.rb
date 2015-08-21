@@ -1,17 +1,17 @@
 module Karafka
   # Class-wrapper for hash with indifferent access
   class Params < HashWithIndifferentAccess
-    # Builds params instance based on event
-    # @param event [Karafka::Connection::Event] single incoming event
+    # Builds params instance based on message
+    # @param message [Karafka::Connection::Message] single incoming message
     # @return [Karafka::Params] params instance
-    def self.build(event)
+    def self.build(message)
       # Sidekiq returns us a hash already - so we will just convert it into
       # a indifferent access version
-      return new(event.message) if event.message.is_a?(Hash)
+      return new(message.content) if message.content.is_a?(Hash)
 
-      new(JSON.parse(event.message))
+      new(JSON.parse(message.content))
     rescue JSON::ParserError
-      return new(message: event.message)
+      return new(message: message.content)
     end
   end
 end

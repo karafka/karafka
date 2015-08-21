@@ -104,7 +104,7 @@ RSpec.describe Karafka::Worker do
         expect(Karafka::Routing::Router)
           .not_to receive(:new)
 
-        expect(Karafka::Connection::Event)
+        expect(Karafka::Connection::Message)
           .not_to receive(:new)
 
         expect(subject.send(:controller)).to eq controller
@@ -113,22 +113,22 @@ RSpec.describe Karafka::Worker do
 
     context 'when controller is not yet built' do
       let(:controller) { nil }
-      let(:event) { double }
+      let(:message) { double }
       let(:router) { double }
       let(:routed_controller) { double }
       let(:topic) { double }
       let(:params) { { topic: topic, rand => rand } }
 
-      it 'should create karafka event and build a controller' do
+      it 'should create karafka message and build a controller' do
         expect(Karafka::Routing::Router)
           .to receive(:new)
-          .with(event)
+          .with(message)
           .and_return(router)
 
-        expect(Karafka::Connection::Event)
+        expect(Karafka::Connection::Message)
           .to receive(:new)
           .with(topic, params)
-          .and_return(event)
+          .and_return(message)
 
         expect(subject)
           .to receive(:params)

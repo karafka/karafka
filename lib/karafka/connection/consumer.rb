@@ -1,6 +1,6 @@
 module Karafka
   module Connection
-    # Class that consumes events for which we listen
+    # Class that consumes messages for which we listen
     class Consumer
       # Performs a single fetch of all listeners one by one
       # @note This should be looped to obtain a constant listening
@@ -8,10 +8,10 @@ module Karafka
         listeners.each do |listener|
           Karafka.logger.info("Listening to #{listener.controller}")
 
-          listener.fetch do |event|
-            Karafka.logger.info("Handling event for #{listener.controller} with #{event}")
+          listener.fetch do |message|
+            Karafka.logger.info("Handling message for #{listener.controller} with #{message}")
 
-            Karafka::Routing::Router.new(event).build.call
+            Karafka::Routing::Router.new(message).build.call
           end
         end
       end

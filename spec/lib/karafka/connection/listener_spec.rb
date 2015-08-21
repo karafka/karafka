@@ -58,7 +58,7 @@ RSpec.describe Karafka::Connection::Listener do
     context 'when no errors occur' do
       let(:consumer) { double }
       let(:_partition) { double }
-      let(:events_bulk) { [incoming_message] }
+      let(:messages_bulk) { [incoming_message] }
       let(:incoming_message) { double }
 
       it 'should yield for each incoming message' do
@@ -69,10 +69,10 @@ RSpec.describe Karafka::Connection::Listener do
 
         expect(consumer)
           .to receive(:fetch)
-          .and_yield(_partition, events_bulk)
+          .and_yield(_partition, messages_bulk)
 
         expect(subject)
-          .to receive(:event)
+          .to receive(:message)
           .with(incoming_message)
 
         expect(consumer)
@@ -84,18 +84,18 @@ RSpec.describe Karafka::Connection::Listener do
     end
   end
 
-  describe '#event' do
-    let(:event) { double }
-    let(:message) { rand }
-    let(:incoming_message) { double(value: message) }
+  describe '#message' do
+    let(:message) { double }
+    let(:content) { rand }
+    let(:incoming_message) { double(value: content) }
 
-    it 'should create an event instance' do
-      expect(Karafka::Connection::Event)
+    it 'should create an message instance' do
+      expect(Karafka::Connection::Message)
         .to receive(:new)
-        .with(controller.topic, message)
-        .and_return(event)
+        .with(controller.topic, content)
+        .and_return(message)
 
-      expect(subject.send(:event, incoming_message)).to eq event
+      expect(subject.send(:message, incoming_message)).to eq message
     end
   end
 
