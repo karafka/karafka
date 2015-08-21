@@ -74,47 +74,15 @@ Karafka provides following rake tasks:
 | rake karafka:sidekiq | Runs a single Sidekiq worker for Karafka  |
 
 
-## Usage
+## Sending events from Karafka
 
-### 1. Sending events to Kafka server
-
-To add ability to send events you need add *waterdrop* gem to your Gemfile.
+To add ability to send events you need add **waterdrop** gem to your Gemfile.
 
 Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to install and use it.
 
-After that you have ability to create messages in two ways.
+## Usage
 
-#### Generate event through aspect
-
-Define model in *app/models folder*
-``` ruby
-  class Calculator
-    def sum(a, b)
-      a + b
-    end
-  end
-```
-
-Add any of available aspects. e.g. AfterAspect
-```ruby
-  WaterDrop::Aspects::AfterAspect.apply(
-    Calculator,
-    method: :sum,
-    topic: 'karafka_topic',
-    message: ->(result) { "This is calculation result: #{result}" }
-  )
-```
-Run
-```ruby
-  Calculator.new.sum(5, 5)
-```
-
-#### Generate event directly
-```ruby
-  event = WaterDrop::Event.new('karafka_topic', 'message’)
-  event.send!
-```
-### 2. Receiving messages
+### Receiving messages
 
 First create application as it was written in **Installation** section above.
 It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file.
