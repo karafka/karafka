@@ -85,63 +85,57 @@ Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/maste
 ### Receiving messages
 
 First create application as it was written in **Installation** section above.
-It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file.
-Also you should have log folder where karafka logs will be written, rakefile.rb file to have ability to run karafka rake tasks.
+It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file,
+log folder where karafka logs will be written(based on environment), rakefile.rb file to have ability to run karafka rake tasks.
 
-Example of rakefile.rb:
+Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should be inherited from Karafka::BaseController.
+You have to define in the controller the next:
 
-```ruby
-  ENV['KARAFKA_ENV'] ||= 'development'
+ - *perform* method
+ - *group* name
+ - *topic* name
 
-  require './app.rb'
+Group and topic should be unique. You can't define different controllers with the same group or topic names, it will raise error.
 
-  task(:environment) {}
+You can add any number of *before_enqueue* callbacks. It can be method or block.
+before_enqueue acts as rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on it you can define which data you want to receive and which not.
+If any of callbacks returns false - *perform* method will be not enqueued to Sidekiq Worker.
 
-  Karafka::Loader.new.load(Karafka::App.root)
-
-  Dir.glob('lib/tasks/*.rake').each { |r| load r }
-```
-
-Now, to have ability to receive messages you should define controllers in app/controllers folder inherited from Karafka::BaseController. Controller should define *perform* method and has *group* and *topic* names. Names should be unique. You should not define different controllers with the same group or topic names.
-
-You can add any number of *before_enqueue* callbacks. It can be method or block. Write here logic which will not take long time to implement. You have access to params. Based on it you can define which data you want to receive and which not.
-Once at least one of callbacks returns false - *perform* method will be not enqueued to Sidekiq Worker.
-
-SidekiqWorker is inherited from [SidekiqGlass](https://github.com/karafka/sidekiq-glass), so it uses reentrancy. If you want to use it, you should add *after_failure* method in controller as well.
+SidekiqWorker is inherited from [SidekiqGlass](https://github.com/karafka/sidekiq-glass), so it uses reentrancy. If you want to use it, you should add *after_failure* method in the controller as well.
 To run Sidekiq worker you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **rake karafka:install**.
 
-One you run consumer - all messages from Kafka server will be received to needed controller. Routing to controller is based on topic name.
+Once you run consumer - messages from Kafka server will be send to needed controller (based on topic name).
 
-This controller will receive the message based on topic name(:karafka_topic).
+Presented example controller will accept incoming messages from a Kafka topic named :karafka_topic
 
 ```ruby
   class TestController < Karafka::BaseController
     self.group = :karafka_group
     self.topic = :karafka_topic
 
+    # before_enqueue has access to received params, you can modify them before enqueue it to sidekiq queue.
     before_enqueue {
-      # Logic here. Has access to params.
+      params.merge!(received_time: Time.now.to_s)
     }
 
     before_enqueue :validate_params
 
     # Method execution will be enqueued in Sidekiq.
-    # Example of perform method which writes **params** into log file.
     def perform
-      file = File.open('params.log', 'a+')
-      file.write "Topic #{self.class.topic} receive params #{params}\n"
-      file.close
+      Service.new.add_to_queue(params[:message])
     end
 
-    # You can not define this method once you don’t want to use Sidekiq reentrancy.
+    # Define this method if you want to use Sidekiq reentrancy.
+    # Logic to do if Sidekiq worker fails. E.g. because it takes more time than you define in config.worker_timeout setting.
     def after_failure
-      # Logic to do once Sidekiq worker will fail. E.g. because it takes more time than you define in config.worker_timeout setting.
+      Service.new.remove_from_queue(params[:message])
     end
 
     private
 
+   # We will not enqueue to sidekiq those messages, which were sent from sum method and return too high message for our purpose.
    def validate_params
-     # Logic here. Has access to params.
+     params['message'].to_i > 50 && params['method'] != 'sum'
    end
 end
 ```
