@@ -3,6 +3,7 @@
 ## 0.1.3
 
 - Karafka::App.logger moved to Karafka.logger
+- README updates (Usage section was added)
 
 ## 0.1.2
 

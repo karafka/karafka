@@ -73,11 +73,72 @@ Karafka provides following rake tasks:
 | rake karafka:run     | Runs a single Karafka processing instance |
 | rake karafka:sidekiq | Runs a single Sidekiq worker for Karafka  |
 
+
 ## Sending events from Karafka
 
 To add ability to send events you need add **waterdrop** gem to your Gemfile.
 
 Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to install and use it.
+
+## Usage
+
+### Receiving messages
+
+First create application as it was written in **Installation** section above.
+It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file,
+log folder where karafka logs will be written(based on environment), rakefile.rb file to have ability to run karafka rake tasks.
+
+Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should be inherited from Karafka::BaseController.
+You have to define in the controller the next:
+
+ - *perform* method
+ - *group* name
+ - *topic* name
+
+Group and topic should be unique. You can't define different controllers with the same group or topic names, it will raise error.
+
+You can add any number of *before_enqueue* callbacks. It can be method or block.
+before_enqueue acts as rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on it you can define which data you want to receive and which not.
+If any of callbacks returns false - *perform* method will be not enqueued to Sidekiq Worker.
+
+SidekiqWorker is inherited from [SidekiqGlass](https://github.com/karafka/sidekiq-glass), so it uses reentrancy. If you want to use it, you should add *after_failure* method in the controller as well.
+To run Sidekiq worker you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **rake karafka:install**.
+
+Once you run consumer - messages from Kafka server will be send to needed controller (based on topic name).
+
+Presented example controller will accept incoming messages from a Kafka topic named :karafka_topic
+
+```ruby
+  class TestController < Karafka::BaseController
+    self.group = :karafka_group
+    self.topic = :karafka_topic
+
+    # before_enqueue has access to received params, you can modify them before enqueue it to sidekiq queue.
+    before_enqueue {
+      params.merge!(received_time: Time.now.to_s)
+    }
+
+    before_enqueue :validate_params
+
+    # Method execution will be enqueued in Sidekiq.
+    def perform
+      Service.new.add_to_queue(params[:message])
+    end
+
+    # Define this method if you want to use Sidekiq reentrancy.
+    # Logic to do if Sidekiq worker fails. E.g. because it takes more time than you define in config.worker_timeout setting.
+    def after_failure
+      Service.new.remove_from_queue(params[:message])
+    end
+
+    private
+
+   # We will not enqueue to sidekiq those messages, which were sent from sum method and return too high message for our purpose.
+   def validate_params
+     params['message'].to_i > 50 && params['method'] != 'sum'
+   end
+end
+```
 
 ## Note on Patches/Pull Requests
 
