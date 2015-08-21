@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/karafka/karafka.png)](https://travis-ci.org/karafka/karafka)
 [![Code Climate](https://codeclimate.com/github/karafka/karafka/badges/gpa.svg)](https://codeclimate.com/github/karafka/karafka)
 
-Microframework used to simplify Kafka based Ruby applications
+Microframework used to simplify Kafka based Ruby applications development.
 
 ## How does it work
 
@@ -11,7 +11,7 @@ Karafka is a microframework to work easier with Kafka incoming events.
 
 ## Installation
 
-Karafka does not have yet a standard installation shell command. In order to install it, please follow given steps:
+Karafka does not have yet a standard installation shell commands. In order to install it, please follow given steps:
 
 Create a directory for your project:
 
@@ -88,18 +88,18 @@ First create application as it was written in **Installation** section above.
 It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file,
 log folder where karafka logs will be written(based on environment), rakefile.rb file to have ability to run karafka rake tasks.
 
-Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should be inherited from Karafka::BaseController.
-You have to define in the controller the next:
+Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should inherit from Karafka::BaseController.
+You have to define following elements in every controller:
 
- - *perform* method
- - *group* name
- - *topic* name
+ - *perform* - method that will execute the code in a Sidekiq worker
+ - *group* - symbol/string with a group name. Groups are used to cluster applications
+ - *topic* - symbol/string with a topic to which this controller should listen
 
 Group and topic should be unique. You can't define different controllers with the same group or topic names, it will raise error.
 
 You can add any number of *before_enqueue* callbacks. It can be method or block.
-before_enqueue acts as rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on it you can define which data you want to receive and which not.
-If any of callbacks returns false - *perform* method will be not enqueued to Sidekiq Worker.
+before_enqueue acts in a similar way to Rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on it you can define which data you want to receive and which not.
+If any of callbacks returns false - *perform* method will be not enqueued to Sidekiq Worker (the execution chain will stop).
 
 SidekiqWorker is inherited from [SidekiqGlass](https://github.com/karafka/sidekiq-glass), so it uses reentrancy. If you want to use it, you should add *after_failure* method in the controller as well.
 To run Sidekiq worker you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **rake karafka:install**.
