@@ -113,7 +113,8 @@ Presented example controller will accept incoming messages from a Kafka topic na
     self.group = :karafka_group
     self.topic = :karafka_topic
 
-    # before_enqueue has access to received params, you can modify them before enqueue it to sidekiq queue.
+    # before_enqueue has access to received params.
+    # You can modify them before enqueue it to sidekiq queue.
     before_enqueue {
       params.merge!(received_time: Time.now.to_s)
     }
@@ -126,14 +127,16 @@ Presented example controller will accept incoming messages from a Kafka topic na
     end
 
     # Define this method if you want to use Sidekiq reentrancy.
-    # Logic to do if Sidekiq worker fails. E.g. because it takes more time than you define in config.worker_timeout setting.
+    # Logic to do if Sidekiq worker fails.
+    # E.g. because it takes more time than you define in config.worker_timeout setting.
     def after_failure
       Service.new.remove_from_queue(params[:message])
     end
 
     private
 
-   # We will not enqueue to sidekiq those messages, which were sent from sum method and return too high message for our purpose.
+   # We will not enqueue to sidekiq those messages,
+   # which were sent from sum method and return too high message for our purpose.
    def validate_params
      params['message'].to_i > 50 && params['method'] != 'sum'
    end
