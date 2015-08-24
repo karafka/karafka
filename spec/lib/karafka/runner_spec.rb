@@ -14,7 +14,7 @@ RSpec.describe Karafka::Runner do
   end
 
   describe '#run' do
-    let (:terminator) { double }
+    let(:terminator) { double }
 
     before do
       subject.instance_variable_set(:'@terminator', terminator)
@@ -26,7 +26,7 @@ RSpec.describe Karafka::Runner do
     context 'runner was not terminated' do
       before do
         expect(terminator)
-          .to receive(:terminated?)
+          .to receive(:terminated)
           .and_return(false)
       end
 
@@ -41,7 +41,7 @@ RSpec.describe Karafka::Runner do
     context 'runner was terminated' do
       before do
         expect(terminator)
-          .to receive(:terminated?)
+          .to receive(:terminated)
           .and_return(true)
       end
 

@@ -11,7 +11,7 @@ module Karafka
     # @note This will last forever if not terminated
     def run
       loop do
-        break if @terminator.terminated?
+        break if @terminator.terminated
         fetch
       end
     end

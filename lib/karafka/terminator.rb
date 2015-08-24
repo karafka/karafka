@@ -1,47 +1,57 @@
 module Karafka
-  # Class used to manage terminating signals from Ruby Signal class
+  # Class used to catch signals from ruby Signal class
   class Terminator
-    # Default list of signals which we want to manage
-    SIGNALS = %i(
-      SIGINT
-    )
-
-    # Terminated flag
     attr_reader :terminated
 
-    def initialize(signals = SIGNALS)
+    # Default list of signals which we want to catch
+    DEFAULT_SIGNALS = %i(
+      INT
+    )
+
+    # Setting terminated flag as false
+    # Setting instance variable signals from param or DEFAULT_SIGNALS
+    # @param signals [Array<Symbol>] list of signals
+    #   matching with Signal.list
+    def initialize(signals = DEFAULT_SIGNALS)
       @terminated = false
       @signals = signals
     end
 
+    # Method catch signals defined in @signals variable
+    # @yield custom action
+    # and reset signals to default values [SIG_DFL]
     def catch_signals
       trap_signals
       yield
       reset_signals
     end
 
-    def terminated?
-      @terminated
-    end
-
     private
 
+    # Trapping and ignoring all signals defined in @signals variable
+    # Setting @terminated flag as true
+    # Logging error
     def trap_signals
       @signals.each do |s|
         trap(s) do
-          Thread.new do
-            Karafka.logger.error("Terminating with signal #{s}")
-          end
           @terminated = true
+          log_error(s)
         end
       end
     end
 
-    # Reset signals from SIGNALS array
-    #   into default value ('SIG_DFL')
+    # Logging into Karafka.logger error with signal code
+    # @param [Symbol] signal name
+    def log_error(signal)
+      Thread.new do
+        Karafka.logger.error("Terminating with signal #{signal}")
+      end
+    end
+
+    # Reset signals from @signal variable into default value [SIG_DFL]
     def reset_signals
       @signals.each do |s|
-        trap(s, 'SIG_DFL')
+        trap(s, :SIG_DFL)
       end
     end
   end
