@@ -5,6 +5,7 @@ module Karafka
       # Method which runs app
       def run
         Karafka.logger.info('Starting Karafka framework')
+        Karafka.logger.info("Environment: #{Karafka.env}")
         Karafka.logger.info("Kafka hosts: #{config.kafka_hosts}")
         Karafka.logger.info("Zookeeper hosts: #{config.zookeeper_hosts}")
         Karafka::Runner.new.run

@@ -26,7 +26,7 @@ module Karafka
       # @return [Proc] action that should be taken upon each incoming message
       def message_action(listener)
         lambda do |message|
-          Karafka.logger.info("Handling message for #{listener.controller} with #{message}")
+          Karafka.logger.info("Handling message for #{listener.controller}")
           Karafka::Routing::Router.new(message).build.call
         end
       end
