@@ -8,20 +8,26 @@ module Karafka
         listeners.each do |listener|
           Karafka.logger.info("Listening to #{listener.controller}")
 
-          listener.fetch do |message|
-            Karafka.logger.info("Handling message for #{listener.controller} with #{message}")
-
-            Karafka::Routing::Router.new(message).build.call
-          end
+          listener.async.fetch_loop(message_action(listener))
         end
       end
+
+      private
 
       # @return [Array<Karafka::Connection::Listener>] array of listeners
       #   that allow us to fetch data.
       # @note Each listener listens to a single topic
       def listeners
-        Karafka::Routing::Mapper.controllers.map do |controller|
+        @listeners ||= Karafka::Routing::Mapper.controllers.map do |controller|
           Karafka::Connection::Listener.new(controller)
+        end
+      end
+
+      # @return [Proc] action that should be taken upon each incoming message
+      def message_action(listener)
+        lambda do |message|
+          Karafka.logger.info("Handling message for #{listener.controller} with #{message}")
+          Karafka::Routing::Router.new(message).build.call
         end
       end
     end

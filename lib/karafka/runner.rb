@@ -9,7 +9,8 @@ module Karafka
     # Will loop and fetch any incoming messages
     # @note This will last forever if not interrupted
     def run
-      loop { fetch }
+      fetch
+      sleep
     end
 
     private

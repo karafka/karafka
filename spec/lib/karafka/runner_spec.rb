@@ -10,10 +10,9 @@ RSpec.describe Karafka::Runner do
   end
 
   describe '#run' do
-    it 'should loop with the fetch' do
+    it 'should start fetching and just sleep (rest will happen in celluloid actors)' do
       expect(subject)
-        .to receive(:loop)
-        .and_yield
+        .to receive(:sleep)
 
       expect(subject)
         .to receive(:fetch)

@@ -5,16 +5,38 @@ module Karafka
     # Map containing informations about log level for given environment
     ENV_MAP = {
       'production' => ::Logger::ERROR,
-      'test' => ::Logger::INFO,
-      'development' => ::Logger::DEBUG,
+      'test' => ::Logger::ERROR,
+      'development' => ::Logger::INFO,
       default: ::Logger::INFO
     }
 
-    # Builds a logger with appropriate settings, log level and environment
-    def self.build
-      instance = new(Karafka::App.root.join('log', "#{Karafka.env}.log"))
-      instance.level = ENV_MAP[Karafka.env] || ENV_MAP[:default]
-      instance
+    class << self
+      # Builds a logger with appropriate settings, log level and environment
+      def build
+        instance = new(target)
+        instance.level = ENV_MAP[Karafka.env] || ENV_MAP[:default]
+        instance
+      end
+
+      private
+
+      # @return [Karafka::Helpers::MultiDelegator] multi delegator instance
+      #   to which we will be writtng logs
+      # We use this approach to log stuff to file and to the STDOUT at the same time
+      def target
+        Karafka::Helpers::MultiDelegator
+          .delegate(:write, :close)
+          .to(STDOUT, file)
+      end
+
+      # @return [File] file to which we want to write our logs
+      # @note File is being opened in append mode ('a')
+      def file
+        File.open(
+          Karafka::App.root.join('log', "#{Karafka.env}.log"),
+          'a'
+        )
+      end
     end
   end
 end

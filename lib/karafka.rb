@@ -2,6 +2,7 @@
   rake
   rubygems
   bundler
+  celluloid
   pathname
   timeout
   logger
