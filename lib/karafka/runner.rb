@@ -4,13 +4,14 @@ module Karafka
     # @return [Karafka::Runner] runner instance
     def initialize
       @consumer = Karafka::Connection::Consumer.new
+      @terminator = Terminator.new
     end
 
     # Will loop and fetch any incoming messages
-    # @note This will last forever if not interrupted
+    # @note This will last forever if not terminated
     def run
       loop do
-        break if terminated?
+        break if @terminator.terminated?
         fetch
       end
     end
@@ -19,21 +20,11 @@ module Karafka
 
     # Single fetch run with fatal error catching and logging
     # @note Single consumer consumes all the topics that we listen on
+    #   Method ignore terminator signals
     def fetch
-      Terminator.catch_signals { terminate }
-      @consumer.fetch
+      @terminator.catch_signals { @consumer.fetch }
     rescue => e
       Karafka.logger.fatal(e)
-    ensure
-      Terminator.reset_signals
-    end
-
-    def terminate
-      @terminated = true
-    end
-
-    def terminated?
-      @terminated
     end
   end
 end

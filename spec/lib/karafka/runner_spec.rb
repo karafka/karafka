@@ -7,30 +7,70 @@ RSpec.describe Karafka::Runner do
     it 'should have a consumer instance created' do
       expect(subject.instance_variable_get(:'@consumer')).to be_a Karafka::Connection::Consumer
     end
+
+    it 'should have terminator instance created' do
+      expect(subject.instance_variable_get(:'@terminator')).to be_a Karafka::Terminator
+    end
   end
 
   describe '#run' do
-    it 'should loop with the fetch' do
+    let (:terminator) { double }
+
+    before do
+      subject.instance_variable_set(:'@terminator', terminator)
       expect(subject)
         .to receive(:loop)
         .and_yield
+    end
 
-      expect(subject)
-        .to receive(:fetch)
+    context 'runner was not terminated' do
+      before do
+        expect(terminator)
+          .to receive(:terminated?)
+          .and_return(false)
+      end
 
-      subject.run
+      it 'should fetch' do
+        expect(subject)
+          .to receive(:fetch)
+
+        subject.run
+      end
+    end
+
+    context 'runner was terminated' do
+      before do
+        expect(terminator)
+          .to receive(:terminated?)
+          .and_return(true)
+      end
+
+      it 'should not fetch' do
+        expect(subject)
+          .to_not receive(:fetch)
+
+        subject.run
+      end
     end
   end
 
   describe '#fetch' do
     let(:consumer) { double }
+    let(:terminator) { double }
+
+    before do
+      subject.instance_variable_set(:'@consumer', consumer)
+      subject.instance_variable_set(:'@terminator', terminator)
+    end
 
     context 'when everything is ok' do
-      it 'should just fetch from the consumer and not log anything' do
+      it 'should fetch from the consumer without logs and catch signals' do
+        expect(terminator)
+          .to receive(:catch_signals)
+          .and_yield
+
         expect(Karafka.logger)
           .not_to receive(:fatal)
-
-        subject.instance_variable_set(:'@consumer', consumer)
 
         expect(consumer)
           .to receive(:fetch)
@@ -41,6 +81,10 @@ RSpec.describe Karafka::Runner do
 
     context 'when we have a fatal error' do
       it 'should log this error' do
+        expect(terminator)
+          .to receive(:catch_signals)
+          .and_yield
+
         expect(consumer)
           .to receive(:fetch)
           .and_raise(StandardError)
