@@ -25,16 +25,18 @@ RSpec.describe Karafka::Terminator do
   end
 
   describe '#catch_signals' do
-    pending
-    let(:block) { double }
+    let(:block) { -> {} }
     it 'should trap signals, yield and reset signals' do
       expect(subject)
         .to receive(:trap_signals)
 
+      expect(block)
+        .to receive(:call)
+
       expect(subject)
         .to receive(:reset_signals)
 
-      subject.send(:catch_signals) {}
+      subject.send(:catch_signals, &block)
     end
   end
 

@@ -5,7 +5,7 @@ module Karafka
 
     # Default list of signals which we want to catch
     DEFAULT_SIGNALS = %i(
-      INT
+      SIGINT
     )
 
     # Setting terminated flag as false
@@ -18,11 +18,11 @@ module Karafka
     end
 
     # Method catch signals defined in @signals variable
-    # @yield custom action
+    # @param [Block] block of code that we want to execute
     # and reset signals to default values [SIG_DFL]
-    def catch_signals
+    def catch_signals(&block)
       trap_signals
-      yield
+      block.call
       reset_signals
     end
 
