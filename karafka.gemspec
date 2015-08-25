@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activesupport'
   spec.add_dependency 'aspector'
+  spec.add_dependency 'celluloid'
   spec.add_dependency 'poseidon'
   spec.add_dependency 'poseidon_cluster'
   spec.add_dependency 'sidekiq'

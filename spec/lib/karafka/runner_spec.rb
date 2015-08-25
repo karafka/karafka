@@ -30,7 +30,10 @@ RSpec.describe Karafka::Runner do
           .and_return(false)
       end
 
-      it 'should fetch' do
+      it 'should start fetching and just sleep (rest will happen in celluloid actors)' do
+        expect(subject)
+          .to receive(:sleep)
+
         expect(subject)
           .to receive(:fetch)
 

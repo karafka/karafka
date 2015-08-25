@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 0.1.5
+- Celluloid support for listeners
+- Multi target logging (STDOUT and file)
+
 ## 0.1.4
 - Renamed events to messages to follow Apache Kafka naming convention
 

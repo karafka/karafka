@@ -14,6 +14,7 @@ module Karafka
         break if @terminator.terminated
         fetch
       end
+      sleep
     end
 
     private

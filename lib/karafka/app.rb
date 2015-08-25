@@ -5,6 +5,7 @@ module Karafka
       # Method which runs app
       def run
         Karafka.logger.info('Starting Karafka framework')
+        Karafka.logger.info("Environment: #{Karafka.env}")
         Karafka.logger.info("Kafka hosts: #{config.kafka_hosts}")
         Karafka.logger.info("Zookeeper hosts: #{config.zookeeper_hosts}")
         Karafka::Runner.new.run
@@ -37,6 +38,7 @@ module Karafka
       # Everything that should be initialized after the setup
       def after_setup
         Karafka::Worker.timeout = config.worker_timeout
+        Celluloid.logger = Karafka.logger
       end
     end
   end
