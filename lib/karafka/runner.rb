@@ -10,10 +10,7 @@ module Karafka
     # Will loop and fetch any incoming messages
     # @note This will last forever if not terminated
     def run
-      loop do
-        break if @terminator.terminated
-        fetch
-      end
+      fetch
       sleep
     end
 

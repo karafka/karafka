@@ -14,46 +14,14 @@ RSpec.describe Karafka::Runner do
   end
 
   describe '#run' do
-    let(:terminator) { double }
-
-    before do
-      subject.instance_variable_set(:'@terminator', terminator)
+    it 'should start fetching and just sleep (rest will happen in celluloid actors)' do
       expect(subject)
-        .to receive(:loop)
-        .and_yield
-    end
+        .to receive(:sleep)
 
-    context 'runner was not terminated' do
-      before do
-        expect(terminator)
-          .to receive(:terminated)
-          .and_return(false)
-      end
+      expect(subject)
+        .to receive(:fetch)
 
-      it 'should start fetching and just sleep (rest will happen in celluloid actors)' do
-        expect(subject)
-          .to receive(:sleep)
-
-        expect(subject)
-          .to receive(:fetch)
-
-        subject.run
-      end
-    end
-
-    context 'runner was terminated' do
-      before do
-        expect(terminator)
-          .to receive(:terminated)
-          .and_return(true)
-      end
-
-      it 'should not fetch' do
-        expect(subject)
-          .to_not receive(:fetch)
-
-        subject.run
-      end
+      subject.run
     end
   end
 
