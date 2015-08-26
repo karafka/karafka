@@ -4,13 +4,21 @@ module Karafka
     class << self
       # Method which runs app
       def run
-        Karafka.logger.info('Starting Karafka framework')
-        Karafka.logger.info("Environment: #{Karafka.env}")
-        Karafka.logger.info("Kafka hosts: #{config.kafka_hosts}")
-        Karafka.logger.info("Zookeeper hosts: #{config.zookeeper_hosts}")
-        run!
-        Karafka::Runner.new.run
-        sleep
+        monitor.on_sigint do
+          stop!
+          exit
+        end
+
+        monitor.on_sigquit do
+          stop!
+          exit
+        end
+
+        monitor.supervise do
+          run!
+          Karafka::Runner.new.run
+          sleep
+        end
       end
 
       # @return [Karafka::Config] config instance
@@ -45,6 +53,11 @@ module Karafka
       end
 
       private
+
+      # @return [Karafka::Monitor] monitor instance used to catch system signal calls
+      def monitor
+        Karafka::Monitor.instance
+      end
 
       # Everything that should be initialized after the setup
       def after_setup
