@@ -2,7 +2,7 @@
   rake
   rubygems
   bundler
-  celluloid
+  celluloid/autostart
   pathname
   timeout
   logger

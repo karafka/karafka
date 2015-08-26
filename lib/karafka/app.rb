@@ -8,7 +8,9 @@ module Karafka
         Karafka.logger.info("Environment: #{Karafka.env}")
         Karafka.logger.info("Kafka hosts: #{config.kafka_hosts}")
         Karafka.logger.info("Zookeeper hosts: #{config.zookeeper_hosts}")
+        run!
         Karafka::Runner.new.run
+        sleep
       end
 
       # @return [Karafka::Config] config instance
@@ -22,6 +24,15 @@ module Karafka
         Config.setup(&block)
 
         after_setup
+      end
+
+      # Methods that should be delegated to Karafka::Status object
+      %i(
+        run! running? stop!
+      ).each do |delegated|
+        define_method(delegated) do
+          Status.instance.public_send(delegated)
+        end
       end
 
       # Methods that should be delegated to Karafka module

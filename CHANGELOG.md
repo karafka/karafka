@@ -1,5 +1,12 @@
 # Karafka framework changelog
 
+## 0.1.7
+ - Added better concurency by clusterization of listeners
+ - Added graceful shutdown
+
+## 0.1.6
+ - Added concurency that allows to handle bigger applications with celluloid
+
 ## 0.1.5
 - Celluloid support for listeners
 - Multi target logging (STDOUT and file)

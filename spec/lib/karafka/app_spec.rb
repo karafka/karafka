@@ -4,9 +4,15 @@ RSpec.describe Karafka::App do
   subject { described_class }
 
   describe '#run' do
-    it 'should start consuming' do
+    it 'should run, start consuming and sleep' do
+      expect(subject)
+        .to receive(:run!)
+
       expect_any_instance_of(Karafka::Runner)
         .to receive(:run)
+
+      expect(subject)
+        .to receive(:sleep)
 
       subject.run
     end
@@ -54,15 +60,35 @@ RSpec.describe Karafka::App do
     end
   end
 
-  describe '#root' do
-    let(:root) { double }
+  describe 'Karafka delegations' do
+    %i( root env ).each do |delegation|
+      describe "##{delegation}" do
+        let(:return_value) { double }
 
-    it 'should use Karafka.root' do
-      expect(Karafka)
-        .to receive(:root)
-        .and_return(root)
+        it "should delegate #{delegation} method to Karafka module" do
+          expect(Karafka)
+            .to receive(delegation)
+            .and_return(return_value)
 
-      expect(subject.root).to eq root
+          expect(subject.public_send(delegation)).to eq return_value
+        end
+      end
+    end
+  end
+
+  describe 'Karafka::Status delegations' do
+    %i( run! running? stop! ).each do |delegation|
+      describe "##{delegation}" do
+        let(:return_value) { double }
+
+        it "should delegate #{delegation} method to Karafka module" do
+          expect(Karafka::Status.instance)
+            .to receive(delegation)
+            .and_return(return_value)
+
+          expect(subject.public_send(delegation)).to eq return_value
+        end
+      end
     end
   end
 end

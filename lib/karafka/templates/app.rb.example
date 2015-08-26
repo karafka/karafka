@@ -7,6 +7,7 @@ class App < Karafka::App
     config.kafka_hosts = %w( localhost:9092 )
     config.zookeeper_hosts = %w( localhost:2181 )
     config.worker_timeout = 60 # 1 minute
+    config.concurrency = 10 # 10 listening threads
   end
 end
 

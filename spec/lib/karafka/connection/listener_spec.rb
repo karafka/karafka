@@ -10,76 +10,7 @@ RSpec.describe Karafka::Connection::Listener do
     end
   end
 
-  # It is a celluloid actor, so to spec it - we take the wrapped object
-  subject { described_class.new(controller).wrapped_object }
-
-  describe 'stop?' do
-    context 'when we dont want to stop' do
-      before do
-        subject.instance_variable_set(:'@stop', false)
-      end
-
-      it { expect(subject.stop?).to eq false }
-    end
-
-    context 'when we want to stop' do
-      before do
-        subject.instance_variable_set(:'@stop', true)
-      end
-
-      it { expect(subject.stop?).to eq true }
-    end
-  end
-
-  describe 'stop!' do
-    before do
-      subject.instance_variable_set(:'@stop', false)
-    end
-
-    it 'should switch stop? to true' do
-      expect(subject.stop?).to eq false
-      subject.stop!
-      expect(subject.stop?).to eq true
-    end
-  end
-
-  describe '#fetch_loop' do
-    let(:action) { double }
-
-    context 'when we want to stop the loop' do
-      before do
-        expect(subject)
-          .to receive(:stop?)
-          .and_return(true)
-      end
-
-      it 'should never fetch' do
-        expect(subject)
-          .not_to receive(:fetch)
-
-        subject.fetch_loop(action)
-      end
-    end
-
-    context 'when we dont want to stop the loop' do
-      before do
-        expect(subject)
-          .to receive(:stop?)
-          .and_return(false)
-      end
-
-      it 'should fetch' do
-        expect(subject)
-          .to receive(:fetch)
-
-        expect(subject)
-          .to receive(:loop)
-          .and_yield
-
-        subject.fetch_loop(action)
-      end
-    end
-  end
+  subject { described_class.new(controller) }
 
   describe '#fetch' do
     let(:action) { double }
@@ -108,7 +39,7 @@ RSpec.describe Karafka::Connection::Listener do
           .at_least(:once)
 
         expect(proxy)
-          .to receive(:fetch_loop)
+          .to receive(:fetch)
           .and_raise(error)
 
         expect { subject.send(:fetch, action) }.to raise_error(error)
@@ -120,7 +51,6 @@ RSpec.describe Karafka::Connection::Listener do
       let(:_partition) { double }
       let(:messages_bulk) { [incoming_message] }
       let(:incoming_message) { double }
-      let(:internal_message) { double }
 
       it 'should yield for each incoming message' do
         expect(subject)
@@ -129,35 +59,14 @@ RSpec.describe Karafka::Connection::Listener do
           .at_least(:once)
 
         expect(consumer)
-          .to receive(:fetch_loop)
+          .to receive(:fetch)
           .and_yield(_partition, messages_bulk)
-
-        expect(subject)
-          .to receive(:message)
-          .with(incoming_message)
-          .and_return(internal_message)
-
         expect(action)
           .to receive(:call)
-          .with(internal_message)
+          .with(subject.controller, incoming_message)
 
         subject.send(:fetch, action)
       end
-    end
-  end
-
-  describe '#message' do
-    let(:message) { double }
-    let(:content) { rand }
-    let(:incoming_message) { double(value: content) }
-
-    it 'should create an message instance' do
-      expect(Karafka::Connection::Message)
-        .to receive(:new)
-        .with(controller.topic, content)
-        .and_return(message)
-
-      expect(subject.send(:message, incoming_message)).to eq message
     end
   end
 
