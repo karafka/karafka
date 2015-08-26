@@ -1,6 +1,6 @@
 module Karafka
   # Class used to catch signals from ruby Signal class
-  class Terminator
+  class Monitor
     attr_reader :terminated
 
     # Default list of signals which we want to catch

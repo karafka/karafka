@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Terminator do
+RSpec.describe Karafka::Monitor do
   subject { described_class.new }
 
   describe '#new' do
