@@ -1,26 +1,45 @@
 module Karafka
   # Class used to run the Karafka consumer and handle shutting down, restarting etc
   class Runner
-    # @return [Karafka::Runner] runner instance
-    def initialize
-      @consumer = Karafka::Connection::Consumer.new
-    end
-
-    # Will loop and fetch any incoming messages
-    # @note This will last forever if not interrupted
+    # Starts listening on all the clusters asynchronously
     def run
-      fetch
-      sleep
+      clusters.each do |cluster|
+        cluster.async.fetch_loop(consumer)
+      end
+    rescue => e
+      Karafka::App.stop!
+      Karafka.logger.fatal(e)
+      raise e
     end
 
     private
 
-    # Single fetch run with fatal error catching and logging
-    # @note Single consumer consumes all the topics that we listen on
-    def fetch
-      @consumer.fetch
-    rescue => e
-      Karafka.logger.fatal(e)
+    # @return [Array<Karafka::Connection::Cluster>] array with all the connection clusters
+    def clusters
+      Karafka::Routing::Mapper
+        .controllers
+        .each_slice(slice_size)
+        .map do |chunk|
+          Karafka::Connection::Cluster.new(chunk)
+        end
+    end
+
+    # @return [Integer] number of topics that we want to listen to per thread
+    # @note For smaller amount of controllers it would be the best to number of controllers
+    #   to match number of threads - that way it could consume messages in "real" time
+    def slice_size
+      controllers_length = Karafka::Routing::Mapper.controllers.length
+      size = controllers_length / Karafka::App.config.concurrency
+      size < 1 ? 1 : size
+    end
+
+    # @return [Proc] proc that should be processed when a messaga arrives
+    # @yieldparam controller [Karafka::BaseController] descendant of the base controller
+    # @yieldparam message [Poseidon::FetchedMessage] message from poseidon (raw one)
+    def consumer
+      lambda do |controller, message|
+        Karafka::Connection::Consumer.new.consume(controller, message)
+      end
     end
   end
 end
