@@ -4,15 +4,65 @@ RSpec.describe Karafka::App do
   subject { described_class }
 
   describe '#run' do
-    it 'should run, start consuming and sleep' do
+    it 'should run in supervision, start consuming and sleep' do
+      expect(subject)
+        .to receive(:sleep)
+
       expect(subject)
         .to receive(:run!)
 
       expect_any_instance_of(Karafka::Runner)
         .to receive(:run)
 
+      expect(Karafka::Monitor.instance)
+        .to receive(:supervise)
+        .and_yield
+
+      expect(Karafka::Monitor.instance)
+        .to receive(:on_sigint)
+
+      expect(Karafka::Monitor.instance)
+        .to receive(:on_sigquit)
+
+      subject.run
+    end
+
+    it 'should define a proper action for sigint' do
+      expect(Karafka::Monitor.instance)
+        .to receive(:supervise)
+
+      expect(Karafka::Monitor.instance)
+        .to receive(:on_sigint)
+        .and_yield
+
+      expect(Karafka::Monitor.instance)
+        .to receive(:on_sigquit)
+
       expect(subject)
-        .to receive(:sleep)
+        .to receive(:stop!)
+
+      expect(subject)
+        .to receive(:exit)
+
+      subject.run
+    end
+
+    it 'should define a proper action for sigquit' do
+      expect(Karafka::Monitor.instance)
+        .to receive(:supervise)
+
+      expect(Karafka::Monitor.instance)
+        .to receive(:on_sigint)
+
+      expect(Karafka::Monitor.instance)
+        .to receive(:on_sigquit)
+        .and_yield
+
+      expect(subject)
+        .to receive(:stop!)
+
+      expect(subject)
+        .to receive(:exit)
 
       subject.run
     end
@@ -58,6 +108,10 @@ RSpec.describe Karafka::App do
 
       subject.send(:after_setup)
     end
+  end
+
+  describe '#monitor' do
+    it { expect(subject.send(:monitor)).to be_a Karafka::Monitor }
   end
 
   describe 'Karafka delegations' do

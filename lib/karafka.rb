@@ -17,6 +17,10 @@
 
 ENV['KARAFKA_ENV'] ||= 'development'
 
+# The Poseidon socket timeout is 10, so we give it a bit more time to shutdown after
+# socket timeout
+Celluloid.shutdown_timeout = 15
+
 # Karafka library
 module Karafka
   class << self
