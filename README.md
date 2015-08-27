@@ -128,8 +128,7 @@ Presented example controller will accept incoming messages from a Kafka topic na
     end
 
     # Define this method if you want to use Sidekiq reentrancy.
-    # Logic to do if Sidekiq worker fails.
-    # E.g. because it takes more time than you define in config.worker_timeout setting.
+    # Logic to do if Sidekiq worker fails (because of exception, timeout, etc).
     def after_failure
       Service.new.remove_from_queue(params[:message])
     end
@@ -159,3 +158,11 @@ Make your feature addition or bug fix.
 Add tests for it. This is important so I don't break it in a future version unintentionally.
 Commit, do not mess with Rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 Send me a pull request. Bonus points for topic branches.
+
+Each pull request must pass our quality requirements. To check if everything is as it should be, we use [PolishGeeks Dev Tools](https://github.com/polishgeeks/polishgeeks-dev-tools) that combine multiple linters and code analyzers. Please run:
+
+```bash
+bundle exec rake
+```
+
+to check if everything is in order. After that you can submit a pull request.
