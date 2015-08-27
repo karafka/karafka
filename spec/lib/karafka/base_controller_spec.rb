@@ -13,24 +13,6 @@ RSpec.describe Karafka::BaseController do
   subject { ClassBuilder.inherit(described_class) }
 
   describe 'initial exceptions' do
-    context 'when kafka group is not defined' do
-      it 'should raise an exception' do
-        expect { subject.new }.to raise_error(described_class::GroupNotDefined)
-      end
-    end
-
-    context 'when kafka topic is not defined' do
-      subject do
-        ClassBuilder.inherit(described_class) do
-          self.group = rand
-        end
-      end
-
-      it 'should raise an exception' do
-        expect { subject.new }.to raise_error(described_class::TopicNotDefined)
-      end
-    end
-
     context 'when perform method is not defined' do
       subject do
         ClassBuilder.inherit(described_class) do
@@ -56,6 +38,66 @@ RSpec.describe Karafka::BaseController do
 
       it 'should not raise an exception' do
         expect { subject.new }.not_to raise_error
+      end
+    end
+  end
+
+  describe '#group' do
+    before do
+      subject.instance_variable_set(:'@group', group)
+    end
+
+    context 'when group value is set' do
+      let(:group) { rand.to_s }
+
+      it { expect(subject.group).to eq group }
+    end
+
+    context 'when group value is not set' do
+      let(:group) { nil }
+
+      it 'should build it based on the app name and current controller topic' do
+        expect(subject.group).to eq "#{Karafka::App.config.name}_#{subject.topic}"
+      end
+    end
+  end
+
+  describe '#topic' do
+    before do
+      subject.instance_variable_set(:'@topic', topic)
+    end
+
+    context 'when topic value is set' do
+      let(:topic) { rand.to_s }
+
+      it { expect(subject.topic).to eq topic }
+    end
+
+    context 'when topic value is not set' do
+      context 'and it is not namespaced controller' do
+        let(:topic) { nil }
+
+        it 'should build it based on the controller name' do
+          expect(subject.topic).to eq subject.to_s.underscore.sub('_controller', '').tr('/', '_')
+        end
+      end
+
+      context 'and it is namespaced controller' do
+        subject do
+          # Dummy spec module
+          module DummyModule
+            # Dummy spec controller in a module
+            class Ctrl < Karafka::BaseController
+              self
+            end
+          end
+        end
+
+        let(:topic) { nil }
+
+        it 'should build it based on the controller name and the namespace' do
+          expect(subject.topic).to eq subject.to_s.underscore.sub('_controller', '').tr('/', '_')
+        end
       end
     end
   end

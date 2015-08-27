@@ -1,11 +1,12 @@
 # Karafka framework changelog
 
-## 0.1.7
+## 0.1.6
  - Added better concurency by clusterization of listeners
  - Added graceful shutdown
-
-## 0.1.6
  - Added concurency that allows to handle bigger applications with celluloid
+ - Karafka controllers no longer require group to be defined (created based on the topic and app name)
+ - Karafka controllers no longer require topic to be defined (created based on the controller name)
+ - Readme updates
 
 ## 0.1.5
 - Celluloid support for listeners

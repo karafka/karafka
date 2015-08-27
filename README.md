@@ -85,18 +85,51 @@ Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/maste
 
 ### Receiving messages
 
-First create application as it was written in **Installation** section above.
+First create application as it was written in the installation section above.
 It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file,
 log folder where karafka logs will be written(based on environment), rakefile.rb file to have ability to run karafka rake tasks.
 
+### Methods and attributes for every controller
+
 Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should inherit from Karafka::BaseController.
+
 You have to define following elements in every controller:
 
- - *perform* - method that will execute the code in a Sidekiq worker
- - *group* - symbol/string with a group name. Groups are used to cluster applications
+ - method *perform* - method that will execute the code in a Sidekiq worker
+
+####  Optional attributes
+
+Karafka controller has two optional attributes: **topic** and **group**.
+
+##### Karafka controller topic
+
  - *topic* - symbol/string with a topic to which this controller should listen
 
+By default topic is taken from the controller name (similar to Rails routes). It will also include any namespace name in which the controller is defined. Here you have few examples on what type of topic you will get based on the controller name (with namespaces):
+
+```ruby
+VideosUploadedController => :videos_uploaded
+Source::EventsController => :source_events
+DataApp::Targets::UsersTargetsController => :data_app_targets_users_targets
+```
+
+You can of course overwrite it and set any topic you want:
+
+```ruby
+class TestController < Karafka::BaseController
+  self.topic = :prefered_topic_name
+end
+```
+
+##### Karafka controller group
+
+ - *group* - symbol/string with a group name. Groups are used to cluster applications
+
+Also you can optionally define **group** attribute if you want to build many applications that will share the same Kafka group. Otherwise it will just build it based on the **topic** and **name**. If you're not planning to build applications that will load-balance messages between many different applications (but between one applications many processes), you may want not to define it and allow the framework to define it for you. Otherwise set:
+
 Group and topic should be unique. You can't define different controllers with the same group or topic names, it will raise error.
+
+#### Controllers callbacks
 
 You can add any number of *before_enqueue* callbacks. It can be method or block.
 before_enqueue acts in a similar way to Rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on it you can define which data you want to receive and which not.
@@ -111,7 +144,7 @@ Presented example controller will accept incoming messages from a Kafka topic na
 
 ```ruby
   class TestController < Karafka::BaseController
-    self.group = :karafka_group
+    self.group = :karafka_group # group is optional
     self.topic = :karafka_topic
 
     # before_enqueue has access to received params.
@@ -128,15 +161,15 @@ Presented example controller will accept incoming messages from a Kafka topic na
     end
 
     # Define this method if you want to use Sidekiq reentrancy.
-    # Logic to do if Sidekiq worker fails (because of exception, timeout, etc).
+    # Logic to do if Sidekiq worker fails (because of exception, timeout, etc)
     def after_failure
       Service.new.remove_from_queue(params[:message])
     end
 
     private
 
-   # We will not enqueue to sidekiq those messages,
-   # which were sent from sum method and return too high message for our purpose.
+   # We will not enqueue to sidekiq those messages, which were sent
+   # from sum method and return too high message for our purpose.
    def validate_params
      params['message'].to_i > 50 && params['method'] != 'sum'
    end
