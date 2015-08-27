@@ -75,13 +75,13 @@ Karafka provides following rake tasks:
 | rake karafka:sidekiq | Runs a single Sidekiq worker for Karafka  |
 
 
-## Sending messages from Karafka
+## Usage
+
+### Sending messages from Karafka
 
 To add ability to send messages you need add **waterdrop** gem to your Gemfile.
 
 Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to install and use it.
-
-## Usage
 
 ### Receiving messages
 
@@ -147,6 +147,10 @@ end
 ## Concurency
 
 Karafka uses Celluloid actors to handle listening to incoming connections. Since each topic and group requires a separate connection (which means that we have a connection per controller) we do this concurrently. To prevent Karafka from spawning hundred of threads (in huge application) you can specify concurency level configuration option. If this number matches (or exceeds) your controllers amount, then you will listen to all the topics simultaneously. If it is less then number of controllers, it will use a single thread to check for few topics (one after another). If this value is set to 1, it will just spawn a single thread to check all the sockets one after another.
+
+## Articles and other references
+
+- [Karafka – Ruby micro-framework for building Apache Kafka message-based applications](http://dev.mensfeld.pl/2015/08/karafka-ruby-micro-framework-for-building-apache-kafka-message-based-applications/)
 
 ## Note on Patches/Pull Requests
 
