@@ -49,6 +49,7 @@ Karafka has following configuration options:
 | kafka_hosts             | Array<String> | Kafka server hosts                                                                   |
 | worker_timeout          | Integer       | How long a task can run in Sidekiq before it will be terminated                      |
 | concurency              | Integer       | How many threads (Celluloid actors) should we have that listen for incoming messages |
+| name                    | String        | Application name                                                                     |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
 
@@ -58,6 +59,8 @@ class App < Karafka::App
     config.kafka_hosts = %w( 127.0.0.1:9092 127.0.0.1:9093 )
     config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
     config.worker_timeout =  3600 # 1 hour
+    config.concurrency = 10 # 10 threads max
+    config.name = 'my_application'
   end
 end
 ```
