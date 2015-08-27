@@ -145,7 +145,7 @@ Presented example controller will accept incoming messages from a Kafka topic na
 ```ruby
   class TestController < Karafka::BaseController
     self.group = :karafka_group # group is optional
-    self.topic = :karafka_topic
+    self.topic = :karafka_topic # topic is optional
 
     # before_enqueue has access to received params.
     # You can modify them before enqueue it to sidekiq queue.
