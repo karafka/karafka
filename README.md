@@ -82,7 +82,7 @@ Karafka provides following rake tasks:
 
 ### Sending messages from Karafka
 
-To add ability to send messages you need add **waterdrop** gem to your Gemfile.
+To add ability to send messages you need to add **waterdrop** gem to your Gemfile.
 
 Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to install and use it.
 
@@ -92,7 +92,7 @@ First create application as it was written in the installation section above.
 It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file,
 log folder where karafka logs will be written(based on environment), rakefile.rb file to have ability to run karafka rake tasks.
 
-### Methods and attributes for every controller
+#### Methods and attributes for every controller
 
 Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should inherit from Karafka::BaseController.
 
