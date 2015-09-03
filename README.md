@@ -49,7 +49,7 @@ Karafka has following configuration options:
 | kafka_hosts             | Array<String> | Kafka server hosts                                                                   |
 | redis_host              | Array<String> | Redis server host                                                                    |
 | worker_timeout          | Integer       | How long a task can run in Sidekiq before it will be terminated                      |
-| concurency              | Integer       | How many threads (Celluloid actors) should we have that listen for incoming messages |
+| concurrency             | Integer       | How many threads (Celluloid actors) should we have that listen for incoming messages |
 | name                    | String        | Application name                                                                     |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
@@ -84,7 +84,7 @@ Karafka provides following rake tasks:
 
 ### Sending messages from Karafka
 
-To add ability to send messages you need add **waterdrop** gem to your Gemfile.
+To add ability to send messages you need to add **waterdrop** gem to your Gemfile.
 
 Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to install and use it.
 
@@ -94,7 +94,7 @@ First create application as it was written in the installation section above.
 It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file,
 log folder where karafka logs will be written(based on environment), rakefile.rb file to have ability to run karafka rake tasks.
 
-### Methods and attributes for every controller
+#### Methods and attributes for every controller
 
 Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should inherit from Karafka::BaseController.
 
@@ -181,7 +181,7 @@ Presented example controller will accept incoming messages from a Kafka topic na
 end
 ```
 
-## Concurency
+## Concurrency
 
 Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to incoming connections. Since each topic and group requires a separate connection (which means that we have a connection per controller) we do this concurrently. To prevent Karafka from spawning hundred of threads (in huge application) you can specify concurency level configuration option. If this number matches (or exceeds) your controllers amount, then you will listen to all the topics simultaneously. If it is less then number of controllers, it will use a single thread to check for few topics (one after another). If this value is set to 1, it will just spawn a single thread to check all the sockets one after another.
 
