@@ -10,6 +10,7 @@
   poseidon_cluster
   sidekiq
   sidekiq_glass
+  envlogic
   active_support/callbacks
   active_support/core_ext/hash/indifferent_access
   active_support/inflector
@@ -24,6 +25,8 @@ Celluloid.shutdown_timeout = 15
 
 # Karafka library
 module Karafka
+  extend Envlogic
+
   class << self
     attr_writer :logger
 
@@ -45,11 +48,6 @@ module Karafka
     # @return [String] path to sinatra core root
     def core_root
       Pathname.new(File.expand_path('../karafka', __FILE__))
-    end
-
-    # @return [String] string with current environment
-    def env
-      ENV['KARAFKA_ENV'] || 'development'
     end
   end
 end

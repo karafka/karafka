@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.1.8
+ - Droped local env suppot in favour of [Envlogic](https://github.com/karafka/envlogic) - no changes in API
+
 ## 0.1.7
  - Karafka option for Redis hosts (not localhost only)
 
