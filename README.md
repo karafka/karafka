@@ -47,6 +47,7 @@ Karafka has following configuration options:
 |-------------------------|---------------|--------------------------------------------------------------------------------------|
 | zookeeper_hosts         | Array<String> | Zookeeper server hosts                                                               |
 | kafka_hosts             | Array<String> | Kafka server hosts                                                                   |
+| redis_host              | Array<String> | Redis server host                                                                    |
 | worker_timeout          | Integer       | How long a task can run in Sidekiq before it will be terminated                      |
 | concurency              | Integer       | How many threads (Celluloid actors) should we have that listen for incoming messages |
 | name                    | String        | Application name                                                                     |
@@ -58,6 +59,7 @@ class App < Karafka::App
   setup do |config|
     config.kafka_hosts = %w( 127.0.0.1:9092 127.0.0.1:9093 )
     config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
+    config.redis_host = %w( redis://redis.example.com:7372/1 )
     config.worker_timeout =  3600 # 1 hour
     config.concurrency = 10 # 10 threads max
     config.name = 'my_application'

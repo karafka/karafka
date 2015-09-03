@@ -95,9 +95,21 @@ RSpec.describe Karafka::App do
 
   describe '#after_setup' do
     let(:worker_timeout) { rand }
-    let(:config) { double(worker_timeout: worker_timeout) }
+    let(:redis_host) { rand }
+    let(:name) { rand }
+    let(:concurrency) { rand(1000) }
+    let(:sidekiq_config_client) { double }
+    let(:sidekiq_config_server) { double }
+    let(:config) do
+      double(
+        worker_timeout: worker_timeout,
+        redis_host: redis_host,
+        name: name,
+        concurrency: concurrency
+      )
+    end
 
-    it 'should setup a workers timeout' do
+    it 'should setup all options that base on the config data' do
       expect(Karafka::Worker)
         .to receive(:timeout=)
         .with(worker_timeout)
@@ -105,6 +117,34 @@ RSpec.describe Karafka::App do
       expect(subject)
         .to receive(:config)
         .and_return(config)
+        .exactly(6).times
+
+      expect(Celluloid)
+        .to receive(:logger=)
+        .with(Karafka.logger)
+
+      expect(Sidekiq)
+        .to receive(:configure_client)
+        .and_yield(sidekiq_config_client)
+
+      expect(sidekiq_config_client)
+        .to receive(:redis=)
+        .with(
+          url: config.redis_host,
+          namespace: config.name,
+          size: config.concurrency
+        )
+
+      expect(Sidekiq)
+        .to receive(:configure_server)
+        .and_yield(sidekiq_config_server)
+
+      expect(sidekiq_config_server)
+        .to receive(:redis=)
+        .with(
+          url: config.redis_host,
+          namespace: config.name
+        )
 
       subject.send(:after_setup)
     end

@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.1.7
+ - Karafka option for Redis hosts (not localhost only)
+
 ## 0.1.6
  - Added better concurency by clusterization of listeners
  - Added graceful shutdown

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (0.1.6)
+    karafka (0.1.7)
       activesupport
       aspector
       celluloid

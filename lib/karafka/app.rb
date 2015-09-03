@@ -63,6 +63,23 @@ module Karafka
       def after_setup
         Karafka::Worker.timeout = config.worker_timeout
         Celluloid.logger = Karafka.logger
+
+        Sidekiq.configure_client do |sidekiq_config|
+          sidekiq_config.redis = {
+            url: config.redis_host,
+            namespace: config.name,
+            size: config.concurrency
+          }
+        end
+
+        Sidekiq.configure_server do |sidekiq_config|
+          # We don't set size for the server - this will be set automatically based
+          # on the Sidekiq concurrency level (Sidekiq not Karafkas)
+          sidekiq_config.redis = {
+            url: config.redis_host,
+            namespace: config.name
+          }
+        end
       end
     end
   end
