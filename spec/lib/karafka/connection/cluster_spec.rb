@@ -6,7 +6,9 @@ RSpec.describe Karafka::Connection::Cluster do
       self.group = rand
       self.topic = rand
 
-      def perform; end
+      def perform
+        self
+      end
     end
   end
 

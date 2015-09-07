@@ -6,7 +6,9 @@ RSpec.describe Karafka::BaseController do
       self.group = rand
       self.topic = rand
 
-      def perform; end
+      def perform
+        self
+      end
     end
   end
 
@@ -32,7 +34,9 @@ RSpec.describe Karafka::BaseController do
           self.group = rand
           self.topic = rand
 
-          def perform; end
+          def perform
+            self
+          end
         end
       end
 
@@ -124,7 +128,9 @@ RSpec.describe Karafka::BaseController do
           false
         end
 
-        def perform; end
+        def perform
+          self
+        end
       end.new
     end
 
@@ -153,7 +159,9 @@ RSpec.describe Karafka::BaseController do
             false
           end
 
-          def perform; end
+          def perform
+            self
+          end
         end.new
       end
 
@@ -174,7 +182,9 @@ RSpec.describe Karafka::BaseController do
             true
           end
 
-          def perform; end
+          def perform
+            self
+          end
         end.new
       end
 
@@ -210,7 +220,9 @@ RSpec.describe Karafka::BaseController do
 
           before_enqueue :method
 
-          def perform; end
+          def perform
+            self
+          end
 
           def method
             false
@@ -233,7 +245,9 @@ RSpec.describe Karafka::BaseController do
 
           before_enqueue :method
 
-          def perform; end
+          def perform
+            self
+          end
 
           def method
             true
