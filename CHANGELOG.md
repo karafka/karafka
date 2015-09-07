@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.1.9
+ - Added worker logger
+
 ## 0.1.8
  - Droped local env suppot in favour of [Envlogic](https://github.com/karafka/envlogic) - no changes in API
 
