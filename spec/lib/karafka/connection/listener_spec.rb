@@ -6,7 +6,9 @@ RSpec.describe Karafka::Connection::Listener do
       self.group = rand
       self.topic = rand
 
-      def perform; end
+      def perform
+        self
+      end
     end
   end
 

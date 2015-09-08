@@ -95,17 +95,9 @@ RSpec.describe Karafka::App do
 
   describe '#after_setup' do
     let(:worker_timeout) { rand }
-    let(:redis_host) { rand }
-    let(:name) { rand }
-    let(:concurrency) { rand(1000) }
-    let(:sidekiq_config_client) { double }
-    let(:sidekiq_config_server) { double }
     let(:config) do
       double(
-        worker_timeout: worker_timeout,
-        redis_host: redis_host,
-        name: name,
-        concurrency: concurrency
+        worker_timeout: worker_timeout
       )
     end
 
@@ -117,11 +109,42 @@ RSpec.describe Karafka::App do
       expect(subject)
         .to receive(:config)
         .and_return(config)
-        .exactly(6).times
+        .once
 
       expect(Celluloid)
         .to receive(:logger=)
         .with(Karafka.logger)
+
+      expect(Karafka::Worker)
+        .to receive(:logger=)
+        .with(Karafka.logger)
+
+      expect(subject)
+        .to receive(:configure_sidekiq)
+
+      subject.send(:after_setup)
+    end
+  end
+
+  describe '#configure_sidekiq' do
+    let(:redis_host) { rand }
+    let(:name) { rand }
+    let(:concurrency) { rand(1000) }
+    let(:sidekiq_config_client) { double }
+    let(:sidekiq_config_server) { double }
+    let(:config) do
+      double(
+        redis_host: redis_host,
+        name: name,
+        concurrency: concurrency
+      )
+    end
+
+    before do
+      expect(subject)
+        .to receive(:config)
+        .and_return(config)
+        .exactly(5).times
 
       expect(Sidekiq)
         .to receive(:configure_client)
@@ -145,9 +168,9 @@ RSpec.describe Karafka::App do
           url: config.redis_host,
           namespace: config.name
         )
-
-      subject.send(:after_setup)
     end
+
+    it { subject.send(:configure_sidekiq) }
   end
 
   describe '#monitor' do

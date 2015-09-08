@@ -62,8 +62,13 @@ module Karafka
       # Everything that should be initialized after the setup
       def after_setup
         Karafka::Worker.timeout = config.worker_timeout
+        Karafka::Worker.logger = Karafka.logger
         Celluloid.logger = Karafka.logger
+        configure_sidekiq
+      end
 
+      # Configure sidekiq client and server
+      def configure_sidekiq
         Sidekiq.configure_client do |sidekiq_config|
           sidekiq_config.redis = {
             url: config.redis_host,

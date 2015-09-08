@@ -26,6 +26,7 @@ RSpec.describe Karafka::Routing::Router do
           self.topic = :topic_2
 
           def perform
+            self
           end
         end
       end

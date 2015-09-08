@@ -10,9 +10,13 @@ RSpec.describe Karafka::Worker do
       self.group = rand
       self.topic = rand
 
-      def perform; end
+      def perform
+        self
+      end
 
-      def after_failure; end
+      def after_failure
+        self
+      end
     end
   end
 
