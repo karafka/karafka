@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 0.1.10
+ - Added possibility to specify redis namespace in configuration
+ - Renamed redis_host to redis_url in configuration
+
 ## 0.1.9
  - Added worker logger
 
