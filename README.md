@@ -61,7 +61,7 @@ class App < Karafka::App
     config.kafka_hosts = %w( 127.0.0.1:9092 127.0.0.1:9093 )
     config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
     config.redis_url = 'redis://redis.example.com:7372/1'
-    config.namespace = 'my_app_redis_namespace'
+    config.redis_namespace = 'my_app_redis_namespace'
     config.worker_timeout =  3600 # 1 hour
     config.concurrency = 10 # 10 threads max
     config.name = 'my_application'
