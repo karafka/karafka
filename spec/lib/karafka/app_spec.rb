@@ -127,16 +127,18 @@ RSpec.describe Karafka::App do
   end
 
   describe '#configure_sidekiq' do
-    let(:redis_host) { rand }
+    let(:redis_url) { rand }
+    let(:redis_namespace) { rand }
     let(:name) { rand }
     let(:concurrency) { rand(1000) }
     let(:sidekiq_config_client) { double }
     let(:sidekiq_config_server) { double }
     let(:config) do
       double(
-        redis_host: redis_host,
         name: name,
-        concurrency: concurrency
+        concurrency: concurrency,
+        redis_url: redis_url,
+        redis_namespace: redis_namespace
       )
     end
 
@@ -153,8 +155,8 @@ RSpec.describe Karafka::App do
       expect(sidekiq_config_client)
         .to receive(:redis=)
         .with(
-          url: config.redis_host,
-          namespace: config.name,
+          url: config.redis_url,
+          namespace: config.redis_namespace,
           size: config.concurrency
         )
 
@@ -165,8 +167,8 @@ RSpec.describe Karafka::App do
       expect(sidekiq_config_server)
         .to receive(:redis=)
         .with(
-          url: config.redis_host,
-          namespace: config.name
+          url: config.redis_url,
+          namespace: config.redis_namespace
         )
     end
 
