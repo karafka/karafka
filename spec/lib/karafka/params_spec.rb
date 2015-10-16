@@ -5,7 +5,7 @@ RSpec.describe Karafka::Params do
     let(:message) { double(content: content) }
     let(:random_hash) { { rand.to_s => rand.to_s } }
 
-    subject { described_class.build(message) }
+    subject { described_class.build(message, JSON) }
 
     context 'when we try to build from a hash' do
       let(:content) { random_hash }

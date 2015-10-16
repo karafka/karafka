@@ -2,6 +2,8 @@ module Karafka
   # App class
   class App
     class << self
+      attr_writer :parser
+
       # Method which runs app
       def run
         monitor.on_sigint do
@@ -19,6 +21,12 @@ module Karafka
           Karafka::Runner.new.run
           sleep
         end
+      end
+
+      # @return [Parser] karafka app message parser.
+      # If not define, return JSON parser
+      def parser
+        @parser ||= JSON
       end
 
       # @return [Karafka::Config] config instance
