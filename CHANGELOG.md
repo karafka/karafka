@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.1.11
+ - Add an ability to use user-defined parsers for a messages
+
 ## 0.1.10
  - Added possibility to specify redis namespace in configuration
  - Renamed redis_host to redis_url in configuration
