@@ -6,6 +6,9 @@ RSpec.describe Karafka::App do
   describe '#run' do
     it 'should run in supervision, start consuming and sleep' do
       expect(subject)
+        .to receive(:initialize!)
+
+      expect(subject)
         .to receive(:sleep)
 
       expect(subject)

@@ -5,14 +5,6 @@ module Karafka
     # @note Listener itself does nothing with the message - it will return to the block
     #   a raw Poseidon::FetchedMessage
     class Listener
-      # Errors that we catch and ignore
-      # We should not take any action if one of this happens
-      # Instead we just log it and proceed
-      IGNORED_ERRORS = [
-        ZK::Exceptions::OperationTimeOut,
-        Poseidon::Connection::ConnectionFailedError
-      ]
-
       attr_reader :controller
 
       # @param controller [Karafka::BaseController] a descendant of base controller
@@ -28,6 +20,12 @@ module Karafka
       # Since Poseidon socket has a timeout (10 000ms by default) we catch it and ignore,
       #   we will just reconnect again
       # @note This will yield with a raw message - no preprocessing or reformatting
+      # @note We catch all the errors here, so they don't affect other listeners (or this one)
+      #   so we will be able to listen and consume other incoming messages.
+      #   Since it is run inside Karafka::Connection::Cluster - catching all the exceptions won't
+      #   crash the whole cluster. Here we mostly focus on catchin the exceptions related to
+      #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
+      #   propagate this far
       def fetch(block)
         Karafka.logger.info("Fetching: #{controller.topic}")
 
@@ -38,9 +36,12 @@ module Karafka
             block.call(controller, raw_message)
           end
         end
-      rescue *IGNORED_ERRORS => e
-        Karafka.logger.debug("An ignored error occur in #{self.class}")
-        Karafka.logger.debug(e)
+        # This is on purpose - see the notes for this method
+        # rubocop:disable RescueException
+      rescue Exception => e
+        # rubocop:enable RescueException
+        Karafka.logger.error("An error occur in #{self.class}")
+        Karafka.logger.error(e)
       end
 
       private

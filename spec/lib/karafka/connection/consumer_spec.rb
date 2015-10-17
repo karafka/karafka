@@ -21,25 +21,52 @@ RSpec.describe Karafka::Connection::Consumer do
     let(:builder) { Karafka::Routing::Router.new(nil) }
     let(:controller_instance) { double }
 
-    it 'should route to a proper controller and call it' do
-      expect(Karafka::Connection::Message)
-        .to receive(:new)
-        .with(controller_class.topic, raw_message_value)
-        .and_return(message)
+    context 'everything works well' do
+      it 'should route to a proper controller and call it' do
+        expect(Karafka::Connection::Message)
+          .to receive(:new)
+          .with(controller_class.topic, raw_message_value)
+          .and_return(message)
 
-      expect(Karafka::Routing::Router)
-        .to receive(:new)
-        .with(message)
-        .and_return(builder)
+        expect(Karafka::Routing::Router)
+          .to receive(:new)
+          .with(message)
+          .and_return(builder)
 
-      expect(builder)
-        .to receive(:build)
-        .and_return(controller_instance)
+        expect(builder)
+          .to receive(:build)
+          .and_return(controller_instance)
 
-      expect(controller_instance)
-        .to receive(:call)
+        expect(controller_instance)
+          .to receive(:call)
 
-      subject.consume(controller_class, raw_message)
+        subject.consume(controller_class, raw_message)
+      end
+
+      context 'something goes wrong (exception is raised)' do
+        [
+          ZK::Exceptions::OperationTimeOut,
+          Poseidon::Connection::ConnectionFailedError,
+          Exception
+        ].each do |error|
+          context "when #{error} happens" do
+            before do
+              # Lets silence exceptions printing
+              expect(Karafka.logger)
+                .to receive(:error)
+                .exactly(2).times
+
+              expect(Karafka::Routing::Router)
+                .to receive(:new)
+                .and_raise(error)
+            end
+
+            it 'should log and not reraise error' do
+              expect { subject.consume(controller_class, raw_message) }.not_to raise_error
+            end
+          end
+        end
+      end
     end
   end
 end

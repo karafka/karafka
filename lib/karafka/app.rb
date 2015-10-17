@@ -4,6 +4,8 @@ module Karafka
     class << self
       # Method which runs app
       def run
+        initialize!
+
         monitor.on_sigint do
           stop!
           exit
@@ -15,8 +17,8 @@ module Karafka
         end
 
         monitor.supervise do
-          run!
           Karafka::Runner.new.run
+          run!
           sleep
         end
       end
@@ -34,10 +36,7 @@ module Karafka
         after_setup
       end
 
-      # Methods that should be delegated to Karafka::Status object
-      %i(
-        run! running? stop!
-      ).each do |delegated|
+      Status.instance_methods(false).each do |delegated|
         define_method(delegated) do
           Status.instance.public_send(delegated)
         end
@@ -72,7 +71,7 @@ module Karafka
         Sidekiq.configure_client do |sidekiq_config|
           sidekiq_config.redis = {
             url: config.redis_url,
-            namespace: config.redis_namespace,
+            namespace: config.redis_namespace || config.name,
             size: config.concurrency
           }
         end
@@ -82,7 +81,7 @@ module Karafka
           # on the Sidekiq concurrency level (Sidekiq not Karafkas)
           sidekiq_config.redis = {
             url: config.redis_url,
-            namespace: config.redis_namespace
+            namespace: config.redis_namespace || config.name
           }
         end
       end

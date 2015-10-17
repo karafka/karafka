@@ -140,12 +140,15 @@ Group and topic should be unique. You can't define different controllers with th
 
 You can add any number of *before_enqueue* callbacks. It can be method or block.
 before_enqueue acts in a similar way to Rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on it you can define which data you want to receive and which not.
+
+**Warning**: keep in mind, that all *before_enqueue* blocks/methods are executed after messages are received. This is not executed in Sidekiq, but right after receiving the incoming message. This means, that if you perform "heavy duty" operations there, Karafka might significantly slow down.
+
 If any of callbacks returns false - *perform* method will be not enqueued to Sidekiq Worker (the execution chain will stop).
 
 SidekiqWorker is inherited from [SidekiqGlass](https://github.com/karafka/sidekiq-glass), so it uses reentrancy. If you want to use it, you should add *after_failure* method in the controller as well.
 To run Sidekiq worker you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **rake karafka:install**.
 
-Once you run consumer - messages from Kafka server will be send to needed controller (based on topic name).
+Once you run consumer - messages from Kafka server will be send to a proper controller (based on topic name).
 
 Presented example controller will accept incoming messages from a Kafka topic named :karafka_topic
 

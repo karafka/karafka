@@ -3,19 +3,21 @@ module Karafka
   class Status
     include Singleton
 
-    # Mark application as running
-    def run!
-      @status = :running
-    end
+    # Available states and their transitions
+    STATES = {
+      initializing: :initialize!,
+      running: :run!,
+      stopped: :stop!
+    }
 
-    # Mark application as stopped
-    def stop!
-      @status = :stopped
-    end
+    STATES.each do |state, transition|
+      define_method :"#{state}?" do
+        @status == state
+      end
 
-    # Check if application should run
-    def running?
-      @status == :running
+      define_method transition do
+        @status = state
+      end
     end
   end
 end

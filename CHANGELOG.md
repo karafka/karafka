@@ -1,25 +1,31 @@
 # Karafka framework changelog
 
+## 0.1.11
+- Rescuing all the "before Sidekiq" processing so errors won't affect other incoming messages
+- Fixed dying actors after connection error
+- Added a new app status - "initializing"
+- Karafka::Status model cleanup
+
 ## 0.1.10
- - Added possibility to specify redis namespace in configuration
- - Renamed redis_host to redis_url in configuration
+- Added possibility to specify redis namespace in configuration (failover to app name)
+- Renamed redis_host to redis_url in configuration
 
 ## 0.1.9
- - Added worker logger
+- Added worker logger
 
 ## 0.1.8
- - Droped local env suppot in favour of [Envlogic](https://github.com/karafka/envlogic) - no changes in API
+- Droped local env suppot in favour of [Envlogic](https://github.com/karafka/envlogic) - no changes in API
 
 ## 0.1.7
- - Karafka option for Redis hosts (not localhost only)
+- Karafka option for Redis hosts (not localhost only)
 
 ## 0.1.6
- - Added better concurency by clusterization of listeners
- - Added graceful shutdown
- - Added concurency that allows to handle bigger applications with celluloid
- - Karafka controllers no longer require group to be defined (created based on the topic and app name)
- - Karafka controllers no longer require topic to be defined (created based on the controller name)
- - Readme updates
+- Added better concurency by clusterization of listeners
+- Added graceful shutdown
+- Added concurency that allows to handle bigger applications with celluloid
+- Karafka controllers no longer require group to be defined (created based on the topic and app name)
+- Karafka controllers no longer require topic to be defined (created based on the controller name)
+- Readme updates
 
 ## 0.1.5
 - Celluloid support for listeners

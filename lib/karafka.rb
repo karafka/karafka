@@ -15,6 +15,7 @@
   active_support/core_ext/hash/indifferent_access
   active_support/inflector
   karafka/loader
+  karafka/status
 ).each { |lib| require lib }
 
 ENV['KARAFKA_ENV'] ||= 'development'

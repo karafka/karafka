@@ -16,11 +16,21 @@ RSpec.describe Karafka::Connection::Listener do
 
   describe '#fetch' do
     let(:action) { double }
-
-    described_class::IGNORED_ERRORS.each do |error|
+    [
+      ZK::Exceptions::OperationTimeOut,
+      Poseidon::Connection::ConnectionFailedError,
+      Exception
+    ].each do |error|
       let(:proxy) { double }
 
       context "when #{error} happens" do
+        before do
+          # Lets silence exceptions printing
+          expect(Karafka.logger)
+            .to receive(:error)
+            .exactly(2).times
+        end
+
         it 'should close the consumer and not raise error' do
           expect(subject)
             .to receive(:consumer)
@@ -28,23 +38,6 @@ RSpec.describe Karafka::Connection::Listener do
 
           expect { subject.send(:fetch, action) }.not_to raise_error
         end
-      end
-    end
-
-    context 'when unexpected error occurs' do
-      let(:error) { StandardError }
-
-      it 'should close the consumer and raise error' do
-        expect(subject)
-          .to receive(:consumer)
-          .and_return(proxy)
-          .at_least(:once)
-
-        expect(proxy)
-          .to receive(:fetch)
-          .and_raise(error)
-
-        expect { subject.send(:fetch, action) }.to raise_error(error)
       end
     end
 
