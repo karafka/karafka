@@ -61,9 +61,6 @@ module Karafka
 
     attr_reader :params
 
-    # Raised when we have a controller that does not have a perform method that is required
-    class PerformMethodNotDefined < StandardError; end
-
     # The call method is wrapped with a set of callbacks
     # We won't run perform at the backend if any of the callbacks
     # returns false
@@ -106,12 +103,12 @@ module Karafka
       end
     end
 
-    # @raise [Karafka::BaseController::TopicNotDefined] raised if we didn't define kafka topic
-    # @raise [Karafka::BaseController::PerformMethodNotDefined] raised if we
+    # @raise [Karafka::Errors::TopicNotDefined] raised if we didn't define kafka topic
+    # @raise [Karafka::Errors::PerformMethodNotDefined] raised if we
     #   didn't define the perform method
     def initialize
-      fail TopicNotDefined unless self.class.topic
-      fail PerformMethodNotDefined unless self.respond_to?(:perform)
+      fail Errors::TopicNotDefined unless self.class.topic
+      fail Errors::PerformMethodNotDefined unless self.respond_to?(:perform)
     end
 
     # Assigns parameters hash (Karafka::Params) internally. It also adds some extra

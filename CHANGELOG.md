@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.1.12
+- All internal errors went to Karafka::Errors namespace
+
 ## 0.1.11
 - Rescuing all the "before Sidekiq" processing so errors won't affect other incoming messages
 - Fixed dying actors after connection error

@@ -24,7 +24,7 @@ RSpec.describe Karafka::BaseController do
       end
 
       it 'should raise an exception' do
-        expect { subject.new }.to raise_error(described_class::PerformMethodNotDefined)
+        expect { subject.new }.to raise_error(Karafka::Errors::PerformMethodNotDefined)
       end
     end
 

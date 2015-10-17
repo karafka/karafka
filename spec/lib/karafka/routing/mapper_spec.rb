@@ -21,11 +21,11 @@ RSpec.describe Karafka::Routing::Mapper do
     it 'should validate groups and topics and then return input' do
       expect(subject)
         .to receive(:validate_key)
-        .with(controllers, :group, described_class::DuplicatedGroupError)
+        .with(controllers, :group, Karafka::Errors::DuplicatedGroupError)
 
       expect(subject)
         .to receive(:validate_key)
-        .with(controllers, :topic, described_class::DuplicatedTopicError)
+        .with(controllers, :topic, Karafka::Errors::DuplicatedTopicError)
 
       expect(subject.send(:validate, controllers)).to eq controllers
     end
