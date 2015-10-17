@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.1.13
+- Ability to assign custom workers and use them bypassing Karafka::BaseWorker (or its descendants)
+
 ## 0.1.12
 - All internal errors went to Karafka::Errors namespace
 

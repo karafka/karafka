@@ -105,20 +105,7 @@ RSpec.describe Karafka::App do
     end
 
     it 'should setup all options that base on the config data' do
-      expect(Karafka::Worker)
-        .to receive(:timeout=)
-        .with(worker_timeout)
-
-      expect(subject)
-        .to receive(:config)
-        .and_return(config)
-        .once
-
       expect(Celluloid)
-        .to receive(:logger=)
-        .with(Karafka.logger)
-
-      expect(Karafka::Worker)
         .to receive(:logger=)
         .with(Karafka.logger)
 

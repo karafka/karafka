@@ -106,6 +106,48 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
+  describe '#worker' do
+    before do
+      working_class.worker = worker
+    end
+
+    context 'when worker is already assigned' do
+      let(:worker) { double }
+
+      before do
+        expect(Karafka::Workers::Builder)
+          .not_to receive(:new)
+      end
+
+      it 'should not try to build a new one and return currently assigned' do
+        expect(working_class.worker).to eq worker
+      end
+    end
+
+    context 'when worker is not assigned' do
+      let(:worker) { nil }
+      let(:built_worker) { double }
+      let(:builder) { double }
+
+      before do
+        expect(Karafka::Workers::Builder)
+          .to receive(:new)
+          .with(working_class)
+          .and_return(builder)
+
+        expect(builder)
+          .to receive(:build)
+          .and_return(built_worker)
+
+        working_class.worker = worker
+      end
+
+      it 'should build a new one and return it' do
+        expect(working_class.worker).to eq built_worker
+      end
+    end
+  end
+
   describe '#call' do
     context 'when there are no callbacks' do
       subject { working_class.new }
@@ -173,6 +215,8 @@ RSpec.describe Karafka::BaseController do
     end
 
     context 'and it does not return false' do
+      let(:worker) { double }
+
       subject do
         ClassBuilder.inherit(described_class) do
           self.group = rand
@@ -202,7 +246,11 @@ RSpec.describe Karafka::BaseController do
           .and_return(params)
           .at_least(:once)
 
-        expect(Karafka::Worker)
+        expect_any_instance_of(Karafka::Workers::Builder)
+          .to receive(:build)
+          .and_return(worker)
+
+        expect(worker)
           .to receive(:perform_async)
           .with(params)
 

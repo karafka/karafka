@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Worker do
+RSpec.describe Karafka::Workers::BaseWorker do
   subject { described_class.new }
 
   specify { expect(described_class).to be < SidekiqGlass::Worker }

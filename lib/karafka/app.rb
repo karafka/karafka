@@ -44,7 +44,7 @@ module Karafka
 
       # Methods that should be delegated to Karafka module
       %i(
-        root env
+        root env logger
       ).each do |delegated|
         define_method(delegated) do
           Karafka.public_send(delegated)
@@ -60,8 +60,6 @@ module Karafka
 
       # Everything that should be initialized after the setup
       def after_setup
-        Karafka::Worker.timeout = config.worker_timeout
-        Karafka::Worker.logger = Karafka.logger
         Celluloid.logger = Karafka.logger
         configure_sidekiq
       end
