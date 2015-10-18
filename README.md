@@ -215,9 +215,10 @@ Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to in
 * [Apache Kafka](http://kafka.apache.org/)
 * [Apache ZooKeeper](https://zookeeper.apache.org/)
 
-### Articles
+### Articles and references
 
 * [Karafka – Ruby micro-framework for building Apache Kafka message-based applications](http://dev.mensfeld.pl/2015/08/karafka-ruby-micro-framework-for-building-apache-kafka-message-based-applications/)
+* [Karafka example application](https://github.com/karafka/karafka-example-app)
 
 ## Note on Patches/Pull Requests
 
