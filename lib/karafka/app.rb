@@ -61,11 +61,12 @@ module Karafka
       # Everything that should be initialized after the setup
       def after_setup
         Celluloid.logger = Karafka.logger
-        configure_sidekiq
+        configure_sidekiq_client
+        configure_sidekiq_server
       end
 
-      # Configure sidekiq client and server
-      def configure_sidekiq
+      # Configure sidekiq client
+      def configure_sidekiq_client
         Sidekiq.configure_client do |sidekiq_config|
           sidekiq_config.redis = {
             url: config.redis_url,
@@ -73,7 +74,10 @@ module Karafka
             size: config.concurrency
           }
         end
+      end
 
+      # Configure sidekiq server
+      def configure_sidekiq_server
         Sidekiq.configure_server do |sidekiq_config|
           # We don't set size for the server - this will be set automatically based
           # on the Sidekiq concurrency level (Sidekiq not Karafkas)
