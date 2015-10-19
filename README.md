@@ -106,7 +106,7 @@ You have to define following elements in every controller:
 
 ####  Optional attributes
 
-Karafka controller has two optional attributes: **topic** and **group**.
+Karafka controller has tree optional attributes: **topic**, **group** and **worker**.
 
 ##### Karafka controller topic
 
@@ -136,16 +136,33 @@ Also you can optionally define **group** attribute if you want to build many app
 
 Group and topic should be unique. You can't define different controllers with the same group or topic names, it will raise error.
 
+##### Karafka controller custom worker
+
+Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **Karafka::Workers::BaseWorker** and will share all its settings. **Karafka::Workers::BaseWorker**.
+
+Karafka::Workers::BaseWorker inherits from [SidekiqGlass::Worker](https://github.com/karafka/sidekiq-glass), so it uses reentrancy. If you want to use it, you should add *after_failure* method in the controller as well.
+
+To run Sidekiq you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **rake karafka:install**.
+
+However, if you want to use a raw Sidekiq worker (without any Karafka additional magic), or you want to use SidekiqPro (or any other queuing engine that has the same API as Sidekiq), you can assign your own custom worker:
+
+```ruby
+class TestController < Karafka::BaseController
+  # This can be any type of worker that provides a perform_async method
+  self.worker = MyDifferentWorker
+end
+```
+
 #### Controllers callbacks
 
 You can add any number of *before_enqueue* callbacks. It can be method or block.
 before_enqueue acts in a similar way to Rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on it you can define which data you want to receive and which not.
-If any of callbacks returns false - *perform* method will be not enqueued to Sidekiq Worker (the execution chain will stop).
 
-SidekiqWorker is inherited from [SidekiqGlass](https://github.com/karafka/sidekiq-glass), so it uses reentrancy. If you want to use it, you should add *after_failure* method in the controller as well.
-To run Sidekiq worker you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **rake karafka:install**.
+**Warning**: keep in mind, that all *before_enqueue* blocks/methods are executed after messages are received. This is not executed in Sidekiq, but right after receiving the incoming message. This means, that if you perform "heavy duty" operations there, Karafka might significantly slow down.
 
-Once you run consumer - messages from Kafka server will be send to needed controller (based on topic name).
+If any of callbacks returns false - *perform* method will be not enqueued to the worker (the execution chain will stop).
+
+Once you run consumer - messages from Kafka server will be send to a proper controller (based on topic name).
 
 Presented example controller will accept incoming messages from a Kafka topic named :karafka_topic
 
@@ -198,9 +215,10 @@ Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to in
 * [Apache Kafka](http://kafka.apache.org/)
 * [Apache ZooKeeper](https://zookeeper.apache.org/)
 
-### Articles
+### Articles and references
 
 * [Karafka – Ruby micro-framework for building Apache Kafka message-based applications](http://dev.mensfeld.pl/2015/08/karafka-ruby-micro-framework-for-building-apache-kafka-message-based-applications/)
+* [Karafka example application](https://github.com/karafka/karafka-example-app)
 
 ## Note on Patches/Pull Requests
 

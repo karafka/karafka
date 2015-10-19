@@ -6,6 +6,9 @@ RSpec.describe Karafka::App do
   describe '#run' do
     it 'should run in supervision, start consuming and sleep' do
       expect(subject)
+        .to receive(:initialize!)
+
+      expect(subject)
         .to receive(:sleep)
 
       expect(subject)
@@ -120,36 +123,62 @@ RSpec.describe Karafka::App do
     end
 
     it 'should setup all options that base on the config data' do
-      expect(Karafka::Worker)
-        .to receive(:timeout=)
-        .with(worker_timeout)
-
-      expect(subject)
-        .to receive(:config)
-        .and_return(config)
-        .once
-
       expect(Celluloid)
         .to receive(:logger=)
         .with(Karafka.logger)
 
-      expect(Karafka::Worker)
-        .to receive(:logger=)
-        .with(Karafka.logger)
+      expect(subject)
+        .to receive(:configure_sidekiq_client)
 
       expect(subject)
-        .to receive(:configure_sidekiq)
+        .to receive(:configure_sidekiq_server)
 
       subject.send(:after_setup)
     end
   end
 
-  describe '#configure_sidekiq' do
+  describe '#configure_sidekiq_client' do
     let(:redis_url) { rand }
     let(:redis_namespace) { rand }
     let(:name) { rand }
     let(:concurrency) { rand(1000) }
     let(:sidekiq_config_client) { double }
+    let(:config) do
+      double(
+        name: name,
+        concurrency: concurrency,
+        redis_url: redis_url,
+        redis_namespace: redis_namespace
+      )
+    end
+
+    before do
+      expect(subject)
+        .to receive(:config)
+        .and_return(config)
+        .exactly(3).times
+
+      expect(Sidekiq)
+        .to receive(:configure_client)
+        .and_yield(sidekiq_config_client)
+
+      expect(sidekiq_config_client)
+        .to receive(:redis=)
+        .with(
+          url: config.redis_url,
+          namespace: config.redis_namespace,
+          size: config.concurrency
+        )
+    end
+
+    it { subject.send(:configure_sidekiq_client) }
+  end
+
+  describe '#configure_sidekiq_server' do
+    let(:redis_url) { rand }
+    let(:redis_namespace) { rand }
+    let(:name) { rand }
+    let(:concurrency) { rand(1000) }
     let(:sidekiq_config_server) { double }
     let(:config) do
       double(
@@ -164,19 +193,7 @@ RSpec.describe Karafka::App do
       expect(subject)
         .to receive(:config)
         .and_return(config)
-        .exactly(5).times
-
-      expect(Sidekiq)
-        .to receive(:configure_client)
-        .and_yield(sidekiq_config_client)
-
-      expect(sidekiq_config_client)
-        .to receive(:redis=)
-        .with(
-          url: config.redis_url,
-          namespace: config.redis_namespace,
-          size: config.concurrency
-        )
+        .exactly(2).times
 
       expect(Sidekiq)
         .to receive(:configure_server)
@@ -190,7 +207,7 @@ RSpec.describe Karafka::App do
         )
     end
 
-    it { subject.send(:configure_sidekiq) }
+    it { subject.send(:configure_sidekiq_server) }
   end
 
   describe '#monitor' do

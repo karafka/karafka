@@ -15,7 +15,7 @@ RSpec.describe Karafka::Routing::Router do
 
       it 'should raise a NonMatchingTopicError' do
         expect { subject.build }
-          .to raise_error(described_class::NonMatchingTopicError)
+          .to raise_error(Karafka::Errors::NonMatchingTopicError)
       end
     end
 

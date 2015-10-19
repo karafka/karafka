@@ -15,8 +15,8 @@ module Karafka
       app/models
       app/services
       app/presenters
-      app/controllers
       app/workers
+      app/controllers
       app/aspects
       app/**
     )

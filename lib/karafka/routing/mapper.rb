@@ -4,13 +4,6 @@ module Karafka
     # @note All the controllers must be loaded before we use it
     # @note It caches all the mappings after the first use
     class Mapper
-      # Raised when we have few controllers(inherited from Karafka::BaseController)
-      #   with the same group name
-      class DuplicatedGroupError < StandardError; end
-      # Raised when we have few controllers(inherited from Karafka::BaseController)
-      #   with the same topic name
-      class DuplicatedTopicError < StandardError; end
-
       class << self
         # @return [Array<Controller>] descendants of Karafka::BaseController
         def controllers
@@ -37,8 +30,8 @@ module Karafka
         # @example Validate all Karafka::BaseController descendants
         #   validate(Karafka::BaseController.descendants)
         def validate(controllers)
-          validate_key(controllers, :group, DuplicatedGroupError)
-          validate_key(controllers, :topic, DuplicatedTopicError)
+          validate_key(controllers, :group, Errors::DuplicatedGroupError)
+          validate_key(controllers, :topic, Errors::DuplicatedTopicError)
 
           controllers
         end

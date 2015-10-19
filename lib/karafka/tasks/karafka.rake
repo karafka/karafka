@@ -1,10 +1,10 @@
 namespace :karafka do
   desc 'Runs a single Karafka processing instance'
   task :run do
-    Karafka.logger.info('Starting Karafka framework')
-    Karafka.logger.info("Environment: #{Karafka.env}")
-    Karafka.logger.info("Kafka hosts: #{Karafka::App.config.kafka_hosts}")
-    Karafka.logger.info("Zookeeper hosts: #{Karafka::App.config.zookeeper_hosts}")
+    puts('Starting Karafka framework')
+    puts("Environment: #{Karafka.env}")
+    puts("Kafka hosts: #{Karafka::App.config.kafka_hosts}")
+    puts("Zookeeper hosts: #{Karafka::App.config.zookeeper_hosts}")
     Karafka::App.run
   end
 
@@ -13,10 +13,10 @@ namespace :karafka do
     require_file = Karafka::App.root.join('app.rb')
     config_file = Karafka::App.root.join('/config/sidekiq.yml')
 
-    Karafka.logger.info('Starting Karafka Sidekiq')
-    Karafka.logger.info("Environment: #{Karafka.env}")
-    Karafka.logger.info("Kafka hosts: #{Karafka::App.config.kafka_hosts}")
-    Karafka.logger.info("Zookeeper hosts: #{Karafka::App.config.zookeeper_hosts}")
+    puts('Starting Karafka Sidekiq')
+    puts("Environment: #{Karafka.env}")
+    puts("Kafka hosts: #{Karafka::App.config.kafka_hosts}")
+    puts("Zookeeper hosts: #{Karafka::App.config.zookeeper_hosts}")
     system ("bundle exec sidekiq -r #{require_file} -C #{config_file}")
   end
 

@@ -6,6 +6,8 @@ module Karafka
 
       # Method which runs app
       def run
+        initialize!
+
         monitor.on_sigint do
           stop!
           exit
@@ -17,8 +19,8 @@ module Karafka
         end
 
         monitor.supervise do
-          run!
           Karafka::Runner.new.run
+          run!
           sleep
         end
       end
@@ -42,10 +44,7 @@ module Karafka
         after_setup
       end
 
-      # Methods that should be delegated to Karafka::Status object
-      %i(
-        run! running? stop!
-      ).each do |delegated|
+      Status.instance_methods(false).each do |delegated|
         define_method(delegated) do
           Status.instance.public_send(delegated)
         end
@@ -53,7 +52,7 @@ module Karafka
 
       # Methods that should be delegated to Karafka module
       %i(
-        root env
+        root env logger
       ).each do |delegated|
         define_method(delegated) do
           Karafka.public_send(delegated)
@@ -69,28 +68,30 @@ module Karafka
 
       # Everything that should be initialized after the setup
       def after_setup
-        Karafka::Worker.timeout = config.worker_timeout
-        Karafka::Worker.logger = Karafka.logger
         Celluloid.logger = Karafka.logger
-        configure_sidekiq
+        configure_sidekiq_client
+        configure_sidekiq_server
       end
 
-      # Configure sidekiq client and server
-      def configure_sidekiq
+      # Configure sidekiq client
+      def configure_sidekiq_client
         Sidekiq.configure_client do |sidekiq_config|
           sidekiq_config.redis = {
             url: config.redis_url,
-            namespace: config.redis_namespace,
+            namespace: config.redis_namespace || config.name,
             size: config.concurrency
           }
         end
+      end
 
+      # Configure sidekiq server
+      def configure_sidekiq_server
         Sidekiq.configure_server do |sidekiq_config|
           # We don't set size for the server - this will be set automatically based
           # on the Sidekiq concurrency level (Sidekiq not Karafkas)
           sidekiq_config.redis = {
             url: config.redis_url,
-            namespace: config.redis_namespace
+            namespace: config.redis_namespace || config.name
           }
         end
       end
