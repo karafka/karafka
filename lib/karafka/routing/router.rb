@@ -19,7 +19,7 @@ module Karafka
         fail Errors::NonMatchingTopicError, @message.topic unless descendant
 
         controller = descendant.new
-        controller.params = Karafka::Params.build(@message, descendant.parser)
+        controller.params = @message
 
         controller
       end
