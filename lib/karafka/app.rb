@@ -25,12 +25,6 @@ module Karafka
         end
       end
 
-      # @return [Parser] karafka app message parser.
-      # If not define, return JSON parser
-      def parser
-        @parser ||= JSON
-      end
-
       # @return [Karafka::Config] config instance
       def config
         Config.config

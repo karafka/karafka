@@ -106,7 +106,7 @@ You have to define following elements in every controller:
 
 ####  Optional attributes
 
-Karafka controller has tree optional attributes: **topic**, **group** and **worker**.
+Karafka controller has tree optional attributes: **topic**, **group**, **parser** and **worker**.
 
 ##### Karafka controller topic
 
@@ -150,6 +150,28 @@ However, if you want to use a raw Sidekiq worker (without any Karafka additional
 class TestController < Karafka::BaseController
   # This can be any type of worker that provides a perform_async method
   self.worker = MyDifferentWorker
+end
+```
+
+##### Karafka controller custom parser
+
+Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. This parser should contain parse method and raise ParseError when has problem with parsing.
+
+```ruby
+class TestController < Karafka::BaseController
+  # This can be any type of parser that provides a parse method
+  # and raise ParseError when error appear during parsing
+  self.parser = XmlParser
+end
+
+class XmlParser
+  class ParserError < StandardError; end
+
+  def self.parse(message)
+    Hash.from_xml(message)
+  rescue REXML::ParseException
+    raise ParserError
+  end
 end
 ```
 

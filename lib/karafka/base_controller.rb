@@ -98,7 +98,7 @@ module Karafka
       # @return [Parser] controller message parser
       # If not define, return karafka app parser
       def parser
-        @parser ||= Karafka::App.parser
+        @parser ||= JSON
       end
 
       # @return [Class] worker class to which we should schedule Sidekiq bg stuff
@@ -135,10 +135,13 @@ module Karafka
     end
 
     # Method lazy load params, so when they were
-    # not build yet - build and parse them
+    # not build yet build and parse them.
+    # @note when controller is created in routing,
+    #   @params have simple Karafka::Connection::Message format,
+    #   don't parsed and don't build with HashWithIndifferentAccess
     # @return [Array] @params
     def params
-      return @params if @params.is_a?(Karafka::Params)
+      return @params if params_build?
       merge_params Karafka::Params.build(@params, self.class.parser)
       @params
     end
@@ -170,6 +173,11 @@ module Karafka
     def enqueue
       Karafka.logger.info("Enqueuing #{self.class} - #{params} into #{self.class.worker}")
       self.class.worker.perform_async(params)
+    end
+
+    # @return true if @params has been already build, false if not
+    def params_build?
+      @params.is_a?(Karafka::Params)
     end
   end
 end

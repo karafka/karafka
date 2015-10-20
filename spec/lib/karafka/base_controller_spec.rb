@@ -114,11 +114,6 @@ RSpec.describe Karafka::BaseController do
     context 'when parser is already assigned' do
       let(:parser) { double }
 
-      before do
-        expect(Karafka::App)
-          .not_to receive(:parser)
-      end
-
       it 'should not to get karafka app parser' do
         expect(working_class.parser).to eq parser
       end
@@ -126,16 +121,9 @@ RSpec.describe Karafka::BaseController do
 
     context 'when parser is not assigned' do
       let(:parser) { nil }
-      let(:app_parser) { double }
-
-      before do
-        expect(Karafka::App)
-          .to receive(:parser)
-          .and_return app_parser
-      end
 
       it 'should set app parser to controller' do
-        expect(working_class.parser).to eq app_parser
+        expect(working_class.parser).to eq JSON
       end
     end
   end
@@ -373,6 +361,26 @@ RSpec.describe Karafka::BaseController do
 
         subject.call
       end
+    end
+  end
+
+  describe 'params_build?' do
+    subject { working_class.new }
+
+    before do
+      subject.instance_variable_set(:@params, params)
+    end
+
+    context 'params was build' do
+      let(:params) { instance_double(Karafka::Connection::Message) }
+
+      it { expect(subject.send(:params_build?)).to eq false }
+    end
+
+    context 'params was no build' do
+      let(:params) { Karafka::Params.new }
+
+      it { expect(subject.send(:params_build?)).to eq true }
     end
   end
 end

@@ -71,24 +71,6 @@ RSpec.describe Karafka::App do
     end
   end
 
-  describe '#parser' do
-    before do
-      subject.instance_variable_set(:'@parser', parser)
-    end
-
-    context 'when parser value is set' do
-      let(:parser) { double }
-
-      it { expect(subject.parser).to eq parser }
-    end
-
-    context 'when parser value is not set' do
-      let(:parser) { nil }
-
-      it { expect(subject.parser).to eq JSON }
-    end
-  end
-
   describe '#config' do
     let(:config) { double }
 
