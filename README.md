@@ -155,7 +155,7 @@ end
 
 ##### Karafka controller custom parser
 
-Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. This parser should contain parse method and raise ParseError when has problem with parsing.
+Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. This parser should contain parse method and raise ParserError when problem with parsing appear.
 
 ```ruby
 class TestController < Karafka::BaseController

@@ -2,6 +2,7 @@
 
 ## 0.1.14
  - Add an ability to use user-defined parsers for a messages
+ - Lazy load params for before callbacks
 
 ## 0.1.13
 - Ability to assign custom workers and use them bypassing Karafka::BaseWorker (or its descendants)
