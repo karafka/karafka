@@ -1,3 +1,6 @@
+ENV['RACK_ENV'] ||= 'development'
+ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
+
 %w(
   rake
   rubygems
@@ -17,8 +20,6 @@
   karafka/loader
   karafka/status
 ).each { |lib| require lib }
-
-ENV['KARAFKA_ENV'] ||= 'development'
 
 # The Poseidon socket timeout is 10, so we give it a bit more time to shutdown after
 # socket timeout
