@@ -1,5 +1,3 @@
-ENV['KARAFKA_ENV'] ||= 'development'
-
 require './app.rb'
 
 task(:environment) {}

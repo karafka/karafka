@@ -1,6 +1,3 @@
-ENV['RACK_ENV'] ||= 'development'
-ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
-
 %w(
   rake
   rubygems
@@ -57,3 +54,4 @@ end
 Karafka::Loader.new.load!(Karafka.core_root)
 
 load 'karafka/tasks/karafka.rake'
+load 'karafka/tasks/kafka.rake'

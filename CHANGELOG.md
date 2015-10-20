@@ -1,8 +1,11 @@
 # Karafka framework changelog
 
-## 0.1.14
+## 0.1.15
  - Add an ability to use user-defined parsers for a messages
  - Lazy load params for before callbacks
+
+## 0.1.14
+- Rake tasks for listing all the topics on Kafka server (rake kafka:topics)
 
 ## 0.1.13
 - Ability to assign custom workers and use them bypassing Karafka::BaseWorker (or its descendants)
