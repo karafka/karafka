@@ -106,6 +106,40 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
+  describe '#parser' do
+    before do
+      working_class.parser = parser
+    end
+
+    context 'when parser is already assigned' do
+      let(:parser) { double }
+
+      before do
+        expect(Karafka::App)
+          .not_to receive(:parser)
+      end
+
+      it 'should not to get karafka app parser' do
+        expect(working_class.parser).to eq parser
+      end
+    end
+
+    context 'when parser is not assigned' do
+      let(:parser) { nil }
+      let(:app_parser) { double }
+
+      before do
+        expect(Karafka::App)
+          .to receive(:parser)
+          .and_return app_parser
+      end
+
+      it 'should set app parser to controller' do
+        expect(working_class.parser).to eq app_parser
+      end
+    end
+  end
+
   describe '#worker' do
     before do
       working_class.worker = worker
@@ -148,6 +182,37 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
+  describe '#params' do
+    subject { working_class.new }
+
+    before do
+      subject.instance_variable_set(:@params, params)
+    end
+
+    context 'when call first time' do
+      let(:params) { instance_double(Karafka::Connection::Message) }
+
+      before do
+        expect(Karafka::Params)
+          .to receive(:build)
+          .with(params, JSON)
+          .and_return(params)
+
+        expect(subject)
+          .to receive(:merge_params)
+          .with(params)
+      end
+
+      it { subject.params }
+    end
+
+    context 'when params were build before' do
+      let(:params) { Karafka::Params.new }
+
+      it { expect(subject.params).to eq params }
+    end
+  end
+
   describe '#call' do
     context 'when there are no callbacks' do
       subject { working_class.new }
@@ -160,7 +225,7 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
-  describe '#params=' do
+  describe '#merge_params' do
     subject do
       ClassBuilder.inherit(described_class) do
         self.group = rand
@@ -179,14 +244,14 @@ RSpec.describe Karafka::BaseController do
     let(:params) { { rand => rand } }
 
     it 'should merge controller specific options into params' do
-      subject.params = params
+      subject.send(:merge_params, params)
 
       expected = params.merge(
         controller: subject.class,
         topic: subject.class.topic
       )
 
-      expect(subject.send(:params)).to eq expected
+      expect(subject.instance_variable_get(:@params)).to eq expected
     end
   end
 

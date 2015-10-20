@@ -69,6 +69,7 @@ module Karafka
     include ActiveSupport::Callbacks
 
     attr_writer :params
+
     # The call method is wrapped with a set of callbacks
     # We won't run perform at the backend if any of the callbacks
     # returns false
@@ -134,7 +135,7 @@ module Karafka
     end
 
     # Method lazy load params, so when they were
-    # not builded yet - build them
+    # not build yet - build and parse them
     # @return [Array] @params
     def params
       return @params if @params.is_a?(Karafka::Params)
