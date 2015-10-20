@@ -1,6 +1,3 @@
-ENV['RACK_ENV'] ||= 'development'
-ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
-
 %w(
   rake
   rubygems
