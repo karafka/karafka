@@ -1,3 +1,5 @@
+ENV['KARAFKA_ENV'] = 'test'
+
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
@@ -6,8 +8,6 @@ require 'simplecov'
 require 'rake'
 require 'logger'
 require 'poseidon'
-
-ENV['KARAFKA_ENV'] ||= 'test'
 
 # Don't include unnecessary stuff into rcov
 SimpleCov.start do

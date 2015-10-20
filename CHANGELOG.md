@@ -1,5 +1,11 @@
 # Karafka framework changelog
 
+## 0.1.15
+- Fixed max_wait_ms vs socket_timeout_ms issue
+- Fixed closing queue connection after Poseidon::Errors::ProtocolError failure
+- Fixed wrong logging file selection based on env
+- Extracted Karafka::Connection::QueueConsumer object to wrap around queue connection
+
 ## 0.1.14
 - Rake tasks for listing all the topics on Kafka server (rake kafka:topics)
 
