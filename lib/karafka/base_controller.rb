@@ -96,7 +96,19 @@ module Karafka
       end
 
       # @return [Parser] controller message parser
-      # If not define, return karafka app parser
+      # If not define, return JSON parser.
+      # Parser should contain parse method
+      # and raise ParserError when something went wrong
+      # @example:
+      # class XmlParser
+      #   class ParserError < StandardError; end
+      #
+      #   def self.parse(message)
+      #     Hash.from_xml(message)
+      #   rescue REXML::ParseException
+      #     raise ParserError
+      #   end
+      # end
       def parser
         @parser ||= JSON
       end

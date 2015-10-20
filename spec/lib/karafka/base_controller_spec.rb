@@ -114,17 +114,13 @@ RSpec.describe Karafka::BaseController do
     context 'when parser is already assigned' do
       let(:parser) { double }
 
-      it 'should not to get karafka app parser' do
-        expect(working_class.parser).to eq parser
-      end
+      it { expect(working_class.parser).to eq parser }
     end
 
     context 'when parser is not assigned' do
       let(:parser) { nil }
 
-      it 'should set app parser to controller' do
-        expect(working_class.parser).to eq JSON
-      end
+      it { expect(working_class.parser).to eq JSON }
     end
   end
 
