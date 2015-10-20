@@ -2,8 +2,6 @@ module Karafka
   # App class
   class App
     class << self
-      attr_writer :parser
-
       # Method which runs app
       def run
         initialize!
