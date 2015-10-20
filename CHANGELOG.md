@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.1.14
+- Rake tasks for listing all the topics on Kafka server (rake kafka:topics)
+
 ## 0.1.13
 - Ability to assign custom workers and use them bypassing Karafka::BaseWorker (or its descendants)
 - Gem dump

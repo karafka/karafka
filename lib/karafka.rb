@@ -57,3 +57,4 @@ end
 Karafka::Loader.new.load!(Karafka.core_root)
 
 load 'karafka/tasks/karafka.rake'
+load 'karafka/tasks/kafka.rake'
