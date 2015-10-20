@@ -138,7 +138,7 @@ module Karafka
     # @return [Array] @params
     def params
       return @params if @params.is_a?(Karafka::Params)
-      set_params Karafka::Params.build(@params, self.class.parser)
+      merge_params Karafka::Params.build(@params, self.class.parser)
       @params
     end
 
@@ -155,7 +155,7 @@ module Karafka
     # Assigns parameters hash (Karafka::Params) internally. It also adds some extra
     #  flavour values to it
     # @param params [Karafka::Params] params instance
-    def set_params(params)
+    def merge_params(params)
       @params = params.tap do |param|
         param.merge!(
           controller: self.class,
