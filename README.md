@@ -106,7 +106,7 @@ You have to define following elements in every controller:
 
 ####  Optional attributes
 
-Karafka controller has tree optional attributes: **topic**, **group**, **parser** and **worker**.
+Karafka controller has four optional attributes: **topic**, **group**, **parser** and **worker**.
 
 ##### Karafka controller topic
 
@@ -155,7 +155,7 @@ end
 
 ##### Karafka controller custom parser
 
-Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. This parser should contain parse method and raise ParserError when problem with parsing appear.
+Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. This parser should contain parse method and raise ParserError when appear problem with parsing.
 
 ```ruby
 class TestController < Karafka::BaseController
