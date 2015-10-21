@@ -17,8 +17,7 @@ RSpec.describe Karafka::Connection::Listener do
   describe '#fetch' do
     let(:action) { double }
     [
-      ZK::Exceptions::OperationTimeOut,
-      Poseidon::Connection::ConnectionFailedError,
+      StandardError,
       Exception
     ].each do |error|
       let(:proxy) { double }
@@ -44,30 +43,38 @@ RSpec.describe Karafka::Connection::Listener do
       end
     end
 
-    context "when one of #{Poseidon::Errors::ProtocolError} happen" do
-      let(:error) { Poseidon::Errors::ProtocolError }
-      let(:queue_consumer) { double }
+    context 'when one of errors that we handle happen' do
+      [
+        Poseidon::Connection::ConnectionFailedError,
+        Poseidon::Errors::ProtocolError,
+        ZK::Exceptions::OperationTimeOut
+      ].each do |error|
+        context "when it is #{error}" do
+          let(:error) { Poseidon::Errors::ProtocolError }
+          let(:queue_consumer) { double }
 
-      before do
-        expect(subject)
-          .to receive(:queue_consumer)
-          .and_return(queue_consumer)
+          before do
+            expect(subject)
+              .to receive(:queue_consumer)
+              .and_return(queue_consumer)
 
-        expect(queue_consumer)
-          .to receive(:fetch)
-          .and_raise(error.new)
+            expect(queue_consumer)
+              .to receive(:fetch)
+              .and_raise(error.new)
 
-        subject.instance_variable_set(:@queue_consumer, queue_consumer)
-      end
+            subject.instance_variable_set(:@queue_consumer, queue_consumer)
+          end
 
-      it 'should close the consumer and not raise error' do
-        expect(subject.instance_variable_get(:@queue_consumer)).to eq queue_consumer
+          it 'should close the consumer and not raise error' do
+            expect(subject.instance_variable_get(:@queue_consumer)).to eq queue_consumer
 
-        expect(queue_consumer)
-          .to receive(:close)
+            expect(queue_consumer)
+              .to receive(:close)
 
-        expect { subject.send(:fetch, action) }.not_to raise_error
-        expect(subject.instance_variable_get(:@queue_consumer)).to eq nil
+            expect { subject.send(:fetch, action) }.not_to raise_error
+            expect(subject.instance_variable_get(:@queue_consumer)).to eq nil
+          end
+        end
       end
     end
 

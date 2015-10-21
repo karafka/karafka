@@ -7,6 +7,15 @@ module Karafka
     class Listener
       attr_reader :controller
 
+      # Errors on which we close the connection and reconnect again
+      # They happen when something is wrong on Kafka/Zookeeper side or when
+      # some timeout/network issues happen
+      CONNECTION_CLOSE_ERRORS = [
+        Poseidon::Connection::ConnectionFailedError,
+        Poseidon::Errors::ProtocolError,
+        ZK::Exceptions::OperationTimeOut
+      ]
+
       # @param controller [Karafka::BaseController] a descendant of base controller
       # @return [Karafka::Connection::Listener] listener instance
       def initialize(controller)
@@ -37,20 +46,16 @@ module Karafka
             block.call(controller, raw_message)
           end
         end
-        # rubocop:enable RescueException
+      rescue *CONNECTION_CLOSE_ERRORS
+        # @see https://github.com/bpot/poseidon/issues/92
+        # @see https://github.com/bsm/poseidon_cluster/issues/20
+        @queue_consumer.close
+        @queue_consumer = nil
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
-        # rubocop:enable RescueException
-        if e.is_a? Poseidon::Errors::ProtocolError
-          # @see https://github.com/bsm/poseidon_cluster/issues/20
-          # @see https://github.com/bpot/poseidon/issues/92
-          @queue_consumer.close
-          @queue_consumer = nil
-        else
-          Karafka.logger.error("An error occur in #{self.class}")
-          Karafka.logger.error(e)
-        end
+        Karafka.logger.error("An error occur in #{self.class}")
+        Karafka.logger.error(e)
       end
 
       private
