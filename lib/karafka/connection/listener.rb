@@ -30,7 +30,7 @@ module Karafka
       def fetch(block)
         Karafka.logger.info("Fetching: #{controller.topic}")
 
-        val = queue_consumer.fetch do |_partition, messages_bulk|
+        queue_consumer.fetch do |_partition, messages_bulk|
           Karafka.logger.info("Received #{messages_bulk.count} messages from #{controller.topic}")
 
           messages_bulk.each do |raw_message|
@@ -51,7 +51,6 @@ module Karafka
           Karafka.logger.error("An error occur in #{self.class}")
           Karafka.logger.error(e)
         end
-
       end
 
       private
