@@ -49,11 +49,6 @@ RSpec.describe Karafka::Connection::Listener do
       let(:queue_consumer) { double }
 
       before do
-        # Lets silence exceptions printing
-        expect(Karafka.logger)
-          .to receive(:error)
-          .exactly(2).times
-
         expect(subject)
           .to receive(:queue_consumer)
           .and_return(queue_consumer)

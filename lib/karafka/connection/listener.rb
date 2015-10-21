@@ -30,7 +30,7 @@ module Karafka
       def fetch(block)
         Karafka.logger.info("Fetching: #{controller.topic}")
 
-        queue_consumer.fetch do |_partition, messages_bulk|
+        val = queue_consumer.fetch do |_partition, messages_bulk|
           Karafka.logger.info("Received #{messages_bulk.count} messages from #{controller.topic}")
 
           messages_bulk.each do |raw_message|
@@ -42,14 +42,16 @@ module Karafka
         # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
-        # @see https://github.com/bsm/poseidon_cluster/issues/20
         if e.is_a? Poseidon::Errors::ProtocolError
+          # @see https://github.com/bsm/poseidon_cluster/issues/20
+          # @see https://github.com/bpot/poseidon/issues/92
           @queue_consumer.close
           @queue_consumer = nil
+        else
+          Karafka.logger.error("An error occur in #{self.class}")
+          Karafka.logger.error(e)
         end
 
-        Karafka.logger.error("An error occur in #{self.class}")
-        Karafka.logger.error(e)
       end
 
       private
