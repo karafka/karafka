@@ -22,6 +22,9 @@ RSpec.describe Karafka::Config do
     before do
       instance
 
+      @config = described_class.instance_variable_get('@config')
+      described_class.instance_variable_set('@config', nil)
+
       expect(subject)
         .to receive(:new)
         .and_return(instance)
@@ -32,6 +35,10 @@ RSpec.describe Karafka::Config do
 
       expect(instance)
         .to receive(:freeze)
+    end
+
+    after do
+      described_class.instance_variable_set('@config', @config)
     end
 
     it { subject.setup(&block) }

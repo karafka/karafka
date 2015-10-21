@@ -28,7 +28,7 @@ module Karafka
 
     # Configurating method
     def self.setup(&block)
-      self.config = new
+      self.config ||= new
 
       block.call(config)
       config.freeze

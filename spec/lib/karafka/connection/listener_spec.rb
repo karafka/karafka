@@ -31,29 +31,64 @@ RSpec.describe Karafka::Connection::Listener do
             .exactly(2).times
         end
 
-        it 'should close the consumer and not raise error' do
+        it 'should log the error wthout closing the consumer' do
           expect(subject)
-            .to receive(:consumer)
+            .to receive(:queue_consumer)
             .and_raise(error.new)
+
+          expect(subject)
+            .not_to receive(:queue_consumer)
 
           expect { subject.send(:fetch, action) }.not_to raise_error
         end
       end
     end
 
+    context "when one of #{Poseidon::Errors::ProtocolError} happen" do
+      let(:error) { Poseidon::Errors::ProtocolError }
+      let(:queue_consumer) { double }
+
+      before do
+        # Lets silence exceptions printing
+        expect(Karafka.logger)
+          .to receive(:error)
+          .exactly(2).times
+
+        expect(subject)
+          .to receive(:queue_consumer)
+          .and_return(queue_consumer)
+
+        expect(queue_consumer)
+          .to receive(:fetch)
+          .and_raise(error.new)
+
+        subject.instance_variable_set(:@queue_consumer, queue_consumer)
+      end
+
+      it 'should close the consumer and not raise error' do
+        expect(subject.instance_variable_get(:@queue_consumer)).to eq queue_consumer
+
+        expect(queue_consumer)
+          .to receive(:close)
+
+        expect { subject.send(:fetch, action) }.not_to raise_error
+        expect(subject.instance_variable_get(:@queue_consumer)).to eq nil
+      end
+    end
+
     context 'when no errors occur' do
-      let(:consumer) { double }
+      let(:queue_consumer) { double }
       let(:_partition) { double }
       let(:messages_bulk) { [incoming_message] }
       let(:incoming_message) { double }
 
       it 'should yield for each incoming message' do
         expect(subject)
-          .to receive(:consumer)
-          .and_return(consumer)
+          .to receive(:queue_consumer)
+          .and_return(queue_consumer)
           .at_least(:once)
 
-        expect(consumer)
+        expect(queue_consumer)
           .to receive(:fetch)
           .and_yield(_partition, messages_bulk)
         expect(action)
@@ -65,41 +100,36 @@ RSpec.describe Karafka::Connection::Listener do
     end
   end
 
-  describe '#consumer' do
-    context 'when consumer is already created' do
-      let(:consumer) { double }
+  describe '#queue_consumer' do
+    context 'when queue_consumer is already created' do
+      let(:queue_consumer) { double }
 
       before do
-        subject.instance_variable_set(:'@consumer', consumer)
+        subject.instance_variable_set(:'@queue_consumer', queue_consumer)
       end
 
       it 'should just return it' do
         expect(Poseidon::ConsumerGroup)
           .to receive(:new)
           .never
-        expect(subject.send(:consumer)).to eq consumer
+        expect(subject.send(:queue_consumer)).to eq queue_consumer
       end
     end
 
-    context 'when consumer is not yet created' do
-      let(:consumer) { double }
+    context 'when queue_consumer is not yet created' do
+      let(:queue_consumer) { double }
 
       before do
-        subject.instance_variable_set(:'@consumer', nil)
+        subject.instance_variable_set(:'@queue_consumer', nil)
       end
 
       it 'should create an instance and return' do
-        expect(Poseidon::ConsumerGroup)
+        expect(Karafka::Connection::QueueConsumer)
           .to receive(:new)
-          .with(
-            controller.group.to_s,
-            Karafka::App.config.kafka_hosts,
-            Karafka::App.config.zookeeper_hosts,
-            controller.topic.to_s
-          )
-          .and_return(consumer)
+          .with(controller)
+          .and_return(queue_consumer)
 
-        expect(subject.send(:consumer)).to eq consumer
+        expect(subject.send(:queue_consumer)).to eq queue_consumer
       end
     end
   end

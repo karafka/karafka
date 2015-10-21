@@ -14,7 +14,8 @@ module Karafka
       end
 
       # Opens connection, gets messages bulk and calls a block for each of the incoming messages
-      # After everything is done, consumer connection is being closed so it cannot be used again
+      # After everything is done, queue_consumer connection is being closed so
+      #   it cannot be used again
       # @yieldparam [Karafka::BaseController] base controller descendant
       # @yieldparam [Poseidon::FetchedMessage] poseidon fetched message
       # Since Poseidon socket has a timeout (10 000ms by default) we catch it and ignore,
@@ -29,32 +30,34 @@ module Karafka
       def fetch(block)
         Karafka.logger.info("Fetching: #{controller.topic}")
 
-        consumer.fetch do |_partition, messages_bulk|
+        queue_consumer.fetch do |_partition, messages_bulk|
           Karafka.logger.info("Received #{messages_bulk.count} messages from #{controller.topic}")
 
           messages_bulk.each do |raw_message|
             block.call(controller, raw_message)
           end
         end
+        # rubocop:enable RescueException
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
+        # @see https://github.com/bsm/poseidon_cluster/issues/20
+        if e.is_a? Poseidon::Errors::ProtocolError
+          @queue_consumer.close
+          @queue_consumer = nil
+        end
+
         Karafka.logger.error("An error occur in #{self.class}")
         Karafka.logger.error(e)
       end
 
       private
 
-      # @return [Poseidon::ConsumerGroup] consumer group that listens to a topic
+      # @return [Karafka::Connection::QueueConsumer] queue consumer that listens to a topic
       # @note This is not a Karafka::Connection::Consumer
-      def consumer
-        @consumer ||= Poseidon::ConsumerGroup.new(
-          @controller.group.to_s,
-          Karafka::App.config.kafka_hosts,
-          Karafka::App.config.zookeeper_hosts,
-          @controller.topic.to_s
-        )
+      def queue_consumer
+        @queue_consumer ||= QueueConsumer.new(@controller)
       end
     end
   end
