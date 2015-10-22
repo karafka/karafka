@@ -1,5 +1,12 @@
 # Karafka framework changelog
 
+## 0.1.16
+- Cluster level error catching for all exceptions so actor is not killer
+- Cluster level error logging
+- Listener refactoring (QueueConsumer extracted)
+- Karafka::Connection::QueueConsumer to wrap around fetching logic - technically we could replace Kafka with any other messaging engine as long as we preserve the same API
+- Added debug env for debugging purpose in applications
+
 ## 0.1.15
 - Fixed max_wait_ms vs socket_timeout_ms issue
 - Fixed closing queue connection after Poseidon::Errors::ProtocolError failure

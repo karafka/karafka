@@ -7,15 +7,6 @@ module Karafka
     class Listener
       attr_reader :controller
 
-      # Errors on which we close the connection and reconnect again
-      # They happen when something is wrong on Kafka/Zookeeper side or when
-      # some timeout/network issues happen
-      CONNECTION_CLOSE_ERRORS = [
-        Poseidon::Connection::ConnectionFailedError,
-        Poseidon::Errors::ProtocolError,
-        ZK::Exceptions::OperationTimeOut
-      ]
-
       # @param controller [Karafka::BaseController] a descendant of base controller
       # @return [Karafka::Connection::Listener] listener instance
       def initialize(controller)
@@ -23,8 +14,6 @@ module Karafka
       end
 
       # Opens connection, gets messages bulk and calls a block for each of the incoming messages
-      # After everything is done, queue_consumer connection is being closed so
-      #   it cannot be used again
       # @yieldparam [Karafka::BaseController] base controller descendant
       # @yieldparam [Poseidon::FetchedMessage] poseidon fetched message
       # Since Poseidon socket has a timeout (10 000ms by default) we catch it and ignore,
@@ -39,6 +28,9 @@ module Karafka
       def fetch(block)
         Karafka.logger.info("Fetching: #{controller.topic}")
 
+        # Fetch provides us with additional informations
+        # It will be set to false if we couldn't clame connection
+        # So if it is not claimed, we should try again with a new connection
         queue_consumer.fetch do |_partition, messages_bulk|
           Karafka.logger.info("Received #{messages_bulk.count} messages from #{controller.topic}")
 
@@ -46,14 +38,10 @@ module Karafka
             block.call(controller, raw_message)
           end
         end
-      rescue *CONNECTION_CLOSE_ERRORS
-        # @see https://github.com/bpot/poseidon/issues/92
-        # @see https://github.com/bsm/poseidon_cluster/issues/20
-        @queue_consumer.close
-        @queue_consumer = nil
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
+        # rubocop:enable RescueException
         Karafka.logger.error("An error occur in #{self.class}")
         Karafka.logger.error(e)
       end

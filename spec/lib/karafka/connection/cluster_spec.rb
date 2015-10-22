@@ -21,38 +21,70 @@ RSpec.describe Karafka::Connection::Cluster do
     let(:listeners) { [listener] }
     let(:block) { -> {} }
 
-    before do
-      expect(subject)
-        .to receive(:loop)
-        .and_yield
+    context 'when there is no errors (happy path)' do
+      before do
+        expect(subject)
+          .to receive(:loop)
+          .and_yield
 
-      expect(subject)
-        .to receive(:listeners)
-        .and_return(listeners)
+        expect(subject)
+          .to receive(:listeners)
+          .and_return(listeners)
 
-      expect(Karafka::App)
-        .to receive(:running?)
-        .and_return(running?)
-    end
+        expect(Karafka::App)
+          .to receive(:running?)
+          .and_return(running?)
+      end
 
-    context 'when we decide to stop the application' do
-      let(:running?) { false }
+      context 'when we decide to stop the application' do
+        let(:running?) { false }
 
-      it 'should not start listening' do
-        expect(listener)
-          .not_to receive(:fetch)
+        it 'should not start listening' do
+          expect(listener)
+            .not_to receive(:fetch)
 
-        subject.fetch_loop(block)
+          subject.fetch_loop(block)
+        end
+      end
+
+      context 'when the application is running' do
+        let(:running?) { true }
+
+        it 'should start listening' do
+          expect(listener)
+            .to receive(:fetch)
+            .with(block)
+
+          subject.fetch_loop(block)
+        end
       end
     end
 
-    context 'when the application is running' do
-      let(:running?) { true }
+    context 'when something wrong happens' do
+      before do
+        expect(subject)
+          .to receive(:loop)
+          .and_yield
+          .exactly(2).times
 
-      it 'should start listening' do
+        expect(subject)
+          .to receive(:listeners)
+          .and_return(listeners)
+          .exactly(2).times
+
         expect(listener)
           .to receive(:fetch)
-          .with(block)
+          .and_raise(StandardError)
+
+        allow(Karafka::App)
+          .to receive(:running?)
+          .and_return(true, false)
+      end
+
+      it 'should log it and retry' do
+        expect(Karafka.logger)
+          .to receive(:error)
+          .exactly(2).times
 
         subject.fetch_loop(block)
       end
