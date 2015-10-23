@@ -68,8 +68,6 @@ module Karafka
   class BaseController
     include ActiveSupport::Callbacks
 
-    attr_reader :params
-
     # The call method is wrapped with a set of callbacks
     # We won't run perform at the backend if any of the callbacks
     # returns false
