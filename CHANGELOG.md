@@ -1,9 +1,7 @@
 # Karafka framework changelog
 
-## Current master
-- Changed Karafka::Connection::Cluster tp Karafka::Connection::ActorCluster to distinguish between a single thread actor cluster for multiple topic connection and a future feature that will allow process clusterization.
-
 ## 0.1.17
+- Changed Karafka::Connection::Cluster tp Karafka::Connection::ActorCluster to distinguish between a single thread actor cluster for multiple topic connection and a future feature that will allow process clusterization.
  - Add an ability to use user-defined parsers for a messages
  - Lazy load params for before callbacks
 
