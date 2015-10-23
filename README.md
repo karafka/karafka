@@ -245,6 +245,8 @@ Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to in
 
 * [Karafka – Ruby micro-framework for building Apache Kafka message-based applications](http://dev.mensfeld.pl/2015/08/karafka-ruby-micro-framework-for-building-apache-kafka-message-based-applications/)
 * [Karafka example application](https://github.com/karafka/karafka-example-app)
+* [Karafka Travis CI](https://travis-ci.org/karafka/karafka)
+* [Karafka Code Climate](https://codeclimate.com/github/karafka/karafka)
 
 ## Note on Patches/Pull Requests
 
