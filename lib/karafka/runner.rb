@@ -14,13 +14,13 @@ module Karafka
 
     private
 
-    # @return [Array<Karafka::Connection::Cluster>] array with all the connection clusters
+    # @return [Array<Karafka::Connection::ActorCluster>] array with all the connection clusters
     def clusters
       Karafka::Routing::Mapper
         .controllers
         .each_slice(slice_size)
         .map do |chunk|
-          Karafka::Connection::Cluster.new(chunk)
+          Karafka::Connection::ActorCluster.new(chunk)
         end
     end
 

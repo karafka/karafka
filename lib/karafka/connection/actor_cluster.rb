@@ -2,7 +2,7 @@ module Karafka
   module Connection
     # A single connection cluster is responsible for listening to few controllers topics
     # It should listen in a separate thread
-    class Cluster
+    class ActorCluster
       include Celluloid
 
       execute_block_on_receiver :fetch_loop

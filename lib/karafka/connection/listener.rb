@@ -21,8 +21,8 @@ module Karafka
       # @note This will yield with a raw message - no preprocessing or reformatting
       # @note We catch all the errors here, so they don't affect other listeners (or this one)
       #   so we will be able to listen and consume other incoming messages.
-      #   Since it is run inside Karafka::Connection::Cluster - catching all the exceptions won't
-      #   crash the whole cluster. Here we mostly focus on catchin the exceptions related to
+      #   Since it is run inside Karafka::Connection::ActorCluster - catching all the exceptions
+      #   won't crash the whole cluster. Here we mostly focus on catchin the exceptions related to
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far
       def fetch(block)

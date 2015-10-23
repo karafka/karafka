@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Connection::Cluster do
+RSpec.describe Karafka::Connection::ActorCluster do
   let(:controller) do
     ClassBuilder.inherit(Karafka::BaseController) do
       self.group = rand

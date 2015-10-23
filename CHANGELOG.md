@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Current master
+- Changed Karafka::Connection::Cluster tp Karafka::Connection::ActorCluster to distinguish between a single thread actor cluster for multiple topic connection and a future feature that will allow process clusterization.
+
 ## 0.1.16
 - Cluster level error catching for all exceptions so actor is not killer
 - Cluster level error logging
