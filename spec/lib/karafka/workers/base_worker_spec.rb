@@ -35,7 +35,7 @@ RSpec.describe Karafka::Workers::BaseWorker do
 
       subject.execute(*args)
 
-      expect(subject.args).to eq args
+      expect(subject.params).to eq args.first
     end
   end
 
@@ -76,75 +76,30 @@ RSpec.describe Karafka::Workers::BaseWorker do
     end
   end
 
-  describe '#params' do
-    let(:params) { double }
-    let(:arg) { double }
-    let(:args) { [arg] }
-
-    it 'should create karafka params based on the first (and only) argument' do
-      expect(subject)
-        .to receive(:args)
-        .and_return(args)
-
-      expect(Karafka::Params)
-        .to receive(:new)
-        .with(arg)
-        .and_return(params)
-
-      expect(subject.send(:params)).to eq params
-      expect(subject.instance_variable_get(:'@params')).to eq params
-    end
-  end
-
   describe '#controller' do
     before do
-      subject.instance_variable_set(:'@controller', controller)
+      NamedController = controller
     end
 
-    context 'when controller is already built' do
-      let(:controller) { double }
-
-      it 'should return it and do nothing else' do
-        expect(Karafka::Routing::Router)
-          .not_to receive(:new)
-
-        expect(Karafka::Connection::Message)
-          .not_to receive(:new)
-
-        expect(subject.send(:controller)).to eq controller
-      end
+    let(:params) do
+      {
+        'controller' => 'NamedController'
+      }
     end
 
-    context 'when controller is not yet built' do
-      let(:controller) { nil }
-      let(:message) { double }
-      let(:router) { double }
-      let(:routed_controller) { double }
-      let(:topic) { double }
-      let(:params) { { topic: topic, rand => rand } }
+    it 'should get the controller out of params and assign params as params' do
+      expect(subject)
+        .to receive(:params)
+        .and_return(params)
+        .exactly(2).times
 
-      it 'should create karafka message and build a controller' do
-        expect(Karafka::Routing::Router)
-          .to receive(:new)
-          .with(message)
-          .and_return(router)
+      expect_any_instance_of(controller)
+        .to receive(:params=)
+        .with(params)
 
-        expect(Karafka::Connection::Message)
-          .to receive(:new)
-          .with(topic, params)
-          .and_return(message)
+      ctrl = subject.send(:controller)
 
-        expect(subject)
-          .to receive(:params)
-          .and_return(params)
-          .exactly(2).times
-
-        expect(router)
-          .to receive(:build)
-          .and_return(routed_controller)
-
-        expect(subject.send(:controller)).to eq routed_controller
-      end
+      expect(ctrl).to be_a controller
     end
   end
 end

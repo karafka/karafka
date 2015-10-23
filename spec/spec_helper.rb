@@ -3,11 +3,16 @@ ENV['KARAFKA_ENV'] = 'test'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-require 'rubygems'
-require 'simplecov'
-require 'rake'
-require 'logger'
-require 'poseidon'
+%w(
+  rubygems
+  simplecov
+  rake
+  logger
+  poseidon
+  timecop
+).each do |lib|
+  require lib
+end
 
 # Don't include unnecessary stuff into rcov
 SimpleCov.start do
@@ -20,6 +25,8 @@ SimpleCov.start do
   add_filter '/lib/karafka/tasks'
   merge_timeout 600
 end
+
+Timecop.safe_mode = true
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 

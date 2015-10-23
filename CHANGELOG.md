@@ -4,6 +4,8 @@
 - Changed Karafka::Connection::Cluster tp Karafka::Connection::ActorCluster to distinguish between a single thread actor cluster for multiple topic connection and a future feature that will allow process clusterization.
  - Add an ability to use user-defined parsers for a messages
  - Lazy load params for before callbacks
+ - Automatic loading/initializng all workers classes during startup (so Sidekiq won't fail with unknown workers exception)
+ - Params are now private to controller
 
 ## 0.1.16
 - Cluster level error catching for all exceptions so actor is not killer

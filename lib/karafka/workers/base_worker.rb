@@ -3,13 +3,13 @@ module Karafka
   module Workers
     # Worker wrapper for Sidekiq workers
     class BaseWorker < ::SidekiqGlass::Worker
-      attr_accessor :args
+      attr_accessor :params
 
       # @param args [Array] controller params and controller topic
       # @note Arguments are provided in Karafka::BaseController enqueue
       def execute(*args)
-        Karafka.logger.info("#{self.class}#execute for #{args}")
-        self.args = args
+        self.params = args.first
+        Karafka.logger.info("#{self.class}#execute for #{params}")
         controller.perform
       end
 
@@ -17,10 +17,10 @@ module Karafka
       # With after_failure we can provide reentrancy to this worker
       # @param args [Array] controller params and controller topic
       def after_failure(*args)
-        self.args = args
+        self.params = args.first
 
         unless controller.respond_to?(:after_failure)
-          Karafka.logger.warn("#{self.class}#after_failure controller missing for #{args}")
+          Karafka.logger.warn("#{self.class}#after_failure controller missing for #{params}")
           return
         end
 
@@ -30,17 +30,14 @@ module Karafka
 
       private
 
-      # @return [Karafka::Params] Karafka Params instance
-      # @note It behaves similar to Rails params
-      def params
-        @params ||= Karafka::Params.new(args.first)
-      end
-
       # @return [Karafka::Controller] descendant of Karafka::BaseController that matches the topic
+      #   with params assigned already (controller is ready to use)
+      # @note We don't use router here because in Sidekiq params (args) we alread know what
+      #   controller it is going to be
       def controller
-        @controller ||= Karafka::Routing::Router.new(
-          Karafka::Connection::Message.new(params[:topic], params)
-        ).build
+        @controller ||= Kernel.const_get(params['controller']).new.tap do |ctrl|
+          ctrl.params = params
+        end
       end
     end
   end

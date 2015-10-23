@@ -230,6 +230,7 @@ DEPENDENCIES
   karafka!
   polishgeeks-dev-tools
   rake
+  timecop
 
 BUNDLED WITH
    1.10.6

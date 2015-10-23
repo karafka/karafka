@@ -3,9 +3,9 @@ require 'spec_helper'
 RSpec.describe Karafka::Status do
   subject { described_class.instance }
 
-  it 'by default should be in initializing' do
+  it 'by default should not be in any state' do
     expect(subject.running?).to eq false
-    expect(subject.initializing?).to eq true
+    expect(subject.initializing?).to eq false
     expect(subject.stopped?).to eq false
   end
 

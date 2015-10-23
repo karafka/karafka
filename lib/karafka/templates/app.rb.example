@@ -15,3 +15,5 @@ class App < Karafka::App
 end
 
 Karafka::Loader.new.load(App.root)
+
+App.bootstrap

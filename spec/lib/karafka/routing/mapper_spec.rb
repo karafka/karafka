@@ -107,4 +107,21 @@ RSpec.describe Karafka::Routing::Mapper do
       end
     end
   end
+
+  describe '#workers' do
+    let(:worker1) { double }
+    let(:worker2) { double }
+    let(:controller1) { double(worker: worker1) }
+    let(:controller2) { double(worker: worker2) }
+    let(:controllers) { [controller1, controller2] }
+    let(:workers) { controllers.map(&:worker) }
+
+    it 'should map all controllers workers' do
+      expect(subject)
+        .to receive(:controllers)
+        .and_return(controllers)
+
+      expect(subject.workers).to eq workers
+    end
+  end
 end

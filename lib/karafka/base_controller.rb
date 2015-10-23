@@ -68,7 +68,7 @@ module Karafka
   class BaseController
     include ActiveSupport::Callbacks
 
-    attr_writer :params
+    attr_reader :params
 
     # The call method is wrapped with a set of callbacks
     # We won't run perform at the backend if any of the callbacks
@@ -146,16 +146,11 @@ module Karafka
       fail Errors::PerformMethodNotDefined unless self.respond_to?(:perform)
     end
 
-    # Method lazy load params, so when they were
-    # not build yet build and parse them.
-    # @note when controller is created in routing,
-    #   @params have simple Karafka::Connection::Message format,
-    #   don't parsed and don't build with HashWithIndifferentAccess
-    # @return [Array] @params
-    def params
-      return @params if params_build?
-      merge_params Karafka::Params.build(@params, self.class.parser)
-      @params
+    # Creates lazy loaded params object
+    # @note Until first params usage, it won't parse data at all
+    # @param message [Karafka::Connection::Message] message with raw content
+    def params=(message)
+      @params = Karafka::Params.new(message, self)
     end
 
     # Executes the default controller flow, runs callbacks and if not halted
@@ -168,28 +163,18 @@ module Karafka
 
     private
 
-    # Assigns parameters hash (Karafka::Params) internally. It also adds some extra
-    #  flavour values to it
-    # @param params [Karafka::Params] params instance
-    def merge_params(params)
-      @params = params.tap do |param|
-        param.merge!(
-          controller: self.class,
-          topic: self.class.topic,
-          worker: self.class.worker
-        )
-      end
+    # @return [Karafka::Params] Karafka params that is a hash with indifferent access
+    # @note Params internally are lazy loaded, so if you have anything to parse it
+    #   won't parse it until first params use - that way we can skip parsing if we have
+    #   before_enqueue that rejects some incoming messages without using params
+    def params
+      @params.fetch
     end
 
     # Enqueues the execution of perform method into sidekiq worker
     def enqueue
       Karafka.logger.info("Enqueuing #{self.class} - #{params} into #{self.class.worker}")
       self.class.worker.perform_async(params)
-    end
-
-    # @return true if @params has been already build, false if not
-    def params_build?
-      @params.is_a?(Karafka::Params)
     end
   end
 end
