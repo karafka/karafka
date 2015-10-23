@@ -10,6 +10,11 @@ module Karafka
           @controllers ||= validate(Karafka::BaseController.descendants)
         end
 
+        # @return [Array<Worker>] all workers that are being used by all controllers
+        def workers
+          controllers.map(&:worker)
+        end
+
         # @return [Hash<Symbol, Controller>] hash where the key is equal to the topic
         #   and value represents a controller assigned to that topic
         # @example

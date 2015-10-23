@@ -3,11 +3,23 @@ require 'spec_helper'
 RSpec.describe Karafka::App do
   subject { described_class }
 
-  describe '#run' do
-    it 'should run in supervision, start consuming and sleep' do
+  describe '#bootstrap' do
+    it 'should set app status to initializing and load dynamic stuff' do
       expect(subject)
         .to receive(:initialize!)
 
+      expect(Karafka::Routing::Mapper)
+        .to receive(:controllers)
+
+      expect(Karafka::Routing::Mapper)
+        .to receive(:workers)
+
+      subject.bootstrap
+    end
+  end
+
+  describe '#run' do
+    it 'should run in supervision, start consuming and sleep' do
       expect(subject)
         .to receive(:sleep)
 

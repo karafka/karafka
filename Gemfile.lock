@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (0.1.16)
+    karafka (0.1.17)
       activesupport
       celluloid
       envlogic
@@ -230,6 +230,7 @@ DEPENDENCIES
   karafka!
   polishgeeks-dev-tools
   rake
+  timecop
 
 BUNDLED WITH
    1.10.6
