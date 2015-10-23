@@ -138,6 +138,8 @@ Group and topic should be unique. You can't define different controllers with th
 
 ##### Karafka controller custom worker
 
+ - *worker* - Class name - name of a worker class that we want to use to schedule perform code
+
 Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **Karafka::Workers::BaseWorker** and will share all its settings. **Karafka::Workers::BaseWorker**.
 
 Karafka::Workers::BaseWorker inherits from [SidekiqGlass::Worker](https://github.com/karafka/sidekiq-glass), so it uses reentrancy. If you want to use it, you should add *after_failure* method in the controller as well.
@@ -154,6 +156,8 @@ end
 ```
 
 ##### Karafka controller custom parser
+
+ - *parser* - Class name - name of a parser class that we want to use to parse incoming data
 
 Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. This parser should contain parse method and raise ParserError when appear problem with parsing.
 
