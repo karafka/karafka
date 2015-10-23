@@ -5,7 +5,7 @@ RSpec.describe Karafka::Runner do
 
   describe '#run' do
     context 'when everything is ok' do
-      let(:cluster) { Karafka::Connection::Cluster.new([]) }
+      let(:cluster) { Karafka::Connection::ActorCluster.new([]) }
       let(:clusters) { [cluster] }
       let(:consumer) { -> {} }
       let(:async_scope) { cluster }
@@ -67,7 +67,7 @@ RSpec.describe Karafka::Runner do
         .to receive(:slice_size)
         .and_return(rand(1000) + 1)
 
-      expect(Karafka::Connection::Cluster)
+      expect(Karafka::Connection::ActorCluster)
         .to receive(:new)
         .with(controllers)
     end

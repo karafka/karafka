@@ -1,8 +1,18 @@
 # Karafka framework changelog
 
-## 0.1.16
+## Current master
+- Changed Karafka::Connection::Cluster tp Karafka::Connection::ActorCluster to distinguish between a single thread actor cluster for multiple topic connection and a future feature that will allow process clusterization.
+
+## 0.1.17
  - Add an ability to use user-defined parsers for a messages
  - Lazy load params for before callbacks
+
+## 0.1.16
+- Cluster level error catching for all exceptions so actor is not killer
+- Cluster level error logging
+- Listener refactoring (QueueConsumer extracted)
+- Karafka::Connection::QueueConsumer to wrap around fetching logic - technically we could replace Kafka with any other messaging engine as long as we preserve the same API
+- Added debug env for debugging purpose in applications
 
 ## 0.1.15
 - Fixed max_wait_ms vs socket_timeout_ms issue

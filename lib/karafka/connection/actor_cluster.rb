@@ -2,7 +2,7 @@ module Karafka
   module Connection
     # A single connection cluster is responsible for listening to few controllers topics
     # It should listen in a separate thread
-    class Cluster
+    class ActorCluster
       include Celluloid
 
       execute_block_on_receiver :fetch_loop
@@ -23,6 +23,17 @@ module Karafka
             listener.fetch(block)
           end
         end
+      # This is the last protection layer before the actor crashes
+      # If anything happens down the road - we should catch it here and just
+      # rerun the whole loop while rebuilding all the listeners to reset
+      # everything and make sure that this error does not affect actors
+      # rubocop:disable RescueException
+      rescue Exception => e
+        # rubocop:enable RescueException
+        Karafka.logger.error("An error occur in #{self.class}")
+        Karafka.logger.error(e)
+        @listeners = nil
+        retry
       end
 
       private

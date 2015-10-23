@@ -7,6 +7,7 @@ module Karafka
       'production' => ::Logger::ERROR,
       'test' => ::Logger::ERROR,
       'development' => ::Logger::INFO,
+      'debug' => ::Logger::DEBUG,
       default: ::Logger::INFO
     }
 

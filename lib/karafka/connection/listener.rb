@@ -14,8 +14,6 @@ module Karafka
       end
 
       # Opens connection, gets messages bulk and calls a block for each of the incoming messages
-      # After everything is done, queue_consumer connection is being closed so
-      #   it cannot be used again
       # @yieldparam [Karafka::BaseController] base controller descendant
       # @yieldparam [Poseidon::FetchedMessage] poseidon fetched message
       # Since Poseidon socket has a timeout (10 000ms by default) we catch it and ignore,
@@ -23,13 +21,16 @@ module Karafka
       # @note This will yield with a raw message - no preprocessing or reformatting
       # @note We catch all the errors here, so they don't affect other listeners (or this one)
       #   so we will be able to listen and consume other incoming messages.
-      #   Since it is run inside Karafka::Connection::Cluster - catching all the exceptions won't
-      #   crash the whole cluster. Here we mostly focus on catchin the exceptions related to
+      #   Since it is run inside Karafka::Connection::ActorCluster - catching all the exceptions
+      #   won't crash the whole cluster. Here we mostly focus on catchin the exceptions related to
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far
       def fetch(block)
         Karafka.logger.info("Fetching: #{controller.topic}")
 
+        # Fetch provides us with additional informations
+        # It will be set to false if we couldn't clame connection
+        # So if it is not claimed, we should try again with a new connection
         queue_consumer.fetch do |_partition, messages_bulk|
           Karafka.logger.info("Received #{messages_bulk.count} messages from #{controller.topic}")
 
@@ -37,17 +38,10 @@ module Karafka
             block.call(controller, raw_message)
           end
         end
-        # rubocop:enable RescueException
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
-        # @see https://github.com/bsm/poseidon_cluster/issues/20
-        if e.is_a? Poseidon::Errors::ProtocolError
-          @queue_consumer.close
-          @queue_consumer = nil
-        end
-
         Karafka.logger.error("An error occur in #{self.class}")
         Karafka.logger.error(e)
       end

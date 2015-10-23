@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (0.1.16)
+    karafka (0.1.17)
       activesupport
       celluloid
       envlogic
