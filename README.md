@@ -75,11 +75,12 @@ Note: You can use any library like [Settingslogic](https://github.com/binarylogi
 
 Karafka provides following rake tasks:
 
-| Task                 | Description                               |
-|----------------------|-------------------------------------------|
-| rake karafka:install | Creates whole minimal app structure       |
-| rake karafka:run     | Runs a single Karafka processing instance |
-| rake karafka:sidekiq | Runs a single Sidekiq worker for Karafka  |
+| Task                 | Description                                      |
+|----------------------|--------------------------------------------------|
+| rake karafka:install | Creates whole minimal app structure              |
+| rake karafka:run     | Runs a single Karafka processing instance        |
+| rake karafka:sidekiq | Runs a single Sidekiq worker for Karafka         |
+| rake kafka:topics    | Lists all the topics available on a Kafka server |
 
 
 ## Usage
