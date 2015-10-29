@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 0.1.18
+- Changed Redis configuration options into a single hash that is directly passed to Redis setup for Sidekiq
+- Added config.ru to provide a Sidekiq web UI (see README for more details)
+
 ## 0.1.17
 - Changed Karafka::Connection::Cluster tp Karafka::Connection::ActorCluster to distinguish between a single thread actor cluster for multiple topic connection and a future feature that will allow process clusterization.
 - Add an ability to use user-defined parsers for a messages

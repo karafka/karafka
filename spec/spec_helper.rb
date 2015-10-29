@@ -50,6 +50,7 @@ module Karafka
       config.worker_timeout = 3600
       config.concurrency = 1
       config.name = rand.to_s
+      config.redis = {}
     end
   end
 end

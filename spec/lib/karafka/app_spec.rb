@@ -141,8 +141,10 @@ RSpec.describe Karafka::App do
       double(
         name: name,
         concurrency: concurrency,
-        redis_url: redis_url,
-        redis_namespace: redis_namespace
+        redis: {
+          url: redis_url,
+          namespace: redis_namespace
+        }
       )
     end
 
@@ -150,7 +152,7 @@ RSpec.describe Karafka::App do
       expect(subject)
         .to receive(:config)
         .and_return(config)
-        .exactly(3).times
+        .exactly(2).times
 
       expect(Sidekiq)
         .to receive(:configure_client)
@@ -159,9 +161,9 @@ RSpec.describe Karafka::App do
       expect(sidekiq_config_client)
         .to receive(:redis=)
         .with(
-          url: config.redis_url,
-          namespace: config.redis_namespace,
-          size: config.concurrency
+          config.redis.merge(
+            size: config.concurrency
+          )
         )
     end
 
@@ -178,8 +180,10 @@ RSpec.describe Karafka::App do
       double(
         name: name,
         concurrency: concurrency,
-        redis_url: redis_url,
-        redis_namespace: redis_namespace
+        redis: {
+          url: redis_url,
+          namespace: redis_namespace
+        }
       )
     end
 
@@ -187,7 +191,6 @@ RSpec.describe Karafka::App do
       expect(subject)
         .to receive(:config)
         .and_return(config)
-        .exactly(2).times
 
       expect(Sidekiq)
         .to receive(:configure_server)
@@ -195,10 +198,7 @@ RSpec.describe Karafka::App do
 
       expect(sidekiq_config_server)
         .to receive(:redis=)
-        .with(
-          url: config.redis_url,
-          namespace: config.redis_namespace
-        )
+        .with(config.redis)
     end
 
     it { subject.send(:configure_sidekiq_server) }

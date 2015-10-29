@@ -83,23 +83,18 @@ module Karafka
       # Configure sidekiq client
       def configure_sidekiq_client
         Sidekiq.configure_client do |sidekiq_config|
-          sidekiq_config.redis = {
-            url: config.redis_url,
-            namespace: config.redis_namespace || config.name,
+          sidekiq_config.redis = config.redis.merge(
             size: config.concurrency
-          }
+          )
         end
       end
 
-      # Configure sidekiq server
+      # Configure sidekiq setorrver
       def configure_sidekiq_server
         Sidekiq.configure_server do |sidekiq_config|
           # We don't set size for the server - this will be set automatically based
           # on the Sidekiq concurrency level (Sidekiq not Karafkas)
-          sidekiq_config.redis = {
-            url: config.redis_url,
-            namespace: config.redis_namespace || config.name
-          }
+          sidekiq_config.redis = config.redis
         end
       end
     end

@@ -47,8 +47,7 @@ Karafka has following configuration options:
 |-------------------------|---------------|--------------------------------------------------------------------------------------|
 | zookeeper_hosts         | Array<String> | Zookeeper server hosts                                                               |
 | kafka_hosts             | Array<String> | Kafka server hosts                                                                   |
-| redis_url               | String        | Redis server url                                                                    |
-| redis_namespace         | String        | Redis namespace                                                                      |
+| redis                   | Hash          | Hash with Redis configuration options (url and namespace)                            |
 | worker_timeout          | Integer       | How long a task can run in Sidekiq before it will be terminated                      |
 | concurrency             | Integer       | How many threads (Celluloid actors) should we have that listen for incoming messages |
 | name                    | String        | Application name                                                                     |
@@ -60,8 +59,10 @@ class App < Karafka::App
   setup do |config|
     config.kafka_hosts = %w( 127.0.0.1:9092 127.0.0.1:9093 )
     config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
-    config.redis_url = 'redis://redis.example.com:7372/1'
-    config.redis_namespace = 'my_app_redis_namespace'
+    config.redis = {
+      url: 'redis://redis.example.com:7372/1',
+      namespace: 'my_app_redis_namespace'
+    }
     config.worker_timeout =  3600 # 1 hour
     config.concurrency = 10 # 10 threads max
     config.name = 'my_application'
@@ -230,6 +231,20 @@ end
 ## Concurrency
 
 Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to incoming connections. Since each topic and group requires a separate connection (which means that we have a connection per controller) we do this concurrently. To prevent Karafka from spawning hundred of threads (in huge application) you can specify concurency level configuration option. If this number matches (or exceeds) your controllers amount, then you will listen to all the topics simultaneously. If it is less then number of controllers, it will use a single thread to check for few topics (one after another). If this value is set to 1, it will just spawn a single thread to check all the sockets one after another.
+
+## Sidekiq Web UI
+
+Karafka comes with a Sidekiq Web UI application that can display the current state of a Sidekiq installation. If you installed Karafka using install rake task, you will have a **config.ru** file that allows you to run standalone Puma instance with a Sidekiq Web UI:
+
+```
+bundle exec rackup
+# Puma starting...
+# * Min threads: 0, max threads: 16
+# * Environment: development
+# * Listening on tcp://localhost:9292
+```
+
+You can then navigate to displayer url to check your Sidekiq status. Sidekiq Web UI by default is password protected. To check (or change) your login and password, please review **config.ru** file in your application.
 
 ## Articles and other references
 

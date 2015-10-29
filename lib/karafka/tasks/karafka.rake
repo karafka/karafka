@@ -37,6 +37,7 @@ namespace :karafka do
 
     {
       'app.rb.example' => 'app.rb',
+      'config.ru.example' => 'config.ru',
       'rakefile.rb.example' => 'rakefile.rb',
       'sidekiq.yml.example' => 'config/sidekiq.yml.example'
     }.each do |source, target|
