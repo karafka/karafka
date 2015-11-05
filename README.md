@@ -20,7 +20,7 @@ mkdir app_dir
 cd app_dir
 ```
 
-Create a Gemfile with Karafka:
+Create a **Gemfile** with Karafka:
 
 ```ruby
 'https://rubygems.org'
