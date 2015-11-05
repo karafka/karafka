@@ -22,9 +22,18 @@ cd app_dir
 
 Create a Gemfile with Karafka:
 
-```bash
-echo "source 'https://rubygems.org'" > Gemfile
-echo "gem 'karafka'" >> Gemfile
+```ruby
+'https://rubygems.org'
+
+gem 'karafka', github: 'karafka/karafka'
+```
+
+Create a **rakefile.rb** with following code:
+
+```ruby
+ENV['KARAFKA_ENV'] ||= 'development'
+
+Bundler.require(:default, ENV['KARAFKA_ENV'])
 ```
 
 Bundle afterwards
@@ -33,7 +42,7 @@ Bundle afterwards
 bundle install
 ```
 
-Execute the *karafka:install rake* task:
+Execute the *karafka:install* rake task:
 
 ```bash
 bundle exec rake karafka:install
