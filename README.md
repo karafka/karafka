@@ -23,7 +23,7 @@ cd app_dir
 Create a **Gemfile** with Karafka:
 
 ```ruby
-'https://rubygems.org'
+source 'https://rubygems.org'
 
 gem 'karafka', github: 'karafka/karafka'
 ```
