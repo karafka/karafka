@@ -3,6 +3,7 @@
 ## 0.2.0 (master)
 - Interal call - schedule naming change
 - Enqueue to perform_async naming in controller to follow Sidekiqs naming convention
+- Gem dump
 
 ## 0.1.18
 - Changed Redis configuration options into a single hash that is directly passed to Redis setup for Sidekiq
