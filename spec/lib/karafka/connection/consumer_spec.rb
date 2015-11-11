@@ -22,7 +22,7 @@ RSpec.describe Karafka::Connection::Consumer do
     let(:controller_instance) { double }
 
     context 'everything works well' do
-      it 'should route to a proper controller and call it' do
+      it 'should route to a proper controller and schedule task' do
         expect(Karafka::Connection::Message)
           .to receive(:new)
           .with(controller_class.topic, raw_message_value)
@@ -38,7 +38,7 @@ RSpec.describe Karafka::Connection::Consumer do
           .and_return(controller_instance)
 
         expect(controller_instance)
-          .to receive(:call)
+          .to receive(:schedule)
 
         subject.consume(controller_class, raw_message)
       end

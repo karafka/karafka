@@ -153,9 +153,9 @@ module Karafka
 
     # Executes the default controller flow, runs callbacks and if not halted
     # will schedule a perform task in sidekiq
-    def call
+    def schedule
       run_callbacks :call do
-        enqueue
+        perform_async
       end
     end
 
@@ -170,7 +170,7 @@ module Karafka
     end
 
     # Enqueues the execution of perform method into sidekiq worker
-    def enqueue
+    def perform_async
       Karafka.logger.info("Enqueuing #{self.class} - #{params} into #{self.class.worker}")
       self.class.worker.perform_async(params)
     end

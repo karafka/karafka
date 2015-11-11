@@ -18,7 +18,7 @@ module Karafka
           Message.new(controller.topic, message.value)
         ).build
 
-        controller.call
+        controller.schedule
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e

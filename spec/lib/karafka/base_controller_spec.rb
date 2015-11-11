@@ -171,12 +171,12 @@ RSpec.describe Karafka::BaseController do
       end
     end
 
-    describe '#call' do
+    describe '#schedule' do
       context 'when there are no callbacks' do
-        it 'should just execute enqueue' do
-          expect(subject).to receive(:enqueue)
+        it 'should just schedule via perform_async' do
+          expect(subject).to receive(:perform_async)
 
-          subject.call
+          subject.schedule
         end
       end
     end
@@ -236,7 +236,7 @@ RSpec.describe Karafka::BaseController do
         it 'should not enqueue' do
           expect(subject).not_to receive(:enqueue)
 
-          subject.call
+          subject.schedule
         end
       end
 
@@ -260,10 +260,10 @@ RSpec.describe Karafka::BaseController do
 
         let(:params) { double }
 
-        it 'should enqueue' do
-          expect(subject).to receive(:enqueue)
+        it 'should execute perform_async' do
+          expect(subject).to receive(:perform_async)
 
-          subject.call
+          subject.schedule
         end
 
         it 'enqueue perform function' do
@@ -280,7 +280,7 @@ RSpec.describe Karafka::BaseController do
             .to receive(:perform_async)
             .with(params)
 
-          subject.call
+          subject.schedule
         end
       end
     end
@@ -307,7 +307,7 @@ RSpec.describe Karafka::BaseController do
         it 'should not enqueue' do
           expect(subject).not_to receive(:enqueue)
 
-          subject.call
+          subject.schedule
         end
       end
 
@@ -329,10 +329,10 @@ RSpec.describe Karafka::BaseController do
           end.new
         end
 
-        it 'should enqueue' do
-          expect(subject).to receive(:enqueue)
+        it 'should enqueue with perform_async' do
+          expect(subject).to receive(:perform_async)
 
-          subject.call
+          subject.schedule
         end
       end
     end
