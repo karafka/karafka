@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 0.2.0 (master)
+## 0.1.19
 - Interal call - schedule naming change
 - Enqueue to perform_async naming in controller to follow Sidekiqs naming convention
 - Gem dump
