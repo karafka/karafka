@@ -270,6 +270,7 @@ You can then navigate to displayer url to check your Sidekiq status. Sidekiq Web
 
 * [Karafka – Ruby micro-framework for building Apache Kafka message-based applications](http://dev.mensfeld.pl/2015/08/karafka-ruby-micro-framework-for-building-apache-kafka-message-based-applications/)
 * [Benchmarking Karafka – how does it handle multiple TCP connections](http://dev.mensfeld.pl/2015/11/benchmarking-karafka-how-does-it-handle-multiple-tcp-connections/)
+* [Karafka – Ruby framework for building Kafka message based applications (presentation)](http://mensfeld.github.io/karafka-framework-introduction/)
 * [Karafka example application](https://github.com/karafka/karafka-example-app)
 * [Karafka Travis CI](https://travis-ci.org/karafka/karafka)
 * [Karafka Code Climate](https://codeclimate.com/github/karafka/karafka)
