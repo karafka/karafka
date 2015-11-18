@@ -1,7 +1,12 @@
 # Karafka framework changelog
 
+## 0.1.21
+- Sidekiq 4.0.1 dump
+- Gem dump
+- Added direct celluloid requirement to Karafka (removed from Sidekiq)
+
 ## 0.1.19
-- Interal call - schedule naming change
+- Internal call - schedule naming change
 - Enqueue to perform_async naming in controller to follow Sidekiqs naming convention
 - Gem dump
 
