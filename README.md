@@ -170,7 +170,7 @@ end
 
  - *parser* - Class name - name of a parser class that we want to use to parse incoming data
 
-Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. Parser needs to have a #parse method and raise ParserError when problem appears during parsing process.
+Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. Parser needs to have a #parse method and raise error that is a ::Karafka::Errors::ParserError descendant when problem appears during parsing process.
 
 ```ruby
 class TestController < Karafka::BaseController
@@ -180,7 +180,7 @@ class TestController < Karafka::BaseController
 end
 
 class XmlParser
-  class ParserError < StandardError; end
+  class ParserError < ::Karafka::Errors::ParserError; end
 
   def self.parse(message)
     Hash.from_xml(message)
@@ -189,6 +189,8 @@ class XmlParser
   end
 end
 ```
+
+Note that parsing failure won't stop the application flow. Instead, Karafka will assign the raw message inside the :message key of params. That way you can handle raw message inside the Sidekiq worker (you can implement error detection, etc - any "heavy" parsing logic can and should be implemented there).
 
 #### Controllers callbacks
 

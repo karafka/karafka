@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 0.1.22
+- Switched from custom ParserError for each parser to general catching of Karafka::Errors::ParseError and its descendants
+- Gem dump
+
 ## 0.1.21
 - Sidekiq 4.0.1 dump
 - Gem dump

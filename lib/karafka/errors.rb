@@ -4,11 +4,16 @@ module Karafka
     # Base class for all the Karafka internal errors
     class BaseError < StandardError; end
 
+    # Should be raised when we attemp to parse incoming params but parsing fails
+    #   If this error (or its descendant) is detected, we will pass the raw message
+    #   into params and proceed further
+    class ParserError < BaseError; end
+
     # Raised when router receives topic name which is not provided for any of
-    #  controllers(inherited from Karafka::BaseController)
-    # This should never happen because we listed only to topics defined in controllers
-    # but theory is not always right. If you encounter this error - please contact
-    # Karafka maintainers
+    #   controllers(inherited from Karafka::BaseController)
+    #   This should never happen because we listed only to topics defined in controllers
+    #   but theory is not always right. If you encounter this error - please contact
+    #   Karafka maintainers
     class NonMatchingTopicError < BaseError; end
 
     # Raised when we have a controller that does not have a perform method that is required

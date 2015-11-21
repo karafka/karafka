@@ -44,7 +44,8 @@ module Karafka
       # If it was not a hash, then it means that it is probably something that we should
       # try to parse
       @controller_class.parser.parse(@message.content)
-    rescue @controller_class.parser::ParserError
+      # We catch both of them, because for default JSON - we use JSON parser directly
+    rescue ::Karafka::Errors::ParserError, JSON::ParserError
       return { message: @message.content }
     end
 
