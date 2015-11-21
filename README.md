@@ -170,7 +170,7 @@ end
 
  - *parser* - Class name - name of a parser class that we want to use to parse incoming data
 
-Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. Parser needs to have a #parse class method and raise ParserError when problem appears with parsing.
+Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. Parser needs to have a #parse method and raise ParserError when problem appears during parsing process.
 
 ```ruby
 class TestController < Karafka::BaseController
