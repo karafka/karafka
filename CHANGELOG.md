@@ -1,8 +1,9 @@
 # Karafka framework changelog
 
-## 0.1.22
+## 0.2.2-head
 - Switched from custom ParserError for each parser to general catching of Karafka::Errors::ParseError and its descendants
 - Gem dump
+- Fixed #32 - now when using custom workers that does not inherit from Karafka::Workers::BaseWorker perform method is not required. Using custom workers means that the logic that would normally lie under #perform, needs to be executed directly from the worker.
 
 ## 0.1.21
 - Sidekiq 4.0.1 dump

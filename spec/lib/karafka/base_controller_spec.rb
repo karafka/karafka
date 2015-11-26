@@ -141,15 +141,31 @@ RSpec.describe Karafka::BaseController do
 
     describe 'initial exceptions' do
       context 'when perform method is not defined' do
-        subject do
-          ClassBuilder.inherit(described_class) do
-            self.group = rand
-            self.topic = rand
+        context 'but we use custom worker' do
+          subject do
+            ClassBuilder.inherit(described_class) do
+              self.group = rand
+              self.topic = rand
+              self.worker = Class.new
+            end
+          end
+
+          it 'expect not to raise an exception' do
+            expect { subject.new }.not_to raise_error
           end
         end
 
-        it 'should raise an exception' do
-          expect { subject.new }.to raise_error(Karafka::Errors::PerformMethodNotDefined)
+        context 'and we use worker built by default' do
+          subject do
+            ClassBuilder.inherit(described_class) do
+              self.group = rand
+              self.topic = rand
+            end
+          end
+
+          it 'should raise an exception' do
+            expect { subject.new }.to raise_error(Karafka::Errors::PerformMethodNotDefined)
+          end
         end
       end
 
@@ -241,8 +257,6 @@ RSpec.describe Karafka::BaseController do
       end
 
       context 'and it does not return false' do
-        let(:worker) { double }
-
         subject do
           ClassBuilder.inherit(described_class) do
             self.group = rand
@@ -272,11 +286,7 @@ RSpec.describe Karafka::BaseController do
             .and_return(params)
             .at_least(:once)
 
-          expect_any_instance_of(Karafka::Workers::Builder)
-            .to receive(:build)
-            .and_return(worker)
-
-          expect(worker)
+          expect(Karafka::Workers::BaseWorker)
             .to receive(:perform_async)
             .with(params)
 

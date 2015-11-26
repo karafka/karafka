@@ -109,11 +109,7 @@ log folder where karafka logs will be written(based on environment), rakefile.rb
 
 #### Methods and attributes for every controller
 
-Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should inherit from Karafka::BaseController.
-
-You have to define following elements in every controller:
-
- - method *perform* - method that will execute the code in a Sidekiq worker
+Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should inherit from Karafka::BaseController. If you don't want to use custom workers (and except some particular cases you shouldn't), yo need to define a #perform method that will be execute your business logic code in a Sidekiq worker
 
 ####  Optional attributes
 

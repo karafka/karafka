@@ -57,13 +57,12 @@ module Karafka
   #     end
   #   end
   #
-  # @example Create a controller with a custom Sidekiq worker assigned
+  # @example Create a controller with a custom Sidekiq worker assigned. Note that if you use
+  #   custom workers that does not inherit from Karafka::Workers::BaseWorker, perform method won't
+  #   be exucted and you need to provide your business logic in the workers execution method.
+  #
   #   class ExampleController < Karafka::BaseController
   #     self.worker = MyAppMainWorker
-  #
-  #     def perform
-  #       # some logic here
-  #     end
   #   end
   class BaseController
     include ActiveSupport::Callbacks
@@ -137,11 +136,16 @@ module Karafka
     end
 
     # @raise [Karafka::Errors::TopicNotDefined] raised if we didn't define kafka topic
-    # @raise [Karafka::Errors::PerformMethodNotDefined] raised if we
-    #   didn't define the perform method
+    # @raise [Karafka::Errors::PerformMethodNotDefined] raised if we didn't define the
+    #   perform method and we use default built worker that requires it. If one will use
+    #   custom worker, it won't be executed since the #perform logic then will be implemented
+    #   and executed outside of default flow
     def initialize
-      fail Errors::TopicNotDefined unless self.class.topic
-      fail Errors::PerformMethodNotDefined unless self.respond_to?(:perform)
+      fail Errors::TopicNotDefined unless
+        self.class.topic
+
+      fail Errors::PerformMethodNotDefined if
+        (self.class.worker <= Karafka::Workers::BaseWorker) && !respond_to?(:perform)
     end
 
     # Creates lazy loaded params object
