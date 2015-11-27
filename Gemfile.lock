@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (0.2.2.pre.head)
+    karafka (0.3.0.pre.head)
       activesupport
       celluloid
       envlogic
@@ -82,7 +82,7 @@ GEM
       activesupport
     equalizer (0.0.11)
     erubis (2.7.0)
-    faker (1.5.0)
+    faker (1.6.1)
       i18n (~> 0.5)
     fastercsv (1.5.5)
     flay (2.6.1)
@@ -184,7 +184,7 @@ GEM
       sexp_processor (~> 4.0)
     ruby_parser (3.7.2)
       sexp_processor (~> 4.1)
-    rubycritic (2.1.0)
+    rubycritic (2.2.0)
       flay (= 2.6.1)
       flog (= 4.3.2)
       parser (>= 2.2.0, < 3.0)

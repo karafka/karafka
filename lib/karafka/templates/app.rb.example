@@ -1,6 +1,8 @@
+# Additional support for lazy people that use RACK_ENV everywhere
 ENV['RACK_ENV'] ||= 'development'
 ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
 
+# Load all the gems for appropriate environment
 Bundler.require(:default, ENV['KARAFKA_ENV'])
 
 class App < Karafka::App
@@ -11,12 +13,14 @@ class App < Karafka::App
     config.concurrency = 10 # 10 listening threads
     config.name = 'app-name'
     config.redis = {
-      url: 'redis://localhost:6379/1',
-      namespace: 'redis-app-namespace'
+      url: 'redis://localhost:6379/1'
     }
   end
 end
 
+# Load all application internal code (app/, lib/, etc)
 Karafka::Loader.new.load(App.root)
 
+# Initialize all dynamically built worker classes and any other
+# elements that need to be loaded before using Karafka
 App.bootstrap

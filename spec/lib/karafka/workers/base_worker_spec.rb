@@ -20,22 +20,31 @@ RSpec.describe Karafka::Workers::BaseWorker do
     end
   end
 
-  describe '#execute' do
-    let(:args) { [rand] }
+  let(:args) { [controller.to_s, rand] }
 
+  describe '#execute' do
     before do
       expect(subject)
         .to receive(:controller)
         .and_return(controller)
     end
 
-    it 'should assign sidekiq args and perform controller action' do
+    it 'should set params and perform controller action' do
       expect(controller)
         .to receive(:perform)
 
       subject.execute(*args)
 
-      expect(subject.params).to eq args.first
+      expect(subject.params).to eq args.last
+    end
+
+    it 'should set controller_class_name and perform controller action' do
+      expect(controller)
+        .to receive(:perform)
+
+      subject.execute(*args)
+
+      expect(subject.controller_class_name).to eq args.first
     end
   end
 
@@ -57,7 +66,7 @@ RSpec.describe Karafka::Workers::BaseWorker do
         expect(controller)
           .to_not receive(:after_failure)
 
-        subject.after_failure
+        subject.after_failure(*args)
       end
     end
 
@@ -71,7 +80,7 @@ RSpec.describe Karafka::Workers::BaseWorker do
         expect(controller)
           .to receive(:after_failure)
 
-        subject.after_failure
+        subject.after_failure(*args)
       end
     end
   end
@@ -81,21 +90,26 @@ RSpec.describe Karafka::Workers::BaseWorker do
       NamedController = controller
     end
 
-    let(:params) do
-      {
-        'controller' => 'NamedController'
-      }
-    end
+    let(:params) { double }
+    let(:interchanged_parse_params) { double }
 
-    it 'should get the controller out of params and assign params as params' do
+    it 'should get controller based on controller_class_name and assign params via interchanger' do
+      expect(subject)
+        .to receive(:controller_class_name)
+        .and_return(NamedController.to_s)
+
       expect(subject)
         .to receive(:params)
         .and_return(params)
-        .exactly(2).times
+
+      expect(NamedController.interchanger)
+        .to receive(:parse)
+        .with(params)
+        .and_return(interchanged_parse_params)
 
       expect_any_instance_of(controller)
         .to receive(:params=)
-        .with(params)
+        .with(interchanged_parse_params)
 
       ctrl = subject.send(:controller)
 

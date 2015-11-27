@@ -134,6 +134,26 @@ RSpec.describe Karafka::BaseController do
         end
       end
     end
+
+    describe '#interchanger' do
+      before do
+        subject.instance_variable_set(:'@interchanger', interchanger)
+      end
+
+      context 'when interchanger is set' do
+        let(:interchanger) { rand.to_s }
+
+        it { expect(subject.interchanger).to eq interchanger }
+      end
+
+      context 'when interchanger is not set' do
+        let(:interchanger) { nil }
+
+        it 'should use a default interchanger' do
+          expect(subject.interchanger).to eq Karafka::Params::Interchanger
+        end
+      end
+    end
   end
 
   context 'instance methods and behaviours' do
@@ -202,8 +222,8 @@ RSpec.describe Karafka::BaseController do
       let(:params) { double }
 
       it 'should create params instance and assign it' do
-        expect(Karafka::Params)
-          .to receive(:new)
+        expect(Karafka::Params::Params)
+          .to receive(:build)
           .with(
             message,
             subject
@@ -217,7 +237,7 @@ RSpec.describe Karafka::BaseController do
     end
 
     describe '#params' do
-      let(:params) { Karafka::Params.new({}, subject) }
+      let(:params) { Karafka::Params::Params.build({}, subject) }
 
       before do
         subject.instance_variable_set(:@params, params)
@@ -229,6 +249,28 @@ RSpec.describe Karafka::BaseController do
           .and_return(params)
 
         expect(subject.send(:params)).to eq params
+      end
+    end
+
+    describe '#perform_async' do
+      context 'when we want to perform async stuff' do
+        let(:params) { double }
+        let(:interchanged_load_params) { double }
+
+        it 'enqueue perform function' do
+          subject.instance_variable_set :@params, params
+
+          expect(subject.class.interchanger)
+            .to receive(:load)
+            .with(params)
+            .and_return(interchanged_load_params)
+
+          expect(Karafka::Workers::BaseWorker)
+            .to receive(:perform_async)
+            .with(subject.class, interchanged_load_params)
+
+          subject.send :perform_async
+        end
       end
     end
 
@@ -276,19 +318,6 @@ RSpec.describe Karafka::BaseController do
 
         it 'should execute perform_async' do
           expect(subject).to receive(:perform_async)
-
-          subject.schedule
-        end
-
-        it 'enqueue perform function' do
-          expect(subject)
-            .to receive(:params)
-            .and_return(params)
-            .at_least(:once)
-
-          expect(Karafka::Workers::BaseWorker)
-            .to receive(:perform_async)
-            .with(params)
 
           subject.schedule
         end
