@@ -207,7 +207,7 @@ GEM
     sidekiq-glass (0.1.4)
       null-logger
       sidekiq (= 4.0.1)
-    simplecov (0.10.0)
+    simplecov (0.11.0)
       docile (~> 1.1.0)
       json (~> 1.8)
       simplecov-html (~> 0.10.0)
