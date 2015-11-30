@@ -9,11 +9,14 @@ module Karafka
     # Karafka faster, because it will pass data as it is directly to Sidekiq
     class Params < HashWithIndifferentAccess
       class << self
+        # We allow building instances only via the #build method
+        private_class_method :new
+
         # @param message [Karafka::Connection::Message, Hash] message that we get out of Kafka
         #   in case of building params inside main Karafka process in
         #   Karafka::Connection::Consumer, or a hash when we retrieve data from Sidekiq
-        # @param [Karafka::BaseController] Karafka's base controllers descendant instance that
-        #   wants to use params
+        # @param controller [Karafka::BaseController] Karafka's base controllers descendant
+        #   instance that wants to use params
         # @return [Karafka::Params::Params] Karafka params object not yet used parser for
         #   retrieving data that we've got from Kafka
         # @example Build params instance from a hash
@@ -29,15 +32,15 @@ module Karafka
             defaults(controller).merge!(
               parsed: false,
               received_at: Time.now,
-              data: message.content
+              content: message.content
             )
           end
         end
 
         private
 
-        # @param [Karafka::BaseController] Karafka's base controllers descendant instance that
-        #   wants to use params
+        # @param controller [Karafka::BaseController] Karafka's base controllers descendant
+        #   instance that wants to use params
         # @return [Karafka::Params::Params] freshly initialized only with default values object
         #   that can be populated with incoming data
         def defaults(controller)
@@ -62,21 +65,21 @@ module Karafka
         return self if self[:parsed]
 
         merge!(
-          parse(delete(:data))
+          parse(delete(:content))
         ) { |_key, base_value, _new_value| base_value }
       end
 
       private
 
-      # @param data [String] Raw data that we want to parse using controller's parser
+      # @param content [String] Raw data that we want to parse using controller's parser
       # @note If something goes wrong, it will return raw data in a hash with a message key
       # @return [Hash] parsed data or a hash with message key containing raw data if something
       #   went wrong during parsing
-      def parse(data)
-        self[:parser].parse(data)
+      def parse(content)
+        self[:parser].parse(content)
         # We catch both of them, because for default JSON - we use JSON parser directly
       rescue ::Karafka::Errors::ParserError, JSON::ParserError
-        return { message: data }
+        return { message: content }
       ensure
         self[:parsed] = true
       end

@@ -8,7 +8,7 @@ module Karafka
     #   - parse - decoded params back to a hash format that we can use
     class Interchanger
       class << self
-        # @param [Karafka::Params::Params] Karafka params object
+        # @param params [Karafka::Params::Params] Karafka params object
         # @note Params might not be parsed because of lazy loading feature. If you implement your
         #   own interchanger logic, this method needs to return data that can be converted to
         #   json with default Sidekiqs logic
@@ -18,7 +18,7 @@ module Karafka
           params
         end
 
-        # @param [Hash] Sidekiqs params that are now a Hash (after they were JSON#parse)
+        # @param params [Hash] Sidekiqs params that are now a Hash (after they were JSON#parse)
         # @note Hash is what we need to build Karafka::Params::Params, so we do nothing
         #   with it. If you implement your own interchanger logic, this method needs to return
         #   a hash with appropriate data that will be used to build Karafka::Params::Params
