@@ -25,12 +25,12 @@ RSpec.describe Karafka::Connection::Listener do
       context "when #{error} happens" do
         before do
           # Lets silence exceptions printing
-          expect(Karafka.logger)
-            .to receive(:error)
-            .exactly(2).times
+          expect(Karafka.monitor)
+            .to receive(:notice_error)
+            .with(described_class, error)
         end
 
-        it 'should log the error wthout closing the consumer' do
+        it 'should notice the error wthout closing the consumer' do
           expect(subject)
             .to receive(:queue_consumer)
             .and_raise(error.new)

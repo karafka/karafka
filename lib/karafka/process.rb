@@ -43,18 +43,18 @@ module Karafka
     # @param [Symbol] signal type that we want to catch
     def trap_signal(signal)
       trap(signal) do
-        log_signal(signal)
+        notice_signal(signal)
         (@callbacks[signal] || []).each(&:call)
       end
     end
 
-    # Logging into Karafka.logger error with signal code
+    # Informs monitoring about trapped signal
     # @param [Symbol] signal type that we received
     # @note We cannot perform logging from trap context, that's why
     #   we have to spin up a new thread to do this
-    def log_signal(signal)
+    def notice_signal(signal)
       Thread.new do
-        Karafka.logger.info("Received system signal #{signal}")
+        Karafka.monitor.notice(self.class, signal: signal)
       end
     end
   end

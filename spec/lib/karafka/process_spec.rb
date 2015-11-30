@@ -46,7 +46,7 @@ RSpec.describe Karafka::Process do
 
     it 'should trap signals, log it and run callbacks if defined' do
       expect(subject)
-        .to receive(:log_signal)
+        .to receive(:notice_signal)
         .with(signal)
 
       expect(callback)
@@ -56,18 +56,18 @@ RSpec.describe Karafka::Process do
     end
   end
 
-  describe '#log_signal' do
+  describe '#notice_signal' do
     let(:signal) { rand.to_s }
     it 'should log info with signal code into Karafka logger' do
       expect(Thread)
         .to receive(:new)
         .and_yield
 
-      expect(Karafka.logger)
-        .to receive(:info)
-        .with("Received system signal #{signal}")
+      expect(Karafka.monitor)
+        .to receive(:notice)
+        .with(described_class, signal: signal)
 
-      subject.send(:log_signal, signal)
+      subject.send(:notice_signal, signal)
     end
   end
 end

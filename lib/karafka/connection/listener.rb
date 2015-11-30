@@ -26,13 +26,15 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far
       def fetch(block)
-        Karafka.logger.info("Fetching: #{controller.topic}")
-
         # Fetch provides us with additional informations
         # It will be set to false if we couldn't clame connection
         # So if it is not claimed, we should try again with a new connection
         queue_consumer.fetch do |_partition, messages_bulk|
-          Karafka.logger.info("Received #{messages_bulk.count} messages from #{controller.topic}")
+          Karafka.monitor.notice(
+            self.class,
+            topic: controller.topic,
+            message_count: messages_bulk.count
+          )
 
           messages_bulk.each do |raw_message|
             block.call(controller, raw_message)
@@ -42,8 +44,7 @@ module Karafka
         # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
-        Karafka.logger.error("An error occur in #{self.class}")
-        Karafka.logger.error(e)
+        Karafka.monitor.notice_error(self.class, e)
       end
 
       private

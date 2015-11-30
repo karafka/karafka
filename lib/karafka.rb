@@ -28,11 +28,16 @@ module Karafka
   extend Envlogic
 
   class << self
-    attr_writer :logger
+    attr_writer :logger, :monitor
 
-    # @return [Logger] logger that we want to use
+    # @return [Logger] logger that we want to use. Will use ::Karafka::Logger by default
     def logger
       @logger ||= ::Karafka::Logger.build
+    end
+
+    # @return [::Karafka::Monitor] monitor that we want to use. Will use dummy monitor by default
+    def monitor
+      @monitor ||= ::Karafka::Monitor.instance
     end
 
     # @return [String] root path of this gem

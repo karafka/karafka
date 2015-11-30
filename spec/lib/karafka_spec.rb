@@ -20,32 +20,62 @@ RSpec.describe Karafka do
     end
   end
 
-  describe '#logger' do
-    context 'when logger is already set' do
-      let(:logger) { double }
+  describe '#monitor' do
+    context 'when monitor is already set' do
+      let(:monitor) { double }
 
       before do
-        subject.instance_variable_set(:'@logger', logger)
+        subject.instance_variable_set(:'@monitor', monitor)
       end
 
-      it 'should use logger that was defined' do
-        expect(subject.logger).to eq logger
+      it 'should use monitor that was defined' do
+        expect(subject.monitor).to eq monitor
       end
     end
 
-    context 'when logger is not provided' do
-      let(:logger) { double }
+    context 'when monitor is not provided' do
+      let(:monitor) { double }
 
       before do
-        subject.instance_variable_set(:'@logger', nil)
+        subject.instance_variable_set(:'@monitor', nil)
       end
 
-      it 'should build a default logger' do
-        expect(Karafka::Logger)
-          .to receive(:build)
-          .and_return(logger)
+      it 'should build a default monitor' do
+        expect(Karafka::Monitor)
+          .to receive(:instance)
+          .and_return(monitor)
 
-        expect(subject.logger).to eq logger
+        expect(subject.monitor).to eq monitor
+      end
+    end
+  end
+
+  describe '#monitor' do
+    context 'when monitor is already set' do
+      let(:monitor) { double }
+
+      before do
+        subject.instance_variable_set(:'@monitor', monitor)
+      end
+
+      it 'should use monitor that was defined' do
+        expect(subject.monitor).to eq monitor
+      end
+    end
+
+    context 'when monitor is not provided' do
+      let(:monitor) { double }
+
+      before do
+        subject.instance_variable_set(:'@monitor', nil)
+      end
+
+      it 'should build a default monitor' do
+        expect(Karafka::Monitor)
+          .to receive(:instance)
+          .and_return(monitor)
+
+        expect(subject.monitor).to eq monitor
       end
     end
   end

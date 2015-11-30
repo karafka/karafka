@@ -30,8 +30,7 @@ module Karafka
       # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
-        Karafka.logger.error("An error occur in #{self.class}")
-        Karafka.logger.error(e)
+        Karafka.monitor.notice_error(self.class, e)
         @listeners = nil
         retry
       end

@@ -52,16 +52,16 @@ RSpec.describe Karafka::Connection::Consumer do
           context "when #{error} happens" do
             before do
               # Lets silence exceptions printing
-              expect(Karafka.logger)
-                .to receive(:error)
-                .exactly(2).times
+              expect(Karafka.monitor)
+                .to receive(:notice_error)
+                .with(described_class, error)
 
               expect(Karafka::Routing::Router)
                 .to receive(:new)
                 .and_raise(error)
             end
 
-            it 'should log and not reraise error' do
+            it 'should notice and not reraise error' do
               expect { subject.consume(controller_class, raw_message) }.not_to raise_error
             end
           end

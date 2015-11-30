@@ -11,7 +11,7 @@ module Karafka
       def execute(controller_class_name, params)
         self.controller_class_name = controller_class_name
         self.params = params
-        Karafka.logger.info("#{self.class}#execute for #{params}")
+        Karafka.monitor.notice(self.class, params: params)
         controller.perform
       end
 
@@ -22,16 +22,9 @@ module Karafka
         self.controller_class_name = controller_class_name
         self.params = params
 
-        unless controller.respond_to?(:after_failure)
-          Karafka.logger.warn(
-            "#{self.class}#after_failure controller missing for #{params}"
-          )
-          return
-        end
+        return unless controller.respond_to?(:after_failure)
 
-        Karafka.logger.warn(
-          "#{self.class}#after_failure for #{controller_class_name} for #{params}"
-        )
+        Karafka.monitor.notice(self.class, params: params)
         controller.after_failure
       end
 

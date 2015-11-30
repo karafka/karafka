@@ -59,8 +59,7 @@ module Karafka
         close
         sleep(CLAIM_SLEEP_TIME)
       rescue *CONNECTION_CLEAR_ERRORS => e
-        Karafka.logger.info("An error occur in #{self.class}")
-        Karafka.logger.info(e)
+        Karafka.monitor.notice_error(self.class, e)
         close
       end
 
@@ -77,8 +76,7 @@ module Karafka
           max_wait_ms: MAX_WAIT_MS
         )
       rescue *CONNECTION_CLEAR_ERRORS => e
-        Karafka.logger.info("An error occur in #{self.class}")
-        Karafka.logger.info(e)
+        Karafka.monitor.notice_error(self.class, e)
         close
       end
 
@@ -90,8 +88,7 @@ module Karafka
         target.reload
         target.close
       rescue *CONNECTION_CLEAR_ERRORS => e
-        Karafka.logger.info("An error occur in #{self.class}")
-        Karafka.logger.info(e)
+        Karafka.monitor.notice_error(self.class, e)
       ensure
         @target = nil
       end

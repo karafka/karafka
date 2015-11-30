@@ -9,13 +9,13 @@ module Karafka
       # @note We catch all the errors here, to make sure that none failures
       #   for a given consumption will affect other consumed messages
       #   If we would't catch it, it would propagate up until killing the Celluloid actor
-      # @param controller [Karafka::BaseController] base controller descendant
+      # @param controller_class [Karafka::BaseController] base controller descendant class
       # @param message [Poseidon::FetchedMessage] message that was fetched by poseidon
-      def consume(controller, message)
-        Karafka.logger.info("Consuming message for #{controller}")
+      def consume(controller_class, message)
+        Karafka.monitor.notice(self.class, controller_class: controller_class)
 
         controller = Karafka::Routing::Router.new(
-          Message.new(controller.topic, message.value)
+          Message.new(controller_class.topic, message.value)
         ).build
 
         controller.schedule
@@ -23,8 +23,7 @@ module Karafka
         # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
-        Karafka.logger.error("An error occur in #{self.class}")
-        Karafka.logger.error(e)
+        Karafka.monitor.notice_error(self.class, e)
       end
     end
   end

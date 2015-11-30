@@ -152,7 +152,6 @@ module Karafka
       # @example Define a class name before_enqueue callback
       #   before_enqueue :method_name
       def before_enqueue(method_name = nil, &block)
-        Karafka.logger.debug("Defining before_enqueue filter with #{block}")
         set_callback :schedule, :before, method_name ? method_name : block
       end
     end
@@ -208,12 +207,15 @@ module Karafka
     #   parameters into it. We always pass controller class as a first argument and this request
     #   params as a second one
     def perform_async
-      # We use @params directly (instead of #params) because of lazy loading logic that is behind
-      # it. See Karafka::Params::Params class for more details about that
-      Karafka.logger.info(
-        "Enqueue #{self.class} - #{@params} to #{self.class.worker} via #{self.class.interchanger}"
+      Karafka.monitor.notice(
+        self.class,
+        params: @params,
+        worker: self.class.worker,
+        interchanger: self.class.interchanger
       )
 
+      # We use @params directly (instead of #params) because of lazy loading logic that is behind
+      # it. See Karafka::Params::Params class for more details about that
       self.class.worker.perform_async(
         self.class,
         self.class.interchanger.load(@params)
