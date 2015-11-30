@@ -21,17 +21,17 @@ module Karafka
 
       # Method which runs app
       def run
-        monitor.on_sigint do
+        process.on_sigint do
           stop!
           exit
         end
 
-        monitor.on_sigquit do
+        process.on_sigquit do
           stop!
           exit
         end
 
-        monitor.supervise do
+        process.supervise do
           Karafka::Runner.new.run
           run!
           sleep
@@ -68,9 +68,9 @@ module Karafka
 
       private
 
-      # @return [Karafka::Monitor] monitor instance used to catch system signal calls
-      def monitor
-        Karafka::Monitor.instance
+      # @return [Karafka::Process] process wrapper instance used to catch system signal calls
+      def process
+        Karafka::Process.instance
       end
 
       # Everything that should be initialized after the setup

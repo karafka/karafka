@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Monitor do
+RSpec.describe Karafka::Process do
   subject { described_class.instance }
 
   described_class::HANDLED_SIGNALS.each do |signal|

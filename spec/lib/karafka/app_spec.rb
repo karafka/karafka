@@ -29,28 +29,28 @@ RSpec.describe Karafka::App do
       expect_any_instance_of(Karafka::Runner)
         .to receive(:run)
 
-      expect(Karafka::Monitor.instance)
+      expect(Karafka::Process.instance)
         .to receive(:supervise)
         .and_yield
 
-      expect(Karafka::Monitor.instance)
+      expect(Karafka::Process.instance)
         .to receive(:on_sigint)
 
-      expect(Karafka::Monitor.instance)
+      expect(Karafka::Process.instance)
         .to receive(:on_sigquit)
 
       subject.run
     end
 
     it 'should define a proper action for sigint' do
-      expect(Karafka::Monitor.instance)
+      expect(Karafka::Process.instance)
         .to receive(:supervise)
 
-      expect(Karafka::Monitor.instance)
+      expect(Karafka::Process.instance)
         .to receive(:on_sigint)
         .and_yield
 
-      expect(Karafka::Monitor.instance)
+      expect(Karafka::Process.instance)
         .to receive(:on_sigquit)
 
       expect(subject)
@@ -63,13 +63,13 @@ RSpec.describe Karafka::App do
     end
 
     it 'should define a proper action for sigquit' do
-      expect(Karafka::Monitor.instance)
+      expect(Karafka::Process.instance)
         .to receive(:supervise)
 
-      expect(Karafka::Monitor.instance)
+      expect(Karafka::Process.instance)
         .to receive(:on_sigint)
 
-      expect(Karafka::Monitor.instance)
+      expect(Karafka::Process.instance)
         .to receive(:on_sigquit)
         .and_yield
 
@@ -204,8 +204,8 @@ RSpec.describe Karafka::App do
     it { subject.send(:configure_sidekiq_server) }
   end
 
-  describe '#monitor' do
-    it { expect(subject.send(:monitor)).to be_a Karafka::Monitor }
+  describe '#process' do
+    it { expect(subject.send(:process)).to be_a Karafka::Process }
   end
 
   describe 'Karafka delegations' do

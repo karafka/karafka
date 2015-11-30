@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (0.3.0.pre.head)
+    karafka (0.3.1.pre.head)
       activesupport
       celluloid
       envlogic
@@ -66,6 +66,8 @@ GEM
       timers (>= 4.1.1)
     celluloid-supervision (0.20.5)
       timers (>= 4.1.1)
+    codeclimate-engine-rb (0.1.0)
+      virtus (~> 1.0)
     coderay (1.1.0)
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
@@ -153,7 +155,8 @@ GEM
     rainbow (2.0.0)
     rake (10.4.2)
     redis (3.2.2)
-    reek (3.6.0)
+    reek (3.7.1)
+      codeclimate-engine-rb (~> 0.1.0)
       parser (~> 2.2, >= 2.2.2.5)
       private_attr (~> 1.1)
       rainbow (~> 2.0)
@@ -184,11 +187,11 @@ GEM
       sexp_processor (~> 4.0)
     ruby_parser (3.7.2)
       sexp_processor (~> 4.1)
-    rubycritic (2.2.0)
+    rubycritic (2.3.0)
       flay (= 2.6.1)
       flog (= 4.3.2)
       parser (>= 2.2.0, < 3.0)
-      reek (= 3.6.0)
+      reek (= 3.7.1)
       virtus (~> 1.0)
     safe_yaml (1.0.4)
     sass (3.4.19)

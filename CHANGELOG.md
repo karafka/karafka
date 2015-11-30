@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.3.1-head
+- Renamed Karafka::Monitor to Karafka::Process to represent a Karafka process wrapper
+
 ## 0.3.0
 - Switched from custom ParserError for each parser to general catching of Karafka::Errors::ParseError and its descendants
 - Gem dump

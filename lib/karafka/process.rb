@@ -1,7 +1,7 @@
 module Karafka
   # Class used to catch signals from ruby Signal class in order to manage Karafka shutdown
-  # @note There might be only one monitor - this class is a singleton
-  class Monitor
+  # @note There might be only one process - this class is a singleton
+  class Process
     include Singleton
 
     # Signal types that we handle
@@ -14,7 +14,7 @@ module Karafka
       # to Karafka server instance
       # @note It does not define the callback itself -it needs to be passed in a block
       # @example Define an action that should be taken on_sigint
-      #   monitor.on_sigint do
+      #   process.on_sigint do
       #     Karafka.logger.info('Log something here')
       #     exit
       #   end
@@ -23,7 +23,7 @@ module Karafka
       end
     end
 
-    # Creates an instance of monitor and creates empty hash for callbacks
+    # Creates an instance of process and creates empty hash for callbacks
     def initialize
       @callbacks = {}
       HANDLED_SIGNALS.each { |signal| @callbacks[signal] = [] }
