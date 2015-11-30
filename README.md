@@ -113,7 +113,7 @@ Now, to have ability to receive messages you should define controllers in app/co
 
 ####  Optional attributes
 
-Karafka controller has four optional attributes: **topic**, **group**, **parser** and **worker**.
+Karafka controller has four optional attributes: **topic**, **group**, **parser**, **worker** and **interchanger**.
 
 ##### Karafka controller topic
 
@@ -162,6 +162,13 @@ class TestController < Karafka::BaseController
 end
 ```
 
+Custom workers need to provide a **#perform_async** method. It needs to accept two arguments:
+
+ - *controller class* - first argument is a current controller class (controller that schedules the job)
+ - *params* - all the params that came from Kafka + additional metadata. This data format might be changed if you use custom interchangers. Otherwise it will be an instance of Karafka::Params::Params
+
+Keep in mind, that params might be in two states: parsed or unparsed when passed to #perform_async. This means, that if you use custom interchangers and/or custom workers, you might want to look into Karafka's sources to see exactly how it works.
+
 ##### Karafka controller custom parser
 
  - *parser* - Class name - name of a parser class that we want to use to parse incoming data
@@ -187,6 +194,32 @@ end
 ```
 
 Note that parsing failure won't stop the application flow. Instead, Karafka will assign the raw message inside the :message key of params. That way you can handle raw message inside the Sidekiq worker (you can implement error detection, etc - any "heavy" parsing logic can and should be implemented there).
+
+##### Karafka controller custom interchanger
+
+ - *interchanger* - Class name - name of a interchanger class that we want to use to format data that we put/fetch into/from #perform_async.
+
+Custom interchangers target issues with non-standard (binary, etc) data that we want to store when we do #perform_async. This data might be corrupted when fetched in a worker (see [this](https://github.com/karafka/karafka/issues/30) issue). With custom interchangers, you can encode/compress data before it is being passed to scheduling and decode/decompress it when it gets into the worker.
+
+**Warning**: if you decide to use slow interchangers, they might significantly slow down Karafka.
+
+```ruby
+class TestController < Karafka::BaseController
+  self.interchanger = Base64Interchanger
+end
+
+class Base64Interchanger
+  class << self
+    def load(params)
+      Base64.encode64(Marshal.dump(params))
+    end
+
+    def parse(params)
+      Marshal.load(Base64.decode64(params))
+    end
+  end
+end
+```
 
 #### Controllers callbacks
 

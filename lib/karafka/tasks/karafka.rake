@@ -19,7 +19,7 @@ namespace :karafka do
     puts("Zookeeper hosts: #{Karafka::App.config.zookeeper_hosts}")
     cmd = "bundle exec sidekiq -e #{Karafka.env} -r #{require_file} -C #{config_file}"
     puts(cmd)
-    system (cmd)
+    system(cmd)
   end
 
   desc 'Creates whole minimal app structure'

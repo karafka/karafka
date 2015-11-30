@@ -16,6 +16,7 @@
   active_support/inflector
   karafka/loader
   karafka/status
+  base64
 ).each { |lib| require lib }
 
 # The Poseidon socket timeout is 10, so we give it a bit more time to shutdown after
