@@ -21,9 +21,9 @@ module Karafka
 
       # Method which runs app
       def run
-        process.on_sigint(&method(:on_shutdown))
-        process.on_sigquit(&method(:on_shutdown))
-        process.supervise(&method(:on_supervised_run))
+        bind_on_sigint
+        bind_on_sigquit
+        start_supervised
       end
 
       # Sets up the whole configuration
@@ -56,22 +56,34 @@ module Karafka
 
       private
 
+      # What should happen when we decide to quit with sigint
+      def bind_on_sigint
+        process.on_sigint do
+          stop!
+          exit
+        end
+      end
+
+      # What should happen when we decide to quit with sigquit
+      def bind_on_sigquit
+        process.on_sigquit do
+          stop!
+          exit
+        end
+      end
+
+      # Starts Karafka with a supervision
+      def start_supervised
+        process.supervise do
+          Karafka::Runner.new.run
+          run!
+          sleep
+        end
+      end
+
       # @return [Karafka::Process] process wrapper instance used to catch system signal calls
       def process
         Karafka::Process.instance
-      end
-
-      # What code should be executed in supervised run (what should be supervised)
-      def on_supervised_run
-        Karafka::Runner.new.run
-        run!
-        sleep
-      end
-
-      # That should happen when we decide to close Karafka instance
-      def on_shutdown
-        stop!
-        exit
       end
 
       # Everything that should be initialized after the setup
