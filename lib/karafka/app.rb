@@ -21,15 +21,8 @@ module Karafka
 
       # Method which runs app
       def run
-        process.on_sigint do
-          stop!
-          exit
-        end
-
-        process.on_sigquit do
-          stop!
-          exit
-        end
+        process.on_sigint(&method(:on_shutdown))
+        process.on_sigquit(&method(:on_shutdown))
 
         process.supervise do
           Karafka::Runner.new.run
@@ -59,7 +52,7 @@ module Karafka
 
       # Methods that should be delegated to Karafka module
       %i(
-        root env logger
+        root env logger monitor
       ).each do |delegated|
         define_method(delegated) do
           Karafka.public_send(delegated)
@@ -67,6 +60,12 @@ module Karafka
       end
 
       private
+
+      # That should happen when we decide to close Karafka instance
+      def on_shutdown
+        stop!
+        exit
+      end
 
       # @return [Karafka::Process] process wrapper instance used to catch system signal calls
       def process

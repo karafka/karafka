@@ -7,8 +7,8 @@ module Karafka
         cluster.async.fetch_loop(consumer)
       end
     rescue => e
+      Karafka.monitor.notice_error(self.class, e)
       Karafka::App.stop!
-      Karafka.logger.fatal(e)
       raise e
     end
 

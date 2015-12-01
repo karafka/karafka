@@ -34,22 +34,23 @@ RSpec.describe Karafka::Runner do
     end
 
     context 'when something goes wrong internaly' do
-      let(:exception) { StandardError }
+      let(:error) { StandardError }
 
       before do
         expect(subject)
           .to receive(:clusters)
-          .and_raise(exception)
+          .and_raise(error)
       end
 
       it 'should stop the app and reraise' do
         expect(Karafka::App)
           .to receive(:stop!)
 
-        expect(Karafka.logger)
-          .to receive(:fatal)
+        expect(Karafka.monitor)
+          .to receive(:notice_error)
+          .with(described_class, error)
 
-        expect { subject.run }.to raise_error(exception)
+        expect { subject.run }.to raise_error(error)
       end
     end
   end

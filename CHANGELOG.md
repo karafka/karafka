@@ -1,7 +1,11 @@
 # Karafka framework changelog
 
-## 0.3.1-head
+## 0.3.1
 - Renamed Karafka::Monitor to Karafka::Process to represent a Karafka process wrapper
+- Added Karafka::Monitoring that allows to add custom logging and monitoring with external libraries and systems
+- Moved logging functionality into Karafka::Monitoring default monitoring
+- Added possibility to provide own monitoring as long as in responds to #notice and #notice_error
+- Standarized logging format for all logs
 
 ## 0.3.0
 - Switched from custom ParserError for each parser to general catching of Karafka::Errors::ParseError and its descendants

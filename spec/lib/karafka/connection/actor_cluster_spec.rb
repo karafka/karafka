@@ -81,10 +81,10 @@ RSpec.describe Karafka::Connection::ActorCluster do
           .and_return(true, false)
       end
 
-      it 'should log it and retry' do
-        expect(Karafka.logger)
-          .to receive(:error)
-          .exactly(2).times
+      it 'should notice it and retry' do
+        expect(Karafka.monitor)
+          .to receive(:notice_error)
+          .with(described_class, StandardError)
 
         subject.fetch_loop(block)
       end
