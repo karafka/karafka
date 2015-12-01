@@ -5,6 +5,32 @@
 
 Microframework used to simplify Apache Kafka based Ruby applications development.
 
+## Table of Contents
+
+  - [Table of Contents](#user-content-table-of-contents)
+  - [How does it work](#user-content-how-does-it-work)
+  - [Installation](#user-content-installation)
+  - [Setup](#user-content-setup)
+  - [Rake tasks](#user-content-rake-tasks)
+  - [Usage](#user-content-usage)
+    - [Sending messages from Karafka](#user-content-sending-messages-from-karafka)
+    - [Receiving messages](#user-content-receiving-messages)
+      - [Methods and attributes for every controller](#user-content-methods-and-attributes-for-every-controller)
+      - [Optional attributes](#user-content-optional-attributes)
+        - [Karafka controller topic](#user-content-karafka-controller-topic)
+        - [Karafka controller group](#user-content-karafka-controller-group)
+        - [Karafka controller custom worker](#user-content-karafka-controller-custom-worker)
+        - [Karafka controller custom parser](#user-content-karafka-controller-custom-parser)
+        - [Karafka controller custom interchanger](#user-content-karafka-controller-custom-interchanger)
+      - [Controllers callbacks](#user-content-controllers-callbacks)
+  - [Monitoring and logging](#user-content-monitoring-and-logging)
+  - [Concurrency](#user-content-concurrency)
+  - [Sidekiq Web UI](#user-content-sidekiq-web-ui)
+  - [Articles and other references](#user-content-articles-and-other-references)
+    - [Libraries and components](#user-content-libraries-and-components)
+    - [Articles and references](#user-content-articles-and-references)
+  - [Note on Patches/Pull Requests](#user-content-note-on-patchespull-requests)
+
 ## How does it work
 
 Karafka is a microframework to work easier with Apache Kafka incoming messages.
@@ -267,6 +293,19 @@ Presented example controller will accept incoming messages from a Kafka topic na
    end
 end
 ```
+
+### Monitoring and logging
+
+Karafka provides a simple monitor (Karafka::Monitor) with a really small API. You can use it to develop your own monitoring system (using for example NewRelic). By default, the only thing that is hooked up to this monitoring is a Karafka logger (Karafka::Logger). It is based on a standard [Ruby logger](http://ruby-doc.org/stdlib-2.2.3/libdoc/logger/rdoc/Logger.html).
+
+To change monitor or a logger, you can just simply replace them:
+
+```ruby
+Karafka.monitor = CustomMonitor.new
+Karafka.logger = CustomLogger.new
+```
+
+Keep in mind, that if you replace monitor with a custom one, you will have to implement logging as well. It is because monitoring is used for both monitoring and logging and a default monitor handles logging as well.
 
 ## Concurrency
 

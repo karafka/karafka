@@ -12,8 +12,8 @@ module Karafka
 
     # This method is executed in many important places in the code (during data flow), like
     # the moment before #perform_async, etc. For full list just grep for 'monitor.notice'
-    # @param [Class] class of object that executed this call
-    # @param [Hash] hash with options that we passed to notice. It differs depent of who
+    # @param caller_class [Class] class of object that executed this call
+    # @param options [Hash] hash with options that we passed to notice. It differs depent of who
     #   and when is calling
     # @note We don't provide a name of method in which this was called, because we can take
     #   it directly from Ruby (see #caller_label method of this class for more details)
@@ -25,8 +25,8 @@ module Karafka
 
     # This method is executed when we want to notify about an error that happened somewhere
     # in the system
-    # @param [Class] class of object that executed this call
-    # @param [Exception] exception that was raised
+    # @param caller_class [Class] class of object that executed this call
+    # @param e [Exception] exception that was raised
     # @note We don't provide a name of method in which this was called, because we can take
     #   it directly from Ruby (see #caller_label method of this class for more details)
     # @example Notify about error
