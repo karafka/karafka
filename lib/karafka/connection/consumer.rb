@@ -12,11 +12,14 @@ module Karafka
       # @param controller_class [Karafka::BaseController] base controller descendant class
       # @param message [Poseidon::FetchedMessage] message that was fetched by poseidon
       def consume(controller_class, message)
-        Karafka.monitor.notice(self.class, controller_class: controller_class)
-
         controller = Karafka::Routing::Router.new(
           Message.new(controller_class.topic, message.value)
         ).build
+
+        Karafka.monitor.notice(
+          self.class,
+          controller_class: controller_class
+        )
 
         controller.schedule
         # This is on purpose - see the notes for this method
