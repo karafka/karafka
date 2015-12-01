@@ -23,17 +23,7 @@ module Karafka
       def run
         process.on_sigint(&method(:on_shutdown))
         process.on_sigquit(&method(:on_shutdown))
-
-        process.supervise do
-          Karafka::Runner.new.run
-          run!
-          sleep
-        end
-      end
-
-      # @return [Karafka::Config] config instance
-      def config
-        Config.config
+        process.supervise(&method(:on_supervised_run))
       end
 
       # Sets up the whole configuration
@@ -42,6 +32,11 @@ module Karafka
         Config.setup(&block)
 
         after_setup
+      end
+
+      # @return [Karafka::Config] config instance
+      def config
+        Config.config
       end
 
       Status.instance_methods(false).each do |delegated|
@@ -61,15 +56,22 @@ module Karafka
 
       private
 
+      # @return [Karafka::Process] process wrapper instance used to catch system signal calls
+      def process
+        Karafka::Process.instance
+      end
+
+      # What code should be executed in supervised run (what should be supervised)
+      def on_supervised_run
+        Karafka::Runner.new.run
+        run!
+        sleep
+      end
+
       # That should happen when we decide to close Karafka instance
       def on_shutdown
         stop!
         exit
-      end
-
-      # @return [Karafka::Process] process wrapper instance used to catch system signal calls
-      def process
-        Karafka::Process.instance
       end
 
       # Everything that should be initialized after the setup
