@@ -24,6 +24,7 @@ Microframework used to simplify Apache Kafka based Ruby applications development
         - [Karafka controller custom interchanger](#user-content-karafka-controller-custom-interchanger)
       - [Controllers callbacks](#user-content-controllers-callbacks)
   - [Monitoring and logging](#user-content-monitoring-and-logging)
+    - [Example monitor with NewRelic and Errbit support](#user-content-example-monitor-with-newrelic-and-errbit-support)
   - [Concurrency](#user-content-concurrency)
   - [Sidekiq Web UI](#user-content-sidekiq-web-ui)
   - [Articles and other references](#user-content-articles-and-other-references)
@@ -306,6 +307,45 @@ Karafka.logger = CustomLogger.new
 ```
 
 Keep in mind, that if you replace monitor with a custom one, you will have to implement logging as well. It is because monitoring is used for both monitoring and logging and a default monitor handles logging as well.
+
+#### Example monitor with NewRelic and Errbit support
+
+Here's a simple example of monitor that is used to both handle error loging with Errbit and sending custom metrics about Karafka into NewRelic. It will send metrics with information about amount of processed messages per topic and how many of them were scheduled to be performed async.
+
+```ruby
+class AppMonitor < Karafka::Monitor
+  def notice(caller_class, options = {})
+    super
+    action = :"notice_#{caller_label}"
+    return unless respond_to?(action, true)
+    send(action, caller_class, options)
+  end
+
+  def notice_error(caller_class, e)
+    super
+    Airbrake.notify_or_ignore(e)
+    NewRelic::Agent.notice_error(e)
+  end
+
+  private
+
+  def notice_consume(_caller_class, options)
+    record_count metric_key(options[:controller_class], __method__)
+  end
+
+  def notice_perform_async(caller_class, _options)
+    record_count metric_key(caller_class, __method__)
+  end
+
+  def metric_key(caller_class, method_name)
+    "Custom/#{caller_class.topic}/#{method_name}"
+  end
+
+  def record_count(key)
+    NewRelic::Agent.record_metric(key, count: 1)
+  end
+end
+```
 
 ## Concurrency
 
