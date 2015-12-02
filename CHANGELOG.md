@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.3.2
+- Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix
+
 ## 0.3.1
 - Renamed Karafka::Monitor to Karafka::Process to represent a Karafka process wrapper
 - Added Karafka::Monitoring that allows to add custom logging and monitoring with external libraries and systems

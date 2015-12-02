@@ -174,4 +174,52 @@ RSpec.describe Karafka::Params::Params do
       end
     end
   end
+
+  describe '#merge!' do
+    subject { described_class.send(:new, base) }
+
+    context 'string based params merge with string key' do
+      let(:initial_value) { rand }
+      let(:key) { rand.to_s }
+      let(:base) { { key => initial_value } }
+
+      it 'expect to keep initial values' do
+        subject.merge!(key => rand)
+        expect(subject[key]).to eq initial_value
+      end
+    end
+
+    context 'string based params merge with symbol key' do
+      let(:initial_value) { rand }
+      let(:key) { rand.to_s }
+      let(:base) { { key => initial_value } }
+
+      it 'expect to keep initial values' do
+        subject.merge!(key.to_sym => rand)
+        expect(subject[key]).to eq initial_value
+      end
+    end
+
+    context 'symbol based params merge with symbol key' do
+      let(:initial_value) { rand }
+      let(:key) { rand.to_s.to_sym }
+      let(:base) { { key => initial_value } }
+
+      it 'expect to keep initial values' do
+        subject.merge!(key.to_sym => rand)
+        expect(subject[key]).to eq initial_value
+      end
+    end
+
+    context 'symbol based params merge with string key' do
+      let(:initial_value) { rand }
+      let(:key) { rand.to_s.to_sym }
+      let(:base) { { key.to_s => initial_value } }
+
+      it 'expect to keep initial values' do
+        subject.merge!(key.to_sym => rand)
+        expect(subject[key]).to eq initial_value
+      end
+    end
+  end
 end

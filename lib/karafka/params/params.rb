@@ -64,9 +64,24 @@ module Karafka
       def fetch
         return self if self[:parsed]
 
-        merge!(
-          parse(delete(:content))
-        ) { |_key, base_value, _new_value| base_value }
+        merge!(parse(delete(:content)))
+      end
+
+      # Overwritten merge! method - it behaves differently for keys that are the same in our hash
+      #  and in a other_hash - it will not replace keys that are the same in our hash
+      #  and in the other one
+      # @param other_hash [Hash, HashWithIndifferentAccess] hash that we want to merge into current
+      # @return [Karafka::Params::Params] our parameters hash with merged values
+      # @example Merge with hash without same keys
+      #   new(a: 1, b: 2).merge!(c: 3) #=> { a: 1, b: 2, c: 3 }
+      # @example Merge with hash with same keys (symbol based)
+      #   new(a: 1).merge!(a: 2) #=> { a: 1 }
+      # @example Merge with hash with same keys (string based)
+      #   new(a: 1).merge!('a' => 2) #=> { a: 1 }
+      # @example Merge with hash with same keys (current string based)
+      #   new('a' => 1).merge!(a: 2) #=> { a: 1 }
+      def merge!(other_hash)
+        super(other_hash) { |_key, base_value, _new_value| base_value }
       end
 
       private
