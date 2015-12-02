@@ -24,7 +24,8 @@ Microframework used to simplify Apache Kafka based Ruby applications development
         - [Karafka controller custom interchanger](#user-content-karafka-controller-custom-interchanger)
       - [Controllers callbacks](#user-content-controllers-callbacks)
   - [Monitoring and logging](#user-content-monitoring-and-logging)
-    - [Example monitor with NewRelic and Errbit support](#user-content-example-monitor-with-newrelic-and-errbit-support)
+    - [Example monitor with Errbit support](#user-content-example-monitor-with-errbitairbrake-support)
+    - [Example monitor with NewRelic support](#user-content-example-monitor-with-newrelic-support)
   - [Concurrency](#user-content-concurrency)
   - [Sidekiq Web UI](#user-content-sidekiq-web-ui)
   - [Articles and other references](#user-content-articles-and-other-references)
@@ -308,9 +309,22 @@ Karafka.logger = CustomLogger.new
 
 Keep in mind, that if you replace monitor with a custom one, you will have to implement logging as well. It is because monitoring is used for both monitoring and logging and a default monitor handles logging as well.
 
-#### Example monitor with NewRelic and Errbit support
+#### Example monitor with Errbit/Airbrake support
 
-Here's a simple example of monitor that is used to both handle error loging with Errbit and sending custom metrics about Karafka into NewRelic. It will send metrics with information about amount of processed messages per topic and how many of them were scheduled to be performed async.
+Here's a simple example of monitor that is used to handle errors logging into Airbrake/Errbit.
+
+```ruby
+class AppMonitor < Karafka::Monitor
+  def notice_error(caller_class, e)
+    super
+    Airbrake.notify_or_ignore(e)
+  end
+end
+```
+
+#### Example monitor with NewRelic support
+
+Here's a simple example of monitor that is used to handle events and errors logging into NewRelic. It will send metrics with information about amount of processed messages per topic and how many of them were scheduled to be performed async.
 
 ```ruby
 class AppMonitor < Karafka::Monitor
@@ -323,7 +337,6 @@ class AppMonitor < Karafka::Monitor
 
   def notice_error(caller_class, e)
     super
-    Airbrake.notify_or_ignore(e)
     NewRelic::Agent.notice_error(e)
   end
 
