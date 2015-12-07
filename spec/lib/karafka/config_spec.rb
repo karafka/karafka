@@ -34,6 +34,9 @@ RSpec.describe Karafka::Config do
         .with(instance)
 
       expect(instance)
+        .to receive(:setup_components)
+
+      expect(instance)
         .to receive(:freeze)
     end
 
@@ -42,5 +45,27 @@ RSpec.describe Karafka::Config do
     end
 
     it { subject.setup(&block) }
+  end
+end
+
+RSpec.describe Karafka::Config do
+  subject { described_class.new }
+
+  describe '#setup_components' do
+    it 'expect to take descendants of BaseConfigurator and run setuo on each' do
+      Karafka::Configurators::Base.descendants.each do |descendant_class|
+        config = double
+
+        expect(descendant_class)
+          .to receive(:new)
+          .with(subject)
+          .and_return(config)
+
+        expect(config)
+          .to receive(:setup)
+      end
+
+      subject.send :setup_components
+    end
   end
 end

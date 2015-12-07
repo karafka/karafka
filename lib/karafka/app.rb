@@ -30,8 +30,6 @@ module Karafka
       # @param [Block] block configuration block
       def setup(&block)
         Config.setup(&block)
-
-        after_setup
       end
 
       # @return [Karafka::Config] config instance
@@ -56,6 +54,11 @@ module Karafka
 
       private
 
+      # @return [Karafka::Process] process wrapper instance used to catch system signal calls
+      def process
+        Karafka::Process.instance
+      end
+
       # What should happen when we decide to quit with sigint
       def bind_on_sigint
         process.on_sigint do
@@ -78,36 +81,6 @@ module Karafka
           Karafka::Runner.new.run
           run!
           sleep
-        end
-      end
-
-      # @return [Karafka::Process] process wrapper instance used to catch system signal calls
-      def process
-        Karafka::Process.instance
-      end
-
-      # Everything that should be initialized after the setup
-      def after_setup
-        Celluloid.logger = Karafka.logger
-        configure_sidekiq_client
-        configure_sidekiq_server
-      end
-
-      # Configure sidekiq client
-      def configure_sidekiq_client
-        Sidekiq.configure_client do |sidekiq_config|
-          sidekiq_config.redis = config.redis.merge(
-            size: config.concurrency
-          )
-        end
-      end
-
-      # Configure sidekiq setorrver
-      def configure_sidekiq_server
-        Sidekiq.configure_server do |sidekiq_config|
-          # We don't set size for the server - this will be set automatically based
-          # on the Sidekiq concurrency level (Sidekiq not Karafkas)
-          sidekiq_config.redis = config.redis
         end
       end
     end

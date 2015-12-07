@@ -1,5 +1,9 @@
 module Karafka
-  # Configurator for setting up delivery details
+  # Configurator for setting up all the Karafka framework details that are required to make it work
+  # @note If you want to do some configurations after all of this is done, please add to
+  #   karafka/config a proper file (needs to inherit from Karafka::Config::BaseComponent) after
+  #   that everything will happen automatically
+  # @see Karafka::Config::BaseComponent for more details about configurators api
   class Config
     class << self
       attr_accessor :config
@@ -24,12 +28,28 @@ module Karafka
       attr_accessor attr_name
     end
 
-    # Configurating method
-    def self.setup(&block)
-      self.config ||= new
+    class << self
+      # Configurating method
+      def setup(&block)
+        self.config ||= new
 
-      block.call(config)
-      config.freeze
+        block.call(config)
+        # This is a class method and we don't want to make setup_components
+        # public but we still want to invoke it here
+        config.send :setup_components
+        config.freeze
+      end
+    end
+
+    private
+
+    # Everything that should be initialized after the setup
+    # Components are in karafka/config directory and are all loaded one by one
+    # If you want to configure a next component, please add a proper file to config dir
+    def setup_components
+      Configurators::Base.descendants.each do |klass|
+        klass.new(self).setup
+      end
     end
   end
 end
