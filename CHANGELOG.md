@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 0.3.3-head
+- Refactoring of config logic to simplify adding new dependencies that need to be configured based on #setup data
+- Gem dump
+
 ## 0.3.2
 - Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix
 

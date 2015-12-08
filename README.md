@@ -109,6 +109,20 @@ end
 
 Note: You can use any library like [Settingslogic](https://github.com/binarylogic/settingslogic) to handle your application configuration.
 
+If you want to do some configurations after all of this is done, please add to config directory a proper file (needs to inherit from Karafka::Config::Base and implement setup method) after that everything will happen automatically.
+
+Example configuration class:
+
+```ruby
+class ExampleConfigurator < Base
+  def setup
+    ExampleClass.logger = Karafka.logger
+    ExampleClass.redis = config.redis
+  end
+end
+```
+
+
 ## Rake tasks
 
 Karafka provides following rake tasks:

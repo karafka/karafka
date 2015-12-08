@@ -74,6 +74,7 @@ module Karafka
   #     end
   #   end
   class BaseController
+    extend ActiveSupport::DescendantsTracker
     include ActiveSupport::Callbacks
 
     # The schedule method is wrapped with a set of callbacks
