@@ -115,10 +115,10 @@ Example configuration class:
 
 ```ruby
 class ExampleConfigurator < Base
- def setup
-   ExampleClass.logger = Karafka.logger
-   ExampleClass.redis = config.redis
- end
+  def setup
+    ExampleClass.logger = Karafka.logger
+    ExampleClass.redis = config.redis
+  end
 end
 ```
 
