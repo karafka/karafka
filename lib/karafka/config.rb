@@ -1,9 +1,9 @@
 module Karafka
   # Configurator for setting up all the Karafka framework details that are required to make it work
   # @note If you want to do some configurations after all of this is done, please add to
-  #   karafka/config a proper file (needs to inherit from Karafka::Config::BaseComponent) after
-  #   that everything will happen automatically
-  # @see Karafka::Config::BaseComponent for more details about configurators api
+  #   karafka/config a proper file (needs to inherit from Karafka::Config::Base
+  #   and implement setup method) after that everything will happen automatically
+  # @see Karafka::Config::Base for more details about configurators api
   class Config
     class << self
       attr_accessor :config
