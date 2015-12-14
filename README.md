@@ -11,6 +11,9 @@ Microframework used to simplify Apache Kafka based Ruby applications development
   - [How does it work](#user-content-how-does-it-work)
   - [Installation](#user-content-installation)
   - [Setup](#user-content-setup)
+    - [Karafka](#user-content-karafka)
+    - [WaterDrop](#user-content-waterdrop)
+    - [Configurators](#user-content-configurators)
   - [Rake tasks](#user-content-rake-tasks)
   - [Usage](#user-content-usage)
     - [Sending messages from Karafka](#user-content-sending-messages-from-karafka)
@@ -109,7 +112,7 @@ end
 
 Note: You can use any library like [Settingslogic](https://github.com/binarylogic/settingslogic) to handle your application configuration.
 
-### Waterdrop
+### WaterDrop
 
 Karafka contains WaterDrop which is used to send messages to Kafka in a standard and in an aspect way.
 Default configuration for WaterDrop:
