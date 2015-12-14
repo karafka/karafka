@@ -18,7 +18,7 @@ module Karafka
       app/workers
       app/controllers
       app/aspects
-      app/**
+      app
     )
 
     # @return [Integer] order for sorting

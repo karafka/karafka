@@ -3,6 +3,7 @@
   rubygems
   bundler
   celluloid/current
+  waterdrop
   pathname
   timeout
   logger
