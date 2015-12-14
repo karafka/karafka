@@ -11,7 +11,7 @@ Microframework used to simplify Apache Kafka based Ruby applications development
   - [How does it work](#user-content-how-does-it-work)
   - [Installation](#user-content-installation)
   - [Setup](#user-content-setup)
-    - [Karafka](#user-content-application)
+    - [Application](#user-content-application)
     - [WaterDrop](#user-content-waterdrop)
     - [Configurators](#user-content-configurators)
   - [Rake tasks](#user-content-rake-tasks)
