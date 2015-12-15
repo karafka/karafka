@@ -11,6 +11,7 @@ PATH
       sidekiq
       sidekiq-glass
       sinatra
+      waterdrop
 
 GEM
   remote: https://rubygems.org/
@@ -28,6 +29,7 @@ GEM
     adamantium (0.2.0)
       ice_nine (~> 0.11.0)
       memoizable (~> 0.4.0)
+    aspector (0.14.0)
     ast (2.1.0)
     astrolabe (1.3.1)
       parser (~> 2.2)
@@ -247,6 +249,13 @@ GEM
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
+    waterdrop (0.1.13)
+      aspector
+      bundler
+      connection_pool
+      null-logger
+      poseidon
+      rake
     yard (0.8.7.6)
     zk (1.9.6)
       zookeeper (~> 1.4.0)

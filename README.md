@@ -11,6 +11,9 @@ Microframework used to simplify Apache Kafka based Ruby applications development
   - [How does it work](#user-content-how-does-it-work)
   - [Installation](#user-content-installation)
   - [Setup](#user-content-setup)
+    - [Application](#user-content-application)
+    - [WaterDrop](#user-content-waterdrop)
+    - [Configurators](#user-content-configurators)
   - [Rake tasks](#user-content-rake-tasks)
   - [Usage](#user-content-usage)
     - [Sending messages from Karafka](#user-content-sending-messages-from-karafka)
@@ -77,7 +80,7 @@ bundle exec rake karafka:install
 ```
 
 ## Setup
-
+### Application
 Karafka has following configuration options:
 
 | Option                  | Value type    | Description                                                                          |
@@ -109,6 +112,23 @@ end
 
 Note: You can use any library like [Settingslogic](https://github.com/binarylogic/settingslogic) to handle your application configuration.
 
+### WaterDrop
+
+Karafka contains WaterDrop gem which is used to send messages to Kafka in a standard and in an aspect way.
+Default configuration for WaterDrop:
+
+| Option                  | Value type    | Description                      | Default Value                    |
+|-------------------------|---------------|----------------------------------|----------------------------------|
+| send_messages           | Boolean       | Should we send messages to Kafka | true                             |
+| kafka_hosts             | Array<String> | Kafka servers hosts with ports   | the same as karafka kafka_hosts  |
+| connection_pool_size    | Integer       | Kafka connection pool size       | 1                                |
+| connection_pool_timeout | Integer       | Kafka connection pool timeout    | the same as karafka concurrency  |
+| raise_on_failure        | Boolean       | Raise exception on failure       | true                             |
+
+Note: If you want to change default configs for WaterDrop you need to override WaterDrop setup.
+
+### Configurators
+
 If you want to do some configurations after all of this is done, please add to config directory a proper file (needs to inherit from Karafka::Config::Base and implement setup method) after that everything will happen automatically.
 
 Example configuration class:
@@ -139,9 +159,19 @@ Karafka provides following rake tasks:
 
 ### Sending messages from Karafka
 
-To add ability to send messages you need to add **waterdrop** gem to your Gemfile.
+If you want send messages from karafka you need to use **waterdrop** gem.
 
-Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to install and use it.
+Example usage:
+
+```ruby
+message = WaterDrop::Message.new('topic', 'message')
+message.send!
+
+message = WaterDrop::Message.new('topic', { user_id: 1 }.to_json)
+message.send!
+```
+
+Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to use it.
 
 ### Receiving messages
 

@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 0.3.3-head
+- Added WaterDrop gem with default configuration
 - Refactoring of config logic to simplify adding new dependencies that need to be configured based on #setup data
 - Gem dump
 
