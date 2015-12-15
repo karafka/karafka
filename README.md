@@ -114,7 +114,7 @@ Note: You can use any library like [Settingslogic](https://github.com/binarylogi
 
 ### WaterDrop
 
-Karafka contains WaterDrop which is used to send messages to Kafka in a standard and in an aspect way.
+Karafka contains WaterDrop gem which is used to send messages to Kafka in a standard and in an aspect way.
 Default configuration for WaterDrop:
 
 | Option                  | Value type    | Description                      | Default Value                    |
@@ -125,7 +125,7 @@ Default configuration for WaterDrop:
 | connection_pool_timeout | Integer       | Kafka connection pool timeout    | the same as karafka concurrency  |
 | raise_on_failure        | Boolean       | Raise exception on failure       | true                             |
 
-Note: If you want to change default configs for WaterDrop you need to add new config file (see section below).
+Note: If you want to change default configs for WaterDrop you need to override WaterDrop setup.
 
 ### Configurators
 
@@ -156,6 +156,22 @@ Karafka provides following rake tasks:
 
 
 ## Usage
+
+### Sending messages from Karafka
+
+If you want send messages from karafka you need to use **waterdrop** gem.
+
+Example usage:
+
+```ruby
+message = WaterDrop::Message.new('topic', 'message')
+message.send!
+
+message = WaterDrop::Message.new('topic', { user_id: 1 }.to_json)
+message.send!
+```
+
+Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to use it.
 
 ### Receiving messages
 
