@@ -35,6 +35,7 @@ module Karafka
       return logger.error(e) if caller_class == Karafka::Connection::ActorCluster
       return logger.error(e) if caller_class == Karafka::Connection::Consumer
       return logger.error(e) if caller_class == Karafka::Connection::Listener
+      return logger.error(e) if caller_class == Karafka::Params::Params
       return logger.fatal(e) if caller_class == Karafka::Runner
 
       logger.info(e)

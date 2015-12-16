@@ -22,7 +22,8 @@ RSpec.describe Karafka::Monitor do
     [
       Karafka::Connection::ActorCluster,
       Karafka::Connection::Consumer,
-      Karafka::Connection::Listener
+      Karafka::Connection::Listener,
+      Karafka::Params::Params
     ].each do |caller_class|
       context "when caller class is #{caller_class}" do
         it 'expec to log with error' do
