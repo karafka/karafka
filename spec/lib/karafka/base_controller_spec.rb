@@ -243,9 +243,9 @@ RSpec.describe Karafka::BaseController do
         subject.instance_variable_set(:@params, params)
       end
 
-      it 'should fetch params data' do
+      it 'should retrieve params data' do
         expect(params)
-          .to receive(:fetch)
+          .to receive(:retrieve)
           .and_return(params)
 
         expect(subject.send(:params)).to eq params

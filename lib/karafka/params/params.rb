@@ -57,11 +57,11 @@ module Karafka
         end
       end
 
-      # @return [Karafka::Params::Params] this will trigger parser execution. If we decide to fetch
-      #   data, parser will be executed to parse data. Output of parsing will be merged to the
-      #   current object. This object will be also marked as already parsed, so we won't
+      # @return [Karafka::Params::Params] this will trigger parser execution. If we decide to
+      #   retrieve data, parser will be executed to parse data. Output of parsing will be merged
+      #   to the current object. This object will be also marked as already parsed, so we won't
       #   parse it again.
-      def fetch
+      def retrieve
         return self if self[:parsed]
 
         merge!(parse(delete(:content)))

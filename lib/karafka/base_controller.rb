@@ -200,7 +200,7 @@ module Karafka
     # @note Invokation of this method will cause load all the data into params object. If you want
     #   to get access without parsing, please access @params directly
     def params
-      @params.fetch
+      @params.retrieve
     end
 
     # Enqueues the execution of perform method into a worker.

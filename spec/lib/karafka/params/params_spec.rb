@@ -84,7 +84,7 @@ end
 RSpec.describe Karafka::Params::Params do
   subject { described_class.send(:new, {}) }
 
-  describe '#fetch' do
+  describe '#retrieve' do
     context 'when params are already parsed' do
       before do
         subject[:parsed] = true
@@ -97,7 +97,7 @@ RSpec.describe Karafka::Params::Params do
         expect(subject)
           .not_to receive(:merge!)
 
-        expect(subject.fetch).to eq subject
+        expect(subject.retrieve).to eq subject
       end
     end
 
@@ -118,7 +118,7 @@ RSpec.describe Karafka::Params::Params do
         let(:parsed_content) { { double => double } }
 
         it 'expect to merge with parsed stuff that is under content key and remove this key' do
-          expect(subject.fetch[parsed_content.keys[0]]).to eq parsed_content.values[0]
+          expect(subject.retrieve[parsed_content.keys[0]]).to eq parsed_content.values[0]
           expect(subject.keys).not_to include :content
         end
       end
@@ -127,7 +127,7 @@ RSpec.describe Karafka::Params::Params do
         let(:parsed_content) { { received_at: rand } }
 
         it 'expect not to overwrite existing keys' do
-          subject.fetch
+          subject.retrieve
           expect(subject[parsed_content[:received_at]]).not_to eq parsed_content[:received_at]
           expect(subject.keys).not_to include :content
         end

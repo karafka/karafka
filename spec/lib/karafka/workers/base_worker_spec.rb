@@ -3,7 +3,10 @@ require 'spec_helper'
 RSpec.describe Karafka::Workers::BaseWorker do
   subject { described_class.new }
 
-  specify { expect(described_class).to be < SidekiqGlass::Worker }
+  before do
+    # By default we don't set on base - on those that inherit only
+    described_class.timeout = 1
+  end
 
   let(:controller) do
     ClassBuilder.inherit(Karafka::BaseController) do
@@ -22,7 +25,7 @@ RSpec.describe Karafka::Workers::BaseWorker do
 
   let(:args) { [controller.to_s, rand] }
 
-  describe '#execute' do
+  describe '#perform' do
     before do
       expect(subject)
         .to receive(:controller)
@@ -33,7 +36,7 @@ RSpec.describe Karafka::Workers::BaseWorker do
       expect(controller)
         .to receive(:perform)
 
-      subject.execute(*args)
+      subject.perform(*args)
 
       expect(subject.params).to eq args.last
     end
@@ -42,7 +45,7 @@ RSpec.describe Karafka::Workers::BaseWorker do
       expect(controller)
         .to receive(:perform)
 
-      subject.execute(*args)
+      subject.perform(*args)
 
       expect(subject.controller_class_name).to eq args.first
     end

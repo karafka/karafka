@@ -26,9 +26,7 @@ module Karafka
         return self.class.const_get(name) if self.class.const_defined?(name)
 
         klass = Class.new(Karafka::Workers::BaseWorker)
-
         klass.timeout = Karafka::App.config.worker_timeout
-        klass.logger = Karafka::App.logger
 
         scope.const_set(name, klass)
       end

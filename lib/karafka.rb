@@ -10,7 +10,7 @@
   poseidon
   poseidon_cluster
   sidekiq
-  sidekiq_glass
+  worker_glass
   envlogic
   active_support/callbacks
   active_support/descendants_tracker

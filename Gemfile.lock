@@ -1,0 +1,275 @@
+PATH
+  remote: .
+  specs:
+    karafka (0.4.0.pre.head)
+      activesupport
+      celluloid
+      envlogic
+      poseidon
+      poseidon_cluster
+      puma
+      sidekiq
+      sinatra
+      waterdrop
+      worker-glass
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    abstract_type (0.0.7)
+    activemodel (4.2.5)
+      activesupport (= 4.2.5)
+      builder (~> 3.1)
+    activesupport (4.2.5)
+      i18n (~> 0.7)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.3, >= 0.3.4)
+      tzinfo (~> 1.1)
+    adamantium (0.2.0)
+      ice_nine (~> 0.11.0)
+      memoizable (~> 0.4.0)
+    aspector (0.14.0)
+    ast (2.1.0)
+    astrolabe (1.3.1)
+      parser (~> 2.2)
+    axiom-types (0.1.1)
+      descendants_tracker (~> 0.0.4)
+      ice_nine (~> 0.11.0)
+      thread_safe (~> 0.3, >= 0.3.1)
+    brakeman (3.1.3)
+      erubis (~> 2.6)
+      fastercsv (~> 1.5)
+      haml (>= 3.0, < 5.0)
+      highline (>= 1.6.20, < 2.0)
+      multi_json (~> 1.2)
+      ruby2ruby (>= 2.1.1, < 2.3.0)
+      ruby_parser (~> 3.7.0)
+      safe_yaml (>= 1.0)
+      sass (~> 3.0)
+      slim (>= 1.3.6, < 4.0)
+      terminal-table (~> 1.4)
+    bson (4.0.0)
+    builder (3.2.2)
+    celluloid (0.17.2)
+      celluloid-essentials
+      celluloid-extras
+      celluloid-fsm
+      celluloid-pool
+      celluloid-supervision
+      timers (>= 4.1.1)
+    celluloid-essentials (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-extras (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-fsm (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-pool (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-supervision (0.20.5)
+      timers (>= 4.1.1)
+    codeclimate-engine-rb (0.1.0)
+      virtus (~> 1.0)
+    coderay (1.1.0)
+    coercible (1.0.0)
+      descendants_tracker (~> 0.0.1)
+    concord (0.1.5)
+      adamantium (~> 0.2.0)
+      equalizer (~> 0.0.9)
+    concurrent-ruby (1.0.0)
+    connection_pool (2.2.0)
+    descendants_tracker (0.0.4)
+      thread_safe (~> 0.3, >= 0.3.1)
+    diff-lcs (1.2.5)
+    docile (1.1.5)
+    envlogic (1.0.0)
+      activesupport
+    equalizer (0.0.11)
+    erubis (2.7.0)
+    faker (1.6.1)
+      i18n (~> 0.5)
+    fastercsv (1.5.5)
+    flay (2.6.1)
+      ruby_parser (~> 3.0)
+      sexp_processor (~> 4.0)
+    flog (4.3.2)
+      ruby_parser (~> 3.1, > 3.1.0)
+      sexp_processor (~> 4.4)
+    haml (4.0.7)
+      tilt
+    haml-lint (0.13.0)
+      haml (~> 4.0)
+      rubocop (>= 0.25.0)
+      sysexits (~> 1.1)
+    highline (1.7.8)
+    hitimes (1.2.3)
+    i18n (0.7.0)
+    ice_nine (0.11.1)
+    json (1.8.3)
+    memoizable (0.4.2)
+      thread_safe (~> 0.3, >= 0.3.1)
+    method_source (0.8.2)
+    minitest (5.8.3)
+    mongo (2.2.1)
+      bson (~> 4.0)
+    mongoid (5.0.1)
+      activemodel (~> 4.0)
+      mongo (~> 2.1)
+      origin (~> 2.1)
+      tzinfo (>= 0.3.37)
+    mongoid-rspec (3.0.0)
+      mongoid (~> 5.0)
+      rake
+      rspec (~> 3.3)
+    multi_json (1.11.2)
+    null-logger (0.1.0)
+    origin (2.1.1)
+    parser (2.2.3.0)
+      ast (>= 1.1, < 3.0)
+    polishgeeks-dev-tools (1.2.1)
+      brakeman
+      faker
+      haml-lint
+      mongoid-rspec
+      pry
+      rspec
+      rubocop
+      rubycritic
+      shoulda
+      simplecov
+      timecop
+      yard
+    poseidon (0.0.5)
+    poseidon_cluster (0.3.3)
+      poseidon (>= 0.0.5, < 0.1.0)
+      zk
+    powerpack (0.1.1)
+    private_attr (1.1.0)
+    procto (0.0.2)
+    pry (0.10.3)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+    puma (2.15.3)
+    rack (1.6.4)
+    rack-protection (1.5.3)
+      rack
+    rainbow (2.0.0)
+    rake (10.4.2)
+    redis (3.2.2)
+    reek (3.7.1)
+      codeclimate-engine-rb (~> 0.1.0)
+      parser (~> 2.2, >= 2.2.2.5)
+      private_attr (~> 1.1)
+      rainbow (~> 2.0)
+      unparser (~> 0.2.2)
+    rspec (3.4.0)
+      rspec-core (~> 3.4.0)
+      rspec-expectations (~> 3.4.0)
+      rspec-mocks (~> 3.4.0)
+    rspec-core (3.4.1)
+      rspec-support (~> 3.4.0)
+    rspec-expectations (3.4.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.4.0)
+    rspec-mocks (3.4.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.4.0)
+    rspec-support (3.4.1)
+    rubocop (0.35.1)
+      astrolabe (~> 1.3)
+      parser (>= 2.2.3.0, < 3.0)
+      powerpack (~> 0.1)
+      rainbow (>= 1.99.1, < 3.0)
+      ruby-progressbar (~> 1.7)
+      tins (<= 1.6.0)
+    ruby-progressbar (1.7.5)
+    ruby2ruby (2.2.0)
+      ruby_parser (~> 3.1)
+      sexp_processor (~> 4.0)
+    ruby_parser (3.7.2)
+      sexp_processor (~> 4.1)
+    rubycritic (2.3.0)
+      flay (= 2.6.1)
+      flog (= 4.3.2)
+      parser (>= 2.2.0, < 3.0)
+      reek (= 3.7.1)
+      virtus (~> 1.0)
+    safe_yaml (1.0.4)
+    sass (3.4.20)
+    sexp_processor (4.6.0)
+    shoulda (3.5.0)
+      shoulda-context (~> 1.0, >= 1.0.1)
+      shoulda-matchers (>= 1.4.1, < 3.0)
+    shoulda-context (1.2.1)
+    shoulda-matchers (2.8.0)
+      activesupport (>= 3.0.0)
+    sidekiq (4.0.1)
+      concurrent-ruby (~> 1.0)
+      connection_pool (~> 2.2, >= 2.2.0)
+      json (~> 1.0)
+      redis (~> 3.2, >= 3.2.1)
+    simplecov (0.11.1)
+      docile (~> 1.1.0)
+      json (~> 1.8)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
+    sinatra (1.4.6)
+      rack (~> 1.4)
+      rack-protection (~> 1.4)
+      tilt (>= 1.3, < 3)
+    slim (3.0.6)
+      temple (~> 0.7.3)
+      tilt (>= 1.3.3, < 2.1)
+    slop (3.6.0)
+    sysexits (1.2.0)
+    temple (0.7.6)
+    terminal-table (1.5.2)
+    thread_safe (0.3.5)
+    tilt (2.0.1)
+    timecop (0.8.0)
+    timers (4.1.1)
+      hitimes
+    tins (1.6.0)
+    tzinfo (1.2.2)
+      thread_safe (~> 0.1)
+    unparser (0.2.4)
+      abstract_type (~> 0.0.7)
+      adamantium (~> 0.2.0)
+      concord (~> 0.1.5)
+      diff-lcs (~> 1.2.5)
+      equalizer (~> 0.0.9)
+      parser (~> 2.2.2)
+      procto (~> 0.0.2)
+    virtus (1.0.5)
+      axiom-types (~> 0.1)
+      coercible (~> 1.0)
+      descendants_tracker (~> 0.0, >= 0.0.3)
+      equalizer (~> 0.0, >= 0.0.9)
+    waterdrop (0.1.13)
+      aspector
+      bundler
+      connection_pool
+      null-logger
+      poseidon
+      rake
+    worker-glass (0.2.0)
+      activesupport
+      null-logger
+    yard (0.8.7.6)
+    zk (1.9.6)
+      zookeeper (~> 1.4.0)
+    zookeeper (1.4.11)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler
+  karafka!
+  polishgeeks-dev-tools
+  rake
+  timecop
+
+BUNDLED WITH
+   1.10.6

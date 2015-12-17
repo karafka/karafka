@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'poseidon'
   spec.add_dependency 'poseidon_cluster'
   spec.add_dependency 'sidekiq'
-  spec.add_dependency 'sidekiq-glass'
+  spec.add_dependency 'worker-glass'
   spec.add_dependency 'celluloid'
   spec.add_dependency 'envlogic'
   spec.add_dependency 'sinatra'

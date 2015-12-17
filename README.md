@@ -218,9 +218,7 @@ Group and topic should be unique. You can't define different controllers with th
 
  - *worker* - Class name - name of a worker class that we want to use to schedule perform code
 
-Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **Karafka::Workers::BaseWorker** and will share all its settings. **Karafka::Workers::BaseWorker**.
-
-Karafka::Workers::BaseWorker inherits from [SidekiqGlass::Worker](https://github.com/karafka/sidekiq-glass), so it uses reentrancy. If you want to use it, you should add *after_failure* method in the controller as well.
+Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **Karafka::Workers::BaseWorker** and will share all its settings.
 
 To run Sidekiq you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **rake karafka:install**.
 
@@ -427,7 +425,7 @@ You can then navigate to displayer url to check your Sidekiq status. Sidekiq Web
 
 * [Karafka framework](https://github.com/karafka/karafka)
 * [Waterdrop](https://github.com/karafka/waterdrop)
-* [Sidekiq Glass](https://github.com/karafka/sidekiq-glass)
+* [Worker Glass](https://github.com/karafka/worker-glass)
 * [Envlogic](https://github.com/karafka/envlogic)
 * [Apache Kafka](http://kafka.apache.org/)
 * [Apache ZooKeeper](https://zookeeper.apache.org/)
