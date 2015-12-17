@@ -168,7 +168,10 @@ RSpec.describe Karafka::Params::Params do
           .and_raise(::Karafka::Errors::ParserError)
       end
 
-      it 'expect to mark as parsed and return content in a message key' do
+      it 'expect to monitor, mark as parsed and return content in a message key' do
+        expect(Karafka.monitor)
+          .to receive(:notice_error)
+
         expect(subject.send(:parse, content)).to eq(message: content)
         expect(subject[:parsed]).to eq true
       end

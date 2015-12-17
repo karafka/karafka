@@ -1,10 +1,13 @@
 # Karafka framework changelog
 
-## 0.3.3-head
+## 0.4.0-head
 - Added WaterDrop gem with default configuration
 - Refactoring of config logic to simplify adding new dependencies that need to be configured based on #setup data
 - Gem dump
 - #37 - warn log for failed parsing of a message
+- Readme updates
+- Renamed cluster to actor_cluster for method names
+- #43 - wrong constant name
 
 ## 0.3.2
 - Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix

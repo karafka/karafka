@@ -87,7 +87,7 @@ Karafka has following configuration options:
 |-------------------------|---------------|--------------------------------------------------------------------------------------|
 | zookeeper_hosts         | Array<String> | Zookeeper server hosts                                                               |
 | kafka_hosts             | Array<String> | Kafka server hosts                                                                   |
-| redis                   | Hash          | Hash with Redis configuration options (url and namespace)                            |
+| redis                   | Hash          | Hash with Redis configuration options                                                |
 | worker_timeout          | Integer       | How long a task can run in Sidekiq before it will be terminated                      |
 | concurrency             | Integer       | How many threads (Celluloid actors) should we have that listen for incoming messages |
 | name                    | String        | Application name                                                                     |
@@ -100,8 +100,7 @@ class App < Karafka::App
     config.kafka_hosts = %w( 127.0.0.1:9092 127.0.0.1:9093 )
     config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
     config.redis = {
-      url: 'redis://redis.example.com:7372/1',
-      namespace: 'my_app_redis_namespace'
+      url: 'redis://redis.example.com:7372/1'
     }
     config.worker_timeout =  3600 # 1 hour
     config.concurrency = 10 # 10 threads max
@@ -195,7 +194,7 @@ By default topic is taken from the controller name (similar to Rails routes). It
 
 ```ruby
 VideosUploadedController => :videos_uploaded
-Source::EventsController => :source_events
+Source::EventsController => :'source/events'
 DataApp::Targets::UsersTargetsController => :data_app_targets_users_targets
 ```
 

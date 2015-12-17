@@ -3,8 +3,8 @@ module Karafka
   class Runner
     # Starts listening on all the clusters asynchronously
     def run
-      clusters.each do |cluster|
-        cluster.async.fetch_loop(consumer)
+      actor_clusters.each do |actor_cluster|
+        actor_cluster.async.fetch_loop(consumer)
       end
     rescue => e
       Karafka.monitor.notice_error(self.class, e)
@@ -15,7 +15,7 @@ module Karafka
     private
 
     # @return [Array<Karafka::Connection::ActorCluster>] array with all the connection clusters
-    def clusters
+    def actor_clusters
       Karafka::Routing::Mapper
         .controllers
         .each_slice(slice_size)

@@ -5,23 +5,23 @@ RSpec.describe Karafka::Runner do
 
   describe '#run' do
     context 'when everything is ok' do
-      let(:cluster) { Karafka::Connection::ActorCluster.new([]) }
-      let(:clusters) { [cluster] }
+      let(:actor_cluster) { Karafka::Connection::ActorCluster.new([]) }
+      let(:actor_clusters) { [actor_cluster] }
       let(:consumer) { -> {} }
-      let(:async_scope) { cluster }
+      let(:async_scope) { actor_cluster }
 
       before do
         expect(subject)
-          .to receive(:clusters)
-          .and_return(clusters)
+          .to receive(:actor_clusters)
+          .and_return(actor_clusters)
 
         expect(subject)
           .to receive(:consumer)
           .and_return(consumer)
       end
 
-      it 'should start asynchronously fetch loop for each cluster' do
-        expect(cluster)
+      it 'should start asynchronously fetch loop for each actor_cluster' do
+        expect(actor_cluster)
           .to receive(:async)
           .and_return(async_scope)
 
@@ -38,7 +38,7 @@ RSpec.describe Karafka::Runner do
 
       before do
         expect(subject)
-          .to receive(:clusters)
+          .to receive(:actor_clusters)
           .and_raise(error)
       end
 
@@ -55,7 +55,7 @@ RSpec.describe Karafka::Runner do
     end
   end
 
-  describe '#clusters' do
+  describe '#actor_clusters' do
     let(:controller) { double }
     let(:controllers) { [controller] }
 
@@ -73,7 +73,7 @@ RSpec.describe Karafka::Runner do
         .with(controllers)
     end
 
-    it { expect(subject.send(:clusters)).to be_a Array }
+    it { expect(subject.send(:actor_clusters)).to be_a Array }
   end
 
   describe '#consumer' do

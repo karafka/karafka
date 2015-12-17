@@ -9,15 +9,15 @@ module Karafka
       # class name (if defined dynamically, etc)
       CONSTANT_REGEXP = %r{[?!=+\-\*/\^\|&\[\]<>%~\#\:]}
 
-      # @param controller [Karafka::BaseController] descendant of Karafka::BaseController
+      # @param controller_class [Karafka::BaseController] descendant of Karafka::BaseController
       # @example Create a worker builder
       #   Karafka::Workers::Builder.new(SuperController)
-      def initialize(controller)
-        @controller = controller
+      def initialize(controller_class)
+        @controller_class = controller_class
       end
 
       # @return [Class] Sidekiq worker class that already exists or new build based
-      #   on the provided controller name
+      #   on the provided controller_class name
       # @example Controller: SuperController
       #   build #=> SuperWorker
       # @example Controller: Videos::NewVideosController
@@ -30,25 +30,34 @@ module Karafka
         klass.timeout = Karafka::App.config.worker_timeout
         klass.logger = Karafka::App.logger
 
-        Object.const_set(name, klass)
+        scope.const_set(name, klass)
       end
 
       private
 
+      # @return [Class, Module] scope to which we want to assign a built worker class
+      # @note If there is no scope, we should attach directly to Object
+      # @example Controller name not namespaced: 'SuperController'
+      #   scope #=> Object
+      # @example Controller name namespace: 'Videos::NewVideosController'
+      #   scope #=> Videos
+      def scope
+        enclosing = @controller_class.to_s.to_s.split('::')[0...-1]
+        return Object if enclosing.empty?
+        Object.const_get(enclosing.join('::'))
+      end
+
       # @return [String] stringified theoretical worker class name
+      # @note It will return only controller name, without
       # @example Controller name: 'SuperController'
       #   name #=> 'SuperWorker'
       # @example Controller name: 'Videos::NewVideosController'
-      #   name #=> 'Videos::NewVideosWorker'
+      #   name #=> 'NewVideosWorker'
       def name
-        parts = @controller.to_s.split('::')
-        parts.map! do |part|
-          part.gsub!('Controller', 'Worker')
-          part.gsub!(CONSTANT_REGEXP, '')
-          part
-        end
-
-        parts.join('::')
+        base = @controller_class.to_s.split('::').last
+        base.gsub!('Controller', 'Worker')
+        base.gsub!(CONSTANT_REGEXP, '')
+        base
       end
     end
   end
