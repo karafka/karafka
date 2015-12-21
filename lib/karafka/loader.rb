@@ -21,15 +21,6 @@ module Karafka
       app
     )
 
-    # @return [Integer] order for sorting
-    # @note We need sort all base files based on their position in a file tree
-    #   so all the files that are "higher" should be loaded first
-    # @param str1 [String] first string for comparison
-    # @param str2 [String] second string for comparison
-    def base_sorter(str1, str2)
-      str1.count('/') <=> str2.count('/')
-    end
-
     # Will load files in a proper order (based on DIRS)
     # @param [String] root path from which we want to start
     def load(root)
@@ -48,6 +39,15 @@ module Karafka
 
       Dir[bases].sort(&method(:base_sorter)).each(&method(:require))
       Dir[files].sort.each(&method(:require))
+    end
+
+    # @return [Integer] order for sorting
+    # @note We need sort all base files based on their position in a file tree
+    #   so all the files that are "higher" should be loaded first
+    # @param str1 [String] first string for comparison
+    # @param str2 [String] second string for comparison
+    def base_sorter(str1, str2)
+      str1.count('/') <=> str2.count('/')
     end
 
     # Requires all the ruby files from one relative path inside application directory

@@ -14,19 +14,20 @@ Gem::Specification.new do |spec|
   spec.description   = %q{ Microframework used to simplify Kafka based Ruby applications }
   spec.license       = 'MIT'
 
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'bundler', '~> 1.10'
+  spec.add_development_dependency 'rake', '~> 10.4'
 
-  spec.add_dependency 'activesupport'
+  spec.add_dependency 'activesupport', '~> 4.2'
   spec.add_dependency 'poseidon'
   spec.add_dependency 'poseidon_cluster'
-  spec.add_dependency 'sidekiq'
-  spec.add_dependency 'worker-glass'
-  spec.add_dependency 'celluloid'
-  spec.add_dependency 'envlogic'
-  spec.add_dependency 'sinatra'
-  spec.add_dependency 'puma'
-  spec.add_dependency 'waterdrop'
+  spec.add_dependency 'sidekiq', '~> 4.0'
+  spec.add_dependency 'worker-glass', '~> 0.2'
+  spec.add_dependency 'celluloid', '~> 0.17'
+  spec.add_dependency 'envlogic', '~> 1.0'
+  spec.add_dependency 'sinatra', '~> 1.4'
+  spec.add_dependency 'puma', '~> 2.15'
+  spec.add_dependency 'waterdrop', '~> 0.1'
+  spec.add_dependency 'thor', '~> 0.19'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
