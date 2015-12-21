@@ -1,6 +1,0 @@
-#!/usr/bin/env ruby
-
-require 'karafka'
-require "#{Karafka.root}/rakefile.rb"
-
-Karafka::Cli.start
