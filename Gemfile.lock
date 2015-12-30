@@ -267,7 +267,6 @@ DEPENDENCIES
   bundler
   karafka!
   polishgeeks-dev-tools
-  rake
   timecop
 
 BUNDLED WITH
