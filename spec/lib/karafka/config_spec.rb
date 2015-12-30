@@ -60,9 +60,11 @@ RSpec.describe Karafka::Config do
           .to receive(:new)
           .with(subject)
           .and_return(config)
+          .at_least(:once)
 
         expect(config)
           .to receive(:setup)
+          .at_least(:once)
       end
 
       subject.send :setup_components

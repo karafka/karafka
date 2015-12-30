@@ -80,17 +80,20 @@ bundle exec rake karafka:install
 ```
 
 ## Setup
+
 ### Application
 Karafka has following configuration options:
 
-| Option                  | Value type    | Description                                                                          |
-|-------------------------|---------------|--------------------------------------------------------------------------------------|
-| zookeeper_hosts         | Array<String> | Zookeeper server hosts                                                               |
-| kafka_hosts             | Array<String> | Kafka server hosts                                                                   |
-| redis                   | Hash          | Hash with Redis configuration options                                                |
-| worker_timeout          | Integer       | How long a task can run in Sidekiq before it will be terminated                      |
-| concurrency             | Integer       | How many threads (Celluloid actors) should we have that listen for incoming messages |
-| name                    | String        | Application name                                                                     |
+| Option                 | Required | Value type    | Description                                                       |
+|------------------------|----------|---------------|-------------------------------------------------------------------|
+| zookeeper_hosts        | true     | Array<String> | Zookeeper server hosts                                            |
+| kafka_hosts            | true     | Array<String> | Kafka server hosts                                                |
+| redis                  | true     | Hash          | Hash with Redis configuration options                             |
+| worker_timeout         | true     | Integer       | How long a task can run in Sidekiq before it will be terminated   |
+| concurrency            | true     | Integer       | How many threads should we have that listen for incoming messages |
+| name                   | true     | String        | Application name                                                  |
+| logger                 | false    | Object        | Logger instance (defaults to Karafka::Logger)                     |
+| monitor                | false    | Object        | Monitor instance (defaults to Karafka::Monitor)                   |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
 
@@ -105,6 +108,7 @@ class App < Karafka::App
     config.worker_timeout =  3600 # 1 hour
     config.concurrency = 10 # 10 threads max
     config.name = 'my_application'
+    config.logger = MyCustomLogger.new # not required
   end
 end
 ```
@@ -113,18 +117,7 @@ Note: You can use any library like [Settingslogic](https://github.com/binarylogi
 
 ### WaterDrop
 
-Karafka contains WaterDrop gem which is used to send messages to Kafka in a standard and in an aspect way.
-Default configuration for WaterDrop:
-
-| Option                  | Value type    | Description                      | Default Value                    |
-|-------------------------|---------------|----------------------------------|----------------------------------|
-| send_messages           | Boolean       | Should we send messages to Kafka | true                             |
-| kafka_hosts             | Array<String> | Kafka servers hosts with ports   | the same as karafka kafka_hosts  |
-| connection_pool_size    | Integer       | Kafka connection pool size       | 1                                |
-| connection_pool_timeout | Integer       | Kafka connection pool timeout    | the same as karafka concurrency  |
-| raise_on_failure        | Boolean       | Raise exception on failure       | true                             |
-
-Note: If you want to change default configs for WaterDrop you need to override WaterDrop setup.
+Karafka contains WaterDrop gem which is used to send messages to Kafka. It is autoconfigured based on the Karafka config.
 
 ### Configurators
 
@@ -341,11 +334,16 @@ end
 
 Karafka provides a simple monitor (Karafka::Monitor) with a really small API. You can use it to develop your own monitoring system (using for example NewRelic). By default, the only thing that is hooked up to this monitoring is a Karafka logger (Karafka::Logger). It is based on a standard [Ruby logger](http://ruby-doc.org/stdlib-2.2.3/libdoc/logger/rdoc/Logger.html).
 
-To change monitor or a logger, you can just simply replace them:
+To change monitor or a logger assign new logger/monitor during setup:
 
 ```ruby
-Karafka.monitor = CustomMonitor.new
-Karafka.logger = CustomLogger.new
+class App < Karafka::App
+  setup do |config|
+    # Other setup stuff...
+    config.logger = MyCustomLogger.new
+    config.monitor = CustomMonitor.new
+  end
+end
 ```
 
 Keep in mind, that if you replace monitor with a custom one, you will have to implement logging as well. It is because monitoring is used for both monitoring and logging and a default monitor handles logging as well.

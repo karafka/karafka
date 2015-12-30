@@ -15,6 +15,7 @@
 - #44 - Method name conflict
 - #48 - Cannot load such file -- celluloid/current
 - #46 - Loading application
+- #45 - Set up monitor in config
 
 ## 0.3.2
 - Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix

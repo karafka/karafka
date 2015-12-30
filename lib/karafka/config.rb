@@ -15,6 +15,8 @@ module Karafka
     # option worker_timeout [Integer] how many seconds should we proceed stuff at Sidekiq
     # option concurrency [Integer] how many threads that listen to incoming connections can we have
     # option name [String] current app name - used to provide default Kafka groups namespaces
+    # option monitor [Instance] monitor instance that we want to use (defaults to Karafka::Monitor)
+    # option logger [Instance] logger that we want to use (defaults to Karafka::Logger)
     SETTINGS = %i(
       zookeeper_hosts
       kafka_hosts
@@ -22,6 +24,8 @@ module Karafka
       worker_timeout
       concurrency
       name
+      logger
+      monitor
     )
 
     SETTINGS.each do |attr_name|
@@ -47,6 +51,9 @@ module Karafka
     # Components are in karafka/config directory and are all loaded one by one
     # If you want to configure a next component, please add a proper file to config dir
     def setup_components
+      # We configure internals first because other configurators rely on them
+      Configurators::Internals.new(self).setup
+
       Configurators::Base.descendants.each do |klass|
         klass.new(self).setup
       end
