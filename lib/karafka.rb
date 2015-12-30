@@ -1,4 +1,5 @@
 %w(
+  rake
   rubygems
   bundler
   celluloid/current
