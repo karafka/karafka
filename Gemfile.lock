@@ -8,6 +8,7 @@ PATH
       poseidon (>= 0.0.5)
       poseidon_cluster
       puma
+      rake (~> 10.4)
       sidekiq (~> 4.0)
       sinatra (~> 1.4)
       waterdrop
@@ -270,4 +271,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   1.10.6
+   1.11.2

@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'sinatra', '~> 1.4'
   spec.add_dependency 'puma'
   spec.add_dependency 'waterdrop'
+  spec.add_dependency 'rake', '~> 10.4'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
