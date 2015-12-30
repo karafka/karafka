@@ -4,13 +4,16 @@
 - Added WaterDrop gem with default configuration
 - Refactoring of config logic to simplify adding new dependencies that need to be configured based on #setup data
 - Gem dump
-- #37 - warn log for failed parsing of a message
 - Readme updates
 - Renamed cluster to actor_cluster for method names
-- #43 - wrong constant name
 - Replaced SidekiqGlass with generic WorkerGlass lib
+- Application bootstrap in app.rb no longer required
+- Small loader refactor (no API changes)
+- #37 - warn log for failed parsing of a message
+- #43 - wrong constant name
 - #44 - Method name conflict
 - #48 - Cannot load such file -- celluloid/current
+- #46 - Loading application
 
 ## 0.3.2
 - Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix

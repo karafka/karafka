@@ -1,26 +1,20 @@
-# Additional support for lazy people that use RACK_ENV everywhere
 ENV['RACK_ENV'] ||= 'development'
 ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
 
-# Load all the gems for appropriate environment
 Bundler.require(:default, ENV['KARAFKA_ENV'])
 
+Karafka::Loader.new.load(File.dirname(__FILE__))
+
+# App class
 class App < Karafka::App
   setup do |config|
-    config.kafka_hosts = %w( localhost:9092 )
-    config.zookeeper_hosts = %w( localhost:2181 )
+    config.kafka_hosts = %w( 127.0.0.1:9092 )
+    config.zookeeper_hosts = %w( 127.0.0.1:2181 )
     config.worker_timeout = 60 # 1 minute
-    config.concurrency = 10 # 10 listening threads
-    config.name = 'app-name'
+    config.concurrency = 5
+    config.name = 'example_app'
     config.redis = {
-      url: 'redis://localhost:6379/1'
+      url: 'redis://localhost:6379'
     }
   end
 end
-
-# Load all application internal code (app/, lib/, etc)
-Karafka::Loader.new.load(App.root)
-
-# Initialize all dynamically built worker classes and any other
-# elements that need to be loaded before using Karafka
-App.bootstrap

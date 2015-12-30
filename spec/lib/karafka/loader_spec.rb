@@ -6,7 +6,7 @@ RSpec.describe Karafka::Loader do
   it { should be_const_defined(:DIRS) }
 
   describe '#base_sorter' do
-    subject { described_class.new.base_sorter(str1, str2) }
+    subject { described_class.new.send(:base_sorter, str1, str2) }
 
     context 'when str1 is higher that str2' do
       let(:str1) { '/this' }
