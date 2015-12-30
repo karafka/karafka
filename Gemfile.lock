@@ -2,14 +2,14 @@ PATH
   remote: .
   specs:
     karafka (0.4.0.pre.head)
-      activesupport
-      celluloid
+      activesupport (~> 4.2)
+      celluloid (>= 0.17)
       envlogic
-      poseidon
+      poseidon (>= 0.0.5)
       poseidon_cluster
       puma
-      sidekiq
-      sinatra
+      sidekiq (~> 4.0)
+      sinatra (~> 1.4)
       waterdrop
       worker-glass
 
@@ -29,15 +29,14 @@ GEM
     adamantium (0.2.0)
       ice_nine (~> 0.11.0)
       memoizable (~> 0.4.0)
-    aspector (0.14.0)
-    ast (2.1.0)
+    ast (2.2.0)
     astrolabe (1.3.1)
       parser (~> 2.2)
     axiom-types (0.1.1)
       descendants_tracker (~> 0.0.4)
       ice_nine (~> 0.11.0)
       thread_safe (~> 0.3, >= 0.3.1)
-    brakeman (3.1.3)
+    brakeman (3.1.4)
       erubis (~> 2.6)
       fastercsv (~> 1.5)
       haml (>= 3.0, < 5.0)
@@ -112,7 +111,7 @@ GEM
     minitest (5.8.3)
     mongo (2.2.1)
       bson (~> 4.0)
-    mongoid (5.0.1)
+    mongoid (5.0.2)
       activemodel (~> 4.0)
       mongo (~> 2.1)
       origin (~> 2.1)
@@ -189,7 +188,7 @@ GEM
       sexp_processor (~> 4.0)
     ruby_parser (3.7.2)
       sexp_processor (~> 4.1)
-    rubycritic (2.3.0)
+    rubycritic (2.4.0)
       flay (= 2.6.1)
       flog (= 4.3.2)
       parser (>= 2.2.0, < 3.0)
@@ -246,8 +245,7 @@ GEM
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
-    waterdrop (0.1.13)
-      aspector
+    waterdrop (0.2.0)
       bundler
       connection_pool
       null-logger

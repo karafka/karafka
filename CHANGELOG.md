@@ -10,6 +10,7 @@
 - #43 - wrong constant name
 - Replaced SidekiqGlass with generic WorkerGlass lib
 - #44 - Method name conflict
+- #48 - Cannot load such file -- celluloid/current
 
 ## 0.3.2
 - Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix
