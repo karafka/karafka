@@ -9,6 +9,7 @@
 - Replaced SidekiqGlass with generic WorkerGlass lib
 - Application bootstrap in app.rb no longer required
 - Small loader refactor (no API changes)
+- Ruby 2.3.0 support (default)
 - #37 - warn log for failed parsing of a message
 - #43 - wrong constant name
 - #44 - Method name conflict
