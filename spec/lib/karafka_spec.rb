@@ -11,6 +11,18 @@ RSpec.describe Karafka do
     subject.logger = @logger
   end
 
+  describe '#boot' do
+    it 'should load dynamic stuff' do
+      expect(Karafka::Routing::Mapper)
+        .to receive(:controllers)
+
+      expect(Karafka::Routing::Mapper)
+        .to receive(:workers)
+
+      subject.boot
+    end
+  end
+
   describe '#logger=' do
     let(:logger) { double }
 

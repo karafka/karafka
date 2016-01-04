@@ -18,3 +18,7 @@ class App < Karafka::App
 end
 
 Karafka::Loader.new.load(App.root)
+
+# This method boots whole Karafka framework and loads all the dynamic classes/modules that are
+# required by Karafka. Execute this method after all application code is loaded
+Karafka.boot

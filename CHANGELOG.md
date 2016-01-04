@@ -8,6 +8,7 @@
 - Renamed cluster to actor_cluster for method names
 - Replaced SidekiqGlass with generic WorkerGlass lib
 - Application bootstrap in app.rb no longer required
+- Karafka.boot needs to be executed after all the application files are loaded (template updated)
 - Small loader refactor (no API changes)
 - Ruby 2.3.0 support (default)
 - #37 - warn log for failed parsing of a message
