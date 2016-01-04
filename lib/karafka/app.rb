@@ -13,8 +13,7 @@ module Karafka
       # @param [Block] block configuration block
       def setup(&block)
         Config.setup(&block)
-        # Once everything is configured we can bootstrap the whole framework
-        bootstrap
+        initialize!
       end
 
       # @return [Karafka::Config] config instance
@@ -38,22 +37,6 @@ module Karafka
       end
 
       private
-
-      # This method is used to load all dynamically created/generated parts of Karafka framework
-      # It needs to be executed before we run the application
-      # @note This method is private because we bootstrap everything after configuration
-      def bootstrap
-        initialize!
-        # This is tricky part to explain ;) but we will try
-        # Each Karafka controller can have its own worker that will process in background
-        # (or not if you really, really wish to). If you define them explicitly on a
-        # controller level, they will be built automatically on first usage (lazy loaded)
-        # Unfortunatelly Sidekiq (and other background processing engines) need to have workers
-        # loaded, because when they do something like const_get(worker_name), they will get nil
-        # instead of proper worker class
-        Karafka::Routing::Mapper.controllers
-        Karafka::Routing::Mapper.workers
-      end
 
       # @return [Karafka::Process] process wrapper instance used to catch system signal calls
       def process

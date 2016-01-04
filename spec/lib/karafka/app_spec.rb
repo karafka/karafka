@@ -68,21 +68,6 @@ RSpec.describe Karafka::App do
     end
   end
 
-  describe '#bootstrap' do
-    it 'should set app status to initializing and load dynamic stuff' do
-      expect(subject)
-        .to receive(:initialize!)
-
-      expect(Karafka::Routing::Mapper)
-        .to receive(:controllers)
-
-      expect(Karafka::Routing::Mapper)
-        .to receive(:workers)
-
-      subject.send(:bootstrap)
-    end
-  end
-
   describe '#config' do
     let(:config) { double }
 
@@ -96,13 +81,13 @@ RSpec.describe Karafka::App do
   end
 
   describe '#setup' do
-    it 'should delegate it to Config setup and bootstrap framework' do
+    it 'should delegate it to Config setup and set framework to initializing state' do
       expect(Karafka::Config)
         .to receive(:setup)
         .once
 
       expect(subject)
-        .to receive(:bootstrap)
+        .to receive(:initialize!)
 
       subject.setup
     end
