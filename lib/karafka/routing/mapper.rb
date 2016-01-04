@@ -7,7 +7,7 @@ module Karafka
       class << self
         # @return [Array<Controller>] descendants of Karafka::BaseController
         def controllers
-          @controllers ||= validate(Karafka::BaseController.descendants)
+          validate(Karafka::BaseController.descendants)
         end
 
         # @return [Array<Worker>] all workers that are being used by all controllers

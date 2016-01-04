@@ -72,39 +72,23 @@ RSpec.describe Karafka::Routing::Mapper do
   end
 
   describe '#controllers' do
-    context 'when they are already invoked' do
-      let(:controllers) { double }
+    let(:descendants) { double }
+    let(:validated_descendants) { double }
 
-      before do
-        subject.instance_variable_set(:'@controllers', controllers)
-      end
-
-      it 'should return what is already stored' do
-        expect(subject.controllers).to eq controllers
-      end
+    before do
+      subject.instance_variable_set(:'@controllers', nil)
     end
 
-    context 'when this is first invokation' do
-      let(:descendants) { double }
-      let(:validated_descendants) { double }
+    it 'should load descendants and validate them' do
+      expect(Karafka::BaseController)
+        .to receive(:descendants)
+        .and_return(descendants)
 
-      before do
-        subject.instance_variable_set(:'@controllers', nil)
-      end
+      expect(subject)
+        .to receive(:validate)
+        .and_return(validated_descendants)
 
-      it 'should load descendants and validate them' do
-        expect(Karafka::BaseController)
-          .to receive(:descendants)
-          .and_return(descendants)
-
-        expect(subject)
-          .to receive(:validate)
-          .and_return(validated_descendants)
-
-        expect(subject.controllers).to eq validated_descendants
-        # We check twice to check if it is stored
-        expect(subject.controllers).to eq validated_descendants
-      end
+      expect(subject.controllers).to eq validated_descendants
     end
   end
 
