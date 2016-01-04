@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'karafka'
+require "#{Karafka.root}/app.rb"
+
+Karafka::Cli.start

@@ -1,4 +1,5 @@
 %w(
+  English
   rake
   rubygems
   bundler
@@ -12,18 +13,14 @@
   sidekiq
   worker_glass
   envlogic
+  thor
   active_support/callbacks
   active_support/descendants_tracker
   active_support/core_ext/hash/indifferent_access
   active_support/inflector
   karafka/loader
   karafka/status
-  base64
 ).each { |lib| require lib }
-
-# The Poseidon socket timeout is 10, so we give it a bit more time to shutdown after
-# socket timeout
-Celluloid.shutdown_timeout = 15
 
 # Karafka library
 module Karafka
