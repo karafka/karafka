@@ -1,7 +1,7 @@
 module Karafka
   # Karafka framework Cli
-  # If you want to add/modify command that belongs to CLI, please review all comamnds
-  # available cli/ directory inside Karafka source code.
+  # If you want to add/modify command that belongs to CLI, please review all commands
+  # available in cli/ directory inside Karafka source code.
   #
   # @note Whole Cli is built using Thor
   # @see https://github.com/erikhuda/thor
@@ -18,6 +18,9 @@ end
 #
 # Also - the KARAFKA_CONSOLE is used to detect that we're executing the irb session
 # so this method is only available when the Karafka console is running
+#
+# We skip this because this should exist and be only valid in the console
+# :nocov:
 if ENV['KARAFKA_CONSOLE']
   # Reloads Karafka irb console session
   def reload!
@@ -25,3 +28,4 @@ if ENV['KARAFKA_CONSOLE']
     Kernel.exit 10
   end
 end
+# :nocov:

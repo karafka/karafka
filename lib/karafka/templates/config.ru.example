@@ -3,7 +3,7 @@
   sidekiq/web
 ).each { |lib| require lib }
 
-require "#{File.dirname(__FILE__)}/app.rb"
+require Karafka.boot_file
 
 use Rack::Auth::Basic, 'Protected Area' do |username, password|
   username == 'sidekiq' &&

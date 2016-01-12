@@ -59,19 +59,31 @@ module Karafka
       Pathname.new(File.expand_path('../..', __FILE__))
     end
 
-    # @return [String] app root path
+    # @return [String] Karafka app root path (user application path)
     def root
       Pathname.new(File.dirname(ENV['BUNDLE_GEMFILE']))
     end
 
-    # @return [String] path to sinatra core root
+    # @return [String] path to Karafka gem root core
     def core_root
       Pathname.new(File.expand_path('../karafka', __FILE__))
+    end
+
+    # @return [String] path to a default file that contains booting procedure etc
+    # @note By default it is a file called 'app.rb' but it can be specified as you wish if you
+    #   have Karafka that is merged into a Sinatra/Rails app and app.rb is taken.
+    #   It will be used for console/workers/etc
+    # @example Standard only-Karafka case
+    #   Karafka.boot_file #=> '/home/app_path/app.rb'
+    # @example Non standard case
+    #   KARAFKA_BOOT_FILE='/home/app_path/karafka.rb'
+    #   Karafka.boot_file #=> '/home/app_path/karafka.rb'
+    def boot_file
+      Pathname.new(
+        ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'app.rb')
+      )
     end
   end
 end
 
 Karafka::Loader.new.load!(Karafka.core_root)
-
-load 'karafka/tasks/karafka.rake'
-load 'karafka/tasks/kafka.rake'

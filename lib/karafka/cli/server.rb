@@ -3,11 +3,11 @@ module Karafka
   class Cli
     desc 'server', 'Start the Karafka server (short-cut alias: "s")'
     method_option :server, aliases: 's'
+    # Start the Karafka server
     def server
-      puts('Starting Karafka framework')
-      puts("Environment: #{Karafka.env}")
-      puts("Kafka hosts: #{Karafka::App.config.kafka_hosts}")
-      puts("Zookeeper hosts: #{Karafka::App.config.zookeeper_hosts}")
+      puts 'Starting Karafka framework'
+      info
+
       Karafka::App.run
     end
   end

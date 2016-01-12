@@ -1,7 +1,8 @@
 module Karafka
   # Karafka framework Cli
   class Cli
-    desc 'topics', 'Lists all topics available on Karafka server (short-cut alias: "t")'
+    desc 'topics', 'List all topics available on Karafka server (short-cut alias: "t")'
+    # List all topics available on Karafka server
     def topics
       topics = []
 

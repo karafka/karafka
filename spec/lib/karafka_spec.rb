@@ -118,4 +118,25 @@ RSpec.describe Karafka do
       end
     end
   end
+
+  describe '.boot_file' do
+    before { ENV['KARAFKA_BOOT_FILE'] = boot_file }
+
+    context 'when KARAFKA_BOOT_FILE is not defined' do
+      let(:boot_file) { nil }
+      let(:default) { Pathname.new(File.join(Karafka.root, 'app.rb')) }
+
+      it 'expect to use default one' do
+        expect(subject.boot_file).to eq default
+      end
+    end
+
+    context 'when KARAFKA_BOOT_FILE is defined' do
+      let(:boot_file) { rand.to_s }
+
+      it 'expect to use one from env' do
+        expect(subject.boot_file).to eq Pathname.new(boot_file)
+      end
+    end
+  end
 end

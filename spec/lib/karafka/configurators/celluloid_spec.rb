@@ -13,7 +13,7 @@ RSpec.describe Karafka::Configurators::Celluloid do
         .with(Karafka.logger)
 
       expect(Celluloid)
-        .to receive(:shutdown_timeout)
+        .to receive(:shutdown_timeout=)
         .with(15)
 
       subject.setup
