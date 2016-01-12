@@ -3,6 +3,7 @@
   rake
   rubygems
   bundler
+  English
   celluloid/current
   waterdrop
   pathname
@@ -14,6 +15,7 @@
   worker_glass
   envlogic
   thor
+  fileutils
   active_support/callbacks
   active_support/descendants_tracker
   active_support/core_ext/hash/indifferent_access
