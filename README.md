@@ -188,7 +188,7 @@ By default topic is taken from the controller name (similar to Rails routes). It
 
 ```ruby
 VideosUploadedController => :videos_uploaded
-Source::EventsController => :'source/events'
+Source::EventsController => :source_events
 DataApp::Targets::UsersTargetsController => :data_app_targets_users_targets
 ```
 
