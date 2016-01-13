@@ -16,7 +16,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler'
 
-  spec.add_dependency 'activesupport', '~> 4.2'
   spec.add_dependency 'poseidon', '>= 0.0.5'
   spec.add_dependency 'poseidon_cluster'
   spec.add_dependency 'sidekiq', '~> 4.0'
@@ -27,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'puma'
   spec.add_dependency 'waterdrop'
   spec.add_dependency 'rake', '~> 10.4'
+  spec.add_dependency 'thor', '~> 0.19'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }

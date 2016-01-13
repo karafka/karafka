@@ -11,12 +11,15 @@
 - Karafka.boot needs to be executed after all the application files are loaded (template updated)
 - Small loader refactor (no API changes)
 - Ruby 2.3.0 support (default)
+- No more rake tasks
+- Karafka CLI instead of rake tasks
 - #37 - warn log for failed parsing of a message
 - #43 - wrong constant name
 - #44 - Method name conflict
 - #48 - Cannot load such file -- celluloid/current
 - #46 - Loading application
 - #45 - Set up monitor in config
+- #47 - rake karafka:run uses app.rb only
 
 ## 0.3.2
 - Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix

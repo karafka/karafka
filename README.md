@@ -14,7 +14,6 @@ Microframework used to simplify Apache Kafka based Ruby applications development
     - [Application](#user-content-application)
     - [WaterDrop](#user-content-waterdrop)
     - [Configurators](#user-content-configurators)
-  - [Rake tasks](#user-content-rake-tasks)
   - [Usage](#user-content-usage)
     - [Sending messages from Karafka](#user-content-sending-messages-from-karafka)
     - [Receiving messages](#user-content-receiving-messages)
@@ -42,7 +41,7 @@ Karafka is a microframework to work easier with Apache Kafka incoming messages.
 
 ## Installation
 
-Karafka does not have yet a standard installation shell commands. In order to install it, please follow given steps:
+Karafka does not have a full installation shell command. In order to install it, please follow given steps:
 
 Create a directory for your project:
 
@@ -59,24 +58,10 @@ source 'https://rubygems.org'
 gem 'karafka', github: 'karafka/karafka'
 ```
 
-Create a **rakefile.rb** with following code:
+and run Karafka install CLI task:
 
-```ruby
-ENV['KARAFKA_ENV'] ||= 'development'
-
-Bundler.require(:default, ENV['KARAFKA_ENV'])
 ```
-
-Bundle afterwards
-
-```bash
-bundle install
-```
-
-Execute the *karafka:install* rake task:
-
-```bash
-bundle exec rake karafka:install
+bundle exec karafka install
 ```
 
 ## Setup
@@ -134,20 +119,36 @@ class ExampleConfigurator < Base
 end
 ```
 
+### Environment variables settings
 
-## Rake tasks
+There are several env settings you can use:
 
-Karafka provides following rake tasks:
-
-| Task                 | Description                                      |
-|----------------------|--------------------------------------------------|
-| rake karafka:install | Creates whole minimal app structure              |
-| rake karafka:run     | Runs a single Karafka processing instance        |
-| rake karafka:sidekiq | Runs a single Sidekiq worker for Karafka         |
-| rake kafka:topics    | Lists all the topics available on a Kafka server |
-
+| ENV name          | Default | Description                                                                           |
+|-------------------|-----------------|-------------------------------------------------------------------------------|
+| KARAFKA_ENV       | development     | In what mode this application should boot (production/development/test/etc)   |
+| KARAFKA_BOOT_FILE | app_root/app.rb | Path to a file that contains Karafka app configuration and booting procedures |
 
 ## Usage
+
+### Karafka CLI
+
+Karafka has a simple CLI built in. It provides following commands:
+
+| Command        | Description                                                               |
+|----------------|---------------------------------------------------------------------------|
+| help [COMMAND] | Describe available commands or one specific command                       |
+| console        | Start the Karafka console (short-cut alias: "c")                          |
+| install        | Installs all required things for Karafka application in current directory |
+| server         | Start the Karafka server (short-cut alias: "s")                           |
+| topics         | Lists all topics available on Karafka server (short-cut alias: "t")       |
+| worker         | Start the Karafka Sidekiq worker (short-cut alias: "w")                   |
+| info           | Print configuration details and other options of your application         |
+
+All the commands are executed the same way:
+
+```
+bundle exec karafka [COMMAND]
+```
 
 ### Sending messages from Karafka
 
@@ -168,8 +169,8 @@ Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/maste
 ### Receiving messages
 
 First create application as it was written in the installation section above.
-It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file,
-log folder where karafka logs will be written(based on environment), rakefile.rb file to have ability to run karafka rake tasks.
+It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file and a
+log folder where karafka logs will be written(based on environment).
 
 #### Methods and attributes for every controller
 
@@ -213,7 +214,7 @@ Group and topic should be unique. You can't define different controllers with th
 
 Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **Karafka::Workers::BaseWorker** and will share all its settings.
 
-To run Sidekiq you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **rake karafka:install**.
+To run Sidekiq you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **bundle exec karafka install**.
 
 However, if you want to use a raw Sidekiq worker (without any Karafka additional magic), or you want to use SidekiqPro (or any other queuing engine that has the same API as Sidekiq), you can assign your own custom worker:
 
@@ -405,7 +406,7 @@ Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to in
 
 ## Sidekiq Web UI
 
-Karafka comes with a Sidekiq Web UI application that can display the current state of a Sidekiq installation. If you installed Karafka using install rake task, you will have a **config.ru** file that allows you to run standalone Puma instance with a Sidekiq Web UI:
+Karafka comes with a Sidekiq Web UI application that can display the current state of a Sidekiq installation. If you installed Karafka based on the install instructions, you will have a **config.ru** file that allows you to run standalone Puma instance with a Sidekiq Web UI:
 
 ```
 bundle exec rackup
