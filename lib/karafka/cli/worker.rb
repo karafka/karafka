@@ -2,14 +2,18 @@ module Karafka
   # Karafka framework Cli
   class Cli
     desc 'worker', 'Start the Karafka Sidekiq worker (short-cut alias: "w")'
-    method_option :worker, aliases: 'w'
     # Start the Karafka Sidekiq worker
-    def worker
+    # @param params [Array<String>] additional params that will be passed to sidekiq, that way we
+    #   can override any default Karafka settings
+    def worker(*params)
       puts 'Starting Karafka worker'
+      config = "-C #{Karafka::App.root.join('config/sidekiq.yml')}"
+      req = "-r #{Karafka.boot_file}"
+      env = "-e #{Karafka.env}"
+
       info
 
-      config_file = Karafka::App.root.join('config/sidekiq.yml')
-      cmd = "bundle exec sidekiq -e #{Karafka.env} -r #{Karafka.boot_file} -C #{config_file}"
+      cmd = "bundle exec sidekiq #{env} #{req} #{config} #{params.join(' ')}"
       puts(cmd)
       exec(cmd)
     end
