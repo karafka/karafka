@@ -48,7 +48,7 @@ module Karafka
       config.kafka_hosts = ['localhost:9092']
       config.zookeeper_hosts = ['localhost:2181']
       config.worker_timeout = 3600
-      config.concurrency = 1
+      config.max_concurrency = 1
       config.name = rand.to_s
       config.redis = {}
     end

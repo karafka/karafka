@@ -21,12 +21,12 @@ RSpec.describe Karafka::Configurators::Sidekiq do
   describe '#setup_sidekiq_client' do
     let(:redis_url) { rand }
     let(:name) { rand }
-    let(:concurrency) { rand(1000) }
+    let(:max_concurrency) { rand(1000) }
     let(:sidekiq_config_client) { double }
     let(:config) do
       double(
         name: name,
-        concurrency: concurrency,
+        max_concurrency: max_concurrency,
         redis: {
           url: redis_url
         }
@@ -41,7 +41,7 @@ RSpec.describe Karafka::Configurators::Sidekiq do
         .to receive(:redis=)
         .with(
           config.redis.merge(
-            size: config.concurrency
+            size: config.max_concurrency
           )
         )
     end

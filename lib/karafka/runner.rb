@@ -29,7 +29,7 @@ module Karafka
     #   to match number of threads - that way it could consume messages in "real" time
     def slice_size
       controllers_length = Karafka::Routing::Mapper.controllers.length
-      size = controllers_length / Karafka::App.config.concurrency
+      size = controllers_length / Karafka::App.config.max_concurrency
       size < 1 ? 1 : size
     end
 

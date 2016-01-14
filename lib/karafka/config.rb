@@ -13,7 +13,7 @@ module Karafka
     # option kafka_hosts [Array] kafka hosts with ports where kafka servers are run
     # option redis [Hash] redis options hash (url and optional parameters)
     # option worker_timeout [Integer] how many seconds should we proceed stuff at Sidekiq
-    # option concurrency [Integer] how many threads that listen to incoming connections can we have
+    # option max_concurrency [Integer] how many threads that listen to Kafka can we have
     # option name [String] current app name - used to provide default Kafka groups namespaces
     # option monitor [Instance] monitor instance that we want to use (defaults to Karafka::Monitor)
     # option logger [Instance] logger that we want to use (defaults to Karafka::Logger)
@@ -22,7 +22,7 @@ module Karafka
       kafka_hosts
       redis
       worker_timeout
-      concurrency
+      max_concurrency
       name
       logger
       monitor

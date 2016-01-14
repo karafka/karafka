@@ -9,10 +9,6 @@ module Karafka
       # gap between those two values so we won't raise socket timeouts when
       # we just want to close the connection because nothing is going on
       TIMEOUT_OFFSET = 1_000
-      # How long should we wait for messages if nothing is there to process
-      # @note This must be smaller than SOCKET_TIMEOUT_MS so we won't raise
-      #   constantly socket timeout errors
-      MAX_WAIT_MS = SOCKET_TIMEOUT_MS - TIMEOUT_OFFSET
 
       # Errors on which we close the connection and reconnect again
       # They happen when something is wrong on Kafka/Zookeeper side or when
@@ -73,7 +69,10 @@ module Karafka
           ::Karafka::App.config.zookeeper_hosts,
           @controller.topic.to_s,
           socket_timeout_ms: SOCKET_TIMEOUT_MS,
-          max_wait_ms: MAX_WAIT_MS
+          # How long should we wait for messages if nothing is there to process
+          # @note This must be smaller than SOCKET_TIMEOUT_MS so we won't raise
+          #   constantly socket timeout errors
+          max_wait_ms: SOCKET_TIMEOUT_MS - TIMEOUT_OFFSET
         )
       rescue *CONNECTION_CLEAR_ERRORS => e
         Karafka.monitor.notice_error(self.class, e)

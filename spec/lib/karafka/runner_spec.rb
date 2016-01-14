@@ -112,34 +112,34 @@ RSpec.describe Karafka::Runner do
         .and_return(config)
 
       expect(config)
-        .to receive(:concurrency)
-        .and_return(concurrency)
+        .to receive(:max_concurrency)
+        .and_return(max_concurrency)
     end
 
     context 'when there are no controllers' do
       let(:controllers_length) { 0 }
-      let(:concurrency) { 100 }
+      let(:max_concurrency) { 100 }
 
       it { expect(subject).to eq 1 }
     end
 
-    context 'when we have less controllers than concurrency level' do
+    context 'when we have less controllers than max_concurrency level' do
       let(:controllers_length) { 1 }
-      let(:concurrency) { 20 }
+      let(:max_concurrency) { 20 }
 
       it { expect(subject).to eq 1 }
     end
 
-    context 'when we have more controllers than concurrency level' do
+    context 'when we have more controllers than max_concurrency level' do
       let(:controllers_length) { 110 }
-      let(:concurrency) { 20 }
+      let(:max_concurrency) { 20 }
 
       it { expect(subject).to eq 5 }
     end
 
-    context 'when we have the same amount of controllers and concurrency level' do
+    context 'when we have the same amount of controllers and max_concurrency level' do
       let(:controllers_length) { 20 }
-      let(:concurrency) { 20 }
+      let(:max_concurrency) { 20 }
 
       it { expect(subject).to eq 1 }
     end

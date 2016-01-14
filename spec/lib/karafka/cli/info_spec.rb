@@ -8,7 +8,7 @@ RSpec.describe Karafka::Cli do
       [
         "Karafka framework version: #{Karafka::VERSION}",
         "Application name: #{Karafka::App.config.name}",
-        "Number of threads: #{Karafka::App.config.concurrency}",
+        "Max number of threads: #{Karafka::App.config.max_concurrency}",
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
         "Kafka hosts: #{Karafka::App.config.kafka_hosts}",
