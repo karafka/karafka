@@ -8,7 +8,8 @@ class App < Karafka::App
   setup do |config|
     config.kafka_hosts = %w( 127.0.0.1:9092 )
     config.zookeeper_hosts = %w( 127.0.0.1:2181 )
-    config.worker_timeout = 60 # 1 minute
+    config.worker_timeout = 60 # 1 minute,
+    config.wait_timeout = 60 # 1 minute
     config.max_concurrency = 5
     config.name = 'example_app'
     config.redis = {

@@ -8,24 +8,27 @@ module Karafka
     class << self
       attr_accessor :config
     end
+
     # Available settings
-    # option zookeeper_hosts [Array] zookeeper hosts with ports where zookeeper servers are run
-    # option kafka_hosts [Array] kafka hosts with ports where kafka servers are run
-    # option redis [Hash] redis options hash (url and optional parameters)
-    # option worker_timeout [Integer] how many seconds should we proceed stuff at Sidekiq
-    # option max_concurrency [Integer] how many threads that listen to Kafka can we have
-    # option name [String] current app name - used to provide default Kafka groups namespaces
-    # option monitor [Instance] monitor instance that we want to use (defaults to Karafka::Monitor)
     # option logger [Instance] logger that we want to use (defaults to Karafka::Logger)
+    # option kafka_hosts [Array] kafka hosts with ports where kafka servers are run
+    # option max_concurrency [Integer] how many threads that listen to Kafka can we have
+    # option monitor [Instance] monitor instance that we want to use (defaults to Karafka::Monitor)
+    # option name [String] current app name - used to provide default Kafka groups namespaces
+    # option redis [Hash] redis options hash (url and optional parameters)
+    # option wait_timeout [Integer] seconds that we will wait on a single topic for messages
+    # option worker_timeout [Integer] how many seconds should we proceed stuff at Sidekiq
+    # option zookeeper_hosts [Array] zookeeper hosts with ports where zookeeper servers are run
     SETTINGS = %i(
-      zookeeper_hosts
-      kafka_hosts
-      redis
-      worker_timeout
-      max_concurrency
-      name
       logger
+      kafka_hosts
+      max_concurrency
       monitor
+      name
+      redis
+      wait_timeout
+      worker_timeout
+      zookeeper_hosts
     )
 
     SETTINGS.each do |attr_name|

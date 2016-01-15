@@ -9,8 +9,8 @@ RSpec.describe Karafka::Connection::QueueConsumer do
       topic: topic
     )
   end
-  let(:max_wait_ms) { described_class::SOCKET_TIMEOUT_MS - described_class::TIMEOUT_OFFSET }
-  let(:socket_timeout_ms) { described_class::SOCKET_TIMEOUT_MS }
+  let(:max_wait_ms) { Karafka::App.config.wait_timeout * 1000 }
+  let(:socket_timeout_ms) { max_wait_ms + (described_class::TIMEOUT_OFFSET * 1000) }
   connection_clear_errors = [
     Poseidon::Connection::ConnectionFailedError,
     Poseidon::Errors::ProtocolError,
@@ -130,7 +130,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
             ::Karafka::App.config.kafka_hosts,
             ::Karafka::App.config.zookeeper_hosts,
             controller.topic.to_s,
-            socket_timeout_ms: described_class::SOCKET_TIMEOUT_MS,
+            socket_timeout_ms: socket_timeout_ms,
             max_wait_ms: max_wait_ms
           )
       end

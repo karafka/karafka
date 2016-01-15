@@ -15,6 +15,7 @@
 - Karafka CLI instead of rake tasks
 - Worker cli command allows passing additional options directly to Sidekiq
 - Renamed concurrency to max_concurrency - it describes better what happens - Karafka will use this number of threads only when required
+- Added wait_timeout that allows us to tune how long should we wait on a single socket connection (single topic) for new messages before going to next one (this applies to each thread separately)
 - #37 - warn log for failed parsing of a message
 - #43 - wrong constant name
 - #44 - Method name conflict

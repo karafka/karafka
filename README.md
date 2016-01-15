@@ -69,16 +69,17 @@ bundle exec karafka install
 ### Application
 Karafka has following configuration options:
 
-| Option                 | Required | Value type    | Description                                                                 |
-|------------------------|----------|---------------|-----------------------------------------------------------------------------|
-| zookeeper_hosts        | true     | Array<String> | Zookeeper server hosts                                                      |
-| kafka_hosts            | true     | Array<String> | Kafka server hosts                                                          |
-| redis                  | true     | Hash          | Hash with Redis configuration options                                       |
-| worker_timeout         | true     | Integer       | How long a task can run in Sidekiq before it will be terminated             |
-| max_concurrency        | true     | Integer       | How many threads maximally should we have that listen for incoming messages |
-| name                   | true     | String        | Application name                                                            |
-| logger                 | false    | Object        | Logger instance (defaults to Karafka::Logger)                               |
-| monitor                | false    | Object        | Monitor instance (defaults to Karafka::Monitor)                             |
+| Option                 | Required | Value type        | Description                                                                 |
+|------------------------|----------|-------------------|-----------------------------------------------------------------------------|
+| kafka_hosts            | true     | Array<String>     | Kafka server hosts                                                          |
+| logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                               |
+| max_concurrency        | true     | Integer           | How many threads maximally should we have that listen for incoming messages |
+| monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                             |
+| name                   | true     | String            | Application name                                                            |
+| redis                  | true     | Hash              | Hash with Redis configuration options                                       |
+| wait_timeout           | true     | Integer (Seconds) | How long do we wait for incoming messages on a single socket (topic)        |
+| worker_timeout         | true     | Integer (Seconds) | How long a task can run in Sidekiq before it will be terminated             |
+| zookeeper_hosts        | true     | Array<String>     | Zookeeper server hosts                                                      |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
 
@@ -90,6 +91,7 @@ class App < Karafka::App
     config.redis = {
       url: 'redis://redis.example.com:7372/1'
     }
+    config.wait_timeout = 10 # 10 seconds
     config.worker_timeout =  3600 # 1 hour
     config.max_concurrency = 10 # 10 threads max
     config.name = 'my_application'

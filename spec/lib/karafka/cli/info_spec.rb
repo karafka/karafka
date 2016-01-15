@@ -14,7 +14,8 @@ RSpec.describe Karafka::Cli do
         "Kafka hosts: #{Karafka::App.config.kafka_hosts}",
         "Zookeeper hosts: #{Karafka::App.config.zookeeper_hosts}",
         "Redis: #{Karafka::App.config.redis}",
-        "Worker timeout: #{Karafka::App.config.worker_timeout}"
+        "Worker timeout: #{Karafka::App.config.worker_timeout}",
+        "Wait timeout: #{Karafka::App.config.wait_timeout}"
       ]
     end
 

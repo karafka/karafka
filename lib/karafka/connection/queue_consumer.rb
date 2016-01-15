@@ -3,12 +3,10 @@ module Karafka
     # Class used as a wrapper around Poseidon::ConsumerGroup to simplify additional
     # features that we provide/might provide in future
     class QueueConsumer
-      # Connection socket default timeout
-      SOCKET_TIMEOUT_MS = 11_000
       # Offset between socket timeout and wait timeout - there needs to be
       # gap between those two values so we won't raise socket timeouts when
       # we just want to close the connection because nothing is going on
-      TIMEOUT_OFFSET = 1_000
+      TIMEOUT_OFFSET = 1
 
       # Errors on which we close the connection and reconnect again
       # They happen when something is wrong on Kafka/Zookeeper side or when
@@ -68,11 +66,12 @@ module Karafka
           ::Karafka::App.config.kafka_hosts,
           ::Karafka::App.config.zookeeper_hosts,
           @controller.topic.to_s,
-          socket_timeout_ms: SOCKET_TIMEOUT_MS,
+          socket_timeout_ms: (::Karafka::App.config.wait_timeout + TIMEOUT_OFFSET) * 1000,
           # How long should we wait for messages if nothing is there to process
-          # @note This must be smaller than SOCKET_TIMEOUT_MS so we won't raise
-          #   constantly socket timeout errors
-          max_wait_ms: SOCKET_TIMEOUT_MS - TIMEOUT_OFFSET
+          # @note This must be smaller than socket_timeout_ms so we won't raise
+          #   constantly socket timeout errors. Also we use a seconds value, meanwhile
+          #   Poseidon requires a ms value - that's why we multiply by 1000
+          max_wait_ms: ::Karafka::App.config.wait_timeout * 1000
         )
       rescue *CONNECTION_CLEAR_ERRORS => e
         Karafka.monitor.notice_error(self.class, e)
