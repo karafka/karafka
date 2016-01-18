@@ -14,7 +14,7 @@ RSpec.describe Karafka::Configurators::Celluloid do
 
       expect(Celluloid)
         .to receive(:shutdown_timeout=)
-        .with(15)
+        .with(::Karafka::App.config.wait_timeout * 2)
 
       subject.setup
     end
