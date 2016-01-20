@@ -124,7 +124,7 @@ RSpec.describe Karafka do
 
     context 'when KARAFKA_BOOT_FILE is not defined' do
       let(:boot_file) { nil }
-      let(:default) { Pathname.new(File.join(Karafka.root, 'app.rb')) }
+      let(:default) { File.join(Karafka.root, 'app.rb') }
 
       it 'expect to use default one' do
         expect(subject.boot_file).to eq default
@@ -135,7 +135,7 @@ RSpec.describe Karafka do
       let(:boot_file) { rand.to_s }
 
       it 'expect to use one from env' do
-        expect(subject.boot_file).to eq Pathname.new(boot_file)
+        expect(subject.boot_file).to eq boot_file
       end
     end
   end

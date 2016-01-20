@@ -81,9 +81,7 @@ module Karafka
     #   KARAFKA_BOOT_FILE='/home/app_path/karafka.rb'
     #   Karafka.boot_file #=> '/home/app_path/karafka.rb'
     def boot_file
-      Pathname.new(
-        ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'app.rb')
-      )
+      ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'app.rb')
     end
   end
 end
