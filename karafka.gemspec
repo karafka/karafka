@@ -22,8 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'worker-glass'
   spec.add_dependency 'celluloid', '>= 0.17'
   spec.add_dependency 'envlogic'
-  spec.add_dependency 'sinatra', '~> 1.4'
-  spec.add_dependency 'puma'
   spec.add_dependency 'waterdrop'
   spec.add_dependency 'rake', '~> 10.4'
   spec.add_dependency 'thor', '~> 0.19'
