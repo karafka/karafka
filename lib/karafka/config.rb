@@ -29,7 +29,7 @@ module Karafka
       wait_timeout
       worker_timeout
       zookeeper_hosts
-    )
+    ).freeze
 
     SETTINGS.each do |attr_name|
       attr_accessor attr_name
@@ -37,10 +37,12 @@ module Karafka
 
     class << self
       # Configurating method
-      def setup(&block)
+      # @yield Runs a block of code providing a config singleton instance to it
+      # @yieldparam [Karafka::Config] Karafka config instance
+      def setup
         self.config ||= new
 
-        block.call(config)
+        yield(config)
         # This is a class method and we don't want to make setup_components
         # public but we still want to invoke it here
         config.send :setup_components

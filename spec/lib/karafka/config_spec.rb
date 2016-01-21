@@ -17,7 +17,6 @@ RSpec.describe Karafka::Config do
   describe '.setup' do
     subject { described_class }
     let(:instance) { described_class.new }
-    let(:block) { -> {} }
 
     before do
       instance
@@ -28,10 +27,6 @@ RSpec.describe Karafka::Config do
       expect(subject)
         .to receive(:new)
         .and_return(instance)
-
-      expect(block)
-        .to receive(:call)
-        .with(instance)
 
       expect(instance)
         .to receive(:setup_components)
@@ -44,7 +39,7 @@ RSpec.describe Karafka::Config do
       described_class.instance_variable_set('@config', @config)
     end
 
-    it { subject.setup(&block) }
+    it { expect { |block| subject.setup(&block) }.to yield_with_args }
   end
 end
 

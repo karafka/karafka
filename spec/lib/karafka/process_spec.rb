@@ -15,8 +15,6 @@ RSpec.describe Karafka::Process do
   end
 
   describe '#supervise' do
-    let(:block) { -> {} }
-
     it 'should trap signals and yield' do
       described_class::HANDLED_SIGNALS.each do |signal|
         expect(subject)
@@ -24,10 +22,7 @@ RSpec.describe Karafka::Process do
           .with(signal)
       end
 
-      expect(block)
-        .to receive(:call)
-
-      subject.send(:supervise, &block)
+      expect { |block| subject.send(:supervise, &block) }.to yield_control
     end
   end
 

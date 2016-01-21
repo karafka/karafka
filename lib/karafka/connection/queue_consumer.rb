@@ -17,7 +17,7 @@ module Karafka
         Poseidon::Errors::UnableToFetchMetadata,
         ZK::Exceptions::KeeperException,
         Zookeeper::Exceptions::ZookeeperException
-      ]
+      ].freeze
 
       # How long should it wait until trying to rebalance again
       CLAIM_SLEEP_TIME = 1

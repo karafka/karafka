@@ -24,7 +24,7 @@ module Karafka
           self
         end
 
-        alias_method :to, :new
+        alias to new
       end
     end
   end

@@ -19,7 +19,7 @@ module Karafka
       app/controllers
       app/aspects
       app
-    )
+    ).freeze
 
     # Will load files in a proper order (based on DIRS)
     # @param [String] root path from which we want to start

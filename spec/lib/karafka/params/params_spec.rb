@@ -187,7 +187,7 @@ RSpec.describe Karafka::Params::Params do
       let(:base) { { key => initial_value } }
 
       it 'expect to keep initial values' do
-        subject.merge!(key => rand)
+        subject.send :merge!, key => rand
         expect(subject[key]).to eq initial_value
       end
     end
@@ -198,7 +198,7 @@ RSpec.describe Karafka::Params::Params do
       let(:base) { { key => initial_value } }
 
       it 'expect to keep initial values' do
-        subject.merge!(key.to_sym => rand)
+        subject.send :merge!, key.to_sym => rand
         expect(subject[key]).to eq initial_value
       end
     end
@@ -209,7 +209,7 @@ RSpec.describe Karafka::Params::Params do
       let(:base) { { key => initial_value } }
 
       it 'expect to keep initial values' do
-        subject.merge!(key.to_sym => rand)
+        subject.send :merge!, key.to_sym => rand
         expect(subject[key]).to eq initial_value
       end
     end
@@ -220,7 +220,7 @@ RSpec.describe Karafka::Params::Params do
       let(:base) { { key.to_s => initial_value } }
 
       it 'expect to keep initial values' do
-        subject.merge!(key.to_sym => rand)
+        subject.send :merge!, key.to_sym => rand
         expect(subject[key]).to eq initial_value
       end
     end

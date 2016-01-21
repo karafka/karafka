@@ -9,7 +9,7 @@ module Karafka
       'development' => ::Logger::INFO,
       'debug' => ::Logger::DEBUG,
       default: ::Logger::INFO
-    }
+    }.freeze
 
     class << self
       # Builds a logger with appropriate settings, log level and environment

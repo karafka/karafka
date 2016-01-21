@@ -7,14 +7,14 @@ module Karafka
       app/controllers
       config
       log
-    )
+    ).freeze
 
     # Where should we map proper files from templates
     INSTALL_FILES_MAP = {
       'app.rb.example' => Karafka.boot_file,
       'config.ru.example' => Karafka.root.join('config.ru'),
       'sidekiq.yml.example' => Karafka.root.join('config/sidekiq.yml.example')
-    }
+    }.freeze
 
     desc 'install', 'Install all required things for Karafka application in current directory'
     method_option :new

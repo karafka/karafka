@@ -16,6 +16,8 @@
 - Worker cli command allows passing additional options directly to Sidekiq
 - Renamed concurrency to max_concurrency - it describes better what happens - Karafka will use this number of threads only when required
 - Added wait_timeout that allows us to tune how long should we wait on a single socket connection (single topic) for new messages before going to next one (this applies to each thread separately)
+- Rubocop remarks
+- Removed Sinatra and Puma dependencies
 - #37 - warn log for failed parsing of a message
 - #43 - wrong constant name
 - #44 - Method name conflict
@@ -23,6 +25,7 @@
 - #46 - Loading application
 - #45 - Set up monitor in config
 - #47 - rake karafka:run uses app.rb only
+- #53 - README update with Sinatra/Rails integration description
 
 ## 0.3.2
 - Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix

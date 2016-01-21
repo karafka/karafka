@@ -8,7 +8,7 @@ module Karafka
       initializing: :initialize!,
       running: :run!,
       stopped: :stop!
-    }
+    }.freeze
 
     STATES.each do |state, transition|
       define_method :"#{state}?" do

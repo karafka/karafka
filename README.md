@@ -30,6 +30,9 @@ Microframework used to simplify Apache Kafka based Ruby applications development
     - [Example monitor with NewRelic support](#user-content-example-monitor-with-newrelic-support)
   - [Concurrency](#user-content-concurrency)
   - [Sidekiq Web UI](#user-content-sidekiq-web-ui)
+  - [Integrating with other frameworks](#integrating-with-other-frameworks)
+    - [Integrating with Ruby on Rails](#integrating-with-ruby-on-rails)
+    - [Integrating with Sinatra](#integrating-with-sinatra)
   - [Articles and other references](#user-content-articles-and-other-references)
     - [Libraries and components](#user-content-libraries-and-components)
     - [Articles and references](#user-content-articles-and-references)
@@ -408,7 +411,16 @@ Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to in
 
 ## Sidekiq Web UI
 
-Karafka comes with a Sidekiq Web UI application that can display the current state of a Sidekiq installation. If you installed Karafka based on the install instructions, you will have a **config.ru** file that allows you to run standalone Puma instance with a Sidekiq Web UI:
+Karafka comes with a Sidekiq Web UI application that can display the current state of a Sidekiq installation. If you installed Karafka based on the install instructions, you will have a **config.ru** file that allows you to run standalone Puma instance with a Sidekiq Web UI.
+
+To be able to use it (since Karafka does not depend on Puma and Sinatra) add both of them into your Gemfile:
+
+```ruby
+gem 'puma'
+gem 'sinatra'
+```
+
+bundle and run:
 
 ```
 bundle exec rackup
@@ -419,6 +431,51 @@ bundle exec rackup
 ```
 
 You can then navigate to displayer url to check your Sidekiq status. Sidekiq Web UI by default is password protected. To check (or change) your login and password, please review **config.ru** file in your application.
+
+## Integrating with other frameworks
+
+Want to use Karafka with Ruby on Rails or Sinatra? It can be done!
+
+### Integrating with Ruby on Rails
+
+Add Karafka to your Ruby on Rails application Gemfile:
+
+```ruby
+gem 'karafka', github: 'karafka/karafka'
+```
+
+Copy the **app.rb** file from your Karafka application into your Rails app (if you don't have this file, just create an empty Karafka app and copy it). This file is responsible for booting up Karafka framework. To make it work with Ruby on Rails, you need to load whole Rails application in this file. To do so, replace:
+
+```ruby
+ENV['RACK_ENV'] ||= 'development'
+ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
+
+Bundler.require(:default, ENV['KARAFKA_ENV'])
+```
+
+with
+
+```ruby
+ENV['RAILS_ENV'] ||= 'development'
+ENV['KARAFKA_ENV'] ||= ENV['RAILS_ENV']
+
+require ::File.expand_path('../config/environment', __FILE__)
+Rails.application.eager_load!
+```
+
+and you are ready to go!
+
+### Integrating with Sinatra
+
+Sinatra applications differ from one another. There are single file applications and apps with similar to Rails structure. That's why we cannot provide a simple single tutorial. Here are some guidelines that you should follow in order to integrate it with Sinatra based application:
+
+Add Karafka to your Sinatra application Gemfile:
+
+```ruby
+gem 'karafka', github: 'karafka/karafka'
+```
+
+After that make sure that whole your application is loaded before setting up and booting Karafka (see Ruby on Rails integration for more details about that).
 
 ## Articles and other references
 

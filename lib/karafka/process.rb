@@ -7,7 +7,7 @@ module Karafka
     # Signal types that we handle
     HANDLED_SIGNALS = %i(
       SIGINT SIGQUIT
-    )
+    ).freeze
 
     HANDLED_SIGNALS.each do |signal|
       # Assigns a callback that will happen when certain signal will be send
@@ -31,10 +31,10 @@ module Karafka
 
     # Method catches all HANDLED_SIGNALS and performs appropriate callbacks (if defined)
     # @note If there are no callbacks, this method will just ignore a given signal that was sent
-    # @param [Block] block of code that we want to execute and supervise
-    def supervise(&block)
+    # @yield [Block] block of code that we want to execute and supervise
+    def supervise
       HANDLED_SIGNALS.each { |signal| trap_signal(signal) }
-      block.call
+      yield
     end
 
     private
