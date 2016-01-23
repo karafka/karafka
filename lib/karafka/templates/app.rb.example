@@ -20,6 +20,11 @@ end
 
 Karafka::Loader.new.load(App.root)
 
-# This method boots whole Karafka framework and loads all the dynamic classes/modules that are
-# required by Karafka. Execute this method after all application code is loaded
-Karafka.boot
+# Routes need to be drawn after the application code is loaded because routes rely on your code
+# Please read documentation for more details on how to draw routes
+App.routes.draw do
+  # topic :example do
+  #   controller ExampleController
+  #   interchanger CustomInterchanger
+  # end
+end

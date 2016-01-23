@@ -44,15 +44,13 @@ module Karafka
         # @return [Karafka::Params::Params] freshly initialized only with default values object
         #   that can be populated with incoming data
         def defaults(controller)
-          controller_class = controller.class
-
           # We initialize some default values that will be used both in Karafka main process and
           # inside workers
           new(
-            controller: controller_class,
-            worker: controller_class.worker,
-            parser: controller_class.parser,
-            topic: controller_class.topic
+            controller: controller.class,
+            worker: controller.worker,
+            parser: controller.parser,
+            topic: controller.topic
           )
         end
       end
