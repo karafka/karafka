@@ -1,46 +1,85 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Routing::Router do
-  subject { described_class.new(message) }
+  subject { described_class.new(topic) }
+
+  let(:topic) { "topic#{rand(1000)}" }
 
   describe '#build' do
-    let(:topic) { "topic#{rand(1000)}".to_sym }
-    let(:message) { double(topic: topic, content: {}.to_json) }
-    context 'when there is no controller that matches the topic' do
-      before do
-        expect(Karafka::Routing::Mapper)
-          .to receive(:by_topics)
-          .and_return({})
-      end
+    let(:parser) { double }
+    let(:worker) { double }
+    let(:controller) { double }
+    let(:interchanger) { double }
+    let(:controller_instance) { double }
 
-      it 'should raise a NonMatchingTopicError' do
-        expect { subject.build }
-          .to raise_error(Karafka::Errors::NonMatchingTopicError)
+    let(:route) do
+      Karafka::Routing::Route.new.tap do |route|
+        route.controller = controller
+        route.topic = topic
+        route.parser = parser
+        route.worker = worker
+        route.interchanger = interchanger
       end
     end
 
-    context 'when there is a matching controller' do
-      let(:another_controller) do
-        ClassBuilder.inherit(Karafka::BaseController) do
-          self.group = :group_2
-          self.topic = :topic_2
+    it 'expect to build controller with all proper options assigned' do
+      allow(subject)
+        .to receive(:route)
+        .and_return(route)
 
-          def perform
-            self
+      expect(controller)
+        .to receive(:new)
+        .and_return(controller_instance)
+
+      expect(controller_instance)
+        .to receive(:topic=)
+        .with(topic)
+
+      expect(controller_instance)
+        .to receive(:interchanger=)
+        .with(interchanger)
+
+      expect(controller_instance)
+        .to receive(:parser=)
+        .with(parser)
+
+      expect(controller_instance)
+        .to receive(:worker=)
+        .with(worker)
+
+      expect(subject.build).to eq controller_instance
+    end
+  end
+
+  describe '#route' do
+    context 'when there is a route for a given topic' do
+      let(:routes) do
+        [
+          Karafka::Routing::Route.new.tap do |route|
+            route.topic = topic
           end
-        end
+        ]
       end
-      before do
-        expect(Karafka::Routing::Mapper)
-          .to receive(:by_topics)
-          .and_return(topic => another_controller)
-      end
-      it 'should use it, assign params and return controller' do
-        expect_any_instance_of(another_controller)
-          .to receive(:params=)
 
-        expect(subject.build).to be_a(another_controller)
+      before do
+        expect(Karafka::App)
+          .to receive(:routes)
+          .and_return(routes)
       end
+
+      it { expect(subject.send(:route)).to eq routes.first }
+    end
+
+    context 'when there is no route for a given topic' do
+      let(:routes) { [] }
+
+      before do
+        expect(Karafka::App)
+          .to receive(:routes)
+          .and_return(routes)
+      end
+
+      it { expect { subject.send(:route) }.to raise_error(Karafka::Errors::NonMatchingRouteError) }
     end
   end
 end

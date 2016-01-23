@@ -7,14 +7,14 @@ RSpec.describe Karafka::Errors do
     specify { expect(subject).to be < StandardError }
   end
 
-  describe 'NonMatchingTopicError' do
-    subject { described_class::NonMatchingTopicError }
+  describe 'ParserError' do
+    subject { described_class::ParserError }
 
     specify { expect(subject).to be < described_class::BaseError }
   end
 
-  describe 'PerformMethodNotDefined' do
-    subject { described_class::PerformMethodNotDefined }
+  describe 'NonMatchingRouteError' do
+    subject { described_class::NonMatchingRouteError }
 
     specify { expect(subject).to be < described_class::BaseError }
   end
@@ -27,6 +27,18 @@ RSpec.describe Karafka::Errors do
 
   describe 'DuplicatedTopicError' do
     subject { described_class::DuplicatedTopicError }
+
+    specify { expect(subject).to be < described_class::BaseError }
+  end
+
+  describe 'InvalidTopicName' do
+    subject { described_class::InvalidTopicName }
+
+    specify { expect(subject).to be < described_class::BaseError }
+  end
+
+  describe 'InvalidGroupName' do
+    subject { described_class::InvalidGroupName }
 
     specify { expect(subject).to be < described_class::BaseError }
   end

@@ -59,7 +59,7 @@ RSpec.describe Karafka::Params::Params do
     let(:parser) { double }
     let(:topic) { double }
 
-    let(:controller_class) do
+    let(:controller) do
       double(
         worker: worker,
         parser: parser,
@@ -67,13 +67,11 @@ RSpec.describe Karafka::Params::Params do
       )
     end
 
-    let(:controller) { double(class: controller_class) }
-
     it 'expect to return default params' do
       params = subject.send(:defaults, controller)
 
       expect(params).to be_a subject
-      expect(params[:controller]).to eq controller_class
+      expect(params[:controller]).to eq controller.class
       expect(params[:worker]).to eq worker
       expect(params[:parser]).to eq parser
       expect(params[:topic]).to eq topic

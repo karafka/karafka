@@ -1,18 +1,14 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Connection::Listener do
-  let(:controller) do
-    ClassBuilder.inherit(Karafka::BaseController) do
-      self.group = rand
-      self.topic = rand
-
-      def perform
-        self
-      end
+  let(:route) do
+    Karafka::Routing::Route.new.tap do |route|
+      route.topic = rand.to_s
+      route.group = rand.to_s
     end
   end
 
-  subject { described_class.new(controller) }
+  subject { described_class.new(route) }
 
   describe '#fetch' do
     let(:action) { double }
@@ -60,7 +56,7 @@ RSpec.describe Karafka::Connection::Listener do
           .and_yield(_partition, messages_bulk)
         expect(action)
           .to receive(:call)
-          .with(subject.controller, incoming_message)
+          .with(incoming_message)
 
         subject.send(:fetch, action)
       end
@@ -93,7 +89,7 @@ RSpec.describe Karafka::Connection::Listener do
       it 'should create an instance and return' do
         expect(Karafka::Connection::QueueConsumer)
           .to receive(:new)
-          .with(controller)
+          .with(route)
           .and_return(queue_consumer)
 
         expect(subject.send(:queue_consumer)).to eq queue_consumer
