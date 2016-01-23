@@ -10,9 +10,6 @@ RSpec.describe Karafka::Workers::BaseWorker do
 
   let(:controller) do
     ClassBuilder.inherit(Karafka::BaseController) do
-      self.group = rand
-      self.topic = rand
-
       def perform
         self
       end
@@ -23,7 +20,7 @@ RSpec.describe Karafka::Workers::BaseWorker do
     end
   end
 
-  let(:args) { [controller.to_s, rand] }
+  let(:args) { [rand.to_s, rand] }
 
   describe '#perform' do
     before do
@@ -41,13 +38,13 @@ RSpec.describe Karafka::Workers::BaseWorker do
       expect(subject.params).to eq args.last
     end
 
-    it 'should set controller_class_name and perform controller action' do
+    it 'should set topic and perform controller action' do
       expect(controller)
         .to receive(:perform)
 
       subject.perform(*args)
 
-      expect(subject.controller_class_name).to eq args.first
+      expect(subject.topic).to eq args.first
     end
   end
 
@@ -89,34 +86,45 @@ RSpec.describe Karafka::Workers::BaseWorker do
   end
 
   describe '#controller' do
+    let(:topic) { rand.to_s }
+    let(:router) { Karafka::Routing::Router.new(topic) }
+    let(:interchanger) { double }
+    let(:params) { double }
+    let(:interchanged_params) { double }
+    let(:controller_instance) { controller.new }
+
     before do
-      NamedController = controller
+      router
+      subject.params = params
     end
 
-    let(:params) { double }
-    let(:interchanged_parse_params) { double }
-
-    it 'should get controller based on controller_class_name and assign params via interchanger' do
+    it 'expect to use router to pick controller, assign params and return' do
       expect(subject)
-        .to receive(:controller_class_name)
-        .and_return(NamedController.to_s)
+        .to receive(:topic) { topic }
 
-      expect(subject)
-        .to receive(:params)
-        .and_return(params)
+      expect(Karafka::Routing::Router)
+        .to receive(:new)
+        .with(topic)
+        .and_return(router)
 
-      expect(NamedController.interchanger)
+      expect(router)
+        .to receive(:build)
+        .and_return(controller_instance)
+
+      expect(controller_instance)
+        .to receive(:interchanger)
+        .and_return(interchanger)
+
+      expect(interchanger)
         .to receive(:parse)
         .with(params)
-        .and_return(interchanged_parse_params)
+        .and_return(interchanged_params)
 
-      expect_any_instance_of(controller)
+      expect(controller_instance)
         .to receive(:params=)
-        .with(interchanged_parse_params)
+        .with(interchanged_params)
 
-      ctrl = subject.send(:controller)
-
-      expect(ctrl).to be_a controller
+      expect(subject.send(:controller)).to eq controller_instance
     end
   end
 end
