@@ -232,7 +232,7 @@ Note that a single group can be used only in a single topic.
 
  - *worker* - Class name - name of a worker class that we want to use to schedule perform code
 
-Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **Karafka::Workers::BaseWorker** and will share all its settings.
+Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **Karafka::BaseWorker** and will share all its settings.
 
 To run Sidekiq you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **bundle exec karafka install**.
 

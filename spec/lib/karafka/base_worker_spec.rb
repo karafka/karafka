@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Workers::BaseWorker do
+RSpec.describe Karafka::BaseWorker do
   subject { described_class.new }
 
   before do

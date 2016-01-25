@@ -1,7 +1,8 @@
 module Karafka
+  # Internal stuff related to workers
   module Workers
     # Builder is used to check if there is a proper controller with the same name as
-    # a controller and if not, it will create a default one using Karafka::Workers::BaseWorker
+    # a controller and if not, it will create a default one using Karafka::BaseWorker
     # This is used as a building layer between controllers and workers. it will be only used
     # when user does not provide his own worker that should perform controller stuff
     class Builder
@@ -25,7 +26,7 @@ module Karafka
       def build
         return self.class.const_get(name) if self.class.const_defined?(name)
 
-        klass = Class.new(Karafka::Workers::BaseWorker)
+        klass = Class.new(Karafka::BaseWorker)
         klass.timeout = Karafka::App.config.worker_timeout
 
         scope.const_set(name, klass)

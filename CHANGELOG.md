@@ -27,6 +27,7 @@
 - #47 - rake karafka:run uses app.rb only
 - #53 - README update with Sinatra/Rails integration description
 - #41 - New Routing engine
+- #54 - Move Karafka::Workers::BaseWorker to Karafka::BaseWorker
 
 ## 0.3.2
 - Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix
@@ -41,7 +42,7 @@
 ## 0.3.0
 - Switched from custom ParserError for each parser to general catching of Karafka::Errors::ParseError and its descendants
 - Gem dump
-- Fixed #32 - now when using custom workers that does not inherit from Karafka::Workers::BaseWorker perform method is not required. Using custom workers means that the logic that would normally lie under #perform, needs to be executed directly from the worker.
+- Fixed #32 - now when using custom workers that does not inherit from Karafka::BaseWorker perform method is not required. Using custom workers means that the logic that would normally lie under #perform, needs to be executed directly from the worker.
 - Fixed #31 - Technically didn't fix because this is how Sidekiq is meant to work, but provided possibility to assign custom interchangers that allow to bypass JSON encoding issues by converting data that goes to Redis to a required format (and parsing it back when it is fetched)
 - Added full parameters lazy load - content is no longer loaded during #perform_async if params are not used in before_enqueue
 - No more namespaces for Redis by default (use separate DBs)
