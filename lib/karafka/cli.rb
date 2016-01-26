@@ -22,13 +22,11 @@ module Karafka
 
       # @return [Array<Class>] Array with Cli action classes that can be used as commands
       def cli_commands
-        commands = constants.map do |action|
-          object = const_get(action)
-          object.instance_of?(Class) && (object < Cli::Base) ? object : nil
-        end
-
-        commands.compact!
-        commands
+        constants
+          .map! { |object| const_get(object) }
+          .keep_if do |object|
+            object.instance_of?(Class) && (object < Cli::Base)
+          end
       end
     end
   end
