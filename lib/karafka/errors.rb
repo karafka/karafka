@@ -28,5 +28,9 @@ module Karafka
 
     # Raised when we want to use group name that has unsupported characters
     class InvalidGroupName < BaseError; end
+
+    # Raised when application does not have ApplicationWorker or other class that directly
+    # inherits from Karafka::BaseWorker
+    class BaseWorkerDescentantMissing < BaseError; end
   end
 end

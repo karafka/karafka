@@ -3,9 +3,6 @@ module Karafka
   class BaseWorker
     include Sidekiq::Worker
 
-    prepend WorkerGlass::Timeout
-    prepend WorkerGlass::Reentrancy
-
     attr_accessor :params, :topic
 
     # Executes the logic that lies in #perform Karafka controller method

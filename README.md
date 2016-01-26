@@ -233,7 +233,7 @@ Note that a single group can be used only in a single topic.
 
  - *worker* - Class name - name of a worker class that we want to use to schedule perform code
 
-Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **Karafka::BaseWorker** and will share all its settings.
+Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **ApplicationWorker** and will share all its settings.
 
 To run Sidekiq you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **bundle exec karafka install**.
 
@@ -311,10 +311,10 @@ end
 
 ### Receiving messages
 
-Controllers should inherit from Karafka::BaseController. If you don't want to use custom workers (and except some particular cases you don't need to), you need to define a #perform method that will execute your business logic code in background.
+Controllers should inherit from **ApplicationController** (or any other controller that inherits from **Karafka::BaseController**). If you don't want to use custom workers (and except some particular cases you don't need to), you need to define a #perform method that will execute your business logic code in background.
 
 ```ruby
-class UsersController < Karafka::BaseController
+class UsersController < ApplicationController
   # Method execution will be enqueued in Sidekiq
   # Karafka will schedule automatically a proper job and execute this logic in the background
   def perform
@@ -337,7 +337,7 @@ Once you run consumer - messages from Kafka server will be send to a proper cont
 Presented example controller will accept incoming messages from a Kafka topic named :karafka_topic
 
 ```ruby
-  class TestController < Karafka::BaseController
+  class TestController < ApplicationController
     # before_enqueue has access to received params.
     # You can modify them before enqueue it to sidekiq queue.
     before_enqueue {

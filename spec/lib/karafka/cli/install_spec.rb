@@ -17,14 +17,14 @@ RSpec.describe Karafka::Cli::Install do
       described_class::INSTALL_FILES_MAP.each do |source, target|
         expect(File)
           .to receive(:exist?)
-          .with(target)
+          .with(Karafka.root.join(target))
           .and_return(false)
 
         expect(FileUtils)
           .to receive(:cp_r)
           .with(
             Karafka.core_root.join("templates/#{source}"),
-            target
+            Karafka.root.join(target)
           )
       end
 

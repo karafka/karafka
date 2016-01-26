@@ -30,6 +30,7 @@
 - #53 - README update with Sinatra/Rails integration description
 - #41 - New Routing engine
 - #54 - Move Karafka::Workers::BaseWorker to Karafka::BaseWorker
+- #55 - ApplicationController and ApplicationWorker
 
 ## 0.3.2
 - Karafka::Params::Params lazy load merge keys with string/symbol names priorities fix

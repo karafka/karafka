@@ -42,4 +42,10 @@ RSpec.describe Karafka::Errors do
 
     specify { expect(subject).to be < described_class::BaseError }
   end
+
+  describe 'BaseWorkerDescentantMissing' do
+    subject { described_class::BaseWorkerDescentantMissing }
+
+    specify { expect(subject).to be < described_class::BaseError }
+  end
 end

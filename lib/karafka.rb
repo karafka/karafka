@@ -17,8 +17,9 @@
   thor
   fileutils
   active_support/callbacks
-  active_support/descendants_tracker
+  active_support/core_ext/class/subclasses
   active_support/core_ext/hash/indifferent_access
+  active_support/descendants_tracker
   active_support/inflector
   karafka/loader
   karafka/status
@@ -66,7 +67,7 @@ module Karafka
     #   KARAFKA_BOOT_FILE='/home/app_path/karafka.rb'
     #   Karafka.boot_file #=> '/home/app_path/karafka.rb'
     def boot_file
-      ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'app.rb')
+      Pathname.new(ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'app.rb'))
     end
   end
 end

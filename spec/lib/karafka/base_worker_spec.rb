@@ -3,11 +3,6 @@ require 'spec_helper'
 RSpec.describe Karafka::BaseWorker do
   subject { described_class.new }
 
-  before do
-    # By default we don't set on base - on those that inherit only
-    described_class.timeout = 1
-  end
-
   let(:controller) do
     ClassBuilder.inherit(Karafka::BaseController) do
       def perform

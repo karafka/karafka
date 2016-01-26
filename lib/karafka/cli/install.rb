@@ -9,15 +9,18 @@ module Karafka
       INSTALL_DIRS = %w(
         app/models
         app/controllers
+        app/workers
         config
         log
       ).freeze
 
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
-        'app.rb.example' => Karafka.boot_file,
-        'config.ru.example' => Karafka.root.join('config.ru'),
-        'sidekiq.yml.example' => Karafka.root.join('config/sidekiq.yml.example')
+        'app.rb.example' => Karafka.boot_file.basename,
+        'config.ru.example' => 'config.ru',
+        'sidekiq.yml.example' => 'config/sidekiq.yml.example',
+        'application_worker.rb.example' => 'app/workers/application_worker.rb',
+        'application_controller.rb.example' => 'app/controllers/application_controller.rb'
       }.freeze
 
       # Install all required things for Karafka application in current directory
@@ -27,6 +30,7 @@ module Karafka
         end
 
         INSTALL_FILES_MAP.each do |source, target|
+          target = Karafka.root.join(target)
           next if File.exist?(target)
 
           source = Karafka.core_root.join("templates/#{source}")

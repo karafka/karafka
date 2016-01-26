@@ -16,7 +16,6 @@ module Karafka
   #
   # @example Create a controller with a block before_enqueue
   #   class ExampleController < Karafka::BaseController
-  #
   #     before_enqueue do
   #       # Here we should have some checking logic
   #       # If false is returned, won't schedule a perform action

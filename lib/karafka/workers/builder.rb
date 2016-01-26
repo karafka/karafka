@@ -26,8 +26,7 @@ module Karafka
       def build
         return self.class.const_get(name) if self.class.const_defined?(name)
 
-        klass = Class.new(Karafka::BaseWorker)
-        klass.timeout = Karafka::App.config.worker_timeout
+        klass = Class.new(base)
 
         scope.const_set(name, klass)
       end
@@ -57,6 +56,14 @@ module Karafka
         base.gsub!('Controller', 'Worker')
         base.gsub!(CONSTANT_REGEXP, '')
         base
+      end
+
+      # @return [Class] descendant of Karafka::BaseWorker from which all other workers
+      #   should inherit
+      # @raise [Karafka::Errors::BaseWorkerDescentantMissing] raised when Karafka cannot detect
+      #   direct Karafka::BaseWorker descendant from which it could build workers
+      def base
+        Karafka::BaseWorker.subclasses.first || fail(Errors::BaseWorkerDescentantMissing)
       end
     end
   end

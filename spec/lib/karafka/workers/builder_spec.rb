@@ -11,6 +11,14 @@ RSpec.describe Karafka::Workers::Builder do
   end
 
   describe '#build' do
+    let(:base) { Karafka::BaseWorker }
+
+    before do
+      allow(subject)
+        .to receive(:base)
+        .and_return(base)
+    end
+
     context 'when the worker class already exists' do
       let(:name) { 'Karafka' }
 
@@ -124,6 +132,29 @@ RSpec.describe Karafka::Workers::Builder do
       let(:controller_class) { "Karafka::#<Class:#{object_id}>" }
 
       it { expect(subject.send(:scope)).to eq Karafka }
+    end
+  end
+
+  describe '#base' do
+    before do
+      expect(Karafka::BaseWorker)
+        .to receive(:subclasses)
+        .and_return([descendant])
+    end
+
+    context 'when there is a direct descendant of Karafka::BaseWorker' do
+      let(:descendant) { double }
+
+      it 'expect to use it' do
+        expect(subject.send(:base)).to eq descendant
+      end
+    end
+
+    context 'when there is no direct descendant of Karafka::BaseWorker' do
+      let(:descendant) { nil }
+      let(:error) { Karafka::Errors::BaseWorkerDescentantMissing }
+
+      it { expect { subject.send(:base) }.to raise_error(error) }
     end
   end
 end
