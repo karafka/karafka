@@ -1,22 +1,12 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Connection::Consumer do
-  let(:controller_class) do
-    ClassBuilder.inherit(Karafka::BaseController) do
-      self.group = rand
-      self.topic = rand
-
-      def perform
-        self
-      end
-    end
-  end
-
   subject { described_class.new }
 
   describe '#consume' do
+    let(:topic) { rand.to_s }
     let(:raw_message_value) { rand }
-    let(:raw_message) { double(value: raw_message_value) }
+    let(:raw_message) { double(value: raw_message_value, topic: topic) }
     let(:message) { double }
     let(:builder) { Karafka::Routing::Router.new(nil) }
     let(:controller_instance) { double }
@@ -25,12 +15,12 @@ RSpec.describe Karafka::Connection::Consumer do
       it 'should route to a proper controller and schedule task' do
         expect(Karafka::Connection::Message)
           .to receive(:new)
-          .with(controller_class.topic, raw_message_value)
+          .with(topic, raw_message_value)
           .and_return(message)
 
         expect(Karafka::Routing::Router)
           .to receive(:new)
-          .with(message)
+          .with(topic)
           .and_return(builder)
 
         expect(builder)
@@ -38,9 +28,13 @@ RSpec.describe Karafka::Connection::Consumer do
           .and_return(controller_instance)
 
         expect(controller_instance)
+          .to receive(:params=)
+          .with(message)
+
+        expect(controller_instance)
           .to receive(:schedule)
 
-        subject.consume(controller_class, raw_message)
+        subject.consume(raw_message)
       end
 
       context 'something goes wrong (exception is raised)' do
@@ -62,7 +56,7 @@ RSpec.describe Karafka::Connection::Consumer do
             end
 
             it 'should notice and not reraise error' do
-              expect { subject.consume(controller_class, raw_message) }.not_to raise_error
+              expect { subject.consume(raw_message) }.not_to raise_error
             end
           end
         end

@@ -1,14 +1,18 @@
 module Karafka
   # Karafka framework Cli
   class Cli
-    desc 'server', 'Start the Karafka server (short-cut alias: "s")'
-    method_option :server, aliases: 's'
-    # Start the Karafka server
-    def server
-      puts 'Starting Karafka framework'
-      info
+    # Server Karafka Cli action
+    class Server < Base
+      self.desc = 'Start the Karafka server (short-cut alias: "s")'
+      self.options = { aliases: 's' }
 
-      Karafka::App.run
+      # Start the Karafka server
+      def call
+        puts 'Starting Karafka framework'
+        cli.info
+
+        Karafka::App.run
+      end
     end
   end
 end

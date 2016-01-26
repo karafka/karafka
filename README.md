@@ -7,36 +7,37 @@ Microframework used to simplify Apache Kafka based Ruby applications development
 
 ## Table of Contents
 
-  - [Table of Contents](#user-content-table-of-contents)
-  - [How does it work](#user-content-how-does-it-work)
-  - [Installation](#user-content-installation)
-  - [Setup](#user-content-setup)
-    - [Application](#user-content-application)
-    - [WaterDrop](#user-content-waterdrop)
-    - [Configurators](#user-content-configurators)
-  - [Usage](#user-content-usage)
-    - [Sending messages from Karafka](#user-content-sending-messages-from-karafka)
-    - [Receiving messages](#user-content-receiving-messages)
-      - [Methods and attributes for every controller](#user-content-methods-and-attributes-for-every-controller)
-      - [Optional attributes](#user-content-optional-attributes)
-        - [Karafka controller topic](#user-content-karafka-controller-topic)
-        - [Karafka controller group](#user-content-karafka-controller-group)
-        - [Karafka controller custom worker](#user-content-karafka-controller-custom-worker)
-        - [Karafka controller custom parser](#user-content-karafka-controller-custom-parser)
-        - [Karafka controller custom interchanger](#user-content-karafka-controller-custom-interchanger)
-      - [Controllers callbacks](#user-content-controllers-callbacks)
-  - [Monitoring and logging](#user-content-monitoring-and-logging)
-    - [Example monitor with Errbit support](#user-content-example-monitor-with-errbitairbrake-support)
-    - [Example monitor with NewRelic support](#user-content-example-monitor-with-newrelic-support)
-  - [Concurrency](#user-content-concurrency)
-  - [Sidekiq Web UI](#user-content-sidekiq-web-ui)
+  - [Table of Contents](#table-of-contents)
+  - [How does it work](#how-does-it-work)
+  - [Installation](#installation)
+  - [Setup](#setup)
+    - [Application](#application)
+    - [WaterDrop](#waterdrop)
+    - [Configurators](#configurators)
+    - [Environment variables settings](#environment-variables-settings)
+  - [Usage](#usage)
+    - [Karafka CLI](#karafka-cli)
+    - [Routing](#routing)
+        - [Topic](#topic)
+        - [Group](#group)
+        - [Worker](#worker)
+        - [Parser](#parser)
+        - [Interchanger](#interchanger)
+    - [Receiving messages](#receiving-messages)
+      - [Controllers callbacks](#controllers-callbacks)
+    - [Sending messages from Karafka](#sending-messages-from-karafka)
+    - [Monitoring and logging](#monitoring-and-logging)
+      - [Example monitor with Errbit/Airbrake support](#example-monitor-with-errbit/airbrake-support)
+      - [Example monitor with NewRelic support](#example-monitor-with-newrelic-support)
+  - [Concurrency](#concurrency)
+  - [Sidekiq Web UI](#sidekiq-web-ui)
   - [Integrating with other frameworks](#integrating-with-other-frameworks)
     - [Integrating with Ruby on Rails](#integrating-with-ruby-on-rails)
     - [Integrating with Sinatra](#integrating-with-sinatra)
-  - [Articles and other references](#user-content-articles-and-other-references)
-    - [Libraries and components](#user-content-libraries-and-components)
-    - [Articles and references](#user-content-articles-and-references)
-  - [Note on Patches/Pull Requests](#user-content-note-on-patchespull-requests)
+  - [Articles and other references](#articles-and-other-references)
+    - [Libraries and components](#libraries-and-components)
+    - [Articles and references](#articles-and-references)
+  - [Note on Patches/Pull Requests](#note-on-patches/pull-requests)
 
 ## How does it work
 
@@ -143,11 +144,12 @@ Karafka has a simple CLI built in. It provides following commands:
 |----------------|---------------------------------------------------------------------------|
 | help [COMMAND] | Describe available commands or one specific command                       |
 | console        | Start the Karafka console (short-cut alias: "c")                          |
+| info           | Print configuration details and other options of your application         |
 | install        | Installs all required things for Karafka application in current directory |
+| routes         | Print out all defined routes in alphabetical order                        |
 | server         | Start the Karafka server (short-cut alias: "s")                           |
 | topics         | Lists all topics available on Karafka server (short-cut alias: "t")       |
 | worker         | Start the Karafka Sidekiq worker (short-cut alias: "w")                   |
-| info           | Print configuration details and other options of your application         |
 
 All the commands are executed the same way:
 
@@ -155,101 +157,111 @@ All the commands are executed the same way:
 bundle exec karafka [COMMAND]
 ```
 
-### Sending messages from Karafka
+### Routing
 
-If you want send messages from karafka you need to use **waterdrop** gem.
+Prior to version 0.4 Karafka framework didn't have routing. Group, topic and all other "controller related" options were being either taken or initialized directly from the controller. Unfortunately this solution was insufficient. From version 0.4 there's a routing engine.
 
-Example usage:
-
-```ruby
-message = WaterDrop::Message.new('topic', 'message')
-message.send!
-
-message = WaterDrop::Message.new('topic', { user_id: 1 }.to_json)
-message.send!
-```
-
-Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to use it.
-
-### Receiving messages
-
-First create application as it was written in the installation section above.
-It will generate app folder with controllers and models folder, app.rb file, config folder with sidekiq.yml.example file and a
-log folder where karafka logs will be written(based on environment).
-
-#### Methods and attributes for every controller
-
-Now, to have ability to receive messages you should define controllers in app/controllers folder. Controllers should inherit from Karafka::BaseController. If you don't want to use custom workers (and except some particular cases you shouldn't), yo need to define a #perform method that will be execute your business logic code in a Sidekiq worker
-
-####  Optional attributes
-
-Karafka controller has four optional attributes: **topic**, **group**, **parser**, **worker** and **interchanger**.
-
-##### Karafka controller topic
-
- - *topic* - symbol/string with a topic to which this controller should listen
-
-By default topic is taken from the controller name (similar to Rails routes). It will also include any namespace name in which the controller is defined. Here you have few examples on what type of topic you will get based on the controller name (with namespaces):
+Routing engine provides an interface to describe how messages from all the topics should be handled. To start using it, just use the *draw* method on routes:
 
 ```ruby
-VideosUploadedController => :videos_uploaded
-Source::EventsController => :source_events
-DataApp::Targets::UsersTargetsController => :data_app_targets_users_targets
-```
-
-You can of course overwrite it and set any topic you want:
-
-```ruby
-class TestController < Karafka::BaseController
-  self.topic = :prefered_topic_name
+App.routes.draw do
+  topic :example do
+    controller ExampleController
+  end
 end
 ```
 
-##### Karafka controller group
+The basic route description requires providing *topic* and *controller* that should handle it (Karafka will create a separate controller instance for each request).
+
+There are also several other methods available (optional):
+
+  - *group* - symbol/string with a group name. Groups are used to cluster applications
+  - *worker* - Class name - name of a worker class that we want to use to schedule perform code
+  - *parser* - Class name - name of a parser class that we want to use to parse incoming data
+  - *interchanger* - Class name - name of a interchanger class that we want to use to format data that we put/fetch into/from #perform_async
+
+```ruby
+App.routes.draw do
+  topic :binary_video_details do
+    group :composed_application
+    controller Videos::DetailsController
+    worker Workers::DetailsWorker
+    parser Parsers::BinaryToJson
+    interchanger Interchangers::Binary
+  end
+
+  topic :new_videos do
+    controller Videos::NewVideosController
+  end
+end
+```
+
+See description below for more details on each of them.
+
+##### Topic
+
+ - *topic* - symbol/string with a topic that we want to route
+
+```ruby
+topic :incoming_messages do
+  # Details about how to handle this topic should go here
+end
+```
+
+Topic is the root point of each route. Keep in mind that:
+
+  - All topic names must be unique in a single Karafka application
+  - Topics names are being validated because Kafka does not accept some characters
+  - If you don't specify a group, it will be built based on the topic and application name
+
+##### Group
 
  - *group* - symbol/string with a group name. Groups are used to cluster applications
 
-Also you can optionally define **group** attribute if you want to build many applications that will share the same Kafka group. Otherwise it will just build it based on the **topic** and **name**. If you're not planning to build applications that will load-balance messages between many different applications (but between one applications many processes), you may want not to define it and allow the framework to define it for you. Otherwise set:
+Optionally you can use **group** method to define group for this topic. Use it if you want to build many applications that will share the same Kafka group. Otherwise it will just build it based on the **topic** and application name. If you're not planning to build applications that will load-balance messages between many different applications (but between one applications many processes), you may want not to define it and allow the framework to define it for you.
 
-Group and topic should be unique. You can't define different controllers with the same group or topic names, it will raise error.
+```ruby
+topic :incoming_messages do
+  group :load_balanced_group
+  controler MessagesController
+end
+```
 
-##### Karafka controller custom worker
+Note that a single group can be used only in a single topic.
+
+##### Worker
 
  - *worker* - Class name - name of a worker class that we want to use to schedule perform code
 
-Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **Karafka::Workers::BaseWorker** and will share all its settings.
+Karafka by default will build a worker that will correspond to each of your controllers (so you will have a pair - controller and a worker). All of them will inherit from **ApplicationWorker** and will share all its settings.
 
 To run Sidekiq you should have sidekiq.yml file in *config* folder. The example of sidekiq.yml file will be generated to config/sidekiq.yml.example once you run **bundle exec karafka install**.
 
 However, if you want to use a raw Sidekiq worker (without any Karafka additional magic), or you want to use SidekiqPro (or any other queuing engine that has the same API as Sidekiq), you can assign your own custom worker:
 
 ```ruby
-class TestController < Karafka::BaseController
-  # This can be any type of worker that provides a perform_async method
-  self.worker = MyDifferentWorker
+topic :incoming_messages do
+  controler MessagesController
+  worker MyCustomController
 end
 ```
 
+Note that even then, you need to specify a controller that will schedule a background task.
+
 Custom workers need to provide a **#perform_async** method. It needs to accept two arguments:
 
- - *controller class* - first argument is a current controller class (controller that schedules the job)
- - *params* - all the params that came from Kafka + additional metadata. This data format might be changed if you use custom interchangers. Otherwise it will be an instance of Karafka::Params::Params
+ - *topic* - first argument is a current topic from which a given message comes
+ - *params* - all the params that came from Kafka + additional metadata. This data format might be changed if you use custom interchangers. Otherwise it will be an instance of Karafka::Params::Params.
 
 Keep in mind, that params might be in two states: parsed or unparsed when passed to #perform_async. This means, that if you use custom interchangers and/or custom workers, you might want to look into Karafka's sources to see exactly how it works.
 
-##### Karafka controller custom parser
+##### Parser
 
  - *parser* - Class name - name of a parser class that we want to use to parse incoming data
 
-Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set parser in controller. Parser needs to have a #parse method and raise error that is a ::Karafka::Errors::ParserError descendant when problem appears during parsing process.
+Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set custom parser for each route. Parser needs to have a #parse method and raise error that is a ::Karafka::Errors::ParserError descendant when problem appears during parsing process.
 
 ```ruby
-class TestController < Karafka::BaseController
-  # This can be any type of parser that provides a parse method
-  # and raise ParseError when error appear during parsing
-  self.parser = XmlParser
-end
-
 class XmlParser
   class ParserError < ::Karafka::Errors::ParserError; end
 
@@ -259,11 +271,18 @@ class XmlParser
     raise ParserError
   end
 end
+
+App.routes.draw do
+  topic :binary_video_details do
+    controller Videos::DetailsController
+    parser XmlParser
+  end
+end
 ```
 
 Note that parsing failure won't stop the application flow. Instead, Karafka will assign the raw message inside the :message key of params. That way you can handle raw message inside the Sidekiq worker (you can implement error detection, etc - any "heavy" parsing logic can and should be implemented there).
 
-##### Karafka controller custom interchanger
+##### Interchanger
 
  - *interchanger* - Class name - name of a interchanger class that we want to use to format data that we put/fetch into/from #perform_async.
 
@@ -272,10 +291,6 @@ Custom interchangers target issues with non-standard (binary, etc) data that we 
 **Warning**: if you decide to use slow interchangers, they might significantly slow down Karafka.
 
 ```ruby
-class TestController < Karafka::BaseController
-  self.interchanger = Base64Interchanger
-end
-
 class Base64Interchanger
   class << self
     def load(params)
@@ -285,6 +300,25 @@ class Base64Interchanger
     def parse(params)
       Marshal.load(Base64.decode64(params))
     end
+  end
+end
+
+  topic :binary_video_details do
+    controller Videos::DetailsController
+    interchanger Base64Interchanger
+  end
+```
+
+### Receiving messages
+
+Controllers should inherit from **ApplicationController** (or any other controller that inherits from **Karafka::BaseController**). If you don't want to use custom workers (and except some particular cases you don't need to), you need to define a #perform method that will execute your business logic code in background.
+
+```ruby
+class UsersController < ApplicationController
+  # Method execution will be enqueued in Sidekiq
+  # Karafka will schedule automatically a proper job and execute this logic in the background
+  def perform
+    User.create(params[:user])
   end
 end
 ```
@@ -303,10 +337,7 @@ Once you run consumer - messages from Kafka server will be send to a proper cont
 Presented example controller will accept incoming messages from a Kafka topic named :karafka_topic
 
 ```ruby
-  class TestController < Karafka::BaseController
-    self.group = :karafka_group # group is optional
-    self.topic = :karafka_topic # topic is optional
-
+  class TestController < ApplicationController
     # before_enqueue has access to received params.
     # You can modify them before enqueue it to sidekiq queue.
     before_enqueue {
@@ -335,6 +366,22 @@ Presented example controller will accept incoming messages from a Kafka topic na
    end
 end
 ```
+
+### Sending messages from Karafka
+
+If you want send messages from karafka you need to use **waterdrop** gem.
+
+Example usage:
+
+```ruby
+message = WaterDrop::Message.new('topic', 'message')
+message.send!
+
+message = WaterDrop::Message.new('topic', { user_id: 1 }.to_json)
+message.send!
+```
+
+Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to use it.
 
 ### Monitoring and logging
 

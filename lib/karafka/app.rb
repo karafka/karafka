@@ -21,6 +21,11 @@ module Karafka
         Config.config
       end
 
+      # @return [Karafka::Routing::Builder] routes builder instance
+      def routes
+        Routing::Builder.instance
+      end
+
       Status.instance_methods(false).each do |delegated|
         define_method(delegated) do
           Status.instance.public_send(delegated)

@@ -1,16 +1,15 @@
 module Karafka
   module Connection
-    # A single listener that listens to incoming messages from a single topic
+    # A single listener that listens to incoming messages from a single route
     # @note It does not loop on itself - it needs to be executed in a loop
     # @note Listener itself does nothing with the message - it will return to the block
     #   a raw Poseidon::FetchedMessage
     class Listener
-      attr_reader :controller
+      attr_reader :route
 
-      # @param controller [Karafka::BaseController] a descendant of base controller
       # @return [Karafka::Connection::Listener] listener instance
-      def initialize(controller)
-        @controller = controller
+      def initialize(route)
+        @route = route
       end
 
       # Opens connection, gets messages bulk and calls a block for each of the incoming messages
@@ -32,12 +31,12 @@ module Karafka
         queue_consumer.fetch do |_partition, messages_bulk|
           Karafka.monitor.notice(
             self.class,
-            topic: controller.topic,
+            topic: route.topic,
             message_count: messages_bulk.count
           )
 
           messages_bulk.each do |raw_message|
-            block.call(controller, raw_message)
+            block.call(raw_message)
           end
         end
         # This is on purpose - see the notes for this method
@@ -49,10 +48,10 @@ module Karafka
 
       private
 
-      # @return [Karafka::Connection::QueueConsumer] queue consumer that listens to a topic
+      # @return [Karafka::Connection::QueueConsumer] queue consumer that listens to a route
       # @note This is not a Karafka::Connection::Consumer
       def queue_consumer
-        @queue_consumer ||= QueueConsumer.new(@controller)
+        @queue_consumer ||= QueueConsumer.new(@route)
       end
     end
   end

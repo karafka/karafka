@@ -56,13 +56,13 @@ RSpec.describe Karafka::Runner do
   end
 
   describe '#actor_clusters' do
-    let(:controller) { double }
-    let(:controllers) { [controller] }
+    let(:route) { double }
+    let(:routes) { [route] }
 
     before do
-      expect(Karafka::Routing::Mapper)
-        .to receive(:controllers)
-        .and_return(controllers)
+      expect(Karafka::App)
+        .to receive(:routes)
+        .and_return(routes)
 
       expect(subject)
         .to receive(:slice_size)
@@ -70,7 +70,7 @@ RSpec.describe Karafka::Runner do
 
       expect(Karafka::Connection::ActorCluster)
         .to receive(:new)
-        .with(controllers)
+        .with(routes)
     end
 
     it { expect(subject.send(:actor_clusters)).to be_a Array }
@@ -85,14 +85,13 @@ RSpec.describe Karafka::Runner do
 
     context 'when we invoke a consumer block' do
       let(:message) { double }
-      let(:controller) { double }
 
       it 'should consume the message' do
         expect_any_instance_of(Karafka::Connection::Consumer)
           .to receive(:consume)
-          .with(controller, message)
+          .with(message)
 
-        subject.call(controller, message)
+        subject.call(message)
       end
     end
   end
@@ -103,8 +102,8 @@ RSpec.describe Karafka::Runner do
     let(:config) { double }
 
     before do
-      expect(Karafka::Routing::Mapper)
-        .to receive(:controllers)
+      expect(Karafka::App)
+        .to receive(:routes)
         .and_return(Array.new(controllers_length))
 
       expect(Karafka::App)

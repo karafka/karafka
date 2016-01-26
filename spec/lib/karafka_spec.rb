@@ -11,18 +11,6 @@ RSpec.describe Karafka do
     subject.logger = @logger
   end
 
-  describe '#boot' do
-    it 'should load dynamic stuff' do
-      expect(Karafka::Routing::Mapper)
-        .to receive(:controllers)
-
-      expect(Karafka::Routing::Mapper)
-        .to receive(:workers)
-
-      subject.boot
-    end
-  end
-
   describe '#logger=' do
     let(:logger) { double }
 
@@ -127,7 +115,7 @@ RSpec.describe Karafka do
       let(:default) { File.join(Karafka.root, 'app.rb') }
 
       it 'expect to use default one' do
-        expect(subject.boot_file).to eq default
+        expect(subject.boot_file).to eq Pathname.new(default)
       end
     end
 
@@ -135,7 +123,7 @@ RSpec.describe Karafka do
       let(:boot_file) { rand.to_s }
 
       it 'expect to use one from env' do
-        expect(subject.boot_file).to eq boot_file
+        expect(subject.boot_file).to eq Pathname.new(boot_file)
       end
     end
   end

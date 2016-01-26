@@ -16,8 +16,8 @@ module Karafka
 
     # @return [Array<Karafka::Connection::ActorCluster>] array with all the connection clusters
     def actor_clusters
-      Karafka::Routing::Mapper
-        .controllers
+      App
+        .routes
         .each_slice(slice_size)
         .map do |chunk|
           Karafka::Connection::ActorCluster.new(chunk)
@@ -28,17 +28,15 @@ module Karafka
     # @note For smaller amount of controllers it would be the best to number of controllers
     #   to match number of threads - that way it could consume messages in "real" time
     def slice_size
-      controllers_length = Karafka::Routing::Mapper.controllers.length
-      size = controllers_length / Karafka::App.config.max_concurrency
+      size = App.routes.size / Karafka::App.config.max_concurrency
       size < 1 ? 1 : size
     end
 
     # @return [Proc] proc that should be processed when a messaga arrives
-    # @yieldparam controller [Karafka::BaseController] descendant of the base controller
     # @yieldparam message [Poseidon::FetchedMessage] message from poseidon (raw one)
     def consumer
-      lambda do |controller, message|
-        Karafka::Connection::Consumer.new.consume(controller, message)
+      lambda do |message|
+        Karafka::Connection::Consumer.new.consume(message)
       end
     end
   end

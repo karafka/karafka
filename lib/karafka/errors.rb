@@ -9,15 +9,11 @@ module Karafka
     #   into params and proceed further
     class ParserError < BaseError; end
 
-    # Raised when router receives topic name which is not provided for any of
-    #   controllers(inherited from Karafka::BaseController)
-    #   This should never happen because we listed only to topics defined in controllers
+    # Raised when router receives topic name which does not correspond with any routes
+    #   This should never happen because we listed only to topics defined in routes
     #   but theory is not always right. If you encounter this error - please contact
     #   Karafka maintainers
-    class NonMatchingTopicError < BaseError; end
-
-    # Raised when we have a controller that does not have a perform method that is required
-    class PerformMethodNotDefined < BaseError; end
+    class NonMatchingRouteError < BaseError; end
 
     # Raised when we have few controllers(inherited from Karafka::BaseController)
     #   with the same group name
@@ -26,5 +22,15 @@ module Karafka
     # Raised when we have few controllers(inherited from Karafka::BaseController)
     #   with the same topic name
     class DuplicatedTopicError < BaseError; end
+
+    # Raised when we want to use topic name that has unsupported characters
+    class InvalidTopicName < BaseError; end
+
+    # Raised when we want to use group name that has unsupported characters
+    class InvalidGroupName < BaseError; end
+
+    # Raised when application does not have ApplicationWorker or other class that directly
+    # inherits from Karafka::BaseWorker
+    class BaseWorkerDescentantMissing < BaseError; end
   end
 end

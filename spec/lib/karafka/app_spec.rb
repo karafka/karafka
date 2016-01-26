@@ -80,6 +80,14 @@ RSpec.describe Karafka::App do
     end
   end
 
+  describe '#routes' do
+    let(:routes) { Karafka::Routing::Builder.instance }
+
+    it 'should return routes builder' do
+      expect(subject.routes).to eq routes
+    end
+  end
+
   describe '#setup' do
     it 'should delegate it to Config setup and set framework to initializing state' do
       expect(Karafka::Config)

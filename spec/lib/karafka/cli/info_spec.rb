@@ -1,9 +1,12 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Cli do
-  subject { described_class.new }
+RSpec.describe Karafka::Cli::Info do
+  let(:cli) { Karafka::Cli.new }
+  subject { described_class.new(cli) }
 
-  describe '#info' do
+  specify { expect(described_class).to be < Karafka::Cli::Base }
+
+  describe '#call' do
     let(:info) do
       [
         "Karafka framework version: #{Karafka::VERSION}",
@@ -24,7 +27,7 @@ RSpec.describe Karafka::Cli do
         .to receive(:puts)
         .with(info.join("\n"))
 
-      subject.info
+      subject.call
     end
   end
 end

@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'karafka'
-require Karafka.boot_file if File.exist?(Karafka.boot_file)
+require Karafka.boot_file.to_s if File.exist?(Karafka.boot_file.to_s)
 
+Karafka::Cli.prepare
 Karafka::Cli.start

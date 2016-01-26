@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe Karafka::Connection::QueueConsumer do
   let(:group) { rand.to_s }
   let(:topic) { rand.to_s }
-  let(:controller) do
+  let(:route) do
     double(
       group: group,
       topic: topic
@@ -19,7 +19,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
     Zookeeper::Exceptions::ZookeeperException
   ]
 
-  subject { described_class.new(controller) }
+  subject { described_class.new(route) }
 
   describe 'preconditions' do
     it 'should have socket timeout bigger then wait timeout' do
@@ -28,8 +28,8 @@ RSpec.describe Karafka::Connection::QueueConsumer do
   end
 
   describe '.new' do
-    it 'should just remember controller' do
-      expect(subject.instance_variable_get(:@controller)).to eq controller
+    it 'should just remember route' do
+      expect(subject.instance_variable_get(:@route)).to eq route
     end
   end
 
@@ -126,10 +126,10 @@ RSpec.describe Karafka::Connection::QueueConsumer do
         expect(Poseidon::ConsumerGroup)
           .to receive(:new)
           .with(
-            controller.group.to_s,
+            route.group.to_s,
             ::Karafka::App.config.kafka_hosts,
             ::Karafka::App.config.zookeeper_hosts,
-            controller.topic.to_s,
+            route.topic.to_s,
             socket_timeout_ms: socket_timeout_ms,
             max_wait_ms: max_wait_ms
           )

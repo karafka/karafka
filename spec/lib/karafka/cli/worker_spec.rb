@@ -1,9 +1,12 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Cli do
-  subject { described_class.new }
+RSpec.describe Karafka::Cli::Worker do
+  let(:cli) { Karafka::Cli.new }
+  subject { described_class.new(cli) }
 
-  describe '#worker' do
+  specify { expect(described_class).to be < Karafka::Cli::Base }
+
+  describe '#call' do
     let(:config_file) { Karafka::App.root.join('config/sidekiq.yml') }
     let(:cmd) do
       config = "-C #{Karafka::App.root.join('config/sidekiq.yml')}"
@@ -18,7 +21,7 @@ RSpec.describe Karafka::Cli do
         .to receive(:puts)
         .with('Starting Karafka worker')
 
-      expect(subject)
+      expect(cli)
         .to receive(:info)
 
       expect(subject)
@@ -34,7 +37,7 @@ RSpec.describe Karafka::Cli do
       let(:params) { [] }
 
       it 'expect to print info and execute Sidekiq with default options' do
-        subject.worker
+        subject.call
       end
     end
 
@@ -42,7 +45,7 @@ RSpec.describe Karafka::Cli do
       let(:params) { ["-q #{rand}", "-e #{rand}"] }
 
       it 'expect to print info and execute Sidekiq with extra options' do
-        subject.worker(*params)
+        subject.call(*params)
       end
     end
   end

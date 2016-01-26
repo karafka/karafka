@@ -23,10 +23,11 @@ module Karafka
       CLAIM_SLEEP_TIME = 1
 
       # Creates a queue consumer that will pull the data from Kafka
-      # @param controller [Karafka::BaseController] base controller descendant
+      # @param [Karafka::Routing::Route] route details that will be used to build up a
+      #   queue consumer instance
       # @return [Karafka::Connection::QueueConsumer] queue consumer instance
-      def initialize(controller)
-        @controller = controller
+      def initialize(route)
+        @route = route
       end
 
       # Fetches a bulk of messages from Kafka and yield a block with them
@@ -62,10 +63,10 @@ module Karafka
       # @return [Poseidon::ConsumerGroup] consumer group instance
       def target
         @target ||= Poseidon::ConsumerGroup.new(
-          @controller.group.to_s,
+          @route.group,
           ::Karafka::App.config.kafka_hosts,
           ::Karafka::App.config.zookeeper_hosts,
-          @controller.topic.to_s,
+          @route.topic,
           socket_timeout_ms: (::Karafka::App.config.wait_timeout + TIMEOUT_OFFSET) * 1000,
           # How long should we wait for messages if nothing is there to process
           # @note This must be smaller than socket_timeout_ms so we won't raise

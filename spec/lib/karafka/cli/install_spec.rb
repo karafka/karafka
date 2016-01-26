@@ -1,9 +1,12 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Cli do
-  subject { described_class.new }
+RSpec.describe Karafka::Cli::Install do
+  let(:cli) { Karafka::Cli.new }
+  subject { described_class.new(cli) }
 
-  describe '#install' do
+  specify { expect(described_class).to be < Karafka::Cli::Base }
+
+  describe '#call' do
     it 'expect to create proper dirs and copy template files' do
       described_class::INSTALL_DIRS.each do |dir|
         expect(FileUtils)
@@ -14,18 +17,18 @@ RSpec.describe Karafka::Cli do
       described_class::INSTALL_FILES_MAP.each do |source, target|
         expect(File)
           .to receive(:exist?)
-          .with(target)
+          .with(Karafka.root.join(target))
           .and_return(false)
 
         expect(FileUtils)
           .to receive(:cp_r)
           .with(
             Karafka.core_root.join("templates/#{source}"),
-            target
+            Karafka.root.join(target)
           )
       end
 
-      subject.install
+      subject.call
     end
   end
 end
