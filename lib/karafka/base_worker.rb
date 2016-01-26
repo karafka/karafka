@@ -9,7 +9,7 @@ module Karafka
     attr_accessor :params, :topic
 
     # Executes the logic that lies in #perform Karafka controller method
-    # @param topic [String] Topic bthat we will use to route to a proper controller
+    # @param topic [String] Topic that we will use to route to a proper controller
     # @param params [Hash] params hash that we use to build Karafka params object
     def perform(topic, params)
       self.topic = topic

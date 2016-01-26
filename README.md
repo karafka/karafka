@@ -144,11 +144,12 @@ Karafka has a simple CLI built in. It provides following commands:
 |----------------|---------------------------------------------------------------------------|
 | help [COMMAND] | Describe available commands or one specific command                       |
 | console        | Start the Karafka console (short-cut alias: "c")                          |
+| info           | Print configuration details and other options of your application         |
 | install        | Installs all required things for Karafka application in current directory |
+| routes         | Print out all defined routes in alphabetical order                        |
 | server         | Start the Karafka server (short-cut alias: "s")                           |
 | topics         | Lists all topics available on Karafka server (short-cut alias: "t")       |
 | worker         | Start the Karafka Sidekiq worker (short-cut alias: "w")                   |
-| info           | Print configuration details and other options of your application         |
 
 All the commands are executed the same way:
 

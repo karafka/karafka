@@ -18,6 +18,8 @@
 - Added wait_timeout that allows us to tune how long should we wait on a single socket connection (single topic) for new messages before going to next one (this applies to each thread separately)
 - Rubocop remarks
 - Removed Sinatra and Puma dependencies
+- Karafka Cli internal reorganization
+- Karafka Cli routes task
 - #37 - warn log for failed parsing of a message
 - #43 - wrong constant name
 - #44 - Method name conflict

@@ -3,4 +3,5 @@
 require 'karafka'
 require Karafka.boot_file if File.exist?(Karafka.boot_file)
 
+Karafka::Cli.prepare
 Karafka::Cli.start

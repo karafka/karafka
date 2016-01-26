@@ -1,9 +1,12 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Cli do
-  subject { described_class.new }
+RSpec.describe Karafka::Cli::Topics do
+  let(:cli) { Karafka::Cli.new }
+  subject { described_class.new(cli) }
 
-  describe '#topics' do
+  specify { expect(described_class).to be < Karafka::Cli::Base }
+
+  describe '#call' do
     let(:zookeeper_host) { double }
     let(:topics) { { children: [rand.to_s] } }
 
@@ -28,7 +31,7 @@ RSpec.describe Karafka::Cli do
           .with(topic)
       end
 
-      subject.topics
+      subject.call
     end
   end
 end

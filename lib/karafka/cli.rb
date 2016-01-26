@@ -5,8 +5,32 @@ module Karafka
   #
   # @note Whole Cli is built using Thor
   # @see https://github.com/erikhuda/thor
-  class Cli < Thor
+  class Cli
     package_name 'Karafka'
+
+    class << self
+      # Loads all Cli commands into Thor framework
+      # This method should be executed before we run Karafka::Cli.start, otherwise we won't
+      # have any Cli commands available
+      def prepare
+        cli_commands.each do |action|
+          action.bind_to(self)
+        end
+      end
+
+      private
+
+      # @return [Array<Class>] Array with Cli action classes that can be used as commands
+      def cli_commands
+        commands = constants.map do |action|
+          object = const_get(action)
+          object.instance_of?(Class) && (object < Cli::Base) ? object : nil
+        end
+
+        commands.compact!
+        commands
+      end
+    end
   end
 end
 

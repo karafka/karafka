@@ -13,20 +13,20 @@ module Karafka
       NAME_FORMAT = /\A(\w|\-)+\z/
 
       # Options that we can set per each route
-      attr_writer :group, :topic, :controller, :worker, :parser, :interchanger
+      attr_writer :group, :topic, :worker, :parser, :interchanger
 
       # This we can get "directly" because it does not have any details, etc
-      attr_reader :controller
+      attr_accessor :controller
 
       # Initializes default values for all the options that support defaults if their values are
       # not yet specified. This is need to be done (cannot be lazy loaded on first use) because
       # everywhere except Karafka server command, those would not be initialized on time - for
       # example for Sidekiq
       def build
+        group
         worker
         parser
         interchanger
-        group
         self
       end
 
