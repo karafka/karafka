@@ -48,7 +48,9 @@ module Karafka
         end
 
         # In order not to produce infinite number of errors, when we cannot claim any partitions
-        # lets just wait and try again later - maybe someone else
+        # lets just wait and try again later - maybe someone else will release it
+        # Otherwise (if claimed) we just stop. We don't close connection or anything because we
+        # are connected and can receive data
         return if claimed
 
         close

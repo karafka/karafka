@@ -6,7 +6,9 @@ Bundler.require(:default, ENV['KARAFKA_ENV'])
 # App class
 class App < Karafka::App
   setup do |config|
-    config.kafka_hosts = %w( 127.0.0.1:9092 )
+    # In most of the cases, Karafka will figure out kafka hosts automatically based on the zookeeper
+    #   data. Set it manually only if you know what you are doing
+    # config.kafka_hosts = %w( 127.0.0.1:9092 )
     config.zookeeper_hosts = %w( 127.0.0.1:2181 )
     config.worker_timeout = 60 # 1 minute,
     config.wait_timeout = 60 # 1 minute

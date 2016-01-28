@@ -11,7 +11,6 @@ module Karafka
 
     # Available settings
     # option logger [Instance] logger that we want to use (defaults to Karafka::Logger)
-    # option kafka_hosts [Array] kafka hosts with ports where kafka servers are run
     # option max_concurrency [Integer] how many threads that listen to Kafka can we have
     # option monitor [Instance] monitor instance that we want to use (defaults to Karafka::Monitor)
     # option name [String] current app name - used to provide default Kafka groups namespaces
@@ -19,6 +18,7 @@ module Karafka
     # option wait_timeout [Integer] seconds that we will wait on a single topic for messages
     # option worker_timeout [Integer] how many seconds should we proceed stuff at Sidekiq
     # option zookeeper_hosts [Array] zookeeper hosts with ports where zookeeper servers are run
+    # option kafka_hosts [Array] - optional - kafka hosts with ports (autodiscovered if missing)
     SETTINGS = %i(
       logger
       kafka_hosts
@@ -33,6 +33,18 @@ module Karafka
 
     SETTINGS.each do |attr_name|
       attr_accessor attr_name
+    end
+
+    # @return [Array<String>] all Kafka hosts (with porsts)
+    # @note If hosts were not provided Karafka will ask Zookeeper for Kafka brokers. This is the
+    #   default behaviour because it allows us to autodiscover new brokers and detect changes
+    #   It might create a bigger load on Zookeeeper since on each failure it will reobtain brokers
+    #   This is the reason why we don't use ||= syntax - it would assign and store brokers that
+    #   might change during the runtime
+    # @example
+    #   kafka_hosts #=> ['172.17.0.2:9092', '172.17.0.4:9092']
+    def kafka_hosts
+      @kafka_hosts || Karafka::Connection::BrokerManager.new.all.map(&:url)
     end
 
     class << self
