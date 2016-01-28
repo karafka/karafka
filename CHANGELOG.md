@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 0.4.1
+## 0.4.1-head
 - #61 - Autodiscover Kafka brokers based on Zookeeper data
 
 ## 0.4.0
