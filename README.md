@@ -15,6 +15,7 @@ Microframework used to simplify Apache Kafka based Ruby applications development
     - [WaterDrop](#waterdrop)
     - [Configurators](#configurators)
     - [Environment variables settings](#environment-variables-settings)
+    - [Kafka brokers auto-discovery](#kafka-brokers-auto-discovery)
   - [Usage](#usage)
     - [Karafka CLI](#karafka-cli)
     - [Routing](#routing)
@@ -73,24 +74,23 @@ bundle exec karafka install
 ### Application
 Karafka has following configuration options:
 
-| Option                 | Required | Value type        | Description                                                                 |
-|------------------------|----------|-------------------|-----------------------------------------------------------------------------|
-| kafka_hosts            | true     | Array<String>     | Kafka server hosts                                                          |
-| logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                               |
-| max_concurrency        | true     | Integer           | How many threads maximally should we have that listen for incoming messages |
-| monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                             |
-| name                   | true     | String            | Application name                                                            |
-| redis                  | true     | Hash              | Hash with Redis configuration options                                       |
-| wait_timeout           | true     | Integer (Seconds) | How long do we wait for incoming messages on a single socket (topic)        |
-| worker_timeout         | true     | Integer (Seconds) | How long a task can run in Sidekiq before it will be terminated             |
-| zookeeper_hosts        | true     | Array<String>     | Zookeeper server hosts                                                      |
+| Option                 | Required | Value type        | Description                                                                                 |
+|------------------------|----------|-------------------|---------------------------------------------------------------------------------------------|
+| max_concurrency        | true     | Integer           | How many threads maximally should we have that listen for incoming messages                 |
+| name                   | true     | String            | Application name                                                                            |
+| redis                  | true     | Hash              | Hash with Redis configuration options                                                       |
+| wait_timeout           | true     | Integer (Seconds) | How long do we wait for incoming messages on a single socket (topic)                        |
+| worker_timeout         | true     | Integer (Seconds) | How long a task can run in Sidekiq before it will be terminated                             |
+| zookeeper_hosts        | true     | Array<String>     | Zookeeper server hosts                                                                      |
+| monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                             |
+| logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                                               |
+| kafka_hosts            | false    | Array<String>     | Kafka server hosts - if not provided Karafka will autodiscover them based on Zookeeper data |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
 
 ```ruby
 class App < Karafka::App
   setup do |config|
-    config.kafka_hosts = %w( 127.0.0.1:9092 127.0.0.1:9093 )
     config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
     config.redis = {
       url: 'redis://redis.example.com:7372/1'
@@ -133,6 +133,10 @@ There are several env settings you can use:
 |-------------------|-----------------|-------------------------------------------------------------------------------|
 | KARAFKA_ENV       | development     | In what mode this application should boot (production/development/test/etc)   |
 | KARAFKA_BOOT_FILE | app_root/app.rb | Path to a file that contains Karafka app configuration and booting procedures |
+
+### Kafka brokers auto-discovery
+
+Karafka supports Kafka brokers auto-discovery during both startup and runtime. It means that **zookeeper_hosts** option allows Karafka to get all the details it needs about Kafka brokers, first during boot and after each failure. If something happens to a connection on which we were listening (or if we cannot connect to a given broker), Karafka will refresh list of available brokers. This allows it to be aware of changes that happen in the infrastructure (adding and removing nodes) and allows it to be up and running as long as Zookeeper is able to provide it all the required information.
 
 ## Usage
 

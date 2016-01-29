@@ -14,6 +14,39 @@ RSpec.describe Karafka::Config do
     end
   end
 
+  describe '#kafka_hosts' do
+    before { subject.kafka_hosts = kafka_hosts }
+
+    context 'when kafka hosts are not provided' do
+      let(:kafka_hosts) { nil }
+      let(:broker_manager) { double }
+      let(:brokers) { [Karafka::Connection::Broker.new({}.to_json)] }
+
+      it 'expect to use broker manager to discover them' do
+        expect(Karafka::Connection::BrokerManager)
+          .to receive(:new)
+          .and_return(broker_manager)
+
+        expect(broker_manager)
+          .to receive(:all)
+          .and_return(brokers)
+
+        expect(subject.kafka_hosts).to eq brokers.map(&:host)
+      end
+    end
+
+    context 'when kafka hosts were provided' do
+      let(:kafka_hosts) { double }
+
+      it 'expect not to use broker manager to discover them' do
+        expect(Karafka::Connection::BrokerManager)
+          .not_to receive(:new)
+
+        expect(subject.kafka_hosts).to eq kafka_hosts
+      end
+    end
+  end
+
   describe '.setup' do
     subject { described_class }
     let(:instance) { described_class.new }

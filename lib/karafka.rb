@@ -1,6 +1,6 @@
 %w(
-  English
   rake
+  ostruct
   rubygems
   bundler
   English

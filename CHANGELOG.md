@@ -1,6 +1,9 @@
 # Karafka framework changelog
 
-## 0.4.0-head
+## 0.4.1-head
+- #61 - Autodiscover Kafka brokers based on Zookeeper data
+
+## 0.4.0
 - Added WaterDrop gem with default configuration
 - Refactoring of config logic to simplify adding new dependencies that need to be configured based on #setup data
 - Gem dump
