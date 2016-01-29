@@ -46,7 +46,7 @@ if ENV['KARAFKA_CONSOLE']
   # Reloads Karafka irb console session
   def reload!
     puts "Reloading...\n"
-    Kernel.exec "KARAFKA_CONSOLE=true bundle exec irb -r #{Karafka.boot_file}"
+    Kernel.exec Karafka::Cli::Console.command
   end
 end
 # :nocov:

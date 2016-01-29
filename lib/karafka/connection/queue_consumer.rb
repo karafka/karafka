@@ -95,7 +95,7 @@ module Karafka
       # @note Most of the time, this method will be scheduled on a last message that we've received
       #   from Kafka, but there are some cases (graceful shutdown, restart) when we will stop
       #   processing fetched messages, return last that we've managed to handle and exit
-      # @note If is also worth pointing out, that if we kill Karafka process during the data
+      # @note It is also worth pointing out, that if we kill Karafka process during the data
       #   processing, this method won't be executed, offset won't be commited and we will have to
       #   process last messages bulk again
       def commit(partition, last_processed_message)
