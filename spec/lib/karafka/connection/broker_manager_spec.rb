@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Connection::BrokerManager do
-  subject { described_class.new }
-
   let(:zk) { double }
 
   describe '#all' do

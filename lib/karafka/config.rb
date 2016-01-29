@@ -21,7 +21,6 @@ module Karafka
     # option kafka_hosts [Array] - optional - kafka hosts with ports (autodiscovered if missing)
     SETTINGS = %i(
       logger
-      kafka_hosts
       max_concurrency
       monitor
       name
@@ -29,13 +28,14 @@ module Karafka
       wait_timeout
       worker_timeout
       zookeeper_hosts
+      kafka_hosts
     ).freeze
 
     SETTINGS.each do |attr_name|
       attr_accessor attr_name
     end
 
-    # @return [Array<String>] all Kafka hosts (with porsts)
+    # @return [Array<String>] all Kafka hosts (with ports)
     # @note If hosts were not provided Karafka will ask Zookeeper for Kafka brokers. This is the
     #   default behaviour because it allows us to autodiscover new brokers and detect changes
     #   It might create a bigger load on Zookeeeper since on each failure it will reobtain brokers
@@ -44,7 +44,7 @@ module Karafka
     # @example
     #   kafka_hosts #=> ['172.17.0.2:9092', '172.17.0.4:9092']
     def kafka_hosts
-      @kafka_hosts || Karafka::Connection::BrokerManager.new.all.map(&:url)
+      @kafka_hosts || Karafka::Connection::BrokerManager.new.all.map(&:host)
     end
 
     class << self

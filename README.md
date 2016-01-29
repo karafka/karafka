@@ -136,7 +136,7 @@ There are several env settings you can use:
 
 ### Kafka brokers auto-discovery
 
-Karafka supports Kafka brokers auto-discovery during both startup and runtime. It means that **zookeeper_hosts** option allows Karafka to get all the details it needs about Kafka brokers, first during boot and after each failure. If something happens to a connection on which we werelistening (or if we cannot connect to a given broker), Karafka will refresh list of available brokers. This allows it to be aware of changes that happen in the infrastructure (adding and removing nodes) and allows it to be up and running as long as Zookeeper is able to provide it all the required informations.
+Karafka supports Kafka brokers auto-discovery during both startup and runtime. It means that **zookeeper_hosts** option allows Karafka to get all the details it needs about Kafka brokers, first during boot and after each failure. If something happens to a connection on which we were listening (or if we cannot connect to a given broker), Karafka will refresh list of available brokers. This allows it to be aware of changes that happen in the infrastructure (adding and removing nodes) and allows it to be up and running as long as Zookeeper is able to provide it all the required information.
 
 ## Usage
 

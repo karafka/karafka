@@ -11,9 +11,9 @@ module Karafka
 
       # @return [String] host with port for this broker
       # @example
-      #   broker #=> '172.16.0.1:9092'
-      def url
-        "#{host}:#{port}"
+      #   broker.host #=> '172.16.0.1:9092'
+      def host
+        "#{super}:#{port}"
       end
     end
   end

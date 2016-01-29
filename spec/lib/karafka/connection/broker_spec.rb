@@ -15,7 +15,7 @@ RSpec.describe Karafka::Connection::Broker do
     it { expect { subject }.not_to raise_error }
   end
 
-  describe '#url' do
-    it { expect(subject.url).to eq "#{json_data['host']}:#{json_data['port']}" }
+  describe '#host' do
+    it { expect(subject.host).to eq "#{json_data['host']}:#{json_data['port']}" }
   end
 end

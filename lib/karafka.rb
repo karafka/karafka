@@ -1,5 +1,4 @@
 %w(
-  English
   rake
   ostruct
   rubygems
