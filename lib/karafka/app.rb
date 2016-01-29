@@ -6,7 +6,6 @@ module Karafka
       def run
         bind_on_sigint
         bind_on_sigquit
-        bind_on_sighup
         start_supervised
       end
 
@@ -60,15 +59,6 @@ module Karafka
       # What should happen when we decide to quit with sigquit
       def bind_on_sigquit
         process.on_sigquit do
-          stop!
-          exit
-        end
-      end
-
-      def bind_on_sighup
-        process.on_sighup do
-          # cmd = "ps -h -u -p #{::Process.pid} | awk '{ print $11\" \"$12 }'"
-          # {}`#{cmd}`
           stop!
           exit
         end

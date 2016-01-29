@@ -40,6 +40,12 @@ module Karafka
 
           messages_bulk.each do |raw_message|
             block.call(raw_message)
+            # We check this for each message because application might be set for shutdown
+            # or restart. Then we stop processing messages that we received, we return
+            # last processed message and based on that queue consumer will commit the offset
+            # in place where we've finished. That way after restarting, we will start from
+            # the place where we've ended
+            return raw_message unless Karafka::App.running?
           end
 
           messages_bulk.last

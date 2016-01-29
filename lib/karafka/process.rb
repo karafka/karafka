@@ -6,7 +6,7 @@ module Karafka
 
     # Signal types that we handle
     HANDLED_SIGNALS = %i(
-      SIGINT SIGQUIT SIGHUP
+      SIGINT SIGQUIT
     ).freeze
 
     HANDLED_SIGNALS.each do |signal|

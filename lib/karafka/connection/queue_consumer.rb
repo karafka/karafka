@@ -31,7 +31,6 @@ module Karafka
       end
 
       # Fetches a bulk of messages from Kafka and yield a block with them
-      # @param options [Hash] additional options for fetching
       # @yield [partition, message_bulk] Yields code providing partition details and message bulk
       # @yieldparam partition [Integer] number of Kafka partition
       # @yieldparam message_bulk [Array<Poseidon::FetchedMessage>] array with fetched messages

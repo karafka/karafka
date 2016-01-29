@@ -2,6 +2,7 @@
 
 ## 0.4.1-head
 - #61 - Autodiscover Kafka brokers based on Zookeeper data
+- #63 - Graceful shutdown with current offset state during data processing
 
 ## 0.4.0
 - Added WaterDrop gem with default configuration

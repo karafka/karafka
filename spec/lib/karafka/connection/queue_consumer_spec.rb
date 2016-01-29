@@ -47,6 +47,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
 
         expect(target)
           .to receive(:fetch)
+          .with(commit: false)
           .and_yield(partition, message_bulk)
           .and_return(true)
 
@@ -168,7 +169,38 @@ RSpec.describe Karafka::Connection::QueueConsumer do
   end
 
   describe '#commit' do
-    pending
+    let(:partition) { rand(1000) }
+    let(:target) { double }
+
+    before do
+      allow(subject)
+        .to receive(:target)
+        .and_return(target)
+    end
+
+    context 'when there is no last processed message' do
+      let(:last_processed_message) { nil }
+
+      it 'expect not to commit anything' do
+        expect(target)
+          .not_to receive(:commit)
+
+        subject.send(:commit, partition, last_processed_message)
+      end
+    end
+
+    context 'when there is last processed message' do
+      let(:offset) { rand(1000) }
+      let(:last_processed_message) { double(offset: offset) }
+
+      it 'expect to commit based on its offset' do
+        expect(target)
+          .to receive(:commit)
+          .with(partition, offset + 1)
+
+        subject.send(:commit, partition, last_processed_message)
+      end
+    end
   end
 
   describe '#close' do
