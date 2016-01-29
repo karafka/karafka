@@ -33,9 +33,8 @@ module Karafka
 end
 
 # This is kinda trick - since we don't have a autoload and other magic stuff
-# like Rails does, so instead this method allows us to exist with exitcode 10
-# then our wrapping process (outside of irb) detects this, it will restart the
-# console with new code loaded
+# like Rails does, so instead this method allows us to replace currently running
+# console with a new one via Kernel.exec. It will start console with new code loaded
 # Yes we know that it is not turbofast, however it is turbo convinient and small
 #
 # Also - the KARAFKA_CONSOLE is used to detect that we're executing the irb session
@@ -47,7 +46,7 @@ if ENV['KARAFKA_CONSOLE']
   # Reloads Karafka irb console session
   def reload!
     puts "Reloading...\n"
-    Kernel.exit 10
+    Kernel.exec Karafka::Cli::Console.command
   end
 end
 # :nocov:
