@@ -1,7 +1,7 @@
 module Karafka
   module Connection
     # Object representing a single Kafka broker (node) information
-    # It is being built based on Zooekeeper incoming json data
+    # It is being built based on Zookeeper incoming json data
     # @note By using OpenStruct as a base we can use JSON data to map directly to object attributes
     class Broker < OpenStruct
       # @param json_data [String] string with JSON data describing broker
