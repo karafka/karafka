@@ -42,9 +42,12 @@ module Karafka
       #   end
       # @note If something went wrong during fetch, it will log in and close current connection
       #   so a new one will be created during next fetch
-      def fetch(options = {})
-        claimed = target.fetch(options) do |partition, message_bulk|
-          yield(partition, message_bulk)
+      # @note The block that is being yielded needs to return last processed message as a return
+      #   value, because we need that information in order to commit the offset
+      def fetch
+        claimed = target.fetch(commit: false) do |partition, message_bulk|
+          last_processed_message = yield(partition, message_bulk)
+          commit(partition, last_processed_message)
         end
 
         # In order not to produce infinite number of errors, when we cannot claim any partitions
@@ -79,6 +82,27 @@ module Karafka
       rescue *CONNECTION_CLEAR_ERRORS => e
         Karafka.monitor.notice_error(self.class, e)
         close
+      end
+
+      # Commits offset to Kafka
+      # We should commit offset only when we've consumed all the messages, otherwise if the process
+      # is killed, we won't be able to get messages that were not processed yet (sent via socket)
+      # @param partition [Integer] Number of partition from which we were consuming messages
+      # @param last_processed_message [Poseidon::FetchedMessage] last message that we've
+      #   successfully processed
+      # @note By processed we mean passing it through the controller and scheduling it to be
+      #   handled by the worker. Then we can consider data to be "saved" since it is being stored
+      #   in Redis and will be handled in a background job
+      # @note Most of the time, this method will be scheduled on a last message that we've received
+      #   from Kafka, but there are some cases (graceful shutdown, restart) when we will stop
+      #   processing fetched messages, return last that we've managed to handle and exit
+      # @note If is also worth pointing out, that if we kill Karafka process during the data
+      #   processing, this method won't be executed, offset won't be commited and we will have to
+      #   process last messages bulk again
+      def commit(partition, last_processed_message)
+        return unless last_processed_message
+
+        target.commit partition, last_processed_message.offset + 1
       end
 
       # If something is wrong with the connection, it will try to

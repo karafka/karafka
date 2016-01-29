@@ -32,7 +32,7 @@ module Karafka
       size < 1 ? 1 : size
     end
 
-    # @return [Proc] proc that should be processed when a messaga arrives
+    # @return [Proc] proc that should be processed when a message arrives
     # @yieldparam message [Poseidon::FetchedMessage] message from poseidon (raw one)
     def consumer
       lambda do |message|

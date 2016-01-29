@@ -15,6 +15,9 @@ module Karafka
       # Opens connection, gets messages bulk and calls a block for each of the incoming messages
       # @yieldparam [Karafka::BaseController] base controller descendant
       # @yieldparam [Poseidon::FetchedMessage] poseidon fetched message
+      # @return [Poseidon::FetchedMessage] last message that was processed. Keep in mind that
+      #   this might not mean last message from the message bulk. We might stop processing in the
+      #   middle of the bulk if for example restart is triggered, etc
       # Since Poseidon socket has a timeout (10 000ms by default) we catch it and ignore,
       #   we will just reconnect again
       # @note This will yield with a raw message - no preprocessing or reformatting
@@ -38,6 +41,8 @@ module Karafka
           messages_bulk.each do |raw_message|
             block.call(raw_message)
           end
+
+          messages_bulk.last
         end
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException

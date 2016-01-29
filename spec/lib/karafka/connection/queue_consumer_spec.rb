@@ -35,9 +35,9 @@ RSpec.describe Karafka::Connection::QueueConsumer do
 
   describe '#fetch' do
     let(:target) { double }
-    let(:options) { rand }
     let(:partition) { rand }
     let(:message_bulk) { double }
+    let(:lambda_return) { double }
 
     context 'when everything is ok' do
       before do
@@ -47,7 +47,6 @@ RSpec.describe Karafka::Connection::QueueConsumer do
 
         expect(target)
           .to receive(:fetch)
-          .with(options)
           .and_yield(partition, message_bulk)
           .and_return(true)
 
@@ -58,13 +57,19 @@ RSpec.describe Karafka::Connection::QueueConsumer do
           .not_to receive(:sleep)
       end
 
-      it 'should forward to target and fetch' do
+      it 'should forward to target, fetch and commit' do
         fetch = lambda do
-          subject.fetch(options) do |rec_partition, rec_message_bulk|
+          subject.fetch do |rec_partition, rec_message_bulk|
             expect(rec_partition).to eq partition
             expect(rec_message_bulk).to eq message_bulk
+
+            lambda_return
           end
         end
+
+        expect(subject)
+          .to receive(:commit)
+          .with(partition, lambda_return)
 
         expect { fetch.call }.not_to raise_error
       end
@@ -85,7 +90,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
 
             block = -> {}
 
-            expect { subject.fetch(options, &block) }.not_to raise_error
+            expect { subject.fetch(&block) }.not_to raise_error
           end
         end
       end
@@ -99,7 +104,6 @@ RSpec.describe Karafka::Connection::QueueConsumer do
 
         expect(target)
           .to receive(:fetch)
-          .with(options)
           .and_return(false)
 
         expect(subject)
@@ -112,7 +116,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
 
       it 'should close the connection and wait' do
         fetch = lambda do
-          subject.fetch(options)
+          subject.fetch
         end
 
         expect { fetch.call }.not_to raise_error
@@ -161,6 +165,10 @@ RSpec.describe Karafka::Connection::QueueConsumer do
         end
       end
     end
+  end
+
+  describe '#commit' do
+    pending
   end
 
   describe '#close' do
