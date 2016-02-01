@@ -439,15 +439,15 @@ class AppMonitor < Karafka::Monitor
   private
 
   def notice_consume(_caller_class, options)
-    record_count metric_key(options[:controller_class], __method__)
+    record_count metric_key(options[:topic], __method__)
   end
 
   def notice_perform_async(caller_class, _options)
     record_count metric_key(caller_class, __method__)
   end
 
-  def metric_key(caller_class, method_name)
-    "Custom/#{caller_class.topic}/#{method_name}"
+  def metric_key(topic, method_name)
+    "Custom/#{topic}/#{method_name}"
   end
 
   def record_count(key)
