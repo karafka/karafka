@@ -30,7 +30,7 @@ module Karafka
       #   any route defined by user using routes.draw
       def route
         App.routes.find { |route| route.topic == @topic } ||
-          fail(Errors::NonMatchingRouteError, @topic)
+          raise(Errors::NonMatchingRouteError, @topic)
       end
     end
   end

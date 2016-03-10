@@ -24,7 +24,7 @@ module Karafka
 
       # This method needs to be implemented in a subclass
       def setup
-        fail NotImplementedError
+        raise NotImplementedError
       end
     end
   end

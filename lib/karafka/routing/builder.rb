@@ -81,7 +81,7 @@ module Karafka
 
         wrong = map.find { |_, amount| amount > 1 }
 
-        fail error, wrong if wrong
+        raise error, wrong if wrong
       end
     end
   end

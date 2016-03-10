@@ -63,7 +63,7 @@ module Karafka
       # @raise [Karafka::Errors::BaseWorkerDescentantMissing] raised when Karafka cannot detect
       #   direct Karafka::BaseWorker descendant from which it could build workers
       def base
-        Karafka::BaseWorker.subclasses.first || fail(Errors::BaseWorkerDescentantMissing)
+        Karafka::BaseWorker.subclasses.first || raise(Errors::BaseWorkerDescentantMissing)
       end
     end
   end

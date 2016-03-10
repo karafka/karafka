@@ -26,7 +26,7 @@ module Karafka
 
       # This method should implement proper cli action
       def call
-        fail NotImplementedError, 'Implement this in a subclass'
+        raise NotImplementedError, 'Implement this in a subclass'
       end
 
       class << self

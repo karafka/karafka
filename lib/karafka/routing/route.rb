@@ -65,8 +65,8 @@ module Karafka
       # @raise [Karafka::Errors::InvalidTopicName] raised when topic name is invalid
       # @raise [Karafka::Errors::InvalidGroupName] raised when group name is invalid
       def validate!
-        fail Errors::InvalidTopicName, topic if (NAME_FORMAT =~ topic) != 0
-        fail Errors::InvalidGroupName, group if (NAME_FORMAT =~ group) != 0
+        raise Errors::InvalidTopicName, topic if (NAME_FORMAT =~ topic) != 0
+        raise Errors::InvalidGroupName, group if (NAME_FORMAT =~ group) != 0
       end
     end
   end
