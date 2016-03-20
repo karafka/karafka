@@ -27,6 +27,3 @@ class App < Karafka::App
     end
   end
 end
-
-
-
