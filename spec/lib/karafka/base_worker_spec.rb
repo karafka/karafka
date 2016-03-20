@@ -15,17 +15,20 @@ RSpec.describe Karafka::BaseWorker do
     end
   end
 
+  let(:controller_instance) { controller.new }
+
   let(:args) { [rand.to_s, rand] }
 
   describe '#perform' do
     before do
       expect(subject)
         .to receive(:controller)
-        .and_return(controller)
+        .and_return(controller_instance)
+        .at_least(:once)
     end
 
     it 'should set params and perform controller action' do
-      expect(controller)
+      expect(controller_instance)
         .to receive(:perform)
 
       subject.perform(*args)
@@ -34,7 +37,7 @@ RSpec.describe Karafka::BaseWorker do
     end
 
     it 'should set topic and perform controller action' do
-      expect(controller)
+      expect(controller_instance)
         .to receive(:perform)
 
       subject.perform(*args)
@@ -47,18 +50,18 @@ RSpec.describe Karafka::BaseWorker do
     before do
       expect(subject)
         .to receive(:controller)
-        .and_return(controller)
+        .and_return(controller_instance)
         .at_least(:once)
     end
 
     context 'when after_failure method is not defined on the controller' do
       it 'should do nothing' do
-        expect(controller)
+        expect(controller_instance)
           .to receive(:respond_to?)
           .and_return(false)
           .at_least(:once)
 
-        expect(controller)
+        expect(controller_instance)
           .to_not receive(:after_failure)
 
         subject.after_failure(*args)
@@ -67,12 +70,12 @@ RSpec.describe Karafka::BaseWorker do
 
     context 'when after_failure method is defined on the controller' do
       it 'should execute it' do
-        expect(controller)
+        expect(controller_instance)
           .to receive(:respond_to?)
           .and_return(true)
           .at_least(:once)
 
-        expect(controller)
+        expect(controller_instance)
           .to receive(:after_failure)
 
         subject.after_failure(*args)
@@ -86,7 +89,6 @@ RSpec.describe Karafka::BaseWorker do
     let(:interchanger) { double }
     let(:params) { double }
     let(:interchanged_params) { double }
-    let(:controller_instance) { controller.new }
 
     before do
       router

@@ -100,6 +100,14 @@ module Karafka
       end
     end
 
+    # @return [Hash] hash with all controller details - it works similar to #params method however
+    #   it won't parse data so it will return unparsed details about controller and its parameters
+    # @example Get data about ctrl
+    #   ctrl.to_h #=> { "worker"=>WorkerClass, "parsed"=>false, "content"=>"{}" }
+    def to_h
+      @params
+    end
+
     private
 
     # @return [Karafka::Params::Params] Karafka params that is a hash with indifferent access
@@ -122,12 +130,7 @@ module Karafka
     #   parameters into it. We always pass topic as a first argument and this request params
     #   as a second one (we pass topic to be able to build back the controller in the worker)
     def perform_async
-      Karafka.monitor.notice(
-        self.class,
-        params: @params,
-        worker: worker,
-        interchanger: interchanger
-      )
+      Karafka.monitor.notice(self.class, to_h)
 
       # We use @params directly (instead of #params) because of lazy loading logic that is behind
       # it. See Karafka::Params::Params class for more details about that

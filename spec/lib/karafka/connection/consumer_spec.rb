@@ -9,7 +9,7 @@ RSpec.describe Karafka::Connection::Consumer do
     let(:raw_message) { double(value: raw_message_value, topic: topic) }
     let(:message) { double }
     let(:builder) { Karafka::Routing::Router.new(nil) }
-    let(:controller_instance) { double }
+    let(:controller_instance) { double(to_h: {}) }
 
     context 'everything works well' do
       it 'should route to a proper controller and schedule task' do
