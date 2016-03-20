@@ -81,7 +81,6 @@ Karafka has following configuration options:
 | name                   | true     | String            | Application name                                                                            |
 | redis                  | true     | Hash              | Hash with Redis configuration options                                                       |
 | wait_timeout           | true     | Integer (Seconds) | How long do we wait for incoming messages on a single socket (topic)                        |
-| worker_timeout         | true     | Integer (Seconds) | How long a task can run in Sidekiq before it will be terminated                             |
 | zookeeper_hosts        | true     | Array<String>     | Zookeeper server hosts                                                                      |
 | monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                             |
 | logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                                               |
@@ -97,7 +96,6 @@ class App < Karafka::App
       url: 'redis://redis.example.com:7372/1'
     }
     config.wait_timeout = 10 # 10 seconds
-    config.worker_timeout =  3600 # 1 hour
     config.max_concurrency = 10 # 10 threads max
     config.name = 'my_application'
     config.logger = MyCustomLogger.new # not required

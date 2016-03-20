@@ -5,6 +5,8 @@
 - #63 - Graceful shutdown with current offset state during data processing
 - Gem dump
 - Rubocop remarks
+- worker_timeout config option has been removed. It now needs to be defined manually by the framework user because WorkerGlass::Timeout can be disabled and we cannot use Karafka settings on a class level to initialize user code stuff
+- #71 - Setup should not freeze config since some config options (if not all) could be loaded after the user code
 
 ## 0.4.0
 - Added WaterDrop gem with default configuration
