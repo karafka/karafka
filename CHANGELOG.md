@@ -1,11 +1,13 @@
 # Karafka framework changelog
 
-## 0.4.1-head
-- #61 - Autodiscover Kafka brokers based on Zookeeper data
-- #63 - Graceful shutdown with current offset state during data processing
+## 0.4.2-head
 - #65 - Example of NewRelic monitor is outdated
 - Gem dump
 - Rubocop remarks
+
+## 0.4.1
+- #61 - Autodiscover Kafka brokers based on Zookeeper data
+- #63 - Graceful shutdown with current offset state during data processing
 
 ## 0.4.0
 - Added WaterDrop gem with default configuration
