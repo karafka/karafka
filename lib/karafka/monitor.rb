@@ -45,9 +45,9 @@ module Karafka
 
     private
 
-    # @return [Hash] Hash containing informations on with what level of notification should
-    #   we use for errors that happen in certain parts of Karafka
-    # @note Keep in mind that any not handled here should be logged with info
+    # @return [Hash] Hash containing informations on which level of notification should
+    #   we use for exceptions that happen in certain parts of Karafka
+    # @note Keep in mind that any not handled here class should be logged with info
     # @note Those are not maps of exceptions classes but of classes that were callers of this
     #   particular exception
     def caller_exceptions_map

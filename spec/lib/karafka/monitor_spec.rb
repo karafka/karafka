@@ -99,7 +99,7 @@ RSpec.describe Karafka::Monitor do
       expect(subject.send(:caller_exceptions_map)[:error]).to eq error_callers
     end
 
-    it 'expect to have proper classes on fataal' do
+    it 'expect to have proper classes on fatal' do
       expect(subject.send(:caller_exceptions_map)[:fatal]).to eq fatal_callers
     end
   end
