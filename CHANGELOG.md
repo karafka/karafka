@@ -6,7 +6,7 @@
 - Gem dump
 - Rubocop remarks
 - worker_timeout config option has been removed. It now needs to be defined manually by the framework user because WorkerGlass::Timeout can be disabled and we cannot use Karafka settings on a class level to initialize user code stuff
-- #71 - Setup should ne executed after user code is loaded
+- #71 - Setup should be executed after user code is loaded
 
 ## 0.4.0
 - Added WaterDrop gem with default configuration
