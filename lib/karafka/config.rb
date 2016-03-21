@@ -16,7 +16,6 @@ module Karafka
     # option name [String] current app name - used to provide default Kafka groups namespaces
     # option redis [Hash] redis options hash (url and optional parameters)
     # option wait_timeout [Integer] seconds that we will wait on a single topic for messages
-    # option worker_timeout [Integer] how many seconds should we proceed stuff at Sidekiq
     # option zookeeper_hosts [Array] zookeeper hosts with ports where zookeeper servers are run
     # option kafka_hosts [Array] - optional - kafka hosts with ports (autodiscovered if missing)
     SETTINGS = %i(
@@ -26,7 +25,6 @@ module Karafka
       name
       redis
       wait_timeout
-      worker_timeout
       zookeeper_hosts
       kafka_hosts
     ).freeze

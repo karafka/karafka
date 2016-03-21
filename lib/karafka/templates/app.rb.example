@@ -3,6 +3,8 @@ ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
 
 Bundler.require(:default, ENV['KARAFKA_ENV'])
 
+Karafka::Loader.new.load(Karafka::App.root)
+
 # App class
 class App < Karafka::App
   setup do |config|
@@ -10,23 +12,18 @@ class App < Karafka::App
     #   data. Set it manually only if you know what you are doing
     # config.kafka_hosts = %w( 127.0.0.1:9092 )
     config.zookeeper_hosts = %w( 127.0.0.1:2181 )
-    config.worker_timeout = 60 # 1 minute,
     config.wait_timeout = 60 # 1 minute
     config.max_concurrency = 5
     config.name = 'example_app'
     config.redis = {
       url: 'redis://localhost:6379'
     }
+
+    routes.draw do
+      # topic :example do
+      #   controller ExampleController
+      #   interchanger CustomInterchanger
+      # end
+    end
   end
-end
-
-Karafka::Loader.new.load(App.root)
-
-# Routes need to be drawn after the application code is loaded because routes rely on your code
-# Please read documentation for more details on how to draw routes
-App.routes.draw do
-  # topic :example do
-  #   controller ExampleController
-  #   interchanger CustomInterchanger
-  # end
 end

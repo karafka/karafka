@@ -7,5 +7,6 @@ class ApplicationWorker < Karafka::BaseWorker
   prepend WorkerGlass::Timeout
   prepend WorkerGlass::Reentrancy
 
-  self.timeout = Karafka::App.config.worker_timeout
+  # If you remove WorkerGlass::Timeout, this line will be useless as well
+  self.timeout = 60
 end
