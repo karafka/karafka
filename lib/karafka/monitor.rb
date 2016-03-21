@@ -19,6 +19,8 @@ module Karafka
     #   it directly from Ruby (see #caller_label method of this class for more details)
     # @example Notice about consuming with controller_class
     #   Karafka.monitor.notice(self.class, controller_class: controller_class)
+    # @example Notice about terminating with a signal
+    #   Karafka.monitor.notice(self.class, signal: signal)
     def notice(caller_class, options = {})
       logger.info("#{caller_class}##{caller_label} with #{options}")
     end
@@ -32,16 +34,35 @@ module Karafka
     # @example Notify about error
     #   Karafka.monitor.notice(self.class, e)
     def notice_error(caller_class, e)
-      return logger.error(e) if caller_class == Karafka::Connection::ActorCluster
-      return logger.error(e) if caller_class == Karafka::Connection::Consumer
-      return logger.error(e) if caller_class == Karafka::Connection::Listener
-      return logger.error(e) if caller_class == Karafka::Params::Params
-      return logger.fatal(e) if caller_class == Karafka::Runner
+      caller_exceptions_map.each do |level, types|
+        next unless types.include?(caller_class)
+
+        return logger.public_send(level, e)
+      end
 
       logger.info(e)
     end
 
     private
+
+    # @return [Hash] Hash containing informations on which level of notification should
+    #   we use for exceptions that happen in certain parts of Karafka
+    # @note Keep in mind that any not handled here class should be logged with info
+    # @note Those are not maps of exceptions classes but of classes that were callers of this
+    #   particular exception
+    def caller_exceptions_map
+      @caller_exceptions_map ||= {
+        error: [
+          Karafka::Connection::ActorCluster,
+          Karafka::Connection::Consumer,
+          Karafka::Connection::Listener,
+          Karafka::Params::Params
+        ],
+        fatal: [
+          Karafka::Runner
+        ]
+      }
+    end
 
     # @return [String] label of method that invoked #notice or #notice_error
     # @example Check label of method that invoked #notice

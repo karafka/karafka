@@ -3,6 +3,7 @@
 ## 0.4.1-head
 - #61 - Autodiscover Kafka brokers based on Zookeeper data
 - #63 - Graceful shutdown with current offset state during data processing
+- #65 - Example of NewRelic monitor is outdated
 - Gem dump
 - Rubocop remarks
 - worker_timeout config option has been removed. It now needs to be defined manually by the framework user because WorkerGlass::Timeout can be disabled and we cannot use Karafka settings on a class level to initialize user code stuff

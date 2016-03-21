@@ -76,4 +76,31 @@ RSpec.describe Karafka::Monitor do
       expect(subject.send(:logger)).to eq Karafka.logger
     end
   end
+
+  describe '#caller_exceptions_map' do
+    it { expect(subject.send(:caller_exceptions_map).keys).to eq %i( error fatal ) }
+
+    let(:error_callers) do
+      [
+        Karafka::Connection::ActorCluster,
+        Karafka::Connection::Consumer,
+        Karafka::Connection::Listener,
+        Karafka::Params::Params
+      ]
+    end
+
+    let(:fatal_callers) do
+      [
+        Karafka::Runner
+      ]
+    end
+
+    it 'expect to have proper classes on error' do
+      expect(subject.send(:caller_exceptions_map)[:error]).to eq error_callers
+    end
+
+    it 'expect to have proper classes on fatal' do
+      expect(subject.send(:caller_exceptions_map)[:fatal]).to eq fatal_callers
+    end
+  end
 end

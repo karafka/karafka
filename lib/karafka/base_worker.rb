@@ -11,7 +11,7 @@ module Karafka
     def perform(topic, params)
       self.topic = topic
       self.params = params
-      Karafka.monitor.notice(self.class, params: params)
+      Karafka.monitor.notice(self.class, controller.to_h)
       controller.perform
     end
 
@@ -24,7 +24,7 @@ module Karafka
 
       return unless controller.respond_to?(:after_failure)
 
-      Karafka.monitor.notice(self.class, params: params)
+      Karafka.monitor.notice(self.class, controller.to_h)
       controller.after_failure
     end
 

@@ -15,10 +15,7 @@ module Karafka
         # a raw Poseidon message
         controller.params = Message.new(message.topic, message.value)
 
-        Karafka.monitor.notice(
-          self.class,
-          controller_class: controller.class
-        )
+        Karafka.monitor.notice(self.class, controller.to_h)
 
         controller.schedule
         # This is on purpose - see the notes for this method
