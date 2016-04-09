@@ -82,6 +82,7 @@ Karafka has following configuration options:
 | redis                  | true     | Hash              | Hash with Redis configuration options                                                       |
 | wait_timeout           | true     | Integer (Seconds) | How long do we wait for incoming messages on a single socket (topic)                        |
 | zookeeper_hosts        | true     | Array<String>     | Zookeeper server hosts                                                                      |
+| zookeeper_base_znode   | false    | String            | Base znode that stores kafka brokers data                                                   |
 | monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                             |
 | logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                                               |
 | kafka_hosts            | false    | Array<String>     | Kafka server hosts - if not provided Karafka will autodiscover them based on Zookeeper data |
