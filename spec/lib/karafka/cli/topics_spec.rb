@@ -20,7 +20,7 @@ RSpec.describe Karafka::Cli::Topics do
 
       expect(zookeeper_host)
         .to receive(:get_children)
-        .with(path: '/brokers/topics')
+        .with(path: '/base_znode/brokers/topics')
         .and_return(topics)
     end
 

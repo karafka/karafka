@@ -43,7 +43,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
     it 'expect to get a proper broker data' do
       expect(zk)
         .to receive(:get)
-        .with("#{described_class::BROKERS_PATH}/#{id}")
+        .with("/base_znode#{described_class::BROKERS_PATH}/#{id}")
         .and_return([broker_data])
 
       expect(subject.send(:find, id)).to eq broker_data
@@ -60,7 +60,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
 
       expect(zk)
         .to receive(:children)
-        .with(described_class::BROKERS_PATH)
+        .with("/base_znode#{described_class::BROKERS_PATH}")
         .and_return(result)
     end
 

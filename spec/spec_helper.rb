@@ -46,6 +46,7 @@ module Karafka
   class App
     setup do |config|
       config.kafka_hosts = ['localhost:9092']
+      config.zookeeper_base_znode = '/base_znode'
       config.zookeeper_hosts = ['localhost:2181']
       config.wait_timeout = 10 # 10 seconds
       config.max_concurrency = 1 # 1 thread for specs

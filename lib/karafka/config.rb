@@ -26,6 +26,7 @@ module Karafka
       redis
       wait_timeout
       zookeeper_hosts
+      zookeeper_base_znode
       kafka_hosts
     ).freeze
 

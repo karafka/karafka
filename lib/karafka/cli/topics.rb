@@ -12,7 +12,8 @@ module Karafka
 
         Karafka::App.config.zookeeper_hosts.each do |host|
           zookeeper = Zookeeper.new(host)
-          topics += zookeeper.get_children(path: '/brokers/topics')[:children]
+          path = File.join(::Karafka::App.config.zookeeper_base_znode || '', 'brokers', 'topics')
+          topics += zookeeper.get_children(path: path)[:children]
         end
 
         topics.sort.each { |topic| puts topic }

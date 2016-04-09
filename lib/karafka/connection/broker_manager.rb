@@ -25,14 +25,14 @@ module Karafka
       # @param id [String] id of Kafka broker
       # @return [::Karafka::Connection::Broker] single Kafka broker details
       def find(id)
-        zk.get("#{BROKERS_PATH}/#{id}").first
+        zk.get("#{brokers_full_path}/#{id}").first
       end
 
       # @return [Array<String>] ids of all the brokers
       # @example
       #   ids #=> ['0', '2', '3']
       def ids
-        zk.children(BROKERS_PATH)
+        zk.children(brokers_full_path)
       end
 
       # @return [::ZK] Zookeeper high level client
@@ -40,6 +40,11 @@ module Karafka
         @zk ||= ::ZK.new(
           ::Karafka::App.config.zookeeper_hosts.join(',')
         )
+      end
+
+      # @return [String] Full path to brokers znode
+      def brokers_full_path
+        File.join(::Karafka::App.config.zookeeper_base_znode || '', BROKERS_PATH)
       end
     end
   end
