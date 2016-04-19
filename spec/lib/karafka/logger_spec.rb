@@ -7,7 +7,7 @@ RSpec.describe Karafka::Logger do
   describe '#build' do
     let(:target) { double }
     let(:log_file) { Karafka::App.root.join('log', "#{env}.log") }
-    let(:logger) { Karafka::Logger.new(STDOUT) }
+    let(:logger) { described_class.new(STDOUT) }
 
     it 'creates an instance that will log in the app root' do
       expect(subject)
