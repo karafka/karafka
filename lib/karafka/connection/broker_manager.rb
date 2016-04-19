@@ -9,7 +9,7 @@ module Karafka
     # we can connect
     class BrokerManager
       # Path at Zookeeper under which brokers details are being stored
-      BROKERS_PATH = '/brokers/ids'.freeze
+      BROKERS_PATH = '/brokers/ids'
 
       # @return [Array<Karafka::Connection::Broker>] Array with details about all the brokers
       # @example Create new manager and get details about the brokers
