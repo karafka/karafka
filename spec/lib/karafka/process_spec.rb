@@ -7,7 +7,7 @@ RSpec.describe Karafka::Process do
     let(:callback) { -> {} }
 
     describe "on_#{signal.to_s.downcase}" do
-      it 'should assign given callback to appropriate signal key' do
+      it 'assigns given callback to appropriate signal key' do
         subject.send(:"on_#{signal.to_s.downcase}", &callback)
         expect(subject.instance_variable_get(:@callbacks)[signal]).to include callback
       end
@@ -15,7 +15,7 @@ RSpec.describe Karafka::Process do
   end
 
   describe '#supervise' do
-    it 'should trap signals and yield' do
+    it 'traps signals and yield' do
       described_class::HANDLED_SIGNALS.each do |signal|
         expect(subject)
           .to receive(:trap_signal)
@@ -39,7 +39,7 @@ RSpec.describe Karafka::Process do
         .and_yield
     end
 
-    it 'should trap signals, log it and run callbacks if defined' do
+    it 'traps signals, log it and run callbacks if defined' do
       expect(subject)
         .to receive(:notice_signal)
         .with(signal)
@@ -53,7 +53,7 @@ RSpec.describe Karafka::Process do
 
   describe '#notice_signal' do
     let(:signal) { rand.to_s }
-    it 'should log info with signal code into Karafka logger' do
+    it 'logs info with signal code into Karafka logger' do
       expect(Thread)
         .to receive(:new)
         .and_yield

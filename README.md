@@ -226,7 +226,7 @@ Optionally you can use **group** method to define group for this topic. Use it i
 ```ruby
 topic :incoming_messages do
   group :load_balanced_group
-  controler MessagesController
+  controller MessagesController
 end
 ```
 
@@ -244,7 +244,7 @@ However, if you want to use a raw Sidekiq worker (without any Karafka additional
 
 ```ruby
 topic :incoming_messages do
-  controler MessagesController
+  controller MessagesController
   worker MyCustomController
 end
 ```
