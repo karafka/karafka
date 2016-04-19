@@ -29,7 +29,7 @@ RSpec.describe Karafka::Configurators::Internals do
       it 'expect not to assign App logger to Karafka logger' do
         subject.setup
 
-        expect(Karafka.logger).to_not eq logger
+        expect(Karafka.logger).not_to eq logger
       end
     end
 
@@ -47,7 +47,7 @@ RSpec.describe Karafka::Configurators::Internals do
       it 'expect not to assign App monitor to Karafka monitor' do
         subject.setup
 
-        expect(Karafka.monitor).to_not eq monitor
+        expect(Karafka.monitor).not_to eq monitor
       end
     end
   end

@@ -62,7 +62,7 @@ RSpec.describe Karafka::BaseWorker do
           .at_least(:once)
 
         expect(controller_instance)
-          .to_not receive(:after_failure)
+          .not_to receive(:after_failure)
 
         subject.after_failure(*args)
       end
