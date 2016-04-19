@@ -21,7 +21,7 @@ RSpec.describe Karafka::Helpers::MultiDelegator do
         .to(target1, target2)
     end
 
-    it 'should delegate to all' do
+    it 'delegates to all' do
       methods.each do |mname|
         expect(target1).to receive(mname)
         expect(target2).to receive(mname)

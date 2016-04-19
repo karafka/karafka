@@ -5,7 +5,7 @@ RSpec.describe Karafka::Workers::Builder do
   let(:controller_class) { double }
 
   describe '.new' do
-    it 'should assign internally controller_class' do
+    it 'assigns internally controller_class' do
       expect(subject.instance_variable_get('@controller_class')).to eq controller_class
     end
   end
@@ -29,7 +29,7 @@ RSpec.describe Karafka::Workers::Builder do
           .exactly(2).times
       end
 
-      it 'should not build it again' do
+      it 'does not build it again' do
         expect(subject.build).to eq Karafka
       end
     end
@@ -47,7 +47,7 @@ RSpec.describe Karafka::Workers::Builder do
               .exactly(2).times
           end
 
-          it 'should build it' do
+          it 'builds it' do
             expect(subject.build.to_s).to eq "Karafka#{random}Worker"
           end
         end
@@ -67,7 +67,7 @@ RSpec.describe Karafka::Workers::Builder do
               .and_return(Karafka)
           end
 
-          it 'should build it in this scope' do
+          it 'builds it in this scope' do
             expect(subject.build.to_s).to eq "Karafka::Karafka#{random}Worker"
           end
         end

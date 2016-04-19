@@ -22,13 +22,13 @@ RSpec.describe Karafka::Connection::QueueConsumer do
   subject { described_class.new(route) }
 
   describe 'preconditions' do
-    it 'should have socket timeout bigger then wait timeout' do
+    it 'has socket timeout bigger then wait timeout' do
       expect(max_wait_ms < socket_timeout_ms).to be true
     end
   end
 
   describe '.new' do
-    it 'should just remember route' do
+    it 'just remembers route' do
       expect(subject.instance_variable_get(:@route)).to eq route
     end
   end
@@ -58,7 +58,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
           .not_to receive(:sleep)
       end
 
-      it 'should forward to target, fetch and commit' do
+      it 'forwards to target, fetch and commit' do
         fetch = lambda do
           subject.fetch do |rec_partition, rec_message_bulk|
             expect(rec_partition).to eq partition
@@ -85,7 +85,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
               .and_raise(error)
           end
 
-          it 'should try closing the connection' do
+          it 'tries closing the connection' do
             expect(subject)
               .to receive(:close)
 
@@ -115,7 +115,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
           .with(described_class::CLAIM_SLEEP_TIME)
       end
 
-      it 'should close the connection and wait' do
+      it 'closes the connection and wait' do
         fetch = lambda do
           subject.fetch
         end
@@ -140,7 +140,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
           )
       end
 
-      it 'should create Poseidon::ConsumerGroup instance' do
+      it 'creates Poseidon::ConsumerGroup instance' do
         expect(subject)
           .not_to receive(:close)
 
@@ -157,7 +157,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
               .and_raise(error)
           end
 
-          it 'should try to close it' do
+          it 'tries to close it' do
             expect(subject)
               .to receive(:close)
 
@@ -212,7 +212,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
       let(:target) { nil }
       let(:method_target) { double }
 
-      it 'should do nothing' do
+      it 'does nothing' do
         allow(subject)
           .to receive(:target)
           .and_return(method_target)
@@ -230,7 +230,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
     context 'when target is existing and we can close it' do
       let(:target) { double }
 
-      it 'should just reload and close it' do
+      it 'just reloads and close it' do
         expect(target)
           .to receive(:reload)
 
@@ -259,7 +259,7 @@ RSpec.describe Karafka::Connection::QueueConsumer do
             .and_raise(error)
         end
 
-        it 'should delete @target assignment so new target will be created' do
+        it 'deletes @target assignment so new target will be created' do
           subject.send(:close)
           expect(subject.instance_variable_get(:@target)).to eq nil
         end

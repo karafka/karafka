@@ -30,7 +30,7 @@ RSpec.describe Karafka::Connection::ActorCluster do
       context 'when we decide to stop the application' do
         let(:running?) { false }
 
-        it 'should not start listening' do
+        it 'does not start listening' do
           expect(listener)
             .not_to receive(:fetch)
 
@@ -41,7 +41,7 @@ RSpec.describe Karafka::Connection::ActorCluster do
       context 'when the application is running' do
         let(:running?) { true }
 
-        it 'should start listening' do
+        it 'starts listening' do
           expect(listener)
             .to receive(:fetch)
             .with(block)
@@ -72,7 +72,7 @@ RSpec.describe Karafka::Connection::ActorCluster do
           .and_return(true, false)
       end
 
-      it 'should notice it and retry' do
+      it 'notices it and retry' do
         expect(Karafka.monitor)
           .to receive(:notice_error)
           .with(described_class, StandardError)
@@ -92,7 +92,7 @@ RSpec.describe Karafka::Connection::ActorCluster do
         .and_return(listener)
     end
 
-    it 'should create new listeners based on the controllers' do
+    it 'creates new listeners based on the controllers' do
       expect(subject.send(:listeners)).to eq [listener]
     end
   end
