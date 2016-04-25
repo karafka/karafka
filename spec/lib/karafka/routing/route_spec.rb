@@ -180,7 +180,7 @@ RSpec.describe Karafka::Routing::Route do
       context 'and group name is valid' do
         let(:group) { rand(1000).to_s }
 
-        it { expect { subject.validate! }.to_not raise_error }
+        it { expect { subject.validate! }.not_to raise_error }
       end
     end
   end

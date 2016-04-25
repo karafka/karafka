@@ -12,7 +12,7 @@ RSpec.describe Karafka::Connection::Consumer do
     let(:controller_instance) { double(to_h: {}) }
 
     context 'everything works well' do
-      it 'should route to a proper controller and schedule task' do
+      it 'routes to a proper controller and schedule task' do
         expect(Karafka::Connection::Message)
           .to receive(:new)
           .with(topic, raw_message_value)
@@ -55,7 +55,7 @@ RSpec.describe Karafka::Connection::Consumer do
                 .and_raise(error)
             end
 
-            it 'should notice and not reraise error' do
+            it 'notices and not reraise error' do
               expect { subject.consume(raw_message) }.not_to raise_error
             end
           end

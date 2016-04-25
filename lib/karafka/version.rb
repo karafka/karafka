@@ -2,5 +2,5 @@
 # Main module namespace
 module Karafka
   # Current Karafka version
-  VERSION = '0.4.1'.freeze
+  VERSION = '0.4.2'
 end

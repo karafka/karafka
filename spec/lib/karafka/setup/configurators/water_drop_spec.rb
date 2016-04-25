@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Configurators::WaterDrop do
-  specify { expect(described_class).to be < Karafka::Configurators::Base }
+RSpec.describe Karafka::Setup::Configurators::WaterDrop do
+  specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
   let(:config) do
     double(

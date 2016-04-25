@@ -4,14 +4,20 @@ RSpec.describe Karafka::App do
   subject { described_class }
 
   describe '#run' do
-    it 'should run in supervision, start consuming and sleep' do
+    let(:runner) { Karafka::Runner.new }
+
+    it 'runs in supervision, start consuming and sleep' do
       expect(subject)
         .to receive(:sleep)
 
       expect(subject)
         .to receive(:run!)
 
-      expect_any_instance_of(Karafka::Runner)
+      expect(Karafka::Runner)
+        .to receive(:new)
+        .and_return(runner)
+
+      expect(runner)
         .to receive(:run)
 
       expect(Karafka::Process.instance)
@@ -27,7 +33,7 @@ RSpec.describe Karafka::App do
       subject.run
     end
 
-    it 'should define a proper action for sigint' do
+    it 'defines a proper action for sigint' do
       expect(Karafka::Process.instance)
         .to receive(:supervise)
 
@@ -47,7 +53,7 @@ RSpec.describe Karafka::App do
       subject.run
     end
 
-    it 'should define a proper action for sigquit' do
+    it 'defines a proper action for sigquit' do
       expect(Karafka::Process.instance)
         .to receive(:supervise)
 
@@ -71,8 +77,8 @@ RSpec.describe Karafka::App do
   describe '#config' do
     let(:config) { double }
 
-    it 'should alias to Config' do
-      expect(Karafka::Config)
+    it 'aliases to Config' do
+      expect(Karafka::Setup::Config)
         .to receive(:config)
         .and_return(config)
 
@@ -83,14 +89,14 @@ RSpec.describe Karafka::App do
   describe '#routes' do
     let(:routes) { Karafka::Routing::Builder.instance }
 
-    it 'should return routes builder' do
+    it 'returns routes builder' do
       expect(subject.routes).to eq routes
     end
   end
 
   describe '#setup' do
-    it 'should delegate it to Config setup and set framework to initializing state' do
-      expect(Karafka::Config)
+    it 'delegates it to Config setup and set framework to initializing state' do
+      expect(Karafka::Setup::Config)
         .to receive(:setup)
         .once
 

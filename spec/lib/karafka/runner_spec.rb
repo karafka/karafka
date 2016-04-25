@@ -20,7 +20,7 @@ RSpec.describe Karafka::Runner do
           .and_return(consumer)
       end
 
-      it 'should start asynchronously fetch loop for each actor_cluster' do
+      it 'starts asynchronously fetch loop for each actor_cluster' do
         expect(actor_cluster)
           .to receive(:async)
           .and_return(async_scope)
@@ -42,7 +42,7 @@ RSpec.describe Karafka::Runner do
           .and_raise(error)
       end
 
-      it 'should stop the app and reraise' do
+      it 'stops the app and reraise' do
         expect(Karafka::App)
           .to receive(:stop!)
 
@@ -79,15 +79,22 @@ RSpec.describe Karafka::Runner do
   describe '#consumer' do
     let(:subject) { described_class.new.send(:consumer) }
 
-    it 'should be a proc' do
+    it 'is a proc' do
       expect(subject).to be_a Proc
     end
 
     context 'when we invoke a consumer block' do
       let(:message) { double }
+      let(:consumer) { Karafka::Connection::Consumer.new }
 
-      it 'should consume the message' do
-        expect_any_instance_of(Karafka::Connection::Consumer)
+      before do
+        expect(Karafka::Connection::Consumer)
+          .to receive(:new)
+          .and_return(consumer)
+      end
+
+      it 'consumes the message' do
+        expect(consumer)
           .to receive(:consume)
           .with(message)
 

@@ -31,7 +31,7 @@ RSpec.describe Karafka::Connection::Listener do
             .with(described_class, error)
         end
 
-        it 'should notice the error wthout closing the consumer' do
+        it 'notices the error wthout closing the consumer' do
           expect(subject)
             .to receive(:queue_consumer)
             .and_raise(error.new)
@@ -105,7 +105,7 @@ RSpec.describe Karafka::Connection::Listener do
         subject.instance_variable_set(:'@queue_consumer', queue_consumer)
       end
 
-      it 'should just return it' do
+      it 'just returns it' do
         expect(Poseidon::ConsumerGroup)
           .to receive(:new)
           .never
@@ -120,7 +120,7 @@ RSpec.describe Karafka::Connection::Listener do
         subject.instance_variable_set(:'@queue_consumer', nil)
       end
 
-      it 'should create an instance and return' do
+      it 'creates an instance and return' do
         expect(Karafka::Connection::QueueConsumer)
           .to receive(:new)
           .with(route)

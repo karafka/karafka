@@ -95,7 +95,7 @@ RSpec.describe Karafka::Routing::Builder do
     context 'when there are no attributes' do
       before { subject.clear }
 
-      it { expect { subject.send(:validate!, attribute, error) }.to_not raise_error }
+      it { expect { subject.send(:validate!, attribute, error) }.not_to raise_error }
     end
 
     context 'when there are objects without duplication of attribute' do
@@ -104,7 +104,7 @@ RSpec.describe Karafka::Routing::Builder do
         subject << route.class.new.tap { |route| route.topic = rand.to_s }
       end
 
-      it { expect { subject.send(:validate!, attribute, error) }.to_not raise_error }
+      it { expect { subject.send(:validate!, attribute, error) }.not_to raise_error }
     end
   end
 end

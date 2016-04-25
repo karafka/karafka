@@ -16,7 +16,7 @@ RSpec.describe Karafka::BaseController do
 
     describe '#schedule' do
       context 'when there are no callbacks' do
-        it 'should just schedule via perform_async' do
+        it 'just schedules via perform_async' do
           expect(subject).to receive(:perform_async)
 
           subject.schedule
@@ -28,7 +28,7 @@ RSpec.describe Karafka::BaseController do
       let(:message) { double }
       let(:params) { double }
 
-      it 'should create params instance and assign it' do
+      it 'creates params instance and assign it' do
         expect(Karafka::Params::Params)
           .to receive(:build)
           .with(
@@ -50,7 +50,7 @@ RSpec.describe Karafka::BaseController do
         subject.instance_variable_set(:@params, params)
       end
 
-      it 'should retrieve params data' do
+      it 'retrieves params data' do
         expect(params)
           .to receive(:retrieve)
           .and_return(params)
@@ -104,7 +104,7 @@ RSpec.describe Karafka::BaseController do
           end.new
         end
 
-        it 'should not enqueue' do
+        it 'does not enqueue' do
           expect(subject).not_to receive(:enqueue)
 
           subject.schedule
@@ -126,7 +126,7 @@ RSpec.describe Karafka::BaseController do
 
         let(:params) { double }
 
-        it 'should execute perform_async' do
+        it 'executes perform_async' do
           expect(subject).to receive(:perform_async)
 
           subject.schedule
@@ -150,7 +150,7 @@ RSpec.describe Karafka::BaseController do
           end.new
         end
 
-        it 'should not enqueue' do
+        it 'does not enqueue' do
           expect(subject).not_to receive(:enqueue)
 
           subject.schedule
@@ -172,7 +172,7 @@ RSpec.describe Karafka::BaseController do
           end.new
         end
 
-        it 'should enqueue with perform_async' do
+        it 'enqueues with perform_async' do
           expect(subject).to receive(:perform_async)
 
           subject.schedule
