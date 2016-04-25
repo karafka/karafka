@@ -85,9 +85,16 @@ RSpec.describe Karafka::Runner do
 
     context 'when we invoke a consumer block' do
       let(:message) { double }
+      let(:consumer) { Karafka::Connection::Consumer.new }
+
+      before do
+        expect(Karafka::Connection::Consumer)
+          .to receive(:new)
+          .and_return(consumer)
+      end
 
       it 'consumes the message' do
-        expect_any_instance_of(Karafka::Connection::Consumer)
+        expect(consumer)
           .to receive(:consume)
           .with(message)
 

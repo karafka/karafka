@@ -4,6 +4,8 @@ RSpec.describe Karafka::App do
   subject { described_class }
 
   describe '#run' do
+    let(:runner) { Karafka::Runner.new }
+
     it 'runs in supervision, start consuming and sleep' do
       expect(subject)
         .to receive(:sleep)
@@ -11,7 +13,11 @@ RSpec.describe Karafka::App do
       expect(subject)
         .to receive(:run!)
 
-      expect_any_instance_of(Karafka::Runner)
+      expect(Karafka::Runner)
+        .to receive(:new)
+        .and_return(runner)
+
+      expect(runner)
         .to receive(:run)
 
       expect(Karafka::Process.instance)

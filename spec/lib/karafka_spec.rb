@@ -3,12 +3,14 @@ require 'spec_helper'
 RSpec.describe Karafka do
   subject { described_class }
 
+  let(:std_logger) { subject.logger }
+
   before do
-    @logger = subject.logger
+    std_logger
   end
 
   after do
-    subject.logger = @logger
+    subject.logger = std_logger
   end
 
   describe '#logger=' do
