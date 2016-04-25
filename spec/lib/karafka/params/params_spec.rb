@@ -113,7 +113,7 @@ RSpec.describe Karafka::Params::Params do
             .and_return(parsed_content)
         end
 
-        context 'when parsed contant does not contain same keys as already existing' do
+        context 'when parsed content does not contain same keys as already existing' do
           let(:parsed_content) { { double => double } }
 
           it 'expect to merge with parsed stuff that is under content key and remove this key' do
@@ -122,7 +122,7 @@ RSpec.describe Karafka::Params::Params do
           end
         end
 
-        context 'when parsed contant contains same keys as already existing' do
+        context 'when parsed content contains same keys as already existing' do
           let(:parsed_content) { { received_at: rand } }
 
           it 'expect not to overwrite existing keys' do
