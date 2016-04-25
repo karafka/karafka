@@ -105,7 +105,7 @@ RSpec.describe Karafka::Connection::Listener do
         subject.instance_variable_set(:'@queue_consumer', queue_consumer)
       end
 
-      it 'justs return it' do
+      it 'just returns it' do
         expect(Poseidon::ConsumerGroup)
           .to receive(:new)
           .never
