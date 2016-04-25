@@ -12,13 +12,13 @@ module Karafka
       # Sets up the whole configuration
       # @param [Block] block configuration block
       def setup(&block)
-        Config.setup(&block)
+        Setup::Config.setup(&block)
         initialize!
       end
 
       # @return [Karafka::Config] config instance
       def config
-        Config.config
+        Setup::Config.config
       end
 
       # @return [Karafka::Routing::Builder] routes builder instance

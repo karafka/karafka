@@ -72,7 +72,7 @@ RSpec.describe Karafka::App do
     let(:config) { double }
 
     it 'should alias to Config' do
-      expect(Karafka::Config)
+      expect(Karafka::Setup::Config)
         .to receive(:config)
         .and_return(config)
 
@@ -90,7 +90,7 @@ RSpec.describe Karafka::App do
 
   describe '#setup' do
     it 'should delegate it to Config setup and set framework to initializing state' do
-      expect(Karafka::Config)
+      expect(Karafka::Setup::Config)
         .to receive(:setup)
         .once
 

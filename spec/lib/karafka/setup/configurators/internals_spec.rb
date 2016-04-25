@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Configurators::Internals do
-  specify { expect(described_class).to be < Karafka::Configurators::Base }
+RSpec.describe Karafka::Setup::Configurators::Internals do
+  specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
   let(:config) { double(logger: logger, monitor: monitor) }
   subject { described_class.new(config) }

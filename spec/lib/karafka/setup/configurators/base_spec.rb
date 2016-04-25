@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Configurators::Base do
+RSpec.describe Karafka::Setup::Configurators::Base do
   subject { described_class }
 
   it { expect(subject).to respond_to :descendants }
 end
 
-RSpec.describe Karafka::Configurators::Base do
+RSpec.describe Karafka::Setup::Configurators::Base do
   let(:config) { double }
   subject { described_class.new(config) }
 

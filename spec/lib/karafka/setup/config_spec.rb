@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Config do
+RSpec.describe Karafka::Setup::Config do
   subject { described_class.new }
 
   described_class::SETTINGS.each do |attribute|
@@ -12,37 +12,47 @@ RSpec.describe Karafka::Config do
         expect(subject.public_send(attribute)).to eq value
       end
     end
-  end
 
-  describe '#kafka_hosts' do
-    before { subject.kafka_hosts = kafka_hosts }
-
-    context 'when kafka hosts are not provided' do
-      let(:kafka_hosts) { nil }
-      let(:broker_manager) { double }
-      let(:brokers) { [Karafka::Connection::Broker.new({}.to_json)] }
-
-      it 'expect to use broker manager to discover them' do
-        expect(Karafka::Connection::BrokerManager)
-          .to receive(:new)
-          .and_return(broker_manager)
-
-        expect(broker_manager)
-          .to receive(:all)
-          .and_return(brokers)
-
-        expect(subject.kafka_hosts).to eq brokers.map(&:host)
+    describe "##{attribute}" do
+      before do
+        subject.public_send(:"#{attribute}=", value)
       end
-    end
 
-    context 'when kafka hosts were provided' do
-      let(:kafka_hosts) { double }
+      context 'when value is assigned' do
+        let(:value) { rand }
 
-      it 'expect not to use broker manager to discover them' do
-        expect(Karafka::Connection::BrokerManager)
-          .not_to receive(:new)
+        it { expect(subject.public_send(attribute)).to eq value }
+      end
 
-        expect(subject.kafka_hosts).to eq kafka_hosts
+      context 'when value is not assigned' do
+        let(:value) { nil }
+        let(:default_value) { rand }
+
+        context 'and there is a default' do
+          before do
+            expect(Karafka::Setup::Defaults)
+              .to receive(:respond_to?)
+              .and_return(true)
+              .at_least(:once)
+
+            expect(Karafka::Setup::Defaults)
+              .to receive(attribute)
+              .and_return(default_value)
+          end
+
+          it { expect(subject.public_send(attribute)).to eq default_value }
+        end
+
+        context 'but there is no default' do
+          before do
+            expect(Karafka::Setup::Defaults)
+              .to receive(:respond_to?)
+              .and_return(false)
+              .at_least(:once)
+          end
+
+          it { expect(subject.public_send(attribute)).to eq nil }
+        end
       end
     end
   end
@@ -76,12 +86,12 @@ RSpec.describe Karafka::Config do
   end
 end
 
-RSpec.describe Karafka::Config do
+RSpec.describe Karafka::Setup::Config do
   subject { described_class.new }
 
   describe '#setup_components' do
     it 'expect to take descendants of BaseConfigurator and run setuo on each' do
-      Karafka::Configurators::Base.descendants.each do |descendant_class|
+      Karafka::Setup::Configurators::Base.descendants.each do |descendant_class|
         config = double
 
         expect(descendant_class)
