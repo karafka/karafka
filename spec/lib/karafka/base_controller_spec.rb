@@ -16,7 +16,7 @@ RSpec.describe Karafka::BaseController do
 
     describe '#schedule' do
       context 'when there are no callbacks' do
-        it 'justs schedule via perform_async' do
+        it 'just schedules via perform_async' do
           expect(subject).to receive(:perform_async)
 
           subject.schedule
