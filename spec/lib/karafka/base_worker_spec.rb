@@ -27,7 +27,7 @@ RSpec.describe Karafka::BaseWorker do
         .at_least(:once)
     end
 
-    it 'should set params and perform controller action' do
+    it 'sets params and perform controller action' do
       expect(controller_instance)
         .to receive(:perform)
 
@@ -36,7 +36,7 @@ RSpec.describe Karafka::BaseWorker do
       expect(subject.params).to eq args.last
     end
 
-    it 'should set topic and perform controller action' do
+    it 'sets topic and perform controller action' do
       expect(controller_instance)
         .to receive(:perform)
 
@@ -55,21 +55,21 @@ RSpec.describe Karafka::BaseWorker do
     end
 
     context 'when after_failure method is not defined on the controller' do
-      it 'should do nothing' do
+      it 'does nothing' do
         expect(controller_instance)
           .to receive(:respond_to?)
           .and_return(false)
           .at_least(:once)
 
         expect(controller_instance)
-          .to_not receive(:after_failure)
+          .not_to receive(:after_failure)
 
         subject.after_failure(*args)
       end
     end
 
     context 'when after_failure method is defined on the controller' do
-      it 'should execute it' do
+      it 'executes it' do
         expect(controller_instance)
           .to receive(:respond_to?)
           .and_return(true)

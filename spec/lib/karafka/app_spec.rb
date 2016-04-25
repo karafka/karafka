@@ -4,7 +4,7 @@ RSpec.describe Karafka::App do
   subject { described_class }
 
   describe '#run' do
-    it 'should run in supervision, start consuming and sleep' do
+    it 'runs in supervision, start consuming and sleep' do
       expect(subject)
         .to receive(:sleep)
 
@@ -27,7 +27,7 @@ RSpec.describe Karafka::App do
       subject.run
     end
 
-    it 'should define a proper action for sigint' do
+    it 'defines a proper action for sigint' do
       expect(Karafka::Process.instance)
         .to receive(:supervise)
 
@@ -47,7 +47,7 @@ RSpec.describe Karafka::App do
       subject.run
     end
 
-    it 'should define a proper action for sigquit' do
+    it 'defines a proper action for sigquit' do
       expect(Karafka::Process.instance)
         .to receive(:supervise)
 
@@ -71,7 +71,7 @@ RSpec.describe Karafka::App do
   describe '#config' do
     let(:config) { double }
 
-    it 'should alias to Config' do
+    it 'aliases to Config' do
       expect(Karafka::Setup::Config)
         .to receive(:config)
         .and_return(config)
@@ -83,13 +83,13 @@ RSpec.describe Karafka::App do
   describe '#routes' do
     let(:routes) { Karafka::Routing::Builder.instance }
 
-    it 'should return routes builder' do
+    it 'returns routes builder' do
       expect(subject.routes).to eq routes
     end
   end
 
   describe '#setup' do
-    it 'should delegate it to Config setup and set framework to initializing state' do
+    it 'delegates it to Config setup and set framework to initializing state' do
       expect(Karafka::Setup::Config)
         .to receive(:setup)
         .once

@@ -7,9 +7,9 @@ RSpec.describe Karafka::Logger do
   describe '#build' do
     let(:target) { double }
     let(:log_file) { Karafka::App.root.join('log', "#{env}.log") }
-    let(:logger) { Karafka::Logger.new(STDOUT) }
+    let(:logger) { described_class.new(STDOUT) }
 
-    it 'should create an instance that will log in the app root' do
+    it 'creates an instance that will log in the app root' do
       expect(subject)
         .to receive(:target)
         .and_return(target)
@@ -27,7 +27,7 @@ RSpec.describe Karafka::Logger do
     let(:delegate_scope) { double }
     let(:file) { double }
 
-    it 'should delegate write and close to STDOUT and file' do
+    it 'delegates write and close to STDOUT and file' do
       expect(Karafka::Helpers::MultiDelegator)
         .to receive(:delegate)
         .with(:write, :close)
@@ -49,7 +49,7 @@ RSpec.describe Karafka::Logger do
     let(:file) { double }
     let(:log_file) { Karafka::App.root.join('log', "#{Karafka.env}.log") }
 
-    it 'should open a log_file in append mode' do
+    it 'opens a log_file in append mode' do
       expect(File)
         .to receive(:open)
         .with(log_file, 'a')

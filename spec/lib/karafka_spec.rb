@@ -14,7 +14,7 @@ RSpec.describe Karafka do
   describe '#logger=' do
     let(:logger) { double }
 
-    it 'should assign logger' do
+    it 'assigns logger' do
       subject.logger = logger
       expect(subject.instance_variable_get(:'@logger')).to eq logger
     end
@@ -28,7 +28,7 @@ RSpec.describe Karafka do
         subject.instance_variable_set(:'@monitor', monitor)
       end
 
-      it 'should use monitor that was defined' do
+      it 'uses monitor that was defined' do
         expect(subject.monitor).to eq monitor
       end
     end
@@ -40,7 +40,7 @@ RSpec.describe Karafka do
         subject.instance_variable_set(:'@monitor', nil)
       end
 
-      it 'should build a default monitor' do
+      it 'builds a default monitor' do
         expect(Karafka::Monitor)
           .to receive(:instance)
           .and_return(monitor)
@@ -58,7 +58,7 @@ RSpec.describe Karafka do
         subject.instance_variable_set(:'@monitor', monitor)
       end
 
-      it 'should use monitor that was defined' do
+      it 'uses monitor that was defined' do
         expect(subject.monitor).to eq monitor
       end
     end
@@ -70,7 +70,7 @@ RSpec.describe Karafka do
         subject.instance_variable_set(:'@monitor', nil)
       end
 
-      it 'should build a default monitor' do
+      it 'builds a default monitor' do
         expect(Karafka::Monitor)
           .to receive(:instance)
           .and_return(monitor)
@@ -112,7 +112,7 @@ RSpec.describe Karafka do
 
     context 'when KARAFKA_BOOT_FILE is not defined' do
       let(:boot_file) { nil }
-      let(:default) { File.join(Karafka.root, 'app.rb') }
+      let(:default) { File.join(described_class.root, 'app.rb') }
 
       it 'expect to use default one' do
         expect(subject.boot_file).to eq Pathname.new(default)
