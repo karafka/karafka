@@ -9,7 +9,7 @@ module Karafka
             water_config.send_messages = true
             water_config.connection_pool_size = config.max_concurrency
             water_config.connection_pool_timeout = 1
-            water_config.kafka_hosts = config.kafka_hosts
+            water_config.kafka_hosts = config.kafka.hosts
             water_config.raise_on_failure = true
           end
         end

@@ -14,7 +14,7 @@ module Karafka
         # Configure sidekiq client
         def setup_sidekiq_client
           ::Sidekiq.configure_client do |sidekiq_config|
-            sidekiq_config.redis = config.redis.merge(
+            sidekiq_config.redis = config.redis.to_h.merge(
               size: config.max_concurrency
             )
           end
@@ -25,7 +25,7 @@ module Karafka
           ::Sidekiq.configure_server do |sidekiq_config|
             # We don't set size for the server - this will be set automatically based
             # on the Sidekiq concurrency level (Sidekiq not Karafkas)
-            sidekiq_config.redis = config.redis
+            sidekiq_config.redis = config.redis.to_h
           end
         end
       end

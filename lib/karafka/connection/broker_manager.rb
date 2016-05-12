@@ -38,7 +38,7 @@ module Karafka
       # @return [::ZK] Zookeeper high level client
       def zk
         @zk ||= ::ZK.new(
-          ::Karafka::App.config.zookeeper_hosts.join(',')
+          ::Karafka::App.config.zookeeper.hosts.join(',')
         )
       end
     end

@@ -11,7 +11,7 @@ RSpec.describe Karafka::Cli::Topics do
     let(:topics) { { children: [rand.to_s] } }
 
     before do
-      Karafka::App.config.zookeeper_hosts.each do |host|
+      Karafka::App.config.zookeeper.hosts.each do |host|
         expect(Zookeeper)
           .to receive(:new)
           .with(host)

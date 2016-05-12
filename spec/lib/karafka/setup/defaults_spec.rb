@@ -7,8 +7,7 @@ RSpec.describe Karafka::Setup::Defaults do
     it { expect(subject.monitor).to be_an_instance_of ::Karafka::Monitor }
   end
 
-  describe '#kafka_hosts' do
-    let(:kafka_hosts) { nil }
+  describe '#kafka' do
     let(:broker_manager) { double }
     let(:brokers) { [Karafka::Connection::Broker.new({}.to_json)] }
 
@@ -21,7 +20,7 @@ RSpec.describe Karafka::Setup::Defaults do
         .to receive(:all)
         .and_return(brokers)
 
-      expect(subject.kafka_hosts).to eq brokers.map(&:host)
+      expect(subject.kafka).to eq(hosts: brokers.map(&:host))
     end
   end
 

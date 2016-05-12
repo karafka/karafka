@@ -13,8 +13,8 @@ module Karafka
           "Max number of threads: #{Karafka::App.config.max_concurrency}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
-          "Kafka hosts: #{Karafka::App.config.kafka_hosts}",
-          "Zookeeper hosts: #{Karafka::App.config.zookeeper_hosts}",
+          "Kafka hosts: #{Karafka::App.config.kafka.hosts}",
+          "Zookeeper hosts: #{Karafka::App.config.zookeeper.hosts}",
           "Redis: #{Karafka::App.config.redis}",
           "Wait timeout: #{Karafka::App.config.wait_timeout}"
         ]

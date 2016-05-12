@@ -1,10 +1,12 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Setup::Config do
+  specify { expect(described_class::Node).to be < OpenStruct }
+
   describe 'class methods' do
     subject { described_class.new }
 
-    described_class::SETTINGS.each do |attribute|
+    described_class::ROOT_SETTINGS.each do |attribute|
       describe "#{attribute}=" do
         let(:value) { rand }
         before { subject.public_send(:"#{attribute}=", value) }
@@ -108,6 +110,21 @@ RSpec.describe Karafka::Setup::Config do
         end
 
         subject.send :setup_components
+      end
+    end
+
+    describe 'example node' do
+      let(:hosts) { rand }
+      let(:kafka_node) { { hosts: hosts } }
+
+      before { subject.kafka = kafka_node }
+
+      it 'expect to return a node' do
+        expect(subject.kafka.hosts).to eq hosts
+      end
+
+      it 'expect to be a Node object' do
+        expect(subject.kafka).to be_a described_class::Node
       end
     end
   end

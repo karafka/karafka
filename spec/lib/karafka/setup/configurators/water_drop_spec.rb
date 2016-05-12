@@ -6,7 +6,7 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
   let(:config) do
     double(
       max_concurrency: ::Karafka::App.config.max_concurrency,
-      kafka_hosts: ::Karafka::App.config.kafka_hosts
+      kafka: double(hosts: ::Karafka::App.config.kafka.hosts)
     )
   end
   subject { described_class.new(config) }
@@ -18,7 +18,7 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
       expect(WaterDrop.config.send_messages).to eq true
       expect(WaterDrop.config.connection_pool_size).to eq config.max_concurrency
       expect(WaterDrop.config.connection_pool_timeout).to eq 1
-      expect(WaterDrop.config.kafka_hosts).to eq config.kafka_hosts
+      expect(WaterDrop.config.kafka_hosts).to eq config.kafka.hosts
       expect(WaterDrop.config.raise_on_failure).to eq true
     end
   end

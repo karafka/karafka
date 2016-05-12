@@ -73,7 +73,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
     it 'expect to create ZK instance out of joined hosts' do
       expect(ZK)
         .to receive(:new)
-        .with(::Karafka::App.config.zookeeper_hosts.join(','))
+        .with(::Karafka::App.config.zookeeper.hosts.join(','))
         .and_return(zk_instance)
 
       subject.send(:zk)
