@@ -6,6 +6,8 @@ module Karafka
     # @note If you want to do some configurations after all of this is done, please add to
     #   karafka/config a proper file (needs to inherit from Karafka::Setup::Configurators::Base
     #   and implement setup method) after that everything will happen automatically
+    # @note This config object allows to create a 1 level nestings (nodes) only. This should be
+    #   enough and will still keep the code simple
     # @see Karafka::Setup::Configurators::Base for more details about configurators api
     class Config
       # Nested settings node (for hash based settings) - this will allow us to have nice
