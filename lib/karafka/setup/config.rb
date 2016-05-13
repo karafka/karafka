@@ -43,7 +43,7 @@ module Karafka
 
       # We assume that we can have up to two levels of settings (root settings + additional node)
       # No more nodes are supported (1 level nestings)
-      ROOT_SETTINGS = SETTINGS.map { |set| set.is_a?(Hash) ? set.keys : set }.flatten
+      ROOT_SETTINGS = SETTINGS.flat_map { |set| set.is_a?(Hash) ? set.keys : set }
 
       ROOT_SETTINGS.each do |attr_name|
         attr_writer attr_name
