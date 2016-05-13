@@ -68,8 +68,8 @@ module Karafka
       def target
         @target ||= Poseidon::ConsumerGroup.new(
           @route.group,
-          ::Karafka::App.config.kafka_hosts,
-          ::Karafka::App.config.zookeeper_hosts,
+          ::Karafka::App.config.kafka.hosts,
+          ::Karafka::App.config.zookeeper.hosts,
           @route.topic,
           socket_timeout_ms: (::Karafka::App.config.wait_timeout + TIMEOUT_OFFSET) * 1000,
           # How long should we wait for messages if nothing is there to process

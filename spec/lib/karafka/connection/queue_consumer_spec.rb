@@ -132,8 +132,8 @@ RSpec.describe Karafka::Connection::QueueConsumer do
           .to receive(:new)
           .with(
             route.group.to_s,
-            ::Karafka::App.config.kafka_hosts,
-            ::Karafka::App.config.zookeeper_hosts,
+            ::Karafka::App.config.kafka.hosts,
+            ::Karafka::App.config.zookeeper.hosts,
             route.topic.to_s,
             socket_timeout_ms: socket_timeout_ms,
             max_wait_ms: max_wait_ms

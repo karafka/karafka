@@ -10,7 +10,7 @@ module Karafka
       def call
         topics = []
 
-        Karafka::App.config.zookeeper_hosts.each do |host|
+        Karafka::App.config.zookeeper.hosts.each do |host|
           zookeeper = Zookeeper.new(host)
           topics += zookeeper.get_children(path: '/brokers/topics')[:children]
         end

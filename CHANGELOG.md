@@ -10,6 +10,7 @@
 - worker_timeout config option has been removed. It now needs to be defined manually by the framework user because WorkerGlass::Timeout can be disabled and we cannot use Karafka settings on a class level to initialize user code stuff
 - Moved setup logic under setup/Setup namespace
 - Better defaults handling
+- #75 - Kafka and Zookeeper options as a hash
 
 ## 0.4.0
 - Added WaterDrop gem with default configuration
