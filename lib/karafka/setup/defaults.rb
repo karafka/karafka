@@ -4,7 +4,7 @@ module Karafka
     # use one hidden under a proper method from this class
     class Defaults
       class << self
-        # @return [Hash>] all Kafka default settings
+        # @return [Hash] all Kafka default settings
         # @note If kafka settings were not provided, Karafka will ask Zookeeper for Kafka brokers.
         #   This is the default behaviour because it allows us to autodiscover new brokers
         #   and detect changes. It will create a bigger load on Zookeeeper since on each failure
