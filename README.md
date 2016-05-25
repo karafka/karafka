@@ -81,17 +81,17 @@ Karafka has following configuration options:
 | name                   | true     | String            | Application name                                                                            |
 | redis                  | true     | Hash              | Hash with Redis configuration options                                                       |
 | wait_timeout           | true     | Integer (Seconds) | How long do we wait for incoming messages on a single socket (topic)                        |
-| zookeeper_hosts        | true     | Array<String>     | Zookeeper server hosts                                                                      |
 | monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                             |
 | logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                                               |
-| kafka_hosts            | false    | Array<String>     | Kafka server hosts - if not provided Karafka will autodiscover them based on Zookeeper data |
+| zookeeper.hosts        | true     | Array<String>     | Zookeeper server hosts                                                                      |
+| kafka.hosts            | false    | Array<String>     | Kafka server hosts - if not provided Karafka will autodiscover them based on Zookeeper data |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
 
 ```ruby
 class App < Karafka::App
   setup do |config|
-    config.zookeeper_hosts =  %w( 127.0.0.1:2181 )
+    config.zookeeper.hosts =  %w( 127.0.0.1:2181 )
     config.redis = {
       url: 'redis://redis.example.com:7372/1'
     }

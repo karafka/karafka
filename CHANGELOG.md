@@ -11,6 +11,9 @@
 - Moved setup logic under setup/Setup namespace
 - Better defaults handling
 - #75 - Kafka and Zookeeper options as a hash
+- #82 - Karafka autodiscovery fails upon caching of configs
+- #81 - Switch config management to dry configurable
+- Version fix
 
 ## 0.4.0
 - Added WaterDrop gem with default configuration

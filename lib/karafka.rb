@@ -16,6 +16,7 @@
   envlogic
   thor
   fileutils
+  dry-configurable
   active_support/callbacks
   active_support/core_ext/class/subclasses
   active_support/core_ext/hash/indifferent_access
@@ -30,16 +31,14 @@ module Karafka
   extend Envlogic
 
   class << self
-    attr_writer :logger, :monitor
-
     # @return [Logger] logger that we want to use. Will use ::Karafka::Logger by default
     def logger
-      @logger ||= ::Karafka::Logger.build
+      @logger ||= App.config.logger
     end
 
     # @return [::Karafka::Monitor] monitor that we want to use. Will use dummy monitor by default
     def monitor
-      @monitor ||= ::Karafka::Monitor.instance
+      @monitor ||= App.config.monitor
     end
 
     # @return [String] root path of this gem

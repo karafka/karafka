@@ -13,7 +13,7 @@ module Karafka
 
     class << self
       # Builds a logger with appropriate settings, log level and environment
-      def build
+      def instance
         instance = new(target)
         instance.level = ENV_MAP[Karafka.env] || ENV_MAP[:default]
         instance
