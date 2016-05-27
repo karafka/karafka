@@ -4,7 +4,7 @@ RSpec.describe Karafka::Logger do
   specify { expect(described_class).to be < ::Logger }
   subject { described_class }
 
-  describe '#build' do
+  describe '#instance' do
     let(:target) { double }
     let(:log_file) { Karafka::App.root.join('log', "#{env}.log") }
     let(:logger) { described_class.new(STDOUT) }
@@ -19,7 +19,7 @@ RSpec.describe Karafka::Logger do
         .with(target)
         .and_return(logger)
 
-      subject.build
+      subject.instance
     end
   end
 

@@ -12,8 +12,8 @@ module Karafka
     }.freeze
 
     class << self
-      # Builds a logger with appropriate settings, log level and environment
-      def build
+      # Returns a logger instance with appropriate settings, log level and environment
+      def instance
         instance = new(target)
         instance.level = ENV_MAP[Karafka.env] || ENV_MAP[:default]
         instance

@@ -3,82 +3,15 @@ require 'spec_helper'
 RSpec.describe Karafka do
   subject { described_class }
 
-  let(:std_logger) { subject.logger }
-
-  before do
-    std_logger
-  end
-
-  after do
-    subject.logger = std_logger
-  end
-
-  describe '#logger=' do
-    let(:logger) { double }
-
-    it 'assigns logger' do
-      subject.logger = logger
-      expect(subject.instance_variable_get(:'@logger')).to eq logger
+  describe '.logger' do
+    it 'expect to use app logger' do
+      expect(subject.logger).to eq described_class::App.config.logger
     end
   end
 
-  describe '#monitor' do
-    context 'when monitor is already set' do
-      let(:monitor) { double }
-
-      before do
-        subject.instance_variable_set(:'@monitor', monitor)
-      end
-
-      it 'uses monitor that was defined' do
-        expect(subject.monitor).to eq monitor
-      end
-    end
-
-    context 'when monitor is not provided' do
-      let(:monitor) { double }
-
-      before do
-        subject.instance_variable_set(:'@monitor', nil)
-      end
-
-      it 'builds a default monitor' do
-        expect(Karafka::Monitor)
-          .to receive(:instance)
-          .and_return(monitor)
-
-        expect(subject.monitor).to eq monitor
-      end
-    end
-  end
-
-  describe '#monitor' do
-    context 'when monitor is already set' do
-      let(:monitor) { double }
-
-      before do
-        subject.instance_variable_set(:'@monitor', monitor)
-      end
-
-      it 'uses monitor that was defined' do
-        expect(subject.monitor).to eq monitor
-      end
-    end
-
-    context 'when monitor is not provided' do
-      let(:monitor) { double }
-
-      before do
-        subject.instance_variable_set(:'@monitor', nil)
-      end
-
-      it 'builds a default monitor' do
-        expect(Karafka::Monitor)
-          .to receive(:instance)
-          .and_return(monitor)
-
-        expect(subject.monitor).to eq monitor
-      end
+  describe '.monitor' do
+    it 'expect to use app monitor' do
+      expect(subject.monitor).to eq described_class::App.config.monitor
     end
   end
 
