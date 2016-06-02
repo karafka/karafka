@@ -14,8 +14,8 @@ module Karafka
     class << self
       # Returns a logger instance with appropriate settings, log level and environment
       def instance
-        instance = new(target)
         ensure_dir_exists
+        instance = new(target)
         instance.level = ENV_MAP[Karafka.env] || ENV_MAP[:default]
         instance
       end
