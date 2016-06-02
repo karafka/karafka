@@ -15,6 +15,7 @@ module Karafka
       # Returns a logger instance with appropriate settings, log level and environment
       def instance
         instance = new(target)
+        ensure_dir_exists
         instance.level = ENV_MAP[Karafka.env] || ENV_MAP[:default]
         instance
       end
@@ -30,13 +31,19 @@ module Karafka
           .to(STDOUT, file)
       end
 
+      # @return [Pathname] the directory in which the logs will be written
+      def log_dir
+        Karafka::App.root.join('log')
+      end
+
+      # Makes sure the log directory exists
+      def ensure_dir_exists
+        Dir.mkdir(log_dir) unless Dir.exist?(log_dir)
+      end
+
       # @return [File] file to which we want to write our logs
       # @note File is being opened in append mode ('a')
       def file
-        log_dir = Karafka::App.root.join('log')
-        unless Dir.exist?(log_dir)
-          Dir.mkdir(log_dir)
-        end
         File.open(
           log_dir.join("#{Karafka.env}.log"),
           'a'
