@@ -48,6 +48,20 @@ RSpec.describe Karafka::Logger do
   describe '#file' do
     let(:file) { double }
     let(:log_file) { Karafka::App.root.join('log', "#{Karafka.env}.log") }
+    # A Pathname, because this is what is returned by File.join
+    let(:log_dir) { Pathname.new(File.dirname(log_file)) }
+
+    it 'makes sure the "log" dir exists' do
+      expect(Dir)
+        .to receive(:exist?)
+        .with( log_dir )
+        .and_return( false )
+      expect(Dir)
+        .to receive(:mkdir)
+        .with( log_dir )
+        .and_return( 0 ) # Don't ask me why, but this is what Dir.mkdir returns normally
+      subject.send(:file)
+    end
 
     it 'opens a log_file in append mode' do
       expect(File)

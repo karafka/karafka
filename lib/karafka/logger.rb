@@ -33,8 +33,12 @@ module Karafka
       # @return [File] file to which we want to write our logs
       # @note File is being opened in append mode ('a')
       def file
+        log_dir = Karafka::App.root.join('log')
+        unless Dir.exist?(log_dir)
+          Dir.mkdir(log_dir)
+        end
         File.open(
-          Karafka::App.root.join('log', "#{Karafka.env}.log"),
+          log_dir.join("#{Karafka.env}.log"),
           'a'
         )
       end
