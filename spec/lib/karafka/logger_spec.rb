@@ -6,8 +6,10 @@ RSpec.describe Karafka::Logger do
 
   describe '#instance' do
     let(:target) { double }
-    let(:log_file) { Karafka::App.root.join('log', "#{env}.log") }
     let(:logger) { described_class.new(STDOUT) }
+    let(:log_file) { Karafka::App.root.join('log', "#{Karafka.env}.log") }
+    # A Pathname, because this is what is returned by File.join
+    let(:log_dir) { Pathname.new(File.dirname(log_file)) }
 
     it 'creates an instance that will log in the app root' do
       expect(subject)
@@ -19,6 +21,18 @@ RSpec.describe Karafka::Logger do
         .with(target)
         .and_return(logger)
 
+      subject.instance
+    end
+
+    it 'makes sure the "log" dir exists' do
+      expect(Dir)
+        .to receive(:exist?)
+        .with(log_dir)
+        .and_return(false)
+      expect(Dir)
+        .to receive(:mkdir)
+        .with(log_dir)
+        .and_return(0) # Don't ask me why, but this is what Dir.mkdir returns normally
       subject.instance
     end
   end
