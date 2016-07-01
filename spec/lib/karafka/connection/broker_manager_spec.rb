@@ -33,6 +33,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
   describe '#find' do
     let(:id) { rand.to_s }
     let(:broker_data) { double }
+    let(:namespace) { '/namespace' }
 
     before do
       expect(subject)
@@ -48,12 +49,24 @@ RSpec.describe Karafka::Connection::BrokerManager do
 
       expect(subject.send(:find, id)).to eq broker_data
     end
+
+    it 'expect to use namespace when set' do
+      ::Karafka::App.config.zookeeper.namespace = namespace
+      expect(zk)
+        .to receive(:get)
+        .with("#{namespace}#{described_class::BROKERS_PATH}/#{id}")
+        .and_return([broker_data])
+
+      expect(subject.send(:find, id)).to eq broker_data
+    end
   end
 
   describe '#ids' do
     let(:result) { double }
 
     before do
+      ::Karafka::App.config.zookeeper.namespace = nil
+
       expect(subject)
         .to receive(:zk)
         .and_return(zk)
@@ -61,6 +74,26 @@ RSpec.describe Karafka::Connection::BrokerManager do
       expect(zk)
         .to receive(:children)
         .with(described_class::BROKERS_PATH)
+        .and_return(result)
+    end
+
+    it { expect(subject.send(:ids)).to eq result }
+  end
+
+  describe '#ids regarding namespace' do
+    let(:result) { double }
+    let(:namespace) { '/namespace' }
+
+    before do
+      ::Karafka::App.config.zookeeper.namespace = namespace
+
+      expect(subject)
+        .to receive(:zk)
+        .and_return(zk)
+
+      expect(zk)
+        .to receive(:children)
+        .with("#{namespace}#{described_class::BROKERS_PATH}")
         .and_return(result)
     end
 
@@ -78,6 +111,33 @@ RSpec.describe Karafka::Connection::BrokerManager do
 
       subject.send(:zk)
       expect(subject.send(:zk)).to eq zk_instance
+    end
+  end
+
+  describe '#namespace' do
+    it 'expect to be empty when it is nil' do
+      ::Karafka::App.config.zookeeper.namespace = nil
+      expect(subject.send(:namespace)).to eq ''
+    end
+
+    it 'expect to be empty when it is blank' do
+      ::Karafka::App.config.zookeeper.namespace = ''
+      expect(subject.send(:namespace)).to eq ''
+    end
+
+    it 'expect to get namespace from config' do
+      ::Karafka::App.config.zookeeper.namespace = '/namespace'
+      expect(subject.send(:namespace)).to eq ::Karafka::App.config.zookeeper.namespace
+    end
+
+    it 'expect to add leading /' do
+      ::Karafka::App.config.zookeeper.namespace = 'namespace'
+      expect(subject.send(:namespace)).to eq '/namespace'
+    end
+
+    it 'expect to strip trailing /' do
+      ::Karafka::App.config.zookeeper.namespace = 'namespace/'
+      expect(subject.send(:namespace)).to eq '/namespace'
     end
   end
 end
