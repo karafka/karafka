@@ -78,7 +78,7 @@ RSpec.describe Karafka::Monitor do
   end
 
   describe '#caller_exceptions_map' do
-    it { expect(subject.send(:caller_exceptions_map).keys).to eq %i( error fatal ) }
+    it { expect(subject.send(:caller_exceptions_map).keys).to eq %i(error fatal) }
 
     let(:error_callers) do
       [

@@ -33,20 +33,13 @@ RSpec.describe Karafka::Params::Params do
         let(:content) { rand }
 
         let(:message) do
-          double(
-            content: content
-          )
+          instance_double(Karafka::Connection::Message, content: content)
         end
 
         it 'expect to build defaults and merge with additional values and content' do
           Timecop.freeze do
-            expect(defaults)
-              .to receive(:merge!)
-              .with(
-                parsed: false,
-                received_at: Time.now,
-                content: content
-              )
+            expect(defaults).to receive(:merge!)
+              .with(parsed: false, received_at: Time.now, content: content)
               .and_return(merged_with_defaults)
 
             expect(subject.build(message, controller)).to eq merged_with_defaults
@@ -61,7 +54,8 @@ RSpec.describe Karafka::Params::Params do
       let(:topic) { double }
 
       let(:controller) do
-        double(
+        instance_double(
+          Karafka::BaseController,
           worker: worker,
           parser: parser,
           topic: topic

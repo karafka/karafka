@@ -10,7 +10,7 @@ RSpec.describe Karafka::Helpers::MultiDelegator do
         meth[method] = rand
       end
 
-      double(meth)
+      Struct.new(*meth.keys).new(*meth.values)
     end
   end
 

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Dry::Configurable::Config do
-  let(:keys) { %i( a b ) }
+  let(:keys) { %i(a b) }
   subject { described_class.new(*keys).new(*values) }
 
   describe 'non proc example' do

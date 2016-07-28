@@ -96,30 +96,12 @@ RSpec.describe Karafka::BaseWorker do
     end
 
     it 'expect to use router to pick controller, assign params and return' do
-      expect(subject)
-        .to receive(:topic) { topic }
-
-      expect(Karafka::Routing::Router)
-        .to receive(:new)
-        .with(topic)
-        .and_return(router)
-
-      expect(router)
-        .to receive(:build)
-        .and_return(controller_instance)
-
-      expect(controller_instance)
-        .to receive(:interchanger)
-        .and_return(interchanger)
-
-      expect(interchanger)
-        .to receive(:parse)
-        .with(params)
-        .and_return(interchanged_params)
-
-      expect(controller_instance)
-        .to receive(:params=)
-        .with(interchanged_params)
+      expect(subject).to receive(:topic) { topic }
+      expect(Karafka::Routing::Router).to receive(:new).with(topic).and_return(router)
+      expect(router).to receive(:build).and_return(controller_instance)
+      expect(controller_instance).to receive(:interchanger).and_return(interchanger)
+      expect(interchanger).to receive(:parse).with(params).and_return(interchanged_params)
+      expect(controller_instance).to receive(:params=).with(interchanged_params)
 
       expect(subject.send(:controller)).to eq controller_instance
     end

@@ -22,7 +22,7 @@ RSpec.describe Karafka::Routing::Router do
       end
     end
 
-    it 'expect to build controller with all proper options assigned' do
+    before do
       allow(subject)
         .to receive(:route)
         .and_return(route)
@@ -46,7 +46,9 @@ RSpec.describe Karafka::Routing::Router do
       expect(controller_instance)
         .to receive(:worker=)
         .with(worker)
+    end
 
+    it 'expect to build controller with all proper options assigned' do
       expect(subject.build).to eq controller_instance
     end
   end

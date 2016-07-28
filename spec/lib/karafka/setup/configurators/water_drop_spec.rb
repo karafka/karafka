@@ -4,9 +4,13 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
   let(:config) do
-    double(
+    instance_double(
+      Karafka::Setup::Config.config.class,
       max_concurrency: ::Karafka::App.config.max_concurrency,
-      kafka: double(hosts: ::Karafka::App.config.kafka.hosts)
+      kafka: instance_double(
+        Karafka::Setup::Config.config.kafka.class,
+        hosts: ::Karafka::App.config.kafka.hosts
+      )
     )
   end
   subject { described_class.new(config) }

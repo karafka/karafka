@@ -7,68 +7,33 @@ RSpec.describe Karafka::App do
     let(:runner) { Karafka::Runner.new }
 
     it 'runs in supervision, start consuming and sleep' do
-      expect(subject)
-        .to receive(:sleep)
-
-      expect(subject)
-        .to receive(:run!)
-
-      expect(Karafka::Runner)
-        .to receive(:new)
-        .and_return(runner)
-
-      expect(runner)
-        .to receive(:run)
-
-      expect(Karafka::Process.instance)
-        .to receive(:supervise)
-        .and_yield
-
-      expect(Karafka::Process.instance)
-        .to receive(:on_sigint)
-
-      expect(Karafka::Process.instance)
-        .to receive(:on_sigquit)
+      expect(subject).to receive(:sleep)
+      expect(subject).to receive(:run!)
+      expect(Karafka::Runner).to receive(:new).and_return(runner)
+      expect(runner).to receive(:run)
+      expect(Karafka::Process.instance).to receive(:supervise).and_yield
+      expect(Karafka::Process.instance).to receive(:on_sigint)
+      expect(Karafka::Process.instance).to receive(:on_sigquit)
 
       subject.run
     end
 
     it 'defines a proper action for sigint' do
-      expect(Karafka::Process.instance)
-        .to receive(:supervise)
-
-      expect(Karafka::Process.instance)
-        .to receive(:on_sigint)
-        .and_yield
-
-      expect(Karafka::Process.instance)
-        .to receive(:on_sigquit)
-
-      expect(subject)
-        .to receive(:stop!)
-
-      expect(subject)
-        .to receive(:exit)
+      expect(Karafka::Process.instance).to receive(:supervise)
+      expect(Karafka::Process.instance).to receive(:on_sigint).and_yield
+      expect(Karafka::Process.instance).to receive(:on_sigquit)
+      expect(subject).to receive(:stop!)
+      expect(subject).to receive(:exit)
 
       subject.run
     end
 
     it 'defines a proper action for sigquit' do
-      expect(Karafka::Process.instance)
-        .to receive(:supervise)
-
-      expect(Karafka::Process.instance)
-        .to receive(:on_sigint)
-
-      expect(Karafka::Process.instance)
-        .to receive(:on_sigquit)
-        .and_yield
-
-      expect(subject)
-        .to receive(:stop!)
-
-      expect(subject)
-        .to receive(:exit)
+      expect(Karafka::Process.instance).to receive(:supervise)
+      expect(Karafka::Process.instance).to receive(:on_sigint)
+      expect(Karafka::Process.instance).to receive(:on_sigquit).and_yield
+      expect(subject).to receive(:stop!)
+      expect(subject).to receive(:exit)
 
       subject.run
     end
@@ -112,11 +77,14 @@ RSpec.describe Karafka::App do
   end
 
   describe 'Karafka delegations' do
-    %i( root env ).each do |delegation|
+    %i(
+      root
+      env
+    ).each do |delegation|
       describe "##{delegation}" do
         let(:return_value) { double }
 
-        it "should delegate #{delegation} method to Karafka module" do
+        it "expect to delegate #{delegation} method to Karafka module" do
           expect(Karafka)
             .to receive(delegation)
             .and_return(return_value)
@@ -128,11 +96,15 @@ RSpec.describe Karafka::App do
   end
 
   describe 'Karafka::Status delegations' do
-    %i( run! running? stop! ).each do |delegation|
+    %i(
+      run!
+      running?
+      stop!
+    ).each do |delegation|
       describe "##{delegation}" do
         let(:return_value) { double }
 
-        it "should delegate #{delegation} method to Karafka module" do
+        it "expect to delegate #{delegation} method to Karafka module" do
           expect(Karafka::Status.instance)
             .to receive(delegation)
             .and_return(return_value)
