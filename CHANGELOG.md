@@ -16,7 +16,7 @@
 - #81 - Switch config management to dry configurable
 - Version fix
 - Dropped support for Ruby 2.1.*
-- Ruby dump
+- Ruby dump tp 2.3.1
 
 ## 0.4.0
 - Added WaterDrop gem with default configuration
