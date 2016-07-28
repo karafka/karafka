@@ -84,7 +84,7 @@ RSpec.describe Karafka::App do
       describe "##{delegation}" do
         let(:return_value) { double }
 
-        it "should delegate #{delegation} method to Karafka module" do
+        it "expect to delegate #{delegation} method to Karafka module" do
           expect(Karafka)
             .to receive(delegation)
             .and_return(return_value)
@@ -104,7 +104,7 @@ RSpec.describe Karafka::App do
       describe "##{delegation}" do
         let(:return_value) { double }
 
-        it "should delegate #{delegation} method to Karafka module" do
+        it "expect to delegate #{delegation} method to Karafka module" do
           expect(Karafka::Status.instance)
             .to receive(delegation)
             .and_return(return_value)
