@@ -52,18 +52,9 @@ RSpec.describe Karafka::Connection::Listener do
       end
 
       it 'expect to yield for each incoming message and return last one' do
-        expect(subject)
-          .to receive(:queue_consumer)
-          .and_return(queue_consumer)
-          .at_least(:once)
-
-        expect(queue_consumer)
-          .to receive(:fetch)
-          .and_yield(_partition, messages_bulk)
-
-        expect(action)
-          .to receive(:call)
-          .with(incoming_message)
+        expect(subject).to receive(:queue_consumer).and_return(queue_consumer).at_least(:once)
+        expect(queue_consumer).to receive(:fetch).and_yield(_partition, messages_bulk)
+        expect(action).to receive(:call).with(incoming_message)
 
         expect(subject.send(:fetch, action)).to eq incoming_message
       end
@@ -79,18 +70,9 @@ RSpec.describe Karafka::Connection::Listener do
       end
 
       it 'expect to process first message and then return it' do
-        expect(subject)
-          .to receive(:queue_consumer)
-          .and_return(queue_consumer)
-          .at_least(:once)
-
-        expect(queue_consumer)
-          .to receive(:fetch)
-          .and_yield(_partition, messages_bulk)
-
-        expect(action)
-          .to receive(:call)
-          .with(incoming_message)
+        expect(subject).to receive(:queue_consumer).and_return(queue_consumer).at_least(:once)
+        expect(queue_consumer).to receive(:fetch).and_yield(_partition, messages_bulk)
+        expect(action).to receive(:call).with(incoming_message)
 
         expect(subject.send(:fetch, action)).to eq incoming_message
       end

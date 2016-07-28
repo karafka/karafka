@@ -6,13 +6,15 @@ RSpec.describe Karafka::Connection::Consumer do
   describe '#consume' do
     let(:topic) { rand.to_s }
     let(:raw_message_value) { rand }
-    let(:raw_message) { double(value: raw_message_value, topic: topic) }
     let(:message) { double }
     let(:builder) { Karafka::Routing::Router.new(nil) }
-    let(:controller_instance) { double(to_h: {}) }
+    let(:controller_instance) { instance_double(Karafka::BaseController, to_h: {}) }
+    let(:raw_message) do
+      instance_double(Poseidon::FetchedMessage, value: raw_message_value, topic: topic)
+    end
 
     context 'everything works well' do
-      it 'routes to a proper controller and schedule task' do
+      before do
         expect(Karafka::Connection::Message)
           .to receive(:new)
           .with(topic, raw_message_value)
@@ -33,31 +35,33 @@ RSpec.describe Karafka::Connection::Consumer do
 
         expect(controller_instance)
           .to receive(:schedule)
-
-        subject.consume(raw_message)
       end
 
-      context 'something goes wrong (exception is raised)' do
-        [
-          ZK::Exceptions::OperationTimeOut,
-          Poseidon::Connection::ConnectionFailedError,
-          Exception
-        ].each do |error|
-          context "when #{error} happens" do
-            before do
-              # Lets silence exceptions printing
-              expect(Karafka.monitor)
-                .to receive(:notice_error)
-                .with(described_class, error)
+      it 'routes to a proper controller and schedule task' do
+        expect { subject.consume(raw_message) }.not_to raise_error
+      end
+    end
 
-              expect(Karafka::Routing::Router)
-                .to receive(:new)
-                .and_raise(error)
-            end
+    context 'something goes wrong (exception is raised)' do
+      [
+        ZK::Exceptions::OperationTimeOut,
+        Poseidon::Connection::ConnectionFailedError,
+        Exception
+      ].each do |error|
+        context "when #{error} happens" do
+          before do
+            # Lets silence exceptions printing
+            expect(Karafka.monitor)
+              .to receive(:notice_error)
+              .with(described_class, error)
 
-            it 'notices and not reraise error' do
-              expect { subject.consume(raw_message) }.not_to raise_error
-            end
+            expect(Karafka::Routing::Router)
+              .to receive(:new)
+              .and_raise(error)
+          end
+
+          it 'notices and not reraise error' do
+            expect { subject.consume(raw_message) }.not_to raise_error
           end
         end
       end

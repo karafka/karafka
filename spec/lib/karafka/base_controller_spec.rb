@@ -91,11 +91,11 @@ RSpec.describe Karafka::BaseController do
     end
 
     context 'when we have a block based before_enqueue' do
-      context 'and it returns false' do
+      context 'and it throws abort to halt' do
         subject do
           ClassBuilder.inherit(described_class) do
             before_enqueue do
-              false
+              throw(:abort)
             end
 
             def perform
@@ -111,7 +111,7 @@ RSpec.describe Karafka::BaseController do
         end
       end
 
-      context 'and it does not return false' do
+      context 'and it does not throw abort to halt' do
         subject do
           ClassBuilder.inherit(described_class) do
             before_enqueue do
@@ -135,7 +135,7 @@ RSpec.describe Karafka::BaseController do
     end
 
     context 'when we have a method based before_enqueue' do
-      context 'and it returns false' do
+      context 'and it throws abort to halt' do
         subject do
           ClassBuilder.inherit(described_class) do
             before_enqueue :method
@@ -145,7 +145,7 @@ RSpec.describe Karafka::BaseController do
             end
 
             def method
-              false
+              throw(:abort)
             end
           end.new
         end

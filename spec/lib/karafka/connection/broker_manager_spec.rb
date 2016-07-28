@@ -7,7 +7,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
     let(:ids) { [rand, rand, rand] }
     let(:brokers) { [double, double, double] }
 
-    it 'expect to build brokers out of fetched details data' do
+    before do
       expect(subject)
         .to receive(:ids)
         .and_return(ids)
@@ -25,7 +25,9 @@ RSpec.describe Karafka::Connection::BrokerManager do
           .with(found_data)
           .and_return(brokers[index])
       end
+    end
 
+    it 'expect to build brokers out of fetched details data' do
       expect(subject.all).to eq brokers
     end
   end

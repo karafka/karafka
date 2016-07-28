@@ -7,7 +7,7 @@ RSpec.describe Karafka::Cli::Install do
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
   describe '#call' do
-    it 'expect to create proper dirs and copy template files' do
+    before do
       described_class::INSTALL_DIRS.each do |dir|
         expect(FileUtils)
           .to receive(:mkdir_p)
@@ -27,7 +27,9 @@ RSpec.describe Karafka::Cli::Install do
             Karafka.root.join(target)
           )
       end
+    end
 
+    it 'expect to create proper dirs and copy template files' do
       subject.call
     end
   end

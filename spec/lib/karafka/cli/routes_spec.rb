@@ -20,7 +20,7 @@ RSpec.describe Karafka::Cli::Routes do
     let(:route) do
       attrs = KEYS.each_with_object({}) { |key, hash| hash[key] = send(key) }
 
-      double(attrs.merge(topic: topic))
+      instance_double(Karafka::Routing::Route, attrs.merge(topic: topic))
     end
 
     before do

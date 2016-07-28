@@ -1,11 +1,12 @@
 # Karafka framework changelog
 
 ## 0.4.1-head
+- Explicit throw(:abort) required to halt before_enqueue (like in Rails 5)
 - #61 - Autodiscover Kafka brokers based on Zookeeper data
 - #63 - Graceful shutdown with current offset state during data processing
 - #65 - Example of NewRelic monitor is outdated
 - #71 - Setup should be executed after user code is loaded
-- Gem dump x2
+- Gem dump x3
 - Rubocop remarks
 - worker_timeout config option has been removed. It now needs to be defined manually by the framework user because WorkerGlass::Timeout can be disabled and we cannot use Karafka settings on a class level to initialize user code stuff
 - Moved setup logic under setup/Setup namespace
@@ -14,6 +15,8 @@
 - #82 - Karafka autodiscovery fails upon caching of configs
 - #81 - Switch config management to dry configurable
 - Version fix
+- Dropped support for Ruby 2.1.*
+- Ruby dump
 
 ## 0.4.0
 - Added WaterDrop gem with default configuration

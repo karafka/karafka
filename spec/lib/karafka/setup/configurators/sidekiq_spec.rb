@@ -24,7 +24,8 @@ RSpec.describe Karafka::Setup::Configurators::Sidekiq do
     let(:max_concurrency) { rand(1000) }
     let(:sidekiq_config_client) { double }
     let(:config) do
-      double(
+      instance_double(
+        Karafka::Setup::Config.config.class,
         name: name,
         max_concurrency: max_concurrency,
         redis: {
@@ -55,7 +56,8 @@ RSpec.describe Karafka::Setup::Configurators::Sidekiq do
     let(:concurrency) { rand(1000) }
     let(:sidekiq_config_server) { double }
     let(:config) do
-      double(
+      instance_double(
+        Karafka::Setup::Config.config.class,
         redis: {
           url: redis_url
         }

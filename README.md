@@ -333,7 +333,7 @@ before_enqueue acts in a similar way to Rails before_action so it should perform
 
 **Warning**: keep in mind, that all *before_enqueue* blocks/methods are executed after messages are received. This is not executed in Sidekiq, but right after receiving the incoming message. This means, that if you perform "heavy duty" operations there, Karafka might significantly slow down.
 
-If any of callbacks returns false - *perform* method will be not enqueued to the worker (the execution chain will stop).
+If any of callbacks throws :abort - *perform* method will be not enqueued to the worker (the execution chain will stop).
 
 Once you run consumer - messages from Kafka server will be send to a proper controller (based on topic name).
 
@@ -365,7 +365,7 @@ Presented example controller will accept incoming messages from a Kafka topic na
    # We will not enqueue to sidekiq those messages, which were sent
    # from sum method and return too high message for our purpose.
    def validate_params
-     params['message'].to_i > 50 && params['method'] != 'sum'
+     throw(:abort) unless params['message'].to_i > 50 && params['method'] != 'sum'
    end
 end
 ```

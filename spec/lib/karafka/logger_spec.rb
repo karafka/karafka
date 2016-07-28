@@ -42,17 +42,14 @@ RSpec.describe Karafka::Logger do
     let(:file) { double }
 
     it 'delegates write and close to STDOUT and file' do
-      expect(Karafka::Helpers::MultiDelegator)
-        .to receive(:delegate)
+      expect(Karafka::Helpers::MultiDelegator).to receive(:delegate)
         .with(:write, :close)
         .and_return(delegate_scope)
 
-      expect(delegate_scope)
-        .to receive(:to)
+      expect(delegate_scope).to receive(:to)
         .with(STDOUT, file)
 
-      expect(subject)
-        .to receive(:file)
+      expect(subject).to receive(:file)
         .and_return(file)
 
       subject.send(:target)

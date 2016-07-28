@@ -13,7 +13,7 @@ RSpec.describe Karafka::Setup::Config do
   end
 
   describe '#setup_components' do
-    it 'expect to take descendants of BaseConfigurator and run setup on each' do
+    before do
       Karafka::Setup::Configurators::Base.descendants.each do |descendant_class|
         config = double
 
@@ -27,7 +27,9 @@ RSpec.describe Karafka::Setup::Config do
           .to receive(:setup)
           .at_least(:once)
       end
+    end
 
+    it 'expect to take descendants of BaseConfigurator and run setup on each' do
       subject.send :setup_components
     end
   end

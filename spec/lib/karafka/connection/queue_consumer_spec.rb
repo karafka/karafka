@@ -4,7 +4,8 @@ RSpec.describe Karafka::Connection::QueueConsumer do
   let(:group) { rand.to_s }
   let(:topic) { rand.to_s }
   let(:route) do
-    double(
+    instance_double(
+      Karafka::Routing::Route,
       group: group,
       topic: topic
     )
@@ -40,6 +41,17 @@ RSpec.describe Karafka::Connection::QueueConsumer do
     let(:lambda_return) { double }
 
     context 'when everything is ok' do
+      let(:fetch) do
+        lambda do
+          subject.fetch do |rec_partition, rec_message_bulk|
+            expect(rec_partition).to eq partition
+            expect(rec_message_bulk).to eq message_bulk
+
+            lambda_return
+          end
+        end
+      end
+
       before do
         expect(subject)
           .to receive(:target)
@@ -59,15 +71,6 @@ RSpec.describe Karafka::Connection::QueueConsumer do
       end
 
       it 'forwards to target, fetch and commit' do
-        fetch = lambda do
-          subject.fetch do |rec_partition, rec_message_bulk|
-            expect(rec_partition).to eq partition
-            expect(rec_message_bulk).to eq message_bulk
-
-            lambda_return
-          end
-        end
-
         expect(subject)
           .to receive(:commit)
           .with(partition, lambda_return)
@@ -191,7 +194,9 @@ RSpec.describe Karafka::Connection::QueueConsumer do
 
     context 'when there is last processed message' do
       let(:offset) { rand(1000) }
-      let(:last_processed_message) { double(offset: offset) }
+      let(:last_processed_message) do
+        instance_double(Poseidon::FetchedMessage, offset: offset)
+      end
 
       it 'expect to commit based on its offset' do
         expect(target)

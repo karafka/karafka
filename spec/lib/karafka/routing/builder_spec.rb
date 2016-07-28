@@ -29,16 +29,9 @@ RSpec.describe Karafka::Routing::Builder do
     before { route }
 
     it 'expect to create a new route, assign to it a topic and eval' do
-      expect(Karafka::Routing::Route)
-        .to receive(:new)
-        .and_return(route)
-
-      expect(route)
-        .to receive(:topic=)
-        .with(topic)
-
-      expect(subject)
-        .to receive(:store!)
+      expect(Karafka::Routing::Route).to receive(:new).and_return(route)
+      expect(route).to receive(:topic=).with(topic)
+      expect(subject).to receive(:store!)
 
       expect { |block| subject.topic(topic, &block) }.to yield_control
     end
@@ -56,22 +49,12 @@ RSpec.describe Karafka::Routing::Builder do
     end
 
     it 'expect to build, validate and save current route' do
-      expect(route)
-        .to receive(:build)
-
-      expect(route)
-        .to receive(:validate!)
-
-      expect(subject)
-        .to receive(:<<)
-        .with(route)
-
-      expect(subject)
-        .to receive(:validate!)
+      expect(route).to receive(:build)
+      expect(route).to receive(:validate!)
+      expect(subject).to receive(:<<).with(route)
+      expect(subject).to receive(:validate!)
         .with(:topic, Karafka::Errors::DuplicatedTopicError)
-
-      expect(subject)
-        .to receive(:validate!)
+      expect(subject).to receive(:validate!)
         .with(:group, Karafka::Errors::DuplicatedGroupError)
 
       subject.send(:store!)
