@@ -30,6 +30,7 @@ module Karafka
       # option zookeeper [Hash] zookeeper configuration options (hosts with ports and chroot)
       setting :zookeeper do
         setting :hosts
+        setting :namespace
       end
       # option kafka [Hash] - optional - kafka configuration options (hosts)
       setting :kafka do
