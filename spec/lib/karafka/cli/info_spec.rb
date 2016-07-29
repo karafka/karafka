@@ -14,9 +14,11 @@ RSpec.describe Karafka::Cli::Info do
         "Max number of threads: #{Karafka::App.config.max_concurrency}",
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
-        "Kafka hosts: #{Karafka::App.config.kafka.hosts}",
         "Zookeeper hosts: #{Karafka::App.config.zookeeper.hosts}",
-        "Redis: #{Karafka::App.config.redis}",
+        "Zookeeper chroot: #{Karafka::App.config.zookeeper.chroot}",
+        "Zookeeper brokers_path: #{Karafka::App.config.zookeeper.brokers_path}",
+        "Kafka hosts: #{Karafka::App.config.kafka.hosts}",
+        "Redis: #{Karafka::App.config.redis.to_h}",
         "Wait timeout: #{Karafka::App.config.wait_timeout}"
       ]
     end

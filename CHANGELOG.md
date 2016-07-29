@@ -1,6 +1,10 @@
 # Karafka framework changelog
 
-## 0.4.1-head
+## 0.4.2-head
+- Added chroot option to Zookeeper options
+- Moved BROKERS_PATH into config from constant
+
+## 0.4.1
 - Explicit throw(:abort) required to halt before_enqueue (like in Rails 5)
 - #61 - Autodiscover Kafka brokers based on Zookeeper data
 - #63 - Graceful shutdown with current offset state during data processing

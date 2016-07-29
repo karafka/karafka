@@ -29,7 +29,13 @@ module Karafka
       setting :redis
       # option zookeeper [Hash] zookeeper configuration options (hosts with ports and chroot)
       setting :zookeeper do
+        # Array with Zookeeper hosts details
         setting :hosts
+        # Path at Zookeeper under which brokers details are being stored
+        setting :brokers_path, 'brokers/ids'
+        # Optional chroot for Zookeeper
+        # @see https://zookeeper.apache.org/doc/r3.2.2/zookeeperProgrammers.html#ch_zkSessions
+        setting :chroot
       end
       # option kafka [Hash] - optional - kafka configuration options (hosts)
       setting :kafka do

@@ -84,6 +84,8 @@ Karafka has following configuration options:
 | monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                             |
 | logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                                               |
 | zookeeper.hosts        | true     | Array<String>     | Zookeeper server hosts                                                                      |
+| zookeeper.chroot       | false    | String            | Zookeeper chroot if used (Zookeeper namespace for Kafka settings)                           |
+| zookeeper.brokers_path | false    | String            | Zookeeper brokers path (defaults to 'brokers/ids')                                          |
 | kafka.hosts            | false    | Array<String>     | Kafka server hosts - if not provided Karafka will autodiscover them based on Zookeeper data |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
@@ -92,6 +94,7 @@ To apply this configuration, you need to use a *setup* method from the Karafka::
 class App < Karafka::App
   setup do |config|
     config.zookeeper.hosts =  %w( 127.0.0.1:2181 )
+    config.zookeeper.chroot = '/kafka_cluster'
     config.redis = {
       url: 'redis://redis.example.com:7372/1'
     }

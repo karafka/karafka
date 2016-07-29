@@ -7,16 +7,20 @@ module Karafka
 
       # Print configuration details and other options of your application
       def call
+        config = Karafka::App.config
+
         info = [
           "Karafka framework version: #{Karafka::VERSION}",
-          "Application name: #{Karafka::App.config.name}",
-          "Max number of threads: #{Karafka::App.config.max_concurrency}",
+          "Application name: #{config.name}",
+          "Max number of threads: #{config.max_concurrency}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
-          "Kafka hosts: #{Karafka::App.config.kafka.hosts}",
-          "Zookeeper hosts: #{Karafka::App.config.zookeeper.hosts}",
-          "Redis: #{Karafka::App.config.redis}",
-          "Wait timeout: #{Karafka::App.config.wait_timeout}"
+          "Zookeeper hosts: #{config.zookeeper.hosts}",
+          "Zookeeper chroot: #{config.zookeeper.chroot}",
+          "Zookeeper brokers_path: #{config.zookeeper.brokers_path}",
+          "Kafka hosts: #{config.kafka.hosts}",
+          "Redis: #{config.redis.to_h}",
+          "Wait timeout: #{config.wait_timeout}"
         ]
 
         puts(info.join("\n"))
