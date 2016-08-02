@@ -59,7 +59,7 @@ module Karafka
           Karafka::Params::Params
         ],
         fatal: [
-          Karafka::Runner
+          Karafka::Fetcher
         ]
       }
     end

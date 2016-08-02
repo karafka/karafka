@@ -10,12 +10,12 @@ RSpec.describe Karafka::Cli::Server do
     it 'expect to print info and expect to run Karafka application' do
       expect(subject)
         .to receive(:puts)
-        .with('Starting Karafka framework')
+        .with('Starting Karafka framework server')
 
       expect(cli)
         .to receive(:info)
 
-      expect(Karafka::App)
+      expect(Karafka::Server)
         .to receive(:run)
 
       subject.call

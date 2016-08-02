@@ -40,7 +40,7 @@ RSpec.describe Karafka::Monitor do
     end
 
     [
-      Karafka::Runner
+      Karafka::Fetcher
     ].each do |caller_class|
       context "when caller class is #{caller_class}" do
         it 'expec to log with fatal' do
@@ -91,7 +91,7 @@ RSpec.describe Karafka::Monitor do
 
     let(:fatal_callers) do
       [
-        Karafka::Runner
+        Karafka::Fetcher
       ]
     end
 

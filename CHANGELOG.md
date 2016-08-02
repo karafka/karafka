@@ -1,6 +1,10 @@
 # Karafka framework changelog
 
 ## 0.4.2-head
+- #87 - Reconsume mode with crone for better Rails/Rack integration
+- Moved Karafka server related stuff into separate Karafka::Server class
+- Renamed Karafka::Runner into Karafka::Fetcher
+- Gem dump
 - Added chroot option to Zookeeper options
 - Moved BROKERS_PATH into config from constant
 

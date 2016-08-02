@@ -1,17 +1,46 @@
 require 'spec_helper'
 
-RSpec.describe Karafka::Runner do
+RSpec.describe Karafka::Fetcher do
   subject { described_class.new }
 
-  describe '#run' do
+  describe '#fetch_loop' do
+    it 'expect to consume with fetch_loop' do
+      expect(subject)
+        .to receive(:consume_with)
+        .with(:fetch_loop)
+
+      subject.fetch_loop
+    end
+  end
+
+  describe '#fetch' do
+    it 'expect to consume with fetch' do
+      expect(subject)
+        .to receive(:consume_with)
+        .with(:fetch)
+
+      subject.fetch
+    end
+  end
+
+  describe '#consume_with' do
+    let(:execution_method) { %i(fetch_loop fetch).sample }
+
     context 'when everything is ok' do
-      let(:actor_cluster) { Karafka::Connection::ActorCluster.new([]) }
+      let(:future) { instance_double(Celluloid::Future, value: rand) }
       let(:actor_clusters) { [actor_cluster] }
       let(:consumer) { -> {} }
       let(:async_scope) { actor_cluster }
+      let(:actor_cluster) do
+        instance_double(
+          Karafka::Connection::ActorCluster,
+          execution_method => future,
+          terminate: true
+        )
+      end
 
       before do
-        expect(subject)
+        allow(subject)
           .to receive(:actor_clusters)
           .and_return(actor_clusters)
 
@@ -20,16 +49,12 @@ RSpec.describe Karafka::Runner do
           .and_return(consumer)
       end
 
-      it 'starts asynchronously fetch loop for each actor_cluster' do
+      it 'starts asynchronously consumption for each actor_cluster' do
         expect(actor_cluster)
-          .to receive(:async)
+          .to receive(:future)
           .and_return(async_scope)
 
-        expect(async_scope)
-          .to receive(:fetch_loop)
-          .with(consumer)
-
-        subject.run
+        subject.send(:consume_with, execution_method)
       end
     end
 
@@ -50,7 +75,7 @@ RSpec.describe Karafka::Runner do
           .to receive(:notice_error)
           .with(described_class, error)
 
-        expect { subject.run }.to raise_error(error)
+        expect { subject.send(:consume_with, execution_method) }.to raise_error(error)
       end
     end
   end
