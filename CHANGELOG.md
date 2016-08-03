@@ -7,6 +7,9 @@
 - Gem dump
 - Added chroot option to Zookeeper options
 - Moved BROKERS_PATH into config from constant
+- Added Karafka consume CLI action for a short running single consumption round
+- Small fixes to close broken connections
+- Readme updates
 
 ## 0.4.1
 - Explicit throw(:abort) required to halt before_enqueue (like in Rails 5)

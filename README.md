@@ -26,6 +26,9 @@ Microframework used to simplify Apache Kafka based Ruby applications development
         - [Parser](#parser)
         - [Interchanger](#interchanger)
     - [Receiving messages](#receiving-messages)
+      - [Karafka server](#karafka-server)
+      - [Karafka consumer](#karafka-consumer)
+    - [Karafka controllers](#karafka-controllers)
       - [Controllers callbacks](#controllers-callbacks)
     - [Sending messages from Karafka](#sending-messages-from-karafka)
     - [Monitoring and logging](#monitoring-and-logging)
@@ -150,6 +153,7 @@ Karafka has a simple CLI built in. It provides following commands:
 |----------------|---------------------------------------------------------------------------|
 | help [COMMAND] | Describe available commands or one specific command                       |
 | console        | Start the Karafka console (short-cut alias: "c")                          |
+| consume        | Start the Karafka messages consuming process (single round without loop)  |
 | info           | Print configuration details and other options of your application         |
 | install        | Installs all required things for Karafka application in current directory |
 | routes         | Print out all defined routes in alphabetical order                        |
@@ -164,8 +168,6 @@ bundle exec karafka [COMMAND]
 ```
 
 ### Routing
-
-Prior to version 0.4 Karafka framework didn't have routing. Group, topic and all other "controller related" options were being either taken or initialized directly from the controller. Unfortunately this solution was insufficient. From version 0.4 there's a routing engine.
 
 Routing engine provides an interface to describe how messages from all the topics should be handled. To start using it, just use the *draw* method on routes:
 
@@ -317,7 +319,80 @@ end
 
 ### Receiving messages
 
-Controllers should inherit from **ApplicationController** (or any other controller that inherits from **Karafka::BaseController**). If you don't want to use custom workers (and except some particular cases you don't need to), you need to define a #perform method that will execute your business logic code in background.
+Karafka framework provides two methods that allow you to start receiving messages:
+
+* Karafka long running server process
+* Karafka consumer that can be used from inside of any existing Ruby process that includes (and configures) Karafka
+
+Each of the methods has its own pros and cons. Please read proper sections below for more details.
+
+Note, that both of this methods handle messages receiving, not messages processing (this happens via Sidekiq).
+
+#### Karafka server
+
+Starting a Karafka server is a recommended way to consume messages. It creates a separate Ruby process that listens for incoming messages. To start a Karafka server process, use following CLI command:
+
+```bash
+bundle exec karafka server
+```
+
+Use it when:
+
+* You are willing to have a next long-running process in the memory
+* You have many messages that are constantly being sent to Kafka cluster
+* You want to consume and process messages as fast as possible
+* You know your way with Capistrano and/or any other deployment tools and you are willing to integrate Karafka with it
+
+#### Karafka consumer
+
+Karafka consumer allows you to perform a single consumption from all the topics that you listen to. This method can be used both from a CLI (then it will create a short running process that will terminate once it is done):
+
+```bash
+bundle exec karafka consume
+```
+
+or from any Ruby process (console, Rails server, rake task) that is already running:
+
+```ruby
+Karafka::Consumer.run
+```
+
+Note, that if you have many messages, this method might not consume all of them, as it is dependent on a **wait_timeout** socket setting. It will consume as much messages as it can from each of the topics in a given timeframe. That's why it is not recommended when you expect a constant stream of messages.
+
+Karafka consumer can be used even from Sidekiq as a recurring job using [Sidetiq](https://github.com/tobiassvn/sidetiq). That way you can tell Karafka to consume messages (for example) every 5 minutes. It will reuse your already loaded Sidekiq process.
+
+Here's an example Sidekiq worker job for that:
+
+```ruby
+class KarafkaConsumerWorker
+  include Sidekiq::Worker
+  def perform
+    Karafka::Consumer.run
+  end
+end
+```
+
+You can also create a Rake task to consume messages and just add it to cron:
+
+```ruby
+desc 'Does many background recurring things'
+task consumption: :environment do
+  # Other things that you want to do here...
+  Karafka::Consumer.run
+end
+```
+
+Use it when:
+
+* You don't want to have a next Ruby process running on your machines
+* You don't have a constant stream of messages
+* You don't need to process messages right after they are being sent to Kafka cluster
+* You don't want to integrate Karafka with Capistrano and/or any other deployment tools
+* You want to have everything up and running as fast as it is possible (proof of concept, demo, etc)
+
+### Karafka controllers
+
+Controllers should inherit from **ApplicationController** (or any other controller that inherits from **Karafka::BaseController**). If you don't want to use custom workers (and except some particular cases you don't need to), you need to define a **#perform** method that will execute your business logic code in background.
 
 ```ruby
 class UsersController < ApplicationController
