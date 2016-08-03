@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Karafka::Params::Params do
   describe 'class methods' do
-    subject { described_class }
+    subject(:params_class) { described_class }
 
     describe '#build' do
       let(:controller) { double }
@@ -10,7 +10,7 @@ RSpec.describe Karafka::Params::Params do
       let(:merged_with_defaults) { double }
 
       before do
-        expect(subject)
+        expect(params_class)
           .to receive(:defaults)
           .with(controller)
           .and_return(defaults)
@@ -25,7 +25,7 @@ RSpec.describe Karafka::Params::Params do
             .with(message)
             .and_return(merged_with_defaults)
 
-          expect(subject.build(message, controller)).to eq merged_with_defaults
+          expect(params_class.build(message, controller)).to eq merged_with_defaults
         end
       end
 
@@ -42,7 +42,7 @@ RSpec.describe Karafka::Params::Params do
               .with(parsed: false, received_at: Time.now, content: content)
               .and_return(merged_with_defaults)
 
-            expect(subject.build(message, controller)).to eq merged_with_defaults
+            expect(params_class.build(message, controller)).to eq merged_with_defaults
           end
         end
       end
@@ -63,9 +63,9 @@ RSpec.describe Karafka::Params::Params do
       end
 
       it 'expect to return default params' do
-        params = subject.send(:defaults, controller)
+        params = params_class.send(:defaults, controller)
 
-        expect(params).to be_a subject
+        expect(params).to be_a params_class
         expect(params[:controller]).to eq controller.class
         expect(params[:worker]).to eq worker
         expect(params[:parser]).to eq parser
@@ -75,22 +75,22 @@ RSpec.describe Karafka::Params::Params do
   end
 
   describe 'instance methods' do
-    subject { described_class.send(:new, {}) }
+    subject(:params) { described_class.send(:new, {}) }
 
     describe '#retrieve' do
       context 'when params are already parsed' do
         before do
-          subject[:parsed] = true
+          params[:parsed] = true
         end
 
         it 'expect not to parse again and return self' do
-          expect(subject)
+          expect(params)
             .not_to receive(:parse)
 
-          expect(subject)
+          expect(params)
             .not_to receive(:merge!)
 
-          expect(subject.retrieve).to eq subject
+          expect(params.retrieve).to eq params
         end
       end
 
@@ -98,10 +98,10 @@ RSpec.describe Karafka::Params::Params do
         let(:content) { double }
 
         before do
-          subject[:parsed] = false
-          subject[:content] = content
+          params[:parsed] = false
+          params[:content] = content
 
-          expect(subject)
+          expect(params)
             .to receive(:parse)
             .with(content)
             .and_return(parsed_content)
@@ -111,8 +111,8 @@ RSpec.describe Karafka::Params::Params do
           let(:parsed_content) { { double => double } }
 
           it 'expect to merge with parsed stuff that is under content key and remove this key' do
-            expect(subject.retrieve[parsed_content.keys[0]]).to eq parsed_content.values[0]
-            expect(subject.keys).not_to include :content
+            expect(params.retrieve[parsed_content.keys[0]]).to eq parsed_content.values[0]
+            expect(params.keys).not_to include :content
           end
         end
 
@@ -120,9 +120,9 @@ RSpec.describe Karafka::Params::Params do
           let(:parsed_content) { { received_at: rand } }
 
           it 'expect not to overwrite existing keys' do
-            subject.retrieve
-            expect(subject[parsed_content[:received_at]]).not_to eq parsed_content[:received_at]
-            expect(subject.keys).not_to include :content
+            params.retrieve
+            expect(params[parsed_content[:received_at]]).not_to eq parsed_content[:received_at]
+            expect(params.keys).not_to include :content
           end
         end
       end
@@ -133,8 +133,8 @@ RSpec.describe Karafka::Params::Params do
       let(:content) { double }
 
       before do
-        subject[:parser] = parser
-        subject[:parsed] = false
+        params[:parser] = parser
+        params[:parsed] = false
       end
 
       context 'when we are able to successfully parse' do
@@ -148,8 +148,8 @@ RSpec.describe Karafka::Params::Params do
         end
 
         it 'expect to mark as parsed and return content in a message key' do
-          expect(subject.send(:parse, content)).to eq parsed_content
-          expect(subject[:parsed]).to eq true
+          expect(params.send(:parse, content)).to eq parsed_content
+          expect(params[:parsed]).to eq true
         end
       end
 
@@ -165,14 +165,14 @@ RSpec.describe Karafka::Params::Params do
           expect(Karafka.monitor)
             .to receive(:notice_error)
 
-          expect(subject.send(:parse, content)).to eq(message: content)
-          expect(subject[:parsed]).to eq true
+          expect(params.send(:parse, content)).to eq(message: content)
+          expect(params[:parsed]).to eq true
         end
       end
     end
 
     describe '#merge!' do
-      subject { described_class.send(:new, base) }
+      subject(:params) { described_class.send(:new, base) }
 
       context 'string based params merge with string key' do
         let(:initial_value) { rand }
@@ -180,8 +180,8 @@ RSpec.describe Karafka::Params::Params do
         let(:base) { { key => initial_value } }
 
         it 'expect to keep initial values' do
-          subject.send :merge!, key => rand
-          expect(subject[key]).to eq initial_value
+          params.send :merge!, key => rand
+          expect(params[key]).to eq initial_value
         end
       end
 
@@ -191,8 +191,8 @@ RSpec.describe Karafka::Params::Params do
         let(:base) { { key => initial_value } }
 
         it 'expect to keep initial values' do
-          subject.send :merge!, key.to_sym => rand
-          expect(subject[key]).to eq initial_value
+          params.send :merge!, key.to_sym => rand
+          expect(params[key]).to eq initial_value
         end
       end
 
@@ -202,8 +202,8 @@ RSpec.describe Karafka::Params::Params do
         let(:base) { { key => initial_value } }
 
         it 'expect to keep initial values' do
-          subject.send :merge!, key.to_sym => rand
-          expect(subject[key]).to eq initial_value
+          params.send :merge!, key.to_sym => rand
+          expect(params[key]).to eq initial_value
         end
       end
 
@@ -213,8 +213,8 @@ RSpec.describe Karafka::Params::Params do
         let(:base) { { key.to_s => initial_value } }
 
         it 'expect to keep initial values' do
-          subject.send :merge!, key.to_sym => rand
-          expect(subject[key]).to eq initial_value
+          params.send :merge!, key.to_sym => rand
+          expect(params[key]).to eq initial_value
         end
       end
     end

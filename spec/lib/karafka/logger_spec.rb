@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Karafka::Logger do
   specify { expect(described_class).to be < ::Logger }
-  subject { described_class }
+  subject(:logger_class) { described_class }
 
   describe '#instance' do
     let(:target) { double }
@@ -12,16 +12,16 @@ RSpec.describe Karafka::Logger do
     let(:log_dir) { Pathname.new(File.dirname(log_file)) }
 
     it 'creates an instance that will log in the app root' do
-      expect(subject)
+      expect(logger_class)
         .to receive(:target)
         .and_return(target)
 
-      expect(subject)
+      expect(logger_class)
         .to receive(:new)
         .with(target)
         .and_return(logger)
 
-      subject.instance
+      logger_class.instance
     end
 
     it 'makes sure the "log" dir exists' do
@@ -33,7 +33,7 @@ RSpec.describe Karafka::Logger do
         .to receive(:mkdir)
         .with(log_dir)
         .and_return(0) # Don't ask me why, but this is what Dir.mkdir returns normally
-      subject.instance
+      logger_class.instance
     end
   end
 
@@ -49,10 +49,10 @@ RSpec.describe Karafka::Logger do
       expect(delegate_scope).to receive(:to)
         .with(STDOUT, file)
 
-      expect(subject).to receive(:file)
+      expect(logger_class).to receive(:file)
         .and_return(file)
 
-      subject.send(:target)
+      logger_class.send(:target)
     end
   end
 
@@ -66,7 +66,7 @@ RSpec.describe Karafka::Logger do
         .with(log_file, 'a')
         .and_return(file)
 
-      expect(subject.send(:file)).to eq file
+      expect(logger_class.send(:file)).to eq file
     end
   end
 end

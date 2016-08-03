@@ -4,19 +4,21 @@ RSpec.describe Karafka::Connection::BrokerManager do
   let(:zk) { double }
   let(:brokers_path) { Karafka::App.config.zookeeper.brokers_path }
 
+  subject(:broker_manager) { described_class.new }
+
   describe '#all' do
     let(:ids) { [rand, rand, rand] }
     let(:brokers) { [double, double, double] }
 
     before do
-      expect(subject)
+      expect(broker_manager)
         .to receive(:ids)
         .and_return(ids)
 
       ids.each_with_index do |id, index|
         found_data = double
 
-        expect(subject)
+        expect(broker_manager)
           .to receive(:find)
           .with(id)
           .and_return(found_data)
@@ -29,7 +31,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
     end
 
     it 'expect to build brokers out of fetched details data' do
-      expect(subject.all).to eq brokers
+      expect(broker_manager.all).to eq brokers
     end
   end
 
@@ -39,7 +41,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
     let(:chroot) { rand.to_s }
 
     before do
-      expect(subject)
+      expect(broker_manager)
         .to receive(:zk)
         .and_return(zk)
     end
@@ -50,7 +52,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
         .with("/#{brokers_path}/#{id}")
         .and_return([broker_data])
 
-      expect(subject.send(:find, id)).to eq broker_data
+      expect(broker_manager.send(:find, id)).to eq broker_data
     end
 
     it 'expect to use chroot when set' do
@@ -60,7 +62,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
         .with("/#{chroot}/#{brokers_path}/#{id}")
         .and_return([broker_data])
 
-      expect(subject.send(:find, id)).to eq broker_data
+      expect(broker_manager.send(:find, id)).to eq broker_data
     end
   end
 
@@ -70,7 +72,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
     before do
       ::Karafka::App.config.zookeeper.chroot = nil
 
-      expect(subject)
+      expect(broker_manager)
         .to receive(:zk)
         .and_return(zk)
 
@@ -80,7 +82,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
         .and_return(result)
     end
 
-    it { expect(subject.send(:ids)).to eq result }
+    it { expect(broker_manager.send(:ids)).to eq result }
   end
 
   describe '#ids regarding chroot' do
@@ -90,7 +92,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
     before do
       ::Karafka::App.config.zookeeper.chroot = chroot
 
-      expect(subject)
+      expect(broker_manager)
         .to receive(:zk)
         .and_return(zk)
 
@@ -100,7 +102,7 @@ RSpec.describe Karafka::Connection::BrokerManager do
         .and_return(result)
     end
 
-    it { expect(subject.send(:ids)).to eq result }
+    it { expect(broker_manager.send(:ids)).to eq result }
   end
 
   describe '#zk' do
@@ -112,8 +114,8 @@ RSpec.describe Karafka::Connection::BrokerManager do
         .with(::Karafka::App.config.zookeeper.hosts.join(','))
         .and_return(zk_instance)
 
-      subject.send(:zk)
-      expect(subject.send(:zk)).to eq zk_instance
+      broker_manager.send(:zk)
+      expect(broker_manager.send(:zk)).to eq zk_instance
     end
   end
 
@@ -127,20 +129,20 @@ RSpec.describe Karafka::Connection::BrokerManager do
       let(:chroot) { nil }
       let(:brokers_path) { nil }
 
-      it { expect(subject.send(:path)).to eq '/' }
+      it { expect(broker_manager.send(:path)).to eq '/' }
     end
 
     context 'when chroot is defined but brokers_path is not' do
       let(:chroot) { rand.to_s }
 
-      it { expect(subject.send(:path)).to eq "/#{chroot}" }
+      it { expect(broker_manager.send(:path)).to eq "/#{chroot}" }
     end
 
     context 'when chroot is not defined but brokers_path is' do
       let(:chroot) { nil }
       let(:brokers_path) { rand.to_s }
 
-      it { expect(subject.send(:path)).to eq "/#{brokers_path}" }
+      it { expect(broker_manager.send(:path)).to eq "/#{brokers_path}" }
     end
 
     context 'when chroot and brokers_path are defined' do
@@ -150,20 +152,20 @@ RSpec.describe Karafka::Connection::BrokerManager do
       context 'and chroot starts with /' do
         let(:chroot) { "/#{rand}" }
 
-        it { expect(subject.send(:path)).to eq "#{chroot}/#{brokers_path}" }
+        it { expect(broker_manager.send(:path)).to eq "#{chroot}/#{brokers_path}" }
       end
 
       context 'and chroot ends with /' do
         let(:chroot) { "#{rand}/" }
 
-        it { expect(subject.send(:path)).to eq "/#{chroot}#{brokers_path}" }
+        it { expect(broker_manager.send(:path)).to eq "/#{chroot}#{brokers_path}" }
       end
 
       context 'and brokers_path starts with /' do
         let(:brokers_path) { "/#{rand}" }
 
         it 'expect to ignore chroot since we will go from root path' do
-          expect(subject.send(:path)).to eq brokers_path
+          expect(broker_manager.send(:path)).to eq brokers_path
         end
       end
     end

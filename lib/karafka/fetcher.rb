@@ -8,6 +8,7 @@ module Karafka
     # so we don't have to terminate them
     def fetch_loop
       consume_with(:fetch_loop)
+      actor_clusters.map(&:close)
     end
 
     # Starts consuming messages without a loop
@@ -17,6 +18,7 @@ module Karafka
     # @note If there are many messages, it might not consume all of them in a single run
     def fetch
       consume_with(:fetch)
+      actor_clusters.map(&:close)
     end
 
     private
@@ -45,11 +47,11 @@ module Karafka
     #   the same partitions
     def actor_clusters
       @actor_clusters ||= App
-        .routes
-        .each_slice(slice_size)
-        .map do |chunk|
-          Karafka::Connection::ActorCluster.new(chunk)
-        end
+                          .routes
+                          .each_slice(slice_size)
+                          .map do |chunk|
+                            Karafka::Connection::ActorCluster.new(chunk)
+                          end
     end
 
     # @return [Integer] number of topics that we want to listen to per thread

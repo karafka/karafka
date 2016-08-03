@@ -1,15 +1,15 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Setup::Config do
-  subject { described_class }
+  subject(:config_class) { described_class }
 
   describe '#setup' do
     before do
-      expect(subject)
+      expect(config_class)
         .to receive(:setup_components)
     end
 
-    it { expect { |block| subject.setup(&block) }.to yield_with_args }
+    it { expect { |block| config_class.setup(&block) }.to yield_with_args }
   end
 
   describe '#setup_components' do
@@ -19,7 +19,7 @@ RSpec.describe Karafka::Setup::Config do
 
         expect(descendant_class)
           .to receive(:new)
-          .with(subject.config)
+          .with(config_class.config)
           .and_return(config)
           .at_least(:once)
 
@@ -30,7 +30,7 @@ RSpec.describe Karafka::Setup::Config do
     end
 
     it 'expect to take descendants of BaseConfigurator and run setup on each' do
-      subject.send :setup_components
+      config_class.send :setup_components
     end
   end
 end

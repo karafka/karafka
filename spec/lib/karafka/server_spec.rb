@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Server do
-  subject { described_class }
+  subject(:server_class) { described_class }
 
   describe '#run' do
     let(:runner) { Karafka::Fetcher.new }
@@ -14,7 +14,7 @@ RSpec.describe Karafka::Server do
       expect(Karafka::Process.instance).to receive(:on_sigint)
       expect(Karafka::Process.instance).to receive(:on_sigquit)
 
-      subject.run
+      server_class.run
     end
 
     it 'defines a proper action for sigint' do
@@ -22,9 +22,9 @@ RSpec.describe Karafka::Server do
       expect(Karafka::Process.instance).to receive(:on_sigint).and_yield
       expect(Karafka::Process.instance).to receive(:on_sigquit)
       expect(Karafka::App).to receive(:stop!)
-      expect(subject).to receive(:exit)
+      expect(server_class).to receive(:exit)
 
-      subject.run
+      server_class.run
     end
 
     it 'defines a proper action for sigquit' do
@@ -32,9 +32,9 @@ RSpec.describe Karafka::Server do
       expect(Karafka::Process.instance).to receive(:on_sigint)
       expect(Karafka::Process.instance).to receive(:on_sigquit).and_yield
       expect(Karafka::App).to receive(:stop!)
-      expect(subject).to receive(:exit)
+      expect(server_class).to receive(:exit)
 
-      subject.run
+      server_class.run
     end
   end
 end

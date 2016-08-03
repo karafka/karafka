@@ -3,18 +3,18 @@ require 'spec_helper'
 RSpec.describe Karafka::Cli::Base do
   describe 'instance methods' do
     let(:cli) { Karafka::Cli.new }
-    subject { described_class.new(cli) }
+    subject(:base_cli) { described_class.new(cli) }
 
     describe '#cli' do
-      it { expect(subject.cli).to eq cli }
+      it { expect(base_cli.cli).to eq cli }
     end
   end
 
   describe 'class methods' do
-    subject { described_class }
+    subject(:base_cli_class) { described_class }
 
     describe '#name' do
-      it { expect(subject.send(:name)).to eq 'base' }
+      it { expect(base_cli_class.send(:name)).to eq 'base' }
     end
 
     describe '#bind_to' do
@@ -24,16 +24,16 @@ RSpec.describe Karafka::Cli::Base do
       let(:cli_class) { Karafka::Cli }
 
       before do
-        subject.desc = desc
-        subject.options = options
+        base_cli_class.desc = desc
+        base_cli_class.options = options
 
-        allow(subject)
+        allow(base_cli_class)
           .to receive(:name)
           .and_return(name)
       end
 
       it 'expect to use thor api to define proper action' do
-        subject.bind_to(cli_class)
+        base_cli_class.bind_to(cli_class)
 
         expect(cli_class.instance_methods).to include name.to_sym
 

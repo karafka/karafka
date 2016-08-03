@@ -26,6 +26,7 @@ module Karafka
       rescue Exception => e
         # rubocop:enable RescueException
         Karafka.monitor.notice_error(self.class, e)
+        close
         @listeners = nil
         retry
       end
@@ -41,6 +42,13 @@ module Karafka
         end
 
         true
+      end
+
+      # Closes all the listeners and frees the connections so other listeners
+      # can connect to the same partitions and topics
+      # @note Short running connections should be closed after they are no longer needed
+      def close
+        listeners.map(&:close)
       end
 
       private

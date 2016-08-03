@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Karafka::Cli::Info do
   let(:cli) { Karafka::Cli.new }
-  subject { described_class.new(cli) }
+  subject(:info_cli) { described_class.new(cli) }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
@@ -24,11 +24,11 @@ RSpec.describe Karafka::Cli::Info do
     end
 
     it 'expect to print details of this Karafka app instance' do
-      expect(subject)
+      expect(info_cli)
         .to receive(:puts)
         .with(info.join("\n"))
 
-      subject.call
+      info_cli.call
     end
   end
 end

@@ -1,25 +1,25 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Fetcher do
-  subject { described_class.new }
+  subject(:fetcher) { described_class.new }
 
   describe '#fetch_loop' do
     it 'expect to consume with fetch_loop' do
-      expect(subject)
+      expect(fetcher)
         .to receive(:consume_with)
         .with(:fetch_loop)
 
-      subject.fetch_loop
+      fetcher.fetch_loop
     end
   end
 
   describe '#fetch' do
     it 'expect to consume with fetch' do
-      expect(subject)
+      expect(fetcher)
         .to receive(:consume_with)
         .with(:fetch)
 
-      subject.fetch
+      fetcher.fetch
     end
   end
 
@@ -40,11 +40,11 @@ RSpec.describe Karafka::Fetcher do
       end
 
       before do
-        allow(subject)
+        allow(fetcher)
           .to receive(:actor_clusters)
           .and_return(actor_clusters)
 
-        expect(subject)
+        expect(fetcher)
           .to receive(:consumer)
           .and_return(consumer)
       end
@@ -54,7 +54,7 @@ RSpec.describe Karafka::Fetcher do
           .to receive(:future)
           .and_return(async_scope)
 
-        subject.send(:consume_with, execution_method)
+        fetcher.send(:consume_with, execution_method)
       end
     end
 
@@ -62,7 +62,7 @@ RSpec.describe Karafka::Fetcher do
       let(:error) { StandardError }
 
       before do
-        expect(subject)
+        expect(fetcher)
           .to receive(:actor_clusters)
           .and_raise(error)
       end
@@ -75,7 +75,7 @@ RSpec.describe Karafka::Fetcher do
           .to receive(:notice_error)
           .with(described_class, error)
 
-        expect { subject.send(:consume_with, execution_method) }.to raise_error(error)
+        expect { fetcher.send(:consume_with, execution_method) }.to raise_error(error)
       end
     end
   end
@@ -89,7 +89,7 @@ RSpec.describe Karafka::Fetcher do
         .to receive(:routes)
         .and_return(routes)
 
-      expect(subject)
+      expect(fetcher)
         .to receive(:slice_size)
         .and_return(rand(1000) + 1)
 
@@ -98,14 +98,14 @@ RSpec.describe Karafka::Fetcher do
         .with(routes)
     end
 
-    it { expect(subject.send(:actor_clusters)).to be_a Array }
+    it { expect(fetcher.send(:actor_clusters)).to be_a Array }
   end
 
   describe '#consumer' do
-    let(:subject) { described_class.new.send(:consumer) }
+    subject(:fetcher) { described_class.new.send(:consumer) }
 
     it 'is a proc' do
-      expect(subject).to be_a Proc
+      expect(fetcher).to be_a Proc
     end
 
     context 'when we invoke a consumer block' do
@@ -123,13 +123,13 @@ RSpec.describe Karafka::Fetcher do
           .to receive(:consume)
           .with(message)
 
-        subject.call(message)
+        fetcher.call(message)
       end
     end
   end
 
   describe '#slice_size' do
-    subject { described_class.new.send(:slice_size) }
+    subject(:fetcher) { described_class.new.send(:slice_size) }
 
     let(:config) { double }
 
@@ -151,28 +151,28 @@ RSpec.describe Karafka::Fetcher do
       let(:controllers_length) { 0 }
       let(:max_concurrency) { 100 }
 
-      it { expect(subject).to eq 1 }
+      it { expect(fetcher).to eq 1 }
     end
 
     context 'when we have less controllers than max_concurrency level' do
       let(:controllers_length) { 1 }
       let(:max_concurrency) { 20 }
 
-      it { expect(subject).to eq 1 }
+      it { expect(fetcher).to eq 1 }
     end
 
     context 'when we have more controllers than max_concurrency level' do
       let(:controllers_length) { 110 }
       let(:max_concurrency) { 20 }
 
-      it { expect(subject).to eq 5 }
+      it { expect(fetcher).to eq 5 }
     end
 
     context 'when we have the same amount of controllers and max_concurrency level' do
       let(:controllers_length) { 20 }
       let(:max_concurrency) { 20 }
 
-      it { expect(subject).to eq 1 }
+      it { expect(fetcher).to eq 1 }
     end
   end
 end
