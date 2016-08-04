@@ -69,7 +69,7 @@ module Karafka
         @target ||= Poseidon::ConsumerGroup.new(
           @route.group,
           ::Karafka::App.config.kafka.hosts,
-          ::Karafka::App.config.zookeeper.hosts,
+          zookeeper_hosts,
           @route.topic,
           socket_timeout_ms: (::Karafka::App.config.wait_timeout + TIMEOUT_OFFSET) * 1000,
           # How long should we wait for messages if nothing is there to process
@@ -81,6 +81,24 @@ module Karafka
       rescue *CONNECTION_CLEAR_ERRORS => e
         Karafka.monitor.notice_error(self.class, e)
         close
+      end
+
+      # @ retun the zookeeper hosts with the optional chroot inserted
+      def zookeeper_hosts
+        @zookeeper_hosts ||= begin
+          hosts = ::Karafka::App.config.zookeeper.hosts
+          chroot = zookeeper_chroot
+          hosts.map { |host| "#{host}#{chroot}" }
+        end
+        @zookeeper_hosts
+      end
+
+      # @return zookeeper chroot with leading and trailing slashes removed or nil when
+      #   it is not set
+      def zookeeper_chroot
+        chroot = ::Karafka::App.config.zookeeper.chroot
+        return '' unless chroot
+        '/' + chroot.split('/').reject(&:empty?).join('/')
       end
 
       # Commits offset to Kafka

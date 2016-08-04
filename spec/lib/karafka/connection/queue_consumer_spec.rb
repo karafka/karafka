@@ -129,8 +129,9 @@ RSpec.describe Karafka::Connection::QueueConsumer do
   end
 
   describe '#target' do
-    context 'when everything is ok' do
+    context 'when everything is ok without zookeeper chroot' do
       before do
+        ::Karafka::App.config.zookeeper.chroot = nil
         expect(Poseidon::ConsumerGroup)
           .to receive(:new)
           .with(
@@ -147,6 +148,54 @@ RSpec.describe Karafka::Connection::QueueConsumer do
         expect(subject)
           .not_to receive(:close)
 
+        subject.send(:target)
+      end
+    end
+
+    context '#zookeeper_chroot' do
+      it 'removes multiple leading slashes' do
+        chroot = '///chroot'
+        ::Karafka::App.config.zookeeper.chroot = chroot
+        expect(subject.send(:zookeeper_chroot)).to eq '/chroot'
+      end
+
+      it 'removes trailing /' do
+        chroot = 'chroot/'
+        ::Karafka::App.config.zookeeper.chroot = chroot
+        expect(subject.send(:zookeeper_chroot)).to eq '/chroot'
+      end
+
+      it 'removes multiple trailing slashes' do
+        chroot = 'chroot////'
+        ::Karafka::App.config.zookeeper.chroot = chroot
+        expect(subject.send(:zookeeper_chroot)).to eq '/chroot'
+      end
+
+      it 'leaves / in between node names' do
+        chroot = '/some/chroot/'
+        ::Karafka::App.config.zookeeper.chroot = chroot
+        expect(subject.send(:zookeeper_chroot)).to eq '/some/chroot'
+      end
+    end
+
+    context 'when everything is ok with a zookeeper chroot' do
+      let(:chroot) { 'chroot' }
+      before do
+        ::Karafka::App.config.zookeeper.chroot = chroot
+
+        expect(Poseidon::ConsumerGroup)
+          .to receive(:new)
+          .with(
+            route.group.to_s,
+            ::Karafka::App.config.kafka.hosts,
+            ["localhost:2181/#{chroot}"],
+            route.topic.to_s,
+            socket_timeout_ms: socket_timeout_ms,
+            max_wait_ms: max_wait_ms
+          )
+      end
+
+      it 'creates Poseidon::ConsumerGroup instance' do
         subject.send(:target)
       end
     end
