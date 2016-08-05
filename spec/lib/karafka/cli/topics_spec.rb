@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Karafka::Cli::Topics do
   let(:cli) { Karafka::Cli.new }
-  subject { described_class.new(cli) }
+  subject(:topics_cli) { described_class.new(cli) }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
@@ -26,12 +26,12 @@ RSpec.describe Karafka::Cli::Topics do
 
     it 'expect to fetch all broker topics to zookeeper and print them' do
       topics[:children].each do |topic|
-        expect(subject)
+        expect(topics_cli)
           .to receive(:puts)
           .with(topic)
       end
 
-      subject.call
+      topics_cli.call
     end
   end
 end

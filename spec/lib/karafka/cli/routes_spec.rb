@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Karafka::Cli::Routes do
   let(:cli) { Karafka::Cli.new }
-  subject { described_class.new(cli) }
+  subject(:routes_cli) { described_class.new(cli) }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
@@ -24,23 +24,23 @@ RSpec.describe Karafka::Cli::Routes do
     end
 
     before do
-      expect(subject)
+      expect(routes_cli)
         .to receive(:routes)
         .and_return([route])
     end
 
     it 'expect to print routes' do
-      expect(subject)
+      expect(routes_cli)
         .to receive(:puts)
         .with("#{topic}:")
 
       KEYS.each do |key|
-        expect(subject)
+        expect(routes_cli)
           .to receive(:print)
           .with(key.to_s.capitalize, send(key))
       end
 
-      subject.call
+      routes_cli.call
     end
   end
 
@@ -55,7 +55,7 @@ RSpec.describe Karafka::Cli::Routes do
         .and_return(karafka_routes)
     end
 
-    it { expect(subject.send(:routes)).to eq [route2, route1] }
+    it { expect(routes_cli.send(:routes)).to eq [route2, route1] }
   end
 
   describe '#print' do
@@ -63,11 +63,11 @@ RSpec.describe Karafka::Cli::Routes do
     let(:value) { rand.to_s }
 
     it 'expect to printf nicely' do
-      expect(subject)
+      expect(routes_cli)
         .to receive(:printf)
         .with("%-18s %s\n", "  - #{label}:", value)
 
-      subject.send(:print, label, value)
+      routes_cli.send(:print, label, value)
     end
   end
 end

@@ -13,11 +13,12 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
       )
     )
   end
-  subject { described_class.new(config) }
+
+  subject(:water_drop_configurator) { described_class.new(config) }
 
   describe '#setup' do
     it 'expect to assign waterdrop default configs' do
-      subject.setup
+      water_drop_configurator.setup
 
       expect(WaterDrop.config.send_messages).to eq true
       expect(WaterDrop.config.connection_pool_size).to eq config.max_concurrency

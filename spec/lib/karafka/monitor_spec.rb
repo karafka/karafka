@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Monitor do
-  subject { described_class.instance }
+  subject(:monitor) { described_class.instance }
 
   describe '#notice' do
     let(:options) { { rand => rand } }
@@ -12,7 +12,7 @@ RSpec.describe Karafka::Monitor do
         .to receive(:info)
         .with("#{self.class}##{caller_label} with #{options}")
 
-      subject.notice self.class, options
+      monitor.notice self.class, options
     end
   end
 
@@ -34,13 +34,13 @@ RSpec.describe Karafka::Monitor do
             .to receive(:error)
             .with(error)
 
-          subject.notice_error(caller_class, error)
+          monitor.notice_error(caller_class, error)
         end
       end
     end
 
     [
-      Karafka::Runner
+      Karafka::Fetcher
     ].each do |caller_class|
       context "when caller class is #{caller_class}" do
         it 'expec to log with fatal' do
@@ -51,7 +51,7 @@ RSpec.describe Karafka::Monitor do
             .to receive(:fatal)
             .with(error)
 
-          subject.notice_error(caller_class, error)
+          monitor.notice_error(caller_class, error)
         end
       end
     end
@@ -62,23 +62,23 @@ RSpec.describe Karafka::Monitor do
           .to receive(:info)
           .with(error)
 
-        subject.notice_error(Karafka, error)
+        monitor.notice_error(Karafka, error)
       end
     end
   end
 
   describe '#caller_label' do
-    it { expect(subject.send(:caller_label)).to eq 'instance_exec' }
+    it { expect(monitor.send(:caller_label)).to eq 'instance_exec' }
   end
 
   describe '#logger' do
     it 'expect to return logger' do
-      expect(subject.send(:logger)).to eq Karafka.logger
+      expect(monitor.send(:logger)).to eq Karafka.logger
     end
   end
 
   describe '#caller_exceptions_map' do
-    it { expect(subject.send(:caller_exceptions_map).keys).to eq %i(error fatal) }
+    it { expect(monitor.send(:caller_exceptions_map).keys).to eq %i(error fatal) }
 
     let(:error_callers) do
       [
@@ -91,16 +91,16 @@ RSpec.describe Karafka::Monitor do
 
     let(:fatal_callers) do
       [
-        Karafka::Runner
+        Karafka::Fetcher
       ]
     end
 
     it 'expect to have proper classes on error' do
-      expect(subject.send(:caller_exceptions_map)[:error]).to eq error_callers
+      expect(monitor.send(:caller_exceptions_map)[:error]).to eq error_callers
     end
 
     it 'expect to have proper classes on fatal' do
-      expect(subject.send(:caller_exceptions_map)[:fatal]).to eq fatal_callers
+      expect(monitor.send(:caller_exceptions_map)[:fatal]).to eq fatal_callers
     end
   end
 end

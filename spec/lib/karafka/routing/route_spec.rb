@@ -1,78 +1,78 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Routing::Route do
-  subject { described_class.new }
+  subject(:route) { described_class.new }
 
   let(:group) { rand.to_s }
   let(:topic) { rand.to_s }
 
   describe '#build' do
     it 'expect to eager load all the attributes' do
-      expect(subject)
+      expect(route)
         .to receive(:worker)
 
-      expect(subject)
+      expect(route)
         .to receive(:parser)
 
-      expect(subject)
+      expect(route)
         .to receive(:interchanger)
 
-      expect(subject)
+      expect(route)
         .to receive(:group)
 
-      expect(subject.build).to eq subject
+      expect(route.build).to eq route
     end
   end
 
   describe '#group=' do
-    it { expect { subject.group = group }.not_to raise_error }
+    it { expect { route.group = group }.not_to raise_error }
   end
 
   describe '#group' do
     before do
-      subject.group = group
-      subject.topic = topic
+      route.group = group
+      route.topic = topic
     end
 
     context 'when group is not set' do
       let(:group) { nil }
 
       it 'expect to build group from app name and topic' do
-        expect(subject.group).to eq "#{Karafka::App.config.name.underscore}_#{topic}".to_s
+        expect(route.group).to eq "#{Karafka::App.config.name.underscore}_#{topic}".to_s
       end
     end
 
     context 'when group is set' do
-      it { expect(subject.group).to eq group }
+      it { expect(route.group).to eq group }
     end
   end
 
   describe '#topic=' do
-    it { expect { subject.topic = topic }.not_to raise_error }
+    it { expect { route.topic = topic }.not_to raise_error }
   end
 
   describe '#topic' do
     let(:topic) { rand }
 
-    before { subject.topic = topic }
+    before { route.topic = topic }
 
     it 'expect to return stringified topic' do
-      expect(subject.topic).to eq topic.to_s
+      expect(route.topic).to eq topic.to_s
     end
   end
 
   describe '#worker=' do
     let(:worker) { double }
 
-    it { expect { subject.worker = worker }.not_to raise_error }
+    it { expect { route.worker = worker }.not_to raise_error }
   end
 
   describe '#worker' do
     let(:controller) { double }
 
     before do
-      subject.worker = worker
-      subject.controller = controller
+      route.worker = worker
+      route.controller = controller
     end
 
     context 'when worker is not set' do
@@ -90,67 +90,67 @@ RSpec.describe Karafka::Routing::Route do
           .to receive(:build)
           .and_return(built_worker)
 
-        expect(subject.worker).to eq built_worker
+        expect(route.worker).to eq built_worker
       end
     end
 
     context 'when worker is set' do
       let(:worker) { double }
 
-      it { expect(subject.worker).to eq worker }
+      it { expect(route.worker).to eq worker }
     end
   end
 
   describe '#parser=' do
     let(:parser) { double }
 
-    it { expect { subject.parser = parser }.not_to raise_error }
+    it { expect { route.parser = parser }.not_to raise_error }
   end
 
   describe '#parser' do
-    before { subject.parser = parser }
+    before { route.parser = parser }
 
     context 'when parser is not set' do
       let(:parser) { nil }
 
       it 'expect to use default one' do
-        expect(subject.parser).to eq JSON
+        expect(route.parser).to eq JSON
       end
     end
 
     context 'when parser is set' do
       let(:parser) { double }
 
-      it { expect(subject.parser).to eq parser }
+      it { expect(route.parser).to eq parser }
     end
   end
 
   describe '#interchanger=' do
     let(:interchanger) { double }
 
-    it { expect { subject.interchanger = interchanger }.not_to raise_error }
+    it { expect { route.interchanger = interchanger }.not_to raise_error }
   end
 
   describe '#interchanger' do
-    before { subject.interchanger = interchanger }
+    before { route.interchanger = interchanger }
 
     context 'when interchanger is not set' do
       let(:interchanger) { nil }
 
       it 'expect to use default one' do
-        expect(subject.interchanger).to eq Karafka::Params::Interchanger
+        expect(route.interchanger).to eq Karafka::Params::Interchanger
       end
     end
 
     context 'when interchanger is set' do
       let(:interchanger) { double }
 
-      it { expect(subject.interchanger).to eq interchanger }
+      it { expect(route.interchanger).to eq interchanger }
     end
   end
 
   describe '#validate!' do
-    before { subject.topic = topic }
+    before { route.topic = topic }
 
     context 'when topic name is invalid' do
       %w(
@@ -158,14 +158,14 @@ RSpec.describe Karafka::Routing::Route do
       ).each do |topic_name|
         let(:topic) { topic_name }
 
-        it { expect { subject.validate! }.to raise_error(Karafka::Errors::InvalidTopicName) }
+        it { expect { route.validate! }.to raise_error(Karafka::Errors::InvalidTopicName) }
       end
     end
 
     context 'when topic name is valid' do
       let(:topic) { rand(1000).to_s }
 
-      before { subject.group = group }
+      before { route.group = group }
 
       context 'but group name is invalid' do
         %w(
@@ -173,14 +173,14 @@ RSpec.describe Karafka::Routing::Route do
         ).each do |group_name|
           let(:group) { group_name }
 
-          it { expect { subject.validate! }.to raise_error(Karafka::Errors::InvalidGroupName) }
+          it { expect { route.validate! }.to raise_error(Karafka::Errors::InvalidGroupName) }
         end
       end
 
       context 'and group name is valid' do
         let(:group) { rand(1000).to_s }
 
-        it { expect { subject.validate! }.not_to raise_error }
+        it { expect { route.validate! }.not_to raise_error }
       end
     end
   end

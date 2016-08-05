@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Cli do
-  subject { described_class }
+  subject(:cli) { described_class }
 
   describe '.prepare' do
     let(:command) { Karafka::Cli::Server }
@@ -10,9 +10,9 @@ RSpec.describe Karafka::Cli do
     it 'expect to use all Cli commands defined' do
       expect(command)
         .to receive(:bind_to)
-        .with(subject)
+        .with(cli)
 
-      subject.prepare
+      cli.prepare
     end
   end
 
@@ -20,6 +20,7 @@ RSpec.describe Karafka::Cli do
     let(:available_commands) do
       [
         Karafka::Cli::Console,
+        Karafka::Cli::Consume,
         Karafka::Cli::Info,
         Karafka::Cli::Install,
         Karafka::Cli::Routes,
@@ -30,7 +31,7 @@ RSpec.describe Karafka::Cli do
     end
 
     it 'expect to return all cli commands classes' do
-      expect(subject.send(:cli_commands)).to eq available_commands
+      expect(cli.send(:cli_commands)).to eq available_commands
     end
   end
 end

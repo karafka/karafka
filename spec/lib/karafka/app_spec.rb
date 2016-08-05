@@ -1,43 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::App do
-  subject { described_class }
-
-  describe '#run' do
-    let(:runner) { Karafka::Runner.new }
-
-    it 'runs in supervision, start consuming and sleep' do
-      expect(subject).to receive(:sleep)
-      expect(subject).to receive(:run!)
-      expect(Karafka::Runner).to receive(:new).and_return(runner)
-      expect(runner).to receive(:run)
-      expect(Karafka::Process.instance).to receive(:supervise).and_yield
-      expect(Karafka::Process.instance).to receive(:on_sigint)
-      expect(Karafka::Process.instance).to receive(:on_sigquit)
-
-      subject.run
-    end
-
-    it 'defines a proper action for sigint' do
-      expect(Karafka::Process.instance).to receive(:supervise)
-      expect(Karafka::Process.instance).to receive(:on_sigint).and_yield
-      expect(Karafka::Process.instance).to receive(:on_sigquit)
-      expect(subject).to receive(:stop!)
-      expect(subject).to receive(:exit)
-
-      subject.run
-    end
-
-    it 'defines a proper action for sigquit' do
-      expect(Karafka::Process.instance).to receive(:supervise)
-      expect(Karafka::Process.instance).to receive(:on_sigint)
-      expect(Karafka::Process.instance).to receive(:on_sigquit).and_yield
-      expect(subject).to receive(:stop!)
-      expect(subject).to receive(:exit)
-
-      subject.run
-    end
-  end
+  subject(:app_class) { described_class }
 
   describe '#config' do
     let(:config) { double }
@@ -47,7 +11,7 @@ RSpec.describe Karafka::App do
         .to receive(:config)
         .and_return(config)
 
-      expect(subject.config).to eq config
+      expect(app_class.config).to eq config
     end
   end
 
@@ -55,7 +19,7 @@ RSpec.describe Karafka::App do
     let(:routes) { Karafka::Routing::Builder.instance }
 
     it 'returns routes builder' do
-      expect(subject.routes).to eq routes
+      expect(app_class.routes).to eq routes
     end
   end
 
@@ -65,15 +29,11 @@ RSpec.describe Karafka::App do
         .to receive(:setup)
         .once
 
-      expect(subject)
+      expect(app_class)
         .to receive(:initialize!)
 
-      subject.setup
+      app_class.setup
     end
-  end
-
-  describe '#process' do
-    it { expect(subject.send(:process)).to be_a Karafka::Process }
   end
 
   describe 'Karafka delegations' do
@@ -89,7 +49,7 @@ RSpec.describe Karafka::App do
             .to receive(delegation)
             .and_return(return_value)
 
-          expect(subject.public_send(delegation)).to eq return_value
+          expect(app_class.public_send(delegation)).to eq return_value
         end
       end
     end
@@ -109,7 +69,7 @@ RSpec.describe Karafka::App do
             .to receive(delegation)
             .and_return(return_value)
 
-          expect(subject.public_send(delegation)).to eq return_value
+          expect(app_class.public_send(delegation)).to eq return_value
         end
       end
     end

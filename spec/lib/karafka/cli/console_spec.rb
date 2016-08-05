@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Karafka::Cli::Console do
   let(:cli) { Karafka::Cli.new }
-  subject { described_class.new(cli) }
+  subject(:console_cli) { described_class.new(cli) }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
@@ -13,11 +13,11 @@ RSpec.describe Karafka::Cli::Console do
       expect(cli)
         .to receive(:info)
 
-      expect(subject)
+      expect(console_cli)
         .to receive(:system)
         .with(cmd)
 
-      subject.call
+      console_cli.call
     end
   end
 end

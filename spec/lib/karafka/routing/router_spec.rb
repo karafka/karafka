@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Routing::Router do
-  subject { described_class.new(topic) }
+  subject(:router) { described_class.new(topic) }
 
   let(:topic) { "topic#{rand(1000)}" }
 
@@ -23,7 +23,7 @@ RSpec.describe Karafka::Routing::Router do
     end
 
     before do
-      allow(subject)
+      allow(router)
         .to receive(:route)
         .and_return(route)
 
@@ -49,7 +49,7 @@ RSpec.describe Karafka::Routing::Router do
     end
 
     it 'expect to build controller with all proper options assigned' do
-      expect(subject.build).to eq controller_instance
+      expect(router.build).to eq controller_instance
     end
   end
 
@@ -69,7 +69,7 @@ RSpec.describe Karafka::Routing::Router do
           .and_return(routes)
       end
 
-      it { expect(subject.send(:route)).to eq routes.first }
+      it { expect(router.send(:route)).to eq routes.first }
     end
 
     context 'when there is no route for a given topic' do
@@ -81,7 +81,7 @@ RSpec.describe Karafka::Routing::Router do
           .and_return(routes)
       end
 
-      it { expect { subject.send(:route) }.to raise_error(Karafka::Errors::NonMatchingRouteError) }
+      it { expect { router.send(:route) }.to raise_error(Karafka::Errors::NonMatchingRouteError) }
     end
   end
 end

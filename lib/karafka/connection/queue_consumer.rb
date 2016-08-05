@@ -62,6 +62,22 @@ module Karafka
         close
       end
 
+      # Closes current connection, co we will be able to claim Kafka connection again
+      # for the same partitions of a given topic
+      # @note For long running processes, don't close connection, it will be closed automatically
+      #   if something goes wrong. For short running, make sure to close them because if not
+      #   closed, you won't be able to claim the same partitions of a given topic
+      def close
+        return unless @target
+
+        target.reload
+        target.close
+      rescue *CONNECTION_CLEAR_ERRORS => e
+        Karafka.monitor.notice_error(self.class, e)
+      ensure
+        @target = nil
+      end
+
       private
 
       # @return [Poseidon::ConsumerGroup] consumer group instance
@@ -102,19 +118,6 @@ module Karafka
         return unless last_processed_message
 
         target.commit partition, last_processed_message.offset + 1
-      end
-
-      # If something is wrong with the connection, it will try to
-      # trigger reload and will close it
-      def close
-        return unless @target
-
-        target.reload
-        target.close
-      rescue *CONNECTION_CLEAR_ERRORS => e
-        Karafka.monitor.notice_error(self.class, e)
-      ensure
-        @target = nil
       end
     end
   end

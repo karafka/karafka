@@ -17,13 +17,7 @@ module Karafka
       #   will pass the block that should be evaluated
       # @param [Proc] block that should be executed for each incoming message
       def fetch_loop(block)
-        loop do
-          listeners.each do |listener|
-            return true unless Karafka::App.running?
-
-            listener.fetch(block)
-          end
-        end
+        loop { fetch(block) || return }
       # This is the last protection layer before the actor crashes
       # If anything happens down the road - we should catch it here and just
       # rerun the whole loop while rebuilding all the listeners to reset
@@ -32,8 +26,29 @@ module Karafka
       rescue Exception => e
         # rubocop:enable RescueException
         Karafka.monitor.notice_error(self.class, e)
+        close
         @listeners = nil
         retry
+      end
+
+      # Performs a single fetching of all the messages from all the listeners
+      # @param [Proc] block that should be executed for each incoming message
+      # @note We don't catch things here, because this method can be used to
+      #   perform a single checking from all the topics (without loop)
+      def fetch(block)
+        listeners.each do |listener|
+          return false unless Karafka::App.running?
+          listener.fetch(block)
+        end
+
+        true
+      end
+
+      # Closes all the listeners and frees the connections so other listeners
+      # can connect to the same partitions and topics
+      # @note Short running connections should be closed after they are no longer needed
+      def close
+        listeners.map(&:close)
       end
 
       private

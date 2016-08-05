@@ -15,7 +15,7 @@ RSpec.describe Karafka::Helpers::MultiDelegator do
   end
 
   describe 'delegation' do
-    subject do
+    subject(:delegator) do
       described_class
         .delegate(*methods)
         .to(target1, target2)
@@ -26,7 +26,7 @@ RSpec.describe Karafka::Helpers::MultiDelegator do
         expect(target1).to receive(mname)
         expect(target2).to receive(mname)
 
-        subject.send(mname)
+        delegator.send(mname)
       end
     end
   end

@@ -1,8 +1,15 @@
 # Karafka framework changelog
 
 ## 0.4.2-head
+- #87 - Reconsume mode with crone for better Rails/Rack integration
+- Moved Karafka server related stuff into separate Karafka::Server class
+- Renamed Karafka::Runner into Karafka::Fetcher
+- Gem dump
 - Added chroot option to Zookeeper options
 - Moved BROKERS_PATH into config from constant
+- Added Karafka consume CLI action for a short running single consumption round
+- Small fixes to close broken connections
+- Readme updates
 
 ## 0.4.1
 - Explicit throw(:abort) required to halt before_enqueue (like in Rails 5)

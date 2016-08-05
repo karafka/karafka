@@ -8,7 +8,7 @@ RSpec.describe Karafka::Connection::Listener do
     end
   end
 
-  subject { described_class.new(route) }
+  subject(:listener) { described_class.new(route) }
 
   describe '#fetch' do
     let(:queue_consumer) { double }
@@ -32,14 +32,14 @@ RSpec.describe Karafka::Connection::Listener do
         end
 
         it 'notices the error wthout closing the consumer' do
-          expect(subject)
+          expect(listener)
             .to receive(:queue_consumer)
             .and_raise(error.new)
 
-          expect(subject)
+          expect(listener)
             .not_to receive(:queue_consumer)
 
-          expect { subject.send(:fetch, action) }.not_to raise_error
+          expect { listener.send(:fetch, action) }.not_to raise_error
         end
       end
     end
@@ -52,11 +52,11 @@ RSpec.describe Karafka::Connection::Listener do
       end
 
       it 'expect to yield for each incoming message and return last one' do
-        expect(subject).to receive(:queue_consumer).and_return(queue_consumer).at_least(:once)
+        expect(listener).to receive(:queue_consumer).and_return(queue_consumer).at_least(:once)
         expect(queue_consumer).to receive(:fetch).and_yield(_partition, messages_bulk)
         expect(action).to receive(:call).with(incoming_message)
 
-        expect(subject.send(:fetch, action)).to eq incoming_message
+        expect(listener.send(:fetch, action)).to eq incoming_message
       end
     end
 
@@ -70,11 +70,11 @@ RSpec.describe Karafka::Connection::Listener do
       end
 
       it 'expect to process first message and then return it' do
-        expect(subject).to receive(:queue_consumer).and_return(queue_consumer).at_least(:once)
+        expect(listener).to receive(:queue_consumer).and_return(queue_consumer).at_least(:once)
         expect(queue_consumer).to receive(:fetch).and_yield(_partition, messages_bulk)
         expect(action).to receive(:call).with(incoming_message)
 
-        expect(subject.send(:fetch, action)).to eq incoming_message
+        expect(listener.send(:fetch, action)).to eq incoming_message
       end
     end
   end
@@ -84,14 +84,14 @@ RSpec.describe Karafka::Connection::Listener do
       let(:queue_consumer) { double }
 
       before do
-        subject.instance_variable_set(:'@queue_consumer', queue_consumer)
+        listener.instance_variable_set(:'@queue_consumer', queue_consumer)
       end
 
       it 'just returns it' do
         expect(Poseidon::ConsumerGroup)
           .to receive(:new)
           .never
-        expect(subject.send(:queue_consumer)).to eq queue_consumer
+        expect(listener.send(:queue_consumer)).to eq queue_consumer
       end
     end
 
@@ -99,7 +99,7 @@ RSpec.describe Karafka::Connection::Listener do
       let(:queue_consumer) { double }
 
       before do
-        subject.instance_variable_set(:'@queue_consumer', nil)
+        listener.instance_variable_set(:'@queue_consumer', nil)
       end
 
       it 'creates an instance and return' do
@@ -108,8 +108,15 @@ RSpec.describe Karafka::Connection::Listener do
           .with(route)
           .and_return(queue_consumer)
 
-        expect(subject.send(:queue_consumer)).to eq queue_consumer
+        expect(listener.send(:queue_consumer)).to eq queue_consumer
       end
+    end
+  end
+
+  describe '#close' do
+    it 'expect to close queue_consumer connection' do
+      expect(listener.send(:queue_consumer)).to receive(:close)
+      listener.close
     end
   end
 end

@@ -57,6 +57,11 @@ module Karafka
         Karafka.monitor.notice_error(self.class, e)
       end
 
+      # Closes queue consumer connection so we will be able to reconnect with a new connection
+      def close
+        queue_consumer.close
+      end
+
       private
 
       # @return [Karafka::Connection::QueueConsumer] queue consumer that listens to a route

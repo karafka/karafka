@@ -4,17 +4,17 @@ RSpec.describe Karafka::Setup::Configurators::Sidekiq do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
   let(:config) { double }
-  subject { described_class.new(config) }
+  subject(:sidekiq_configurator) { described_class.new(config) }
 
   describe '#setup' do
     it 'expect to configure client and server' do
-      expect(subject)
+      expect(sidekiq_configurator)
         .to receive(:setup_sidekiq_client)
 
-      expect(subject)
+      expect(sidekiq_configurator)
         .to receive(:setup_sidekiq_server)
 
-      subject.setup
+      sidekiq_configurator.setup
     end
   end
 
@@ -33,6 +33,7 @@ RSpec.describe Karafka::Setup::Configurators::Sidekiq do
         }
       )
     end
+
     before do
       expect(Sidekiq)
         .to receive(:configure_client)
@@ -47,7 +48,7 @@ RSpec.describe Karafka::Setup::Configurators::Sidekiq do
         )
     end
 
-    it { subject.send(:setup_sidekiq_client) }
+    it { sidekiq_configurator.send(:setup_sidekiq_client) }
   end
 
   describe '#setup_sidekiq_server' do
@@ -74,6 +75,6 @@ RSpec.describe Karafka::Setup::Configurators::Sidekiq do
         .with(config.redis)
     end
 
-    it { subject.send(:setup_sidekiq_server) }
+    it { sidekiq_configurator.send(:setup_sidekiq_server) }
   end
 end

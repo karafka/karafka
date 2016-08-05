@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Karafka::Connection::Consumer do
-  subject { described_class.new }
+  subject(:consumer) { described_class.new }
 
   describe '#consume' do
     let(:topic) { rand.to_s }
@@ -38,7 +38,7 @@ RSpec.describe Karafka::Connection::Consumer do
       end
 
       it 'routes to a proper controller and schedule task' do
-        expect { subject.consume(raw_message) }.not_to raise_error
+        expect { consumer.consume(raw_message) }.not_to raise_error
       end
     end
 
@@ -61,7 +61,7 @@ RSpec.describe Karafka::Connection::Consumer do
           end
 
           it 'notices and not reraise error' do
-            expect { subject.consume(raw_message) }.not_to raise_error
+            expect { consumer.consume(raw_message) }.not_to raise_error
           end
         end
       end

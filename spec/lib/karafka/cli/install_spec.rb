@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Karafka::Cli::Install do
   let(:cli) { Karafka::Cli.new }
-  subject { described_class.new(cli) }
+  subject(:install_cli) { described_class.new(cli) }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
@@ -30,7 +30,7 @@ RSpec.describe Karafka::Cli::Install do
     end
 
     it 'expect to create proper dirs and copy template files' do
-      subject.call
+      install_cli.call
     end
   end
 end

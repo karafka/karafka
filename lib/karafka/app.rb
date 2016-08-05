@@ -2,13 +2,6 @@ module Karafka
   # App class
   class App
     class << self
-      # Method which runs app
-      def run
-        bind_on_sigint
-        bind_on_sigquit
-        start_supervised
-      end
-
       # Sets up the whole configuration
       # @param [Block] block configuration block
       def setup(&block)
@@ -38,38 +31,6 @@ module Karafka
       ).each do |delegated|
         define_method(delegated) do
           Karafka.public_send(delegated)
-        end
-      end
-
-      private
-
-      # @return [Karafka::Process] process wrapper instance used to catch system signal calls
-      def process
-        Karafka::Process.instance
-      end
-
-      # What should happen when we decide to quit with sigint
-      def bind_on_sigint
-        process.on_sigint do
-          stop!
-          exit
-        end
-      end
-
-      # What should happen when we decide to quit with sigquit
-      def bind_on_sigquit
-        process.on_sigquit do
-          stop!
-          exit
-        end
-      end
-
-      # Starts Karafka with a supervision
-      def start_supervised
-        process.supervise do
-          Karafka::Runner.new.run
-          run!
-          sleep
         end
       end
     end

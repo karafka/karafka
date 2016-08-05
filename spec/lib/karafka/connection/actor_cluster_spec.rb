@@ -2,10 +2,9 @@ require 'spec_helper'
 
 RSpec.describe Karafka::Connection::ActorCluster do
   let(:controller) { ClassBuilder.inherit(Karafka::BaseController) }
-
   let(:controllers) { [controller] }
 
-  subject { described_class.new(controllers).wrapped_object }
+  subject(:actor_cluster) { described_class.new(controllers).wrapped_object }
 
   describe '#fetch_loop' do
     let(:listener) { double }
@@ -14,11 +13,11 @@ RSpec.describe Karafka::Connection::ActorCluster do
 
     context 'when there is no errors (happy path)' do
       before do
-        expect(subject)
+        expect(actor_cluster)
           .to receive(:loop)
           .and_yield
 
-        expect(subject)
+        expect(actor_cluster)
           .to receive(:listeners)
           .and_return(listeners)
 
@@ -34,7 +33,7 @@ RSpec.describe Karafka::Connection::ActorCluster do
           expect(listener)
             .not_to receive(:fetch)
 
-          subject.fetch_loop(block)
+          actor_cluster.fetch_loop(block)
         end
       end
 
@@ -46,26 +45,29 @@ RSpec.describe Karafka::Connection::ActorCluster do
             .to receive(:fetch)
             .with(block)
 
-          subject.fetch_loop(block)
+          actor_cluster.fetch_loop(block)
         end
       end
     end
 
     context 'when something wrong happens' do
       before do
-        expect(subject)
+        expect(actor_cluster)
           .to receive(:loop)
           .and_yield
           .exactly(2).times
 
-        expect(subject)
+        expect(actor_cluster)
           .to receive(:listeners)
           .and_return(listeners)
-          .exactly(2).times
+          .exactly(3).times
 
         expect(listener)
           .to receive(:fetch)
           .and_raise(StandardError)
+
+        expect(listener)
+          .to receive(:close)
 
         allow(Karafka::App)
           .to receive(:running?)
@@ -77,7 +79,7 @@ RSpec.describe Karafka::Connection::ActorCluster do
           .to receive(:notice_error)
           .with(described_class, StandardError)
 
-        subject.fetch_loop(block)
+        actor_cluster.fetch_loop(block)
       end
     end
   end
@@ -93,7 +95,24 @@ RSpec.describe Karafka::Connection::ActorCluster do
     end
 
     it 'creates new listeners based on the controllers' do
-      expect(subject.send(:listeners)).to eq [listener]
+      expect(actor_cluster.send(:listeners)).to eq [listener]
+    end
+  end
+
+  describe '#close' do
+    let(:listener) { instance_double(Karafka::Connection::Listener) }
+
+    before do
+      expect(Karafka::Connection::Listener)
+        .to receive(:new)
+        .with(controller)
+        .and_return(listener)
+    end
+
+    it 'expect to close all the listeners' do
+      expect(listener).to receive(:close)
+
+      actor_cluster.close
     end
   end
 end

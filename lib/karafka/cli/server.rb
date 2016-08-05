@@ -8,10 +8,10 @@ module Karafka
 
       # Start the Karafka server
       def call
-        puts 'Starting Karafka framework'
+        puts 'Starting Karafka framework server'
         cli.info
 
-        Karafka::App.run
+        Karafka::Server.run
       end
     end
   end
