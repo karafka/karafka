@@ -599,7 +599,7 @@ Copy the **app.rb** file from your Karafka application into your Rails app (if y
 
 ```ruby
 ENV['RACK_ENV'] ||= 'development'
-ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
+ENV['KARAFKA_ENV'] = ENV['RACK_ENV']
 
 Bundler.require(:default, ENV['KARAFKA_ENV'])
 ```
