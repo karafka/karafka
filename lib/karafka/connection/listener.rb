@@ -16,12 +16,9 @@ module Karafka
         @route = route
       end
 
-      # Opens connection, gets messages bulk and calls a block for each of the incoming messages
+      # Opens connection, gets messages and calls a block for each of the incoming messages
       # @yieldparam [Karafka::BaseController] base controller descendant
       # @yieldparam [Kafka::FetchedMessage] kafka fetched message
-      # @return [Kafka::FetchedMessage] last message that was processed. Keep in mind that
-      #   this might not mean last message from the message bulk. We might stop processing in the
-      #   middle of the bulk if for example restart is triggered, etc
       # @note This will yield with a raw message - no preprocessing or reformatting
       # @note We catch all the errors here, so they don't affect other listeners (or this one)
       #   so we will be able to listen and consume other incoming messages.
@@ -44,6 +41,9 @@ module Karafka
 
       private
 
+      # @return [Karafka::Connection::TopicConsumer] wrapped kafka consumer for a given topic
+      #   consumption
+      # @note It adds consumer into Karafka::Server consumers pool for graceful shutdown on exit
       def topic_consumer
         @topic_consumer ||= TopicConsumer.new(@route).tap do |consumer|
           Karafka::Server.consumers << consumer if Karafka::Server.consumers

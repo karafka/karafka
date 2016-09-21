@@ -3,6 +3,9 @@ module Karafka
   # @note Creating multiple fetchers will result in having multiple connections to the same
   #   topics, which means that if there are no partitions, it won't use them.
   class Fetcher
+    # Starts listening on all the listeners asynchronously
+    # Fetch loop should never end, which means that we won't create more actor clusters
+    # so we don't have to terminate them
     def fetch_loop
       futures = listeners.map do |listener|
         listener.future.public_send(:fetch_loop, consumer)
@@ -19,6 +22,7 @@ module Karafka
 
     private
 
+    # @return [Array<Karafka::Connection::Listener>] listeners that will consume messages
     def listeners
       @listeners ||= App.routes.each.map do |route|
         Karafka::Connection::Listener.new(route)

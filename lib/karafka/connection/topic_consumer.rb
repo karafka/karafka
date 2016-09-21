@@ -11,12 +11,16 @@ module Karafka
         @route = route
       end
 
+      # Opens connection, gets messages and calls a block for each of the incoming messages
+      # @yieldparam [Kafka::FetchedMessage] kafka fetched message
+      # @note This will yield with a raw message - no preprocessing or reformatting
       def fetch_loop
         kafka_consumer.each_message do |message|
           yield(message)
         end
       end
 
+      # Gracefuly stops topic consumption
       def stop
         kafka_consumer.stop
         @kafka_consumer = nil
@@ -24,6 +28,8 @@ module Karafka
 
       private
 
+      # @return [Kafka::Consumer] returns a ready to consume Kafka consumer
+      #   that is set up to consume a given routes topic
       def kafka_consumer
         return @kafka_consumer if @kafka_consumer
 
