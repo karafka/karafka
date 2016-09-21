@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::BaseController do
   let(:working_class) do
     ClassBuilder.inherit(described_class) do

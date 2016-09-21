@@ -8,7 +8,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   simplecov
   rake
   logger
-  poseidon
   timecop
 ).each do |lib|
   require lib
@@ -46,9 +45,6 @@ module Karafka
   class App
     setup do |config|
       config.kafka.hosts = ['localhost:9092']
-      config.zookeeper.hosts = ['localhost:2181']
-      config.wait_timeout = 10 # 10 seconds
-      config.max_concurrency = 1 # 1 thread for specs
       config.name = rand.to_s
       config.redis = {}
     end

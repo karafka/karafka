@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Status do
   subject(:status_manager) { described_class.instance }
 

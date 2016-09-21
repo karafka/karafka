@@ -1,5 +1,22 @@
 # Karafka framework changelog
 
+## 0.5.0-beta
+- Removed Zookeeper totally as dependency
+- Better group and partition rebalancing
+- Automatic thread management (no need for tunning) - each topic is a separate actor/thread
+- Moved from Poseidon into Ruby-Kafka
+- No move max_concurrency
+- After you define your App class and routes (and everything else) you need to add execute App.boot!
+- Manual consuming is no longer available (no more karafka consume)
+- Karafka topics CLI is no longer available. No Zookeeper - no global topic discovery
+- Dropped ZK as dependency
+- karafka info no longer prints details about Zookeeper
+- Better shutdown
+- No more autodiscovery via Zookeeper - instead, the whole cluster will be discovered directly from Kafka
+- No more support for Kafka 0.8
+- Support for Kafka 0.9
+- No more need for ActorCluster, since now we have a single thread (and Kafka connection) per topic
+
 ## 0.4.2-head
 - #87 - Reconsume mode with crone for better Rails/Rack integration
 - Moved Karafka server related stuff into separate Karafka::Server class

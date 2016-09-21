@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Routing::Builder do
   subject(:builder) { described_class.instance }
 

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Connection::Message do
   let(:topic) { double }
   let(:content) { double }

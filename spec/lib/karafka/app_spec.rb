@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::App do
   subject(:app_class) { described_class }
 
@@ -33,6 +31,17 @@ RSpec.describe Karafka::App do
         .to receive(:initialize!)
 
       app_class.setup
+    end
+  end
+
+  describe '#boot!' do
+    let(:config) { double }
+
+    it 'expect to run setup_components' do
+      expect(Karafka::Setup::Config)
+        .to receive(:setup_components)
+
+      app_class.boot!
     end
   end
 

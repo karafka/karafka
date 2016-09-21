@@ -9,6 +9,13 @@ module Karafka
         initialize!
       end
 
+      # Sets up all the internal components and bootstrap whole app
+      # We need to know details about routes in order to setup components,
+      # that's why we don't setup them after std setup is done
+      def boot!
+        Setup::Config.setup_components
+      end
+
       # @return [Karafka::Config] config instance
       def config
         Setup::Config.config

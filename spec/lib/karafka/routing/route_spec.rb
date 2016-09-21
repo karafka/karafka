@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Routing::Route do
   subject(:route) { described_class.new }
 

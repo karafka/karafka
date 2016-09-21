@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Connection::Listener do
   let(:route) do
     Karafka::Routing::Route.new.tap do |route|
@@ -8,13 +6,11 @@ RSpec.describe Karafka::Connection::Listener do
     end
   end
 
-  subject(:listener) { described_class.new(route) }
+  subject(:listener) { described_class.new(route).wrapped_object }
 
-  describe '#fetch' do
-    let(:queue_consumer) { double }
-    let(:_partition) { double }
+  describe '#fetch_loop' do
+    let(:topic_consumer) { double }
     let(:incoming_message) { double }
-    let(:messages_bulk) { [incoming_message] }
 
     let(:action) { double }
     [
@@ -31,92 +27,58 @@ RSpec.describe Karafka::Connection::Listener do
             .with(described_class, error)
         end
 
-        it 'notices the error wthout closing the consumer' do
+        it 'notices the error and stop the consumer' do
           expect(listener)
-            .to receive(:queue_consumer)
+            .to receive(:topic_consumer)
             .and_raise(error.new)
 
-          expect(listener)
-            .not_to receive(:queue_consumer)
-
-          expect { listener.send(:fetch, action) }.not_to raise_error
+          expect { listener.fetch_loop(-> {}) }.not_to raise_error
         end
       end
     end
 
     context 'when no errors occur' do
-      before do
-        expect(Karafka::App)
-          .to receive(:running?)
-          .and_return(true)
-      end
-
-      it 'expect to yield for each incoming message and return last one' do
-        expect(listener).to receive(:queue_consumer).and_return(queue_consumer).at_least(:once)
-        expect(queue_consumer).to receive(:fetch).and_yield(_partition, messages_bulk)
+      it 'expect to yield for each incoming message' do
+        expect(listener).to receive(:topic_consumer).and_return(topic_consumer).at_least(:once)
+        expect(topic_consumer).to receive(:fetch_loop).and_yield(incoming_message)
         expect(action).to receive(:call).with(incoming_message)
 
-        expect(listener.send(:fetch, action)).to eq incoming_message
-      end
-    end
-
-    context 'when app is no longer running' do
-      let(:messages_bulk) { [incoming_message, double] }
-
-      before do
-        expect(Karafka::App)
-          .to receive(:running?)
-          .and_return(false)
-      end
-
-      it 'expect to process first message and then return it' do
-        expect(listener).to receive(:queue_consumer).and_return(queue_consumer).at_least(:once)
-        expect(queue_consumer).to receive(:fetch).and_yield(_partition, messages_bulk)
-        expect(action).to receive(:call).with(incoming_message)
-
-        expect(listener.send(:fetch, action)).to eq incoming_message
+        listener.send(:fetch_loop, action)
       end
     end
   end
 
-  describe '#queue_consumer' do
-    context 'when queue_consumer is already created' do
-      let(:queue_consumer) { double }
+  describe '#topic_consumer' do
+    context 'when topic_consumer is already created' do
+      let(:topic_consumer) { double }
 
       before do
-        listener.instance_variable_set(:'@queue_consumer', queue_consumer)
+        listener.instance_variable_set(:'@topic_consumer', topic_consumer)
       end
 
       it 'just returns it' do
-        expect(Poseidon::ConsumerGroup)
+        expect(Karafka::Connection::TopicConsumer)
           .to receive(:new)
           .never
-        expect(listener.send(:queue_consumer)).to eq queue_consumer
+        expect(listener.send(:topic_consumer)).to eq topic_consumer
       end
     end
 
-    context 'when queue_consumer is not yet created' do
-      let(:queue_consumer) { double }
+    context 'when topic_consumer is not yet created' do
+      let(:topic_consumer) { double }
 
       before do
-        listener.instance_variable_set(:'@queue_consumer', nil)
+        listener.instance_variable_set(:'@topic_consumer', nil)
       end
 
       it 'creates an instance and return' do
-        expect(Karafka::Connection::QueueConsumer)
+        expect(Karafka::Connection::TopicConsumer)
           .to receive(:new)
           .with(route)
-          .and_return(queue_consumer)
+          .and_return(topic_consumer)
 
-        expect(listener.send(:queue_consumer)).to eq queue_consumer
+        expect(listener.send(:topic_consumer)).to eq topic_consumer
       end
-    end
-  end
-
-  describe '#close' do
-    it 'expect to close queue_consumer connection' do
-      expect(listener.send(:queue_consumer)).to receive(:close)
-      listener.close
     end
   end
 end

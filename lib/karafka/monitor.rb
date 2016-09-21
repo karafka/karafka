@@ -53,7 +53,6 @@ module Karafka
     def caller_exceptions_map
       @caller_exceptions_map ||= {
         error: [
-          Karafka::Connection::ActorCluster,
           Karafka::Connection::Consumer,
           Karafka::Connection::Listener,
           Karafka::Params::Params

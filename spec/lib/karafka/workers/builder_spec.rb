@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Workers::Builder do
   subject(:builder) { described_class.new(controller_class) }
   let(:controller_class) { double }

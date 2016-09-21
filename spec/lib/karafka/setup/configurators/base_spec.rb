@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Setup::Configurators::Base do
   subject(:base_configurator) { described_class }
 

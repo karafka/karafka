@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::BaseWorker do
   subject(:base_worker) { described_class.new }
 

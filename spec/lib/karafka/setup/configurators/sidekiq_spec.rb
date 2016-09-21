@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Setup::Configurators::Sidekiq do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
@@ -21,13 +19,13 @@ RSpec.describe Karafka::Setup::Configurators::Sidekiq do
   describe '#setup_sidekiq_client' do
     let(:redis_url) { rand }
     let(:name) { rand }
-    let(:max_concurrency) { rand(1000) }
+    let(:concurrency) { rand(1000) }
     let(:sidekiq_config_client) { double }
     let(:config) do
       instance_double(
         Karafka::Setup::Config.config.class,
         name: name,
-        max_concurrency: max_concurrency,
+        concurrency: concurrency,
         redis: {
           url: redis_url
         }
@@ -43,7 +41,7 @@ RSpec.describe Karafka::Setup::Configurators::Sidekiq do
         .to receive(:redis=)
         .with(
           config.redis.merge(
-            size: config.max_concurrency
+            size: config.concurrency
           )
         )
     end

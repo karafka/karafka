@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Setup::Configurators::Celluloid do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
@@ -14,7 +12,7 @@ RSpec.describe Karafka::Setup::Configurators::Celluloid do
 
       expect(Celluloid)
         .to receive(:shutdown_timeout=)
-        .with(::Karafka::App.config.wait_timeout * 2)
+        .with(Karafka::Setup::Configurators::Celluloid::SHUTDOWN_TIME)
 
       celluloid_configurator.setup
     end

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Monitor do
   subject(:monitor) { described_class.instance }
 
@@ -20,7 +18,6 @@ RSpec.describe Karafka::Monitor do
     let(:error) { StandardError }
 
     [
-      Karafka::Connection::ActorCluster,
       Karafka::Connection::Consumer,
       Karafka::Connection::Listener,
       Karafka::Params::Params
@@ -82,7 +79,6 @@ RSpec.describe Karafka::Monitor do
 
     let(:error_callers) do
       [
-        Karafka::Connection::ActorCluster,
         Karafka::Connection::Consumer,
         Karafka::Connection::Listener,
         Karafka::Params::Params

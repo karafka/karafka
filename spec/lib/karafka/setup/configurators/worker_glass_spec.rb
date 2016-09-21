@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Setup::Configurators::WorkerGlass do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 

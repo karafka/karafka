@@ -16,8 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler'
 
-  spec.add_dependency 'poseidon', '>= 0.0.5'
-  spec.add_dependency 'poseidon_cluster'
+  spec.add_dependency 'ruby-kafka', '= 0.3.15'
   spec.add_dependency 'sidekiq', '~> 4.0'
   spec.add_dependency 'worker-glass'
   spec.add_dependency 'celluloid', '>= 0.17'
