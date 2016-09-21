@@ -12,30 +12,30 @@ module Karafka
       end
 
       def fetch_loop
-        target.each_message do |message|
+        kafka_consumer.each_message do |message|
           yield(message)
         end
       end
 
       def stop
-        target.stop
-        @target = nil
+        kafka_consumer.stop
+        @kafka_consumer = nil
       end
 
       private
 
       # @return [Poseidon::ConsumerGroup] consumer group instance
-      def target
-        return @target if @target
+      def kafka_consumer
+        return @kafka_consumer if @kafka_consumer
 
         kafka = Kafka.new(
           seed_brokers: ::Karafka::App.config.kafka.hosts,
           logger: ::Karafka.logger
         )
 
-        @target = kafka.consumer(group_id: @route.group)
-        @target.subscribe(@route.topic)
-        @target
+        @kafka_consumer = kafka.consumer(group_id: @route.group)
+        @kafka_consumer.subscribe(@route.topic)
+        @kafka_consumer
       end
     end
   end
