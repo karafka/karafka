@@ -17,6 +17,7 @@
 - Support for Kafka 0.9
 - No more need for ActorCluster, since now we have a single thread (and Kafka connection) per topic
 - Ruby 2.2.* support droped
+- Using App name as a Kafka client_id
 
 ## 0.4.2-head
 - #87 - Reconsume mode with crone for better Rails/Rack integration

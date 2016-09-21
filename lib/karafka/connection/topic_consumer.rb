@@ -35,7 +35,8 @@ module Karafka
 
         kafka = Kafka.new(
           seed_brokers: ::Karafka::App.config.kafka.hosts,
-          logger: ::Karafka.logger
+          logger: ::Karafka.logger,
+          client_id: ::Karafka::App.config.name
         )
 
         @kafka_consumer = kafka.consumer(group_id: @route.group)

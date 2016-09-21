@@ -67,7 +67,8 @@ RSpec.describe Karafka::Connection::TopicConsumer do
           .to receive(:new)
           .with(
             seed_brokers: ::Karafka::App.config.kafka.hosts,
-            logger: ::Karafka.logger
+            logger: ::Karafka.logger,
+            client_id: ::Karafka::App.config.name
           )
           .and_return(kafka)
       end
