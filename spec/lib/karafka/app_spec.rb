@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 RSpec.describe Karafka::App do
   subject(:app_class) { described_class }
 
