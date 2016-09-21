@@ -26,7 +26,7 @@ module Karafka
     end
 
     # @return [Proc] proc that should be processed when a message arrives
-    # @yieldparam message [Poseidon::FetchedMessage] message from poseidon (raw one)
+    # @yieldparam message [Kafka::FetchedMessage] message from kafka (raw one)
     def consumer
       lambda do |message|
         Karafka::Connection::Consumer.new.consume(message)

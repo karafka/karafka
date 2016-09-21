@@ -24,7 +24,6 @@ module Karafka
 
       private
 
-      # @return [Poseidon::ConsumerGroup] consumer group instance
       def kafka_consumer
         return @kafka_consumer if @kafka_consumer
 

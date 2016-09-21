@@ -3,7 +3,7 @@ module Karafka
     # A single listener that listens to incoming messages from a single route
     # @note It does not loop on itself - it needs to be executed in a loop
     # @note Listener itself does nothing with the message - it will return to the block
-    #   a raw Poseidon::FetchedMessage
+    #   a raw Kafka::FetchedMessage
     class Listener
       include Celluloid
 
@@ -18,12 +18,10 @@ module Karafka
 
       # Opens connection, gets messages bulk and calls a block for each of the incoming messages
       # @yieldparam [Karafka::BaseController] base controller descendant
-      # @yieldparam [Poseidon::FetchedMessage] poseidon fetched message
-      # @return [Poseidon::FetchedMessage] last message that was processed. Keep in mind that
+      # @yieldparam [Kafka::FetchedMessage] kafka fetched message
+      # @return [Kafka::FetchedMessage] last message that was processed. Keep in mind that
       #   this might not mean last message from the message bulk. We might stop processing in the
       #   middle of the bulk if for example restart is triggered, etc
-      # Since Poseidon socket has a timeout (10 000ms by default) we catch it and ignore,
-      #   we will just reconnect again
       # @note This will yield with a raw message - no preprocessing or reformatting
       # @note We catch all the errors here, so they don't affect other listeners (or this one)
       #   so we will be able to listen and consume other incoming messages.

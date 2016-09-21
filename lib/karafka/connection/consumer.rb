@@ -12,7 +12,7 @@ module Karafka
       def consume(message)
         controller = Karafka::Routing::Router.new(message.topic).build
         # We wrap it around with our internal message format, so we don't pass around
-        # a raw Poseidon message
+        # a raw Kafka message
         controller.params = Message.new(message.topic, message.value)
 
         Karafka.monitor.notice(self.class, controller.to_h)
