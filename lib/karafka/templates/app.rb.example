@@ -9,8 +9,6 @@ Karafka::Loader.new.load(Karafka::App.root)
 class App < Karafka::App
   setup do |config|
     config.kafka = { hosts: %w( 127.0.0.1:9092 ) }
-    config.wait_timeout = 60 # 1 minute
-    config.max_concurrency = 5
     config.name = 'example_app'
     config.redis = {
       url: 'redis://localhost:6379'
