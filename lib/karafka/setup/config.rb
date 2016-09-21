@@ -28,6 +28,9 @@ module Karafka
         setting :hosts
       end
 
+      # This is configured automatically, don't overwrite it!
+      # Each route requires separate thread, so number of threads should be equal to number
+      # of routes
       setting :concurrency, -> { ::Karafka::App.routes.count }
 
       class << self

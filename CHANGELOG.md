@@ -5,7 +5,7 @@
 - Better group and partition rebalancing
 - Automatic thread management (no need for tunning) - each topic is a separate actor/thread
 - Moved from Poseidon into Ruby-Kafka
-- No move max_concurrency
+- No more max_concurrency setting
 - After you define your App class and routes (and everything else) you need to add execute App.boot!
 - Manual consuming is no longer available (no more karafka consume)
 - Karafka topics CLI is no longer available. No Zookeeper - no global topic discovery

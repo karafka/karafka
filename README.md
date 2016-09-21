@@ -80,15 +80,10 @@ Karafka has following configuration options:
 
 | Option                 | Required | Value type        | Description                                                                                 |
 |------------------------|----------|-------------------|---------------------------------------------------------------------------------------------|
-| max_concurrency        | true     | Integer           | How many threads maximally should we have that listen for incoming messages                 |
 | name                   | true     | String            | Application name                                                                            |
 | redis                  | true     | Hash              | Hash with Redis configuration options                                                       |
-| wait_timeout           | true     | Integer (Seconds) | How long do we wait for incoming messages on a single socket (topic)                        |
 | monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                             |
 | logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                                               |
-| zookeeper.hosts        | true     | Array<String>     | Zookeeper server hosts                                                                      |
-| zookeeper.chroot       | false    | String            | Zookeeper chroot if used (Zookeeper namespace for Kafka settings)                           |
-| zookeeper.brokers_path | false    | String            | Zookeeper brokers path (defaults to 'brokers/ids')                                          |
 | kafka.hosts            | false    | Array<String>     | Kafka server hosts - if not provided Karafka will autodiscover them based on Zookeeper data |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
@@ -96,13 +91,12 @@ To apply this configuration, you need to use a *setup* method from the Karafka::
 ```ruby
 class App < Karafka::App
   setup do |config|
-    config.zookeeper.hosts =  %w( 127.0.0.1:2181 )
-    config.zookeeper.chroot = '/kafka_cluster'
+    config.kafka = {
+      hosts:  %w( 127.0.0.1:9092 )
+    }
     config.redis = {
       url: 'redis://redis.example.com:7372/1'
     }
-    config.wait_timeout = 10 # 10 seconds
-    config.max_concurrency = 10 # 10 threads max
     config.name = 'my_application'
     config.logger = MyCustomLogger.new # not required
   end
@@ -117,7 +111,7 @@ Karafka contains WaterDrop gem which is used to send messages to Kafka. It is au
 
 ### Configurators
 
-If you want to do some configurations after all of this is done, please add to config directory a proper file (needs to inherit from Karafka::Config::Base and implement setup method) after that everything will happen automatically.
+If you want to do some configurations after all of this is done, please add to config directory a proper file (needs to inherit from Karafka::Config::Base and implement setup method), after that everything will happen automatically.
 
 Example configuration class:
 
@@ -141,7 +135,7 @@ There are several env settings you can use:
 
 ### Kafka brokers auto-discovery
 
-Karafka supports Kafka brokers auto-discovery during both startup and runtime. It means that **zookeeper_hosts** option allows Karafka to get all the details it needs about Kafka brokers, first during boot and after each failure. If something happens to a connection on which we were listening (or if we cannot connect to a given broker), Karafka will refresh list of available brokers. This allows it to be aware of changes that happen in the infrastructure (adding and removing nodes) and allows it to be up and running as long as Zookeeper is able to provide it all the required information.
+Karafka supports Kafka brokers auto-discovery during startup and on failures. You need to provide att least one Kafka broker, from which the entire Kafka cluster will be discovered. Karafka will refresh list of available brokers if something goes wrong. This allows it to be aware of changes that happen in the infrastructure (adding and removing nodes).
 
 ## Usage
 
@@ -153,12 +147,10 @@ Karafka has a simple CLI built in. It provides following commands:
 |----------------|---------------------------------------------------------------------------|
 | help [COMMAND] | Describe available commands or one specific command                       |
 | console        | Start the Karafka console (short-cut alias: "c")                          |
-| consume        | Start the Karafka messages consuming process (single round without loop)  |
 | info           | Print configuration details and other options of your application         |
 | install        | Installs all required things for Karafka application in current directory |
 | routes         | Print out all defined routes in alphabetical order                        |
 | server         | Start the Karafka server (short-cut alias: "s")                           |
-| topics         | Lists all topics available on Karafka server (short-cut alias: "t")       |
 | worker         | Start the Karafka Sidekiq worker (short-cut alias: "w")                   |
 
 All the commands are executed the same way:
@@ -521,19 +513,19 @@ class AppMonitor < Karafka::Monitor
 
   private
 
-  # Log that messages for a given topic were consumed
+  # Log that message for a given topic was consumed
   # @param topic [String] topic name
   def consume(topic)
     record_count metric_key(topic, __method__)
   end
 
-  # Log that message for topic were scheduled to be performed async
+  # Log that message for topic was scheduled to be performed async
   # @param topic [String] topic name
   def perform_async(topic)
     record_count metric_key(topic, __method__)
   end
 
-  # Log that message for topic were performed async
+  # Log that message for topic was performed async
   # @param topic [String] topic name
   def perform(topic)
     record_count metric_key(topic, __method__)
@@ -558,7 +550,7 @@ end
 
 ## Concurrency
 
-Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to incoming connections. Since each topic and group requires a separate connection (which means that we have a connection per controller) we do this concurrently. To prevent Karafka from spawning hundred of threads (in huge application) you can specify concurency level configuration option. If this number matches (or exceeds) your controllers amount, then you will listen to all the topics simultaneously. If it is less then number of controllers, it will use a single thread to check for few topics (one after another). If this value is set to 1, it will just spawn a single thread to check all the sockets one after another.
+Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to incoming connections. Since each topic and group requires a separate connection (which means that we have a connection per controller) we do this concurrently. Each topic requires a separate connection, so for each route, you will have one additional thread running.
 
 ## Sidekiq Web UI
 
@@ -608,7 +600,7 @@ with
 
 ```ruby
 ENV['RAILS_ENV'] ||= 'development'
-ENV['KARAFKA_ENV'] ||= ENV['RAILS_ENV']
+ENV['KARAFKA_ENV'] = ENV['RAILS_ENV']
 
 require ::File.expand_path('../config/environment', __FILE__)
 Rails.application.eager_load!
