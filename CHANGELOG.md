@@ -16,6 +16,7 @@
 - No more support for Kafka 0.8
 - Support for Kafka 0.9
 - No more need for ActorCluster, since now we have a single thread (and Kafka connection) per topic
+- Ruby 2.2.* support droped
 
 ## 0.4.2-head
 - #87 - Reconsume mode with crone for better Rails/Rack integration
