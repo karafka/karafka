@@ -3,7 +3,7 @@ module Karafka
     class Configurators
       # Class responsible for setting up Celluloid settings
       class Celluloid < Base
-        # How long should we wait for actors (listeners) before forcefully shutting them down
+        # How many seconds should we wait for actors (listeners) before forcefully shutting them
         SHUTDOWN_TIME = 30
 
         # Sets up a Karafka logger as celluloid logger

@@ -24,7 +24,7 @@ module Karafka
 
     # @return [Array<Karafka::Connection::Listener>] listeners that will consume messages
     def listeners
-      @listeners ||= App.routes.each.map do |route|
+      @listeners ||= App.routes.map do |route|
         Karafka::Connection::Listener.new(route)
       end
     end

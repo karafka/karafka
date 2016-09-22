@@ -7,16 +7,16 @@
 - Moved from Poseidon into Ruby-Kafka
 - No more max_concurrency setting
 - After you define your App class and routes (and everything else) you need to add execute App.boot!
-- Manual consuming is no longer available (no more karafka consume)
+- Manual consuming is no longer available (no more karafka consume command)
 - Karafka topics CLI is no longer available. No Zookeeper - no global topic discovery
 - Dropped ZK as dependency
-- karafka info no longer prints details about Zookeeper
+- karafka info command no longer prints details about Zookeeper
 - Better shutdown
 - No more autodiscovery via Zookeeper - instead, the whole cluster will be discovered directly from Kafka
 - No more support for Kafka 0.8
 - Support for Kafka 0.9
 - No more need for ActorCluster, since now we have a single thread (and Kafka connection) per topic
-- Ruby 2.2.* support droped
+- Ruby 2.2.* support dropped
 - Using App name as a Kafka client_id
 
 ## 0.4.2-head

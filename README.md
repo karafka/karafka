@@ -91,9 +91,7 @@ To apply this configuration, you need to use a *setup* method from the Karafka::
 ```ruby
 class App < Karafka::App
   setup do |config|
-    config.kafka = {
-      hosts:  %w( 127.0.0.1:9092 )
-    }
+    config.kafka.hosts = %w( 127.0.0.1:9092 )
     config.redis = {
       url: 'redis://redis.example.com:7372/1'
     }
@@ -135,7 +133,7 @@ There are several env settings you can use:
 
 ### Kafka brokers auto-discovery
 
-Karafka supports Kafka brokers auto-discovery during startup and on failures. You need to provide att least one Kafka broker, from which the entire Kafka cluster will be discovered. Karafka will refresh list of available brokers if something goes wrong. This allows it to be aware of changes that happen in the infrastructure (adding and removing nodes).
+Karafka supports Kafka brokers auto-discovery during startup and on failures. You need to provide at least one Kafka broker, from which the entire Kafka cluster will be discovered. Karafka will refresh list of available brokers if something goes wrong. This allows it to be aware of changes that happen in the infrastructure (adding and removing nodes).
 
 ## Usage
 
