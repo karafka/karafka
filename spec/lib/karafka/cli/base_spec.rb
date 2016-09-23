@@ -22,8 +22,8 @@ RSpec.describe Karafka::Cli::Base do
       let(:cli_class) { Karafka::Cli }
 
       before do
-        base_cli_class.desc = desc
-        base_cli_class.options = options
+        base_cli_class.desc desc
+        base_cli_class.option options
 
         allow(base_cli_class)
           .to receive(:name)

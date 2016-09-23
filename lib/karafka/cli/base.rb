@@ -30,15 +30,27 @@ module Karafka
       end
 
       class << self
-        # Our smaller interface to thor allows us to set desc and options
-        attr_accessor :desc, :options
+        # Allows to set options for Thor cli
+        # @see https://github.com/erikhuda/thor
+        # @param option Single option details
+        def option(*option)
+          @options ||= []
+          @options << option
+        end
+
+        # Allows to set description of a given cli command
+        # @param desc [String] Description of a given cli command
+        def desc(desc)
+          @desc ||= desc
+        end
 
         # This method will bind a given Cli command into Karafka Cli
         # This method is a wrapper to way Thor defines its commands
         # @param cli_class [Karafka::Cli] Karafka cli_class
         def bind_to(cli_class)
-          cli_class.desc name, desc
-          cli_class.method_option name, options || {}
+          cli_class.desc name, @desc
+
+          (@options || []).each { |option| cli_class.option(*option) }
 
           context = self
 

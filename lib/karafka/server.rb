@@ -24,19 +24,16 @@ module Karafka
       # What should happen when we decide to quit with sigint
       def bind_on_sigint
         process.on_sigint do
-          # We should not send stop signal twice to consumers on exit (mupltiple times sigint)
-          consumers.map(&:stop) if Karafka::App.running?
           Karafka::App.stop!
-          exit
+          consumers.map(&:stop) if Karafka::App.running?
         end
       end
 
       # What should happen when we decide to quit with sigquit
       def bind_on_sigquit
         process.on_sigquit do
-          consumers.map(&:stop) if Karafka::App.running?
           Karafka::App.stop!
-          exit
+          consumers.map(&:stop) if Karafka::App.running?
         end
       end
 
