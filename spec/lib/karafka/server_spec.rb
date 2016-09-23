@@ -20,6 +20,7 @@ RSpec.describe Karafka::Server do
       expect(Karafka::Process.instance).to receive(:on_sigint).and_yield
       expect(Karafka::Process.instance).to receive(:on_sigquit)
       expect(Karafka::App).to receive(:stop!)
+      expect(server_class).to receive(:exit)
 
       server_class.run
     end
@@ -29,6 +30,7 @@ RSpec.describe Karafka::Server do
       expect(Karafka::Process.instance).to receive(:on_sigint)
       expect(Karafka::Process.instance).to receive(:on_sigquit).and_yield
       expect(Karafka::App).to receive(:stop!)
+      expect(server_class).to receive(:exit)
 
       server_class.run
     end
