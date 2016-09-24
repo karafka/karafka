@@ -8,7 +8,6 @@ module Karafka
 
       # Method which runs app
       def run
-        Celluloid.boot
         @consumers = Concurrent::Array.new
         bind_on_sigint
         bind_on_sigquit

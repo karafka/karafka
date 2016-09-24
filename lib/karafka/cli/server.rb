@@ -13,18 +13,29 @@ module Karafka
         puts 'Starting Karafka framework server'
         cli.info
 
-        prepare if cli.options[:pid]
-        daemonize if cli.options[:daemon]
+        if cli.options[:daemon]
+          # For some reason Celluloid spins threads that break forking
+          # Threads are not shutdown immediately so deamonization will stale until
+          # those threads are killed by Celluloid manager (via timeout)
+          # There's nothing initialized here yet, so instead we shutdown celluloid
+          # and run it again when we need (after fork)
+          Celluloid.shutdown
+          validate!
+          daemonize
+          Celluloid.boot
+        end
+
+        ObjectSpace.define_finalizer('string', proc { send(:clean) })
+
+        # After we fork, we can boot celluloid again
         Karafka::Server.run
-      ensure
-        clean if cli.options[:pid]
       end
 
       private
 
       # Prepare (if not exists) directory for a pidfile and check if there is no running karafka
       # instance already (and raise error if so)
-      def prepare
+      def validate!
         FileUtils.mkdir_p File.dirname(cli.options[:pid])
         raise "#{cli.options[:pid]} already exists" if File.exist?(cli.options[:pid])
       end

@@ -6,6 +6,8 @@ RSpec.describe Karafka::Cli::Server do
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
+  after { Celluloid.boot }
+
   describe '#call' do
     context 'when we run in foreground (not daemonized)' do
       before do
@@ -20,20 +22,14 @@ RSpec.describe Karafka::Cli::Server do
         server_cli.call
       end
 
-      it 'expect not to prepare anything' do
-        expect(server_cli).not_to receive(:prepare)
+      it 'expect not to validate! anything' do
+        expect(server_cli).not_to receive(:validate!)
 
         server_cli.call
       end
 
       it 'expect not to daemonize anything' do
         expect(server_cli).not_to receive(:daemonize)
-
-        server_cli.call
-      end
-
-      it 'expect not to clean anything' do
-        expect(server_cli).not_to receive(:clean)
 
         server_cli.call
       end
@@ -50,17 +46,16 @@ RSpec.describe Karafka::Cli::Server do
         expect(Karafka::Server).to receive(:run)
       end
 
-      it 'expect to print info, prepare, daemonize and clean' do
-        expect(server_cli).to receive(:prepare)
+      it 'expect to print info, validate!, daemonize and clean' do
+        expect(server_cli).to receive(:validate!)
         expect(server_cli).to receive(:daemonize)
-        expect(server_cli).to receive(:clean)
 
         server_cli.call
       end
     end
   end
 
-  describe '#prepare' do
+  describe '#validate!' do
     before { cli.options = { pid: pid } }
 
     it 'expect to create dir for pid' do
@@ -68,7 +63,7 @@ RSpec.describe Karafka::Cli::Server do
         .to receive(:mkdir_p)
         .with(File.dirname(cli.options[:pid]))
 
-      server_cli.send(:prepare)
+      server_cli.send(:validate!)
     end
 
     context 'when pid file already exists' do
@@ -76,7 +71,7 @@ RSpec.describe Karafka::Cli::Server do
         expect(File).to receive(:exist?)
           .with(pid).and_raise(StandardError)
 
-        expect { server_cli.send(:prepare) }.to raise_error(StandardError)
+        expect { server_cli.send(:validate!) }.to raise_error(StandardError)
       end
     end
   end
