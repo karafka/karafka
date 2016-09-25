@@ -6,11 +6,11 @@ module Karafka
       desc 'Start the Karafka server (short-cut alias: "s")'
       option aliases: 's'
       option :daemon, default: false, type: :boolean, aliases: :d
-      option :pid, default: 'tmp/pids/karafka.pid', type: :string, aliases: :p
+      option :pid, default: 'tmp/pids/karafka', type: :string, aliases: :p
 
       # Start the Karafka server
       def call
-        puts 'Starting Karafka framework server'
+        puts 'Starting Karafka server'
         cli.info
 
         if cli.options[:daemon]

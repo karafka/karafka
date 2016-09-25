@@ -12,7 +12,7 @@ RSpec.describe Karafka::Cli::Server do
     context 'when we run in foreground (not daemonized)' do
       before do
         expect(server_cli).to receive(:puts)
-          .with('Starting Karafka framework server')
+          .with('Starting Karafka server')
 
         expect(cli).to receive(:info)
         expect(Karafka::Server).to receive(:run)
@@ -40,7 +40,7 @@ RSpec.describe Karafka::Cli::Server do
 
       before do
         expect(server_cli).to receive(:puts)
-          .with('Starting Karafka framework server')
+          .with('Starting Karafka server')
 
         expect(cli).to receive(:info)
         expect(Karafka::Server).to receive(:run)

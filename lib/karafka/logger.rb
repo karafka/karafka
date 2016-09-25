@@ -31,23 +31,21 @@ module Karafka
           .to(STDOUT, file)
       end
 
-      # @return [Pathname] the directory in which the logs will be written
-      def log_dir
-        Karafka::App.root.join('log')
-      end
-
       # Makes sure the log directory exists
       def ensure_dir_exists
-        Dir.mkdir(log_dir) unless Dir.exist?(log_dir)
+        dir = File.dirname(log_path)
+        FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
+      end
+
+      # @return [Pathname] Path to a file to which we should log
+      def log_path
+        Karafka::App.root.join("log/#{Karafka.env}.log")
       end
 
       # @return [File] file to which we want to write our logs
       # @note File is being opened in append mode ('a')
       def file
-        File.open(
-          log_dir.join("#{Karafka.env}.log"),
-          'a'
-        )
+        File.open(log_path, 'a')
       end
     end
   end
