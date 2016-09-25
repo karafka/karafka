@@ -18,6 +18,7 @@
 - No more need for ActorCluster, since now we have a single thread (and Kafka connection) per topic
 - Ruby 2.2.* support dropped
 - Using App name as a Kafka client_id
+- Automatic Capistrano integration
 
 ## 0.4.2-head
 - #87 - Reconsume mode with crone for better Rails/Rack integration
@@ -178,7 +179,6 @@
 - Renamed events to messages to follow Apache Kafka naming convention
 
 ## 0.1.3
-
 - Karafka::App.logger moved to Karafka.logger
 - README updates (Usage section was added)
 

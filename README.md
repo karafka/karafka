@@ -26,23 +26,24 @@ Microframework used to simplify Apache Kafka based Ruby applications development
         - [Parser](#parser)
         - [Interchanger](#interchanger)
     - [Receiving messages](#receiving-messages)
-      - [Karafka server](#karafka-server)
-      - [Karafka consumer](#karafka-consumer)
     - [Karafka controllers](#karafka-controllers)
       - [Controllers callbacks](#controllers-callbacks)
     - [Sending messages from Karafka](#sending-messages-from-karafka)
     - [Monitoring and logging](#monitoring-and-logging)
-      - [Example monitor with Errbit/Airbrake support](#example-monitor-with-errbit/airbrake-support)
+      - [Example monitor with Errbit/Airbrake support](#example-monitor-with-errbitairbrake-support)
       - [Example monitor with NewRelic support](#example-monitor-with-newrelic-support)
-  - [Concurrency](#concurrency)
+  - [Deployment](#deployment)
+    - [Capistrano](#capistrano)
+    - [Docker](#docker)
   - [Sidekiq Web UI](#sidekiq-web-ui)
+  - [Concurrency](#concurrency)
   - [Integrating with other frameworks](#integrating-with-other-frameworks)
     - [Integrating with Ruby on Rails](#integrating-with-ruby-on-rails)
     - [Integrating with Sinatra](#integrating-with-sinatra)
   - [Articles and other references](#articles-and-other-references)
     - [Libraries and components](#libraries-and-components)
     - [Articles and references](#articles-and-references)
-  - [Note on Patches/Pull Requests](#note-on-patches/pull-requests)
+  - [Note on Patches/Pull Requests](#note-on-patchespull-requests)
 
 ## How does it work
 
@@ -155,6 +156,12 @@ All the commands are executed the same way:
 
 ```
 bundle exec karafka [COMMAND]
+```
+
+If you need more details about each of the CLI commands, you can execute following command:
+
+```
+  bundle exec karafka help [COMMAND]
 ```
 
 ### Routing
@@ -309,76 +316,19 @@ end
 
 ### Receiving messages
 
-Karafka framework provides two methods that allow you to start receiving messages:
+Karafka framework has a long running server process that is responsible for receiving messages.
 
-* Karafka long running server process
-* Karafka consumer that can be used from inside of any existing Ruby process that includes (and configures) Karafka
-
-Each of the methods has its own pros and cons. Please read proper sections below for more details.
-
-Note, that both of this methods handle messages receiving, not messages processing (this happens via Sidekiq).
-
-#### Karafka server
-
-Starting a Karafka server is a recommended way to consume messages. It creates a separate Ruby process that listens for incoming messages. To start a Karafka server process, use following CLI command:
+To start Karafka server process, use the following CLI command:
 
 ```bash
 bundle exec karafka server
 ```
 
-Use it when:
+Karafka server can be daemonized with the **--daemon** flag:
 
-* You are willing to have a next long-running process in the memory
-* You have many messages that are constantly being sent to Kafka cluster
-* You want to consume and process messages as fast as possible
-* You know your way with Capistrano and/or any other deployment tools and you are willing to integrate Karafka with it
-
-#### Karafka consumer
-
-Karafka consumer allows you to perform a single consumption from all the topics that you listen to. This method can be used both from a CLI (then it will create a short running process that will terminate once it is done):
-
-```bash
-bundle exec karafka consume
 ```
-
-or from any Ruby process (console, Rails server, rake task) that is already running:
-
-```ruby
-Karafka::Consumer.run
+bundle exec karafka server --daemon
 ```
-
-Note, that if you have many messages, this method might not consume all of them, as it is dependent on a **wait_timeout** socket setting. It will consume as much messages as it can from each of the topics in a given timeframe. That's why it is not recommended when you expect a constant stream of messages.
-
-Karafka consumer can be used even from Sidekiq as a recurring job using [Sidetiq](https://github.com/tobiassvn/sidetiq). That way you can tell Karafka to consume messages (for example) every 5 minutes. It will reuse your already loaded Sidekiq process.
-
-Here's an example Sidekiq worker job for that:
-
-```ruby
-class KarafkaConsumerWorker
-  include Sidekiq::Worker
-  def perform
-    Karafka::Consumer.run
-  end
-end
-```
-
-You can also create a Rake task to consume messages and just add it to cron:
-
-```ruby
-desc 'Does many background recurring things'
-task consumption: :environment do
-  # Other things that you want to do here...
-  Karafka::Consumer.run
-end
-```
-
-Use it when:
-
-* You don't want to have a next Ruby process running on your machines
-* You don't have a constant stream of messages
-* You don't need to process messages right after they are being sent to Kafka cluster
-* You don't want to integrate Karafka with Capistrano and/or any other deployment tools
-* You want to have everything up and running as fast as it is possible (proof of concept, demo, etc)
 
 ### Karafka controllers
 
@@ -546,9 +496,26 @@ class AppMonitor < Karafka::Monitor
 end
 ```
 
-## Concurrency
+## Deployment
 
-Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to incoming connections. Since each topic and group requires a separate connection (which means that we have a connection per controller) we do this concurrently. Each topic requires a separate connection, so for each route, you will have one additional thread running.
+Karafka is currently being used in production with following deployment methods:
+
+  - Capistrano
+  - Docker
+
+Since the only thing that is long-running is Karafka server, it should't be hard to make it work with other deployment and CD tools.
+
+### Capistrano
+
+Use the built-in Capistrano recipe for easy Karafka server start/stop and restart with deploys.
+
+In your **Capfile** file:
+
+```ruby
+require 'karafka/capistrano'
+```
+
+### Docker
 
 ## Sidekiq Web UI
 
@@ -572,6 +539,10 @@ bundle exec rackup
 ```
 
 You can then navigate to displayer url to check your Sidekiq status. Sidekiq Web UI by default is password protected. To check (or change) your login and password, please review **config.ru** file in your application.
+
+## Concurrency
+
+Karafka uses [Celluloid](https://celluloid.io/) actors to handle listening to incoming connections. Since each topic and group requires a separate connection (which means that we have a connection per controller) we do this concurrently. It means, that for each route, you will have one additional thread running.
 
 ## Integrating with other frameworks
 
@@ -628,6 +599,7 @@ After that make sure that whole your application is loaded before setting up and
 * [Envlogic](https://github.com/karafka/envlogic)
 * [Apache Kafka](http://kafka.apache.org/)
 * [Apache ZooKeeper](https://zookeeper.apache.org/)
+* [Ruby-Kafka](https://github.com/zendesk/ruby-kafka)
 
 ### Articles and references
 

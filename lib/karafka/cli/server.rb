@@ -25,6 +25,7 @@ module Karafka
           Celluloid.boot
         end
 
+        # Remove pidfile on shutdown
         ObjectSpace.define_finalizer('string', proc { send(:clean) })
 
         # After we fork, we can boot celluloid again
