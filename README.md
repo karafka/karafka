@@ -9,6 +9,7 @@ Microframework used to simplify Apache Kafka based Ruby applications development
 ## Table of Contents
 
   - [Table of Contents](#table-of-contents)
+  - [Requirements](#requirements)
   - [How does it work](#how-does-it-work)
   - [Installation](#installation)
   - [Setup](#setup)
@@ -48,6 +49,14 @@ Microframework used to simplify Apache Kafka based Ruby applications development
 ## How does it work
 
 Karafka is a microframework to work easier with Apache Kafka incoming messages.
+
+## Requirements
+
+In order to use Karafka framework, you need to have:
+
+  - Zookeeper (required by Kafka)
+  - Kafka (at least 0.9.0)
+  - Ruby (at least 2.3.0)
 
 ## Installation
 
@@ -515,7 +524,20 @@ In your **Capfile** file:
 require 'karafka/capistrano'
 ```
 
+Take a look at the [load:defaults task](https://github.com/karafka/karafka/blob/master/lib/karafka/capistrano/karafka.cap) (top of file) for options you can set. For example, to specify a different pidfile than default:
+
+```ruby
+set :karafka_pid, ->{ File.join(shared_path, 'tmp', 'pids', 'karafka0') }
+```
+
 ### Docker
+
+Karafka can be dockerized as any other Ruby/Rails app. To execute **karafka server** command in your Docker container, just put this into your Dockerfile:
+
+```bash
+ENV KARAFKA_ENV production
+CMD bundle exec karafka server
+```
 
 ## Sidekiq Web UI
 
