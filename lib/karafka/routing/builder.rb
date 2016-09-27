@@ -17,6 +17,7 @@ module Karafka
         controller
         parser
         interchanger
+        responder
       ).freeze
 
       # All those options should be set on the route level

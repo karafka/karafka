@@ -6,6 +6,7 @@ RSpec.describe Karafka::Routing::Router do
   describe '#build' do
     let(:parser) { double }
     let(:worker) { double }
+    let(:responder) { double }
     let(:controller) { double }
     let(:interchanger) { double }
     let(:controller_instance) { double }
@@ -16,6 +17,7 @@ RSpec.describe Karafka::Routing::Router do
         route.topic = topic
         route.parser = parser
         route.worker = worker
+        route.responder = responder
         route.interchanger = interchanger
       end
     end
@@ -44,6 +46,10 @@ RSpec.describe Karafka::Routing::Router do
       expect(controller_instance)
         .to receive(:worker=)
         .with(worker)
+
+      expect(controller_instance)
+        .to receive(:responder=)
+        .with(responder)
     end
 
     it 'expect to build controller with all proper options assigned' do

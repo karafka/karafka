@@ -15,6 +15,7 @@ module Karafka
           print('Worker', route.worker)
           print('Parser', route.parser)
           print('Interchanger', route.interchanger)
+          print('Responder', route.responder)
         end
       end
 

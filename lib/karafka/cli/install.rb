@@ -9,6 +9,7 @@ module Karafka
       INSTALL_DIRS = %w(
         app/models
         app/controllers
+        app/responders
         app/workers
         config
         log
@@ -21,7 +22,8 @@ module Karafka
         'config.ru.example' => 'config.ru',
         'sidekiq.yml.example' => 'config/sidekiq.yml.example',
         'application_worker.rb.example' => 'app/workers/application_worker.rb',
-        'application_controller.rb.example' => 'app/controllers/application_controller.rb'
+        'application_controller.rb.example' => 'app/controllers/application_controller.rb',
+        'application_responder.rb.example' => 'app/responders/application_responder.rb'
       }.freeze
 
       # Install all required things for Karafka application in current directory

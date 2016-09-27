@@ -13,7 +13,7 @@ module Karafka
       NAME_FORMAT = /\A(\w|\-)+\z/
 
       # Options that we can set per each route
-      attr_writer :group, :topic, :worker, :parser, :interchanger
+      attr_writer :group, :topic, :worker, :parser, :interchanger, :responder
 
       # This we can get "directly" because it does not have any details, etc
       attr_accessor :controller
@@ -27,6 +27,7 @@ module Karafka
         worker
         parser
         interchanger
+        responder
         self
       end
 
@@ -47,6 +48,12 @@ module Karafka
       # @note If not provided - will be built based on the provided controller
       def worker
         @worker ||= Karafka::Workers::Builder.new(controller).build
+      end
+
+      # @return [Class, nil] Class (not an instance) of a responder that should respond from
+      #   controller back to Kafka (usefull for piping dataflows)
+      def responder
+        @responder ||= Karafka::Responders::Builder.new(controller).build
       end
 
       # @return [Class] Parser class (not instance) that we want to use to unparse Kafka messages

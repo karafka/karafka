@@ -19,8 +19,9 @@
 - Ruby 2.2.* support dropped
 - Using App name as a Kafka client_id
 - Automatic Capistrano integration
+- Responders support for handling better responses pipelining and better responses flow description and design (see README for more details)
 
-## 0.4.2-head
+## 0.4.2
 - #87 - Reconsume mode with crone for better Rails/Rack integration
 - Moved Karafka server related stuff into separate Karafka::Server class
 - Renamed Karafka::Runner into Karafka::Fetcher
