@@ -62,7 +62,7 @@ RSpec.describe Karafka::BaseController do
         let(:responder_class) { nil }
         let(:error) { Karafka::Errors::ResponderMissing }
 
-        it { expect { subject.send(:respond_with, {}) }.to raise_error(error) }
+        it { expect { base_controller.send(:respond_with, {}) }.to raise_error(error) }
       end
 
       context 'when there is responder for a given controller' do
@@ -77,7 +77,7 @@ RSpec.describe Karafka::BaseController do
 
         it 'expect to use responder to respond with provided data' do
           expect(responder).to receive(:call).with(data)
-          subject.send(:respond_with, data)
+          base_controller.send(:respond_with, data)
         end
       end
     end

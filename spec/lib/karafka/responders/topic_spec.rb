@@ -7,11 +7,11 @@ RSpec.describe Karafka::Responders::Topic do
     context 'when name is invalid' do
       let(:name) { rand.to_f.to_s }
 
-      it { expect { subject }.to raise_error(Karafka::Errors::InvalidTopicName) }
+      it { expect { topic }.to raise_error(Karafka::Errors::InvalidTopicName) }
     end
 
     context 'when name is valid' do
-      it { expect { subject }.not_to raise_error }
+      it { expect { topic }.not_to raise_error }
     end
   end
 
@@ -19,17 +19,17 @@ RSpec.describe Karafka::Responders::Topic do
     context 'when topic is optional' do
       let(:options) { { optional: true } }
 
-      it { expect(subject.required?).to eq false }
+      it { expect(topic.required?).to eq false }
     end
 
     context 'when topic has no options (default)' do
-      it { expect(subject.required?).to eq true }
+      it { expect(topic.required?).to eq true }
     end
 
     context 'when topic is required' do
       let(:options) { { required: true } }
 
-      it { expect(subject.required?).to eq true }
+      it { expect(topic.required?).to eq true }
     end
   end
 
@@ -37,17 +37,17 @@ RSpec.describe Karafka::Responders::Topic do
     context 'when topic is for multiple usage' do
       let(:options) { { multiple_usage: true } }
 
-      it { expect(subject.multiple_usage?).to eq true }
+      it { expect(topic.multiple_usage?).to eq true }
     end
 
     context 'when topic has no options (default)' do
-      it { expect(subject.multiple_usage?).to eq false }
+      it { expect(topic.multiple_usage?).to eq false }
     end
 
     context 'when topic is not for multiple usage' do
       let(:options) { { multiple_usage: false } }
 
-      it { expect(subject.multiple_usage?).to eq false }
+      it { expect(topic.multiple_usage?).to eq false }
     end
   end
 end
