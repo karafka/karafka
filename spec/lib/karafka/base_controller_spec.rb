@@ -55,6 +55,33 @@ RSpec.describe Karafka::BaseController do
       end
     end
 
+    describe '#respond_with' do
+      before { base_controller.responder = responder_class }
+
+      context 'when there is no responder for a given controller' do
+        let(:responder_class) { nil }
+        let(:error) { Karafka::Errors::ResponderMissing }
+
+        it { expect { subject.send(:respond_with, {}) }.to raise_error(error) }
+      end
+
+      context 'when there is responder for a given controller' do
+        let(:responder_class) { Karafka::BaseResponder }
+        let(:responder) { instance_double(responder_class) }
+        let(:data) { [rand, rand] }
+
+        before do
+          expect(responder_class)
+            .to receive(:new).and_return(responder)
+        end
+
+        it 'expect to use responder to respond with provided data' do
+          expect(responder).to receive(:call).with(data)
+          subject.send(:respond_with, data)
+        end
+      end
+    end
+
     describe '#perform_async' do
       context 'when we want to perform async stuff' do
         let(:params) { double }
