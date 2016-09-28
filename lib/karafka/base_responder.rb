@@ -36,6 +36,16 @@ module Karafka
   #       end
   #     end
   #   end
+  # @example Accept multiple arguments to a respond method
+  #   class Responder < BaseResponder
+  #     topic :users_actions
+  #     topic :articles_viewed
+  #
+  #     def respond(user, article)
+  #       respond_to :users_actions, user
+  #       respond_to :articles_viewed, article
+  #     end
+  #   end
   class BaseResponder
     # Definitions of all topics that we want to be able to use in this responder should go here
     class_attribute :topics
@@ -62,8 +72,8 @@ module Karafka
     # @note We know that validators should be executed also before sending data to topics, however
     #   the implementation gets way more complicated then, that's why we check after everything
     #   was sent using responder
-    def call(data)
-      respond(data)
+    def call(*data)
+      respond(*data)
       validate!
     end
 
@@ -72,7 +82,7 @@ module Karafka
     # Method that needs to be implemented in a subclass. It should handle responding
     #   on registered topics
     # @raise [NotImplementedError] This method needs to be implemented in a subclass
-    def respond(_data)
+    def respond(*_data)
       raise NotImplementedError, 'Implement this in a subclass'
     end
 
@@ -82,6 +92,7 @@ module Karafka
     # @param data [String, Object] string or object that we want to send
     # @note Note that if we pass object here (not a string), this method will invoke a #to_json
     #   on it.
+    # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data)
       topic = topic.to_s
       @used_topics << topic

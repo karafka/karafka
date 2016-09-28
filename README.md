@@ -40,7 +40,9 @@ Karafka not only handles incoming messages but also provides tools for building 
     - [Controllers](#controllers)
         - [Controllers callbacks](#controllers-callbacks)
     - [Responders](#responders)
-    - [Workers](#workers)
+        - [Registering topics](#registering-topics)
+        - [Responding on topics](#responding-on-topics)
+        - [Response validation](#response-validation)
   - [Monitoring and logging](#monitoring-and-logging)
       - [Example monitor with Errbit/Airbrake support](#example-monitor-with-errbitairbrake-support)
       - [Example monitor with NewRelic support](#example-monitor-with-newrelic-support)
@@ -59,7 +61,7 @@ Karafka not only handles incoming messages but also provides tools for building 
 
 ## How does it work
 
-Karafka provides a higher-level abstraction than raw Kafka Ruby drivers like Kafka-Ruby and Poseidon. Instead of focusing on a single topic consumption, it provides developers with set of tools that are dedicated for bulding multi-topic applications similary to how Rails applications are being built.
+Karafka provides a higher-level abstraction than raw Kafka Ruby drivers, such as Kafka-Ruby and Poseidon. Instead of focusing on  single topic consumption, it provides developers with a set of tools that are dedicated for bulding multi-topic applications similarly to how Rails applications are being built.
 
 ## Support
 
@@ -203,7 +205,7 @@ There are also several other methods available (optional):
   - *group* - symbol/string with a group name. Groups are used to cluster applications
   - *worker* - Class name - name of a worker class that we want to use to schedule perform code
   - *parser* - Class name - name of a parser class that we want to use to parse incoming data
-  - *interchanger* - Class name - name of a interchanger class that we want to use to format data that we put/fetch into/from #perform_async
+  - *interchanger* - Class name - name of a interchanger class that we want to use to format data that we put/fetch into/from *#perform_async*
   - *responder* - Class name - name of a responder that we want to use to generate responses to other Kafka topics based on our processed data
 
 ```ruby
@@ -286,7 +288,7 @@ Keep in mind, that params might be in two states: parsed or unparsed when passed
 
  - *parser* - Class name - name of a parser class that we want to use to parse incoming data
 
-Karafka by default will parse messages with JSON parser. If you want to change this behaviour you need to set custom parser for each route. Parser needs to have a #parse method and raise error that is a ::Karafka::Errors::ParserError descendant when problem appears during parsing process.
+Karafka by default will parse messages with a JSON parser. If you want to change this behaviour you need to set custom parser for each route. Parser needs to have a #parse method and raise error that is a ::Karafka::Errors::ParserError descendant when problem appears during parsing process.
 
 ```ruby
 class XmlParser
@@ -340,7 +342,19 @@ end
 
   - *responder* - Class name - name of a responder that we want to use to generate responses to other Kafka topics based on our processed data.
 
-Responders are used to design the response that should be generated and sent to proper Kafka topics once processing is done. They allow programmers to build not only data-consuming apps but to build apps that consume data and then based on the business logic output send this processed data onwards (similary to how Bash pipelines work).
+Responders are used to design the response that should be generated and sent to proper Kafka topics, once processing is done. It allows programmers to build not only data-consuming apps, but to build apps that consume data and, then, based on the business logic output send this processed data onwards (similary to how Bash pipelines work).
+
+```ruby
+class Responder < ApplicationResponder
+  topic :users_created
+  topic :profiles_created
+
+  def respond(user, profile)
+    respond_to :users_created, user
+    respond_to :profiles_created, profile
+  end
+end
+```
 
 For more details about responders, please go to the [using responders](#using-responders) section.
 
@@ -389,7 +403,7 @@ Each of them has it's own advantages and disadvantages and it strongly depends o
 
 #### Using responders (recommended)
 
-One of the main differences when you respond to a Kafka message instead of a HTTP response, is that the response can be sent to many topics (instead of one HTTP response per one request). That's why a simple **respond_to** would not be enough.
+One of the main differences when you respond to a Kafka message instead of a HTTP response, is that the response can be sent to many topics (instead of one HTTP response per one request) and that the data that is being sent can be different for different topics. That's why a simple **respond_to** would not be enough.
 
 In order to go beyond this limitation, Karafka uses responder objects that are responsible for sending data to other Kafka topics.
 
@@ -399,6 +413,8 @@ By default, if you name a responder with the same name as a controller, it will 
 module Users
   class CreateController < ApplicationController
     def perform
+      # You can provide as many objects as you want to respond_with as long as a responders
+      # #respond method accepts the same amount
       respond_with User.create(params[:user])
     end
   end
@@ -415,7 +431,7 @@ end
 
 Appropriate responder will be used automatically when you invoke the **respond_with** controller method.
 
-Why did we separate response layer from the controller layer? Because sometimes when you respond to multiple topics conditionally, that logic can be really complex and it is way better to manage and test in in isolation.
+Why did we separate response layer from the controller layer? Because sometimes when you respond to multiple topics conditionally, that logic can be really complex and it is way better to manage and test it in isolation.
 
 For more details about responders DSL, please visit the [responders](#responders) section.
 
@@ -504,11 +520,80 @@ end
 
 ### Responders
 
-Work in progress
+Responders are used to design and control response flow that comes from a single controller action. You might be familiar with a #respond_with Rails controller method. In Karafka it is an entrypoint to a responder *#respond*.
 
-### Workers
+Having a responders layer helps you prevent bugs when you design a receive-respond applications that handle multiple incoming and outgoing topics. Responders also provide a security layer that allows you to control that the flow is as you intended. It will raise an exception if you didn't respond to all the topics that you wanted to respond to.
 
-Work in progress
+Here's a simple responder example:
+
+```ruby
+class ExampleResponder < ApplicationResponder
+  topic :users_notified
+
+  def respond(user)
+    respond_to :users_notified, user
+  end
+end
+```
+
+Note: You can use responders outside of controllers scope, however it is not recommended because then, they won't be listed when executing **karafka flow** command.
+
+#### Registering topics
+
+In order to maintain order in topics organization, before you can send data to a given topic, you need to register it. To do that, just execute *#topic* method with a topic name and optional settings during responder initialization:
+
+```ruby
+class ExampleResponder < ApplicationResponder
+  topic :regular_topic
+  topic :optional_topic, required: false
+  topic :multiple_use_topic, multiple_usage: true
+end
+```
+
+*#topic* method accepts following settings:
+
+| Option         | Type    | Default | Description                                                                                                |
+|----------------|---------|---------|------------------------------------------------------------------------------------------------------------|
+| required       | Boolean | true    | Should we raise an error when a topic was not used (if required)                                           |
+| multiple_usage | Boolean | false   | Should we raise an error when during a single response flow we sent more than one message to a given topic |
+
+#### Responding on topics
+
+When you receive a single HTTP request, you generate a single HTTP response. This logic does not apply to Karafka. You can respond on as many topics as you want (or on none).
+
+To handle responding, you need to define *#respond* instance method. This method should accept the same amount of arguments passed into *#respond_with* method.
+
+In order to send a message to a given topic, you have to use *#respond_to* method that accepts two arguments:
+
+  - topic name (Symbol)
+  - data you want to send (if data is not string, responder will try to run #to_json method on the incoming data)
+
+```ruby
+# respond_with user, profile
+
+class ExampleResponder < ApplicationResponder
+  topic :regular_topic
+  topic :optional_topic, required: false
+
+  def respond(user, profile)
+    respond_to :regular_topic, user
+
+    if user.registered?
+      respond_to :optional_topic, profile
+    end
+  end
+end
+```
+
+#### Response validation
+
+In order to ensure the dataflow is as intended, responder will validate what and where was sent, making sure that:
+
+  - Only topics that were registered were used (no typos, etc)
+  - Only a single message was sent to a topic that was registered without a **multiple_usage** flag
+  - Any topic that was registered with **required** flag (default behavior) has been used
+
+This is an automatic process and does not require any triggers.
 
 ## Monitoring and logging
 

@@ -137,9 +137,9 @@ module Karafka
     #   Kafka responding
     # @raise [Karafka::Errors::ResponderMissing] raised when we don't have a responder defined,
     #   but we still try to use this method
-    def respond_with(data)
+    def respond_with(*data)
       raise(Errors::ResponderMissing, self.class) unless responder
-      responder.new.call(data)
+      responder.new.call(*data)
     end
 
     # Enqueues the execution of perform method into a worker.
