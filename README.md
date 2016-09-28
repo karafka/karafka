@@ -168,6 +168,7 @@ Karafka has a simple CLI built in. It provides following commands:
 |----------------|---------------------------------------------------------------------------|
 | help [COMMAND] | Describe available commands or one specific command                       |
 | console        | Start the Karafka console (short-cut alias: "c")                          |
+| flow           | Print application data flow (incoming => outgoing)                        |
 | info           | Print configuration details and other options of your application         |
 | install        | Installs all required things for Karafka application in current directory |
 | routes         | Print out all defined routes in alphabetical order                        |
@@ -536,7 +537,7 @@ class ExampleResponder < ApplicationResponder
 end
 ```
 
-Note: You can use responders outside of controllers scope, however it is not recommended because then, they won't be listed when executing **karafka flow** command.
+Note: You can use responders outside of controllers scope, however it is not recommended because then, they won't be listed when executing **karafka flow** CLI command.
 
 #### Registering topics
 

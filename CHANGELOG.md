@@ -21,6 +21,8 @@
 - Automatic Capistrano integration
 - Responders support for handling better responses pipelining and better responses flow description and design (see README for more details)
 - Gem dump
+- Readme updates
+- karafka flow CLI command for printing the application flow
 
 ## 0.4.2
 - #87 - Reconsume mode with crone for better Rails/Rack integration
