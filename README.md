@@ -4,17 +4,21 @@
 [![Code Climate](https://codeclimate.com/github/karafka/karafka/badges/gpa.svg)](https://codeclimate.com/github/karafka/karafka)
 [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Microframework used to simplify Apache Kafka based Ruby applications development.
+Framework used to simplify Apache Kafka based Ruby applications development.
+
+It allows programmers to use approach similar to "the Rails way" when working with asynchronous Kafka messages.
+
+Karafka not only handles incoming messages but also provides tools for building complex data-flow applications that receive and send messages.
 
 ## Table of Contents
 
   - [Table of Contents](#table-of-contents)
+  - [Support](#support)
   - [Requirements](#requirements)
   - [How does it work](#how-does-it-work)
   - [Installation](#installation)
   - [Setup](#setup)
     - [Application](#application)
-    - [WaterDrop](#waterdrop)
     - [Configurators](#configurators)
     - [Environment variables settings](#environment-variables-settings)
     - [Kafka brokers auto-discovery](#kafka-brokers-auto-discovery)
@@ -26,29 +30,40 @@ Microframework used to simplify Apache Kafka based Ruby applications development
         - [Worker](#worker)
         - [Parser](#parser)
         - [Interchanger](#interchanger)
+        - [Responder](#responder)
     - [Receiving messages](#receiving-messages)
-    - [Karafka controllers](#karafka-controllers)
-      - [Controllers callbacks](#controllers-callbacks)
+        - [Processing messages directly (without Sidekiq)](#processing-messages-directly-without-sidekiq)
     - [Sending messages from Karafka](#sending-messages-from-karafka)
-    - [Monitoring and logging](#monitoring-and-logging)
+        - [Using responders (recommended)](#using-responders-recommended)
+        - [Using WaterDrop directly](#using-waterdrop-directly)
+  - [Important components](#important-components)
+    - [Controllers](#controllers)
+        - [Controllers callbacks](#controllers-callbacks)
+    - [Responders](#responders)
+    - [Workers](#workers)
+  - [Monitoring and logging](#monitoring-and-logging)
       - [Example monitor with Errbit/Airbrake support](#example-monitor-with-errbitairbrake-support)
       - [Example monitor with NewRelic support](#example-monitor-with-newrelic-support)
   - [Deployment](#deployment)
-    - [Capistrano](#capistrano)
-    - [Docker](#docker)
+      - [Capistrano](#capistrano)
+      - [Docker](#docker)
   - [Sidekiq Web UI](#sidekiq-web-ui)
   - [Concurrency](#concurrency)
   - [Integrating with other frameworks](#integrating-with-other-frameworks)
-    - [Integrating with Ruby on Rails](#integrating-with-ruby-on-rails)
-    - [Integrating with Sinatra](#integrating-with-sinatra)
+      - [Integrating with Ruby on Rails](#integrating-with-ruby-on-rails)
+      - [Integrating with Sinatra](#integrating-with-sinatra)
   - [Articles and other references](#articles-and-other-references)
-    - [Libraries and components](#libraries-and-components)
-    - [Articles and references](#articles-and-references)
+      - [Libraries and components](#libraries-and-components)
+      - [Articles and references](#articles-and-references)
   - [Note on Patches/Pull Requests](#note-on-patchespull-requests)
 
 ## How does it work
 
-Karafka is a microframework to work easier with Apache Kafka incoming messages.
+Karafka provides a higher-level abstraction than raw Kafka Ruby drivers like Kafka-Ruby and Poseidon. Instead of focusing on a single topic consumption, it provides developers with set of tools that are dedicated for bulding multi-topic applications similary to how Rails applications are being built.
+
+## Support
+
+If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
 
 ## Requirements
 
@@ -94,7 +109,7 @@ Karafka has following configuration options:
 | redis                  | true     | Hash              | Hash with Redis configuration options                                                       |
 | monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                             |
 | logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                                               |
-| kafka.hosts            | false    | Array<String>     | Kafka server hosts - if not provided Karafka will autodiscover them based on Zookeeper data |
+| kafka.hosts            | false    | Array<String>     | Kafka server hosts. If 1 provided, Karafka will discover cluster structure automatically    |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
 
@@ -112,10 +127,6 @@ end
 ```
 
 Note: You can use any library like [Settingslogic](https://github.com/binarylogic/settingslogic) to handle your application configuration.
-
-### WaterDrop
-
-Karafka contains WaterDrop gem which is used to send messages to Kafka. It is autoconfigured based on the Karafka config.
 
 ### Configurators
 
@@ -193,6 +204,7 @@ There are also several other methods available (optional):
   - *worker* - Class name - name of a worker class that we want to use to schedule perform code
   - *parser* - Class name - name of a parser class that we want to use to parse incoming data
   - *interchanger* - Class name - name of a interchanger class that we want to use to format data that we put/fetch into/from #perform_async
+  - *responder* - Class name - name of a responder that we want to use to generate responses to other Kafka topics based on our processed data
 
 ```ruby
 App.routes.draw do
@@ -202,6 +214,7 @@ App.routes.draw do
     worker Workers::DetailsWorker
     parser Parsers::BinaryToJson
     interchanger Interchangers::Binary
+    responder BinaryVideoProcessingResponder
   end
 
   topic :new_videos do
@@ -323,6 +336,14 @@ end
   end
 ```
 
+##### Responder
+
+  - *responder* - Class name - name of a responder that we want to use to generate responses to other Kafka topics based on our processed data.
+
+Responders are used to design the response that should be generated and sent to proper Kafka topics once processing is done. They allow programmers to build not only data-consuming apps but to build apps that consume data and then based on the business logic output send this processed data onwards (similary to how Bash pipelines work).
+
+For more details about responders, please go to the [using responders](#using-responders) section.
+
 ### Receiving messages
 
 Karafka framework has a long running server process that is responsible for receiving messages.
@@ -339,7 +360,91 @@ Karafka server can be daemonized with the **--daemon** flag:
 bundle exec karafka server --daemon
 ```
 
-### Karafka controllers
+#### Processing messages directly (without Sidekiq)
+
+If you don't want to use Sidekiq for processing and you would rather process messages directly in the main Karafka server process, you can do that using the *before_enqueue* callback inside of controller:
+
+```ruby
+class UsersController < ApplicationController
+  before_enqueue :perform_directly
+
+  # By throwing abort signal, Karafka will not schedule a background #perform task.
+  def perform_directly
+    User.create(params[:user])
+    throw(:abort)
+  end
+end
+```
+
+Note: it can slow Karafka significantly if you do heavy stuff that way.
+
+### Sending messages from Karafka
+
+It's quite common when using Kafka, to treat applications as parts of a bigger pipeline (similary to Bash pipeline) and forward processing results to other applications. Karafka provides two ways of dealing with that:
+
+  - Using responders
+  - Using Waterdrop directly
+
+Each of them has it's own advantages and disadvantages and it strongly depends on your application business logic which one will be better. The recommended (and way more elegant) way is to use responders for that.
+
+#### Using responders (recommended)
+
+One of the main differences when you respond to a Kafka message instead of a HTTP response, is that the response can be sent to many topics (instead of one HTTP response per one request). That's why a simple **respond_to** would not be enough.
+
+In order to go beyond this limitation, Karafka uses responder objects that are responsible for sending data to other Kafka topics.
+
+By default, if you name a responder with the same name as a controller, it will be detected automatically:
+
+```ruby
+module Users
+  class CreateController < ApplicationController
+    def perform
+      respond_with User.create(params[:user])
+    end
+  end
+
+  class CreateResponder < ApplicationResponder
+    topic :user_created
+
+    def respond(user)
+      respond_to :user_created, user
+    end
+  end
+end
+```
+
+Appropriate responder will be used automatically when you invoke the **respond_with** controller method.
+
+Why did we separate response layer from the controller layer? Because sometimes when you respond to multiple topics conditionally, that logic can be really complex and it is way better to manage and test in in isolation.
+
+For more details about responders DSL, please visit the [responders](#responders) section.
+
+#### Using WaterDrop directly
+
+It is not recommended (as it breaks responders validations and makes it harder to track data flow), but if you want to send messages outside of Karafka responders, you can to use **waterdrop** gem directly.
+
+Example usage:
+
+```ruby
+message = WaterDrop::Message.new('topic', 'message')
+message.send!
+
+message = WaterDrop::Message.new('topic', { user_id: 1 }.to_json)
+message.send!
+```
+
+Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to use it.
+
+
+## Important components
+
+Apart from the internal implementation, Karafka is combined from the following components  programmers mostly will work with:
+
+  - Controllers - objects that are responsible for processing incoming messages (similar to Rails controllers)
+  - Responders - objects that are responsible for sending responses based on the processed data
+  - Workers - objects that execute data processing using Sidekiq backend
+
+### Controllers
 
 Controllers should inherit from **ApplicationController** (or any other controller that inherits from **Karafka::BaseController**). If you don't want to use custom workers (and except some particular cases you don't need to), you need to define a **#perform** method that will execute your business logic code in background.
 
@@ -397,23 +502,15 @@ Presented example controller will accept incoming messages from a Kafka topic na
 end
 ```
 
-### Sending messages from Karafka
+### Responders
 
-If you want send messages from karafka you need to use **waterdrop** gem.
+Work in progress
 
-Example usage:
+### Workers
 
-```ruby
-message = WaterDrop::Message.new('topic', 'message')
-message.send!
+Work in progress
 
-message = WaterDrop::Message.new('topic', { user_id: 1 }.to_json)
-message.send!
-```
-
-Please follow [WaterDrop README](https://github.com/karafka/waterdrop/blob/master/README.md) for more details on how to use it.
-
-### Monitoring and logging
+## Monitoring and logging
 
 Karafka provides a simple monitor (Karafka::Monitor) with a really small API. You can use it to develop your own monitoring system (using for example NewRelic). By default, the only thing that is hooked up to this monitoring is a Karafka logger (Karafka::Logger). It is based on a standard [Ruby logger](http://ruby-doc.org/stdlib-2.2.3/libdoc/logger/rdoc/Logger.html).
 
@@ -431,7 +528,7 @@ end
 
 Keep in mind, that if you replace monitor with a custom one, you will have to implement logging as well. It is because monitoring is used for both monitoring and logging and a default monitor handles logging as well.
 
-#### Example monitor with Errbit/Airbrake support
+### Example monitor with Errbit/Airbrake support
 
 Here's a simple example of monitor that is used to handle errors logging into Airbrake/Errbit.
 
@@ -444,7 +541,7 @@ class AppMonitor < Karafka::Monitor
 end
 ```
 
-#### Example monitor with NewRelic support
+### Example monitor with NewRelic support
 
 Here's a simple example of monitor that is used to handle events and errors logging into NewRelic. It will send metrics with information about amount of processed messages per topic and how many of them were scheduled to be performed async.
 
