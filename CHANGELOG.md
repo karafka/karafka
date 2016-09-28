@@ -20,6 +20,7 @@
 - Using App name as a Kafka client_id
 - Automatic Capistrano integration
 - Responders support for handling better responses pipelining and better responses flow description and design (see README for more details)
+- Gem dump
 
 ## 0.4.2
 - #87 - Reconsume mode with crone for better Rails/Rack integration

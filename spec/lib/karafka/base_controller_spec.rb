@@ -10,6 +10,17 @@ RSpec.describe Karafka::BaseController do
   context 'instance methods and behaviours' do
     subject(:base_controller) { working_class.new }
 
+    describe '#perform' do
+      context 'when perform method is defined' do
+        it { expect { base_controller.perform }.not_to raise_error }
+      end
+
+      context 'when perform method is not defined' do
+        let(:working_class) { ClassBuilder.inherit(described_class) }
+        it { expect { base_controller.perform }.to raise_error NotImplementedError }
+      end
+    end
+
     describe '#schedule' do
       context 'when there are no callbacks' do
         it 'just schedules via perform_async' do

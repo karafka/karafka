@@ -58,12 +58,23 @@ module Karafka
     end
 
     # Performs respond and validates that all the response requirement were met
+    # @param data Anything that we want to respond with
+    # @note We know that validators should be executed also before sending data to topics, however
+    #   the implementation gets way more complicated then, that's why we check after everything
+    #   was sent using responder
     def call(data)
       respond(data)
       validate!
     end
 
     private
+
+    # Method that needs to be implemented in a subclass. It should handle responding
+    #   on registered topics
+    # @raise [NotImplementedError] This method needs to be implemented in a subclass
+    def respond(_data)
+      raise NotImplementedError, 'Implement this in a subclass'
+    end
 
     # This method allow us to respond to a single topic with a given data. It can be used
     # as many times as we need. Especially when we have 1:n flow
@@ -75,8 +86,10 @@ module Karafka
       topic = topic.to_s
       @used_topics << topic
 
-      data = data.to_json unless data.is_a?(String)
-      ::WaterDrop::Message.new(topic, data).send!
+      ::WaterDrop::Message.new(
+        topic,
+        data.is_a?(String) ? data : data.to_json
+      ).send!
     end
 
     # Checks if we met all the topics requirements. It will fail if we didn't send a message to
