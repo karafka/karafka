@@ -139,6 +139,8 @@ module Karafka
     #   but we still try to use this method
     def respond_with(*data)
       raise(Errors::ResponderMissing, self.class) unless responder
+
+      Karafka.monitor.notice(self.class, data: data)
       responder.new.call(*data)
     end
 

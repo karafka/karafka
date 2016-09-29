@@ -94,6 +94,8 @@ module Karafka
     #   on it.
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data)
+      Karafka.monitor.notice(self.class, topic: topic, data: data)
+
       topic = topic.to_s
       @used_topics << topic
 
