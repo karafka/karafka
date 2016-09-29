@@ -22,12 +22,11 @@ module Karafka
       # @return [Class] Responder class (not an instance)
       # @return [nil] or nil if there's no matching responding class
       def build
-        class_name = @controller_class.to_s.gsub('Controller', 'Responder')
-        ::Object.const_defined?(class_name) ? class_name.constantize : nil
-      # For anonymous controllers we need to catch error, since there can't even be a constant
-      # with a name based on a anonymous class
-      rescue NameError
-        return nil
+        Helpers::ClassMatcher.new(
+          @controller_class,
+          from: 'Controller',
+          to: 'Responder'
+        ).match
       end
     end
   end

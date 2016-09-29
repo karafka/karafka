@@ -6,10 +6,6 @@ module Karafka
     # This is used as a building layer between controllers and workers. it will be only used
     # when user does not provide his own worker that should perform controller stuff
     class Builder
-      # Regexp used to remove any non classy like characters that might be in the controller
-      # class name (if defined dynamically, etc)
-      CONSTANT_REGEXP = %r{[?!=+\-\*/\^\|&\[\]<>%~\#\:]}
-
       # @param controller_class [Karafka::BaseController] descendant of Karafka::BaseController
       # @example Create a worker builder
       #   Karafka::Workers::Builder.new(SuperController)
@@ -24,39 +20,12 @@ module Karafka
       # @example Controller: Videos::NewVideosController
       #   build #=> Videos::NewVideosWorker
       def build
-        return self.class.const_get(name) if self.class.const_defined?(name)
-
+        return matcher.match if matcher.match
         klass = Class.new(base)
-
-        scope.const_set(name, klass)
+        matcher.scope.const_set(matcher.name, klass)
       end
 
       private
-
-      # @return [Class, Module] scope to which we want to assign a built worker class
-      # @note If there is no scope, we should attach directly to Object
-      # @example Controller name not namespaced: 'SuperController'
-      #   scope #=> Object
-      # @example Controller name namespace: 'Videos::NewVideosController'
-      #   scope #=> Videos
-      def scope
-        enclosing = @controller_class.to_s.to_s.split('::')[0...-1]
-        return Object if enclosing.empty?
-        Object.const_get(enclosing.join('::'))
-      end
-
-      # @return [String] stringified theoretical worker class name
-      # @note It will return only controller name, without
-      # @example Controller name: 'SuperController'
-      #   name #=> 'SuperWorker'
-      # @example Controller name: 'Videos::NewVideosController'
-      #   name #=> 'NewVideosWorker'
-      def name
-        base = @controller_class.to_s.split('::').last
-        base.gsub!('Controller', 'Worker')
-        base.gsub!(CONSTANT_REGEXP, '')
-        base
-      end
 
       # @return [Class] descendant of Karafka::BaseWorker from which all other workers
       #   should inherit
@@ -64,6 +33,16 @@ module Karafka
       #   direct Karafka::BaseWorker descendant from which it could build workers
       def base
         Karafka::BaseWorker.subclasses.first || raise(Errors::BaseWorkerDescentantMissing)
+      end
+
+      # @return [Karafka::Helpers::ClassMatcher] matcher instance for matching between controller
+      #   and appropriate worker
+      def matcher
+        @matcher ||= Helpers::ClassMatcher.new(
+          @controller_class,
+          from: 'Controller',
+          to: 'Worker'
+        )
       end
     end
   end

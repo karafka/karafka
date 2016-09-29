@@ -10,14 +10,16 @@ RSpec.describe Karafka::Responders::Builder do
 
     context 'named controller' do
       context 'matching responder exists' do
-        let(:responder_class) { class MatchingResponder; end }
-        let(:controller_class) { class MatchingController; end }
+        let(:responder_class) { class MatchingResponder; self end }
+        let(:controller_class) { class MatchingController; self end }
+
+        before { responder_class }
 
         it { expect(builder.build).to eq responder_class }
       end
 
       context 'no matching responder' do
-        let(:controller_class) { class Matching2Controller; end }
+        let(:controller_class) { class Matching2Controller; self end }
 
         it { expect(builder.build).to eq nil }
       end
