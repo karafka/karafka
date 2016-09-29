@@ -13,6 +13,7 @@ module Karafka
       app/decorators
       app/models/concerns
       app/models
+      app/responders
       app/services
       app/presenters
       app/workers
