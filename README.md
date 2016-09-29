@@ -61,7 +61,7 @@ Karafka not only handles incoming messages but also provides tools for building 
 
 ## How does it work
 
-Karafka provides a higher-level abstraction than raw Kafka Ruby drivers, such as Kafka-Ruby and Poseidon. Instead of focusing on  single topic consumption, it provides developers with a set of tools that are dedicated for bulding multi-topic applications similarly to how Rails applications are being built.
+Karafka provides a higher-level abstraction than raw Kafka Ruby drivers, such as Kafka-Ruby and Poseidon. Instead of focusing on  single topic consumption, it provides developers with a set of tools that are dedicated for building multi-topic applications similarly to how Rails applications are being built.
 
 ## Support
 
