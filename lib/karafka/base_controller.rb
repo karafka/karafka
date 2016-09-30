@@ -107,7 +107,7 @@ module Karafka
       @params
     end
 
-    # Method that will perfor business logic on data received from Kafka
+    # Method that will perform business logic on data received from Kafka
     # @note This method needs bo be implemented in a subclass. We stub it here as a failover if
     #   someone forgets about it or makes on with typo
     def perform

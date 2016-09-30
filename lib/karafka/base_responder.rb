@@ -36,6 +36,7 @@ module Karafka
   #       end
   #     end
   #   end
+  #
   # @example Accept multiple arguments to a respond method
   #   class Responder < BaseResponder
   #     topic :users_actions
