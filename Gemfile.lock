@@ -2,16 +2,16 @@ PATH
   remote: .
   specs:
     karafka (0.5.0)
-      activesupport
-      celluloid (>= 0.17)
-      dry-configurable
-      envlogic
-      rake
+      activesupport (~> 5.0)
+      celluloid (~> 0.17)
+      dry-configurable (~> 0.1.7)
+      envlogic (~> 1.0)
+      rake (~> 11.3)
       ruby-kafka (= 0.3.15)
-      sidekiq
-      thor
-      waterdrop
-      worker-glass
+      sidekiq (~> 4.2)
+      thor (~> 0.19)
+      waterdrop (~> 0.3)
+      worker-glass (~> 0.2)
 
 GEM
   remote: https://rubygems.org/
@@ -207,7 +207,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler
+  bundler (~> 1.2)
   karafka!
   polishgeeks-dev-tools
   timecop
