@@ -13,13 +13,13 @@ class App < Karafka::App
     config.redis = {
       url: 'redis://localhost:6379'
     }
+  end
 
-    routes.draw do
-      # topic :example do
-      #   controller ExampleController
-      #   interchanger CustomInterchanger
-      # end
-    end
+  routes.draw do
+    # topic :example do
+    #   controller ExampleController
+    #   interchanger CustomInterchanger
+    # end
   end
 end
 
