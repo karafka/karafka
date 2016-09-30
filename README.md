@@ -91,7 +91,7 @@ Create a **Gemfile** with Karafka:
 ```ruby
 source 'https://rubygems.org'
 
-gem 'karafka', github: 'karafka/karafka'
+gem 'karafka'
 ```
 
 and run Karafka install CLI task:
@@ -758,7 +758,7 @@ Want to use Karafka with Ruby on Rails or Sinatra? It can be done!
 Add Karafka to your Ruby on Rails application Gemfile:
 
 ```ruby
-gem 'karafka', github: 'karafka/karafka'
+gem 'karafka'
 ```
 
 Copy the **app.rb** file from your Karafka application into your Rails app (if you don't have this file, just create an empty Karafka app and copy it). This file is responsible for booting up Karafka framework. To make it work with Ruby on Rails, you need to load whole Rails application in this file. To do so, replace:
@@ -789,7 +789,7 @@ Sinatra applications differ from one another. There are single file applications
 Add Karafka to your Sinatra application Gemfile:
 
 ```ruby
-gem 'karafka', github: 'karafka/karafka'
+gem 'karafka'
 ```
 
 After that make sure that whole your application is loaded before setting up and booting Karafka (see Ruby on Rails integration for more details about that).
