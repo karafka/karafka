@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (0.5.0.pre.beta)
+    karafka (0.5.0)
       activesupport
       celluloid (>= 0.17)
       dry-configurable
