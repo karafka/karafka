@@ -808,6 +808,7 @@ After that make sure that whole your application is loaded before setting up and
 
 ### Articles and references
 
+* [Karafka (Ruby + Kafka framework) 0.5.0 release details](http://dev.mensfeld.pl/2016/09/karafka-ruby-kafka-framework-0-5-0-release-details/)
 * [Karafka – Ruby micro-framework for building Apache Kafka message-based applications](http://dev.mensfeld.pl/2015/08/karafka-ruby-micro-framework-for-building-apache-kafka-message-based-applications/)
 * [Benchmarking Karafka – how does it handle multiple TCP connections](http://dev.mensfeld.pl/2015/11/benchmarking-karafka-how-does-it-handle-multiple-tcp-connections/)
 * [Karafka – Ruby framework for building Kafka message based applications (presentation)](http://mensfeld.github.io/karafka-framework-introduction/)
