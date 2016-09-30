@@ -3,15 +3,17 @@ module Karafka
   class Cli
     # Install Karafka Cli action
     class Install < Base
-      self.desc = 'Install all required things for Karafka application in current directory'
+      desc 'Install all required things for Karafka application in current directory'
 
       # Directories created by default
       INSTALL_DIRS = %w(
         app/models
         app/controllers
+        app/responders
         app/workers
         config
         log
+        tmp/pids
       ).freeze
 
       # Where should we map proper files from templates
@@ -20,7 +22,8 @@ module Karafka
         'config.ru.example' => 'config.ru',
         'sidekiq.yml.example' => 'config/sidekiq.yml.example',
         'application_worker.rb.example' => 'app/workers/application_worker.rb',
-        'application_controller.rb.example' => 'app/controllers/application_controller.rb'
+        'application_controller.rb.example' => 'app/controllers/application_controller.rb',
+        'application_responder.rb.example' => 'app/responders/application_responder.rb'
       }.freeze
 
       # Install all required things for Karafka application in current directory

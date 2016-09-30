@@ -1,14 +1,7 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Setup::Config do
   subject(:config_class) { described_class }
 
   describe '#setup' do
-    before do
-      expect(config_class)
-        .to receive(:setup_components)
-    end
-
     it { expect { |block| config_class.setup(&block) }.to yield_with_args }
   end
 

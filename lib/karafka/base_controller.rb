@@ -64,7 +64,7 @@ module Karafka
 
     # This will be set based on routing settings
     # From 0.4 a single controller can handle multiple topics jobs
-    attr_accessor :group, :topic, :worker, :parser, :interchanger
+    attr_accessor :group, :topic, :worker, :parser, :interchanger, :responder
 
     class << self
       # Creates a callback that will be executed before scheduling to Sidekiq
@@ -107,6 +107,13 @@ module Karafka
       @params
     end
 
+    # Method that will perform business logic on data received from Kafka
+    # @note This method needs bo be implemented in a subclass. We stub it here as a failover if
+    #   someone forgets about it or makes on with typo
+    def perform
+      raise NotImplementedError, 'Implement this in a subclass'
+    end
+
     private
 
     # @return [Karafka::Params::Params] Karafka params that is a hash with indifferent access
@@ -122,6 +129,19 @@ module Karafka
     #   to get access without parsing, please access @params directly
     def params
       @params.retrieve
+    end
+
+    # Responds with given data using given responder. This allows us to have a similar way of
+    # defining flows like synchronous protocols
+    # @param data Anything we want to pass to responder based on which we want to trigger further
+    #   Kafka responding
+    # @raise [Karafka::Errors::ResponderMissing] raised when we don't have a responder defined,
+    #   but we still try to use this method
+    def respond_with(*data)
+      raise(Errors::ResponderMissing, self.class) unless responder
+
+      Karafka.monitor.notice(self.class, data: data)
+      responder.new.call(*data)
     end
 
     # Enqueues the execution of perform method into a worker.

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::BaseController do
   let(:working_class) do
     ClassBuilder.inherit(described_class) do
@@ -11,6 +9,17 @@ RSpec.describe Karafka::BaseController do
 
   context 'instance methods and behaviours' do
     subject(:base_controller) { working_class.new }
+
+    describe '#perform' do
+      context 'when perform method is defined' do
+        it { expect { base_controller.perform }.not_to raise_error }
+      end
+
+      context 'when perform method is not defined' do
+        let(:working_class) { ClassBuilder.inherit(described_class) }
+        it { expect { base_controller.perform }.to raise_error NotImplementedError }
+      end
+    end
 
     describe '#schedule' do
       context 'when there are no callbacks' do
@@ -54,6 +63,33 @@ RSpec.describe Karafka::BaseController do
           .and_return(params)
 
         expect(base_controller.send(:params)).to eq params
+      end
+    end
+
+    describe '#respond_with' do
+      before { base_controller.responder = responder_class }
+
+      context 'when there is no responder for a given controller' do
+        let(:responder_class) { nil }
+        let(:error) { Karafka::Errors::ResponderMissing }
+
+        it { expect { base_controller.send(:respond_with, {}) }.to raise_error(error) }
+      end
+
+      context 'when there is responder for a given controller' do
+        let(:responder_class) { Karafka::BaseResponder }
+        let(:responder) { instance_double(responder_class) }
+        let(:data) { [rand, rand] }
+
+        before do
+          expect(responder_class)
+            .to receive(:new).and_return(responder)
+        end
+
+        it 'expect to use responder to respond with provided data' do
+          expect(responder).to receive(:call).with(data)
+          base_controller.send(:respond_with, data)
+        end
       end
     end
 

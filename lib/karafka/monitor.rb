@@ -13,8 +13,8 @@ module Karafka
     # This method is executed in many important places in the code (during data flow), like
     # the moment before #perform_async, etc. For full list just grep for 'monitor.notice'
     # @param caller_class [Class] class of object that executed this call
-    # @param options [Hash] hash with options that we passed to notice. It differs depent of who
-    #   and when is calling
+    # @param options [Hash] hash with options that we passed to notice. It differs based
+    #   on of who and when is calling
     # @note We don't provide a name of method in which this was called, because we can take
     #   it directly from Ruby (see #caller_label method of this class for more details)
     # @example Notice about consuming with controller_class
@@ -53,7 +53,6 @@ module Karafka
     def caller_exceptions_map
       @caller_exceptions_map ||= {
         error: [
-          Karafka::Connection::ActorCluster,
           Karafka::Connection::Consumer,
           Karafka::Connection::Listener,
           Karafka::Params::Params

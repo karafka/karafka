@@ -1,4 +1,5 @@
-require 'spec_helper'
+module TestModule
+end
 
 RSpec.describe Karafka::Workers::Builder do
   subject(:builder) { described_class.new(controller_class) }
@@ -20,118 +21,82 @@ RSpec.describe Karafka::Workers::Builder do
     end
 
     context 'when the worker class already exists' do
-      let(:name) { 'Karafka' }
+      before { worker_class }
 
-      before do
-        expect(builder)
-          .to receive(:name)
-          .and_return(name)
-          .exactly(2).times
-      end
-
-      it 'does not build it again' do
-        expect(builder.build).to eq Karafka
-      end
-    end
-
-    context 'when a given worker does not exist' do
-      context 'when the worker class does not exist' do
-        context 'and it is on a root level' do
-          let(:random) { rand(1000) }
-          let(:name) { "Karafka#{random}Worker" }
-
-          before do
-            expect(builder)
-              .to receive(:name)
-              .and_return(name)
-              .exactly(2).times
-          end
-
-          it 'builds it' do
-            expect(builder.build.to_s).to eq "Karafka#{random}Worker"
+      context 'and it is on a root level' do
+        let(:controller_class) do
+          class SuperController
+            self
           end
         end
 
-        context 'and it is in a module/class' do
-          let(:random) { rand(1000) }
-          let(:name) { "Karafka#{random}Worker" }
-
-          before do
-            expect(builder)
-              .to receive(:name)
-              .and_return(name)
-              .exactly(2).times
-
-            expect(builder)
-              .to receive(:scope)
-              .and_return(Karafka)
-          end
-
-          it 'builds it in this scope' do
-            expect(builder.build.to_s).to eq "Karafka::Karafka#{random}Worker"
+        let(:worker_class) do
+          class SuperWorker
+            self
           end
         end
+
+        it { expect(builder.build).to eq worker_class }
+      end
+
+      context 'and it is in a module/class' do
+        let(:controller_class) do
+          module TestModule
+            class SuperController
+              self
+            end
+          end
+        end
+
+        let(:worker_class) do
+          module TestModule
+            class SuperWorker
+              self
+            end
+          end
+        end
+
+        it { expect(builder.build).to eq worker_class }
+      end
+
+      context 'and it is anonymous' do
+        let(:controller_class) { Class.new }
+        let(:worker_class) { nil }
+
+        it { expect(builder.build).to be < Karafka::BaseWorker }
       end
     end
-  end
 
-  describe '#name' do
-    before do
-      builder.instance_variable_set('@controller_class', controller_class)
-    end
+    context 'when a given worker class does not exist' do
+      context 'and it is on a root level' do
+        let(:controller_class) do
+          class SuperSadController
+            self
+          end
+        end
 
-    context 'when this is a non namespaced typical controller_class' do
-      let(:controller_class) { 'TypicalController' }
+        it 'expect to build it' do
+          expect(builder.build.to_s).to eq 'SuperSadWorker'
+        end
 
-      it { expect(builder.send(:name)).to eq 'TypicalWorker' }
-    end
+        it { expect(builder.build).to be < Karafka::BaseWorker }
+      end
 
-    context 'when this is a non namespaced anonymous controller_class' do
-      let(:controller_class) { "#<Class:#{object_id}>" }
+      context 'and it is in a module/class' do
+        let(:controller_class) do
+          module TestModule
+            class SuperSad2Controller
+              self
+            end
+          end
+        end
 
-      it { expect(builder.send(:name)).to eq "Class#{object_id}" }
-    end
+        it 'expect to build it' do
+          expect(builder.build.to_s).to eq 'TestModule::SuperSad2Worker'
+        end
 
-    context 'when this is a namespaced typical controller_class' do
-      let(:controller_class) { 'Videos::TypicalController' }
-
-      it { expect(builder.send(:name)).to eq 'TypicalWorker' }
-    end
-
-    context 'when this is a namespaced anonymous controller_class' do
-      let(:controller_class) { "Videos::#<Class:#{object_id}>" }
-
-      it { expect(builder.send(:name)).to eq "Class#{object_id}" }
-    end
-  end
-
-  describe '#scope' do
-    before do
-      builder.instance_variable_set('@controller_class', controller_class)
-    end
-
-    context 'when this is a non namespaced typical controller_class' do
-      let(:controller_class) { 'TypicalController' }
-
-      it { expect(builder.send(:scope)).to eq Object }
-    end
-
-    context 'when this is a non namespaced anonymous controller_class' do
-      let(:controller_class) { "#<Class:#{object_id}>" }
-
-      it { expect(builder.send(:scope)).to eq Object }
-    end
-
-    context 'when this is a namespaced typical controller_class' do
-      let(:controller_class) { 'Karafka::TypicalController' }
-
-      it { expect(builder.send(:scope)).to eq Karafka }
-    end
-
-    context 'when this is a namespaced anonymous controller_class' do
-      let(:controller_class) { "Karafka::#<Class:#{object_id}>" }
-
-      it { expect(builder.send(:scope)).to eq Karafka }
+        it { expect(builder.build).to be < Karafka::BaseWorker }
+      end
     end
   end
 
@@ -156,5 +121,9 @@ RSpec.describe Karafka::Workers::Builder do
 
       it { expect { builder.send(:base) }.to raise_error(error) }
     end
+  end
+
+  describe '#matcher' do
+    it { expect(builder.send(:matcher)).to be_a Karafka::Helpers::ClassMatcher }
   end
 end

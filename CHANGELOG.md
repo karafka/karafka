@@ -1,6 +1,31 @@
 # Karafka framework changelog
 
-## 0.4.2-head
+## 0.5.0-beta
+- Removed Zookeeper totally as dependency
+- Better group and partition rebalancing
+- Automatic thread management (no need for tunning) - each topic is a separate actor/thread
+- Moved from Poseidon into Ruby-Kafka
+- No more max_concurrency setting
+- After you define your App class and routes (and everything else) you need to add execute App.boot!
+- Manual consuming is no longer available (no more karafka consume command)
+- Karafka topics CLI is no longer available. No Zookeeper - no global topic discovery
+- Dropped ZK as dependency
+- karafka info command no longer prints details about Zookeeper
+- Better shutdown
+- No more autodiscovery via Zookeeper - instead, the whole cluster will be discovered directly from Kafka
+- No more support for Kafka 0.8
+- Support for Kafka 0.9
+- No more need for ActorCluster, since now we have a single thread (and Kafka connection) per topic
+- Ruby 2.2.* support dropped
+- Using App name as a Kafka client_id
+- Automatic Capistrano integration
+- Responders support for handling better responses pipelining and better responses flow description and design (see README for more details)
+- Gem dump
+- Readme updates
+- karafka flow CLI command for printing the application flow
+- Some internal refactorings
+
+## 0.4.2
 - #87 - Reconsume mode with crone for better Rails/Rack integration
 - Moved Karafka server related stuff into separate Karafka::Server class
 - Renamed Karafka::Runner into Karafka::Fetcher
@@ -159,7 +184,6 @@
 - Renamed events to messages to follow Apache Kafka naming convention
 
 ## 0.1.3
-
 - Karafka::App.logger moved to Karafka.logger
 - README updates (Usage section was added)
 

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Process do
   subject(:process) { described_class.instance }
 

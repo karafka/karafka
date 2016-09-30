@@ -19,6 +19,7 @@ module Karafka
         controller.parser = route.parser
         controller.worker = route.worker
         controller.interchanger = route.interchanger
+        controller.responder = route.responder
 
         controller
       end

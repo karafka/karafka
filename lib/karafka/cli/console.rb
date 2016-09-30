@@ -3,8 +3,8 @@ module Karafka
   class Cli
     # Console Karafka Cli action
     class Console < Base
-      self.desc = 'Start the Karafka console (short-cut alias: "c")'
-      self.options = { aliases: 'c' }
+      desc 'Start the Karafka console (short-cut alias: "c")'
+      option aliases: 'c'
 
       # @return [String] Console executing command
       # @example

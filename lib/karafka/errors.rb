@@ -32,5 +32,19 @@ module Karafka
     # Raised when application does not have ApplicationWorker or other class that directly
     # inherits from Karafka::BaseWorker
     class BaseWorkerDescentantMissing < BaseError; end
+
+    # Raised when we want to use #respond_with in controllers but we didn't define
+    # (and we couldn't find) any appropriate responder for a given controller
+    class ResponderMissing < BaseError; end
+
+    # Raised when we want to use #respond_to in responders with a topic that we didn't register
+    class UnregisteredTopic < BaseError; end
+
+    # Raised when we send more than one message to a single topic but we didn't allow that when
+    # we were registering topic in a responder
+    class TopicMultipleUsage < BaseError; end
+
+    # Raised when we didn't use a topic that was defined as non-optional (required)
+    class UnusedResponderRequiredTopic < BaseError; end
   end
 end

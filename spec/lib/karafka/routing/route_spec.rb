@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Routing::Route do
   subject(:route) { described_class.new }
 
@@ -98,6 +96,40 @@ RSpec.describe Karafka::Routing::Route do
       let(:worker) { double }
 
       it { expect(route.worker).to eq worker }
+    end
+  end
+
+  describe '#responder' do
+    let(:controller) { double }
+
+    before do
+      route.responder = responder
+      route.controller = controller
+    end
+
+    context 'when responder is not set' do
+      let(:responder) { nil }
+      let(:built_responder) { double }
+      let(:builder) { double }
+
+      it 'expect to build responder using builder' do
+        expect(Karafka::Responders::Builder)
+          .to receive(:new)
+          .with(controller)
+          .and_return(builder)
+
+        expect(builder)
+          .to receive(:build)
+          .and_return(built_responder)
+
+        expect(route.responder).to eq built_responder
+      end
+    end
+
+    context 'when responder is set' do
+      let(:responder) { double }
+
+      it { expect(route.responder).to eq responder }
     end
   end
 

@@ -8,11 +8,11 @@ module Karafka
       # @note We catch all the errors here, to make sure that none failures
       #   for a given consumption will affect other consumed messages
       #   If we would't catch it, it would propagate up until killing the Celluloid actor
-      # @param message [Poseidon::FetchedMessage] message that was fetched by poseidon
+      # @param message [Kafka::FetchedMessage] message that was fetched by kafka
       def consume(message)
         controller = Karafka::Routing::Router.new(message.topic).build
         # We wrap it around with our internal message format, so we don't pass around
-        # a raw Poseidon message
+        # a raw Kafka message
         controller.params = Message.new(message.topic, message.value)
 
         Karafka.monitor.notice(self.class, controller.to_h)

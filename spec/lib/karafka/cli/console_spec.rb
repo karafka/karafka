@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Cli::Console do
   let(:cli) { Karafka::Cli.new }
   subject(:console_cli) { described_class.new(cli) }

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Cli do
   subject(:cli) { described_class }
 
@@ -20,12 +18,11 @@ RSpec.describe Karafka::Cli do
     let(:available_commands) do
       [
         Karafka::Cli::Console,
-        Karafka::Cli::Consume,
+        Karafka::Cli::Flow,
         Karafka::Cli::Info,
         Karafka::Cli::Install,
         Karafka::Cli::Routes,
         Karafka::Cli::Server,
-        Karafka::Cli::Topics,
         Karafka::Cli::Worker
       ]
     end

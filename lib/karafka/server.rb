@@ -2,8 +2,13 @@ module Karafka
   # Karafka consuming server class
   class Server
     class << self
+      # We need to store reference to all the consumers in the main server thread,
+      # So we can have access to them later on and be able to stop them on exit
+      attr_reader :consumers
+
       # Method which runs app
       def run
+        @consumers = Concurrent::Array.new
         bind_on_sigint
         bind_on_sigquit
         start_supervised
@@ -20,6 +25,7 @@ module Karafka
       def bind_on_sigint
         process.on_sigint do
           Karafka::App.stop!
+          consumers.map(&:stop) if Karafka::App.running?
           exit
         end
       end
@@ -28,6 +34,7 @@ module Karafka
       def bind_on_sigquit
         process.on_sigquit do
           Karafka::App.stop!
+          consumers.map(&:stop) if Karafka::App.running?
           exit
         end
       end

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Helpers::MultiDelegator do
   let(:methods) { [:"m1#{rand(1000)}", :"m2#{rand(1000)}"] }
 

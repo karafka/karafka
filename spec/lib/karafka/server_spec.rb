@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Server do
   subject(:server_class) { described_class }
 

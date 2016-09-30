@@ -13,12 +13,8 @@ module Karafka
       extend Dry::Configurable
 
       # Available settings
-      # option max_concurrency [Integer] how many threads that listen to Kafka can we have
-      setting :max_concurrency
       # option name [String] current app name - used to provide default Kafka groups namespaces
       setting :name
-      # option wait_timeout [Integer] seconds that we will wait on a single topic for messages
-      setting :wait_timeout
       # option logger [Instance] logger that we want to use
       setting :logger, ::Karafka::Logger.instance
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
@@ -27,20 +23,15 @@ module Karafka
       # Note that redis could be rewriten using nested options, but it is a sidekiq specific
       # stuff and we don't want to touch it
       setting :redis
-      # option zookeeper [Hash] zookeeper configuration options (hosts with ports and chroot)
-      setting :zookeeper do
-        # Array with Zookeeper hosts details
-        setting :hosts
-        # Path at Zookeeper under which brokers details are being stored
-        setting :brokers_path, 'brokers/ids'
-        # Optional chroot for Zookeeper
-        # @see https://zookeeper.apache.org/doc/r3.2.2/zookeeperProgrammers.html#ch_zkSessions
-        setting :chroot
-      end
       # option kafka [Hash] - optional - kafka configuration options (hosts)
       setting :kafka do
-        setting :hosts, -> { ::Karafka::Connection::BrokerManager.new.all.map(&:host) }
+        setting :hosts
       end
+
+      # This is configured automatically, don't overwrite it!
+      # Each route requires separate thread, so number of threads should be equal to number
+      # of routes
+      setting :concurrency, -> { ::Karafka::App.routes.count }
 
       class << self
         # Configurating method
@@ -50,11 +41,7 @@ module Karafka
           configure do |config|
             yield(config)
           end
-
-          setup_components
         end
-
-        private
 
         # Everything that should be initialized after the setup
         # Components are in karafka/config directory and are all loaded one by one

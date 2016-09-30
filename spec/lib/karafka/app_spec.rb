@@ -36,6 +36,17 @@ RSpec.describe Karafka::App do
     end
   end
 
+  describe '#boot!' do
+    let(:config) { double }
+
+    it 'expect to run setup_components' do
+      expect(Karafka::Setup::Config)
+        .to receive(:setup_components)
+
+      app_class.boot!
+    end
+  end
+
   describe 'Karafka delegations' do
     %i(
       root

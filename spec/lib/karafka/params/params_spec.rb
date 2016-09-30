@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Params::Params do
   describe 'class methods' do
     subject(:params_class) { described_class }

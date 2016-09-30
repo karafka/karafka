@@ -3,8 +3,8 @@ module Karafka
   class Cli
     # Routes Karafka Cli action
     class Routes < Base
-      self.desc = 'Print out all defined routes in alphabetical order'
-      self.options = { aliases: 's' }
+      desc 'Print out all defined routes in alphabetical order'
+      option aliases: 'r'
 
       # Print out all defined routes in alphabetical order
       def call
@@ -15,6 +15,7 @@ module Karafka
           print('Worker', route.worker)
           print('Parser', route.parser)
           print('Interchanger', route.interchanger)
+          print('Responder', route.responder)
         end
       end
 

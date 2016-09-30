@@ -9,8 +9,7 @@
   pathname
   timeout
   logger
-  poseidon
-  poseidon_cluster
+  kafka
   sidekiq
   worker_glass
   envlogic

@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Errors do
   describe 'BaseError' do
     subject(:error) { described_class::BaseError }

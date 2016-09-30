@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Connection::Consumer do
   subject(:consumer) { described_class.new }
 
@@ -10,7 +8,7 @@ RSpec.describe Karafka::Connection::Consumer do
     let(:builder) { Karafka::Routing::Router.new(nil) }
     let(:controller_instance) { instance_double(Karafka::BaseController, to_h: {}) }
     let(:raw_message) do
-      instance_double(Poseidon::FetchedMessage, value: raw_message_value, topic: topic)
+      instance_double(Kafka::FetchedMessage, value: raw_message_value, topic: topic)
     end
 
     context 'everything works well' do
@@ -44,8 +42,6 @@ RSpec.describe Karafka::Connection::Consumer do
 
     context 'something goes wrong (exception is raised)' do
       [
-        ZK::Exceptions::OperationTimeOut,
-        Poseidon::Connection::ConnectionFailedError,
         Exception
       ].each do |error|
         context "when #{error} happens" do

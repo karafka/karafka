@@ -3,8 +3,8 @@ module Karafka
   class Cli
     # Worker Karafka Cli action
     class Worker < Base
-      self.desc = 'Start the Karafka Sidekiq worker (short-cut alias: "w")'
-      self.options = { aliases: 'w' }
+      desc 'Start the Karafka Sidekiq worker (short-cut alias: "w")'
+      option aliases: 'w'
 
       # Start the Karafka Sidekiq worker
       # @param params [Array<String>] additional params that will be passed to sidekiq, that way we

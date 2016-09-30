@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Params::Interchanger do
   subject(:interchanger_class) { described_class }
 

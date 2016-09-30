@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Cli::Routes do
   let(:cli) { Karafka::Cli.new }
   subject(:routes_cli) { described_class.new(cli) }
@@ -10,7 +8,7 @@ RSpec.describe Karafka::Cli::Routes do
     let(:topic) { rand.to_s }
 
     KEYS = %i(
-      group controller worker parser interchanger
+      group controller worker parser interchanger responder
     ).freeze
 
     KEYS.each do |key|

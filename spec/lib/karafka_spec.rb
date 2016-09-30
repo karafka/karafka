@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka do
   subject(:karafka) { described_class }
 

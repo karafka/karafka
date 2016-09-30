@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Loader do
   subject(:loader_class) { described_class }
 

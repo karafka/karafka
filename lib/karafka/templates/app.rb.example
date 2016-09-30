@@ -8,22 +8,19 @@ Karafka::Loader.new.load(Karafka::App.root)
 # App class
 class App < Karafka::App
   setup do |config|
-    # In most of the cases, Karafka will figure out kafka hosts automatically based on the zookeeper
-    #   data. Set it manually only if you know what you are doing
-    # config.kafka = { hosts: %w( 127.0.0.1:9092 ) }
-    config.zookeeper.hosts = %w( 127.0.0.1:2181 )
-    config.wait_timeout = 60 # 1 minute
-    config.max_concurrency = 5
+    config.kafka = { hosts: %w( 127.0.0.1:9092 ) }
     config.name = 'example_app'
     config.redis = {
       url: 'redis://localhost:6379'
     }
+  end
 
-    routes.draw do
-      # topic :example do
-      #   controller ExampleController
-      #   interchanger CustomInterchanger
-      # end
-    end
+  routes.draw do
+    # topic :example do
+    #   controller ExampleController
+    #   interchanger CustomInterchanger
+    # end
   end
 end
+
+App.boot!

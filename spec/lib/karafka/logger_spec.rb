@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Karafka::Logger do
   specify { expect(described_class).to be < ::Logger }
   subject(:logger_class) { described_class }
@@ -9,7 +7,7 @@ RSpec.describe Karafka::Logger do
     let(:logger) { described_class.new(STDOUT) }
     let(:log_file) { Karafka::App.root.join('log', "#{Karafka.env}.log") }
     # A Pathname, because this is what is returned by File.join
-    let(:log_dir) { Pathname.new(File.dirname(log_file)) }
+    let(:log_dir) { File.dirname(log_file) }
 
     it 'creates an instance that will log in the app root' do
       expect(logger_class)

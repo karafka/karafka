@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe Dry::Configurable::Config do
   let(:keys) { %i(a b) }
   subject(:config) { described_class.new(*keys).new(*values) }
