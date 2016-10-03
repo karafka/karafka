@@ -21,7 +21,7 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
       expect(WaterDrop.config.send_messages).to eq true
       expect(WaterDrop.config.connection_pool_size).to eq config.concurrency
       expect(WaterDrop.config.connection_pool_timeout).to eq 1
-      expect(WaterDrop.config.kafka_hosts).to eq config.kafka.hosts
+      expect(WaterDrop.config.kafka.hosts).to eq config.kafka.hosts
       expect(WaterDrop.config.raise_on_failure).to eq true
     end
   end

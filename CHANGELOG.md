@@ -4,6 +4,7 @@
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available
 - #101
 - fix error on startup from waterdrop #102
+- Waterdrop 0.3.2.1 with kafka.hosts instead of kafka_hosts
 
 ## 0.5.0
 - Removed Zookeeper totally as dependency
