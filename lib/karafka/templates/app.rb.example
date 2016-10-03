@@ -8,7 +8,7 @@ Karafka::Loader.new.load(Karafka::App.root)
 # App class
 class App < Karafka::App
   setup do |config|
-    config.kafka = { hosts: %w( 127.0.0.1:9092 ) }
+    config.kafka.hosts = %w( 127.0.0.1:9092 )
     config.name = 'example_app'
     config.redis = {
       url: 'redis://localhost:6379'
