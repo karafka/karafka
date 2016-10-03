@@ -3,6 +3,7 @@
 ## 0.5.0-head
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available
 - #101
+- fix error on startup from waterdrop #102
 
 ## 0.5.0
 - Removed Zookeeper totally as dependency
