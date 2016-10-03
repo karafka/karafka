@@ -4,7 +4,7 @@ module Karafka
     # @example Define topic (required by default)
     #   Karafka::Responders::Topic.new(:topic_name, {}) #=> #<Karafka::Responders::Topic...
     # @example Define optional topic
-    #   Karafka::Responders::Topic.new(:topic_name, optional: true)
+    #   Karafka::Responders::Topic.new(:topic_name, required: false)
     # @example Define topic that on which we want to respond multiple times
     #   Karafka::Responders::Topic.new(:topic_name, multiple_usage: true)
     class Topic
@@ -22,8 +22,7 @@ module Karafka
 
       # @return [Boolean] is this a required topic (if not, it is optional)
       def required?
-        return false if @options[:optional]
-        @options[:required] || true
+        @options.key?(:required) ? @options[:required] : true
       end
 
       # @return [Boolean] do we expect to use it multiple times in a single respond flow

@@ -17,7 +17,7 @@ RSpec.describe Karafka::Responders::Topic do
 
   describe '#required?' do
     context 'when topic is optional' do
-      let(:options) { { optional: true } }
+      let(:options) { { required: false } }
 
       it { expect(topic.required?).to eq false }
     end

@@ -40,6 +40,7 @@ module Karafka
       def validate_usage_of!(used_topic)
         raise(Errors::UnregisteredTopic, used_topic) unless @registered_topics[used_topic]
         return if @registered_topics[used_topic].multiple_usage?
+        return unless @registered_topics[used_topic].required?
         return if @used_topics.count(used_topic) < 2
         raise(Errors::TopicMultipleUsage, used_topic)
       end

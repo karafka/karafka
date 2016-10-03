@@ -50,6 +50,18 @@ RSpec.describe Karafka::Responders::UsageValidator do
           it { expect { validator.send(:validate_usage_of!, topic_name) }.not_to raise_error }
         end
       end
+
+      context 'and it was supposed to be used multiple times' do
+        context 'and we used it once' do
+          let(:used_topics) { [topic_name] }
+
+          let(:registered_topics) do
+            { topic_name => Karafka::Responders::Topic.new(topic_name, multiple_usage: true) }
+          end
+
+          it { expect { validator.send(:validate_usage_of!, topic_name) }.not_to raise_error }
+        end
+      end
     end
   end
 
@@ -58,7 +70,7 @@ RSpec.describe Karafka::Responders::UsageValidator do
 
     context 'when topic usage was optional' do
       let(:registered_topics) do
-        { topic_name => Karafka::Responders::Topic.new(topic_name, optional: true) }
+        { topic_name => Karafka::Responders::Topic.new(topic_name, required: false) }
       end
 
       context 'and it was not used' do

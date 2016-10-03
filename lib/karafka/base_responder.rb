@@ -16,10 +16,10 @@ module Karafka
   #     end
   #   end
   #
-  # @example Marking topic as optional (we won't have to use it)
+  # @example Marking topic as not required (we won't have to use it)
   #   class Responder < BaseResponder
   #     topic :required_topic
-  #     topic :new_action, optional: true
+  #     topic :new_action, required: false
   #
   #     def respond(data)
   #       respond_to :required_topic, data
