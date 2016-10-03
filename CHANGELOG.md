@@ -1,6 +1,10 @@
 # Karafka framework changelog
 
-## 0.5.0-beta
+## 0.5.0-head
+- Fixed inconsistency in responders non-required topic definition. Now only required: false available
+- #101
+
+## 0.5.0
 - Removed Zookeeper totally as dependency
 - Better group and partition rebalancing
 - Automatic thread management (no need for tunning) - each topic is a separate actor/thread
