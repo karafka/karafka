@@ -64,7 +64,8 @@ module Karafka
 
     # This will be set based on routing settings
     # From 0.4 a single controller can handle multiple topics jobs
-    attr_accessor :group, :topic, :worker, :parser, :interchanger, :responder, :inline
+    # All the attributes are taken from route
+    Karafka::Routing::Route::ATTRIBUTES.each { |attr| attr_accessor attr }
 
     class << self
       # Creates a callback that will be executed before scheduling to Sidekiq

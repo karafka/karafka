@@ -10,12 +10,9 @@ module Karafka
       def call
         routes.each do |route|
           puts "#{route.topic}:"
-          print('Group', route.group)
-          print('Controller', route.controller)
-          print('Worker', route.worker)
-          print('Parser', route.parser)
-          print('Interchanger', route.interchanger)
-          print('Responder', route.responder)
+          Karafka::Routing::Route::ATTRIBUTES.each do |attr|
+            print(attr.to_s.capitalize, route.public_send(attr))
+          end
         end
       end
 

@@ -8,7 +8,13 @@ RSpec.describe Karafka::Cli::Routes do
     let(:topic) { rand.to_s }
 
     KEYS = %i(
-      group controller worker parser interchanger responder
+      group
+      topic
+      worker
+      parser
+      interchanger
+      responder
+      inline
     ).freeze
 
     KEYS.each do |key|

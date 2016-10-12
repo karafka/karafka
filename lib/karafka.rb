@@ -23,6 +23,7 @@
   active_support/inflector
   karafka/loader
   karafka/status
+  karafka/routing/route
 ).each { |lib| require lib }
 
 # Karafka library
