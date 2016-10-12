@@ -51,6 +51,8 @@ module Karafka
     # Definitions of all topics that we want to be able to use in this responder should go here
     class_attribute :topics
 
+    attr_reader :messages_buffer
+
     class << self
       # Registers a topic as on to which we will be able to respond
       # @param topic_name [Symbol, String] name of topic to which we want to respond
@@ -65,7 +67,7 @@ module Karafka
     # Creates a responder object
     # @return [Karafka::BaseResponder] base responder descendant responder
     def initialize
-      @used_topics = []
+      @messages_buffer = {}
     end
 
     # Performs respond and validates that all the response requirement were met
@@ -76,6 +78,7 @@ module Karafka
     def call(*data)
       respond(*data)
       validate!
+      deliver!
     end
 
     private
@@ -97,22 +100,30 @@ module Karafka
     def respond_to(topic, data)
       Karafka.monitor.notice(self.class, topic: topic, data: data)
 
-      topic = topic.to_s
-      @used_topics << topic
-
-      ::WaterDrop::Message.new(
-        topic,
-        data.is_a?(String) ? data : data.to_json
-      ).send!
+      messages_buffer[topic.to_s] ||= []
+      messages_buffer[topic.to_s] << (data.is_a?(String) ? data : data.to_json)
     end
 
     # Checks if we met all the topics requirements. It will fail if we didn't send a message to
     # a registered required topic, etc.
     def validate!
+      used_topics = messages_buffer.map do |key, data_elements|
+        Array.new(data_elements.count) { key }
+      end
+
       Responders::UsageValidator.new(
         self.class.topics || {},
-        @used_topics
+        used_topics.flatten
       ).validate!
+    end
+
+    # Takes all the messages from the buffer and delivers them one by one
+    # @note This method is executed after the validation, so we're sure that
+    #   what we send is legit and it will go to a proper topics
+    def deliver!
+      messages_buffer.each do |topic, data_elements|
+        data_elements.each { |data| ::WaterDrop::Message.new(topic, data).send! }
+      end
     end
   end
 end
