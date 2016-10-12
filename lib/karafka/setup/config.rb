@@ -15,6 +15,8 @@ module Karafka
       # Available settings
       # option name [String] current app name - used to provide default Kafka groups namespaces
       setting :name
+      # If inline is set to true, we won't enqueue jobs, instead we will run them immediately
+      setting :inline, false
       # option logger [Instance] logger that we want to use
       setting :logger, ::Karafka::Logger.instance
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)

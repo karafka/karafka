@@ -66,6 +66,20 @@ RSpec.describe Karafka::Monitor do
 
   describe '#caller_label' do
     it { expect(monitor.send(:caller_label)).to eq 'instance_exec' }
+
+    context 'when is is called from subclass' do
+      subject(:monitor) do
+        klass = ClassBuilder.inherit(described_class) do
+          def check
+            caller_label
+          end
+        end
+
+        klass.instance
+      end
+
+      it { expect(monitor.send(:check)).to eq 'instance_exec' }
+    end
   end
 
   describe '#logger' do

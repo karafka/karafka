@@ -23,10 +23,26 @@ RSpec.describe Karafka::BaseController do
 
     describe '#schedule' do
       context 'when there are no callbacks' do
-        it 'just schedules via perform_async' do
-          expect(base_controller).to receive(:perform_async)
+        context 'and we dont want to perform inline' do
+          it 'just schedules via perform_async' do
+            expect(base_controller).to receive(:perform_async)
 
-          base_controller.schedule
+            base_controller.schedule
+          end
+        end
+
+        context 'and we want to perform inline' do
+          before do
+            expect(base_controller)
+              .to receive(:inline)
+              .and_return(true)
+          end
+
+          it 'just expect to run with perform_inline' do
+            expect(base_controller).to receive(:perform_inline)
+
+            base_controller.schedule
+          end
         end
       end
     end
@@ -93,34 +109,39 @@ RSpec.describe Karafka::BaseController do
       end
     end
 
+    describe '#perform_inline' do
+      it 'expect to perform' do
+        expect(base_controller).to receive(:perform)
+        base_controller.send(:perform_inline)
+      end
+    end
+
     describe '#perform_async' do
-      context 'when we want to perform async stuff' do
-        let(:params) { double }
-        let(:interchanger) { double }
-        let(:interchanged_load_params) { double }
-        let(:worker) { double }
-        let(:topic) { rand.to_s }
+      let(:params) { double }
+      let(:interchanger) { double }
+      let(:interchanged_load_params) { double }
+      let(:worker) { double }
+      let(:topic) { rand.to_s }
 
-        before do
-          base_controller.interchanger = interchanger
-          base_controller.worker = worker
-          base_controller.topic = topic
-        end
+      before do
+        base_controller.interchanger = interchanger
+        base_controller.worker = worker
+        base_controller.topic = topic
+      end
 
-        it 'enqueue perform function' do
-          base_controller.instance_variable_set :@params, params
+      it 'enqueue perform function' do
+        base_controller.instance_variable_set :@params, params
 
-          expect(base_controller.interchanger)
-            .to receive(:load)
-            .with(params)
-            .and_return(interchanged_load_params)
+        expect(base_controller.interchanger)
+          .to receive(:load)
+          .with(params)
+          .and_return(interchanged_load_params)
 
-          expect(worker)
-            .to receive(:perform_async)
-            .with(topic, interchanged_load_params)
+        expect(worker)
+          .to receive(:perform_async)
+          .with(topic, interchanged_load_params)
 
-          base_controller.send :perform_async
-        end
+        base_controller.send :perform_async
       end
     end
 

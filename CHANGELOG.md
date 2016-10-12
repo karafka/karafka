@@ -5,6 +5,8 @@
 - #101
 - fix error on startup from waterdrop #102
 - Waterdrop 0.3.2.1 with kafka.hosts instead of kafka_hosts
+- #105 - Karafka::Monitor#caller_label not working with inherited monitors
+- #99 - Standalone mode (without Sidekiq)
 
 ## 0.5.0
 - Removed Zookeeper totally as dependency

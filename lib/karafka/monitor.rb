@@ -71,7 +71,10 @@ module Karafka
     # @example Check label of method that invoked #notice_error
     #   caller_label #=> 'rescue in target'
     def caller_label
-      caller_locations(1, 2)[1].label
+      # We need to calculate ancestors because if someone inherits
+      # from this  class, caller chains is longer
+      index = self.class.ancestors.index(Karafka::Monitor) + 1
+      caller_locations(index, 2)[1].label
     end
 
     # @return [Logger] logger instance

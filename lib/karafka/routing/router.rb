@@ -20,6 +20,7 @@ module Karafka
         controller.worker = route.worker
         controller.interchanger = route.interchanger
         controller.responder = route.responder
+        controller.inline = route.inline
 
         controller
       end

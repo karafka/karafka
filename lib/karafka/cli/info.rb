@@ -12,6 +12,7 @@ module Karafka
         info = [
           "Karafka framework version: #{Karafka::VERSION}",
           "Application name: #{config.name}",
+          "Inline mode: #{config.inline}",
           "Number of threads: #{config.concurrency}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",

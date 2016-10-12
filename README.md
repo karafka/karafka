@@ -31,6 +31,7 @@ Karafka not only handles incoming messages but also provides tools for building 
         - [Parser](#parser)
         - [Interchanger](#interchanger)
         - [Responder](#responder)
+        - [Inline flag](#inline-flag)
     - [Receiving messages](#receiving-messages)
         - [Processing messages directly (without Sidekiq)](#processing-messages-directly-without-sidekiq)
     - [Sending messages from Karafka](#sending-messages-from-karafka)
@@ -108,6 +109,7 @@ Karafka has following configuration options:
 | Option                 | Required | Value type        | Description                                                                                 |
 |------------------------|----------|-------------------|---------------------------------------------------------------------------------------------|
 | name                   | true     | String            | Application name                                                                            |
+| inline                 | false    | Boolean           | Do we want to perform logic without enqueuing it with Sidekiq (directly and asap)           |
 | redis                  | true     | Hash              | Hash with Redis configuration options                                                       |
 | monitor                | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                             |
 | logger                 | false    | Object            | Logger instance (defaults to Karafka::Logger)                                               |
@@ -119,6 +121,7 @@ To apply this configuration, you need to use a *setup* method from the Karafka::
 class App < Karafka::App
   setup do |config|
     config.kafka.hosts = %w( 127.0.0.1:9092 )
+    config.inline = false
     config.redis = {
       url: 'redis://redis.example.com:7372/1'
     }
@@ -208,6 +211,7 @@ There are also several other methods available (optional):
   - *parser* - Class name - name of a parser class that we want to use to parse incoming data
   - *interchanger* - Class name - name of a interchanger class that we want to use to format data that we put/fetch into/from *#perform_async*
   - *responder* - Class name - name of a responder that we want to use to generate responses to other Kafka topics based on our processed data
+  - *inline* - Boolean - Do we want to perform logic without enqueuing it with Sidekiq (directly and asap) - overwrites global app setting
 
 ```ruby
 App.routes.draw do
@@ -218,6 +222,7 @@ App.routes.draw do
     parser Parsers::BinaryToJson
     interchanger Interchangers::Binary
     responder BinaryVideoProcessingResponder
+    inline true
   end
 
   topic :new_videos do
@@ -359,6 +364,17 @@ end
 
 For more details about responders, please go to the [using responders](#using-responders) section.
 
+##### Inline flag
+
+Inline flag allows you to disable Sidekiq usage by performing your #perform method business logic in the main Karafka server process.
+
+This flag be useful when you want to:
+
+  - process messages one by one in a single flow
+  - process messages as soon as possible (without Sidekiq delay)
+
+Note: Keep in mind, that by using this, you can significantly slow down Karafka. You also loose all the advantages of Sidekiq processing (reentrancy, retries, etc).
+
 ### Receiving messages
 
 Karafka framework has a long running server process that is responsible for receiving messages.
@@ -377,16 +393,24 @@ bundle exec karafka server --daemon
 
 #### Processing messages directly (without Sidekiq)
 
-If you don't want to use Sidekiq for processing and you would rather process messages directly in the main Karafka server process, you can do that using the *before_enqueue* callback inside of controller:
+If you don't want to use Sidekiq for processing and you would rather process messages directly in the main Karafka server process, you can do that by setting the *inline* flag either on an app level:
 
 ```ruby
-class UsersController < ApplicationController
-  before_enqueue :perform_directly
+class App < Karafka::App
+  setup do |config|
+    config.inline = false
+    # Rest of the config
+  end
+end
+```
 
-  # By throwing abort signal, Karafka will not schedule a background #perform task.
-  def perform_directly
-    User.create(params[:user])
-    throw(:abort)
+or per route (when you want to treat some routes in a different way):
+
+```ruby
+App.routes.draw do
+  topic :binary_video_details do
+    controller Videos::DetailsController
+    inline true
   end
 end
 ```

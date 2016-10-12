@@ -64,7 +64,8 @@ module Karafka
 
     # This will be set based on routing settings
     # From 0.4 a single controller can handle multiple topics jobs
-    attr_accessor :group, :topic, :worker, :parser, :interchanger, :responder
+    # All the attributes are taken from route
+    Karafka::Routing::Route::ATTRIBUTES.each { |attr| attr_accessor attr }
 
     class << self
       # Creates a callback that will be executed before scheduling to Sidekiq
@@ -95,7 +96,7 @@ module Karafka
     # will schedule a perform task in sidekiq
     def schedule
       run_callbacks :schedule do
-        perform_async
+        inline ? perform_inline : perform_async
       end
     end
 
@@ -142,6 +143,14 @@ module Karafka
 
       Karafka.monitor.notice(self.class, data: data)
       responder.new.call(*data)
+    end
+
+    # Executes perform code immediately (without enqueuing)
+    # @note Despite the fact, that workers won't be used, we still initialize all the
+    #   classes and other framework elements
+    def perform_inline
+      Karafka.monitor.notice(self.class, to_h)
+      perform
     end
 
     # Enqueues the execution of perform method into a worker.
