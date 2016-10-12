@@ -50,29 +50,19 @@ RSpec.describe Karafka::BaseResponder do
     describe '#respond_to' do
       context 'when we send a string data' do
         let(:input_data) { rand.to_s }
-        let(:kafka_message) { instance_double(::WaterDrop::Message) }
 
-        it 'expect to register topic as used and message via waterdrop' do
-          expect(::WaterDrop::Message)
-            .to receive(:new).with(topic_name, input_data)
-            .and_return(kafka_message)
-          expect(kafka_message).to receive(:send!)
+        it 'expect to expect to put string data into messages buffer' do
           responder.send(:respond_to, topic_name, input_data)
-          expect(responder.instance_variable_get(:'@used_topics')).to eq [topic_name]
+          expect(responder.messages_buffer).to eq(topic_name => [input_data])
         end
       end
 
       context 'when we send non string data' do
         let(:input_data) { { rand => rand } }
-        let(:kafka_message) { instance_double(::WaterDrop::Message) }
 
-        it 'expect to cast to json, register topic as used and message via waterdrop' do
-          expect(::WaterDrop::Message)
-            .to receive(:new).with(topic_name, input_data.to_json)
-            .and_return(kafka_message)
-          expect(kafka_message).to receive(:send!)
+        it 'expect to cast to json, and buffer in messages buffer' do
           responder.send(:respond_to, topic_name, input_data)
-          expect(responder.instance_variable_get(:'@used_topics')).to eq [topic_name]
+          expect(responder.messages_buffer).to eq(topic_name => [input_data.to_json])
         end
       end
     end
@@ -80,19 +70,52 @@ RSpec.describe Karafka::BaseResponder do
     describe '#validate!' do
       let(:usage_validator) { instance_double(Karafka::Responders::UsageValidator) }
       let(:registered_topics) { [rand, rand] }
-      let(:used_topics) { [rand, rand] }
+      let(:messages_buffer) { { rand => [rand], rand => [rand] } }
 
       before do
         working_class.topics = registered_topics
-        responder.instance_variable_set(:'@used_topics', used_topics)
+        responder.instance_variable_set(:'@messages_buffer', messages_buffer)
 
         expect(Karafka::Responders::UsageValidator).to receive(:new)
-          .with(registered_topics, used_topics).and_return(usage_validator)
+          .with(registered_topics, messages_buffer.keys).and_return(usage_validator)
       end
 
       it 'expect to use UsageValidator to validate' do
         expect(usage_validator).to receive(:validate!)
         responder.send(:validate!)
+      end
+    end
+
+    describe '#deliver!' do
+      before { responder.instance_variable_set(:'@messages_buffer', messages_buffer) }
+
+      context 'when there is nothing to deliver' do
+        let(:messages_buffer) { {} }
+
+        it 'expect to do nothing' do
+          expect(::WaterDrop::Message).not_to receive(:new)
+          responder.send(:deliver!)
+        end
+      end
+
+      context 'when there are messages to be delivered' do
+        let(:messages_buffer) { { rand => [rand, rand] } }
+
+        it 'expect to deliver them using waterdrop' do
+          messages_buffer.each do |topic, data_elements|
+            data_elements.each do |data|
+              kafka_message = instance_double(::WaterDrop::Message)
+
+              expect(::WaterDrop::Message)
+                .to receive(:new).with(topic, data)
+                .and_return(kafka_message)
+
+              expect(kafka_message).to receive(:send!)
+            end
+          end
+
+          responder.send(:deliver!)
+        end
       end
     end
   end
