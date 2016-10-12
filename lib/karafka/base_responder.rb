@@ -107,9 +107,13 @@ module Karafka
     # Checks if we met all the topics requirements. It will fail if we didn't send a message to
     # a registered required topic, etc.
     def validate!
+      used_topics = messages_buffer.map do |key, data_elements|
+        Array.new(data_elements.count) { key }
+      end
+
       Responders::UsageValidator.new(
         self.class.topics || {},
-        messages_buffer.keys
+        used_topics.flatten
       ).validate!
     end
 
