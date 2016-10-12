@@ -99,6 +99,42 @@ RSpec.describe Karafka::Routing::Route do
     end
   end
 
+  describe '#inline=' do
+    let(:inline) { double }
+
+    it { expect { route.inline = inline }.not_to raise_error }
+  end
+
+  describe '#inline' do
+    before { route.inline = inline }
+
+    context 'when inline is not set' do
+      let(:default_inline) { rand }
+      let(:inline) { nil }
+
+      before do
+        expect(Karafka::App.config).to receive(:inline)
+          .and_return(default_inline)
+      end
+
+      it 'expect to use Karafka::App default' do
+        expect(route.inline).to eq default_inline
+      end
+    end
+
+    context 'when inline per route is set to false' do
+      let(:inline) { false }
+
+      it { expect(route.inline).to eq inline }
+    end
+
+    context 'when inline per route is set to true' do
+      let(:inline) { true }
+
+      it { expect(route.inline).to eq inline }
+    end
+  end
+
   describe '#responder' do
     let(:controller) { double }
 

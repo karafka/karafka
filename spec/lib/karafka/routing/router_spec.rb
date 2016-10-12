@@ -9,6 +9,7 @@ RSpec.describe Karafka::Routing::Router do
     let(:responder) { double }
     let(:controller) { double }
     let(:interchanger) { double }
+    let(:inline) { [true, false].sample }
     let(:controller_instance) { double }
 
     let(:route) do
@@ -19,6 +20,7 @@ RSpec.describe Karafka::Routing::Router do
         route.worker = worker
         route.responder = responder
         route.interchanger = interchanger
+        route.inline = inline
       end
     end
 
@@ -50,6 +52,10 @@ RSpec.describe Karafka::Routing::Router do
       expect(controller_instance)
         .to receive(:responder=)
         .with(responder)
+
+      expect(controller_instance)
+        .to receive(:inline=)
+        .with(inline)
     end
 
     it 'expect to build controller with all proper options assigned' do

@@ -13,7 +13,17 @@ module Karafka
       NAME_FORMAT = /\A(\w|\-)+\z/
 
       # Options that we can set per each route
-      attr_writer :group, :topic, :worker, :parser, :interchanger, :responder
+      ATTRIBUTES = %i(
+        group
+        topic
+        worker
+        parser
+        interchanger
+        responder
+        inline
+      ).freeze
+
+      ATTRIBUTES.each { |attr| attr_writer(attr) }
 
       # This we can get "directly" because it does not have any details, etc
       attr_accessor :controller
@@ -23,11 +33,7 @@ module Karafka
       # everywhere except Karafka server command, those would not be initialized on time - for
       # example for Sidekiq
       def build
-        group
-        worker
-        parser
-        interchanger
-        responder
+        ATTRIBUTES.each { |attr| send(attr) }
         self
       end
 
@@ -66,6 +72,14 @@ module Karafka
       #   params between Karafka server and Karafka background job
       def interchanger
         @interchanger ||= Karafka::Params::Interchanger
+      end
+
+      # @return [Boolean] Should we perform execution in the background (default) or
+      #   inline. This can be set globally and overwritten by a per route setting
+      # @note This method can be set to false, so direct assigment ||= would not work
+      def inline
+        return @inline unless @inline.nil?
+        @inline = Karafka::App.config.inline
       end
 
       # Checks if topic and group have proper format (acceptable by Kafka)
