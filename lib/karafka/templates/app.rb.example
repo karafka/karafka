@@ -13,6 +13,7 @@ class App < Karafka::App
     config.redis = {
       url: 'redis://localhost:6379'
     }
+    config.inline = false
   end
 
   routes.draw do
