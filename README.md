@@ -277,7 +277,7 @@ However, if you want to use a raw Sidekiq worker (without any Karafka additional
 ```ruby
 topic :incoming_messages do
   controller MessagesController
-  worker MyCustomController
+  worker MyCustomWorker
 end
 ```
 
