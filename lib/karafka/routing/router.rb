@@ -14,15 +14,11 @@ module Karafka
       # Builds a controller instance that should handle message from a given topic
       # @return [Karafka::BaseController] base controller descendant instance object
       def build
-        controller = route.controller.new
-        controller.topic = route.topic
-        controller.parser = route.parser
-        controller.worker = route.worker
-        controller.interchanger = route.interchanger
-        controller.responder = route.responder
-        controller.inline = route.inline
-
-        controller
+        route.controller.new.tap do |ctrl|
+          Karafka::Routing::Route::ATTRIBUTES.each do |attr|
+            ctrl.public_send(:"#{attr}=", route.public_send(attr))
+          end
+        end
       end
 
       private

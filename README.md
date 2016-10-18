@@ -40,6 +40,7 @@ Karafka not only handles incoming messages but also provides tools for building 
   - [Important components](#important-components)
     - [Controllers](#controllers)
         - [Controllers callbacks](#controllers-callbacks)
+        - [Dynamic worker selection](#dynamic-worker-selection)
     - [Responders](#responders)
         - [Registering topics](#registering-topics)
         - [Responding on topics](#responding-on-topics)
@@ -542,6 +543,17 @@ Presented example controller will accept incoming messages from a Kafka topic na
    end
 end
 ```
+
+#### Dynamic worker selection
+
+When you work with Karafka, you may want to schedule part of the jobs to a different worker based on the incoming params. This can be achieved by reassigning worker in the *#before_enqueue* block:
+
+```ruby
+before_enqueue do
+  self.worker = (params[:important] ? FastWorker : SlowWorker)
+end
+```
+
 
 ### Responders
 

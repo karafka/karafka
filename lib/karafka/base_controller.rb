@@ -65,7 +65,14 @@ module Karafka
     # This will be set based on routing settings
     # From 0.4 a single controller can handle multiple topics jobs
     # All the attributes are taken from route
-    Karafka::Routing::Route::ATTRIBUTES.each { |attr| attr_accessor attr }
+    Karafka::Routing::Route::ATTRIBUTES.each do |attr|
+      attr_reader attr
+
+      define_method(:"#{attr}=") do |new_attr_value|
+        instance_variable_set(:"@#{attr}", new_attr_value)
+        @params[attr] = new_attr_value if @params
+      end
+    end
 
     class << self
       # Creates a callback that will be executed before scheduling to Sidekiq
@@ -159,7 +166,6 @@ module Karafka
     #   as a second one (we pass topic to be able to build back the controller in the worker)
     def perform_async
       Karafka.monitor.notice(self.class, to_h)
-
       # We use @params directly (instead of #params) because of lazy loading logic that is behind
       # it. See Karafka::Params::Params class for more details about that
       worker.perform_async(

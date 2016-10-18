@@ -8,6 +8,7 @@
 - #105 - Karafka::Monitor#caller_label not working with inherited monitors
 - #99 - Standalone mode (without Sidekiq)
 - #97 - Buffer responders single topics before send (prevalidation)
+- #111 - Dynamic worker assignment based on the income params
 
 ## 0.5.0
 - Removed Zookeeper totally as dependency
