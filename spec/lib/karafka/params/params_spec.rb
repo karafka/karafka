@@ -50,13 +50,15 @@ RSpec.describe Karafka::Params::Params do
       let(:worker) { double }
       let(:parser) { double }
       let(:topic) { double }
+      let(:responder) { double }
 
       let(:controller) do
         instance_double(
           Karafka::BaseController,
           worker: worker,
           parser: parser,
-          topic: topic
+          topic: topic,
+          responder: responder
         )
       end
 

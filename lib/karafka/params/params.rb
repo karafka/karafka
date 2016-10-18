@@ -50,7 +50,8 @@ module Karafka
             controller: controller.class,
             worker: controller.worker,
             parser: controller.parser,
-            topic: controller.topic
+            topic: controller.topic,
+            responder: controller.responder
           )
         end
       end
