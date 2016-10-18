@@ -79,7 +79,7 @@ In order to use Karafka framework, you need to have:
 
 ## Installation
 
-Karafka does not have a full installation shell command. In order to install it, please follow given steps:
+Karafka does not have a full installation shell command. In order to install it, please follow the below steps:
 
 Create a directory for your project:
 
@@ -278,7 +278,7 @@ However, if you want to use a raw Sidekiq worker (without any Karafka additional
 ```ruby
 topic :incoming_messages do
   controller MessagesController
-  worker MyCustomController
+  worker MyCustomWorker
 end
 ```
 
@@ -295,7 +295,7 @@ Keep in mind, that params might be in two states: parsed or unparsed when passed
 
  - *parser* - Class name - name of a parser class that we want to use to parse incoming data
 
-Karafka by default will parse messages with a JSON parser. If you want to change this behaviour you need to set custom parser for each route. Parser needs to have a #parse method and raise error that is a ::Karafka::Errors::ParserError descendant when problem appears during parsing process.
+Karafka by default will parse messages with a JSON parser. If you want to change this behaviour you need to set a custom parser for each route. Parser needs to have a #parse method and raise an error that is a ::Karafka::Errors::ParserError descendant when problem appears during the parsing process.
 
 ```ruby
 class XmlParser
@@ -320,7 +320,7 @@ Note that parsing failure won't stop the application flow. Instead, Karafka will
 
 ##### Interchanger
 
- - *interchanger* - Class name - name of a interchanger class that we want to use to format data that we put/fetch into/from #perform_async.
+ - *interchanger* - Class name - name of an interchanger class that we want to use to format data that we put/fetch into/from #perform_async.
 
 Custom interchangers target issues with non-standard (binary, etc) data that we want to store when we do #perform_async. This data might be corrupted when fetched in a worker (see [this](https://github.com/karafka/karafka/issues/30) issue). With custom interchangers, you can encode/compress data before it is being passed to scheduling and decode/decompress it when it gets into the worker.
 
@@ -455,15 +455,15 @@ module Users
 end
 ```
 
-Appropriate responder will be used automatically when you invoke the **respond_with** controller method.
+The appropriate responder will be used automatically when you invoke the **respond_with** controller method.
 
-Why did we separate response layer from the controller layer? Because sometimes when you respond to multiple topics conditionally, that logic can be really complex and it is way better to manage and test it in isolation.
+Why did we separate the response layer from the controller layer? Because sometimes when you respond to multiple topics conditionally, that logic can be really complex and it is way better to manage and test it in isolation.
 
 For more details about responders DSL, please visit the [responders](#responders) section.
 
 #### Using WaterDrop directly
 
-It is not recommended (as it breaks responders validations and makes it harder to track data flow), but if you want to send messages outside of Karafka responders, you can to use **waterdrop** gem directly.
+It is not recommended (as it breaks responders validations and makes it harder to track data flow), but if you want to send messages outside of Karafka responders, you can to use the **waterdrop** gem directly.
 
 Example usage:
 
@@ -502,7 +502,7 @@ end
 
 #### Controllers callbacks
 
-You can add any number of *before_enqueue* callbacks. It can be method or block.
+You can add any number of *before_enqueue* callbacks. It can be a method or a block.
 before_enqueue acts in a similar way to Rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on it you can define which data you want to receive and which not.
 
 **Warning**: keep in mind, that all *before_enqueue* blocks/methods are executed after messages are received. This is not executed in Sidekiq, but right after receiving the incoming message. This means, that if you perform "heavy duty" operations there, Karafka might significantly slow down.
