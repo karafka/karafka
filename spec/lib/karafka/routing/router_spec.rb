@@ -10,6 +10,7 @@ RSpec.describe Karafka::Routing::Router do
     let(:controller) { double }
     let(:interchanger) { double }
     let(:inline) { [true, false].sample }
+    let(:group) { rand.to_s }
     let(:controller_instance) { double }
 
     let(:route) do
@@ -21,6 +22,7 @@ RSpec.describe Karafka::Routing::Router do
         route.responder = responder
         route.interchanger = interchanger
         route.inline = inline
+        route.group = group
       end
     end
 
@@ -44,6 +46,10 @@ RSpec.describe Karafka::Routing::Router do
       expect(controller_instance)
         .to receive(:parser=)
         .with(parser)
+
+      expect(controller_instance)
+        .to receive(:group=)
+        .with(group)
 
       expect(controller_instance)
         .to receive(:worker=)
