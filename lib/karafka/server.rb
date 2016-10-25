@@ -25,7 +25,7 @@ module Karafka
       def bind_on_sigint
         process.on_sigint do
           Karafka::App.stop!
-          consumers.map(&:stop) if Karafka::App.running?
+          consumers.map(&:stop)
           exit
         end
       end
@@ -34,7 +34,7 @@ module Karafka
       def bind_on_sigquit
         process.on_sigquit do
           Karafka::App.stop!
-          consumers.map(&:stop) if Karafka::App.running?
+          consumers.map(&:stop)
           exit
         end
       end

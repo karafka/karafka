@@ -20,11 +20,9 @@ RSpec.describe Karafka::Connection::TopicConsumer do
   end
 
   describe '#stop' do
-    it 'expect to stop consumer' do
-      expect(topic_consumer)
-        .to receive(:kafka_consumer)
-        .and_return(kafka_consumer)
+    before { topic_consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
+    it 'expect to stop consumer' do
       expect(kafka_consumer)
         .to receive(:stop)
 

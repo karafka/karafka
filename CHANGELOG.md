@@ -10,6 +10,7 @@
 - #97 - Buffer responders single topics before send (prevalidation)
 - Better control over consumer thanks to additional config options
 - #111 - Dynamic worker assignment based on the income params
+- Long shutdown time fix
 
 ## 0.5.0
 - Removed Zookeeper totally as dependency
