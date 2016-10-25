@@ -74,7 +74,7 @@ RSpec.describe Karafka::Connection::TopicConsumer do
       end
 
       it 'expect to build it and subscribe' do
-        expect(kafka).to receive(:consumer).with(group_id: route.group).and_return(consumer)
+        expect(kafka).to receive(:consumer).and_return(consumer)
         expect(consumer).to receive(:subscribe).with(route.topic)
         expect(topic_consumer.send(:kafka_consumer)).to eq consumer
       end

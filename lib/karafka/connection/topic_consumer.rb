@@ -39,7 +39,14 @@ module Karafka
           client_id: ::Karafka::App.config.name
         )
 
-        @kafka_consumer = kafka.consumer(group_id: @route.group)
+        @kafka_consumer = kafka.consumer(
+          group_id: @route.group,
+          session_timeout: ::Karafka::App.config.kafka.session_timeout,
+          offset_commit_interval: ::Karafka::App.config.kafka.offset_commit_interval,
+          offset_commit_threshold: ::Karafka::App.config.kafka.offset_commit_threshold,
+          heartbeat_interval: ::Karafka::App.config.kafka.heartbeat_interval
+        )
+
         @kafka_consumer.subscribe(@route.topic)
         @kafka_consumer
       end

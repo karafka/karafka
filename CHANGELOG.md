@@ -8,6 +8,7 @@
 - #105 - Karafka::Monitor#caller_label not working with inherited monitors
 - #99 - Standalone mode (without Sidekiq)
 - #97 - Buffer responders single topics before send (prevalidation)
+- Better control over consumer thanks to additional config options
 
 ## 0.5.0
 - Removed Zookeeper totally as dependency

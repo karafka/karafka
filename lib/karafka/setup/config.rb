@@ -27,7 +27,21 @@ module Karafka
       setting :redis
       # option kafka [Hash] - optional - kafka configuration options (hosts)
       setting :kafka do
+        # Array with at least one host
         setting :hosts
+        # option session_timeout [Integer] the number of seconds after which, if a client
+        #   hasn't contacted the Kafka cluster, it will be kicked out of the group.
+        setting :session_timeout, 30
+        # option offset_commit_interval [Integer] the interval between offset commits,
+        #   in seconds.
+        setting :offset_commit_interval, 10
+        # option offset_commit_threshold [Integer] the number of messages that can be
+        #   processed before their offsets are committed. If zero, offset commits are
+        #   not triggered by message processing.
+        setting :offset_commit_threshold, 0
+        # option heartbeat_interval [Integer] the interval between heartbeats; must be less
+        #   than the session window.
+        setting :heartbeat_interval, 10
       end
 
       # This is configured automatically, don't overwrite it!
