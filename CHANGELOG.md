@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 0.5.0-head
+## 0.5.0.1
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available
 - #101
 - fix error on startup from waterdrop #102
