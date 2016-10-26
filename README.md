@@ -140,7 +140,7 @@ Note: You can use any library like [Settingslogic](https://github.com/binarylogi
 
 ### Configurators
 
-If you want to do some configurations after all of this is done, please add to config directory a proper file (needs to inherit from Karafka::Config::Base and implement setup method), after that everything will happen automatically.
+If you want to do some configurations after all of this is done, please add a proper file to config directory (it needs to inherit from Karafka::Config::Base and implement setup method), after that everything will happen automatically.
 
 Example configuration class:
 
@@ -320,13 +320,13 @@ App.routes.draw do
 end
 ```
 
-Note that parsing failure won't stop the application flow. Instead, Karafka will assign the raw message inside the :message key of params. That way you can handle raw message inside the Sidekiq worker (you can implement error detection, etc - any "heavy" parsing logic can and should be implemented there).
+Note that parsing failure won't stop the application flow. Instead, Karafka will assign the raw message inside the :message key of params. That way you can handle raw message inside the Sidekiq worker (you can implement error detection, etc. - any "heavy" parsing logic can and should be implemented there).
 
 ##### Interchanger
 
  - *interchanger* - Class name - name of an interchanger class that we want to use to format data that we put/fetch into/from #perform_async.
 
-Custom interchangers target issues with non-standard (binary, etc) data that we want to store when we do #perform_async. This data might be corrupted when fetched in a worker (see [this](https://github.com/karafka/karafka/issues/30) issue). With custom interchangers, you can encode/compress data before it is being passed to scheduling and decode/decompress it when it gets into the worker.
+Custom interchangers target issues with non-standard (binary, etc.) data that we want to store when we do #perform_async. This data might be corrupted when fetched in a worker (see [this](https://github.com/karafka/karafka/issues/30) issue). With custom interchangers, you can encode/compress data before it is being passed to scheduling and decode/decompress it when it gets into the worker.
 
 **Warning**: if you decide to use slow interchangers, they might significantly slow down Karafka.
 
@@ -353,7 +353,7 @@ end
 
   - *responder* - Class name - name of a responder that we want to use to generate responses to other Kafka topics based on our processed data.
 
-Responders are used to design the response that should be generated and sent to proper Kafka topics, once processing is done. It allows programmers to build not only data-consuming apps, but to build apps that consume data and, then, based on the business logic output send this processed data onwards (similary to how Bash pipelines work).
+Responders are used to design the response that should be generated and sent to proper Kafka topics, once processing is done. It allows programmers to build not only data-consuming apps, but to build apps that consume data and, then, based on the business logic output send this processed data onwards (similarly to how Bash pipelines work).
 
 ```ruby
 class Responder < ApplicationResponder
@@ -403,7 +403,7 @@ If you don't want to use Sidekiq for processing and you would rather process mes
 ```ruby
 class App < Karafka::App
   setup do |config|
-    config.inline = false
+    config.inline = true
     # Rest of the config
   end
 end
@@ -420,7 +420,7 @@ App.routes.draw do
 end
 ```
 
-Note: it can slow Karafka significantly if you do heavy stuff that way.
+Note: it can slow Karafka down significantly if you do heavy stuff that way.
 
 ### Sending messages from Karafka
 
@@ -507,20 +507,20 @@ end
 #### Controllers callbacks
 
 You can add any number of *before_enqueue* callbacks. It can be a method or a block.
-before_enqueue acts in a similar way to Rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on it you can define which data you want to receive and which not.
+before_enqueue acts in a similar way to Rails before_action so it should perform "lightweight" operations. You have access to params inside. Based on them you can define which data you want to receive and which you do not.
 
-**Warning**: keep in mind, that all *before_enqueue* blocks/methods are executed after messages are received. This is not executed in Sidekiq, but right after receiving the incoming message. This means, that if you perform "heavy duty" operations there, Karafka might significantly slow down.
+**Warning**: keep in mind, that all *before_enqueue* blocks/methods are executed after messages are received. This is not executed in Sidekiq, but right after receiving the incoming message. This means, that if you perform "heavy duty" operations there, Karafka might slow down significantly.
 
 If any of callbacks throws :abort - *perform* method will be not enqueued to the worker (the execution chain will stop).
 
-Once you run consumer - messages from Kafka server will be send to a proper controller (based on topic name).
+Once you run a consumer - messages from Kafka server will be send to a proper controller (based on topic name).
 
 Presented example controller will accept incoming messages from a Kafka topic named :karafka_topic
 
 ```ruby
   class TestController < ApplicationController
     # before_enqueue has access to received params.
-    # You can modify them before enqueue it to sidekiq queue.
+    # You can modify them before enqueuing it to sidekiq.
     before_enqueue {
       params.merge!(received_time: Time.now.to_s)
     }
@@ -630,7 +630,7 @@ end
 
 In order to ensure the dataflow is as intended, responder will validate what and where was sent, making sure that:
 
-  - Only topics that were registered were used (no typos, etc)
+  - Only topics that were registered were used (no typos, etc.)
   - Only a single message was sent to a topic that was registered without a **multiple_usage** flag
   - Any topic that was registered with **required** flag (default behavior) has been used
 
