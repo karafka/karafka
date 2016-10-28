@@ -1,8 +1,11 @@
 # Karafka framework changelog
 
+## 0.5.0.1-head
+- #114 - Option to configure waterdrop connection pool timeout and concurrency
+
 ## 0.5.0.1
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available
-- #101
+- #101 - Responders fail when multiple_usage true and required false
 - fix error on startup from waterdrop #102
 - Waterdrop 0.3.2.1 with kafka.hosts instead of kafka_hosts
 - #105 - Karafka::Monitor#caller_label not working with inherited monitors

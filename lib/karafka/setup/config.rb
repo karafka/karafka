@@ -25,6 +25,20 @@ module Karafka
       # Note that redis could be rewriten using nested options, but it is a sidekiq specific
       # stuff and we don't want to touch it
       setting :redis
+
+      # Connection pool options are used for producer (Waterdrop)
+      # They are configured automatically based on Sidekiq concurrency and number of routes
+      # The bigger one is selected as we need to be able to send messages from both places
+      setting :connection_pool do
+        # Connection pool size for producers. Note that we take a bigger number because there
+        # are cases when we might have more sidekiq threads than Karafka routes (small app)
+        # or the opposite for bigger systems
+        setting :size, -> { [::Karafka::App.routes.count, Sidekiq.options[:concurrency]].max }
+        # How long should we wait for a working resource from the pool before rising timeout
+        # With a proper connection pool size, this should never happen
+        setting :timeout, 5
+      end
+
       # option kafka [Hash] - optional - kafka configuration options (hosts)
       setting :kafka do
         # Array with at least one host
