@@ -110,8 +110,8 @@ Karafka has following configuration options:
 | Option                        | Required | Value type        | Description                                                                                                |
 |-------------------------------|----------|-------------------|------------------------------------------------------------------------------------------------------------|
 | name                          | true     | String            | Application name                                                                                           |
-| inline                        | false    | Boolean           | Do we want to perform logic without enqueuing it with Sidekiq (directly and asap)                          |
 | redis                         | true     | Hash              | Hash with Redis configuration options                                                                      |
+| inline                        | false    | Boolean           | Do we want to perform logic without enqueuing it with Sidekiq (directly and asap)                          |
 | monitor                       | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                                            |
 | logger                        | false    | Object            | Logger instance (defaults to Karafka::Logger)                                                              |
 | kafka.hosts                   | false    | Array<String>     | Kafka server hosts. If 1 provided, Karafka will discover cluster structure automatically                   |
@@ -119,6 +119,8 @@ Karafka has following configuration options:
 | kafka.offset_commit_interval  | false    | Integer           | The interval between offset commits in seconds                                                             |
 | kafka.offset_commit_threshold | false    | Integer           | The number of messages that can be processed before their offsets are committed                            |
 | kafka.heartbeat_interval      | false    | Integer           | The interval between heartbeats                                                                            |
+| connection_pool.size          | false    | Integer           | Connection pool size for message producers connection pool                                                 |
+| connection_pool.timeout       | false    | Integer           | Connection pool timeout for message producers connection pool                                              |
 
 To apply this configuration, you need to use a *setup* method from the Karafka::App class (app.rb):
 
