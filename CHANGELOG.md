@@ -2,6 +2,7 @@
 
 ## 0.5.0.1-head
 - #114 - Option to configure waterdrop connection pool timeout and concurrency
+- #98 - Use parser when responding on a topic
 
 ## 0.5.0.1
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available
