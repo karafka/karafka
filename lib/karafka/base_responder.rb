@@ -65,8 +65,10 @@ module Karafka
     end
 
     # Creates a responder object
+    # @param parser_class [Class] parser class that we can use to generate appropriate string
     # @return [Karafka::BaseResponder] base responder descendant responder
-    def initialize
+    def initialize(parser_class)
+      @parser_class = parser_class
       @messages_buffer = {}
     end
 
@@ -94,14 +96,12 @@ module Karafka
     # as many times as we need. Especially when we have 1:n flow
     # @param topic [Symbol, String] topic to which we want to respond
     # @param data [String, Object] string or object that we want to send
-    # @note Note that if we pass object here (not a string), this method will invoke a #to_json
-    #   on it.
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data)
       Karafka.monitor.notice(self.class, topic: topic, data: data)
 
       messages_buffer[topic.to_s] ||= []
-      messages_buffer[topic.to_s] << (data.is_a?(String) ? data : data.to_json)
+      messages_buffer[topic.to_s] << @parser_class.generate(data)
     end
 
     # Checks if we met all the topics requirements. It will fail if we didn't send a message to

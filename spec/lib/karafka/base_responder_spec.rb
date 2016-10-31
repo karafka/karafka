@@ -32,7 +32,8 @@ RSpec.describe Karafka::BaseResponder do
   end
 
   context 'instance' do
-    subject(:responder) { working_class.new }
+    subject(:responder) { working_class.new(parser_class) }
+    let(:parser_class) { Karafka::Parsers::Json }
 
     describe '#call' do
       it 'expect to respond and validate' do

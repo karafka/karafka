@@ -63,9 +63,9 @@ module Karafka
       end
 
       # @return [Class] Parser class (not instance) that we want to use to unparse Kafka messages
-      # @note If not provided - will use JSON as default
+      # @note If not provided - will use Json as default
       def parser
-        @parser ||= JSON
+        @parser ||= Karafka::Parsers::Json
       end
 
       # @return [Class] Interchanger class (not an instance) that we want to use to interchange
