@@ -299,9 +299,14 @@ Keep in mind, that params might be in two states: parsed or unparsed when passed
 
 ##### Parser
 
- - *parser* - Class name - name of a parser class that we want to use to parse incoming data
+ - *parser* - Class name - name of a parser class that we want to use to serialize and deserialize incoming and outgoing data.
 
-Karafka by default will parse messages with a JSON parser. If you want to change this behaviour you need to set a custom parser for each route. Parser needs to have a #parse method and raise an error that is a ::Karafka::Errors::ParserError descendant when problem appears during the parsing process.
+Karafka by default will parse messages with a Json parser. If you want to change this behaviour you need to set a custom parser for each route. Parser needs to have a following class methods:
+
+  - *parse* - method used to parse incoming string into an object/hash
+  - *generate* - method used in responders in order to convert objects into strings that have desired format
+
+and raise an error that is a ::Karafka::Errors::ParserError descendant when problem appears during the parsing process.
 
 ```ruby
 class XmlParser
@@ -311,6 +316,10 @@ class XmlParser
     Hash.from_xml(message)
   rescue REXML::ParseException
     raise ParserError
+  end
+
+  def self.generate(object)
+    object.to_xml
   end
 end
 
@@ -578,6 +587,8 @@ class ExampleResponder < ApplicationResponder
   end
 end
 ```
+
+When passing data back to Kafka, responder uses parser #generate method to convert message object to a string. It will use parser of a route for which a current message was received. By default it is Karafka::Parsers::Json parser.
 
 Note: You can use responders outside of controllers scope, however it is not recommended because then, they won't be listed when executing **karafka flow** CLI command.
 

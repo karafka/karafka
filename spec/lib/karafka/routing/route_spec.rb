@@ -182,7 +182,7 @@ RSpec.describe Karafka::Routing::Route do
       let(:parser) { nil }
 
       it 'expect to use default one' do
-        expect(route.parser).to eq JSON
+        expect(route.parser).to eq Karafka::Parsers::Json
       end
     end
 

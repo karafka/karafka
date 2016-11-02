@@ -149,7 +149,7 @@ module Karafka
       raise(Errors::ResponderMissing, self.class) unless responder
 
       Karafka.monitor.notice(self.class, data: data)
-      responder.new.call(*data)
+      responder.new(parser).call(*data)
     end
 
     # Executes perform code immediately (without enqueuing)

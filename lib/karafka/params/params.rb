@@ -92,7 +92,7 @@ module Karafka
       def parse(content)
         self[:parser].parse(content)
         # We catch both of them, because for default JSON - we use JSON parser directly
-      rescue ::Karafka::Errors::ParserError, JSON::ParserError => e
+      rescue ::Karafka::Errors::ParserError => e
         Karafka.monitor.notice_error(self.class, e)
         return { message: content }
       ensure
