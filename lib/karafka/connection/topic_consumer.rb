@@ -33,12 +33,6 @@ module Karafka
       def kafka_consumer
         return @kafka_consumer if @kafka_consumer
 
-        kafka = Kafka.new(
-          seed_brokers: ::Karafka::App.config.kafka.hosts,
-          logger: ::Karafka.logger,
-          client_id: ::Karafka::App.config.name
-        )
-
         @kafka_consumer = kafka.consumer(
           group_id: @route.group,
           session_timeout: ::Karafka::App.config.kafka.session_timeout,
@@ -49,6 +43,18 @@ module Karafka
 
         @kafka_consumer.subscribe(@route.topic)
         @kafka_consumer
+      end
+
+      # @return [Kafka] returns a Kafka
+      def kafka
+        Kafka.new(
+          seed_brokers: ::Karafka::App.config.kafka.hosts,
+          logger: ::Karafka.logger,
+          client_id: ::Karafka::App.config.name,
+          ssl_ca_cert: ::Karafka::App.config.kafka.ssl_ca_cert,
+          ssl_client_cert: ::Karafka::App.config.kafka.ssl_client_cert,
+          ssl_client_cert_key: ::Karafka::App.config.kafka.ssl_client_cert_key
+        )
       end
     end
   end
