@@ -1,5 +1,5 @@
 RSpec.describe Karafka::BaseResponder do
-  let(:topic_name) { "topic#{rand(1000)}" }
+  let(:topic_name) { 'topic_123.abc-xyz' }
   let(:input_data) { rand }
 
   let(:working_class) do
@@ -24,9 +24,13 @@ RSpec.describe Karafka::BaseResponder do
       end
 
       context 'when we register invalid topic' do
-        let(:topic_name) { rand.to_s }
+        %w(
+          & /31 ół !@
+        ).each do |topic_name|
+          let(:topic_name) { topic_name }
 
-        it { expect { responder_class }.to raise_error Karafka::Errors::InvalidTopicName }
+          it { expect { responder_class }.to raise_error(Karafka::Errors::InvalidTopicName) }
+        end
       end
     end
   end
