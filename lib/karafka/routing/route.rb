@@ -9,8 +9,9 @@ module Karafka
     # - parser - What parsed do we want to use to unparse the data (optional)
     # - interchanger - What interchanger to encode/decode data do we want to use (optional)
     class Route
-      # Only ASCII alphanumeric characters and underscore and dash are allowed in topics and groups
-      NAME_FORMAT = /\A(\w|\-)+\z/
+      # Only ASCII alphanumeric characters, underscore, dash and dots
+      # are allowed in topics and groups
+      NAME_FORMAT = /\A(\w|\-|\.)+\z/
 
       # Options that we can set per each route
       ATTRIBUTES = %i(

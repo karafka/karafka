@@ -1,13 +1,17 @@
 RSpec.describe Karafka::Responders::Topic do
   subject(:topic) { described_class.new(name, options) }
-  let(:name) { rand(1000).to_s }
+  let(:name) { 'topic_123.abc-xyz' }
   let(:options) { {} }
 
   describe '.new' do
     context 'when name is invalid' do
-      let(:name) { rand.to_f.to_s }
+      %w(
+        & /31 ół !@
+      ).each do |topic_name|
+        let(:name) { topic_name }
 
-      it { expect { topic }.to raise_error(Karafka::Errors::InvalidTopicName) }
+        it { expect { topic }.to raise_error(Karafka::Errors::InvalidTopicName) }
+      end
     end
 
     context 'when name is valid' do

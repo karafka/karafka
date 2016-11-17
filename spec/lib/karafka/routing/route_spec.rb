@@ -231,7 +231,7 @@ RSpec.describe Karafka::Routing::Route do
     end
 
     context 'when topic name is valid' do
-      let(:topic) { rand(1000).to_s }
+      let(:topic) { 'topic_123.abc-xyz' }
 
       before { route.group = group }
 
@@ -246,7 +246,7 @@ RSpec.describe Karafka::Routing::Route do
       end
 
       context 'and group name is valid' do
-        let(:group) { rand(1000).to_s }
+        let(:group) { 'topic_123.abc-xyz' }
 
         it { expect { route.validate! }.not_to raise_error }
       end
