@@ -56,6 +56,12 @@ module Karafka
         # option heartbeat_interval [Integer] the interval between heartbeats; must be less
         #   than the session window.
         setting :heartbeat_interval, 10
+        # option ssl_ca_cert [String] SSL CA certificate
+        setting :ssl_ca_cert, nil
+        # option ssl_client_cert [String] SSL client certificate
+        setting :ssl_client_cert, nil
+        # option ssl_client_cert [String] SSL client certificate password
+        setting :ssl_client_cert_key, nil
       end
 
       # This is configured automatically, don't overwrite it!
