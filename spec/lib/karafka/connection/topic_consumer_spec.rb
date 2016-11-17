@@ -67,9 +67,9 @@ RSpec.describe Karafka::Connection::TopicConsumer do
             seed_brokers: ::Karafka::App.config.kafka.hosts,
             logger: ::Karafka.logger,
             client_id: ::Karafka::App.config.name,
-            ssl_ca_cert: ::Karafka::App.config.kafka.ssl_ca_cert,
-            ssl_client_cert: ::Karafka::App.config.kafka.ssl_client_cert,
-            ssl_client_cert_key: ::Karafka::App.config.kafka.ssl_client_cert_key
+            ssl_ca_cert: ::Karafka::App.config.kafka.ssl.ca_cert,
+            ssl_client_cert: ::Karafka::App.config.kafka.ssl.client_cert,
+            ssl_client_cert_key: ::Karafka::App.config.kafka.ssl.client_cert_key
           )
           .and_return(kafka)
       end

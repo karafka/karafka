@@ -5,6 +5,7 @@
 - #98 - Use parser when responding on a topic
 - #118 - Added dot in topic validation format
 - Gems update
+- #119 - add support for authentication using SSL
 
 ## 0.5.0.1
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available
