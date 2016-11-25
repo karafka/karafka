@@ -120,7 +120,7 @@ GEM
       rack
     rainbow (2.1.0)
     rake (11.3.0)
-    redis (3.3.1)
+    redis (3.3.2)
     reek (4.1.0)
       codeclimate-engine-rb (~> 0.3.1)
       parser (~> 2.3.1, >= 2.3.1.2)
@@ -214,4 +214,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   1.12.5
+   1.13.6

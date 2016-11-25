@@ -4,8 +4,9 @@
 - #114 - Option to configure waterdrop connection pool timeout and concurrency
 - #98 - Use parser when responding on a topic
 - #118 - Added dot in topic validation format
-- Gems update
+- Gems update x2
 - #119 - add support for authentication using SSL
+- Default Ruby set to 2.3.3
 
 ## 0.5.0.1
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available
