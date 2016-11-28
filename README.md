@@ -145,7 +145,7 @@ Note: You can use any library like [Settingslogic](https://github.com/binarylogi
 
 ### Configurators
 
-For addtional setup and/or configuration tasks you can create custom configurators. Similar to Rails these are added to a `config/initializers` directory and run after app initialization.
+For additional setup and/or configuration tasks you can create custom configurators. Similar to Rails these are added to a `config/initializers` directory and run after app initialization.
 
 Your new configurator class must inherit from `Karafka::Setup::Configurators::Base` and implement a `setup` method.
 
