@@ -39,6 +39,13 @@ RSpec.describe Karafka::BaseResponder do
     subject(:responder) { working_class.new(parser_class) }
     let(:parser_class) { Karafka::Parsers::Json }
 
+    describe 'default responder' do
+      subject(:responder) { working_class.new }
+      let(:default_parser) { Karafka::Parsers::Json }
+
+      it { expect(responder.instance_variable_get(:'@parser_class')).to eq default_parser }
+    end
+
     describe '#call' do
       it 'expect to respond and validate' do
         expect(responder).to receive(:respond).with(input_data)
