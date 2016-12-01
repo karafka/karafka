@@ -145,12 +145,14 @@ Note: You can use any library like [Settingslogic](https://github.com/binarylogi
 
 ### Configurators
 
-If you want to do some configurations after all of this is done, please add a proper file to config directory (it needs to inherit from Karafka::Config::Base and implement setup method), after that everything will happen automatically.
+For additional setup and/or configuration tasks you can create custom configurators. Similar to Rails these are added to a `config/initializers` directory and run after app initialization.
+
+Your new configurator class must inherit from `Karafka::Setup::Configurators::Base` and implement a `setup` method.
 
 Example configuration class:
 
 ```ruby
-class ExampleConfigurator < Base
+class ExampleConfigurator < Karafka::Setup::Configurators::Base
   def setup
     ExampleClass.logger = Karafka.logger
     ExampleClass.redis = config.redis
