@@ -8,6 +8,7 @@
 - #119 - add support for authentication using SSL
 - Default Ruby set to 2.3.3
 - #121 - JSON as a default for standalone responders usage
+- #122 - Allow on capistrano role customization
 
 ## 0.5.0.1
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available
