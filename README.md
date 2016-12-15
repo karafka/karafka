@@ -665,7 +665,7 @@ class App < Karafka::App
   setup do |config|
     # Other setup stuff...
     config.logger = MyCustomLogger.new
-    config.monitor = CustomMonitor.new
+    config.monitor = CustomMonitor.instance
   end
 end
 ```
