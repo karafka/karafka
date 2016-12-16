@@ -16,6 +16,15 @@ module Karafka
   #     end
   #   end
   #
+  # @example Responding to a topic with extra options
+  #   class Responder < BaseResponder
+  #     topic :new_action
+  #
+  #     def respond(data)
+  #       respond_to :new_action, data, partition_key: 'thing'
+  #     end
+  #   end
+  #
   # @example Marking topic as not required (we won't have to use it)
   #   class Responder < BaseResponder
   #     topic :required_topic
@@ -97,12 +106,13 @@ module Karafka
     # as many times as we need. Especially when we have 1:n flow
     # @param topic [Symbol, String] topic to which we want to respond
     # @param data [String, Object] string or object that we want to send
+    # @param options [Hash] options for waterdrop (e.g. partition_key)
     # @note Respond to does not accept multiple data arguments.
-    def respond_to(topic, data)
-      Karafka.monitor.notice(self.class, topic: topic, data: data)
+    def respond_to(topic, data, options = {})
+      Karafka.monitor.notice(self.class, topic: topic, data: data, options: options)
 
       messages_buffer[topic.to_s] ||= []
-      messages_buffer[topic.to_s] << @parser_class.generate(data)
+      messages_buffer[topic.to_s] << [@parser_class.generate(data), options]
     end
 
     # Checks if we met all the topics requirements. It will fail if we didn't send a message to
@@ -123,7 +133,9 @@ module Karafka
     #   what we send is legit and it will go to a proper topics
     def deliver!
       messages_buffer.each do |topic, data_elements|
-        data_elements.each { |data| ::WaterDrop::Message.new(topic, data).send! }
+        data_elements.each do |(data, options)|
+          ::WaterDrop::Message.new(topic, data, options).send!
+        end
       end
     end
   end

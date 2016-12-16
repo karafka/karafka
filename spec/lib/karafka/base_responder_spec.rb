@@ -65,7 +65,7 @@ RSpec.describe Karafka::BaseResponder do
 
         it 'expect to expect to put string data into messages buffer' do
           responder.send(:respond_to, topic_name, input_data)
-          expect(responder.messages_buffer).to eq(topic_name => [input_data])
+          expect(responder.messages_buffer).to eq(topic_name => [[input_data, {}]])
         end
       end
 
@@ -74,7 +74,7 @@ RSpec.describe Karafka::BaseResponder do
 
         it 'expect to cast to json, and buffer in messages buffer' do
           responder.send(:respond_to, topic_name, input_data)
-          expect(responder.messages_buffer).to eq(topic_name => [input_data.to_json])
+          expect(responder.messages_buffer).to eq(topic_name => [[input_data.to_json, {}]])
         end
       end
     end
@@ -115,11 +115,11 @@ RSpec.describe Karafka::BaseResponder do
 
         it 'expect to deliver them using waterdrop' do
           messages_buffer.each do |topic, data_elements|
-            data_elements.each do |data|
+            data_elements.each do |(data, options)|
               kafka_message = instance_double(::WaterDrop::Message)
 
               expect(::WaterDrop::Message)
-                .to receive(:new).with(topic, data)
+                .to receive(:new).with(topic, data, options)
                 .and_return(kafka_message)
 
               expect(kafka_message).to receive(:send!)
