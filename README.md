@@ -45,6 +45,7 @@ Karafka not only handles incoming messages but also provides tools for building 
         - [Registering topics](#registering-topics)
         - [Responding on topics](#responding-on-topics)
         - [Response validation](#response-validation)
+        - [Response partitioning](#response-partitioning)
   - [Monitoring and logging](#monitoring-and-logging)
       - [Example monitor with Errbit/Airbrake support](#example-monitor-with-errbitairbrake-support)
       - [Example monitor with NewRelic support](#example-monitor-with-newrelic-support)
@@ -593,7 +594,7 @@ class ExampleResponder < ApplicationResponder
 end
 ```
 
-When passing data back to Kafka, responder uses parser #generate method to convert message object to a string. It will use parser of a route for which a current message was received. By default it is Karafka::Parsers::Json parser.
+When passing data back to Kafka, responder uses parser **#generate** method to convert message object to a string. It will use parser of a route for which a current message was directed. By default it uses Karafka::Parsers::Json parser.
 
 Note: You can use responders outside of controllers scope, however it is not recommended because then, they won't be listed when executing **karafka flow** CLI command.
 
@@ -622,7 +623,7 @@ When you receive a single HTTP request, you generate a single HTTP response. Thi
 
 To handle responding, you need to define *#respond* instance method. This method should accept the same amount of arguments passed into *#respond_with* method.
 
-In order to send a message to a given topic, you have to use *#respond_to* method that accepts two arguments:
+In order to send a message to a given topic, you have to use **#respond_to** method that accepts two arguments:
 
   - topic name (Symbol)
   - data you want to send (if data is not string, responder will try to run #to_json method on the incoming data)
@@ -653,6 +654,30 @@ In order to ensure the dataflow is as intended, responder will validate what and
   - Any topic that was registered with **required** flag (default behavior) has been used
 
 This is an automatic process and does not require any triggers.
+
+#### Response partitioning
+
+Kafka topics are partitioned, which means that  you can assing messages to partitions based on your business logic. To do so from responders, you can pass one of the following keyword arguments as a last option of a **#respond_to** method:
+
+* partition - use it when you want to send a given message to a certain partition
+* partition_key - use it when you want to ensure that a certain group of messages is delivered to the same partition, but you don't which partition it will be.
+
+```ruby
+class ExampleResponder < ApplicationResponder
+  topic :regular_topic
+  topic :different_topic
+
+  def respond(user, profile)
+    respond_to :regular_topic, user, partition: 12
+    # This will send user details to a partition based on the first letter
+    # of login which means that for example all users with login starting
+    # with "a" will go to the same partition on the different_topic
+    respond_to :different_topic, user, partition_key: user.login[0].downcase
+  end
+end
+```
+
+If no keys are passed, the producer will randomly assign a partition.
 
 ## Monitoring and logging
 

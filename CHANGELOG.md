@@ -1,12 +1,14 @@
 # Karafka framework changelog
 
 ## 0.5.0.1-head
-- #114 - Option to configure waterdrop connection pool timeout and concurrency
-- #98 - Use parser when responding on a topic
-- #118 - Added dot in topic validation format
 - Gems update x2
-- #119 - add support for authentication using SSL
 - Default Ruby set to 2.3.3
+- Readme updates to match bug fixes and resolved issues
+- #95 - Allow options into responder
+- #98 - Use parser when responding on a topic
+- #114 - Option to configure waterdrop connection pool timeout and concurrency
+- #118 - Added dot in topic validation format
+- #119 - add support for authentication using SSL
 - #121 - JSON as a default for standalone responders usage
 - #122 - Allow on capistrano role customization
 
