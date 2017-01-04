@@ -24,11 +24,11 @@ RSpec.describe Karafka::Cli do
         Karafka::Cli::Routes,
         Karafka::Cli::Server,
         Karafka::Cli::Worker
-      ]
+      ].map(&:to_s).sort
     end
 
     it 'expect to return all cli commands classes' do
-      expect(cli.send(:cli_commands)).to eq available_commands
+      expect(cli.send(:cli_commands).map(&:to_s).sort).to eq available_commands
     end
   end
 end

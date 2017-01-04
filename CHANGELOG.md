@@ -1,8 +1,9 @@
 # Karafka framework changelog
 
 ## 0.5.0.1-head
-- Gems update x2
+- Gems update x3
 - Default Ruby set to 2.3.3
+- ~~Default Ruby set to 2.4.0~~
 - Readme updates to match bug fixes and resolved issues
 - #95 - Allow options into responder
 - #98 - Use parser when responding on a topic
