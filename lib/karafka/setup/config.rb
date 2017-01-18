@@ -25,6 +25,8 @@ module Karafka
       # Note that redis could be rewriten using nested options, but it is a sidekiq specific
       # stuff and we don't want to touch it
       setting :redis
+      # If batch_mode is true, incoming messages will be handled in batch, otherwsie one at a time.
+      setting :batch_mode, false
 
       # Connection pool options are used for producer (Waterdrop)
       # They are configured automatically based on Sidekiq concurrency and number of routes

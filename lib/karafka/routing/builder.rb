@@ -19,6 +19,7 @@ module Karafka
         interchanger
         responder
         inline
+        batch_mode
       ).freeze
 
       # All those options should be set on the route level

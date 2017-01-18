@@ -15,8 +15,16 @@ module Karafka
       # @yieldparam [Kafka::FetchedMessage] kafka fetched message
       # @note This will yield with a raw message - no preprocessing or reformatting
       def fetch_loop
-        kafka_consumer.each_message do |message|
-          yield(message)
+        if @route.batch_mode
+          kafka_consumer.each_batch do |batch|
+            batch.messages.each do |message|
+              yield(message)
+            end
+          end
+        else
+          kafka_consumer.each_message do |message|
+            yield(message)
+          end
         end
       end
 

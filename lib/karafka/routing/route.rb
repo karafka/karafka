@@ -22,6 +22,7 @@ module Karafka
         interchanger
         responder
         inline
+        batch_mode
       ).freeze
 
       ATTRIBUTES.each { |attr| attr_writer(attr) }
@@ -81,6 +82,12 @@ module Karafka
       def inline
         return @inline unless @inline.nil?
         @inline = Karafka::App.config.inline
+      end
+
+      # @return [Boolean] Should the consumer handle incoming events one at a time, or in batch
+      def batch_mode
+        return @batch_mode unless @batch_mode.nil?
+        @batch_mode = Karafka::App.config.batch_mode
       end
 
       # Checks if topic and group have proper format (acceptable by Kafka)
