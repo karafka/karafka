@@ -61,7 +61,7 @@ module Karafka
       end
 
       # @return [Kafka] returns a Kafka
-      # @note We don't cache it internally because we cache kafka_consumer thta uses kafka
+      # @note We don't cache it internally because we cache kafka_consumer that uses kafka
       #   object instance
       def kafka
         Kafka.new(
