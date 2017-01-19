@@ -18,7 +18,7 @@ module Karafka
         send(
           @route.batch_mode ? :consume_each_batch : :consume_each_message
         ) do |message|
-          yield message
+          yield(message)
         end
       end
 
