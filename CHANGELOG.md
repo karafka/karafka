@@ -12,6 +12,8 @@
 - #119 - add support for authentication using SSL
 - #121 - JSON as a default for standalone responders usage
 - #122 - Allow on capistrano role customization
+- #125 - Add support to batch incoming messages
+- Renamed *inline* to *inline_mode* to stay consistent with flags that change the way karafka works (#125)
 
 ## 0.5.0.1
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available

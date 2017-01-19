@@ -99,39 +99,39 @@ RSpec.describe Karafka::Routing::Route do
     end
   end
 
-  describe '#inline=' do
-    let(:inline) { double }
+  describe '#inline_mode=' do
+    let(:inline_mode) { double }
 
-    it { expect { route.inline = inline }.not_to raise_error }
+    it { expect { route.inline_mode = inline_mode }.not_to raise_error }
   end
 
-  describe '#inline' do
-    before { route.inline = inline }
+  describe '#inline_mode' do
+    before { route.inline_mode = inline_mode }
 
-    context 'when inline is not set' do
+    context 'when inline_mode is not set' do
       let(:default_inline) { rand }
-      let(:inline) { nil }
+      let(:inline_mode) { nil }
 
       before do
-        expect(Karafka::App.config).to receive(:inline)
+        expect(Karafka::App.config).to receive(:inline_mode)
           .and_return(default_inline)
       end
 
       it 'expect to use Karafka::App default' do
-        expect(route.inline).to eq default_inline
+        expect(route.inline_mode).to eq default_inline
       end
     end
 
-    context 'when inline per route is set to false' do
-      let(:inline) { false }
+    context 'when inline_mode per route is set to false' do
+      let(:inline_mode) { false }
 
-      it { expect(route.inline).to eq inline }
+      it { expect(route.inline_mode).to eq inline_mode }
     end
 
-    context 'when inline per route is set to true' do
-      let(:inline) { true }
+    context 'when inline_mode per route is set to true' do
+      let(:inline_mode) { true }
 
-      it { expect(route.inline).to eq inline }
+      it { expect(route.inline_mode).to eq inline_mode }
     end
   end
 

@@ -18,7 +18,7 @@ module Karafka
         parser
         interchanger
         responder
-        inline
+        inline_mode
         batch_mode
       ).freeze
 

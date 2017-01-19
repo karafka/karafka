@@ -33,7 +33,7 @@ RSpec.describe Karafka::BaseController do
       context 'and we want to perform inline' do
         before do
           expect(base_controller)
-            .to receive(:inline)
+            .to receive(:inline_mode)
             .and_return(true)
         end
 

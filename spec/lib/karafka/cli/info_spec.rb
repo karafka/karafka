@@ -9,7 +9,8 @@ RSpec.describe Karafka::Cli::Info do
       [
         "Karafka framework version: #{Karafka::VERSION}",
         "Application name: #{Karafka::App.config.name}",
-        "Inline mode: #{Karafka::App.config.inline}",
+        "Inline mode: #{Karafka::App.config.inline_mode}",
+        "Batch mode: #{Karafka::App.config.batch_mode}",
         "Number of threads: #{Karafka::App.config.concurrency}",
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
