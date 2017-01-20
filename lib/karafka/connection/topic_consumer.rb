@@ -15,7 +15,9 @@ module Karafka
       # @yieldparam [Kafka::FetchedMessage] kafka fetched message
       # @note This will yield with a raw message - no preprocessing or reformatting
       def fetch_loop
-        kafka_consumer.each_message do |message|
+        send(
+          @route.batch_mode ? :consume_each_batch : :consume_each_message
+        ) do |message|
           yield(message)
         end
       end
@@ -28,24 +30,39 @@ module Karafka
 
       private
 
+      # Consumes messages from Kafka in batches
+      # @yieldparam [Kafka::FetchedMessage] kafka fetched message
+      def consume_each_batch
+        kafka_consumer.each_batch do |batch|
+          batch.messages.each do |message|
+            yield(message)
+          end
+        end
+      end
+
+      # Consumes messages from Kafka one by one
+      # @yieldparam [Kafka::FetchedMessage] kafka fetched message
+      def consume_each_message
+        kafka_consumer.each_message do |message|
+          yield(message)
+        end
+      end
+
       # @return [Kafka::Consumer] returns a ready to consume Kafka consumer
       #   that is set up to consume a given routes topic
       def kafka_consumer
-        return @kafka_consumer if @kafka_consumer
-
-        @kafka_consumer = kafka.consumer(
+        @kafka_consumer ||= kafka.consumer(
           group_id: @route.group,
           session_timeout: ::Karafka::App.config.kafka.session_timeout,
           offset_commit_interval: ::Karafka::App.config.kafka.offset_commit_interval,
           offset_commit_threshold: ::Karafka::App.config.kafka.offset_commit_threshold,
           heartbeat_interval: ::Karafka::App.config.kafka.heartbeat_interval
-        )
-
-        @kafka_consumer.subscribe(@route.topic)
-        @kafka_consumer
+        ).tap { |consumer| consumer.subscribe(@route.topic) }
       end
 
       # @return [Kafka] returns a Kafka
+      # @note We don't cache it internally because we cache kafka_consumer that uses kafka
+      #   object instance
       def kafka
         Kafka.new(
           seed_brokers: ::Karafka::App.config.kafka.hosts,

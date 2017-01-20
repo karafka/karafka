@@ -31,7 +31,8 @@ Karafka not only handles incoming messages but also provides tools for building 
         - [Parser](#parser)
         - [Interchanger](#interchanger)
         - [Responder](#responder)
-        - [Inline flag](#inline-flag)
+        - [Inline mode flag](#inline-mode-flag)
+        - [Batch mode flag](#batch-mode-flag)
     - [Receiving messages](#receiving-messages)
         - [Processing messages directly (without Sidekiq)](#processing-messages-directly-without-sidekiq)
     - [Sending messages from Karafka](#sending-messages-from-karafka)
@@ -112,7 +113,8 @@ Karafka has following configuration options:
 |-------------------------------|----------|-------------------|------------------------------------------------------------------------------------------------------------|
 | name                          | true     | String            | Application name                                                                                           |
 | redis                         | true     | Hash              | Hash with Redis configuration options                                                                      |
-| inline                        | false    | Boolean           | Do we want to perform logic without enqueuing it with Sidekiq (directly and asap)                          |
+| inline_mode                   | false    | Boolean           | Do we want to perform logic without enqueuing it with Sidekiq (directly and asap)                          |
+| batch_mode                    | false    | Boolean           | Should the incoming messages be consumed in batches, or one at a time                                      |
 | monitor                       | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                                            |
 | logger                        | false    | Object            | Logger instance (defaults to Karafka::Logger)                                                              |
 | kafka.hosts                   | false    | Array<String>     | Kafka server hosts. If 1 provided, Karafka will discover cluster structure automatically                   |
@@ -132,7 +134,8 @@ To apply this configuration, you need to use a *setup* method from the Karafka::
 class App < Karafka::App
   setup do |config|
     config.kafka.hosts = %w( 127.0.0.1:9092 )
-    config.inline = false
+    config.inline_mode = false
+    config.batch_mode = false
     config.redis = {
       url: 'redis://redis.example.com:7372/1'
     }
@@ -224,7 +227,8 @@ There are also several other methods available (optional):
   - *parser* - Class name - name of a parser class that we want to use to parse incoming data
   - *interchanger* - Class name - name of a interchanger class that we want to use to format data that we put/fetch into/from *#perform_async*
   - *responder* - Class name - name of a responder that we want to use to generate responses to other Kafka topics based on our processed data
-  - *inline* - Boolean - Do we want to perform logic without enqueuing it with Sidekiq (directly and asap) - overwrites global app setting
+  - *inline_mode* - Boolean - Do we want to perform logic without enqueuing it with Sidekiq (directly and asap) - overwrites global app setting
+  - *batch_mode* - Boolean - Handle the incoming messages in batch, or one at a time - overwrites global app setting
 
 ```ruby
 App.routes.draw do
@@ -235,7 +239,8 @@ App.routes.draw do
     parser Parsers::BinaryToJson
     interchanger Interchangers::Binary
     responder BinaryVideoProcessingResponder
-    inline true
+    inline_mode true
+    batch_mode true
   end
 
   topic :new_videos do
@@ -386,9 +391,9 @@ end
 
 For more details about responders, please go to the [using responders](#using-responders) section.
 
-##### Inline flag
+##### Inline mode flag
 
-Inline flag allows you to disable Sidekiq usage by performing your #perform method business logic in the main Karafka server process.
+Inline mode flag allows you to disable Sidekiq usage by performing your #perform method business logic in the main Karafka server process.
 
 This flag be useful when you want to:
 
@@ -396,6 +401,12 @@ This flag be useful when you want to:
   - process messages as soon as possible (without Sidekiq delay)
 
 Note: Keep in mind, that by using this, you can significantly slow down Karafka. You also loose all the advantages of Sidekiq processing (reentrancy, retries, etc).
+
+##### Batch mode flag
+
+Batch mode allows you to increase the overall throughput of your kafka consumer by handling incoming messages in batches, instead of one at a time.
+
+Note: The downside of increasing throughput is a slight increase in latency. Also keep in mind, that the client commits the offset of the batch's messages only **after** the entire batch has been scheduled into Sidekiq (or processed in case of inline mode).
 
 ### Receiving messages
 
@@ -420,7 +431,7 @@ If you don't want to use Sidekiq for processing and you would rather process mes
 ```ruby
 class App < Karafka::App
   setup do |config|
-    config.inline = true
+    config.inline_mode = true
     # Rest of the config
   end
 end
@@ -432,7 +443,7 @@ or per route (when you want to treat some routes in a different way):
 App.routes.draw do
   topic :binary_video_details do
     controller Videos::DetailsController
-    inline true
+    inline_mode true
   end
 end
 ```

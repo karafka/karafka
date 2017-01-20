@@ -15,8 +15,8 @@ module Karafka
       # Available settings
       # option name [String] current app name - used to provide default Kafka groups namespaces
       setting :name
-      # If inline is set to true, we won't enqueue jobs, instead we will run them immediately
-      setting :inline, false
+      # If inline_mode is set to true, we won't enqueue jobs, instead we will run them immediately
+      setting :inline_mode, false
       # option logger [Instance] logger that we want to use
       setting :logger, ::Karafka::Logger.instance
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
@@ -25,6 +25,8 @@ module Karafka
       # Note that redis could be rewriten using nested options, but it is a sidekiq specific
       # stuff and we don't want to touch it
       setting :redis
+      # If batch_mode is true, incoming messages will be handled in batch, otherwsie one at a time.
+      setting :batch_mode, false
 
       # Connection pool options are used for producer (Waterdrop)
       # They are configured automatically based on Sidekiq concurrency and number of routes

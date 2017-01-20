@@ -18,7 +18,8 @@ module Karafka
         parser
         interchanger
         responder
-        inline
+        inline_mode
+        batch_mode
       ).freeze
 
       # All those options should be set on the route level

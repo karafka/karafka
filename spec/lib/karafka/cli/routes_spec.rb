@@ -14,7 +14,8 @@ RSpec.describe Karafka::Cli::Routes do
       parser
       interchanger
       responder
-      inline
+      inline_mode
+      batch_mode
     ).freeze
 
     KEYS.each do |key|

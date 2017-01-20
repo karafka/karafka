@@ -9,9 +9,10 @@ RSpec.describe Karafka::Routing::Router do
     let(:responder) { double }
     let(:controller) { double }
     let(:interchanger) { double }
-    let(:inline) { [true, false].sample }
+    let(:inline_mode) { [true, false].sample }
     let(:group) { rand.to_s }
     let(:controller_instance) { double }
+    let(:batch_mode) { [true, false].sample }
 
     let(:route) do
       Karafka::Routing::Route.new.tap do |route|
@@ -21,8 +22,9 @@ RSpec.describe Karafka::Routing::Router do
         route.worker = worker
         route.responder = responder
         route.interchanger = interchanger
-        route.inline = inline
         route.group = group
+        route.batch_mode = batch_mode
+        route.inline_mode = inline_mode
       end
     end
 
@@ -60,8 +62,12 @@ RSpec.describe Karafka::Routing::Router do
         .with(responder)
 
       expect(controller_instance)
-        .to receive(:inline=)
-        .with(inline)
+        .to receive(:inline_mode=)
+        .with(inline_mode)
+
+      expect(controller_instance)
+        .to receive(:batch_mode=)
+        .with(batch_mode)
     end
 
     it 'expect to build controller with all proper options assigned' do

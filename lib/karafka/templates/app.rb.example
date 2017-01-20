@@ -13,7 +13,8 @@ class App < Karafka::App
     config.redis = {
       url: 'redis://localhost:6379'
     }
-    config.inline = false
+    config.inline_mode = false
+    config.batch_mode = false
   end
 
   routes.draw do

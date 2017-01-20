@@ -21,7 +21,8 @@ module Karafka
         parser
         interchanger
         responder
-        inline
+        inline_mode
+        batch_mode
       ).freeze
 
       ATTRIBUTES.each { |attr| attr_writer(attr) }
@@ -78,9 +79,15 @@ module Karafka
       # @return [Boolean] Should we perform execution in the background (default) or
       #   inline. This can be set globally and overwritten by a per route setting
       # @note This method can be set to false, so direct assigment ||= would not work
-      def inline
-        return @inline unless @inline.nil?
-        @inline = Karafka::App.config.inline
+      def inline_mode
+        return @inline_mode unless @inline_mode.nil?
+        @inline_mode = Karafka::App.config.inline_mode
+      end
+
+      # @return [Boolean] Should the consumer handle incoming events one at a time, or in batch
+      def batch_mode
+        return @batch_mode unless @batch_mode.nil?
+        @batch_mode = Karafka::App.config.batch_mode
       end
 
       # Checks if topic and group have proper format (acceptable by Kafka)
