@@ -21,11 +21,11 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'worker-glass', '~> 0.2'
   spec.add_dependency 'celluloid', '~> 0.17'
   spec.add_dependency 'envlogic', '~> 1.0'
-  spec.add_dependency 'waterdrop', '~> 0.3'
+  spec.add_dependency 'waterdrop', '~> 0.3.2.1'
   spec.add_dependency 'rake', '~> 11.3'
   spec.add_dependency 'thor', '~> 0.19'
   spec.add_dependency 'activesupport', '~> 5.0'
-  spec.add_dependency 'dry-configurable', '~> 0.1.7'
+  spec.add_dependency 'dry-configurable', '~> 0.5'
   spec.required_ruby_version = '>= 2.3.0'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
