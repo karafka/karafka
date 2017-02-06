@@ -57,7 +57,12 @@ module Karafka
           offset_commit_interval: ::Karafka::App.config.kafka.offset_commit_interval,
           offset_commit_threshold: ::Karafka::App.config.kafka.offset_commit_threshold,
           heartbeat_interval: ::Karafka::App.config.kafka.heartbeat_interval
-        ).tap { |consumer| consumer.subscribe(@route.topic) }
+        ).tap do |consumer|
+          consumer.subscribe(
+            @route.topic,
+            start_from_beginning: @route.start_from_beginning
+          )
+        end
       end
 
       # @return [Kafka] returns a Kafka

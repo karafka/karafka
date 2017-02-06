@@ -23,6 +23,7 @@ module Karafka
         responder
         inline_mode
         batch_mode
+        start_from_beginning
       ).freeze
 
       ATTRIBUTES.each { |attr| attr_writer(attr) }
@@ -88,6 +89,16 @@ module Karafka
       def batch_mode
         return @batch_mode unless @batch_mode.nil?
         @batch_mode = Karafka::App.config.batch_mode
+      end
+
+      # For each topic subscription it's possible to decide whether to consume messages starting
+      # at the beginning of the topic or to just consume new messages that are produced to
+      # the topic.
+      # @return [Boolean] Should we consume from the beggining or from new incoming messages on
+      #   the first run
+      def start_from_beginning
+        return @start_from_beginning unless @start_from_beginning.nil?
+        @start_from_beginning = Karafka::App.config.start_from_beginning
       end
 
       # Checks if topic and group have proper format (acceptable by Kafka)
