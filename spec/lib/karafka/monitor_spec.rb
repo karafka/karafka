@@ -1,6 +1,12 @@
 RSpec.describe Karafka::Monitor do
   subject(:monitor) { described_class.instance }
 
+  MonitorWithSuper = ClassBuilder.inherit(described_class) do
+    def notice(klass, options)
+      super
+    end
+  end
+
   describe '#notice' do
     let(:options) { { rand => rand } }
     let(:caller_label) { 'block (3 levels) in <top (required)>' }
@@ -67,18 +73,58 @@ RSpec.describe Karafka::Monitor do
   describe '#caller_label' do
     it { expect(monitor.send(:caller_label)).to eq 'instance_exec' }
 
-    context 'when is is called from subclass' do
-      subject(:monitor) do
-        klass = ClassBuilder.inherit(described_class) do
+    context 'when it is called from the base monitor' do
+      let(:monitor_runner) do
+        ClassBuilder.build do
           def check
-            caller_label
+            Karafka::Monitor.instance.notice(self.class, 'test')
           end
         end
-
-        klass.instance
       end
 
-      it { expect(monitor.send(:check)).to eq 'instance_exec' }
+      it 'expect logger to receive proper details with caller_label' do
+        expect(Karafka.logger)
+          .to receive(:info)
+          .with("#{monitor_runner}#check with test")
+
+        monitor_runner.new.check
+      end
+    end
+
+    context 'when is is called from subclass' do
+      let(:monitor_runner) do
+        ClassBuilder.build do
+          def check
+            ClassBuilder.inherit(Karafka::Monitor).instance.notice(self.class, 'test')
+          end
+        end
+      end
+
+      it 'expect logger to receive proper details with caller_label' do
+        expect(Karafka.logger)
+          .to receive(:info)
+          .with("#{monitor_runner}#check with test")
+
+        monitor_runner.new.check
+      end
+    end
+
+    context 'when is is called from subclass super' do
+      let(:monitor_runner) do
+        ClassBuilder.build do
+          def check
+            MonitorWithSuper.instance.notice(self.class, 'test')
+          end
+        end
+      end
+
+      it 'expect logger to receive proper details with caller_label' do
+        expect(Karafka.logger)
+          .to receive(:info)
+          .with("#{monitor_runner}#check with test")
+
+        monitor_runner.new.check
+      end
     end
   end
 
