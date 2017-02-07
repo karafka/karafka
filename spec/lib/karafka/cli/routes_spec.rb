@@ -16,6 +16,7 @@ RSpec.describe Karafka::Cli::Routes do
       responder
       inline_mode
       batch_mode
+      start_from_beginning
     ).freeze
 
     KEYS.each do |key|

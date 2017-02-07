@@ -27,6 +27,8 @@ module Karafka
       setting :redis
       # If batch_mode is true, incoming messages will be handled in batch, otherwsie one at a time.
       setting :batch_mode, false
+      #  whether to consume messages starting at the beginning or to just consume new messages
+      setting :start_from_beginning, true
 
       # Connection pool options are used for producer (Waterdrop)
       # They are configured automatically based on Sidekiq concurrency and number of routes

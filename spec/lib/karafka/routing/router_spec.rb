@@ -10,6 +10,7 @@ RSpec.describe Karafka::Routing::Router do
     let(:controller) { double }
     let(:interchanger) { double }
     let(:inline_mode) { [true, false].sample }
+    let(:start_from_beginning) { [true, false].sample }
     let(:group) { rand.to_s }
     let(:controller_instance) { double }
     let(:batch_mode) { [true, false].sample }
@@ -25,6 +26,7 @@ RSpec.describe Karafka::Routing::Router do
         route.group = group
         route.batch_mode = batch_mode
         route.inline_mode = inline_mode
+        route.start_from_beginning = start_from_beginning
       end
     end
 
@@ -68,6 +70,10 @@ RSpec.describe Karafka::Routing::Router do
       expect(controller_instance)
         .to receive(:batch_mode=)
         .with(batch_mode)
+
+      expect(controller_instance)
+        .to receive(:start_from_beginning=)
+        .with(start_from_beginning)
     end
 
     it 'expect to build controller with all proper options assigned' do

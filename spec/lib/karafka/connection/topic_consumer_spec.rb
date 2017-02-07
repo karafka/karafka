@@ -2,12 +2,14 @@ RSpec.describe Karafka::Connection::TopicConsumer do
   let(:group) { rand.to_s }
   let(:topic) { rand.to_s }
   let(:batch_mode) { false }
+  let(:start_from_beginning) { false }
   let(:route) do
     instance_double(
       Karafka::Routing::Route,
       group: group,
       topic: topic,
-      batch_mode: batch_mode
+      batch_mode: batch_mode,
+      start_from_beginning: start_from_beginning
     )
   end
 
@@ -94,7 +96,8 @@ RSpec.describe Karafka::Connection::TopicConsumer do
 
       it 'expect to build it and subscribe' do
         expect(kafka).to receive(:consumer).and_return(consumer)
-        expect(consumer).to receive(:subscribe).with(route.topic)
+        expect(consumer).to receive(:subscribe)
+          .with(route.topic, start_from_beginning: start_from_beginning)
         expect(topic_consumer.send(:kafka_consumer)).to eq consumer
       end
     end
