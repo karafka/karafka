@@ -14,6 +14,7 @@
 - #122 - Allow on capistrano role customization
 - #125 - Add support to batch incoming messages
 - #130 - start_from_beginning flag on routes and default
+- #128 - Monitor caller_label not working with super on inheritance
 - Renamed *inline* to *inline_mode* to stay consistent with flags that change the way karafka works (#125)
 - Dry-configurable dump to 0.5 with fixed proc value evaluation on retrieve patch (internal change)
 
