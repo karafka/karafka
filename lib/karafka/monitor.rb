@@ -73,8 +73,19 @@ module Karafka
     def caller_label
       # We need to calculate ancestors because if someone inherits
       # from this  class, caller chains is longer
-      index = self.class.ancestors.index(Karafka::Monitor) + 1
-      caller_locations(index, 2)[1].label
+      index = self.class.ancestors.index(Karafka::Monitor)
+      # caller_locations has a differs in result whether it is a subclass of
+      # Karafka::Monitor, the basic Karafka::Monitor itself or a super for a subclass.
+      # So to cover all the cases we need to differentiate.
+      # @see https://github.com/karafka/karafka/issues/128
+      # @note It won't work if the monitor caller_label caller class is defined using
+      #   define method
+      super_execution = caller_locations(1, 2)[0].label == caller_locations(1, 2)[1].label
+
+      scope = super_execution ? 1 : nil
+      scope ||= index.positive? ? 0 : 1
+
+      caller_locations(index + 1, 2)[scope].label
     end
 
     # @return [Logger] logger instance
