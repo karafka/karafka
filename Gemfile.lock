@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (0.5.0.1)
+    karafka (0.5.0.2)
       activesupport (~> 5.0)
       celluloid (~> 0.17)
       dry-configurable (~> 0.5)
@@ -120,7 +120,7 @@ GEM
       rack
     rainbow (2.1.0)
     rake (11.3.0)
-    redis (3.3.2)
+    redis (3.3.3)
     reek (4.1.0)
       codeclimate-engine-rb (~> 0.3.1)
       parser (~> 2.3.1, >= 2.3.1.2)

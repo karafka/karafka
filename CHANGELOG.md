@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 0.5.0.1-head
+## 0.5.0.2
 - Gems update x3
 - Default Ruby set to 2.3.3
 - ~~Default Ruby set to 2.4.0~~
