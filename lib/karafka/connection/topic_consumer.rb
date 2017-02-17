@@ -3,6 +3,10 @@ module Karafka
     # Class used as a wrapper around Ruby-Kafka to simplify additional
     # features that we provide/might provide in future
     class TopicConsumer
+      # How long should we wait before trying to reconnect to Kafka cluster
+      # that went down (in seconds)
+      RECONNECT_TIMEOUT = 5
+
       # Creates a queue consumer that will pull the data from Kafka
       # @param [Karafka::Routing::Route] route details that will be used to build up a
       #   queue consumer instance
@@ -63,6 +67,13 @@ module Karafka
             start_from_beginning: @route.start_from_beginning
           )
         end
+      rescue Kafka::ConnectionError
+        # If we would not wait it would totally spam log file with failed
+        # attempts if Kafka is down
+        sleep(RECONNECT_TIMEOUT)
+        # We don't log and just reraise - this will be logged
+        # down the road
+        raise
       end
 
       # @return [Kafka] returns a Kafka
