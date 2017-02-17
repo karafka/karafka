@@ -101,5 +101,19 @@ RSpec.describe Karafka::Connection::TopicConsumer do
         expect(topic_consumer.send(:kafka_consumer)).to eq consumer
       end
     end
+
+    context 'when there was a kafka connection failure' do
+      before do
+        topic_consumer.instance_variable_set(:'@kafka_consumer', nil)
+
+        expect(Kafka).to receive(:new).and_raise(Kafka::ConnectionError)
+      end
+
+      it 'expect to sleep and reraise' do
+        expect(topic_consumer).to receive(:sleep).with(5)
+
+        expect { topic_consumer.send(:kafka_consumer) }.to raise_error(Kafka::ConnectionError)
+      end
+    end
   end
 end

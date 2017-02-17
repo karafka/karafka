@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 0.5.0.2-head
+- #132 - When Kafka is gone, should reconnect after a time period
+
 ## 0.5.0.2
 - Gems update x3
 - Default Ruby set to 2.3.3
