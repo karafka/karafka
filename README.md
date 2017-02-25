@@ -717,7 +717,7 @@ Here's a simple example of monitor that is used to handle errors logging into Ai
 class AppMonitor < Karafka::Monitor
   def notice_error(caller_class, e)
     super
-    Airbrake.notify_or_ignore(e)
+    Airbrake.notify(e)
   end
 end
 ```
