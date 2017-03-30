@@ -1,13 +1,13 @@
 PATH
   remote: .
   specs:
-    karafka (0.5.0.2)
+    karafka (0.5.0.3)
       activesupport (~> 5.0)
       celluloid (~> 0.17)
-      dry-configurable (~> 0.5)
+      dry-configurable (~> 0.6)
       envlogic (~> 1.0)
       rake (~> 11.3)
-      ruby-kafka (= 0.3.15)
+      ruby-kafka (= 0.3.16)
       sidekiq (~> 4.2)
       thor (~> 0.19)
       waterdrop (~> 0.3.2.1)
@@ -16,7 +16,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (5.0.1)
+    activesupport (5.0.2)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (~> 0.7)
       minitest (~> 5.1)
@@ -54,13 +54,13 @@ GEM
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
     colorize (0.8.1)
-    concurrent-ruby (1.0.4)
+    concurrent-ruby (1.0.5)
     connection_pool (2.2.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.2.5)
     docile (1.1.5)
-    dry-configurable (0.5.0)
+    dry-configurable (0.6.2)
       concurrent-ruby (~> 1.0)
     envlogic (1.0.3)
       activesupport
@@ -146,7 +146,7 @@ GEM
       unicode-display_width (~> 1.0, >= 1.0.1)
     rubocop-rspec (1.5.3)
       rubocop (>= 0.42.0)
-    ruby-kafka (0.3.15)
+    ruby-kafka (0.3.16)
     ruby-progressbar (1.8.1)
     ruby_parser (3.8.2)
       sexp_processor (~> 4.1)
@@ -166,7 +166,7 @@ GEM
     shoulda-context (1.2.1)
     shoulda-matchers (2.8.0)
       activesupport (>= 3.0.0)
-    sidekiq (4.2.9)
+    sidekiq (4.2.10)
       concurrent-ruby (~> 1.0)
       connection_pool (~> 2.2, >= 2.2.0)
       rack-protection (>= 1.5.0)
@@ -184,7 +184,7 @@ GEM
     timecop (0.8.1)
     timers (4.1.2)
       hitimes
-    tzinfo (1.2.2)
+    tzinfo (1.2.3)
       thread_safe (~> 0.1)
     unicode-display_width (1.1.0)
     virtus (1.0.5)
@@ -192,10 +192,10 @@ GEM
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
-    waterdrop (0.3.2.2)
+    waterdrop (0.3.2.3)
       bundler
       connection_pool
-      dry-configurable (~> 0.5)
+      dry-configurable (~> 0.6)
       null-logger
       rake
       ruby-kafka

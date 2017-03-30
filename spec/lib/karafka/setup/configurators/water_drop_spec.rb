@@ -5,8 +5,7 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
     instance_double(
       Karafka::Setup::Config.config.class,
       concurrency: ::Karafka::App.config.concurrency,
-      kafka: instance_double(
-        Karafka::Setup::Config.config.kafka.class,
+      kafka: OpenStruct.new(
         hosts: ::Karafka::App.config.kafka.hosts
       ),
       # Instance double has a private method called timeout, that's why we use
