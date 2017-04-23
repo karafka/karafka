@@ -1,3 +1,16 @@
+GIT
+  remote: https://github.com/mach-kernel/waterdrop.git
+  revision: b576a4df99f769be67af3b724c6c691c53a3931c
+  branch: add-topic-prefix
+  specs:
+    waterdrop (0.3.2.4)
+      bundler
+      connection_pool
+      dry-configurable (~> 0.6)
+      null-logger
+      rake
+      ruby-kafka
+
 PATH
   remote: .
   specs:
@@ -10,7 +23,6 @@ PATH
       ruby-kafka (= 0.3.16)
       sidekiq (~> 4.2)
       thor (~> 0.19)
-      waterdrop (~> 0.3.2.1)
       worker-glass (~> 0.2)
 
 GEM
@@ -192,13 +204,6 @@ GEM
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
-    waterdrop (0.3.2.3)
-      bundler
-      connection_pool
-      dry-configurable (~> 0.6)
-      null-logger
-      rake
-      ruby-kafka
     worker-glass (0.2.2)
       activesupport
       null-logger
@@ -212,6 +217,7 @@ DEPENDENCIES
   karafka!
   polishgeeks-dev-tools
   timecop
+  waterdrop!
 
 BUNDLED WITH
-   1.13.7
+   1.14.6
