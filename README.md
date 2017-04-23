@@ -126,6 +126,7 @@ Karafka has following configuration options:
 | kafka.ssl.ca_cert             | false    | String            | SSL CA certificate                                                                                         |
 | kafka.ssl.client_cert         | false    | String            | SSL client certificate                                                                                     |
 | kafka.ssl.client_cert_key     | false    | String            | SSL client certificate password                                                                            |
+| kafka.topic_prefix            | false    | String            | Prefix to concatenate to topic                                                                             |
 | connection_pool.size          | false    | Integer           | Connection pool size for message producers connection pool                                                 |
 | connection_pool.timeout       | false    | Integer           | Connection pool timeout for message producers connection pool                                              |
 
