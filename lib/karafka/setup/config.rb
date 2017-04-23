@@ -61,6 +61,9 @@ module Karafka
         #   than the session window.
         setting :heartbeat_interval, 10
 
+        # Kafka topic prefix
+        setting :topic_prefix
+
         # SSL authentication related settings
         setting :ssl do
           # option ca_cert [String] SSL CA certificate
