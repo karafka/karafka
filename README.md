@@ -863,6 +863,8 @@ ENV['RACK_ENV'] ||= 'development'
 ENV['KARAFKA_ENV'] = ENV['RACK_ENV']
 
 Bundler.require(:default, ENV['KARAFKA_ENV'])
+
+Karafka::Loader.new.load(Karafka::App.root)
 ```
 
 with
