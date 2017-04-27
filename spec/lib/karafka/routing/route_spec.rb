@@ -51,11 +51,35 @@ RSpec.describe Karafka::Routing::Route do
 
   describe '#topic' do
     let(:topic) { rand }
+    let(:mapper) { nil }
 
-    before { route.topic = topic }
+    before do
+      route.topic = topic
+
+      allow(Karafka::App)
+        .to receive_message_chain(:config, :kafka, :topic_mapper)
+        .and_return(mapper)
+    end
 
     it 'expect to return stringified topic' do
       expect(route.topic).to eq topic.to_s
+    end
+
+    context 'with a topic mapper' do
+      let(:mapper) { ->(topic_in) { "#{topic_in}cat" } }
+
+      it 'adds the mapper to the topic' do
+        expect(mapper).to receive(:call).with(topic).and_call_original
+        expect(route.topic).to include('cat')
+      end
+    end
+
+    context 'with a different type' do
+      let(:mapper) { 'foobar' }
+
+      it 'does not change the topic' do
+        expect(route.topic).to eql(topic.to_s)
+      end
     end
   end
 

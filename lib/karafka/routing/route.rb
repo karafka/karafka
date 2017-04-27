@@ -47,9 +47,11 @@ module Karafka
         (@group ||= "#{Karafka::App.config.name.underscore}_#{topic}").to_s
       end
 
-      # @return [String] route topic - this is the core esence of Kafka
-      def topic
-        @topic.to_s
+      # @return [String] route topic - this is the core essence of Kafka
+      # @note If kafka.topic_mapper is set, the topic will be set to the return
+      #       value of that block
+      def topic(mapper = ::Karafka::App.config.kafka.topic_mapper)
+        (mapper.is_a?(Proc) ? mapper.call(@topic) : @topic).to_s
       end
 
       # @return [Class] Class (not an instance) of a worker that should be used to schedule the
