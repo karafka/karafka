@@ -14,10 +14,10 @@ module Karafka
       end
 
       # Returns topic name
-      # @note Appends kafka.topic_prefix config flag if set
-      def topic
-        prefix = ::Karafka::App.config.kafka.topic_prefix
-        !prefix.nil? ? "#{prefix}#{@topic}" : @topic
+      # @note If kafka.topic_mapper is set, the topic will be set to the return
+      #       value of that block
+      def topic(mapper = ::Karafka::App.config.kafka.topic_mapper)
+        mapper.is_a?(Proc) ? mapper.call(@topic).to_s : @topic
       end
     end
   end

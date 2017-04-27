@@ -10,7 +10,7 @@ module Karafka
             water_config.connection_pool_size = config.connection_pool.size
             water_config.connection_pool_timeout = config.connection_pool.timeout
             water_config.kafka.hosts = config.kafka.hosts
-            water_config.kafka.topic_prefix = config.kafka.topic_prefix
+            water_config.kafka.topic_mapper = config.kafka.topic_mapper
             water_config.raise_on_failure = true
           end
         end

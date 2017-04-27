@@ -61,8 +61,8 @@ module Karafka
         #   than the session window.
         setting :heartbeat_interval, 10
 
-        # Kafka topic prefix
-        setting :topic_prefix
+        # Kafka topic mapper [Proc [String->String]]
+        setting :topic_mapper
 
         # SSL authentication related settings
         setting :ssl do

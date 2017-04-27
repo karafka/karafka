@@ -7,7 +7,7 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
       concurrency: ::Karafka::App.config.concurrency,
       kafka: OpenStruct.new(
         hosts: ::Karafka::App.config.kafka.hosts,
-        topic_prefix: ::Karafka::App.config.kafka.topic_prefix
+        topic_mapper: ::Karafka::App.config.kafka.topic_mapper
       ),
       # Instance double has a private method called timeout, that's why we use
       # openstruct here
@@ -28,7 +28,7 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
       expect(WaterDrop.config.connection_pool_size).to eq config.connection_pool.size
       expect(WaterDrop.config.connection_pool_timeout).to eq config.connection_pool.timeout
       expect(WaterDrop.config.kafka.hosts).to eq config.kafka.hosts
-      expect(WaterDrop.config.kafka.topic_prefix).to eq config.kafka.topic_prefix
+      expect(WaterDrop.config.kafka.topic_mapper).to eq config.kafka.topic_mapper
       expect(WaterDrop.config.raise_on_failure).to eq true
     end
   end
