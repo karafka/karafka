@@ -56,6 +56,7 @@ module Karafka
       #   background job
       # @note If not provided - will be built based on the provided controller
       def worker
+        return nil if inline_mode
         @worker ||= Karafka::Workers::Builder.new(controller).build
       end
 

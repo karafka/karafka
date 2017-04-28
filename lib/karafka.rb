@@ -16,6 +16,7 @@
   thor
   fileutils
   dry-configurable
+  dry-validation
   active_support/callbacks
   active_support/core_ext/class/subclasses
   active_support/core_ext/hash/indifferent_access

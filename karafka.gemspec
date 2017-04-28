@@ -25,7 +25,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rake', '~> 11.3'
   spec.add_dependency 'thor', '~> 0.19'
   spec.add_dependency 'activesupport', '~> 5.0'
-  spec.add_dependency 'dry-configurable', '~> 0.6'
+  spec.add_dependency 'dry-validation', '~> 0.10.6'
+  spec.add_dependency 'dry-configurable', '~> 0.7'
   spec.required_ruby_version = '>= 2.3.0'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }

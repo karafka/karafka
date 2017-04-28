@@ -46,7 +46,7 @@ module Karafka
     setup do |config|
       config.kafka.hosts = ['localhost:9092']
       config.name = rand.to_s
-      config.redis = {}
+      config.redis = { url: 'redis://' }
     end
   end
 end
