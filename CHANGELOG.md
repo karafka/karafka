@@ -4,6 +4,7 @@
 - #132 - When Kafka is gone, should reconnect after a time period
 - #136 - new ruby-kafka version + other gem dumps
 - ruby-kafka update
+- #135 - NonMatchingRouteError - better error description in the code
 
 ## 0.5.0.2
 - Gems update x3
