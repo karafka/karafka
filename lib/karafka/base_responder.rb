@@ -75,6 +75,7 @@ module Karafka
       # A simple alias for easier standalone responder usage.
       # Instead of building it with new.call it allows (in case of usin JSON parser)
       # to just run it directly from the class level
+      # @param data Anything that we want to respond with
       # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
       #   UsersCreatedResponder.call(@created_user)
       def call(*data)
