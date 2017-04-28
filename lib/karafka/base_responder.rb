@@ -71,6 +71,16 @@ module Karafka
         topic_obj = Responders::Topic.new(topic_name, options)
         self.topics[topic_obj.name] = topic_obj
       end
+
+      # A simple alias for easier standalone responder usage.
+      # Instead of building it with new.call it allows (in case of usin JSON parser)
+      # to just run it directly from the class level
+      # @param data Anything that we want to respond with
+      # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
+      #   UsersCreatedResponder.call(@created_user)
+      def call(*data)
+        new.call(*data)
+      end
     end
 
     # Creates a responder object
@@ -87,6 +97,10 @@ module Karafka
     # @note We know that validators should be executed also before sending data to topics, however
     #   the implementation gets way more complicated then, that's why we check after everything
     #   was sent using responder
+    # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
+    #   UsersCreatedResponder.new.call(@created_user)
+    # @example Send user data with a responder using non default Parser
+    #   UsersCreatedResponder.new(MyParser).call(@created_user)
     def call(*data)
       respond(*data)
       validate!

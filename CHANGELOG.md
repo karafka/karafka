@@ -5,6 +5,7 @@
 - #136 - new ruby-kafka version + other gem dumps
 - ruby-kafka update
 - #135 - NonMatchingRouteError - better error description in the code
+- #110 - Add call method on a responder class to alias instance build and call
 
 ## 0.5.0.2
 - Gems update x3

@@ -33,6 +33,13 @@ RSpec.describe Karafka::BaseResponder do
         end
       end
     end
+
+    describe '.call' do
+      it 'expect to create instance and try to deliver' do
+        # Since there is no #respond method, it will build an instance and raise this
+        expect { responder_class.call(input_data) }.to raise_error NotImplementedError
+      end
+    end
   end
 
   context 'instance' do
