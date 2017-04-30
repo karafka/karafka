@@ -1,4 +1,4 @@
-RSpec.describe Karafka::Setup::ValidationSchema do
+RSpec.describe Karafka::Setup::ConfigSchema do
   let(:schema) { described_class }
 
   let(:config) do

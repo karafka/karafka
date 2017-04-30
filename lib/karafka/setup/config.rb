@@ -97,12 +97,15 @@ module Karafka
         end
 
         # Validate config based on ConfigurationSchema
+        # @return [Boolean] true if configuration is valid
         # @raise [Karafka::Errors::WrongConfiguration] raised when configuration
         #   doesn't match with ConfigurationSchema
         def validate!
-          validation_result = Karafka::Setup::ValidationSchema.call(config.to_h)
+          validation_result = Karafka::Setup::ConfigSchema.call(config.to_h)
 
-          raise Errors::WrongConfiguration, validation_result.errors if validation_result.failure?
+          return true if validation_result.success?
+
+          raise Errors::InvalidConfiguration, validation_result.errors
         end
       end
     end

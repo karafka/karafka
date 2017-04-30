@@ -48,7 +48,7 @@ RSpec.describe Karafka::Errors do
   end
 
   describe 'WrongConfiguration' do
-    subject(:error) { described_class::WrongConfiguration }
+    subject(:error) { described_class::InvalidConfiguration }
 
     specify { expect(error).to be < described_class::BaseError }
   end

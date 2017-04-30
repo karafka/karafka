@@ -29,7 +29,7 @@ RSpec.describe Karafka::Setup::Config do
 
   describe '#validate' do
     context 'when configuration has errors' do
-      let(:error_class) { ::Karafka::Errors::WrongConfiguration }
+      let(:error_class) { ::Karafka::Errors::InvalidConfiguration }
       let(:error_message) { { kafka: { hosts: ['must be filled'] } }.to_s }
 
       before do

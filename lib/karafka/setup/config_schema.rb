@@ -1,7 +1,7 @@
 module Karafka
   module Setup
     # Schema with validation rules for all configuration
-    ValidationSchema = Dry::Validation.Schema do
+    ConfigSchema = Dry::Validation.Schema do
       required(:name).filled(:str?)
       optional(:inline_mode).filled(:bool?)
 

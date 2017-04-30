@@ -54,6 +54,6 @@ module Karafka
     class UnusedResponderRequiredTopic < BaseError; end
 
     # Raised when configuration doesn't match with validation schema
-    class WrongConfiguration < BaseError; end
+    class InvalidConfiguration < BaseError; end
   end
 end

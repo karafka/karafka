@@ -112,7 +112,7 @@ Karafka has following configuration options:
 | Option                        | Required | Value type        | Description                                                                                                |
 |-------------------------------|----------|-------------------|------------------------------------------------------------------------------------------------------------|
 | name                          | true     | String            | Application name                                                                                           |
-| redis                         | false    | Hash              | Hash with Redis configuration options. It is required if inline_mode is true.                              |
+| redis                         | false    | Hash              | Hash with Redis configuration options. It is required if inline_mode is off.                               |
 | inline_mode                   | false    | Boolean           | Do we want to perform logic without enqueuing it with Sidekiq (directly and asap)                          |
 | batch_mode                    | false    | Boolean           | Should the incoming messages be consumed in batches, or one at a time                                      |
 | start_from_beginning          | false    | Boolean           | Consume messages starting at the beginning or consume new messages that are produced at first run          |

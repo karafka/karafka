@@ -74,7 +74,7 @@ RSpec.describe Karafka::Routing::Route do
     end
 
     context 'when inline_mode is true' do
-      let(:worker) { double }
+      let(:worker) { false }
 
       before do
         route.inline_mode = true
