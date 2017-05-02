@@ -884,6 +884,7 @@ After that make sure that whole your application is loaded before setting up and
 ### Libraries and components
 
 * [Karafka framework](https://github.com/karafka/karafka)
+* [Capistrano Karafka](https://github.com/karafka/capistrano-karafka)
 * [Waterdrop](https://github.com/karafka/waterdrop)
 * [Worker Glass](https://github.com/karafka/worker-glass)
 * [Envlogic](https://github.com/karafka/envlogic)
