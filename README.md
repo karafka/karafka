@@ -794,32 +794,7 @@ Since the only thing that is long-running is Karafka server, it should't be hard
 
 ### Capistrano
 
-Capistrano support is available by a separate gem: ```capistrano-karafka```. Use it for easy Karafka server start/stop and restart with deploys.
-
-In your **Gemfile** file:
-
-```ruby
-gem 'capistrano-karafka', github: "karafka/capistrano-karafka"
-```
-
-or
-
-```ruby
-gem 'capistrano-karafka' , group: :development
-```
-
-In your **Capfile** file:
-
-```ruby
-require 'capistrano/karafka'
-install_plugin Capistrano::Karafka
-```
-
-Take a look at the [load:defaults task](https://github.com/karafka/karafka/blob/master/lib/karafka/capistrano/karafka.cap) (top of file) for options you can set. For example, to specify a different pidfile than default:
-
-```ruby
-set :karafka_pid, ->{ File.join(shared_path, 'tmp', 'pids', 'karafka0') }
-```
+For details about integration with Capistrano, please go to [capistrano-karafka](https://github.com/karafka/capistrano-karafka) gem page.
 
 ### Docker
 
