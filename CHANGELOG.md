@@ -6,6 +6,7 @@
 - ruby-kafka update
 - #135 - NonMatchingRouteError - better error description in the code
 - #140 - Move Capistrano Karafka to a different specific gem
+- #110 - Add call method on a responder class to alias instance build and call
 
 ## 0.5.0.2
 - Gems update x3
