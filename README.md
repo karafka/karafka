@@ -794,19 +794,7 @@ Since the only thing that is long-running is Karafka server, it should't be hard
 
 ### Capistrano
 
-Use the built-in Capistrano recipe for easy Karafka server start/stop and restart with deploys.
-
-In your **Capfile** file:
-
-```ruby
-require 'karafka/capistrano'
-```
-
-Take a look at the [load:defaults task](https://github.com/karafka/karafka/blob/master/lib/karafka/capistrano/karafka.cap) (top of file) for options you can set. For example, to specify a different pidfile than default:
-
-```ruby
-set :karafka_pid, ->{ File.join(shared_path, 'tmp', 'pids', 'karafka0') }
-```
+For details about integration with Capistrano, please go to [capistrano-karafka](https://github.com/karafka/capistrano-karafka) gem page.
 
 ### Docker
 
@@ -896,6 +884,7 @@ After that make sure that whole your application is loaded before setting up and
 ### Libraries and components
 
 * [Karafka framework](https://github.com/karafka/karafka)
+* [Capistrano Karafka](https://github.com/karafka/capistrano-karafka)
 * [Waterdrop](https://github.com/karafka/waterdrop)
 * [Worker Glass](https://github.com/karafka/worker-glass)
 * [Envlogic](https://github.com/karafka/envlogic)

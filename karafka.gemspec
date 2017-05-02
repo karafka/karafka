@@ -4,15 +4,15 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'karafka/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'karafka'
-  spec.version       = ::Karafka::VERSION
-  spec.platform      = Gem::Platform::RUBY
-  spec.authors       = ['Maciej Mensfeld', 'Pavlo Vavruk', 'Adam Gwozdowski']
-  spec.email         = %w( maciej@mensfeld.pl pavlo.vavruk@gmail.com adam99g@gmail.com )
-  spec.homepage      = 'https://github.com/karafka/karafka'
-  spec.summary       = %q{ Ruby based framework for working with Apache Kafka }
-  spec.description   = %q{ Framework used to simplify Apache Kafka based Ruby applications development }
-  spec.license       = 'MIT'
+  spec.name        = 'karafka'
+  spec.version     = ::Karafka::VERSION
+  spec.platform    = Gem::Platform::RUBY
+  spec.authors     = ['Maciej Mensfeld', 'Pavlo Vavruk', 'Adam Gwozdowski']
+  spec.email       = %w( maciej@coditsu.io pavlo.vavruk@gmail.com adam99g@gmail.com )
+  spec.homepage    = 'https://github.com/karafka/karafka'
+  spec.summary     = %q{ Ruby based framework for working with Apache Kafka }
+  spec.description = %q{ Framework used to simplify Apache Kafka based Ruby applications development }
+  spec.license     = 'MIT'
 
   spec.add_development_dependency 'bundler', '~> 1.2'
 
