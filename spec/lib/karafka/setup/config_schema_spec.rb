@@ -130,11 +130,6 @@ RSpec.describe Karafka::Setup::ConfigSchema do
           config[:connection_pool][:size] = nil
           expect(schema.call(config).success?).to be_falsey
         end
-
-        it 'size is not a int' do
-          config[:connection_pool][:size] = 's'
-          expect(schema.call(config).success?).to be_falsey
-        end
       end
 
       context 'timeout validator' do

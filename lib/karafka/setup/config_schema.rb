@@ -20,7 +20,7 @@ module Karafka
       optional(:start_from_beginning).filled(:bool?)
 
       optional(:connection_pool).schema do
-        required(:size).filled(:int?)
+        required(:size).filled
         optional(:timeout).filled(:int?)
       end
 

@@ -37,7 +37,7 @@ module Karafka
         # Connection pool size for producers. Note that we take a bigger number because there
         # are cases when we might have more sidekiq threads than Karafka routes (small app)
         # or the opposite for bigger systems
-        setting :size, [::Karafka::App.routes.count, Sidekiq.options[:concurrency]].max
+        setting :size, -> { [::Karafka::App.routes.count, Sidekiq.options[:concurrency]].max }
         # How long should we wait for a working resource from the pool before rising timeout
         # With a proper connection pool size, this should never happen
         setting :timeout, 5
@@ -98,7 +98,7 @@ module Karafka
 
         # Validate config based on ConfigurationSchema
         # @return [Boolean] true if configuration is valid
-        # @raise [Karafka::Errors::WrongConfiguration] raised when configuration
+        # @raise [Karafka::Errors::InvalidConfiguration] raised when configuration
         #   doesn't match with ConfigurationSchema
         def validate!
           validation_result = Karafka::Setup::ConfigSchema.call(config.to_h)

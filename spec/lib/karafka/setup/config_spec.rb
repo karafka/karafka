@@ -42,7 +42,7 @@ RSpec.describe Karafka::Setup::Config do
         end
       end
 
-      it 'raise WrongConfiguration exception' do
+      it 'raise InvalidConfiguration exception' do
         expect { config_class.send(:validate!) }.to raise_error do |error|
           expect(error).to be_a(error_class)
           expect(error.message).to eq(error_message)
@@ -61,7 +61,7 @@ RSpec.describe Karafka::Setup::Config do
     end
 
     context 'when configuration is valid' do
-      it 'not raise WrongConfiguration exception' do
+      it 'not raise InvalidConfiguration exception' do
         expect { config_class.send(:validate!) }
           .not_to raise_error
       end
