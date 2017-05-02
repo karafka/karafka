@@ -56,7 +56,7 @@ module Karafka
       #   background job
       # @note If not provided - will be built based on the provided controller
       def worker
-        @worker ||= Karafka::Workers::Builder.new(controller).build
+        @worker ||= inline_mode ? nil : Karafka::Workers::Builder.new(controller).build
       end
 
       # @return [Class, nil] Class (not an instance) of a responder that should respond from

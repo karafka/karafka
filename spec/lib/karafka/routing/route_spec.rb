@@ -73,22 +73,38 @@ RSpec.describe Karafka::Routing::Route do
       route.controller = controller
     end
 
-    context 'when worker is not set' do
-      let(:worker) { nil }
-      let(:built_worker) { double }
-      let(:builder) { double }
+    context 'when inline_mode is true' do
+      let(:worker) { false }
 
-      it 'expect to build worker using builder' do
-        expect(Karafka::Workers::Builder)
-          .to receive(:new)
-          .with(controller)
-          .and_return(builder)
+      before do
+        route.inline_mode = true
+      end
 
-        expect(builder)
-          .to receive(:build)
-          .and_return(built_worker)
+      it { expect(route.worker).to eq nil }
+    end
 
-        expect(route.worker).to eq built_worker
+    context 'when inline_mode is false' do
+      before do
+        route.inline_mode = false
+      end
+
+      context 'when worker is not set' do
+        let(:worker) { nil }
+        let(:built_worker) { double }
+        let(:builder) { double }
+
+        it 'expect to build worker using builder' do
+          expect(Karafka::Workers::Builder)
+            .to receive(:new)
+            .with(controller)
+            .and_return(builder)
+
+          expect(builder)
+            .to receive(:build)
+            .and_return(built_worker)
+
+          expect(route.worker).to eq built_worker
+        end
       end
     end
 

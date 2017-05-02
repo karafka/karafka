@@ -41,6 +41,10 @@ RSpec.describe Karafka::App do
 
     it 'expect to run setup_components' do
       expect(Karafka::Setup::Config)
+        .to receive(:validate!)
+        .once
+
+      expect(Karafka::Setup::Config)
         .to receive(:setup_components)
 
       app_class.boot!

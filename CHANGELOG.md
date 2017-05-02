@@ -1,12 +1,14 @@
 # Karafka framework changelog
 
-## 0.5.0.2-head
+## 0.5.0.3-head
 - #132 - When Kafka is gone, should reconnect after a time period
 - #136 - new ruby-kafka version + other gem dumps
 - ruby-kafka update
 - #135 - NonMatchingRouteError - better error description in the code
 - #140 - Move Capistrano Karafka to a different specific gem
 - #110 - Add call method on a responder class to alias instance build and call
+- #76 - Configs validator
+- #138 - Possibility to have no worker class defined if inline_mode is being used
 
 ## 0.5.0.2
 - Gems update x3

@@ -52,5 +52,8 @@ module Karafka
 
     # Raised when we didn't use a topic that was defined as non-optional (required)
     class UnusedResponderRequiredTopic < BaseError; end
+
+    # Raised when configuration doesn't match with validation schema
+    class InvalidConfiguration < BaseError; end
   end
 end

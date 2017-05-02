@@ -26,4 +26,45 @@ RSpec.describe Karafka::Setup::Config do
       config_class.send :setup_components
     end
   end
+
+  describe '#validate' do
+    context 'when configuration has errors' do
+      let(:error_class) { ::Karafka::Errors::InvalidConfiguration }
+      let(:error_message) { { kafka: { hosts: ['must be filled'] } }.to_s }
+
+      before do
+        module Karafka
+          class App
+            setup do |config|
+              config.kafka.hosts = nil
+            end
+          end
+        end
+      end
+
+      it 'raise InvalidConfiguration exception' do
+        expect { config_class.send(:validate!) }.to raise_error do |error|
+          expect(error).to be_a(error_class)
+          expect(error.message).to eq(error_message)
+        end
+      end
+
+      after do
+        module Karafka
+          class App
+            setup do |config|
+              config.kafka.hosts = ['localhost:9092']
+            end
+          end
+        end
+      end
+    end
+
+    context 'when configuration is valid' do
+      it 'not raise InvalidConfiguration exception' do
+        expect { config_class.send(:validate!) }
+          .not_to raise_error
+      end
+    end
+  end
 end

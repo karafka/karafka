@@ -12,7 +12,10 @@ module Karafka
       # Sets up all the internal components and bootstrap whole app
       # We need to know details about routes in order to setup components,
       # that's why we don't setup them after std setup is done
+      # @raise [Karafka::Errors::InvalidConfiguration] raised when configuration
+      #   doesn't match with ConfigurationSchema
       def boot!
+        Setup::Config.validate!
         Setup::Config.setup_components
       end
 

@@ -112,13 +112,13 @@ Karafka has following configuration options:
 | Option                        | Required | Value type        | Description                                                                                                |
 |-------------------------------|----------|-------------------|------------------------------------------------------------------------------------------------------------|
 | name                          | true     | String            | Application name                                                                                           |
-| redis                         | true     | Hash              | Hash with Redis configuration options                                                                      |
+| redis                         | false    | Hash              | Hash with Redis configuration options. It is required if inline_mode is off.                               |
 | inline_mode                   | false    | Boolean           | Do we want to perform logic without enqueuing it with Sidekiq (directly and asap)                          |
 | batch_mode                    | false    | Boolean           | Should the incoming messages be consumed in batches, or one at a time                                      |
 | start_from_beginning          | false    | Boolean           | Consume messages starting at the beginning or consume new messages that are produced at first run          |
 | monitor                       | false    | Object            | Monitor instance (defaults to Karafka::Monitor)                                                            |
 | logger                        | false    | Object            | Logger instance (defaults to Karafka::Logger)                                                              |
-| kafka.hosts                   | false    | Array<String>     | Kafka server hosts. If 1 provided, Karafka will discover cluster structure automatically                   |
+| kafka.hosts                   | true     | Array<String>     | Kafka server hosts. If 1 provided, Karafka will discover cluster structure automatically                   |
 | kafka.session_timeout         | false    | Integer           | The number of seconds after which, if a consumer hasn't contacted the Kafka cluster, it will be kicked out |
 | kafka.offset_commit_interval  | false    | Integer           | The interval between offset commits in seconds                                                             |
 | kafka.offset_commit_threshold | false    | Integer           | The number of messages that can be processed before their offsets are committed                            |
