@@ -22,6 +22,7 @@ Karafka not only handles incoming messages but also provides tools for building 
     - [Configurators](#configurators)
     - [Environment variables settings](#environment-variables-settings)
     - [Kafka brokers auto-discovery](#kafka-brokers-auto-discovery)
+    - [Topic mappers](#topic-mappers)
   - [Usage](#usage)
     - [Karafka CLI](#karafka-cli)
     - [Routing](#routing)
@@ -112,6 +113,7 @@ Karafka has following configuration options:
 | Option                        | Required | Value type        | Description                                                                                                |
 |-------------------------------|----------|-------------------|------------------------------------------------------------------------------------------------------------|
 | name                          | true     | String            | Application name                                                                                           |
+| topic_mapper                  | false    | Class/Module      | Mapper for hiding Kafka provider specific topic prefixes/postfixes, so internaly we use "pure" topics      |
 | redis                         | false    | Hash              | Hash with Redis configuration options. It is required if inline_mode is off.                               |
 | inline_mode                   | false    | Boolean           | Do we want to perform logic without enqueuing it with Sidekiq (directly and asap)                          |
 | batch_mode                    | false    | Boolean           | Should the incoming messages be consumed in batches, or one at a time                                      |
@@ -177,6 +179,50 @@ There are several env settings you can use:
 ### Kafka brokers auto-discovery
 
 Karafka supports Kafka brokers auto-discovery during startup and on failures. You need to provide at least one Kafka broker, from which the entire Kafka cluster will be discovered. Karafka will refresh list of available brokers if something goes wrong. This allows it to be aware of changes that happen in the infrastructure (adding and removing nodes).
+
+### Topic mappers
+
+Some Kafka cloud providers require topics to be namespaced with user name. This approach is understandable, but at the same time, makes your applications less provider agnostic. To target that issue, you can create your own topic mapper that will sanitize incoming/outgoing topic names, so your logic won't be binded to those specific versions of topic names.
+
+Mapper needs to implement two following methods:
+
+  - ```#incoming``` - accepts an incoming "namespace dirty" version ot topic. Needs to return sanitized topic.
+  - ```#outgoing``` - accepts outgoing sanitized topic version. Needs to return namespaced one.
+
+Given each of the topics needs to have "karafka." prefix, your mapper could look like that:
+
+```ruby
+class KarafkaTopicMapper
+  def initialize(prefix)
+    @prefix = prefix
+  end
+
+  def incoming(topic)
+    topic.to_s.gsub("#{@prefix}.", '')
+  end
+
+  def outgoing(topic)
+    "#{@prefix}.#{topic}"
+  end
+end
+
+mapper = KarafkaTopicMapper.new('karafka')
+mapper.incoming('karafka.my_super_topic') #=> 'my_super_topic'
+mapper.outgoing('my_other_topic') #=> 'karafka.my_other_topic'
+```
+
+To use custom mapper, just assign it during application configuration:
+
+```ruby
+class App < Karafka::App
+  setup do |config|
+    # Other settings
+    config.topic_mapper = MyCustomMapper.new('username')
+  end
+end
+```
+
+Topic mapper automatically integrates with both messages consumer and responders.
 
 ## Usage
 

@@ -1,14 +1,17 @@
 # Karafka framework changelog
 
-## 0.5.0.3-head
+## Unreleased
 - #132 - When Kafka is gone, should reconnect after a time period
-- #136 - new ruby-kafka version + other gem dumps
+- #136 - new ruby-kafka version + other gem bumps
 - ruby-kafka update
 - #135 - NonMatchingRouteError - better error description in the code
 - #140 - Move Capistrano Karafka to a different specific gem
 - #110 - Add call method on a responder class to alias instance build and call
 - #76 - Configs validator
 - #138 - Possibility to have no worker class defined if inline_mode is being used
+- #145 - Topic Mapper
+- Ruby update to 2.4.1
+- Gem bump
 
 ## 0.5.0.2
 - Gems update x3
@@ -26,7 +29,7 @@
 - #130 - start_from_beginning flag on routes and default
 - #128 - Monitor caller_label not working with super on inheritance
 - Renamed *inline* to *inline_mode* to stay consistent with flags that change the way karafka works (#125)
-- Dry-configurable dump to 0.5 with fixed proc value evaluation on retrieve patch (internal change)
+- Dry-configurable bump to 0.5 with fixed proc value evaluation on retrieve patch (internal change)
 
 ## 0.5.0.1
 - Fixed inconsistency in responders non-required topic definition. Now only required: false available
@@ -60,7 +63,7 @@
 - Using App name as a Kafka client_id
 - Automatic Capistrano integration
 - Responders support for handling better responses pipelining and better responses flow description and design (see README for more details)
-- Gem dump
+- Gem bump
 - Readme updates
 - karafka flow CLI command for printing the application flow
 - Some internal refactorings
@@ -69,7 +72,7 @@
 - #87 - Reconsume mode with crone for better Rails/Rack integration
 - Moved Karafka server related stuff into separate Karafka::Server class
 - Renamed Karafka::Runner into Karafka::Fetcher
-- Gem dump
+- Gem bump
 - Added chroot option to Zookeeper options
 - Moved BROKERS_PATH into config from constant
 - Added Karafka consume CLI action for a short running single consumption round
@@ -82,7 +85,7 @@
 - #63 - Graceful shutdown with current offset state during data processing
 - #65 - Example of NewRelic monitor is outdated
 - #71 - Setup should be executed after user code is loaded
-- Gem dump x3
+- Gem bump x3
 - Rubocop remarks
 - worker_timeout config option has been removed. It now needs to be defined manually by the framework user because WorkerGlass::Timeout can be disabled and we cannot use Karafka settings on a class level to initialize user code stuff
 - Moved setup logic under setup/Setup namespace
@@ -92,12 +95,12 @@
 - #81 - Switch config management to dry configurable
 - Version fix
 - Dropped support for Ruby 2.1.*
-- Ruby dump to 2.3.1
+- Ruby bump to 2.3.1
 
 ## 0.4.0
 - Added WaterDrop gem with default configuration
 - Refactoring of config logic to simplify adding new dependencies that need to be configured based on #setup data
-- Gem dump
+- Gem bump
 - Readme updates
 - Renamed cluster to actor_cluster for method names
 - Replaced SidekiqGlass with generic WorkerGlass lib
@@ -138,21 +141,21 @@
 
 ## 0.3.0
 - Switched from custom ParserError for each parser to general catching of Karafka::Errors::ParseError and its descendants
-- Gem dump
+- Gem bump
 - Fixed #32 - now when using custom workers that does not inherit from Karafka::BaseWorker perform method is not required. Using custom workers means that the logic that would normally lie under #perform, needs to be executed directly from the worker.
 - Fixed #31 - Technically didn't fix because this is how Sidekiq is meant to work, but provided possibility to assign custom interchangers that allow to bypass JSON encoding issues by converting data that goes to Redis to a required format (and parsing it back when it is fetched)
 - Added full parameters lazy load - content is no longer loaded during #perform_async if params are not used in before_enqueue
 - No more namespaces for Redis by default (use separate DBs)
 
 ## 0.1.21
-- Sidekiq 4.0.1 dump
-- Gem dump
+- Sidekiq 4.0.1 bump
+- Gem bump
 - Added direct celluloid requirement to Karafka (removed from Sidekiq)
 
 ## 0.1.19
 - Internal call - schedule naming change
 - Enqueue to perform_async naming in controller to follow Sidekiqs naming convention
-- Gem dump
+- Gem bump
 
 ## 0.1.18
 - Changed Redis configuration options into a single hash that is directly passed to Redis setup for Sidekiq
@@ -184,7 +187,7 @@
 
 ## 0.1.13
 - Ability to assign custom workers and use them bypassing Karafka::BaseWorker (or its descendants)
-- Gem dump
+- Gem bump
 
 ## 0.1.12
 - All internal errors went to Karafka::Errors namespace
