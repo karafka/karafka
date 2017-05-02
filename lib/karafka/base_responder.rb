@@ -147,8 +147,16 @@ module Karafka
     #   what we send is legit and it will go to a proper topics
     def deliver!
       messages_buffer.each do |topic, data_elements|
+        # We map this topic name, so it will match namespaced/etc topic in Kafka
+        # @note By default will not change topic (if default mapper used)
+        mapped_topic = Karafka::App.config.topic_mapper.outgoing(topic)
+
         data_elements.each do |(data, options)|
-          ::WaterDrop::Message.new(topic, data, options).send!
+          ::WaterDrop::Message.new(
+            mapped_topic,
+            data,
+            options
+          ).send!
         end
       end
     end

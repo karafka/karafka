@@ -3,6 +3,7 @@ module Karafka
     # Schema with validation rules for all configuration
     ConfigSchema = Dry::Validation.Schema do
       required(:name).filled(:str?)
+      required(:topic_mapper).filled
       optional(:inline_mode).filled(:bool?)
 
       required(:redis).maybe do
