@@ -4,6 +4,7 @@ RSpec.describe Karafka::Setup::ConfigSchema do
   let(:config) do
     {
       name: 'name',
+      topic_mapper: Karafka::Routing::Mapper,
       redis: { url: 'url' },
       kafka: {
         hosts: ['localhost:9092'],

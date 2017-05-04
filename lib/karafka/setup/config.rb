@@ -29,6 +29,12 @@ module Karafka
       setting :batch_mode, false
       #  whether to consume messages starting at the beginning or to just consume new messages
       setting :start_from_beginning, true
+      # Mapper used to remap names of topics, so we can have a clean internal topic namings despite
+      # using any Kafka provider that uses namespacing, etc
+      # It needs to implement two methods:
+      #   - #incoming - for remapping from the incoming message to our internal format
+      #   - #outgoing - for remapping from internal topic name into outgoing message
+      setting :topic_mapper, Routing::Mapper
 
       # Connection pool options are used for producer (Waterdrop)
       # They are configured automatically based on Sidekiq concurrency and number of routes

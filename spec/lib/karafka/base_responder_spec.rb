@@ -136,6 +136,41 @@ RSpec.describe Karafka::BaseResponder do
           responder.send(:deliver!)
         end
       end
+
+      context 'custom mapper delivery' do
+        let(:mapped_topic) { "prefix.#{topic}" }
+        let(:topic) { rand.to_s }
+        let(:messages_buffer) { { topic => [rand, rand] } }
+        let(:custom_mapper) do
+          ClassBuilder.build do
+            def self.outgoing(topic)
+              "prefix.#{topic}"
+            end
+          end
+        end
+
+        before do
+          expect(Karafka::App.config)
+            .to receive(:topic_mapper)
+            .and_return(custom_mapper)
+        end
+
+        it 'expect to deliver them to mapped topic' do
+          messages_buffer.each do |_topic, data_elements|
+            data_elements.each do |(data, options)|
+              kafka_message = instance_double(::WaterDrop::Message)
+
+              expect(::WaterDrop::Message)
+                .to receive(:new).with(mapped_topic, data, options)
+                .and_return(kafka_message)
+
+              expect(kafka_message).to receive(:send!)
+            end
+          end
+
+          responder.send(:deliver!)
+        end
+      end
     end
   end
 end
