@@ -125,6 +125,7 @@ Karafka has following configuration options:
 | kafka.offset_commit_interval  | false    | Integer           | The interval between offset commits in seconds                                                             |
 | kafka.offset_commit_threshold | false    | Integer           | The number of messages that can be processed before their offsets are committed                            |
 | kafka.heartbeat_interval      | false    | Integer           | The interval between heartbeats                                                                            |
+| kafka.max_bytes_per_partition | false    | Integer           | The max bytes to retrieve per partition.                                                                            |
 | kafka.ssl.ca_cert             | false    | String            | SSL CA certificate                                                                                         |
 | kafka.ssl.client_cert         | false    | String            | SSL client certificate                                                                                     |
 | kafka.ssl.client_cert_key     | false    | String            | SSL client certificate password                                                                            |

@@ -66,6 +66,9 @@ module Karafka
         # option heartbeat_interval [Integer] the interval between heartbeats; must be less
         #   than the session window.
         setting :heartbeat_interval, 10
+        # option max_bytes_per_partition [Integer] the maximum amount of data fetched
+        #   from a single partition at a time.
+        setting :max_bytes_per_partition, 1_048_576
 
         # SSL authentication related settings
         setting :ssl do

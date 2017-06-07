@@ -32,6 +32,7 @@ module Karafka
         required(:offset_commit_interval).filled(:int?)
         required(:offset_commit_threshold).filled(:int?)
         required(:heartbeat_interval).filled(:int?)
+        required(:max_bytes_per_partition).filled(:int?)
 
         optional(:ssl).schema do
           required(:ca_cert).maybe(:str?)

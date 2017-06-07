@@ -64,7 +64,8 @@ module Karafka
         ).tap do |consumer|
           consumer.subscribe(
             @route.topic,
-            start_from_beginning: @route.start_from_beginning
+            start_from_beginning: @route.start_from_beginning,
+            max_bytes_per_partition: ::Karafka::App.config.kafka.max_bytes_per_partition
           )
         end
       rescue Kafka::ConnectionError
