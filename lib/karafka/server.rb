@@ -11,6 +11,7 @@ module Karafka
         @consumers = Concurrent::Array.new
         bind_on_sigint
         bind_on_sigquit
+        bind_on_sigterm
         start_supervised
       end
 
@@ -33,6 +34,15 @@ module Karafka
       # What should happen when we decide to quit with sigquit
       def bind_on_sigquit
         process.on_sigquit do
+          Karafka::App.stop!
+          consumers.map(&:stop)
+          exit
+        end
+      end
+
+      # What should happen when we decide to quit with sigterm
+      def bind_on_sigterm
+        process.on_sigterm do
           Karafka::App.stop!
           consumers.map(&:stop)
           exit

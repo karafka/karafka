@@ -11,6 +11,7 @@ RSpec.describe Karafka::Server do
       expect(Karafka::Process.instance).to receive(:supervise).and_yield
       expect(Karafka::Process.instance).to receive(:on_sigint)
       expect(Karafka::Process.instance).to receive(:on_sigquit)
+      expect(Karafka::Process.instance).to receive(:on_sigterm)
 
       server_class.run
     end
@@ -19,6 +20,7 @@ RSpec.describe Karafka::Server do
       expect(Karafka::Process.instance).to receive(:supervise)
       expect(Karafka::Process.instance).to receive(:on_sigint).and_yield
       expect(Karafka::Process.instance).to receive(:on_sigquit)
+      expect(Karafka::Process.instance).to receive(:on_sigterm)
       expect(Karafka::App).to receive(:stop!)
       expect(server_class).to receive(:exit)
 
@@ -29,6 +31,18 @@ RSpec.describe Karafka::Server do
       expect(Karafka::Process.instance).to receive(:supervise)
       expect(Karafka::Process.instance).to receive(:on_sigint)
       expect(Karafka::Process.instance).to receive(:on_sigquit).and_yield
+      expect(Karafka::Process.instance).to receive(:on_sigterm)
+      expect(Karafka::App).to receive(:stop!)
+      expect(server_class).to receive(:exit)
+
+      server_class.run
+    end
+
+    it 'defines a proper action for sigterm' do
+      expect(Karafka::Process.instance).to receive(:supervise)
+      expect(Karafka::Process.instance).to receive(:on_sigint)
+      expect(Karafka::Process.instance).to receive(:on_sigquit)
+      expect(Karafka::Process.instance).to receive(:on_sigterm).and_yield
       expect(Karafka::App).to receive(:stop!)
       expect(server_class).to receive(:exit)
 
