@@ -49,7 +49,7 @@ module Karafka
 
     # @return [String] Karafka app root path (user application path)
     def root
-      Pathname.new(File.dirname(ENV['BUNDLE_GEMFILE']))
+      Pathname.new(ENV['KARAFKA_ROOT_DIR'] || File.dirname(ENV['BUNDLE_GEMFILE']))
     end
 
     # @return [String] path to Karafka gem root core
