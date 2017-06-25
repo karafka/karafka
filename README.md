@@ -175,6 +175,7 @@ There are several env settings you can use:
 |-------------------|-----------------|-------------------------------------------------------------------------------|
 | KARAFKA_ENV       | development     | In what mode this application should boot (production/development/test/etc)   |
 | KARAFKA_BOOT_FILE | app_root/app.rb | Path to a file that contains Karafka app configuration and booting procedures |
+| KARAFKA_ROOT_DIR  | Gemfile location| Path to Karafka's root directory                                              |
 
 ### Kafka brokers auto-discovery
 
