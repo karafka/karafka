@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period
 - #136 - new ruby-kafka version + other gem bumps
 - ruby-kafka update
@@ -11,7 +11,12 @@
 - #138 - Possibility to have no worker class defined if inline_mode is being used
 - #145 - Topic Mapper
 - Ruby update to 2.4.1
-- Gem bump
+- Gem bump x2
+- #158 - Update docs section on heroku usage
+- #150 - Add support for start_from_beginning on a per topic basis
+- #148 - Lower Karafka Sidekiq dependency
+- Allow karafka root to be specified from ENV
+- Handle SIGTERM as a shutdown command for kafka server to support Heroku deployment
 
 ## 0.5.0.2
 - Gems update x3
