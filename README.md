@@ -54,6 +54,7 @@ Karafka not only handles incoming messages but also provides tools for building 
   - [Deployment](#deployment)
       - [Capistrano](#capistrano)
       - [Docker](#docker)
+      - [Heroku](#heroku)
   - [Sidekiq Web UI](#sidekiq-web-ui)
   - [Concurrency](#concurrency)
   - [Integrating with other frameworks](#integrating-with-other-frameworks)
@@ -850,6 +851,37 @@ Karafka can be dockerized as any other Ruby/Rails app. To execute **karafka serv
 ```bash
 ENV KARAFKA_ENV production
 CMD bundle exec karafka server
+```
+
+### Heroku
+
+Karafka may be deployed on [Heroku](https://www.heroku.com/), and works with
+[Heroku Kafka](https://www.heroku.com/kafka) and [Heroku Redis](https://www.heroku.com/redis).
+
+Set `KARAFKA_ENV`:
+```bash
+heroku config:set KARAFKA_ENV=production
+```
+
+Configure Karafka to use the Kafka and Redis configuration provided by Heroku:
+```ruby
+# app_root/app.rb
+class App < Karafka::App
+  setup do |config|
+    config.kafka.hosts = ENV['KAFKA_URL'].split(',') # Convert CSV list of broker urls to an array
+    config.kafka.ssl.ca_cert = ENV['KAFKA_TRUSTED_CERT'] if ENV['KAFKA_TRUSTED_CERT']
+    config.kafka.ssl.client_cert = ENV['KAFKA_CLIENT_CERT'] if ENV['KAFKA_CLIENT_CERT']
+    config.kafka.ssl.client_cert_key = ENV['KAFKA_CLIENT_CERT_KEY'] if ENV['KAFKA_CLIENT_CERT_KEY']
+    config.redis = { url: ENV['REDIS_URL'] }
+    # ...other configuration options...
+  end  
+end
+```
+
+Create your Procfile:
+```text
+karafka_server: bundle exec karafka server
+karafka_worker: bundle exec karafka worker
 ```
 
 ## Sidekiq Web UI
