@@ -855,14 +855,15 @@ CMD bundle exec karafka server
 
 ### Heroku
 
-Karafka may be deployed on [Heroku](https://www.heroku.com/), and works with [Heroku Kafka](https://www.heroku.com/kafka).
+Karafka may be deployed on [Heroku](https://www.heroku.com/), and works with
+[Heroku Kafka](https://www.heroku.com/kafka) and [Heroku Redis](https://www.heroku.com/redis).
 
 Set `KARAFKA_ENV`:
 ```bash
 heroku config:set KARAFKA_ENV=production
 ```
 
-Configure Karafka to use the Kafka configuration provided by Heroku:
+Configure Karafka to use the Kafka and Redis configuration provided by Heroku:
 ```ruby
 # app_root/app.rb
 class App < Karafka::App
@@ -871,6 +872,7 @@ class App < Karafka::App
     config.kafka.ssl.ca_cert = ENV['KAFKA_TRUSTED_CERT'] if ENV['KAFKA_TRUSTED_CERT']
     config.kafka.ssl.client_cert = ENV['KAFKA_CLIENT_CERT'] if ENV['KAFKA_CLIENT_CERT']
     config.kafka.ssl.client_cert_key = ENV['KAFKA_CLIENT_CERT_KEY'] if ENV['KAFKA_CLIENT_CERT_KEY']
+    config.redis = config.redis = { url: ENV['REDIS_URL'] }
     # ...other configuration options...
   end  
 end
