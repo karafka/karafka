@@ -11,16 +11,10 @@ module Karafka
       include Singleton
 
       # Options that are being set on the route level
-      ROUTE_OPTIONS = %i(
-        group
-        worker
-        controller
-        parser
-        interchanger
-        responder
-        inline_mode
-        batch_mode
-      ).freeze
+      # @note Topic is not being set as a route option. It is being set as a part of the routing
+      #   DSL. The same (but the other way around) goes for controller, that is a route option
+      #   and is not in the Route::ATTRIBUTES because there's no default controller
+      ROUTE_OPTIONS = (Route::ATTRIBUTES - %i(topic) + %i(controller)).freeze.sort
 
       # All those options should be set on the route level
       ROUTE_OPTIONS.each do |option|
