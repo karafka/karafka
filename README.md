@@ -1,5 +1,9 @@
 ![karafka logo](http://mensfeld.github.io/karafka-framework-introduction/img/karafka-04.png)
 
+[![Build Status](https://travis-ci.org/karafka/karafka.png)](https://travis-ci.org/karafka/karafka)
+[![Code Climate](https://codeclimate.com/github/karafka/karafka/badges/gpa.svg)](https://codeclimate.com/github/karafka/karafka)
+[![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Framework used to simplify Apache Kafka based Ruby applications development.
 
 It allows programmers to use approach similar to "the Rails way" when working with asynchronous Kafka messages.
