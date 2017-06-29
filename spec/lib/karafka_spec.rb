@@ -22,11 +22,20 @@ RSpec.describe Karafka do
 
   describe '.root' do
     context 'when we want to get app root path' do
-      before do
-        expect(ENV).to receive(:[]).with('BUNDLE_GEMFILE').and_return('/')
+      let(:root_dir_env) { nil }
+
+      before { expect(ENV).to receive(:[]).with('KARAFKA_ROOT_DIR').and_return(root_dir_env) }
+
+      it do
+        expect(ENV).to receive(:[]).with('BUNDLE_GEMFILE').and_return('/Gemfile')
+        expect(karafka.root.to_path).to eq '/'
       end
 
-      it { expect(karafka.root.to_path).to eq '/' }
+      context 'when KARAFKA_ROOT_DIR is specified' do
+        let(:root_dir_env) { './karafka_dir' }
+
+        it { expect(karafka.root.to_path).to eq './karafka_dir' }
+      end
     end
   end
 
