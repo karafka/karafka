@@ -14,7 +14,7 @@ module Karafka
       # @note Topic is not being set as a route option. It is being set as a part of the routing
       #   DSL. The same (but the other way around) goes for controller, that is a route option
       #   and is not in the Route::ATTRIBUTES because there's no default controller
-      ROUTE_OPTIONS = (Route::ATTRIBUTES - %i(topic) + %i(controller)).freeze.sort
+      ROUTE_OPTIONS = (Route::ATTRIBUTES - %i(topic) + %i(controller)).freeze
 
       # All those options should be set on the route level
       ROUTE_OPTIONS.each do |option|
