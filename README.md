@@ -26,7 +26,7 @@ Karafka dev team also provides commercial support in following matters:
 - Expertise and guidance on using Karafka within new and existing projects
 - Trainings on how to design and develop systems based on Apache Kafka and Karafka framework
 
-If you have any questions about Kafka/Karafka commercial support, please contact [Maciej Mensfeld (maciej@coditsu.io)](mailto:maciej@coditsu.io) directly.
+If you are interested in our commercial services, please contact [Maciej Mensfeld (maciej@coditsu.io)](mailto:maciej@coditsu.io) directly.
 
 ## Warning
 
