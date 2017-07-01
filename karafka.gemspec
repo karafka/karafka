@@ -19,14 +19,18 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'ruby-kafka', '= 0.3.17'
   spec.add_dependency 'sidekiq', '>= 4.2'
   spec.add_dependency 'worker-glass', '~> 0.2'
-  spec.add_dependency 'celluloid', '~> 0.17'
+  spec.add_dependency 'celluloid'
   spec.add_dependency 'envlogic', '~> 1.0'
   spec.add_dependency 'waterdrop', '~> 0.3.2.4'
-  spec.add_dependency 'rake', '~> 11.3'
+  spec.add_dependency 'rake', '>= 11.3'
   spec.add_dependency 'thor', '~> 0.19'
-  spec.add_dependency 'activesupport', '~> 5.0'
-  spec.add_dependency 'dry-validation', '~> 0.10.6'
+  spec.add_dependency 'activesupport', '>= 5.0'
+  spec.add_dependency 'dry-validation', '~> 0.11'
   spec.add_dependency 'dry-configurable', '~> 0.7'
+
+  spec.add_development_dependency 'rspec', '>= 3.6'
+  spec.add_development_dependency 'simplecov', '>= 0.14'
+
   spec.required_ruby_version = '>= 2.3.0'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
