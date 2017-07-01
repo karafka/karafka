@@ -20,6 +20,18 @@ Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost e
 
 If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
 
+Karafka dev team also provides commercial support in following matters:
+
+- Additional programming services for integrating existing Ruby apps with Kafka and Karafka
+- Expertise and guidance on using Karafka within new and existing projects
+- Trainings on how to design and develop systems based on Apache Kafka and Karafka framework
+
+If you are interested in our commercial services, please contact [Maciej Mensfeld (maciej@coditsu.io)](mailto:maciej@coditsu.io) directly.
+
+## Notice
+
+Karafka framework and Karafka team is __not__ related to Kafka streaming service called CloudKarafka in any matter. We don't recommend nor discourage usage of their platform.
+
 ## Requirements
 
 In order to use Karafka framework, you need to have:
