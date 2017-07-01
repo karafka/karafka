@@ -30,7 +30,7 @@ If you are interested in our commercial services, please contact [Maciej Mensfel
 
 ## Notice
 
-Karafka framework and Karafka team is __not__ related to Kafka streaming service called CloudKarafka in any matter. We don't recommend nor discourage usage of their platform.
+Karafka framework and Karafka team are __not__ related to Kafka streaming service called CloudKarafka in any matter. We don't recommend nor discourage usage of their platform.
 
 ## Requirements
 
