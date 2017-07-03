@@ -16,7 +16,7 @@ module Karafka
       NAME_FORMAT = /\A(\w|\-|\.)+\z/
 
       # Options that we can set per each route
-      ATTRIBUTES = %i(
+      ATTRIBUTES = %i[
         group
         topic
         worker
@@ -27,7 +27,7 @@ module Karafka
         inline_mode
         batch_mode
         start_from_beginning
-      ).freeze
+      ].freeze
 
       ATTRIBUTES.each { |attr| attr_writer(attr) }
 

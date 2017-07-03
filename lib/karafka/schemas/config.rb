@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Setup
+  # Namespace for all the validation schemas that we use to check input
+  module Schemas
     # Schema with validation rules for all configuration
-    ConfigSchema = Dry::Validation.Schema do
+    Config = Dry::Validation.Schema do
       required(:name).filled(:str?)
       required(:topic_mapper).filled
       optional(:inline_mode).filled(:bool?)
@@ -15,7 +16,7 @@ module Karafka
       end
 
       # If inline_mode is true, redis should be filled
-      rule(redis_presence: [:redis, :inline_mode]) do |redis, inline_mode|
+      rule(redis_presence: %i[redis inline_mode]) do |redis, inline_mode|
         inline_mode.false?.then(redis.filled?)
       end
 

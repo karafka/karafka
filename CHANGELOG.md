@@ -4,12 +4,14 @@
 - #150 - Add support for start_from_beginning on a per topic basis
 - Got rid of PolishGeeksDevTools (will be replaced with Coditsu soon)
 - Gem bump (dry-stuff and other gems)
-- #160 - Split kafka settings into three groups
+- #160 - Reorganize settings to better resemble ruby-kafka requirements
 - #166 - Params and route reorganization
 - Removed worker glass as dependency (not independent gem)
 - Cleaner internal API
 - More SRP
 - #route on an controller instance to make a clear distinction in between params and route details
+- #167 - Remove Sidekiq UI from Karafka
+- Waaaaaay better code quality thanks to switching from dev tools to Coditsu
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

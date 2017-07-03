@@ -9,7 +9,7 @@ RSpec.describe Karafka::Cli::Routes do
   describe '#call' do
     let(:topic) { rand.to_s }
 
-    KEYS = %i(
+    KEYS = %i[
       group
       topic
       worker
@@ -20,7 +20,7 @@ RSpec.describe Karafka::Cli::Routes do
       batch_mode
       start_from_beginning
       controller
-    ).freeze
+    ].freeze
 
     KEYS.each do |key|
       let(key) { rand.to_s }

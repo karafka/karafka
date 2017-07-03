@@ -239,9 +239,9 @@ RSpec.describe Karafka::Routing::Route do
     before { route.topic = topic }
 
     context 'when topic name is invalid' do
-      %w(
+      %w[
         & /31 ół !@
-      ).each do |topic_name|
+      ].each do |topic_name|
         let(:topic) { topic_name }
 
         it { expect { route.validate! }.to raise_error(Karafka::Errors::InvalidTopicName) }
@@ -254,9 +254,9 @@ RSpec.describe Karafka::Routing::Route do
       before { route.group = group }
 
       context 'but group name is invalid' do
-        %w(
+        %w[
           & /31 ół !@
-        ).each do |group_name|
+        ].each do |group_name|
           let(:group) { group_name }
 
           it { expect { route.validate! }.to raise_error(Karafka::Errors::InvalidGroupName) }

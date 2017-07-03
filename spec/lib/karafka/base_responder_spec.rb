@@ -26,9 +26,9 @@ RSpec.describe Karafka::BaseResponder do
       end
 
       context 'when we register invalid topic' do
-        %w(
+        %w[
           & /31 ół !@
-        ).each do |topic_name|
+        ].each do |topic_name|
           let(:topic_name) { topic_name }
 
           it { expect { responder_class }.to raise_error(Karafka::Errors::InvalidTopicName) }
@@ -46,10 +46,12 @@ RSpec.describe Karafka::BaseResponder do
 
   context 'instance' do
     subject(:responder) { working_class.new(parser_class) }
+
     let(:parser_class) { Karafka::Parsers::Json }
 
     describe 'default responder' do
       subject(:responder) { working_class.new }
+
       let(:default_parser) { Karafka::Parsers::Json }
 
       it { expect(responder.instance_variable_get(:'@parser_class')).to eq default_parser }

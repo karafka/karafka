@@ -109,7 +109,7 @@ module Karafka
         # @raise [Karafka::Errors::InvalidConfiguration] raised when configuration
         #   doesn't match with ConfigurationSchema
         def validate!
-          validation_result = Karafka::Setup::ConfigSchema.call(config.to_h)
+          validation_result = Karafka::Schemas::Config.call(config.to_h)
 
           return true if validation_result.success?
 

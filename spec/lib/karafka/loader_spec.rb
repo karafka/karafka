@@ -59,7 +59,7 @@ RSpec.describe Karafka::Loader do
     let(:app_path) { '/app' }
 
     before do
-      stub_const('Karafka::Loader::DIRS', %w(lib app))
+      stub_const('Karafka::Loader::DIRS', %w[lib app])
       expect(loader).to receive(:load!)
         .with('/app/decorators/lib')
         .and_return(double)

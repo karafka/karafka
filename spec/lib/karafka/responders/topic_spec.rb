@@ -7,9 +7,9 @@ RSpec.describe Karafka::Responders::Topic do
 
   describe '.new' do
     context 'when name is invalid' do
-      %w(
+      %w[
         & /31 ół !@
-      ).each do |topic_name|
+      ].each do |topic_name|
         let(:name) { topic_name }
 
         it { expect { topic }.to raise_error(Karafka::Errors::InvalidTopicName) }

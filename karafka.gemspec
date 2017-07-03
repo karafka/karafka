@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
@@ -10,8 +12,8 @@ Gem::Specification.new do |spec|
   spec.authors     = ['Maciej Mensfeld', 'Pavlo Vavruk', 'Adam Gwozdowski']
   spec.email       = %w[maciej@coditsu.io pavlo.vavruk@gmail.com adam99g@gmail.com]
   spec.homepage    = 'https://github.com/karafka/karafka'
-  spec.summary     = %q[Ruby based framework for working with Apache Kafka]
-  spec.description = %q[Framework used to simplify Apache Kafka based Ruby applications development]
+  spec.summary     = 'Ruby based framework for working with Apache Kafka'
+  spec.description = 'Framework used to simplify Apache Kafka based Ruby applications development'
   spec.license     = 'MIT'
 
   spec.add_development_dependency 'bundler', '~> 1.2'

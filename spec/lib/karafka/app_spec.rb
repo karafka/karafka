@@ -52,10 +52,10 @@ RSpec.describe Karafka::App do
   end
 
   describe 'Karafka delegations' do
-    %i(
+    %i[
       root
       env
-    ).each do |delegation|
+    ].each do |delegation|
       describe "##{delegation}" do
         let(:return_value) { double }
 
@@ -71,11 +71,11 @@ RSpec.describe Karafka::App do
   end
 
   describe 'Karafka::Status delegations' do
-    %i(
+    %i[
       run!
       running?
       stop!
-    ).each do |delegation|
+    ].each do |delegation|
       describe "##{delegation}" do
         let(:return_value) { double }
 
