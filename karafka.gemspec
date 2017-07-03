@@ -18,7 +18,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'ruby-kafka', '= 0.3.17'
   spec.add_dependency 'sidekiq', '>= 4.2'
-  spec.add_dependency 'worker-glass', '~> 0.2'
   spec.add_dependency 'celluloid'
   spec.add_dependency 'envlogic', '~> 1.0'
   spec.add_dependency 'waterdrop', '~> 0.3.2.4'
@@ -30,6 +29,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'rspec', '>= 3.6'
   spec.add_development_dependency 'simplecov', '>= 0.14'
+  spec.add_development_dependency 'byebug'
 
   spec.required_ruby_version = '>= 2.3.0'
 

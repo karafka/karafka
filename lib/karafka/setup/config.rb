@@ -27,8 +27,6 @@ module Karafka
       setting :redis
       # If batch_mode is true, incoming messages will be handled in batch, otherwsie one at a time.
       setting :batch_mode, false
-      #  whether to consume messages starting at the beginning or to just consume new messages
-      setting :start_from_beginning, true
       # Mapper used to remap names of topics, so we can have a clean internal topic namings despite
       # using any Kafka provider that uses namespacing, etc
       # It needs to implement two methods:
@@ -66,16 +64,18 @@ module Karafka
         # option heartbeat_interval [Integer] the interval between heartbeats; must be less
         #   than the session window.
         setting :heartbeat_interval, 10
-
         # SSL authentication related settings
-        setting :ssl do
-          # option ca_cert [String] SSL CA certificate
-          setting :ca_cert, nil
-          # option client_cert [String] SSL client certificate
-          setting :client_cert, nil
-          # option client_cert_key [String] SSL client certificate password
-          setting :client_cert_key, nil
-        end
+        # option ca_cert [String] SSL CA certificate
+        setting :ssl_ca_cert, nil
+        # option client_cert [String] SSL client certificate
+        setting :ssl_client_cert, nil
+        # option client_cert_key [String] SSL client certificate password
+        setting :ssl_client_cert_key, nil
+        # option max_bytes_per_partition [Integer] the maximum amount of data fetched
+        #   from a single partition at a time.
+        setting :max_bytes_per_partition, 1_048_576
+        #  whether to consume messages starting at the beginning or to just consume new messages
+        setting :start_from_beginning, true
       end
 
       # This is configured automatically, don't overwrite it!

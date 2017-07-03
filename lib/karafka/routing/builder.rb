@@ -11,12 +11,11 @@ module Karafka
       include Singleton
 
       # Options that are being set on the route level
-      # @note Topic is not being set as a route option. It is being set as a part of the routing
-      #   DSL. The same (but the other way around) goes for controller, that is a route option
-      #   and is not in the Route::ATTRIBUTES because there's no default controller
-      ROUTE_OPTIONS = (Route::ATTRIBUTES - %i(topic) + %i(controller)).freeze
+      ROUTE_OPTIONS = (
+        Route::ATTRIBUTES # + ::Karafka::App.config.kafka.to_h.keys
+      ).uniq.freeze
 
-      # All those options should be set on the route level
+      # All those options can be set on the route level
       ROUTE_OPTIONS.each do |option|
         define_method option do |value|
           @current_route.public_send :"#{option}=", value

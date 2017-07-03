@@ -11,7 +11,10 @@ RSpec.describe Karafka::Setup::ConfigSchema do
         offset_commit_interval: 1,
         offset_commit_threshold: 1,
         heartbeat_interval: 1,
-        session_timeout: 1
+        session_timeout: 1,
+        ssl_ca_cert: 'ca_cert',
+        ssl_client_cert: 'client_cert',
+        ssl_client_cert_key: 'client_cert_key'
       }
     }
   end
@@ -228,54 +231,39 @@ RSpec.describe Karafka::Setup::ConfigSchema do
       end
     end
 
-    context 'ssl validator' do
-      before do
-        config[:kafka][:ssl] = {
-          ca_cert: 'ca_cert',
-          client_cert: 'client_cert',
-          client_cert_key: 'client_cert_key'
-        }
+    context 'ssl_ca_cert validator' do
+      it 'ssl_ca_cert is nil' do
+        config[:kafka][:ssl_ca_cert] = nil
+        expect(schema.call(config).success?).to be_truthy
       end
 
-      it 'ssl is not a hash' do
-        config[:kafka][:ssl] = 'ssl'
+      it 'ssl_ca_cert is not a string' do
+        config[:kafka][:ssl_ca_cert] = 2
         expect(schema.call(config).success?).to be_falsey
       end
+    end
 
-      context 'ca_cert validator' do
-        it 'ca_cert is nil' do
-          config[:kafka][:ssl][:ca_cert] = nil
-          expect(schema.call(config).success?).to be_truthy
-        end
-
-        it 'ca_cert is not a string' do
-          config[:kafka][:ssl][:ca_cert] = 2
-          expect(schema.call(config).success?).to be_falsey
-        end
+    context 'ssl_client_cert validator' do
+      it 'ssl_client_cert is nil' do
+        config[:kafka][:ssl_client_cert] = nil
+        expect(schema.call(config).success?).to be_truthy
       end
 
-      context 'client_cert validator' do
-        it 'client_cert is nil' do
-          config[:kafka][:ssl][:client_cert] = nil
-          expect(schema.call(config).success?).to be_truthy
-        end
+      it 'ssl_client_cert is not a string' do
+        config[:kafka][:ssl_client_cert] = 2
+        expect(schema.call(config).success?).to be_falsey
+      end
+    end
 
-        it 'client_cert is not a string' do
-          config[:kafka][:ssl][:client_cert] = 2
-          expect(schema.call(config).success?).to be_falsey
-        end
+    context 'ssl_client_cert_key validator' do
+      it 'ssl_client_cert_key is nil' do
+        config[:kafka][:ssl_client_cert_key] = nil
+        expect(schema.call(config).success?).to be_truthy
       end
 
-      context 'client_cert_key validator' do
-        it 'client_cert_key is nil' do
-          config[:kafka][:ssl][:client_cert_key] = nil
-          expect(schema.call(config).success?).to be_truthy
-        end
-
-        it 'client_cert_key is not a string' do
-          config[:kafka][:ssl][:client_cert_key] = 2
-          expect(schema.call(config).success?).to be_falsey
-        end
+      it 'ssl_client_cert_key is not a string' do
+        config[:kafka][:ssl_client_cert_key] = 2
+        expect(schema.call(config).success?).to be_falsey
       end
     end
   end

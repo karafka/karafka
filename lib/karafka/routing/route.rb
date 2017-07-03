@@ -18,6 +18,7 @@ module Karafka
         group
         topic
         worker
+        controller
         parser
         interchanger
         responder
@@ -36,7 +37,7 @@ module Karafka
       # everywhere except Karafka server command, those would not be initialized on time - for
       # example for Sidekiq
       def build
-        ATTRIBUTES.each { |attr| send(attr) }
+        ATTRIBUTES.each { |attr| send(attr) if respond_to?(attr) }
         self
       end
 
@@ -98,7 +99,7 @@ module Karafka
       #   the first run
       def start_from_beginning
         return @start_from_beginning unless @start_from_beginning.nil?
-        @start_from_beginning = Karafka::App.config.start_from_beginning
+        @start_from_beginning = Karafka::App.config.kafka.start_from_beginning
       end
 
       # Checks if topic and group have proper format (acceptable by Kafka)

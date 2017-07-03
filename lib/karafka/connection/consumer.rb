@@ -17,9 +17,10 @@ module Karafka
         controller = Karafka::Routing::Router.new(mapped_topic).build
         # We wrap it around with our internal message format, so we don't pass around
         # a raw Kafka message
-        controller.params = Message.new(mapped_topic, message.value)
+        message = Message.new(mapped_topic, message.value)
+        controller.params = message
 
-        Karafka.monitor.notice(self.class, controller.to_h)
+        Karafka.monitor.notice(self.class, message)
 
         controller.schedule
         # This is on purpose - see the notes for this method

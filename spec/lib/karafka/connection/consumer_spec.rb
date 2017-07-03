@@ -6,7 +6,7 @@ RSpec.describe Karafka::Connection::Consumer do
     let(:raw_message_value) { rand }
     let(:message) { double }
     let(:builder) { Karafka::Routing::Router.new(nil) }
-    let(:controller_instance) { instance_double(Karafka::BaseController, to_h: {}) }
+    let(:controller_instance) { instance_double(Karafka::BaseController) }
     let(:raw_message) do
       instance_double(Kafka::FetchedMessage, value: raw_message_value, topic: topic)
     end

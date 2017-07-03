@@ -12,7 +12,6 @@ PATH
       sidekiq (>= 4.2)
       thor (~> 0.19)
       waterdrop (~> 0.3.2.4)
-      worker-glass (~> 0.2)
 
 GEM
   remote: https://rubygems.org/
@@ -22,6 +21,7 @@ GEM
       i18n (~> 0.7)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
+    byebug (9.0.6)
     celluloid (0.17.3)
       celluloid-essentials
       celluloid-extras
@@ -121,15 +121,13 @@ GEM
       null-logger
       rake
       ruby-kafka
-    worker-glass (0.2.3)
-      activesupport
-      null-logger
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   bundler (~> 1.2)
+  byebug
   karafka!
   rspec (>= 3.6)
   simplecov (>= 0.14)

@@ -11,7 +11,6 @@
   logger
   kafka
   sidekiq
-  worker_glass
   envlogic
   thor
   fileutils

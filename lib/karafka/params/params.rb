@@ -23,36 +23,18 @@ module Karafka
         #   Karafka::Params::Params.build({ key: 'value' }, DataController.new) #=> params object
         # @example Build params instance from a Karafka::Connection::Message object
         #   Karafka::Params::Params.build(message, IncomingController.new) #=> params object
-        def build(message, controller)
+        def build(message)
           # Hash case happens inside workers
           if message.is_a?(Hash)
-            defaults(controller).merge!(message)
+            new.merge!(message)
           else
             # This happens inside Karafka::Connection::Consumer
-            defaults(controller).merge!(
+            new.merge!(
               parsed: false,
               received_at: Time.now,
               content: message.content
             )
           end
-        end
-
-        private
-
-        # @param controller [Karafka::BaseController] Karafka's base controllers descendant
-        #   instance that wants to use params
-        # @return [Karafka::Params::Params] freshly initialized only with default values object
-        #   that can be populated with incoming data
-        def defaults(controller)
-          # We initialize some default values that will be used both in Karafka main process and
-          # inside workers
-          new(
-            controller: controller.class,
-            worker: controller.worker,
-            parser: controller.parser,
-            topic: controller.topic,
-            responder: controller.responder
-          )
         end
       end
 

@@ -4,72 +4,34 @@ RSpec.describe Karafka::Params::Params do
 
     describe '#build' do
       let(:controller) { double }
-      let(:defaults) { double }
       let(:merged_with_defaults) { double }
-
-      before do
-        expect(params_class)
-          .to receive(:defaults)
-          .with(controller)
-          .and_return(defaults)
-      end
 
       context 'when we build from a hash' do
         let(:message) { { rand => rand } }
 
-        it 'expect to build a new based on defaults and merge a message' do
-          expect(defaults)
-            .to receive(:merge!)
-            .with(message)
-            .and_return(merged_with_defaults)
-
-          expect(params_class.build(message, controller)).to eq merged_with_defaults
+        it 'expect to build based on a message' do
+          expect(params_class.build(message)).to eq message
         end
       end
 
       context 'when we build based on Karafka::Connection::Message' do
         let(:content) { rand }
-
+        let(:extra_content) do
+          {
+            'parsed' => false,
+            'received_at' => Time.now,
+            'content' => content
+          }
+        end
         let(:message) do
-          instance_double(Karafka::Connection::Message, content: content)
+          Karafka::Connection::Message.new(rand, content)
         end
 
-        it 'expect to build defaults and merge with additional values and content' do
+        it 'expect to build with additional values and content' do
           Timecop.freeze do
-            expect(defaults).to receive(:merge!)
-              .with(parsed: false, received_at: Time.now, content: content)
-              .and_return(merged_with_defaults)
-
-            expect(params_class.build(message, controller)).to eq merged_with_defaults
+            expect(params_class.build(message)).to eq extra_content.merge('content' => content)
           end
         end
-      end
-    end
-
-    describe '#defaults' do
-      let(:worker) { double }
-      let(:parser) { double }
-      let(:topic) { double }
-      let(:responder) { double }
-
-      let(:controller) do
-        instance_double(
-          Karafka::BaseController,
-          worker: worker,
-          parser: parser,
-          topic: topic,
-          responder: responder
-        )
-      end
-
-      it 'expect to return default params' do
-        params = params_class.send(:defaults, controller)
-
-        expect(params).to be_a params_class
-        expect(params[:controller]).to eq controller.class
-        expect(params[:worker]).to eq worker
-        expect(params[:parser]).to eq parser
-        expect(params[:topic]).to eq topic
       end
     end
   end

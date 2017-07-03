@@ -1,6 +1,20 @@
 RSpec.describe Karafka::BaseController do
   subject(:base_controller) { working_class.new }
 
+  let(:topic) { "topic#{rand.to_s}" }
+  let(:inline_mode) { false }
+  let(:responder_class) { nil }
+  let(:interchanger) { nil }
+  let(:worker) { nil }
+  let(:route) do
+    Karafka::Routing::Route.new.tap do |route|
+      route.inline_mode = inline_mode
+      route.topic = topic
+      route.responder = responder_class
+      route.interchanger = interchanger
+      route.worker = worker
+    end
+  end
   let(:working_class) do
     ClassBuilder.inherit(described_class) do
       def perform
@@ -8,6 +22,8 @@ RSpec.describe Karafka::BaseController do
       end
     end
   end
+
+  before { base_controller.route = route }
 
   describe '#perform' do
     context 'when perform method is defined' do
@@ -23,6 +39,8 @@ RSpec.describe Karafka::BaseController do
   describe '#schedule' do
     context 'when there are no callbacks' do
       context 'and we dont want to perform inline' do
+        let(:inline_mode) { false }
+
         it 'just schedules via perform_async' do
           expect(base_controller).to receive(:perform_async)
 
@@ -31,11 +49,7 @@ RSpec.describe Karafka::BaseController do
       end
 
       context 'and we want to perform inline' do
-        before do
-          expect(base_controller)
-            .to receive(:inline_mode)
-            .and_return(true)
-        end
+        let(:inline_mode) { true }
 
         it 'just expect to run with perform_inline' do
           expect(base_controller).to receive(:perform_inline)
@@ -53,10 +67,7 @@ RSpec.describe Karafka::BaseController do
     it 'creates params instance and assign it' do
       expect(Karafka::Params::Params)
         .to receive(:build)
-        .with(
-          message,
-          base_controller
-        )
+        .with(message)
         .and_return(params)
 
       base_controller.params = message
@@ -66,7 +77,7 @@ RSpec.describe Karafka::BaseController do
   end
 
   describe '#params' do
-    let(:params) { Karafka::Params::Params.build({}, base_controller) }
+    let(:params) { Karafka::Params::Params.build({}) }
 
     before do
       base_controller.instance_variable_set(:@params, params)
@@ -82,10 +93,7 @@ RSpec.describe Karafka::BaseController do
   end
 
   describe '#respond_with' do
-    before { base_controller.responder = responder_class }
-
     context 'when there is no responder for a given controller' do
-      let(:responder_class) { nil }
       let(:error) { Karafka::Errors::ResponderMissing }
 
       it { expect { base_controller.send(:respond_with, {}) }.to raise_error(error) }
@@ -117,28 +125,20 @@ RSpec.describe Karafka::BaseController do
 
   describe '#perform_async' do
     let(:params) { double }
-    let(:interchanger) { double }
     let(:interchanged_load_params) { double }
     let(:worker) { double }
-    let(:topic) { rand.to_s }
-
-    before do
-      base_controller.interchanger = interchanger
-      base_controller.worker = worker
-      base_controller.topic = topic
-    end
 
     it 'enqueue perform function' do
       base_controller.instance_variable_set :@params, params
 
-      expect(base_controller.interchanger)
+      expect(route.interchanger)
         .to receive(:load)
         .with(params)
         .and_return(interchanged_load_params)
 
       expect(worker)
         .to receive(:perform_async)
-        .with(topic, interchanged_load_params)
+        .with(route.topic, interchanged_load_params)
 
       base_controller.send :perform_async
     end

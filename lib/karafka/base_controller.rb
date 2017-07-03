@@ -62,17 +62,7 @@ module Karafka
     # @see http://api.rubyonrails.org/classes/ActiveSupport/Callbacks/ClassMethods.html#method-i-get_callbacks
     define_callbacks :schedule
 
-    # This will be set based on routing settings
-    # From 0.4 a single controller can handle multiple topics jobs
-    # All the attributes are taken from route
-    Karafka::Routing::Route::ATTRIBUTES.each do |attr|
-      attr_reader attr
-
-      define_method(:"#{attr}=") do |new_attr_value|
-        instance_variable_set(:"@#{attr}", new_attr_value)
-        @params[attr] = new_attr_value if @params
-      end
-    end
+    attr_accessor :route
 
     class << self
       # Creates a callback that will be executed before scheduling to Sidekiq
@@ -96,23 +86,15 @@ module Karafka
     # @param message [Karafka::Connection::Message, Hash] message with raw content or a hash
     #   from Sidekiq that allows us to build params.
     def params=(message)
-      @params = Karafka::Params::Params.build(message, self)
+      @params = Karafka::Params::Params.build(message)
     end
 
     # Executes the default controller flow, runs callbacks and if not halted
     # will schedule a perform task in sidekiq
     def schedule
       run_callbacks :schedule do
-        inline_mode ? perform_inline : perform_async
+        route.inline_mode ? perform_inline : perform_async
       end
-    end
-
-    # @return [Hash] hash with all controller details - it works similar to #params method however
-    #   it won't parse data so it will return unparsed details about controller and its parameters
-    # @example Get data about ctrl
-    #   ctrl.to_h #=> { "worker"=>WorkerClass, "parsed"=>false, "content"=>"{}" }
-    def to_h
-      @params
     end
 
     # Method that will perform business logic on data received from Kafka
@@ -146,17 +128,17 @@ module Karafka
     # @raise [Karafka::Errors::ResponderMissing] raised when we don't have a responder defined,
     #   but we still try to use this method
     def respond_with(*data)
-      raise(Errors::ResponderMissing, self.class) unless responder
+      raise(Errors::ResponderMissing, self.class) unless route.responder
 
       Karafka.monitor.notice(self.class, data: data)
-      responder.new(parser).call(*data)
+      route.responder.new(route.parser).call(*data)
     end
 
     # Executes perform code immediately (without enqueuing)
     # @note Despite the fact, that workers won't be used, we still initialize all the
     #   classes and other framework elements
     def perform_inline
-      Karafka.monitor.notice(self.class, to_h)
+      Karafka.monitor.notice(self.class, @params)
       perform
     end
 
@@ -165,12 +147,12 @@ module Karafka
     #   parameters into it. We always pass topic as a first argument and this request params
     #   as a second one (we pass topic to be able to build back the controller in the worker)
     def perform_async
-      Karafka.monitor.notice(self.class, to_h)
+      Karafka.monitor.notice(self.class, @params)
       # We use @params directly (instead of #params) because of lazy loading logic that is behind
       # it. See Karafka::Params::Params class for more details about that
-      worker.perform_async(
-        topic,
-        interchanger.load(@params)
+      route.worker.perform_async(
+        route.topic,
+        route.interchanger.load(@params)
       )
     end
   end

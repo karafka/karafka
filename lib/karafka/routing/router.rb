@@ -14,11 +14,7 @@ module Karafka
       # Builds a controller instance that should handle message from a given topic
       # @return [Karafka::BaseController] base controller descendant instance object
       def build
-        route.controller.new.tap do |ctrl|
-          Karafka::Routing::Route::ATTRIBUTES.each do |attr|
-            ctrl.public_send(:"#{attr}=", route.public_send(attr))
-          end
-        end
+        route.controller.new.tap { |ctrl| ctrl.route = route }
       end
 
       private

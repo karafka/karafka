@@ -7,12 +7,11 @@ RSpec.describe Karafka::Routing::Router do
     let(:parser) { double }
     let(:worker) { double }
     let(:responder) { double }
-    let(:controller) { double }
+    let(:controller) { Karafka::BaseController }
     let(:interchanger) { double }
     let(:inline_mode) { [true, false].sample }
     let(:start_from_beginning) { [true, false].sample }
     let(:group) { rand.to_s }
-    let(:controller_instance) { double }
     let(:batch_mode) { [true, false].sample }
 
     let(:route) do
@@ -34,50 +33,14 @@ RSpec.describe Karafka::Routing::Router do
       allow(router)
         .to receive(:route)
         .and_return(route)
-
-      expect(controller)
-        .to receive(:new)
-        .and_return(controller_instance)
-
-      expect(controller_instance)
-        .to receive(:topic=)
-        .with(topic)
-
-      expect(controller_instance)
-        .to receive(:interchanger=)
-        .with(interchanger)
-
-      expect(controller_instance)
-        .to receive(:parser=)
-        .with(parser)
-
-      expect(controller_instance)
-        .to receive(:group=)
-        .with(group)
-
-      expect(controller_instance)
-        .to receive(:worker=)
-        .with(worker)
-
-      expect(controller_instance)
-        .to receive(:responder=)
-        .with(responder)
-
-      expect(controller_instance)
-        .to receive(:inline_mode=)
-        .with(inline_mode)
-
-      expect(controller_instance)
-        .to receive(:batch_mode=)
-        .with(batch_mode)
-
-      expect(controller_instance)
-        .to receive(:start_from_beginning=)
-        .with(start_from_beginning)
     end
 
     it 'expect to build controller with all proper options assigned' do
-      expect(router.build).to eq controller_instance
+      expect(router.build).to be_a(Karafka::BaseController)
+    end
+
+    it 'expect assign route into current instance' do
+      expect(router.build.route).to eq route
     end
   end
 

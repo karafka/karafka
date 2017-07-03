@@ -33,11 +33,9 @@ module Karafka
         required(:offset_commit_threshold).filled(:int?)
         required(:heartbeat_interval).filled(:int?)
 
-        optional(:ssl).schema do
-          required(:ca_cert).maybe(:str?)
-          required(:client_cert).maybe(:str?)
-          required(:client_cert_key).maybe(:str?)
-        end
+        optional(:ssl_ca_cert).maybe(:str?)
+        optional(:ssl_client_cert).maybe(:str?)
+        optional(:ssl_client_cert_key).maybe(:str?)
       end
     end
   end
