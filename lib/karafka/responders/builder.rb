@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Responders namespace encapsulates all the internal responder implementation parts
   module Responders

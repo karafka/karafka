@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Responders::Builder do
   subject(:builder) { described_class.new(controller_class) }
 

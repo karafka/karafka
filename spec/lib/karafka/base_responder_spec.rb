@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::BaseResponder do
   let(:topic_name) { 'topic_123.abc-xyz' }
   let(:input_data) { rand }
@@ -127,7 +129,7 @@ RSpec.describe Karafka::BaseResponder do
 
               expect(::WaterDrop::Message)
                 .to receive(:new).with(topic, data, options)
-                .and_return(kafka_message)
+                                 .and_return(kafka_message)
 
               expect(kafka_message).to receive(:send!)
             end
@@ -162,7 +164,7 @@ RSpec.describe Karafka::BaseResponder do
 
               expect(::WaterDrop::Message)
                 .to receive(:new).with(mapped_topic, data, options)
-                .and_return(kafka_message)
+                                 .and_return(kafka_message)
 
               expect(kafka_message).to receive(:send!)
             end

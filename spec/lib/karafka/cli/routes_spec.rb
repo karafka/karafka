@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Routes do
   let(:cli) { Karafka::Cli.new }
   subject(:routes_cli) { described_class.new(cli) }

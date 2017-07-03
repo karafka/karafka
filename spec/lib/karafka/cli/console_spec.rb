@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Console do
   let(:cli) { Karafka::Cli.new }
   subject(:console_cli) { described_class.new(cli) }

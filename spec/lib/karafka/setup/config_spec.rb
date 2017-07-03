@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Setup::Config do
   subject(:config_class) { described_class }
 

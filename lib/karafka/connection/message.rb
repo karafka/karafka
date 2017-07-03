@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Namespace that encapsulates everything related to connections
   module Connection

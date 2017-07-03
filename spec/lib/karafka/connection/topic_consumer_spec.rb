@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Connection::TopicConsumer do
   let(:group) { rand.to_s }
   let(:topic) { rand.to_s }

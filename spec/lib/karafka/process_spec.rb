@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Process do
   subject(:process) { described_class.instance }
 

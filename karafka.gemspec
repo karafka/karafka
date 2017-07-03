@@ -8,10 +8,10 @@ Gem::Specification.new do |spec|
   spec.version     = ::Karafka::VERSION
   spec.platform    = Gem::Platform::RUBY
   spec.authors     = ['Maciej Mensfeld', 'Pavlo Vavruk', 'Adam Gwozdowski']
-  spec.email       = %w( maciej@coditsu.io pavlo.vavruk@gmail.com adam99g@gmail.com )
+  spec.email       = %w[maciej@coditsu.io pavlo.vavruk@gmail.com adam99g@gmail.com]
   spec.homepage    = 'https://github.com/karafka/karafka'
-  spec.summary     = %q{ Ruby based framework for working with Apache Kafka }
-  spec.description = %q{ Framework used to simplify Apache Kafka based Ruby applications development }
+  spec.summary     = %q[Ruby based framework for working with Apache Kafka]
+  spec.description = %q[Framework used to simplify Apache Kafka based Ruby applications development]
   spec.license     = 'MIT'
 
   spec.add_development_dependency 'bundler', '~> 1.2'
@@ -35,5 +35,5 @@ Gem::Specification.new do |spec|
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.require_paths = %w( lib )
+  spec.require_paths = %w[lib]
 end

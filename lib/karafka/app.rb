@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # App class
   class App
@@ -36,9 +38,11 @@ module Karafka
       end
 
       # Methods that should be delegated to Karafka module
-      %i(
-        root env logger monitor
-      ).each do |delegated|
+      %i[
+        root
+        env
+        logger monitor
+      ].each do |delegated|
         define_method(delegated) do
           Karafka.public_send(delegated)
         end

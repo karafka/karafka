@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Params namespace encapsulating all the logic that is directly related to params handling
   module Params
@@ -15,14 +17,12 @@ module Karafka
         # @param message [Karafka::Connection::Message, Hash] message that we get out of Kafka
         #   in case of building params inside main Karafka process in
         #   Karafka::Connection::Consumer, or a hash when we retrieve data from Sidekiq
-        # @param controller [Karafka::BaseController] Karafka's base controllers descendant
-        #   instance that wants to use params
         # @return [Karafka::Params::Params] Karafka params object not yet used parser for
         #   retrieving data that we've got from Kafka
         # @example Build params instance from a hash
-        #   Karafka::Params::Params.build({ key: 'value' }, DataController.new) #=> params object
+        #   Karafka::Params::Params.build({ key: 'value' }) #=> params object
         # @example Build params instance from a Karafka::Connection::Message object
-        #   Karafka::Params::Params.build(message, IncomingController.new) #=> params object
+        #   Karafka::Params::Params.build(message) #=> params object
         def build(message)
           # Hash case happens inside workers
           if message.is_a?(Hash)

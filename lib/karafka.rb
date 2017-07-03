@@ -1,4 +1,6 @@
-%w(
+# frozen_string_literal: true
+
+%w[
   rake
   ostruct
   rubygems
@@ -24,7 +26,7 @@
   karafka/loader
   karafka/status
   karafka/routing/route
-).each { |lib| require lib }
+].each(&method(:require))
 
 # Karafka library
 module Karafka

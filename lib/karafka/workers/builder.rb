@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Internal stuff related to workers
   module Workers

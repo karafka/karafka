@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Parsers::Json do
   subject(:parser_class) { described_class }
 

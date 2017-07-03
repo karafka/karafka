@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Helpers
     # Class used to autodetect corresponding classes that are internally inside Karafka framework

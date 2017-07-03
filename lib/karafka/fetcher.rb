@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Class used to run the Karafka consumer and handle shutting down, restarting etc
   # @note Creating multiple fetchers will result in having multiple connections to the same

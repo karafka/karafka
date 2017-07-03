@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Karafka framework Cli
   class Cli
@@ -30,9 +32,7 @@ module Karafka
 
       # @return [Array<Karafka::Routing::Route>] all routes sorted in alphabetical order
       def routes
-        Karafka::App.routes.sort do |route1, route2|
-          route1.topic <=> route2.topic
-        end
+        Karafka::App.routes.sort_by(&:topic)
       end
 
       # Prints a given value with label in a nice way

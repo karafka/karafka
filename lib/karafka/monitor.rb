@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Monitor is used to hookup external monitoring services to monitor how Karafka works
   # It provides a standarized API for checking incoming messages/enqueueing etc

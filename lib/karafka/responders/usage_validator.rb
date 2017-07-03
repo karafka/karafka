@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Responders
     # Usage validator checks if all the requirements related to responders topics were met

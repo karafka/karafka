@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Monitor do
   subject(:monitor) { described_class.instance }
 

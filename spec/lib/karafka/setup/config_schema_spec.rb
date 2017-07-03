@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Setup::ConfigSchema do
   let(:schema) { described_class }
 

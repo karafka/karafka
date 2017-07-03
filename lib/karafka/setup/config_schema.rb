@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Setup
     # Schema with validation rules for all configuration

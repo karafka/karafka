@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Base responder from which all Karafka responders should inherit
   # Similar to Rails responders concept. It allows us to design flow from one app to another

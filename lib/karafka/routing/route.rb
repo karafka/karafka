@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Routing
     # Class representing a single route (from topic to worker) with all additional features

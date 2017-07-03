@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Routing
     # Routes builder used as a DSL layer for drawing and describing routes

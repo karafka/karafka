@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Responders
     # Topic describes a single topic on which we want to respond with responding requirements

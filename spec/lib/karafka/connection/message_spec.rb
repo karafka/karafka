@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Connection::Message do
   let(:topic) { double }
   let(:content) { double }

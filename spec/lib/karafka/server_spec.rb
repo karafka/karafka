@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Server do
   subject(:server_class) { described_class }
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Loader for requiring all the files in a proper order
   # Some files needs to be required before other, so it will
@@ -5,7 +7,7 @@ module Karafka
   # any other.
   class Loader
     # Order in which we want to load app files
-    DIRS = %w(
+    DIRS = %w[
       config/initializers
       lib
       app/helpers
@@ -20,7 +22,7 @@ module Karafka
       app/controllers
       app/aspects
       app
-    ).freeze
+    ].freeze
 
     # Will load files in a proper order (based on DIRS)
     # @param [String] root path from which we want to start

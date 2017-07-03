@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Module containing classes and methods that provide some additional functionalities
   module Helpers

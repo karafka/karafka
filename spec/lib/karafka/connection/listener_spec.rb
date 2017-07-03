@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Connection::Listener do
   let(:route) do
     Karafka::Routing::Route.new.tap do |route|

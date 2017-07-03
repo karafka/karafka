@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Responders::Topic do
   subject(:topic) { described_class.new(name, options) }
   let(:name) { 'topic_123.abc-xyz' }

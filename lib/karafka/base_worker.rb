@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Worker wrapper for Sidekiq workers
   class BaseWorker

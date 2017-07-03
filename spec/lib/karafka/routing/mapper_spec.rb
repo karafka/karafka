@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Routing::Mapper do
   subject(:mapper) { described_class }
 

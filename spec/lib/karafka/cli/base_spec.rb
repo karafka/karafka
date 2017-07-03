@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Base do
   describe 'instance methods' do
     let(:cli) { Karafka::Cli.new }

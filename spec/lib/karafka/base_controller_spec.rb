@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::BaseController do
   subject(:base_controller) { working_class.new }
 
-  let(:topic) { "topic#{rand.to_s}" }
+  let(:topic) { "topic#{rand}" }
   let(:inline_mode) { false }
   let(:responder_class) { nil }
   let(:interchanger) { nil }

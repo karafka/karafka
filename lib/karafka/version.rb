@@ -1,6 +1,7 @@
 # frozen_string_literal: true
+
 # Main module namespace
 module Karafka
   # Current Karafka version
-  VERSION = '0.5.0.3'
+  VERSION = '0.5.1.0'
 end

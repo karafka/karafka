@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Responders::UsageValidator do
   subject(:validator) { described_class.new(registered_topics, used_topics) }
   let(:topic_name) { "topic#{rand(1000)}" }

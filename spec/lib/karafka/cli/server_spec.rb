@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Server do
   subject(:server_cli) { described_class.new(cli) }
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Setup::Configurators::Sidekiq do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 

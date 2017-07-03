@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Patches::DryConfigurable do
   context 'root level' do
     let(:dummy_class) do

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Connection
     # Class that consumes messages for which we listen

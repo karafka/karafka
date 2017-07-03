@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Karafka module namespace
 module Karafka
   # Base controller from which all Karafka controllers should inherit

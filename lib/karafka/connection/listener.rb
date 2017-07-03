@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Connection
     # A single listener that listens to incoming messages from a single route

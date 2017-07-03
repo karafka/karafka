@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Module for all supported by default parsers for incoming/outgoing data
   module Parsers

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Namespace used to encapsulate all the internal errors of Karafka
   module Errors

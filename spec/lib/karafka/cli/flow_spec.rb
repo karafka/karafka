@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Flow do
   let(:cli) { Karafka::Cli.new }
   subject(:flow_cli) { described_class.new(cli) }

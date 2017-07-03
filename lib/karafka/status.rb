@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # App status monitor
   class Status

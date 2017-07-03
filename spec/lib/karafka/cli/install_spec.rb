@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Install do
   let(:cli) { Karafka::Cli.new }
   subject(:install_cli) { described_class.new(cli) }

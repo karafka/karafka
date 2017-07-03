@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Connection
     # Class used as a wrapper around Ruby-Kafka to simplify additional

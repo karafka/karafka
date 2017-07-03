@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::BaseWorker do
   subject(:base_worker) { described_class.new }
 

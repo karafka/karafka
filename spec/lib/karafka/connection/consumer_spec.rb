@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Connection::Consumer do
   subject(:consumer) { described_class.new }
 
