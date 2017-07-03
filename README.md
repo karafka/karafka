@@ -28,6 +28,10 @@ Karafka dev team also provides commercial support in following matters:
 
 If you are interested in our commercial services, please contact [Maciej Mensfeld (maciej@coditsu.io)](mailto:maciej@coditsu.io) directly.
 
+## Sponsorship
+
+We are looking for sustainable sponsorship. If your company is relying on Karafka framework or simply want to see Karafka evolve faster to meet your requirements, please consider backing the project. Please contact [Maciej Mensfeld (maciej@coditsu.io)](mailto:maciej@coditsu.io) directly for more details.
+
 ## Notice
 
 Karafka framework and Karafka team are __not__ related to Kafka streaming service called CloudKarafka in any matter. We don't recommend nor discourage usage of their platform.
