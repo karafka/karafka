@@ -2,6 +2,8 @@
 
 ## Unreleased
 - #150 - Add support for start_from_beginning on a per topic basis
+- Got rid of PolishGeeksDevTools (will be replaced with Coditsu soon)
+- Gem bump (dry-stuff and other gems)
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period
