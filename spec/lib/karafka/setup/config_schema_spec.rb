@@ -11,7 +11,8 @@ RSpec.describe Karafka::Setup::ConfigSchema do
         offset_commit_interval: 1,
         offset_commit_threshold: 1,
         heartbeat_interval: 1,
-        session_timeout: 1
+        session_timeout: 1,
+        max_bytes_per_partition: 1000
       }
     }
   end
@@ -224,6 +225,18 @@ RSpec.describe Karafka::Setup::ConfigSchema do
 
       it 'heartbeat_interval is not integer' do
         config[:kafka][:heartbeat_interval] = 's'
+        expect(schema.call(config).success?).to be_falsey
+      end
+    end
+
+    context 'max_bytes_per_partition validator' do
+      it 'max_bytes_per_partition is nil' do
+        config[:kafka][:max_bytes_per_partition] = nil
+        expect(schema.call(config).success?).to be_falsey
+      end
+
+      it 'max_bytes_per_partition is not integer' do
+        config[:kafka][:max_bytes_per_partition] = 's'
         expect(schema.call(config).success?).to be_falsey
       end
     end
