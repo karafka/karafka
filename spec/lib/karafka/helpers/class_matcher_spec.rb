@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Dummy module used for spec purposes
 module TestModule
 end
 

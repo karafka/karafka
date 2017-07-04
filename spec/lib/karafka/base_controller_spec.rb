@@ -68,8 +68,8 @@ RSpec.describe Karafka::BaseController do
 
     it 'creates params instance and assign it' do
       expect(Karafka::Params::Params).to receive(:build)
-                                     .with(message, route.parser)
-                                     .and_return(params)
+        .with(message, route.parser)
+        .and_return(params)
 
       base_controller.params = message
 
@@ -132,8 +132,9 @@ RSpec.describe Karafka::BaseController do
     it 'enqueue perform function' do
       base_controller.instance_variable_set :@params, params
       expect(route.interchanger).to receive(:load)
-                                .with(params).and_return(interchanged_load_params)
-      expect(worker).to receive(:perform_async).with(route.topic, interchanged_load_params)
+        .with(params).and_return(interchanged_load_params)
+      expect(worker).to receive(:perform_async)
+        .with(route.topic, interchanged_load_params)
       base_controller.send :perform_async
     end
   end

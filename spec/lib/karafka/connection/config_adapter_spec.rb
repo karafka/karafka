@@ -5,4 +5,3 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
 
   pending
 end
-

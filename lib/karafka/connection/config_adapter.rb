@@ -25,7 +25,7 @@ module Karafka
           start_from_beginning
           max_bytes_per_partition
         ]
-      }
+      }.freeze
 
       class << self
         # Builds app all the configuration settings for Kafka.new method
@@ -85,7 +85,7 @@ module Karafka
         # @param settings [Hash] settings that may contain nil values
         # @return [Hash] settings without nil using keys (non of karafka options should be nil)
         def sanitize(settings)
-          settings.select { |_key, value| !value.nil? }
+          settings.reject { |_key, value| value.nil? }
         end
 
         # @return [Hash] Kafka config details as a hash
