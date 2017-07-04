@@ -24,11 +24,21 @@ module Karafka
         subscription: %i[
           start_from_beginning
           max_bytes_per_partition
+        ],
+        consuming: %i[
+          min_bytes
+          max_wait_time
+        ],
+        # All the options that are under kafka config namespace, but are not used
+        # directly with kafka api, but from the Karafka user perspective, they are
+        # still related to kafka. They should not be proxied  anywhere
+        ignored: %i[
+          reconnect_timeout
         ]
       }.freeze
 
       class << self
-        # Builds app all the configuration settings for Kafka.new method
+        # Builds all the configuration settings for Kafka.new method
         # @param _route [Karafka::Routing::Route] route details
         # @return [Hash] hash with all the settings required by Kafka.new method
         def client(_route)
@@ -40,8 +50,7 @@ module Karafka
           }
 
           kafka_configs.each do |setting_name, setting_value|
-            next if EDGE_CASES_MAP[:consumer].include?(setting_name)
-            next if EDGE_CASES_MAP[:subscription].include?(setting_name)
+            next if EDGE_CASES_MAP.values.flatten.include?(setting_name)
 
             settings[setting_name] = setting_value
           end
@@ -49,7 +58,7 @@ module Karafka
           sanitize(settings)
         end
 
-        # Builds app all the configuration settings for kafka#consumer method
+        # Builds all the configuration settings for kafka#consumer method
         # @param route [Karafka::Routing::Route] route details
         # @return [Hash] hash with all the settings required by Kafka#consumer method
         def consumer(route)
@@ -64,7 +73,23 @@ module Karafka
           sanitize(settings)
         end
 
-        # Builds app all the configuration settings for kafka consumer#subscribe method
+        # Builds all the configuration settings for kafka consumer consume_each_batch and
+        #   consume_each_message methods
+        # @return [Hash] hash with all the settings required by
+        #   Kafka::Consumer#consume_each_message and Kafka::Consumer#consume_each_batch method
+        def consuming(route)
+          settings = {}
+
+          kafka_configs.each do |setting_name, setting_value|
+            next unless EDGE_CASES_MAP[:consuming].include?(setting_name)
+            next if settings.keys.include?(setting_name)
+            settings[setting_name] = setting_value
+          end
+
+          sanitize(settings)
+        end
+
+        # Builds all the configuration settings for kafka consumer#subscribe method
         # @param route [Karafka::Routing::Route] route details
         # @return [Hash] hash with all the settings required by kafka consumer#subscribe method
         def subscription(route)

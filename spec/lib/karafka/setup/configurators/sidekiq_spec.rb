@@ -3,8 +3,9 @@
 RSpec.describe Karafka::Setup::Configurators::Sidekiq do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
-  let(:config) { double }
   subject(:sidekiq_configurator) { described_class.new(config) }
+
+  let(:config) { double }
 
   describe '#setup' do
     it 'expect to configure client and server' do

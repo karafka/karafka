@@ -21,7 +21,6 @@ module Karafka
       end
 
       optional(:batch_mode).filled(:bool?)
-      optional(:start_from_beginning).filled(:bool?)
 
       optional(:connection_pool).schema do
         required(:size).filled
@@ -35,10 +34,14 @@ module Karafka
         required(:offset_commit_threshold).filled(:int?)
         required(:heartbeat_interval).filled(:int?)
         required(:max_bytes_per_partition).filled(:int?)
+        required(:start_from_beginning).filled(:bool?)
+        required(:offset_retention_time){ none?.not > int? }
 
         optional(:ssl_ca_cert).maybe(:str?)
         optional(:ssl_client_cert).maybe(:str?)
         optional(:ssl_client_cert_key).maybe(:str?)
+        optional(:sasl_gssapi_principal).maybe(:str?)
+        optional(:sasl_gssapi_keytab).maybe(:str?)
       end
     end
   end

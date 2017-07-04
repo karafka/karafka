@@ -54,6 +54,7 @@ RSpec.describe Karafka::Loader do
 
   describe '#load' do
     subject(:loader) { described_class.new }
+
     let(:relative_path) { '/app/decorators' }
     let(:lib_path) { '/lib' }
     let(:app_path) { '/app' }

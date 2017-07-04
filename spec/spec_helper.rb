@@ -50,6 +50,7 @@ module Karafka
       config.kafka.seed_brokers = ['localhost:9092']
       config.name = rand.to_s
       config.redis = { url: 'redis://' }
+      config.kafka.offset_retention_time = -1
     end
   end
 end

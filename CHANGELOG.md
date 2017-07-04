@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## Unreleased 0.6.0 wip
 - #150 - Add support for start_from_beginning on a per topic basis
 - Got rid of PolishGeeksDevTools (will be replaced with Coditsu soon)
 - Gem bump (dry-stuff and other gems)
@@ -14,6 +14,7 @@
 - Waaaaaay better code quality thanks to switching from dev tools to Coditsu
 - kafka.hosts option renamed to seed_brokers - you don't need to provide all the hosts to work with Kafka
 - start_from_beginning moved into kafka scope (kafka.start_from_beginning)
+- #154 - Support for min_bytes and max_wait_time on messages consuming
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

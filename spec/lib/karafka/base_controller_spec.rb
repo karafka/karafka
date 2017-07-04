@@ -34,6 +34,7 @@ RSpec.describe Karafka::BaseController do
 
     context 'when perform method is not defined' do
       let(:working_class) { ClassBuilder.inherit(described_class) }
+
       it { expect { base_controller.perform }.to raise_error NotImplementedError }
     end
   end

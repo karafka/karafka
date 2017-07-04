@@ -13,7 +13,6 @@ RSpec.describe Karafka::Connection::Listener do
   describe '#fetch_loop' do
     let(:topic_consumer) { double }
     let(:incoming_message) { double }
-
     let(:action) { double }
     [
       StandardError,

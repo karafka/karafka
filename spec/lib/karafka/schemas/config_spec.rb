@@ -17,7 +17,9 @@ RSpec.describe Karafka::Schemas::Config do
         ssl_ca_cert: 'ca_cert',
         ssl_client_cert: 'client_cert',
         ssl_client_cert_key: 'client_cert_key',
-        max_bytes_per_partition: 1_048_576
+        max_bytes_per_partition: 1_048_576,
+        offset_retention_time: 1000,
+        start_from_beginning: true
       }
     }
   end
@@ -104,18 +106,6 @@ RSpec.describe Karafka::Schemas::Config do
     end
   end
 
-  context 'start_from_beginning validator' do
-    it 'start_from_beginning is nil' do
-      config[:start_from_beginning] = nil
-      expect(schema.call(config).success?).to be_falsey
-    end
-
-    it 'start_from_beginning is not a bool' do
-      config[:start_from_beginning] = 2
-      expect(schema.call(config).success?).to be_falsey
-    end
-  end
-
   context 'connection_pool validator' do
     it 'connection_pool is nil' do
       config[:connection_pool] = nil
@@ -169,6 +159,18 @@ RSpec.describe Karafka::Schemas::Config do
       expect(schema.call(config).success?).to be_falsey
     end
 
+    context 'start_from_beginning validator' do
+      it 'start_from_beginning is nil' do
+        config[:kafka][:start_from_beginning] = nil
+        expect(schema.call(config).success?).to be_falsey
+      end
+
+      it 'start_from_beginning is not a bool' do
+        config[:kafka][:start_from_beginning] = 2
+        expect(schema.call(config).success?).to be_falsey
+      end
+    end
+
     context 'seed_brokers validator' do
       it 'seed_brokers is nil' do
         config[:kafka][:seed_brokers] = nil
@@ -182,6 +184,13 @@ RSpec.describe Karafka::Schemas::Config do
 
       it 'seed_brokers is not an array' do
         config[:kafka][:seed_brokers] = 'timeout'
+        expect(schema.call(config).success?).to be_falsey
+      end
+    end
+
+    context 'offset_retention_time validator' do
+      it 'offset_retention_time is not integer' do
+        config[:kafka][:offset_retention_time] = 's'
         expect(schema.call(config).success?).to be_falsey
       end
     end
@@ -278,6 +287,30 @@ RSpec.describe Karafka::Schemas::Config do
 
       it 'ssl_client_cert_key is not a string' do
         config[:kafka][:ssl_client_cert_key] = 2
+        expect(schema.call(config).success?).to be_falsey
+      end
+    end
+
+    context 'sasl_gssapi_principal validator' do
+      it 'sasl_gssapi_principal is nil' do
+        config[:kafka][:sasl_gssapi_principal] = nil
+        expect(schema.call(config).success?).to be_truthy
+      end
+
+      it 'sasl_gssapi_principal is not a string' do
+        config[:kafka][:sasl_gssapi_principal] = 2
+        expect(schema.call(config).success?).to be_falsey
+      end
+    end
+
+    context 'sasl_gssapi_keytab validator' do
+      it 'sasl_gssapi_keytab is nil' do
+        config[:kafka][:sasl_gssapi_keytab] = nil
+        expect(schema.call(config).success?).to be_truthy
+      end
+
+      it 'sasl_gssapi_keytab is not a string' do
+        config[:kafka][:sasl_gssapi_keytab] = 2
         expect(schema.call(config).success?).to be_falsey
       end
     end

@@ -69,6 +69,21 @@ module Karafka
         # option max_bytes_per_partition [Integer] the maximum amount of data fetched
         #   from a single partition at a time.
         setting :max_bytes_per_partition, 1_048_576
+        #  whether to consume messages starting at the beginning or to just consume new messages
+        setting :start_from_beginning, true
+        # option min_bytes [Integer] the minimum number of bytes to read before
+        #   returning messages from the server; if `max_wait_time` is reached, this
+        #   is ignored.
+        setting :min_bytes, 1
+        # option max_wait_time [Integer, Float] the maximum duration of time to wait before
+        #   returning messages from the server, in seconds.
+        setting :max_wait_time, 5
+        # option reconnect_timeout [Integer] How long should we wait before trying to reconnect to
+        # Kafka cluster that went down (in seconds)
+        setting :reconnect_timeout, 5
+        # option offset_retention_time [Integer] The length of the retention window, known as offset
+        #   retention time
+        setting :offset_retention_time, nil
         # SSL authentication related settings
         # option ca_cert [String] SSL CA certificate
         setting :ssl_ca_cert, nil
@@ -80,11 +95,6 @@ module Karafka
         setting :sasl_gssapi_principal, nil
         # option sasl_gssapi_keytab [String] sasl keytab
         setting :sasl_gssapi_keytab, nil
-        # option max_bytes_per_partition [Integer] the maximum amount of data fetched
-        #   from a single partition at a time.
-        setting :max_bytes_per_partition, 1_048_576
-        #  whether to consume messages starting at the beginning or to just consume new messages
-        setting :start_from_beginning, true
       end
 
       # This is configured automatically, don't overwrite it!

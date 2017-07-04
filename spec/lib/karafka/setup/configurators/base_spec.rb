@@ -6,8 +6,9 @@ RSpec.describe Karafka::Setup::Configurators::Base do
   it { expect(base_configurator).to respond_to :descendants }
 
   describe 'instance methods' do
-    let(:config) { double }
     subject(:base_configurator) { described_class.new(config) }
+
+    let(:config) { double }
 
     describe '#config' do
       it { expect(base_configurator.config).to eq config }

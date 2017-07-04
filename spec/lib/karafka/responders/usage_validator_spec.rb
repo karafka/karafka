@@ -2,6 +2,7 @@
 
 RSpec.describe Karafka::Responders::UsageValidator do
   subject(:validator) { described_class.new(registered_topics, used_topics) }
+
   let(:topic_name) { "topic#{rand(1000)}" }
   let(:registered_topics) { { topic_name => Karafka::Responders::Topic.new(topic_name, {}) } }
   let(:used_topics) { [rand] }

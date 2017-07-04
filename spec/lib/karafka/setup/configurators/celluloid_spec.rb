@@ -3,8 +3,9 @@
 RSpec.describe Karafka::Setup::Configurators::Celluloid do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
-  let(:config) { double }
   subject(:celluloid_configurator) { described_class.new(config) }
+
+  let(:config) { double }
 
   describe '#setup' do
     it 'expect to assign Karafka logger to Celluloid and set a shutdown_timeout' do

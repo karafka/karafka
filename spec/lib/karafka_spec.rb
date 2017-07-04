@@ -18,6 +18,7 @@ RSpec.describe Karafka do
   describe '.gem_root' do
     context 'when we want to get gem root path' do
       let(:path) { Dir.pwd }
+
       it { expect(karafka.gem_root.to_path).to eq path }
     end
   end
