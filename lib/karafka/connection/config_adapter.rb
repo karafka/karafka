@@ -75,9 +75,11 @@ module Karafka
 
         # Builds all the configuration settings for kafka consumer consume_each_batch and
         #   consume_each_message methods
+        # @param _route [Karafka::Routing::Route] route details
+
         # @return [Hash] hash with all the settings required by
         #   Kafka::Consumer#consume_each_message and Kafka::Consumer#consume_each_batch method
-        def consuming(route)
+        def consuming(_route)
           settings = {}
 
           kafka_configs.each do |setting_name, setting_value|

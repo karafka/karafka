@@ -51,6 +51,8 @@ module Karafka
       config.name = rand.to_s
       config.redis = { url: 'redis://' }
       config.kafka.offset_retention_time = -1
+      config.kafka.max_bytes_per_partition = 1_048_576
+      config.kafka.start_from_beginning = true
     end
   end
 end

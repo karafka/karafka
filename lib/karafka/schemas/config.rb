@@ -35,7 +35,7 @@ module Karafka
         required(:heartbeat_interval).filled(:int?)
         required(:max_bytes_per_partition).filled(:int?)
         required(:start_from_beginning).filled(:bool?)
-        required(:offset_retention_time){ none?.not > int? }
+        required(:offset_retention_time) { none?.not > int? }
 
         optional(:ssl_ca_cert).maybe(:str?)
         optional(:ssl_client_cert).maybe(:str?)

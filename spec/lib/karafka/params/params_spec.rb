@@ -5,7 +5,6 @@ RSpec.describe Karafka::Params::Params do
     subject(:params_class) { described_class }
 
     describe '#build' do
-      let(:merged_with_defaults) { double }
       let(:parser) { Karafka::Parsers::Json }
 
       context 'when we build from a hash' do
@@ -17,22 +16,39 @@ RSpec.describe Karafka::Params::Params do
       end
 
       context 'when we build based on Karafka::Connection::Message' do
-        let(:content) { rand }
-        let(:extra_content) do
+        let(:topic) { rand.to_s }
+        let(:content) { rand.to_s }
+        let(:key) { nil }
+        let(:offset) { rand(1000) }
+        let(:partition) { rand(100) }
+        let(:kafka_message) do
+          Kafka::FetchedMessage.new(
+            topic: topic,
+            value: content,
+            key: key,
+            offset: offset,
+            partition: partition
+          )
+        end
+        let(:params_attributes) do
           {
             'parser' => parser,
             'parsed' => false,
             'received_at' => Time.now,
-            'content' => content
+            'content' => content,
+            'offset' => offset,
+            'partition' => partition,
+            'key' => key,
+            'topic' => topic
           }
         end
         let(:message) do
-          Karafka::Connection::Message.new(rand, content)
+          Karafka::Connection::Message.new(topic, kafka_message)
         end
 
         it 'expect to build with additional values and content' do
           Timecop.freeze do
-            expect(params_class.build(message, parser)).to eq extra_content
+            expect(params_class.build(message, parser)).to eq params_attributes
           end
         end
       end

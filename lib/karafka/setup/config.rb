@@ -81,8 +81,8 @@ module Karafka
         # option reconnect_timeout [Integer] How long should we wait before trying to reconnect to
         # Kafka cluster that went down (in seconds)
         setting :reconnect_timeout, 5
-        # option offset_retention_time [Integer] The length of the retention window, known as offset
-        #   retention time
+        # option offset_retention_time [Integer] The length of the retention window, known as
+        #   offset retention time
         setting :offset_retention_time, nil
         # SSL authentication related settings
         # option ca_cert [String] SSL CA certificate

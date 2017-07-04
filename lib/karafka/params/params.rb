@@ -30,11 +30,7 @@ module Karafka
             new(parser: parser).merge!(message)
           else
             # This happens inside Karafka::Connection::Consumer
-            new(parser: parser).merge!(
-              parsed: false,
-              received_at: Time.now,
-              content: message.content
-            )
+            new(parser: parser, parsed: false, received_at: Time.now).merge!(message.to_h)
           end
         end
       end
