@@ -16,7 +16,8 @@ RSpec.describe Karafka::Schemas::Config do
         session_timeout: 1,
         ssl_ca_cert: 'ca_cert',
         ssl_client_cert: 'client_cert',
-        ssl_client_cert_key: 'client_cert_key'
+        ssl_client_cert_key: 'client_cert_key',
+        max_bytes_per_partition: 1_048_576
       }
     }
   end
@@ -217,6 +218,18 @@ RSpec.describe Karafka::Schemas::Config do
 
       it 'offset_commit_threshold is not integer' do
         config[:kafka][:offset_commit_threshold] = 's'
+        expect(schema.call(config).success?).to be_falsey
+      end
+    end
+
+    context 'max_bytes_per_partition validator' do
+      it 'max_bytes_per_partition is nil' do
+        config[:kafka][:max_bytes_per_partition] = nil
+        expect(schema.call(config).success?).to be_falsey
+      end
+
+      it 'max_bytes_per_partition is not integer' do
+        config[:kafka][:max_bytes_per_partition] = 's'
         expect(schema.call(config).success?).to be_falsey
       end
     end
