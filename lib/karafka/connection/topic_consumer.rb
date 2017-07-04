@@ -58,10 +58,10 @@ module Karafka
       #   that is set up to consume a given routes topic
       def kafka_consumer
         @kafka_consumer ||= kafka.consumer(
-          ConfigMapper.consumer(@route)
+          ConfigAdapter.consumer(@route)
         ).tap do |consumer|
           consumer.subscribe(
-            *ConfigMapper.subscription(@route)
+            *ConfigAdapter.subscription(@route)
           )
         end
       rescue Kafka::ConnectionError
@@ -77,7 +77,7 @@ module Karafka
       # @note We don't cache it internally because we cache kafka_consumer that uses kafka
       #   object instance
       def kafka
-        Kafka.new(ConfigMapper.client(@route))
+        Kafka.new(ConfigAdapter.client(@route))
       end
     end
   end
