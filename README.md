@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/karafka/karafka.png)](https://travis-ci.org/karafka/karafka)
 [![Code Climate](https://codeclimate.com/github/karafka/karafka/badges/gpa.svg)](https://codeclimate.com/github/karafka/karafka)
-[![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Backers on Open Collective](https://opencollective.com/karafka/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/karafka/sponsors/badge.svg)](#sponsors) [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Framework used to simplify Apache Kafka based Ruby applications development.
 
@@ -27,10 +27,6 @@ Karafka dev team also provides commercial support in following matters:
 - Trainings on how to design and develop systems based on Apache Kafka and Karafka framework
 
 If you are interested in our commercial services, please contact [Maciej Mensfeld (maciej@coditsu.io)](mailto:maciej@coditsu.io) directly.
-
-## Sponsorship
-
-We are looking for sustainable sponsorship. If your company is relying on Karafka framework or simply want to see Karafka evolve faster to meet your requirements, please consider backing the project. Please contact [Maciej Mensfeld (maciej@coditsu.io)](mailto:maciej@coditsu.io) directly for more details.
 
 ## Notice
 
@@ -58,3 +54,36 @@ bundle exec rake
 ```
 
 to check if everything is in order. After that you can submit a pull request.
+
+## Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute]](CONTRIBUTING.md).
+<a href="graphs/contributors"><img src="https://opencollective.com/karafka/contributors.svg?width=890" /></a>
+
+
+## Backers
+
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/karafka#backer)]
+
+<a href="https://opencollective.com/karafka#backers" target="_blank"><img src="https://opencollective.com/karafka/backers.svg?width=890"></a>
+
+
+## Sponsors
+
+We are looking for sustainable sponsorship. If your company is relying on Karafka framework or simply want to see Karafka evolve faster to meet your requirements, please consider backing the project. [[Become a sponsor](https://opencollective.com/karafka#sponsor)]
+
+Please contact [Maciej Mensfeld (maciej@coditsu.io)](mailto:maciej@coditsu.io) directly for more details.
+
+
+<a href="https://opencollective.com/karafka/sponsor/0/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/karafka/sponsor/1/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/karafka/sponsor/2/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/karafka/sponsor/3/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/karafka/sponsor/4/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/karafka/sponsor/5/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/karafka/sponsor/6/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/karafka/sponsor/7/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/karafka/sponsor/8/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/karafka/sponsor/9/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/9/avatar.svg"></a>
+
+
