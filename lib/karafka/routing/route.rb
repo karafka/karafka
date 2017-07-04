@@ -29,10 +29,7 @@ module Karafka
         start_from_beginning
       ].freeze
 
-      ATTRIBUTES.each { |attr| attr_writer(attr) }
-
-      # This we can get "directly" because it does not have any details, etc
-      attr_accessor :controller
+      ATTRIBUTES.each { |attr| attr_accessor(attr) }
 
       # Initializes default values for all the options that support defaults if their values are
       # not yet specified. This is need to be done (cannot be lazy loaded on first use) because

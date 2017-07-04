@@ -32,13 +32,13 @@ RSpec.describe Karafka::Setup::Config do
   describe '#validate' do
     context 'when configuration has errors' do
       let(:error_class) { ::Karafka::Errors::InvalidConfiguration }
-      let(:error_message) { { kafka: { hosts: ['must be filled'] } }.to_s }
+      let(:error_message) { { kafka: { seed_brokers: ['must be filled'] } }.to_s }
 
       before do
         module Karafka
           class App
             setup do |config|
-              config.kafka.hosts = nil
+              config.kafka.seed_brokers = nil
             end
           end
         end
@@ -55,7 +55,7 @@ RSpec.describe Karafka::Setup::Config do
         module Karafka
           class App
             setup do |config|
-              config.kafka.hosts = ['localhost:9092']
+              config.kafka.seed_brokers = ['localhost:9092']
             end
           end
         end

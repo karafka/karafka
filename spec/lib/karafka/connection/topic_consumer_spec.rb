@@ -86,12 +86,9 @@ RSpec.describe Karafka::Connection::TopicConsumer do
         expect(Kafka)
           .to receive(:new)
           .with(
-            seed_brokers: ::Karafka::App.config.kafka.hosts,
             logger: ::Karafka.logger,
             client_id: ::Karafka::App.config.name,
-            ssl_ca_cert: ::Karafka::App.config.kafka.ssl_ca_cert,
-            ssl_client_cert: ::Karafka::App.config.kafka.ssl_client_cert,
-            ssl_client_cert_key: ::Karafka::App.config.kafka.ssl_client_cert_key
+            seed_brokers: ::Karafka::App.config.kafka.seed_brokers
           )
           .and_return(kafka)
       end
@@ -99,7 +96,7 @@ RSpec.describe Karafka::Connection::TopicConsumer do
       it 'expect to build it and subscribe' do
         expect(kafka).to receive(:consumer).and_return(consumer)
         expect(consumer).to receive(:subscribe)
-          .with(route.topic, start_from_beginning: start_from_beginning)
+          .with(route.topic, start_from_beginning: start_from_beginning, max_bytes_per_partition: 1_048_576)
         expect(topic_consumer.send(:kafka_consumer)).to eq consumer
       end
     end

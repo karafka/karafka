@@ -58,15 +58,10 @@ module Karafka
       #   that is set up to consume a given routes topic
       def kafka_consumer
         @kafka_consumer ||= kafka.consumer(
-          group_id: @route.group,
-          session_timeout: ::Karafka::App.config.kafka.session_timeout,
-          offset_commit_interval: ::Karafka::App.config.kafka.offset_commit_interval,
-          offset_commit_threshold: ::Karafka::App.config.kafka.offset_commit_threshold,
-          heartbeat_interval: ::Karafka::App.config.kafka.heartbeat_interval
+          ConfigMapper.consumer(@route)
         ).tap do |consumer|
           consumer.subscribe(
-            @route.topic,
-            start_from_beginning: @route.start_from_beginning
+            *ConfigMapper.subscription(@route)
           )
         end
       rescue Kafka::ConnectionError
@@ -82,14 +77,7 @@ module Karafka
       # @note We don't cache it internally because we cache kafka_consumer that uses kafka
       #   object instance
       def kafka
-        Kafka.new(
-          seed_brokers: ::Karafka::App.config.kafka.hosts,
-          logger: ::Karafka.logger,
-          client_id: ::Karafka::App.config.name,
-          ssl_ca_cert: ::Karafka::App.config.kafka.ssl_ca_cert,
-          ssl_client_cert: ::Karafka::App.config.kafka.ssl_client_cert,
-          ssl_client_cert_key: ::Karafka::App.config.kafka.ssl_client_cert_key
-        )
+        Kafka.new(ConfigMapper.client(@route))
       end
     end
   end

@@ -12,6 +12,8 @@
 - #route on an controller instance to make a clear distinction in between params and route details
 - #167 - Remove Sidekiq UI from Karafka
 - Waaaaaay better code quality thanks to switching from dev tools to Coditsu
+- kafka.hosts option renamed to seed_brokers - you don't need to provide all the hosts to work with Kafka
+- start_from_beginning moved into kafka scope (kafka.start_from_beginning)
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

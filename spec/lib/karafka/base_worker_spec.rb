@@ -44,6 +44,7 @@ RSpec.describe Karafka::BaseWorker do
     let(:interchanger) { double }
     let(:params) { double }
     let(:interchanged_params) { double }
+    let(:route) { double(interchanger: interchanger) }
 
     before do
       router
@@ -52,7 +53,7 @@ RSpec.describe Karafka::BaseWorker do
     it 'expect to use router to pick controller, assign params and return' do
       expect(Karafka::Routing::Router).to receive(:new).with(topic).and_return(router)
       expect(router).to receive(:build).and_return(controller_instance)
-      expect(controller_instance).to receive(:interchanger).and_return(interchanger)
+      expect(controller_instance).to receive(:route).and_return(route)
       expect(interchanger).to receive(:parse).with(params).and_return(interchanged_params)
       expect(controller_instance).to receive(:params=).with(interchanged_params)
 

@@ -9,7 +9,7 @@ RSpec.describe Karafka::Schemas::Config do
       topic_mapper: Karafka::Routing::Mapper,
       redis: { url: 'url' },
       kafka: {
-        hosts: ['localhost:9092'],
+        seed_brokers: ['localhost:9092'],
         offset_commit_interval: 1,
         offset_commit_threshold: 1,
         heartbeat_interval: 1,
@@ -168,19 +168,19 @@ RSpec.describe Karafka::Schemas::Config do
       expect(schema.call(config).success?).to be_falsey
     end
 
-    context 'hosts validator' do
-      it 'hosts is nil' do
-        config[:kafka][:hosts] = nil
+    context 'seed_brokers validator' do
+      it 'seed_brokers is nil' do
+        config[:kafka][:seed_brokers] = nil
         expect(schema.call(config).success?).to be_falsey
       end
 
-      it 'hosts is an empty array' do
-        config[:kafka][:hosts] = []
+      it 'seed_brokers is an empty array' do
+        config[:kafka][:seed_brokers] = []
         expect(schema.call(config).success?).to be_falsey
       end
 
-      it 'hosts is not an array' do
-        config[:kafka][:hosts] = 'timeout'
+      it 'seed_brokers is not an array' do
+        config[:kafka][:seed_brokers] = 'timeout'
         expect(schema.call(config).success?).to be_falsey
       end
     end

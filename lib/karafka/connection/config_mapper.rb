@@ -18,13 +18,12 @@ module Karafka
         ]
       }
 
-      def client
+      def self.client(_route)
         # This one is a default that takes all the settings except special
         # cases defined in the map
         settings = {
           logger: ::Karafka.logger,
-          client_id: ::Karafka::App.config.name,
-          seed_brokers: ::Karafka::App.config.kafka.hosts
+          client_id: ::Karafka::App.config.name
         }
 
         ::Karafka::App.config.kafka.to_h.each do |setting_name, setting_value|
@@ -34,28 +33,31 @@ module Karafka
           settings[setting_name] = setting_value
         end
 
+        settings.delete_if { |k,v| v.nil? }
         settings
       end
 
-      def consumer(route)
+      def self.consumer(route)
         settings = { group_id: route.group }
 
         ::Karafka::App.config.kafka.to_h.each do |setting_name, setting_value|
           next unless MAP[:consumer].include?(setting_name)
           settings[setting_name] = setting_value
         end
-
+        settings.delete_if { |k,v| v.nil? }
         settings
       end
 
-      def subscription(route)
-        settings = {}
+      def self.subscription(route)
+        settings = { start_from_beginning: route.start_from_beginning }
 
         ::Karafka::App.config.kafka.to_h.each do |setting_name, setting_value|
-          next unless MAP[:consumer].include?(setting_name)
+          next unless MAP[:subscription].include?(setting_name)
+          next if settings.keys.include?(setting_name)
           settings[setting_name] = setting_value
         end
 
+        settings.delete_if { |k,v| v.nil? }
         [route.topic, settings]
       end
     end

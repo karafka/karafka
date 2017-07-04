@@ -5,14 +5,14 @@ RSpec.describe Karafka::Params::Params do
     subject(:params_class) { described_class }
 
     describe '#build' do
-      let(:controller) { double }
       let(:merged_with_defaults) { double }
+      let(:parser) { Karafka::Parsers::Json }
 
       context 'when we build from a hash' do
         let(:message) { { rand => rand } }
 
         it 'expect to build based on a message' do
-          expect(params_class.build(message)).to eq message
+          expect(params_class.build(message, parser)).to eq message.merge('parser' => parser)
         end
       end
 
@@ -20,6 +20,7 @@ RSpec.describe Karafka::Params::Params do
         let(:content) { rand }
         let(:extra_content) do
           {
+            'parser' => parser,
             'parsed' => false,
             'received_at' => Time.now,
             'content' => content
@@ -31,7 +32,7 @@ RSpec.describe Karafka::Params::Params do
 
         it 'expect to build with additional values and content' do
           Timecop.freeze do
-            expect(params_class.build(message)).to eq extra_content.merge('content' => content)
+            expect(params_class.build(message, parser)).to eq extra_content.merge('content' => content)
           end
         end
       end

@@ -29,8 +29,7 @@ module Karafka
       end
 
       required(:kafka).schema do
-        required(:hosts).filled(:array?)
-
+        required(:seed_brokers).filled(:array?)
         required(:session_timeout).filled(:int?)
         required(:offset_commit_interval).filled(:int?)
         required(:offset_commit_threshold).filled(:int?)

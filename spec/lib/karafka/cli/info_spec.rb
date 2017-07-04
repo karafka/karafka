@@ -16,7 +16,7 @@ RSpec.describe Karafka::Cli::Info do
         "Number of threads: #{Karafka::App.config.concurrency}",
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
-        "Kafka hosts: #{Karafka::App.config.kafka.hosts}",
+        "Kafka seed brokers: #{Karafka::App.config.kafka.seed_brokers}",
         "Redis: #{Karafka::App.config.redis.to_h}"
       ]
     end

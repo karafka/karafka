@@ -69,7 +69,7 @@ RSpec.describe Karafka::BaseController do
     it 'creates params instance and assign it' do
       expect(Karafka::Params::Params)
         .to receive(:build)
-        .with(message)
+        .with(message, route.parser)
         .and_return(params)
 
       base_controller.params = message
@@ -79,7 +79,7 @@ RSpec.describe Karafka::BaseController do
   end
 
   describe '#params' do
-    let(:params) { Karafka::Params::Params.build({}) }
+    let(:params) { Karafka::Params::Params.build({}, nil) }
 
     before do
       base_controller.instance_variable_set(:@params, params)

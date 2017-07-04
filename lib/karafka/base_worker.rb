@@ -19,7 +19,7 @@ module Karafka
     #   with params assigned already (controller is ready to use)
     def controller(topic, params)
       @controller ||= Karafka::Routing::Router.new(topic).build.tap do |ctrl|
-        ctrl.params = ctrl.interchanger.parse(params)
+        ctrl.params = ctrl.route.interchanger.parse(params)
       end
     end
   end

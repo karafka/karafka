@@ -49,10 +49,10 @@ module Karafka
         setting :timeout, 5
       end
 
-      # option kafka [Hash] - optional - kafka configuration options (hosts)
+      # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
         # Array with at least one host
-        setting :hosts
+        setting :seed_brokers
         # option session_timeout [Integer] the number of seconds after which, if a client
         #   hasn't contacted the Kafka cluster, it will be kicked out of the group.
         setting :session_timeout, 30
@@ -73,6 +73,10 @@ module Karafka
         setting :ssl_client_cert, nil
         # option client_cert_key [String] SSL client certificate password
         setting :ssl_client_cert_key, nil
+        # option sasl_gssapi_principal [String] sasl principal
+        setting :sasl_gssapi_principal, nil
+        # option sasl_gssapi_keytab [String] sasl keytab
+        setting :sasl_gssapi_keytab, nil
         # option max_bytes_per_partition [Integer] the maximum amount of data fetched
         #   from a single partition at a time.
         setting :max_bytes_per_partition, 1_048_576

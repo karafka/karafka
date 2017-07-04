@@ -88,7 +88,7 @@ module Karafka
     # @param message [Karafka::Connection::Message, Hash] message with raw content or a hash
     #   from Sidekiq that allows us to build params.
     def params=(message)
-      @params = Karafka::Params::Params.build(message)
+      @params = Karafka::Params::Params.build(message, route.parser)
     end
 
     # Executes the default controller flow, runs callbacks and if not halted

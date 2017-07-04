@@ -23,13 +23,13 @@ module Karafka
         #   Karafka::Params::Params.build({ key: 'value' }) #=> params object
         # @example Build params instance from a Karafka::Connection::Message object
         #   Karafka::Params::Params.build(message) #=> params object
-        def build(message)
+        def build(message, parser)
           # Hash case happens inside workers
           if message.is_a?(Hash)
-            new.merge!(message)
+            new(parser: parser).merge!(message)
           else
             # This happens inside Karafka::Connection::Consumer
-            new.merge!(
+            new(parser: parser).merge!(
               parsed: false,
               received_at: Time.now,
               content: message.content

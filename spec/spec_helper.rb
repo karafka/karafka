@@ -47,7 +47,7 @@ module Karafka
   # Configuration for test env
   class App
     setup do |config|
-      config.kafka.hosts = ['localhost:9092']
+      config.kafka.seed_brokers = ['localhost:9092']
       config.name = rand.to_s
       config.redis = { url: 'redis://' }
     end
