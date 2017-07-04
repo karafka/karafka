@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Connection::TopicConsumer do
+  subject(:topic_consumer) { described_class.new(route) }
+
   let(:group) { rand.to_s }
   let(:topic) { rand.to_s }
   let(:batch_mode) { false }
   let(:start_from_beginning) { false }
+  let(:kafka_consumer) { instance_double(Kafka::Consumer, stop: true) }
   let(:route) do
     instance_double(
       Karafka::Routing::Route,
@@ -14,10 +17,6 @@ RSpec.describe Karafka::Connection::TopicConsumer do
       start_from_beginning: start_from_beginning
     )
   end
-
-  subject(:topic_consumer) { described_class.new(route) }
-
-  let(:kafka_consumer) { instance_double(Kafka::Consumer, stop: true) }
 
   describe '.new' do
     it 'just remembers route' do
@@ -81,6 +80,13 @@ RSpec.describe Karafka::Connection::TopicConsumer do
     context 'when kafka_consumer is not yet built' do
       let(:kafka) { instance_double(Kafka::Client) }
       let(:consumer) { instance_double(Kafka::Consumer) }
+      let(:subscribe_params) do
+        [
+          route.topic,
+          start_from_beginning: start_from_beginning,
+          max_bytes_per_partition: 1_048_576
+        ]
+      end
 
       before do
         expect(Kafka)
@@ -95,8 +101,7 @@ RSpec.describe Karafka::Connection::TopicConsumer do
 
       it 'expect to build it and subscribe' do
         expect(kafka).to receive(:consumer).and_return(consumer)
-        expect(consumer).to receive(:subscribe)
-          .with(route.topic, start_from_beginning: start_from_beginning, max_bytes_per_partition: 1_048_576)
+        expect(consumer).to receive(:subscribe).with(*subscribe_params)
         expect(topic_consumer.send(:kafka_consumer)).to eq consumer
       end
     end

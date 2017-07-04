@@ -29,13 +29,6 @@ RSpec.describe Karafka::BaseWorker do
 
       expect { base_worker.perform(*args) }.not_to raise_error
     end
-
-    it 'sets topic and perform controller action' do
-      expect(controller_instance)
-        .to receive(:perform)
-
-      expect { base_worker.perform(*args) }.not_to raise_error
-    end
   end
 
   describe '#controller' do
@@ -44,7 +37,7 @@ RSpec.describe Karafka::BaseWorker do
     let(:interchanger) { double }
     let(:params) { double }
     let(:interchanged_params) { double }
-    let(:route) { double(interchanger: interchanger) }
+    let(:route) { instance_double(Karafka::Routing::Route, interchanger: interchanger) }
 
     before do
       router

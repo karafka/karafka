@@ -12,13 +12,9 @@ module Karafka
     class Builder < Array
       include Singleton
 
-      # Options that are being set on the route level
-      ROUTE_OPTIONS = (
-        Route::ATTRIBUTES # + ::Karafka::App.config.kafka.to_h.keys
-      ).uniq.freeze
-
-      # All those options can be set on the route level
-      ROUTE_OPTIONS.each do |option|
+      # All those options can be set on the route level except topic. Topic setup is part of
+      # the builder DSL, so we don't set it as an option
+      (Route::ATTRIBUTES - %i[topic]).each do |option|
         define_method option do |value|
           @current_route.public_send :"#{option}=", value
         end

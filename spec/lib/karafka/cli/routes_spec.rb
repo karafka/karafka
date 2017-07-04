@@ -8,6 +8,11 @@ RSpec.describe Karafka::Cli::Routes do
 
   describe '#call' do
     let(:topic) { rand.to_s }
+    let(:route) do
+      attrs = KEYS.each_with_object({}) { |key, hash| hash[key] = send(key) }
+
+      instance_double(Karafka::Routing::Route, attrs.merge(topic: topic))
+    end
 
     KEYS = %i[
       group
@@ -24,12 +29,6 @@ RSpec.describe Karafka::Cli::Routes do
 
     KEYS.each do |key|
       let(key) { rand.to_s }
-    end
-
-    let(:route) do
-      attrs = KEYS.each_with_object({}) { |key, hash| hash[key] = send(key) }
-
-      instance_double(Karafka::Routing::Route, attrs.merge(topic: topic))
     end
 
     before do

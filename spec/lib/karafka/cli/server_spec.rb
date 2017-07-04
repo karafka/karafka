@@ -38,9 +38,9 @@ RSpec.describe Karafka::Cli::Server do
     end
 
     context 'when run in background (demonized)' do
-      before { cli.options = { daemon: true, pid: true } }
-
       before do
+        cli.options = { daemon: true, pid: true }
+
         expect(server_cli).to receive(:puts)
           .with('Starting Karafka server')
 

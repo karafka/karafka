@@ -6,7 +6,7 @@ RSpec.describe Karafka::Routing::Builder do
   let(:route) { Karafka::Routing::Route.new }
 
   # Topic is set differently than other route options
-  (Karafka::Routing::Builder::ROUTE_OPTIONS - %i[topic]).each do |option|
+  (Karafka::Routing::Route::ATTRIBUTES - %i[topic]).each do |option|
     describe "##{option}" do
       let(:value) { double }
 

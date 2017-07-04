@@ -32,7 +32,7 @@ RSpec.describe Karafka::Params::Params do
 
         it 'expect to build with additional values and content' do
           Timecop.freeze do
-            expect(params_class.build(message, parser)).to eq extra_content.merge('content' => content)
+            expect(params_class.build(message, parser)).to eq extra_content
           end
         end
       end

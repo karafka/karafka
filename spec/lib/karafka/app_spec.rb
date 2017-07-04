@@ -25,12 +25,8 @@ RSpec.describe Karafka::App do
 
   describe '#setup' do
     it 'delegates it to Config setup and set framework to initializing state' do
-      expect(Karafka::Setup::Config)
-        .to receive(:setup)
-        .once
-
-      expect(app_class)
-        .to receive(:initialize!)
+      expect(Karafka::Setup::Config).to receive(:setup).once
+      expect(app_class).to receive(:initialize!)
 
       app_class.setup
     end
@@ -40,12 +36,8 @@ RSpec.describe Karafka::App do
     let(:config) { double }
 
     it 'expect to run setup_components' do
-      expect(Karafka::Setup::Config)
-        .to receive(:validate!)
-        .once
-
-      expect(Karafka::Setup::Config)
-        .to receive(:setup_components)
+      expect(Karafka::Setup::Config).to receive(:validate!).once
+      expect(Karafka::Setup::Config).to receive(:setup_components)
 
       app_class.boot!
     end

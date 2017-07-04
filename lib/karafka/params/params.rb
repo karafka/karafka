@@ -17,6 +17,7 @@ module Karafka
         # @param message [Karafka::Connection::Message, Hash] message that we get out of Kafka
         #   in case of building params inside main Karafka process in
         #   Karafka::Connection::Consumer, or a hash when we retrieve data from Sidekiq
+        # @param parser [Class] parser class that we will use to unparse data
         # @return [Karafka::Params::Params] Karafka params object not yet used parser for
         #   retrieving data that we've got from Kafka
         # @example Build params instance from a hash
