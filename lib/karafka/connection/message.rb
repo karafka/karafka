@@ -14,7 +14,7 @@ module Karafka
         key
       ].freeze
 
-      attr_reader *ATTRIBUTES
+      ATTRIBUTES.each(&method(:attr_reader))
 
       # @param topic [String] topic from which this message comes
       # @param kafka_message [Kafka::FetchedMessage] raw kafka message

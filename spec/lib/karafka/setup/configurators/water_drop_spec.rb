@@ -3,6 +3,8 @@
 RSpec.describe Karafka::Setup::Configurators::WaterDrop do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
+  subject(:water_drop_configurator) { described_class.new(config) }
+
   let(:config) do
     instance_double(
       Karafka::Setup::Config.config.class,
@@ -18,8 +20,6 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
       )
     )
   end
-
-  subject(:water_drop_configurator) { described_class.new(config) }
 
   describe '#setup' do
     it 'expect to assign waterdrop default configs' do

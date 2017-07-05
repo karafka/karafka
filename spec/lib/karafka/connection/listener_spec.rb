@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Connection::Listener do
+  subject(:listener) { described_class.new(route).wrapped_object }
+
   let(:route) do
     Karafka::Routing::Route.new.tap do |route|
       route.topic = rand.to_s
       route.group = rand.to_s
     end
   end
-
-  subject(:listener) { described_class.new(route).wrapped_object }
 
   describe '#fetch_loop' do
     let(:topic_consumer) { double }

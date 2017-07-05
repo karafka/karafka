@@ -15,6 +15,7 @@
 - kafka.hosts option renamed to seed_brokers - you don't need to provide all the hosts to work with Kafka
 - start_from_beginning moved into kafka scope (kafka.start_from_beginning)
 - #154 - Support for min_bytes and max_wait_time on messages consuming
+- #171 - Add kafka message metadata to params
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

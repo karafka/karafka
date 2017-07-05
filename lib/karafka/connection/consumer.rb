@@ -10,7 +10,7 @@ module Karafka
       # @note We catch all the errors here, to make sure that none failures
       #   for a given consumption will affect other consumed messages
       #   If we would't catch it, it would propagate up until killing the Celluloid actor
-      # @param message [Kafka::FetchedMessage] message that was fetched by kafka
+      # @param kafka_message [Kafka::FetchedMessage] raw message that was fetched by kafka
       def consume(kafka_message)
         # We map from incoming topic name, as it might be namespaced, etc.
         # @see topic_mapper internal docs

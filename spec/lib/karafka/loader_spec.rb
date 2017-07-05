@@ -3,8 +3,6 @@
 RSpec.describe Karafka::Loader do
   subject(:loader_class) { described_class }
 
-  it { should be_const_defined(:DIRS) }
-
   describe '#base_sorter' do
     subject(:loader) { described_class.new.send(:base_sorter, str1, str2) }
 

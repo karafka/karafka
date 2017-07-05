@@ -10,14 +10,21 @@ RSpec.describe Karafka::Connection::Consumer do
     let(:builder) { Karafka::Routing::Router.new(nil) }
     let(:controller_instance) { instance_double(Karafka::BaseController) }
     let(:raw_message) do
-      instance_double(Kafka::FetchedMessage, value: raw_message_value, topic: topic)
+      instance_double(
+        Kafka::FetchedMessage,
+        value: raw_message_value,
+        topic: topic,
+        offset: 0,
+        partition: 0,
+        key: nil
+      )
     end
 
     context 'everything works well' do
       before do
         expect(Karafka::Connection::Message)
           .to receive(:new)
-          .with(topic, raw_message_value)
+          .with(topic, raw_message)
           .and_return(message)
 
         expect(Karafka::Routing::Router)
@@ -61,7 +68,7 @@ RSpec.describe Karafka::Connection::Consumer do
 
         expect(Karafka::Connection::Message)
           .to receive(:new)
-          .with(mapped_topic, raw_message_value)
+          .with(mapped_topic, raw_message)
           .and_return(message)
 
         expect(Karafka::Routing::Router)

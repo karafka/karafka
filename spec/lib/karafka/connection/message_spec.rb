@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Connection::Message do
+  subject(:message) { described_class.new(topic, kafka_message) }
+
   let(:topic) { rand.to_s }
   let(:content) { rand.to_s }
   let(:key) { nil }
@@ -15,8 +17,6 @@ RSpec.describe Karafka::Connection::Message do
       partition: partition
     )
   end
-
-  subject(:message) { described_class.new(topic, kafka_message) }
 
   describe '.initialize' do
     it { expect(message.topic).to eq topic }
