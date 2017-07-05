@@ -16,6 +16,7 @@
 - start_from_beginning moved into kafka scope (kafka.start_from_beginning)
 - #154 - Support for min_bytes and max_wait_time on messages consuming
 - #171 - Add kafka message metadata to params
+- #176 - Transform Karafka::Connection::Consumer into a module
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

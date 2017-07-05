@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Connection::Consumer do
-  subject(:consumer) { described_class.new }
+  subject(:consumer) { described_class }
 
   describe '#consume' do
     let(:topic) { rand.to_s }

@@ -35,7 +35,7 @@ module Karafka
     # @yieldparam message [Kafka::FetchedMessage] message from kafka (raw one)
     def consumer
       lambda do |message|
-        Karafka::Connection::Consumer.new.consume(message)
+        Karafka::Connection::Consumer.consume(message)
       end
     end
   end

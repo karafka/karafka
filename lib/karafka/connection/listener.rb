@@ -47,7 +47,7 @@ module Karafka
       #   consumption
       # @note It adds consumer into Karafka::Server consumers pool for graceful shutdown on exit
       def topic_consumer
-        @topic_consumer ||= TopicConsumer.new(@route).tap do |consumer|
+        @topic_consumer ||= TopicConsumer.new(route).tap do |consumer|
           Karafka::Server.consumers << consumer if Karafka::Server.consumers
         end
       end

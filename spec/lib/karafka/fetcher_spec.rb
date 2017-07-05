@@ -67,13 +67,7 @@ RSpec.describe Karafka::Fetcher do
 
     context 'when we invoke a consumer block' do
       let(:message) { double }
-      let(:consumer) { Karafka::Connection::Consumer.new }
-
-      before do
-        expect(Karafka::Connection::Consumer)
-          .to receive(:new)
-          .and_return(consumer)
-      end
+      let(:consumer) { Karafka::Connection::Consumer }
 
       it 'consumes the message' do
         expect(consumer)
