@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler', '~> 1.2'
 
-  spec.add_dependency 'ruby-kafka', '= 0.3.17'
+  spec.add_dependency 'ruby-kafka', '>= 0.4'
   spec.add_dependency 'sidekiq', '>= 4.2'
   spec.add_dependency 'celluloid'
   spec.add_dependency 'envlogic', '~> 1.0'
