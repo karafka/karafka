@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Connection::TopicConsumer do
+RSpec.describe Karafka::Connection::MessagesConsumer do
   subject(:topic_consumer) { described_class.new(route) }
 
   let(:group) { rand.to_s }

@@ -22,6 +22,7 @@
 - Better settings proxying and management between ruby-kafka and karafka
 - Change in the way we identify topics in between Karafka and Sidekiq workers
 - Better naming conventions to reflect Kafka reality
+- Lower memory requirements do to object creation limitation (2-3 times less objects on each new message)
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

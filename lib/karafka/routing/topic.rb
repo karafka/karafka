@@ -9,10 +9,10 @@ module Karafka
       # @param [String, Symbol] name of a topic on which we want to listen
       # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
       # @yield Evaluates given block in a current topic context allowing us to have a nice DSL
-      def initialize(name, consumer_group, &block)
+      def initialize(name, consumer_group)
         @name = name
         @consumer_group = consumer_group
-        instance_eval(&block)
+        @attributes = {}
       end
 
       attr_reader :consumer_group
@@ -60,24 +60,21 @@ module Karafka
       end
 
       Karafka::AttributesMap.topic_attributes.each do |attribute|
-        next if method_defined?(attribute)
-        attr_writer attribute
+        attr_writer attribute unless method_defined? :"#{attribute}="
 
-        define_method attribute do |argument = nil|
-          if argument.nil?
-            current_value = instance_variable_get(:"@#{attribute}")
-            return current_value unless current_value.nil?
+        next if method_defined? attribute
 
-            value = if Karafka::App.config.respond_to?(attribute)
-              Karafka::App.config.public_send(attribute)
-            else
-              Karafka::App.config.kafka.public_send(attribute)
-            end
+        define_method attribute do
+          current_value = instance_variable_get(:"@#{attribute}")
+          return current_value unless current_value.nil?
 
-            instance_variable_set(:"@#{attribute}", value)
+          value = if Karafka::App.config.respond_to?(attribute)
+            Karafka::App.config.public_send(attribute)
           else
-            instance_variable_set(:"@#{attribute}", argument)
+            Karafka::App.config.kafka.public_send(attribute)
           end
+
+          instance_variable_set(:"@#{attribute}", value)
         end
       end
     end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Connection::Consumer do
+RSpec.describe Karafka::Connection::MessageProcessor do
   subject(:consumer) { described_class }
 
   describe '#consume' do

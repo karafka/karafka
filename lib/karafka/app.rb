@@ -27,7 +27,7 @@ module Karafka
       end
 
       # @return [Karafka::Routing::Builder] consumers builder instance
-      def consumers
+      def consumer_groups
         Routing::Builder.instance
       end
 

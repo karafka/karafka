@@ -15,11 +15,11 @@ RSpec.describe Karafka::App do
     end
   end
 
-  describe '#routes' do
-    let(:routes) { Karafka::Routing::Builder.instance }
+  describe '#consumer_groups' do
+    let(:builder) { Karafka::Routing::Builder.instance }
 
-    it 'returns routes builder' do
-      expect(app_class.routes).to eq routes
+    it 'returns consumer_groups builder' do
+      expect(app_class.consumer_groups).to eq builder
     end
   end
 

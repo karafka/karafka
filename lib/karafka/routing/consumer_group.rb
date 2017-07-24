@@ -12,36 +12,38 @@ module Karafka
       # @param [String, Symbol] id of this consumer group
       # @yield Evalues given block in current consumer group context allowing to
       #   configure multiple kafka and karafka related options on a per consumer group basis
-      def initialize(id, &block)
-        @id = "#{Karafka::App.config.name.underscore}_#{id}"
+      def initialize(id)
+        @id = "#{Karafka::App.config.name.to_s.underscore}_#{id}"
         @topics = []
-        instance_eval(&block)
       end
 
+      # Builds a topic representation inside of a current consumer group route
       # @param topic_name [String, Symbol] name of a topic from which we want to consumer
       # @yield Evaluates a given block in a topic context
+      # @param name [String, Symbol] name of topic to which we want to subscribe
       # @return [Karafka::Routing::Topic] newly built topic instance
-      def topic(name, &block)
-        @topics << Topic.new(name, self, &block).tap(&:build)
+      def topic=(name, &block)
+        topic = Topic.new(name, self)
+        @topics << Proxy.new(topic, &block).target.tap(&:build)
         @topics.last
       end
 
       Karafka::AttributesMap.consumer_group_attributes.each do |attribute|
-        define_method attribute do |argument = nil|
-          if argument.nil?
-            current_value = instance_variable_get(:"@#{attribute}")
-            return current_value unless current_value.nil?
+        attr_writer attribute unless method_defined? :"#{attribute}="
 
-            value = if Karafka::App.config.respond_to?(attribute)
-              Karafka::App.config.public_send(attribute)
-            else
-              Karafka::App.config.kafka.public_send(attribute)
-            end
+        next if method_defined? attribute
 
-            instance_variable_set(:"@#{attribute}", value)
+        define_method attribute do
+          current_value = instance_variable_get(:"@#{attribute}")
+          return current_value unless current_value.nil?
+
+          value = if Karafka::App.config.respond_to?(attribute)
+            Karafka::App.config.public_send(attribute)
           else
-            instance_variable_set(:"@#{attribute}", argument)
+            Karafka::App.config.kafka.public_send(attribute)
           end
+
+          instance_variable_set(:"@#{attribute}", value)
         end
       end
     end

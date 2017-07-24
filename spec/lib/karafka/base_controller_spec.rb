@@ -3,19 +3,20 @@
 RSpec.describe Karafka::BaseController do
   subject(:base_controller) { working_class.new }
 
-  let(:topic) { "topic#{rand}" }
+  let(:topic_name) { "topic#{rand}" }
   let(:inline_mode) { false }
   let(:responder_class) { nil }
   let(:interchanger) { nil }
   let(:worker) { nil }
-  let(:route) do
-    Karafka::Routing::Route.new.tap do |route|
-      route.inline_mode = inline_mode
-      route.topic = topic
-      route.responder = responder_class
-      route.interchanger = interchanger
-      route.worker = worker
-    end
+  let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand.to_s) }
+  let(:topic) do
+    topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
+    topic.controller = Class.new(described_class)
+    topic.inline_mode = inline_mode
+    topic.responder = responder_class
+    topic.interchanger = interchanger
+    topic.worker = worker
+    topic
   end
   let(:working_class) do
     ClassBuilder.inherit(described_class) do
@@ -25,7 +26,7 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
-  before { base_controller.route = route }
+  before { base_controller.topic = topic }
 
   describe '#perform' do
     context 'when perform method is defined' do
@@ -69,7 +70,7 @@ RSpec.describe Karafka::BaseController do
 
     it 'creates params instance and assign it' do
       expect(Karafka::Params::Params).to receive(:build)
-        .with(message, route.parser)
+        .with(message, topic.parser)
         .and_return(params)
 
       base_controller.params = message
@@ -132,10 +133,10 @@ RSpec.describe Karafka::BaseController do
 
     it 'enqueue perform function' do
       base_controller.instance_variable_set :@params, params
-      expect(route.interchanger).to receive(:load)
+      expect(topic.interchanger).to receive(:load)
         .with(params).and_return(interchanged_load_params)
       expect(worker).to receive(:perform_async)
-        .with(route.topic, interchanged_load_params)
+        .with(topic.id, interchanged_load_params)
       base_controller.send :perform_async
     end
   end

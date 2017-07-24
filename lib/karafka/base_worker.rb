@@ -18,7 +18,7 @@ module Karafka
     # @return [Karafka::Controller] descendant of Karafka::BaseController that matches the topic
     #   with params assigned already (controller is ready to use)
     def controller(topic_id, params)
-      @controller ||= Karafka::Routing::Router.new(topic_id).build.tap do |ctrl|
+      @controller ||= Karafka::Routing::Router.build(topic_id).tap do |ctrl|
         ctrl.params = ctrl.topic.interchanger.parse(params)
       end
     end

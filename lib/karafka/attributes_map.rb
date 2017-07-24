@@ -61,10 +61,10 @@ module Karafka
       def consumer_group_attributes
         defined_settings = config_adapter.values.flatten - config_adapter[:subscription]
         dynamically_proxied = Karafka::Setup::Config
-          ._settings
-          .find { |s| s.name == :kafka }
-          .value
-          .instance_variable_get('@klass').settings
+                              ._settings
+                              .find { |s| s.name == :kafka }
+                              .value
+                              .instance_variable_get('@klass').settings
 
         (defined_settings + dynamically_proxied).uniq + %i[batch_mode topic_mapper]
       end

@@ -17,7 +17,7 @@ module Karafka
         # @see topic_mapper internal docs
         mapped_topic = Karafka::App.config.topic_mapper.incoming(kafka_message.topic)
         # @note We search based on the topic id - that is a combination of group id and topic name
-        controller = Karafka::Routing::Router.new("#{group_id}_#{mapped_topic}").build
+        controller = Karafka::Routing::Router.build("#{group_id}_#{mapped_topic}")
         # We wrap it around with our internal message format, so we don't pass around
         # a raw Kafka message (especially because it contains non-mapped topic name)
         message = Message.new(mapped_topic, kafka_message)

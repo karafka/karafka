@@ -16,13 +16,14 @@ module Karafka
       # @param group_id [String, Symbol] name for consumer group
       # @yield Evaluates a given block in a consumer group context
       def consumer_group(group_id, &block)
-        self << ConsumerGroup.new(group_id.to_s, &block)
+        consumer_group = ConsumerGroup.new(group_id.to_s)
+        self << Proxy.new(consumer_group, &block).target
       end
 
       # @param topic_name [String, Symbol] name of a topic from which we want to consumer
       # @yield Evaluates a given block in a topic context
       def topic(topic_name, &block)
-        self << ConsumerGroup.new(topic_name) do
+        consumer_group(topic_name) do
           topic(topic_name, &block).tap(&:build)
         end
       end

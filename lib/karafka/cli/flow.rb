@@ -15,12 +15,12 @@ module Karafka
           if any_topics
             puts "#{topic.name} =>"
 
-            topic.responder.topics.each do |_name, topic|
+            topic.responder.topics.each do |_name, responder_topic|
               features = []
-              features << (topic.required? ? 'always' : 'conditionally')
-              features << (topic.multiple_usage? ? 'one or more' : 'exactly once')
+              features << (responder_topic.required? ? 'always' : 'conditionally')
+              features << (responder_topic.multiple_usage? ? 'one or more' : 'exactly once')
 
-              print topic.name, "(#{features.join(', ')})"
+              print responder_topic.name, "(#{features.join(', ')})"
             end
           else
             puts "#{topic.name} => (nothing)"
@@ -32,7 +32,7 @@ module Karafka
 
       # @return [Array<Karafka::Routing::Topic>] all topics sorted in alphabetical order
       def topics
-        Karafka::App.consumers.map(&:topics).flatten.sort_by(&:name)
+        Karafka::App.consumer_groups.map(&:topics).flatten.sort_by(&:name)
       end
 
       # Prints a given value with label in a nice way

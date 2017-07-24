@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Routing::Route do
+RSpec.describe Karafka::Routing::Topic do
   subject(:route) { described_class.new }
 
   let(:group) { rand.to_s }
