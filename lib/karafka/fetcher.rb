@@ -26,16 +26,16 @@ module Karafka
 
     # @return [Array<Karafka::Connection::Listener>] listeners that will consume messages
     def listeners
-      @listeners ||= App.routes.map do |route|
-        Karafka::Connection::Listener.new(route)
+      @listeners ||= App.consumers.map do |consumer|
+        Karafka::Connection::Listener.new(consumer)
       end
     end
 
     # @return [Proc] proc that should be processed when a message arrives
     # @yieldparam message [Kafka::FetchedMessage] message from kafka (raw one)
     def consumer
-      lambda do |message|
-        Karafka::Connection::Consumer.consume(message)
+      lambda do |consumer_group_id, message|
+        Karafka::Connection::MessageConsumer.consume(consumer_group_id, message)
       end
     end
   end

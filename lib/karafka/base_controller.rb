@@ -64,7 +64,9 @@ module Karafka
     # @see http://api.rubyonrails.org/classes/ActiveSupport/Callbacks/ClassMethods.html#method-i-get_callbacks
     define_callbacks :schedule
 
-    attr_accessor :route
+    # Each controller instance is always bind to a single topic. We don't place it on a class
+    # level because some programmers use same controller for multiple topics
+    attr_accessor :topic
 
     class << self
       # Creates a callback that will be executed before scheduling to Sidekiq
@@ -88,14 +90,14 @@ module Karafka
     # @param message [Karafka::Connection::Message, Hash] message with raw content or a hash
     #   from Sidekiq that allows us to build params.
     def params=(message)
-      @params = Karafka::Params::Params.build(message, route.parser)
+      @params = Karafka::Params::Params.build(message, topic.parser)
     end
 
     # Executes the default controller flow, runs callbacks and if not halted
     # will schedule a perform task in sidekiq
     def schedule
       run_callbacks :schedule do
-        route.inline_mode ? perform_inline : perform_async
+        topic.inline_mode ? perform_inline : perform_async
       end
     end
 
@@ -130,10 +132,10 @@ module Karafka
     # @raise [Karafka::Errors::ResponderMissing] raised when we don't have a responder defined,
     #   but we still try to use this method
     def respond_with(*data)
-      raise(Errors::ResponderMissing, self.class) unless route.responder
+      raise(Errors::ResponderMissing, self.class) unless topic.responder
 
       Karafka.monitor.notice(self.class, data: data)
-      route.responder.new(route.parser).call(*data)
+      topic.responder.new(topic.parser).call(*data)
     end
 
     # Executes perform code immediately (without enqueuing)
@@ -152,9 +154,9 @@ module Karafka
       Karafka.monitor.notice(self.class, @params)
       # We use @params directly (instead of #params) because of lazy loading logic that is behind
       # it. See Karafka::Params::Params class for more details about that
-      route.worker.perform_async(
-        route.topic,
-        route.interchanger.load(@params)
+      topic.worker.perform_async(
+        topic.id,
+        topic.interchanger.load(@params)
       )
     end
   end

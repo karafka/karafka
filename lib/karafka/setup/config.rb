@@ -20,30 +20,29 @@ module Karafka
       # If inline_mode is set to true, we won't enqueue jobs, instead we will run them immediately
       setting :inline_mode, false
       # option logger [Instance] logger that we want to use
-      setting :logger, ::Karafka::Logger.instance
+      setting :logger, -> { ::Karafka::Logger.instance }
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
-      setting :monitor, ::Karafka::Monitor.instance
+      setting :monitor, -> { ::Karafka::Monitor.instance }
       # option redis [Hash] redis options hash (url and optional parameters)
       # Note that redis could be rewriten using nested options, but it is a sidekiq specific
       # stuff and we don't want to touch it
       setting :redis
-      # If batch_mode is true, incoming messages will be handled in batch, otherwsie one at a time.
-      setting :batch_mode, false
       # Mapper used to remap names of topics, so we can have a clean internal topic namings despite
       # using any Kafka provider that uses namespacing, etc
       # It needs to implement two methods:
       #   - #incoming - for remapping from the incoming message to our internal format
       #   - #outgoing - for remapping from internal topic name into outgoing message
-      setting :topic_mapper, Routing::Mapper
-
+      setting :topic_mapper, -> { Routing::Mapper }
+      # If batch_mode is true, incoming messages will be handled in batch, otherwise one at a time.
+      setting :batch_mode, false
       # Connection pool options are used for producer (Waterdrop)
-      # They are configured automatically based on Sidekiq concurrency and number of routes
+      # They are configured automatically based on Sidekiq concurrency and number of consumers
       # The bigger one is selected as we need to be able to send messages from both places
       setting :connection_pool do
         # Connection pool size for producers. Note that we take a bigger number because there
-        # are cases when we might have more sidekiq threads than Karafka routes (small app)
+        # are cases when we might have more sidekiq threads than Karafka consumers (small app)
         # or the opposite for bigger systems
-        setting :size, -> { [::Karafka::App.routes.count, Sidekiq.options[:concurrency]].max }
+        setting :size, -> { [::Karafka::App.consumers.count, Sidekiq.options[:concurrency]].max }
         # How long should we wait for a working resource from the pool before rising timeout
         # With a proper connection pool size, this should never happen
         setting :timeout, 5
@@ -98,9 +97,9 @@ module Karafka
       end
 
       # This is configured automatically, don't overwrite it!
-      # Each route requires separate thread, so number of threads should be equal to number
-      # of routes
-      setting :concurrency, -> { ::Karafka::App.routes.count }
+      # Each consumers requires separate thread, so number of threads should be equal to number
+      # of consumers
+      setting :concurrency, -> { ::Karafka::App.consumers.count }
 
       class << self
         # Configurating method

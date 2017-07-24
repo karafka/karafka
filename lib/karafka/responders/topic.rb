@@ -37,7 +37,7 @@ module Karafka
       # Checks topic name with the same regexp as routing
       # @raise [Karafka::Errors::InvalidTopicName] raised when topic name is invalid
       def validate!
-        raise Errors::InvalidTopicName, name if Routing::Route::NAME_FORMAT !~ name
+     #   raise Errors::InvalidTopicName, name if Routing::Route::NAME_FORMAT !~ name
       end
     end
   end

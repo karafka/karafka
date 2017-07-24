@@ -24,8 +24,9 @@
   active_support/descendants_tracker
   active_support/inflector
   karafka/loader
+  karafka/setup/config
   karafka/status
-  karafka/routing/route
+  karafka/routing/router
 ].each(&method(:require))
 
 # Karafka library

@@ -4,13 +4,13 @@ module Karafka
   module Connection
     # Class used as a wrapper around Ruby-Kafka to simplify additional
     # features that we provide/might provide in future
-    class TopicConsumer
+    class GroupConsumer
       # Creates a queue consumer that will pull the data from Kafka
-      # @param [Karafka::Routing::Route] route details that will be used to build up a
-      #   queue consumer instance
-      # @return [Karafka::Connection::QueueConsumer] queue consumer instance
-      def initialize(route)
-        @route = route
+      # @param [Karafka::Routing::ConsumerGroup] consumer group for which we create a client
+      # @return [Karafka::Connection::GroupConsumer] group consumer that can subscribe to
+      #   multiple topics
+      def initialize(consumer_group)
+        @consumer_group = consumer_group
       end
 
       # Opens connection, gets messages and calls a block for each of the incoming messages
@@ -18,7 +18,7 @@ module Karafka
       # @note This will yield with a raw message - no preprocessing or reformatting
       def fetch_loop
         send(
-          @route.batch_mode ? :consume_each_batch : :consume_each_message
+          consumer_group.batch_mode ? :consume_each_batch : :consume_each_message
         ) do |message|
           yield(message)
         end
@@ -32,10 +32,14 @@ module Karafka
 
       private
 
+      attr_reader :consumer_group
+
       # Consumes messages from Kafka in batches
       # @yieldparam [Kafka::FetchedMessage] kafka fetched message
       def consume_each_batch
-        kafka_consumer.each_batch(ConfigAdapter.consuming(@route)) do |batch|
+        kafka_consumer.each_batch(
+          ConfigAdapter.consuming(consumer_group)
+        ) do |batch|
           batch.messages.each do |message|
             yield(message)
           end
@@ -45,20 +49,22 @@ module Karafka
       # Consumes messages from Kafka one by one
       # @yieldparam [Kafka::FetchedMessage] kafka fetched message
       def consume_each_message
-        kafka_consumer.each_message(ConfigAdapter.consuming(@route)) do |message|
+        kafka_consumer.each_message(
+          ConfigAdapter.consuming(consumer_group)
+        ) do |message|
           yield(message)
         end
       end
 
       # @return [Kafka::Consumer] returns a ready to consume Kafka consumer
-      #   that is set up to consume a given routes topic
+      #   that is set up to consume from topics of a given consumer group
       def kafka_consumer
         @kafka_consumer ||= kafka.consumer(
-          ConfigAdapter.consumer(@route)
+          ConfigAdapter.consumer(consumer_group)
         ).tap do |consumer|
-          consumer.subscribe(
-            *ConfigAdapter.subscription(@route)
-          )
+          consumer_group.topics.each do |topic|
+            consumer.subscribe(*ConfigAdapter.subscription(topic))
+          end
         end
       rescue Kafka::ConnectionError
         # If we would not wait it would totally spam log file with failed
@@ -73,7 +79,7 @@ module Karafka
       # @note We don't cache it internally because we cache kafka_consumer that uses kafka
       #   object instance
       def kafka
-        Kafka.new(ConfigAdapter.client(@route))
+        Kafka.new(ConfigAdapter.client(consumer_group))
       end
     end
   end

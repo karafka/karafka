@@ -12,7 +12,7 @@ module Karafka
       end
 
       # Sets up all the internal components and bootstrap whole app
-      # We need to know details about routes in order to setup components,
+      # We need to know details about consumers in order to setup components,
       # that's why we don't setup them after std setup is done
       # @raise [Karafka::Errors::InvalidConfiguration] raised when configuration
       #   doesn't match with ConfigurationSchema
@@ -26,8 +26,8 @@ module Karafka
         Setup::Config.config
       end
 
-      # @return [Karafka::Routing::Builder] routes builder instance
-      def routes
+      # @return [Karafka::Routing::Builder] consumers builder instance
+      def consumers
         Routing::Builder.instance
       end
 

@@ -18,6 +18,9 @@
 - #171 - Add kafka message metadata to params
 - #176 - Transform Karafka::Connection::Consumer into a module
 - ruby-kafka bump
+- Changed routing model (still compatible with 0.5) to allow better resources management on demand
+- Better settings proxying and management between ruby-kafka and karafka
+- Change in the way we identify topics in between Karafka and Sidekiq workers
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

@@ -9,21 +9,23 @@ module Karafka
 
       # Print out all defined routes in alphabetical order
       def call
-        routes.each do |route|
-          any_topics = !route.responder&.topics.nil?
+        consumers.each do |consumer|
+          consumer.topics.each do |topic|
+            any_topics = !topic.responder&.topics.nil?
 
-          if any_topics
-            puts "#{route.topic} =>"
+            if any_topics
+              puts "#{topic.name} =>"
 
-            route.responder.topics.each do |_name, topic|
-              features = []
-              features << (topic.required? ? 'always' : 'conditionally')
-              features << (topic.multiple_usage? ? 'one or more' : 'exactly once')
+              topic.responder.topics.each do |_name, topic|
+                features = []
+                features << (topic.required? ? 'always' : 'conditionally')
+                features << (topic.multiple_usage? ? 'one or more' : 'exactly once')
 
-              print topic.name, "(#{features.join(', ')})"
+                print topic.name, "(#{features.join(', ')})"
+              end
+            else
+              puts "#{topic.name} => (nothing)"
             end
-          else
-            puts "#{route.topic} => (nothing)"
           end
         end
       end
@@ -31,8 +33,8 @@ module Karafka
       private
 
       # @return [Array<Karafka::Routing::Route>] all routes sorted in alphabetical order
-      def routes
-        Karafka::App.routes.sort_by(&:topic)
+      def consumers
+        Karafka::App.consumers.sort_by(&:id)
       end
 
       # Prints a given value with label in a nice way

@@ -11,15 +11,17 @@ module Karafka
 
       execute_block_on_receiver :fetch_loop
 
-      attr_reader :route
+      attr_reader :consumer_group
 
+      # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group that holds details
+      #   on what topics and with what settings should we listen
       # @return [Karafka::Connection::Listener] listener instance
-      def initialize(route)
-        @route = route
+      def initialize(consumer_group)
+        @consumer_group = consumer_group
       end
 
       # Opens connection, gets messages and calls a block for each of the incoming messages
-      # @yieldparam [Karafka::BaseController] base controller descendant
+      # @yieldparam [String] consumer group id
       # @yieldparam [Kafka::FetchedMessage] kafka fetched message
       # @note This will yield with a raw message - no preprocessing or reformatting
       # @note We catch all the errors here, so they don't affect other listeners (or this one)
@@ -30,7 +32,7 @@ module Karafka
       #   propagate this far
       def fetch_loop(block)
         topic_consumer.fetch_loop do |raw_message|
-          block.call(raw_message)
+          block.call(consumer_group.id, raw_message)
         end
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
@@ -43,11 +45,11 @@ module Karafka
 
       private
 
-      # @return [Karafka::Connection::TopicConsumer] wrapped kafka consumer for a given topic
+      # @return [Karafka::Connection::GroupConsumer] wrapped kafka consumer for a given topic
       #   consumption
       # @note It adds consumer into Karafka::Server consumers pool for graceful shutdown on exit
       def topic_consumer
-        @topic_consumer ||= TopicConsumer.new(route).tap do |consumer|
+        @topic_consumer ||= GroupConsumer.new(consumer_group).tap do |consumer|
           Karafka::Server.consumers << consumer if Karafka::Server.consumers
         end
       end

@@ -10,38 +10,11 @@ module Karafka
     #   do nothing. So we don't have to worry about injecting our internal settings
     #   into the client and breaking stuff
     module ConfigAdapter
-      # What settings should go where in ruby-kafka
-      # @note All other settings will be passed to Kafka.new method invokation.
-      #   All elements in this hash are just edge cases
-      EDGE_CASES_MAP = {
-        consumer: %i[
-          session_timeout
-          offset_commit_interval
-          offset_commit_threshold
-          offset_retention_time
-          heartbeat_interval
-        ],
-        subscription: %i[
-          start_from_beginning
-          max_bytes_per_partition
-        ],
-        consuming: %i[
-          min_bytes
-          max_wait_time
-        ],
-        # All the options that are under kafka config namespace, but are not used
-        # directly with kafka api, but from the Karafka user perspective, they are
-        # still related to kafka. They should not be proxied  anywhere
-        ignored: %i[
-          reconnect_timeout
-        ]
-      }.freeze
-
       class << self
         # Builds all the configuration settings for Kafka.new method
-        # @param _route [Karafka::Routing::Route] route details
+        # @param _consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
         # @return [Hash] hash with all the settings required by Kafka.new method
-        def client(_route)
+        def client(_consumer_group)
           # This one is a default that takes all the settings except special
           # cases defined in the map
           settings = {
@@ -50,7 +23,7 @@ module Karafka
           }
 
           kafka_configs.each do |setting_name, setting_value|
-            next if EDGE_CASES_MAP.values.flatten.include?(setting_name)
+            next if AttributesMap.config_adapter.values.flatten.include?(setting_name)
 
             settings[setting_name] = setting_value
           end
@@ -59,13 +32,13 @@ module Karafka
         end
 
         # Builds all the configuration settings for kafka#consumer method
-        # @param route [Karafka::Routing::Route] route details
+        # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
         # @return [Hash] hash with all the settings required by Kafka#consumer method
-        def consumer(route)
-          settings = { group_id: route.group }
+        def consumer(consumer_group)
+          settings = { group_id: consumer_group.id }
 
           kafka_configs.each do |setting_name, setting_value|
-            next unless EDGE_CASES_MAP[:consumer].include?(setting_name)
+            next unless AttributesMap.config_adapter[:consumer].include?(setting_name)
             next if settings.keys.include?(setting_name)
             settings[setting_name] = setting_value
           end
@@ -75,15 +48,14 @@ module Karafka
 
         # Builds all the configuration settings for kafka consumer consume_each_batch and
         #   consume_each_message methods
-        # @param _route [Karafka::Routing::Route] route details
-
+        # @param _consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
         # @return [Hash] hash with all the settings required by
         #   Kafka::Consumer#consume_each_message and Kafka::Consumer#consume_each_batch method
-        def consuming(_route)
+        def consuming(_consumer_group)
           settings = {}
 
           kafka_configs.each do |setting_name, setting_value|
-            next unless EDGE_CASES_MAP[:consuming].include?(setting_name)
+            next unless AttributesMap.config_adapter[:consuming].include?(setting_name)
             next if settings.keys.include?(setting_name)
             settings[setting_name] = setting_value
           end
@@ -92,18 +64,18 @@ module Karafka
         end
 
         # Builds all the configuration settings for kafka consumer#subscribe method
-        # @param route [Karafka::Routing::Route] route details
+        # @param topic [Karafka::Routing::Topic] topic that holds details for a given subscription
         # @return [Hash] hash with all the settings required by kafka consumer#subscribe method
-        def subscription(route)
-          settings = { start_from_beginning: route.start_from_beginning }
+        def subscription(topic)
+          settings = { start_from_beginning: topic.start_from_beginning }
 
           kafka_configs.each do |setting_name, setting_value|
-            next unless EDGE_CASES_MAP[:subscription].include?(setting_name)
+            next unless AttributesMap.config_adapter[:subscription].include?(setting_name)
             next if settings.keys.include?(setting_name)
             settings[setting_name] = setting_value
           end
 
-          [route.topic, sanitize(settings)]
+          [topic.name, sanitize(settings)]
         end
 
         private
