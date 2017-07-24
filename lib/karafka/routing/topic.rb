@@ -2,7 +2,13 @@
 
 module Karafka
   module Routing
+    # Topic stores all the details on how we should interact with Kafka given topic
+    # It belongs to a consumer group as from 0.6 all the topics can work in the same consumer group
+    # It is a part of Karafka's DSL
     class Topic
+      # @param [String, Symbol] name of a topic on which we want to listen
+      # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
+      # @yield Evaluates given block in a current topic context allowing us to have a nice DSL
       def initialize(name, consumer_group, &block)
         @name = name
         @consumer_group = consumer_group

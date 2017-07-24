@@ -22,7 +22,7 @@ module Karafka
       # @param topic_name [String, Symbol] name of a topic from which we want to consumer
       # @yield Evaluates a given block in a topic context
       def topic(topic_name, &block)
-        self << ConsumerGroup.new(topic_name) do |consumer_group|
+        self << ConsumerGroup.new(topic_name) do
           topic(topic_name, &block).tap(&:build)
         end
       end

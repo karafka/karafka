@@ -45,11 +45,11 @@ module Karafka
 
       private
 
-      # @return [Karafka::Connection::GroupConsumer] wrapped kafka consumer for a given topic
+      # @return [Karafka::Connection::MessagesConsumer] wrapped kafka consumer for a given topic
       #   consumption
       # @note It adds consumer into Karafka::Server consumers pool for graceful shutdown on exit
       def topic_consumer
-        @topic_consumer ||= GroupConsumer.new(consumer_group).tap do |consumer|
+        @topic_consumer ||= MessagesConsumer.new(consumer_group).tap do |consumer|
           Karafka::Server.consumers << consumer if Karafka::Server.consumers
         end
       end

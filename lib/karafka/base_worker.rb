@@ -6,7 +6,7 @@ module Karafka
     include Sidekiq::Worker
 
     # Executes the logic that lies in #perform Karafka controller method
-    # @param topic [String] Topic that we will use to route to a proper controller
+    # @param topic_id [String] Unique topic id that we will use to find a proper topic
     # @param params [Hash] params hash that we use to build Karafka params object
     def perform(topic_id, params)
       Karafka.monitor.notice(self.class, params)

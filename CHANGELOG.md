@@ -21,6 +21,7 @@
 - Changed routing model (still compatible with 0.5) to allow better resources management on demand
 - Better settings proxying and management between ruby-kafka and karafka
 - Change in the way we identify topics in between Karafka and Sidekiq workers
+- Better naming conventions to reflect Kafka reality
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

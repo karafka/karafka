@@ -4,10 +4,11 @@ module Karafka
   module Connection
     # Class used as a wrapper around Ruby-Kafka to simplify additional
     # features that we provide/might provide in future
-    class GroupConsumer
+    class MessagesConsumer
       # Creates a queue consumer that will pull the data from Kafka
-      # @param [Karafka::Routing::ConsumerGroup] consumer group for which we create a client
-      # @return [Karafka::Connection::GroupConsumer] group consumer that can subscribe to
+      # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group for which
+      #   we create a client
+      # @return [Karafka::Connection::MessagesConsumer] group consumer that can subscribe to
       #   multiple topics
       def initialize(consumer_group)
         @consumer_group = consumer_group

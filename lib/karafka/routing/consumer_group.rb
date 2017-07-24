@@ -26,7 +26,7 @@ module Karafka
         @topics.last
       end
 
-      Karafka::AttributesMap.consumer_attributes.each do |attribute|
+      Karafka::AttributesMap.consumer_group_attributes.each do |attribute|
         define_method attribute do |argument = nil|
           if argument.nil?
             current_value = instance_variable_get(:"@#{attribute}")

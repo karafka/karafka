@@ -3,15 +3,16 @@
 module Karafka
   module Connection
     # Class that consumes messages for which we listen
-    module MessageConsumer
-      # Consumes a message (does something with it)
+    module MessageProcessor
+      # Processes a message (does something with it)
       # It will execute a scheduling task from a proper controller based on a message topic
       # @note This should be looped to obtain a constant listening
       # @note We catch all the errors here, to make sure that none failures
       #   for a given consumption will affect other consumed messages
       #   If we would't catch it, it would propagate up until killing the Celluloid actor
+      # @param group_id [String] group_id of a group from which a given message came
       # @param kafka_message [Kafka::FetchedMessage] raw message that was fetched by kafka
-      def self.consume(group_id, kafka_message)
+      def self.process(group_id, kafka_message)
         # We map from incoming topic name, as it might be namespaced, etc.
         # @see topic_mapper internal docs
         mapped_topic = Karafka::App.config.topic_mapper.incoming(kafka_message.topic)

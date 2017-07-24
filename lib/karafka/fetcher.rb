@@ -10,7 +10,7 @@ module Karafka
     # so we don't have to terminate them
     def fetch_loop
       futures = listeners.map do |listener|
-        listener.future.public_send(:fetch_loop, consumer)
+        listener.future.public_send(:fetch_loop, processor)
       end
 
       futures.map(&:value)
@@ -26,16 +26,16 @@ module Karafka
 
     # @return [Array<Karafka::Connection::Listener>] listeners that will consume messages
     def listeners
-      @listeners ||= App.consumers.map do |consumer|
-        Karafka::Connection::Listener.new(consumer)
+      @listeners ||= App.consumers.map do |processor|
+        Karafka::Connection::Listener.new(processor)
       end
     end
 
     # @return [Proc] proc that should be processed when a message arrives
     # @yieldparam message [Kafka::FetchedMessage] message from kafka (raw one)
-    def consumer
+    def processor
       lambda do |consumer_group_id, message|
-        Karafka::Connection::MessageConsumer.consume(consumer_group_id, message)
+        Karafka::Connection::MessageProcessor.process(consumer_group_id, message)
       end
     end
   end
