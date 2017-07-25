@@ -19,7 +19,6 @@ module Karafka
       def initialize(name, options)
         @name = name.to_s
         @options = options
-        validate!
       end
 
       # @return [Boolean] is this a required topic (if not, it is optional)
@@ -30,14 +29,6 @@ module Karafka
       # @return [Boolean] do we expect to use it multiple times in a single respond flow
       def multiple_usage?
         @options[:multiple_usage] || false
-      end
-
-      private
-
-      # Checks topic name with the same regexp as routing
-      # @raise [Karafka::Errors::InvalidTopicName] raised when topic name is invalid
-      def validate!
-     #   raise Errors::InvalidTopicName, name if Routing::Route::NAME_FORMAT !~ name
       end
     end
   end

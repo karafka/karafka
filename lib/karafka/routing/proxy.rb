@@ -2,20 +2,26 @@
 
 module Karafka
   module Routing
+    # Proxy is used as a translation layer in between the DSL and raw topic and consumer group
+    # objects.
     class Proxy
       attr_reader :target
 
+      # @param target [Object] target object to which we proxy any DSL call
+      # @yield Evaluates block in the proxy context
       def initialize(target, &block)
         @target = target
         instance_eval(&block)
       end
 
+      # Translets the no "=" DSL of routing into elements assigments on target
       def method_missing(method_name, *arguments, &block)
         @target.public_send(:"#{method_name}=", *arguments, &block)
       end
 
+      # Tells whether or not a given element exists on the target
       def respond_to_missing?(method_name, include_private = false)
-        @target.respond_to?(:"#{method_name}=") || super
+        @target.respond_to?(:"#{method_name}=", include_private) || super
       end
     end
   end

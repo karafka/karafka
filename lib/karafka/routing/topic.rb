@@ -6,9 +6,10 @@ module Karafka
     # It belongs to a consumer group as from 0.6 all the topics can work in the same consumer group
     # It is a part of Karafka's DSL
     class Topic
+      extend Helpers::ConfigRetriever
+
       # @param [String, Symbol] name of a topic on which we want to listen
       # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
-      # @yield Evaluates given block in a current topic context allowing us to have a nice DSL
       def initialize(name, consumer_group)
         @name = name
         @consumer_group = consumer_group
@@ -60,22 +61,24 @@ module Karafka
       end
 
       Karafka::AttributesMap.topic_attributes.each do |attribute|
-        attr_writer attribute unless method_defined? :"#{attribute}="
+        config_retriever_for(attribute)
+      end
 
-        next if method_defined? attribute
+      def to_h
+        result = {
+          worker: worker,
+          id: id,
+          controller: controller,
+          responder: responder,
+          parser: parser,
+          interchanger: interchanger
+        }
 
-        define_method attribute do
-          current_value = instance_variable_get(:"@#{attribute}")
-          return current_value unless current_value.nil?
-
-          value = if Karafka::App.config.respond_to?(attribute)
-            Karafka::App.config.public_send(attribute)
-          else
-            Karafka::App.config.kafka.public_send(attribute)
-          end
-
-          instance_variable_set(:"@#{attribute}", value)
+        Karafka::AttributesMap.topic_attributes.each do |attribute|
+          result[attribute] = public_send(attribute)
         end
+
+        result
       end
     end
   end

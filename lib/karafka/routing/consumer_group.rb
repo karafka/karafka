@@ -6,12 +6,12 @@ module Karafka
     # given topics
     # It is a part of Karafka's DSL
     class ConsumerGroup
+      extend Helpers::ConfigRetriever
+
       attr_reader :topics
       attr_reader :id
 
       # @param [String, Symbol] id of this consumer group
-      # @yield Evalues given block in current consumer group context allowing to
-      #   configure multiple kafka and karafka related options on a per consumer group basis
       def initialize(id)
         @id = "#{Karafka::App.config.name.to_s.underscore}_#{id}"
         @topics = []
@@ -29,22 +29,20 @@ module Karafka
       end
 
       Karafka::AttributesMap.consumer_group_attributes.each do |attribute|
-        attr_writer attribute unless method_defined? :"#{attribute}="
+        config_retriever_for(attribute)
+      end
 
-        next if method_defined? attribute
+      def to_h
+        result = {
+          topics: topics.map(&:to_h),
+          id: id
+        }
 
-        define_method attribute do
-          current_value = instance_variable_get(:"@#{attribute}")
-          return current_value unless current_value.nil?
-
-          value = if Karafka::App.config.respond_to?(attribute)
-            Karafka::App.config.public_send(attribute)
-          else
-            Karafka::App.config.kafka.public_send(attribute)
-          end
-
-          instance_variable_set(:"@#{attribute}", value)
+        Karafka::AttributesMap.consumer_group_attributes.each do |attribute|
+          result[attribute] = public_send(attribute)
         end
+
+        result
       end
     end
   end

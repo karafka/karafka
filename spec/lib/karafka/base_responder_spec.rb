@@ -24,16 +24,6 @@ RSpec.describe Karafka::BaseResponder do
           expect(responder_class.topics[topic_name]).to be_a Karafka::Responders::Topic
         end
       end
-
-      context 'when we register invalid topic' do
-        %w[
-          & /31 ół !@
-        ].each do |topic_name|
-          let(:topic_name) { topic_name }
-
-          it { expect { responder_class }.to raise_error(Karafka::Errors::InvalidTopicName) }
-        end
-      end
     end
 
     describe '.call' do

@@ -3,11 +3,13 @@
 module Karafka
   # Namespace for all the validation schemas that we use to check input
   module Schemas
-    # Schema with validation rules for all configuration
+    # Schema with validation rules for Karafka configuration details
+    # @note There are many more configuration options inside of the
+    #   Karafka::Setup::Config model, but we don't validate them here as they are
+    #   validated per each route (topic + consumer_group) because they can be overwritten,
+    #   so we validate all of that once all the routes are defined and ready
     Config = Dry::Validation.Schema do
-      required(:name).filled(:str?)
-      required(:topic_mapper).filled
-      optional(:inline_mode).filled(:bool?)
+      required(:name).filled(:str?, format?: /\A(\w|\-|\.)+\z/)
 
       required(:redis).maybe do
         schema do
@@ -15,33 +17,16 @@ module Karafka
         end
       end
 
+      optional(:inline_mode).filled(:bool?)
+
       # If inline_mode is true, redis should be filled
       rule(redis_presence: %i[redis inline_mode]) do |redis, inline_mode|
         inline_mode.false?.then(redis.filled?)
       end
 
-      optional(:batch_mode).filled(:bool?)
-
       optional(:connection_pool).schema do
         required(:size).filled
         optional(:timeout).filled(:int?)
-      end
-
-      required(:kafka).schema do
-        required(:seed_brokers).filled(:array?)
-        required(:session_timeout).filled(:int?)
-        required(:offset_commit_interval).filled(:int?)
-        required(:offset_commit_threshold).filled(:int?)
-        required(:heartbeat_interval).filled(:int?)
-        required(:max_bytes_per_partition).filled(:int?)
-        required(:start_from_beginning).filled(:bool?)
-        required(:offset_retention_time) { none?.not > int? }
-
-        optional(:ssl_ca_cert).maybe(:str?)
-        optional(:ssl_client_cert).maybe(:str?)
-        optional(:ssl_client_cert_key).maybe(:str?)
-        optional(:sasl_gssapi_principal).maybe(:str?)
-        optional(:sasl_gssapi_keytab).maybe(:str?)
       end
     end
   end

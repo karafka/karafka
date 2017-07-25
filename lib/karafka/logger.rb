@@ -15,7 +15,8 @@ module Karafka
       default: ::Logger::INFO
     }.freeze
 
-    def initialize(*args)
+    # Creates a new instance of logger ensuring that it has a place to write to
+    def initialize(*_args)
       ensure_dir_exists
       super(target)
       self.level = ENV_MAP[Karafka.env] || ENV_MAP[:default]

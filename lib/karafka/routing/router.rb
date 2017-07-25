@@ -7,8 +7,6 @@ module Karafka
     # @note Since Kafka does not provide namespaces or modules for topics, they all have "flat"
     #  structure so all the routes are being stored in a single level array
     module Router
-      extend self
-
       # Builds a controller instance that should handle message from a given topic
       # @param topic_id [String] topic based on which we find a proper route
       # @return [Karafka::BaseController] base controller descendant instance object
@@ -31,6 +29,9 @@ module Karafka
 
         raise(Errors::NonMatchingRouteError, topic_id)
       end
+
+      module_function :build
+      module_function :topic
     end
   end
 end

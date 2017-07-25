@@ -39,6 +39,14 @@ module Karafka
       #   end
       def draw(&block)
         instance_eval(&block)
+        each do |consumer_group|
+          validation_result = Karafka::Schemas::Routing.call(consumer_group.to_h)
+
+          return true if validation_result.success?
+
+          raise Errors::InvalidConfiguration, validation_result.errors
+        end
+
         freeze
       end
     end
