@@ -18,7 +18,6 @@ module Karafka
       end
 
       # Builds a topic representation inside of a current consumer group route
-      # @param topic_name [String, Symbol] name of a topic from which we want to consumer
       # @yield Evaluates a given block in a topic context
       # @param name [String, Symbol] name of topic to which we want to subscribe
       # @return [Karafka::Routing::Topic] newly built topic instance

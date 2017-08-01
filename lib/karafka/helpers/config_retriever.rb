@@ -2,6 +2,12 @@
 
 module Karafka
   module Helpers
+    # A helper method that allows us to build methods that try to get a given
+    # attribute from its instance value and if it fails, will fallback to
+    # the default config or config.kafka value for a given attribute.
+    # It is used to simplify the checkings.
+    # @note Worth noticing, that the value might be equal to false, so even
+    #   then we need to return it. That's why we check for nil?
     module ConfigRetriever
       def config_retriever_for(attribute)
         attr_writer attribute unless method_defined? :"#{attribute}="

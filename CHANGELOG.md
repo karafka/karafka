@@ -23,6 +23,7 @@
 - Change in the way we identify topics in between Karafka and Sidekiq workers
 - Better naming conventions to reflect Kafka reality
 - Lower memory requirements do to object creation limitation (2-3 times less objects on each new message)
+- Router now longer checks for route uniqueness - now you can define same routes for multiple kafka's and do a lot of crazy stuff, so it's your responsibility to check uniqueness
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period
