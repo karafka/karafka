@@ -8,6 +8,16 @@ module Karafka
     # It is used to simplify the checkings.
     # @note Worth noticing, that the value might be equal to false, so even
     #   then we need to return it. That's why we check for nil?
+    # @example Define config retried attribute for start_from_beginning
+    # class Test
+    #   extend Karafka::Helpers::ConfigRetriever
+    #   config_retriever_for :start_from_beginning
+    # end
+    #
+    # Test.new.start_from_beginning #=> false
+    # test_instance = Test.new
+    # test_instance.start_from_beginning = true
+    # test_instance.start_from_beginning #=> true
     module ConfigRetriever
       def config_retriever_for(attribute)
         attr_writer attribute unless method_defined? :"#{attribute}="

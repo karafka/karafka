@@ -27,7 +27,7 @@ module Karafka
         @topics.last
       end
 
-      Karafka::AttributesMap.consumer_group_attributes.each do |attribute|
+      Karafka::AttributesMap.consumer_group.each do |attribute|
         config_retriever_for(attribute)
       end
 
@@ -40,7 +40,7 @@ module Karafka
           id: id
         }
 
-        Karafka::AttributesMap.consumer_group_attributes.each do |attribute|
+        Karafka::AttributesMap.consumer_group.each do |attribute|
           result[attribute] = public_send(attribute)
         end
 

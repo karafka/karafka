@@ -8,30 +8,28 @@ module Karafka
     class Topic
       extend Helpers::ConfigRetriever
 
+      attr_reader :id
+
       # @param [String, Symbol] name of a topic on which we want to listen
       # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
       def initialize(name, consumer_group)
         @name = name
         @consumer_group = consumer_group
         @attributes = {}
+        # @note We use identifier related to the consumer group that owns a topic, because from
+        #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can have
+        #   same topic name across mutliple Kafkas
+        @id = "#{consumer_group.id}_#{@name}"
       end
 
       attr_reader :consumer_group
-
-      # @return [String] unique topic identifier
-      # @note We use identifier related to the consumer group that owns a topic, because from
-      #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can have
-      #   same topic name across mutliple Kafkas
-      def id
-        "#{consumer_group.id}_#{@name}"
-      end
 
       # Initializes default values for all the options that support defaults if their values are
       # not yet specified. This is need to be done (cannot be lazy loaded on first use) because
       # everywhere except Karafka server command, those would not be initialized on time - for
       # example for Sidekiq
       def build
-        Karafka::AttributesMap.topic_attributes.each { |attr| send(attr) }
+        Karafka::AttributesMap.topic.each { |attr| send(attr) }
         self
       end
 
@@ -60,21 +58,24 @@ module Karafka
         @interchanger ||= Karafka::Params::Interchanger
       end
 
-      Karafka::AttributesMap.topic_attributes.each do |attribute|
+      Karafka::AttributesMap.topic.each do |attribute|
         config_retriever_for(attribute)
       end
 
+      # @return [Hash] hash with all the topic attributes
+      # @note This is being used when we validate the consumer_group and its topics
       def to_h
         result = {
           worker: worker,
           id: id,
+          name: name,
           controller: controller,
           responder: responder,
           parser: parser,
           interchanger: interchanger
         }
 
-        Karafka::AttributesMap.topic_attributes.each do |attribute|
+        Karafka::AttributesMap.topic.each do |attribute|
           result[attribute] = public_send(attribute)
         end
 

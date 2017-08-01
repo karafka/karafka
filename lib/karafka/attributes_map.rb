@@ -41,7 +41,7 @@ module Karafka
       end
 
       # @return [Array<Symbol>] properties that can be set on a per topic level
-      def topic_attributes
+      def topic
         (config_adapter[:subscription] + %i[
           name
           controller
@@ -58,7 +58,7 @@ module Karafka
       #   I did this that way, so I won't have to repeat same setting keys over and over again
       #   Thanks to this solution, if any new setting is available for ruby-kafka, we just need
       #   to add it to our configuration class and it will be handled automatically.
-      def consumer_group_attributes
+      def consumer_group
         defined_settings = config_adapter.values.flatten - config_adapter[:subscription]
         dynamically_proxied = Karafka::Setup::Config
                               ._settings
