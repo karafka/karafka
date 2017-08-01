@@ -19,10 +19,10 @@ module Karafka
           return current_value unless current_value.nil?
 
           value = if Karafka::App.config.respond_to?(attribute)
-            Karafka::App.config.public_send(attribute)
-          else
-            Karafka::App.config.kafka.public_send(attribute)
-          end
+                    Karafka::App.config.public_send(attribute)
+                  else
+                    Karafka::App.config.kafka.public_send(attribute)
+                  end
 
           instance_variable_set(:"@#{attribute}", value)
         end

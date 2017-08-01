@@ -42,7 +42,12 @@ module Karafka
         # Connection pool size for producers. Note that we take a bigger number because there
         # are cases when we might have more sidekiq threads than Karafka consumers (small app)
         # or the opposite for bigger systems
-        setting :size, -> { [::Karafka::App.consumer_groups.count, Sidekiq.options[:concurrency]].max }
+        setting :size, lambda {
+          [
+            ::Karafka::App.consumer_groups.count,
+            Sidekiq.options[:concurrency]
+          ].max
+        }
         # How long should we wait for a working resource from the pool before rising timeout
         # With a proper connection pool size, this should never happen
         setting :timeout, 5
@@ -97,8 +102,8 @@ module Karafka
       end
 
       # This is configured automatically, don't overwrite it!
-      # Each consumer group requires separate thread, so number of threads should be equal to number
-      # of consumer groups
+      # Each consumer group requires separate thread, so number of threads should be equal to
+      # number of consumer groups
       setting :concurrency, -> { ::Karafka::App.consumer_groups.count }
 
       class << self

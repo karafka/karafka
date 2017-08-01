@@ -2,7 +2,8 @@
 
 module Karafka
   module Schemas
-    Routing= Dry::Validation.Schema do
+    # Schema for single route validation.
+    ConsumerGroup = Dry::Validation.Schema do
       required(:id).filled(:str?, format?: /\A(\w|\-|\.)+\z/)
       required(:seed_brokers).filled(:array?)
       required(:session_timeout).filled(:int?)
@@ -21,8 +22,7 @@ module Karafka
       optional(:sasl_gssapi_principal).maybe(:str?)
       optional(:sasl_gssapi_keytab).maybe(:str?)
 
-
-      required(:topics).each do
+      required(:topics).filled.each do
         schema do
           required(:id).filled(:str?, format?: /\A(\w|\-|\.)+\z/)
           required(:name).filled(:str?, format?: /\A(\w|\-|\.)+\z/)

@@ -7,6 +7,12 @@ module Karafka
     class Proxy
       attr_reader :target
 
+      # We should proxy only non ? and = methods as we want to have a regular dsl
+      IGNORED_POSTFIXES = %w[
+        ?
+        =
+      ].freeze
+
       # @param target [Object] target object to which we proxy any DSL call
       # @yield Evaluates block in the proxy context
       def initialize(target, &block)
@@ -16,11 +22,13 @@ module Karafka
 
       # Translets the no "=" DSL of routing into elements assigments on target
       def method_missing(method_name, *arguments, &block)
+        return super if IGNORED_POSTFIXES.any? { |postfix| method_name.to_s.end_with?(postfix) }
         @target.public_send(:"#{method_name}=", *arguments, &block)
       end
 
       # Tells whether or not a given element exists on the target
       def respond_to_missing?(method_name, include_private = false)
+        return false if IGNORED_POSTFIXES.any? { |postfix| method_name.to_s.end_with?(postfix) }
         @target.respond_to?(:"#{method_name}=", include_private) || super
       end
     end

@@ -43,7 +43,6 @@ RSpec.describe Karafka::BaseWorker do
       expect(controller_instance).to receive(:topic).and_return(topic)
       expect(interchanger).to receive(:parse).with(params).and_return(interchanged_params)
       expect(controller_instance).to receive(:params=).with(interchanged_params)
-
       expect(base_worker.send(:controller, topic_id, params)).to eq controller_instance
     end
   end

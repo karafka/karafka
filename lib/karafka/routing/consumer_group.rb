@@ -18,8 +18,8 @@ module Karafka
       end
 
       # Builds a topic representation inside of a current consumer group route
-      # @yield Evaluates a given block in a topic context
       # @param name [String, Symbol] name of topic to which we want to subscribe
+      # @yield Evaluates a given block in a topic context
       # @return [Karafka::Routing::Topic] newly built topic instance
       def topic=(name, &block)
         topic = Topic.new(name, self)
@@ -31,6 +31,9 @@ module Karafka
         config_retriever_for(attribute)
       end
 
+      # Hashed version of consumer group that can be used for validation purposes
+      # @return [Hash] hash with consumer group attributes including serialized to hash
+      # topics inside of it.
       def to_h
         result = {
           topics: topics.map(&:to_h),

@@ -1,26 +1,30 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Connection::MessagesConsumer do
-  subject(:topic_consumer) { described_class.new(route) }
+  subject(:topic_consumer) { described_class.new(consumer_group) }
 
   let(:group) { rand.to_s }
   let(:topic) { rand.to_s }
   let(:batch_mode) { false }
   let(:start_from_beginning) { false }
   let(:kafka_consumer) { instance_double(Kafka::Consumer, stop: true) }
-  let(:route) do
-    instance_double(
-      Karafka::Routing::Route,
-      group: group,
-      topic: topic,
-      batch_mode: batch_mode,
-      start_from_beginning: start_from_beginning
-    )
+  let(:consumer_group) do
+    batch_mode_active = batch_mode
+    start_from_beginning_active = start_from_beginning
+    Karafka::Routing::ConsumerGroup.new(group).tap do |cg|
+      cg.batch_mode = batch_mode_active
+
+      cg.public_send(:topic=, topic) do
+        controller Class.new
+        inline_mode true
+        start_from_beginning start_from_beginning_active
+      end
+    end
   end
 
   describe '.new' do
-    it 'just remembers route' do
-      expect(topic_consumer.instance_variable_get(:@route)).to eq route
+    it 'just remembers consumer_group' do
+      expect(topic_consumer.instance_variable_get(:@consumer_group)).to eq consumer_group
     end
   end
 
@@ -82,7 +86,7 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
       let(:consumer) { instance_double(Kafka::Consumer) }
       let(:subscribe_params) do
         [
-          route.topic,
+          consumer_group.topics.first.name,
           start_from_beginning: start_from_beginning,
           max_bytes_per_partition: 1_048_576
         ]

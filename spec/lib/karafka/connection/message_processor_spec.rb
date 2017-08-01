@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Connection::MessageProcessor do
-  subject(:consumer) { described_class }
+  subject(:processor) { described_class }
 
-  describe '#consume' do
+  describe '#process' do
+    let(:group_id) { rand.to_s }
     let(:topic) { rand.to_s }
     let(:raw_message_value) { rand }
     let(:message) { double }
-    let(:builder) { Karafka::Routing::Router.new(nil) }
     let(:controller_instance) { instance_double(Karafka::BaseController) }
     let(:raw_message) do
       instance_double(
@@ -28,11 +28,6 @@ RSpec.describe Karafka::Connection::MessageProcessor do
           .and_return(message)
 
         expect(Karafka::Routing::Router)
-          .to receive(:new)
-          .with(topic)
-          .and_return(builder)
-
-        expect(builder)
           .to receive(:build)
           .and_return(controller_instance)
 
@@ -45,7 +40,7 @@ RSpec.describe Karafka::Connection::MessageProcessor do
       end
 
       it 'routes to a proper controller and schedule task' do
-        expect { consumer.consume(raw_message) }.not_to raise_error
+        expect { processor.process(group_id, raw_message) }.not_to raise_error
       end
     end
 
@@ -72,11 +67,6 @@ RSpec.describe Karafka::Connection::MessageProcessor do
           .and_return(message)
 
         expect(Karafka::Routing::Router)
-          .to receive(:new)
-          .with(mapped_topic)
-          .and_return(builder)
-
-        expect(builder)
           .to receive(:build)
           .and_return(controller_instance)
 
@@ -89,7 +79,7 @@ RSpec.describe Karafka::Connection::MessageProcessor do
       end
 
       it 'routes to a proper controller and schedule task' do
-        expect { consumer.consume(raw_message) }.not_to raise_error
+        expect { processor.process(group_id, raw_message) }.not_to raise_error
       end
     end
 
@@ -105,12 +95,12 @@ RSpec.describe Karafka::Connection::MessageProcessor do
               .with(described_class, error)
 
             expect(Karafka::Routing::Router)
-              .to receive(:new)
+              .to receive(:build)
               .and_raise(error)
           end
 
           it 'notices and not reraise error' do
-            expect { consumer.consume(raw_message) }.not_to raise_error
+            expect { processor.process(group_id, raw_message) }.not_to raise_error
           end
         end
       end

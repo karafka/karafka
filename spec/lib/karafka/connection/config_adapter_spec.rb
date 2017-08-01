@@ -3,10 +3,13 @@
 RSpec.describe Karafka::Connection::ConfigAdapter do
   let(:controller) { Karafka::BaseController }
   let(:topic) { rand.to_s }
-  let(:route) do
-    Karafka::Routing::Route.new.tap do |route|
-      route.controller = controller
-      route.topic = topic
+  let(:attributes_map_values) { Karafka::AttributesMap.config_adapter }
+  let(:consumer_group) do
+    Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
+      cg.public_send(:topic=, topic) do
+        controller Class.new
+        inline_mode true
+      end
     end
   end
 
@@ -15,9 +18,9 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
   end
 
   describe '#consumer' do
-    subject(:config) { described_class.consumer(route) }
+    subject(:config) { described_class.consumer(consumer_group) }
 
-    let(:expected_keys) { (described_class::EDGE_CASES_MAP[:consumer] + %i[group_id]).sort }
+    let(:expected_keys) { (attributes_map_values[:consumer] + %i[group_id]).sort }
 
     it 'expect not to have anything else than consumer specific options + group_id' do
       expect(config.keys.sort).to eq expected_keys
@@ -25,9 +28,9 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
   end
 
   describe '#consuming' do
-    subject(:config) { described_class.consuming(route) }
+    subject(:config) { described_class.consuming(consumer_group) }
 
-    let(:expected_keys) { (described_class::EDGE_CASES_MAP[:consuming]).sort }
+    let(:expected_keys) { (attributes_map_values[:consuming]).sort }
 
     it 'expect not to have anything else than consuming specific options' do
       expect(config.keys.sort).to eq expected_keys
@@ -35,14 +38,14 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
   end
 
   describe '#subscription' do
-    subject(:config) { described_class.subscription(route) }
+    subject(:config) { described_class.subscription(consumer_group.topics.first) }
 
-    let(:expected_keys) { (described_class::EDGE_CASES_MAP[:subscription]).sort }
+    let(:expected_keys) { (attributes_map_values[:subscription]).sort }
 
     it 'expect not to have anything else than subscription specific options' do
       expect(config.last.keys.sort).to eq expected_keys
     end
 
-    it { expect(config.first).to eq route.topic }
+    it { expect(config.first).to eq consumer_group.topics.first.name }
   end
 end

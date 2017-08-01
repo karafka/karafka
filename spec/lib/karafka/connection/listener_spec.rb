@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Connection::Listener do
-  subject(:listener) { described_class.new(route).wrapped_object }
+  subject(:listener) { described_class.new(consumer_group).wrapped_object }
 
-  let(:route) do
-    Karafka::Routing::Route.new.tap do |route|
-      route.topic = rand.to_s
-      route.group = rand.to_s
+  let(:consumer_group) do
+    Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
+      cg.public_send(:topic=, rand.to_s) do
+        controller Class.new
+        inline_mode true
+      end
     end
   end
 
@@ -42,7 +44,7 @@ RSpec.describe Karafka::Connection::Listener do
       it 'expect to yield for each incoming message' do
         expect(listener).to receive(:topic_consumer).and_return(topic_consumer).at_least(:once)
         expect(topic_consumer).to receive(:fetch_loop).and_yield(incoming_message)
-        expect(action).to receive(:call).with(incoming_message)
+        expect(action).to receive(:call).with(consumer_group.id, incoming_message)
 
         listener.send(:fetch_loop, action)
       end
@@ -58,7 +60,7 @@ RSpec.describe Karafka::Connection::Listener do
       end
 
       it 'just returns it' do
-        expect(Karafka::Connection::TopicConsumer)
+        expect(Karafka::Connection::MessagesConsumer)
           .to receive(:new)
           .never
         expect(listener.send(:topic_consumer)).to eq topic_consumer
@@ -73,9 +75,9 @@ RSpec.describe Karafka::Connection::Listener do
       end
 
       it 'creates an instance and return' do
-        expect(Karafka::Connection::TopicConsumer)
+        expect(Karafka::Connection::MessagesConsumer)
           .to receive(:new)
-          .with(route)
+          .with(consumer_group)
           .and_return(topic_consumer)
 
         expect(listener.send(:topic_consumer)).to eq topic_consumer
