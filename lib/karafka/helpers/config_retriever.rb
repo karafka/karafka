@@ -19,6 +19,9 @@ module Karafka
     # test_instance.start_from_beginning = true
     # test_instance.start_from_beginning #=> true
     module ConfigRetriever
+      # Builds proper methods for setting and retrieving (with fallback) given attribute value
+      # @param attribute [Symbol] attribute name based on which we will build
+      #   accessor with fallback
       def config_retriever_for(attribute)
         attr_writer attribute unless method_defined? :"#{attribute}="
 

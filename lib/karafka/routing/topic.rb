@@ -17,8 +17,8 @@ module Karafka
         @consumer_group = consumer_group
         @attributes = {}
         # @note We use identifier related to the consumer group that owns a topic, because from
-        #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can have
-        #   same topic name across mutliple Kafkas
+        #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can
+        #   have same topic name across mutliple Kafkas
         @id = "#{consumer_group.id}_#{@name}"
       end
 

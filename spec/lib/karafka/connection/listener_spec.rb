@@ -16,6 +16,7 @@ RSpec.describe Karafka::Connection::Listener do
     let(:topic_consumer) { double }
     let(:incoming_message) { double }
     let(:action) { double }
+
     [
       StandardError,
       Exception

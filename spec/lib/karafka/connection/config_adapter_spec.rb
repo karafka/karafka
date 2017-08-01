@@ -30,7 +30,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
   describe '#consuming' do
     subject(:config) { described_class.consuming(consumer_group) }
 
-    let(:expected_keys) { (attributes_map_values[:consuming]).sort }
+    let(:expected_keys) { attributes_map_values[:consuming].sort }
 
     it 'expect not to have anything else than consuming specific options' do
       expect(config.keys.sort).to eq expected_keys
@@ -40,7 +40,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
   describe '#subscription' do
     subject(:config) { described_class.subscription(consumer_group.topics.first) }
 
-    let(:expected_keys) { (attributes_map_values[:subscription]).sort }
+    let(:expected_keys) { attributes_map_values[:subscription].sort }
 
     it 'expect not to have anything else than subscription specific options' do
       expect(config.last.keys.sort).to eq expected_keys
