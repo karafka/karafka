@@ -23,7 +23,7 @@
 - Change in the way we identify topics in between Karafka and Sidekiq workers
 - Better naming conventions to reflect Kafka reality
 - Lower memory requirements do to object creation limitation (2-3 times less objects on each new message)
-- Router now longer checks for route uniqueness - now you can define same routes for multiple kafka's and do a lot of crazy stuff, so it's your responsibility to check uniqueness
+- Router no longer checks for route uniqueness - now you can define same routes for multiple kafka's and do a lot of crazy stuff, so it's your responsibility to check uniqueness
 - #103 - Env for logger is loaded 2 early (on gem load not on app init)
 - #165 - Router validator
 - #142 - Possibility to better control Kafka consumer
