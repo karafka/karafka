@@ -89,7 +89,6 @@ RSpec.describe Karafka::Params::Params do
             .and_return(parsed_content)
         end
 
-
         it 'expect to merge with parsed stuff that is under content key and remove this key' do
           expect(params.retrieve[parsed_content.keys[0]]).to eq parsed_content.values[0]
           expect(params.keys).not_to include :content
