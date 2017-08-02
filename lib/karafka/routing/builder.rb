@@ -12,22 +12,6 @@ module Karafka
     class Builder < Array
       include Singleton
 
-      # Builds and saves given consumer group
-      # @param group_id [String, Symbol] name for consumer group
-      # @yield Evaluates a given block in a consumer group context
-      def consumer_group(group_id, &block)
-        consumer_group = ConsumerGroup.new(group_id.to_s)
-        self << Proxy.new(consumer_group, &block).target
-      end
-
-      # @param topic_name [String, Symbol] name of a topic from which we want to consumer
-      # @yield Evaluates a given block in a topic context
-      def topic(topic_name, &block)
-        consumer_group(topic_name) do
-          topic(topic_name, &block).tap(&:build)
-        end
-      end
-
       # Used to draw routes for Karafka
       # @note After it is done drawing it will store and validate all the routes to make sure that
       #   they are correct and that there are no topic/group duplications (this is forbidden)
@@ -48,6 +32,24 @@ module Karafka
         end
 
         freeze
+      end
+
+      private
+
+      # Builds and saves given consumer group
+      # @param group_id [String, Symbol] name for consumer group
+      # @yield Evaluates a given block in a consumer group context
+      def consumer_group(group_id, &block)
+        consumer_group = ConsumerGroup.new(group_id.to_s)
+        self << Proxy.new(consumer_group, &block).target
+      end
+
+      # @param topic_name [String, Symbol] name of a topic from which we want to consumer
+      # @yield Evaluates a given block in a topic context
+      def topic(topic_name, &block)
+        consumer_group(topic_name) do
+          topic(topic_name, &block).tap(&:build)
+        end
       end
     end
   end

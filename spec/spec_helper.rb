@@ -12,6 +12,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   logger
   timecop
   byebug
+  fiddle
 ].each do |lib|
   require lib
 end
