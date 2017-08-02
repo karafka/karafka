@@ -8,12 +8,13 @@ module Karafka
     class Topic
       extend Helpers::ConfigRetriever
 
-      attr_reader :id
+      attr_reader :id, :consumer_group
+      attr_accessor :controller
 
       # @param [String, Symbol] name of a topic on which we want to listen
       # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
       def initialize(name, consumer_group)
-        @name = name
+        @name = name.to_s
         @consumer_group = consumer_group
         @attributes = {}
         # @note We use identifier related to the consumer group that owns a topic, because from
@@ -21,8 +22,6 @@ module Karafka
         #   have same topic name across mutliple Kafkas
         @id = "#{consumer_group.id}_#{@name}"
       end
-
-      attr_reader :consumer_group
 
       # Initializes default values for all the options that support defaults if their values are
       # not yet specified. This is need to be done (cannot be lazy loaded on first use) because
@@ -65,21 +64,14 @@ module Karafka
       # @return [Hash] hash with all the topic attributes
       # @note This is being used when we validate the consumer_group and its topics
       def to_h
-        result = {
-          worker: worker,
-          id: id,
-          name: name,
-          controller: controller,
-          responder: responder,
-          parser: parser,
-          interchanger: interchanger
-        }
-
-        Karafka::AttributesMap.topic.each do |attribute|
-          result[attribute] = public_send(attribute)
+        map = Karafka::AttributesMap.topic.map do |attribute|
+          [attribute, public_send(attribute)]
         end
 
-        result
+        Hash[map].merge!(
+          id: id,
+          controller: controller
+        )
       end
     end
   end

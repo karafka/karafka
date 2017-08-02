@@ -25,6 +25,7 @@ module Karafka
       def config_retriever_for(attribute)
         attr_writer attribute unless method_defined? :"#{attribute}="
 
+        # Don't redefine if we already have accessor for a given element
         return if method_defined? attribute
 
         define_method attribute do

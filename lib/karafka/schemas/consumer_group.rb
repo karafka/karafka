@@ -11,8 +11,6 @@ module Karafka
       required(:offset_commit_threshold).filled(:int?)
       required(:offset_retention_time) { none?.not > int? }
       required(:heartbeat_interval).filled(:int?, gteq?: 0)
-      required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
-      required(:start_from_beginning).filled(:bool?)
       required(:topic_mapper).filled
       required(:connect_timeout).filled(:int?, gt?: 0)
       required(:socket_timeout).filled(:int?, gt?: 0)
@@ -38,6 +36,8 @@ module Karafka
           required(:controller).filled
           required(:parser).filled
           required(:interchanger).filled
+          required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
+          required(:start_from_beginning).filled(:bool?)
         end
       end
     end

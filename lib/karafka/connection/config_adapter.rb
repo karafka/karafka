@@ -23,6 +23,10 @@ module Karafka
           }
 
           kafka_configs.each do |setting_name, setting_value|
+            # All options for config adapter should be ignored as we're just interested
+            # in what is left, as we want to pass all the options that are "typical"
+            # and not listed in the config_adapter special cases mapping. All the values
+            # from the config_adapter mapping go somewhere else, not to the client directly
             next if AttributesMap.config_adapter.values.flatten.include?(setting_name)
 
             settings[setting_name] = setting_value

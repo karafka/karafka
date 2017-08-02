@@ -14,7 +14,18 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
   end
 
   describe '#client' do
-    pending
+    subject(:config) { described_class.client(consumer_group) }
+
+    let(:expected_keys) { (attributes_map_values[:consumer] + %i[group_id]).sort }
+
+    it 'not to have any config_adapter keys' do
+      expect(config.keys - Karafka::AttributesMap.config_adapter.values.flatten).to eq config.keys
+    end
+
+    it 'expect to have std kafka config keys' do
+      expected = %i[logger client_id seed_brokers connect_timeout socket_timeout]
+      expect(config.keys.sort).to eq expected.sort
+    end
   end
 
   describe '#consumer' do
