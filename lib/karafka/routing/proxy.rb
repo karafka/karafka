@@ -23,15 +23,12 @@ module Karafka
 
       # Translets the no "=" DSL of routing into elements assigments on target
       def method_missing(method_name, *arguments, &block)
-        # We care only about single assignment methods
-        return super if arguments.count != 1
-        return super if IGNORED_POSTFIXES.any? { |postfix| method_name.to_s.end_with?(postfix) }
+        return super unless respond_to_missing?(method_name)
         @target.public_send(:"#{method_name}=", *arguments, &block)
       end
 
       # Tells whether or not a given element exists on the target
       def respond_to_missing?(method_name, include_private = false)
-        return false if arguments.count != 1
         return false if IGNORED_POSTFIXES.any? { |postfix| method_name.to_s.end_with?(postfix) }
         @target.respond_to?(:"#{method_name}=", include_private) || super
       end
