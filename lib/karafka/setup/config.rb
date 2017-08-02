@@ -88,6 +88,15 @@ module Karafka
         # option offset_retention_time [Integer] The length of the retention window, known as
         #   offset retention time
         setting :offset_retention_time, nil
+        # option connect_timeout [Integer] Sets the number of seconds to wait while connecting to
+        # a broker for the first time. When ruby-kafka initializes, it needs to connect to at
+        # least one host.
+        setting :connect_timeout, 10
+        # option socket_timeout [Integer] Sets the number of seconds to wait when reading from or
+        # writing to a socket connection to a broker. After this timeout expires the connection
+        # will be killed. Note that some Kafka operations are by definition long-running, such as
+        # waiting for new messages to arrive in a partition, so don't set this value too low
+        setting :socket_timeout, 10
         # SSL authentication related settings
         # option ca_cert [String] SSL CA certificate
         setting :ssl_ca_cert, nil

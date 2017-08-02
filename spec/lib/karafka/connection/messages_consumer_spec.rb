@@ -98,7 +98,9 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
           .with(
             logger: ::Karafka.logger,
             client_id: ::Karafka::App.config.name,
-            seed_brokers: ::Karafka::App.config.kafka.seed_brokers
+            seed_brokers: ::Karafka::App.config.kafka.seed_brokers,
+            socket_timeout: 10,
+            connect_timeout: 10
           )
           .and_return(kafka)
       end
