@@ -75,8 +75,9 @@ RSpec.describe Karafka::Params::Params do
         end
       end
 
-      context 'when params were not yet parsed' do
+      context 'when params were not yet parsed and content does not contain same keys' do
         let(:content) { double }
+        let(:parsed_content) { { double => double } }
 
         before do
           params[:parsed] = false
@@ -88,23 +89,31 @@ RSpec.describe Karafka::Params::Params do
             .and_return(parsed_content)
         end
 
-        context 'when parsed content does not contain same keys as already existing' do
-          let(:parsed_content) { { double => double } }
 
-          it 'expect to merge with parsed stuff that is under content key and remove this key' do
-            expect(params.retrieve[parsed_content.keys[0]]).to eq parsed_content.values[0]
-            expect(params.keys).not_to include :content
-          end
+        it 'expect to merge with parsed stuff that is under content key and remove this key' do
+          expect(params.retrieve[parsed_content.keys[0]]).to eq parsed_content.values[0]
+          expect(params.keys).not_to include :content
+        end
+      end
+
+      context 'when params were not yet parsed and content does contain same keys' do
+        let(:content) { double }
+        let(:parsed_content) { { received_at: rand } }
+
+        before do
+          params[:parsed] = false
+          params[:content] = content
+
+          expect(params)
+            .to receive(:parse)
+            .with(content)
+            .and_return(parsed_content)
         end
 
-        context 'when parsed content contains same keys as already existing' do
-          let(:parsed_content) { { received_at: rand } }
-
-          it 'expect not to overwrite existing keys' do
-            params.retrieve
-            expect(params[parsed_content[:received_at]]).not_to eq parsed_content[:received_at]
-            expect(params.keys).not_to include :content
-          end
+        it 'expect not to overwrite existing keys' do
+          params.retrieve
+          expect(params[parsed_content[:received_at]]).not_to eq parsed_content[:received_at]
+          expect(params.keys).not_to include :content
         end
       end
     end
