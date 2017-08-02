@@ -3,13 +3,16 @@
 module Karafka
   # Namespace for all the validation schemas that we use to check input
   module Schemas
+    # Regexp for validating format of groups and topics
+    TOPIC_REGEXP = /\A(\w|\-|\.)+\z/
+
     # Schema with validation rules for Karafka configuration details
     # @note There are many more configuration options inside of the
     #   Karafka::Setup::Config model, but we don't validate them here as they are
     #   validated per each route (topic + consumer_group) because they can be overwritten,
     #   so we validate all of that once all the routes are defined and ready
     Config = Dry::Validation.Schema do
-      required(:name).filled(:str?, format?: /\A(\w|\-|\.)+\z/)
+      required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
 
       required(:redis).maybe do
         schema do

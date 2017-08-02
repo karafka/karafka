@@ -5,8 +5,6 @@ RSpec.describe Karafka::Routing::Builder do
 
   ATTRIBUTES = %i[
     controller
-    inline_mode
-    name
     worker
     parser
     interchanger
@@ -36,8 +34,8 @@ RSpec.describe Karafka::Routing::Builder do
             # shitload of time to setup to pass to instance eval from instance variables,
             # so instead we check against constant names
             controller :controller1
-            inline_mode :inline_mode1
-            name :name1
+            inline_mode true
+            name 'name1'
             worker :worker1
             parser :parser1
             interchanger :interchanger1
@@ -46,8 +44,8 @@ RSpec.describe Karafka::Routing::Builder do
 
           topic :topic_name2 do
             controller :controller2
-            inline_mode :inline_mode2
-            name :name2
+            inline_mode true
+            name 'name2'
             worker :worker2
             parser :parser2
             interchanger :interchanger2
@@ -67,6 +65,10 @@ RSpec.describe Karafka::Routing::Builder do
       it { expect(topic1.id).to eq "#{Karafka::App.config.name}_topic_name1_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.name}_topic_name2_topic_name2" }
       it { expect(builder.size).to eq 2 }
+      it { expect(topic1.name).to eq 'name1' }
+      it { expect(topic1.inline_mode).to eq true }
+      it { expect(topic2.name).to eq 'name2' }
+      it { expect(topic2.inline_mode).to eq true }
     end
 
     context '0.6 simple topic style single topic groups' do
@@ -80,8 +82,8 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name1 do
               controller :controller1
-              inline_mode :inline_mode1
-              name :name1
+              inline_mode true
+              name 'name1'
               worker :worker1
               parser :parser1
               interchanger :interchanger1
@@ -94,8 +96,8 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name2 do
               controller :controller2
-              inline_mode :inline_mode2
-              name :name2
+              inline_mode true
+              name 'name2'
               worker :worker2
               parser :parser2
               interchanger :interchanger2
@@ -128,8 +130,8 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name1 do
               controller :controller1
-              inline_mode :inline_mode1
-              name :name1
+              inline_mode true
+              name 'name1'
               worker :worker1
               parser :parser1
               interchanger :interchanger1
@@ -138,8 +140,8 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name2 do
               controller :controller2
-              inline_mode :inline_mode2
-              name :name2
+              inline_mode true
+              name 'name2'
               worker :worker2
               parser :parser2
               interchanger :interchanger2

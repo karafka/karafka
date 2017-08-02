@@ -33,6 +33,7 @@
 - #175 - Allow single consumer to subscribe to multiple topics
 - #178 - Remove parsing failover when cannot unparse data
 - #174 - Extended config validation
+- All internal validations are now powered by Dry-Validations
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

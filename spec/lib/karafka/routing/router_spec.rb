@@ -20,7 +20,7 @@ RSpec.describe Karafka::Routing::Router do
           topic :topic_name1 do
             controller Struct.new(:topic)
             inline_mode true
-            name :name1
+            name 'name1'
           end
         end
       end
