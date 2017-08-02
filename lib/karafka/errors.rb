@@ -23,20 +23,6 @@ module Karafka
     # @see https://github.com/karafka/karafka/issues/135
     class NonMatchingRouteError < BaseError; end
 
-    # Raised when we have few controllers(inherited from Karafka::BaseController)
-    #   with the same group name
-    class DuplicatedGroupError < BaseError; end
-
-    # Raised when we have few controllers(inherited from Karafka::BaseController)
-    #   with the same topic name
-    class DuplicatedTopicError < BaseError; end
-
-    # Raised when we want to use topic name that has unsupported characters
-    class InvalidTopicName < BaseError; end
-
-    # Raised when we want to use group name that has unsupported characters
-    class InvalidGroupName < BaseError; end
-
     # Raised when application does not have ApplicationWorker or other class that directly
     # inherits from Karafka::BaseWorker
     class BaseWorkerDescentantMissing < BaseError; end
