@@ -59,14 +59,19 @@ module Karafka
       #   Thanks to this solution, if any new setting is available for ruby-kafka, we just need
       #   to add it to our configuration class and it will be handled automatically.
       def consumer_group
-        defined_settings = config_adapter.values.flatten - config_adapter[:subscription]
+        # @note We don't ignore the config_adapter[:ignored] values as they should be ignored
+        #   only when proxying details go ruby-kafka. We use ignored fields internally in karafka
+        ignored_settings = config_adapter[:subscription]
+        defined_settings = config_adapter.values.flatten
+        karafka_settings = %i[batch_mode topic_mapper]
+        # This is a drity and bad hack of dry-configurable to get keys before setting values
         dynamically_proxied = Karafka::Setup::Config
                               ._settings
                               .find { |s| s.name == :kafka }
                               .value
                               .instance_variable_get('@klass').settings
 
-        (defined_settings + dynamically_proxied).uniq + %i[batch_mode topic_mapper]
+        (defined_settings + dynamically_proxied).uniq + karafka_settings - ignored_settings
       end
     end
   end

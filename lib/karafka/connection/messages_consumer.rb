@@ -70,7 +70,7 @@ module Karafka
       rescue Kafka::ConnectionError
         # If we would not wait it would totally spam log file with failed
         # attempts if Kafka is down
-        sleep(::Karafka::App.config.kafka.reconnect_timeout)
+        sleep(consumer_group.reconnect_timeout)
         # We don't log and just reraise - this will be logged
         # down the road
         raise
