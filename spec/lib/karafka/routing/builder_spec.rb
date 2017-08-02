@@ -11,10 +11,15 @@ RSpec.describe Karafka::Routing::Builder do
     parser
     interchanger
     responder
-  ]
+  ].freeze
 
   before(:each) do
     # Unfreezing so we can run multiple checks on a singleton
+    Fiddle::Pointer.new(builder.object_id * 2)[1] &= ~(1 << 3)
+    builder.clear
+  end
+
+  after(:each) do
     Fiddle::Pointer.new(builder.object_id * 2)[1] &= ~(1 << 3)
     builder.clear
   end
@@ -40,9 +45,6 @@ RSpec.describe Karafka::Routing::Builder do
           end
 
           topic :topic_name2 do
-            # Here we should have instance doubles, etc but it takes
-            # shitload of time to setup to pass to instance eval from instance variables,
-            # so instead we check against constant names
             controller :controller2
             inline_mode :inline_mode2
             name :name2
