@@ -58,7 +58,7 @@ to check if everything is in order. After that you can submit a pull request.
 ## Contributors
 
 This project exists thanks to all the people who contribute. [[Contribute]](CONTRIBUTING.md).
-<a href="graphs/contributors"><img src="https://opencollective.com/karafka/contributors.svg?width=890" /></a>
+<a href="https://github.com/karafka/karafka/graphs/contributors"><img src="https://opencollective.com/karafka/contributors.svg?width=890" /></a>
 
 
 ## Backers
