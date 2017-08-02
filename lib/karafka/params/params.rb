@@ -6,9 +6,7 @@ module Karafka
     # Class-wrapper for hash with indifferent access with additional lazy loading feature
     # It provides lazy loading not only until the first usage, but also allows us to skip
     # using parser until we execute our logic inside worker. That way we can operate with
-    # heavy-parsing data without slowing down the whole application. If we won't use
-    # params in before_enqueue (or if we don't us before_enqueue at all), it will make
-    # Karafka faster, because it will pass data as it is directly to Sidekiq
+    # heavy-parsing data without slowing down the whole application.
     class Params < HashWithIndifferentAccess
       class << self
         # We allow building instances only via the #build method
@@ -16,7 +14,7 @@ module Karafka
 
         # @param message [Karafka::Connection::Message, Hash] message that we get out of Kafka
         #   in case of building params inside main Karafka process in
-        #   Karafka::Connection::Consumer, or a hash when we retrieve data from Sidekiq
+        #   Karafka::Connection::Consumer, or a hash when we retrieve data that is already parsed
         # @param parser [Class] parser class that we will use to unparse data
         # @return [Karafka::Params::Params] Karafka params object not yet used parser for
         #   retrieving data that we've got from Kafka
@@ -73,7 +71,7 @@ module Karafka
         # We catch both of them, because for default JSON - we use JSON parser directly
       rescue ::Karafka::Errors::ParserError => e
         Karafka.monitor.notice_error(self.class, e)
-        return { message: content }
+        raise e
       ensure
         self[:parsed] = true
       end
