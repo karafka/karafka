@@ -21,7 +21,8 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       connect_timeout: 10,
       socket_timeout: 10,
       max_wait_time: 10,
-      batch_mode: true,
+      batch_consuming: true,
+      batch_processing: true,
       topics: [
         {
           id: 'id',
@@ -199,14 +200,26 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       end
     end
 
-    context 'batch_mode validator' do
-      it 'batch_mode is nil' do
-        config[:batch_mode] = nil
+    context 'batch_consuming validator' do
+      it 'batch_consuming is nil' do
+        config[:batch_consuming] = nil
         expect(schema.call(config).success?).to be_falsey
       end
 
-      it 'batch_mode is not a bool' do
-        config[:batch_mode] = 2
+      it 'batch_consuming is not a bool' do
+        config[:batch_consuming] = 2
+        expect(schema.call(config).success?).to be_falsey
+      end
+    end
+
+    context 'batch_processing validator' do
+      it 'batch_processing is nil' do
+        config[:batch_processing] = nil
+        expect(schema.call(config).success?).to be_falsey
+      end
+
+      it 'batch_processing is not a bool' do
+        config[:batch_processing] = 2
         expect(schema.call(config).success?).to be_falsey
       end
     end

@@ -5,14 +5,14 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
 
   let(:group) { rand.to_s }
   let(:topic) { rand.to_s }
-  let(:batch_mode) { false }
+  let(:batch_consuming) { false }
   let(:start_from_beginning) { false }
   let(:kafka_consumer) { instance_double(Kafka::Consumer, stop: true) }
   let(:consumer_group) do
-    batch_mode_active = batch_mode
+    batch_consuming_active = batch_consuming
     start_from_beginning_active = start_from_beginning
     Karafka::Routing::ConsumerGroup.new(group).tap do |cg|
-      cg.batch_mode = batch_mode_active
+      cg.batch_consuming = batch_consuming_active
 
       cg.public_send(:topic=, topic) do
         controller Class.new
@@ -58,7 +58,7 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
     end
 
     context 'message batch consumption mode' do
-      let(:batch_mode) { true }
+      let(:batch_consuming) { true }
       let(:incoming_batch) { instance_double(Kafka::FetchedBatch) }
       let(:incoming_messages) { [incoming_message, incoming_message] }
 

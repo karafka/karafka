@@ -62,7 +62,7 @@ module Karafka
         #   only when proxying details go ruby-kafka. We use ignored fields internally in karafka
         ignored_settings = config_adapter[:subscription]
         defined_settings = config_adapter.values.flatten
-        karafka_settings = %i[batch_mode topic_mapper]
+        karafka_settings = %i[batch_consuming batch_processing topic_mapper]
         # This is a drity and bad hack of dry-configurable to get keys before setting values
         dynamically_proxied = Karafka::Setup::Config
                               ._settings

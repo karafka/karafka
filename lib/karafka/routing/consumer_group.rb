@@ -11,7 +11,10 @@ module Karafka
       attr_reader :topics
       attr_reader :id
 
-      # @param [String, Symbol] id of this consumer group
+      # @param [String, Symbol] raw id of this consumer group. Raw means, that it does not
+      #   yet have an application name namespace, this will be added here by default.
+      #   We add it to make a multi-system development easier for people that don't use
+      #   kafka and don't understand concept of consumer groups.
       def initialize(id)
         @id = "#{Karafka::App.config.name.to_s.underscore}_#{id}"
         @topics = []

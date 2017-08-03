@@ -34,6 +34,8 @@
 - #178 - Remove parsing failover when cannot unparse data
 - #174 - Extended config validation
 - All internal validations are now powered by Dry-Validations
+- batch_mode renamed to batch_consuming
+- Introduced the #batch_processing config flag (config for #126)
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

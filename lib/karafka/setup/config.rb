@@ -27,14 +27,16 @@ module Karafka
       # Note that redis could be rewriten using nested options, but it is a sidekiq specific
       # stuff and we don't want to touch it
       setting :redis
-      # Mapper used to remap names of topics, so we can have a clean internal topic namings despite
-      # using any Kafka provider that uses namespacing, etc
+      # Mapper used to remap names of topics, so we can have a clean internal topic namings
+      # despite using any Kafka provider that uses namespacing, etc
       # It needs to implement two methods:
       #   - #incoming - for remapping from the incoming message to our internal format
       #   - #outgoing - for remapping from internal topic name into outgoing message
       setting :topic_mapper, -> { Routing::Mapper }
-      # If batch_mode is true, incoming messages will be handled in batch, otherwise one at a time.
-      setting :batch_mode, false
+      # If batch_consuming is true, we will consume kafka messages in batches instead of 1 by 1
+      # @note Consuming does not equal processing, see batch_processing description for details
+      setting :batch_consuming, true
+      setting :batch_processing, false
       # Connection pool options are used for producer (Waterdrop)
       # They are configured automatically based on Sidekiq concurrency and number of consumers
       # The bigger one is selected as we need to be able to send messages from both places

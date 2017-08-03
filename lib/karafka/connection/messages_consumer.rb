@@ -19,7 +19,7 @@ module Karafka
       # @note This will yield with a raw message - no preprocessing or reformatting
       def fetch_loop
         send(
-          consumer_group.batch_mode ? :consume_each_batch : :consume_each_message
+          consumer_group.batch_consuming ? :consume_each_batch : :consume_each_message
         ) do |message|
           yield(message)
         end

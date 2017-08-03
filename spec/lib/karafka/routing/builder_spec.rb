@@ -69,6 +69,8 @@ RSpec.describe Karafka::Routing::Builder do
       it { expect(topic1.inline_mode).to eq true }
       it { expect(topic2.name).to eq 'name2' }
       it { expect(topic2.inline_mode).to eq true }
+      it { expect(builder.first.id).to eq "#{Karafka::App.config.name}_topic_name1" }
+      it { expect(builder.last.id).to eq "#{Karafka::App.config.name}_topic_name2" }
     end
 
     context '0.6 simple topic style single topic groups' do

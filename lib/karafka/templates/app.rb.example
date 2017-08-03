@@ -14,7 +14,7 @@ class App < Karafka::App
       url: 'redis://localhost:6379'
     }
     config.inline_mode = Karafka.env.development?
-    config.batch_mode = true
+    config.batch_consuming = true
   end
 
   consumer_groups.draw do
