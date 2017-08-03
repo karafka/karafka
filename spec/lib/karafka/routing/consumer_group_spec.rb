@@ -22,7 +22,7 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
   (
     Karafka::AttributesMap.consumer_group - %i[batch_consuming batch_processing topic_mapper]
   ).each do |attribute|
-    context "#{attribute}" do
+    context attribute.to_s do
       it 'by default expect to fallback to a kafka config value' do
         expected_config_value = Karafka::App.config.kafka.public_send(attribute)
         expect(consumer_group.public_send(attribute)).to eq expected_config_value
@@ -31,7 +31,7 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
   end
 
   %i[batch_consuming batch_processing topic_mapper].each do |attribute|
-    context "#{attribute}" do
+    context attribute.to_s do
       it 'by default expect to fallback to a main config value' do
         expected_config_value = Karafka::App.config.public_send(attribute)
         expect(consumer_group.public_send(attribute)).to eq expected_config_value
