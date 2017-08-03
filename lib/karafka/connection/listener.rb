@@ -22,7 +22,7 @@ module Karafka
 
       # Opens connection, gets messages and calls a block for each of the incoming messages
       # @yieldparam [String] consumer group id
-      # @yieldparam [Kafka::FetchedMessage] kafka fetched message
+      # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
       # @note This will yield with a raw message - no preprocessing or reformatting
       # @note We catch all the errors here, so they don't affect other listeners (or this one)
       #   so we will be able to listen and consume other incoming messages.
@@ -31,16 +31,16 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far
       def fetch_loop(block)
-        topic_consumer.fetch_loop do |raw_message|
-          block.call(consumer_group.id, raw_message)
+        messages_consumer.fetch_loop do |raw_messages|
+          block.call(consumer_group.id, raw_messages)
         end
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
         Karafka.monitor.notice_error(self.class, e)
-        @topic_consumer&.stop
-        retry if @topic_consumer
+        @messages_consumer&.stop
+        retry if @messages_consumer
       end
 
       private
@@ -48,8 +48,8 @@ module Karafka
       # @return [Karafka::Connection::MessagesConsumer] wrapped kafka consumer for a given topic
       #   consumption
       # @note It adds consumer into Karafka::Server consumers pool for graceful shutdown on exit
-      def topic_consumer
-        @topic_consumer ||= MessagesConsumer.new(consumer_group).tap do |consumer|
+      def messages_consumer
+        @messages_consumer ||= MessagesConsumer.new(consumer_group).tap do |consumer|
           Karafka::Server.consumers << consumer if Karafka::Server.consumers
         end
       end

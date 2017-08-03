@@ -26,7 +26,7 @@ RSpec.describe Karafka::Monitor do
     let(:error) { StandardError }
 
     [
-      Karafka::Connection::MessageProcessor,
+      Karafka::Connection::MessagesProcessor,
       Karafka::Connection::Listener,
       Karafka::Params::Params
     ].each do |caller_class|
@@ -141,7 +141,7 @@ RSpec.describe Karafka::Monitor do
 
     let(:error_callers) do
       [
-        Karafka::Connection::MessageProcessor,
+        Karafka::Connection::MessagesProcessor,
         Karafka::Connection::Listener,
         Karafka::Params::Params
       ]

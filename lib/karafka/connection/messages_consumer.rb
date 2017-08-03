@@ -15,13 +15,13 @@ module Karafka
       end
 
       # Opens connection, gets messages and calls a block for each of the incoming messages
-      # @yieldparam [Kafka::FetchedMessage] kafka fetched message
-      # @note This will yield with a raw message - no preprocessing or reformatting
+      # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
+      # @note This will yield with raw messages - no preprocessing or reformatting.
       def fetch_loop
         send(
           consumer_group.batch_consuming ? :consume_each_batch : :consume_each_message
-        ) do |message|
-          yield(message)
+        ) do |messages|
+          yield(messages)
         end
       end
 
@@ -36,24 +36,23 @@ module Karafka
       attr_reader :consumer_group
 
       # Consumes messages from Kafka in batches
-      # @yieldparam [Kafka::FetchedMessage] kafka fetched message
+      # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
       def consume_each_batch
         kafka_consumer.each_batch(
           ConfigAdapter.consuming(consumer_group)
         ) do |batch|
-          batch.messages.each do |message|
-            yield(message)
-          end
+          yield(batch.messages)
         end
       end
 
       # Consumes messages from Kafka one by one
-      # @yieldparam [Kafka::FetchedMessage] kafka fetched message
+      # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
       def consume_each_message
         kafka_consumer.each_message(
           ConfigAdapter.consuming(consumer_group)
         ) do |message|
-          yield(message)
+          #   always yield an array of messages, so we have consistent API (always a batch)
+          yield([message])
         end
       end
 

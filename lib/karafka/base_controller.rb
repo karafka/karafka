@@ -67,6 +67,7 @@ module Karafka
     # Each controller instance is always bind to a single topic. We don't place it on a class
     # level because some programmers use same controller for multiple topics
     attr_accessor :topic
+    attr_accessor :params_batch
 
     class << self
       # Creates a callback that will be executed before scheduling to Sidekiq
@@ -85,12 +86,21 @@ module Karafka
       end
     end
 
-    # Creates lazy loaded params object
+    # Creates lazy loaded params batch object
     # @note Until first params usage, it won't parse data at all
-    # @param message [Karafka::Connection::Message, Hash] message with raw content or a hash
-    #   from Sidekiq that allows us to build params.
-    def params=(message)
-      @params = Karafka::Params::Params.build(message, topic.parser)
+    # @param messages [Array<Karafka::Connection::Message>] messages with raw content (from Kafka)
+    # @param messages [Array<Hash>] messages inside a hash (from Sidekiq, etc)
+    # @return [Karafka::Params::ParamsBatch] lazy loaded params batch
+    def params_batch=(messages)
+      @params_batch = Karafka::Params::ParamsBatch.new(messages, topic.parser)
+    end
+
+    # @return [Karafka::Params::Params] params instance for non batch processed controllers
+    # @raise [Karafka::Errors::ParamsMethodUnavailable] raised when we try to use params
+    #   method in a batch_processed controller
+    def params
+      raise Karafka::Errors::ParamsMethodUnavailable if topic.batch_processing
+      params_batch.first
     end
 
     # Executes the default controller flow, runs callbacks and if not halted
@@ -110,21 +120,6 @@ module Karafka
 
     private
 
-    # @return [Karafka::Params::Params] Karafka params that is a hash with indifferent access
-    # @note Params internally are lazy loaded before first use. That way we can skip parsing
-    #   process if we have before_enqueue that rejects some incoming messages without using params
-    #   It can be also used when handling really heavy data (in terms of parsing). Without direct
-    #   usage outside of worker scope, it will pass raw data into sidekiq, so we won't use Karafka
-    #   working time to parse this data. It will happen only in the worker (where it can take time)
-    #   that way Karafka will be able to process data really quickly. On the other hand, if we
-    #   decide to use params somewhere before it hits worker logic, it won't parse it again in
-    #   the worker - it will use already loaded data and pass it to Redis
-    # @note Invokation of this method will cause load all the data into params object. If you want
-    #   to get access without parsing, please access @params directly
-    def params
-      @params.retrieve
-    end
-
     # Responds with given data using given responder. This allows us to have a similar way of
     # defining flows like synchronous protocols
     # @param data Anything we want to pass to responder based on which we want to trigger further
@@ -142,21 +137,19 @@ module Karafka
     # @note Despite the fact, that workers won't be used, we still initialize all the
     #   classes and other framework elements
     def perform_inline
-      Karafka.monitor.notice(self.class, @params)
+      Karafka.monitor.notice(self.class, params_batch)
       perform
     end
 
     # Enqueues the execution of perform method into a worker.
     # @note Each worker needs to have a class #perform_async method that will allow us to pass
-    #   parameters into it. We always pass topic as a first argument and this request params
+    #   parameters into it. We always pass topic as a first argument and this request params_batch
     #   as a second one (we pass topic to be able to build back the controller in the worker)
     def perform_async
-      Karafka.monitor.notice(self.class, @params)
-      # We use @params directly (instead of #params) because of lazy loading logic that is behind
-      # it. See Karafka::Params::Params class for more details about that
+      Karafka.monitor.notice(self.class, params_batch)
       topic.worker.perform_async(
         topic.id,
-        topic.interchanger.load(@params)
+        topic.interchanger.load(params_batch.to_a)
       )
     end
   end

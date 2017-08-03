@@ -34,16 +34,16 @@ RSpec.describe Karafka::BaseWorker do
   describe '#controller' do
     let(:topic_id) { rand.to_s }
     let(:interchanger) { double }
-    let(:params) { double }
+    let(:params_batch) { double }
     let(:interchanged_params) { double }
     let(:topic) { instance_double(Karafka::Routing::Topic, interchanger: interchanger) }
 
-    it 'expect to use router to pick controller, assign params and return' do
+    it 'expect to use router to pick controller, assign params_batch and return' do
       expect(Karafka::Routing::Router).to receive(:build).with(topic_id).and_return(controller_instance)
       expect(controller_instance).to receive(:topic).and_return(topic)
-      expect(interchanger).to receive(:parse).with(params).and_return(interchanged_params)
-      expect(controller_instance).to receive(:params=).with(interchanged_params)
-      expect(base_worker.send(:controller, topic_id, params)).to eq controller_instance
+      expect(interchanger).to receive(:parse).with(params_batch).and_return(interchanged_params)
+      expect(controller_instance).to receive(:params_batch=).with(interchanged_params)
+      expect(base_worker.send(:controller, topic_id, params_batch)).to eq controller_instance
     end
   end
 end

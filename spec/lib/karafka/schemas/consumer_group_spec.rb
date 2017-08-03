@@ -22,7 +22,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       socket_timeout: 10,
       max_wait_time: 10,
       batch_consuming: true,
-      batch_processing: true,
       topics: [
         {
           id: 'id',
@@ -32,7 +31,8 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
           parser: Class.new,
           interchanger: Class.new,
           max_bytes_per_partition: 1,
-          start_from_beginning: true
+          start_from_beginning: true,
+          batch_processing: true
         }
       ]
     }
@@ -212,18 +212,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       end
     end
 
-    context 'batch_processing validator' do
-      it 'batch_processing is nil' do
-        config[:batch_processing] = nil
-        expect(schema.call(config).success?).to be_falsey
-      end
-
-      it 'batch_processing is not a bool' do
-        config[:batch_processing] = 2
-        expect(schema.call(config).success?).to be_falsey
-      end
-    end
-
     context 'max_wait_time bigger than socket_timeout' do
       it 'expect to disallow' do
         config[:max_wait_time] = 2
@@ -396,6 +384,18 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'interchanger validator' do
       it 'interchanger is not present' do
         config[:topics][0][:interchanger] = nil
+        expect(schema.call(config).success?).to be_falsey
+      end
+    end
+
+    context 'batch_processing validator' do
+      it 'batch_processing is nil' do
+        config[:topics][0][:batch_processing] = nil
+        expect(schema.call(config).success?).to be_falsey
+      end
+
+      it 'batch_processing is not a bool' do
+        config[:topics][0][:batch_processing] = 2
         expect(schema.call(config).success?).to be_falsey
       end
     end

@@ -64,34 +64,36 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
-  describe '#params=' do
-    let(:message) { double }
-    let(:params) { double }
+  describe '#params_batch=' do
+    pending
+  end
 
-    it 'creates params instance and assign it' do
-      expect(Karafka::Params::Params).to receive(:build)
-        .with(message, topic.parser)
-        .and_return(params)
-
-      base_controller.params = message
-
-      expect(base_controller.instance_variable_get(:@params)).to eq params
-    end
+  describe '#params_batch' do
+    pending
   end
 
   describe '#params' do
     let(:params) { Karafka::Params::Params.build({}, nil) }
 
     before do
-      base_controller.instance_variable_set(:@params, params)
+      base_controller.instance_variable_set(:@params_batch, [params])
     end
 
-    it 'retrieves params data' do
-      expect(params)
-        .to receive(:retrieve)
-        .and_return(params)
+    context 'for batch_processing controllers' do
+      before do
+        base_controller.topic = instance_double(Karafka::Routing::Topic, batch_processing: true)
+      end
 
-      expect(base_controller.send(:params)).to eq params
+      it 'retrieves params data' do
+        expected_error = Karafka::Errors::ParamsMethodUnavailable
+        expect { base_controller.send(:params) }.to raise_error(expected_error)
+      end
+    end
+
+    context 'for non batch_processing controllers' do
+      it 'retrieves params data' do
+        expect(base_controller.send(:params)).to eq params
+      end
     end
   end
 
@@ -127,14 +129,14 @@ RSpec.describe Karafka::BaseController do
   end
 
   describe '#perform_async' do
-    let(:params) { double }
+    let(:params_batch) { instance_double(Karafka::Params::ParamsBatch, to_a: [double]) }
     let(:interchanged_load_params) { double }
     let(:worker) { double }
 
     it 'enqueue perform function' do
-      base_controller.instance_variable_set :@params, params
+      base_controller.instance_variable_set :@params_batch, params_batch
       expect(topic.interchanger).to receive(:load)
-        .with(params).and_return(interchanged_load_params)
+        .with(params_batch.to_a).and_return(interchanged_load_params)
       expect(worker).to receive(:perform_async)
         .with(topic.id, interchanged_load_params)
       base_controller.send :perform_async

@@ -31,11 +31,11 @@ module Karafka
       end
     end
 
-    # @return [Proc] proc that should be processed when a message arrives
-    # @yieldparam message [Kafka::FetchedMessage] message from kafka (raw one)
+    # @return [Proc] proc that should be processed when a messages arrive
+    # @yieldparam messages [Array<Kafka::FetchedMessage>] messages from kafka (raw)
     def processor
-      lambda do |consumer_group_id, message|
-        Karafka::Connection::MessageProcessor.process(consumer_group_id, message)
+      lambda do |consumer_group_id, messages|
+        Karafka::Connection::MessagesProcessor.process(consumer_group_id, messages)
       end
     end
   end

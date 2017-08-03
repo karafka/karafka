@@ -51,9 +51,9 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
     before { topic_consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
     context 'single message consumption mode' do
-      it 'expect to use kafka_consumer to get messages and yield' do
+      it 'expect to use kafka_consumer to get each message and yield as an array of messages' do
         expect(kafka_consumer).to receive(:each_message).and_yield(incoming_message)
-        expect { |block| topic_consumer.fetch_loop(&block) }.to yield_with_args(incoming_message)
+        expect { |block| topic_consumer.fetch_loop(&block) }.to yield_with_args([incoming_message])
       end
     end
 
@@ -62,12 +62,12 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
       let(:incoming_batch) { instance_double(Kafka::FetchedBatch) }
       let(:incoming_messages) { [incoming_message, incoming_message] }
 
-      it 'expect to use kafka_consumer to get messages and yield' do
+      it 'expect to use kafka_consumer to get messages and yield all of them' do
         expect(kafka_consumer).to receive(:each_batch).and_yield(incoming_batch)
         expect(incoming_batch).to receive(:messages).and_return(incoming_messages)
 
         expect { |block| topic_consumer.fetch_loop(&block) }
-          .to yield_successive_args(*incoming_messages)
+          .to yield_successive_args(incoming_messages)
       end
     end
   end

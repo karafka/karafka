@@ -7,19 +7,19 @@ module Karafka
 
     # Executes the logic that lies in #perform Karafka controller method
     # @param topic_id [String] Unique topic id that we will use to find a proper topic
-    # @param params [Hash] params hash that we use to build Karafka params object
-    def perform(topic_id, params)
-      Karafka.monitor.notice(self.class, params)
-      controller(topic_id, params).perform
+    # @param params_batch [Array] Array with messages batch
+    def perform(topic_id, params_batch)
+      Karafka.monitor.notice(self.class, params_batch)
+      controller(topic_id, params_batch).perform
     end
 
     private
 
     # @return [Karafka::Controller] descendant of Karafka::BaseController that matches the topic
-    #   with params assigned already (controller is ready to use)
-    def controller(topic_id, params)
+    #   with params_batch assigned already (controller is ready to use)
+    def controller(topic_id, params_batch)
       @controller ||= Karafka::Routing::Router.build(topic_id).tap do |ctrl|
-        ctrl.params = ctrl.topic.interchanger.parse(params)
+        ctrl.params_batch = ctrl.topic.interchanger.parse(params_batch)
       end
     end
   end

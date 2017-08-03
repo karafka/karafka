@@ -8,9 +8,10 @@ module Karafka
     # using parser until we execute our logic inside worker. That way we can operate with
     # heavy-parsing data without slowing down the whole application.
     class Params < HashWithIndifferentAccess
+      private_class_method :new
+
       class << self
         # We allow building instances only via the #build method
-        private_class_method :new
 
         # @param message [Karafka::Connection::Message, Hash] message that we get out of Kafka
         #   in case of building params inside main Karafka process in

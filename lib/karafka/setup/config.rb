@@ -36,6 +36,9 @@ module Karafka
       # If batch_consuming is true, we will consume kafka messages in batches instead of 1 by 1
       # @note Consuming does not equal processing, see batch_processing description for details
       setting :batch_consuming, true
+      # If batch_processing is true, we will have access to #params_batch instead of #params.
+      # #params_batch will contain params received from Kafka (may be more than 1) so we can
+      # process them in batches
       setting :batch_processing, false
       # Connection pool options are used for producer (Waterdrop)
       # They are configured automatically based on Sidekiq concurrency and number of consumers

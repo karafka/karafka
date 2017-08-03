@@ -37,6 +37,7 @@
 - batch_mode renamed to batch_consuming
 - Introduced the #batch_processing config flag (config for #126)
 - Responders flow validation based on Dry-validation (thanks a lot @solnic for help!)
+- Added support for partition, offset and partition key in the params hash
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

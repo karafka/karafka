@@ -16,7 +16,6 @@ module Karafka
       required(:socket_timeout).filled(:int?, gt?: 0)
       required(:max_wait_time).filled(:int?, gteq?: 0)
       required(:batch_consuming).filled(:bool?)
-      required(:batch_processing).filled(:bool?)
 
       # Max wait time cannot exceed socket_timeout - wouldn't make sense
       rule(
@@ -42,6 +41,7 @@ module Karafka
             required(:interchanger).filled
             required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
             required(:start_from_beginning).filled(:bool?)
+            required(:batch_processing).filled(:bool?)
           end
         end
       end
