@@ -19,7 +19,8 @@ module Karafka
           # We map from incoming topic name, as it might be namespaced, etc.
           # @see topic_mapper internal docs
           mapped_topic = Karafka::App.config.topic_mapper.incoming(kafka_messages[0].topic)
-          # @note We search based on the topic id - that is a combination of group id and topic name
+          # @note We search based on the topic id - that is a combination of group id and
+          # topic name
           controller = Karafka::Routing::Router.build("#{group_id}_#{mapped_topic}")
           handler = controller.topic.batch_processing ? :process_batch : :process_each
 

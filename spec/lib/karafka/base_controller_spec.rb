@@ -65,19 +65,36 @@ RSpec.describe Karafka::BaseController do
   end
 
   describe '#params_batch=' do
-    pending
+    let(:messages) { [rand] }
+    let(:params_batch) { instance_double(Karafka::Params::ParamsBatch) }
+    let(:topic_parser) { Karafka::Parsers::Json }
+
+    before do
+      base_controller.topic = instance_double(Karafka::Routing::Topic, parser: topic_parser)
+    end
+
+    it 'expect to build params batch using messages and parser' do
+      expect(Karafka::Params::ParamsBatch)
+        .to receive(:new).with(messages, topic_parser)
+        .and_return(params_batch)
+
+      base_controller.params_batch = messages
+      expect(base_controller.params_batch).to eq params_batch
+    end
   end
 
   describe '#params_batch' do
-    pending
+    let(:params_batch) { instance_double(Karafka::Params::ParamsBatch) }
+
+    before { base_controller.instance_variable_set(:@params_batch, params_batch) }
+
+    it { expect(base_controller.params_batch).to eq params_batch }
   end
 
   describe '#params' do
     let(:params) { Karafka::Params::Params.build({}, nil) }
 
-    before do
-      base_controller.instance_variable_set(:@params_batch, [params])
-    end
+    before { base_controller.instance_variable_set(:@params_batch, [params]) }
 
     context 'for batch_processing controllers' do
       before do

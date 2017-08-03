@@ -6,10 +6,6 @@ RSpec.describe Karafka::Responders::Topic do
   let(:name) { 'topic_123.abc-xyz' }
   let(:options) { {} }
 
-  describe 'validations on topic name' do
-    pending
-  end
-
   describe '#required?' do
     context 'when topic is optional' do
       let(:options) { { required: false } }
