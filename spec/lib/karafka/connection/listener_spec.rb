@@ -43,7 +43,7 @@ RSpec.describe Karafka::Connection::Listener do
 
     context 'when no errors occur' do
       it 'expect to yield for each incoming message' do
-        expect(listener).to receive(:messages_consumer).and_return(messages_consumer).at_least(:once)
+        expect(listener).to receive(:messages_consumer).and_return(messages_consumer)
         expect(messages_consumer).to receive(:fetch_loop).and_yield(incoming_message)
         expect(action).to receive(:call).with(consumer_group.id, incoming_message)
 

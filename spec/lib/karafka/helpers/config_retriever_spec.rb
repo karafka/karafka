@@ -3,8 +3,10 @@
 RSpec.describe Karafka::Helpers::ConfigRetriever do
   context 'when a given attribute accessor is already defined' do
     subject(:extended_instance) do
+      described = described_class
+
       klass = ClassBuilder.build do
-        extend Karafka::Helpers::ConfigRetriever
+        extend described
 
         # @return [Integer] example timeout
         def session_timeout
@@ -33,8 +35,10 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
   context 'when a given attribute accessor is not defined' do
     context 'kafka config' do
       subject(:extended_instance) do
+        described = described_class
+
         klass = ClassBuilder.build do
-          extend Karafka::Helpers::ConfigRetriever
+          extend described
 
           config_retriever_for :session_timeout
         end
@@ -59,8 +63,10 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
 
     context 'main config' do
       subject(:extended_instance) do
+        described = described_class
+
         klass = ClassBuilder.build do
-          extend Karafka::Helpers::ConfigRetriever
+          extend described
 
           config_retriever_for :name
         end

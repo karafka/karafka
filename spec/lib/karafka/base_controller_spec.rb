@@ -71,13 +71,13 @@ RSpec.describe Karafka::BaseController do
 
     before do
       base_controller.topic = instance_double(Karafka::Routing::Topic, parser: topic_parser)
+      expect(Karafka::Params::ParamsBatch)
+        .to receive(:new)
+        .with(messages, topic_parser)
+        .and_return(params_batch)
     end
 
     it 'expect to build params batch using messages and parser' do
-      expect(Karafka::Params::ParamsBatch)
-        .to receive(:new).with(messages, topic_parser)
-        .and_return(params_batch)
-
       base_controller.params_batch = messages
       expect(base_controller.params_batch).to eq params_batch
     end
