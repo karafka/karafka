@@ -45,4 +45,12 @@ RSpec.describe Karafka::Responders::Topic do
       it { expect(topic.multiple_usage?).to eq false }
     end
   end
+
+  describe '#to_h' do
+    let(:hashed_topic) { topic.to_h }
+
+    it { expect(hashed_topic[:name]).to eq name }
+    it { expect(hashed_topic[:required]).to eq topic.required? }
+    it { expect(hashed_topic[:multiple_usage]).to eq topic.multiple_usage? }
+  end
 end

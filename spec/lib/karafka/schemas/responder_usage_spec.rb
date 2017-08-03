@@ -109,7 +109,79 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
     end
 
     context 'when we didnt use required topic' do
-      pending
+      before do
+        responder_usage[:topics][0][:required] = true
+        responder_usage[:topics][0][:usage_count] = 0
+      end
+
+      it { expect(schema.call(responder_usage).success?).to be_falsey }
+    end
+
+    context 'when we did use required topic' do
+      before do
+        responder_usage[:topics][0][:required] = true
+        responder_usage[:topics][0][:usage_count] = 1
+      end
+
+      it { expect(schema.call(responder_usage).success?).to be_truthy }
+    end
+
+    context 'when we didnt use required topic with multiple_usage' do
+      before do
+        responder_usage[:topics][0][:multiple_usage] = true
+        responder_usage[:topics][0][:required] = true
+        responder_usage[:topics][0][:usage_count] = 0
+      end
+
+      it { expect(schema.call(responder_usage).success?).to be_falsey }
+    end
+
+    context 'when we did use required topic with multiple_usage once' do
+      before do
+        responder_usage[:topics][0][:multiple_usage] = true
+        responder_usage[:topics][0][:required] = true
+        responder_usage[:topics][0][:usage_count] = 1
+      end
+
+      it { expect(schema.call(responder_usage).success?).to be_truthy }
+    end
+
+    context 'when we did use required topic with multiple_usage twice' do
+      before do
+        responder_usage[:topics][0][:multiple_usage] = true
+        responder_usage[:topics][0][:required] = true
+        responder_usage[:topics][0][:usage_count] = 2
+      end
+
+      it { expect(schema.call(responder_usage).success?).to be_truthy }
+    end
+
+    context 'when we didnt use optional topic with multiple_usage' do
+      before do
+        responder_usage[:topics][0][:multiple_usage] = true
+        responder_usage[:topics][0][:required] = false
+        responder_usage[:topics][0][:usage_count] = 0
+      end
+
+      it { expect(schema.call(responder_usage).success?).to be_truthy }
+    end
+
+    context 'when we did use required topic without multiple_usage once' do
+      before do
+        responder_usage[:topics][0][:multiple_usage] = false
+        responder_usage[:topics][0][:usage_count] = 1
+      end
+
+      it { expect(schema.call(responder_usage).success?).to be_truthy }
+    end
+
+    context 'when we did use required topic without multiple_usage twice' do
+      before do
+        responder_usage[:topics][0][:multiple_usage] = false
+        responder_usage[:topics][0][:usage_count] = 2
+      end
+
+      it { expect(schema.call(responder_usage).success?).to be_falsey }
     end
   end
 end
