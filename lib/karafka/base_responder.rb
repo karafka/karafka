@@ -134,14 +134,21 @@ module Karafka
     # Checks if we met all the topics requirements. It will fail if we didn't send a message to
     # a registered required topic, etc.
     def validate!
-      used_topics = messages_buffer.map do |key, data_elements|
-        Array.new(data_elements.count) { key }
+      topics = messages_buffer.map do |key, data_elements|
+        self.class.topics[key].to_h.merge(
+          usage_count: data_elements.count
+        )
       end
 
-      Responders::UsageValidator.new(
-        self.class.topics || {},
-        used_topics.flatten
-      ).validate!
+      result = Karafka::Schemas::ResponderUsage.call(
+        registered_topics: self.class.topics.keys,
+        used_topics: messages_buffer.keys,
+        topics: topics
+      )
+
+      return if result.success?
+
+      raise Karafka::Errors::InvalidConfiguration, result.errors
     end
 
     # Takes all the messages from the buffer and delivers them one by one

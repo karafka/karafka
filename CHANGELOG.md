@@ -36,6 +36,7 @@
 - All internal validations are now powered by Dry-Validations
 - batch_mode renamed to batch_consuming
 - Introduced the #batch_processing config flag (config for #126)
+- Responders flow validation based on Dry-validation (thanks a lot @solnic for help!)
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

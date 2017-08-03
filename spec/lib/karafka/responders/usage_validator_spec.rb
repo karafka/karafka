@@ -1,33 +1,3 @@
-# frozen_string_literal: true
-
-RSpec.describe Karafka::Responders::UsageValidator do
-  subject(:validator) { described_class.new(registered_topics, used_topics) }
-
-  let(:topic_name) { "topic#{rand(1000)}" }
-  let(:registered_topics) { { topic_name => Karafka::Responders::Topic.new(topic_name, {}) } }
-  let(:used_topics) { [rand] }
-
-  describe '#validate!' do
-    it 'expect to run validations on used and registered topics' do
-      expect(validator).to receive(:validate_usage_of!)
-        .with(used_topics.first)
-      expect(validator).to receive(:validate_requirements_of!)
-        .with(registered_topics.first.last)
-
-      validator.validate!
-    end
-  end
-
-  describe '#validate_usage_of!' do
-    context 'when we used topic that was not registered' do
-      let(:invalid_topic_name) { "notregistered#{rand(1000)}" }
-      let(:error) { Karafka::Errors::UnregisteredTopic }
-
-      it do
-        expect { validator.send(:validate_usage_of!, invalid_topic_name) }.to raise_error error
-      end
-    end
-
     context 'when we used registered topic' do
       context 'and it was used once' do
         it { expect { validator.send(:validate_usage_of!, topic_name) }.not_to raise_error }
@@ -110,3 +80,4 @@ RSpec.describe Karafka::Responders::UsageValidator do
     end
   end
 end
+=end

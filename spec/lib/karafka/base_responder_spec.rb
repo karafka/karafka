@@ -82,20 +82,17 @@ RSpec.describe Karafka::BaseResponder do
 
     describe '#validate!' do
       let(:usage_validator) { instance_double(Karafka::Responders::UsageValidator) }
-      let(:registered_topics) { [rand, rand] }
+      let(:registered_topics) { {} }
       let(:messages_buffer) { { rand => [rand], rand => [rand] } }
 
       before do
         working_class.topics = registered_topics
         responder.instance_variable_set(:'@messages_buffer', messages_buffer)
-
-        expect(Karafka::Responders::UsageValidator).to receive(:new)
-          .with(registered_topics, messages_buffer.keys).and_return(usage_validator)
       end
 
       it 'expect to use UsageValidator to validate' do
-        expect(usage_validator).to receive(:validate!)
-        responder.send(:validate!)
+        expected_error = Karafka::Errors::InvalidConfiguration
+        expect { responder.send(:validate!) }.to raise_error(expected_error)
       end
     end
 

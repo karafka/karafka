@@ -2,7 +2,7 @@
 
 module Karafka
   module Schemas
-    # Schema for single route validation.
+    # Schema for single full route (consumer group + topics) validation.
     ConsumerGroup = Dry::Validation.Schema do
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
       required(:seed_brokers).filled(:array?)

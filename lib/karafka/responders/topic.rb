@@ -30,6 +30,15 @@ module Karafka
       def multiple_usage?
         @options[:multiple_usage] || false
       end
+
+      # @return [Hash] hash with this topic attributes and options
+      def to_h
+        {
+          name: name,
+          multiple_usage: multiple_usage?,
+          required: required?
+        }
+      end
     end
   end
 end
