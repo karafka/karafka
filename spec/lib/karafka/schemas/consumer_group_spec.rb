@@ -3,6 +3,21 @@
 RSpec.describe Karafka::Schemas::ConsumerGroup do
   let(:schema) { described_class }
 
+  let(:topics) do
+    [
+      {
+        id: 'id',
+        name: 'name',
+        inline_mode: true,
+        controller: Class.new,
+        parser: Class.new,
+        interchanger: Class.new,
+        max_bytes_per_partition: 1,
+        start_from_beginning: true,
+        batch_processing: true
+      }
+    ]
+  end
   let(:config) do
     {
       id: 'id',
@@ -22,19 +37,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       socket_timeout: 10,
       max_wait_time: 10,
       batch_consuming: true,
-      topics: [
-        {
-          id: 'id',
-          name: 'name',
-          inline_mode: true,
-          controller: Class.new,
-          parser: Class.new,
-          interchanger: Class.new,
-          max_bytes_per_partition: 1,
-          start_from_beginning: true,
-          batch_processing: true
-        }
-      ]
+      topics: topics
     }
   end
 

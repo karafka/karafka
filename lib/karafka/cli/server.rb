@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Karafka framework Cli
   class Cli
@@ -26,7 +28,7 @@ module Karafka
         end
 
         # Remove pidfile on shutdown
-        ObjectSpace.define_finalizer('string', proc { send(:clean) })
+        ObjectSpace.define_finalizer(String.new, proc { send(:clean) })
 
         # After we fork, we can boot celluloid again
         Karafka::Server.run

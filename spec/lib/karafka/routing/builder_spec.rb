@@ -26,8 +26,7 @@ RSpec.describe Karafka::Routing::Builder do
     context '0.5 compatible simple topic style' do
       let(:topic1) { builder.first.topics.first }
       let(:topic2) { builder.last.topics.first }
-
-      before do
+      let(:consumer_group1) do
         described_class.instance.draw do
           topic :topic_name1 do
             # Here we should have instance doubles, etc but it takes
@@ -41,7 +40,10 @@ RSpec.describe Karafka::Routing::Builder do
             interchanger :interchanger1
             responder :responder1
           end
-
+        end
+      end
+      let(:consumer_group2) do
+        described_class.instance.draw do
           topic :topic_name2 do
             controller :controller2
             inline_mode true
@@ -52,6 +54,11 @@ RSpec.describe Karafka::Routing::Builder do
             responder :responder2
           end
         end
+      end
+
+      before do
+        consumer_group1
+        consumer_group2
       end
 
       ATTRIBUTES.each do |attr|

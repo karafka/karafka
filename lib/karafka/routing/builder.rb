@@ -30,8 +30,6 @@ module Karafka
           next if validation_result.success?
           raise Errors::InvalidConfiguration, [validation_result.errors, hashed_group]
         end
-
-        freeze
       end
 
       private
