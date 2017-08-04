@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased 0.6.0 wip
+## Unreleased 0.6.0
 
 ### Closed issues:
 
