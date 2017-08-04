@@ -73,7 +73,7 @@ RSpec.describe Karafka::BaseController do
             TestClass1 = ClassBuilder.inherit(Karafka::BaseResponder) do
               topic :a, required: false
 
-              def respond(data)
+              def respond(_data)
                 self
               end
             end
@@ -102,7 +102,6 @@ RSpec.describe Karafka::BaseController do
             end
 
             def perform
-
               @responder = TestClass2.new(Karafka::Parsers::Json)
               respond_with({})
             end
@@ -224,8 +223,9 @@ RSpec.describe Karafka::BaseController do
     let(:interchanged_load_params) { double }
     let(:worker) { double }
 
+    before { base_controller.instance_variable_set :@params_batch, params_batch }
+
     it 'enqueue perform function' do
-      base_controller.instance_variable_set :@params_batch, params_batch
       expect(topic.interchanger).to receive(:load)
         .with(params_batch.to_a).and_return(interchanged_load_params)
       expect(worker).to receive(:perform_async)

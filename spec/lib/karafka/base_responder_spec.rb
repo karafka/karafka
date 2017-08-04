@@ -48,11 +48,11 @@ RSpec.describe Karafka::BaseResponder do
     end
 
     describe '#call' do
+      let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
+
       it 'expect to respond and validate' do
         expect(responder).to receive(:respond).with(input_data)
-        expect(responder).to receive(:validate!)
-
-        responder.call(input_data)
+        expect { responder.call(input_data) }.to raise_error(expected_error)
       end
     end
 

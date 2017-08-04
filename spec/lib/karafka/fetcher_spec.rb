@@ -46,13 +46,8 @@ RSpec.describe Karafka::Fetcher do
       end
 
       it 'stops the app and reraise' do
-        expect(Karafka::App)
-          .to receive(:stop!)
-
-        expect(Karafka.monitor)
-          .to receive(:notice_error)
-          .with(described_class, error)
-
+        expect(Karafka::App).to receive(:stop!)
+        expect(Karafka.monitor).to receive(:notice_error).with(described_class, error)
         expect { fetcher.fetch_loop }.to raise_error(error)
       end
     end

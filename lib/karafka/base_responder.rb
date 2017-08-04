@@ -62,6 +62,8 @@ module Karafka
     # Definitions of all topics that we want to be able to use in this responder should go here
     class_attribute :topics
 
+    self.topics = {}
+
     attr_reader :messages_buffer
 
     class << self

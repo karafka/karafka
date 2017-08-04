@@ -25,8 +25,7 @@ RSpec.describe Karafka::Logger do
         .with(:write, :close)
         .and_return(delegate_scope)
 
-      expect(delegate_scope).to receive(:to)
-        .with(STDOUT, logger.send(:file))
+      expect(delegate_scope).to receive(:to).with(STDOUT, logger.send(:file))
 
       logger.send(:target)
     end

@@ -69,15 +69,8 @@ RSpec.describe Karafka::Routing::Topic do
         let(:builder) { double }
 
         it 'expect to build worker using builder' do
-          expect(Karafka::Workers::Builder)
-            .to receive(:new)
-            .with(controller)
-            .and_return(builder)
-
-          expect(builder)
-            .to receive(:build)
-            .and_return(built_worker)
-
+          expect(Karafka::Workers::Builder).to receive(:new).with(controller).and_return(builder)
+          expect(builder).to receive(:build).and_return(built_worker)
           expect(topic.worker).to eq built_worker
         end
       end
@@ -134,15 +127,8 @@ RSpec.describe Karafka::Routing::Topic do
       let(:builder) { double }
 
       it 'expect to build responder using builder' do
-        expect(Karafka::Responders::Builder)
-          .to receive(:new)
-          .with(controller)
-          .and_return(builder)
-
-        expect(builder)
-          .to receive(:build)
-          .and_return(built_responder)
-
+        expect(Karafka::Responders::Builder).to receive(:new).with(controller).and_return(builder)
+        expect(builder).to receive(:build).and_return(built_responder)
         expect(topic.responder).to eq built_responder
       end
     end
