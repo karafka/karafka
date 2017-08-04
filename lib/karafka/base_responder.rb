@@ -115,13 +115,14 @@ module Karafka
     # a registered required topic, etc.
     def validate!
       registered_topics = self.class.topics.map do |name, topic|
-        self.class.topics[name].to_h.merge!(
+        topic.to_h.merge!(
           usage_count: messages_buffer[name]&.count || 0
         )
       end
 
       used_topics = messages_buffer.map do |name, usage|
-        self.class.topics[name].to_h || Responders::Topic.new(name, registered: false).to_h
+        topic = self.class.topics[name] || Responders::Topic.new(name, registered: false)
+        topic.to_h.merge!(usage_count: usage.count)
       end
 
       result = Karafka::Schemas::ResponderUsage.call(

@@ -52,11 +52,10 @@ RSpec.describe Karafka::BaseController do
         it { expect { base_controller.call }.to raise_error(Karafka::Errors::ResponderMissing) }
       end
 
-      context 'but we dont use it' do
+      context 'and we dont use it' do
         let(:working_class) do
           ClassBuilder.inherit(described_class) do
-            def perform
-            end
+            def perform; end
           end
         end
 
@@ -73,8 +72,7 @@ RSpec.describe Karafka::BaseController do
               responder_class = ClassBuilder.inherit(Karafka::BaseResponder) do
                 topic :a, required: false
 
-                def respond(data)
-                end
+                def respond(data); end
               end
 
               @responder = responder_class.new(Karafka::Parsers::Json)
@@ -95,8 +93,7 @@ RSpec.describe Karafka::BaseController do
               responder_class = ClassBuilder.inherit(Karafka::BaseResponder) do
                 topic :a, required: true
 
-                def respond(data)
-                end
+                def respond(data); end
               end
 
               @responder = responder_class.new(Karafka::Parsers::Json)

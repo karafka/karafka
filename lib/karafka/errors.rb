@@ -41,6 +41,5 @@ module Karafka
     # Raised when processing messages in batches but still want to use #params instead of
     # #params_batch
     ParamsMethodUnavailable = Class.new(BaseError)
-
   end
 end

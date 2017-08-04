@@ -21,6 +21,7 @@
 - #178 - Remove parsing failover when cannot unparse data
 - #174 - Extended config validation
 - #180 - Switch from JSON parser to yajl-ruby
+- #181 - When responder is defined and not used due to ```respond_with``` not being triggered in the perform, it won't raise an exception.
 
 ### New features and improvements
 
@@ -40,6 +41,7 @@
 - Change in the way we identify topics in between Karafka and Sidekiq workers. If you upgrade, please make sure, all the jobs scheduled in Sidekiq are finished before the upgrade.
 - ```batch_mode``` renamed to ```batch_consuming```
 - Renamed content to value to better resemble ruby-kafka internal messages naming convention
+- When having a responder with ```required``` topics and not using ```#respond_with``` at all, it will raise an exception
 
 ### Other changed
 - PolishGeeksDevTools removed (in favour of Coditsu)

@@ -52,13 +52,13 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
 
     context 'name validator' do
       context 'name is nil' do
-        let(:name){ nil }
+        let(:name) { nil }
 
         it { expect(subschema.call(topic_data).success?).to be_falsey }
       end
 
       context 'name is an invalid string' do
-        let(:name){ '%^&*(' }
+        let(:name) { '%^&*(' }
 
         it { expect(subschema.call(topic_data).success?).to be_falsey }
       end
@@ -66,13 +66,13 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
 
     context 'required validator' do
       context 'required is nil' do
-        let(:required){ nil }
+        let(:required) { nil }
 
         it { expect(subschema.call(topic_data).success?).to be_falsey }
       end
 
       context 'required is not a bool' do
-        let(:required){ 2 }
+        let(:required) { 2 }
 
         it { expect(subschema.call(topic_data).success?).to be_falsey }
       end
