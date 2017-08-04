@@ -24,10 +24,10 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
   describe '#setup' do
     before { water_drop_configurator.setup }
 
-   it { expect(WaterDrop.config.send_messages).to eq true }
-   it { expect(WaterDrop.config.connection_pool_size).to eq config.connection_pool.size }
-   it { expect(WaterDrop.config.connection_pool_timeout).to eq config.connection_pool.timeout }
-   it { expect(WaterDrop.config.kafka.hosts).to eq config.kafka.seed_brokers }
-   it { expect(WaterDrop.config.raise_on_failure).to eq true }
+    it { expect(WaterDrop.config.send_messages).to eq true }
+    it { expect(WaterDrop.config.connection_pool_size).to eq config.connection_pool.size }
+    it { expect(WaterDrop.config.connection_pool_timeout).to eq config.connection_pool.timeout }
+    it { expect(WaterDrop.config.kafka.hosts).to eq config.kafka.seed_brokers }
+    it { expect(WaterDrop.config.raise_on_failure).to eq true }
   end
 end
