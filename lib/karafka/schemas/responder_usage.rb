@@ -8,6 +8,7 @@ module Karafka
       required(:required).filled(:bool?)
       required(:multiple_usage).filled(:bool?)
       required(:usage_count).filled(:int?, gteq?: 0)
+      required(:registered).filled(eql?: true)
 
       rule(
         required_usage: %i[required usage_count]
@@ -30,27 +31,8 @@ module Karafka
 
     # Validator to check that everything in a responder flow matches responder rules
     ResponderUsage = Dry::Validation.Schema do
-      configure do
-        def self.messages
-          super.merge(
-            en: {
-              errors: {
-                used_topics_registration: 'all used topics must be registered'
-              }
-            }
-          )
-        end
-      end
-
-      required(:used_topics).maybe(:array?)
-      required(:registered_topics).filled(:array?)
-      required(:topics).filled { each { schema(ResponderUsageTopic) } }
-
-      validate(
-        used_topics_registration: %i[used_topics registered_topics]
-      ) do |used_topics, registered_topics|
-        (used_topics - registered_topics).empty?
-      end
+      required(:used_topics) { filled? > each { schema(ResponderUsageTopic) } }
+      required(:registered_topics) { filled? > each { schema(ResponderUsageTopic) } }
     end
   end
 end

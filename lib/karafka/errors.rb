@@ -31,11 +31,16 @@ module Karafka
     # (and we couldn't find) any appropriate responder for a given controller
     ResponderMissing = Class.new(BaseError)
 
+    # Raised when we don't use or use responder not in the way it expected to based on the
+    # topics usage definitions
+    InvalidResponderUsage = Class.new(BaseError)
+
     # Raised when configuration doesn't match with validation schema
     InvalidConfiguration = Class.new(BaseError)
 
     # Raised when processing messages in batches but still want to use #params instead of
     # #params_batch
     ParamsMethodUnavailable = Class.new(BaseError)
+
   end
 end

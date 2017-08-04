@@ -25,7 +25,7 @@ RSpec.describe Karafka::BaseWorker do
 
     it 'performs controller action' do
       expect(controller_instance)
-        .to receive(:perform)
+        .to receive(:call)
 
       expect { base_worker.perform(*args) }.not_to raise_error
     end

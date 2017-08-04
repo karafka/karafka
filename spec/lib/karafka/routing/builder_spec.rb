@@ -83,8 +83,7 @@ RSpec.describe Karafka::Routing::Builder do
     context '0.6 simple topic style single topic groups' do
       let(:topic1) { builder.first.topics.first }
       let(:topic2) { builder.last.topics.first }
-
-      before do
+      let(:consumer_group1) do
         described_class.instance.draw do
           consumer_group :group_name1 do
             seed_brokers [:brokers1]
@@ -99,7 +98,10 @@ RSpec.describe Karafka::Routing::Builder do
               responder :responder1
             end
           end
-
+        end
+      end
+      let(:consumer_group2) do
+        described_class.instance.draw do
           consumer_group :group_name2 do
             seed_brokers [:brokers2]
 
@@ -114,6 +116,11 @@ RSpec.describe Karafka::Routing::Builder do
             end
           end
         end
+      end
+
+      before do
+        consumer_group1
+        consumer_group2
       end
 
       ATTRIBUTES.each do |attr|

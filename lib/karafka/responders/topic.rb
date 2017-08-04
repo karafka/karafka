@@ -31,12 +31,18 @@ module Karafka
         @options[:multiple_usage] || false
       end
 
+      # @return [Boolean] was usage of this topic registered or not
+      def registered?
+        @options[:registered] == true
+      end
+
       # @return [Hash] hash with this topic attributes and options
       def to_h
         {
           name: name,
           multiple_usage: multiple_usage?,
-          required: required?
+          required: required?,
+          registered: registered?
         }
       end
     end

@@ -6,49 +6,21 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
   let(:responder_usage) do
     {
       name: 'name',
-      used_topics: ['topic1'],
-      registered_topics: ['topic1'],
-      topics: [
-        {
-          name: 'topic1',
-          multiple_usage: false,
-          usage_count: 1,
-          required: true
-        }
+      used_topics: [
+        Karafka::Responders::Topic.new(
+          'topic1',
+          registered: true,
+          usage_count: 1
+        )
+      ],
+      registered_topics: [
+        Karafka::Responders::Topic.new(
+          'topic1',
+          registered: true,
+          usage_count: 1
+        )
       ]
     }
-  end
-
-  context 'config is valid' do
-    it { expect(schema.call(responder_usage).success?).to be_truthy }
-  end
-
-  context 'used_topics validator' do
-    context 'used_topics is not an array' do
-      before { responder_usage[:used_topics] = 'invalid' }
-
-      it { expect(schema.call(responder_usage).success?).to be_falsey }
-    end
-  end
-
-  context 'registered_topics validator' do
-    context 'registered_topics is nil' do
-      before { responder_usage[:registered_topics] = nil }
-
-      it { expect(schema.call(responder_usage).success?).to be_falsey }
-    end
-
-    context 'registered_topics is an empty array' do
-      before { responder_usage[:registered_topics] = [] }
-
-      it { expect(schema.call(responder_usage).success?).to be_falsey }
-    end
-
-    context 'registered_topics is not an array' do
-      before { responder_usage[:registered_topics] = 'invalid' }
-
-      it { expect(schema.call(responder_usage).success?).to be_falsey }
-    end
   end
 
   context 'usage of unregistered topics' do
@@ -60,128 +32,120 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
   end
 
   context 'particular topics validators' do
+    subject(:subschema) { Karafka::Schemas::ResponderUsageTopic }
+
+    let(:name) { 'topic1' }
+    let(:registered) { true }
+    let(:usage_count) { 1 }
+    let(:multiple_usage) { false }
+    let(:required) { true }
+    let(:topic_data) do
+      Karafka::Responders::Topic.new(
+        name,
+        registered: registered,
+        required: required,
+        multiple_usage: multiple_usage
+      ).to_h.merge!(usage_count: usage_count)
+    end
+
+    it { expect(subschema.call(topic_data).success?).to be_truthy }
+
     context 'name validator' do
       context 'name is nil' do
-        before { responder_usage[:topics][0][:name] = nil }
+        let(:name){ nil }
 
-        it { expect(schema.call(responder_usage).success?).to be_falsey }
-      end
-
-      context 'name is not a string' do
-        before { responder_usage[:topics][0][:name] = 2 }
-
-        it { expect(schema.call(responder_usage).success?).to be_falsey }
+        it { expect(subschema.call(topic_data).success?).to be_falsey }
       end
 
       context 'name is an invalid string' do
-        before { responder_usage[:topics][0][:name] = '%^&*(' }
+        let(:name){ '%^&*(' }
 
-        it { expect(schema.call(responder_usage).success?).to be_falsey }
+        it { expect(subschema.call(topic_data).success?).to be_falsey }
       end
     end
 
     context 'required validator' do
       context 'required is nil' do
-        before { responder_usage[:topics][0][:required] = nil }
+        let(:required){ nil }
 
-        it { expect(schema.call(responder_usage).success?).to be_falsey }
+        it { expect(subschema.call(topic_data).success?).to be_falsey }
       end
 
       context 'required is not a bool' do
-        before { responder_usage[:topics][0][:required] = 2 }
+        let(:required){ 2 }
 
-        it { expect(schema.call(responder_usage).success?).to be_falsey }
+        it { expect(subschema.call(topic_data).success?).to be_falsey }
       end
     end
 
     context 'multiple_usage validator' do
-      context 'multiple_usage is nil' do
-        before { responder_usage[:topics][0][:multiple_usage] = nil }
-
-        it { expect(schema.call(responder_usage).success?).to be_falsey }
-      end
-
       context 'multiple_usage is not a bool' do
-        before { responder_usage[:topics][0][:multiple_usage] = 2 }
+        let(:multiple_usage) { 2 }
 
-        it { expect(schema.call(responder_usage).success?).to be_falsey }
+        it { expect(subschema.call(topic_data).success?).to be_falsey }
       end
     end
 
     context 'when we didnt use required topic' do
-      before do
-        responder_usage[:topics][0][:required] = true
-        responder_usage[:topics][0][:usage_count] = 0
-      end
+      let(:required) { true }
+      let(:usage_count) { 0 }
 
-      it { expect(schema.call(responder_usage).success?).to be_falsey }
+      it { expect(subschema.call(topic_data).success?).to be_falsey }
     end
 
     context 'when we did use required topic' do
-      before do
-        responder_usage[:topics][0][:required] = true
-        responder_usage[:topics][0][:usage_count] = 1
-      end
+      let(:required) { true }
+      let(:usage_count) { 1 }
 
-      it { expect(schema.call(responder_usage).success?).to be_truthy }
+      it { expect(subschema.call(topic_data).success?).to be_truthy }
     end
 
     context 'when we didnt use required topic with multiple_usage' do
-      before do
-        responder_usage[:topics][0][:multiple_usage] = true
-        responder_usage[:topics][0][:required] = true
-        responder_usage[:topics][0][:usage_count] = 0
-      end
+      let(:required) { true }
+      let(:usage_count) { 0 }
+      let(:multiple_usage) { true }
 
-      it { expect(schema.call(responder_usage).success?).to be_falsey }
+      it { expect(subschema.call(topic_data).success?).to be_falsey }
     end
 
     context 'when we did use required topic with multiple_usage once' do
-      before do
-        responder_usage[:topics][0][:multiple_usage] = true
-        responder_usage[:topics][0][:required] = true
-        responder_usage[:topics][0][:usage_count] = 1
-      end
+      let(:required) { true }
+      let(:usage_count) { 1 }
+      let(:multiple_usage) { true }
 
-      it { expect(schema.call(responder_usage).success?).to be_truthy }
+      it { expect(subschema.call(topic_data).success?).to be_truthy }
     end
 
     context 'when we did use required topic with multiple_usage twice' do
-      before do
-        responder_usage[:topics][0][:multiple_usage] = true
-        responder_usage[:topics][0][:required] = true
-        responder_usage[:topics][0][:usage_count] = 2
-      end
+      let(:required) { true }
+      let(:usage_count) { 2 }
+      let(:multiple_usage) { true }
 
-      it { expect(schema.call(responder_usage).success?).to be_truthy }
+      it { expect(subschema.call(topic_data).success?).to be_truthy }
     end
 
     context 'when we didnt use optional topic with multiple_usage' do
-      before do
-        responder_usage[:topics][0][:multiple_usage] = true
-        responder_usage[:topics][0][:required] = false
-        responder_usage[:topics][0][:usage_count] = 0
-      end
+      let(:required) { false }
+      let(:usage_count) { 2 }
+      let(:multiple_usage) { true }
 
-      it { expect(schema.call(responder_usage).success?).to be_truthy }
+      it { expect(subschema.call(topic_data).success?).to be_truthy }
     end
 
     context 'when we did use required topic without multiple_usage once' do
-      before do
-        responder_usage[:topics][0][:multiple_usage] = false
-        responder_usage[:topics][0][:usage_count] = 1
-      end
+      let(:required) { true }
+      let(:usage_count) { 1 }
+      let(:multiple_usage) { false }
 
-      it { expect(schema.call(responder_usage).success?).to be_truthy }
+      it { expect(subschema.call(topic_data).success?).to be_truthy }
     end
 
     context 'when we did use required topic without multiple_usage twice' do
-      before do
-        responder_usage[:topics][0][:multiple_usage] = false
-        responder_usage[:topics][0][:usage_count] = 2
-      end
+      let(:required) { true }
+      let(:usage_count) { 2 }
+      let(:multiple_usage) { false }
 
-      it { expect(schema.call(responder_usage).success?).to be_falsey }
+      it { expect(subschema.call(topic_data).success?).to be_falsey }
     end
   end
 end

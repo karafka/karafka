@@ -70,7 +70,7 @@ module Karafka
       # @param options [Hash] hash with optional configuration details
       def topic(topic_name, options = {})
         self.topics ||= {}
-        topic_obj = Responders::Topic.new(topic_name, options)
+        topic_obj = Responders::Topic.new(topic_name, options.merge(registered: true))
         self.topics[topic_obj.name] = topic_obj
       end
 
@@ -111,6 +111,29 @@ module Karafka
 
     private
 
+    # Checks if we met all the topics requirements. It will fail if we didn't send a message to
+    # a registered required topic, etc.
+    def validate!
+      registered_topics = self.class.topics.map do |name, topic|
+        self.class.topics[name].to_h.merge!(
+          usage_count: messages_buffer[name]&.count || 0
+        )
+      end
+
+      used_topics = messages_buffer.map do |name, usage|
+        self.class.topics[name].to_h || Responders::Topic.new(name, registered: false).to_h
+      end
+
+      result = Karafka::Schemas::ResponderUsage.call(
+        registered_topics: registered_topics,
+        used_topics: used_topics
+      )
+
+      return if result.success?
+
+      raise Karafka::Errors::InvalidResponderUsage, result.errors
+    end
+
     # Method that needs to be implemented in a subclass. It should handle responding
     #   on registered topics
     # @raise [NotImplementedError] This method needs to be implemented in a subclass
@@ -129,26 +152,6 @@ module Karafka
 
       messages_buffer[topic.to_s] ||= []
       messages_buffer[topic.to_s] << [@parser_class.generate(data), options]
-    end
-
-    # Checks if we met all the topics requirements. It will fail if we didn't send a message to
-    # a registered required topic, etc.
-    def validate!
-      topics = messages_buffer.map do |key, data_elements|
-        self.class.topics[key].to_h.merge(
-          usage_count: data_elements.count
-        )
-      end
-
-      result = Karafka::Schemas::ResponderUsage.call(
-        registered_topics: self.class.topics.keys,
-        used_topics: messages_buffer.keys,
-        topics: topics
-      )
-
-      return if result.success?
-
-      raise Karafka::Errors::InvalidConfiguration, result.errors
     end
 
     # Takes all the messages from the buffer and delivers them one by one

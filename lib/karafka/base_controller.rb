@@ -104,12 +104,26 @@ module Karafka
     end
 
     # Executes the default controller flow, runs callbacks and if not halted
-    # will schedule a perform task in sidekiq
+    # will schedule a call task in sidekiq
     def schedule
       run_callbacks :schedule do
-        topic.inline_mode ? perform_inline : perform_async
+        topic.inline_mode ? call_inline : call_async
       end
     end
+
+    # @note We want to leave the #perform method as a public API, but we need to do some
+    # postprocessing after the user code has been executed, so we expose internally a #call
+    # for that
+    def call
+      perform
+      # Since responder has an internal validation during the response process, it would be
+      # useless to validate it twice (if used), but when responder is not being used in the
+      # #respond_with, we need to validate that it definition does not require it to be used
+      # @see https://github.com/karafka/karafka/issues/181
+      responder&.send(:validate!) unless @responded_with_data
+    end
+
+    private
 
     # Method that will perform business logic on data received from Kafka
     # @note This method needs bo be implemented in a subclass. We stub it here as a failover if
@@ -118,7 +132,11 @@ module Karafka
       raise NotImplementedError, 'Implement this in a subclass'
     end
 
-    private
+    # @return [Karafka::BaseResponder] responder instance if defined
+    # @return [nil] nil if no responder for this controller
+    def responder
+      @responder ||= topic.responder&.new(topic.parser)
+    end
 
     # Responds with given data using given responder. This allows us to have a similar way of
     # defining flows like synchronous protocols
@@ -127,25 +145,25 @@ module Karafka
     # @raise [Karafka::Errors::ResponderMissing] raised when we don't have a responder defined,
     #   but we still try to use this method
     def respond_with(*data)
-      raise(Errors::ResponderMissing, self.class) unless topic.responder
-
+      raise(Errors::ResponderMissing, self.class) unless responder
+      @responded_with_data = true
       Karafka.monitor.notice(self.class, data: data)
-      topic.responder.new(topic.parser).call(*data)
+      responder.call(*data)
     end
 
     # Executes perform code immediately (without enqueuing)
     # @note Despite the fact, that workers won't be used, we still initialize all the
     #   classes and other framework elements
-    def perform_inline
+    def call_inline
       Karafka.monitor.notice(self.class, params_batch)
-      perform
+      call
     end
 
     # Enqueues the execution of perform method into a worker.
     # @note Each worker needs to have a class #perform_async method that will allow us to pass
     #   parameters into it. We always pass topic as a first argument and this request params_batch
     #   as a second one (we pass topic to be able to build back the controller in the worker)
-    def perform_async
+    def call_async
       Karafka.monitor.notice(self.class, params_batch)
       topic.worker.perform_async(
         topic.id,

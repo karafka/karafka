@@ -91,7 +91,7 @@ RSpec.describe Karafka::BaseResponder do
       end
 
       it 'expect to use UsageValidator to validate' do
-        expected_error = Karafka::Errors::InvalidConfiguration
+        expected_error = Karafka::Errors::InvalidResponderUsage
         expect { responder.send(:validate!) }.to raise_error(expected_error)
       end
     end

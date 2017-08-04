@@ -28,15 +28,85 @@ RSpec.describe Karafka::BaseController do
 
   before { base_controller.topic = topic }
 
-  describe '#perform' do
+  describe '#call' do
     context 'when perform method is defined' do
-      it { expect { base_controller.perform }.not_to raise_error }
+      it { expect { base_controller.call }.not_to raise_error }
     end
 
     context 'when perform method is not defined' do
       let(:working_class) { ClassBuilder.inherit(described_class) }
 
-      it { expect { base_controller.perform }.to raise_error NotImplementedError }
+      it { expect { base_controller.call }.to raise_error NotImplementedError }
+    end
+
+    context 'when we dont define responder' do
+      context 'but we try to use it' do
+        let(:working_class) do
+          ClassBuilder.inherit(described_class) do
+            def perform
+              respond_with {}
+            end
+          end
+        end
+
+        it { expect { base_controller.call }.to raise_error(Karafka::Errors::ResponderMissing) }
+      end
+
+      context 'but we dont use it' do
+        let(:working_class) do
+          ClassBuilder.inherit(described_class) do
+            def perform
+            end
+          end
+        end
+
+        it { expect { base_controller.call }.not_to raise_error }
+      end
+    end
+
+    context 'when we define responder' do
+      context 'and we decide to use it well' do
+        let(:working_class) do
+          ClassBuilder.inherit(described_class) do
+            def perform
+              # This is a hack for specs, no need to do it in a std flow
+              responder_class = ClassBuilder.inherit(Karafka::BaseResponder) do
+                topic :a, required: false
+
+                def respond(data)
+                end
+              end
+
+              @responder = responder_class.new(Karafka::Parsers::Json)
+
+              respond_with({})
+            end
+          end
+        end
+
+        it { expect { base_controller.call }.not_to raise_error }
+      end
+
+      context 'and we decide to use it not as intended' do
+        let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
+        let(:working_class) do
+          ClassBuilder.inherit(described_class) do
+            def perform
+              responder_class = ClassBuilder.inherit(Karafka::BaseResponder) do
+                topic :a, required: true
+
+                def respond(data)
+                end
+              end
+
+              @responder = responder_class.new(Karafka::Parsers::Json)
+              respond_with({})
+            end
+          end
+        end
+
+        it { expect { base_controller.call }.to raise_error(expected_error) }
+      end
     end
   end
 
@@ -45,8 +115,8 @@ RSpec.describe Karafka::BaseController do
       context 'and we dont want to perform inline' do
         let(:inline_mode) { false }
 
-        it 'just schedules via perform_async' do
-          expect(base_controller).to receive(:perform_async)
+        it 'just schedules via call_async' do
+          expect(base_controller).to receive(:call_async)
 
           base_controller.schedule
         end
@@ -55,8 +125,8 @@ RSpec.describe Karafka::BaseController do
       context 'and we want to perform inline' do
         let(:inline_mode) { true }
 
-        it 'just expect to run with perform_inline' do
-          expect(base_controller).to receive(:perform_inline)
+        it 'just expect to run with call_inline' do
+          expect(base_controller).to receive(:call_inline)
 
           base_controller.schedule
         end
@@ -138,14 +208,14 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
-  describe '#perform_inline' do
+  describe '#call_inline' do
     it 'expect to perform' do
       expect(base_controller).to receive(:perform)
-      base_controller.send(:perform_inline)
+      base_controller.send(:call_inline)
     end
   end
 
-  describe '#perform_async' do
+  describe '#call_async' do
     let(:params_batch) { instance_double(Karafka::Params::ParamsBatch, to_a: [double]) }
     let(:interchanged_load_params) { double }
     let(:worker) { double }
@@ -156,7 +226,7 @@ RSpec.describe Karafka::BaseController do
         .with(params_batch.to_a).and_return(interchanged_load_params)
       expect(worker).to receive(:perform_async)
         .with(topic.id, interchanged_load_params)
-      base_controller.send :perform_async
+      base_controller.send :call_async
     end
   end
 
@@ -196,8 +266,8 @@ RSpec.describe Karafka::BaseController do
 
       let(:params) { double }
 
-      it 'executes perform_async' do
-        expect(base_controller).to receive(:perform_async)
+      it 'executes call_async' do
+        expect(base_controller).to receive(:call_async)
 
         base_controller.schedule
       end
@@ -242,8 +312,8 @@ RSpec.describe Karafka::BaseController do
         end.new
       end
 
-      it 'enqueues with perform_async' do
-        expect(base_controller).to receive(:perform_async)
+      it 'enqueues with call_async' do
+        expect(base_controller).to receive(:call_async)
 
         base_controller.schedule
       end
