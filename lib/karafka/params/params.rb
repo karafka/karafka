@@ -8,6 +8,7 @@ module Karafka
     # using parser until we execute our logic inside worker. That way we can operate with
     # heavy-parsing data without slowing down the whole application.
     class Params < HashWithIndifferentAccess
+      # Kafka::FetchedMessage attributes that we want to use inside of params
       KAFKA_MESSAGE_ATTRIBUTES = %i[
         topic
         value

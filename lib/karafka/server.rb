@@ -29,7 +29,7 @@ module Karafka
         process.on_sigint do
           Karafka::App.stop!
           consumers.map(&:stop)
-          exit
+          Kernel.exit
         end
       end
 
@@ -38,7 +38,7 @@ module Karafka
         process.on_sigquit do
           Karafka::App.stop!
           consumers.map(&:stop)
-          exit
+          Kernel.exit
         end
       end
 
@@ -47,7 +47,7 @@ module Karafka
         process.on_sigterm do
           Karafka::App.stop!
           consumers.map(&:stop)
-          exit
+          Kernel.exit
         end
       end
 

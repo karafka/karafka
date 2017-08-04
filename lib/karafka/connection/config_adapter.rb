@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
+  # Namespace for all the things related to Kafka connection
   module Connection
     # Mapper used to convert our internal settings into ruby-kafka settings
     # Since ruby-kafka has more and more options and there are few "levels" on which

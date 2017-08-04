@@ -2,6 +2,19 @@
 
 module Karafka
   module Schemas
+    # Consumer group topic validation rules
+    ConsumerGroupTopic = Dry::Validation.Schema do
+      required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
+      required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
+      required(:inline_mode).filled(:bool?)
+      required(:controller).filled
+      required(:parser).filled
+      required(:interchanger).filled
+      required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
+      required(:start_from_beginning).filled(:bool?)
+      required(:batch_processing).filled(:bool?)
+    end
+
     # Schema for single full route (consumer group + topics) validation.
     ConsumerGroup = Dry::Validation.Schema do
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
@@ -16,6 +29,7 @@ module Karafka
       required(:socket_timeout).filled(:int?, gt?: 0)
       required(:max_wait_time).filled(:int?, gteq?: 0)
       required(:batch_consuming).filled(:bool?)
+      required(:topics).filled { each { schema(ConsumerGroupTopic) } }
 
       # Max wait time cannot exceed socket_timeout - wouldn't make sense
       rule(
@@ -29,22 +43,6 @@ module Karafka
       optional(:ssl_client_cert_key).maybe(:str?)
       optional(:sasl_gssapi_principal).maybe(:str?)
       optional(:sasl_gssapi_keytab).maybe(:str?)
-
-      required(:topics).filled do
-        each do
-          schema do
-            required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
-            required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
-            required(:inline_mode).filled(:bool?)
-            required(:controller).filled
-            required(:parser).filled
-            required(:interchanger).filled
-            required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
-            required(:start_from_beginning).filled(:bool?)
-            required(:batch_processing).filled(:bool?)
-          end
-        end
-      end
     end
   end
 end
