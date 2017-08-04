@@ -39,10 +39,14 @@ module Karafka
         # @param mapped_topic [String] mapped topic name
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages from kafka
         def process_batch(controller, mapped_topic, kafka_messages)
-          # We wrap it around with our internal message format, so we don't pass around
-          # a raw Kafka message (especially because it contains non-mapped topic name)
           messages_batch = kafka_messages.map do |kafka_message|
-            Message.new(mapped_topic, kafka_message)
+            # Since we support topic mapping (for Kafka providers that require namespaces)
+            # we have to overwrite topic with our mapped topic version
+            # @note For the default mapper, it will be the same as topic
+            # @note We have to use instance_variable_set, as the Kafka::FetchedMessage does not
+            #   provide attribute writers
+            kafka_message.instance_variable_set(:'@topic', mapped_topic)
+            kafka_message
           end
 
           controller.params_batch = messages_batch

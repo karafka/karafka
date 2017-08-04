@@ -16,6 +16,7 @@
   envlogic
   thor
   fileutils
+  yajl
   dry-configurable
   dry-validation
   active_support/callbacks

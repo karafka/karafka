@@ -88,7 +88,7 @@ module Karafka
 
     # Creates lazy loaded params batch object
     # @note Until first params usage, it won't parse data at all
-    # @param messages [Array<Karafka::Connection::Message>, Array<Hash>] messages with raw
+    # @param messages [Array<Kafka::FetchedMessage>, Array<Hash>] messages with raw
     #   content (from Kafka) or messages inside a hash (from Sidekiq, etc)
     # @return [Karafka::Params::ParamsBatch] lazy loaded params batch
     def params_batch=(messages)

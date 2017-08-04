@@ -7,21 +7,9 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
     let(:group_id) { rand.to_s }
     let(:topic) { rand.to_s }
     let(:raw_message_value) { rand }
-    let(:message1) { double }
-    let(:message2) { double }
+    let(:raw_message2) { raw_message1.dup }
     let(:raw_message1) do
-      instance_double(
-        Kafka::FetchedMessage,
-        value: raw_message_value,
-        topic: topic,
-        offset: 0,
-        partition: 0,
-        key: nil
-      )
-    end
-    let(:raw_message2) do
-      instance_double(
-        Kafka::FetchedMessage,
+      Kafka::FetchedMessage.new(
         value: raw_message_value,
         topic: topic,
         offset: 0,
@@ -44,23 +32,13 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
 
       context 'everything works well' do
         before do
-          expect(Karafka::Connection::Message)
-            .to receive(:new)
-            .with(topic, raw_message1)
-            .and_return(message1)
-
-          expect(Karafka::Connection::Message)
-            .to receive(:new)
-            .with(topic, raw_message2)
-            .and_return(message2)
-
           expect(Karafka::Routing::Router)
             .to receive(:build)
             .and_return(controller_instance)
 
           expect(controller_instance)
             .to receive(:params_batch=)
-            .with([message1, message2])
+            .with([raw_message1, raw_message2])
 
           expect(controller_instance)
             .to receive(:schedule)
@@ -88,23 +66,13 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
             .to receive(:topic_mapper)
             .and_return(custom_mapper)
 
-          expect(Karafka::Connection::Message)
-            .to receive(:new)
-            .with(mapped_topic, raw_message1)
-            .and_return(message1)
-
-          expect(Karafka::Connection::Message)
-            .to receive(:new)
-            .with(mapped_topic, raw_message2)
-            .and_return(message2)
-
           expect(Karafka::Routing::Router)
             .to receive(:build)
             .and_return(controller_instance)
 
           expect(controller_instance)
             .to receive(:params_batch=)
-            .with([message1, message2])
+            .with([raw_message1, raw_message2])
 
           expect(controller_instance)
             .to receive(:schedule)
@@ -112,6 +80,12 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
 
         it 'routes to a proper controller and schedule task' do
           expect { processor.process(group_id, messages_batch) }.not_to raise_error
+        end
+
+        it 'expect to replace topic with mapped one on kafka fetched messages' do
+          processor.process(group_id, messages_batch)
+          expect(raw_message1.topic).to eq mapped_topic
+          expect(raw_message2.topic).to eq mapped_topic
         end
       end
 
@@ -153,27 +127,17 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
 
       context 'everything works well' do
         before do
-          expect(Karafka::Connection::Message)
-            .to receive(:new)
-            .with(topic, raw_message1)
-            .and_return(message1)
-
-          expect(Karafka::Connection::Message)
-            .to receive(:new)
-            .with(topic, raw_message2)
-            .and_return(message2)
-
           expect(Karafka::Routing::Router)
             .to receive(:build)
             .and_return(controller_instance)
 
           expect(controller_instance)
             .to receive(:params_batch=)
-            .with([message1])
+            .with([raw_message1])
 
           expect(controller_instance)
             .to receive(:params_batch=)
-            .with([message2])
+            .with([raw_message2])
 
           expect(controller_instance)
             .to receive(:schedule).twice
@@ -201,27 +165,17 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
             .to receive(:topic_mapper)
             .and_return(custom_mapper)
 
-          expect(Karafka::Connection::Message)
-            .to receive(:new)
-            .with(mapped_topic, raw_message1)
-            .and_return(message1)
-
-          expect(Karafka::Connection::Message)
-            .to receive(:new)
-            .with(mapped_topic, raw_message2)
-            .and_return(message2)
-
           expect(Karafka::Routing::Router)
             .to receive(:build)
             .and_return(controller_instance)
 
           expect(controller_instance)
             .to receive(:params_batch=)
-            .with([message1])
+            .with([raw_message1])
 
           expect(controller_instance)
             .to receive(:params_batch=)
-            .with([message2])
+            .with([raw_message2])
 
           expect(controller_instance)
             .to receive(:schedule).twice

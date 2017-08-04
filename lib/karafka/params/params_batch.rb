@@ -14,8 +14,11 @@ module Karafka
     class ParamsBatch
       include Enumerable
 
-      def initialize(messages_set, topic_parser)
-        @collection = messages_set.map do |message|
+      # Builds up a params batch based on raw kafka messages
+      # @param messages_batch [Array<Kafka::FetchedMessage>] messages batch
+      # @param topic_parser [Class] topic parser for unparsing messages values
+      def initialize(messages_batch, topic_parser)
+        @params_batch = messages_batch.map do |message|
           Karafka::Params::Params.build(message, topic_parser)
         end
       end
@@ -24,7 +27,7 @@ module Karafka
       # @note Invokation of this method will cause loading and parsing each param after another.
       #   If you want to get access without parsing, please access params_batch directly
       def each
-        @collection.each { |param| yield(param.retrieve) }
+        @params_batch.each { |param| yield(param.retrieve) }
       end
 
       # @return [Array<Karafka::Params::Params>] returns all the params in a loaded state, so they
@@ -36,7 +39,7 @@ module Karafka
 
       # @return [Array<Karafka::Params::Params>] pure array with params (not parsed)
       def to_a
-        @collection
+        @params_batch
       end
     end
   end

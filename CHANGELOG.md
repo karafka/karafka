@@ -38,6 +38,10 @@
 - Introduced the #batch_processing config flag (config for #126)
 - Responders flow validation based on Dry-validation (thanks a lot @solnic for help!)
 - Added support for partition, offset and partition key in the params hash
+- Renamed content to value to better resemble ruby-kafka internal messages naming convention
+- Removed Karafka::Connection::Message in favour of direct message details extraction from Kafka::FetchedMessage
+- #180 - Switch from JSON parser to yajl-ruby
+- Added #parsed to Karafka::Params::ParamsBatch. It will return all the messages from a batch in an parsed form
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period

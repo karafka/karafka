@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activesupport', '>= 5.0'
   spec.add_dependency 'dry-validation', '~> 0.11'
   spec.add_dependency 'dry-configurable', '~> 0.7'
+  spec.add_dependency 'yajl-ruby', '>= 1.3.0'
 
   spec.add_development_dependency 'rspec', '>= 3.6'
   spec.add_development_dependency 'simplecov', '>= 0.14'

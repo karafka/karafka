@@ -8,12 +8,20 @@ module Karafka
     # using parser until we execute our logic inside worker. That way we can operate with
     # heavy-parsing data without slowing down the whole application.
     class Params < HashWithIndifferentAccess
+      KAFKA_MESSAGE_ATTRIBUTES = %i[
+        topic
+        value
+        partition
+        offset
+        key
+      ].freeze
+
       private_class_method :new
 
       class << self
         # We allow building instances only via the #build method
 
-        # @param message [Karafka::Connection::Message, Hash] message that we get out of Kafka
+        # @param message [Kafka::FetchedMessage, Hash] message that we get out of Kafka
         #   in case of building params inside main Karafka process in
         #   Karafka::Connection::Consumer, or a hash when we retrieve data that is already parsed
         # @param parser [Class] parser class that we will use to unparse data
@@ -21,15 +29,23 @@ module Karafka
         #   retrieving data that we've got from Kafka
         # @example Build params instance from a hash
         #   Karafka::Params::Params.build({ key: 'value' }) #=> params object
-        # @example Build params instance from a Karafka::Connection::Message object
+        # @example Build params instance from a Kafka::FetchedMessage object
         #   Karafka::Params::Params.build(message) #=> params object
         def build(message, parser)
           # Hash case happens inside workers
           if message.is_a?(Hash)
             new(parser: parser).merge!(message)
           else
-            # This happens inside Karafka::Connection::Consumer
-            new(parser: parser, parsed: false, received_at: Time.now).merge!(message.to_h)
+            # This happens inside Kafka::FetchedMessagesProcessor
+            new(
+              parser: parser,
+              parsed: false,
+              received_at: Time.now
+            ).tap do |instance|
+              KAFKA_MESSAGE_ATTRIBUTES.each do |attribute|
+                instance[attribute] = message.send(attribute)
+              end
+            end
           end
         end
       end
@@ -41,7 +57,7 @@ module Karafka
       def retrieve
         return self if self[:parsed]
 
-        merge!(parse(delete(:content)))
+        merge!(parse(delete(:value)))
       end
 
       # Overwritten merge! method - it behaves differently for keys that are the same in our hash
@@ -63,12 +79,12 @@ module Karafka
 
       private
 
-      # @param content [String] Raw data that we want to parse using controller's parser
+      # @param value [String] Raw data that we want to parse using controller's parser
       # @note If something goes wrong, it will return raw data in a hash with a message key
       # @return [Hash] parsed data or a hash with message key containing raw data if something
       #   went wrong during parsing
-      def parse(content)
-        self[:parser].parse(content)
+      def parse(value)
+        self[:parser].parse(value)
         # We catch both of them, because for default JSON - we use JSON parser directly
       rescue ::Karafka::Errors::ParserError => e
         Karafka.monitor.notice_error(self.class, e)
