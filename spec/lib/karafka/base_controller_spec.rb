@@ -69,17 +69,17 @@ RSpec.describe Karafka::BaseController do
       context 'and we decide to use it well' do
         let(:working_class) do
           ClassBuilder.inherit(described_class) do
-            def perform
-              # This is a hack for specs, no need to do it in a std flow
-              responder_class = ClassBuilder.inherit(Karafka::BaseResponder) do
-                topic :a, required: false
+            # This is a hack for specs, no need to do it in a std flow
+            TestClass1 = ClassBuilder.inherit(Karafka::BaseResponder) do
+              topic :a, required: false
 
-                def respond(data)
-                  self
-                end
+              def respond(data)
+                self
               end
+            end
 
-              @responder = responder_class.new(Karafka::Parsers::Json)
+            def perform
+              @responder = TestClass1.new(Karafka::Parsers::Json)
 
               respond_with({})
             end
@@ -93,14 +93,17 @@ RSpec.describe Karafka::BaseController do
         let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
         let(:working_class) do
           ClassBuilder.inherit(described_class) do
-            def perform
-              responder_class = ClassBuilder.inherit(Karafka::BaseResponder) do
-                topic :a, required: true
+            TestClass2 = ClassBuilder.inherit(Karafka::BaseResponder) do
+              topic :a, required: true
 
-                def respond(data); end
+              def respond(_data)
+                self
               end
+            end
 
-              @responder = responder_class.new(Karafka::Parsers::Json)
+            def perform
+
+              @responder = TestClass2.new(Karafka::Parsers::Json)
               respond_with({})
             end
           end
