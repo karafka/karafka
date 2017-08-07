@@ -2,16 +2,16 @@
 
 module Karafka
   # Both Karafka and Ruby-Kafka contain a lot of settings that can be applied on multiple
-  # levels. In Karafka that is on consumer group and on topic level. In Ruby-Kafka it
+  # levels. In Karafka that is on consumer group and on the topic level. In Ruby-Kafka it
   # is on consumer, subscription and consumption levels. In order to maintain an order
-  # in managing those settings, this odule was created. It contains details on what setting
+  # in managing those settings, this module was created. It contains details on what setting
   # where should go and which layer (both on Karafka and Ruby-Kafka) is responsible for
   # setting it and sending it forward
   # @note Settings presented here cover all the settings that are being used across Karafka
   module AttributesMap
     class << self
       # What settings should go where in ruby-kafka
-      # @note All other settings will be passed to Kafka.new method invokation.
+      # @note All other settings will be passed to Kafka.new method invocation.
       #   All elements in this hash are just edge cases
       # @return [Hash] hash with proper sections on what to proxy where in Ruby-Kafka
       def config_adapter

@@ -28,7 +28,7 @@
 - batch processing thanks to ```#batch_processing``` flag and ```#params_batch``` on controllers
 - ```#topic``` method on an controller instance to make a clear distinction in between params and route details
 - Changed routing model (still compatible with 0.5) to allow better resources management
-- Lower memory requirements duo to object creation limitation (2-3 times less objects on each new message)
+- Lower memory requirements due to object creation limitation (2-3 times less objects on each new message)
 - Introduced the ```#batch_processing``` config flag (config for #126) that can be set per each consumer_group
 - Added support for partition, offset and partition key in the params hash
 
@@ -43,7 +43,7 @@
 - Renamed content to value to better resemble ruby-kafka internal messages naming convention
 - When having a responder with ```required``` topics and not using ```#respond_with``` at all, it will raise an exception
 
-### Other changed
+### Other changes
 - PolishGeeksDevTools removed (in favour of Coditsu)
 - Waaaaaay better code quality thanks to switching from dev tools to Coditsu
 - Gem bump

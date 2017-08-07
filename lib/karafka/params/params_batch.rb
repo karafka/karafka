@@ -24,7 +24,7 @@ module Karafka
       end
 
       # @yieldparam [Karafka::Params::Params] each parsed and loaded params instance
-      # @note Invokation of this method will cause loading and parsing each param after another.
+      # @note Invocation of this method will cause loading and parsing each param after another.
       #   If you want to get access without parsing, please access params_batch directly
       def each
         @params_batch.each { |param| yield(param.retrieve) }

@@ -21,7 +21,7 @@ module Karafka
         instance_eval(&block)
       end
 
-      # Translets the no "=" DSL of routing into elements assigments on target
+      # Translates the no "=" DSL of routing into elements assignments on target
       def method_missing(method_name, *arguments, &block)
         return super unless respond_to_missing?(method_name)
         @target.public_send(:"#{method_name}=", *arguments, &block)
