@@ -111,16 +111,10 @@ module Karafka
       end
     end
 
-    # @note We want to leave the #perform method as a public API, but we need to do some
-    # postprocessing after the user code has been executed, so we expose internally a #call
-    # for that
+    # @note We want to leave the #perform method as a public API, but just in case we will do some
+    #   pre or post processing we use call method instead of directly executing #perform
     def call
       perform
-      # Since responder has an internal validation during the response process, it would be
-      # useless to validate it twice (if used), but when responder is not being used in the
-      # #respond_with, we need to validate that it definition does not require it to be used
-      # @see https://github.com/karafka/karafka/issues/181
-      responder&.send(:validate!) unless @responded_with_data
     end
 
     private
@@ -146,7 +140,6 @@ module Karafka
     #   but we still try to use this method
     def respond_with(*data)
       raise(Errors::ResponderMissing, self.class) unless responder
-      @responded_with_data = true
       Karafka.monitor.notice(self.class, data: data)
       responder.call(*data)
     end
