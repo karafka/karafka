@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # App class
   class App
@@ -10,7 +12,7 @@ module Karafka
       end
 
       # Sets up all the internal components and bootstrap whole app
-      # We need to know details about routes in order to setup components,
+      # We need to know details about consumers in order to setup components,
       # that's why we don't setup them after std setup is done
       # @raise [Karafka::Errors::InvalidConfiguration] raised when configuration
       #   doesn't match with ConfigurationSchema
@@ -24,8 +26,8 @@ module Karafka
         Setup::Config.config
       end
 
-      # @return [Karafka::Routing::Builder] routes builder instance
-      def routes
+      # @return [Karafka::Routing::Builder] consumers builder instance
+      def consumer_groups
         Routing::Builder.instance
       end
 
@@ -36,9 +38,11 @@ module Karafka
       end
 
       # Methods that should be delegated to Karafka module
-      %i(
-        root env logger monitor
-      ).each do |delegated|
+      %i[
+        root
+        env
+        logger monitor
+      ].each do |delegated|
         define_method(delegated) do
           Karafka.public_send(delegated)
         end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Class used to catch signals from ruby Signal class in order to manage Karafka shutdown
   # @note There might be only one process - this class is a singleton
@@ -5,9 +7,9 @@ module Karafka
     include Singleton
 
     # Signal types that we handle
-    HANDLED_SIGNALS = %i(
+    HANDLED_SIGNALS = %i[
       SIGINT SIGQUIT SIGTERM
-    ).freeze
+    ].freeze
 
     HANDLED_SIGNALS.each do |signal|
       # Assigns a callback that will happen when certain signal will be send

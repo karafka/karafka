@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Karafka module namespace
 module Karafka
   # Base controller from which all Karafka controllers should inherit
@@ -62,17 +64,10 @@ module Karafka
     # @see http://api.rubyonrails.org/classes/ActiveSupport/Callbacks/ClassMethods.html#method-i-get_callbacks
     define_callbacks :schedule
 
-    # This will be set based on routing settings
-    # From 0.4 a single controller can handle multiple topics jobs
-    # All the attributes are taken from route
-    Karafka::Routing::Route::ATTRIBUTES.each do |attr|
-      attr_reader attr
-
-      define_method(:"#{attr}=") do |new_attr_value|
-        instance_variable_set(:"@#{attr}", new_attr_value)
-        @params[attr] = new_attr_value if @params
-      end
-    end
+    # Each controller instance is always bind to a single topic. We don't place it on a class
+    # level because some programmers use same controller for multiple topics
+    attr_accessor :topic
+    attr_accessor :params_batch
 
     class << self
       # Creates a callback that will be executed before scheduling to Sidekiq
@@ -91,29 +86,44 @@ module Karafka
       end
     end
 
-    # Creates lazy loaded params object
+    # Creates lazy loaded params batch object
     # @note Until first params usage, it won't parse data at all
-    # @param message [Karafka::Connection::Message, Hash] message with raw content or a hash
-    #   from Sidekiq that allows us to build params.
-    def params=(message)
-      @params = Karafka::Params::Params.build(message, self)
+    # @param messages [Array<Kafka::FetchedMessage>, Array<Hash>] messages with raw
+    #   content (from Kafka) or messages inside a hash (from Sidekiq, etc)
+    # @return [Karafka::Params::ParamsBatch] lazy loaded params batch
+    def params_batch=(messages)
+      @params_batch = Karafka::Params::ParamsBatch.new(messages, topic.parser)
+    end
+
+    # @return [Karafka::Params::Params] params instance for non batch processed controllers
+    # @raise [Karafka::Errors::ParamsMethodUnavailable] raised when we try to use params
+    #   method in a batch_processed controller
+    def params
+      raise Karafka::Errors::ParamsMethodUnavailable if topic.batch_processing
+      params_batch.first
     end
 
     # Executes the default controller flow, runs callbacks and if not halted
-    # will schedule a perform task in sidekiq
+    # will schedule a call task in sidekiq
     def schedule
       run_callbacks :schedule do
-        inline_mode ? perform_inline : perform_async
+        topic.inline_mode ? call_inline : call_async
       end
     end
 
-    # @return [Hash] hash with all controller details - it works similar to #params method however
-    #   it won't parse data so it will return unparsed details about controller and its parameters
-    # @example Get data about ctrl
-    #   ctrl.to_h #=> { "worker"=>WorkerClass, "parsed"=>false, "content"=>"{}" }
-    def to_h
-      @params
+    # @note We want to leave the #perform method as a public API, but we need to do some
+    # postprocessing after the user code has been executed, so we expose internally a #call
+    # for that
+    def call
+      perform
+      # Since responder has an internal validation during the response process, it would be
+      # useless to validate it twice (if used), but when responder is not being used in the
+      # #respond_with, we need to validate that it definition does not require it to be used
+      # @see https://github.com/karafka/karafka/issues/181
+      responder&.send(:validate!) unless @responded_with_data
     end
+
+    private
 
     # Method that will perform business logic on data received from Kafka
     # @note This method needs bo be implemented in a subclass. We stub it here as a failover if
@@ -122,21 +132,10 @@ module Karafka
       raise NotImplementedError, 'Implement this in a subclass'
     end
 
-    private
-
-    # @return [Karafka::Params::Params] Karafka params that is a hash with indifferent access
-    # @note Params internally are lazy loaded before first use. That way we can skip parsing
-    #   process if we have before_enqueue that rejects some incoming messages without using params
-    #   It can be also used when handling really heavy data (in terms of parsing). Without direct
-    #   usage outside of worker scope, it will pass raw data into sidekiq, so we won't use Karafka
-    #   working time to parse this data. It will happen only in the worker (where it can take time)
-    #   that way Karafka will be able to process data really quickly. On the other hand, if we
-    #   decide to use params somewhere before it hits worker logic, it won't parse it again in
-    #   the worker - it will use already loaded data and pass it to Redis
-    # @note Invokation of this method will cause load all the data into params object. If you want
-    #   to get access without parsing, please access @params directly
-    def params
-      @params.retrieve
+    # @return [Karafka::BaseResponder] responder instance if defined
+    # @return [nil] nil if no responder for this controller
+    def responder
+      @responder ||= topic.responder&.new(topic.parser)
     end
 
     # Responds with given data using given responder. This allows us to have a similar way of
@@ -147,30 +146,28 @@ module Karafka
     #   but we still try to use this method
     def respond_with(*data)
       raise(Errors::ResponderMissing, self.class) unless responder
-
+      @responded_with_data = true
       Karafka.monitor.notice(self.class, data: data)
-      responder.new(parser).call(*data)
+      responder.call(*data)
     end
 
     # Executes perform code immediately (without enqueuing)
     # @note Despite the fact, that workers won't be used, we still initialize all the
     #   classes and other framework elements
-    def perform_inline
-      Karafka.monitor.notice(self.class, to_h)
-      perform
+    def call_inline
+      Karafka.monitor.notice(self.class, params_batch)
+      call
     end
 
     # Enqueues the execution of perform method into a worker.
     # @note Each worker needs to have a class #perform_async method that will allow us to pass
-    #   parameters into it. We always pass topic as a first argument and this request params
+    #   parameters into it. We always pass topic as a first argument and this request params_batch
     #   as a second one (we pass topic to be able to build back the controller in the worker)
-    def perform_async
-      Karafka.monitor.notice(self.class, to_h)
-      # We use @params directly (instead of #params) because of lazy loading logic that is behind
-      # it. See Karafka::Params::Params class for more details about that
-      worker.perform_async(
-        topic,
-        interchanger.load(@params)
+    def call_async
+      Karafka.monitor.notice(self.class, params_batch)
+      topic.worker.perform_async(
+        topic.id,
+        topic.interchanger.load(params_batch.to_a)
       )
     end
   end

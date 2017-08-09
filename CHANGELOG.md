@@ -1,10 +1,58 @@
 # Karafka framework changelog
 
-## Unreleased
+## Unreleased 0.6.0
+
+### Closed issues:
+
+- #103 - Env for logger is loaded 2 early (on gem load not on app init)
+- #142 - Possibility to better control Kafka consumers (consumer groups management)
 - #150 - Add support for start_from_beginning on a per topic basis
-- Got rid of PolishGeeksDevTools (will be replaced with Coditsu soon)
-- Gem bump (dry-stuff and other gems)
-- ruby-kafka bump
+- #154 - Support for min_bytes and max_wait_time on messages consuming
+- #160 - Reorganize settings to better resemble ruby-kafka requirements
+- #164 - If we decide to have configuration per topic, topic uniqueness should be removed
+- #165 - Router validator
+- #166 - Params and route reorganization (new API)
+- #167 - Remove Sidekiq UI from Karafka
+- #168 - Introduce unique IDs of routes
+- #171 - Add kafka message metadata to params
+- #176 - Transform Karafka::Connection::Consumer into a module
+- #177 - Monitor not reacting when kafka killed with -9
+- #175 - Allow single consumer to subscribe to multiple topics
+- #178 - Remove parsing failover when cannot unparse data
+- #174 - Extended config validation
+- #180 - Switch from JSON parser to yajl-ruby
+- #181 - When responder is defined and not used due to ```respond_with``` not being triggered in the perform, it won't raise an exception.
+
+### New features and improvements
+
+- batch processing thanks to ```#batch_processing``` flag and ```#params_batch``` on controllers
+- ```#topic``` method on an controller instance to make a clear distinction in between params and route details
+- Changed routing model (still compatible with 0.5) to allow better resources management
+- Lower memory requirements due to object creation limitation (2-3 times less objects on each new message)
+- Introduced the ```#batch_processing``` config flag (config for #126) that can be set per each consumer_group
+- Added support for partition, offset and partition key in the params hash
+
+### Incompatibilities
+
+- Removed worker glass as dependency (now and independent gem)
+- ```kafka.hosts``` option renamed to ```kafka.seed_brokers``` - you don't need to provide all the hosts to work with Kafka
+- ```start_from_beginning``` moved into kafka scope (```kafka.start_from_beginning```)
+- Router no longer checks for route uniqueness - now you can define same routes for multiple kafkas and do a lot of crazy stuff, so it's your responsibility to check uniqueness
+- Change in the way we identify topics in between Karafka and Sidekiq workers. If you upgrade, please make sure, all the jobs scheduled in Sidekiq are finished before the upgrade.
+- ```batch_mode``` renamed to ```batch_consuming```
+- Renamed content to value to better resemble ruby-kafka internal messages naming convention
+- When having a responder with ```required``` topics and not using ```#respond_with``` at all, it will raise an exception
+
+### Other changes
+- PolishGeeksDevTools removed (in favour of Coditsu)
+- Waaaaaay better code quality thanks to switching from dev tools to Coditsu
+- Gem bump
+- Cleaner internal API
+- SRP
+- Better settings proxying and management between ruby-kafka and karafka
+- All internal validations are now powered by dry-validation
+- Better naming conventions to reflect Kafka reality
+- Removed Karafka::Connection::Message in favour of direct message details extraction from Kafka::FetchedMessage
 
 ## 0.5.0.3
 - #132 - When Kafka is gone, should reconnect after a time period
@@ -253,4 +301,3 @@
 
 ## 0.1.0
 - Initial framework code
-

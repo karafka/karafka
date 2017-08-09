@@ -1,15 +1,19 @@
+# frozen_string_literal: true
+
 ENV['KARAFKA_ENV'] = 'test'
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-%w(
+%w[
   rubygems
   simplecov
   rake
   logger
   timecop
-).each do |lib|
+  byebug
+  fiddle
+].each do |lib|
   require lib
 end
 
@@ -24,6 +28,8 @@ SimpleCov.start do
   add_filter '/lib/karafka/tasks'
   merge_timeout 600
 end
+
+SimpleCov.minimum_coverage 100
 
 Timecop.safe_mode = true
 
@@ -44,9 +50,12 @@ module Karafka
   # Configuration for test env
   class App
     setup do |config|
-      config.kafka.hosts = ['localhost:9092']
+      config.kafka.seed_brokers = ['localhost:9092']
       config.name = rand.to_s
       config.redis = { url: 'redis://' }
+      config.kafka.offset_retention_time = -1
+      config.kafka.max_bytes_per_partition = 1_048_576
+      config.kafka.start_from_beginning = true
     end
   end
 end

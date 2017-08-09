@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Base do
   describe 'instance methods' do
-    let(:cli) { Karafka::Cli.new }
     subject(:base_cli) { described_class.new(cli) }
+
+    let(:cli) { Karafka::Cli.new }
 
     describe '#cli' do
       it { expect(base_cli.cli).to eq cli }
@@ -34,7 +37,6 @@ RSpec.describe Karafka::Cli::Base do
         base_cli_class.bind_to(cli_class)
 
         expect(cli_class.instance_methods).to include name.to_sym
-
         expect { cli_class.new.send(name) }.to raise_error(NotImplementedError)
       end
     end

@@ -1,37 +1,18 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Logger do
   specify { expect(described_class).to be < ::Logger }
-  subject(:logger_class) { described_class }
+  subject(:logger) { described_class.instance }
 
   describe '#instance' do
     let(:target) { double }
-    let(:logger) { described_class.new(STDOUT) }
+    let(:logger) { described_class.instance }
     let(:log_file) { Karafka::App.root.join('log', "#{Karafka.env}.log") }
     # A Pathname, because this is what is returned by File.join
     let(:log_dir) { File.dirname(log_file) }
 
-    it 'creates an instance that will log in the app root' do
-      expect(logger_class)
-        .to receive(:target)
-        .and_return(target)
-
-      expect(logger_class)
-        .to receive(:new)
-        .with(target)
-        .and_return(logger)
-
-      logger_class.instance
-    end
-
-    it 'makes sure the "log" dir exists' do
-      expect(Dir)
-        .to receive(:exist?)
-        .with(log_dir)
-        .and_return(false)
-      expect(Dir)
-        .to receive(:mkdir)
-        .with(log_dir)
-        .and_return(0) # Don't ask me why, but this is what Dir.mkdir returns normally
-      logger_class.instance
+    it 'expect to be of a proper level' do
+      expect(logger.level).to eq ::Logger::ERROR
     end
   end
 
@@ -44,27 +25,17 @@ RSpec.describe Karafka::Logger do
         .with(:write, :close)
         .and_return(delegate_scope)
 
-      expect(delegate_scope).to receive(:to)
-        .with(STDOUT, file)
+      expect(delegate_scope).to receive(:to).with(STDOUT, logger.send(:file))
 
-      expect(logger_class).to receive(:file)
-        .and_return(file)
-
-      logger_class.send(:target)
+      logger.send(:target)
     end
   end
 
   describe '#file' do
-    let(:file) { double }
     let(:log_file) { Karafka::App.root.join('log', "#{Karafka.env}.log") }
 
     it 'opens a log_file in append mode' do
-      expect(File)
-        .to receive(:open)
-        .with(log_file, 'a')
-        .and_return(file)
-
-      expect(logger_class.send(:file)).to eq file
+      expect(logger.send(:file).path.to_s).to eq log_file.to_s
     end
   end
 end

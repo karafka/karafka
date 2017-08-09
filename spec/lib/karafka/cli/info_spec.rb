@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Info do
-  let(:cli) { Karafka::Cli.new }
   subject(:info_cli) { described_class.new(cli) }
+
+  let(:cli) { Karafka::Cli.new }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
@@ -10,11 +13,12 @@ RSpec.describe Karafka::Cli::Info do
         "Karafka framework version: #{Karafka::VERSION}",
         "Application name: #{Karafka::App.config.name}",
         "Inline mode: #{Karafka::App.config.inline_mode}",
-        "Batch mode: #{Karafka::App.config.batch_mode}",
+        "Batch consuming: #{Karafka::App.config.batch_consuming}",
+        "Batch processing: #{Karafka::App.config.batch_processing}",
         "Number of threads: #{Karafka::App.config.concurrency}",
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
-        "Kafka hosts: #{Karafka::App.config.kafka.hosts}",
+        "Kafka seed brokers: #{Karafka::App.config.kafka.seed_brokers}",
         "Redis: #{Karafka::App.config.redis.to_h}"
       ]
     end

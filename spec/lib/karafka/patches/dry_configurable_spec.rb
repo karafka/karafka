@@ -1,4 +1,8 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Patches::DryConfigurable do
+  subject(:config) { dummy_class.config }
+
   context 'root level' do
     let(:dummy_class) do
       ClassBuilder.build do
@@ -8,8 +12,6 @@ RSpec.describe Karafka::Patches::DryConfigurable do
         setting :b
       end
     end
-
-    subject(:config) { dummy_class.config }
 
     describe 'non proc example' do
       before do
@@ -41,6 +43,8 @@ RSpec.describe Karafka::Patches::DryConfigurable do
   end
 
   context 'nestings' do
+    subject(:config) { dummy_class.config }
+
     let(:dummy_class) do
       ClassBuilder.build do
         extend Dry::Configurable
@@ -54,8 +58,6 @@ RSpec.describe Karafka::Patches::DryConfigurable do
         end
       end
     end
-
-    subject(:config) { dummy_class.config }
 
     describe 'non proc example' do
       before do

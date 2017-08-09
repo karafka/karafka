@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Karafka framework Cli
   # If you want to add/modify command that belongs to CLI, please review all commands

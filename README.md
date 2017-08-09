@@ -6,7 +6,7 @@
 
 Framework used to simplify Apache Kafka based Ruby applications development.
 
-It allows programmers to use approach similar to "the Rails way" when working with asynchronous Kafka messages.
+It allows programmers to use approach similar to standard HTTP conventions (```params``` and ```params_batch```) when working with asynchronous Kafka messages.
 
 Karafka not only handles incoming messages but also provides tools for building complex data-flow applications that receive and send messages.
 
@@ -15,6 +15,8 @@ Karafka not only handles incoming messages but also provides tools for building 
 Karafka provides a higher-level abstraction than raw Kafka Ruby drivers, such as Kafka-Ruby and Poseidon. Instead of focusing on  single topic consumption, it provides developers with a set of tools that are dedicated for building multi-topic applications similarly to how Rails applications are being built.
 
 ## Support
+
+**Warning**: documentation refers to the 0.5 version (one that is released on RubyGems). If you decide to use master or any other branch, be prepared for some inconsistencies. To fix them, please review the [CHANGELOG](https://github.com/karafka/karafka/blob/master/CHANGELOG.md) file.
 
 Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything. It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
 

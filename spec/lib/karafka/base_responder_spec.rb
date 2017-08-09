@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::BaseResponder do
   let(:topic_name) { 'topic_123.abc-xyz' }
   let(:input_data) { rand }
@@ -22,16 +24,6 @@ RSpec.describe Karafka::BaseResponder do
           expect(responder_class.topics[topic_name]).to be_a Karafka::Responders::Topic
         end
       end
-
-      context 'when we register invalid topic' do
-        %w(
-          & /31 ół !@
-        ).each do |topic_name|
-          let(:topic_name) { topic_name }
-
-          it { expect { responder_class }.to raise_error(Karafka::Errors::InvalidTopicName) }
-        end
-      end
     end
 
     describe '.call' do
@@ -44,21 +36,23 @@ RSpec.describe Karafka::BaseResponder do
 
   context 'instance' do
     subject(:responder) { working_class.new(parser_class) }
+
     let(:parser_class) { Karafka::Parsers::Json }
 
     describe 'default responder' do
       subject(:responder) { working_class.new }
+
       let(:default_parser) { Karafka::Parsers::Json }
 
       it { expect(responder.instance_variable_get(:'@parser_class')).to eq default_parser }
     end
 
     describe '#call' do
+      let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
+
       it 'expect to respond and validate' do
         expect(responder).to receive(:respond).with(input_data)
-        expect(responder).to receive(:validate!)
-
-        responder.call(input_data)
+        expect { responder.call(input_data) }.to raise_error(expected_error)
       end
     end
 
@@ -88,20 +82,17 @@ RSpec.describe Karafka::BaseResponder do
 
     describe '#validate!' do
       let(:usage_validator) { instance_double(Karafka::Responders::UsageValidator) }
-      let(:registered_topics) { [rand, rand] }
+      let(:registered_topics) { {} }
       let(:messages_buffer) { { rand => [rand], rand => [rand] } }
 
       before do
         working_class.topics = registered_topics
         responder.instance_variable_set(:'@messages_buffer', messages_buffer)
-
-        expect(Karafka::Responders::UsageValidator).to receive(:new)
-          .with(registered_topics, messages_buffer.keys).and_return(usage_validator)
       end
 
       it 'expect to use UsageValidator to validate' do
-        expect(usage_validator).to receive(:validate!)
-        responder.send(:validate!)
+        expected_error = Karafka::Errors::InvalidResponderUsage
+        expect { responder.send(:validate!) }.to raise_error(expected_error)
       end
     end
 
@@ -127,7 +118,7 @@ RSpec.describe Karafka::BaseResponder do
 
               expect(::WaterDrop::Message)
                 .to receive(:new).with(topic, data, options)
-                .and_return(kafka_message)
+                                 .and_return(kafka_message)
 
               expect(kafka_message).to receive(:send!)
             end
@@ -162,7 +153,7 @@ RSpec.describe Karafka::BaseResponder do
 
               expect(::WaterDrop::Message)
                 .to receive(:new).with(mapped_topic, data, options)
-                .and_return(kafka_message)
+                                 .and_return(kafka_message)
 
               expect(kafka_message).to receive(:send!)
             end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Namespace for patches of external gems/libraries
   module Patches

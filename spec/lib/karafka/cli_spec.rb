@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli do
   subject(:cli) { described_class }
 
@@ -21,7 +23,6 @@ RSpec.describe Karafka::Cli do
         Karafka::Cli::Flow,
         Karafka::Cli::Info,
         Karafka::Cli::Install,
-        Karafka::Cli::Routes,
         Karafka::Cli::Server,
         Karafka::Cli::Worker
       ].map(&:to_s).sort

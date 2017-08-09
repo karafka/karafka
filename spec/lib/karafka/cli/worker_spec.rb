@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Worker do
-  let(:cli) { Karafka::Cli.new }
   subject(:worker_cli) { described_class.new(cli) }
+
+  let(:cli) { Karafka::Cli.new }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 

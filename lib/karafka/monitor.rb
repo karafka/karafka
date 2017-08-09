@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Monitor is used to hookup external monitoring services to monitor how Karafka works
   # It provides a standarized API for checking incoming messages/enqueueing etc
@@ -53,7 +55,7 @@ module Karafka
     def caller_exceptions_map
       @caller_exceptions_map ||= {
         error: [
-          Karafka::Connection::Consumer,
+          Karafka::Connection::MessagesProcessor,
           Karafka::Connection::Listener,
           Karafka::Params::Params
         ],

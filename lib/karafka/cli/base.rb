@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   class Cli < Thor
     # Base class for all the command that we want to define

@@ -1,8 +1,12 @@
+# frozen_string_literal: true
+
+# Dummy module used for spec purposes
 module TestModule
 end
 
 RSpec.describe Karafka::Helpers::ClassMatcher do
   subject(:matcher) { described_class.new(klass, from: from, to: to) }
+
   let(:from) { 'Base' }
   let(:to) { 'Matching' }
   let(:matching) { nil }

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Errors do
   describe 'BaseError' do
     subject(:error) { described_class::BaseError }
@@ -17,30 +19,6 @@ RSpec.describe Karafka::Errors do
     specify { expect(error).to be < described_class::BaseError }
   end
 
-  describe 'DuplicatedGroupError' do
-    subject(:error) { described_class::DuplicatedGroupError }
-
-    specify { expect(error).to be < described_class::BaseError }
-  end
-
-  describe 'DuplicatedTopicError' do
-    subject(:error) { described_class::DuplicatedTopicError }
-
-    specify { expect(error).to be < described_class::BaseError }
-  end
-
-  describe 'InvalidTopicName' do
-    subject(:error) { described_class::InvalidTopicName }
-
-    specify { expect(error).to be < described_class::BaseError }
-  end
-
-  describe 'InvalidGroupName' do
-    subject(:error) { described_class::InvalidGroupName }
-
-    specify { expect(error).to be < described_class::BaseError }
-  end
-
   describe 'BaseWorkerDescentantMissing' do
     subject(:error) { described_class::BaseWorkerDescentantMissing }
 
@@ -49,6 +27,18 @@ RSpec.describe Karafka::Errors do
 
   describe 'InvalidConfiguration' do
     subject(:error) { described_class::InvalidConfiguration }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe 'ResponderMissing' do
+    subject(:error) { described_class::ResponderMissing }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe 'ParamsMethodUnavailable' do
+    subject(:error) { described_class::ParamsMethodUnavailable }
 
     specify { expect(error).to be < described_class::BaseError }
   end

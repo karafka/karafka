@@ -1,11 +1,14 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Cli::Flow do
-  let(:cli) { Karafka::Cli.new }
   subject(:flow_cli) { described_class.new(cli) }
+
+  let(:cli) { Karafka::Cli.new }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
   describe '#call' do
-    context 'when there are no routes' do
+    context 'when there are no consumer_groups' do
       let(:routes) { [] }
 
       it 'expect not to print anything' do
@@ -15,21 +18,25 @@ RSpec.describe Karafka::Cli::Flow do
     end
 
     context 'when there are routes' do
-      let(:route) do
-        Karafka::Routing::Route.new.tap do |route|
-          route.responder = responder
-          route.topic = topic
+      let(:consumer_group) do
+        responder_instance = responder
+        Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
+          cg.public_send(:topic=, topic) do
+            responder responder_instance
+            controller Class.new
+            inline_mode true
+          end
         end
       end
 
-      let(:karafka_routes) { [route] }
+      let(:consumer_groups) { [consumer_group] }
       let(:responder) { instance_double(Karafka::BaseResponder, topics: topics) }
       let(:topic) { "topic#{rand(1000)}" }
 
       before do
-        expect(flow_cli)
-          .to receive(:routes)
-          .and_return(karafka_routes)
+        expect(Karafka::App)
+          .to receive(:consumer_groups)
+          .and_return(consumer_groups)
       end
 
       context 'without outgoing topics' do
@@ -51,20 +58,6 @@ RSpec.describe Karafka::Cli::Flow do
         end
       end
     end
-  end
-
-  describe '#routes' do
-    let(:route1) { Karafka::Routing::Route.new.tap { |route| route.topic = :b } }
-    let(:route2) { Karafka::Routing::Route.new.tap { |route| route.topic = :a } }
-    let(:karafka_routes) { [route1, route2] }
-
-    before do
-      expect(Karafka::App)
-        .to receive(:routes)
-        .and_return(karafka_routes)
-    end
-
-    it { expect(flow_cli.send(:routes)).to eq [route2, route1] }
   end
 
   describe '#print' do

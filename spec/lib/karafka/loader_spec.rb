@@ -1,7 +1,7 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Loader do
   subject(:loader_class) { described_class }
-
-  it { should be_const_defined(:DIRS) }
 
   describe '#base_sorter' do
     subject(:loader) { described_class.new.send(:base_sorter, str1, str2) }
@@ -52,12 +52,13 @@ RSpec.describe Karafka::Loader do
 
   describe '#load' do
     subject(:loader) { described_class.new }
+
     let(:relative_path) { '/app/decorators' }
     let(:lib_path) { '/lib' }
     let(:app_path) { '/app' }
 
     before do
-      stub_const('Karafka::Loader::DIRS', %w(lib app))
+      stub_const('Karafka::Loader::DIRS', %w[lib app])
       expect(loader).to receive(:load!)
         .with('/app/decorators/lib')
         .and_return(double)

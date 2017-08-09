@@ -1,12 +1,16 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Setup::Configurators::WaterDrop do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
+
+  subject(:water_drop_configurator) { described_class.new(config) }
 
   let(:config) do
     instance_double(
       Karafka::Setup::Config.config.class,
       concurrency: ::Karafka::App.config.concurrency,
       kafka: OpenStruct.new(
-        hosts: ::Karafka::App.config.kafka.hosts
+        seed_brokers: ::Karafka::App.config.kafka.seed_brokers
       ),
       # Instance double has a private method called timeout, that's why we use
       # openstruct here
@@ -17,17 +21,13 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
     )
   end
 
-  subject(:water_drop_configurator) { described_class.new(config) }
-
   describe '#setup' do
-    it 'expect to assign waterdrop default configs' do
-      water_drop_configurator.setup
+    before { water_drop_configurator.setup }
 
-      expect(WaterDrop.config.send_messages).to eq true
-      expect(WaterDrop.config.connection_pool_size).to eq config.connection_pool.size
-      expect(WaterDrop.config.connection_pool_timeout).to eq config.connection_pool.timeout
-      expect(WaterDrop.config.kafka.hosts).to eq config.kafka.hosts
-      expect(WaterDrop.config.raise_on_failure).to eq true
-    end
+    it { expect(WaterDrop.config.send_messages).to eq true }
+    it { expect(WaterDrop.config.connection_pool_size).to eq config.connection_pool.size }
+    it { expect(WaterDrop.config.connection_pool_timeout).to eq config.connection_pool.timeout }
+    it { expect(WaterDrop.config.kafka.hosts).to eq config.kafka.seed_brokers }
+    it { expect(WaterDrop.config.raise_on_failure).to eq true }
   end
 end

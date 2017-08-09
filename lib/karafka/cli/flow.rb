@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Karafka framework Cli
   class Cli
@@ -7,32 +9,30 @@ module Karafka
 
       # Print out all defined routes in alphabetical order
       def call
-        routes.each do |route|
-          any_topics = !route.responder&.topics.nil?
+        topics.each do |topic|
+          any_topics = !topic.responder&.topics.nil?
 
           if any_topics
-            puts "#{route.topic} =>"
+            puts "#{topic.name} =>"
 
-            route.responder.topics.each do |_name, topic|
+            topic.responder.topics.each do |_name, responder_topic|
               features = []
-              features << (topic.required? ? 'always' : 'conditionally')
-              features << (topic.multiple_usage? ? 'one or more' : 'exactly once')
+              features << (responder_topic.required? ? 'always' : 'conditionally')
+              features << (responder_topic.multiple_usage? ? 'one or more' : 'exactly once')
 
-              print topic.name, "(#{features.join(', ')})"
+              print responder_topic.name, "(#{features.join(', ')})"
             end
           else
-            puts "#{route.topic} => (nothing)"
+            puts "#{topic.name} => (nothing)"
           end
         end
       end
 
       private
 
-      # @return [Array<Karafka::Routing::Route>] all routes sorted in alphabetical order
-      def routes
-        Karafka::App.routes.sort do |route1, route2|
-          route1.topic <=> route2.topic
-        end
+      # @return [Array<Karafka::Routing::Topic>] all topics sorted in alphabetical order
+      def topics
+        Karafka::App.consumer_groups.map(&:topics).flatten.sort_by(&:name)
       end
 
       # Prints a given value with label in a nice way

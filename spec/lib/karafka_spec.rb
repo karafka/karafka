@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka do
   subject(:karafka) { described_class }
 
@@ -16,6 +18,7 @@ RSpec.describe Karafka do
   describe '.gem_root' do
     context 'when we want to get gem root path' do
       let(:path) { Dir.pwd }
+
       it { expect(karafka.gem_root.to_path).to eq path }
     end
   end

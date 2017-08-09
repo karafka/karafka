@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Fetcher do
   subject(:fetcher) { described_class.new }
 
@@ -5,7 +7,7 @@ RSpec.describe Karafka::Fetcher do
     context 'when everything is ok' do
       let(:future) { instance_double(Celluloid::Future, value: rand) }
       let(:listeners) { [listener] }
-      let(:consumer) { -> {} }
+      let(:processor) { -> {} }
       let(:async_scope) { listener }
       let(:listener) do
         instance_double(
@@ -21,8 +23,8 @@ RSpec.describe Karafka::Fetcher do
           .and_return(listeners)
 
         expect(fetcher)
-          .to receive(:consumer)
-          .and_return(consumer)
+          .to receive(:processor)
+          .and_return(processor)
       end
 
       it 'starts asynchronously consumption for each listener' do
@@ -44,57 +46,47 @@ RSpec.describe Karafka::Fetcher do
       end
 
       it 'stops the app and reraise' do
-        expect(Karafka::App)
-          .to receive(:stop!)
-
-        expect(Karafka.monitor)
-          .to receive(:notice_error)
-          .with(described_class, error)
-
+        expect(Karafka::App).to receive(:stop!)
+        expect(Karafka.monitor).to receive(:notice_error).with(described_class, error)
         expect { fetcher.fetch_loop }.to raise_error(error)
       end
     end
   end
 
-  describe '#consumer' do
-    subject(:fetcher) { described_class.new.send(:consumer) }
+  describe '#processor' do
+    subject(:fetcher) { described_class.new.send(:processor) }
 
     it 'is a proc' do
       expect(fetcher).to be_a Proc
     end
 
-    context 'when we invoke a consumer block' do
+    context 'when we invoke a processor block' do
       let(:message) { double }
-      let(:consumer) { Karafka::Connection::Consumer.new }
+      let(:processor) { Karafka::Connection::MessagesProcessor }
+      let(:consumer_group_id) { rand.to_s }
 
-      before do
-        expect(Karafka::Connection::Consumer)
-          .to receive(:new)
-          .and_return(consumer)
-      end
+      it 'process the message' do
+        expect(processor)
+          .to receive(:process)
+          .with(consumer_group_id, message)
 
-      it 'consumes the message' do
-        expect(consumer)
-          .to receive(:consume)
-          .with(message)
-
-        fetcher.call(message)
+        fetcher.call(consumer_group_id, message)
       end
     end
   end
 
   describe '#listeners' do
-    let(:route) { double }
-    let(:routes) { [route] }
+    let(:consumer_group) { double }
+    let(:consumer_groups) { [consumer_group] }
 
     before do
       expect(Karafka::App)
-        .to receive(:routes)
-        .and_return(routes)
+        .to receive(:consumer_groups)
+        .and_return(consumer_groups)
 
       expect(Karafka::Connection::Listener)
         .to receive(:new)
-        .with(route)
+        .with(consumer_group)
     end
 
     it { expect(fetcher.send(:listeners)).to be_a Array }

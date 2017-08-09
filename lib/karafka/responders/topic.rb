@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Responders
     # Topic describes a single topic on which we want to respond with responding requirements
@@ -17,7 +19,6 @@ module Karafka
       def initialize(name, options)
         @name = name.to_s
         @options = options
-        validate!
       end
 
       # @return [Boolean] is this a required topic (if not, it is optional)
@@ -30,12 +31,19 @@ module Karafka
         @options[:multiple_usage] || false
       end
 
-      private
+      # @return [Boolean] was usage of this topic registered or not
+      def registered?
+        @options[:registered] == true
+      end
 
-      # Checks topic name with the same regexp as routing
-      # @raise [Karafka::Errors::InvalidTopicName] raised when topic name is invalid
-      def validate!
-        raise Errors::InvalidTopicName, name if Routing::Route::NAME_FORMAT !~ name
+      # @return [Hash] hash with this topic attributes and options
+      def to_h
+        {
+          name: name,
+          multiple_usage: multiple_usage?,
+          required: required?,
+          registered: registered?
+        }
       end
     end
   end

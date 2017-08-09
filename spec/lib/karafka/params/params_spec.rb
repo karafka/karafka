@@ -1,75 +1,62 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Params::Params do
   describe 'class methods' do
     subject(:params_class) { described_class }
 
     describe '#build' do
-      let(:controller) { double }
-      let(:defaults) { double }
-      let(:merged_with_defaults) { double }
-
-      before do
-        expect(params_class)
-          .to receive(:defaults)
-          .with(controller)
-          .and_return(defaults)
-      end
+      let(:parser) { Karafka::Parsers::Json }
 
       context 'when we build from a hash' do
         let(:message) { { rand => rand } }
 
-        it 'expect to build a new based on defaults and merge a message' do
-          expect(defaults)
-            .to receive(:merge!)
-            .with(message)
-            .and_return(merged_with_defaults)
-
-          expect(params_class.build(message, controller)).to eq merged_with_defaults
+        it 'expect to build based on a message' do
+          expect(params_class.build(message, parser)).to eq message.merge('parser' => parser)
         end
       end
 
-      context 'when we build based on Karafka::Connection::Message' do
-        let(:content) { rand }
-
+      context 'when we build based on Kafka::FetchedMessage' do
+        let(:topic) { rand.to_s }
+        let(:value) { rand.to_s }
+        let(:key) { nil }
+        let(:offset) { rand(1000) }
+        let(:partition) { rand(100) }
+        let(:kafka_message) do
+          Kafka::FetchedMessage.new(
+            topic: topic,
+            value: value,
+            key: key,
+            offset: offset,
+            partition: partition
+          )
+        end
+        let(:params_attributes) do
+          {
+            'parser' => parser,
+            'parsed' => false,
+            'received_at' => Time.now,
+            'value' => value,
+            'offset' => offset,
+            'partition' => partition,
+            'key' => key,
+            'topic' => topic
+          }
+        end
         let(:message) do
-          instance_double(Karafka::Connection::Message, content: content)
+          Kafka::FetchedMessage.new(
+            value: value,
+            key: key,
+            topic: topic,
+            partition: partition,
+            offset: offset
+          )
         end
 
-        it 'expect to build defaults and merge with additional values and content' do
+        it 'expect to build with additional values and value' do
           Timecop.freeze do
-            expect(defaults).to receive(:merge!)
-              .with(parsed: false, received_at: Time.now, content: content)
-              .and_return(merged_with_defaults)
-
-            expect(params_class.build(message, controller)).to eq merged_with_defaults
+            expect(params_class.build(message, parser)).to eq params_attributes
           end
         end
-      end
-    end
-
-    describe '#defaults' do
-      let(:worker) { double }
-      let(:parser) { double }
-      let(:topic) { double }
-      let(:responder) { double }
-
-      let(:controller) do
-        instance_double(
-          Karafka::BaseController,
-          worker: worker,
-          parser: parser,
-          topic: topic,
-          responder: responder
-        )
-      end
-
-      it 'expect to return default params' do
-        params = params_class.send(:defaults, controller)
-
-        expect(params).to be_a params_class
-        expect(params[:controller]).to eq controller.class
-        expect(params[:worker]).to eq worker
-        expect(params[:parser]).to eq parser
-        expect(params[:topic]).to eq topic
       end
     end
   end
@@ -94,43 +81,51 @@ RSpec.describe Karafka::Params::Params do
         end
       end
 
-      context 'when params were not yet parsed' do
-        let(:content) { double }
+      context 'when params were not yet parsed and value does not contain same keys' do
+        let(:value) { double }
+        let(:parsed_value) { { double => double } }
 
         before do
           params[:parsed] = false
-          params[:content] = content
+          params[:value] = value
 
           expect(params)
             .to receive(:parse)
-            .with(content)
-            .and_return(parsed_content)
+            .with(value)
+            .and_return(parsed_value)
         end
 
-        context 'when parsed content does not contain same keys as already existing' do
-          let(:parsed_content) { { double => double } }
+        it 'expect to merge with parsed stuff that is under value key and remove this key' do
+          expect(params.retrieve[parsed_value.keys[0]]).to eq parsed_value.values[0]
+          expect(params.keys).not_to include :value
+        end
+      end
 
-          it 'expect to merge with parsed stuff that is under content key and remove this key' do
-            expect(params.retrieve[parsed_content.keys[0]]).to eq parsed_content.values[0]
-            expect(params.keys).not_to include :content
-          end
+      context 'when params were not yet parsed and value does contain same keys' do
+        let(:value) { double }
+        let(:parsed_value) { { received_at: rand } }
+
+        before do
+          params[:parsed] = false
+          params[:value] = value
+
+          expect(params)
+            .to receive(:parse)
+            .with(value)
+            .and_return(parsed_value)
         end
 
-        context 'when parsed content contains same keys as already existing' do
-          let(:parsed_content) { { received_at: rand } }
-
-          it 'expect not to overwrite existing keys' do
-            params.retrieve
-            expect(params[parsed_content[:received_at]]).not_to eq parsed_content[:received_at]
-            expect(params.keys).not_to include :content
-          end
+        it 'expect not to overwrite existing keys' do
+          params.retrieve
+          expect(params[parsed_value[:received_at]]).not_to eq parsed_value[:received_at]
+          expect(params.keys).not_to include :value
         end
       end
     end
 
     describe '#parse' do
       let(:parser) { double }
-      let(:content) { double }
+      let(:value) { double }
 
       before do
         params[:parser] = parser
@@ -138,17 +133,17 @@ RSpec.describe Karafka::Params::Params do
       end
 
       context 'when we are able to successfully parse' do
-        let(:parsed_content) { { rand => rand } }
+        let(:parsed_value) { { rand => rand } }
 
         before do
           expect(parser)
             .to receive(:parse)
-            .with(content)
-            .and_return(parsed_content)
+            .with(value)
+            .and_return(parsed_value)
         end
 
-        it 'expect to mark as parsed and return content in a message key' do
-          expect(params.send(:parse, content)).to eq parsed_content
+        it 'expect to mark as parsed and return value in a message key' do
+          expect(params.send(:parse, value)).to eq parsed_value
           expect(params[:parsed]).to eq true
         end
       end
@@ -157,15 +152,15 @@ RSpec.describe Karafka::Params::Params do
         before do
           expect(parser)
             .to receive(:parse)
-            .with(content)
+            .with(value)
             .and_raise(::Karafka::Errors::ParserError)
         end
 
-        it 'expect to monitor, mark as parsed and return content in a message key' do
+        it 'expect to monitor, mark as parsed and reraise' do
           expect(Karafka.monitor)
             .to receive(:notice_error)
 
-          expect(params.send(:parse, content)).to eq(message: content)
+          expect { params.send(:parse, value) }.to raise_error(::Karafka::Errors::ParserError)
           expect(params[:parsed]).to eq true
         end
       end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Routing
     # Default routes mapper that does not remap things

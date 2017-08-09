@@ -1,4 +1,4 @@
-require 'spec_helper'
+# frozen_string_literal: true
 
 RSpec.describe Karafka::App do
   subject(:app_class) { described_class }
@@ -15,22 +15,17 @@ RSpec.describe Karafka::App do
     end
   end
 
-  describe '#routes' do
-    let(:routes) { Karafka::Routing::Builder.instance }
+  describe '#consumer_groups' do
+    let(:builder) { Karafka::Routing::Builder.instance }
 
-    it 'returns routes builder' do
-      expect(app_class.routes).to eq routes
+    it 'returns consumer_groups builder' do
+      expect(app_class.consumer_groups).to eq builder
     end
   end
 
   describe '#setup' do
     it 'delegates it to Config setup and set framework to initializing state' do
-      expect(Karafka::Setup::Config)
-        .to receive(:setup)
-        .once
-
-      expect(app_class)
-        .to receive(:initialize!)
+      expect(Karafka::Setup::Config).to receive(:setup).once
 
       app_class.setup
     end
@@ -40,22 +35,18 @@ RSpec.describe Karafka::App do
     let(:config) { double }
 
     it 'expect to run setup_components' do
-      expect(Karafka::Setup::Config)
-        .to receive(:validate!)
-        .once
-
-      expect(Karafka::Setup::Config)
-        .to receive(:setup_components)
+      expect(Karafka::Setup::Config).to receive(:validate!).once
+      expect(Karafka::Setup::Config).to receive(:setup_components)
 
       app_class.boot!
     end
   end
 
   describe 'Karafka delegations' do
-    %i(
+    %i[
       root
       env
-    ).each do |delegation|
+    ].each do |delegation|
       describe "##{delegation}" do
         let(:return_value) { double }
 
@@ -71,11 +62,11 @@ RSpec.describe Karafka::App do
   end
 
   describe 'Karafka::Status delegations' do
-    %i(
+    %i[
       run!
       running?
       stop!
-    ).each do |delegation|
+    ].each do |delegation|
       describe "##{delegation}" do
         let(:return_value) { double }
 

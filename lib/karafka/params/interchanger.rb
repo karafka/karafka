@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Params
     # Interchangers allow us to format/encode/pack data that is being send to perform_async

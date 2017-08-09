@@ -8,19 +8,29 @@ Karafka::Loader.new.load(Karafka::App.root)
 # App class
 class App < Karafka::App
   setup do |config|
-    config.kafka.hosts = %w( 127.0.0.1:9092 )
+    config.kafka.seed_brokers = %w( 127.0.0.1:9092 )
     config.name = 'example_app'
     config.redis = {
       url: 'redis://localhost:6379'
     }
-    config.inline_mode = false
-    config.batch_mode = false
+    config.inline_mode = Karafka.env.development?
+    config.batch_consuming = true
   end
 
-  routes.draw do
+  consumer_groups.draw do
     # topic :example do
     #   controller ExampleController
     #   interchanger CustomInterchanger
+    # end
+
+    # consumer_group :bigger_group do
+    #   topic :test do
+    #     controller TestController
+    #   end
+    #
+    #   topic :test2 do
+    #     controller Test2Controller
+    #   end
     # end
   end
 end

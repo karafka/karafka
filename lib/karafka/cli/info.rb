@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Karafka framework Cli
   class Cli
@@ -13,11 +15,12 @@ module Karafka
           "Karafka framework version: #{Karafka::VERSION}",
           "Application name: #{config.name}",
           "Inline mode: #{config.inline_mode}",
-          "Batch mode: #{config.batch_mode}",
+          "Batch consuming: #{config.batch_consuming}",
+          "Batch processing: #{config.batch_processing}",
           "Number of threads: #{config.concurrency}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
-          "Kafka hosts: #{config.kafka.hosts}",
+          "Kafka seed brokers: #{config.kafka.seed_brokers}",
           "Redis: #{config.redis.to_h}"
         ]
 

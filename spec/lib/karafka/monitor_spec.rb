@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Monitor do
   subject(:monitor) { described_class.instance }
 
@@ -24,19 +26,14 @@ RSpec.describe Karafka::Monitor do
     let(:error) { StandardError }
 
     [
-      Karafka::Connection::Consumer,
+      Karafka::Connection::MessagesProcessor,
       Karafka::Connection::Listener,
       Karafka::Params::Params
     ].each do |caller_class|
       context "when caller class is #{caller_class}" do
         it 'expec to log with error' do
-          expect(Karafka.logger)
-            .not_to receive(:info)
-
-          expect(Karafka.logger)
-            .to receive(:error)
-            .with(error)
-
+          expect(Karafka.logger).not_to receive(:info)
+          expect(Karafka.logger).to receive(:error).with(error)
           monitor.notice_error(caller_class, error)
         end
       end
@@ -47,13 +44,8 @@ RSpec.describe Karafka::Monitor do
     ].each do |caller_class|
       context "when caller class is #{caller_class}" do
         it 'expec to log with fatal' do
-          expect(Karafka.logger)
-            .not_to receive(:info)
-
-          expect(Karafka.logger)
-            .to receive(:fatal)
-            .with(error)
-
+          expect(Karafka.logger).not_to receive(:info)
+          expect(Karafka.logger).to receive(:fatal).with(error)
           monitor.notice_error(caller_class, error)
         end
       end
@@ -61,10 +53,7 @@ RSpec.describe Karafka::Monitor do
 
     context 'any other class' do
       it 'expec to log with info' do
-        expect(Karafka.logger)
-          .to receive(:info)
-          .with(error)
-
+        expect(Karafka.logger).to receive(:info).with(error)
         monitor.notice_error(Karafka, error)
       end
     end
@@ -135,11 +124,11 @@ RSpec.describe Karafka::Monitor do
   end
 
   describe '#caller_exceptions_map' do
-    it { expect(monitor.send(:caller_exceptions_map).keys).to eq %i(error fatal) }
+    it { expect(monitor.send(:caller_exceptions_map).keys).to eq %i[error fatal] }
 
     let(:error_callers) do
       [
-        Karafka::Connection::Consumer,
+        Karafka::Connection::MessagesProcessor,
         Karafka::Connection::Listener,
         Karafka::Params::Params
       ]

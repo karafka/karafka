@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Module for all supported by default parsers for incoming/outgoing data
   module Parsers
@@ -8,8 +10,8 @@ module Karafka
       # @example
       #   Json.parse("{\"a\":1}") #=> { 'a' => 1 }
       def self.parse(content)
-        ::JSON.parse(content)
-      rescue ::JSON::ParserError => e
+        ::Yajl::Parser.parse(content)
+      rescue ::Yajl::ParseError => e
         raise ::Karafka::Errors::ParserError, e
       end
 

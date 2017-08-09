@@ -1,52 +1,68 @@
+# frozen_string_literal: true
+
 RSpec.describe Karafka::Server do
   subject(:server_class) { described_class }
 
   describe '#run' do
     let(:runner) { Karafka::Fetcher.new }
 
-    it 'runs in supervision, start consuming' do
-      expect(Karafka::App).to receive(:run!)
-      expect(Karafka::Fetcher).to receive(:new).and_return(runner)
-      expect(runner).to receive(:fetch_loop)
-      expect(Karafka::Process.instance).to receive(:supervise).and_yield
-      expect(Karafka::Process.instance).to receive(:on_sigint)
-      expect(Karafka::Process.instance).to receive(:on_sigquit)
-      expect(Karafka::Process.instance).to receive(:on_sigterm)
+    after { server_class.run }
 
-      server_class.run
+    context 'supervision' do
+      before do
+        expect(Karafka::App).to receive(:run!)
+        expect(Karafka::Fetcher).to receive(:new).and_return(runner)
+        expect(runner).to receive(:fetch_loop)
+        expect(Karafka::Process.instance).to receive(:on_sigint)
+        expect(Karafka::Process.instance).to receive(:on_sigquit)
+        expect(Karafka::Process.instance).to receive(:on_sigterm)
+      end
+
+      it 'runs in supervision, start consuming' do
+        expect(Karafka::Process.instance).to receive(:supervise).and_yield
+      end
     end
 
-    it 'defines a proper action for sigint' do
-      expect(Karafka::Process.instance).to receive(:supervise)
-      expect(Karafka::Process.instance).to receive(:on_sigint).and_yield
-      expect(Karafka::Process.instance).to receive(:on_sigquit)
-      expect(Karafka::Process.instance).to receive(:on_sigterm)
-      expect(Karafka::App).to receive(:stop!)
-      expect(server_class).to receive(:exit)
+    context 'sigint' do
+      before do
+        expect(Karafka::Process.instance).to receive(:supervise)
+        expect(Karafka::Process.instance).to receive(:on_sigquit)
+        expect(Karafka::Process.instance).to receive(:on_sigterm)
+        expect(Karafka::App).to receive(:stop!)
+        expect(Kernel).to receive(:exit)
+      end
 
-      server_class.run
+      it 'defines a proper action for sigint' do
+        expect(Karafka::Process.instance).to receive(:on_sigint).and_yield
+      end
     end
 
-    it 'defines a proper action for sigquit' do
-      expect(Karafka::Process.instance).to receive(:supervise)
-      expect(Karafka::Process.instance).to receive(:on_sigint)
-      expect(Karafka::Process.instance).to receive(:on_sigquit).and_yield
-      expect(Karafka::Process.instance).to receive(:on_sigterm)
-      expect(Karafka::App).to receive(:stop!)
-      expect(server_class).to receive(:exit)
+    context 'sigquit' do
+      before do
+        expect(Karafka::Process.instance).to receive(:supervise)
+        expect(Karafka::Process.instance).to receive(:on_sigint)
+        expect(Karafka::Process.instance).to receive(:on_sigterm)
+        expect(Karafka::App).to receive(:stop!)
+        expect(Kernel).to receive(:exit)
+      end
 
-      server_class.run
+      it 'defines a proper action for sigquit' do
+        expect(Karafka::Process.instance).to receive(:on_sigquit).and_yield
+      end
     end
 
-    it 'defines a proper action for sigterm' do
-      expect(Karafka::Process.instance).to receive(:supervise)
-      expect(Karafka::Process.instance).to receive(:on_sigint)
-      expect(Karafka::Process.instance).to receive(:on_sigquit)
-      expect(Karafka::Process.instance).to receive(:on_sigterm).and_yield
-      expect(Karafka::App).to receive(:stop!)
-      expect(server_class).to receive(:exit)
+    context 'sigterm' do
+      before do
+        expect(Karafka::Process.instance).to receive(:supervise)
+        expect(Karafka::Process.instance).to receive(:on_sigint)
+        expect(Karafka::Process.instance).to receive(:on_sigquit)
+        expect(Karafka::App).to receive(:stop!)
+        expect(Kernel).to receive(:exit)
+      end
 
-      server_class.run
+      it 'defines a proper action for sigterm' do
+        expect(Karafka::Process.instance).to receive(:on_sigterm).and_yield
+      end
     end
   end
 end

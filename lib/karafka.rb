@@ -1,4 +1,6 @@
-%w(
+# frozen_string_literal: true
+
+%w[
   rake
   ostruct
   rubygems
@@ -11,10 +13,10 @@
   logger
   kafka
   sidekiq
-  worker_glass
   envlogic
   thor
   fileutils
+  yajl
   dry-configurable
   dry-validation
   active_support/callbacks
@@ -23,9 +25,10 @@
   active_support/descendants_tracker
   active_support/inflector
   karafka/loader
+  karafka/setup/config
   karafka/status
-  karafka/routing/route
-).each { |lib| require lib }
+  karafka/routing/router
+].each(&method(:require))
 
 # Karafka library
 module Karafka

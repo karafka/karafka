@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   # Class used to run the Karafka consumer and handle shutting down, restarting etc
   # @note Creating multiple fetchers will result in having multiple connections to the same
@@ -8,7 +10,7 @@ module Karafka
     # so we don't have to terminate them
     def fetch_loop
       futures = listeners.map do |listener|
-        listener.future.public_send(:fetch_loop, consumer)
+        listener.future.public_send(:fetch_loop, processor)
       end
 
       futures.map(&:value)
@@ -24,16 +26,16 @@ module Karafka
 
     # @return [Array<Karafka::Connection::Listener>] listeners that will consume messages
     def listeners
-      @listeners ||= App.routes.map do |route|
-        Karafka::Connection::Listener.new(route)
+      @listeners ||= App.consumer_groups.map do |consumer_group|
+        Karafka::Connection::Listener.new(consumer_group)
       end
     end
 
-    # @return [Proc] proc that should be processed when a message arrives
-    # @yieldparam message [Kafka::FetchedMessage] message from kafka (raw one)
-    def consumer
-      lambda do |message|
-        Karafka::Connection::Consumer.new.consume(message)
+    # @return [Proc] proc that should be processed when a messages arrive
+    # @yieldparam messages [Array<Kafka::FetchedMessage>] messages from kafka (raw)
+    def processor
+      lambda do |consumer_group_id, messages|
+        Karafka::Connection::MessagesProcessor.process(consumer_group_id, messages)
       end
     end
   end
