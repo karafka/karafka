@@ -17,8 +17,6 @@ module Karafka
         key
       ].freeze
 
-      private_class_method :new
-
       class << self
         # We allow building instances only via the #build method
 
