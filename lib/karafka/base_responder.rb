@@ -62,8 +62,6 @@ module Karafka
     # Definitions of all topics that we want to be able to use in this responder should go here
     class_attribute :topics
 
-    self.topics = {}
-
     attr_reader :messages_buffer
 
     class << self
@@ -83,6 +81,9 @@ module Karafka
       # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
       #   UsersCreatedResponder.call(@created_user)
       def call(*data)
+        # Just in case there were no topics defined for a responder, we initialize with
+        # empty hash not to handle a nil case
+        self.topics ||= {}
         new.call(*data)
       end
     end
