@@ -105,7 +105,6 @@ module Karafka
         # SSL authentication related settings
         # option ssl_ca_cert_file_path [String] SSL CA certificate file path
         setting :ssl_ca_cert_file_path, nil
-        # SSL authentication related settings
         # option ca_cert [String] SSL CA certificate
         setting :ssl_ca_cert, nil
         # option client_cert [String] SSL client certificate
