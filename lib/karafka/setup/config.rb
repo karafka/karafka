@@ -15,10 +15,12 @@ module Karafka
       extend Dry::Configurable
 
       # Available settings
-      # option name [String] current app name - used to provide default Kafka groups namespaces
-      setting :name
-      # If inline_mode is set to true, we won't enqueue jobs, instead we will run them immediately
-      setting :inline_mode, false
+      # option client_id [String] kafka client_id - used to provide
+      #   default Kafka groups namespaces and identify that app in kafka
+      setting :client_id
+      # If inline_processing is set to true, we won't enqueue jobs, instead we will run them
+      # immediately
+      setting :inline_processing, false
       # option logger [Instance] logger that we want to use
       setting :logger, -> { ::Karafka::Logger.instance }
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
@@ -103,10 +105,10 @@ module Karafka
         # waiting for new messages to arrive in a partition, so don't set this value too low
         setting :socket_timeout, 10
         # SSL authentication related settings
-        # option ssl_ca_cert_file_path [String] SSL CA certificate file path
-        setting :ssl_ca_cert_file_path, nil
         # option ca_cert [String] SSL CA certificate
         setting :ssl_ca_cert, nil
+        # option ssl_ca_cert_file_path [String] SSL CA certificate file path
+        setting :ssl_ca_cert_file_path, nil
         # option client_cert [String] SSL client certificate
         setting :ssl_client_cert, nil
         # option client_cert_key [String] SSL client certificate password
@@ -115,6 +117,12 @@ module Karafka
         setting :sasl_gssapi_principal, nil
         # option sasl_gssapi_keytab [String] sasl keytab
         setting :sasl_gssapi_keytab, nil
+        # option sasl_plain_authzid [String] The authorization identity to use
+        setting :sasl_plain_authzid, ''
+        # option sasl_plain_username [String] The username used to authenticate
+        setting :sasl_plain_username, nil
+        # option sasl_plain_password [String] The password used to authenticate
+        setting :sasl_plain_password, nil
       end
 
       # This is configured automatically, don't overwrite it!

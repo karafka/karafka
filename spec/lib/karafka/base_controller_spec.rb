@@ -4,7 +4,7 @@ RSpec.describe Karafka::BaseController do
   subject(:base_controller) { working_class.new }
 
   let(:topic_name) { "topic#{rand}" }
-  let(:inline_mode) { false }
+  let(:inline_processing) { false }
   let(:responder_class) { nil }
   let(:interchanger) { nil }
   let(:worker) { nil }
@@ -12,7 +12,7 @@ RSpec.describe Karafka::BaseController do
   let(:topic) do
     topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
     topic.controller = Class.new(described_class)
-    topic.inline_mode = inline_mode
+    topic.inline_processing = inline_processing
     topic.responder = responder_class
     topic.interchanger = interchanger
     topic.worker = worker
@@ -116,7 +116,7 @@ RSpec.describe Karafka::BaseController do
   describe '#schedule' do
     context 'when there are no callbacks' do
       context 'and we dont want to perform inline' do
-        let(:inline_mode) { false }
+        let(:inline_processing) { false }
 
         it 'just schedules via call_async' do
           expect(base_controller).to receive(:call_async)
@@ -126,7 +126,7 @@ RSpec.describe Karafka::BaseController do
       end
 
       context 'and we want to perform inline' do
-        let(:inline_mode) { true }
+        let(:inline_processing) { true }
 
         it 'just expect to run with call_inline' do
           expect(base_controller).to receive(:call_inline)

@@ -6,7 +6,7 @@ module Karafka
     ConsumerGroupTopic = Dry::Validation.Schema do
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
       required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
-      required(:inline_mode).filled(:bool?)
+      required(:inline_processing).filled(:bool?)
       required(:controller).filled
       required(:parser).filled
       required(:interchanger).filled
@@ -38,11 +38,19 @@ module Karafka
         socket_timeout.int? > max_wait_time.lteq?(value(:socket_timeout))
       end
 
-      optional(:ssl_ca_cert).maybe(:str?)
-      optional(:ssl_client_cert).maybe(:str?)
-      optional(:ssl_client_cert_key).maybe(:str?)
-      optional(:sasl_gssapi_principal).maybe(:str?)
-      optional(:sasl_gssapi_keytab).maybe(:str?)
+      %i[
+        ssl_ca_cert
+        ssl_ca_cert_file_path
+        ssl_client_cert
+        ssl_client_cert_key
+        sasl_plain_authzid
+        sasl_plain_username
+        sasl_plain_password
+        sasl_gssapi_principal
+        sasl_gssapi_keytab
+      ].each do |encryption_attribute|
+        optional(encryption_attribute).maybe(:str?)
+      end
     end
   end
 end

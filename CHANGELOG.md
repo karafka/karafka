@@ -22,6 +22,8 @@
 - #174 - Extended config validation
 - #180 - Switch from JSON parser to yajl-ruby
 - #181 - When responder is defined and not used due to ```respond_with``` not being triggered in the perform, it won't raise an exception.
+- #188 - Rename name in config to client id
+- #186 - Support ruby-kafka ```ssl_ca_cert_file_path``` config
 
 ### New features and improvements
 
@@ -31,6 +33,7 @@
 - Lower memory requirements due to object creation limitation (2-3 times less objects on each new message)
 - Introduced the ```#batch_processing``` config flag (config for #126) that can be set per each consumer_group
 - Added support for partition, offset and partition key in the params hash
+- ```name``` option in config renamed to ```client_id```
 
 ### Incompatibilities
 
@@ -42,6 +45,7 @@
 - ```batch_mode``` renamed to ```batch_consuming```
 - Renamed content to value to better resemble ruby-kafka internal messages naming convention
 - When having a responder with ```required``` topics and not using ```#respond_with``` at all, it will raise an exception
+- Renamed ```inline_mode``` to ```inline_processing``` to resemble other settings conventions
 
 ### Other changes
 - PolishGeeksDevTools removed (in favour of Coditsu)

@@ -21,13 +21,13 @@ RSpec.describe Karafka::Setup::Configurators::Sidekiq do
 
   describe '#setup_sidekiq_client' do
     let(:redis_url) { rand }
-    let(:name) { rand }
+    let(:client_id) { rand }
     let(:concurrency) { rand(1000) }
     let(:sidekiq_config_client) { double }
     let(:config) do
       instance_double(
         Karafka::Setup::Config.config.class,
-        name: name,
+        client_id: client_id,
         concurrency: concurrency,
         redis: {
           url: redis_url

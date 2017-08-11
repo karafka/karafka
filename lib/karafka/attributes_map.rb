@@ -32,7 +32,7 @@ module Karafka
       # @return [Array<Symbol>] properties that can be set on a per topic level
       def topic
         (config_adapter[:subscription] + %i[
-          inline_mode
+          inline_processing
           name
           worker
           parser

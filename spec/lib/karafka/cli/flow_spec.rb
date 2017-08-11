@@ -24,7 +24,7 @@ RSpec.describe Karafka::Cli::Flow do
           cg.public_send(:topic=, topic) do
             responder responder_instance
             controller Class.new
-            inline_mode true
+            inline_processing true
           end
         end
       end

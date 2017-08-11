@@ -10,7 +10,7 @@ RSpec.describe Karafka::Routing::Topic do
 
   before do
     topic.controller = controller
-    topic.inline_mode = true
+    topic.inline_processing = true
   end
 
   describe '#build' do
@@ -48,19 +48,19 @@ RSpec.describe Karafka::Routing::Topic do
       topic.controller = controller
     end
 
-    context 'when inline_mode is true' do
+    context 'when inline_processing is true' do
       let(:worker) { false }
 
       before do
-        topic.inline_mode = true
+        topic.inline_processing = true
       end
 
       it { expect(topic.worker).to eq nil }
     end
 
-    context 'when inline_mode is false' do
+    context 'when inline_processing is false' do
       before do
-        topic.inline_mode = false
+        topic.inline_processing = false
       end
 
       context 'when worker is not set' do
@@ -83,33 +83,33 @@ RSpec.describe Karafka::Routing::Topic do
     end
   end
 
-  describe '#inline_mode' do
-    before { topic.inline_mode = inline_mode }
+  describe '#inline_processing' do
+    before { topic.inline_processing = inline_processing }
 
-    context 'when inline_mode is not set' do
+    context 'when inline_processing is not set' do
       let(:default_inline) { rand }
-      let(:inline_mode) { nil }
+      let(:inline_processing) { nil }
 
       before do
-        expect(Karafka::App.config).to receive(:inline_mode)
+        expect(Karafka::App.config).to receive(:inline_processing)
           .and_return(default_inline)
       end
 
       it 'expect to use Karafka::App default' do
-        expect(topic.inline_mode).to eq default_inline
+        expect(topic.inline_processing).to eq default_inline
       end
     end
 
-    context 'when inline_mode per topic is set to false' do
-      let(:inline_mode) { false }
+    context 'when inline_processing per topic is set to false' do
+      let(:inline_processing) { false }
 
-      it { expect(topic.inline_mode).to eq inline_mode }
+      it { expect(topic.inline_processing).to eq inline_processing }
     end
 
-    context 'when inline_mode per topic is set to true' do
-      let(:inline_mode) { true }
+    context 'when inline_processing per topic is set to true' do
+      let(:inline_processing) { true }
 
-      it { expect(topic.inline_mode).to eq inline_mode }
+      it { expect(topic.inline_processing).to eq inline_processing }
     end
   end
 

@@ -16,7 +16,7 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
 
       cg.public_send(:topic=, topic) do
         controller Class.new
-        inline_mode true
+        inline_processing true
         start_from_beginning start_from_beginning_active
       end
     end
@@ -97,10 +97,11 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
           .to receive(:new)
           .with(
             logger: ::Karafka.logger,
-            client_id: ::Karafka::App.config.name,
+            client_id: ::Karafka::App.config.client_id,
             seed_brokers: ::Karafka::App.config.kafka.seed_brokers,
             socket_timeout: 10,
-            connect_timeout: 10
+            connect_timeout: 10,
+            sasl_plain_authzid: ''
           )
           .and_return(kafka)
       end

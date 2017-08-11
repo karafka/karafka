@@ -32,13 +32,13 @@ RSpec.describe Karafka::Setup::Config do
   describe '#validate' do
     context 'when configuration has errors' do
       let(:error_class) { ::Karafka::Errors::InvalidConfiguration }
-      let(:error_message) { { name: ['must be filled'] }.to_s }
+      let(:error_message) { { client_id: ['must be filled'] }.to_s }
 
       before do
         module Karafka
           class App
             setup do |config|
-              config.name = nil
+              config.client_id = nil
             end
           end
         end
@@ -55,7 +55,7 @@ RSpec.describe Karafka::Setup::Config do
         module Karafka
           class App
             setup do |config|
-              config.name = rand(100).to_s
+              config.client_id = rand(100).to_s
             end
           end
         end

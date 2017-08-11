@@ -33,7 +33,7 @@ RSpec.describe Karafka::Routing::Builder do
             # shitload of time to setup to pass to instance eval from instance variables,
             # so instead we check against constant names
             controller :controller1
-            inline_mode true
+            inline_processing true
             name 'name1'
             worker :worker1
             parser :parser1
@@ -46,7 +46,7 @@ RSpec.describe Karafka::Routing::Builder do
         described_class.instance.draw do
           topic :topic_name2 do
             controller :controller2
-            inline_mode true
+            inline_processing true
             name 'name2'
             worker :worker2
             parser :parser2
@@ -69,15 +69,15 @@ RSpec.describe Karafka::Routing::Builder do
       # This needs to have twice same name as for a non grouped in consumer group topics,
       # we build id based on the consumer group id, here it is virtual and built based on the
       # topic name
-      it { expect(topic1.id).to eq "#{Karafka::App.config.name}_topic_name1_topic_name1" }
-      it { expect(topic2.id).to eq "#{Karafka::App.config.name}_topic_name2_topic_name2" }
+      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_topic_name1_topic_name1" }
+      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_topic_name2_topic_name2" }
       it { expect(builder.size).to eq 2 }
       it { expect(topic1.name).to eq 'name1' }
-      it { expect(topic1.inline_mode).to eq true }
+      it { expect(topic1.inline_processing).to eq true }
       it { expect(topic2.name).to eq 'name2' }
-      it { expect(topic2.inline_mode).to eq true }
-      it { expect(builder.first.id).to eq "#{Karafka::App.config.name}_topic_name1" }
-      it { expect(builder.last.id).to eq "#{Karafka::App.config.name}_topic_name2" }
+      it { expect(topic2.inline_processing).to eq true }
+      it { expect(builder.first.id).to eq "#{Karafka::App.config.client_id}_topic_name1" }
+      it { expect(builder.last.id).to eq "#{Karafka::App.config.client_id}_topic_name2" }
     end
 
     context '0.6 simple topic style single topic groups' do
@@ -90,7 +90,7 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name1 do
               controller :controller1
-              inline_mode true
+              inline_processing true
               name 'name1'
               worker :worker1
               parser :parser1
@@ -107,7 +107,7 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name2 do
               controller :controller2
-              inline_mode true
+              inline_processing true
               name 'name2'
               worker :worker2
               parser :parser2
@@ -128,8 +128,8 @@ RSpec.describe Karafka::Routing::Builder do
         it { expect(topic2.public_send(attr)).to eq :"#{attr}2" }
       end
 
-      it { expect(topic1.id).to eq "#{Karafka::App.config.name}_group_name1_topic_name1" }
-      it { expect(topic2.id).to eq "#{Karafka::App.config.name}_group_name2_topic_name2" }
+      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
+      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
       it { expect(builder.first.seed_brokers).to eq [:brokers1] }
       it { expect(builder.last.seed_brokers).to eq [:brokers2] }
       it { expect(builder.size).to eq 2 }
@@ -146,7 +146,7 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name1 do
               controller :controller1
-              inline_mode true
+              inline_processing true
               name 'name1'
               worker :worker1
               parser :parser1
@@ -156,7 +156,7 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name2 do
               controller :controller2
-              inline_mode true
+              inline_processing true
               name 'name2'
               worker :worker2
               parser :parser2
@@ -172,8 +172,8 @@ RSpec.describe Karafka::Routing::Builder do
         it { expect(topic2.public_send(attr)).to eq :"#{attr}2" }
       end
 
-      it { expect(topic1.id).to eq "#{Karafka::App.config.name}_group_name1_topic_name1" }
-      it { expect(topic2.id).to eq "#{Karafka::App.config.name}_group_name1_topic_name2" }
+      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
+      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name2" }
       it { expect(builder.first.seed_brokers).to eq [:brokers] }
       it { expect(builder.size).to eq 1 }
     end
@@ -183,7 +183,7 @@ RSpec.describe Karafka::Routing::Builder do
         described_class.instance.draw do
           consumer_group '$%^&*(' do
             topic :topic_name1 do
-              inline_mode true
+              inline_processing true
             end
           end
         end

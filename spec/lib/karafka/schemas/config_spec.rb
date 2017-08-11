@@ -5,7 +5,7 @@ RSpec.describe Karafka::Schemas::Config do
 
   let(:config) do
     {
-      name: 'name',
+      client_id: 'name',
       topic_mapper: Karafka::Routing::Mapper,
       redis: { url: 'url' }
     }
@@ -15,14 +15,14 @@ RSpec.describe Karafka::Schemas::Config do
     it { expect(schema.call(config).success?).to be_truthy }
   end
 
-  context 'name validator' do
-    it 'name is nil' do
-      config[:name] = nil
+  context 'client_id validator' do
+    it 'client_id is nil' do
+      config[:client_id] = nil
       expect(schema.call(config).success?).to be_falsey
     end
 
-    it 'name is not a string' do
-      config[:name] = 2
+    it 'client_id is not a string' do
+      config[:client_id] = 2
       expect(schema.call(config).success?).to be_falsey
     end
   end
@@ -32,9 +32,9 @@ RSpec.describe Karafka::Schemas::Config do
       config[:redis] = { url: 'url' }
     end
 
-    context 'inline_mode is true' do
+    context 'inline_processing is true' do
       before do
-        config[:inline_mode] = true
+        config[:inline_processing] = true
       end
 
       it 'redis is nil' do
@@ -43,9 +43,9 @@ RSpec.describe Karafka::Schemas::Config do
       end
     end
 
-    context 'inline_mode is false' do
+    context 'inline_processing is false' do
       before do
-        config[:inline_mode] = false
+        config[:inline_processing] = false
       end
 
       it 'redis is nil' do

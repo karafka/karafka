@@ -11,8 +11,8 @@ RSpec.describe Karafka::Cli::Info do
     let(:info) do
       [
         "Karafka framework version: #{Karafka::VERSION}",
-        "Application name: #{Karafka::App.config.name}",
-        "Inline mode: #{Karafka::App.config.inline_mode}",
+        "Application client id: #{Karafka::App.config.client_id}",
+        "Inline processing: #{Karafka::App.config.inline_processing}",
         "Batch consuming: #{Karafka::App.config.batch_consuming}",
         "Batch processing: #{Karafka::App.config.batch_processing}",
         "Number of threads: #{Karafka::App.config.concurrency}",

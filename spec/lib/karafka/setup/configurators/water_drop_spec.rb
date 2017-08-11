@@ -8,7 +8,7 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
   let(:config) do
     instance_double(
       Karafka::Setup::Config.config.class,
-      concurrency: ::Karafka::App.config.concurrency,
+      client_id: ::Karafka::App.config.client_id,
       kafka: OpenStruct.new(
         seed_brokers: ::Karafka::App.config.kafka.seed_brokers
       ),
@@ -25,9 +25,10 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
     before { water_drop_configurator.setup }
 
     it { expect(WaterDrop.config.send_messages).to eq true }
-    it { expect(WaterDrop.config.connection_pool_size).to eq config.connection_pool.size }
-    it { expect(WaterDrop.config.connection_pool_timeout).to eq config.connection_pool.timeout }
-    it { expect(WaterDrop.config.kafka.hosts).to eq config.kafka.seed_brokers }
+    it { expect(WaterDrop.config.connection_pool.size).to eq config.connection_pool.size }
+    it { expect(WaterDrop.config.connection_pool.timeout).to eq config.connection_pool.timeout }
+    it { expect(WaterDrop.config.kafka.seed_brokers).to eq config.kafka.seed_brokers }
+    it { expect(WaterDrop.config.logger).to eq Karafka::App.logger }
     it { expect(WaterDrop.config.raise_on_failure).to eq true }
   end
 end

@@ -51,7 +51,7 @@ module Karafka
   class App
     setup do |config|
       config.kafka.seed_brokers = ['localhost:9092']
-      config.name = rand.to_s
+      config.client_id = rand.to_s
       config.redis = { url: 'redis://' }
       config.kafka.offset_retention_time = -1
       config.kafka.max_bytes_per_partition = 1_048_576

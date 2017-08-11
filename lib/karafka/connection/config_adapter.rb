@@ -20,7 +20,7 @@ module Karafka
           # cases defined in the map
           settings = {
             logger: ::Karafka.logger,
-            client_id: ::Karafka::App.config.name
+            client_id: ::Karafka::App.config.client_id
           }
 
           kafka_configs.each do |setting_name, setting_value|
@@ -85,7 +85,8 @@ module Karafka
 
         private
 
-        # Removes nil containing keys from the final settings
+        # Removes nil containing keys from the final settings so it can use Kafkas driver
+        #   defaults for those
         # @param settings [Hash] settings that may contain nil values
         # @return [Hash] settings without nil using keys (non of karafka options should be nil)
         def sanitize(settings)

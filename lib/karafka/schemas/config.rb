@@ -12,7 +12,7 @@ module Karafka
     #   validated per each route (topic + consumer_group) because they can be overwritten,
     #   so we validate all of that once all the routes are defined and ready
     Config = Dry::Validation.Schema do
-      required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
+      required(:client_id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
 
       required(:redis).maybe do
         schema do
@@ -20,11 +20,11 @@ module Karafka
         end
       end
 
-      optional(:inline_mode).filled(:bool?)
+      optional(:inline_processing).filled(:bool?)
 
-      # If inline_mode is true, redis should be filled
-      rule(redis_presence: %i[redis inline_mode]) do |redis, inline_mode|
-        inline_mode.false?.then(redis.filled?)
+      # If inline_processing is true, redis should be filled
+      rule(redis_presence: %i[redis inline_processing]) do |redis, inline_processing|
+        inline_processing.false?.then(redis.filled?)
       end
 
       optional(:connection_pool).schema do

@@ -8,7 +8,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       {
         id: 'id',
         name: 'name',
-        inline_mode: true,
+        inline_processing: true,
         controller: Class.new,
         parser: Class.new,
         interchanger: Class.new,
@@ -223,63 +223,27 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       end
     end
 
-    context 'ssl_ca_cert validator' do
-      it 'ssl_ca_cert is nil' do
-        config[:ssl_ca_cert] = nil
-        expect(schema.call(config).success?).to be_truthy
-      end
+    %i[
+      ssl_ca_cert
+      ssl_ca_cert_file_path
+      ssl_client_cert
+      ssl_client_cert_key
+      sasl_plain_authzid
+      sasl_plain_username
+      sasl_plain_password
+      sasl_gssapi_principal
+      sasl_gssapi_keytab
+    ].each do |encryption_attribute|
+      context "#{encryption_attribute} validator" do
+        it "#{encryption_attribute} is nil" do
+          config[encryption_attribute] = nil
+          expect(schema.call(config).success?).to be_truthy
+        end
 
-      it 'ssl_ca_cert is not a string' do
-        config[:ssl_ca_cert] = 2
-        expect(schema.call(config).success?).to be_falsey
-      end
-    end
-
-    context 'ssl_client_cert validator' do
-      it 'ssl_client_cert is nil' do
-        config[:ssl_client_cert] = nil
-        expect(schema.call(config).success?).to be_truthy
-      end
-
-      it 'ssl_client_cert is not a string' do
-        config[:ssl_client_cert] = 2
-        expect(schema.call(config).success?).to be_falsey
-      end
-    end
-
-    context 'ssl_client_cert_key validator' do
-      it 'ssl_client_cert_key is nil' do
-        config[:ssl_client_cert_key] = nil
-        expect(schema.call(config).success?).to be_truthy
-      end
-
-      it 'ssl_client_cert_key is not a string' do
-        config[:ssl_client_cert_key] = 2
-        expect(schema.call(config).success?).to be_falsey
-      end
-    end
-
-    context 'sasl_gssapi_principal validator' do
-      it 'sasl_gssapi_principal is nil' do
-        config[:sasl_gssapi_principal] = nil
-        expect(schema.call(config).success?).to be_truthy
-      end
-
-      it 'sasl_gssapi_principal is not a string' do
-        config[:sasl_gssapi_principal] = 2
-        expect(schema.call(config).success?).to be_falsey
-      end
-    end
-
-    context 'sasl_gssapi_keytab validator' do
-      it 'sasl_gssapi_keytab is nil' do
-        config[:sasl_gssapi_keytab] = nil
-        expect(schema.call(config).success?).to be_truthy
-      end
-
-      it 'sasl_gssapi_keytab is not a string' do
-        config[:sasl_gssapi_keytab] = 2
-        expect(schema.call(config).success?).to be_falsey
+        it "#{encryption_attribute} is not a string" do
+          config[encryption_attribute] = 2
+          expect(schema.call(config).success?).to be_falsey
+        end
       end
     end
   end
@@ -329,14 +293,14 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       end
     end
 
-    context 'inline_mode validator' do
-      it 'inline_mode is nil' do
-        config[:topics][0][:inline_mode] = nil
+    context 'inline_processing validator' do
+      it 'inline_processing is nil' do
+        config[:topics][0][:inline_processing] = nil
         expect(schema.call(config).success?).to be_falsey
       end
 
-      it 'inline_mode is not a bool' do
-        config[:topics][0][:inline_mode] = 2
+      it 'inline_processing is not a bool' do
+        config[:topics][0][:inline_processing] = 2
         expect(schema.call(config).success?).to be_falsey
       end
     end

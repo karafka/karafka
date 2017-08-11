@@ -9,11 +9,11 @@ Karafka::Loader.new.load(Karafka::App.root)
 class App < Karafka::App
   setup do |config|
     config.kafka.seed_brokers = %w( 127.0.0.1:9092 )
-    config.name = 'example_app'
+    config.client_id = 'example_app'
     config.redis = {
       url: 'redis://localhost:6379'
     }
-    config.inline_mode = Karafka.env.development?
+    config.inline_processing = Karafka.env.development?
     config.batch_consuming = true
   end
 

@@ -13,8 +13,8 @@ module Karafka
 
         info = [
           "Karafka framework version: #{Karafka::VERSION}",
-          "Application name: #{config.name}",
-          "Inline mode: #{config.inline_mode}",
+          "Application client id: #{config.client_id}",
+          "Inline processing: #{config.inline_processing}",
           "Batch consuming: #{config.batch_consuming}",
           "Batch processing: #{config.batch_processing}",
           "Number of threads: #{config.concurrency}",

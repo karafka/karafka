@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'sidekiq', '>= 4.2'
   spec.add_dependency 'celluloid'
   spec.add_dependency 'envlogic', '~> 1.0'
-  spec.add_dependency 'waterdrop', '~> 0.3.2.4'
+  spec.add_dependency 'waterdrop', '>= 0.4'
   spec.add_dependency 'rake', '>= 11.3'
   spec.add_dependency 'thor', '~> 0.19'
   spec.add_dependency 'activesupport', '>= 5.0'

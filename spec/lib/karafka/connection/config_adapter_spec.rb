@@ -8,7 +8,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
     Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
       cg.public_send(:topic=, topic) do
         controller Class.new
-        inline_mode true
+        inline_processing true
       end
     end
   end
@@ -23,8 +23,32 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
     end
 
     it 'expect to have std kafka config keys' do
-      expected = %i[logger client_id seed_brokers connect_timeout socket_timeout]
+      expected = %i[
+        logger client_id seed_brokers connect_timeout socket_timeout sasl_plain_authzid
+      ]
       expect(config.keys.sort).to eq expected.sort
+    end
+
+    context 'when values of keys are not nil' do
+      let(:expected_keys) do
+        Kafka::Client.instance_method(:initialize).parameters.map(&:last).sort
+      end
+
+      before do
+        hashed_details = ::Karafka::App.config.kafka.to_h
+        expect(::Karafka::App.config.kafka).to receive(:to_h).and_return(hashed_details)
+
+        expected_keys.each do |client_key|
+          # This line will skip settings that are defined somewhere else (on config root level)
+          # or new not supported settings
+          next unless Karafka::App.config.kafka.respond_to?(client_key)
+          hashed_details[client_key] = rand.to_s
+        end
+      end
+
+      it 'expect to have all the keys as kafka requires' do
+        expect(config.keys.sort).to eq expected_keys
+      end
     end
   end
 

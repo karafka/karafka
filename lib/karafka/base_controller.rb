@@ -107,7 +107,7 @@ module Karafka
     # will schedule a call task in sidekiq
     def schedule
       run_callbacks :schedule do
-        topic.inline_mode ? call_inline : call_async
+        topic.inline_processing ? call_inline : call_async
       end
     end
 

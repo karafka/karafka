@@ -68,7 +68,7 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
         klass = ClassBuilder.build do
           extend described
 
-          config_retriever_for :name
+          config_retriever_for :client_id
         end
 
         klass.new
@@ -77,15 +77,15 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
       context 'assignment' do
         let(:new_value) { rand }
 
-        before { extended_instance.name = new_value }
+        before { extended_instance.client_id = new_value }
 
-        it { expect(extended_instance.name).to eq new_value }
+        it { expect(extended_instance.client_id).to eq new_value }
       end
 
       context 'default' do
-        let(:default_value) { Karafka::App.config.name }
+        let(:default_value) { Karafka::App.config.client_id }
 
-        it { expect(extended_instance.name).to eq default_value }
+        it { expect(extended_instance.client_id).to eq default_value }
       end
     end
   end
