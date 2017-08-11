@@ -8,7 +8,13 @@ RSpec.describe Karafka::Cli::Console do
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
   describe '#call' do
-    let(:cmd) { "KARAFKA_CONSOLE=true bundle exec irb -r #{Karafka.boot_file}" }
+    let(:cmd) do
+      envs = [
+        "IRBRC='#{Karafka.gem_root}/.console_irbrc'",
+        'KARAFKA_CONSOLE=true'
+      ]
+      "#{envs.join(' ')} bundle exec irb"
+    end
 
     it 'expect to execute irb with boot file required' do
       expect(cli).to receive(:info)

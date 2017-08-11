@@ -12,7 +12,11 @@ module Karafka
       # @example
       #   Karafka::Cli::Console.command #=> 'KARAFKA_CONSOLE=true bundle exec irb...'
       def self.command
-        "KARAFKA_CONSOLE=true bundle exec irb -r #{Karafka.boot_file}"
+        envs = [
+          "IRBRC='#{Karafka.gem_root}/.console_irbrc'",
+          'KARAFKA_CONSOLE=true'
+        ]
+        "#{envs.join(' ')} bundle exec irb"
       end
 
       # Start the Karafka console

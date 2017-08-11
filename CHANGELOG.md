@@ -24,6 +24,7 @@
 - #181 - When responder is defined and not used due to ```respond_with``` not being triggered in the perform, it won't raise an exception.
 - #188 - Rename name in config to client id
 - #186 - Support ruby-kafka ```ssl_ca_cert_file_path``` config
+- #189 - karafka console does not preserve history on exit
 
 ### New features and improvements
 
