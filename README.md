@@ -1,7 +1,6 @@
 ![karafka logo](http://mensfeld.github.io/karafka-framework-introduction/img/karafka-04.png)
 
 [![Build Status](https://travis-ci.org/karafka/karafka.png)](https://travis-ci.org/karafka/karafka)
-[![Code Climate](https://codeclimate.com/github/karafka/karafka/badges/gpa.svg)](https://codeclimate.com/github/karafka/karafka)
 [![Backers on Open Collective](https://opencollective.com/karafka/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/karafka/sponsors/badge.svg)](#sponsors) [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Framework used to simplify Apache Kafka based Ruby applications development.
@@ -12,11 +11,17 @@ Karafka not only handles incoming messages but also provides tools for building 
 
 ## How does it work
 
-Karafka provides a higher-level abstraction than raw Kafka Ruby drivers, such as Kafka-Ruby and Poseidon. Instead of focusing on  single topic consumption, it provides developers with a set of tools that are dedicated for building multi-topic applications similarly to how Rails applications are being built.
+Karafka provides a higher-level abstraction that allows you to focus on your business logic development, instead of focusing on  implementing lower level abstration layers. It provides developers with a set of tools that are dedicated for building multi-topic applications similarly to how Rails applications are being built.
+
+Karafka based applications can be easily deployed to any type of infrastructure, including those based on:
+
+* Heroku
+* Capistrano
+* Docker
 
 ## Support
 
-**Warning**: documentation refers to the 0.5 version (one that is released on RubyGems). If you decide to use master or any other branch, be prepared for some inconsistencies. To fix them, please review the [CHANGELOG](https://github.com/karafka/karafka/blob/master/CHANGELOG.md) file.
+**Warning**: We're currently in the middle of upgrading our [Wiki pages](https://github.com/karafka/karafka/wiki), to match our newest 0.6 release and it's API. If you use the 0.5 version, you might encounter some incompatibilities. We're really sorry for the inconvenience.
 
 Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything. It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
 
