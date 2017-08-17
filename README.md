@@ -40,8 +40,6 @@ and follow the instructions from the [example app Wiki](https://github.com/karaf
 
 ## Support
 
-**Warning**: We're currently in the middle of upgrading our [Wiki pages](https://github.com/karafka/karafka/wiki), to match our newest 0.6 release and it's API. If you use the 0.5 version, you might encounter some incompatibilities. We're really sorry for the inconvenience.
-
 Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything. It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
 
 If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
