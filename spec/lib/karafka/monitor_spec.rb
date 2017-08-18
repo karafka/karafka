@@ -12,11 +12,14 @@ RSpec.describe Karafka::Monitor do
   describe '#notice' do
     let(:options) { { rand => rand } }
     let(:caller_label) { 'block (3 levels) in <top (required)>' }
+    let(:called_label_jruby) { 'block in (root)' }
 
     it 'expect to log a proper info' do
+      label = jruby? ? called_label_jruby : caller_label
+
       expect(Karafka.logger)
         .to receive(:info)
-        .with("#{self.class}##{caller_label} with #{options}")
+        .with("#{self.class}##{label} with #{options}")
 
       monitor.notice self.class, options
     end

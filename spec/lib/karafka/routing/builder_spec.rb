@@ -11,16 +11,8 @@ RSpec.describe Karafka::Routing::Builder do
     responder
   ].freeze
 
-  before do
-    # Unfreezing so we can run multiple checks on a singleton
-    Fiddle::Pointer.new(builder.object_id * 2)[1] &= ~(1 << 3)
-    builder.clear
-  end
-
-  after do
-    Fiddle::Pointer.new(builder.object_id * 2)[1] &= ~(1 << 3)
-    builder.clear
-  end
+  before { builder.clear }
+  after { builder.clear }
 
   describe '#draw' do
     context '0.5 compatible simple topic style' do

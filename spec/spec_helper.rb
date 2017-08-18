@@ -1,19 +1,29 @@
 # frozen_string_literal: true
 
 ENV['KARAFKA_ENV'] = 'test'
-
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 %w[
-  rubygems
   simplecov
-  rake
-  logger
   timecop
   fiddle
 ].each do |lib|
   require lib
+end
+
+# Some object patches are here
+class Object
+  # This is a workaround class for thor patches, so it won' bother us
+  # with nonexisting method namespace (that we don't use)
+  def namespace
+    raise
+  end
+end
+
+# @return [Boolean] true if we run against jruby
+def jruby?
+  ENV['RUBY_VERSION'].include?('jruby')
 end
 
 # Don't include unnecessary stuff into rcov
@@ -28,7 +38,8 @@ SimpleCov.start do
   merge_timeout 600
 end
 
-SimpleCov.minimum_coverage 100
+# jruby counts coverage a bit differently, so we ignore that
+SimpleCov.minimum_coverage jruby? ? 95 : 100
 
 Timecop.safe_mode = true
 

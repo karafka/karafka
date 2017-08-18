@@ -131,10 +131,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.2)
   karafka!
-  rspec (>= 3.6)
-  simplecov (>= 0.14)
+  rspec
+  simplecov
   timecop
 
 BUNDLED WITH
