@@ -40,28 +40,3 @@ You can also reach us at hello@karafka.opencollective.com.
 
 Thank you to all the people who have already contributed to karafka!
 <a href="graphs/contributors"><img src="https://opencollective.com/karafka/contributors.svg?width=890" /></a>
-
-
-### Backers
-
-Thank you to all our backers! [[Become a backer](https://opencollective.com/karafka#backer)]
-
-<a href="https://opencollective.com/karafka#backers" target="_blank"><img src="https://opencollective.com/karafka/backers.svg?width=890"></a>
-
-
-### Sponsors
-
-Thank you to all our sponsors! (please ask your company to also support this open source project by [becoming a sponsor](https://opencollective.com/karafka#sponsor))
-
-<a href="https://opencollective.com/karafka/sponsor/0/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/karafka/sponsor/1/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/1/avatar.svg"></a>
-<a href="https://opencollective.com/karafka/sponsor/2/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/2/avatar.svg"></a>
-<a href="https://opencollective.com/karafka/sponsor/3/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/3/avatar.svg"></a>
-<a href="https://opencollective.com/karafka/sponsor/4/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/4/avatar.svg"></a>
-<a href="https://opencollective.com/karafka/sponsor/5/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/5/avatar.svg"></a>
-<a href="https://opencollective.com/karafka/sponsor/6/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/6/avatar.svg"></a>
-<a href="https://opencollective.com/karafka/sponsor/7/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/7/avatar.svg"></a>
-<a href="https://opencollective.com/karafka/sponsor/8/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/8/avatar.svg"></a>
-<a href="https://opencollective.com/karafka/sponsor/9/website" target="_blank"><img src="https://opencollective.com/karafka/sponsor/9/avatar.svg"></a>
-
-<!-- This `CONTRIBUTING.md` is based on @nayafia's template https://github.com/nayafia/contributing-template -->

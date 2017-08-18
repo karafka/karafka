@@ -19,9 +19,26 @@ Karafka based applications can be easily deployed to any type of infrastructure,
 * Capistrano
 * Docker
 
-## Support
+## Getting started
 
-**Warning**: We're currently in the middle of upgrading our [Wiki pages](https://github.com/karafka/karafka/wiki), to match our newest 0.6 release and it's API. If you use the 0.5 version, you might encounter some incompatibilities. We're really sorry for the inconvenience.
+If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to just clone our example repository:
+
+```bash
+git clone https://github.com/karafka/karafka-example-app ./example_app
+```
+
+then, just bundle install all the dependencies:
+
+```bash
+cd ./example_app
+bundle install
+```
+
+and follow the instructions from the [example app Wiki](https://github.com/karafka/karafka-example-app/blob/master/README.md).
+
+**Note**: you need to ensure, that you have Kafka up and running and you need to configure Kafka seed_brokers in the ```app.rb``` file.
+
+## Support
 
 Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything. It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
 
@@ -38,14 +55,6 @@ If you are interested in our commercial services, please contact [Maciej Mensfel
 ## Notice
 
 Karafka framework and Karafka team are __not__ related to Kafka streaming service called CloudKarafka in any matter. We don't recommend nor discourage usage of their platform.
-
-## Requirements
-
-In order to use Karafka framework, you need to have:
-
-  - Zookeeper (required by Kafka)
-  - Kafka (at least 0.9.0)
-  - Ruby (at least 2.3.0)
 
 ## Note on Patches/Pull Requests
 
