@@ -11,7 +11,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   rake
   logger
   timecop
-  byebug
   fiddle
 ].each do |lib|
   require lib
