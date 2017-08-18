@@ -16,7 +16,7 @@
   envlogic
   thor
   fileutils
-  yajl
+  multi_json
   dry-configurable
   dry-validation
   active_support/callbacks

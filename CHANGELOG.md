@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 0.6.0.rc1
+## 0.6.0.rc2 - unreleased
 
 ### Closed issues:
 
@@ -20,11 +20,13 @@
 - #175 - Allow single consumer to subscribe to multiple topics
 - #178 - Remove parsing failover when cannot unparse data
 - #174 - Extended config validation
-- #180 - Switch from JSON parser to yajl-ruby
+- ~~#180 - Switch from JSON parser to yajl-ruby~~
 - #181 - When responder is defined and not used due to ```respond_with``` not being triggered in the perform, it won't raise an exception.
 - #188 - Rename name in config to client id
 - #186 - Support ruby-kafka ```ssl_ca_cert_file_path``` config
 - #189 - karafka console does not preserve history on exit
+- #191 - Karafka 0.6.0rc1 does not work with jruby
+- Switch to multi json so everyone can use their favourite JSON parser
 
 ### New features and improvements
 
