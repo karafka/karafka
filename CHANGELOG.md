@@ -27,6 +27,7 @@
 - #189 - karafka console does not preserve history on exit
 - #191 - Karafka 0.6.0rc1 does not work with jruby
 - Switch to multi json so everyone can use their favourite JSON parser
+- Added jruby support in general and in Travis
 
 ### New features and improvements
 

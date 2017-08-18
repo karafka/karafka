@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'rake'
-Rake.application.run
-
 ENV['KARAFKA_ENV'] = 'test'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
@@ -13,6 +10,11 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   fiddle
 ].each do |lib|
   require lib
+end
+
+class Object
+  def namespace
+  end
 end
 
 # Don't include unnecessary stuff into rcov

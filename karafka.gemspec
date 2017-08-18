@@ -28,10 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-configurable', '~> 0.7'
   spec.add_dependency 'multi_json', '>= 1.12'
 
-  spec.add_development_dependency 'bundler', '~> 1.2'
-  spec.add_development_dependency 'rspec', '>= 3.6'
-  spec.add_development_dependency 'simplecov', '>= 0.14'
-
   spec.required_ruby_version = '>= 2.3.0'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }

@@ -10,7 +10,8 @@ rvm:
   - 2.4.1
   - ruby-head
   - jruby-9.1.12.0
-  - jruby-head
+before_install:
+- gem install bundler --no-document -v '~> 1.13.3'
 before_script:
   - unset JRUBY_OPTS
-script: bundle exec rspec spec/
+script: bundle exec rspec spec
