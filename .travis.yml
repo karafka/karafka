@@ -15,3 +15,6 @@ before_install:
 before_script:
   - unset JRUBY_OPTS
 script: bundle exec rspec spec
+env:
+  global:
+    - JRUBY_OPTS='--debug'
