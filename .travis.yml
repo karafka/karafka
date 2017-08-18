@@ -9,4 +9,4 @@ rvm:
   - 2.4.1
   - jruby-9.1.12.0
 script:
-  - bundle exec rake
+  - bundle exec rspec spec
