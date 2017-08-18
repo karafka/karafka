@@ -80,7 +80,7 @@ module Karafka
             settings[setting_name] = setting_value
           end
 
-          [topic.name, sanitize(settings)]
+          [Karafka::App.config.topic_mapper.outgoing(topic.name), sanitize(settings)]
         end
 
         private

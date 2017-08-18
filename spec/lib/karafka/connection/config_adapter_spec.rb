@@ -82,5 +82,23 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
     end
 
     it { expect(config.first).to eq consumer_group.topics.first.name }
+
+    context 'with a custom topic mapper' do
+      let(:custom_mapper) do
+        ClassBuilder.build do
+          def self.outgoing(topic)
+            "prefix.#{topic}"
+          end
+        end
+      end
+
+      before do
+        expect(Karafka::App.config)
+          .to receive(:topic_mapper)
+                .and_return(custom_mapper)
+      end
+
+      it { expect(config.first).to eq custom_mapper.outgoing(consumer_group.topics.first.name) }
+    end
   end
 end
