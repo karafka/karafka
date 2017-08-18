@@ -38,6 +38,8 @@ and follow the instructions from the [example app Wiki](https://github.com/karaf
 
 **Note**: you need to ensure, that you have Kafka up and running and you need to configure Kafka seed_brokers in the ```app.rb``` file.
 
+If you need more details and know how to start karafka with a clean installation read [Getting started page](https://github.com/karafka/karafka/wiki/Getting-started) in Wiki.
+
 ## Support
 
 Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything. It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
