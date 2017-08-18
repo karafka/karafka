@@ -15,7 +15,7 @@ RSpec.describe Karafka::Monitor do
     let(:called_label_jruby) { 'block in (root)' }
 
     it 'expect to log a proper info' do
-      label = ENV['RUBY_VERSION'].include?('jruby') ? called_label_jruby : caller_label
+      label = jruby? ? called_label_jruby : caller_label
 
       expect(Karafka.logger)
         .to receive(:info)
