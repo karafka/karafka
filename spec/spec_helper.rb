@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 
-ENV['KARAFKA_ENV'] = 'test'
+require 'rake'
+Rake.application.run
 
+ENV['KARAFKA_ENV'] = 'test'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 %w[
-  rubygems
   simplecov
-  rake
-  logger
   timecop
   fiddle
 ].each do |lib|
