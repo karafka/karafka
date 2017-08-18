@@ -14,3 +14,4 @@ script: bundle exec rspec spec/
 env:
   global:
     - JRUBY_OPTS='--debug'
+install: bundle install --jobs=3 --retry=3
