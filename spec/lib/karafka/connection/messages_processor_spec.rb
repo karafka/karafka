@@ -178,6 +178,11 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
         it 'routes to a proper controller and schedule task' do
           expect { processor.process(group_id, messages_batch) }.not_to raise_error
         end
+
+        it 'dont corrupt the raw kafka message with topic remapping' do
+          processor.process(group_id, messages_batch)
+          expect(messages_batch.first.topic).to eq topic
+        end
       end
 
       context 'something goes wrong (exception is raised)' do

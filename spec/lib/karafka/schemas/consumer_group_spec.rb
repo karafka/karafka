@@ -135,13 +135,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       end
     end
 
-    context 'topic_mapper validator' do
-      it 'topic_mapper is not present' do
-        config[:topic_mapper] = nil
-        expect(schema.call(config).success?).to be_falsey
-      end
-    end
-
     context 'connect_timeout validator' do
       it 'connect_timeout is nil' do
         config[:connect_timeout] = nil

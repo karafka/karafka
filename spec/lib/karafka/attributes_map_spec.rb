@@ -41,7 +41,6 @@ RSpec.describe Karafka::AttributesMap do
 
     it 'expect to include karafka specific settings' do
       expect(map.consumer_group).to include(:batch_consuming)
-      expect(map.consumer_group).to include(:topic_mapper)
     end
   end
 end

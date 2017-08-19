@@ -10,7 +10,6 @@ module Karafka
     class Params < HashWithIndifferentAccess
       # Kafka::FetchedMessage attributes that we want to use inside of params
       KAFKA_MESSAGE_ATTRIBUTES = %i[
-        topic
         value
         partition
         offset
@@ -44,6 +43,14 @@ module Karafka
               KAFKA_MESSAGE_ATTRIBUTES.each do |attribute|
                 instance[attribute] = message.send(attribute)
               end
+
+              # When we get raw messages, they might have a topic, that was modified by a
+              # topic mapper. We need to "reverse" this change and map back to the non-modified
+              # format, so our internal flow is not corrupted with the mapping
+              instance[:topic] = Karafka::App
+                .config
+                .topic_mapper
+                .incoming(message.topic)
             end
           end
         end

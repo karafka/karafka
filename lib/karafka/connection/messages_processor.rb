@@ -36,7 +36,6 @@ module Karafka
 
         # Processes whole batch in one request (all at once)
         # @param controller [Karafka::BaseController] base controller descendant
-        # @param mapped_topic [String] mapped topic name
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages from kafka
         def process_batch(controller, kafka_messages)
           controller.params_batch = kafka_messages
@@ -46,7 +45,6 @@ module Karafka
 
         # Processes messages one by one (like with std http requests)
         # @param controller [Karafka::BaseController] base controller descendant
-        # @param mapped_topic [String] mapped topic name
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages from kafka
         def process_each(controller, kafka_messages)
           kafka_messages.each do |kafka_message|

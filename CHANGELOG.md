@@ -28,6 +28,7 @@
 - #191 - Karafka 0.6.0rc1 does not work with jruby
 - Switch to multi json so everyone can use their favourite JSON parser
 - Added jruby support in general and in Travis
+- #196 - Topic mapper does not map topics when subscribing thanks to @webandtech
 
 ### New features and improvements
 
