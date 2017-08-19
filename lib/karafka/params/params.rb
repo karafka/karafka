@@ -47,10 +47,7 @@ module Karafka
               # When we get raw messages, they might have a topic, that was modified by a
               # topic mapper. We need to "reverse" this change and map back to the non-modified
               # format, so our internal flow is not corrupted with the mapping
-              instance[:topic] = Karafka::App
-                                 .config
-                                 .topic_mapper
-                                 .incoming(message.topic)
+              instance[:topic] = Karafka::App.config.topic_mapper.incoming(message.topic)
             end
           end
         end
