@@ -62,20 +62,10 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
         end
 
         before do
-          expect(Karafka::App.config)
-            .to receive(:topic_mapper)
-                  .and_return(custom_mapper)
-
-          expect(Karafka::Routing::Router)
-            .to receive(:build)
-                  .and_return(controller_instance)
-
-          expect(controller_instance)
-            .to receive(:params_batch=)
-                  .with([raw_message1, raw_message2])
-
-          expect(controller_instance)
-            .to receive(:schedule)
+          expect(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper)
+          expect(Karafka::Routing::Router).to receive(:build).and_return(controller_instance)
+          expect(controller_instance).to receive(:params_batch=).with([raw_message1, raw_message2])
+          expect(controller_instance).to receive(:schedule)
         end
 
         it 'routes to a proper controller and schedule task' do

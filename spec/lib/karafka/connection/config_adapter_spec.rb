@@ -92,11 +92,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
         end
       end
 
-      before do
-        expect(Karafka::App.config)
-          .to receive(:topic_mapper)
-                .and_return(custom_mapper)
-      end
+      before { expect(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
 
       it { expect(config.first).to eq custom_mapper.outgoing(consumer_group.topics.first.name) }
     end
