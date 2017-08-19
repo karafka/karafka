@@ -64,15 +64,15 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
         before do
           expect(Karafka::App.config)
             .to receive(:topic_mapper)
-            .and_return(custom_mapper)
+                  .and_return(custom_mapper)
 
           expect(Karafka::Routing::Router)
             .to receive(:build)
-            .and_return(controller_instance)
+                  .and_return(controller_instance)
 
           expect(controller_instance)
             .to receive(:params_batch=)
-            .with([raw_message1, raw_message2])
+                  .with([raw_message1, raw_message2])
 
           expect(controller_instance)
             .to receive(:schedule)
@@ -80,12 +80,6 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
 
         it 'routes to a proper controller and schedule task' do
           expect { processor.process(group_id, messages_batch) }.not_to raise_error
-        end
-
-        it 'expect to replace topic with mapped one on kafka fetched messages' do
-          processor.process(group_id, messages_batch)
-          expect(raw_message1.topic).to eq mapped_topic
-          expect(raw_message2.topic).to eq mapped_topic
         end
       end
 
