@@ -25,7 +25,7 @@
 - #188 - Rename name in config to client id
 - #186 - Support ruby-kafka ```ssl_ca_cert_file_path``` config
 - #189 - karafka console does not preserve history on exit
-- #191 - Karafka 0.6.0rc1 does not work with jruby
+- #191 - Karafka 0.6.0rc1 does not work with jruby / now it does :-)
 - Switch to multi json so everyone can use their favourite JSON parser
 - Added jruby support in general and in Travis
 - #196 - Topic mapper does not map topics when subscribing thanks to @webandtech
