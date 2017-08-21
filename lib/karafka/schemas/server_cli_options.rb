@@ -26,8 +26,8 @@ module Karafka
       optional(:consumer_groups).filled(:array?)
 
       validate(consumer_groups_inclusion: :consumer_groups) do |consumer_groups|
-        # If there were no consumer_groups declared in the server cli, it means that we will run all of
-        # them and no need to validate them here at all
+        # If there were no consumer_groups declared in the server cli, it means that we will
+        # run all of them and no need to validate them here at all
         if consumer_groups.nil?
           true
         else
