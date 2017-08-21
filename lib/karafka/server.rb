@@ -8,6 +8,7 @@ module Karafka
       # So we can have access to them later on and be able to stop them on exit
       attr_reader :consumers
 
+      # Writer for list of topics that we want to consume in our current process context
       attr_writer :active_topics
 
       # Method which runs app

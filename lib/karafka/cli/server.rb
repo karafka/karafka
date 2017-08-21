@@ -48,7 +48,7 @@ module Karafka
       def validate!
         result = Schemas::ServerCliOptions.call(cli.options)
         return if result.success?
-        raise Errors::InvalidConfiguration, res.errors
+        raise Errors::InvalidConfiguration, result.errors
       end
 
       # Detaches current process into background and writes its pidfile

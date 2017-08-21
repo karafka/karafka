@@ -63,12 +63,22 @@ RSpec.describe Karafka::Cli::Server do
   end
 
   describe '#validate!' do
-    context 'when server cli options are ok' do
-      pending
+    context 'when server cli options are not valid' do
+      let(:expected_error) { Karafka::Errors::InvalidConfiguration }
+
+      before { cli.options = { daemon: true, pid: nil } }
+
+      it 'expect to raise proper exception' do
+        expect { server_cli.send(:validate!) }.to raise_error(expected_error)
+      end
     end
 
-    context 'when server cli options are not valid' do
-      pending
+    context 'when server cli options are ok' do
+      before { cli.options = { daemon: false } }
+
+      it 'expect not to raise exception' do
+        expect { server_cli.send(:validate!) }.not_to raise_error
+      end
     end
   end
 

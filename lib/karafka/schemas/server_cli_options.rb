@@ -24,7 +24,7 @@ module Karafka
 
       validate(topics_inclusion: :topics) do |topics|
         topics.nil? ? true : \
-          (topics - Karafka::App.consumer_groups.map(&:topics).flatten.map(&:name)).empty?
+          (topics - Karafka::Routing::Builder.instance.map(&:topics).flatten.map(&:name)).empty?
       end
 
       validate(pid_existence: :pid) do |pid|

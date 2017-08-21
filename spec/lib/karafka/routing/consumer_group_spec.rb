@@ -54,6 +54,36 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
     it { expect(built_topic.name).to eq :topic_name.to_s }
   end
 
+  describe '#active?' do
+    context 'when there are no topics in the consumer group' do
+      it { expect(consumer_group.active?).to eq false }
+    end
+
+    context 'when none of the topics is active' do
+      before do
+        consumer_group.public_send(:topic=, :topic_name) do
+          controller Class.new
+          worker Class.new
+        end
+      end
+
+      it { expect(consumer_group.active?).to eq false }
+    end
+
+    context 'when any of the topics is active' do
+      before do
+        consumer_group.public_send(:topic=, :topic_name) do
+          controller Class.new
+          worker Class.new
+        end
+      end
+
+      before { Karafka::Server.active_topics = %w[topic_name] }
+
+      it { expect(consumer_group.active?).to eq true }
+    end
+  end
+
   describe '#to_h' do
     let(:casted_consumer_group) { consumer_group.to_h }
 

@@ -17,7 +17,7 @@ module Karafka
       #   kafka and don't understand the concept of consumer groups.
       def initialize(id)
         @id = "#{Karafka::App.config.client_id.to_s.underscore}_#{id}"
-        @topics = TopicGroup.new
+        @topics = TopicsGroup.new
       end
 
       # @return [Boolean] true if this consumer group should be active in our current process

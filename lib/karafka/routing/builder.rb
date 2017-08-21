@@ -12,8 +12,6 @@ module Karafka
     class Builder < Array
       include Singleton
 
-      attr_writer :active_topics
-
       # Used to draw routes for Karafka
       # @note After it is done drawing it will store and validate all the routes to make sure that
       #   they are correct and that there are no topic/group duplications (this is forbidden)

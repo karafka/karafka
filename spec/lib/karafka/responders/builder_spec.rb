@@ -27,4 +27,8 @@ RSpec.describe Karafka::Responders::Builder do
       end
     end
   end
+
+  describe '#active' do
+    pending
+  end
 end
