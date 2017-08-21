@@ -23,7 +23,7 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
   end
 
   before do
-    Karafka::Server.active_topics = [topic]
+    Karafka::Server.consumer_groups = [group]
   end
 
   describe '.new' do

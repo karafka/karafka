@@ -62,7 +62,7 @@ module Karafka
         @kafka_consumer ||= kafka.consumer(
           ConfigAdapter.consumer(consumer_group)
         ).tap do |consumer|
-          consumer_group.topics.active.each do |topic|
+          consumer_group.topics.each do |topic|
             consumer.subscribe(*ConfigAdapter.subscription(topic))
           end
         end

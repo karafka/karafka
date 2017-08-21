@@ -195,7 +195,7 @@ RSpec.describe Karafka::Routing::Topic do
 
   describe '#to_h' do
     it 'expect to contain all the topic map attributes plus id and controller' do
-      expected = (Karafka::AttributesMap.topic + %i[id controller active]).sort
+      expected = (Karafka::AttributesMap.topic + %i[id controller]).sort
       expect(topic.to_h.keys.sort).to eq(expected)
     end
   end

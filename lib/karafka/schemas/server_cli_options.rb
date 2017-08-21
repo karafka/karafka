@@ -3,17 +3,17 @@
 module Karafka
   module Schemas
     # Schema for validating correctness of the server cli command options
-    # We validate some basics + the list of topics on which we want to listen, to make
+    # We validate some basics + the list of consumer_groups on which we want to use, to make
     # sure that all of them are defined, plus that a pidfile does not exist
     ServerCliOptions = Dry::Validation.Schema do
       configure do
-        option :topics
+        option :consumer_groups
 
         def self.messages
           super.merge(
             en: {
               errors: {
-                topics_inclusion: 'Unknown topics that don\'t match any from the routing.',
+                consumer_groups_inclusion: 'Unknown consumer group.',
                 pid_existence: 'Pidfile already exists.'
               }
             }
@@ -23,15 +23,15 @@ module Karafka
 
       optional(:pid).filled(:str?)
       optional(:daemon).filled(:bool?)
-      optional(:topics).filled(:array?)
+      optional(:consumer_groups).filled(:array?)
 
-      validate(topics_inclusion: :topics) do |topics|
-        # If there were no topics declared in the server cli, it means that we will run all of
+      validate(consumer_groups_inclusion: :consumer_groups) do |consumer_groups|
+        # If there were no consumer_groups declared in the server cli, it means that we will run all of
         # them and no need to validate them here at all
-        if topics.nil?
+        if consumer_groups.nil?
           true
         else
-          (topics - Karafka::Routing::Builder.instance.map(&:topics).flatten.map(&:name)).empty?
+          (consumer_groups - Karafka::Routing::Builder.instance.map(&:name)).empty?
         end
       end
 

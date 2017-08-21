@@ -23,10 +23,6 @@ module Karafka
         @id = "#{consumer_group.id}_#{@name}"
       end
 
-      def active?
-        Karafka::Server.active_topics.include?(name)
-      end
-
       # Initializes default values for all the options that support defaults if their values are
       # not yet specified. This is need to be done (cannot be lazy loaded on first use) because
       # everywhere except Karafka server command, those would not be initialized on time - for
@@ -74,8 +70,7 @@ module Karafka
 
         Hash[map].merge!(
           id: id,
-          controller: controller,
-          active: active?
+          controller: controller
         )
       end
     end

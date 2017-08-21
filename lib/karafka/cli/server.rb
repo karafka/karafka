@@ -9,7 +9,7 @@ module Karafka
       option aliases: 's'
       option :daemon, default: false, type: :boolean, aliases: :d
       option :pid, default: 'tmp/pids/karafka', type: :string, aliases: :p
-      option :topics, type: :array, aliases: :t, default: nil
+      option :consumer_groups, type: :array, default: nil, aliases: :g
 
       # Start the Karafka server
       def call
@@ -35,7 +35,7 @@ module Karafka
 
         # We assign active topics on a server level, as only server is expected to listen on
         # part of the topics
-        Karafka::Server.active_topics = cli.options[:topics]
+        Karafka::Server.consumer_groups = cli.options[:consumer_groups]
 
         # After we fork, we can boot celluloid again
         Karafka::Server.run
