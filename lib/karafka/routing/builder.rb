@@ -12,6 +12,8 @@ module Karafka
     class Builder < Array
       include Singleton
 
+      attr_writer :active_topics
+
       # Used to draw routes for Karafka
       # @note After it is done drawing it will store and validate all the routes to make sure that
       #   they are correct and that there are no topic/group duplications (this is forbidden)
@@ -30,6 +32,13 @@ module Karafka
           next if validation_result.success?
           raise Errors::InvalidConfiguration, [validation_result.errors, hashed_group]
         end
+      end
+
+      # @return [Array<Karafka::Routing::ConsumerGroup>] only active consumer groups that
+      #   we want to use. Since Karafka supports multi-process setup, we need to be able
+      #   to pick only those consumer groups that should be active in our given process context
+      def active
+        select(&:active?)
       end
 
       private

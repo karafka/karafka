@@ -8,6 +8,8 @@ module Karafka
       # So we can have access to them later on and be able to stop them on exit
       attr_reader :consumers
 
+      attr_writer :active_topics
+
       # Method which runs app
       def run
         @consumers = Concurrent::Array.new
@@ -15,6 +17,13 @@ module Karafka
         bind_on_sigquit
         bind_on_sigterm
         start_supervised
+      end
+
+      # @return [Array<String>] array with names of topics that should be consumed in a current
+      #   server context
+      def active_topics
+        # If not specified, a server will listed on all the topics
+        @active_topics ||= Karafka::App.consumer_groups.map(&:topics).flatten.map(&:name).freeze
       end
 
       private

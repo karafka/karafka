@@ -17,7 +17,15 @@ module Karafka
       #   kafka and don't understand the concept of consumer groups.
       def initialize(id)
         @id = "#{Karafka::App.config.client_id.to_s.underscore}_#{id}"
-        @topics = []
+        @topics = TopicGroup.new
+      end
+
+      # @return [Boolean] true if this consumer group should be active in our current process
+      #   context. A given consumer group might not always be active, as there might be a
+      #   process that should listen only on certain topics
+      # @note Only consumer groups that have at least 1 active topic are considered active
+      def active?
+        topics.any?(&:active?)
       end
 
       # Builds a topic representation inside of a current consumer group route
