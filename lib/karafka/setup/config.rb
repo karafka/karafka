@@ -51,7 +51,7 @@ module Karafka
         # or the opposite for bigger systems
         setting :size, lambda {
           [
-            ::Karafka::App.consumer_groups.count,
+            ::Karafka::App.consumer_groups.active.count,
             Sidekiq.options[:concurrency]
           ].max
         }
