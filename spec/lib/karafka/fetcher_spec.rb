@@ -77,7 +77,7 @@ RSpec.describe Karafka::Fetcher do
 
   describe '#listeners' do
     let(:consumer_group) { double }
-    let(:consumer_groups) { [consumer_group] }
+    let(:consumer_groups) { OpenStruct.new(active: [consumer_group]) }
 
     before do
       expect(Karafka::App)

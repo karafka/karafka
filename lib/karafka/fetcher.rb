@@ -26,7 +26,7 @@ module Karafka
 
     # @return [Array<Karafka::Connection::Listener>] listeners that will consume messages
     def listeners
-      @listeners ||= App.consumer_groups.map do |consumer_group|
+      @listeners ||= App.consumer_groups.active.map do |consumer_group|
         Karafka::Connection::Listener.new(consumer_group)
       end
     end

@@ -184,4 +184,18 @@ RSpec.describe Karafka::Routing::Builder do
       it { expect { invalid_route }.to raise_error(Karafka::Errors::InvalidConfiguration) }
     end
   end
+
+  describe '#active' do
+    let(:active_group) { instance_double(Karafka::Routing::ConsumerGroup, active?: true) }
+    let(:inactive_group) { instance_double(Karafka::Routing::ConsumerGroup, active?: false) }
+
+    before do
+      builder << active_group
+      builder << inactive_group
+    end
+
+    it 'expect to select only active consumer groups' do
+      expect(builder.active).to eq [active_group]
+    end
+  end
 end

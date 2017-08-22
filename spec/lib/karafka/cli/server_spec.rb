@@ -24,8 +24,8 @@ RSpec.describe Karafka::Cli::Server do
         server_cli.call
       end
 
-      it 'expect not to validate! anything' do
-        expect(server_cli).not_to receive(:validate!)
+      it 'expect to validate!' do
+        expect(server_cli).to receive(:validate!)
 
         server_cli.call
       end
@@ -39,12 +39,17 @@ RSpec.describe Karafka::Cli::Server do
 
     context 'when run in background (demonized)' do
       before do
-        cli.options = { daemon: true, pid: true }
+        cli.options = { daemon: true, pid: 'tmp/pid' }
 
         expect(server_cli).to receive(:puts)
           .with('Starting Karafka server')
 
         expect(cli).to receive(:info)
+
+        expect(FileUtils)
+          .to receive(:mkdir_p)
+          .with(File.dirname(cli.options[:pid]))
+
         expect(Karafka::Server).to receive(:run)
       end
 
@@ -58,22 +63,21 @@ RSpec.describe Karafka::Cli::Server do
   end
 
   describe '#validate!' do
-    before { cli.options = { pid: pid } }
+    context 'when server cli options are not valid' do
+      let(:expected_error) { Karafka::Errors::InvalidConfiguration }
 
-    it 'expect to create dir for pid' do
-      expect(FileUtils)
-        .to receive(:mkdir_p)
-        .with(File.dirname(cli.options[:pid]))
+      before { cli.options = { daemon: true, pid: nil } }
 
-      server_cli.send(:validate!)
+      it 'expect to raise proper exception' do
+        expect { server_cli.send(:validate!) }.to raise_error(expected_error)
+      end
     end
 
-    context 'when pid file already exists' do
-      it 'expect to raise error' do
-        expect(File).to receive(:exist?)
-          .with(pid).and_raise(StandardError)
+    context 'when server cli options are ok' do
+      before { cli.options = { daemon: false } }
 
-        expect { server_cli.send(:validate!) }.to raise_error(StandardError)
+      it 'expect not to raise exception' do
+        expect { server_cli.send(:validate!) }.not_to raise_error
       end
     end
   end

@@ -29,6 +29,8 @@
 - Switch to multi json so everyone can use their favourite JSON parser
 - Added jruby support in general and in Travis
 - #196 - Topic mapper does not map topics when subscribing thanks to @webandtech
+- #96 - Karafka server - possiblity to run it only for a certain topics
+- karafka worker cli option is removed (please use sidekiq directly)
 
 ### New features and improvements
 

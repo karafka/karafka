@@ -8,6 +8,9 @@ module Karafka
       # So we can have access to them later on and be able to stop them on exit
       attr_reader :consumers
 
+      # Writer for list of consumer groups that we want to consume in our current process context
+      attr_writer :consumer_groups
+
       # Method which runs app
       def run
         @consumers = Concurrent::Array.new
@@ -15,6 +18,13 @@ module Karafka
         bind_on_sigquit
         bind_on_sigterm
         start_supervised
+      end
+
+      # @return [Array<String>] array with names of consumer groups that should be consumed in a
+      #   current server context
+      def consumer_groups
+        # If not specified, a server will listed on all the topics
+        @consumer_groups ||= Karafka::App.consumer_groups.map(&:name).freeze
       end
 
       private

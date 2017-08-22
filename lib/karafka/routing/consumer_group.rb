@@ -10,14 +10,21 @@ module Karafka
 
       attr_reader :topics
       attr_reader :id
+      attr_reader :name
 
-      # @param id [String, Symbol] raw id of this consumer group. Raw means, that it does not
+      # @param name [String, Symbol] raw name of this consumer group. Raw means, that it does not
       #   yet have an application client_id namespace, this will be added here by default.
       #   We add it to make a multi-system development easier for people that don't use
       #   kafka and don't understand the concept of consumer groups.
-      def initialize(id)
-        @id = "#{Karafka::App.config.client_id.to_s.underscore}_#{id}"
+      def initialize(name)
+        @name = name
+        @id = "#{Karafka::App.config.client_id.to_s.underscore}_#{@name}"
         @topics = []
+      end
+
+      # @return [Boolean] true if this consumer group should be active in our current process
+      def active?
+        Karafka::Server.consumer_groups.include?(name)
       end
 
       # Builds a topic representation inside of a current consumer group route

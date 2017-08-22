@@ -22,6 +22,10 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
     end
   end
 
+  before do
+    Karafka::Server.consumer_groups = [group]
+  end
+
   describe '.new' do
     it 'just remembers consumer_group' do
       expect(topic_consumer.instance_variable_get(:@consumer_group)).to eq consumer_group
