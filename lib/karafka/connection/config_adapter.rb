@@ -65,7 +65,7 @@ module Karafka
 
         # Builds all the configuration settings required by kafka consumer#pause method
         # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
-        # @return [Hash] hash with all the settings required to pausa kafka consumer
+        # @return [Hash] hash with all the settings required to pause kafka consumer
         def pausing(consumer_group)
           { timeout: consumer_group.pause_timeout }
         end
