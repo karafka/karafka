@@ -11,7 +11,7 @@ Karafka::Loader.new.load(Karafka::App.root)
 # require ::File.expand_path('../config/environment', __FILE__)
 # Rails.application.eager_load!
 # App class
-class App < Karafka::App
+class Karafka < Karafka::App
   setup do |config|
     config.kafka.seed_brokers = %w( 127.0.0.1:9092 )
     config.client_id = 'example_app'

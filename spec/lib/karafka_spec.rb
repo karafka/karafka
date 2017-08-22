@@ -57,7 +57,7 @@ RSpec.describe Karafka do
 
     context 'when KARAFKA_BOOT_FILE is not defined' do
       let(:boot_file) { nil }
-      let(:default) { File.join(described_class.root, 'app.rb') }
+      let(:default) { File.join(described_class.root, 'karafka.rb') }
 
       it 'expect to use default one' do
         expect(karafka.boot_file).to eq Pathname.new(default)

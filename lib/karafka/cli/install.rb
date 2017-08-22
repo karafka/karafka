@@ -20,7 +20,7 @@ module Karafka
 
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
-        'app.rb.example' => Karafka.boot_file.basename,
+        'karafka.rb.example' => Karafka.boot_file.basename,
         'sidekiq.yml.example' => 'config/sidekiq.yml.example',
         'application_worker.rb.example' => 'app/workers/application_worker.rb',
         'application_controller.rb.example' => 'app/controllers/application_controller.rb',

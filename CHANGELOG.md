@@ -45,6 +45,7 @@
 
 ### Incompatibilities
 
+- Default boot file is renamed from app.rb to karafka.rb
 - Removed worker glass as dependency (now and independent gem)
 - ```kafka.hosts``` option renamed to ```kafka.seed_brokers``` - you don't need to provide all the hosts to work with Kafka
 - ```start_from_beginning``` moved into kafka scope (```kafka.start_from_beginning```)

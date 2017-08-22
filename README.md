@@ -36,7 +36,7 @@ bundle install
 
 and follow the instructions from the [example app Wiki](https://github.com/karafka/karafka-example-app/blob/master/README.md).
 
-**Note**: you need to ensure, that you have Kafka up and running and you need to configure Kafka seed_brokers in the ```app.rb``` file.
+**Note**: you need to ensure, that you have Kafka up and running and you need to configure Kafka seed_brokers in the ```karafka.rb``` file.
 
 If you need more details and know how on how to start Karafka with a clean installation, read the [Getting started page](https://github.com/karafka/karafka/wiki/Getting-started) section of our Wiki.
 
