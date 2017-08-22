@@ -50,9 +50,9 @@ module Karafka
       # @param partition [Integer] number partition that we want to pause
       def pause(topic, partition)
         settings = ConfigAdapter.pausing(consumer_group)
-        return false unless settings[:timeout] > 0
+        return false unless settings[:timeout].positive?
         kafka_consumer.pause(topic, partition, settings)
-        return true
+        true
       end
 
       # Consumes messages from Kafka in batches

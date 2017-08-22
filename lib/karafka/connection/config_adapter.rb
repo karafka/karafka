@@ -77,8 +77,6 @@ module Karafka
         # @param preexisting_settings [Hash] hash with some preexisting settings that might have
         #   been loaded in a different way
         def fetch_for(namespace_key, preexisting_settings = {})
-          preexisting_settings
-
           kafka_configs.each do |setting_name, setting_value|
             next unless AttributesMap.config_adapter[namespace_key].include?(setting_name)
             next if preexisting_settings.keys.include?(setting_name)

@@ -82,9 +82,11 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
 
     context 'when everything works smooth' do
       context 'single message consumption mode' do
+        let(:messages) { [incoming_message] }
+
         it 'expect to use kafka_consumer to get each message and yield as an array of messages' do
           expect(kafka_consumer).to receive(:each_message).and_yield(incoming_message)
-          expect { |block| messages_consumer.fetch_loop(&block) }.to yield_with_args([incoming_message])
+          expect { |block| messages_consumer.fetch_loop(&block) }.to yield_with_args(messages)
         end
       end
 
