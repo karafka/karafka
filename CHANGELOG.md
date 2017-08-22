@@ -31,6 +31,7 @@
 - #196 - Topic mapper does not map topics when subscribing thanks to @webandtech
 - #96 - Karafka server - possiblity to run it only for a certain topics
 - karafka worker cli option is removed (please use sidekiq directly)
+- (optional) pausing upon processing failures ```pause_timeout```
 
 ### New features and improvements
 
