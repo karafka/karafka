@@ -72,6 +72,14 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
     end
   end
 
+  describe '#pausing' do
+    subject(:config) { described_class.pausing(consumer_group) }
+
+    it 'expect not to have anything else except timeout' do
+      expect(config.keys.sort).to eq %i[timeout]
+    end
+  end
+
   describe '#subscription' do
     subject(:config) { described_class.subscription(consumer_group.topics.first) }
 

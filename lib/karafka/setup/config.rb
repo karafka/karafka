@@ -67,6 +67,11 @@ module Karafka
         # option session_timeout [Integer] the number of seconds after which, if a client
         #   hasn't contacted the Kafka cluster, it will be kicked out of the group.
         setting :session_timeout, 30
+        # Time that a given partition will be paused from processing messages, when message
+        # processing fails. It allows us to process other partitions, while the error is being
+        # resolved and also "slows" things down, so it prevents from "eating" up all messages and
+        # processing them with failed code
+        setting :pause_timeout, 10
         # option offset_commit_interval [Integer] the interval between offset commits,
         #   in seconds.
         setting :offset_commit_interval, 10

@@ -9,7 +9,10 @@ RSpec.describe Karafka::AttributesMap do
       expect(values.count).to eq values.uniq.count
     end
 
-    it { expect(map.config_adapter.keys).to eq(%i[consumer subscription consuming ignored]) }
+    it 'expect to have proper keys for actions' do
+      expected_keys = %i[consumer subscription consuming pausing ignored]
+      expect(map.config_adapter.keys).to eq(expected_keys)
+    end
   end
 
   describe '#topic' do

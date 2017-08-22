@@ -20,6 +20,7 @@ module Karafka
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
       required(:seed_brokers).filled(:array?)
       required(:session_timeout).filled(:int?)
+      required(:pause_timeout).filled(:int?, gteq?: 0)
       required(:offset_commit_interval).filled(:int?)
       required(:offset_commit_threshold).filled(:int?)
       required(:offset_retention_time) { none?.not > int? }
