@@ -23,7 +23,8 @@ RSpec.describe Karafka::Cli do
         Karafka::Cli::Flow,
         Karafka::Cli::Info,
         Karafka::Cli::Install,
-        Karafka::Cli::Server
+        Karafka::Cli::Server,
+        Karafka::Cli::Worker
       ].map(&:to_s).sort
     end
 
