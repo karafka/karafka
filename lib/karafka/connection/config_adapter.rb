@@ -41,13 +41,7 @@ module Karafka
         # @return [Hash] hash with all the settings required by Kafka#consumer method
         def consumer(consumer_group)
           settings = { group_id: consumer_group.id }
-
-          kafka_configs.each do |setting_name, setting_value|
-            next unless AttributesMap.config_adapter[:consumer].include?(setting_name)
-            next if settings.keys.include?(setting_name)
-            settings[setting_name] = setting_value
-          end
-
+          settings = fetch_for(:consumer, settings)
           sanitize(settings)
         end
 
@@ -57,15 +51,7 @@ module Karafka
         # @return [Hash] hash with all the settings required by
         #   Kafka::Consumer#consume_each_message and Kafka::Consumer#consume_each_batch method
         def consuming(_consumer_group)
-          settings = {}
-
-          kafka_configs.each do |setting_name, setting_value|
-            next unless AttributesMap.config_adapter[:consuming].include?(setting_name)
-            next if settings.keys.include?(setting_name)
-            settings[setting_name] = setting_value
-          end
-
-          sanitize(settings)
+          sanitize(fetch_for(:consuming))
         end
 
         # Builds all the configuration settings for kafka consumer#subscribe method
@@ -73,17 +59,32 @@ module Karafka
         # @return [Hash] hash with all the settings required by kafka consumer#subscribe method
         def subscription(topic)
           settings = { start_from_beginning: topic.start_from_beginning }
-
-          kafka_configs.each do |setting_name, setting_value|
-            next unless AttributesMap.config_adapter[:subscription].include?(setting_name)
-            next if settings.keys.include?(setting_name)
-            settings[setting_name] = setting_value
-          end
-
+          settings = fetch_for(:subscription, settings)
           [Karafka::App.config.topic_mapper.outgoing(topic.name), sanitize(settings)]
         end
 
+        # Builds all the configuration settings required by kafka consumer#pause method
+        # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
+        # @return [Hash] hash with all the settings required to pause kafka consumer
+        def pausing(consumer_group)
+          { timeout: consumer_group.pause_timeout }
+        end
+
         private
+
+        # Fetches proper settings for a given map namespace
+        # @param namespace_key [Symbol] namespace from attributes map config adapter hash
+        # @param preexisting_settings [Hash] hash with some preexisting settings that might have
+        #   been loaded in a different way
+        def fetch_for(namespace_key, preexisting_settings = {})
+          kafka_configs.each do |setting_name, setting_value|
+            next unless AttributesMap.config_adapter[namespace_key].include?(setting_name)
+            next if preexisting_settings.keys.include?(setting_name)
+            preexisting_settings[setting_name] = setting_value
+          end
+
+          preexisting_settings
+        end
 
         # Removes nil containing keys from the final settings so it can use Kafkas driver
         #   defaults for those

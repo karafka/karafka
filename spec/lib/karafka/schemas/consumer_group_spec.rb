@@ -35,6 +35,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       start_from_beginning: true,
       connect_timeout: 10,
       socket_timeout: 10,
+      pause_timeout: 10,
       max_wait_time: 10,
       batch_consuming: true,
       topics: topics

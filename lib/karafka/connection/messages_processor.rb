@@ -25,11 +25,6 @@ module Karafka
           handler = controller.topic.batch_processing ? :process_batch : :process_each
 
           send(handler, controller, kafka_messages)
-          # This is on purpose - see the notes for this method
-          # rubocop:disable RescueException
-        rescue Exception => e
-          # rubocop:enable RescueException
-          Karafka.monitor.notice_error(self, e)
         end
 
         private

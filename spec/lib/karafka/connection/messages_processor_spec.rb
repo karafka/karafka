@@ -72,29 +72,6 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
           expect { processor.process(group_id, messages_batch) }.not_to raise_error
         end
       end
-
-      context 'something goes wrong (exception is raised)' do
-        [
-          Exception
-        ].each do |error|
-          context "when #{error} happens" do
-            before do
-              # Lets silence exceptions printing
-              expect(Karafka.monitor)
-                .to receive(:notice_error)
-                .with(described_class, error)
-
-              expect(Karafka::Routing::Router)
-                .to receive(:build)
-                .and_raise(error)
-            end
-
-            it 'notices and not reraise error' do
-              expect { processor.process(group_id, messages_batch) }.not_to raise_error
-            end
-          end
-        end
-      end
     end
 
     context 'batch_processing false' do
@@ -172,29 +149,6 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
         it 'dont corrupt the raw kafka message with topic remapping' do
           processor.process(group_id, messages_batch)
           expect(messages_batch.first.topic).to eq topic
-        end
-      end
-
-      context 'something goes wrong (exception is raised)' do
-        [
-          Exception
-        ].each do |error|
-          context "when #{error} happens" do
-            before do
-              # Lets silence exceptions printing
-              expect(Karafka.monitor)
-                .to receive(:notice_error)
-                .with(described_class, error)
-
-              expect(Karafka::Routing::Router)
-                .to receive(:build)
-                .and_raise(error)
-            end
-
-            it 'notices and not reraise error' do
-              expect { processor.process(group_id, messages_batch) }.not_to raise_error
-            end
-          end
         end
       end
     end

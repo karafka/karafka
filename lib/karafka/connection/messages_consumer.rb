@@ -20,9 +20,19 @@ module Karafka
       def fetch_loop
         send(
           consumer_group.batch_consuming ? :consume_each_batch : :consume_each_message
-        ) do |messages|
-          yield(messages)
-        end
+        ) { |messages| yield(messages) }
+      rescue Kafka::ProcessingError => e
+        # If there was an error during processing, we have to log it, pause current partition
+        # and process other things
+        Karafka.monitor.notice_error(self.class, e.cause)
+        pause(e.topic, e.partition)
+        retry
+        # This is on purpose - see the notes for this method
+        # rubocop:disable RescueException
+      rescue Exception => e
+        # rubocop:enable RescueException
+        Karafka.monitor.notice_error(self.class, e)
+        retry
       end
 
       # Gracefuly stops topic consumption
@@ -34,6 +44,16 @@ module Karafka
       private
 
       attr_reader :consumer_group
+
+      # Pauses processing of a given topic partition
+      # @param topic [String] topic that we want to pause
+      # @param partition [Integer] number partition that we want to pause
+      def pause(topic, partition)
+        settings = ConfigAdapter.pausing(consumer_group)
+        return false unless settings[:timeout].positive?
+        kafka_consumer.pause(topic, partition, settings)
+        true
+      end
 
       # Consumes messages from Kafka in batches
       # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
