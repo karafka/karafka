@@ -44,7 +44,6 @@ if rails_preloaded
   # @note This will load Karafka to Rails, not the other way around
   Class.new(Rails::Railtie) do
     config.to_prepare do
-      p 'aaaaaaaaaa'
       require Karafka.boot_file
     end
   end
