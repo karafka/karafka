@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'karafka'
+
 class KarafkaApp < Karafka::App
   setup do |config|
     config.kafka.seed_brokers = %w( 127.0.0.1:9092 )

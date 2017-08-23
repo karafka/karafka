@@ -42,18 +42,17 @@ if rails_preloaded
   # Railtie used to load Karafka stuff into Rails, so all routes, etc are available
   # from Rails console and in other Rails related places
   # @note This will load Karafka to Rails, not the other way around
-  class Karafka::Railtie < Rails::Railtie
-    config.to_prepare do |c|
+  Class.new(Rails::Railtie) do
+    config.to_prepare do
+      p 'aaaaaaaaaa'
       require Karafka.boot_file
     end
   end
-else
+elsif rails_app
   # Loading Rails to Karafka if needed
-  if rails_app
-    require File.join(Karafka.root, './config/environment')
-    Rails.application.eager_load!
-  else
-    Bundler.require(:default, ENV['KARAFKA_ENV'])
-    Karafka::Loader.load(Karafka::App.root)
-  end
+  require File.join(Karafka.root, './config/environment')
+  Rails.application.eager_load!
+else
+  Bundler.require(:default, ENV['KARAFKA_ENV'])
+  Karafka::Loader.load(Karafka::App.root)
 end
