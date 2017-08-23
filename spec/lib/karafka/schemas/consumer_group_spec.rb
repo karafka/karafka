@@ -8,7 +8,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       {
         id: 'id',
         name: 'name',
-        processing_adapter: :inline,
+        processing_backend: :inline,
         controller: Class.new,
         parser: Class.new,
         interchanger: Class.new,
@@ -287,14 +287,14 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       end
     end
 
-    context 'processing_adapter validator' do
-      it 'processing_adapter is nil' do
-        config[:topics][0][:processing_adapter] = nil
+    context 'processing_backend validator' do
+      it 'processing_backend is nil' do
+        config[:topics][0][:processing_backend] = nil
         expect(schema.call(config).success?).to be_falsey
       end
 
-      it 'processing_adapter is not inline or sidekiq' do
-        config[:topics][0][:processing_adapter] = 2
+      it 'processing_backend is not inline or sidekiq' do
+        config[:topics][0][:processing_backend] = 2
         expect(schema.call(config).success?).to be_falsey
       end
     end

@@ -24,7 +24,7 @@ RSpec.describe Karafka::Cli::Flow do
           cg.public_send(:topic=, topic) do
             responder responder_instance
             controller Class.new
-            processing_adapter :inline
+            processing_backend :inline
           end
         end
       end

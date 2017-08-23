@@ -20,7 +20,7 @@ class KarafkaApp < Karafka::App
     config.redis = {
       url: 'redis://localhost:6379'
     }
-    config.processing_adapter = Karafka.env.development? ? :inline : :sidekiq
+    config.processing_backend = Karafka.env.development? ? :inline : :sidekiq
     config.batch_consuming = true
   end
 

@@ -20,11 +20,11 @@ module Karafka
         end
       end
 
-      optional(:processing_adapter).filled(included_in?: %i[inline sidekiq])
+      optional(:processing_backend).filled(included_in?: %i[inline sidekiq])
 
       # If we want to use sidekiq, then redis needs to be configured
-      rule(redis_presence: %i[redis processing_adapter]) do |redis, processing_adapter|
-        processing_adapter.eql?(:sidekiq).then(redis.filled?)
+      rule(redis_presence: %i[redis processing_backend]) do |redis, processing_backend|
+        processing_backend.eql?(:sidekiq).then(redis.filled?)
       end
 
       optional(:connection_pool).schema do

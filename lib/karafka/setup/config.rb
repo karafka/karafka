@@ -20,7 +20,7 @@ module Karafka
       setting :client_id
       # How should we process messages. For now we support inline mode (asap in the process) or
       # sidekiq mode (schedule to sidekiq)
-      setting :processing_adapter, :inline
+      setting :processing_backend, :inline
       # option logger [Instance] logger that we want to use
       setting :logger, -> { ::Karafka::Logger.instance }
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)

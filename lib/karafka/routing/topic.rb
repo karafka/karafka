@@ -36,7 +36,7 @@ module Karafka
       #   background job
       # @note If not provided - will be built based on the provided controller
       def worker
-        @worker ||= processing_adapter == :sidekiq ? Workers::Builder.new(controller).build : nil
+        @worker ||= processing_backend == :sidekiq ? Workers::Builder.new(controller).build : nil
       end
 
       # @return [Class, nil] Class (not an instance) of a responder that should respond from

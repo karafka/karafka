@@ -56,7 +56,7 @@
 - Renamed content to value to better resemble ruby-kafka internal messages naming convention
 - When having a responder with ```required``` topics and not using ```#respond_with``` at all, it will raise an exception
 - Renamed ```inline_mode``` to ```inline_processing``` to resemble other settings conventions
-- Renamed ```inline_processing``` to ```processing_adapter``` to reach 1.0 future compatibility
+- Renamed ```inline_processing``` to ```processing_backend``` to reach 1.0 future compatibility
 
 ### Other changes
 - PolishGeeksDevTools removed (in favour of Coditsu)

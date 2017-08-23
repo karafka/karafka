@@ -17,7 +17,7 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
 
       cg.public_send(:topic=, topic) do
         controller Class.new
-        processing_adapter :inline
+        processing_backend :inline
         start_from_beginning start_from_beginning_active
       end
     end

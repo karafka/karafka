@@ -4,7 +4,7 @@ RSpec.describe Karafka::BaseController do
   subject(:base_controller) { working_class.new }
 
   let(:topic_name) { "topic#{rand}" }
-  let(:processing_adapter) { :inline }
+  let(:processing_backend) { :inline }
   let(:responder_class) { nil }
   let(:interchanger) { nil }
   let(:worker) { nil }
@@ -12,7 +12,7 @@ RSpec.describe Karafka::BaseController do
   let(:topic) do
     topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
     topic.controller = Class.new(described_class)
-    topic.processing_adapter = processing_adapter
+    topic.processing_backend = processing_backend
     topic.responder = responder_class
     topic.interchanger = interchanger
     topic.worker = worker
@@ -116,7 +116,7 @@ RSpec.describe Karafka::BaseController do
   describe '#schedule' do
     context 'when there are no callbacks' do
       context 'and we dont want to perform inline' do
-        let(:processing_adapter) { :sidekiq }
+        let(:processing_backend) { :sidekiq }
 
         it 'just schedules via call_async' do
           expect(base_controller).to receive(:call_async)
@@ -126,7 +126,7 @@ RSpec.describe Karafka::BaseController do
       end
 
       context 'and we want to perform inline' do
-        let(:processing_adapter) { :inline }
+        let(:processing_backend) { :inline }
 
         it 'just expect to run with call_inline' do
           expect(base_controller).to receive(:call_inline)
@@ -139,7 +139,7 @@ RSpec.describe Karafka::BaseController do
     context 'invalid adapter' do
       let(:expected_error) { Karafka::Errors::InvalidProcessingAdapter }
 
-      before { topic.processing_adapter = rand }
+      before { topic.processing_backend = rand }
 
       it { expect { base_controller.schedule }.to raise_error(expected_error) }
     end
@@ -243,7 +243,7 @@ RSpec.describe Karafka::BaseController do
   end
 
   context 'when we have a block based before_enqueue' do
-    let(:processing_adapter) { :sidekiq }
+    let(:processing_backend) { :sidekiq }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do
@@ -289,7 +289,7 @@ RSpec.describe Karafka::BaseController do
   end
 
   context 'when we have a method based before_enqueue' do
-    let(:processing_adapter) { :sidekiq }
+    let(:processing_backend) { :sidekiq }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do

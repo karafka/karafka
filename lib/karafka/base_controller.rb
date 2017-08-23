@@ -107,13 +107,13 @@ module Karafka
     # will schedule a call task in sidekiq
     def schedule
       run_callbacks :schedule do
-        case topic.processing_adapter
+        case topic.processing_backend
         when :inline then
           call_inline
         when :sidekiq then
           call_async
         else
-          raise Errors::InvalidProcessingAdapter, topic.processing_adapter
+          raise Errors::InvalidProcessingAdapter, topic.processing_backend
         end
       end
     end

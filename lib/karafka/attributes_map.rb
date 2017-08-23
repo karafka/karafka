@@ -33,7 +33,7 @@ module Karafka
       # @return [Array<Symbol>] properties that can be set on a per topic level
       def topic
         (config_adapter[:subscription] + %i[
-          processing_adapter
+          processing_backend
           name
           worker
           parser
