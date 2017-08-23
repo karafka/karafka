@@ -77,4 +77,3 @@ module Karafka
 end
 
 Karafka::Loader.load!(Karafka.core_root)
-require File.join(Karafka.gem_root, 'lib/initializer')

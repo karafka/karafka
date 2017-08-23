@@ -32,7 +32,6 @@
 - #96 - Karafka server - possiblity to run it only for a certain topics
 - ~~karafka worker cli option is removed (please use sidekiq directly)~~ - restored, bad idea
 - (optional) pausing upon processing failures ```pause_timeout```
-- Rails autoload and karafka.rb cleanup
 - Karafka console main process no longer intercepts irb errors
 
 ### New features and improvements
