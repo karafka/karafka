@@ -10,7 +10,7 @@ RSpec.describe Karafka::Routing::Topic do
 
   before do
     topic.controller = controller
-    topic.inline_processing = true
+    topic.processing_adapter = :inline
   end
 
   describe '#build' do
@@ -48,19 +48,19 @@ RSpec.describe Karafka::Routing::Topic do
       topic.controller = controller
     end
 
-    context 'when inline_processing is true' do
+    context 'when processing_adapter is inline' do
       let(:worker) { false }
 
       before do
-        topic.inline_processing = true
+        topic.processing_adapter = :inline
       end
 
       it { expect(topic.worker).to eq nil }
     end
 
-    context 'when inline_processing is false' do
+    context 'when processing_adapter is sidekiq' do
       before do
-        topic.inline_processing = false
+        topic.processing_adapter = :sidekiq
       end
 
       context 'when worker is not set' do
@@ -83,33 +83,33 @@ RSpec.describe Karafka::Routing::Topic do
     end
   end
 
-  describe '#inline_processing' do
-    before { topic.inline_processing = inline_processing }
+  describe '#processing_adapter' do
+    before { topic.processing_adapter = processing_adapter }
 
-    context 'when inline_processing is not set' do
+    context 'when processing_adapter is not set' do
       let(:default_inline) { rand }
-      let(:inline_processing) { nil }
+      let(:processing_adapter) { nil }
 
       before do
-        expect(Karafka::App.config).to receive(:inline_processing)
+        expect(Karafka::App.config).to receive(:processing_adapter)
           .and_return(default_inline)
       end
 
       it 'expect to use Karafka::App default' do
-        expect(topic.inline_processing).to eq default_inline
+        expect(topic.processing_adapter).to eq default_inline
       end
     end
 
-    context 'when inline_processing per topic is set to false' do
-      let(:inline_processing) { false }
+    context 'when processing_adapter per topic is set to sidekiq' do
+      let(:processing_adapter) { :sidekiq }
 
-      it { expect(topic.inline_processing).to eq inline_processing }
+      it { expect(topic.processing_adapter).to eq processing_adapter }
     end
 
-    context 'when inline_processing per topic is set to true' do
-      let(:inline_processing) { true }
+    context 'when processing_adapter per topic is set to inline' do
+      let(:processing_adapter) { :inline }
 
-      it { expect(topic.inline_processing).to eq inline_processing }
+      it { expect(topic.processing_adapter).to eq processing_adapter }
     end
   end
 

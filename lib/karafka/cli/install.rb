@@ -2,7 +2,7 @@
 
 module Karafka
   # Karafka framework Cli
-  class Cli
+  class Cli < Thor
     # Install Karafka Cli action
     class Install < Base
       desc 'Install all required things for Karafka application in current directory'

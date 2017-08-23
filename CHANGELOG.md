@@ -32,6 +32,8 @@
 - #96 - Karafka server - possiblity to run it only for a certain topics
 - ~~karafka worker cli option is removed (please use sidekiq directly)~~ - restored, bad idea
 - (optional) pausing upon processing failures ```pause_timeout```
+- Rails autoload and karafka.rb cleanup
+- Karafka console main process no longer intercepts irb errors
 
 ### New features and improvements
 
@@ -55,6 +57,7 @@
 - Renamed content to value to better resemble ruby-kafka internal messages naming convention
 - When having a responder with ```required``` topics and not using ```#respond_with``` at all, it will raise an exception
 - Renamed ```inline_mode``` to ```inline_processing``` to resemble other settings conventions
+- Renamed ```inline_processing``` to ```processing_adapter``` to reach 1.0 future compatibility
 
 ### Other changes
 - PolishGeeksDevTools removed (in favour of Coditsu)

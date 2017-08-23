@@ -2,7 +2,7 @@
 
 module Karafka
   # Karafka framework Cli
-  class Cli
+  class Cli < Thor
     # Server Karafka Cli action
     class Server < Base
       desc 'Start the Karafka server (short-cut alias: "s")'

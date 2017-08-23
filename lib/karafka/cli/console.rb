@@ -2,7 +2,7 @@
 
 module Karafka
   # Karafka framework Cli
-  class Cli
+  class Cli < Thor
     # Console Karafka Cli action
     class Console < Base
       desc 'Start the Karafka console (short-cut alias: "c")'
@@ -22,7 +22,7 @@ module Karafka
       # Start the Karafka console
       def call
         cli.info
-        system self.class.command
+        exec self.class.command
       end
     end
   end

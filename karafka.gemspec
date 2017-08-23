@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-validation', '~> 0.11'
   spec.add_dependency 'dry-configurable', '~> 0.7'
   spec.add_dependency 'multi_json', '>= 1.12'
+  spec.add_dependency 'require_all', '>= 1.4'
 
   spec.required_ruby_version = '>= 2.3.0'
 

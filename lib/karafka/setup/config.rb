@@ -18,9 +18,9 @@ module Karafka
       # option client_id [String] kafka client_id - used to provide
       #   default Kafka groups namespaces and identify that app in kafka
       setting :client_id
-      # If inline_processing is set to true, we won't enqueue jobs, instead we will run them
-      # immediately
-      setting :inline_processing, false
+      # How should we process messages. For now we support inline mode (asap in the process) or
+      # sidekiq mode (schedule to sidekiq)
+      setting :processing_adapter, :inline
       # option logger [Instance] logger that we want to use
       setting :logger, -> { ::Karafka::Logger.instance }
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)

@@ -7,7 +7,7 @@ module Karafka
   #
   # @note Whole Cli is built using Thor
   # @see https://github.com/erikhuda/thor
-  class Cli
+  class Cli < Thor
     package_name 'Karafka'
 
     class << self

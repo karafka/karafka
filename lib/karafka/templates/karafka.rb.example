@@ -1,24 +1,15 @@
-# Non Ruby on Rails setup
-ENV['RACK_ENV'] ||= 'development'
-ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
-Bundler.require(:default, ENV['KARAFKA_ENV'])
-Karafka::Loader.new.load(Karafka::App.root)
+# frozen_string_literal: true
 
-# Ruby on Rails setup
-# Remove whole non-Rails setup that is above and uncomment the 4 lines below
-# ENV['RAILS_ENV'] ||= 'development'
-# ENV['KARAFKA_ENV'] = ENV['RAILS_ENV']
-# require ::File.expand_path('../config/environment', __FILE__)
-# Rails.application.eager_load!
-# App class
-class Karafka < Karafka::App
+require 'karafka'
+
+class KarafkaApp < Karafka::App
   setup do |config|
     config.kafka.seed_brokers = %w( 127.0.0.1:9092 )
     config.client_id = 'example_app'
     config.redis = {
       url: 'redis://localhost:6379'
     }
-    config.inline_processing = Karafka.env.development?
+    config.processing_adapter = Karafka.env.development? ? :inline : :sidekiq
     config.batch_consuming = true
   end
 
@@ -40,4 +31,4 @@ class Karafka < Karafka::App
   end
 end
 
-App.boot!
+KarafkaApp.boot!

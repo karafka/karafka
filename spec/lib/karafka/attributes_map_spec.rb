@@ -21,7 +21,7 @@ RSpec.describe Karafka::AttributesMap do
         name
         controller
         worker
-        inline_processing
+        processing_adapter
         parser
         interchanger
         responder

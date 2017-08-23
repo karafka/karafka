@@ -2,7 +2,7 @@
 
 module Karafka
   # Karafka framework Cli
-  class Cli
+  class Cli < Thor
     # Worker Karafka Cli action
     class Worker < Base
       desc 'Start the Karafka Sidekiq worker (short-cut alias: "w")'

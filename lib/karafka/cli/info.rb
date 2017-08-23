@@ -2,7 +2,7 @@
 
 module Karafka
   # Karafka framework Cli
-  class Cli
+  class Cli < Thor
     # Info Karafka Cli action
     class Info < Base
       desc 'Print configuration details and other options of your application'
@@ -14,7 +14,7 @@ module Karafka
         info = [
           "Karafka framework version: #{Karafka::VERSION}",
           "Application client id: #{config.client_id}",
-          "Inline processing: #{config.inline_processing}",
+          "Processing adapter: #{config.processing_adapter}",
           "Batch consuming: #{config.batch_consuming}",
           "Batch processing: #{config.batch_processing}",
           "Number of threads: #{config.concurrency}",
