@@ -113,7 +113,7 @@ module Karafka
         when :sidekiq then
           call_async
         else
-          raise Errors::InvalidProcessingAdapter, topic.processing_backend
+          raise Errors::InvalidProcessingBackend, topic.processing_backend
         end
       end
     end

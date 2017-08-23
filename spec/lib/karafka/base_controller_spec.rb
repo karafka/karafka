@@ -136,8 +136,8 @@ RSpec.describe Karafka::BaseController do
       end
     end
 
-    context 'invalid adapter' do
-      let(:expected_error) { Karafka::Errors::InvalidProcessingAdapter }
+    context 'invalid backend' do
+      let(:expected_error) { Karafka::Errors::InvalidProcessingBackend }
 
       before { topic.processing_backend = rand }
 

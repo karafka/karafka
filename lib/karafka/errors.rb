@@ -42,8 +42,8 @@ module Karafka
     # #params_batch
     ParamsMethodUnavailable = Class.new(BaseError)
 
-    # Raised when for some reason we try to use invalid processing adapter and
+    # Raised when for some reason we try to use invalid processing backend and
     # we bypass validations
-    InvalidProcessingAdapter = Class.new(BaseError)
+    InvalidProcessingBackend = Class.new(BaseError)
   end
 end

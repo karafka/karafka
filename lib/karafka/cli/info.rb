@@ -14,7 +14,7 @@ module Karafka
         info = [
           "Karafka framework version: #{Karafka::VERSION}",
           "Application client id: #{config.client_id}",
-          "Processing adapter: #{config.processing_backend}",
+          "Processing backend: #{config.processing_backend}",
           "Batch consuming: #{config.batch_consuming}",
           "Batch processing: #{config.batch_processing}",
           "Number of threads: #{config.concurrency}",
