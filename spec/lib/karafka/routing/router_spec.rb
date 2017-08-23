@@ -19,7 +19,7 @@ RSpec.describe Karafka::Routing::Router do
         Karafka::Routing::Builder.instance.draw do
           topic :topic_name1 do
             controller Struct.new(:topic)
-            inline_processing true
+            processing_adapter :inline
             name 'name1'
           end
         end

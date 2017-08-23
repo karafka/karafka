@@ -1,76 +1,35 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Loader do
-  subject(:loader_class) { described_class }
-
-  describe '#base_sorter' do
-    subject(:loader) { described_class.new.send(:base_sorter, str1, str2) }
-
-    context 'when str1 is higher that str2' do
-      let(:str1) { '/this' }
-      let(:str2) { '/that/2' }
-
-      it { expect(loader).to eq(-1) }
-    end
-
-    context 'when str2 is higher that str1' do
-      let(:str2) { '/this' }
-      let(:str1) { '/that/2' }
-
-      it { expect(loader).to eq(1) }
-    end
-
-    context 'when str1 is equal to str2' do
-      let(:str1) { '/this' }
-      let(:str2) { '/that' }
-
-      it { expect(loader).to eq(0) }
-    end
-  end
-
-  describe '#relative_load!' do
-    subject(:loader) { described_class.new }
-
-    let(:relative_path) { '/app/decorators' }
-    let(:app_root) { '/apps/data_api' }
-    let(:result) { double }
-
-    before do
-      expect(::Karafka)
-        .to receive(:root)
-        .and_return(app_root)
-      expect(loader)
-        .to receive(:load!)
-        .with(File.join(app_root, relative_path))
-        .and_return(result)
-    end
-
-    it 'executes #load! with built full path' do
-      loader.relative_load!(relative_path)
-    end
-  end
+  subject(:loader) { described_class }
 
   describe '#load' do
-    subject(:loader) { described_class.new }
-
-    let(:relative_path) { '/app/decorators' }
+    let(:relative_path) { Karafka.gem_root }
     let(:lib_path) { '/lib' }
     let(:app_path) { '/app' }
 
     before do
       stub_const('Karafka::Loader::DIRS', %w[lib app])
       expect(loader).to receive(:load!)
-        .with('/app/decorators/lib')
+        .with(File.join(Karafka.gem_root, 'lib'))
         .and_return(double)
-        .ordered
-      expect(loader).to receive(:load!)
-        .with('/app/decorators/app')
-        .and_return(double)
-        .ordered
+
+      # This one does not exist so we expect to skip it
+      expect(loader).not_to receive(:load!)
+        .with(File.join(Karafka.gem_root, 'app'))
     end
 
-    it 'load paths for all DIRS' do
+    it 'load paths for all DIRS that exist' do
       loader.load(relative_path)
+    end
+  end
+
+  describe '#load!' do
+    let(:path) { rand.to_s }
+
+    it 'expect to use require_all' do
+      expect(loader).to receive(:require_all).with(path)
+      loader.load!(path)
     end
   end
 end

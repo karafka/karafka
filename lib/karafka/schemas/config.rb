@@ -20,11 +20,11 @@ module Karafka
         end
       end
 
-      optional(:inline_processing).filled(:bool?)
+      optional(:processing_adapter).filled(included_in?: %i[inline sidekiq])
 
-      # If inline_processing is true, redis should be filled
-      rule(redis_presence: %i[redis inline_processing]) do |redis, inline_processing|
-        inline_processing.false?.then(redis.filled?)
+      # If we want to use sidekiq, then redis needs to be configured
+      rule(redis_presence: %i[redis processing_adapter]) do |redis, processing_adapter|
+        processing_adapter.eql?(:sidekiq).then(redis.filled?)
       end
 
       optional(:connection_pool).schema do

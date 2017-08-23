@@ -17,6 +17,7 @@
   thor
   fileutils
   multi_json
+  require_all
   dry-configurable
   dry-validation
   active_support/callbacks
@@ -75,4 +76,5 @@ module Karafka
   end
 end
 
-Karafka::Loader.new.load!(Karafka.core_root)
+Karafka::Loader.load!(Karafka.core_root)
+require File.join(Karafka.gem_root, 'lib/initializer')
