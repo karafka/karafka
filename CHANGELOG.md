@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 0.6.0.rc2 - unreleased
+## 0.6.0.rc2 - released
 
 ### Closed issues:
 
@@ -33,6 +33,7 @@
 - ~~karafka worker cli option is removed (please use sidekiq directly)~~ - restored, bad idea
 - (optional) pausing upon processing failures ```pause_timeout```
 - Karafka console main process no longer intercepts irb errors
+- Wiki updates
 
 ### New features and improvements
 
