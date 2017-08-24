@@ -4,7 +4,13 @@ RSpec.describe Karafka::Routing::Router do
   subject(:router) { described_class }
 
   let(:partition) { rand(100) }
-  let(:kafka_message) { instance_double(Kafka::FetchedMessage, partition: partition, topic: topic_name) }
+  let(:kafka_message) do
+    instance_double(
+      Kafka::FetchedMessage,
+      partition: partition,
+      topic: topic_name
+    )
+  end
 
   describe 'build' do
     context 'not persisted' do
@@ -33,6 +39,10 @@ RSpec.describe Karafka::Routing::Router do
           expect(router.build(group_id, kafka_message)).to be_a(Karafka::BaseController)
         end
       end
+    end
+
+    context 'persisted' do
+      pending
     end
   end
 end

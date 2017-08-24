@@ -81,6 +81,7 @@ module Karafka
       end
     end
 
+    # @return [Karafka::Routing::Topic] topic to which a given controller is subscribed
     def topic
       self.class.topic
     end

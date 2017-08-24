@@ -59,7 +59,14 @@ RSpec.describe Karafka::BaseController do
     let(:topic_parser) { Karafka::Parsers::Json }
 
     before do
-      working_class.topic = instance_double(Karafka::Routing::Topic, parser: topic_parser, processing_backend: :inline, batch_processing: false, responder: false)
+      working_class.topic = instance_double(
+        Karafka::Routing::Topic,
+        parser: topic_parser,
+        processing_backend: :inline,
+        batch_processing: false,
+        responder: false
+      )
+
       expect(Karafka::Params::ParamsBatch)
         .to receive(:new)
         .with(messages, topic_parser)

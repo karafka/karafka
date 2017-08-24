@@ -12,11 +12,10 @@ module Karafka
       #   based on the topic under which it operates
       def self.call(controller_class)
         topic = controller_class.topic
-        controller_class.include Controllers::InlineBackend if topic.processing_backend == :inline
-        controller_class.include Controllers::SidekiqBackend if topic.processing_backend == :sidekiq
-        controller_class.include Controllers::SingleParams unless topic.batch_processing
-        controller_class.include Controllers::Responders if topic.responder
-        nil
+        controller_class.include InlineBackend if topic.processing_backend == :inline
+        controller_class.include SidekiqBackend if topic.processing_backend == :sidekiq
+        controller_class.include SingleParams unless topic.batch_processing
+        controller_class.include Responders if topic.responder
       end
     end
   end

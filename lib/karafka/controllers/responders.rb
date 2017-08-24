@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Controllers
     # Feature that allows us to use responders flow in controller
