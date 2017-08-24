@@ -14,16 +14,8 @@ module Karafka
         # @param group_id [String] group_id of a group from which a given message came
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages fetched from kafka
         def process(group_id, kafka_messages)
-          # @note We always get messages by topic and partition so we can take topic from the
-          # first one and it will be valid for all the messages
-          # We map from incoming topic name, as it might be namespaced, etc.
-          # @see topic_mapper internal docs
-          mapped_topic = Karafka::App.config.topic_mapper.incoming(kafka_messages[0].topic)
-          # @note We search based on the topic id - that is a combination of group id and
-          # topic name
-          controller = Karafka::Routing::Router.build("#{group_id}_#{mapped_topic}")
+          controller = Karafka::Routing::Router.build(group_id, kafka_messages[0])
           handler = controller.topic.batch_processing ? :process_batch : :process_each
-
           send(handler, controller, kafka_messages)
         end
 

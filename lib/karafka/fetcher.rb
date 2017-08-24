@@ -34,8 +34,8 @@ module Karafka
     # @return [Proc] proc that should be processed when a messages arrive
     # @yieldparam messages [Array<Kafka::FetchedMessage>] messages from kafka (raw)
     def processor
-      lambda do |consumer_group_id, messages|
-        Karafka::Connection::MessagesProcessor.process(consumer_group_id, messages)
+      lambda do |group_id, messages|
+        Karafka::Connection::MessagesProcessor.process(group_id, messages)
       end
     end
   end

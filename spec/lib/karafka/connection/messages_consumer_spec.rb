@@ -16,7 +16,7 @@ RSpec.describe Karafka::Connection::MessagesConsumer do
       cg.batch_consuming = batch_consuming_active
 
       cg.public_send(:topic=, topic) do
-        controller Class.new
+        controller Class.new(Karafka::BaseController)
         processing_backend :inline
         start_from_beginning start_from_beginning_active
       end

@@ -30,16 +30,4 @@ RSpec.describe Karafka::Errors do
 
     specify { expect(error).to be < described_class::BaseError }
   end
-
-  describe 'ResponderMissing' do
-    subject(:error) { described_class::ResponderMissing }
-
-    specify { expect(error).to be < described_class::BaseError }
-  end
-
-  describe 'ParamsMethodUnavailable' do
-    subject(:error) { described_class::ParamsMethodUnavailable }
-
-    specify { expect(error).to be < described_class::BaseError }
-  end
 end

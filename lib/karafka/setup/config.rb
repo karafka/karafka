@@ -42,6 +42,11 @@ module Karafka
       # #params_batch will contain params received from Kafka (may be more than 1) so we can
       # process them in batches
       setting :batch_processing, false
+      # Should we operate in a single controller instance across multiple batches of messages,
+      # from the same partition or should we build a new instance for each incoming batch.
+      # Persistent mode can be usefull when we want to flush data after multiple messages were
+      # received and processed together
+      setting :persistent, false
       # Connection pool options are used for producer (Waterdrop)
       # They are configured automatically based on Sidekiq concurrency and number of consumers
       # The bigger one is selected as we need to be able to send messages from both places

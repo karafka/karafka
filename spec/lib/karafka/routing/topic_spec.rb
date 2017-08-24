@@ -6,7 +6,7 @@ RSpec.describe Karafka::Routing::Topic do
   let(:consumer_group) { instance_double(Karafka::Routing::ConsumerGroup, id: group_id) }
   let(:name) { :test }
   let(:group_id) { rand.to_s }
-  let(:controller) { Class.new }
+  let(:controller) { Class.new(Karafka::BaseController) }
 
   before do
     topic.controller = controller
