@@ -39,7 +39,7 @@ module Karafka
         def process_batch(controller, kafka_messages)
           controller.params_batch = kafka_messages
           Karafka.monitor.notice(self, kafka_messages)
-          controller.schedule
+          controller.call
         end
 
         # Processes messages one by one (like with std http requests)

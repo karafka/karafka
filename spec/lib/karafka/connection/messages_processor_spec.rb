@@ -29,7 +29,7 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
         .with([raw_message1, raw_message2])
 
       expect(controller_instance)
-        .to receive(:schedule)
+        .to receive(:call)
     end
 
     context 'everything works well' do
@@ -52,7 +52,7 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
           .and_return(consumer_group.topics[0])
       end
 
-      it 'routes to a proper controller and schedule task' do
+      it 'routes to a proper controller and call task' do
         expect { processor.process(group_id, messages_batch) }.not_to raise_error
       end
     end
@@ -106,7 +106,7 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
         .with([raw_message2])
 
       expect(controller_instance)
-        .to receive(:schedule)
+        .to receive(:call)
         .twice
     end
 
@@ -130,7 +130,7 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
           .and_return(consumer_group.topics[0])
       end
 
-      it 'routes to a proper controller and schedule task' do
+      it 'routes to a proper controller and call task' do
         expect { processor.process(group_id, messages_batch) }.not_to raise_error
       end
     end
