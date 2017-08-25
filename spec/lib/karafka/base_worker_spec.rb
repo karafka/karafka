@@ -42,7 +42,6 @@ RSpec.describe Karafka::BaseWorker do
         processing_backend: :sidekiq,
         batch_processing: false,
         responder: nil,
-        interchanger: interchanger,
         parser: nil
       )
     end

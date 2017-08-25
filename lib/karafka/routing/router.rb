@@ -23,8 +23,6 @@ module Karafka
         raise(Errors::NonMatchingRouteError, topic_id)
       end
 
-      private
-
       module_function :find
     end
   end

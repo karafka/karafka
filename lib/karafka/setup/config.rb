@@ -47,6 +47,7 @@ module Karafka
       # Disabling that can be useful when you want to build a new controller instance for each
       # incoming batch. It's disabled by default, not to create more objects that needed on
       # each batch
+      # @note It won't have any effect on Sidekiq backend
       setting :persistent, true
       # Connection pool options are used for producer (Waterdrop)
       # They are configured automatically based on Sidekiq concurrency and number of consumers

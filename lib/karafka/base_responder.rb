@@ -138,6 +138,25 @@ module Karafka
       raise Karafka::Errors::InvalidResponderUsage, result.errors
     end
 
+    # Takes all the messages from the buffer and delivers them one by one
+    # @note This method is executed after the validation, so we're sure that
+    #   what we send is legit and it will go to a proper topics
+    def deliver!
+      messages_buffer.each do |topic, data_elements|
+        # We map this topic name, so it will match namespaced/etc topic in Kafka
+        # @note By default will not change topic (if default mapper used)
+        mapped_topic = Karafka::App.config.topic_mapper.outgoing(topic)
+
+        data_elements.each do |(data, options)|
+          ::WaterDrop::Message.new(
+            mapped_topic,
+            data,
+            options
+          ).send!
+        end
+      end
+    end
+
     # Method that needs to be implemented in a subclass. It should handle responding
     #   on registered topics
     # @raise [NotImplementedError] This method needs to be implemented in a subclass
@@ -156,25 +175,6 @@ module Karafka
 
       messages_buffer[topic.to_s] ||= []
       messages_buffer[topic.to_s] << [@parser_class.generate(data), options]
-    end
-
-    # Takes all the messages from the buffer and delivers them one by one
-    # @note This method is executed after the validation, so we're sure that
-    #   what we send is legit and it will go to a proper topics
-    def deliver!
-      messages_buffer.each do |topic, data_elements|
-        # We map this topic name, so it will match namespaced/etc topic in Kafka
-        # @note By default will not change topic (if default mapper used)
-        mapped_topic = Karafka::App.config.topic_mapper.outgoing(topic)
-
-        data_elements.each do |(data, options)|
-          ::WaterDrop::Message.new(
-            mapped_topic,
-            data,
-            options
-          ).send!
-        end
-      end
     end
   end
 end
