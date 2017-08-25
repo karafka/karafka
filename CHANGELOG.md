@@ -36,6 +36,7 @@
 - Wiki updates
 - #204 - Long running controllers
 - Better internal API to handle multiple usage cases using ```Karafka::Controllers::Includer```
+- #207 - Rename before_enqueued to after_received
 
 ### New features and improvements
 
@@ -62,6 +63,7 @@
 - Renamed ```inline_mode``` to ```inline_processing``` to resemble other settings conventions
 - Renamed ```inline_processing``` to ```processing_backend``` to reach 1.0 future compatibility
 - Single controller **needs** to be used for a single topic consumption
+- Renamed ```before_enqueue``` to ```after_received``` to better resemble internal logic, since for inline backend, there is no enqueue.
 
 ### Other changes
 - PolishGeeksDevTools removed (in favour of Coditsu)

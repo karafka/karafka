@@ -3,10 +3,10 @@
 # Karafka module namespace
 module Karafka
   # Base controller from which all Karafka controllers should inherit
-  # Similar to Rails controllers we can define before_enqueue callbacks
+  # Similar to Rails controllers we can define after_received callbacks
   # that will be executed
   #
-  # Note that if before_enqueue return false, the chain will be stopped and
+  # Note that if after_received return false, the chain will be stopped and
   #   the perform method won't be executed in sidekiq (won't peform_async it)
   #
   # @example Create simple controller
@@ -16,9 +16,9 @@ module Karafka
   #     end
   #   end
   #
-  # @example Create a controller with a block before_enqueue
+  # @example Create a controller with a block after_received
   #   class ExampleController < Karafka::BaseController
-  #     before_enqueue do
+  #     after_received do
   #       # Here we should have some checking logic
   #       # If false is returned, won't schedule a perform action
   #     end
@@ -28,9 +28,9 @@ module Karafka
   #     end
   #   end
   #
-  # @example Create a controller with a method before_enqueue
+  # @example Create a controller with a method after_received
   #   class ExampleController < Karafka::BaseController
-  #     before_enqueue :before_method
+  #     after_received :after_received_method
   #
   #     def perform
   #       # some logic here
@@ -38,7 +38,7 @@ module Karafka
   #
   #     private
   #
-  #     def before_method
+  #     def after_received_method
   #       # Here we should have some checking logic
   #       # If false is returned, won't schedule a perform action
   #     end
@@ -47,11 +47,11 @@ module Karafka
     extend ActiveSupport::DescendantsTracker
     include ActiveSupport::Callbacks
 
-    # The schedule method is wrapped with a set of callbacks
+    # The call method is wrapped with a set of callbacks
     # We won't run perform at the backend if any of the callbacks
     # returns false
     # @see http://api.rubyonrails.org/classes/ActiveSupport/Callbacks/ClassMethods.html#method-i-get_callbacks
-    define_callbacks :schedule
+    define_callbacks :after_received
 
     attr_accessor :params_batch
 
@@ -72,15 +72,15 @@ module Karafka
       # @param method_name [Symbol, String] method name or nil if we plan to provide a block
       # @yield A block with a code that should be executed before scheduling
       # @note If value returned is false, will chalt the chain and not schedlue to Sidekiq
-      # @example Define a block before_enqueue callback
-      #   before_enqueue do
+      # @example Define a block after_received callback
+      #   after_received do
       #     # logic here
       #   end
       #
-      # @example Define a class name before_enqueue callback
-      #   before_enqueue :method_name
-      def before_enqueue(method_name = nil, &block)
-        set_callback :schedule, :before, method_name ? method_name : block
+      # @example Define a class name after_received callback
+      #   after_received :method_name
+      def after_received(method_name = nil, &block)
+        set_callback :after_received, :before, method_name ? method_name : block
       end
     end
 
@@ -99,17 +99,11 @@ module Karafka
     end
 
     # Executes the default controller flow, runs callbacks and if not halted
-    # will schedule a call task in sidekiq
-    def schedule
-      run_callbacks :schedule do
+    # will call process method of a proper backend
+    def call
+      run_callbacks :after_received do
         process
       end
-    end
-
-    # @note We want to leave the #perform method as a public API, but just in case we will do some
-    #   pre or post processing we use call method instead of directly executing #perform
-    def call
-      perform
     end
 
     private

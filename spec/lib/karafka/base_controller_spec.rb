@@ -31,24 +31,18 @@ RSpec.describe Karafka::BaseController do
 
   before { working_class.topic = topic }
 
-  describe '#call' do
-    context 'when perform method is defined' do
-      it { expect { base_controller.call }.not_to raise_error }
-    end
+  describe '#perform' do
+    let(:working_class) { ClassBuilder.inherit(described_class) }
 
-    context 'when perform method is not defined' do
-      let(:working_class) { ClassBuilder.inherit(described_class) }
-
-      it { expect { base_controller.call }.to raise_error NotImplementedError }
-    end
+    it { expect { base_controller.send(:perform) }.to raise_error NotImplementedError }
   end
 
-  describe '#schedule' do
+  describe '#call' do
     context 'when there are no callbacks' do
       it 'just schedules' do
         expect(base_controller).to receive(:process)
 
-        base_controller.schedule
+        base_controller.call
       end
     end
   end
@@ -103,13 +97,13 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
-  context 'when we have a block based before_enqueue' do
+  context 'when we have a block based after_received' do
     let(:processing_backend) { :sidekiq }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do
         ClassBuilder.inherit(described_class) do
-          before_enqueue do
+          after_received do
             throw(:abort)
           end
 
@@ -122,7 +116,7 @@ RSpec.describe Karafka::BaseController do
       it 'does not enqueue' do
         expect(base_controller).not_to receive(:enqueue)
 
-        base_controller.schedule
+        base_controller.call
       end
     end
 
@@ -131,7 +125,7 @@ RSpec.describe Karafka::BaseController do
         ClassBuilder.inherit(described_class) do
           include Karafka::Controllers::InlineBackend
 
-          before_enqueue do
+          after_received do
             true
           end
 
@@ -145,18 +139,18 @@ RSpec.describe Karafka::BaseController do
 
       it 'executes' do
         expect(base_controller).to receive(:process)
-        base_controller.schedule
+        base_controller.call
       end
     end
   end
 
-  context 'when we have a method based before_enqueue' do
+  context 'when we have a method based after_received' do
     let(:processing_backend) { :sidekiq }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do
         ClassBuilder.inherit(described_class) do
-          before_enqueue :method
+          after_received :method
 
           def perform
             self
@@ -171,7 +165,7 @@ RSpec.describe Karafka::BaseController do
       it 'does not enqueue' do
         expect(base_controller).not_to receive(:enqueue)
 
-        base_controller.schedule
+        base_controller.call
       end
     end
 
@@ -180,7 +174,7 @@ RSpec.describe Karafka::BaseController do
         ClassBuilder.inherit(described_class) do
           include Karafka::Controllers::InlineBackend
 
-          before_enqueue :method
+          after_received :method
 
           def perform
             self
@@ -195,7 +189,7 @@ RSpec.describe Karafka::BaseController do
       it 'schedules to a backend' do
         expect(base_controller).to receive(:process)
 
-        base_controller.schedule
+        base_controller.call
       end
     end
   end

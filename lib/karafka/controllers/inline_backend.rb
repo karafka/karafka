@@ -11,7 +11,7 @@ module Karafka
       #   classes and other framework elements
       def process
         Karafka.monitor.notice(self.class, params_batch)
-        call
+        perform
       end
     end
   end

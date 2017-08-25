@@ -34,6 +34,6 @@ RSpec.describe Karafka::Controllers::SidekiqBackend do
   it 'expect to schedule with sidekiq using interchanger' do
     expect(topic.worker).to receive(:perform_async)
       .with(topic.id, interchanged_data)
-    controller.schedule
+    controller.call
   end
 end
