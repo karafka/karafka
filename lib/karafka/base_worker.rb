@@ -10,7 +10,7 @@ module Karafka
     # @param params_batch [Array] Array with messages batch
     def perform(topic_id, params_batch)
       Karafka.monitor.notice(self.class, params_batch)
-      controller(topic_id, params_batch).call
+      controller(topic_id, params_batch).perform
     end
 
     private
