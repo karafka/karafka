@@ -58,7 +58,10 @@ module Karafka
     class << self
       attr_reader :topic
 
+      # Assigns a topic to a controller and build up proper controller functionalities, so it can
+      #   cooperate with the topic settings
       # @param topic [Karafka::Routing::Topic]
+      # @return [Karafka::Routing::Topic] assigned topic
       def topic=(topic)
         @topic = topic
         Controllers::Includer.call(self)

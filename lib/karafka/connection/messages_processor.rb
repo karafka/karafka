@@ -14,8 +14,20 @@ module Karafka
         # @param group_id [String] group_id of a group from which a given message came
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages fetched from kafka
         def process(group_id, kafka_messages)
-          controller = Karafka::Routing::Router.build(group_id, kafka_messages[0])
-          handler = controller.topic.batch_processing ? :process_batch : :process_each
+          # @note We always get messages by topic and partition so we can take topic from the
+          # first one and it will be valid for all the messages
+          # We map from incoming topic name, as it might be namespaced, etc.
+          # @see topic_mapper internal docs
+          mapped_topic_name = Karafka::App.config.topic_mapper.incoming(kafka_messages[0].topic)
+          topic = Routing::Router.find("#{group_id}_#{mapped_topic_name}")
+
+          # Depending on a case (persisted or not) we might use new controller instance per each
+          # batch, or use the same instance for all of them (for implementing buffering, etc)
+          controller = Persistence.fetch(topic, kafka_messages[0].partition, :controller) do
+            topic.controller.new
+          end
+
+          handler = topic.batch_processing ? :process_batch : :process_each
           send(handler, controller, kafka_messages)
         end
 

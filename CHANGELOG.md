@@ -34,6 +34,8 @@
 - (optional) pausing upon processing failures ```pause_timeout```
 - Karafka console main process no longer intercepts irb errors
 - Wiki updates
+- #204 - Long running controllers
+- Better internal API to handle multiple usage cases using ```Karafka::Controllers::Includer```
 
 ### New features and improvements
 
@@ -44,6 +46,7 @@
 - Introduced the ```#batch_processing``` config flag (config for #126) that can be set per each consumer_group
 - Added support for partition, offset and partition key in the params hash
 - ```name``` option in config renamed to ```client_id```
+- Long running controllers with ```persistent``` flag on a topic config level, to make controller instances persistent between messages batches (single controller instance per topic per partition no per messages batch) - turned on by default
 
 ### Incompatibilities
 
@@ -58,6 +61,7 @@
 - When having a responder with ```required``` topics and not using ```#respond_with``` at all, it will raise an exception
 - Renamed ```inline_mode``` to ```inline_processing``` to resemble other settings conventions
 - Renamed ```inline_processing``` to ```processing_backend``` to reach 1.0 future compatibility
+- Single controller **needs** to be used for a single topic consumption
 
 ### Other changes
 - PolishGeeksDevTools removed (in favour of Coditsu)
