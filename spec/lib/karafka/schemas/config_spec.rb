@@ -53,17 +53,15 @@ RSpec.describe Karafka::Schemas::Config do
         expect(schema.call(config).success?).to be_falsey
       end
 
-      context 'redis is a hash' do
-        context 'url validator' do
-          it 'url is nil' do
-            config[:redis][:url] = nil
-            expect(schema.call(config).success?).to be_falsey
-          end
+      context 'redis is a hash url validation' do
+        it 'url is nil' do
+          config[:redis][:url] = nil
+          expect(schema.call(config).success?).to be_falsey
+        end
 
-          it 'url is not a string' do
-            config[:redis][:url] = 2
-            expect(schema.call(config).success?).to be_falsey
-          end
+        it 'url is not a string' do
+          config[:redis][:url] = 2
+          expect(schema.call(config).success?).to be_falsey
         end
       end
     end

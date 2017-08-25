@@ -48,11 +48,27 @@ RSpec.describe Karafka::BaseResponder do
     end
 
     describe '#call' do
-      let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
+      context 'with errors' do
+        let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
 
-      it 'expect to respond and validate' do
-        expect(responder).to receive(:respond).with(input_data)
-        expect { responder.call(input_data) }.to raise_error(expected_error)
+        it 'expect to respond and validate' do
+          expect(responder).to receive(:respond).with(input_data)
+          expect { responder.call(input_data) }.to raise_error(expected_error)
+        end
+      end
+
+      context 'without errors' do
+        let(:working_class) do
+          name = topic_name
+          ClassBuilder.inherit(described_class) do
+            topic name, required: false
+          end
+        end
+
+        it 'expect to respond and validate' do
+          expect(responder).to receive(:respond).with(input_data)
+          expect { responder.call(input_data) }.not_to raise_error
+        end
       end
     end
 
