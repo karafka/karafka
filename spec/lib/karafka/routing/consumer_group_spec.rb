@@ -43,7 +43,7 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
     let(:built_topic) do
       # assigning block to a "=" method does not work normally
       consumer_group.public_send(:topic=, :topic_name) do
-        controller Class.new
+        controller Class.new(Karafka::BaseController)
         worker Class.new
       end
     end
@@ -62,7 +62,7 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
     context 'when none of the topics is active' do
       before do
         consumer_group.public_send(:topic=, :topic_name) do
-          controller Class.new
+          controller Class.new(Karafka::BaseController)
           worker Class.new
         end
       end
@@ -90,7 +90,7 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
     context 'when there are topics inside' do
       let(:built_topic) do
         consumer_group.public_send(:topic=, :topic_name) do
-          controller Class.new
+          controller Class.new(Karafka::BaseController)
           worker Class.new
         end
       end

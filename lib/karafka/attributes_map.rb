@@ -40,6 +40,7 @@ module Karafka
           interchanger
           responder
           batch_processing
+          persistent
         ]).uniq
       end
 

@@ -20,128 +20,30 @@ RSpec.describe Karafka::BaseController do
   end
   let(:working_class) do
     ClassBuilder.inherit(described_class) do
+      include Karafka::Controllers::InlineBackend
+      include Karafka::Controllers::Responders
+
       def perform
         self
       end
     end
   end
 
-  before { base_controller.topic = topic }
+  before { working_class.topic = topic }
 
-  describe '#call' do
-    context 'when perform method is defined' do
-      it { expect { base_controller.call }.not_to raise_error }
-    end
+  describe '#perform' do
+    let(:working_class) { ClassBuilder.inherit(described_class) }
 
-    context 'when perform method is not defined' do
-      let(:working_class) { ClassBuilder.inherit(described_class) }
-
-      it { expect { base_controller.call }.to raise_error NotImplementedError }
-    end
-
-    context 'when we dont define responder' do
-      context 'but we try to use it' do
-        let(:working_class) do
-          ClassBuilder.inherit(described_class) do
-            def perform
-              respond_with {}
-            end
-          end
-        end
-
-        it { expect { base_controller.call }.to raise_error(Karafka::Errors::ResponderMissing) }
-      end
-
-      context 'and we dont use it' do
-        let(:working_class) do
-          ClassBuilder.inherit(described_class) do
-            def perform
-              self
-            end
-          end
-        end
-
-        it { expect { base_controller.call }.not_to raise_error }
-      end
-    end
-
-    context 'when we define responder' do
-      context 'and we decide to use it well' do
-        let(:working_class) do
-          ClassBuilder.inherit(described_class) do
-            # This is a hack for specs, no need to do it in a std flow
-            TestClass1 = ClassBuilder.inherit(Karafka::BaseResponder) do
-              topic :a, required: false
-
-              def respond(_data)
-                self
-              end
-            end
-
-            def perform
-              @responder = TestClass1.new(Karafka::Parsers::Json)
-
-              respond_with({})
-            end
-          end
-        end
-
-        it { expect { base_controller.call }.not_to raise_error }
-      end
-
-      context 'and we decide to use it not as intended' do
-        let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
-        let(:working_class) do
-          ClassBuilder.inherit(described_class) do
-            TestClass2 = ClassBuilder.inherit(Karafka::BaseResponder) do
-              topic :a, required: true
-
-              def respond(_data)
-                self
-              end
-            end
-
-            def perform
-              @responder = TestClass2.new(Karafka::Parsers::Json)
-              respond_with({})
-            end
-          end
-        end
-
-        it { expect { base_controller.call }.to raise_error(expected_error) }
-      end
-    end
+    it { expect { base_controller.send(:perform) }.to raise_error NotImplementedError }
   end
 
-  describe '#schedule' do
+  describe '#call' do
     context 'when there are no callbacks' do
-      context 'and we dont want to perform inline' do
-        let(:processing_backend) { :sidekiq }
+      it 'just schedules' do
+        expect(base_controller).to receive(:process)
 
-        it 'just schedules via call_async' do
-          expect(base_controller).to receive(:call_async)
-
-          base_controller.schedule
-        end
+        base_controller.call
       end
-
-      context 'and we want to perform inline' do
-        let(:processing_backend) { :inline }
-
-        it 'just expect to run with call_inline' do
-          expect(base_controller).to receive(:call_inline)
-
-          base_controller.schedule
-        end
-      end
-    end
-
-    context 'invalid backend' do
-      let(:expected_error) { Karafka::Errors::InvalidProcessingBackend }
-
-      before { topic.processing_backend = rand }
-
-      it { expect { base_controller.schedule }.to raise_error(expected_error) }
     end
   end
 
@@ -151,7 +53,14 @@ RSpec.describe Karafka::BaseController do
     let(:topic_parser) { Karafka::Parsers::Json }
 
     before do
-      base_controller.topic = instance_double(Karafka::Routing::Topic, parser: topic_parser)
+      working_class.topic = instance_double(
+        Karafka::Routing::Topic,
+        parser: topic_parser,
+        processing_backend: :inline,
+        batch_processing: false,
+        responder: false
+      )
+
       expect(Karafka::Params::ParamsBatch)
         .to receive(:new)
         .with(messages, topic_parser)
@@ -172,83 +81,29 @@ RSpec.describe Karafka::BaseController do
     it { expect(base_controller.params_batch).to eq params_batch }
   end
 
-  describe '#params' do
-    let(:params) { Karafka::Params::Params.build({}, nil) }
-
-    before { base_controller.instance_variable_set(:@params_batch, [params]) }
-
-    context 'for batch_processing controllers' do
-      before do
-        base_controller.topic = instance_double(Karafka::Routing::Topic, batch_processing: true)
-      end
-
-      it 'retrieves params data' do
-        expected_error = Karafka::Errors::ParamsMethodUnavailable
-        expect { base_controller.send(:params) }.to raise_error(expected_error)
-      end
-    end
-
-    context 'for non batch_processing controllers' do
-      it 'retrieves params data' do
-        expect(base_controller.send(:params)).to eq params
-      end
-    end
-  end
-
   describe '#respond_with' do
-    context 'when there is no responder for a given controller' do
-      let(:error) { Karafka::Errors::ResponderMissing }
+    let(:responder_class) { Karafka::BaseResponder }
+    let(:responder) { instance_double(responder_class) }
+    let(:data) { [rand, rand] }
 
-      it { expect { base_controller.send(:respond_with, {}) }.to raise_error(error) }
+    before do
+      expect(responder_class)
+        .to receive(:new).and_return(responder)
     end
 
-    context 'when there is responder for a given controller' do
-      let(:responder_class) { Karafka::BaseResponder }
-      let(:responder) { instance_double(responder_class) }
-      let(:data) { [rand, rand] }
-
-      before do
-        expect(responder_class)
-          .to receive(:new).and_return(responder)
-      end
-
-      it 'expect to use responder to respond with provided data' do
-        expect(responder).to receive(:call).with(data)
-        base_controller.send(:respond_with, data)
-      end
+    it 'expect to use responder to respond with provided data' do
+      expect(responder).to receive(:call).with(data)
+      base_controller.send(:respond_with, data)
     end
   end
 
-  describe '#call_inline' do
-    it 'expect to perform' do
-      expect(base_controller).to receive(:perform)
-      base_controller.send(:call_inline)
-    end
-  end
-
-  describe '#call_async' do
-    let(:params_batch) { instance_double(Karafka::Params::ParamsBatch, to_a: [double]) }
-    let(:interchanged_load_params) { double }
-    let(:worker) { double }
-
-    before { base_controller.instance_variable_set :@params_batch, params_batch }
-
-    it 'enqueue perform function' do
-      expect(topic.interchanger).to receive(:load)
-        .with(params_batch.to_a).and_return(interchanged_load_params)
-      expect(worker).to receive(:perform_async)
-        .with(topic.id, interchanged_load_params)
-      base_controller.send :call_async
-    end
-  end
-
-  context 'when we have a block based before_enqueue' do
+  context 'when we have a block based after_received' do
     let(:processing_backend) { :sidekiq }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do
         ClassBuilder.inherit(described_class) do
-          before_enqueue do
+          after_received do
             throw(:abort)
           end
 
@@ -261,14 +116,16 @@ RSpec.describe Karafka::BaseController do
       it 'does not enqueue' do
         expect(base_controller).not_to receive(:enqueue)
 
-        base_controller.schedule
+        base_controller.call
       end
     end
 
     context 'and it does not throw abort to halt' do
       subject(:base_controller) do
         ClassBuilder.inherit(described_class) do
-          before_enqueue do
+          include Karafka::Controllers::InlineBackend
+
+          after_received do
             true
           end
 
@@ -280,21 +137,20 @@ RSpec.describe Karafka::BaseController do
 
       let(:params) { double }
 
-      it 'executes call_async' do
-        expect(base_controller).to receive(:call_async)
-
-        base_controller.schedule
+      it 'executes' do
+        expect(base_controller).to receive(:process)
+        base_controller.call
       end
     end
   end
 
-  context 'when we have a method based before_enqueue' do
+  context 'when we have a method based after_received' do
     let(:processing_backend) { :sidekiq }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do
         ClassBuilder.inherit(described_class) do
-          before_enqueue :method
+          after_received :method
 
           def perform
             self
@@ -309,14 +165,16 @@ RSpec.describe Karafka::BaseController do
       it 'does not enqueue' do
         expect(base_controller).not_to receive(:enqueue)
 
-        base_controller.schedule
+        base_controller.call
       end
     end
 
     context 'and it does not return false' do
       subject(:base_controller) do
         ClassBuilder.inherit(described_class) do
-          before_enqueue :method
+          include Karafka::Controllers::InlineBackend
+
+          after_received :method
 
           def perform
             self
@@ -328,10 +186,10 @@ RSpec.describe Karafka::BaseController do
         end.new
       end
 
-      it 'enqueues with call_async' do
-        expect(base_controller).to receive(:call_async)
+      it 'schedules to a backend' do
+        expect(base_controller).to receive(:process)
 
-        base_controller.schedule
+        base_controller.call
       end
     end
   end

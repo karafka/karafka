@@ -10,7 +10,7 @@ module Karafka
     # @param params_batch [Array] Array with messages batch
     def perform(topic_id, params_batch)
       Karafka.monitor.notice(self.class, params_batch)
-      controller(topic_id, params_batch).call
+      controller(topic_id, params_batch).perform
     end
 
     private
@@ -18,9 +18,10 @@ module Karafka
     # @return [Karafka::Controller] descendant of Karafka::BaseController that matches the topic
     #   with params_batch assigned already (controller is ready to use)
     def controller(topic_id, params_batch)
-      @controller ||= Karafka::Routing::Router.build(topic_id).tap do |ctrl|
-        ctrl.params_batch = ctrl.topic.interchanger.parse(params_batch)
-      end
+      topic = Karafka::Routing::Router.find(topic_id)
+      controller = topic.controller.new
+      controller.params_batch = topic.interchanger.parse(params_batch)
+      controller
     end
   end
 end

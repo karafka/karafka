@@ -3,6 +3,8 @@
 RSpec.describe Karafka::BaseWorker do
   subject(:base_worker) { described_class.new }
 
+  let(:controller_instance) { controller.new }
+  let(:args) { [rand.to_s, rand] }
   let(:controller) do
     ClassBuilder.inherit(Karafka::BaseController) do
       def perform
@@ -10,10 +12,6 @@ RSpec.describe Karafka::BaseWorker do
       end
     end
   end
-
-  let(:controller_instance) { controller.new }
-
-  let(:args) { [rand.to_s, rand] }
 
   describe '#perform' do
     before do
@@ -25,7 +23,7 @@ RSpec.describe Karafka::BaseWorker do
 
     it 'performs controller action' do
       expect(controller_instance)
-        .to receive(:call)
+        .to receive(:perform)
 
       expect { base_worker.perform(*args) }.not_to raise_error
     end
@@ -36,17 +34,29 @@ RSpec.describe Karafka::BaseWorker do
     let(:interchanger) { double }
     let(:params_batch) { double }
     let(:interchanged_params) { double }
-    let(:topic) { instance_double(Karafka::Routing::Topic, interchanger: interchanger) }
+    let(:topic) do
+      instance_double(
+        Karafka::Routing::Topic,
+        interchanger: interchanger,
+        controller: controller,
+        processing_backend: :sidekiq,
+        batch_processing: false,
+        responder: nil,
+        parser: nil
+      )
+    end
 
     before do
-      expect(Karafka::Routing::Router)
-        .to receive(:build)
-        .with(topic_id)
-        .and_return(controller_instance)
+      controller.topic = topic
 
-      expect(controller_instance)
-        .to receive(:topic)
+      expect(Karafka::Routing::Router)
+        .to receive(:find)
+        .with(topic_id)
         .and_return(topic)
+
+      expect(controller)
+        .to receive(:new)
+        .and_return(controller_instance)
     end
 
     it 'expect to use router to pick controller, assign params_batch and return' do

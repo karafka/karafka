@@ -14,7 +14,8 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         interchanger: Class.new,
         max_bytes_per_partition: 1,
         start_from_beginning: true,
-        batch_processing: true
+        batch_processing: true,
+        persistent: false
       }
     ]
   end

@@ -24,7 +24,7 @@ RSpec.describe Karafka::Routing::Builder do
             # Here we should have instance doubles, etc but it takes
             # shitload of time to setup to pass to instance eval from instance variables,
             # so instead we check against constant names
-            controller :controller1
+            controller Class.new(Karafka::BaseController)
             processing_backend :inline
             name 'name1'
             worker :worker1
@@ -37,7 +37,7 @@ RSpec.describe Karafka::Routing::Builder do
       let(:consumer_group2) do
         described_class.instance.draw do
           topic :topic_name2 do
-            controller :controller2
+            controller Class.new(Karafka::BaseController)
             processing_backend :inline
             name 'name2'
             worker :worker2
@@ -51,11 +51,6 @@ RSpec.describe Karafka::Routing::Builder do
       before do
         consumer_group1
         consumer_group2
-      end
-
-      ATTRIBUTES.each do |attr|
-        it { expect(topic1.public_send(attr)).to eq :"#{attr}1" }
-        it { expect(topic2.public_send(attr)).to eq :"#{attr}2" }
       end
 
       # This needs to have twice same name as for a non grouped in consumer group topics,
@@ -81,7 +76,7 @@ RSpec.describe Karafka::Routing::Builder do
             seed_brokers [:brokers1]
 
             topic :topic_name1 do
-              controller :controller1
+              controller Class.new(Karafka::BaseController)
               processing_backend :inline
               name 'name1'
               worker :worker1
@@ -98,7 +93,7 @@ RSpec.describe Karafka::Routing::Builder do
             seed_brokers [:brokers2]
 
             topic :topic_name2 do
-              controller :controller2
+              controller Class.new(Karafka::BaseController)
               processing_backend :inline
               name 'name2'
               worker :worker2
@@ -113,11 +108,6 @@ RSpec.describe Karafka::Routing::Builder do
       before do
         consumer_group1
         consumer_group2
-      end
-
-      ATTRIBUTES.each do |attr|
-        it { expect(topic1.public_send(attr)).to eq :"#{attr}1" }
-        it { expect(topic2.public_send(attr)).to eq :"#{attr}2" }
       end
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
@@ -137,7 +127,7 @@ RSpec.describe Karafka::Routing::Builder do
             seed_brokers [:brokers]
 
             topic :topic_name1 do
-              controller :controller1
+              controller Class.new(Karafka::BaseController)
               processing_backend :inline
               name 'name1'
               worker :worker1
@@ -147,7 +137,7 @@ RSpec.describe Karafka::Routing::Builder do
             end
 
             topic :topic_name2 do
-              controller :controller2
+              controller Class.new(Karafka::BaseController)
               processing_backend :inline
               name 'name2'
               worker :worker2
@@ -157,11 +147,6 @@ RSpec.describe Karafka::Routing::Builder do
             end
           end
         end
-      end
-
-      ATTRIBUTES.each do |attr|
-        it { expect(topic1.public_send(attr)).to eq :"#{attr}1" }
-        it { expect(topic2.public_send(attr)).to eq :"#{attr}2" }
       end
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }

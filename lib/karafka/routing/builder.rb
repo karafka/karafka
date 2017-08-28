@@ -27,7 +27,7 @@ module Karafka
         each do |consumer_group|
           hashed_group = consumer_group.to_h
           validation_result = Karafka::Schemas::ConsumerGroup.call(hashed_group)
-          next if validation_result.success?
+          return if validation_result.success?
           raise Errors::InvalidConfiguration, [validation_result.errors, hashed_group]
         end
       end
