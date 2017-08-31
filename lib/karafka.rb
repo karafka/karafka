@@ -1,16 +1,10 @@
 # frozen_string_literal: true
 
 %w[
-  rake
-  ostruct
-  rubygems
-  bundler
   English
+  bundler
   celluloid/current
   waterdrop
-  pathname
-  timeout
-  logger
   kafka
   sidekiq
   envlogic
@@ -26,9 +20,6 @@
   active_support/descendants_tracker
   active_support/inflector
   karafka/loader
-  karafka/setup/config
-  karafka/status
-  karafka/routing/router
 ].each(&method(:require))
 
 # Karafka library
