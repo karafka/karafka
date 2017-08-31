@@ -21,16 +21,26 @@ module Karafka
 
         private
 
+        # Figures out backend for a given controller class, based on the topic backend and
+        #   includes it into the controller class
+        # @param controller_class [Class] controller class
+        # @param topic [Karafka::Routing::Topic] topic of a controller class
         def bind_backend(controller_class, topic)
           backend = Kernel.const_get("::Karafka::Backends::#{topic.backend.to_s.capitalize}")
           controller_class.include backend
         end
 
+        # Adds a single #params support for non batch processed topics
+        # @param controller_class [Class] controller class
+        # @param topic [Karafka::Routing::Topic] topic of a controller class
         def bind_params(controller_class, topic)
           return if topic.batch_processing
           controller_class.include SingleParams
         end
 
+        # Adds responders support for topics and controllers with responders defined for them
+        # @param controller_class [Class] controller class
+        # @param topic [Karafka::Routing::Topic] topic of a controller class
         def bind_responders(controller_class, topic)
           return unless topic.responder
           controller_class.include Responders
