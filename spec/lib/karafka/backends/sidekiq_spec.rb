@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Controllers::SidekiqBackend do
+RSpec.describe Karafka::Backends::Sidekiq do
   subject(:controller) { controller_class.new }
 
   let(:controller_class) { Class.new(Karafka::BaseController) }
@@ -12,7 +12,7 @@ RSpec.describe Karafka::Controllers::SidekiqBackend do
       Karafka::Routing::Topic,
       id: rand.to_s,
       interchanger: interchanger,
-      processing_backend: :sidekiq,
+      backend: :sidekiq,
       batch_processing: true,
       responder: nil,
       parser: nil,

@@ -39,7 +39,7 @@ RSpec.describe Karafka::BaseWorker do
         Karafka::Routing::Topic,
         interchanger: interchanger,
         controller: controller,
-        processing_backend: :sidekiq,
+        backend: :sidekiq,
         batch_processing: false,
         responder: nil,
         parser: nil

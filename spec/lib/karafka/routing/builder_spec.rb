@@ -25,7 +25,7 @@ RSpec.describe Karafka::Routing::Builder do
             # shitload of time to setup to pass to instance eval from instance variables,
             # so instead we check against constant names
             controller Class.new(Karafka::BaseController)
-            processing_backend :inline
+            backend :inline
             name 'name1'
             worker :worker1
             parser :parser1
@@ -38,7 +38,7 @@ RSpec.describe Karafka::Routing::Builder do
         described_class.instance.draw do
           topic :topic_name2 do
             controller Class.new(Karafka::BaseController)
-            processing_backend :inline
+            backend :inline
             name 'name2'
             worker :worker2
             parser :parser2
@@ -60,9 +60,9 @@ RSpec.describe Karafka::Routing::Builder do
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_topic_name2_topic_name2" }
       it { expect(builder.size).to eq 2 }
       it { expect(topic1.name).to eq 'name1' }
-      it { expect(topic1.processing_backend).to eq :inline }
+      it { expect(topic1.backend).to eq :inline }
       it { expect(topic2.name).to eq 'name2' }
-      it { expect(topic2.processing_backend).to eq :inline }
+      it { expect(topic2.backend).to eq :inline }
       it { expect(builder.first.id).to eq "#{Karafka::App.config.client_id}_topic_name1" }
       it { expect(builder.last.id).to eq "#{Karafka::App.config.client_id}_topic_name2" }
     end
@@ -77,7 +77,7 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name1 do
               controller Class.new(Karafka::BaseController)
-              processing_backend :inline
+              backend :inline
               name 'name1'
               worker :worker1
               parser :parser1
@@ -94,7 +94,7 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name2 do
               controller Class.new(Karafka::BaseController)
-              processing_backend :inline
+              backend :inline
               name 'name2'
               worker :worker2
               parser :parser2
@@ -128,7 +128,7 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name1 do
               controller Class.new(Karafka::BaseController)
-              processing_backend :inline
+              backend :inline
               name 'name1'
               worker :worker1
               parser :parser1
@@ -138,7 +138,7 @@ RSpec.describe Karafka::Routing::Builder do
 
             topic :topic_name2 do
               controller Class.new(Karafka::BaseController)
-              processing_backend :inline
+              backend :inline
               name 'name2'
               worker :worker2
               parser :parser2
@@ -160,7 +160,7 @@ RSpec.describe Karafka::Routing::Builder do
         described_class.instance.draw do
           consumer_group '$%^&*(' do
             topic :topic_name1 do
-              processing_backend :inline
+              backend :inline
             end
           end
         end

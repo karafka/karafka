@@ -4,7 +4,7 @@ RSpec.describe Karafka::BaseController do
   subject(:base_controller) { working_class.new }
 
   let(:topic_name) { "topic#{rand}" }
-  let(:processing_backend) { :inline }
+  let(:backend) { :inline }
   let(:responder_class) { nil }
   let(:interchanger) { nil }
   let(:worker) { nil }
@@ -12,7 +12,7 @@ RSpec.describe Karafka::BaseController do
   let(:topic) do
     topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
     topic.controller = Class.new(described_class)
-    topic.processing_backend = processing_backend
+    topic.backend = backend
     topic.responder = responder_class
     topic.interchanger = interchanger
     topic.worker = worker
@@ -20,7 +20,7 @@ RSpec.describe Karafka::BaseController do
   end
   let(:working_class) do
     ClassBuilder.inherit(described_class) do
-      include Karafka::Controllers::InlineBackend
+      include Karafka::Backends::Inline
       include Karafka::Controllers::Responders
 
       def perform
@@ -56,7 +56,7 @@ RSpec.describe Karafka::BaseController do
       working_class.topic = instance_double(
         Karafka::Routing::Topic,
         parser: topic_parser,
-        processing_backend: :inline,
+        backend: :inline,
         batch_processing: false,
         responder: false
       )
@@ -98,7 +98,7 @@ RSpec.describe Karafka::BaseController do
   end
 
   context 'when we have a block based after_received' do
-    let(:processing_backend) { :sidekiq }
+    let(:backend) { :sidekiq }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do
@@ -123,7 +123,7 @@ RSpec.describe Karafka::BaseController do
     context 'and it does not throw abort to halt' do
       subject(:base_controller) do
         ClassBuilder.inherit(described_class) do
-          include Karafka::Controllers::InlineBackend
+          include Karafka::Backends::Inline
 
           after_received do
             true
@@ -145,7 +145,7 @@ RSpec.describe Karafka::BaseController do
   end
 
   context 'when we have a method based after_received' do
-    let(:processing_backend) { :sidekiq }
+    let(:backend) { :sidekiq }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do
@@ -172,7 +172,7 @@ RSpec.describe Karafka::BaseController do
     context 'and it does not return false' do
       subject(:base_controller) do
         ClassBuilder.inherit(described_class) do
-          include Karafka::Controllers::InlineBackend
+          include Karafka::Backends::Inline
 
           after_received :method
 

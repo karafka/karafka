@@ -9,7 +9,7 @@ RSpec.describe Karafka::Controllers::SingleParams do
     instance_double(
       Karafka::Routing::Topic,
       id: rand.to_s,
-      processing_backend: :inline,
+      backend: :inline,
       batch_processing: true,
       responder: nil,
       parser: Karafka::Parsers::Json,

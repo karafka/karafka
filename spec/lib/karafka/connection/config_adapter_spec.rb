@@ -8,7 +8,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
     Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
       cg.public_send(:topic=, topic) do
         controller Class.new(Karafka::BaseController)
-        processing_backend :inline
+        backend :inline
       end
     end
   end

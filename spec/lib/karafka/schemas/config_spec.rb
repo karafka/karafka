@@ -32,9 +32,9 @@ RSpec.describe Karafka::Schemas::Config do
       config[:redis] = { url: 'url' }
     end
 
-    context 'processing_backend is inline' do
+    context 'backend is inline' do
       before do
-        config[:processing_backend] = :inline
+        config[:backend] = :inline
       end
 
       it 'redis is nil' do
@@ -43,9 +43,9 @@ RSpec.describe Karafka::Schemas::Config do
       end
     end
 
-    context 'processing_backend is sidekiq' do
+    context 'backend is sidekiq' do
       before do
-        config[:processing_backend] = :sidekiq
+        config[:backend] = :sidekiq
       end
 
       it 'redis is nil' do

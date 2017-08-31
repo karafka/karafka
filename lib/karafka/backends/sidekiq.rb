@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Controllers
+  module Backends
     # Sidekiq backend that schedules stuff to Sidekiq worker for delayed execution
-    module SidekiqBackend
+    module Sidekiq
       private
 
       # Enqueues the execution of perform method into a worker.

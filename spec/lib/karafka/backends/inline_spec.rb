@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Controllers::InlineBackend do
+RSpec.describe Karafka::Backends::Inline do
   subject(:controller) { controller_class.new }
 
   let(:controller_class) { Class.new(Karafka::BaseController) }

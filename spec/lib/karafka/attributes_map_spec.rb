@@ -21,7 +21,7 @@ RSpec.describe Karafka::AttributesMap do
         name
         controller
         worker
-        processing_backend
+        backend
         parser
         interchanger
         responder

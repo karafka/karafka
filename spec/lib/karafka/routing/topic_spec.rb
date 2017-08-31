@@ -10,18 +10,18 @@ RSpec.describe Karafka::Routing::Topic do
 
   before do
     topic.controller = controller
-    topic.processing_backend = :inline
+    topic.backend = :inline
   end
 
   describe '#build' do
     Karafka::AttributesMap.topic.each do |attr|
       context "for #{attr}" do
-        let(:attr_value) { rand.to_s }
+        let(:attr_value) { attr == :backend ? :inline : rand.to_s }
 
         it 'expect to invoke it and store' do
           # Some values are build from other, so we add at least once as they
           # might be used internally
-          expect(topic).to receive(attr).and_return(attr).at_least(:once)
+          expect(topic).to receive(attr).and_return(attr_value).at_least(:once)
           topic.build
         end
       end
@@ -48,19 +48,19 @@ RSpec.describe Karafka::Routing::Topic do
       topic.controller = controller
     end
 
-    context 'when processing_backend is inline' do
+    context 'when backend is inline' do
       let(:worker) { false }
 
       before do
-        topic.processing_backend = :inline
+        topic.backend = :inline
       end
 
       it { expect(topic.worker).to eq nil }
     end
 
-    context 'when processing_backend is sidekiq' do
+    context 'when backend is sidekiq' do
       before do
-        topic.processing_backend = :sidekiq
+        topic.backend = :sidekiq
       end
 
       context 'when worker is not set' do
@@ -83,33 +83,33 @@ RSpec.describe Karafka::Routing::Topic do
     end
   end
 
-  describe '#processing_backend' do
-    before { topic.processing_backend = processing_backend }
+  describe '#backend' do
+    before { topic.backend = backend }
 
-    context 'when processing_backend is not set' do
+    context 'when backend is not set' do
       let(:default_inline) { rand }
-      let(:processing_backend) { nil }
+      let(:backend) { nil }
 
       before do
-        expect(Karafka::App.config).to receive(:processing_backend)
+        expect(Karafka::App.config).to receive(:backend)
           .and_return(default_inline)
       end
 
       it 'expect to use Karafka::App default' do
-        expect(topic.processing_backend).to eq default_inline
+        expect(topic.backend).to eq default_inline
       end
     end
 
-    context 'when processing_backend per topic is set to sidekiq' do
-      let(:processing_backend) { :sidekiq }
+    context 'when backend per topic is set to sidekiq' do
+      let(:backend) { :sidekiq }
 
-      it { expect(topic.processing_backend).to eq processing_backend }
+      it { expect(topic.backend).to eq backend }
     end
 
-    context 'when processing_backend per topic is set to inline' do
-      let(:processing_backend) { :inline }
+    context 'when backend per topic is set to inline' do
+      let(:backend) { :inline }
 
-      it { expect(topic.processing_backend).to eq processing_backend }
+      it { expect(topic.backend).to eq backend }
     end
   end
 

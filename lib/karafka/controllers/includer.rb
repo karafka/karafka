@@ -8,14 +8,33 @@ module Karafka
     # We don't need all the behaviors in all the cases, so it is totally not worth having
     # everything in all the cases all the time
     module Includer
-      # @param controller_class [Class] controller class, that will get some functionalities
-      #   based on the topic under which it operates
-      def self.call(controller_class)
-        topic = controller_class.topic
-        controller_class.include InlineBackend if topic.processing_backend == :inline
-        controller_class.include SidekiqBackend if topic.processing_backend == :sidekiq
-        controller_class.include SingleParams unless topic.batch_processing
-        controller_class.include Responders if topic.responder
+      class << self
+        # @param controller_class [Class] controller class, that will get some functionalities
+        #   based on the topic under which it operates
+        def call(controller_class)
+          topic = controller_class.topic
+
+          bind_backend(controller_class, topic)
+          bind_params(controller_class, topic)
+          bind_responders(controller_class, topic)
+        end
+
+        private
+
+        def bind_backend(controller_class, topic)
+          backend = Kernel.const_get("::Karafka::Backends::#{topic.backend.to_s.capitalize}")
+          controller_class.include backend
+        end
+
+        def bind_params(controller_class, topic)
+          return if topic.batch_processing
+          controller_class.include SingleParams
+        end
+
+        def bind_responders(controller_class, topic)
+          return unless topic.responder
+          controller_class.include Responders
+        end
       end
     end
   end

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Controllers
+  # Namespace for all different backends Karafka supports
+  module Backends
     # Backend that just runs stuff asap without any scheduling
-    module InlineBackend
+    module Inline
       private
 
       # Executes perform code immediately (without enqueuing)

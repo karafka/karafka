@@ -6,7 +6,7 @@ module Karafka
     ConsumerGroupTopic = Dry::Validation.Schema do
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
       required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
-      required(:processing_backend).filled(included_in?: %i[inline sidekiq])
+      required(:backend).filled(included_in?: %i[inline sidekiq])
       required(:controller).filled
       required(:parser).filled
       required(:interchanger).filled

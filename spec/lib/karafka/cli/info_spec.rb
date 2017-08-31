@@ -12,7 +12,7 @@ RSpec.describe Karafka::Cli::Info do
       [
         "Karafka framework version: #{Karafka::VERSION}",
         "Application client id: #{Karafka::App.config.client_id}",
-        "Processing backend: #{Karafka::App.config.processing_backend}",
+        "Backend: #{Karafka::App.config.backend}",
         "Batch consuming: #{Karafka::App.config.batch_consuming}",
         "Batch processing: #{Karafka::App.config.batch_processing}",
         "Number of threads: #{Karafka::App.config.concurrency}",
