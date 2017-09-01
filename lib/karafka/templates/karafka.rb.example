@@ -17,17 +17,13 @@ class KarafkaApp < Karafka::App
   setup do |config|
     config.kafka.seed_brokers = %w( 127.0.0.1:9092 )
     config.client_id = 'example_app'
-    config.redis = {
-      url: 'redis://localhost:6379'
-    }
-    config.backend = Karafka.env.development? ? :inline : :sidekiq
+    config.backend = :inline
     config.batch_consuming = true
   end
 
   consumer_groups.draw do
     # topic :example do
     #   controller ExampleController
-    #   interchanger CustomInterchanger
     # end
 
     # consumer_group :bigger_group do

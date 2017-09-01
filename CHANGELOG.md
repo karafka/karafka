@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 0.6.0.rc2 - released
+## 1.0.0.rc1
 
 ### Closed issues:
 
@@ -37,6 +37,7 @@
 - #204 - Long running controllers
 - Better internal API to handle multiple usage cases using ```Karafka::Controllers::Includer```
 - #207 - Rename before_enqueued to after_received
+- #147 - Deattach Karafka from Sidekiq by extracting Sidekiq backend
 
 ### New features and improvements
 

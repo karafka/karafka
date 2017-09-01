@@ -17,7 +17,6 @@ Gem::Specification.new do |spec|
   spec.license     = 'MIT'
 
   spec.add_dependency 'ruby-kafka', '>= 0.4'
-  spec.add_dependency 'sidekiq', '>= 4.2'
   spec.add_dependency 'celluloid'
   spec.add_dependency 'envlogic', '~> 1.0'
   spec.add_dependency 'waterdrop', '>= 0.4'

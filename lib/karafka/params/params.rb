@@ -5,7 +5,7 @@ module Karafka
   module Params
     # Class-wrapper for hash with indifferent access with additional lazy loading feature
     # It provides lazy loading not only until the first usage, but also allows us to skip
-    # using parser until we execute our logic inside worker. That way we can operate with
+    # using parser until we execute our logic. That way we can operate with
     # heavy-parsing data without slowing down the whole application.
     class Params < HashWithIndifferentAccess
       # Kafka::FetchedMessage attributes that we want to use inside of params
@@ -30,7 +30,7 @@ module Karafka
         # @example Build params instance from a Kafka::FetchedMessage object
         #   Karafka::Params::Params.build(message) #=> params object
         def build(message, parser)
-          # Hash case happens inside workers
+          # Hash case happens inside backends that interchange data
           if message.is_a?(Hash)
             new(parser: parser).merge!(message)
           else

@@ -13,7 +13,7 @@ module Karafka
 
     # Raised when router receives topic name which does not correspond with any routes
     # This can only happen in a case when:
-    #   - you've received a message and it was scheduled to Sidekiq background worker
+    #   - you've received a message and we cannot match it with a controller
     #   - you've changed the routing, so router can no longer associate your topic to
     #     any controller
     #   - or in a case when you do a lot of metaprogramming and you change routing/etc on runtime
@@ -22,10 +22,6 @@ module Karafka
     # you to "eat" everything from the Sidekiq queue.
     # @see https://github.com/karafka/karafka/issues/135
     NonMatchingRouteError = Class.new(BaseError)
-
-    # Raised when application does not have ApplicationWorker or other class that directly
-    # inherits from Karafka::BaseWorker
-    BaseWorkerDescentantMissing = Class.new(BaseError)
 
     # Raised when we don't use or use responder not in the way it expected to based on the
     # topics usage definitions

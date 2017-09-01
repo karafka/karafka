@@ -7,7 +7,7 @@ module Karafka
   # that will be executed
   #
   # Note that if after_received return false, the chain will be stopped and
-  #   the perform method won't be executed in sidekiq (won't peform_async it)
+  #   the perform method won't be executed
   #
   # @example Create simple controller
   #   class ExamplesController < Karafka::BaseController
@@ -68,10 +68,10 @@ module Karafka
         @topic
       end
 
-      # Creates a callback that will be executed before scheduling to Sidekiq
+      # Creates a callback that will be executed after receiving message but before executing the
+      #   backend for processing
       # @param method_name [Symbol, String] method name or nil if we plan to provide a block
       # @yield A block with a code that should be executed before scheduling
-      # @note If value returned is false, will chalt the chain and not schedlue to Sidekiq
       # @example Define a block after_received callback
       #   after_received do
       #     # logic here
@@ -92,7 +92,7 @@ module Karafka
     # Creates lazy loaded params batch object
     # @note Until first params usage, it won't parse data at all
     # @param messages [Array<Kafka::FetchedMessage>, Array<Hash>] messages with raw
-    #   content (from Kafka) or messages inside a hash (from Sidekiq, etc)
+    #   content (from Kafka) or messages inside a hash (from backend, etc)
     # @return [Karafka::Params::ParamsBatch] lazy loaded params batch
     def params_batch=(messages)
       @params_batch = Karafka::Params::ParamsBatch.new(messages, topic.parser)

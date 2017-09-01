@@ -4,7 +4,6 @@ module Karafka
   module Helpers
     # Class used to autodetect corresponding classes that are internally inside Karafka framework
     # It is used among others to match:
-    #   controller => worker
     #   controller => responder
     class ClassMatcher
       # Regexp used to remove any non classy like characters that might be in the controller
@@ -14,11 +13,11 @@ module Karafka
       # @param klass [Class] class to which we want to find a corresponding class
       # @param from [String] what type of object is it (based on postfix name part)
       # @param to [String] what are we looking for (based on a postfix name part)
-      # @example Controller that has a corresponding worker
-      #   matcher = Karafka::Helpers::ClassMatcher.new(SuperController, 'Controller', 'Worker')
-      #   matcher.match #=> SuperWorker
-      # @example Controller without a corresponding worker
-      #   matcher = Karafka::Helpers::ClassMatcher.new(Super2Controller, 'Controller', 'Worker')
+      # @example Controller that has a corresponding responder
+      #   matcher = Karafka::Helpers::ClassMatcher.new(SuperController, 'Controller', 'Responder')
+      #   matcher.match #=> SuperResponder
+      # @example Controller without a corresponding responder
+      #   matcher = Karafka::Helpers::ClassMatcher.new(Super2Controller, 'Controller', 'Responder')
       #   matcher.match #=> nil
       def initialize(klass, from:, to:)
         @klass = klass
@@ -37,10 +36,10 @@ module Karafka
 
       # @return [String] name of a new class that we're looking for
       # @note This method returns name of a class without a namespace
-      # @example From SuperController matching worker
-      #   matcher.name #=> 'SuperWorker'
-      # @example From Namespaced::Super2Controller matching worker
-      #   matcher.name #=> Super2Worker
+      # @example From SuperController matching responder
+      #   matcher.name #=> 'SuperResponder'
+      # @example From Namespaced::Super2Controller matching responder
+      #   matcher.name #=> Super2Responder
       def name
         inflected = @klass.to_s.split('::').last.to_s
         inflected.gsub!(@from, @to)

@@ -5,9 +5,7 @@ RSpec.describe Karafka::Routing::Builder do
 
   ATTRIBUTES = %i[
     controller
-    worker
     parser
-    interchanger
     responder
   ].freeze
 
@@ -27,9 +25,7 @@ RSpec.describe Karafka::Routing::Builder do
             controller Class.new(Karafka::BaseController)
             backend :inline
             name 'name1'
-            worker :worker1
             parser :parser1
-            interchanger :interchanger1
             responder :responder1
           end
         end
@@ -40,9 +36,7 @@ RSpec.describe Karafka::Routing::Builder do
             controller Class.new(Karafka::BaseController)
             backend :inline
             name 'name2'
-            worker :worker2
             parser :parser2
-            interchanger :interchanger2
             responder :responder2
           end
         end
@@ -79,9 +73,7 @@ RSpec.describe Karafka::Routing::Builder do
               controller Class.new(Karafka::BaseController)
               backend :inline
               name 'name1'
-              worker :worker1
               parser :parser1
-              interchanger :interchanger1
               responder :responder1
             end
           end
@@ -96,9 +88,7 @@ RSpec.describe Karafka::Routing::Builder do
               controller Class.new(Karafka::BaseController)
               backend :inline
               name 'name2'
-              worker :worker2
               parser :parser2
-              interchanger :interchanger2
               responder :responder2
             end
           end
@@ -130,9 +120,7 @@ RSpec.describe Karafka::Routing::Builder do
               controller Class.new(Karafka::BaseController)
               backend :inline
               name 'name1'
-              worker :worker1
               parser :parser1
-              interchanger :interchanger1
               responder :responder1
             end
 
@@ -140,9 +128,7 @@ RSpec.describe Karafka::Routing::Builder do
               controller Class.new(Karafka::BaseController)
               backend :inline
               name 'name2'
-              worker :worker2
               parser :parser2
-              interchanger :interchanger2
               responder :responder2
             end
           end

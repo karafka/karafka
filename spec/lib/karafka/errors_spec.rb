@@ -19,12 +19,6 @@ RSpec.describe Karafka::Errors do
     specify { expect(error).to be < described_class::BaseError }
   end
 
-  describe 'BaseWorkerDescentantMissing' do
-    subject(:error) { described_class::BaseWorkerDescentantMissing }
-
-    specify { expect(error).to be < described_class::BaseError }
-  end
-
   describe 'InvalidConfiguration' do
     subject(:error) { described_class::InvalidConfiguration }
 

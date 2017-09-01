@@ -12,8 +12,7 @@ RSpec.describe Karafka::Controllers::SingleParams do
       backend: :inline,
       batch_processing: true,
       responder: nil,
-      parser: Karafka::Parsers::Json,
-      worker: Class.new(Karafka::BaseWorker)
+      parser: Karafka::Parsers::Json
     )
   end
 

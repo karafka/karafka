@@ -6,16 +6,12 @@ RSpec.describe Karafka::BaseController do
   let(:topic_name) { "topic#{rand}" }
   let(:backend) { :inline }
   let(:responder_class) { nil }
-  let(:interchanger) { nil }
-  let(:worker) { nil }
   let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand.to_s) }
   let(:topic) do
     topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
     topic.controller = Class.new(described_class)
     topic.backend = backend
     topic.responder = responder_class
-    topic.interchanger = interchanger
-    topic.worker = worker
     topic
   end
   let(:working_class) do
@@ -98,7 +94,7 @@ RSpec.describe Karafka::BaseController do
   end
 
   context 'when we have a block based after_received' do
-    let(:backend) { :sidekiq }
+    let(:backend) { :inline }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do
@@ -113,8 +109,8 @@ RSpec.describe Karafka::BaseController do
         end.new
       end
 
-      it 'does not enqueue' do
-        expect(base_controller).not_to receive(:enqueue)
+      it 'does not perform' do
+        expect(base_controller).not_to receive(:perform)
 
         base_controller.call
       end
@@ -145,7 +141,7 @@ RSpec.describe Karafka::BaseController do
   end
 
   context 'when we have a method based after_received' do
-    let(:backend) { :sidekiq }
+    let(:backend) { :inline }
 
     context 'and it throws abort to halt' do
       subject(:base_controller) do
@@ -162,8 +158,8 @@ RSpec.describe Karafka::BaseController do
         end.new
       end
 
-      it 'does not enqueue' do
-        expect(base_controller).not_to receive(:enqueue)
+      it 'does not perform' do
+        expect(base_controller).not_to receive(:perform)
 
         base_controller.call
       end

@@ -18,17 +18,12 @@ module Karafka
       # option client_id [String] kafka client_id - used to provide
       #   default Kafka groups namespaces and identify that app in kafka
       setting :client_id
-      # How should we process messages. For now we support inline mode (asap in the process) or
-      # sidekiq mode (schedule to sidekiq)
+      # What backend do we want to use to process messages
       setting :backend, :inline
       # option logger [Instance] logger that we want to use
       setting :logger, -> { ::Karafka::Logger.instance }
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
       setting :monitor, -> { ::Karafka::Monitor.instance }
-      # option redis [Hash] redis options hash (url and optional parameters)
-      # Note that redis could be rewriten using nested options, but it is a sidekiq specific
-      # stuff and we don't want to touch it
-      setting :redis
       # Mapper used to remap names of topics, so we can have a clean internal topic namings
       # despite using any Kafka provider that uses namespacing, etc
       # It needs to implement two methods:
@@ -47,21 +42,14 @@ module Karafka
       # Disabling that can be useful when you want to build a new controller instance for each
       # incoming batch. It's disabled by default, not to create more objects that needed on
       # each batch
-      # @note It won't have any effect on Sidekiq backend
       setting :persistent, true
-      # Connection pool options are used for producer (Waterdrop)
-      # They are configured automatically based on Sidekiq concurrency and number of consumers
-      # The bigger one is selected as we need to be able to send messages from both places
+      # Connection pool options are used for producer (Waterdrop) - by default it will adapt to
+      # number of active actors
       setting :connection_pool do
-        # Connection pool size for producers. Note that we take a bigger number because there
-        # are cases when we might have more sidekiq threads than Karafka consumers (small app)
-        # or the opposite for bigger systems
-        setting :size, lambda {
-          [
-            ::Karafka::App.consumer_groups.active.count,
-            Sidekiq.options[:concurrency]
-          ].max
-        }
+        # Connection pool size for producers. If you use sidekiq or any other multi threaded
+        # backend, you might want to tune it to match number of threads of your background
+        # processing engine
+        setting :size, -> { ::Karafka::App.consumer_groups.active.count }
         # How long should we wait for a working resource from the pool before rising timeout
         # With a proper connection pool size, this should never happen
         setting :timeout, 5

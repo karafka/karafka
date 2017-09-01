@@ -11,7 +11,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         backend: :inline,
         controller: Class.new,
         parser: Class.new,
-        interchanger: Class.new,
         max_bytes_per_partition: 1,
         start_from_beginning: true,
         batch_processing: true,
@@ -293,11 +292,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:topics][0][:backend] = nil
         expect(schema.call(config).success?).to be_falsey
       end
-
-      it 'backend is not inline or sidekiq' do
-        config[:topics][0][:backend] = 2
-        expect(schema.call(config).success?).to be_falsey
-      end
     end
 
     context 'max_bytes_per_partition validator' do
@@ -339,13 +333,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'parser validator' do
       it 'parser is not present' do
         config[:topics][0][:parser] = nil
-        expect(schema.call(config).success?).to be_falsey
-      end
-    end
-
-    context 'interchanger validator' do
-      it 'interchanger is not present' do
-        config[:topics][0][:interchanger] = nil
         expect(schema.call(config).success?).to be_falsey
       end
     end
