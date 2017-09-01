@@ -49,7 +49,7 @@ module Karafka
         # Connection pool size for producers. If you use sidekiq or any other multi threaded
         # backend, you might want to tune it to match number of threads of your background
         # processing engine
-        setting :size, lambda { ::Karafka::App.consumer_groups.active.count }
+        setting :size, -> { ::Karafka::App.consumer_groups.active.count }
         # How long should we wait for a working resource from the pool before rising timeout
         # With a proper connection pool size, this should never happen
         setting :timeout, 5
