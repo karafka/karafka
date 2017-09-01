@@ -20,10 +20,8 @@ RSpec.describe Karafka::AttributesMap do
       %i[
         name
         controller
-        worker
         backend
         parser
-        interchanger
         responder
         batch_processing
       ]
