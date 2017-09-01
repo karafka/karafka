@@ -6,8 +6,7 @@ RSpec.describe Karafka::Schemas::Config do
   let(:config) do
     {
       client_id: 'name',
-      topic_mapper: Karafka::Routing::Mapper,
-      redis: { url: 'url' }
+      topic_mapper: Karafka::Routing::Mapper
     }
   end
 
