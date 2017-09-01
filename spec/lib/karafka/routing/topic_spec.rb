@@ -42,47 +42,6 @@ RSpec.describe Karafka::Routing::Topic do
     it { expect(topic.id).to eq "#{consumer_group.id}_#{name}" }
   end
 
-  describe '#worker' do
-    before do
-      topic.worker = worker
-      topic.controller = controller
-    end
-
-    context 'when backend is inline' do
-      let(:worker) { false }
-
-      before do
-        topic.backend = :inline
-      end
-
-      it { expect(topic.worker).to eq nil }
-    end
-
-    context 'when backend is sidekiq' do
-      before do
-        topic.backend = :sidekiq
-      end
-
-      context 'when worker is not set' do
-        let(:worker) { nil }
-        let(:built_worker) { double }
-        let(:builder) { double }
-
-        it 'expect to build worker using builder' do
-          expect(Karafka::Workers::Builder).to receive(:new).with(controller).and_return(builder)
-          expect(builder).to receive(:build).and_return(built_worker)
-          expect(topic.worker).to eq built_worker
-        end
-      end
-    end
-
-    context 'when worker is set' do
-      let(:worker) { double }
-
-      it { expect(topic.worker).to eq worker }
-    end
-  end
-
   describe '#backend' do
     before { topic.backend = backend }
 
@@ -98,12 +57,6 @@ RSpec.describe Karafka::Routing::Topic do
       it 'expect to use Karafka::App default' do
         expect(topic.backend).to eq default_inline
       end
-    end
-
-    context 'when backend per topic is set to sidekiq' do
-      let(:backend) { :sidekiq }
-
-      it { expect(topic.backend).to eq backend }
     end
 
     context 'when backend per topic is set to inline' do
@@ -161,30 +114,6 @@ RSpec.describe Karafka::Routing::Topic do
       let(:parser) { double }
 
       it { expect(topic.parser).to eq parser }
-    end
-  end
-
-  describe '#interchanger=' do
-    let(:interchanger) { double }
-
-    it { expect { topic.interchanger = interchanger }.not_to raise_error }
-  end
-
-  describe '#interchanger' do
-    before { topic.interchanger = interchanger }
-
-    context 'when interchanger is not set' do
-      let(:interchanger) { nil }
-
-      it 'expect to use default one' do
-        expect(topic.interchanger).to eq Karafka::Params::Interchanger
-      end
-    end
-
-    context 'when interchanger is set' do
-      let(:interchanger) { double }
-
-      it { expect(topic.interchanger).to eq interchanger }
     end
   end
 

@@ -33,13 +33,6 @@ module Karafka
         self
       end
 
-      # @return [Class] Class (not an instance) of a worker that should be used to schedule the
-      #   background job
-      # @note If not provided - will be built based on the provided controller
-      def worker
-        @worker ||= backend == :sidekiq ? Workers::Builder.new(controller).build : nil
-      end
-
       # @return [Class, nil] Class (not an instance) of a responder that should respond from
       #   controller back to Kafka (usefull for piping dataflows)
       def responder
@@ -50,12 +43,6 @@ module Karafka
       # @note If not provided - will use Json as default
       def parser
         @parser ||= Karafka::Parsers::Json
-      end
-
-      # @return [Class] Interchanger class (not an instance) that we want to use to interchange
-      #   params between Karafka server and Karafka background job
-      def interchanger
-        @interchanger ||= Karafka::Params::Interchanger
       end
 
       Karafka::AttributesMap.topic.each do |attribute|

@@ -8,8 +8,6 @@ module Karafka
       private
 
       # Executes perform code immediately (without enqueuing)
-      # @note Despite the fact, that workers won't be used, we still initialize all the
-      #   classes and other framework elements
       def process
         Karafka.monitor.notice(self.class, params_batch)
         perform

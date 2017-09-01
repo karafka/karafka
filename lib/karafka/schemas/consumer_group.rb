@@ -9,7 +9,6 @@ module Karafka
       required(:backend).filled(included_in?: %i[inline sidekiq])
       required(:controller).filled
       required(:parser).filled
-      required(:interchanger).filled
       required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
       required(:start_from_beginning).filled(:bool?)
       required(:batch_processing).filled(:bool?)

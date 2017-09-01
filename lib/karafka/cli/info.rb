@@ -20,8 +20,7 @@ module Karafka
           "Number of threads: #{config.concurrency}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
-          "Kafka seed brokers: #{config.kafka.seed_brokers}",
-          "Redis: #{config.redis.to_h}"
+          "Kafka seed brokers: #{config.kafka.seed_brokers}"
         ]
 
         puts(info.join("\n"))

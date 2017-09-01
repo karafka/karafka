@@ -23,7 +23,6 @@ RSpec.describe Karafka::Controllers::Includer do
     let(:responder) { nil }
 
     it { expect(controller_class.include?(backends_scope::Inline)).to eq true }
-    it { expect(controller_class.include?(backends_scope::Sidekiq)).to eq false }
     it { expect(controller_class.include?(features_scope::SingleParams)).to eq false }
     it { expect(controller_class.include?(features_scope::Responders)).to eq false }
   end
@@ -34,7 +33,6 @@ RSpec.describe Karafka::Controllers::Includer do
     let(:responder) { nil }
 
     it { expect(controller_class.include?(backends_scope::Inline)).to eq true }
-    it { expect(controller_class.include?(backends_scope::Sidekiq)).to eq false }
     it { expect(controller_class.include?(features_scope::SingleParams)).to eq true }
     it { expect(controller_class.include?(features_scope::Responders)).to eq false }
   end
@@ -45,18 +43,6 @@ RSpec.describe Karafka::Controllers::Includer do
     let(:responder) { Class.new }
 
     it { expect(controller_class.include?(backends_scope::Inline)).to eq true }
-    it { expect(controller_class.include?(backends_scope::Sidekiq)).to eq false }
-    it { expect(controller_class.include?(features_scope::SingleParams)).to eq true }
-    it { expect(controller_class.include?(features_scope::Responders)).to eq true }
-  end
-
-  describe 'sidekiq with responder' do
-    let(:backend) { :sidekiq }
-    let(:batch_processing) { false }
-    let(:responder) { Class.new }
-
-    it { expect(controller_class.include?(backends_scope::Inline)).to eq false }
-    it { expect(controller_class.include?(backends_scope::Sidekiq)).to eq true }
     it { expect(controller_class.include?(features_scope::SingleParams)).to eq true }
     it { expect(controller_class.include?(features_scope::Responders)).to eq true }
   end

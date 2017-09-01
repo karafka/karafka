@@ -35,9 +35,7 @@ module Karafka
         (config_adapter[:subscription] + %i[
           backend
           name
-          worker
           parser
-          interchanger
           responder
           batch_processing
           persistent

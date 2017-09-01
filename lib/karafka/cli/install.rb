@@ -12,7 +12,6 @@ module Karafka
         app/models
         app/controllers
         app/responders
-        app/workers
         config
         log
         tmp/pids
@@ -21,8 +20,6 @@ module Karafka
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
         'karafka.rb.example' => Karafka.boot_file.basename,
-        'sidekiq.yml.example' => 'config/sidekiq.yml.example',
-        'application_worker.rb.example' => 'app/workers/application_worker.rb',
         'application_controller.rb.example' => 'app/controllers/application_controller.rb',
         'application_responder.rb.example' => 'app/responders/application_responder.rb'
       }.freeze

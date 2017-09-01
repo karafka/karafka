@@ -14,18 +14,7 @@ module Karafka
     Config = Dry::Validation.Schema do
       required(:client_id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
 
-      required(:redis).maybe do
-        schema do
-          required(:url).filled(:str?)
-        end
-      end
-
-      optional(:backend).filled(included_in?: %i[inline sidekiq])
-
-      # If we want to use sidekiq, then redis needs to be configured
-      rule(redis_presence: %i[redis backend]) do |redis, backend|
-        backend.eql?(:sidekiq).then(redis.filled?)
-      end
+      optional(:backend).filled
 
       optional(:connection_pool).schema do
         required(:size).filled

@@ -27,46 +27,6 @@ RSpec.describe Karafka::Schemas::Config do
     end
   end
 
-  context 'redis validator' do
-    before do
-      config[:redis] = { url: 'url' }
-    end
-
-    context 'backend is inline' do
-      before do
-        config[:backend] = :inline
-      end
-
-      it 'redis is nil' do
-        config[:redis] = nil
-        expect(schema.call(config).success?).to be_truthy
-      end
-    end
-
-    context 'backend is sidekiq' do
-      before do
-        config[:backend] = :sidekiq
-      end
-
-      it 'redis is nil' do
-        config[:redis] = nil
-        expect(schema.call(config).success?).to be_falsey
-      end
-
-      context 'redis is a hash url validation' do
-        it 'url is nil' do
-          config[:redis][:url] = nil
-          expect(schema.call(config).success?).to be_falsey
-        end
-
-        it 'url is not a string' do
-          config[:redis][:url] = 2
-          expect(schema.call(config).success?).to be_falsey
-        end
-      end
-    end
-  end
-
   context 'connection_pool validator' do
     it 'connection_pool is nil' do
       config[:connection_pool] = nil
