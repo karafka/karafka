@@ -66,6 +66,7 @@
 - Single controller **needs** to be used for a single topic consumption
 - Renamed ```before_enqueue``` to ```after_received``` to better resemble internal logic, since for inline backend, there is no enqueue.
 - Due to the level on which topic and controller are related (class level), the dynamic worker selection is no longer available.
+- Renamed params #retrieve to params #retrieve! to better reflect what it does
 
 ### Other changes
 - PolishGeeksDevTools removed (in favour of Coditsu)

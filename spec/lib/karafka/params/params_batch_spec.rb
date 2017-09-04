@@ -19,8 +19,8 @@ RSpec.describe Karafka::Params::ParamsBatch do
 
   describe '#to_a' do
     it 'expect not to parse data and return raw params_batch' do
-      expect(kafka_message1).not_to receive(:retrieve)
-      expect(kafka_message2).not_to receive(:retrieve)
+      expect(kafka_message1).not_to receive(:retrieve!)
+      expect(kafka_message2).not_to receive(:retrieve!)
       expect(params_batch.to_a.first[:parsed]).to eq false
     end
   end

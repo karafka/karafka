@@ -22,7 +22,7 @@ module Karafka
       # @note Invocation of this method will cause loading and parsing each param after another.
       #   If you want to get access without parsing, please access params_batch directly
       def each
-        @params_batch.each { |param| yield(param.retrieve) }
+        @params_batch.each { |param| yield(param.retrieve!) }
       end
 
       # @return [Array<Karafka::Params::Params>] returns all the params in a loaded state, so they
