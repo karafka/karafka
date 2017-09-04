@@ -58,14 +58,26 @@ If you are interested in our commercial services, please contact [Maciej Mensfel
 
 Karafka framework and Karafka team are __not__ related to Kafka streaming service called CloudKarafka in any matter. We don't recommend nor discourage usage of their platform.
 
+## References
+
+* [Karafka framework](https://github.com/karafka/karafka)
+* [Karafka Travis CI](https://travis-ci.org/karafka/karafka)
+* [Karafka Coditsu](https://app.coditsu.io/karafka/repositories/karafka)
+
 ## Note on Patches/Pull Requests
 
 Fork the project.
 Make your feature addition or bug fix.
-Add tests for it. This is important so I don't break it in a future version unintentionally.
+Add tests for it. This is important so we don't break it in a future versions unintentionally.
 Commit, do not mess with Rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull). Send me a pull request. Bonus points for topic branches.
 
-Each pull request must pass our quality requirements. To check if everything is as it should be, we use [PolishGeeks Dev Tools](https://github.com/polishgeeks/polishgeeks-dev-tools) that combine multiple linters and code analyzers. Please run:
+[![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/repositories/karafka)
+
+Each pull request must pass our quality requirements. To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combinse multiple linters and code analyzers for both code and documentation.
+
+Unfortunately, it does not yet support independent forks, however you should be fine by looking at what we require.
+
+Please run:
 
 ```bash
 bundle exec rake
@@ -77,7 +89,6 @@ to check if everything is in order. After that you can submit a pull request.
 
 This project exists thanks to all the people who contribute. [[Contribute]](CONTRIBUTING.md).
 <a href="https://github.com/karafka/karafka/graphs/contributors"><img src="https://opencollective.com/karafka/contributors.svg?width=890" /></a>
-
 
 ## Backers
 
