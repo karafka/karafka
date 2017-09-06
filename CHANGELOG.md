@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 1.0.0.rc1
+## 1.0.0
 
 ### Closed issues:
 
