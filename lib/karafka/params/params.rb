@@ -63,7 +63,6 @@ module Karafka
         merge!(parse(delete(:value)))
       end
 
-
       private
 
       # Overwritten merge! method - it behaves differently for keys that are the same in our hash
