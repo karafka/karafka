@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Setup::Configurators::Celluloid do
-  specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
-
   subject(:celluloid_configurator) { described_class.new(config) }
 
   let(:config) { double }
+
+  specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
   describe '#setup' do
     let(:shutdown_timeout) { Karafka::Setup::Configurators::Celluloid::SHUTDOWN_TIME }

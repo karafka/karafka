@@ -11,30 +11,30 @@ RSpec.describe Karafka::Schemas::Config do
   end
 
   context 'config is valid' do
-    it { expect(schema.call(config).success?).to be_truthy }
+    it { expect(schema.call(config)).to be_success }
   end
 
   context 'client_id validator' do
     it 'client_id is nil' do
       config[:client_id] = nil
-      expect(schema.call(config).success?).to be_falsey
+      expect(schema.call(config)).not_to be_success
     end
 
     it 'client_id is not a string' do
       config[:client_id] = 2
-      expect(schema.call(config).success?).to be_falsey
+      expect(schema.call(config)).not_to be_success
     end
   end
 
   context 'connection_pool validator' do
     it 'connection_pool is nil' do
       config[:connection_pool] = nil
-      expect(schema.call(config).success?).to be_falsey
+      expect(schema.call(config)).not_to be_success
     end
 
     it 'connection_pool is not a hash' do
       config[:connection_pool] = 2
-      expect(schema.call(config).success?).to be_falsey
+      expect(schema.call(config)).not_to be_success
     end
 
     context 'connection_pool is a hash' do
@@ -45,19 +45,19 @@ RSpec.describe Karafka::Schemas::Config do
       context 'size validator' do
         it 'size is nil' do
           config[:connection_pool][:size] = nil
-          expect(schema.call(config).success?).to be_falsey
+          expect(schema.call(config)).not_to be_success
         end
       end
 
       context 'timeout validator' do
         it 'timeout is nil' do
           config[:connection_pool][:timeout] = nil
-          expect(schema.call(config).success?).to be_falsey
+          expect(schema.call(config)).not_to be_success
         end
 
         it 'timeout is not a hash' do
           config[:connection_pool][:timeout] = 's'
-          expect(schema.call(config).success?).to be_falsey
+          expect(schema.call(config)).not_to be_success
         end
       end
     end

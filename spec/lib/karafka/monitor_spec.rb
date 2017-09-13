@@ -127,8 +127,6 @@ RSpec.describe Karafka::Monitor do
   end
 
   describe '#caller_exceptions_map' do
-    it { expect(monitor.send(:caller_exceptions_map).keys).to eq %i[error fatal] }
-
     let(:error_callers) do
       [
         Karafka::Connection::MessagesConsumer,
@@ -142,6 +140,8 @@ RSpec.describe Karafka::Monitor do
         Karafka::Fetcher
       ]
     end
+
+    it { expect(monitor.send(:caller_exceptions_map).keys).to eq %i[error fatal] }
 
     it 'expect to have proper classes on error' do
       expect(monitor.send(:caller_exceptions_map)[:error]).to eq error_callers
