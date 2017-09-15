@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- #210 - LoadError: cannot load such file -- [...]/karafka.rb
+
 ## 1.0.0
 
 ### Closed issues:
