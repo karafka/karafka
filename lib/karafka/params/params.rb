@@ -26,7 +26,7 @@ module Karafka
         partition
         offset
         key
-      ]
+      ].freeze
 
       class << self
         # We allow building instances only via the #build method
@@ -66,7 +66,7 @@ module Karafka
 
         # Defines a method call accessor to a particular hash field.
         # @note Won't work for complex key names that contain spaces, etc
-        # @param [Symbol] name of a field that we want to retrieve with a method call
+        # @param key [Symbol] name of a field that we want to retrieve with a method call
         # @example
         #   key_attr_reader :example
         #   params.example #=> 'my example value'
