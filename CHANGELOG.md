@@ -4,6 +4,7 @@
 - #210 - LoadError: cannot load such file -- [...]/karafka.rb
 - Ruby 2.4.2 as a default (+travis integration)
 - JRuby upgrade
+- Expanded persistence layer (moved to a namespace for easier future development)
 
 ## 1.0.0
 

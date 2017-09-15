@@ -20,15 +20,17 @@ module Karafka
           # @see topic_mapper internal docs
           mapped_topic_name = Karafka::App.config.topic_mapper.incoming(kafka_messages[0].topic)
           topic = Routing::Router.find("#{group_id}_#{mapped_topic_name}")
-
-          # Depending on a case (persisted or not) we might use new controller instance per each
-          # batch, or use the same instance for all of them (for implementing buffering, etc)
-          controller = Persistence.fetch(topic, kafka_messages[0].partition, :controller) do
+          controller = Persistence::Controller.fetch(topic, kafka_messages[0].partition) do
             topic.controller.new
           end
 
-          handler = topic.batch_processing ? :process_batch : :process_each
-          send(handler, controller, kafka_messages)
+          # Depending on a case (persisted or not) we might use new controller instance per each
+          # batch, or use the same instance for all of them (for implementing buffering, etc)
+          send(
+            topic.batch_processing ? :process_batch : :process_each,
+            controller,
+            kafka_messages
+          )
         end
 
         private
