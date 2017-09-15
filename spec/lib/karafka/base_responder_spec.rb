@@ -163,7 +163,7 @@ RSpec.describe Karafka::BaseResponder do
         end
 
         it 'expect to deliver them to mapped topic' do
-          messages_buffer.each do |_topic, data_elements|
+          messages_buffer.each_value do |data_elements|
             data_elements.each do |(data, options)|
               kafka_message = instance_double(::WaterDrop::Message)
 
