@@ -24,4 +24,10 @@ RSpec.describe Karafka::Errors do
 
     specify { expect(error).to be < described_class::BaseError }
   end
+
+  describe 'MissingBootFile' do
+    subject(:error) { described_class::MissingBootFile }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
 end
