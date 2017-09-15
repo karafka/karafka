@@ -1,7 +1,15 @@
 #!/usr/bin/env ruby
 
 require 'karafka'
-require Karafka.boot_file.to_s
+
+begin
+  require Karafka.boot_file.to_s
+rescue LoadError
+  raise(
+    Karafka::Errors::MissingBootFile,
+    Karafka.boot_file
+  ) unless %w[-h install].include?(ARGV[0])
+end
 
 Karafka::Cli.prepare
 Karafka::Cli.start

@@ -13,9 +13,7 @@ module Karafka
       def initialize(*args)
         super
 
-        @config.each do |key, _value|
-          rebuild(key)
-        end
+        @config.each_key(&method(:rebuild))
       end
 
       private

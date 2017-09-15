@@ -29,5 +29,8 @@ module Karafka
 
     # Raised when configuration doesn't match with validation schema
     InvalidConfiguration = Class.new(BaseError)
+
+    # Raised when we try to use Karafka CLI commands (except install) without a bootfile
+    MissingBootFile = Class.new(BaseError)
   end
 end

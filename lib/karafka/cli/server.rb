@@ -31,7 +31,7 @@ module Karafka
         end
 
         # Remove pidfile on shutdown
-        ObjectSpace.define_finalizer(String.new, proc { send(:clean) })
+        ObjectSpace.define_finalizer(+'', proc { send(:clean) })
 
         # We assign active topics on a server level, as only server is expected to listen on
         # part of the topics

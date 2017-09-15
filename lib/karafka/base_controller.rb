@@ -53,7 +53,7 @@ module Karafka
     # @see http://api.rubyonrails.org/classes/ActiveSupport/Callbacks/ClassMethods.html#method-i-get_callbacks
     define_callbacks :after_received
 
-    attr_accessor :params_batch
+    attr_reader :params_batch
 
     class << self
       attr_reader :topic

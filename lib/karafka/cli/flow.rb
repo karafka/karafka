@@ -15,7 +15,7 @@ module Karafka
           if any_topics
             puts "#{topic.name} =>"
 
-            topic.responder.topics.each do |_name, responder_topic|
+            topic.responder.topics.each_value do |responder_topic|
               features = []
               features << (responder_topic.required? ? 'always' : 'conditionally')
               features << (responder_topic.multiple_usage? ? 'one or more' : 'exactly once')

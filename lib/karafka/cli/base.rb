@@ -18,6 +18,8 @@ module Karafka
     #     end
     #   end
     class Base
+      include Thor::Shell
+
       # We can use it to call other cli methods via this object
       attr_reader :cli
 
