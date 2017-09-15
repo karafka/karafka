@@ -9,7 +9,7 @@ rvm:
   - 2.4.0
   - 2.4.1
   - 2.4.2
-  - jruby-9.1.13.0
+  - jruby-head
 script: bundle exec rspec spec/
 env:
   global:
