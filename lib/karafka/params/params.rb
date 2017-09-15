@@ -16,6 +16,18 @@ module Karafka
         key
       ].freeze
 
+      # Params attributes that should be available via a method call invocation for Kafka
+      # client compatibility.
+      # Kafka passes internally Kafka::FetchedMessage object and the ruby-kafka consumer
+      # uses those fields via method calls, so in order to be able to pass there our params
+      # objects, have to have same api.
+      PARAMS_METHOD_ATTRIBUTES = %i[
+        topic
+        partition
+        offset
+        key
+      ]
+
       class << self
         # We allow building instances only via the #build method
 
@@ -51,6 +63,18 @@ module Karafka
             end
           end
         end
+
+        # Defines a method call accessor to a particular hash field.
+        # @note Won't work for complex key names that contain spaces, etc
+        # @param [Symbol] name of a field that we want to retrieve with a method call
+        # @example
+        #   key_attr_reader :example
+        #   params.example #=> 'my example value'
+        def key_attr_reader(key)
+          define_method key do
+            self[key]
+          end
+        end
       end
 
       # @return [Karafka::Params::Params] this will trigger parser execution. If we decide to
@@ -62,6 +86,8 @@ module Karafka
 
         merge!(parse(delete(:value)))
       end
+
+      PARAMS_METHOD_ATTRIBUTES.each(&method(:key_attr_reader))
 
       private
 

@@ -213,5 +213,20 @@ RSpec.describe Karafka::Params::Params do
         end
       end
     end
+
+    %i[
+      topic
+      partition
+      offset
+      key
+    ].each do |key|
+      describe "\##{key}" do
+        let(:value) { rand }
+
+        before { params[key] = value }
+
+        it { expect(params.public_send(key)).to eq params[key] }
+      end
+    end
   end
 end
