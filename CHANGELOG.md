@@ -6,6 +6,7 @@
 - JRuby upgrade
 - Expanded persistence layer (moved to a namespace for easier future development)
 - #213 - Misleading error when non-existing dependency is required
+- #212 - Make params react to #topic, #partition, #offset
 
 ## 1.0.0
 
