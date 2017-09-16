@@ -43,169 +43,169 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
   end
 
   context 'config is valid' do
-    it { expect(schema.call(config).success?).to be_truthy }
+    it { expect(schema.call(config)).to be_success }
   end
 
   context 'consumer group level' do
     context 'id validator' do
       it 'id is nil' do
         config[:id] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'id is not a string' do
         config[:id] = 2
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'id is an invalid string' do
         config[:id] = '%^&*('
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'seed_brokers validator' do
       it 'seed_brokers is nil' do
         config[:seed_brokers] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'seed_brokers is an empty array' do
         config[:seed_brokers] = []
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'seed_brokers is not an array' do
         config[:seed_brokers] = 'timeout'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'session_timeout validator' do
       it 'session_timeout is nil' do
         config[:session_timeout] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'session_timeout is not integer' do
         config[:session_timeout] = 's'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'offset_commit_interval validator' do
       it 'offset_commit_interval is nil' do
         config[:offset_commit_interval] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'offset_commit_interval is not integer' do
         config[:offset_commit_interval] = 's'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'offset_commit_threshold validator' do
       it 'offset_commit_threshold is nil' do
         config[:offset_commit_threshold] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'offset_commit_threshold is not integer' do
         config[:offset_commit_threshold] = 's'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'offset_retention_time validator' do
       it 'offset_retention_time is not integer' do
         config[:offset_retention_time] = 's'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'heartbeat_interval validator' do
       it 'heartbeat_interval is nil' do
         config[:heartbeat_interval] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'heartbeat_interval is not integer' do
         config[:heartbeat_interval] = 's'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'connect_timeout validator' do
       it 'connect_timeout is nil' do
         config[:connect_timeout] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'connect_timeout is not integer' do
         config[:connect_timeout] = 's'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'connect_timeout is 0' do
         config[:connect_timeout] = 0
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'connect_timeout is less than 0' do
         config[:connect_timeout] = -1
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'socket_timeout validator' do
       it 'socket_timeout is nil' do
         config[:socket_timeout] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'socket_timeout is not integer' do
         config[:socket_timeout] = 's'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'socket_timeout is 0' do
         config[:socket_timeout] = 0
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'socket_timeout is less than 0' do
         config[:socket_timeout] = -1
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'max_wait_time validator' do
       it 'max_wait_time is nil' do
         config[:max_wait_time] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'max_wait_time is not integer' do
         config[:max_wait_time] = 's'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'max_wait_time is less than 0' do
         config[:max_wait_time] = -1
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'batch_consuming validator' do
       it 'batch_consuming is nil' do
         config[:batch_consuming] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'batch_consuming is not a bool' do
         config[:batch_consuming] = 2
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
@@ -213,7 +213,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it 'expect to disallow' do
         config[:max_wait_time] = 2
         config[:socket_timeout] = 1
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
@@ -231,12 +231,12 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       context "#{encryption_attribute} validator" do
         it "#{encryption_attribute} is nil" do
           config[encryption_attribute] = nil
-          expect(schema.call(config).success?).to be_truthy
+          expect(schema.call(config)).to be_success
         end
 
         it "#{encryption_attribute} is not a string" do
           config[encryption_attribute] = 2
-          expect(schema.call(config).success?).to be_falsey
+          expect(schema.call(config)).not_to be_success
         end
       end
     end
@@ -245,107 +245,107 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
   context 'topics level' do
     it 'topics is an empty array' do
       config[:topics] = []
-      expect(schema.call(config).success?).to be_falsey
+      expect(schema.call(config)).not_to be_success
     end
 
     it 'topics is not an array' do
       config[:topics] = nil
-      expect(schema.call(config).success?).to be_falsey
+      expect(schema.call(config)).not_to be_success
     end
 
     context 'id validator' do
       it 'id is nil' do
         config[:topics][0][:id] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'id is not a string' do
         config[:topics][0][:id] = 2
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'id is an invalid string' do
         config[:topics][0][:id] = '%^&*('
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'name validator' do
       it 'name is nil' do
         config[:topics][0][:name] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'name is not a string' do
         config[:topics][0][:name] = 2
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'name is an invalid string' do
         config[:topics][0][:name] = '%^&*('
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'backend validator' do
       it 'backend is nil' do
         config[:topics][0][:backend] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'max_bytes_per_partition validator' do
       it 'max_bytes_per_partition is nil' do
         config[:topics][0][:max_bytes_per_partition] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'max_bytes_per_partition is not integer' do
         config[:topics][0][:max_bytes_per_partition] = 's'
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'max_bytes_per_partition is less than 0' do
         config[:topics][0][:max_bytes_per_partition] = -1
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'start_from_beginning validator' do
       it 'start_from_beginning is nil' do
         config[:topics][0][:start_from_beginning] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'start_from_beginning is not a bool' do
         config[:topics][0][:start_from_beginning] = 2
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'controller validator' do
       it 'controller is not present' do
         config[:topics][0][:controller] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'parser validator' do
       it 'parser is not present' do
         config[:topics][0][:parser] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
 
     context 'batch_processing validator' do
       it 'batch_processing is nil' do
         config[:topics][0][:batch_processing] = nil
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
 
       it 'batch_processing is not a bool' do
         config[:topics][0][:batch_processing] = 2
-        expect(schema.call(config).success?).to be_falsey
+        expect(schema.call(config)).not_to be_success
       end
     end
   end
