@@ -54,7 +54,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
       context 'name is nil' do
         let(:name) { nil }
 
-        it { expect(subschema.call(topic_data)).not_to be_success}
+        it { expect(subschema.call(topic_data)).not_to be_success }
       end
 
       context 'name is an invalid string' do
