@@ -83,7 +83,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
         end
       end
 
-      it 'it expect to use it instead of default' do
+      it 'expect to use it instead of default' do
         expect(config[:max_wait_time]).to eq 0.5
       end
     end
