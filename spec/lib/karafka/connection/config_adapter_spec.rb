@@ -70,6 +70,23 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
     it 'expect not to have anything else than consuming specific options' do
       expect(config.keys.sort).to eq expected_keys
     end
+
+    context 'when consuming group has some non default options' do
+      let(:consumer_group) do
+        Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
+          cg.send(:max_wait_time=, 0.5)
+
+          cg.public_send(:topic=, topic) do
+            controller Class.new(Karafka::BaseController)
+            backend :inline
+          end
+        end
+      end
+
+      it 'expect to use it instead of default' do
+        expect(config[:max_wait_time]).to eq 0.5
+      end
+    end
   end
 
   describe '#pausing' do
