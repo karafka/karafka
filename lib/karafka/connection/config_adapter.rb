@@ -41,25 +41,24 @@ module Karafka
         # @return [Hash] hash with all the settings required by Kafka#consumer method
         def consumer(consumer_group)
           settings = { group_id: consumer_group.id }
-          settings = fetch_for(:consumer, settings)
+          settings = fetch_for(:consumer, consumer_group, settings)
           sanitize(settings)
         end
 
         # Builds all the configuration settings for kafka consumer consume_each_batch and
         #   consume_each_message methods
-        # @param _consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
+        # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
         # @return [Hash] hash with all the settings required by
         #   Kafka::Consumer#consume_each_message and Kafka::Consumer#consume_each_batch method
-        def consuming(_consumer_group)
-          sanitize(fetch_for(:consuming))
+        def consuming(consumer_group)
+          sanitize(fetch_for(:consuming, consumer_group))
         end
 
         # Builds all the configuration settings for kafka consumer#subscribe method
         # @param topic [Karafka::Routing::Topic] topic that holds details for a given subscription
         # @return [Hash] hash with all the settings required by kafka consumer#subscribe method
         def subscription(topic)
-          settings = { start_from_beginning: topic.start_from_beginning }
-          settings = fetch_for(:subscription, settings)
+          settings = fetch_for(:subscription, topic)
           [Karafka::App.config.topic_mapper.outgoing(topic.name), sanitize(settings)]
         end
 
@@ -74,13 +73,19 @@ module Karafka
 
         # Fetches proper settings for a given map namespace
         # @param namespace_key [Symbol] namespace from attributes map config adapter hash
+        # @param route_layer [Object] route topic or consumer group
         # @param preexisting_settings [Hash] hash with some preexisting settings that might have
         #   been loaded in a different way
-        def fetch_for(namespace_key, preexisting_settings = {})
-          kafka_configs.each do |setting_name, setting_value|
+        def fetch_for(namespace_key, route_layer, preexisting_settings = {})
+          kafka_configs.each_key do |setting_name|
+            # Ignore settings that are not related to our namespace
             next unless AttributesMap.config_adapter[namespace_key].include?(setting_name)
+            # Ignore settings that are already initialized
+            # In case they are in preexisting settings fetched differently
             next if preexisting_settings.keys.include?(setting_name)
-            preexisting_settings[setting_name] = setting_value
+            # Fetch all the settings from a given layer object. Objects can handle the fallback
+            # to the kafka settings, so
+            preexisting_settings[setting_name] = route_layer.send(setting_name)
           end
 
           preexisting_settings
