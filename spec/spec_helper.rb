@@ -24,7 +24,7 @@ end
 
 # @return [Boolean] true if we run against jruby
 def jruby?
-  ENV['RUBY_VERSION'].include?('jruby')
+  (ENV['RUBY_VERSION'] || RUBY_ENGINE).include?('jruby')
 end
 
 # Don't include unnecessary stuff into rcov
