@@ -8,7 +8,7 @@ RSpec.describe Karafka::Setup::Configurators::Celluloid do
   specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
 
   describe '#setup' do
-    let(:shutdown_timeout) { Karafka::Setup::Configurators::Celluloid::SHUTDOWN_TIME }
+    let(:shutdown_timeout) { ::Karafka::App.config.celluloid.shutdown_timeout }
 
     it 'expect to assign Karafka logger to Celluloid and set a shutdown_timeout' do
       expect(Celluloid).to receive(:logger=).with(Karafka.logger)
