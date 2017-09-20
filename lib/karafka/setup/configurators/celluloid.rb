@@ -11,7 +11,7 @@ module Karafka
           # This is just a precaution - it should automatically close the current
           # connection and shutdown actor - but in case it didn't (hanged, etc)
           # we will kill it after waiting for some time
-          ::Celluloid.shutdown_timeout = ::Karafka::App.config.celluloid.shutdown_timeout
+          ::Celluloid.shutdown_timeout = config.celluloid.shutdown_timeout
         end
       end
     end

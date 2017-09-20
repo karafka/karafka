@@ -8,6 +8,8 @@
 - #213 - Misleading error when non-existing dependency is required
 - #212 - Make params react to #topic, #partition, #offset
 - #215 - Consumer group route dynamic options are ignored
+- #217 - check RUBY_ENGINE constant if RUBY_VERSION is missing (#217)
+- #218 - add configuration setting to control Celluloid's shutdown timeout
 
 ## 1.0.0
 

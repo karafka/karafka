@@ -14,6 +14,10 @@ module Karafka
     Config = Dry::Validation.Schema do
       required(:client_id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
 
+      required(:celluloid).schema do
+        required(:shutdown_timeout).filled(:int?, gteq?: 0)
+      end
+
       optional(:backend).filled
 
       optional(:connection_pool).schema do

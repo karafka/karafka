@@ -6,7 +6,10 @@ RSpec.describe Karafka::Schemas::Config do
   let(:config) do
     {
       client_id: 'name',
-      topic_mapper: Karafka::Routing::Mapper
+      topic_mapper: Karafka::Routing::Mapper,
+      celluloid: {
+        shutdown_timeout: 30
+      }
     }
   end
 
@@ -57,6 +60,36 @@ RSpec.describe Karafka::Schemas::Config do
 
         it 'timeout is not a hash' do
           config[:connection_pool][:timeout] = 's'
+          expect(schema.call(config)).not_to be_success
+        end
+      end
+    end
+  end
+
+  context 'celluloid validator' do
+    it 'celluloid is nil' do
+      config[:celluloid] = nil
+      expect(schema.call(config)).not_to be_success
+    end
+
+    it 'celluloid is not a hash' do
+      config[:celluloid] = 2
+      expect(schema.call(config)).not_to be_success
+    end
+
+    context 'celluloid is a hash' do
+      before do
+        config[:celluloid] = { shutdown_timeout: 2 }
+      end
+
+      context 'shutdown_timeout validator' do
+        it 'shutdown_timeout is nil' do
+          config[:celluloid][:shutdown_timeout] = nil
+          expect(schema.call(config)).not_to be_success
+        end
+
+        it 'shutdown_timeout is less then 0' do
+          config[:celluloid][:shutdown_timeout] = (rand(100) * -1) - 1
           expect(schema.call(config)).not_to be_success
         end
       end
