@@ -29,7 +29,7 @@ module Karafka
       # It needs to implement two methods:
       #   - #incoming - for remapping from the incoming message to our internal format
       #   - #outgoing - for remapping from internal topic name into outgoing message
-      setting :topic_mapper, -> { Routing::Mapper }
+      setting :topic_mapper, -> { Routing::TopicMapper }
       # If batch_consuming is true, we will consume kafka messages in batches instead of 1 by 1
       # @note Consuming does not equal processing, see batch_processing description for details
       setting :batch_consuming, true
