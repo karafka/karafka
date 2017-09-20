@@ -125,6 +125,13 @@ module Karafka
         setting :sasl_plain_password, nil
       end
 
+      # option celluloid [Hash] - optional - celluloid configuration options
+      setting :celluloid do
+        # options shutdown_timeout [Integer] How many seconds should we wait for actors (listeners)
+        # before forcefully shutting them
+        setting :shutdown_timeout, 30
+      end
+
       # This is configured automatically, don't overwrite it!
       # Each consumer group requires separate thread, so number of threads should be equal to
       # number of consumer groups
