@@ -21,7 +21,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
   let(:config) do
     {
       id: 'id',
-      topic_mapper: Karafka::Routing::Mapper,
+      topic_mapper: Karafka::Routing::TopicMapper,
       seed_brokers: ['localhost:9092'],
       offset_commit_interval: 1,
       offset_commit_threshold: 1,

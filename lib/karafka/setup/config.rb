@@ -24,12 +24,16 @@ module Karafka
       setting :logger, -> { ::Karafka::Logger.instance }
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
       setting :monitor, -> { ::Karafka::Monitor.instance }
+      # Mapper used to remap consumer groups ids, so in case users migrate from other tools
+      # or they need to maintain their own internal consumer group naming conventions, they
+      # can easily do it, replacing the default client_id + consumer name pattern concept
+      setting :consumer_mapper, -> { Routing::ConsumerMapper }
       # Mapper used to remap names of topics, so we can have a clean internal topic namings
       # despite using any Kafka provider that uses namespacing, etc
       # It needs to implement two methods:
       #   - #incoming - for remapping from the incoming message to our internal format
       #   - #outgoing - for remapping from internal topic name into outgoing message
-      setting :topic_mapper, -> { Routing::Mapper }
+      setting :topic_mapper, -> { Routing::TopicMapper }
       # If batch_consuming is true, we will consume kafka messages in batches instead of 1 by 1
       # @note Consuming does not equal processing, see batch_processing description for details
       setting :batch_consuming, true
@@ -43,6 +47,18 @@ module Karafka
       # incoming batch. It's disabled by default, not to create more objects that needed on
       # each batch
       setting :persistent, true
+      # This is configured automatically, don't overwrite it!
+      # Each consumer group requires separate thread, so number of threads should be equal to
+      # number of consumer groups
+      setting :concurrency, -> { ::Karafka::App.consumer_groups.count }
+
+      # option celluloid [Hash] - optional - celluloid configuration options
+      setting :celluloid do
+        # options shutdown_timeout [Integer] How many seconds should we wait for actors (listeners)
+        # before forcefully shutting them
+        setting :shutdown_timeout, 30
+      end
+
       # Connection pool options are used for producer (Waterdrop) - by default it will adapt to
       # number of active actors
       setting :connection_pool do
@@ -124,18 +140,6 @@ module Karafka
         # option sasl_plain_password [String] The password used to authenticate
         setting :sasl_plain_password, nil
       end
-
-      # option celluloid [Hash] - optional - celluloid configuration options
-      setting :celluloid do
-        # options shutdown_timeout [Integer] How many seconds should we wait for actors (listeners)
-        # before forcefully shutting them
-        setting :shutdown_timeout, 30
-      end
-
-      # This is configured automatically, don't overwrite it!
-      # Each consumer group requires separate thread, so number of threads should be equal to
-      # number of consumer groups
-      setting :concurrency, -> { ::Karafka::App.consumer_groups.count }
 
       class << self
         # Configurating method

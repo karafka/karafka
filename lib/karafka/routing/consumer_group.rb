@@ -18,7 +18,7 @@ module Karafka
       #   kafka and don't understand the concept of consumer groups.
       def initialize(name)
         @name = name
-        @id = "#{Karafka::App.config.client_id.to_s.underscore}_#{@name}"
+        @id = Karafka::App.config.consumer_mapper.call(name)
         @topics = []
       end
 

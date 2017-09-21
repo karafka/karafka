@@ -6,7 +6,7 @@ RSpec.describe Karafka::Schemas::Config do
   let(:config) do
     {
       client_id: 'name',
-      topic_mapper: Karafka::Routing::Mapper,
+      topic_mapper: Karafka::Routing::TopicMapper,
       celluloid: {
         shutdown_timeout: 30
       }
