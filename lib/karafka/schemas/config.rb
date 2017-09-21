@@ -13,6 +13,8 @@ module Karafka
     #   so we validate all of that once all the routes are defined and ready
     Config = Dry::Validation.Schema do
       required(:client_id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
+      required(:consumer_mapper)
+      required(:topic_mapper)
 
       required(:celluloid).schema do
         required(:shutdown_timeout).filled(:int?, gteq?: 0)
