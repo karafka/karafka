@@ -85,7 +85,7 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
           .and_return(consumer_group.topics[0])
       end
 
-      it 'expect to run with remaping' do
+      it 'expect to run with remapping' do
         expect(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper)
         expect { processor.process(group_id, messages_batch) }.not_to raise_error
       end
@@ -163,7 +163,7 @@ RSpec.describe Karafka::Connection::MessagesProcessor do
           .and_return(consumer_group.topics[0])
       end
 
-      it 'expect to run with remaping' do
+      it 'expect to run with remapping' do
         expect(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper)
         expect { processor.process(group_id, messages_batch) }.not_to raise_error
       end
