@@ -34,9 +34,7 @@ RSpec.describe Karafka::Cli::Flow do
       let(:topic) { "topic#{rand(1000)}" }
 
       before do
-        expect(Karafka::App)
-          .to receive(:consumer_groups)
-          .and_return(consumer_groups)
+        allow(Karafka::App).to receive(:consumer_groups).and_return(consumer_groups)
       end
 
       context 'without outgoing topics' do
@@ -52,8 +50,8 @@ RSpec.describe Karafka::Cli::Flow do
         let(:topics) { { topic => Karafka::Responders::Topic.new(topic, {}) } }
 
         it 'expect to print flow details' do
-          allow(flow_cli).to receive(:puts)
-          allow(flow_cli).to receive(:print)
+          expect(flow_cli).to receive(:puts)
+          expect(flow_cli).to receive(:print)
           expect { flow_cli.call }.not_to raise_error
         end
       end

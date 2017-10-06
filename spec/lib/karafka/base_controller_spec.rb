@@ -47,6 +47,7 @@ RSpec.describe Karafka::BaseController do
     let(:messages) { [rand] }
     let(:params_batch) { instance_double(Karafka::Params::ParamsBatch) }
     let(:topic_parser) { Karafka::Parsers::Json }
+    let(:p_args) { [messages, topic_parser] }
 
     before do
       working_class.topic = instance_double(
@@ -56,14 +57,10 @@ RSpec.describe Karafka::BaseController do
         batch_processing: false,
         responder: false
       )
-
-      expect(Karafka::Params::ParamsBatch)
-        .to receive(:new)
-        .with(messages, topic_parser)
-        .and_return(params_batch)
     end
 
     it 'expect to build params batch using messages and parser' do
+      expect(Karafka::Params::ParamsBatch).to receive(:new).with(*p_args).and_return(params_batch)
       base_controller.params_batch = messages
       expect(base_controller.params_batch).to eq params_batch
     end
@@ -82,12 +79,8 @@ RSpec.describe Karafka::BaseController do
     let(:responder) { instance_double(responder_class) }
     let(:data) { [rand, rand] }
 
-    before do
-      expect(responder_class)
-        .to receive(:new).and_return(responder)
-    end
-
     it 'expect to use responder to respond with provided data' do
+      expect(responder_class).to receive(:new).and_return(responder)
       expect(responder).to receive(:call).with(data)
       base_controller.send(:respond_with, data)
     end

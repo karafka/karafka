@@ -65,7 +65,6 @@ module Karafka
       def topic=(topic)
         @topic = topic
         Controllers::Includer.call(self)
-        topic
       end
 
       # Creates a callback that will be executed after receiving message but before executing the
