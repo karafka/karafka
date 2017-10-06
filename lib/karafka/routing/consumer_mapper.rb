@@ -24,7 +24,7 @@ module Karafka
     #   end
     module ConsumerMapper
       # @param raw_consumer_group_name [String, Symbol] string or symbolized consumer group name
-      # @return [String] remapped final consumer gorup name
+      # @return [String] remapped final consumer group name
       def self.call(raw_consumer_group_name)
         "#{Karafka::App.config.client_id.to_s.underscore}_#{raw_consumer_group_name}"
       end
