@@ -10,6 +10,8 @@
 - #215 - Consumer group route dynamic options are ignored
 - #217 - check RUBY_ENGINE constant if RUBY_VERSION is missing (#217)
 - #218 - add configuration setting to control Celluloid's shutdown timeout
+- Renamed Karafka::Routing::Mapper to Karafka::Routing::TopicMapper to match naming conventions
+- #219 - Allow explicit consumer group names, without prefixes
 
 ## 1.0.0
 

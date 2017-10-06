@@ -2,7 +2,7 @@
 
 module Karafka
   module Routing
-    # Default routes mapper that does not remap things
+    # Default topic mapper that does not remap things
     # Mapper can be used for Kafka providers that require namespaced topic names. Instead of being
     # provider dependent, we can then define mapper and use internally "pure" topic names in
     # routes and responders
@@ -32,7 +32,7 @@ module Karafka
     #       topic.to_s.gsub('_', '.')
     #     end
     #   end
-    module Mapper
+    module TopicMapper
       class << self
         # @param topic [String, Symbol] topic
         # @return [String, Symbol] same topic as on input
