@@ -10,8 +10,8 @@ module Karafka
           dynamic_params = Connection::ConfigAdapter.client(nil)
 
           ::WaterDrop.setup do |water_config|
-            water_config.send_messages = true
-            water_config.raise_on_failure = true
+            water_config.send_messages = config.send_messages
+            water_config.raise_on_failure = config.raise_on_failure
             water_config.connection_pool = config.connection_pool
 
             # Automigration of all the attributes that should be accepted by waterdrop
