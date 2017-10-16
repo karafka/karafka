@@ -55,7 +55,7 @@ GEM
       dry-container (~> 0.2, >= 0.2.6)
       dry-core (~> 0.2)
       dry-equalizer (~> 0.2)
-    dry-types (0.12.0)
+    dry-types (0.12.1)
       concurrent-ruby (~> 1.0)
       dry-configurable (~> 0.1)
       dry-container (~> 0.3)
@@ -73,7 +73,8 @@ GEM
     envlogic (1.0.4)
       activesupport
     hitimes (1.2.6)
-    i18n (0.8.6)
+    i18n (0.9.0)
+      concurrent-ruby (~> 1.0)
     inflecto (0.0.2)
     json (2.1.0)
     minitest (5.10.3)
