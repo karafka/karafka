@@ -30,12 +30,12 @@ module Karafka
           Celluloid.boot
         end
 
-        # Remove pidfile on shutdown
-        ObjectSpace.define_finalizer(+'', proc { send(:clean) })
-
         # We assign active topics on a server level, as only server is expected to listen on
         # part of the topics
         Karafka::Server.consumer_groups = cli.options[:consumer_groups]
+
+        # Remove pidfile on shutdown
+        at_exit { send(:clean) }
 
         # After we fork, we can boot celluloid again
         Karafka::Server.run
@@ -62,7 +62,7 @@ module Karafka
 
       # Removes a pidfile (if exist)
       def clean
-        FileUtils.rm_f(cli.options[:pid])
+        FileUtils.rm_f(cli.options[:pid]) if cli.options[:pid]
       end
     end
   end
