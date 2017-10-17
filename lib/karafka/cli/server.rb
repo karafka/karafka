@@ -34,8 +34,8 @@ module Karafka
         # part of the topics
         Karafka::Server.consumer_groups = cli.options[:consumer_groups]
 
-        # Remove pidfile on shutdown
-        at_exit { send(:clean) }
+        # Remove pidfile on shutdown, just before the server instance is going to be GCed
+        ObjectSpace.define_finalizer(self, proc { send(:clean) })
 
         # After we fork, we can boot celluloid again
         Karafka::Server.run
