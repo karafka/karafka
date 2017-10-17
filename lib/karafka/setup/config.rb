@@ -47,10 +47,6 @@ module Karafka
       # incoming batch. It's disabled by default, not to create more objects that needed on
       # each batch
       setting :persistent, true
-      # Boolean value to define whether messages should be sent
-      setting :send_messages, true
-      # Boolean value to define if it should raise error when failed to deliver a message
-      setting :raise_on_failure, true
       # This is configured automatically, don't overwrite it!
       # Each consumer group requires separate thread, so number of threads should be equal to
       # number of consumer groups
@@ -73,6 +69,14 @@ module Karafka
         # How long should we wait for a working resource from the pool before rising timeout
         # With a proper connection pool size, this should never happen
         setting :timeout, 5
+      end
+
+      # option producer [Hash] - optional - WaterDrop configuration options
+      setting :producer do
+        # Boolean value to define whether messages should be sent
+        setting :send_messages, true
+        # Boolean value to define if it should raise error when failed to deliver a message
+        setting :raise_on_failure, true
       end
 
       # option kafka [Hash] - optional - kafka configuration options
