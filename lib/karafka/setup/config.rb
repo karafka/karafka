@@ -102,9 +102,14 @@ module Karafka
         #   returning messages from the server; if `max_wait_time` is reached, this
         #   is ignored.
         setting :min_bytes, 1
-        # option max_wait_time [Integer, Float] the maximum duration of time to wait before
-        #   returning messages from the server, in seconds.
-        setting :max_wait_time, 5
+        # option max_wait_time [Integer, Float] max_wait_time is the maximum number of seconds to
+        #   wait before returning data from a single message fetch. By setting this high you also
+        #   increase the processing throughput – and by setting it low you set a bound on latency.
+        #   This configuration overrides `min_bytes`, so you'll _always_ get data back within the
+        #   time specified. The default value is one second. If you want to have at most five
+        #   seconds of latency, set `max_wait_time` to 5. You should make sure
+        #   max_wait_time * num brokers + heartbeat_interval is less than session_timeout.
+        setting :max_wait_time, 1
         # option reconnect_timeout [Integer] How long should we wait before trying to reconnect to
         # Kafka cluster that went down (in seconds)
         setting :reconnect_timeout, 5

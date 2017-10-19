@@ -12,6 +12,8 @@
 - #218 - add configuration setting to control Celluloid's shutdown timeout
 - Renamed Karafka::Routing::Mapper to Karafka::Routing::TopicMapper to match naming conventions
 - #219 - Allow explicit consumer group names, without prefixes
+- Fix to early removed pid upon shutdown of demonized process
+- max_wait_time updated to match https://github.com/zendesk/ruby-kafka/issues/433
 
 ## 1.0.0
 
