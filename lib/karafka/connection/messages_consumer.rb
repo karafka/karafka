@@ -12,6 +12,7 @@ module Karafka
       #   multiple topics
       def initialize(consumer_group)
         @consumer_group = consumer_group
+        Persistence::MessagesConsumer.write(self)
       end
 
       # Opens connection, gets messages and calls a block for each of the incoming messages
@@ -41,10 +42,6 @@ module Karafka
         @kafka_consumer = nil
       end
 
-      private
-
-      attr_reader :consumer_group
-
       # Pauses processing of a given topic partition
       # @param topic [String] topic that we want to pause
       # @param partition [Integer] number partition that we want to pause
@@ -54,6 +51,10 @@ module Karafka
         kafka_consumer.pause(topic, partition, settings)
         true
       end
+
+      private
+
+      attr_reader :consumer_group
 
       # Consumes messages from Kafka in batches
       # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages

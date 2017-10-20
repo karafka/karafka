@@ -10,7 +10,7 @@ module Karafka
         # @note This should be looped to obtain a constant listening
         # @note We catch all the errors here, to make sure that none failures
         #   for a given consumption will affect other consumed messages
-        #   If we wouldn't catch it, it would propagate up until killing the Celluloid actor
+        #   If we wouldn't catch it, it would propagate up until killing the thread
         # @param group_id [String] group_id of a group from which a given message came
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages fetched from kafka
         def process(group_id, kafka_messages)

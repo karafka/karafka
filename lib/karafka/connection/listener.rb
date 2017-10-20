@@ -7,10 +7,6 @@ module Karafka
     # @note Listener itself does nothing with the message - it will return to the block
     #   a raw Kafka::FetchedMessage
     class Listener
-      include Celluloid
-
-      execute_block_on_receiver :fetch_loop
-
       attr_reader :consumer_group
 
       # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group that holds details
@@ -47,11 +43,8 @@ module Karafka
 
       # @return [Karafka::Connection::MessagesConsumer] wrapped kafka consumer for a given topic
       #   consumption
-      # @note It adds consumer into Karafka::Server consumers pool for graceful shutdown on exit
       def messages_consumer
-        @messages_consumer ||= MessagesConsumer.new(consumer_group).tap do |consumer|
-          Karafka::Server.consumers << consumer if Karafka::Server.consumers
-        end
+        @messages_consumer ||= MessagesConsumer.new(consumer_group)
       end
     end
   end

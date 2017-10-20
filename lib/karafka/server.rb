@@ -4,16 +4,15 @@ module Karafka
   # Karafka consuming server class
   class Server
     class << self
-      # We need to store reference to all the consumers in the main server thread,
-      # So we can have access to them later on and be able to stop them on exit
-      attr_reader :consumers
+      # Set of consuming threads. Each consumer thread contains a single consumer
+      attr_accessor :consumer_threads
 
       # Writer for list of consumer groups that we want to consume in our current process context
       attr_writer :consumer_groups
 
       # Method which runs app
       def run
-        @consumers = Concurrent::Array.new
+        @consumer_threads = Concurrent::Array.new
         bind_on_sigint
         bind_on_sigquit
         bind_on_sigterm
@@ -36,29 +35,17 @@ module Karafka
 
       # What should happen when we decide to quit with sigint
       def bind_on_sigint
-        process.on_sigint do
-          Karafka::App.stop!
-          consumers.map(&:stop)
-          Kernel.exit
-        end
+        process.on_sigint { Karafka::App.stop! }
       end
 
       # What should happen when we decide to quit with sigquit
       def bind_on_sigquit
-        process.on_sigquit do
-          Karafka::App.stop!
-          consumers.map(&:stop)
-          Kernel.exit
-        end
+        process.on_sigquit { Karafka::App.stop! }
       end
 
       # What should happen when we decide to quit with sigterm
       def bind_on_sigterm
-        process.on_sigterm do
-          Karafka::App.stop!
-          consumers.map(&:stop)
-          Kernel.exit
-        end
+        process.on_sigterm { Karafka::App.stop! }
       end
 
       # Starts Karafka with a supervision

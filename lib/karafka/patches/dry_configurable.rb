@@ -29,5 +29,3 @@ module Karafka
     end
   end
 end
-
-::Dry::Configurable::Config.prepend(Karafka::Patches::DryConfigurable)

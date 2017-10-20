@@ -32,5 +32,9 @@ module Karafka
 
     # Raised when we try to use Karafka CLI commands (except install) without a bootfile
     MissingBootFile = Class.new(BaseError)
+
+    # Raised when we want to read a persisted thread messages consumer but it is unavailable
+    # This should never happen and if it does, please contact us
+    MissingMessagesConsumer = Class.new(BaseError)
   end
 end

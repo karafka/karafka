@@ -17,7 +17,6 @@ Gem::Specification.new do |spec|
   spec.license     = 'MIT'
 
   spec.add_dependency 'activesupport', '>= 5.0'
-  spec.add_dependency 'celluloid'
   spec.add_dependency 'dry-configurable', '~> 0.7'
   spec.add_dependency 'dry-validation', '~> 0.11'
   spec.add_dependency 'envlogic', '~> 1.0'

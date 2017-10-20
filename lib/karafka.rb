@@ -2,8 +2,6 @@
 
 %w[
   English
-  bundler
-  celluloid/current
   waterdrop
   kafka
   envlogic
@@ -14,7 +12,6 @@
   dry-configurable
   dry-validation
   active_support/callbacks
-  active_support/core_ext/class/subclasses
   active_support/core_ext/hash/indifferent_access
   active_support/descendants_tracker
   active_support/inflector
@@ -67,3 +64,5 @@ module Karafka
 end
 
 Karafka::Loader.load!(Karafka.core_root)
+Kafka::Consumer.prepend(Karafka::Patches::RubyKafka)
+Dry::Configurable::Config.prepend(Karafka::Patches::DryConfigurable)

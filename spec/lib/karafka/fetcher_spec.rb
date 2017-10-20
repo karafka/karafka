@@ -5,17 +5,10 @@ RSpec.describe Karafka::Fetcher do
 
   describe '#fetch_loop' do
     context 'when everything is ok' do
-      let(:future) { instance_double(Celluloid::Future, value: rand) }
       let(:listeners) { [listener] }
       let(:processor) { -> {} }
       let(:async_scope) { listener }
-      let(:listener) do
-        instance_double(
-          Karafka::Connection::Listener,
-          fetch_loop: future,
-          terminate: true
-        )
-      end
+      let(:listener) { instance_double(Karafka::Connection::Listener, fetch_loop: nil) }
 
       before do
         allow(fetcher)
@@ -28,9 +21,6 @@ RSpec.describe Karafka::Fetcher do
       end
 
       it 'starts asynchronously consumption for each listener' do
-        expect(listener)
-          .to receive(:future)
-          .and_return(async_scope)
 
         fetcher.fetch_loop
       end

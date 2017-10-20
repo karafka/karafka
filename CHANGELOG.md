@@ -14,6 +14,11 @@
 - #219 - Allow explicit consumer group names, without prefixes
 - Fix to early removed pid upon shutdown of demonized process
 - max_wait_time updated to match https://github.com/zendesk/ruby-kafka/issues/433
+- #233 - Remove unused ActiveSupport require
+- Gem bump
+- Switch from Celluloid to native Thread management
+- Improved shutdown process
+- Introduced optional fetch callbacks and moved current the ```after_received``` there as well
 
 ## 1.0.0
 

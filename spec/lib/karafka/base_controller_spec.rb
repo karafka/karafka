@@ -34,12 +34,10 @@ RSpec.describe Karafka::BaseController do
   end
 
   describe '#call' do
-    context 'when there are no callbacks' do
-      it 'just schedules' do
-        expect(base_controller).to receive(:process)
+    it 'just processes' do
+      expect(base_controller).to receive(:process)
 
-        base_controller.call
-      end
+      base_controller.call
     end
   end
 
@@ -83,103 +81,6 @@ RSpec.describe Karafka::BaseController do
       expect(responder_class).to receive(:new).and_return(responder)
       expect(responder).to receive(:call).with(data)
       base_controller.send(:respond_with, data)
-    end
-  end
-
-  context 'when we have a block based after_received' do
-    let(:backend) { :inline }
-
-    context 'and it throws abort to halt' do
-      subject(:base_controller) do
-        ClassBuilder.inherit(described_class) do
-          after_received do
-            throw(:abort)
-          end
-
-          def perform
-            self
-          end
-        end.new
-      end
-
-      it 'does not perform' do
-        expect(base_controller).not_to receive(:perform)
-
-        base_controller.call
-      end
-    end
-
-    context 'and it does not throw abort to halt' do
-      subject(:base_controller) do
-        ClassBuilder.inherit(described_class) do
-          include Karafka::Backends::Inline
-
-          after_received do
-            true
-          end
-
-          def perform
-            self
-          end
-        end.new
-      end
-
-      let(:params) { double }
-
-      it 'executes' do
-        expect(base_controller).to receive(:process)
-        base_controller.call
-      end
-    end
-  end
-
-  context 'when we have a method based after_received' do
-    let(:backend) { :inline }
-
-    context 'and it throws abort to halt' do
-      subject(:base_controller) do
-        ClassBuilder.inherit(described_class) do
-          after_received :method
-
-          def perform
-            self
-          end
-
-          def method
-            throw(:abort)
-          end
-        end.new
-      end
-
-      it 'does not perform' do
-        expect(base_controller).not_to receive(:perform)
-
-        base_controller.call
-      end
-    end
-
-    context 'and it does not return false' do
-      subject(:base_controller) do
-        ClassBuilder.inherit(described_class) do
-          include Karafka::Backends::Inline
-
-          after_received :method
-
-          def perform
-            self
-          end
-
-          def method
-            true
-          end
-        end.new
-      end
-
-      it 'schedules to a backend' do
-        expect(base_controller).to receive(:process)
-
-        base_controller.call
-      end
     end
   end
 end

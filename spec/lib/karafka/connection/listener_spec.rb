@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Connection::Listener do
-  subject(:listener) { described_class.new(consumer_group).wrapped_object }
+  subject(:listener) { described_class.new(consumer_group) }
 
   let(:consumer_group) do
     Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|

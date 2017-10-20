@@ -8,8 +8,6 @@ RSpec.describe Karafka::Cli::Server do
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
-  after { Celluloid.boot }
-
   describe '#call' do
     context 'when we run in foreground (not daemonized)' do
       before do
