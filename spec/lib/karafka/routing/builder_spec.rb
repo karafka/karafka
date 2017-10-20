@@ -67,7 +67,7 @@ RSpec.describe Karafka::Routing::Builder do
       let(:consumer_group1) do
         described_class.instance.draw do
           consumer_group :group_name1 do
-            seed_brokers [:brokers1]
+            seed_brokers ['kafka://localhost:9092']
 
             topic :topic_name1 do
               controller Class.new(Karafka::BaseController)
@@ -82,7 +82,7 @@ RSpec.describe Karafka::Routing::Builder do
       let(:consumer_group2) do
         described_class.instance.draw do
           consumer_group :group_name2 do
-            seed_brokers [:brokers2]
+            seed_brokers ['kafka://localhost:9093']
 
             topic :topic_name2 do
               controller Class.new(Karafka::BaseController)
@@ -102,8 +102,8 @@ RSpec.describe Karafka::Routing::Builder do
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
-      it { expect(builder.first.seed_brokers).to eq [:brokers1] }
-      it { expect(builder.last.seed_brokers).to eq [:brokers2] }
+      it { expect(builder.first.seed_brokers).to eq ['kafka://localhost:9092'] }
+      it { expect(builder.last.seed_brokers).to eq ['kafka://localhost:9093'] }
       it { expect(builder.size).to eq 2 }
     end
 
@@ -114,7 +114,7 @@ RSpec.describe Karafka::Routing::Builder do
       before do
         described_class.instance.draw do
           consumer_group :group_name1 do
-            seed_brokers [:brokers]
+            seed_brokers ['kafka://localhost:9092']
 
             topic :topic_name1 do
               controller Class.new(Karafka::BaseController)
@@ -137,7 +137,7 @@ RSpec.describe Karafka::Routing::Builder do
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name2" }
-      it { expect(builder.first.seed_brokers).to eq [:brokers] }
+      it { expect(builder.first.seed_brokers).to eq ['kafka://localhost:9092'] }
       it { expect(builder.size).to eq 1 }
     end
 
