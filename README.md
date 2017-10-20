@@ -1,6 +1,6 @@
 ![karafka logo](https://raw.githubusercontent.com/karafka/misc/master/logo/karafka_logotype_transparent2.png)
 
-[![Build Status](https://travis-ci.org/karafka/karafka.png)](https://travis-ci.org/karafka/karafka)
+[![Build Status](https://travis-ci.org/karafka/karafka.svg?branch=master)](https://travis-ci.org/karafka/karafka)
 [![Backers on Open Collective](https://opencollective.com/karafka/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/karafka/sponsors/badge.svg)](#sponsors) [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Framework used to simplify Apache Kafka based Ruby applications development.
