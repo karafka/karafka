@@ -5,7 +5,7 @@ module Karafka
     # Schema for single full route (consumer group + topics) validation.
     ConsumerGroup = Dry::Validation.Schema do
       # Valid uri schemas of Kafka broker url
-      URI_SCHEMES = %w[kafka kafka+ssl]
+      URI_SCHEMES = %w[kafka kafka+ssl].freeze
 
       configure do
         # Uri validator to check if uri is in a Karafka acceptable format
