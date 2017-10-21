@@ -14,6 +14,8 @@
 - #219 - Allow explicit consumer group names, without prefixes
 - Fix to early removed pid upon shutdown of demonized process
 - max_wait_time updated to match https://github.com/zendesk/ruby-kafka/issues/433
+- #230 - Better uri validation for seed brokers (incompatibility as the kafka:// or kafka+ssl:// is required)
+- Small internal docs fixes
 
 ## 1.0.0
 

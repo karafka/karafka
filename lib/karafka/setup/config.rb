@@ -130,9 +130,9 @@ module Karafka
         setting :ssl_ca_cert, nil
         # option ssl_ca_cert_file_path [String] SSL CA certificate file path
         setting :ssl_ca_cert_file_path, nil
-        # option client_cert [String] SSL client certificate
+        # option ssl_client_cert [String] SSL client certificate
         setting :ssl_client_cert, nil
-        # option client_cert_key [String] SSL client certificate password
+        # option ssl_client_cert_key [String] SSL client certificate password
         setting :ssl_client_cert_key, nil
         # option sasl_gssapi_principal [String] sasl principal
         setting :sasl_gssapi_principal, nil

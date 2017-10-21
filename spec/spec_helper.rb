@@ -61,7 +61,7 @@ module Karafka
   # Configuration for test env
   class App
     setup do |config|
-      config.kafka.seed_brokers = ['localhost:9092']
+      config.kafka.seed_brokers = ['kafka://localhost:9092']
       config.client_id = rand.to_s
       config.kafka.offset_retention_time = -1
       config.kafka.max_bytes_per_partition = 1_048_576

@@ -2,23 +2,25 @@
 
 module Karafka
   module Schemas
-    # Consumer group topic validation rules
-    ConsumerGroupTopic = Dry::Validation.Schema do
-      required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
-      required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
-      required(:backend).filled(included_in?: %i[inline sidekiq])
-      required(:controller).filled
-      required(:parser).filled
-      required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
-      required(:start_from_beginning).filled(:bool?)
-      required(:batch_processing).filled(:bool?)
-      required(:persistent).filled(:bool?)
-    end
-
     # Schema for single full route (consumer group + topics) validation.
     ConsumerGroup = Dry::Validation.Schema do
+      # Valid uri schemas of Kafka broker url
+      URI_SCHEMES = %w[kafka kafka+ssl].freeze
+
+      configure do
+        # Uri validator to check if uri is in a Karafka acceptable format
+        # @param uri [String] uri we want to validate
+        # @return [Boolean] true if it is a valid uri, otherwise false
+        def broker_schema?(uri)
+          uri = URI.parse(uri)
+          URI_SCHEMES.include?(uri.scheme) && uri.port
+        rescue URI::InvalidURIError
+          return false
+        end
+      end
+
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
-      required(:seed_brokers).filled(:array?)
+      required(:seed_brokers).filled { each(:broker_schema?) }
       required(:session_timeout).filled(:int?)
       required(:pause_timeout).filled(:int?, gteq?: 0)
       required(:offset_commit_interval).filled(:int?)
