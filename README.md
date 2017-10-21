@@ -1,6 +1,6 @@
 ![karafka logo](https://raw.githubusercontent.com/karafka/misc/master/logo/karafka_logotype_transparent2.png)
 
-[![Build Status](https://travis-ci.org/karafka/karafka.png)](https://travis-ci.org/karafka/karafka)
+[![Build Status](https://travis-ci.org/karafka/karafka.svg?branch=master)](https://travis-ci.org/karafka/karafka)
 [![Backers on Open Collective](https://opencollective.com/karafka/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/karafka/sponsors/badge.svg)](#sponsors) [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Framework used to simplify Apache Kafka based Ruby applications development.
@@ -11,7 +11,7 @@ Karafka not only handles incoming messages but also provides tools for building 
 
 ## How does it work
 
-Karafka provides a higher-level abstraction that allows you to focus on your business logic development, instead of focusing on  implementing lower level abstration layers. It provides developers with a set of tools that are dedicated for building multi-topic applications similarly to how Rails applications are being built.
+Karafka provides a higher-level abstraction that allows you to focus on your business logic development, instead of focusing on implementing lower level abstraction layers. It provides developers with a set of tools that are dedicated for building multi-topic applications similarly to how Rails applications are being built.
 
 Karafka based applications can be easily deployed to any type of infrastructure, including those based on:
 
@@ -73,7 +73,7 @@ Commit, do not mess with Rakefile, version, or history. (if you want to have you
 
 [![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/repositories/karafka)
 
-Each pull request must pass our quality requirements. To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combinse multiple linters and code analyzers for both code and documentation.
+Each pull request must pass our quality requirements. To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation.
 
 Unfortunately, it does not yet support independent forks, however you should be fine by looking at what we require.
 

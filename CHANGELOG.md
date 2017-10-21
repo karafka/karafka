@@ -19,6 +19,8 @@
 - Switch from Celluloid to native Thread management
 - Improved shutdown process
 - Introduced optional fetch callbacks and moved current the ```after_received``` there as well
+- #230 - Better uri validation for seed brokers (incompatibility as the kafka:// or kafka+ssl:// is required)
+- Small internal docs fixes
 
 ## 1.0.0
 
