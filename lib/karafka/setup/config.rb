@@ -85,7 +85,7 @@ module Karafka
         setting :min_bytes, 1
         # option max_wait_time [Integer, Float] max_wait_time is the maximum number of seconds to
         #   wait before returning data from a single message fetch. By setting this high you also
-        #   increase the processing throughput – and by setting it low you set a bound on latency.
+        #   increase the processing throughput - and by setting it low you set a bound on latency.
         #   This configuration overrides `min_bytes`, so you'll _always_ get data back within the
         #   time specified. The default value is one second. If you want to have at most five
         #   seconds of latency, set `max_wait_time` to 5. You should make sure
