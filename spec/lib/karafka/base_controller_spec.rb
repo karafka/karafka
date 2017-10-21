@@ -60,7 +60,7 @@ RSpec.describe Karafka::BaseController do
     it 'expect to build params batch using messages and parser' do
       expect(Karafka::Params::ParamsBatch).to receive(:new).with(*p_args).and_return(params_batch)
       base_controller.params_batch = messages
-      expect(base_controller.params_batch).to eq params_batch
+      expect(base_controller.send(:params_batch)).to eq params_batch
     end
   end
 
@@ -69,7 +69,7 @@ RSpec.describe Karafka::BaseController do
 
     before { base_controller.instance_variable_set(:@params_batch, params_batch) }
 
-    it { expect(base_controller.params_batch).to eq params_batch }
+    it { expect(base_controller.send(:params_batch)).to eq params_batch }
   end
 
   describe '#respond_with' do
@@ -81,6 +81,16 @@ RSpec.describe Karafka::BaseController do
       expect(responder_class).to receive(:new).and_return(responder)
       expect(responder).to receive(:call).with(data)
       base_controller.send(:respond_with, data)
+    end
+  end
+
+  describe '#consumer' do
+    let(:consumer) { instance_double(Karafka::Connection::Consumer) }
+
+    before { Karafka::Persistence::Consumer.write(consumer) }
+
+    it 'expect to return current persisted consumer' do
+      expect(base_controller.send(:consumer)).to eq consumer
     end
   end
 end

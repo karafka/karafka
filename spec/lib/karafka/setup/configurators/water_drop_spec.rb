@@ -9,12 +9,6 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
       client_id: ::Karafka::App.config.client_id,
       kafka: OpenStruct.new(
         seed_brokers: ::Karafka::App.config.kafka.seed_brokers
-      ),
-      # Instance double has a private method called timeout, that's why we use
-      # openstruct here
-      connection_pool: OpenStruct.new(
-        size: ::Karafka::App.config.connection_pool.size,
-        timeout: ::Karafka::App.config.connection_pool.timeout
       )
     )
   end
@@ -25,8 +19,6 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
     before { water_drop_configurator.setup }
 
     it { expect(WaterDrop.config.send_messages).to eq true }
-    it { expect(WaterDrop.config.connection_pool.size).to eq config.connection_pool.size }
-    it { expect(WaterDrop.config.connection_pool.timeout).to eq config.connection_pool.timeout }
     it { expect(WaterDrop.config.kafka.seed_brokers).to eq config.kafka.seed_brokers }
     it { expect(WaterDrop.config.logger).to eq Karafka::App.logger }
     it { expect(WaterDrop.config.raise_on_failure).to eq true }

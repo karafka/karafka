@@ -12,27 +12,25 @@ module Karafka
       PERSISTENCE_SCOPE = :controllers
 
       class << self
+        # @return [Hash] current thread persistence scope hash with all the controllers
+        def all
+          Thread.current[PERSISTENCE_SCOPE] ||= {}
+        end
+
         # Used to build (if block given) and/or fetch a current controller instance that will be used
         #   to process messages from a given topic and partition
         # @return [Karafka::BaseController] base controller descendant
         # @param topic [Karafka::Routing::Topic] topic instance for which we might cache
         # @param partition [Integer] number of partition for which we want to cache
         def fetch(topic, partition)
-          scope[topic.id] ||= {}
+          all[topic.id] ||= {}
 
           # We always store a current instance
           if topic.persistent
-            scope[topic.id][partition] ||= yield
+            all[topic.id][partition] ||= yield
           else
-            scope[topic.id][partition] = yield
+            all[topic.id][partition] = yield
           end
-        end
-
-        private
-
-        # @return [Hash] current thread persistence scope hash
-        def scope
-          Thread.current[PERSISTENCE_SCOPE] ||= {}
         end
       end
     end

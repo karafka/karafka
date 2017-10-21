@@ -12,7 +12,6 @@ module Karafka
           ::WaterDrop.setup do |water_config|
             water_config.send_messages = true
             water_config.raise_on_failure = true
-            water_config.connection_pool = config.connection_pool
 
             # Automigration of all the attributes that should be accepted by waterdrop
             # based on what we use in karafka ruby-kafka initialization

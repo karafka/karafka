@@ -29,7 +29,7 @@ RSpec.describe Karafka::Monitor do
     let(:error) { StandardError }
 
     [
-      Karafka::Connection::MessagesConsumer,
+      Karafka::Connection::Consumer,
       Karafka::Connection::Listener,
       Karafka::Params::Params
     ].each do |caller_class|
@@ -129,7 +129,7 @@ RSpec.describe Karafka::Monitor do
   describe '#caller_exceptions_map' do
     let(:error_callers) do
       [
-        Karafka::Connection::MessagesConsumer,
+        Karafka::Connection::Consumer,
         Karafka::Connection::Listener,
         Karafka::Params::Params
       ]

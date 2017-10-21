@@ -21,6 +21,15 @@
 - Introduced optional fetch callbacks and moved current the ```after_received``` there as well
 - #230 - Better uri validation for seed brokers (incompatibility as the kafka:// or kafka+ssl:// is required)
 - Small internal docs fixes
+- Karafka will raise Errors::InvalidPauseTimeout exception when trying to pause but timeout set to 0
+- Allow float for timeouts and other time based second settings
+- Renamed MessagesProcessor to Processor and MessagesConsumer to Consumer - we don't process and don't consumer anything else so it was pointless to keep this "namespace"
+- #232 - Remove unused ActiveSupport require
+- #214 - Expose consumer on a controller layer
+- #193 - Process shutdown callbacks
+- Fixed accessibility of ```#params_batch``` from the outside of the controller
+- connection_pool config options are no longer required
+- celluloid config options are no longer required
 
 ## 1.0.0
 

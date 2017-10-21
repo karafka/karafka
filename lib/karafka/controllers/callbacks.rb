@@ -11,7 +11,7 @@ module Karafka
         after_received
         after_poll
         before_poll
-        before_shutdown
+        before_stop
       ].freeze
 
       # Class methods needed to make callbacks run

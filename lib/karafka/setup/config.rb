@@ -52,25 +52,6 @@ module Karafka
       # number of consumer groups
       setting :concurrency, -> { ::Karafka::App.consumer_groups.count }
 
-      # option celluloid [Hash] - optional - celluloid configuration options
-      setting :celluloid do
-        # options shutdown_timeout [Integer] How many seconds should we wait for actors (listeners)
-        # before forcefully shutting them
-        setting :shutdown_timeout, 30
-      end
-
-      # Connection pool options are used for producer (Waterdrop) - by default it will adapt to
-      # number of active actors
-      setting :connection_pool do
-        # Connection pool size for producers. If you use sidekiq or any other multi threaded
-        # backend, you might want to tune it to match number of threads of your background
-        # processing engine
-        setting :size, -> { ::Karafka::App.consumer_groups.active.count }
-        # How long should we wait for a working resource from the pool before rising timeout
-        # With a proper connection pool size, this should never happen
-        setting :timeout, 5
-      end
-
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
         # Array with at least one host

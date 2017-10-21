@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Class used to catch signals from ruby Signal class in order to manage Karafka shutdown
+  # Class used to catch signals from ruby Signal class in order to manage Karafka stop
   # @note There might be only one process - this class is a singleton
   class Process
     include Singleton

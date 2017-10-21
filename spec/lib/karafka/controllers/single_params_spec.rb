@@ -23,6 +23,6 @@ RSpec.describe Karafka::Controllers::SingleParams do
   end
 
   it 'expect to provide #params' do
-    expect(controller.send(:params)).to eq controller.params_batch.first
+    expect(controller.send(:params)).to eq controller.send(:params_batch).first
   end
 end

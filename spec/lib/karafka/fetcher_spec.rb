@@ -52,7 +52,7 @@ RSpec.describe Karafka::Fetcher do
 
     context 'when we invoke a processor block' do
       let(:message) { double }
-      let(:processor) { Karafka::Connection::MessagesProcessor }
+      let(:processor) { Karafka::Connection::Processor }
       let(:consumer_group_id) { rand.to_s }
 
       it 'process the message' do

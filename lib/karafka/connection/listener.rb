@@ -27,7 +27,7 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far
       def fetch_loop(block)
-        messages_consumer.fetch_loop do |raw_messages|
+        consumer.fetch_loop do |raw_messages|
           block.call(consumer_group.id, raw_messages)
         end
         # This is on purpose - see the notes for this method
@@ -35,16 +35,16 @@ module Karafka
       rescue Exception => e
         # rubocop:enable RescueException
         Karafka.monitor.notice_error(self.class, e)
-        @messages_consumer&.stop
-        retry if @messages_consumer
+        @consumer&.stop
+        retry if @consumer
       end
 
       private
 
-      # @return [Karafka::Connection::MessagesConsumer] wrapped kafka consumer for a given topic
+      # @return [Karafka::Connection::Consumer] wrapped kafka consumer for a given topic
       #   consumption
-      def messages_consumer
-        @messages_consumer ||= MessagesConsumer.new(consumer_group)
+      def consumer
+        @consumer ||= Consumer.new(consumer_group)
       end
     end
   end

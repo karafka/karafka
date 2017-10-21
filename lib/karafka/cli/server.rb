@@ -27,7 +27,7 @@ module Karafka
         # part of the topics
         Karafka::Server.consumer_groups = cli.options[:consumer_groups]
 
-        # Remove pidfile on shutdown, just before the server instance is going to be GCed
+        # Remove pidfile on stop, just before the server instance is going to be GCed
         # We want to delay the moment in which the pidfile is removed as much as we can,
         # so instead of removing it after the server stops running, we rely on the gc moment
         # when this object gets removed (it is a bit later), so it is closer to the actual

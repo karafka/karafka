@@ -46,7 +46,7 @@ module Karafka
           if message.is_a?(Hash)
             new(parser: parser).send(:merge!, message)
           else
-            # This happens inside Kafka::FetchedMessagesProcessor
+            # This happens inside Kafka::FetchedProcessor
             new(
               parser: parser,
               parsed: false,

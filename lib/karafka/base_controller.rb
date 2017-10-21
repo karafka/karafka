@@ -6,8 +6,6 @@ module Karafka
   class BaseController
     extend ActiveSupport::DescendantsTracker
 
-    attr_reader :params_batch
-
     class << self
       attr_reader :topic
 
@@ -42,6 +40,15 @@ module Karafka
     end
 
     private
+
+    # We make it private as it should be accesible only from the inside of a controller
+    attr_reader :params_batch
+
+    # @return [Karafka::Connection::Consumer] messages consumer that can be used to
+    #    commit manually offset or pause / stop consumer based on the business logic
+    def consumer
+      Persistence::Consumer.read
+    end
 
     # Method that will perform business logic on data received from Kafka
     # @note This method needs bo be implemented in a subclass. We stub it here as a failover if

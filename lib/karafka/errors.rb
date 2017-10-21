@@ -35,6 +35,9 @@ module Karafka
 
     # Raised when we want to read a persisted thread messages consumer but it is unavailable
     # This should never happen and if it does, please contact us
-    MissingMessagesConsumer = Class.new(BaseError)
+    MissingConsumer = Class.new(BaseError)
+
+    # Raised when we attemp to pause a partition but the pause timeout is equal to 0
+    InvalidPauseTimeout = Class.new(BaseError)
   end
 end

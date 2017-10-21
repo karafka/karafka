@@ -12,7 +12,7 @@ module Karafka
       threads = listeners.map do |listener|
         # We abort on exception because there should be an exception handling developed for
         # each listener running in separate threads, so the exceptions should never leak
-        # and if that happens, it means that something really bad happened and we should shutdown
+        # and if that happens, it means that something really bad happened and we should stop
         # the whole process
         Thread
           .new { listener.fetch_loop(processor) }
@@ -41,7 +41,7 @@ module Karafka
     # @yieldparam messages [Array<Kafka::FetchedMessage>] messages from kafka (raw)
     def processor
       lambda do |group_id, messages|
-        Karafka::Connection::MessagesProcessor.process(group_id, messages)
+        Karafka::Connection::Processor.process(group_id, messages)
       end
     end
   end
