@@ -2,6 +2,7 @@
 
 module Karafka
   module Patches
+    # Batches for Ruby Kafka gem
     module RubyKafka
       # This patch allows us to inject business logic in between fetches and before the consumer
       # stop, so we can perform stop commit or anything else that we need since
@@ -13,10 +14,10 @@ module Karafka
       def consumer_loop
         super do
           controllers = Karafka::Persistence::Controller
-            .all
-            .values
-            .flat_map(&:values)
-            .select { |ctrl| ctrl.respond_to?(:run_callbacks) }
+                        .all
+                        .values
+                        .flat_map(&:values)
+                        .select { |ctrl| ctrl.respond_to?(:run_callbacks) }
 
           if Karafka::App.stopped?
             controllers.each { |ctrl| ctrl.run_callbacks :before_stop }

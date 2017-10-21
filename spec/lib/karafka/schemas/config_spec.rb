@@ -6,7 +6,7 @@ RSpec.describe Karafka::Schemas::Config do
   let(:config) do
     {
       client_id: 'name',
-      topic_mapper: Karafka::Routing::TopicMapper,
+      topic_mapper: Karafka::Routing::TopicMapper
     }
   end
 

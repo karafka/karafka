@@ -10,16 +10,18 @@ RSpec.describe Karafka::Controllers::Callbacks do
   let(:topic) do
     topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
     topic.controller = Class.new(Karafka::BaseController)
-    topic.controller.include Karafka::Controllers::Callbacks
+    topic.controller.include described_class
     topic.backend = backend
     topic.responder = responder_class
     topic
   end
   let(:working_class) do
+    described_scope = described_class
+
     ClassBuilder.inherit(Karafka::BaseController) do
       include Karafka::Backends::Inline
       include Karafka::Controllers::Responders
-      include Karafka::Controllers::Callbacks
+      include described_scope
 
       def perform
         self
@@ -51,9 +53,11 @@ RSpec.describe Karafka::Controllers::Callbacks do
 
       context 'and it throws abort to halt' do
         subject(:base_controller) do
+          described_scope = described_class
+
           ClassBuilder.inherit(Karafka::BaseController) do
             include Karafka::Backends::Inline
-            include Karafka::Controllers::Callbacks
+            include described_scope
 
             after_received do
               throw(:abort)
@@ -74,9 +78,11 @@ RSpec.describe Karafka::Controllers::Callbacks do
 
       context 'and it does not throw abort to halt' do
         subject(:base_controller) do
+          described_scope = described_class
+
           ClassBuilder.inherit(Karafka::BaseController) do
             include Karafka::Backends::Inline
-            include Karafka::Controllers::Callbacks
+            include described_scope
 
             after_received do
               true
@@ -102,8 +108,10 @@ RSpec.describe Karafka::Controllers::Callbacks do
 
       context 'and it throws abort to halt' do
         subject(:base_controller) do
+          described_scope = described_class
+
           ClassBuilder.inherit(Karafka::BaseController) do
-            include Karafka::Controllers::Callbacks
+            include described_scope
 
             after_received :method
 
@@ -126,9 +134,11 @@ RSpec.describe Karafka::Controllers::Callbacks do
 
       context 'and it does not return false' do
         subject(:base_controller) do
+          described_scope = described_class
+
           ClassBuilder.inherit(Karafka::BaseController) do
             include Karafka::Backends::Inline
-            include Karafka::Controllers::Callbacks
+            include described_scope
 
             after_received :method
 

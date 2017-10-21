@@ -17,8 +17,8 @@ module Karafka
           Thread.current[PERSISTENCE_SCOPE] ||= {}
         end
 
-        # Used to build (if block given) and/or fetch a current controller instance that will be used
-        #   to process messages from a given topic and partition
+        # Used to build (if block given) and/or fetch a current controller instance that will be
+        #   used to process messages from a given topic and partition
         # @return [Karafka::BaseController] base controller descendant
         # @param topic [Karafka::Routing::Topic] topic instance for which we might cache
         # @param partition [Integer] number of partition for which we want to cache

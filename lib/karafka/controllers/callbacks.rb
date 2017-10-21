@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Karafka
   module Controllers
     # Additional callbacks that can be used to trigger some actions on certain moments like
@@ -26,8 +28,9 @@ module Karafka
         end
       end
 
-      def self.included(base)
-        base.class_eval do
+      # @param controller_class [Class] controller class that we extend with callbacks
+      def self.included(controller_class)
+        controller_class.class_eval do
           extend ClassMethods
           include ActiveSupport::Callbacks
 

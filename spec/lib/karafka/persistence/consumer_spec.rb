@@ -10,7 +10,6 @@ RSpec.describe Karafka::Persistence::Consumer do
     let(:retrieved_result) { persistence.read }
 
     context 'when messages consumer is present' do
-
       before { persistence.write(consumer1) }
 
       it 'expect to overwrite it' do

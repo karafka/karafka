@@ -21,7 +21,6 @@ RSpec.describe Karafka::Fetcher do
       end
 
       it 'starts asynchronously consumption for each listener' do
-
         fetcher.fetch_loop
       end
     end
