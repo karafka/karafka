@@ -29,6 +29,7 @@ module Karafka
       required(:heartbeat_interval).filled { (int? | float?) & gteq?(0) }
       required(:connect_timeout).filled { (int? | float?) & gt?(0) }
       required(:socket_timeout).filled { (int? | float?) & gt?(0) }
+      required(:min_bytes).filled(:int?, gt?: 0)
       required(:max_wait_time).filled { (int? | float?) & gteq?(0) }
       required(:batch_consuming).filled(:bool?)
       required(:topics).filled { each { schema(ConsumerGroupTopic) } }

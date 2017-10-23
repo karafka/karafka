@@ -21,15 +21,7 @@ RSpec.describe Karafka::Params::Params do
         let(:key) { nil }
         let(:offset) { rand(1000) }
         let(:partition) { rand(100) }
-        let(:kafka_message) do
-          Kafka::FetchedMessage.new(
-            topic: topic,
-            value: value,
-            key: key,
-            offset: offset,
-            partition: partition
-          )
-        end
+        let(:create_time) { Time.now }
         let(:params_attributes) do
           {
             'parser' => parser,
@@ -39,7 +31,8 @@ RSpec.describe Karafka::Params::Params do
             'offset' => offset,
             'partition' => partition,
             'key' => key,
-            'topic' => topic
+            'topic' => topic,
+            'create_time' => create_time
           }
         end
         let(:message) do
@@ -48,7 +41,8 @@ RSpec.describe Karafka::Params::Params do
             key: key,
             topic: topic,
             partition: partition,
-            offset: offset
+            offset: offset,
+            create_time: create_time
           )
         end
 
@@ -219,6 +213,7 @@ RSpec.describe Karafka::Params::Params do
       partition
       offset
       key
+      create_time
     ].each do |key|
       describe "\##{key}" do
         let(:value) { rand }

@@ -15,7 +15,8 @@ RSpec.describe Karafka::Connection::Processor do
       topic: topic_id,
       offset: 0,
       partition: 0,
-      key: nil
+      key: nil,
+      create_time: Time.now
     )
   end
 

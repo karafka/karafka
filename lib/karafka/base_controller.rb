@@ -50,11 +50,18 @@ module Karafka
       Persistence::Consumer.read
     end
 
-    # Method that will perform business logic on data received from Kafka
+    # Method that will perform business logic and on data received from Kafka (it will consume
+    #   the data)
     # @note This method needs bo be implemented in a subclass. We stub it here as a failover if
     #   someone forgets about it or makes on with typo
-    def perform
+    def consume
       raise NotImplementedError, 'Implement this in a subclass'
+    end
+
+    # Alias for #consume method and deprecation warning
+    def perform
+      Karafka.logger.warn('[DEPRECATION WARNING]: please use #consume instead of #perform')
+      consume
     end
   end
 end

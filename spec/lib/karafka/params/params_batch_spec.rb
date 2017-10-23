@@ -4,6 +4,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
   subject(:params_batch) { described_class.new(kafka_messages, topic_parser) }
 
   let(:value) { {}.to_json }
+  let(:create_time) { Time.now }
   let(:topic_parser) { Karafka::Parsers::Json }
   let(:kafka_messages) { [kafka_message1, kafka_message2] }
   let(:kafka_message2) { kafka_message1.dup }
@@ -13,7 +14,8 @@ RSpec.describe Karafka::Params::ParamsBatch do
       value: value,
       key: nil,
       partition: 0,
-      offset: 0
+      offset: 0,
+      create_time: create_time
     )
   end
 

@@ -91,6 +91,9 @@ module Karafka
         #   seconds of latency, set `max_wait_time` to 5. You should make sure
         #   max_wait_time * num brokers + heartbeat_interval is less than session_timeout.
         setting :max_wait_time, 1
+        # option automatically_mark_as_processed [Boolean] should we automatically mark received
+        # messages as processed after non-error processing
+        setting :automatically_mark_as_processed, true
         # option reconnect_timeout [Integer] How long should we wait before trying to reconnect to
         # Kafka cluster that went down (in seconds)
         setting :reconnect_timeout, 5

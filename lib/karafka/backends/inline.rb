@@ -7,10 +7,10 @@ module Karafka
     module Inline
       private
 
-      # Executes perform code immediately (without enqueuing)
+      # Executes consume code immediately (without enqueuing)
       def process
         Karafka.monitor.notice(self.class, params_batch)
-        perform
+        consume
       end
     end
   end

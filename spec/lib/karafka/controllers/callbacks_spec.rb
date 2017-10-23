@@ -23,7 +23,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
       include Karafka::Controllers::Responders
       include described_scope
 
-      def perform
+      def consume
         self
       end
     end
@@ -31,10 +31,10 @@ RSpec.describe Karafka::Controllers::Callbacks do
 
   before { working_class.topic = topic }
 
-  describe '#perform' do
+  describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(Karafka::BaseController) }
 
-    it { expect { base_controller.send(:perform) }.to raise_error NotImplementedError }
+    it { expect { base_controller.send(:consume) }.to raise_error NotImplementedError }
   end
 
   context 'after_received' do
@@ -63,14 +63,14 @@ RSpec.describe Karafka::Controllers::Callbacks do
               throw(:abort)
             end
 
-            def perform
+            def consume
               self
             end
           end.new
         end
 
-        it 'does not perform' do
-          expect(base_controller).not_to receive(:perform)
+        it 'does not consume' do
+          expect(base_controller).not_to receive(:consume)
 
           base_controller.call
         end
@@ -88,7 +88,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
               true
             end
 
-            def perform
+            def consume
               self
             end
           end.new
@@ -115,7 +115,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
 
             after_received :method
 
-            def perform
+            def consume
               self
             end
 
@@ -125,8 +125,8 @@ RSpec.describe Karafka::Controllers::Callbacks do
           end.new
         end
 
-        it 'does not perform' do
-          expect(base_controller).not_to receive(:perform)
+        it 'does not consume' do
+          expect(base_controller).not_to receive(:consume)
 
           base_controller.call
         end
@@ -142,7 +142,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
 
             after_received :method
 
-            def perform
+            def consume
               self
             end
 
@@ -153,7 +153,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
         end
 
         it 'schedules to a backend' do
-          expect(base_controller).to receive(:process)
+          expect(base_controller).to receive(:consume)
 
           base_controller.call
         end

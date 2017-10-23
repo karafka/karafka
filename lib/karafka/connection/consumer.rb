@@ -3,7 +3,7 @@
 module Karafka
   module Connection
     # Class used as a wrapper around Ruby-Kafka to simplify additional
-    # features that we provide/might provide in future
+    # features that we provide/might provide in future and to hide the internal implementation
     class Consumer
       # Creates a queue consumer that will pull the data from Kafka
       # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group for which
@@ -37,6 +37,9 @@ module Karafka
       end
 
       # Gracefuly stops topic consumption
+      # @note Stopping running consumers without a really important reason is not recommended
+      #   as until all the consumers are stopped, the server will keep running serving only
+      #   part of the messages
       def stop
         @kafka_consumer&.stop
         @kafka_consumer = nil
@@ -50,6 +53,17 @@ module Karafka
         timeout = settings[:timeout]
         raise(Errors::InvalidPauseTimeout, timeout) unless timeout.positive?
         kafka_consumer.pause(topic, partition, settings)
+      end
+
+      # Marks a given message as processed and commit the offsets
+      # @note In opposite to ruby-kafka, we commit the offset for each manual marking to be sure
+      #   that offset commit happen asap in case of a crash
+      # @param [Karafka::Params::Params] params message that we want to mark as processed
+      def mark_as_processed(params)
+        kafka_consumer.mark_message_as_processed(params)
+        # Trigger an immediate, blocking offset commit in order to minimize the risk of crashing
+        # before the automatic triggers have kicked in.
+        kafka_consumer.commit_offsets
       end
 
       private

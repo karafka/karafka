@@ -13,7 +13,7 @@ module Karafka
     include Singleton
 
     # This method is executed in many important places in the code (during data flow), like
-    # the moment before #perform_async, etc. For full list just grep for 'monitor.notice'
+    # the moment before #consume_async, etc. For full list just grep for 'monitor.notice'
     # @param caller_class [Class] class of object that executed this call
     # @param options [Hash] hash with options that we passed to notice. It differs based
     #   on of who and when is calling

@@ -14,6 +14,7 @@ module Karafka
         partition
         offset
         key
+        create_time
       ].freeze
 
       # Params attributes that should be available via a method call invocation for Kafka
@@ -26,6 +27,7 @@ module Karafka
         partition
         offset
         key
+        create_time
       ].freeze
 
       class << self

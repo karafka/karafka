@@ -19,7 +19,7 @@ RSpec.describe Karafka::BaseController do
       include Karafka::Backends::Inline
       include Karafka::Controllers::Responders
 
-      def perform
+      def consume
         self
       end
     end
@@ -27,10 +27,10 @@ RSpec.describe Karafka::BaseController do
 
   before { working_class.topic = topic }
 
-  describe '#perform' do
+  describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(described_class) }
 
-    it { expect { base_controller.send(:perform) }.to raise_error NotImplementedError }
+    it { expect { base_controller.send(:consume) }.to raise_error NotImplementedError }
   end
 
   describe '#call' do
