@@ -36,7 +36,7 @@ RSpec.describe Karafka::BaseController do
   describe '#perform' do
     it 'expect to run consume' do
       expect(base_controller).to receive(:consume)
-      subject.send(:perform)
+      base_controller.send(:perform)
     end
   end
 
