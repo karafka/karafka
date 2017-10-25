@@ -47,10 +47,10 @@ module Karafka
       # incoming batch. It's disabled by default, not to create more objects that needed on
       # each batch
       setting :persistent, true
-      # This is configured automatically, don't overwrite it!
-      # Each consumer group requires separate thread, so number of threads should be equal to
-      # number of consumer groups
-      setting :concurrency, -> { ::Karafka::App.consumer_groups.count }
+
+      setting :producer do
+        # pending
+      end
 
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
@@ -108,7 +108,8 @@ module Karafka
         # writing to a socket connection to a broker. After this timeout expires the connection
         # will be killed. Note that some Kafka operations are by definition long-running, such as
         # waiting for new messages to arrive in a partition, so don't set this value too low
-        setting :socket_timeout, 10
+        setting :socket_timeout, 30
+
         # SSL authentication related settings
         # option ca_cert [String] SSL CA certificate
         setting :ssl_ca_cert, nil

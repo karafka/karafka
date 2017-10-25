@@ -33,6 +33,7 @@
 - ```#perform``` is not renamed to ```#consume``` with warning level on using the old one (deprecated)
 - #235 - Rename perform to consume
 - Upgrade to ruby-kafka 0.5
+- Due to redesign of Waterdrop concurrency setting is no longer needed
 
 ## 1.0.0
 

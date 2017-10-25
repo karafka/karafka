@@ -17,7 +17,6 @@ module Karafka
           "Backend: #{config.backend}",
           "Batch consuming: #{config.batch_consuming}",
           "Batch processing: #{config.batch_processing}",
-          "Number of threads: #{config.concurrency}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
           "Kafka seed brokers: #{config.kafka.seed_brokers}"

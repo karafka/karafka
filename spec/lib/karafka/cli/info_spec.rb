@@ -15,7 +15,6 @@ RSpec.describe Karafka::Cli::Info do
         "Backend: #{Karafka::App.config.backend}",
         "Batch consuming: #{Karafka::App.config.batch_consuming}",
         "Batch processing: #{Karafka::App.config.batch_processing}",
-        "Number of threads: #{Karafka::App.config.concurrency}",
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
         "Kafka seed brokers: #{Karafka::App.config.kafka.seed_brokers}"
