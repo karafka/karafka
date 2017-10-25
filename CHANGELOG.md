@@ -34,6 +34,7 @@
 - #235 - Rename perform to consume
 - Upgrade to ruby-kafka 0.5
 - Due to redesign of Waterdrop concurrency setting is no longer needed
+- #236 - Manual offset management
 
 ## 1.0.0
 

@@ -76,6 +76,18 @@ RSpec.describe Karafka::Connection::Consumer do
     end
   end
 
+  describe '#mark_as_processed' do
+    let(:params) { instance_double(Karafka::Params::Params) }
+
+    before { consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
+
+    it 'expect to forward to mark_message_as_processed and commit offsets' do
+      expect(kafka_consumer).to receive(:mark_message_as_processed).with(params)
+      expect(kafka_consumer).to receive(:commit_offsets)
+      consumer.mark_as_processed(params)
+    end
+  end
+
   describe '#fetch_loop' do
     let(:incoming_message) { rand }
 
