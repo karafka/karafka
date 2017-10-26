@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (1.0.0)
+    karafka (1.1.0)
       activesupport (>= 5.0)
       dry-configurable (~> 0.7)
       dry-validation (~> 0.11)
@@ -60,7 +60,7 @@ GEM
     minitest (5.10.3)
     multi_json (1.12.2)
     null-logger (0.1.4)
-    rake (12.1.0)
+    rake (12.2.1)
     require_all (1.4.0)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
@@ -75,7 +75,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
     rspec-support (3.7.0)
-    ruby-kafka (0.5.0.beta2)
+    ruby-kafka (0.5.0.beta3)
     simplecov (0.15.1)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)

@@ -80,7 +80,7 @@ Unfortunately, it does not yet support independent forks, however you should be 
 Please run:
 
 ```bash
-bundle exec rake
+bundle exec rspec spec
 ```
 
 to check if everything is in order. After that you can submit a pull request.
