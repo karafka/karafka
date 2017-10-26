@@ -53,7 +53,7 @@ RSpec.describe Karafka::Connection::Consumer do
   describe '#pause' do
     before do
       consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer)
-      expect(consumer_group).to receive(:pause_timeout).and_return(pause_timeout)
+      allow(consumer_group).to receive(:pause_timeout).and_return(pause_timeout)
     end
 
     context 'when pause_timeout is set to 0' do
@@ -129,13 +129,13 @@ RSpec.describe Karafka::Connection::Consumer do
 
       before do
         count = 0
-        expect(consumer).to receive(:consume_each_message).exactly(2).times do
+        allow(consumer).to receive(:consume_each_message).exactly(2).times do
           count += 1
           count == 1 ? raise(error) : true
         end
 
         # Lets silence exceptions printing
-        expect(Karafka.monitor)
+        allow(Karafka.monitor)
           .to receive(:notice_error)
           .with(described_class, error.cause)
       end
@@ -151,13 +151,13 @@ RSpec.describe Karafka::Connection::Consumer do
 
       before do
         count = 0
-        expect(consumer).to receive(:consume_each_message).exactly(2).times do
+        allow(consumer).to receive(:consume_each_message).exactly(2).times do
           count += 1
           count == 1 ? raise(error) : true
         end
 
         # Lets silence exceptions printing
-        expect(Karafka.monitor)
+        allow(Karafka.monitor)
           .to receive(:notice_error)
           .with(described_class, error)
       end
