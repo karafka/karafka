@@ -102,6 +102,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     it 'when seed_broker is not an uri' do
       config[:seed_brokers] = ['#$%^&*()']
       expect(schema.call(config)).not_to be_success
+      expect { schema.call(config).errors }.not_to raise_error
     end
   end
 
