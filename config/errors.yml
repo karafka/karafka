@@ -1,0 +1,6 @@
+en:
+  errors:
+    broker_schema?: >
+      has an invalid format.
+      Expected schema, host and port number.
+      Example: kafka://127.0.0.1:9092 or kafka+ssl://127.0.0.1:9092

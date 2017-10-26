@@ -35,6 +35,7 @@
 - Upgrade to ruby-kafka 0.5
 - Due to redesign of Waterdrop concurrency setting is no longer needed
 - #236 - Manual offset management
+- Dry::Validation::MissingMessageError: message for broker_schema? was not found
 
 ## 1.0.0
 

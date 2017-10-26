@@ -75,7 +75,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
     rspec-support (3.7.0)
-    ruby-kafka (0.5.0.beta3)
+    ruby-kafka (0.5.0.beta4)
     simplecov (0.15.1)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)

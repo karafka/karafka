@@ -8,6 +8,10 @@ module Karafka
       URI_SCHEMES = %w[kafka kafka+ssl].freeze
 
       configure do
+        config.messages_file = File.join(
+          Karafka.gem_root, 'config', 'errors.yml'
+        )
+
         # Uri validator to check if uri is in a Karafka acceptable format
         # @param uri [String] uri we want to validate
         # @return [Boolean] true if it is a valid uri, otherwise false
