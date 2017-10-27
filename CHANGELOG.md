@@ -17,6 +17,7 @@
 - #230 - Better uri validation for seed brokers (incompatibility as the kafka:// or kafka+ssl:// is required)
 - Small internal docs fixes
 - Dry::Validation::MissingMessageError: message for broker_schema? was not found
+- #238 - warning: already initialized constant Karafka::Schemas::URI_SCHEMES
 
 ## 1.0.0
 
