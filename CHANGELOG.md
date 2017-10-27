@@ -1,26 +1,10 @@
 # Karafka framework changelog
 
 ## 1.1.0 Unreleased
-- #210 - LoadError: cannot load such file -- [...]/karafka.rb
-- Ruby 2.4.2 as a default (+travis integration)
-- JRuby upgrade
-- Expanded persistence layer (moved to a namespace for easier future development)
-- #213 - Misleading error when non-existing dependency is required
-- #212 - Make params react to #topic, #partition, #offset
-- #215 - Consumer group route dynamic options are ignored
-- #217 - check RUBY_ENGINE constant if RUBY_VERSION is missing (#217)
-- #218 - add configuration setting to control Celluloid's shutdown timeout
-- Renamed Karafka::Routing::Mapper to Karafka::Routing::TopicMapper to match naming conventions
-- #219 - Allow explicit consumer group names, without prefixes
-- Fix to early removed pid upon shutdown of demonized process
-- max_wait_time updated to match https://github.com/zendesk/ruby-kafka/issues/433
-- #233 - Remove unused ActiveSupport require
 - Gem bump
 - Switch from Celluloid to native Thread management
 - Improved shutdown process
 - Introduced optional fetch callbacks and moved current the ```after_received``` there as well
-- #230 - Better uri validation for seed brokers (incompatibility as the kafka:// or kafka+ssl:// is required)
-- Small internal docs fixes
 - Karafka will raise Errors::InvalidPauseTimeout exception when trying to pause but timeout set to 0
 - Allow float for timeouts and other time based second settings
 - Renamed MessagesProcessor to Processor and MessagesConsumer to Consumer - we don't process and don't consumer anything else so it was pointless to keep this "namespace"
@@ -35,8 +19,25 @@
 - Upgrade to ruby-kafka 0.5
 - Due to redesign of Waterdrop concurrency setting is no longer needed
 - #236 - Manual offset management
-- Dry::Validation::MissingMessageError: message for broker_schema? was not found
 - WaterDrop 1.0.0 support with async
+
+## 1.0.1
+- #210 - LoadError: cannot load such file -- [...]/karafka.rb
+- Ruby 2.4.2 as a default (+travis integration)
+- JRuby upgrade
+- Expanded persistence layer (moved to a namespace for easier future development)
+- #213 - Misleading error when non-existing dependency is required
+- #212 - Make params react to #topic, #partition, #offset
+- #215 - Consumer group route dynamic options are ignored
+- #217 - check RUBY_ENGINE constant if RUBY_VERSION is missing (#217)
+- #218 - add configuration setting to control Celluloid's shutdown timeout
+- Renamed Karafka::Routing::Mapper to Karafka::Routing::TopicMapper to match naming conventions
+- #219 - Allow explicit consumer group names, without prefixes
+- Fix to early removed pid upon shutdown of demonized process
+- max_wait_time updated to match https://github.com/zendesk/ruby-kafka/issues/433
+- #230 - Better uri validation for seed brokers (incompatibility as the kafka:// or kafka+ssl:// is required)
+- Small internal docs fixes
+- Dry::Validation::MissingMessageError: message for broker_schema? was not found
 - #238 - warning: already initialized constant Karafka::Schemas::URI_SCHEMES
 
 ## 1.0.0
