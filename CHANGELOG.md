@@ -37,6 +37,7 @@
 - #236 - Manual offset management
 - Dry::Validation::MissingMessageError: message for broker_schema? was not found
 - WaterDrop 1.0.0 support with async
+- #238 - warning: already initialized constant Karafka::Schemas::URI_SCHEMES
 
 ## 1.0.0
 

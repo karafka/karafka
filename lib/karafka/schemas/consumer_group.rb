@@ -5,7 +5,9 @@ module Karafka
     # Schema for single full route (consumer group + topics) validation.
     ConsumerGroup = Dry::Validation.Schema do
       # Valid uri schemas of Kafka broker url
-      URI_SCHEMES = %w[kafka kafka+ssl].freeze
+      # The ||= is due to the behavior of require_all that resolves dependencies
+      # but someetimes loads things twice
+      URI_SCHEMES ||= %w[kafka kafka+ssl].freeze
 
       configure do
         config.messages_file = File.join(
