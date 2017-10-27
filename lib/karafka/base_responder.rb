@@ -147,12 +147,11 @@ module Karafka
         # @note By default will not change topic (if default mapper used)
         mapped_topic = Karafka::App.config.topic_mapper.outgoing(topic)
 
-        data_elements.each do |(data, options)|
-          ::WaterDrop::Message.new(
-            mapped_topic,
+        data_elements.each do |data, options|
+          producer(options).call(
             data,
-            options
-          ).send!
+            options.merge(topic: mapped_topic)
+          )
         end
       end
     end
@@ -175,6 +174,12 @@ module Karafka
 
       messages_buffer[topic.to_s] ||= []
       messages_buffer[topic.to_s] << [@parser_class.generate(data), options]
+    end
+
+    # @param options [Hash] options for waterdrop
+    # @return [Class] WaterDrop producer (sync or async based on the settings)
+    def producer(options)
+      options[:async] ? WaterDrop::AsyncProducer : WaterDrop::SyncProducer
     end
   end
 end

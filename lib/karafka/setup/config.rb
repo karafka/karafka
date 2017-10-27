@@ -48,10 +48,6 @@ module Karafka
       # each batch
       setting :persistent, true
 
-      setting :producer do
-        # pending
-      end
-
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
         # Array with at least one host

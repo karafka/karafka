@@ -39,12 +39,14 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
     let(:usage_count) { 1 }
     let(:multiple_usage) { false }
     let(:required) { true }
+    let(:async) { false }
     let(:topic_data) do
       Karafka::Responders::Topic.new(
         name,
         registered: registered,
         required: required,
-        multiple_usage: multiple_usage
+        multiple_usage: multiple_usage,
+        async: async
       ).to_h.merge!(usage_count: usage_count)
     end
 
@@ -73,6 +75,20 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
 
       context 'required is not a bool' do
         let(:required) { 2 }
+
+        it { expect(subschema.call(topic_data)).not_to be_success }
+      end
+    end
+
+    context 'async validator' do
+      context 'async is nil' do
+        let(:async) { nil }
+
+        it { expect(subschema.call(topic_data)).not_to be_success }
+      end
+
+      context 'async is not a bool' do
+        let(:async) { 2 }
 
         it { expect(subschema.call(topic_data)).not_to be_success }
       end

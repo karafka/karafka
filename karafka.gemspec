@@ -21,8 +21,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-validation', '~> 0.11'
   spec.add_dependency 'envlogic', '~> 1.0'
   spec.add_dependency 'multi_json', '>= 1.12'
+  spec.add_dependency 'rake', '>= 11.3'
   spec.add_dependency 'require_all', '>= 1.4'
-  spec.add_dependency 'ruby-kafka', '>= 0.5.beta2'
+  spec.add_dependency 'ruby-kafka', '>= 0.5.beta5'
   spec.add_dependency 'thor', '~> 0.19'
   spec.add_dependency 'waterdrop', '>= 0.4'
 

@@ -21,6 +21,5 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
     it { expect(WaterDrop.config.send_messages).to eq true }
     it { expect(WaterDrop.config.kafka.seed_brokers).to eq config.kafka.seed_brokers }
     it { expect(WaterDrop.config.logger).to eq Karafka::App.logger }
-    it { expect(WaterDrop.config.raise_on_failure).to eq true }
   end
 end

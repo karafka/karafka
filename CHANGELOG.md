@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 1.1.0 Unreleased
 - #210 - LoadError: cannot load such file -- [...]/karafka.rb
 - Ruby 2.4.2 as a default (+travis integration)
 - JRuby upgrade
@@ -36,6 +36,7 @@
 - Due to redesign of Waterdrop concurrency setting is no longer needed
 - #236 - Manual offset management
 - Dry::Validation::MissingMessageError: message for broker_schema? was not found
+- WaterDrop 1.0.0 support with async
 
 ## 1.0.0
 
