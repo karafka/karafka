@@ -71,6 +71,14 @@ module Karafka
         setting :timeout, 5
       end
 
+      # option producer [Hash] - optional - WaterDrop configuration options
+      setting :producer do
+        # Boolean value to define whether messages should be sent
+        setting :send_messages, true
+        # Boolean value to define if it should raise error when failed to deliver a message
+        setting :raise_on_failure, true
+      end
+
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
         # Array with at least one host
