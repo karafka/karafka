@@ -22,7 +22,7 @@ module Karafka
       threads.each(&:join)
     # If anything crashes here, we need to raise the error and crush the runner because it means
     # that something really bad happened
-    rescue => e
+    rescue StandardError => e
       Karafka.monitor.notice_error(self.class, e)
       Karafka::App.stop!
       raise e

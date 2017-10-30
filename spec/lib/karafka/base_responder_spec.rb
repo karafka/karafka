@@ -127,6 +127,8 @@ RSpec.describe Karafka::BaseResponder do
       context 'when there are messages to be delivered for sync producer' do
         let(:messages_buffer) { { rand => [[rand, {}]] } }
 
+        after { responder.send(:deliver!) }
+
         it 'expect to deliver them using waterdrop' do
           messages_buffer.each do |topic, data_elements|
             data_elements.each do |data, options|
@@ -134,13 +136,13 @@ RSpec.describe Karafka::BaseResponder do
                 .to receive(:call).with(data, options.merge(topic: topic))
             end
           end
-
-          responder.send(:deliver!)
         end
       end
 
       context 'when there are messages to be delivered for async producer' do
         let(:messages_buffer) { { rand => [[rand, { async: true }]] } }
+
+        after { responder.send(:deliver!) }
 
         it 'expect to deliver them using waterdrop' do
           messages_buffer.each do |topic, data_elements|
@@ -152,8 +154,6 @@ RSpec.describe Karafka::BaseResponder do
                 .to receive(:call).with(data, options.merge(topic: topic))
             end
           end
-
-          responder.send(:deliver!)
         end
       end
 
@@ -175,17 +175,15 @@ RSpec.describe Karafka::BaseResponder do
             .and_return(custom_mapper)
         end
 
+        after { responder.send(:deliver!) }
+
         it 'expect to deliver them to mapped topic' do
           messages_buffer.each_value do |data_elements|
             data_elements.each do |data, options|
-              kafka_message = instance_double(::WaterDrop::SyncProducer)
-
               expect(::WaterDrop::SyncProducer)
                 .to receive(:call).with(data, options.merge(topic: mapped_topic))
             end
           end
-
-          responder.send(:deliver!)
         end
       end
     end
