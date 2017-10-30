@@ -33,13 +33,6 @@ RSpec.describe Karafka::BaseController do
     it { expect { base_controller.send(:consume) }.to raise_error NotImplementedError }
   end
 
-  describe '#perform' do
-    it 'expect to run consume' do
-      expect(base_controller).to receive(:consume)
-      base_controller.send(:perform)
-    end
-  end
-
   describe '#call' do
     it 'just consumes' do
       expect(base_controller).to receive(:consume)

@@ -36,7 +36,7 @@ module Karafka
     # Executes the default controller flow, runs callbacks and if not halted
     # will call perform method of a proper backend
     def call
-      respond_to?(:consume) ? consume : perform
+      process
     end
 
     private
@@ -56,12 +56,6 @@ module Karafka
     #   someone forgets about it or makes on with typo
     def consume
       raise NotImplementedError, 'Implement this in a subclass'
-    end
-
-    # Alias for #consume method and deprecation warning
-    def perform
-      Karafka.logger.warn('[DEPRECATION WARNING]: please use #consume instead of #perform')
-      consume
     end
   end
 end
