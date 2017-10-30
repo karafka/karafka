@@ -22,11 +22,7 @@ RSpec.describe Karafka::Cli::Info do
     end
 
     it 'expect to print details of this Karafka app instance' do
-      expect(info_cli)
-        .to receive(:puts)
-        .with(info.join("\n"))
-
-      info_cli.call
+      expect { info_cli.call }.to output(info.join("\n") + "\n").to_stdout
     end
   end
 end
