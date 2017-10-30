@@ -34,7 +34,7 @@ module Karafka
         # @param controller_class [Class] controller class
         # @param topic [Karafka::Routing::Topic] topic of a controller class
         def bind_params(controller_class, topic)
-          return if topic.batch_processing
+          return if topic.batch_consuming
           controller_class.include SingleParams
         end
 

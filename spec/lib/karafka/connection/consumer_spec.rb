@@ -76,7 +76,7 @@ RSpec.describe Karafka::Connection::Consumer do
     end
   end
 
-  describe '#mark_as_processed' do
+  describe '#mark_as_consumed' do
     let(:params) { instance_double(Karafka::Params::Params) }
 
     before { consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
@@ -84,7 +84,7 @@ RSpec.describe Karafka::Connection::Consumer do
     it 'expect to forward to mark_message_as_processed and commit offsets' do
       expect(kafka_consumer).to receive(:mark_message_as_processed).with(params)
       expect(kafka_consumer).to receive(:commit_offsets)
-      consumer.mark_as_processed(params)
+      consumer.mark_as_consumed(params)
     end
   end
 
@@ -146,7 +146,7 @@ RSpec.describe Karafka::Connection::Consumer do
       end
     end
 
-    context 'any nono processing error' do
+    context 'any nono consuming error' do
       let(:error) { Exception.new }
 
       before do

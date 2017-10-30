@@ -12,7 +12,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
       parser: Class.new,
       max_bytes_per_partition: 1,
       start_from_beginning: true,
-      batch_processing: true,
+      batch_consuming: true,
       persistent: false
     }
   end
@@ -105,14 +105,14 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     end
   end
 
-  context 'batch_processing validator' do
-    it 'batch_processing is nil' do
-      config[:batch_processing] = nil
+  context 'batch_consuming validator' do
+    it 'batch_consuming is nil' do
+      config[:batch_consuming] = nil
       expect(schema.call(config)).not_to be_success
     end
 
-    it 'batch_processing is not a bool' do
-      config[:batch_processing] = 2
+    it 'batch_consuming is not a bool' do
+      config[:batch_consuming] = 2
       expect(schema.call(config)).not_to be_success
     end
   end

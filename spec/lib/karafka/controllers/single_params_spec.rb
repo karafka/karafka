@@ -10,7 +10,7 @@ RSpec.describe Karafka::Controllers::SingleParams do
       Karafka::Routing::Topic,
       id: rand.to_s,
       backend: :inline,
-      batch_processing: true,
+      batch_consuming: true,
       responder: nil,
       parser: Karafka::Parsers::Json
     )

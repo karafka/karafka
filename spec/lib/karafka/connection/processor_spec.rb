@@ -20,7 +20,7 @@ RSpec.describe Karafka::Connection::Processor do
     )
   end
 
-  context 'batch_processing true' do
+  context 'batch_consuming true' do
     before do
       expect(consumer_group.topics[0].controller)
         .to receive(:new).and_return(controller_instance)
@@ -39,7 +39,7 @@ RSpec.describe Karafka::Connection::Processor do
           topic :topic_name1 do
             controller Class.new(Karafka::BaseController)
             persistent false
-            batch_processing true
+            batch_consuming true
           end
         end
 
@@ -65,7 +65,7 @@ RSpec.describe Karafka::Connection::Processor do
           topic :topic_name1 do
             controller Class.new(Karafka::BaseController)
             persistent false
-            batch_processing true
+            batch_consuming true
           end
         end
 
@@ -93,7 +93,7 @@ RSpec.describe Karafka::Connection::Processor do
     end
   end
 
-  context 'batch_processing false' do
+  context 'batch_consuming false' do
     before do
       expect(consumer_group.topics[0].controller)
         .to receive(:new).and_return(controller_instance)
@@ -117,7 +117,7 @@ RSpec.describe Karafka::Connection::Processor do
           topic :topic_name1 do
             controller Class.new(Karafka::BaseController)
             persistent false
-            batch_processing false
+            batch_consuming false
           end
         end
 
@@ -143,7 +143,7 @@ RSpec.describe Karafka::Connection::Processor do
           topic :topic_name1 do
             controller Class.new(Karafka::BaseController)
             persistent false
-            batch_processing false
+            batch_consuming false
           end
         end
 

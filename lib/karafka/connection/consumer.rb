@@ -23,7 +23,7 @@ module Karafka
           consumer_group.batch_fetching ? :consume_each_batch : :consume_each_message
         ) { |messages| yield(messages) }
       rescue Kafka::ProcessingError => e
-        # If there was an error during processing, we have to log it, pause current partition
+        # If there was an error during consumption, we have to log it, pause current partition
         # and process other things
         Karafka.monitor.notice_error(self.class, e.cause)
         pause(e.topic, e.partition)
@@ -45,7 +45,7 @@ module Karafka
         @kafka_consumer = nil
       end
 
-      # Pauses processing of a given topic partition
+      # Pauses fetching and consumption of a given topic partition
       # @param topic [String] topic that we want to pause
       # @param partition [Integer] number partition that we want to pause
       def pause(topic, partition)
@@ -55,11 +55,11 @@ module Karafka
         kafka_consumer.pause(topic, partition, settings)
       end
 
-      # Marks a given message as processed and commit the offsets
+      # Marks a given message as consumed and commit the offsets
       # @note In opposite to ruby-kafka, we commit the offset for each manual marking to be sure
       #   that offset commit happen asap in case of a crash
       # @param [Karafka::Params::Params] params message that we want to mark as processed
-      def mark_as_processed(params)
+      def mark_as_consumed(params)
         kafka_consumer.mark_message_as_processed(params)
         # Trigger an immediate, blocking offset commit in order to minimize the risk of crashing
         # before the automatic triggers have kicked in.

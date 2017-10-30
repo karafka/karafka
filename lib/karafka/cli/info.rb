@@ -16,7 +16,7 @@ module Karafka
           "Application client id: #{config.client_id}",
           "Backend: #{config.backend}",
           "Batch fetching: #{config.batch_fetching}",
-          "Batch processing: #{config.batch_processing}",
+          "Batch consuming: #{config.batch_consuming}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
           "Kafka seed brokers: #{config.kafka.seed_brokers}"

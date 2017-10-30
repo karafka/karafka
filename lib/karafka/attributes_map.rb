@@ -37,7 +37,7 @@ module Karafka
           name
           parser
           responder
-          batch_processing
+          batch_consuming
           persistent
         ]).uniq
       end

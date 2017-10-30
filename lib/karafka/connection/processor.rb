@@ -27,7 +27,7 @@ module Karafka
           # Depending on a case (persisted or not) we might use new controller instance per each
           # batch, or use the same instance for all of them (for implementing buffering, etc)
           send(
-            topic.batch_processing ? :process_batch : :process_each,
+            topic.batch_consuming ? :process_batch : :process_each,
             controller,
             kafka_messages
           )

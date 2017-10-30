@@ -23,7 +23,7 @@ RSpec.describe Karafka::AttributesMap do
         backend
         parser
         responder
-        batch_processing
+        batch_consuming
       ]
     end
 

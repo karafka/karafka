@@ -59,7 +59,7 @@ RSpec.describe Karafka::BaseController do
         Karafka::Routing::Topic,
         parser: topic_parser,
         backend: :inline,
-        batch_processing: false,
+        batch_consuming: false,
         responder: false
       )
     end

@@ -11,7 +11,7 @@ module Karafka
       required(:parser).filled
       required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
       required(:start_from_beginning).filled(:bool?)
-      required(:batch_processing).filled(:bool?)
+      required(:batch_consuming).filled(:bool?)
       required(:persistent).filled(:bool?)
     end
   end

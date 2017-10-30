@@ -21,6 +21,7 @@
 - #236 - Manual offset management
 - WaterDrop 1.0.0 support with async
 - Renamed ```batch_fetching``` option to ```batch_fetching``` as it is not a consumption (with processing) but a process of fetching messages from Kafka. The messages is considered consumed, when it is processed.
+- Renamed ```batch_processing``` to ```batch_consuming``` to resemble Kafka concept of consuming messages.
 
 ## 1.0.1
 - #210 - LoadError: cannot load such file -- [...]/karafka.rb
@@ -82,11 +83,11 @@
 
 ### New features and improvements
 
-- batch processing thanks to ```#batch_processing``` flag and ```#params_batch``` on controllers
+- batch processing thanks to ```#batch_consuming``` flag and ```#params_batch``` on controllers
 - ```#topic``` method on an controller instance to make a clear distinction in between params and route details
 - Changed routing model (still compatible with 0.5) to allow better resources management
 - Lower memory requirements due to object creation limitation (2-3 times less objects on each new message)
-- Introduced the ```#batch_processing``` config flag (config for #126) that can be set per each consumer_group
+- Introduced the ```#batch_consuming``` config flag (config for #126) that can be set per each consumer_group
 - Added support for partition, offset and partition key in the params hash
 - ```name``` option in config renamed to ```client_id```
 - Long running controllers with ```persistent``` flag on a topic config level, to make controller instances persistent between messages batches (single controller instance per topic per partition no per messages batch) - turned on by default
