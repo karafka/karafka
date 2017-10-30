@@ -20,6 +20,7 @@
 - Due to redesign of Waterdrop concurrency setting is no longer needed
 - #236 - Manual offset management
 - WaterDrop 1.0.0 support with async
+- Renamed ```batch_fetching``` option to ```batch_fetching``` as it is not a consumption (with processing) but a process of fetching messages from Kafka. The messages is considered consumed, when it is processed.
 
 ## 1.0.1
 - #210 - LoadError: cannot load such file -- [...]/karafka.rb
@@ -98,7 +99,7 @@
 - ```start_from_beginning``` moved into kafka scope (```kafka.start_from_beginning```)
 - Router no longer checks for route uniqueness - now you can define same routes for multiple kafkas and do a lot of crazy stuff, so it's your responsibility to check uniqueness
 - Change in the way we identify topics in between Karafka and Sidekiq workers. If you upgrade, please make sure, all the jobs scheduled in Sidekiq are finished before the upgrade.
-- ```batch_mode``` renamed to ```batch_consuming```
+- ```batch_mode``` renamed to ```batch_fetching```
 - Renamed content to value to better resemble ruby-kafka internal messages naming convention
 - When having a responder with ```required``` topics and not using ```#respond_with``` at all, it will raise an exception
 - Renamed ```inline_mode``` to ```inline_processing``` to resemble other settings conventions

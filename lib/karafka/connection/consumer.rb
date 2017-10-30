@@ -20,7 +20,7 @@ module Karafka
       # @note This will yield with raw messages - no preprocessing or reformatting.
       def fetch_loop
         send(
-          consumer_group.batch_consuming ? :consume_each_batch : :consume_each_message
+          consumer_group.batch_fetching ? :consume_each_batch : :consume_each_message
         ) { |messages| yield(messages) }
       rescue Kafka::ProcessingError => e
         # If there was an error during processing, we have to log it, pause current partition

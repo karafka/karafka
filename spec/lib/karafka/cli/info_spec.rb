@@ -13,7 +13,7 @@ RSpec.describe Karafka::Cli::Info do
         "Karafka framework version: #{Karafka::VERSION}",
         "Application client id: #{Karafka::App.config.client_id}",
         "Backend: #{Karafka::App.config.backend}",
-        "Batch consuming: #{Karafka::App.config.batch_consuming}",
+        "Batch fetching: #{Karafka::App.config.batch_fetching}",
         "Batch processing: #{Karafka::App.config.batch_processing}",
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
