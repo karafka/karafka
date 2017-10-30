@@ -34,9 +34,9 @@ module Karafka
     end
 
     # Executes the default controller flow, runs callbacks and if not halted
-    # will call process method of a proper backend
+    # will call perform method of a proper backend
     def call
-      process
+      respond_to?(:consume) ? consume : perform
     end
 
     private

@@ -41,8 +41,8 @@ RSpec.describe Karafka::BaseController do
   end
 
   describe '#call' do
-    it 'just processes' do
-      expect(base_controller).to receive(:process)
+    it 'just consumes' do
+      expect(base_controller).to receive(:consume)
 
       base_controller.call
     end
