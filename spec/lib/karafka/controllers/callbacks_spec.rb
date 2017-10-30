@@ -37,7 +37,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
     it { expect { base_controller.send(:consume) }.to raise_error NotImplementedError }
   end
 
-  context 'after_received' do
+  context 'after_fetched' do
     describe '#call' do
       context 'when there are no callbacks' do
         it 'just schedules' do
@@ -48,7 +48,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
       end
     end
 
-    context 'when we have a block based after_received' do
+    context 'when we have a block based after_fetched' do
       let(:backend) { :inline }
 
       context 'and it throws abort to halt' do
@@ -59,7 +59,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
             include Karafka::Backends::Inline
             include described_scope
 
-            after_received do
+            after_fetched do
               throw(:abort)
             end
 
@@ -84,7 +84,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
             include Karafka::Backends::Inline
             include described_scope
 
-            after_received do
+            after_fetched do
               true
             end
 
@@ -103,7 +103,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
       end
     end
 
-    context 'when we have a method based after_received' do
+    context 'when we have a method based after_fetched' do
       let(:backend) { :inline }
 
       context 'and it throws abort to halt' do
@@ -113,7 +113,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
           ClassBuilder.inherit(Karafka::BaseController) do
             include described_scope
 
-            after_received :method
+            after_fetched :method
 
             def consume
               self
@@ -140,7 +140,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
             include Karafka::Backends::Inline
             include described_scope
 
-            after_received :method
+            after_fetched :method
 
             def consume
               self
