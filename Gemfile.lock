@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/karafka/waterdrop.git
-  revision: df86211fdff0665d7267762aeb061609d9802a26
+  revision: c8ffe346d27d4ac96f9900d7fa08c191e3f96c91
   branch: switch
   specs:
     waterdrop (1.0.0.alpha1)
@@ -20,7 +20,7 @@ PATH
       multi_json (>= 1.12)
       rake (>= 11.3)
       require_all (>= 1.4)
-      ruby-kafka (>= 0.5.beta6)
+      ruby-kafka (>= 0.5)
       thor (~> 0.19)
       waterdrop (>= 1.0.beta1)
 
@@ -90,7 +90,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
     rspec-support (3.7.0)
-    ruby-kafka (0.5.0.beta6)
+    ruby-kafka (0.5.0)
     simplecov (0.15.1)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
