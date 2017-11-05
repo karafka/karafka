@@ -12,11 +12,24 @@ Karafka not only handles incoming messages but also provides tools for building 
 
 Karafka provides a higher-level abstraction that allows you to focus on your business logic development, instead of focusing on implementing lower level abstraction layers. It provides developers with a set of tools that are dedicated for building multi-topic applications similarly to how Rails applications are being built.
 
+### Some things you might wonder about:
+
+- You can integrate Karafka with any Ruby based application.
+- Karafka does **not** require Sidekiq or any other third party software (apart from Kafka itself).
+- Karafka works with Ruby on Rails but it is a standalone framework that can work without it.
+- Karafka has a minimal set of dependencies, so adding it won't be a huge burden for your already existing applications.
+
 Karafka based applications can be easily deployed to any type of infrastructure, including those based on:
 
 * Heroku
 * Capistrano
 * Docker
+
+## Support
+
+Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
+
+If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
 
 ## Getting started
 
@@ -38,20 +51,6 @@ and follow the instructions from the [example app Wiki](https://github.com/karaf
 **Note**: you need to ensure, that you have Kafka up and running and you need to configure Kafka seed_brokers in the ```karafka.rb``` file.
 
 If you need more details and know how on how to start Karafka with a clean installation, read the [Getting started page](https://github.com/karafka/karafka/wiki/Getting-started) section of our Wiki.
-
-## Support
-
-Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything. It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
-
-If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
-
-Karafka dev team also provides commercial support in following matters:
-
-- Additional programming services for integrating existing Ruby apps with Kafka and Karafka
-- Expertise and guidance on using Karafka within new and existing projects
-- Trainings on how to design and develop systems based on Apache Kafka and Karafka framework
-
-If you are interested in our commercial services, please contact [Maciej Mensfeld (maciej@coditsu.io)](mailto:maciej@coditsu.io) directly.
 
 ## Notice
 
