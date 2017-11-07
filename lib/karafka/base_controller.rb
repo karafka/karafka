@@ -33,8 +33,7 @@ module Karafka
       @params_batch = Karafka::Params::ParamsBatch.new(messages, topic.parser)
     end
 
-    # Executes the default controller flow, runs callbacks and if not halted
-    # will call perform method of a proper backend
+    # Executes the default controller flow.
     def call
       process
     end

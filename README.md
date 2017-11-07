@@ -78,7 +78,7 @@ Unfortunately, it does not yet support independent forks, however you should be 
 Please run:
 
 ```bash
-bundle exec rspec spec
+bundle exec rspec
 ```
 
 to check if everything is in order. After that you can submit a pull request.
