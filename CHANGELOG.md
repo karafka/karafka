@@ -14,7 +14,7 @@
 - Fixed accessibility of ```#params_batch``` from the outside of the controller
 - connection_pool config options are no longer required
 - celluloid config options are no longer required
-- ```#perform``` is not renamed to ```#consume``` with warning level on using the old one (deprecated)
+- ```#perform``` is now renamed to ```#consume``` with warning level on using the old one (deprecated)
 - #235 - Rename perform to consume
 - Upgrade to ruby-kafka 0.5
 - Due to redesign of Waterdrop concurrency setting is no longer needed
