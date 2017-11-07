@@ -20,7 +20,7 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
   # We don't cover batch mode and topic mapper here as they don't come from kafka namespace of
   # configs but from the main namespace
   (
-    Karafka::AttributesMap.consumer_group - %i[batch_consuming]
+    Karafka::AttributesMap.consumer_group - %i[batch_fetching]
   ).each do |attribute|
     context attribute.to_s do
       it 'by default expect to fallback to a kafka config value' do
@@ -30,7 +30,7 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
     end
   end
 
-  %i[batch_consuming].each do |attribute|
+  %i[batch_fetching].each do |attribute|
     context attribute.to_s do
       it 'by default expect to fallback to a main config value' do
         expected_config_value = Karafka::App.config.public_send(attribute)

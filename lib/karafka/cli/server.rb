@@ -20,21 +20,19 @@ module Karafka
 
         if cli.options[:daemon]
           FileUtils.mkdir_p File.dirname(cli.options[:pid])
-          # For some reason Celluloid spins threads that break forking
-          # Threads are not shutdown immediately so deamonization will stale until
-          # those threads are killed by Celluloid manager (via timeout)
-          # There's nothing initialized here yet, so instead we shutdown celluloid
-          # and run it again when we need (after fork)
-          Celluloid.shutdown
           daemonize
-          Celluloid.boot
         end
 
         # We assign active topics on a server level, as only server is expected to listen on
         # part of the topics
         Karafka::Server.consumer_groups = cli.options[:consumer_groups]
 
-        # Remove pidfile on shutdown, just before the server instance is going to be GCed
+        # Remove pidfile on stop, just before the server instance is going to be GCed
+        # We want to delay the moment in which the pidfile is removed as much as we can,
+        # so instead of removing it after the server stops running, we rely on the gc moment
+        # when this object gets removed (it is a bit later), so it is closer to the actual
+        # system process end. We do that, so monitoring and deployment tools that rely on pids
+        # won't alarm or start new system process up until the current one is finished
         ObjectSpace.define_finalizer(self, proc { send(:clean) })
 
         # After we fork, we can boot celluloid again

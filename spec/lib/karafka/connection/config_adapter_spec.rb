@@ -67,8 +67,14 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
 
     let(:expected_keys) { attributes_map_values[:consuming].sort }
 
-    it 'expect not to have anything else than consuming specific options' do
-      expect(config.keys.sort).to eq expected_keys
+    it 'expect to have consuming specific options and remap of automatically_mark_as_processed' do
+      expect(config.keys.sort).to eq([:automatically_mark_as_processed] + expected_keys)
+    end
+
+    it 'expect to get automatic marking from consume to processed' do
+      remap_value = rand
+      consumer_group.automatically_mark_as_consumed = remap_value
+      expect(config[:automatically_mark_as_processed]).to eq remap_value
     end
 
     context 'when consuming group has some non default options' do

@@ -51,7 +51,10 @@ module Karafka
         # @return [Hash] hash with all the settings required by
         #   Kafka::Consumer#consume_each_message and Kafka::Consumer#consume_each_batch method
         def consuming(consumer_group)
-          sanitize(fetch_for(:consuming, consumer_group))
+          settings = {
+            automatically_mark_as_processed: consumer_group.automatically_mark_as_consumed
+          }
+          sanitize(fetch_for(:consuming, consumer_group, settings))
         end
 
         # Builds all the configuration settings for kafka consumer#subscribe method

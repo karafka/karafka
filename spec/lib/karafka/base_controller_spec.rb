@@ -19,7 +19,7 @@ RSpec.describe Karafka::BaseController do
       include Karafka::Backends::Inline
       include Karafka::Controllers::Responders
 
-      def perform
+      def consume
         self
       end
     end
@@ -27,19 +27,17 @@ RSpec.describe Karafka::BaseController do
 
   before { working_class.topic = topic }
 
-  describe '#perform' do
+  describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(described_class) }
 
-    it { expect { base_controller.send(:perform) }.to raise_error NotImplementedError }
+    it { expect { base_controller.send(:consume) }.to raise_error NotImplementedError }
   end
 
   describe '#call' do
-    context 'when there are no callbacks' do
-      it 'just schedules' do
-        expect(base_controller).to receive(:process)
+    it 'just consumes' do
+      expect(base_controller).to receive(:consume)
 
-        base_controller.call
-      end
+      base_controller.call
     end
   end
 
@@ -54,7 +52,7 @@ RSpec.describe Karafka::BaseController do
         Karafka::Routing::Topic,
         parser: topic_parser,
         backend: :inline,
-        batch_processing: false,
+        batch_consuming: false,
         responder: false
       )
     end
@@ -62,7 +60,7 @@ RSpec.describe Karafka::BaseController do
     it 'expect to build params batch using messages and parser' do
       expect(Karafka::Params::ParamsBatch).to receive(:new).with(*p_args).and_return(params_batch)
       base_controller.params_batch = messages
-      expect(base_controller.params_batch).to eq params_batch
+      expect(base_controller.send(:params_batch)).to eq params_batch
     end
   end
 
@@ -71,7 +69,7 @@ RSpec.describe Karafka::BaseController do
 
     before { base_controller.instance_variable_set(:@params_batch, params_batch) }
 
-    it { expect(base_controller.params_batch).to eq params_batch }
+    it { expect(base_controller.send(:params_batch)).to eq params_batch }
   end
 
   describe '#respond_with' do
@@ -86,100 +84,13 @@ RSpec.describe Karafka::BaseController do
     end
   end
 
-  context 'when we have a block based after_received' do
-    let(:backend) { :inline }
+  describe '#consumer' do
+    let(:consumer) { instance_double(Karafka::Connection::Consumer) }
 
-    context 'and it throws abort to halt' do
-      subject(:base_controller) do
-        ClassBuilder.inherit(described_class) do
-          after_received do
-            throw(:abort)
-          end
+    before { Karafka::Persistence::Consumer.write(consumer) }
 
-          def perform
-            self
-          end
-        end.new
-      end
-
-      it 'does not perform' do
-        expect(base_controller).not_to receive(:perform)
-
-        base_controller.call
-      end
-    end
-
-    context 'and it does not throw abort to halt' do
-      subject(:base_controller) do
-        ClassBuilder.inherit(described_class) do
-          include Karafka::Backends::Inline
-
-          after_received do
-            true
-          end
-
-          def perform
-            self
-          end
-        end.new
-      end
-
-      let(:params) { double }
-
-      it 'executes' do
-        expect(base_controller).to receive(:process)
-        base_controller.call
-      end
-    end
-  end
-
-  context 'when we have a method based after_received' do
-    let(:backend) { :inline }
-
-    context 'and it throws abort to halt' do
-      subject(:base_controller) do
-        ClassBuilder.inherit(described_class) do
-          after_received :method
-
-          def perform
-            self
-          end
-
-          def method
-            throw(:abort)
-          end
-        end.new
-      end
-
-      it 'does not perform' do
-        expect(base_controller).not_to receive(:perform)
-
-        base_controller.call
-      end
-    end
-
-    context 'and it does not return false' do
-      subject(:base_controller) do
-        ClassBuilder.inherit(described_class) do
-          include Karafka::Backends::Inline
-
-          after_received :method
-
-          def perform
-            self
-          end
-
-          def method
-            true
-          end
-        end.new
-      end
-
-      it 'schedules to a backend' do
-        expect(base_controller).to receive(:process)
-
-        base_controller.call
-      end
+    it 'expect to return current persisted consumer' do
+      expect(base_controller.send(:consumer)).to eq consumer
     end
   end
 end

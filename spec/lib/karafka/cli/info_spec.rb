@@ -13,9 +13,8 @@ RSpec.describe Karafka::Cli::Info do
         "Karafka framework version: #{Karafka::VERSION}",
         "Application client id: #{Karafka::App.config.client_id}",
         "Backend: #{Karafka::App.config.backend}",
+        "Batch fetching: #{Karafka::App.config.batch_fetching}",
         "Batch consuming: #{Karafka::App.config.batch_consuming}",
-        "Batch processing: #{Karafka::App.config.batch_processing}",
-        "Number of threads: #{Karafka::App.config.concurrency}",
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
         "Kafka seed brokers: #{Karafka::App.config.kafka.seed_brokers}"
@@ -23,11 +22,7 @@ RSpec.describe Karafka::Cli::Info do
     end
 
     it 'expect to print details of this Karafka app instance' do
-      expect(info_cli)
-        .to receive(:puts)
-        .with(info.join("\n"))
-
-      info_cli.call
+      expect { info_cli.call }.to output(info.join("\n") + "\n").to_stdout
     end
   end
 end

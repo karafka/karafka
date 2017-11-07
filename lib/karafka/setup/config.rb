@@ -34,42 +34,19 @@ module Karafka
       #   - #incoming - for remapping from the incoming message to our internal format
       #   - #outgoing - for remapping from internal topic name into outgoing message
       setting :topic_mapper, -> { Routing::TopicMapper }
-      # If batch_consuming is true, we will consume kafka messages in batches instead of 1 by 1
-      # @note Consuming does not equal processing, see batch_processing description for details
-      setting :batch_consuming, true
-      # If batch_processing is true, we will have access to #params_batch instead of #params.
+      # If batch_fetching is true, we will fetch kafka messages in batches instead of 1 by 1
+      # @note Fetching does not equal consuming, see batch_consuming description for details
+      setting :batch_fetching, true
+      # If batch_consuming is true, we will have access to #params_batch instead of #params.
       # #params_batch will contain params received from Kafka (may be more than 1) so we can
       # process them in batches
-      setting :batch_processing, false
+      setting :batch_consuming, false
       # Should we operate in a single controller instance across multiple batches of messages,
       # from the same partition or should we build a new instance for each incoming batch.
       # Disabling that can be useful when you want to build a new controller instance for each
       # incoming batch. It's disabled by default, not to create more objects that needed on
       # each batch
       setting :persistent, true
-      # This is configured automatically, don't overwrite it!
-      # Each consumer group requires separate thread, so number of threads should be equal to
-      # number of consumer groups
-      setting :concurrency, -> { ::Karafka::App.consumer_groups.count }
-
-      # option celluloid [Hash] - optional - celluloid configuration options
-      setting :celluloid do
-        # options shutdown_timeout [Integer] How many seconds should we wait for actors (listeners)
-        # before forcefully shutting them
-        setting :shutdown_timeout, 30
-      end
-
-      # Connection pool options are used for producer (Waterdrop) - by default it will adapt to
-      # number of active actors
-      setting :connection_pool do
-        # Connection pool size for producers. If you use sidekiq or any other multi threaded
-        # backend, you might want to tune it to match number of threads of your background
-        # processing engine
-        setting :size, -> { ::Karafka::App.consumer_groups.active.count }
-        # How long should we wait for a working resource from the pool before rising timeout
-        # With a proper connection pool size, this should never happen
-        setting :timeout, 5
-      end
 
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
@@ -78,17 +55,17 @@ module Karafka
         # option session_timeout [Integer] the number of seconds after which, if a client
         #   hasn't contacted the Kafka cluster, it will be kicked out of the group.
         setting :session_timeout, 30
-        # Time that a given partition will be paused from processing messages, when message
-        # processing fails. It allows us to process other partitions, while the error is being
+        # Time that a given partition will be paused from fetching messages, when message
+        # consumption fails. It allows us to process other partitions, while the error is being
         # resolved and also "slows" things down, so it prevents from "eating" up all messages and
-        # processing them with failed code
+        # consuming them with failed code
         setting :pause_timeout, 10
         # option offset_commit_interval [Integer] the interval between offset commits,
         #   in seconds.
         setting :offset_commit_interval, 10
         # option offset_commit_threshold [Integer] the number of messages that can be
         #   processed before their offsets are committed. If zero, offset commits are
-        #   not triggered by message processing.
+        #   not triggered by message consumption.
         setting :offset_commit_threshold, 0
         # option heartbeat_interval [Integer] the interval between heartbeats; must be less
         #   than the session window.
@@ -104,12 +81,15 @@ module Karafka
         setting :min_bytes, 1
         # option max_wait_time [Integer, Float] max_wait_time is the maximum number of seconds to
         #   wait before returning data from a single message fetch. By setting this high you also
-        #   increase the processing throughput – and by setting it low you set a bound on latency.
+        #   increase the fetching throughput - and by setting it low you set a bound on latency.
         #   This configuration overrides `min_bytes`, so you'll _always_ get data back within the
         #   time specified. The default value is one second. If you want to have at most five
         #   seconds of latency, set `max_wait_time` to 5. You should make sure
         #   max_wait_time * num brokers + heartbeat_interval is less than session_timeout.
         setting :max_wait_time, 1
+        # option automatically_mark_as_consumed [Boolean] should we automatically mark received
+        # messages as consumed (processed) after non-error consumption
+        setting :automatically_mark_as_consumed, true
         # option reconnect_timeout [Integer] How long should we wait before trying to reconnect to
         # Kafka cluster that went down (in seconds)
         setting :reconnect_timeout, 5
@@ -124,7 +104,8 @@ module Karafka
         # writing to a socket connection to a broker. After this timeout expires the connection
         # will be killed. Note that some Kafka operations are by definition long-running, such as
         # waiting for new messages to arrive in a partition, so don't set this value too low
-        setting :socket_timeout, 10
+        setting :socket_timeout, 30
+
         # SSL authentication related settings
         # option ca_cert [String] SSL CA certificate
         setting :ssl_ca_cert, nil

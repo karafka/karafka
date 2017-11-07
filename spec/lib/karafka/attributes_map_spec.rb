@@ -23,7 +23,7 @@ RSpec.describe Karafka::AttributesMap do
         backend
         parser
         responder
-        batch_processing
+        batch_consuming
       ]
     end
 
@@ -41,7 +41,7 @@ RSpec.describe Karafka::AttributesMap do
     end
 
     it 'expect to include karafka specific settings' do
-      expect(map.consumer_group).to include(:batch_consuming)
+      expect(map.consumer_group).to include(:batch_fetching)
     end
   end
 end

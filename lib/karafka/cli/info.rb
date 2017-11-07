@@ -15,9 +15,8 @@ module Karafka
           "Karafka framework version: #{Karafka::VERSION}",
           "Application client id: #{config.client_id}",
           "Backend: #{config.backend}",
+          "Batch fetching: #{config.batch_fetching}",
           "Batch consuming: #{config.batch_consuming}",
-          "Batch processing: #{config.batch_processing}",
-          "Number of threads: #{config.concurrency}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
           "Kafka seed brokers: #{config.kafka.seed_brokers}"

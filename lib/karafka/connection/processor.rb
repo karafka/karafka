@@ -3,14 +3,14 @@
 module Karafka
   module Connection
     # Class that consumes messages for which we listen
-    module MessagesProcessor
+    module Processor
       class << self
         # Processes messages (does something with them)
         # It will either schedule or run a proper controller action for messages
         # @note This should be looped to obtain a constant listening
         # @note We catch all the errors here, to make sure that none failures
         #   for a given consumption will affect other consumed messages
-        #   If we wouldn't catch it, it would propagate up until killing the Celluloid actor
+        #   If we wouldn't catch it, it would propagate up until killing the thread
         # @param group_id [String] group_id of a group from which a given message came
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages fetched from kafka
         def process(group_id, kafka_messages)
@@ -27,7 +27,7 @@ module Karafka
           # Depending on a case (persisted or not) we might use new controller instance per each
           # batch, or use the same instance for all of them (for implementing buffering, etc)
           send(
-            topic.batch_processing ? :process_batch : :process_each,
+            topic.batch_consuming ? :process_batch : :process_each,
             controller,
             kafka_messages
           )

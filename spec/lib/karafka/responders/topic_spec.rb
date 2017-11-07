@@ -24,6 +24,24 @@ RSpec.describe Karafka::Responders::Topic do
     end
   end
 
+  describe '#async?' do
+    context 'when async is off' do
+      let(:options) { { async: false } }
+
+      it { expect(topic.async?).to eq false }
+    end
+
+    context 'when async has no options (default)' do
+      it { expect(topic.async?).to eq false }
+    end
+
+    context 'when async is on' do
+      let(:options) { { async: true } }
+
+      it { expect(topic.async?).to eq true }
+    end
+  end
+
   describe '#required?' do
     context 'when topic is for multiple usage' do
       let(:options) { { multiple_usage: true } }

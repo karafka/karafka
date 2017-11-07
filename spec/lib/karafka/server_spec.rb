@@ -29,7 +29,6 @@ RSpec.describe Karafka::Server do
         expect(Karafka::Process.instance).to receive(:on_sigquit)
         expect(Karafka::Process.instance).to receive(:on_sigterm)
         expect(Karafka::App).to receive(:stop!)
-        expect(Kernel).to receive(:exit)
       end
 
       it 'defines a proper action for sigint' do
@@ -43,7 +42,6 @@ RSpec.describe Karafka::Server do
         expect(Karafka::Process.instance).to receive(:on_sigint)
         expect(Karafka::Process.instance).to receive(:on_sigterm)
         expect(Karafka::App).to receive(:stop!)
-        expect(Kernel).to receive(:exit)
       end
 
       it 'defines a proper action for sigquit' do
@@ -57,7 +55,6 @@ RSpec.describe Karafka::Server do
         expect(Karafka::Process.instance).to receive(:on_sigint)
         expect(Karafka::Process.instance).to receive(:on_sigquit)
         expect(Karafka::App).to receive(:stop!)
-        expect(Kernel).to receive(:exit)
       end
 
       it 'defines a proper action for sigterm' do

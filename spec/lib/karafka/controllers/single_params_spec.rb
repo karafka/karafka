@@ -10,7 +10,7 @@ RSpec.describe Karafka::Controllers::SingleParams do
       Karafka::Routing::Topic,
       id: rand.to_s,
       backend: :inline,
-      batch_processing: true,
+      batch_consuming: true,
       responder: nil,
       parser: Karafka::Parsers::Json
     )
@@ -23,6 +23,6 @@ RSpec.describe Karafka::Controllers::SingleParams do
   end
 
   it 'expect to provide #params' do
-    expect(controller.send(:params)).to eq controller.params_batch.first
+    expect(controller.send(:params)).to eq controller.send(:params_batch).first
   end
 end

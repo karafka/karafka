@@ -29,7 +29,7 @@ RSpec.describe Karafka::Setup::Config do
     end
   end
 
-  describe '#validate' do
+  describe '#validate!' do
     context 'when configuration has errors' do
       let(:error_class) { ::Karafka::Errors::InvalidConfiguration }
       let(:error_message) { { client_id: ['must be filled'] }.to_s }

@@ -4,7 +4,7 @@ module Karafka
   module Params
     # Params batch represents a set of messages received from Kafka.
     # @note Params internally are lazy loaded before first use. That way we can skip parsing
-    #   process if we have after_received that rejects some incoming messages without using params
+    #   process if we have after_fetched that rejects some incoming messages without using params
     #   It can be also used when handling really heavy data (in terms of parsing).
     class ParamsBatch
       include Enumerable

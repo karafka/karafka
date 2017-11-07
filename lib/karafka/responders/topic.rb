@@ -36,13 +36,20 @@ module Karafka
         @options[:registered] == true
       end
 
+      # @return [Boolean] do we want to use async producer. Defaults to false as the sync producer
+      #   is safer and introduces less problems
+      def async?
+        @options.key?(:async) ? @options[:async] : false
+      end
+
       # @return [Hash] hash with this topic attributes and options
       def to_h
         {
           name: name,
           multiple_usage: multiple_usage?,
           required: required?,
-          registered: registered?
+          registered: registered?,
+          async: async?
         }
       end
     end

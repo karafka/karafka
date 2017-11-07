@@ -13,7 +13,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         parser: Class.new,
         max_bytes_per_partition: 1,
         start_from_beginning: true,
-        batch_processing: true,
+        batch_consuming: true,
         persistent: false
       }
     ]
@@ -37,8 +37,9 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       socket_timeout: 10,
       pause_timeout: 10,
       max_wait_time: 10,
-      batch_consuming: true,
-      topics: topics
+      batch_fetching: true,
+      topics: topics,
+      min_bytes: 1
     }
   end
 
@@ -222,14 +223,36 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
-  context 'batch_consuming validator' do
-    it 'batch_consuming is nil' do
-      config[:batch_consuming] = nil
+  context 'min_bytes validator' do
+    it 'min_bytes is nil' do
+      config[:min_bytes] = nil
       expect(schema.call(config)).not_to be_success
     end
 
-    it 'batch_consuming is not a bool' do
-      config[:batch_consuming] = 2
+    it 'min_bytes is not integer' do
+      config[:min_bytes] = 's'
+      expect(schema.call(config)).not_to be_success
+    end
+
+    it 'min_bytes is less than 1' do
+      config[:min_bytes] = 0
+      expect(schema.call(config)).not_to be_success
+    end
+
+    it 'min_bytes is a float' do
+      config[:min_bytes] = rand(100) + 0.1
+      expect(schema.call(config)).not_to be_success
+    end
+  end
+
+  context 'batch_fetching validator' do
+    it 'batch_fetching is nil' do
+      config[:batch_fetching] = nil
+      expect(schema.call(config)).not_to be_success
+    end
+
+    it 'batch_fetching is not a bool' do
+      config[:batch_fetching] = 2
       expect(schema.call(config)).not_to be_success
     end
   end

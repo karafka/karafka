@@ -26,7 +26,7 @@ module Karafka
           # All the options that are under kafka config namespace, but are not used
           # directly with kafka api, but from the Karafka user perspective, they are
           # still related to kafka. They should not be proxied anywhere
-          ignored: %i[reconnect_timeout]
+          ignored: %i[reconnect_timeout automatically_mark_as_consumed]
         }
       end
 
@@ -37,7 +37,7 @@ module Karafka
           name
           parser
           responder
-          batch_processing
+          batch_consuming
           persistent
         ]).uniq
       end
@@ -52,7 +52,7 @@ module Karafka
         #   only when proxying details go ruby-kafka. We use ignored fields internally in karafka
         ignored_settings = config_adapter[:subscription]
         defined_settings = config_adapter.values.flatten
-        karafka_settings = %i[batch_consuming]
+        karafka_settings = %i[batch_fetching]
         # This is a drity and bad hack of dry-configurable to get keys before setting values
         dynamically_proxied = Karafka::Setup::Config
                               ._settings

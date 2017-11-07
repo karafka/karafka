@@ -18,7 +18,7 @@ class KarafkaApp < Karafka::App
     config.kafka.seed_brokers = %w( 127.0.0.1:9092 )
     config.client_id = 'example_app'
     config.backend = :inline
-    config.batch_consuming = true
+    config.batch_fetching = true
   end
 
   consumer_groups.draw do

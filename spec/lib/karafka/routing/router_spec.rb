@@ -10,7 +10,7 @@ RSpec.describe Karafka::Routing::Router do
       topic :topic_name1 do
         controller Class.new(Karafka::BaseController)
         persistent false
-        batch_processing true
+        batch_consuming true
       end
     end
   end

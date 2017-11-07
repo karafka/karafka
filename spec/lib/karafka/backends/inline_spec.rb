@@ -8,7 +8,7 @@ RSpec.describe Karafka::Backends::Inline do
   before { controller_class.include(described_class) }
 
   it 'expect to call' do
-    expect(controller).to receive(:perform)
+    expect(controller).to receive(:consume)
     controller.call
   end
 end

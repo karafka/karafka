@@ -27,16 +27,17 @@ module Karafka
 
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
       required(:seed_brokers).filled { each(:broker_schema?) }
-      required(:session_timeout).filled(:int?)
-      required(:pause_timeout).filled(:int?, gteq?: 0)
-      required(:offset_commit_interval).filled(:int?)
+      required(:session_timeout).filled { int? | float? }
+      required(:pause_timeout).filled { (int? | float?) & gteq?(0) }
+      required(:offset_commit_interval) { int? | float? }
       required(:offset_commit_threshold).filled(:int?)
       required(:offset_retention_time) { none?.not > int? }
-      required(:heartbeat_interval).filled(:int?, gteq?: 0)
-      required(:connect_timeout).filled(:int?, gt?: 0)
-      required(:socket_timeout).filled(:int?, gt?: 0)
-      required(:max_wait_time).filled(:int?, gteq?: 0)
-      required(:batch_consuming).filled(:bool?)
+      required(:heartbeat_interval).filled { (int? | float?) & gteq?(0) }
+      required(:connect_timeout).filled { (int? | float?) & gt?(0) }
+      required(:socket_timeout).filled { (int? | float?) & gt?(0) }
+      required(:min_bytes).filled(:int?, gt?: 0)
+      required(:max_wait_time).filled { (int? | float?) & gteq?(0) }
+      required(:batch_fetching).filled(:bool?)
       required(:topics).filled { each { schema(ConsumerGroupTopic) } }
 
       # Max wait time cannot exceed socket_timeout - wouldn't make sense

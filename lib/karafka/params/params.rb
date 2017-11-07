@@ -14,6 +14,7 @@ module Karafka
         partition
         offset
         key
+        create_time
       ].freeze
 
       # Params attributes that should be available via a method call invocation for Kafka
@@ -26,6 +27,7 @@ module Karafka
         partition
         offset
         key
+        create_time
       ].freeze
 
       class << self
@@ -46,7 +48,7 @@ module Karafka
           if message.is_a?(Hash)
             new(parser: parser).send(:merge!, message)
           else
-            # This happens inside Kafka::FetchedMessagesProcessor
+            # This happens inside Kafka::FetchedProcessor
             new(
               parser: parser,
               parsed: false,

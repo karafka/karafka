@@ -15,17 +15,7 @@ module Karafka
       required(:client_id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
       required(:consumer_mapper)
       required(:topic_mapper)
-
-      required(:celluloid).schema do
-        required(:shutdown_timeout).filled(:int?, gteq?: 0)
-      end
-
       optional(:backend).filled
-
-      optional(:connection_pool).schema do
-        required(:size).filled
-        optional(:timeout).filled(:int?)
-      end
     end
   end
 end

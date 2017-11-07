@@ -8,20 +8,15 @@ RSpec.describe Karafka::Cli::Server do
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
-  after { Celluloid.boot }
-
   describe '#call' do
     context 'when we run in foreground (not daemonized)' do
       before do
-        expect(server_cli).to receive(:puts)
-          .with('Starting Karafka server')
-
         expect(cli).to receive(:info)
         expect(Karafka::Server).to receive(:run)
       end
 
       it 'expect to print info and expect to run Karafka application' do
-        server_cli.call
+        expect { server_cli.call }.to output("Starting Karafka server\n").to_stdout
       end
 
       it 'expect to validate!' do
@@ -41,9 +36,6 @@ RSpec.describe Karafka::Cli::Server do
       before do
         cli.options = { daemon: true, pid: 'tmp/pid' }
 
-        expect(server_cli).to receive(:puts)
-          .with('Starting Karafka server')
-
         expect(cli).to receive(:info)
 
         expect(FileUtils)
@@ -57,7 +49,7 @@ RSpec.describe Karafka::Cli::Server do
         expect(server_cli).to receive(:validate!)
         expect(server_cli).to receive(:daemonize)
 
-        server_cli.call
+        expect { server_cli.call }.to output("Starting Karafka server\n").to_stdout
       end
     end
   end

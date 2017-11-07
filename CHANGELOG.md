@@ -1,5 +1,29 @@
 # Karafka framework changelog
 
+## 1.1.0 Unreleased
+- Gem bump
+- Switch from Celluloid to native Thread management
+- Improved shutdown process
+- Introduced optional fetch callbacks and moved current the ```after_received``` there as well
+- Karafka will raise Errors::InvalidPauseTimeout exception when trying to pause but timeout set to 0
+- Allow float for timeouts and other time based second settings
+- Renamed MessagesProcessor to Processor and MessagesConsumer to Consumer - we don't process and don't consumer anything else so it was pointless to keep this "namespace"
+- #232 - Remove unused ActiveSupport require
+- #214 - Expose consumer on a controller layer
+- #193 - Process shutdown callbacks
+- Fixed accessibility of ```#params_batch``` from the outside of the controller
+- connection_pool config options are no longer required
+- celluloid config options are no longer required
+- ```#perform``` is not renamed to ```#consume``` with warning level on using the old one (deprecated)
+- #235 - Rename perform to consume
+- Upgrade to ruby-kafka 0.5
+- Due to redesign of Waterdrop concurrency setting is no longer needed
+- #236 - Manual offset management
+- WaterDrop 1.0.0 support with async
+- Renamed ```batch_consuming``` option to ```batch_fetching``` as it is not a consumption (with processing) but a process of fetching messages from Kafka. The messages is considered consumed, when it is processed.
+- Renamed ```batch_processing``` to ```batch_consuming``` to resemble Kafka concept of consuming messages.
+- Renamed ```after_received``` to ```after_fetched``` to normalize the naming conventions.
+
 ## 1.0.1
 - #210 - LoadError: cannot load such file -- [...]/karafka.rb
 - Ruby 2.4.2 as a default (+travis integration)
@@ -60,11 +84,11 @@
 
 ### New features and improvements
 
-- batch processing thanks to ```#batch_processing``` flag and ```#params_batch``` on controllers
+- batch processing thanks to ```#batch_consuming``` flag and ```#params_batch``` on controllers
 - ```#topic``` method on an controller instance to make a clear distinction in between params and route details
 - Changed routing model (still compatible with 0.5) to allow better resources management
 - Lower memory requirements due to object creation limitation (2-3 times less objects on each new message)
-- Introduced the ```#batch_processing``` config flag (config for #126) that can be set per each consumer_group
+- Introduced the ```#batch_consuming``` config flag (config for #126) that can be set per each consumer_group
 - Added support for partition, offset and partition key in the params hash
 - ```name``` option in config renamed to ```client_id```
 - Long running controllers with ```persistent``` flag on a topic config level, to make controller instances persistent between messages batches (single controller instance per topic per partition no per messages batch) - turned on by default
@@ -77,7 +101,7 @@
 - ```start_from_beginning``` moved into kafka scope (```kafka.start_from_beginning```)
 - Router no longer checks for route uniqueness - now you can define same routes for multiple kafkas and do a lot of crazy stuff, so it's your responsibility to check uniqueness
 - Change in the way we identify topics in between Karafka and Sidekiq workers. If you upgrade, please make sure, all the jobs scheduled in Sidekiq are finished before the upgrade.
-- ```batch_mode``` renamed to ```batch_consuming```
+- ```batch_mode``` renamed to ```batch_fetching```
 - Renamed content to value to better resemble ruby-kafka internal messages naming convention
 - When having a responder with ```required``` topics and not using ```#respond_with``` at all, it will raise an exception
 - Renamed ```inline_mode``` to ```inline_processing``` to resemble other settings conventions

@@ -119,35 +119,48 @@ RSpec.describe Karafka::BaseResponder do
         let(:messages_buffer) { {} }
 
         it 'expect to do nothing' do
-          expect(::WaterDrop::Message).not_to receive(:new)
+          expect(::WaterDrop::SyncProducer).not_to receive(:call)
           responder.send(:deliver!)
         end
       end
 
-      context 'when there are messages to be delivered' do
-        let(:messages_buffer) { { rand => [rand, rand] } }
+      context 'when there are messages to be delivered for sync producer' do
+        let(:messages_buffer) { { rand => [[rand, {}]] } }
+
+        after { responder.send(:deliver!) }
 
         it 'expect to deliver them using waterdrop' do
           messages_buffer.each do |topic, data_elements|
-            data_elements.each do |(data, options)|
-              kafka_message = instance_double(::WaterDrop::Message)
-
-              expect(::WaterDrop::Message)
-                .to receive(:new).with(topic, data, options)
-                                 .and_return(kafka_message)
-
-              expect(kafka_message).to receive(:send!)
+            data_elements.each do |data, options|
+              expect(::WaterDrop::SyncProducer)
+                .to receive(:call).with(data, options.merge(topic: topic))
             end
           end
+        end
+      end
 
-          responder.send(:deliver!)
+      context 'when there are messages to be delivered for async producer' do
+        let(:messages_buffer) { { rand => [[rand, { async: true }]] } }
+
+        after { responder.send(:deliver!) }
+
+        it 'expect to deliver them using waterdrop' do
+          messages_buffer.each do |topic, data_elements|
+            data_elements.each do |data, options|
+              expect(::WaterDrop::SyncProducer)
+                .not_to receive(:call)
+
+              expect(::WaterDrop::AsyncProducer)
+                .to receive(:call).with(data, options.merge(topic: topic))
+            end
+          end
         end
       end
 
       context 'custom mapper delivery' do
         let(:mapped_topic) { "prefix.#{topic}" }
         let(:topic) { rand.to_s }
-        let(:messages_buffer) { { topic => [rand, rand] } }
+        let(:messages_buffer) { { topic => [[rand, {}]] } }
         let(:custom_mapper) do
           ClassBuilder.build do
             def self.outgoing(topic)
@@ -162,20 +175,15 @@ RSpec.describe Karafka::BaseResponder do
             .and_return(custom_mapper)
         end
 
+        after { responder.send(:deliver!) }
+
         it 'expect to deliver them to mapped topic' do
           messages_buffer.each_value do |data_elements|
-            data_elements.each do |(data, options)|
-              kafka_message = instance_double(::WaterDrop::Message)
-
-              expect(::WaterDrop::Message)
-                .to receive(:new).with(mapped_topic, data, options)
-                                 .and_return(kafka_message)
-
-              expect(kafka_message).to receive(:send!)
+            data_elements.each do |data, options|
+              expect(::WaterDrop::SyncProducer)
+                .to receive(:call).with(data, options.merge(topic: mapped_topic))
             end
           end
-
-          responder.send(:deliver!)
         end
       end
     end
