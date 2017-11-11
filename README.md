@@ -66,9 +66,13 @@ Karafka framework and Karafka team are __not__ related to Kafka streaming servic
 
 First, thank you for considering contributing to Karafka! It's people like you that make the open source community such a great community!
 
-[![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/commit_builds)
+Each pull request must pass all the rspec specs and meet our quality requirements.
 
-Each pull request must pass all the rspec spec and our quality requirements. To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation. Once you're done with your changes, submit a pull request. Coditsu will automatically check your work against our quality standards. You can find your commit check results on the [builds page](https://app.coditsu.io/karafka/commit_builds) of Karafka organization.
+To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation. Once you're done with your changes, submit a pull request.
+
+Coditsu will automatically check your work against our quality standards. You can find your commit check results on the [builds page](https://app.coditsu.io/karafka/commit_builds) of Karafka organization.
+
+[![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/commit_builds)
 
 ## Contributors
 
