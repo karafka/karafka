@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 1.1.0 Unreleased
+## 1.1.0
 - Gem bump
 - Switch from Celluloid to native Thread management
 - Improved shutdown process
@@ -23,6 +23,7 @@
 - Renamed ```batch_consuming``` option to ```batch_fetching``` as it is not a consumption (with processing) but a process of fetching messages from Kafka. The messages is considered consumed, when it is processed.
 - Renamed ```batch_processing``` to ```batch_consuming``` to resemble Kafka concept of consuming messages.
 - Renamed ```after_received``` to ```after_fetched``` to normalize the naming conventions.
+- Responders support the per topic ```async``` option.
 
 ## 1.0.1
 - #210 - LoadError: cannot load such file -- [...]/karafka.rb
