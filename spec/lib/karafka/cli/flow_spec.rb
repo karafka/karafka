@@ -37,7 +37,7 @@ RSpec.describe Karafka::Cli::Flow do
         allow(Karafka::App).to receive(:consumer_groups).and_return(consumer_groups)
       end
 
-      context 'without outgoing topics' do
+      context 'when they are without outgoing topics' do
         let(:topics) { nil }
 
         it 'expect to print that the flow is terminated' do
@@ -46,7 +46,7 @@ RSpec.describe Karafka::Cli::Flow do
         end
       end
 
-      context 'with outgoing topics' do
+      context 'when they are with outgoing topics' do
         let(:topics) { { topic => Karafka::Responders::Topic.new(topic, {}) } }
 
         it 'expect to print flow details' do

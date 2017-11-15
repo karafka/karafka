@@ -11,7 +11,7 @@ RSpec.describe Karafka::BaseResponder do
     end
   end
 
-  context 'class' do
+  context 'when we want to use class methods' do
     subject(:responder_class) { working_class }
 
     describe '.topic' do
@@ -34,7 +34,7 @@ RSpec.describe Karafka::BaseResponder do
     end
   end
 
-  context 'instance' do
+  context 'when we want to use instance methods' do
     subject(:responder) { working_class.new(parser_class) }
 
     let(:parser_class) { Karafka::Parsers::Json }
@@ -48,7 +48,7 @@ RSpec.describe Karafka::BaseResponder do
     end
 
     describe '#call' do
-      context 'with errors' do
+      context 'when execution goes with errors' do
         let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
 
         it 'expect to respond and validate' do
@@ -57,7 +57,7 @@ RSpec.describe Karafka::BaseResponder do
         end
       end
 
-      context 'without errors' do
+      context 'when execution goes without errors' do
         let(:working_class) do
           name = topic_name
           ClassBuilder.inherit(described_class) do
@@ -157,7 +157,7 @@ RSpec.describe Karafka::BaseResponder do
         end
       end
 
-      context 'custom mapper delivery' do
+      context 'when we have custom mapper delivery' do
         let(:mapped_topic) { "prefix.#{topic}" }
         let(:topic) { rand.to_s }
         let(:messages_buffer) { { topic => [[rand, {}]] } }
