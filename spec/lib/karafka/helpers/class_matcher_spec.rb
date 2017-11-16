@@ -79,7 +79,7 @@ RSpec.describe Karafka::Helpers::ClassMatcher do
     end
 
     context 'when names match but not namespaces' do
-      context 'and matching does not exist' do
+      context 'when matching does not exist' do
         let(:klass) do
           module TestModule
             class SuperRandBase
@@ -100,7 +100,7 @@ RSpec.describe Karafka::Helpers::ClassMatcher do
         it { expect(matcher.match).to eq nil }
       end
 
-      context 'and matching does exist' do
+      context 'when matching does exist' do
         let(:klass) do
           module TestModule
             class SuperRandBase

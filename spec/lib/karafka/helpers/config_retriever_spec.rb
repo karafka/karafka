@@ -19,11 +19,11 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
       klass.new
     end
 
-    context 'default value' do
+    context 'when we use default value' do
       it { expect(extended_instance.session_timeout).to eq 10 }
     end
 
-    context 'overwriten value' do
+    context 'when we use overwriten value' do
       let(:new_value) { rand }
 
       before { extended_instance.session_timeout = new_value }
@@ -33,7 +33,7 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
   end
 
   context 'when a given attribute accessor is not defined' do
-    context 'kafka config' do
+    context 'when we want to use kafka config scope' do
       subject(:extended_instance) do
         described = described_class
 
@@ -46,7 +46,7 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
         klass.new
       end
 
-      context 'assignment' do
+      context 'when we assign value' do
         let(:new_value) { rand }
 
         before { extended_instance.session_timeout = new_value }
@@ -54,14 +54,14 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
         it { expect(extended_instance.session_timeout).to eq new_value }
       end
 
-      context 'default' do
+      context 'when we get default value' do
         let(:default_value) { Karafka::App.config.kafka.session_timeout }
 
         it { expect(extended_instance.session_timeout).to eq default_value }
       end
     end
 
-    context 'main config' do
+    context 'when we want to use main config scope' do
       subject(:extended_instance) do
         described = described_class
 
@@ -74,7 +74,7 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
         klass.new
       end
 
-      context 'assignment' do
+      context 'when we assign value' do
         let(:new_value) { rand }
 
         before { extended_instance.client_id = new_value }
@@ -82,7 +82,7 @@ RSpec.describe Karafka::Helpers::ConfigRetriever do
         it { expect(extended_instance.client_id).to eq new_value }
       end
 
-      context 'default' do
+      context 'when we use default value' do
         let(:default_value) { Karafka::App.config.client_id }
 
         it { expect(extended_instance.client_id).to eq default_value }

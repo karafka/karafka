@@ -37,7 +37,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
     it { expect { base_controller.send(:consume) }.to raise_error NotImplementedError }
   end
 
-  context 'after_fetched' do
+  context 'when we want to use after_fetched callback' do
     describe '#call' do
       context 'when there are no callbacks' do
         it 'just schedules' do
@@ -51,7 +51,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
     context 'when we have a block based after_fetched' do
       let(:backend) { :inline }
 
-      context 'and it throws abort to halt' do
+      context 'when it throws abort to halt' do
         subject(:base_controller) do
           described_scope = described_class
 
@@ -76,7 +76,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
         end
       end
 
-      context 'and it does not throw abort to halt' do
+      context 'when it does not throw abort to halt' do
         subject(:base_controller) do
           described_scope = described_class
 
@@ -132,7 +132,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
         end
       end
 
-      context 'and it does not return false' do
+      context 'when it does not return false' do
         subject(:base_controller) do
           described_scope = described_class
 
