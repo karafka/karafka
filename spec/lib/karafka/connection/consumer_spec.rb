@@ -94,7 +94,7 @@ RSpec.describe Karafka::Connection::Consumer do
     before { consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
     context 'when everything works smooth' do
-      context 'single message consumption mode' do
+      context 'with single message consumption mode' do
         let(:messages) { [incoming_message] }
 
         it 'expect to use kafka_consumer to get each message and yield as an array of messages' do
@@ -103,7 +103,7 @@ RSpec.describe Karafka::Connection::Consumer do
         end
       end
 
-      context 'message batch consumption mode' do
+      context 'with message batch consumption mode' do
         let(:batch_fetching) { true }
         let(:incoming_batch) { instance_double(Kafka::FetchedBatch) }
         let(:incoming_messages) { [incoming_message, incoming_message] }
@@ -118,7 +118,7 @@ RSpec.describe Karafka::Connection::Consumer do
       end
     end
 
-    context 'in case of Kafka::ProcessingError' do
+    context 'when Kafka::ProcessingError occurs' do
       let(:error) do
         Kafka::ProcessingError.new(
           topic,
@@ -146,7 +146,7 @@ RSpec.describe Karafka::Connection::Consumer do
       end
     end
 
-    context 'any nono consuming error' do
+    context 'when no consuming error' do
       let(:error) { Exception.new }
 
       before do

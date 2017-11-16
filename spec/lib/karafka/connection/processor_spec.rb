@@ -20,7 +20,7 @@ RSpec.describe Karafka::Connection::Processor do
     )
   end
 
-  context 'batch_consuming true' do
+  context 'when batch_consuming true' do
     before do
       expect(consumer_group.topics[0].controller)
         .to receive(:new).and_return(controller_instance)
@@ -33,7 +33,7 @@ RSpec.describe Karafka::Connection::Processor do
         .to receive(:call)
     end
 
-    context 'everything works well' do
+    context 'when everything works well' do
       let(:consumer_group) do
         Karafka::Routing::Builder.instance.draw do
           topic :topic_name1 do
@@ -58,7 +58,7 @@ RSpec.describe Karafka::Connection::Processor do
       end
     end
 
-    context 'mapped topic name' do
+    context 'when using mapped topic name' do
       let(:topic_id) { "prefix.#{consumer_group.topics[0].name}" }
       let(:consumer_group) do
         Karafka::Routing::Builder.instance.draw do
@@ -93,7 +93,7 @@ RSpec.describe Karafka::Connection::Processor do
     end
   end
 
-  context 'batch_consuming false' do
+  context 'when batch_consuming false' do
     before do
       expect(consumer_group.topics[0].controller)
         .to receive(:new).and_return(controller_instance)
@@ -111,7 +111,7 @@ RSpec.describe Karafka::Connection::Processor do
         .twice
     end
 
-    context 'everything works well' do
+    context 'when everything works well' do
       let(:consumer_group) do
         Karafka::Routing::Builder.instance.draw do
           topic :topic_name1 do
@@ -136,7 +136,7 @@ RSpec.describe Karafka::Connection::Processor do
       end
     end
 
-    context 'mapped topic name' do
+    context 'when using mapped topic name' do
       let(:topic_id) { "prefix.#{consumer_group.topics[0].name}" }
       let(:consumer_group) do
         Karafka::Routing::Builder.instance.draw do
