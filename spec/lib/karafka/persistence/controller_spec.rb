@@ -14,7 +14,7 @@ RSpec.describe Karafka::Persistence::Controller do
       )
     end
 
-    context 'persistence is disabled' do
+    context 'when persistence is disabled' do
       let(:persistent) { false }
 
       it 'expect not to cache it' do
@@ -23,7 +23,7 @@ RSpec.describe Karafka::Persistence::Controller do
       end
     end
 
-    context 'persistence is enabled' do
+    context 'when persistence is enabled' do
       let(:persistent) { true }
 
       it 'expect not to cache it' do

@@ -163,7 +163,7 @@ RSpec.describe Karafka::Params::Params do
     describe '#merge!' do
       subject(:params) { described_class.send(:new, base) }
 
-      context 'string based params merge with string key' do
+      context 'when string based params merge with string key' do
         let(:initial_value) { rand }
         let(:key) { rand.to_s }
         let(:base) { { key => initial_value } }
@@ -174,7 +174,7 @@ RSpec.describe Karafka::Params::Params do
         end
       end
 
-      context 'string based params merge with symbol key' do
+      context 'when string based params merge with symbol key' do
         let(:initial_value) { rand }
         let(:key) { rand.to_s }
         let(:base) { { key => initial_value } }
@@ -185,7 +185,7 @@ RSpec.describe Karafka::Params::Params do
         end
       end
 
-      context 'symbol based params merge with symbol key' do
+      context 'when symbol based params merge with symbol key' do
         let(:initial_value) { rand }
         let(:key) { rand.to_s.to_sym }
         let(:base) { { key => initial_value } }
@@ -196,7 +196,7 @@ RSpec.describe Karafka::Params::Params do
         end
       end
 
-      context 'symbol based params merge with string key' do
+      context 'when symbol based params merge with string key' do
         let(:initial_value) { rand }
         let(:key) { rand.to_s.to_sym }
         let(:base) { { key.to_s => initial_value } }

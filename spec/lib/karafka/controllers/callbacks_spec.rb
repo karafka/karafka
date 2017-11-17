@@ -106,7 +106,7 @@ RSpec.describe Karafka::Controllers::Callbacks do
     context 'when we have a method based after_fetched' do
       let(:backend) { :inline }
 
-      context 'and it throws abort to halt' do
+      context 'when it throws abort to halt' do
         subject(:base_controller) do
           described_scope = described_class
 

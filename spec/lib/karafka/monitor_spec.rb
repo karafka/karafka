@@ -54,7 +54,7 @@ RSpec.describe Karafka::Monitor do
       end
     end
 
-    context 'any other class' do
+    context 'when it is any other class' do
       it 'expec to log with info' do
         expect(Karafka.logger).to receive(:info).with(error)
         monitor.notice_error(Karafka, error)

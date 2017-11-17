@@ -13,7 +13,7 @@ RSpec.describe Karafka::Routing::Proxy do
   end
 
   describe 'ignored method proxy' do
-    context 'boolean method' do
+    context 'when it is a boolean like named method' do
       it 'expect not to pass it further and raise error' do
         method_name = :"method#{rand(100)}?"
         operation = -> { described_class.new(target) { public_send(method_name, 1) } }
@@ -21,7 +21,7 @@ RSpec.describe Karafka::Routing::Proxy do
       end
     end
 
-    context 'bang method' do
+    context 'when it is a bang method' do
       it 'expect not to pass it further and raise error' do
         method_name = :"method#{rand(100)}!"
         operation = -> { described_class.new(target) { public_send(method_name, 1) } }
@@ -29,7 +29,7 @@ RSpec.describe Karafka::Routing::Proxy do
       end
     end
 
-    context 'assignment method' do
+    context 'when it is an assignment method' do
       it 'expect not to pass it further and raise error' do
         method_name = :"method#{rand(100)}="
         operation = -> { described_class.new(target) { public_send(method_name, 1) } }

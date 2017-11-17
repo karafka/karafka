@@ -42,7 +42,7 @@ RSpec.describe Karafka::Patches::DryConfigurable do
     end
   end
 
-  context 'nestings' do
+  context 'when we want to have nested settings' do
     subject(:config) { dummy_class.config }
 
     let(:dummy_class) do
@@ -59,7 +59,7 @@ RSpec.describe Karafka::Patches::DryConfigurable do
       end
     end
 
-    describe 'non proc example' do
+    describe 'when the value is not a proc' do
       before do
         dummy_class.configure do |config|
           config.a.b = 3
@@ -73,7 +73,7 @@ RSpec.describe Karafka::Patches::DryConfigurable do
       end
     end
 
-    describe 'proc values' do
+    describe 'when the value is a proc' do
       before do
         dummy_class.configure do |config|
           config.a.b = -> { 1 }
