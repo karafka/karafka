@@ -34,6 +34,8 @@ module Karafka
       #   - #incoming - for remapping from the incoming message to our internal format
       #   - #outgoing - for remapping from internal topic name into outgoing message
       setting :topic_mapper, -> { Routing::TopicMapper }
+      # Default parser for parsing and unparsing incoming and outgoing data
+      setting :parser, -> { Karafka::Parsers::Json }
       # If batch_fetching is true, we will fetch kafka messages in batches instead of 1 by 1
       # @note Fetching does not equal consuming, see batch_consuming description for details
       setting :batch_fetching, true

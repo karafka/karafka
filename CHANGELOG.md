@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.1.1
+- #253 - Allow providing a global per app parser in config settings
+
 ## 1.1.0
 - Gem bump
 - Switch from Celluloid to native Thread management

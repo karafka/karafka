@@ -92,7 +92,7 @@ module Karafka
     # @param parser_class [Class] parser class that we can use to generate appropriate string
     #   or nothing if we want to default to Karafka::Parsers::Json
     # @return [Karafka::BaseResponder] base responder descendant responder
-    def initialize(parser_class = Karafka::Parsers::Json)
+    def initialize(parser_class = Karafka::App.config.parser)
       @parser_class = parser_class
       @messages_buffer = {}
     end

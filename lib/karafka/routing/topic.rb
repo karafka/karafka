@@ -39,12 +39,6 @@ module Karafka
         @responder ||= Karafka::Responders::Builder.new(controller).build
       end
 
-      # @return [Class] Parser class (not instance) that we want to use to unparse Kafka messages
-      # @note If not provided - will use Json as default
-      def parser
-        @parser ||= Karafka::Parsers::Json
-      end
-
       Karafka::AttributesMap.topic.each do |attribute|
         config_retriever_for(attribute)
       end

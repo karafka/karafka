@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (1.1.0)
+    karafka (1.1.1)
       activesupport (>= 5.0)
       dry-configurable (~> 0.7)
       dry-validation (~> 0.11)
@@ -64,7 +64,7 @@ GEM
     minitest (5.10.3)
     multi_json (1.12.2)
     null-logger (0.1.4)
-    rake (12.2.1)
+    rake (12.3.0)
     require_all (1.4.0)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
@@ -108,4 +108,4 @@ DEPENDENCIES
   waterdrop
 
 BUNDLED WITH
-   1.15.4
+   1.16.0
