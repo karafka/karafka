@@ -3,7 +3,7 @@
 RSpec.describe Karafka::Patches::DryConfigurable do
   subject(:config) { dummy_class.config }
 
-  context 'root level' do
+  context 'when on a config root level' do
     let(:dummy_class) do
       ClassBuilder.build do
         extend Dry::Configurable

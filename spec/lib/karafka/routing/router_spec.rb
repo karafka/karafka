@@ -16,14 +16,14 @@ RSpec.describe Karafka::Routing::Router do
   end
 
   describe 'find' do
-    context 'non existing topic' do
+    context 'when we look for non existing topic' do
       let(:topic_id) { rand.to_s }
       let(:expected_error) { Karafka::Errors::NonMatchingRouteError }
 
       it { expect { router.find(topic_id) }.to raise_error(expected_error) }
     end
 
-    context 'existing topic' do
+    context 'when we look for existing topic' do
       let(:topic) { Karafka::Routing::Builder.instance.last.topics.last }
       let(:topic_id) { topic.id }
 
