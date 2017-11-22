@@ -17,103 +17,119 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     }
   end
 
-  context 'config is valid' do
+  context 'when config is valid' do
     it { expect(schema.call(config)).to be_success }
   end
 
-  context 'id validator' do
-    it 'id is nil' do
-      config[:id] = nil
-      expect(schema.call(config)).not_to be_success
+  context 'when we validate id' do
+    context 'when it is nil' do
+      before { config[:id] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
     end
 
-    it 'id is not a string' do
-      config[:id] = 2
-      expect(schema.call(config)).not_to be_success
+    context 'when it is not a string' do
+      before { config[:id] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
     end
 
-    it 'id is an invalid string' do
-      config[:id] = '%^&*('
-      expect(schema.call(config)).not_to be_success
-    end
-  end
+    context 'when it is an invalid string' do
+      before { config[:id] = '%^&*(' }
 
-  context 'name validator' do
-    it 'name is nil' do
-      config[:name] = nil
-      expect(schema.call(config)).not_to be_success
-    end
-
-    it 'name is not a string' do
-      config[:name] = 2
-      expect(schema.call(config)).not_to be_success
-    end
-
-    it 'name is an invalid string' do
-      config[:name] = '%^&*('
-      expect(schema.call(config)).not_to be_success
+      it { expect(schema.call(config)).not_to be_success }
     end
   end
 
-  context 'backend validator' do
-    it 'backend is nil' do
-      config[:backend] = nil
-      expect(schema.call(config)).not_to be_success
+  context 'when we validate name' do
+    context 'when it is nil' do
+      before { config[:name] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when it is not a string' do
+      before { config[:name] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when it is an invalid string' do
+      before { config[:name] = '%^&*(' }
+
+      it { expect(schema.call(config)).not_to be_success }
     end
   end
 
-  context 'max_bytes_per_partition validator' do
-    it 'max_bytes_per_partition is nil' do
-      config[:max_bytes_per_partition] = nil
-      expect(schema.call(config)).not_to be_success
-    end
+  context 'when we validate backend' do
+    context 'when it is nil' do
+      before { config[:backend] = nil }
 
-    it 'max_bytes_per_partition is not integer' do
-      config[:max_bytes_per_partition] = 's'
-      expect(schema.call(config)).not_to be_success
-    end
-
-    it 'max_bytes_per_partition is less than 0' do
-      config[:max_bytes_per_partition] = -1
-      expect(schema.call(config)).not_to be_success
+      it { expect(schema.call(config)).not_to be_success }
     end
   end
 
-  context 'start_from_beginning validator' do
-    it 'start_from_beginning is nil' do
-      config[:start_from_beginning] = nil
-      expect(schema.call(config)).not_to be_success
+  context 'when we validate max_bytes_per_partition' do
+    context 'when it is nil' do
+      before { config[:max_bytes_per_partition] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
     end
 
-    it 'start_from_beginning is not a bool' do
-      config[:start_from_beginning] = 2
-      expect(schema.call(config)).not_to be_success
-    end
-  end
+    context 'when it is not integer' do
+      before { config[:max_bytes_per_partition] = 's' }
 
-  context 'controller validator' do
-    it 'controller is not present' do
-      config[:controller] = nil
-      expect(schema.call(config)).not_to be_success
+      it { expect(schema.call(config)).not_to be_success }
     end
-  end
 
-  context 'parser validator' do
-    it 'parser is not present' do
-      config[:parser] = nil
-      expect(schema.call(config)).not_to be_success
+    context 'when it is less than 0' do
+      before { config[:max_bytes_per_partition] = -1 }
+
+      it { expect(schema.call(config)).not_to be_success }
     end
   end
 
-  context 'batch_consuming validator' do
-    it 'batch_consuming is nil' do
-      config[:batch_consuming] = nil
-      expect(schema.call(config)).not_to be_success
+  context 'when we validate start_from_beginning' do
+    context 'when it is nil' do
+      before { config[:start_from_beginning] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
     end
 
-    it 'batch_consuming is not a bool' do
-      config[:batch_consuming] = 2
-      expect(schema.call(config)).not_to be_success
+    context 'when it is not a bool' do
+      before { config[:start_from_beginning] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate controller' do
+    context 'when it is not present' do
+      before { config[:controller] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate parser' do
+    context 'when it is not present' do
+      before { config[:parser] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate batch_consuming' do
+    context 'when it is nil' do
+      before { config[:batch_consuming] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when it is not a bool' do
+      before { config[:batch_consuming] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
     end
   end
 end
