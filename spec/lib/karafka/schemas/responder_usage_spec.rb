@@ -66,7 +66,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
       end
     end
 
-    context 'whe we validate required field' do
+    context 'when we validate required field' do
       context 'required is nil' do
         let(:required) { nil }
 
