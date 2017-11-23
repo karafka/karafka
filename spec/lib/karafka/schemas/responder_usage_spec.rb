@@ -23,7 +23,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
     }
   end
 
-  context 'usage of unregistered topics' do
+  context 'when we try to use unregistered topic' do
     before { responder_usage[:used_topics] = [rand.to_s] }
 
     it 'expect not to allow that' do
@@ -31,7 +31,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
     end
   end
 
-  context 'particular topics validators' do
+  context 'when particular topics validations happen' do
     subject(:subschema) { Karafka::Schemas::ResponderUsageTopic }
 
     let(:name) { 'topic1' }
@@ -52,50 +52,50 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
 
     it { expect(subschema.call(topic_data)).to be_success }
 
-    context 'name validator' do
-      context 'name is nil' do
+    context 'when we validate name' do
+      context 'when name is nil' do
         let(:name) { nil }
 
         it { expect(subschema.call(topic_data)).not_to be_success }
       end
 
-      context 'name is an invalid string' do
+      context 'when name is an invalid string' do
         let(:name) { '%^&*(' }
 
         it { expect(subschema.call(topic_data)).not_to be_success }
       end
     end
 
-    context 'required validator' do
+    context 'whe we validate required field' do
       context 'required is nil' do
         let(:required) { nil }
 
         it { expect(subschema.call(topic_data)).not_to be_success }
       end
 
-      context 'required is not a bool' do
+      context 'when required is not a bool' do
         let(:required) { 2 }
 
         it { expect(subschema.call(topic_data)).not_to be_success }
       end
     end
 
-    context 'async validator' do
+    context 'when we validate async' do
       context 'async is nil' do
         let(:async) { nil }
 
         it { expect(subschema.call(topic_data)).not_to be_success }
       end
 
-      context 'async is not a bool' do
+      context 'when async is not a bool' do
         let(:async) { 2 }
 
         it { expect(subschema.call(topic_data)).not_to be_success }
       end
     end
 
-    context 'multiple_usage validator' do
-      context 'multiple_usage is not a bool' do
+    context 'when we validate multiple_usage' do
+      context 'when multiple_usage is not a bool' do
         let(:multiple_usage) { 2 }
 
         it { expect(subschema.call(topic_data)).not_to be_success }
