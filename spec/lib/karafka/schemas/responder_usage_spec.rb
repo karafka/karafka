@@ -67,7 +67,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
     end
 
     context 'when we validate required field' do
-      context 'required is nil' do
+      context 'when required is nil' do
         let(:required) { nil }
 
         it { expect(subschema.call(topic_data)).not_to be_success }
@@ -81,7 +81,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
     end
 
     context 'when we validate async' do
-      context 'async is nil' do
+      context 'when async is nil' do
         let(:async) { nil }
 
         it { expect(subschema.call(topic_data)).not_to be_success }

@@ -9,7 +9,7 @@ RSpec.describe Karafka::Schemas::ServerCliOptions do
     }
   end
 
-  context 'config is valid' do
+  context 'when config is valid' do
     it { expect(schema.call(config)).to be_success }
   end
 

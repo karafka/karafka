@@ -8,7 +8,7 @@ RSpec.describe Karafka::Server do
 
     after { server_class.run }
 
-    context 'supervision' do
+    context 'when we want to run in supervision' do
       before do
         expect(Karafka::App).to receive(:run!)
         expect(Karafka::Fetcher).to receive(:new).and_return(runner)
@@ -23,7 +23,7 @@ RSpec.describe Karafka::Server do
       end
     end
 
-    context 'sigint' do
+    context 'when sigint is received' do
       before do
         expect(Karafka::Process.instance).to receive(:supervise)
         expect(Karafka::Process.instance).to receive(:on_sigquit)
@@ -36,7 +36,7 @@ RSpec.describe Karafka::Server do
       end
     end
 
-    context 'sigquit' do
+    context 'when sigquit is received' do
       before do
         expect(Karafka::Process.instance).to receive(:supervise)
         expect(Karafka::Process.instance).to receive(:on_sigint)
@@ -49,7 +49,7 @@ RSpec.describe Karafka::Server do
       end
     end
 
-    context 'sigterm' do
+    context 'when sigterm is received' do
       before do
         expect(Karafka::Process.instance).to receive(:supervise)
         expect(Karafka::Process.instance).to receive(:on_sigint)
