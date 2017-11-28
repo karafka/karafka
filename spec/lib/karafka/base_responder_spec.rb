@@ -170,7 +170,7 @@ RSpec.describe Karafka::BaseResponder do
         end
 
         before do
-          expect(Karafka::App.config)
+          allow(Karafka::App.config)
             .to receive(:topic_mapper)
             .and_return(custom_mapper)
         end
