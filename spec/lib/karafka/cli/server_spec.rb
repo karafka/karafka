@@ -11,8 +11,8 @@ RSpec.describe Karafka::Cli::Server do
   describe '#call' do
     context 'when we run in foreground (not daemonized)' do
       before do
-        expect(cli).to receive(:info)
-        expect(Karafka::Server).to receive(:run)
+        allow(cli).to receive(:info)
+        allow(Karafka::Server).to receive(:run)
       end
 
       it 'expect to print info and expect to run Karafka application' do
@@ -21,13 +21,11 @@ RSpec.describe Karafka::Cli::Server do
 
       it 'expect to validate!' do
         expect(server_cli).to receive(:validate!)
-
         server_cli.call
       end
 
       it 'expect not to daemonize anything' do
         expect(server_cli).not_to receive(:daemonize)
-
         server_cli.call
       end
     end
@@ -36,7 +34,7 @@ RSpec.describe Karafka::Cli::Server do
       before do
         cli.options = { daemon: true, pid: 'tmp/pid' }
 
-        expect(cli).to receive(:info)
+        allow(cli).to receive(:info)
 
         expect(FileUtils)
           .to receive(:mkdir_p)
