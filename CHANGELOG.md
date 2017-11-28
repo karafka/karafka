@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.1.2
+- #256 - Default kafka.seed_brokers configuration is created in invalid format
+
 ## 1.1.1
 - #253 - Allow providing a global per app parser in config settings
 
