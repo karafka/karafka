@@ -27,7 +27,7 @@ module Karafka
 
     # Creates an instance of process and creates empty hash for callbacks
     def initialize
-      @callbacks = Hash.new {|hsh, key| hsh[key] = [] }
+      @callbacks = Hash.new { |hsh, key| hsh[key] = [] }
     end
 
     # Method catches all HANDLED_SIGNALS and performs appropriate callbacks (if defined)
