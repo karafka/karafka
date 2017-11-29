@@ -11,11 +11,11 @@
   require_all
   dry-configurable
   dry-validation
+  dry/inflector
   active_support/callbacks
   active_support/core_ext/hash/indifferent_access
   active_support/descendants_tracker
   karafka/loader
-  inflecto
 ].each(&method(:require))
 
 # Karafka library
