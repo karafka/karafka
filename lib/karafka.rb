@@ -14,8 +14,8 @@
   active_support/callbacks
   active_support/core_ext/hash/indifferent_access
   active_support/descendants_tracker
-  active_support/inflector
   karafka/loader
+  inflecto
 ].each(&method(:require))
 
 # Karafka library
