@@ -3,6 +3,8 @@
 RSpec.describe Karafka::Process do
   subject(:process) { described_class.instance }
 
+  before { process.instance_variable_set(:@callbacks, Hash.new { |hsh, key| hsh[key] = [] }) }
+
   described_class::HANDLED_SIGNALS.each do |signal|
     let(:callback) { -> {} }
 
