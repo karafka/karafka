@@ -49,6 +49,12 @@ module Karafka
       # incoming batch. It's disabled by default, not to create more objects that needed on
       # each batch
       setting :persistent, true
+      # option shutdown_timeout [Integer, nil] the number of seconds after which Karafka no
+      #   longer wait for the consumers to stop gracefully but instead we force
+      #   terminate everything.
+      # @note Keep in mind, that if your business logic
+      # @note If set to nil, it won't forcefully shutdown the process at all.
+      setting :shutdown_timeout, 60
 
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do

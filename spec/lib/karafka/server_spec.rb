@@ -25,41 +25,45 @@ RSpec.describe Karafka::Server do
 
     context 'when sigint is received' do
       before do
-        expect(Karafka::Process.instance).to receive(:supervise)
-        expect(Karafka::Process.instance).to receive(:on_sigquit)
-        expect(Karafka::Process.instance).to receive(:on_sigterm)
-        expect(Karafka::App).to receive(:stop!)
+        allow(Karafka::Process.instance).to receive(:supervise)
+        allow(Karafka::Process.instance).to receive(:on_sigquit)
+        allow(Karafka::Process.instance).to receive(:on_sigterm)
       end
 
       it 'defines a proper action for sigint' do
+        expect(Karafka::Server).to receive(:stop_supervised)
         expect(Karafka::Process.instance).to receive(:on_sigint).and_yield
       end
     end
 
     context 'when sigquit is received' do
       before do
-        expect(Karafka::Process.instance).to receive(:supervise)
-        expect(Karafka::Process.instance).to receive(:on_sigint)
-        expect(Karafka::Process.instance).to receive(:on_sigterm)
-        expect(Karafka::App).to receive(:stop!)
+        allow(Karafka::Process.instance).to receive(:supervise)
+        allow(Karafka::Process.instance).to receive(:on_sigint)
+        allow(Karafka::Process.instance).to receive(:on_sigterm)
       end
 
       it 'defines a proper action for sigquit' do
+        expect(Karafka::Server).to receive(:stop_supervised)
         expect(Karafka::Process.instance).to receive(:on_sigquit).and_yield
       end
     end
 
     context 'when sigterm is received' do
       before do
-        expect(Karafka::Process.instance).to receive(:supervise)
-        expect(Karafka::Process.instance).to receive(:on_sigint)
-        expect(Karafka::Process.instance).to receive(:on_sigquit)
-        expect(Karafka::App).to receive(:stop!)
+        allow(Karafka::Process.instance).to receive(:supervise)
+        allow(Karafka::Process.instance).to receive(:on_sigint)
+        allow(Karafka::Process.instance).to receive(:on_sigquit)
       end
 
       it 'defines a proper action for sigterm' do
+        expect(Karafka::Server).to receive(:stop_supervised)
         expect(Karafka::Process.instance).to receive(:on_sigterm).and_yield
       end
     end
+  end
+
+  describe '#stop_supervised' do
+    pending
   end
 end

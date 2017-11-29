@@ -19,6 +19,8 @@ module Karafka
           .tap { |thread| thread.abort_on_exception = true }
       end
 
+      # We aggregate threads here for a supervised shutdown process
+      threads.each { |thread| Karafka::Server.consumer_threads << thread }
       threads.each(&:join)
     # If anything crashes here, we need to raise the error and crush the runner because it means
     # that something really bad happened
