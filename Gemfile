@@ -5,7 +5,6 @@ source 'https://rubygems.org'
 gemspec
 
 group :development, :test do
-  gem 'byebug'
   gem 'waterdrop'
   gem 'timecop'
   gem 'rspec'
