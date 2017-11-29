@@ -31,7 +31,7 @@ RSpec.describe Karafka::Server do
       end
 
       it 'defines a proper action for sigint' do
-        expect(Karafka::Server).to receive(:stop_supervised)
+        expect(described_class).to receive(:stop_supervised)
         expect(Karafka::Process.instance).to receive(:on_sigint).and_yield
       end
     end
@@ -44,7 +44,7 @@ RSpec.describe Karafka::Server do
       end
 
       it 'defines a proper action for sigquit' do
-        expect(Karafka::Server).to receive(:stop_supervised)
+        expect(described_class).to receive(:stop_supervised)
         expect(Karafka::Process.instance).to receive(:on_sigquit).and_yield
       end
     end
@@ -57,7 +57,7 @@ RSpec.describe Karafka::Server do
       end
 
       it 'defines a proper action for sigterm' do
-        expect(Karafka::Server).to receive(:stop_supervised)
+        expect(described_class).to receive(:stop_supervised)
         expect(Karafka::Process.instance).to receive(:on_sigterm).and_yield
       end
     end

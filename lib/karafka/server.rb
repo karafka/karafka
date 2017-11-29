@@ -72,13 +72,13 @@ module Karafka
         # the threads finished their work and if so, we can just return and normal
         # shutdown process will take place
         Karafka::App.config.shutdown_timeout.to_i.times do
-          return if consumer_threads.count(&:alive?) == 0
+          return if consumer_threads.count(&:alive?).zero?
           sleep 1
         end
 
         # We're done waiting, lets kill them!
         consumer_threads.each(&:terminate)
-        exit 1
+        exit 2
       end
     end
   end
