@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## Unreleased
+- Spec improvements
+- #260 - Specs missing randomization
+- #251 - Shutdown upon non responding (unreachable) cluster is not possible
+
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format
 
