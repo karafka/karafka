@@ -6,7 +6,10 @@ RSpec.describe Karafka::Server do
   describe '#run' do
     let(:runner) { Karafka::Fetcher.new }
 
-    after { server_class.run }
+    after do
+      server_class.run
+      described_class.consumer_threads.clear
+    end
 
     context 'when we want to run in supervision' do
       before do
