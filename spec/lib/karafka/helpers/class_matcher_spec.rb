@@ -80,8 +80,6 @@ RSpec.describe Karafka::Helpers::ClassMatcher do
 
     context 'when names match but not namespaces' do
       context 'when matching does not exist' do
-        before { Object.send(:remove_const, :TestModule) if defined?(TestModule) }
-
         let(:klass) do
           module TestModule
             class SuperRandBase
@@ -94,6 +92,7 @@ RSpec.describe Karafka::Helpers::ClassMatcher do
         let(:root_matching) { class SuperRandMatching; self end }
 
         before do
+          Object.send(:remove_const, :TestModule) if defined?(TestModule)
           klass
           root_klass
           root_matching
