@@ -64,6 +64,53 @@ RSpec.describe Karafka::Server do
   end
 
   describe '#stop_supervised' do
-    pending
+    before { Karafka::App.config.shutdown_timeout = timeout }
+
+    after do
+      server_class.send(:stop_supervised)
+      # After shutdown we need to reinitialize the app for other specs
+      Karafka::App.initialize!
+    end
+
+    context 'when there is no shutdown timeout' do
+      let(:timeout) { nil }
+
+      it 'expect stop and not exit' do
+        expect(Karafka::App).to receive(:stop!)
+        expect(Kernel).not_to receive(:exit)
+      end
+    end
+
+    context 'when shutdown time is 0' do
+      let(:timeout) { 0 }
+
+      it 'expect stop and exit without sleep' do
+        expect(Karafka::App).to receive(:stop!)
+        expect(described_class).not_to receive(:sleep)
+        expect(Kernel).to receive(:exit).with(2)
+      end
+    end
+
+    context 'when shutdown time is more then 1' do
+      let(:timeout) { rand(10) + 5 }
+
+      context 'when there are no active threads (all shutdown ok)' do
+        it 'expect stop without exit or sleep' do
+          expect(Karafka::App).to receive(:stop!)
+          expect(described_class).not_to receive(:sleep)
+          expect(Kernel).not_to receive(:exit)
+        end
+      end
+
+      context 'when there are active threads (processing too long)' do
+        before { Karafka::Server.consumer_threads << Thread.new { sleep(100) } }
+
+        it 'expect stop and exit with sleep' do
+          expect(Karafka::App).to receive(:stop!)
+          expect(described_class).to receive(:sleep).with(1).exactly(timeout).times
+          expect(Kernel).to receive(:exit).with(2)
+        end
+      end
+    end
   end
 end

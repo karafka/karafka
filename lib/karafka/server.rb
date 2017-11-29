@@ -5,6 +5,11 @@ module Karafka
   class Server
     @consumer_threads = Concurrent::Array.new
 
+    # How long should we sleep between checks on shutting down consumers
+    SUPERVISION_SLEEP = 1
+    # What system exit code should we use when we terminated forcefully
+    FORCEFUL_EXIT_CODE = 2
+
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
       attr_accessor :consumer_threads
@@ -73,12 +78,12 @@ module Karafka
         # shutdown process will take place
         Karafka::App.config.shutdown_timeout.to_i.times do
           return if consumer_threads.count(&:alive?).zero?
-          sleep 1
+          sleep SUPERVISION_SLEEP
         end
 
         # We're done waiting, lets kill them!
         consumer_threads.each(&:terminate)
-        exit 2
+        Kernel.exit FORCEFUL_EXIT_CODE
       end
     end
   end
