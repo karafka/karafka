@@ -6,10 +6,7 @@ RSpec.describe Karafka::Server do
   describe '#run' do
     let(:runner) { Karafka::Fetcher.new }
 
-    after do
-      server_class.run
-      described_class.consumer_threads.clear
-    end
+    after { server_class.run }
 
     context 'when we want to run in supervision' do
       before do
@@ -71,6 +68,7 @@ RSpec.describe Karafka::Server do
 
     after do
       server_class.send(:stop_supervised)
+      described_class.consumer_threads.clear
       # After shutdown we need to reinitialize the app for other specs
       Karafka::App.initialize!
     end
@@ -106,7 +104,9 @@ RSpec.describe Karafka::Server do
       end
 
       context 'when there are active threads (processing too long)' do
-        before { described_class.consumer_threads << Thread.new { sleep(100) } }
+        let(:active_thread) { instance_double(Thread, alive?: true, terminate: true) }
+
+        before { described_class.consumer_threads << active_thread }
 
         it 'expect stop and exit with sleep' do
           expect(Karafka::App).to receive(:stop!)
