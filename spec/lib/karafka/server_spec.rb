@@ -103,7 +103,7 @@ RSpec.describe Karafka::Server do
       end
 
       context 'when there are active threads (processing too long)' do
-        before { Karafka::Server.consumer_threads << Thread.new { sleep(100) } }
+        before { described_class.consumer_threads << Thread.new { sleep(100) } }
 
         it 'expect stop and exit with sleep' do
           expect(Karafka::App).to receive(:stop!)
