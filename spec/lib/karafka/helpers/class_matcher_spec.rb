@@ -92,6 +92,7 @@ RSpec.describe Karafka::Helpers::ClassMatcher do
         let(:root_matching) { class SuperRandMatching; self end }
 
         before do
+          Object.send(:remove_const, :TestModule) if defined?(TestModule)
           klass
           root_klass
           root_matching

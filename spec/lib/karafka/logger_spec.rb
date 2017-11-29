@@ -4,6 +4,10 @@ RSpec.describe Karafka::Logger do
   specify { expect(described_class).to be < ::Logger }
   subject(:logger) { described_class.instance }
 
+  # We use a singleton logger that could be already initialized in other specs, so
+  # in order to check all the behaviours we need to "reset" it to the initial state
+  before { logger.instance_variable_set('@file', nil) }
+
   describe '#instance' do
     let(:target) { double }
     let(:logger) { described_class.instance }
@@ -18,7 +22,6 @@ RSpec.describe Karafka::Logger do
 
   describe '#target' do
     let(:delegate_scope) { double }
-    let(:file) { double }
 
     it 'delegates write and close to STDOUT and file' do
       expect(Karafka::Helpers::MultiDelegator).to receive(:delegate)
