@@ -17,7 +17,7 @@ module Karafka
     #   module MyMapper
     #     def self.call(raw_consumer_group_name)
     #       [
-    #         Karafka::App.config.client_id.to_s.underscope,
+    #         Karafka::App.config.client_id.to_s.underscore,
     #         raw_consumer_group_name
     #       ].join('_').gsub('_', '.')
     #     end
