@@ -17,11 +17,14 @@ RSpec.describe Karafka::Patches::RubyKafka do
   end
 
   describe '#consumer_loop' do
-    let(:consumer) do
-      instance_double(Karafka::Connection::Consumer, stop: true)
+    let(:consumer) { instance_double(Karafka::Connection::Consumer, stop: true) }
+    let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s, persistent: false) }
+
+    before do
+      Karafka::Persistence::Consumer.write(consumer)
+      Karafka::Persistence::Controller.fetch(topic, 0) { nil }
     end
 
-    before { Karafka::Persistence::Consumer.write(consumer) }
     after { Thread.current[:consumer] = nil }
 
     context 'when karafka app has stopped' do
