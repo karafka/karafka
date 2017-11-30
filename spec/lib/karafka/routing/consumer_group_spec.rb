@@ -16,7 +16,7 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
       old_client_id = Karafka::App.config.client_id
       Karafka::App.config.client_id = 'ExampleClient'
 
-      consumer_group = Karafka::Routing::ConsumerGroup.new('consumers')
+      consumer_group = described_class.new('consumers')
       expect(consumer_group.id).to eq('example_client_consumers')
 
       Karafka::App.config.client_id = old_client_id
