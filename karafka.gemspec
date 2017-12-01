@@ -18,6 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activesupport', '>= 5.0'
   spec.add_dependency 'dry-configurable', '~> 0.7'
+  spec.add_dependency 'dry-inflector', '~> 0.1.1'
   spec.add_dependency 'dry-validation', '~> 0.11'
   spec.add_dependency 'envlogic', '~> 1.0'
   spec.add_dependency 'multi_json', '>= 1.12'

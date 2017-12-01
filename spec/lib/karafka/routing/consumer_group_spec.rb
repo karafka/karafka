@@ -13,7 +13,13 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
 
   describe '#id' do
     it 'expect to namespace id with application client_id' do
-      expect(consumer_group.id).to eq "#{Karafka::App.config.client_id.to_s.underscore}_#{name}"
+      old_client_id = Karafka::App.config.client_id
+      Karafka::App.config.client_id = 'ExampleClient'
+
+      consumer_group = described_class.new('consumers')
+      expect(consumer_group.id).to eq('example_client_consumers')
+
+      Karafka::App.config.client_id = old_client_id
     end
   end
 

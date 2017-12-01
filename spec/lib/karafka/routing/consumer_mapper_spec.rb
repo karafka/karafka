@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Routing::ConsumerMapper do
-  subject(:mapper) { described_class }
-
-  let(:raw_consumer_group_name) { rand.to_s }
-
   describe '#call' do
-    let(:default_mapped_group) do
-      [
-        Karafka::App.config.client_id.to_s.underscore,
-        raw_consumer_group_name
-      ].join('_')
-    end
+    it 'generates name namespaced to underscored client_id' do
+      old_client_id = Karafka::App.config.client_id
+      Karafka::App.config.client_id = 'ExampleClient'
 
-    it { expect(mapper.call(raw_consumer_group_name)).to eq default_mapped_group }
+      actual_value = described_class.call('consumers')
+      expect(actual_value).to eq('example_client_consumers')
+
+      Karafka::App.config.client_id = old_client_id
+    end
   end
 end

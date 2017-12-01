@@ -17,7 +17,7 @@ module Karafka
     #   module MyMapper
     #     def self.call(raw_consumer_group_name)
     #       [
-    #         Karafka::App.config.client_id.to_s.underscope,
+    #         Dry::Inflector.new.underscore(Karafka::App.config.client_id.to_s),
     #         raw_consumer_group_name
     #       ].join('_').gsub('_', '.')
     #     end
@@ -26,7 +26,8 @@ module Karafka
       # @param raw_consumer_group_name [String, Symbol] string or symbolized consumer group name
       # @return [String] remapped final consumer group name
       def self.call(raw_consumer_group_name)
-        "#{Karafka::App.config.client_id.to_s.underscore}_#{raw_consumer_group_name}"
+        client_name = Dry::Inflector.new.underscore(Karafka::App.config.client_id.to_s)
+        "#{client_name}_#{raw_consumer_group_name}"
       end
     end
   end
