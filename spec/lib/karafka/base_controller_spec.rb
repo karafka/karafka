@@ -93,4 +93,16 @@ RSpec.describe Karafka::BaseController do
       expect(base_controller.send(:consumer)).to eq consumer
     end
   end
+
+  describe '#mark_as_consumed' do
+    let(:consumer) { instance_double(Karafka::Connection::Consumer) }
+    let(:params) { instance_double(Karafka::Params::Params) }
+
+    before { Karafka::Persistence::Consumer.write(consumer) }
+
+    it 'expect to proxy pass to consumer' do
+      expect(consumer).to receive(:mark_as_consumed).with(params)
+      base_controller.send(:mark_as_consumed, params)
+    end
+  end
 end
