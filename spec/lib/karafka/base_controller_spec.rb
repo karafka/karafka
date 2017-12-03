@@ -96,7 +96,7 @@ RSpec.describe Karafka::BaseController do
 
   describe '#mark_as_consumed' do
     let(:consumer) { instance_double(Karafka::Connection::Consumer) }
-    let(:params) {  instance_double(Karafka::Params::Params)}
+    let(:params) { instance_double(Karafka::Params::Params) }
 
     before { Karafka::Persistence::Consumer.write(consumer) }
 
