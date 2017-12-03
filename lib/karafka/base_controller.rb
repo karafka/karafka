@@ -5,6 +5,14 @@ module Karafka
   # Base controller from which all Karafka controllers should inherit
   class BaseController
     extend ActiveSupport::DescendantsTracker
+    extend Forwardable
+
+    # Allows us to mark messages as consumed for non-automatic mode without having
+    # to use consumer directly. We do this that way, because most of the people should not
+    # mess with the consumer instance directly (just in case)
+    def_delegator :consumer, :mark_as_consumed
+
+    private :mark_as_consumed
 
     class << self
       attr_reader :topic
