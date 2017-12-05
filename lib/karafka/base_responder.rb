@@ -63,10 +63,9 @@ module Karafka
     class_attribute :topics
 
     # Schema that we can use to control and/or require some additional details upon options
-    # that are being passed to the producer. By default uses WaterDrop schema
+    # that are being passed to the producer. This can be in particular useful if we want to make
+    # sure that for example partition_key is always present.
     class_attribute :options_schema
-
-    self.options_schema = WaterDrop::Schemas::MessageOptions
 
     attr_reader :messages_buffer
 
@@ -115,6 +114,7 @@ module Karafka
     def call(*data)
       respond(*data)
       validate_usage!
+      validate_options!
       deliver!
     end
 
@@ -142,6 +142,19 @@ module Karafka
       return if result.success?
 
       raise Karafka::Errors::InvalidResponderUsage, result.errors
+    end
+
+    # Checks if we met all the options requirements before sending them to the producer.
+    def validate_options!
+      return true unless self.class.options_schema
+
+      messages_buffer.each_value do |messages_set|
+        messages_set.each do |message_data|
+          result = self.class.options_schema.call(message_data.last)
+          next if result.success?
+          raise Karafka::Errors::InvalidResponderMessageOptions, result.errors
+        end
+      end
     end
 
     # Takes all the messages from the buffer and delivers them one by one

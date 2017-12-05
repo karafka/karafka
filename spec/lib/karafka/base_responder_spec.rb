@@ -70,6 +70,29 @@ RSpec.describe Karafka::BaseResponder do
           expect { responder.call(input_data) }.not_to raise_error
         end
       end
+
+      context 'when we have a custom options schema and invalid data' do
+        let(:input_data) { rand.to_s }
+        let(:expected_error) { Karafka::Errors::InvalidResponderMessageOptions }
+        let(:working_class) do
+          name = topic_name
+          ClassBuilder.inherit(described_class) do
+            self.options_schema = Dry::Validation.Schema do
+              required(:key).filled(:str?)
+            end
+
+            topic name
+
+            define_method :respond do |data|
+              respond_to name, data
+            end
+          end
+        end
+
+        it 'expect to expect to put string data into messages buffer' do
+          expect { responder.send(:call, input_data) }.to raise_error(expected_error)
+        end
+      end
     end
 
     describe '#respond' do
