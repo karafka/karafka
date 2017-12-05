@@ -183,7 +183,7 @@ RSpec.describe Karafka::BaseResponder do
         after { responder.send(:deliver!) }
 
         it 'expect to deliver them using waterdrop' do
-          messages_buffer.each do |topic, data_elements|
+          messages_buffer.each_value do |data_elements|
             data_elements.each do |data, options|
               expect(::WaterDrop::SyncProducer)
                 .to receive(:call).with(data, options.merge(topic: topic))
@@ -198,7 +198,7 @@ RSpec.describe Karafka::BaseResponder do
         after { responder.send(:deliver!) }
 
         it 'expect to deliver them using waterdrop' do
-          messages_buffer.each do |topic, data_elements|
+          messages_buffer.each_value do |data_elements|
             data_elements.each do |data, options|
               expect(::WaterDrop::SyncProducer)
                 .not_to receive(:call)
