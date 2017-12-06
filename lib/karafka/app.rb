@@ -41,7 +41,8 @@ module Karafka
       %i[
         root
         env
-        logger monitor
+        logger
+        monitor
       ].each do |delegated|
         define_method(delegated) do
           Karafka.public_send(delegated)
