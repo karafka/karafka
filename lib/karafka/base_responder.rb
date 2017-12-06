@@ -62,6 +62,11 @@ module Karafka
     # Definitions of all topics that we want to be able to use in this responder should go here
     class_attribute :topics
 
+    # Schema that we can use to control and/or require some additional details upon options
+    # that are being passed to the producer. This can be in particular useful if we want to make
+    # sure that for example partition_key is always present.
+    class_attribute :options_schema
+
     attr_reader :messages_buffer
 
     class << self
@@ -108,7 +113,8 @@ module Karafka
     #   UsersCreatedResponder.new(MyParser).call(@created_user)
     def call(*data)
       respond(*data)
-      validate!
+      validate_usage!
+      validate_options!
       deliver!
     end
 
@@ -116,7 +122,7 @@ module Karafka
 
     # Checks if we met all the topics requirements. It will fail if we didn't send a message to
     # a registered required topic, etc.
-    def validate!
+    def validate_usage!
       registered_topics = self.class.topics.map do |name, topic|
         topic.to_h.merge!(
           usage_count: messages_buffer[name]&.count || 0
@@ -138,20 +144,26 @@ module Karafka
       raise Karafka::Errors::InvalidResponderUsage, result.errors
     end
 
+    # Checks if we met all the options requirements before sending them to the producer.
+    def validate_options!
+      return true unless self.class.options_schema
+
+      messages_buffer.each_value do |messages_set|
+        messages_set.each do |message_data|
+          result = self.class.options_schema.call(message_data.last)
+          next if result.success?
+          raise Karafka::Errors::InvalidResponderMessageOptions, result.errors
+        end
+      end
+    end
+
     # Takes all the messages from the buffer and delivers them one by one
     # @note This method is executed after the validation, so we're sure that
     #   what we send is legit and it will go to a proper topics
     def deliver!
-      messages_buffer.each do |topic, data_elements|
-        # We map this topic name, so it will match namespaced/etc topic in Kafka
-        # @note By default will not change topic (if default mapper used)
-        mapped_topic = Karafka::App.config.topic_mapper.outgoing(topic)
-
+      messages_buffer.each_value do |data_elements|
         data_elements.each do |data, options|
-          producer(options).call(
-            data,
-            options.merge(topic: mapped_topic)
-          )
+          producer(options).call(data, options)
         end
       end
     end
@@ -172,8 +184,13 @@ module Karafka
     def respond_to(topic, data, options = {})
       Karafka.monitor.notice(self.class, topic: topic, data: data, options: options)
 
-      messages_buffer[topic.to_s] ||= []
-      messages_buffer[topic.to_s] << [@parser_class.generate(data), options]
+      messages_buffer[topic] ||= []
+      messages_buffer[topic] << [
+        @parser_class.generate(data),
+        # We map this topic name, so it will match namespaced/etc topic in Kafka
+        # @note By default will not change topic (if default mapper used)
+        options.merge(topic: Karafka::App.config.topic_mapper.outgoing(topic))
+      ]
     end
 
     # @param options [Hash] options for waterdrop

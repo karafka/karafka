@@ -27,6 +27,10 @@ module Karafka
     # topics usage definitions
     InvalidResponderUsage = Class.new(BaseError)
 
+    # Raised when options that we provide to the responder to respond aren't what the schema
+    # requires
+    InvalidResponderMessageOptions = Class.new(BaseError)
+
     # Raised when configuration doesn't match with validation schema
     InvalidConfiguration = Class.new(BaseError)
 
