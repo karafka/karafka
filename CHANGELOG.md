@@ -8,6 +8,7 @@
 - Replaced some of the activesupport parts with dry-inflector
 - #246 - Alias consumer#mark_as_consumed on controller
 - #259 - Allow forcing key/partition key on responders
+- #267 - Styling inconsistency
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format
