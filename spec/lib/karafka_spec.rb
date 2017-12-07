@@ -27,7 +27,7 @@ RSpec.describe Karafka do
     context 'when we want to get app root path' do
       let(:root_dir_env) { nil }
 
-      before { expect(ENV).to receive(:[]).with('KARAFKA_ROOT_DIR').and_return(root_dir_env) }
+      before { allow(ENV).to receive(:[]).with('KARAFKA_ROOT_DIR').and_return(root_dir_env) }
 
       it do
         expect(ENV).to receive(:[]).with('BUNDLE_GEMFILE').and_return('/Gemfile')
