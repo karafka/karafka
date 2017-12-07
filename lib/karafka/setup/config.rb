@@ -87,6 +87,9 @@ module Karafka
         #   returning messages from the server; if `max_wait_time` is reached, this
         #   is ignored.
         setting :min_bytes, 1
+        # option max_bytes [Integer] the maximum number of bytes to read before returning messages
+        #   from each broker.
+        setting :max_bytes, 10_485_760
         # option max_wait_time [Integer, Float] max_wait_time is the maximum number of seconds to
         #   wait before returning data from a single message fetch. By setting this high you also
         #   increase the fetching throughput - and by setting it low you set a bound on latency.
@@ -115,24 +118,30 @@ module Karafka
         setting :socket_timeout, 30
 
         # SSL authentication related settings
-        # option ca_cert [String] SSL CA certificate
+        # option ca_cert [String, nil] SSL CA certificate
         setting :ssl_ca_cert, nil
-        # option ssl_ca_cert_file_path [String] SSL CA certificate file path
+        # option ssl_ca_cert_file_path [String, nil] SSL CA certificate file path
         setting :ssl_ca_cert_file_path, nil
-        # option ssl_client_cert [String] SSL client certificate
+        # option ssl_client_cert [String, nil] SSL client certificate
         setting :ssl_client_cert, nil
-        # option ssl_client_cert_key [String] SSL client certificate password
+        # option ssl_client_cert_key [String, nil] SSL client certificate password
         setting :ssl_client_cert_key, nil
-        # option sasl_gssapi_principal [String] sasl principal
+        # option sasl_gssapi_principal [String, nil] sasl principal
         setting :sasl_gssapi_principal, nil
-        # option sasl_gssapi_keytab [String] sasl keytab
+        # option sasl_gssapi_keytab [String, nil] sasl keytab
         setting :sasl_gssapi_keytab, nil
         # option sasl_plain_authzid [String] The authorization identity to use
         setting :sasl_plain_authzid, ''
-        # option sasl_plain_username [String] The username used to authenticate
+        # option sasl_plain_username [String, nil] The username used to authenticate
         setting :sasl_plain_username, nil
-        # option sasl_plain_password [String] The password used to authenticate
+        # option sasl_plain_password [String, nil] The password used to authenticate
         setting :sasl_plain_password, nil
+        # option sasl_scram_username [String, nil] The username used to authenticate
+        setting :sasl_scram_username, nil
+        # option sasl_scram_password [String, nil] The password used to authenticate
+        setting :sasl_scram_password, nil
+        # option sasl_scram_mechanism [String, nil] Scram mechanism, either 'sha256' or 'sha512'
+        setting :sasl_scram_mechanism, nil
       end
 
       class << self

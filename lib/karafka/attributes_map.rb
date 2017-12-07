@@ -21,7 +21,7 @@ module Karafka
             offset_retention_time heartbeat_interval
           ],
           subscription: %i[start_from_beginning max_bytes_per_partition],
-          consuming: %i[min_bytes max_wait_time],
+          consuming: %i[min_bytes max_bytes max_wait_time],
           pausing: %i[pause_timeout],
           # All the options that are under kafka config namespace, but are not used
           # directly with kafka api, but from the Karafka user perspective, they are
