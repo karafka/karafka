@@ -333,32 +333,32 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
-  context "when we validate sasl_scram_mechanism" do
-    context "when sasl_scram_mechanism is nil" do
+  context 'when we validate sasl_scram_mechanism' do
+    context 'when sasl_scram_mechanism is nil' do
       before { config[:sasl_scram_mechanism] = nil }
 
       it { expect(schema.call(config)).to be_success }
     end
 
-    context "when sasl_scram_mechanism is not a string" do
+    context 'when sasl_scram_mechanism is not a string' do
       before { config[:sasl_scram_mechanism] = 2 }
 
       it { expect(schema.call(config)).not_to be_success }
     end
 
-    context "when sasl_scram_mechanism is an invalid string" do
+    context 'when sasl_scram_mechanism is an invalid string' do
       before { config[:sasl_scram_mechanism] = rand.to_s }
 
       it { expect(schema.call(config)).not_to be_success }
     end
 
-    context "when sasl_scram_mechanism is sha256" do
+    context 'when sasl_scram_mechanism is sha256' do
       before { config[:sasl_scram_mechanism] = 'sha256' }
 
       it { expect(schema.call(config)).to be_success }
     end
 
-    context "when sasl_scram_mechanism is sha512" do
+    context 'when sasl_scram_mechanism is sha512' do
       before { config[:sasl_scram_mechanism] = 'sha512' }
 
       it { expect(schema.call(config)).to be_success }

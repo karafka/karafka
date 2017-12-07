@@ -10,7 +10,7 @@ module Karafka
       URI_SCHEMES ||= %w[kafka kafka+ssl].freeze
 
       # Available sasl scram mechanism of authentication (plus nil)
-      SASL_SCRAM_MECHANISMS ||= %[sha256 sha512].freeze
+      SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
 
       configure do
         config.messages_file = File.join(
@@ -69,7 +69,7 @@ module Karafka
 
       # It's not with other encryptions as it has some more rules
       optional(:sasl_scram_mechanism)
-        .maybe(:str?, format?: Karafka::Schemas::SASL_SCRAM_MECHANISMS)
+        .maybe(:str?, included_in?: Karafka::Schemas::SASL_SCRAM_MECHANISMS)
     end
   end
 end
