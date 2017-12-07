@@ -39,7 +39,8 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       max_wait_time: 10,
       batch_fetching: true,
       topics: topics,
-      min_bytes: 1
+      min_bytes: 1,
+      max_bytes: 2048
     }
   end
 
@@ -308,11 +309,14 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     ssl_ca_cert_file_path
     ssl_client_cert
     ssl_client_cert_key
+    sasl_gssapi_principal
+    sasl_gssapi_keytab
     sasl_plain_authzid
     sasl_plain_username
     sasl_plain_password
-    sasl_gssapi_principal
-    sasl_gssapi_keytab
+    sasl_scram_username
+    sasl_scram_password
+    sasl_scram_mechanism
   ].each do |encryption_attribute|
     context "when we validate #{encryption_attribute}" do
       context "when #{encryption_attribute} is nil" do
@@ -326,6 +330,38 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
         it { expect(schema.call(config)).not_to be_success }
       end
+    end
+  end
+
+  context 'when we validate sasl_scram_mechanism' do
+    context 'when sasl_scram_mechanism is nil' do
+      before { config[:sasl_scram_mechanism] = nil }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when sasl_scram_mechanism is not a string' do
+      before { config[:sasl_scram_mechanism] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when sasl_scram_mechanism is an invalid string' do
+      before { config[:sasl_scram_mechanism] = rand.to_s }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when sasl_scram_mechanism is sha256' do
+      before { config[:sasl_scram_mechanism] = 'sha256' }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when sasl_scram_mechanism is sha512' do
+      before { config[:sasl_scram_mechanism] = 'sha512' }
+
+      it { expect(schema.call(config)).to be_success }
     end
   end
 end
