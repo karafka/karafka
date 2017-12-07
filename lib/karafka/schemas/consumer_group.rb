@@ -9,6 +9,9 @@ module Karafka
       # but someetimes loads things twice
       URI_SCHEMES ||= %w[kafka kafka+ssl].freeze
 
+      # Available sasl scram mechanism of authentication (plus nil)
+      SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
+
       configure do
         config.messages_file = File.join(
           Karafka.gem_root, 'config', 'errors.yml'
@@ -36,6 +39,7 @@ module Karafka
       required(:connect_timeout).filled { (int? | float?) & gt?(0) }
       required(:socket_timeout).filled { (int? | float?) & gt?(0) }
       required(:min_bytes).filled(:int?, gt?: 0)
+      required(:max_bytes).filled(:int?, gt?: 0)
       required(:max_wait_time).filled { (int? | float?) & gteq?(0) }
       required(:batch_fetching).filled(:bool?)
       required(:topics).filled { each { schema(ConsumerGroupTopic) } }
@@ -52,14 +56,20 @@ module Karafka
         ssl_ca_cert_file_path
         ssl_client_cert
         ssl_client_cert_key
+        sasl_gssapi_principal
+        sasl_gssapi_keytab
         sasl_plain_authzid
         sasl_plain_username
         sasl_plain_password
-        sasl_gssapi_principal
-        sasl_gssapi_keytab
+        sasl_scram_username
+        sasl_scram_password
       ].each do |encryption_attribute|
         optional(encryption_attribute).maybe(:str?)
       end
+
+      # It's not with other encryptions as it has some more rules
+      optional(:sasl_scram_mechanism)
+        .maybe(:str?, included_in?: Karafka::Schemas::SASL_SCRAM_MECHANISMS)
     end
   end
 end
