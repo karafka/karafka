@@ -5,8 +5,8 @@ source 'https://rubygems.org'
 gemspec
 
 group :development, :test do
-  gem 'waterdrop'
-  gem 'timecop'
   gem 'rspec'
   gem 'simplecov'
+  gem 'timecop'
+  gem 'waterdrop'
 end
