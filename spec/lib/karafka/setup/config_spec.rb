@@ -8,16 +8,9 @@ RSpec.describe Karafka::Setup::Config do
   end
 
   describe '#setup_components' do
-    before do
-      config = double
-
-      expect(Karafka::Setup::Configurators::WaterDrop)
-        .to receive(:setup)
-        .with(config_class.config)
-        .at_least(:once)
-    end
-
     it 'expect to run setup for waterdrop' do
+      expect(Karafka::Setup::Configurators::WaterDrop).to receive(:setup).with(config_class.config)
+        .at_least(:once)
       config_class.send :setup_components
     end
   end
@@ -60,6 +53,15 @@ RSpec.describe Karafka::Setup::Config do
         expect { config_class.send(:validate!) }
           .not_to raise_error
       end
+    end
+  end
+
+  describe '#after_init' do
+    it 'expect to call the after_init block' do
+      expect(config_class.config.internal.after_init)
+        .to receive(:call).with(config_class.config)
+
+      config_class.after_init
     end
   end
 end

@@ -14,7 +14,7 @@ module Karafka
       def boot!
         Setup::Config.validate!
         Setup::Config.setup_components
-        Setup::Config.run_callbacks
+        Setup::Config.after_init
       end
 
       # @return [Karafka::Routing::Builder] consumers builder instance

@@ -17,7 +17,7 @@ module Karafka
       # and configured but before the code runs
       # @param [Block] block that should be executed after the initialization process
       def after_init(&block)
-        config.after_init = block
+        config.internal.after_init = block
       end
 
       # @return [Karafka::Config] config instance

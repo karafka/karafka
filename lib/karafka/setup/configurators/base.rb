@@ -18,9 +18,9 @@ module Karafka
       #     end
       #   end
       class Base
-        # @param config [Karafka::Config] config instance
+        # @param _config [Karafka::Config] config instance
         # This method needs to be implemented in a subclass
-        def self.setup(config)
+        def self.setup(_config)
           raise NotImplementedError
         end
       end

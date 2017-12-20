@@ -40,6 +40,20 @@ RSpec.describe Karafka::Patches::DryConfigurable do
         expect(config.b).to eq 2
       end
     end
+
+    describe 'proc with args values' do
+      before do
+        dummy_class.configure do |config|
+          config.a = ->(_arg) { 1 }
+          config.b = ->(_arg) { 2 }
+        end
+      end
+
+      it 'expect to store and return values' do
+        expect(config.a).to be_a(Proc)
+        expect(config.b).to be_a(Proc)
+      end
+    end
   end
 
   context 'when we want to have nested settings' do

@@ -55,9 +55,6 @@ module Karafka
       # @note Keep in mind, that if your business logic
       # @note If set to nil, it won't forcefully shutdown the process at all.
       setting :shutdown_timeout, 60
-      # option after_init [Proc] block that will be executed right after we finish the bootstrap
-      #   but before we run everything (server, console, etc)
-      setting :after_init, -> (_config) {}
 
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
@@ -147,6 +144,14 @@ module Karafka
         setting :sasl_scram_mechanism, nil
       end
 
+      # option internal [Hash] - optional - internal karafka configuration settings that should
+      #   never be changed by users directly
+      setting :internal do
+        # option after_init [Proc] block that will be executed right after we finish the bootstrap
+        #   but before we run everything (server, console, etc)
+        setting :after_init, ->(_config) {}
+      end
+
       class << self
         # Configurating method
         # @yield Runs a block of code providing a config singleton instance to it
@@ -166,8 +171,9 @@ module Karafka
           ].each { |klass| klass.setup(config) }
         end
 
-        def run_callbacks
-          config.after_init.call(config)
+        # Executes the after init block with the fully loaded config
+        def after_init
+          config.internal.after_init.call(config)
         end
 
         # Validate config based on ConfigurationSchema
