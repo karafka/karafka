@@ -9,7 +9,8 @@ RSpec.describe Karafka::Setup::Config do
 
   describe '#setup_components' do
     it 'expect to run setup for waterdrop' do
-      expect(Karafka::Setup::Configurators::WaterDrop).to receive(:setup).with(config_class.config)
+      expect(Karafka::Setup::Configurators::WaterDrop)
+        .to receive(:setup).with(config_class.config)
         .at_least(:once)
       config_class.send :setup_components
     end
