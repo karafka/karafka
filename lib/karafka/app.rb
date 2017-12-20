@@ -3,14 +3,9 @@
 module Karafka
   # App class
   class App
-    class << self
-      # Sets up the whole configuration
-      # @param [Block] block configuration block
-      def setup(&block)
-        Setup::Config.setup(&block)
-        initialize!
-      end
+    extend Karafka::Setup::Dsl
 
+    class << self
       # Sets up all the internal components and bootstrap whole app
       # We need to know details about consumers in order to setup components,
       # that's why we don't setup them after std setup is done
@@ -19,11 +14,7 @@ module Karafka
       def boot!
         Setup::Config.validate!
         Setup::Config.setup_components
-      end
-
-      # @return [Karafka::Config] config instance
-      def config
-        Setup::Config.config
+        Setup::Config.after_init
       end
 
       # @return [Karafka::Routing::Builder] consumers builder instance

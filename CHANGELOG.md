@@ -11,6 +11,9 @@
 - #267 - Styling inconsistency
 - #242 - Support setting the max bytes to fetch per request
 - #247 - Support SCRAM once released
+- #271 - Provide an after_init option to pass a configuration block
+- Lower ActiveSupport dependency
+- Remove configurators in favor of the after_init block configurator
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format

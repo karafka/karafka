@@ -3,10 +3,13 @@
 module Karafka
   module Setup
     # Configurators module is used to enclose all the external dependencies configurations
+    # upon which Karafka depents
     class Configurators
       # Karafka has come components that it relies on (like Sidekiq)
       # We need to configure all of them only when the framework was set up.
       # Any class that descends from this one will be automatically invoked upon setup (after it)
+      # @note This should be used only for internal Karafka dependencies configuration
+      #   End users configuration should go to the after_init block
       # @example Configure an Example class
       #   class ExampleConfigurator < Base
       #     def setup
@@ -15,18 +18,9 @@ module Karafka
       #     end
       #   end
       class Base
-        extend ActiveSupport::DescendantsTracker
-
-        attr_reader :config
-
-        # @param config [Karafka::Config] config instance
-        # @return [Karafka::Config::Base] configurator for a given component
-        def initialize(config)
-          @config = config
-        end
-
+        # @param _config [Karafka::Config] config instance
         # This method needs to be implemented in a subclass
-        def setup
+        def self.setup(_config)
           raise NotImplementedError
         end
       end

@@ -19,11 +19,15 @@ module Karafka
       private
 
       # Method that rebuilds a given accessor, so when it consists a proc value, it will
-      # evaluate it upon return
+      # evaluate it upon return for blocks that don't require any arguments, otherwise
+      # it will return the block
       # @param method_name [Symbol] name of an accessor that we want to rebuild
       def rebuild(method_name)
         define_singleton_method method_name do
-          super().is_a?(Proc) ? super().call : super()
+          value = super()
+          return value unless value.is_a?(Proc)
+          return value unless value.parameters.empty?
+          value.call
         end
       end
     end

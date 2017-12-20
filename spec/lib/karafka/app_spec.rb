@@ -3,18 +3,6 @@
 RSpec.describe Karafka::App do
   subject(:app_class) { described_class }
 
-  describe '#config' do
-    let(:config) { double }
-
-    it 'aliases to Config' do
-      expect(Karafka::Setup::Config)
-        .to receive(:config)
-        .and_return(config)
-
-      expect(app_class.config).to eq config
-    end
-  end
-
   describe '#consumer_groups' do
     let(:builder) { Karafka::Routing::Builder.instance }
 
@@ -23,20 +11,13 @@ RSpec.describe Karafka::App do
     end
   end
 
-  describe '#setup' do
-    it 'delegates it to Config setup and set framework to initializing state' do
-      expect(Karafka::Setup::Config).to receive(:setup).once
-
-      app_class.setup
-    end
-  end
-
   describe '#boot!' do
     let(:config) { double }
 
     it 'expect to run setup_components' do
       expect(Karafka::Setup::Config).to receive(:validate!).once
-      expect(Karafka::Setup::Config).to receive(:setup_components)
+      expect(Karafka::Setup::Config).to receive(:setup_components).once
+      expect(Karafka::Setup::Config).to receive(:after_init).once
 
       app_class.boot!
     end

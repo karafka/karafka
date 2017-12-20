@@ -144,6 +144,14 @@ module Karafka
         setting :sasl_scram_mechanism, nil
       end
 
+      # option internal [Hash] - optional - internal karafka configuration settings that should
+      #   never be changed by users directly
+      setting :internal do
+        # option after_init [Proc] block that will be executed right after we finish the bootstrap
+        #   but before we run everything (server, console, etc)
+        setting :after_init, ->(_config) {}
+      end
+
       class << self
         # Configurating method
         # @yield Runs a block of code providing a config singleton instance to it
@@ -158,9 +166,14 @@ module Karafka
         # Components are in karafka/config directory and are all loaded one by one
         # If you want to configure a next component, please add a proper file to config dir
         def setup_components
-          Configurators::Base.descendants.each do |klass|
-            klass.new(config).setup
-          end
+          [
+            Configurators::WaterDrop
+          ].each { |klass| klass.setup(config) }
+        end
+
+        # Executes the after init block with the fully loaded config
+        def after_init
+          config.internal.after_init.call(config)
         end
 
         # Validate config based on ConfigurationSchema
