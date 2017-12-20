@@ -6,7 +6,7 @@ module Karafka
       # Class responsible for setting up WaterDrop configuration
       class WaterDrop < Base
         # Sets up a WaterDrop settings
-        def setup
+        def self.setup(config)
           ::WaterDrop.setup do |water_config|
             water_config.deliver = true
 

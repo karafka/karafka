@@ -158,9 +158,9 @@ module Karafka
         # Components are in karafka/config directory and are all loaded one by one
         # If you want to configure a next component, please add a proper file to config dir
         def setup_components
-          Configurators::Base.descendants.each do |klass|
-            klass.new(config).setup
-          end
+          [
+            Configurators::WaterDrop
+          ].each { |klass| klass.new(config).setup }
         end
 
         # Validate config based on ConfigurationSchema
