@@ -9,7 +9,7 @@ module Karafka
       # We need to configure all of them only when the framework was set up.
       # Any class that descends from this one will be automatically invoked upon setup (after it)
       # @note This should be used only for internal Karafka dependencies configuration
-      #   End users configuration should go to the before_boot block
+      #   End users configuration should go to the after_init block
       # @example Configure an Example class
       #   class ExampleConfigurator < Base
       #     def setup

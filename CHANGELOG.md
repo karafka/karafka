@@ -12,7 +12,7 @@
 - #242 - Support setting the max bytes to fetch per request
 - #247 - Support SCRAM once released
 - Lower ActiveSupport dependency
-- Remove configurators in favor of the after_boot block configurator
+- Remove configurators in favor of the after_init block configurator
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format
