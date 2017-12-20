@@ -55,6 +55,9 @@ module Karafka
       # @note Keep in mind, that if your business logic
       # @note If set to nil, it won't forcefully shutdown the process at all.
       setting :shutdown_timeout, 60
+      # option after_init [Proc] block that will be executed right after we finish the bootstrap
+      #   but before we run everything (server, console, etc)
+      setting :after_init, -> (_config) {}
 
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
@@ -160,7 +163,11 @@ module Karafka
         def setup_components
           [
             Configurators::WaterDrop
-          ].each { |klass| klass.new(config).setup }
+          ].each { |klass| klass.setup(config) }
+        end
+
+        def run_callbacks
+          config.after_init.call(config)
         end
 
         # Validate config based on ConfigurationSchema

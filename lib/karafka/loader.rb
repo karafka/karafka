@@ -5,7 +5,6 @@ module Karafka
   module Loader
     # Order in which we want to load app files
     DIRS = %w[
-      config/initializers
       lib
       app
     ].freeze

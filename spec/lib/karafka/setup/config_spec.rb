@@ -12,13 +12,8 @@ RSpec.describe Karafka::Setup::Config do
       config = double
 
       expect(Karafka::Setup::Configurators::WaterDrop)
-        .to receive(:new)
-        .with(config_class.config)
-        .and_return(config)
-        .at_least(:once)
-
-      expect(config)
         .to receive(:setup)
+        .with(config_class.config)
         .at_least(:once)
     end
 
