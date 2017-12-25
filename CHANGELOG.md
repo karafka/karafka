@@ -14,6 +14,7 @@
 - #271 - Provide an after_init option to pass a configuration block
 - Lower ActiveSupport dependency
 - Remove configurators in favor of the after_init block configurator
+- Ruby 2.5.0 support
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format
