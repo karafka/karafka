@@ -67,7 +67,7 @@ RSpec.describe Karafka::Connection::Consumer do
     end
 
     context 'when pause_timeout is not set to 0' do
-      let(:pause_timeout) { rand(100) + 1 }
+      let(:pause_timeout) { rand(1..100) }
 
       it 'expect not to pause consumer_group' do
         expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)

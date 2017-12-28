@@ -93,7 +93,7 @@ RSpec.describe Karafka::Server do
     end
 
     context 'when shutdown time is more then 1' do
-      let(:timeout) { rand(10) + 5 }
+      let(:timeout) { rand(5..15) }
 
       context 'when there are no active threads (all shutdown ok)' do
         it 'expect stop without exit or sleep' do
