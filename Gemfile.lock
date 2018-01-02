@@ -63,7 +63,7 @@ GEM
     inflecto (0.0.2)
     json (2.1.0)
     king_konf (0.1.9)
-    minitest (5.10.3)
+    minitest (5.11.0)
     multi_json (1.12.2)
     null-logger (0.1.4)
     rake (12.3.0)
