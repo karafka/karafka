@@ -18,7 +18,7 @@ Karafka provides a higher-level abstraction that allows you to focus on your bus
 - Karafka does **not** require Sidekiq or any other third party software (apart from Kafka itself).
 - Karafka works with Ruby on Rails but it is a standalone framework that can work without it.
 - Karafka has a minimal set of dependencies, so adding it won't be a huge burden for your already existing applications.
-- Karafka process can be executed for a given subset of consumer groups and/or topics, so you can fine tune it depending on your business logic.
+- Karafka processes can be executed for a given subset of consumer groups and/or topics, so you can fine tune it depending on your business logic.
 
 Karafka based applications can be easily deployed to any type of infrastructure, including those based on:
 
