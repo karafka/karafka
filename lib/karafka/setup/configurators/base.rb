@@ -5,7 +5,7 @@ module Karafka
     # Configurators module is used to enclose all the external dependencies configurations
     # upon which Karafka depents
     class Configurators
-      # Karafka has come components that it relies on (like Sidekiq)
+      # Karafka has some components that it relies on (like Sidekiq)
       # We need to configure all of them only when the framework was set up.
       # Any class that descends from this one will be automatically invoked upon setup (after it)
       # @note This should be used only for internal Karafka dependencies configuration
