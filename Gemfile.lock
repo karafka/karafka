@@ -64,7 +64,7 @@ GEM
     json (2.1.0)
     king_konf (0.1.9)
     minitest (5.11.1)
-    multi_json (1.12.2)
+    multi_json (1.13.0)
     null-logger (0.1.4)
     rake (12.3.0)
     require_all (1.5.0)
