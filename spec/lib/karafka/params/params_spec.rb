@@ -36,7 +36,8 @@ RSpec.describe Karafka::Params::Params do
           }
         end
         let(:message) do
-          Kafka::FetchedMessage.new(
+          instance_double(
+            Kafka::FetchedMessage,
             value: value,
             key: key,
             topic: topic,

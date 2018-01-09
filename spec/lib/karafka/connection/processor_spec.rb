@@ -8,9 +8,20 @@ RSpec.describe Karafka::Connection::Processor do
   let(:controller_instance) { consumer_group.topics[0].controller.new }
   let(:messages_batch) { [raw_message1, raw_message2] }
   let(:raw_message_value) { rand }
-  let(:raw_message2) { raw_message1.dup }
   let(:raw_message1) do
-    Kafka::FetchedMessage.new(
+    instance_double(
+      Kafka::FetchedMessage,
+      value: raw_message_value,
+      topic: topic_id,
+      offset: 0,
+      partition: 0,
+      key: nil,
+      create_time: Time.now
+    )
+  end
+  let(:raw_message2) do
+    instance_double(
+      Kafka::FetchedMessage,
       value: raw_message_value,
       topic: topic_id,
       offset: 0,
