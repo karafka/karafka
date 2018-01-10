@@ -2,7 +2,7 @@
 
 module Karafka
   module Patches
-    # Batches for Ruby Kafka gem
+    # Patches for Ruby Kafka gem
     module RubyKafka
       # This patch allows us to inject business logic in between fetches and before the consumer
       # stop, so we can perform stop commit or anything else that we need since
