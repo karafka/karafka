@@ -21,7 +21,7 @@ module Karafka
 
           if Karafka::App.stopped?
             controllers.each { |ctrl| ctrl.run_callbacks :before_stop }
-            Karafka::Persistence::Consumer.read.stop
+            Karafka::Persistence::Client.read.stop
           else
             controllers.each { |ctrl| ctrl.run_callbacks :before_poll }
             yield

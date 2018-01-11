@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Connection::Consumer do
-  subject(:consumer) { described_class.new(consumer_group) }
+RSpec.describe Karafka::Connection::Client do
+  subject(:client) { described_class.new(consumer_group) }
 
   let(:group) { rand.to_s }
   let(:topic) { rand.to_s }
@@ -29,30 +29,30 @@ RSpec.describe Karafka::Connection::Consumer do
 
   describe '.new' do
     it 'just remembers consumer_group' do
-      expect(consumer.instance_variable_get(:@consumer_group)).to eq consumer_group
+      expect(client.instance_variable_get(:@consumer_group)).to eq consumer_group
     end
   end
 
   describe '#stop' do
-    before { consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
+    before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
     it 'expect to stop consumer' do
       expect(kafka_consumer)
         .to receive(:stop)
 
-      consumer.stop
+      client.stop
     end
 
     it 'expect to remove kafka_consumer' do
-      consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer)
-      consumer.stop
-      expect(consumer.instance_variable_get(:'@kafka_consumer')).to eq nil
+      client.instance_variable_set(:'@kafka_consumer', kafka_consumer)
+      client.stop
+      expect(client.instance_variable_get(:'@kafka_consumer')).to eq nil
     end
   end
 
   describe '#pause' do
     before do
-      consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer)
+      client.instance_variable_set(:'@kafka_consumer', kafka_consumer)
       allow(consumer_group).to receive(:pause_timeout).and_return(pause_timeout)
     end
 
@@ -62,7 +62,7 @@ RSpec.describe Karafka::Connection::Consumer do
 
       it 'expect to raise an exception' do
         expect(kafka_consumer).not_to receive(:pause)
-        expect { consumer.send(:pause, topic, partition) }.to raise_error(error)
+        expect { client.send(:pause, topic, partition) }.to raise_error(error)
       end
     end
 
@@ -71,7 +71,7 @@ RSpec.describe Karafka::Connection::Consumer do
 
       it 'expect not to pause consumer_group' do
         expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
-        expect(consumer.send(:pause, topic, partition)).to eq true
+        expect(client.send(:pause, topic, partition)).to eq true
       end
     end
   end
@@ -79,19 +79,19 @@ RSpec.describe Karafka::Connection::Consumer do
   describe '#mark_as_consumed' do
     let(:params) { instance_double(Karafka::Params::Params) }
 
-    before { consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
+    before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
     it 'expect to forward to mark_message_as_processed and commit offsets' do
       expect(kafka_consumer).to receive(:mark_message_as_processed).with(params)
       expect(kafka_consumer).to receive(:commit_offsets)
-      consumer.mark_as_consumed(params)
+      client.mark_as_consumed(params)
     end
   end
 
   describe '#fetch_loop' do
     let(:incoming_message) { rand }
 
-    before { consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
+    before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
     context 'when everything works smooth' do
       context 'with single message consumption mode' do
@@ -99,7 +99,7 @@ RSpec.describe Karafka::Connection::Consumer do
 
         it 'expect to use kafka_consumer to get each message and yield as an array of messages' do
           expect(kafka_consumer).to receive(:each_message).and_yield(incoming_message)
-          expect { |block| consumer.fetch_loop(&block) }.to yield_with_args(messages)
+          expect { |block| client.fetch_loop(&block) }.to yield_with_args(messages)
         end
       end
 
@@ -112,7 +112,7 @@ RSpec.describe Karafka::Connection::Consumer do
           expect(kafka_consumer).to receive(:each_batch).and_yield(incoming_batch)
           expect(incoming_batch).to receive(:messages).and_return(incoming_messages)
 
-          expect { |block| consumer.fetch_loop(&block) }
+          expect { |block| client.fetch_loop(&block) }
             .to yield_successive_args(incoming_messages)
         end
       end
@@ -129,7 +129,7 @@ RSpec.describe Karafka::Connection::Consumer do
 
       before do
         count = 0
-        allow(consumer).to receive(:consume_each_message).exactly(2).times do
+        allow(client).to receive(:consume_each_message).exactly(2).times do
           count += 1
           count == 1 ? raise(error) : true
         end
@@ -142,7 +142,7 @@ RSpec.describe Karafka::Connection::Consumer do
 
       it 'notice, pause and not reraise error' do
         expect(kafka_consumer).to receive(:pause).and_return(true)
-        expect { consumer.fetch_loop {} }.not_to raise_error
+        expect { client.fetch_loop {} }.not_to raise_error
       end
     end
 
@@ -151,7 +151,7 @@ RSpec.describe Karafka::Connection::Consumer do
 
       before do
         count = 0
-        allow(consumer).to receive(:consume_each_message).exactly(2).times do
+        allow(client).to receive(:consume_each_message).exactly(2).times do
           count += 1
           count == 1 ? raise(error) : true
         end
@@ -164,17 +164,17 @@ RSpec.describe Karafka::Connection::Consumer do
 
       it 'notices and not reraise error' do
         expect(kafka_consumer).not_to receive(:pause)
-        expect { consumer.fetch_loop {} }.not_to raise_error
+        expect { client.fetch_loop {} }.not_to raise_error
       end
     end
   end
 
   describe '#kafka_consumer' do
     context 'when kafka_consumer is already built' do
-      before { consumer.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
+      before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
       it 'expect to return it' do
-        expect(consumer.send(:kafka_consumer)).to eq kafka_consumer
+        expect(client.send(:kafka_consumer)).to eq kafka_consumer
       end
     end
 
@@ -206,21 +206,21 @@ RSpec.describe Karafka::Connection::Consumer do
       it 'expect to build it and subscribe' do
         expect(kafka).to receive(:consumer).and_return(kafka_consumer)
         expect(kafka_consumer).to receive(:subscribe).with(*subscribe_params)
-        expect(consumer.send(:kafka_consumer)).to eq kafka_consumer
+        expect(client.send(:kafka_consumer)).to eq kafka_consumer
       end
     end
 
     context 'when there was a kafka connection failure' do
       before do
-        consumer.instance_variable_set(:'@kafka_consumer', nil)
+        client.instance_variable_set(:'@kafka_consumer', nil)
 
         expect(Kafka).to receive(:new).and_raise(Kafka::ConnectionError)
       end
 
       it 'expect to sleep and reraise' do
-        expect(consumer).to receive(:sleep).with(5)
+        expect(client).to receive(:sleep).with(5)
 
-        expect { consumer.send(:kafka_consumer) }.to raise_error(Kafka::ConnectionError)
+        expect { client.send(:kafka_consumer) }.to raise_error(Kafka::ConnectionError)
       end
     end
   end

@@ -15,7 +15,7 @@ module Karafka
         # and if that happens, it means that something really bad happened and we should stop
         # the whole process
         Thread
-          .new { listener.fetch_loop(processor) }
+          .new { listener.fetch_loop(delegator) }
           .tap { |thread| thread.abort_on_exception = true }
       end
 
@@ -39,11 +39,13 @@ module Karafka
       end
     end
 
-    # @return [Proc] proc that should be processed when a messages arrive
+    # @return [Proc] proc that should be executed when a messages arrive
     # @yieldparam messages [Array<Kafka::FetchedMessage>] messages from kafka (raw)
-    def processor
+    # @note What happens here is a delegation of processing to a proper processor based on the
+    #   incoming messages characteristics
+    def delegator
       lambda do |group_id, messages|
-        Karafka::Connection::Processor.process(group_id, messages)
+        Karafka::Connection::Delegator.call(group_id, messages)
       end
     end
   end

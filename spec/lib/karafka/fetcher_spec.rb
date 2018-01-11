@@ -6,7 +6,7 @@ RSpec.describe Karafka::Fetcher do
   describe '#fetch_loop' do
     context 'when everything is ok' do
       let(:listeners) { [listener] }
-      let(:processor) { -> {} }
+      let(:delegator) { -> {} }
       let(:async_scope) { listener }
       let(:listener) { instance_double(Karafka::Connection::Listener, fetch_loop: nil) }
 
@@ -16,8 +16,8 @@ RSpec.describe Karafka::Fetcher do
           .and_return(listeners)
 
         expect(fetcher)
-          .to receive(:processor)
-          .and_return(processor)
+          .to receive(:delegator)
+          .and_return(delegator)
       end
 
       it 'starts asynchronously consumption for each listener' do
@@ -42,21 +42,21 @@ RSpec.describe Karafka::Fetcher do
     end
   end
 
-  describe '#processor' do
-    subject(:fetcher) { described_class.new.send(:processor) }
+  describe '#delegator' do
+    subject(:fetcher) { described_class.new.send(:delegator) }
 
     it 'is a proc' do
       expect(fetcher).to be_a Proc
     end
 
-    context 'when we invoke a processor block' do
+    context 'when we invoke a delegator block' do
       let(:message) { double }
-      let(:processor) { Karafka::Connection::Processor }
+      let(:delegator) { Karafka::Connection::Delegator }
       let(:consumer_group_id) { rand.to_s }
 
       it 'process the message' do
-        expect(processor)
-          .to receive(:process)
+        expect(delegator)
+          .to receive(:call)
           .with(consumer_group_id, message)
 
         fetcher.call(consumer_group_id, message)
