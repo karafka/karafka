@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Connection::Processor do
-  subject(:processor) { described_class }
+RSpec.describe Karafka::Connection::Delegator do
+  subject(:delegator) { described_class }
 
   let(:group_id) { consumer_group.id }
   let(:topic_id) { consumer_group.topics[0].name }
@@ -65,7 +65,7 @@ RSpec.describe Karafka::Connection::Processor do
       end
 
       it 'routes to a proper controller and call task' do
-        expect { processor.process(group_id, messages_batch) }.not_to raise_error
+        expect { delegator.call(group_id, messages_batch) }.not_to raise_error
       end
     end
 
@@ -99,7 +99,7 @@ RSpec.describe Karafka::Connection::Processor do
 
       it 'expect to run with remapping' do
         expect(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper)
-        expect { processor.process(group_id, messages_batch) }.not_to raise_error
+        expect { delegator.call(group_id, messages_batch) }.not_to raise_error
       end
     end
   end
@@ -143,7 +143,7 @@ RSpec.describe Karafka::Connection::Processor do
       end
 
       it 'routes to a proper controller and call task' do
-        expect { processor.process(group_id, messages_batch) }.not_to raise_error
+        expect { delegator.call(group_id, messages_batch) }.not_to raise_error
       end
     end
 
@@ -177,7 +177,7 @@ RSpec.describe Karafka::Connection::Processor do
 
       it 'expect to run with remapping' do
         expect(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper)
-        expect { processor.process(group_id, messages_batch) }.not_to raise_error
+        expect { delegator.call(group_id, messages_batch) }.not_to raise_error
       end
     end
   end
