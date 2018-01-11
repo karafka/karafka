@@ -13,7 +13,7 @@ RSpec.describe Karafka::Connection::Listener do
   end
 
   describe '#fetch_loop' do
-    let(:consumer) { double }
+    let(:client) { double }
     let(:incoming_message) { double }
     let(:action) { double }
 
@@ -31,9 +31,9 @@ RSpec.describe Karafka::Connection::Listener do
             .with(described_class, error)
         end
 
-        it 'notices the error and stop the consumer' do
+        it 'notices the error and stop the client' do
           expect(listener)
-            .to receive(:consumer)
+            .to receive(:client)
             .and_raise(error.new)
 
           expect { listener.fetch_loop(-> {}) }.not_to raise_error
@@ -43,8 +43,8 @@ RSpec.describe Karafka::Connection::Listener do
 
     context 'when no errors occur' do
       it 'expect to yield for each incoming message' do
-        expect(listener).to receive(:consumer).and_return(consumer)
-        expect(consumer).to receive(:fetch_loop).and_yield(incoming_message)
+        expect(listener).to receive(:client).and_return(client)
+        expect(client).to receive(:fetch_loop).and_yield(incoming_message)
         expect(action).to receive(:call).with(consumer_group.id, incoming_message)
 
         listener.send(:fetch_loop, action)
@@ -52,36 +52,36 @@ RSpec.describe Karafka::Connection::Listener do
     end
   end
 
-  describe '#consumer' do
-    context 'when consumer is already created' do
-      let(:consumer) { double }
+  describe '#client' do
+    context 'when client is already created' do
+      let(:client) { double }
 
       before do
-        listener.instance_variable_set(:'@consumer', consumer)
+        listener.instance_variable_set(:'@client', client)
       end
 
       it 'just returns it' do
-        expect(Karafka::Connection::Consumer)
+        expect(Karafka::Connection::Client)
           .to receive(:new)
           .never
-        expect(listener.send(:consumer)).to eq consumer
+        expect(listener.send(:client)).to eq client
       end
     end
 
-    context 'when consumer is not yet created' do
-      let(:consumer) { double }
+    context 'when client is not yet created' do
+      let(:client) { double }
 
       before do
-        listener.instance_variable_set(:'@consumer', nil)
+        listener.instance_variable_set(:'@client', nil)
       end
 
       it 'creates an instance and return' do
-        expect(Karafka::Connection::Consumer)
+        expect(Karafka::Connection::Client)
           .to receive(:new)
           .with(consumer_group)
-          .and_return(consumer)
+          .and_return(client)
 
-        expect(listener.send(:consumer)).to eq consumer
+        expect(listener.send(:client)).to eq client
       end
     end
   end

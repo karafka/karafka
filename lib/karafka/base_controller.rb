@@ -8,9 +8,9 @@ module Karafka
     extend Forwardable
 
     # Allows us to mark messages as consumed for non-automatic mode without having
-    # to use consumer directly. We do this that way, because most of the people should not
-    # mess with the consumer instance directly (just in case)
-    def_delegator :consumer, :mark_as_consumed
+    # to use consumer client directly. We do this that way, because most of the people should not
+    # mess with the client instance directly (just in case)
+    def_delegator :client, :mark_as_consumed
 
     private :mark_as_consumed
 
@@ -51,10 +51,10 @@ module Karafka
     # We make it private as it should be accesible only from the inside of a controller
     attr_reader :params_batch
 
-    # @return [Karafka::Connection::Consumer] messages consumer that can be used to
+    # @return [Karafka::Connection::Client] messages consuming client that can be used to
     #    commit manually offset or pause / stop consumer based on the business logic
-    def consumer
-      Persistence::Consumer.read
+    def client
+      Persistence::Client.read
     end
 
     # Method that will perform business logic and on data received from Kafka (it will consume

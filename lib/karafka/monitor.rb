@@ -55,7 +55,7 @@ module Karafka
     def caller_exceptions_map
       @caller_exceptions_map ||= {
         error: [
-          Karafka::Connection::Consumer,
+          Karafka::Connection::Client,
           Karafka::Connection::Listener,
           Karafka::Params::Params
         ],

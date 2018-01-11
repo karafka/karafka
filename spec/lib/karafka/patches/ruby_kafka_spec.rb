@@ -17,15 +17,15 @@ RSpec.describe Karafka::Patches::RubyKafka do
   end
 
   describe '#consumer_loop' do
-    let(:consumer) { instance_double(Karafka::Connection::Consumer, stop: true) }
+    let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
     let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s, persistent: false) }
 
     before do
-      Karafka::Persistence::Consumer.write(consumer)
+      Karafka::Persistence::Client.write(client)
       Karafka::Persistence::Controller.fetch(topic, 0) { nil }
     end
 
-    after { Thread.current[:consumer] = nil }
+    after { Thread.current[:client] = nil }
 
     context 'when karafka app has stopped' do
       before { allow(Karafka::App).to receive(:stopped?).and_return(true) }
@@ -34,8 +34,8 @@ RSpec.describe Karafka::Patches::RubyKafka do
         expect { |block| kafka_consumer.consumer_loop(&block) }.not_to yield_control
       end
 
-      it 'expect to stop the current thread messages consumer' do
-        expect(consumer).to receive(:stop)
+      it 'expect to stop the current thread messages client' do
+        expect(client).to receive(:stop)
         kafka_consumer.consumer_loop
       end
     end
