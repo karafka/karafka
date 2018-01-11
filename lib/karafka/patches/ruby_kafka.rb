@@ -14,10 +14,10 @@ module Karafka
       def consumer_loop
         super do
           consumers = Karafka::Persistence::Consumer
-                        .all
-                        .values
-                        .flat_map(&:values)
-                        .select { |ctrl| ctrl.respond_to?(:run_callbacks) }
+                      .all
+                      .values
+                      .flat_map(&:values)
+                      .select { |ctrl| ctrl.respond_to?(:run_callbacks) }
 
           if Karafka::App.stopped?
             consumers.each { |ctrl| ctrl.run_callbacks :before_stop }
