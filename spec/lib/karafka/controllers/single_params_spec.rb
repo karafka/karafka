@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Controllers::SingleParams do
-  subject(:controller) { controller_class.new }
+RSpec.describe Karafka::Consumers::SingleParams do
+  subject(:consumer) { consumer_class.new }
 
-  let(:controller_class) { Class.new(Karafka::BaseController) }
+  let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
   let(:params_batch) { [OpenStruct.new(value: {}.to_json)] }
   let(:topic) do
     instance_double(
@@ -17,12 +17,12 @@ RSpec.describe Karafka::Controllers::SingleParams do
   end
 
   before do
-    controller_class.include(described_class)
-    controller_class.topic = topic
-    controller.params_batch = params_batch
+    consumer_class.include(described_class)
+    consumer_class.topic = topic
+    consumer.params_batch = params_batch
   end
 
   it 'expect to provide #params' do
-    expect(controller.send(:params)).to eq controller.send(:params_batch).first
+    expect(consumer.send(:params)).to eq consumer.send(:params_batch).first
   end
 end

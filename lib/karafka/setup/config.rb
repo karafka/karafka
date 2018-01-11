@@ -43,9 +43,9 @@ module Karafka
       # #params_batch will contain params received from Kafka (may be more than 1) so we can
       # process them in batches
       setting :batch_consuming, false
-      # Should we operate in a single controller instance across multiple batches of messages,
+      # Should we operate in a single consumer instance across multiple batches of messages,
       # from the same partition or should we build a new instance for each incoming batch.
-      # Disabling that can be useful when you want to build a new controller instance for each
+      # Disabling that can be useful when you want to build a new consumer instance for each
       # incoming batch. It's disabled by default, not to create more objects that needed on
       # each batch
       setting :persistent, true

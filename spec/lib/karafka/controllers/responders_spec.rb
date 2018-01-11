@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Controllers::Responders do
+RSpec.describe Karafka::Consumers::Responders do
   pending
 end

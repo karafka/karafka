@@ -9,7 +9,7 @@ module Karafka
       extend Helpers::ConfigRetriever
 
       attr_reader :id, :consumer_group
-      attr_accessor :controller
+      attr_accessor :consumer
 
       # @param [String, Symbol] name of a topic on which we want to listen
       # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
@@ -29,14 +29,14 @@ module Karafka
       # example for Sidekiq
       def build
         Karafka::AttributesMap.topic.each { |attr| send(attr) }
-        controller&.topic = self
+        consumer&.topic = self
         self
       end
 
       # @return [Class, nil] Class (not an instance) of a responder that should respond from
-      #   controller back to Kafka (usefull for piping dataflows)
+      #   consumer back to Kafka (usefull for piping dataflows)
       def responder
-        @responder ||= Karafka::Responders::Builder.new(controller).build
+        @responder ||= Karafka::Responders::Builder.new(consumer).build
       end
 
       Karafka::AttributesMap.topic.each do |attribute|
@@ -52,7 +52,7 @@ module Karafka
 
         Hash[map].merge!(
           id: id,
-          controller: controller
+          consumer: consumer
         )
       end
     end

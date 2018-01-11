@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Controllers::Callbacks do
-  subject(:base_controller) { working_class.new }
+RSpec.describe Karafka::Consumers::Callbacks do
+  subject(:base_consumer) { working_class.new }
 
   let(:topic_name) { "topic#{rand}" }
   let(:backend) { :inline }
@@ -9,8 +9,8 @@ RSpec.describe Karafka::Controllers::Callbacks do
   let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand.to_s) }
   let(:topic) do
     topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
-    topic.controller = Class.new(Karafka::BaseController)
-    topic.controller.include described_class
+    topic.consumer = Class.new(Karafka::BaseConsumer)
+    topic.consumer.include described_class
     topic.backend = backend
     topic.responder = responder_class
     topic
@@ -18,9 +18,9 @@ RSpec.describe Karafka::Controllers::Callbacks do
   let(:working_class) do
     described_scope = described_class
 
-    ClassBuilder.inherit(Karafka::BaseController) do
+    ClassBuilder.inherit(Karafka::BaseConsumer) do
       include Karafka::Backends::Inline
-      include Karafka::Controllers::Responders
+      include Karafka::Consumers::Responders
       include described_scope
 
       def consume
@@ -32,18 +32,18 @@ RSpec.describe Karafka::Controllers::Callbacks do
   before { working_class.topic = topic }
 
   describe '#consume' do
-    let(:working_class) { ClassBuilder.inherit(Karafka::BaseController) }
+    let(:working_class) { ClassBuilder.inherit(Karafka::BaseConsumer) }
 
-    it { expect { base_controller.send(:consume) }.to raise_error NotImplementedError }
+    it { expect { base_consumer.send(:consume) }.to raise_error NotImplementedError }
   end
 
   context 'when we want to use after_fetched callback' do
     describe '#call' do
       context 'when there are no callbacks' do
         it 'just schedules' do
-          expect(base_controller).to receive(:process)
+          expect(base_consumer).to receive(:process)
 
-          base_controller.call
+          base_consumer.call
         end
       end
     end
@@ -52,10 +52,10 @@ RSpec.describe Karafka::Controllers::Callbacks do
       let(:backend) { :inline }
 
       context 'when it throws abort to halt' do
-        subject(:base_controller) do
+        subject(:base_consumer) do
           described_scope = described_class
 
-          ClassBuilder.inherit(Karafka::BaseController) do
+          ClassBuilder.inherit(Karafka::BaseConsumer) do
             include Karafka::Backends::Inline
             include described_scope
 
@@ -70,17 +70,17 @@ RSpec.describe Karafka::Controllers::Callbacks do
         end
 
         it 'does not consume' do
-          expect(base_controller).not_to receive(:consume)
+          expect(base_consumer).not_to receive(:consume)
 
-          base_controller.call
+          base_consumer.call
         end
       end
 
       context 'when it does not throw abort to halt' do
-        subject(:base_controller) do
+        subject(:base_consumer) do
           described_scope = described_class
 
-          ClassBuilder.inherit(Karafka::BaseController) do
+          ClassBuilder.inherit(Karafka::BaseConsumer) do
             include Karafka::Backends::Inline
             include described_scope
 
@@ -97,8 +97,8 @@ RSpec.describe Karafka::Controllers::Callbacks do
         let(:params) { double }
 
         it 'executes' do
-          expect(base_controller).to receive(:process)
-          base_controller.call
+          expect(base_consumer).to receive(:process)
+          base_consumer.call
         end
       end
     end
@@ -107,10 +107,10 @@ RSpec.describe Karafka::Controllers::Callbacks do
       let(:backend) { :inline }
 
       context 'when it throws abort to halt' do
-        subject(:base_controller) do
+        subject(:base_consumer) do
           described_scope = described_class
 
-          ClassBuilder.inherit(Karafka::BaseController) do
+          ClassBuilder.inherit(Karafka::BaseConsumer) do
             include described_scope
 
             after_fetched :method
@@ -126,17 +126,17 @@ RSpec.describe Karafka::Controllers::Callbacks do
         end
 
         it 'does not consume' do
-          expect(base_controller).not_to receive(:consume)
+          expect(base_consumer).not_to receive(:consume)
 
-          base_controller.call
+          base_consumer.call
         end
       end
 
       context 'when it does not return false' do
-        subject(:base_controller) do
+        subject(:base_consumer) do
           described_scope = described_class
 
-          ClassBuilder.inherit(Karafka::BaseController) do
+          ClassBuilder.inherit(Karafka::BaseConsumer) do
             include Karafka::Backends::Inline
             include described_scope
 
@@ -153,9 +153,9 @@ RSpec.describe Karafka::Controllers::Callbacks do
         end
 
         it 'schedules to a backend' do
-          expect(base_controller).to receive(:consume)
+          expect(base_consumer).to receive(:consume)
 
-          base_controller.call
+          base_consumer.call
         end
       end
     end

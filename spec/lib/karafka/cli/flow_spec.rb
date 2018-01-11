@@ -23,7 +23,7 @@ RSpec.describe Karafka::Cli::Flow do
         Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
           cg.public_send(:topic=, topic) do
             responder responder_instance
-            controller Class.new(Karafka::BaseController)
+            consumer Class.new(Karafka::BaseConsumer)
             backend :inline
           end
         end

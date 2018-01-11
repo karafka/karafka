@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Backends::Inline do
-  subject(:controller) { controller_class.new }
+  subject(:consumer) { consumer_class.new }
 
-  let(:controller_class) { Class.new(Karafka::BaseController) }
+  let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
 
-  before { controller_class.include(described_class) }
+  before { consumer_class.include(described_class) }
 
   it 'expect to call' do
-    expect(controller).to receive(:consume)
-    controller.call
+    expect(consumer).to receive(:consume)
+    consumer.call
   end
 end

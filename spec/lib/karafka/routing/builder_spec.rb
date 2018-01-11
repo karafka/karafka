@@ -4,7 +4,7 @@ RSpec.describe Karafka::Routing::Builder do
   subject(:builder) { described_class.instance }
 
   ATTRIBUTES = %i[
-    controller
+    consumer
     parser
     responder
   ].freeze
@@ -22,7 +22,7 @@ RSpec.describe Karafka::Routing::Builder do
             # Here we should have instance doubles, etc but it takes
             # shitload of time to setup to pass to instance eval from instance variables,
             # so instead we check against constant names
-            controller Class.new(Karafka::BaseController)
+            consumer Class.new(Karafka::BaseConsumer)
             backend :inline
             name 'name1'
             parser :parser1
@@ -33,7 +33,7 @@ RSpec.describe Karafka::Routing::Builder do
       let(:consumer_group2) do
         described_class.instance.draw do
           topic :topic_name2 do
-            controller Class.new(Karafka::BaseController)
+            consumer Class.new(Karafka::BaseConsumer)
             backend :inline
             name 'name2'
             parser :parser2
@@ -70,7 +70,7 @@ RSpec.describe Karafka::Routing::Builder do
             seed_brokers ['kafka://localhost:9092']
 
             topic :topic_name1 do
-              controller Class.new(Karafka::BaseController)
+              consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name1'
               parser :parser1
@@ -85,7 +85,7 @@ RSpec.describe Karafka::Routing::Builder do
             seed_brokers ['kafka://localhost:9093']
 
             topic :topic_name2 do
-              controller Class.new(Karafka::BaseController)
+              consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name2'
               parser :parser2
@@ -117,7 +117,7 @@ RSpec.describe Karafka::Routing::Builder do
             seed_brokers ['kafka://localhost:9092']
 
             topic :topic_name1 do
-              controller Class.new(Karafka::BaseController)
+              consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name1'
               parser :parser1
@@ -125,7 +125,7 @@ RSpec.describe Karafka::Routing::Builder do
             end
 
             topic :topic_name2 do
-              controller Class.new(Karafka::BaseController)
+              consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name2'
               parser :parser2

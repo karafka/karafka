@@ -6,7 +6,7 @@ module Karafka
     # @example Build a simple (most common) route
     #   consumers do
     #     topic :new_videos do
-    #       controller NewVideosController
+    #       consumer NewVideosConsumer
     #     end
     #   end
     class Builder < Array

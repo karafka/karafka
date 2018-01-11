@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Connection::ConfigAdapter do
-  let(:controller) { Karafka::BaseController }
+  let(:consumer) { Karafka::BaseConsumer }
   let(:topic) { rand.to_s }
   let(:attributes_map_values) { Karafka::AttributesMap.config_adapter }
   let(:consumer_group) do
     Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
       cg.public_send(:topic=, topic) do
-        controller Class.new(Karafka::BaseController)
+        consumer Class.new(Karafka::BaseConsumer)
         backend :inline
       end
     end
@@ -83,7 +83,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
           cg.send(:max_wait_time=, 0.5)
 
           cg.public_send(:topic=, topic) do
-            controller Class.new(Karafka::BaseController)
+            consumer Class.new(Karafka::BaseConsumer)
             backend :inline
           end
         end
