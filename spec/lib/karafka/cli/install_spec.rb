@@ -10,18 +10,18 @@ RSpec.describe Karafka::Cli::Install do
   describe '#call' do
     before do
       described_class::INSTALL_DIRS.each do |dir|
-        expect(FileUtils)
+        allow(FileUtils)
           .to receive(:mkdir_p)
           .with(Karafka.root.join(dir))
       end
 
       described_class::INSTALL_FILES_MAP.each do |source, target|
-        expect(File)
+        allow(File)
           .to receive(:exist?)
           .with(Karafka.root.join(target))
           .and_return(false)
 
-        expect(FileUtils)
+        allow(FileUtils)
           .to receive(:cp_r)
           .with(
             Karafka.core_root.join("templates/#{source}"),
@@ -31,7 +31,7 @@ RSpec.describe Karafka::Cli::Install do
     end
 
     it 'expect to create proper dirs and copy template files' do
-      install_cli.call
+      expect { install_cli.call }.not_to raise_error
     end
   end
 end
