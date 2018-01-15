@@ -41,9 +41,9 @@ module Karafka
         end
       end
 
-      # Executes the default consumer flow, runs callbacks and if not halted will call process method of
-      # a proper backend. It is here because it interacts with the default Karafka call flow and needs
-      # to be overwritten to support callbacks
+      # Executes the default consumer flow, runs callbacks and if not halted will call process
+      # method of a proper backend. It is here because it interacts with the default Karafka
+      # call flow and needs to be overwritten to support callbacks
       def call
         run_callbacks :after_fetched do
           process

@@ -46,7 +46,8 @@ module Karafka
       # Should we operate in a single consumer instance across multiple batches of messages,
       # from the same partition or should we build a new one for each incoming batch.
       # Disabling that can be useful when you want to create a new consumer instance for each
-      # incoming batch. It's disabled by default, not to create more objects that needed on each batch
+      # incoming batch. It's disabled by default, not to create more objects that needed
+      # on each batch
       setting :persistent, true
       # option shutdown_timeout [Integer, nil] the number of seconds after which Karafka no
       #   longer wait for the consumers to stop gracefully but instead we force
