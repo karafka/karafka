@@ -10,7 +10,7 @@ module Karafka
       #   Kafka responding
       def respond_with(*data)
         Karafka.monitor.notice(self.class, data: data)
-        # @note we build a new instance of responder each time, as a long running (persisted)
+        # @note we build a new instance of responder each time, as a long-running (persisted)
         #   consumers can respond multiple times during the lifecycle
         topic.responder.new(topic.parser).call(*data)
       end

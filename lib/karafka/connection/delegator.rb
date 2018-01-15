@@ -24,8 +24,8 @@ module Karafka
             topic.consumer.new
           end
 
-          # Depending on a case (persisted or not) we might use new consumer instance per each
-          # batch, or use the same instance for all of them (for implementing buffering, etc)
+          # Depending on a case (persisted or not) we might use new consumer instance per
+          # each batch, or use the same one for all of them (for implementing buffering, etc.)
           send(
             topic.batch_consuming ? :delegate_batch : :delegate_each,
             consumer,

@@ -5,8 +5,8 @@ module Karafka
   module Consumers
     # Module used to inject functionalities into a given consumer class, based on the consumer
     # topic and its settings
-    # We don't need all the behaviors in all the cases, so it is totally not worth having
-    # everything in all the cases all the time
+    # We don't need all the behaviors in all the cases, so it is not worth having everything
+    # in all the cases all the time
     module Includer
       class << self
         # @param consumer_class [Class] consumer class, that will get some functionalities

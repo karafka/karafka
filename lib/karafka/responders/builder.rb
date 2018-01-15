@@ -3,9 +3,10 @@
 module Karafka
   # Responders namespace encapsulates all the internal responder implementation parts
   module Responders
-    # Responders builder is used to find (based on the consumer class name) a responder that
-    # match the consumer. This is used when user does not provide a responder inside routing
+    # Responders builder is used to finding (based on the consumer class name) a responder
+    # that match the consumer. We use it when user does not provide a responder inside routing,
     # but he still names responder with the same convention (and namespaces) as consumer
+    #
     # @example Matching responder exists
     #   Karafka::Responder::Builder(NewEventsConsumer).build #=> NewEventsResponder
     # @example Matching responder does not exist

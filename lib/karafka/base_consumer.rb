@@ -17,8 +17,8 @@ module Karafka
     class << self
       attr_reader :topic
 
-      # Assigns a topic to a consumer and build up proper consumer functionalities, so it can
-      #   cooperate with the topic settings
+      # Assigns a topic to a consumer and builds up proper consumer functionalities
+      #   so that it can cooperate with the topic settings
       # @param topic [Karafka::Routing::Topic]
       # @return [Karafka::Routing::Topic] assigned topic
       def topic=(topic)
@@ -48,7 +48,7 @@ module Karafka
 
     private
 
-    # We make it private as it should be accesible only from the inside of a consumer
+    # We make it private as it should be accessible only from the inside of a consumer
     attr_reader :params_batch
 
     # @return [Karafka::Connection::Client] messages consuming client that can be used to
