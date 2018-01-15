@@ -9,7 +9,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         id: 'id',
         name: 'name',
         backend: :inline,
-        controller: Class.new,
+        consumer: Class.new,
         parser: Class.new,
         max_bytes_per_partition: 1,
         start_from_beginning: true,

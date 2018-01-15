@@ -13,19 +13,19 @@ module Karafka
       # thread)
       def consumer_loop
         super do
-          controllers = Karafka::Persistence::Controller
-                        .all
-                        .values
-                        .flat_map(&:values)
-                        .select { |ctrl| ctrl.respond_to?(:run_callbacks) }
+          consumers = Karafka::Persistence::Consumer
+                      .all
+                      .values
+                      .flat_map(&:values)
+                      .select { |ctrl| ctrl.respond_to?(:run_callbacks) }
 
           if Karafka::App.stopped?
-            controllers.each { |ctrl| ctrl.run_callbacks :before_stop }
+            consumers.each { |ctrl| ctrl.run_callbacks :before_stop }
             Karafka::Persistence::Client.read.stop
           else
-            controllers.each { |ctrl| ctrl.run_callbacks :before_poll }
+            consumers.each { |ctrl| ctrl.run_callbacks :before_poll }
             yield
-            controllers.each { |ctrl| ctrl.run_callbacks :after_poll }
+            consumers.each { |ctrl| ctrl.run_callbacks :after_poll }
           end
         end
       end

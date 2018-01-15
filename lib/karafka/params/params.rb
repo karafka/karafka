@@ -110,7 +110,7 @@ module Karafka
         super(other_hash) { |_key, base_value, _new_value| base_value }
       end
 
-      # @param value [String] Raw data that we want to parse using controller's parser
+      # @param value [String] Raw data that we want to parse using consumer parser
       # @note If something goes wrong, it will return raw data in a hash with a message key
       # @return [Hash] parsed data or a hash with message key containing raw data if something
       #   went wrong during parsing

@@ -16,7 +16,7 @@ RSpec.describe Karafka::Connection::Client do
       cg.batch_fetching = batch_fetching_active
 
       cg.public_send(:topic=, topic) do
-        controller Class.new(Karafka::BaseController)
+        consumer Class.new(Karafka::BaseConsumer)
         backend :inline
         start_from_beginning start_from_beginning_active
       end

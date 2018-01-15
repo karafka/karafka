@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Controllers
+  module Consumers
     # Additional callbacks that can be used to trigger some actions on certain moments like
     # manual offset management, committing or anything else outside of a standard messages flow
     # They are not included by default, as we don't want to provide functionalities that are
@@ -28,9 +28,9 @@ module Karafka
         end
       end
 
-      # @param controller_class [Class] controller class that we extend with callbacks
-      def self.included(controller_class)
-        controller_class.class_eval do
+      # @param consumer_class [Class] consumer class that we extend with callbacks
+      def self.included(consumer_class)
+        consumer_class.class_eval do
           extend ClassMethods
           include ActiveSupport::Callbacks
 
@@ -41,9 +41,9 @@ module Karafka
         end
       end
 
-      # Executes the default controller flow, runs callbacks and if not halted will call process
-      # method of a proper backend. This is here because it interacts with the default Karafka
-      # call flow and needs to be overwritten in order to support callbacks
+      # Executes the default consumer flow, runs callbacks and if not halted will call process
+      # method of a proper backend. It is here because it interacts with the default Karafka
+      # call flow and needs to be overwritten to support callbacks
       def call
         run_callbacks :after_fetched do
           process

@@ -13,9 +13,9 @@ module Karafka
 
     # Raised when router receives topic name which does not correspond with any routes
     # This can only happen in a case when:
-    #   - you've received a message and we cannot match it with a controller
+    #   - you've received a message and we cannot match it with a consumer
     #   - you've changed the routing, so router can no longer associate your topic to
-    #     any controller
+    #     any consumer
     #   - or in a case when you do a lot of metaprogramming and you change routing/etc on runtime
     #
     # In case this happens, you will have to create a temporary route that will allow

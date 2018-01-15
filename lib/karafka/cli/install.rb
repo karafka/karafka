@@ -9,8 +9,7 @@ module Karafka
 
       # Directories created by default
       INSTALL_DIRS = %w[
-        app/models
-        app/controllers
+        app/consumers
         app/responders
         config
         log
@@ -20,7 +19,7 @@ module Karafka
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
         'karafka.rb.example' => Karafka.boot_file.basename,
-        'application_controller.rb.example' => 'app/controllers/application_controller.rb',
+        'application_consumer.rb.example' => 'app/consumers/application_consumer.rb',
         'application_responder.rb.example' => 'app/responders/application_responder.rb'
       }.freeze
 

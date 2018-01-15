@@ -19,7 +19,7 @@ RSpec.describe Karafka::AttributesMap do
     let(:per_topic_specific_attributes) do
       %i[
         name
-        controller
+        consumer
         backend
         parser
         responder

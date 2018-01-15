@@ -4,20 +4,20 @@ module Karafka
   module Helpers
     # Class used to autodetect corresponding classes that are internally inside Karafka framework
     # It is used among others to match:
-    #   controller => responder
+    #   consumer => responder
     class ClassMatcher
-      # Regexp used to remove any non classy like characters that might be in the controller
+      # Regexp used to remove any non classy like characters that might be in the consumer
       # class name (if defined dynamically, etc)
       CONSTANT_REGEXP = %r{[?!=+\-\*/\^\|&\[\]<>%~\#\:\s\(\)]}
 
       # @param klass [Class] class to which we want to find a corresponding class
       # @param from [String] what type of object is it (based on postfix name part)
       # @param to [String] what are we looking for (based on a postfix name part)
-      # @example Controller that has a corresponding responder
-      #   matcher = Karafka::Helpers::ClassMatcher.new(SuperController, 'Controller', 'Responder')
+      # @example Consumer that has a corresponding responder
+      #   matcher = Karafka::Helpers::ClassMatcher.new(SuperConsumer, 'Consumer', 'Responder')
       #   matcher.match #=> SuperResponder
-      # @example Controller without a corresponding responder
-      #   matcher = Karafka::Helpers::ClassMatcher.new(Super2Controller, 'Controller', 'Responder')
+      # @example Consumer without a corresponding responder
+      #   matcher = Karafka::Helpers::ClassMatcher.new(Super2Consumer, 'Consumer', 'Responder')
       #   matcher.match #=> nil
       def initialize(klass, from:, to:)
         @klass = klass
@@ -36,9 +36,9 @@ module Karafka
 
       # @return [String] name of a new class that we're looking for
       # @note This method returns name of a class without a namespace
-      # @example From SuperController matching responder
+      # @example From SuperConsumer matching responder
       #   matcher.name #=> 'SuperResponder'
-      # @example From Namespaced::Super2Controller matching responder
+      # @example From Namespaced::Super2Consumer matching responder
       #   matcher.name #=> Super2Responder
       def name
         inflected = @klass.to_s.split('::').last.to_s

@@ -19,8 +19,8 @@ module Karafka
     #   on of who and when is calling
     # @note We don't provide a name of method in which this was called, because we can take
     #   it directly from Ruby (see #caller_label method of this class for more details)
-    # @example Notice about consuming with controller_class
-    #   Karafka.monitor.notice(self.class, controller_class: controller_class)
+    # @example Notice about consuming with consumer_class
+    #   Karafka.monitor.notice(self.class, consumer_class: consumer_class)
     # @example Notice about terminating with a signal
     #   Karafka.monitor.notice(self.class, signal: signal)
     def notice(caller_class, options = {})

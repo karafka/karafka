@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::BaseController do
-  subject(:base_controller) { working_class.new }
+RSpec.describe Karafka::BaseConsumer do
+  subject(:base_consumer) { working_class.new }
 
   let(:topic_name) { "topic#{rand}" }
   let(:backend) { :inline }
@@ -9,7 +9,7 @@ RSpec.describe Karafka::BaseController do
   let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand.to_s) }
   let(:topic) do
     topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
-    topic.controller = Class.new(described_class)
+    topic.consumer = Class.new(described_class)
     topic.backend = backend
     topic.responder = responder_class
     topic
@@ -17,7 +17,7 @@ RSpec.describe Karafka::BaseController do
   let(:working_class) do
     ClassBuilder.inherit(described_class) do
       include Karafka::Backends::Inline
-      include Karafka::Controllers::Responders
+      include Karafka::Consumers::Responders
 
       def consume
         self
@@ -30,14 +30,14 @@ RSpec.describe Karafka::BaseController do
   describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(described_class) }
 
-    it { expect { base_controller.send(:consume) }.to raise_error NotImplementedError }
+    it { expect { base_consumer.send(:consume) }.to raise_error NotImplementedError }
   end
 
   describe '#call' do
     it 'just consumes' do
-      expect(base_controller).to receive(:consume)
+      expect(base_consumer).to receive(:consume)
 
-      base_controller.call
+      base_consumer.call
     end
   end
 
@@ -59,17 +59,17 @@ RSpec.describe Karafka::BaseController do
 
     it 'expect to build params batch using messages and parser' do
       expect(Karafka::Params::ParamsBatch).to receive(:new).with(*p_args).and_return(params_batch)
-      base_controller.params_batch = messages
-      expect(base_controller.send(:params_batch)).to eq params_batch
+      base_consumer.params_batch = messages
+      expect(base_consumer.send(:params_batch)).to eq params_batch
     end
   end
 
   describe '#params_batch' do
     let(:params_batch) { instance_double(Karafka::Params::ParamsBatch) }
 
-    before { base_controller.instance_variable_set(:@params_batch, params_batch) }
+    before { base_consumer.instance_variable_set(:@params_batch, params_batch) }
 
-    it { expect(base_controller.send(:params_batch)).to eq params_batch }
+    it { expect(base_consumer.send(:params_batch)).to eq params_batch }
   end
 
   describe '#respond_with' do
@@ -80,7 +80,7 @@ RSpec.describe Karafka::BaseController do
     it 'expect to use responder to respond with provided data' do
       expect(responder_class).to receive(:new).and_return(responder)
       expect(responder).to receive(:call).with(data)
-      base_controller.send(:respond_with, data)
+      base_consumer.send(:respond_with, data)
     end
   end
 
@@ -90,7 +90,7 @@ RSpec.describe Karafka::BaseController do
     before { Karafka::Persistence::Client.write(client) }
 
     it 'expect to return current persisted client' do
-      expect(base_controller.send(:client)).to eq client
+      expect(base_consumer.send(:client)).to eq client
     end
   end
 
@@ -102,7 +102,7 @@ RSpec.describe Karafka::BaseController do
 
     it 'expect to proxy pass to client' do
       expect(client).to receive(:mark_as_consumed).with(params)
-      base_controller.send(:mark_as_consumed, params)
+      base_consumer.send(:mark_as_consumed, params)
     end
   end
 end

@@ -20,15 +20,15 @@ module Karafka
           # @see topic_mapper internal docs
           mapped_topic_name = Karafka::App.config.topic_mapper.incoming(kafka_messages[0].topic)
           topic = Routing::Router.find("#{group_id}_#{mapped_topic_name}")
-          controller = Persistence::Controller.fetch(topic, kafka_messages[0].partition) do
-            topic.controller.new
+          consumer = Persistence::Consumer.fetch(topic, kafka_messages[0].partition) do
+            topic.consumer.new
           end
 
-          # Depending on a case (persisted or not) we might use new controller instance per each
-          # batch, or use the same instance for all of them (for implementing buffering, etc)
+          # Depending on a case (persisted or not) we might use new consumer instance per
+          # each batch, or use the same one for all of them (for implementing buffering, etc.)
           send(
             topic.batch_consuming ? :delegate_batch : :delegate_each,
-            controller,
+            consumer,
             kafka_messages
           )
         end
@@ -36,23 +36,23 @@ module Karafka
         private
 
         # Delegates whole batch in one request (all at once)
-        # @param controller [Karafka::BaseController] base controller descendant
+        # @param consumer [Karafka::BaseConsumer] base consumer descendant
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages from kafka
-        def delegate_batch(controller, kafka_messages)
-          controller.params_batch = kafka_messages
+        def delegate_batch(consumer, kafka_messages)
+          consumer.params_batch = kafka_messages
           Karafka.monitor.notice(self, kafka_messages)
-          controller.call
+          consumer.call
         end
 
         # Delegates messages one by one (like with std http requests)
-        # @param controller [Karafka::BaseController] base controller descendant
+        # @param consumer [Karafka::BaseConsumer] base consumer descendant
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages from kafka
-        def delegate_each(controller, kafka_messages)
+        def delegate_each(consumer, kafka_messages)
           kafka_messages.each do |kafka_message|
             # @note This is a simple trick - we just delegate one after another, but in order
             # not to handle everywhere both cases (single vs batch), we just "fake" batching with
             # a single message for each
-            delegate_batch(controller, [kafka_message])
+            delegate_batch(consumer, [kafka_message])
           end
         end
       end

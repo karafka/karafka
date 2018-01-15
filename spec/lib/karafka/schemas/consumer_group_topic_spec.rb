@@ -8,7 +8,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
       id: 'id',
       name: 'name',
       backend: :inline,
-      controller: Class.new,
+      consumer: Class.new,
       parser: Class.new,
       max_bytes_per_partition: 1,
       start_from_beginning: true,
@@ -103,9 +103,9 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     end
   end
 
-  context 'when we validate controller' do
+  context 'when we validate consumer' do
     context 'when it is not present' do
-      before { config[:controller] = nil }
+      before { config[:consumer] = nil }
 
       it { expect(schema.call(config)).not_to be_success }
     end

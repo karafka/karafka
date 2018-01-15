@@ -5,7 +5,7 @@ RSpec.describe Karafka::Connection::Delegator do
 
   let(:group_id) { consumer_group.id }
   let(:topic_id) { consumer_group.topics[0].name }
-  let(:controller_instance) { consumer_group.topics[0].controller.new }
+  let(:consumer_instance) { consumer_group.topics[0].consumer.new }
   let(:messages_batch) { [raw_message1, raw_message2] }
   let(:raw_message_value) { rand }
   let(:raw_message1) do
@@ -33,14 +33,14 @@ RSpec.describe Karafka::Connection::Delegator do
 
   context 'when batch_consuming true' do
     before do
-      expect(consumer_group.topics[0].controller)
-        .to receive(:new).and_return(controller_instance)
+      expect(consumer_group.topics[0].consumer)
+        .to receive(:new).and_return(consumer_instance)
 
-      expect(controller_instance)
+      expect(consumer_instance)
         .to receive(:params_batch=)
         .with([raw_message1, raw_message2])
 
-      expect(controller_instance)
+      expect(consumer_instance)
         .to receive(:call)
     end
 
@@ -48,7 +48,7 @@ RSpec.describe Karafka::Connection::Delegator do
       let(:consumer_group) do
         Karafka::Routing::Builder.instance.draw do
           topic :topic_name1 do
-            controller Class.new(Karafka::BaseController)
+            consumer Class.new(Karafka::BaseConsumer)
             persistent false
             batch_consuming true
           end
@@ -64,7 +64,7 @@ RSpec.describe Karafka::Connection::Delegator do
           .and_return(consumer_group.topics[0])
       end
 
-      it 'routes to a proper controller and call task' do
+      it 'routes to a proper consumer and call task' do
         expect { delegator.call(group_id, messages_batch) }.not_to raise_error
       end
     end
@@ -74,7 +74,7 @@ RSpec.describe Karafka::Connection::Delegator do
       let(:consumer_group) do
         Karafka::Routing::Builder.instance.draw do
           topic :topic_name1 do
-            controller Class.new(Karafka::BaseController)
+            consumer Class.new(Karafka::BaseConsumer)
             persistent false
             batch_consuming true
           end
@@ -106,18 +106,18 @@ RSpec.describe Karafka::Connection::Delegator do
 
   context 'when batch_consuming false' do
     before do
-      expect(consumer_group.topics[0].controller)
-        .to receive(:new).and_return(controller_instance)
+      expect(consumer_group.topics[0].consumer)
+        .to receive(:new).and_return(consumer_instance)
 
-      expect(controller_instance)
+      expect(consumer_instance)
         .to receive(:params_batch=)
         .with([raw_message1])
 
-      expect(controller_instance)
+      expect(consumer_instance)
         .to receive(:params_batch=)
         .with([raw_message2])
 
-      expect(controller_instance)
+      expect(consumer_instance)
         .to receive(:call)
         .twice
     end
@@ -126,7 +126,7 @@ RSpec.describe Karafka::Connection::Delegator do
       let(:consumer_group) do
         Karafka::Routing::Builder.instance.draw do
           topic :topic_name1 do
-            controller Class.new(Karafka::BaseController)
+            consumer Class.new(Karafka::BaseConsumer)
             persistent false
             batch_consuming false
           end
@@ -142,7 +142,7 @@ RSpec.describe Karafka::Connection::Delegator do
           .and_return(consumer_group.topics[0])
       end
 
-      it 'routes to a proper controller and call task' do
+      it 'routes to a proper consumer and call task' do
         expect { delegator.call(group_id, messages_batch) }.not_to raise_error
       end
     end
@@ -152,7 +152,7 @@ RSpec.describe Karafka::Connection::Delegator do
       let(:consumer_group) do
         Karafka::Routing::Builder.instance.draw do
           topic :topic_name1 do
-            controller Class.new(Karafka::BaseController)
+            consumer Class.new(Karafka::BaseConsumer)
             persistent false
             batch_consuming false
           end

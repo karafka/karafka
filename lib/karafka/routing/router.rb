@@ -3,7 +3,7 @@
 module Karafka
   # Namespace for all elements related to requests routing
   module Routing
-    # Karafka framework Router for routing incoming messages to proper controllers
+    # Karafka framework Router for routing incoming messages to proper consumers
     # @note Since Kafka does not provide namespaces or modules for topics, they all have "flat"
     #  structure so all the routes are being stored in a single level array
     module Router

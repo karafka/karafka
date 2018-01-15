@@ -2,8 +2,8 @@
 
 # Karafka module namespace
 module Karafka
-  # Base controller from which all Karafka controllers should inherit
-  class BaseController
+  # Base consumer from which all Karafka consumers should inherit
+  class BaseConsumer
     extend ActiveSupport::DescendantsTracker
     extend Forwardable
 
@@ -17,17 +17,17 @@ module Karafka
     class << self
       attr_reader :topic
 
-      # Assigns a topic to a controller and build up proper controller functionalities, so it can
-      #   cooperate with the topic settings
+      # Assigns a topic to a consumer and builds up proper consumer functionalities
+      #   so that it can cooperate with the topic settings
       # @param topic [Karafka::Routing::Topic]
       # @return [Karafka::Routing::Topic] assigned topic
       def topic=(topic)
         @topic = topic
-        Controllers::Includer.call(self)
+        Consumers::Includer.call(self)
       end
     end
 
-    # @return [Karafka::Routing::Topic] topic to which a given controller is subscribed
+    # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
     def topic
       self.class.topic
     end
@@ -41,14 +41,14 @@ module Karafka
       @params_batch = Karafka::Params::ParamsBatch.new(messages, topic.parser)
     end
 
-    # Executes the default controller flow.
+    # Executes the default consumer flow.
     def call
       process
     end
 
     private
 
-    # We make it private as it should be accesible only from the inside of a controller
+    # We make it private as it should be accessible only from the inside of a consumer
     attr_reader :params_batch
 
     # @return [Karafka::Connection::Client] messages consuming client that can be used to

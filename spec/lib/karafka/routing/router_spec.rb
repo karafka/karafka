@@ -8,7 +8,7 @@ RSpec.describe Karafka::Routing::Router do
 
     Karafka::Routing::Builder.instance.draw do
       topic :topic_name1 do
-        controller Class.new(Karafka::BaseController)
+        consumer Class.new(Karafka::BaseConsumer)
         persistent false
         batch_consuming true
       end

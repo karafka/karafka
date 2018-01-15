@@ -21,18 +21,23 @@ class KarafkaApp < Karafka::App
     config.batch_fetching = true
   end
 
+  after_init do |config|
+    # Put here all the things you want to do after the Karafka framework
+    # initialization
+  end
+
   consumer_groups.draw do
     # topic :example do
-    #   controller ExampleController
+    #   consumer ExampleConsumer
     # end
 
     # consumer_group :bigger_group do
     #   topic :test do
-    #     controller TestController
+    #     consumer TestConsumer
     #   end
     #
     #   topic :test2 do
-    #     controller Test2Controller
+    #     consumer Test2Consumer
     #   end
     # end
   end

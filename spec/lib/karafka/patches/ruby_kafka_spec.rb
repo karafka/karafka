@@ -22,7 +22,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
 
     before do
       Karafka::Persistence::Client.write(client)
-      Karafka::Persistence::Controller.fetch(topic, 0) { nil }
+      Karafka::Persistence::Consumer.fetch(topic, 0) { nil }
     end
 
     after { Thread.current[:client] = nil }

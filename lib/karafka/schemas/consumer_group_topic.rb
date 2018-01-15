@@ -7,7 +7,7 @@ module Karafka
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
       required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
       required(:backend).filled(included_in?: %i[inline sidekiq])
-      required(:controller).filled
+      required(:consumer).filled
       required(:parser).filled
       required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
       required(:start_from_beginning).filled(:bool?)
