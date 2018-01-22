@@ -58,8 +58,11 @@ RSpec.describe Karafka::Setup::Config do
   end
 
   describe '#after_init' do
-    it 'expect to call the after_init block' do
-      expect(config_class.config.internal.after_init)
+    before { config_class.config.internal.after_init << ->(_config) {} }
+
+    it 'expect to call the after_init blocks' do
+
+      expect(config_class.config.internal.after_init.first)
         .to receive(:call).with(config_class.config)
 
       config_class.after_init

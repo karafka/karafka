@@ -5,7 +5,7 @@ RSpec.describe Karafka::Parsers::Json do
 
   describe '.parse' do
     context 'when we can parse given content' do
-      let(:content_source) { { rand.to_s => rand.to_s } }
+      let(:content_source) { { rand.to_s.to_sym => rand.to_s } }
       let(:content) { content_source.to_json }
 
       it 'expect to parse' do

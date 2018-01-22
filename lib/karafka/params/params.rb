@@ -44,26 +44,25 @@ module Karafka
         # @example Build params instance from a Kafka::FetchedMessage object
         #   Karafka::Params::Params.build(message) #=> params object
         def build(message, parser)
-          # Hash case happens inside backends that interchange data
-          if message.is_a?(Hash)
-            new(parser: parser).send(:merge!, message)
-          else
-            # This happens inside Kafka::FetchedProcessor
-            new(
-              parser: parser,
-              parsed: false,
-              received_at: Time.now
-            ).tap do |instance|
-              KAFKA_MESSAGE_ATTRIBUTES.each do |attribute|
-                instance[attribute] = message.send(attribute)
-              end
+          instance = new
+          instance[:parser] = parser
 
-              # When we get raw messages, they might have a topic, that was modified by a
-              # topic mapper. We need to "reverse" this change and map back to the non-modified
-              # format, so our internal flow is not corrupted with the mapping
-              instance[:topic] = Karafka::App.config.topic_mapper.incoming(message.topic)
+          # Hash case happens inside backends that interchange data
+          if message.is_a?(Kafka::FetchedMessage)
+            KAFKA_MESSAGE_ATTRIBUTES.each do |attribute|
+              instance[attribute] = message.send(attribute)
             end
+
+            instance[:received_at] = Time.now
+            # When we get raw messages, they might have a topic, that was modified by a
+            # topic mapper. We need to "reverse" this change and map back to the non-modified
+            # format, so our internal flow is not corrupted with the mapping
+            instance[:topic] = Karafka::App.config.topic_mapper.incoming(message.topic)
+          else
+            instance.send(:merge!, message)
           end
+
+          instance
         end
 
         # Defines a method call accessor to a particular hash field.
@@ -95,7 +94,8 @@ module Karafka
 
       # Overwritten merge! method - it behaves differently for keys that are the same in our hash
       #  and in a other_hash - it will not replace keys that are the same in our hash
-      #  and in the other one
+      #  and in the other one. This protects some important Karafka params keys that cannot be
+      #  replaced with custom values from incoming Kafka message
       # @param other_hash [Hash] hash that we want to merge into current
       # @return [Karafka::Params::Params] our parameters hash with merged values
       # @example Merge with hash without same keys

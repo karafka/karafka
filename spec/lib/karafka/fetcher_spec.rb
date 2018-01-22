@@ -6,7 +6,6 @@ RSpec.describe Karafka::Fetcher do
   describe '#fetch_loop' do
     context 'when everything is ok' do
       let(:listeners) { [listener] }
-      let(:delegator) { -> {} }
       let(:async_scope) { listener }
       let(:listener) { instance_double(Karafka::Connection::Listener, fetch_loop: nil) }
 
@@ -14,10 +13,6 @@ RSpec.describe Karafka::Fetcher do
         allow(fetcher)
           .to receive(:listeners)
           .and_return(listeners)
-
-        expect(fetcher)
-          .to receive(:delegator)
-          .and_return(delegator)
       end
 
       it 'starts asynchronously consumption for each listener' do
@@ -27,6 +22,7 @@ RSpec.describe Karafka::Fetcher do
 
     context 'when something goes wrong internaly' do
       let(:error) { StandardError }
+      let(:instrument_args) { ['fetcher.fetch_loop_error', fetcher, error: error] }
 
       before do
         expect(fetcher)
@@ -36,30 +32,8 @@ RSpec.describe Karafka::Fetcher do
 
       it 'stops the app and reraise' do
         expect(Karafka::App).to receive(:stop!)
-        expect(Karafka.monitor).to receive(:notice_error).with(described_class, error)
+        expect(Karafka.monitor).to receive(:instrument).with(*instrument_args)
         expect { fetcher.fetch_loop }.to raise_error(error)
-      end
-    end
-  end
-
-  describe '#delegator' do
-    subject(:fetcher) { described_class.new.send(:delegator) }
-
-    it 'is a proc' do
-      expect(fetcher).to be_a Proc
-    end
-
-    context 'when we invoke a delegator block' do
-      let(:message) { double }
-      let(:delegator) { Karafka::Connection::Delegator }
-      let(:consumer_group_id) { rand.to_s }
-
-      it 'process the message' do
-        expect(delegator)
-          .to receive(:call)
-          .with(consumer_group_id, message)
-
-        fetcher.call(consumer_group_id, message)
       end
     end
   end
