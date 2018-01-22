@@ -1,3 +1,4 @@
+
 # frozen_string_literal: true
 
 module Karafka
@@ -8,15 +9,6 @@ module Karafka
     # using parser until we execute our logic. That way we can operate with
     # heavy-parsing data without slowing down the whole application.
     class Params < Hash
-      # Kafka::FetchedMessage attributes that we want to use inside of params
-      KAFKA_MESSAGE_ATTRIBUTES = %i[
-        value
-        partition
-        offset
-        key
-        create_time
-      ].freeze
-
       # Params attributes that should be available via a method call invocation for Kafka
       # client compatibility.
       # Kafka passes internally Kafka::FetchedMessage object and the ruby-kafka consumer
@@ -29,6 +21,8 @@ module Karafka
         key
         create_time
       ].freeze
+
+      private_constant :PARAMS_METHOD_ATTRIBUTES
 
       class << self
         # We allow building instances only via the #build method
@@ -49,10 +43,11 @@ module Karafka
 
           # Hash case happens inside backends that interchange data
           if message.is_a?(Kafka::FetchedMessage)
-            KAFKA_MESSAGE_ATTRIBUTES.each do |attribute|
-              instance[attribute] = message.send(attribute)
-            end
-
+            instance[:value] = message.value
+            instance[:partition] = message.partition
+            instance[:offset] = message.offset
+            instance[:key] = message.key
+            instance[:create_time] = message.create_time
             instance[:received_at] = Time.now
             # When we get raw messages, they might have a topic, that was modified by a
             # topic mapper. We need to "reverse" this change and map back to the non-modified

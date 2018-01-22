@@ -20,10 +20,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
     let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
     let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s, persistent: false) }
 
-    before do
-      Karafka::Persistence::Client.write(client)
-      Karafka::Persistence::Consumer.fetch(topic, 0) { nil }
-    end
+    before { Karafka::Persistence::Client.write(client) }
 
     after { Thread.current[:client] = nil }
 

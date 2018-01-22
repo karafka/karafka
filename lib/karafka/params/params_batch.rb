@@ -13,7 +13,7 @@ module Karafka
       # @param messages_batch [Array<Kafka::FetchedMessage>] messages batch
       # @param topic_parser [Class] topic parser for unparsing messages values
       def initialize(messages_batch, topic_parser)
-        @params_batch = messages_batch.map do |message|
+        @params_batch = messages_batch.map! do |message|
           Karafka::Params::Params.build(message, topic_parser)
         end
       end

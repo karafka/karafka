@@ -18,6 +18,12 @@
 - Renamed Karafka::Connection::Processor to Karafka::Connection::Delegator to match incoming naming conventions
 - Renamed Karafka::Connection::Consumer to Karafka::Connection::Client due to #274
 - #274 - Rename controllers to consumers
+- Removed HashWithIndifferentAccess in favor of a regular hash
+- JSON parsing defaults now to symbolized keys
+- Lower memory usage due to less params data internal details
+- #262 - Error in the monitor code for NewRelic
+- #241 - Performance metrics
+- Support multiple ```after_init``` blocks in favor of a single one
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format
