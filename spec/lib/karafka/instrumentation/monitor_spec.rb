@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Monitor do
+RSpec.describe Karafka::Instrumentation::Monitor do
   subject(:monitor) { described_class.instance }
 
   MonitorWithSuper = ClassBuilder.inherit(described_class) do

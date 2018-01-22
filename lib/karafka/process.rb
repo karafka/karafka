@@ -55,7 +55,7 @@ module Karafka
     #   we have to spin up a new thread to do this
     def notice_signal(signal)
       Thread.new do
-        Karafka.monitor.notice(self.class, signal: signal)
+        Karafka.monitor.instrument('process.notice_signal', self, signal: signal)
       end
     end
   end

@@ -43,5 +43,8 @@ module Karafka
 
     # Raised when we attemp to pause a partition but the pause timeout is equal to 0
     InvalidPauseTimeout = Class.new(BaseError)
+
+    # Raised when want to hook up to an event that is not registered and supported
+    UnregisteredMonitorEvent = Class.new(BaseError)
   end
 end

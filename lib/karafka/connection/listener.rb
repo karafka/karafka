@@ -26,15 +26,17 @@ module Karafka
       #   won't crash the whole cluster. Here we mostly focus on catchin the exceptions related to
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far
-      def fetch_loop(block)
+      def fetch_loop
         client.fetch_loop do |raw_messages|
-          block.call(consumer_group.id, raw_messages)
+          # @note What happens here is a delegation of processing to a proper processor based on the
+          #   incoming messages characteristics
+          Karafka::Connection::Delegator.call(consumer_group.id, raw_messages)
         end
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
+        Karafka.monitor.instrument('connection.listener.fetch_loop_error', self, error: e)
         # rubocop:enable RescueException
-        Karafka.monitor.notice_error(self.class, e)
         @client&.stop
         retry if @client
       end

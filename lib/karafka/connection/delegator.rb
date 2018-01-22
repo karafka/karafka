@@ -40,7 +40,6 @@ module Karafka
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages from kafka
         def delegate_batch(consumer, kafka_messages)
           consumer.params_batch = kafka_messages
-          Karafka.monitor.notice(self, kafka_messages)
           consumer.call
         end
 

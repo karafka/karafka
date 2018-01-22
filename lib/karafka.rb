@@ -11,9 +11,9 @@
   require_all
   dry-configurable
   dry-validation
+  dry/monitor/notifications
   dry/inflector
   active_support/callbacks
-  active_support/core_ext/hash/indifferent_access
   active_support/descendants_tracker
   karafka/loader
 ].each(&method(:require))

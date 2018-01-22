@@ -21,9 +21,9 @@ module Karafka
       # What backend do we want to use to process messages
       setting :backend, :inline
       # option logger [Instance] logger that we want to use
-      setting :logger, -> { ::Karafka::Logger.instance }
+      setting :logger, -> { ::Karafka::Instrumentation::Logger.instance }
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
-      setting :monitor, -> { ::Karafka::Monitor.instance }
+      setting :monitor, -> { ::Karafka::Instrumentation::Monitor.instance }
       # Mapper used to remap consumer groups ids, so in case users migrate from other tools
       # or they need to maintain their own internal consumer group naming conventions, they
       # can easily do it, replacing the default client_id + consumer name pattern concept
@@ -147,9 +147,9 @@ module Karafka
       # option internal [Hash] - optional - internal karafka configuration settings that should
       #   never be changed by users directly
       setting :internal do
-        # option after_init [Proc] block that will be executed right after we finish the bootstrap
-        #   but before we run everything (server, console, etc)
-        setting :after_init, ->(_config) {}
+        # option after_init [Array<Proc>] array of blocks that will be executed right after we
+        #   finish the bootstrap but before we run everything (server, console, etc)
+        setting :after_init, []
       end
 
       class << self
@@ -173,7 +173,7 @@ module Karafka
 
         # Executes the after init block with the fully loaded config
         def after_init
-          config.internal.after_init.call(config)
+          config.internal.after_init.each { |after_block| after_block.call(config) }
         end
 
         # Validate config based on ConfigurationSchema

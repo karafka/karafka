@@ -182,8 +182,6 @@ module Karafka
     # @param options [Hash] options for waterdrop (e.g. partition_key)
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data, options = {})
-      Karafka.monitor.notice(self.class, topic: topic, data: data, options: options)
-
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
         @parser_class.generate(data),

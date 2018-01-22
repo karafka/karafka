@@ -9,8 +9,9 @@ module Karafka
 
       # Executes consume code immediately (without enqueuing)
       def process
-        Karafka.monitor.notice(self.class, params_batch)
-        consume
+        Karafka.monitor.instrument('backends.inline.process', self) do
+          consume
+        end
       end
     end
   end

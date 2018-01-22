@@ -15,7 +15,7 @@ module Karafka
         # and if that happens, it means that something really bad happened and we should stop
         # the whole process
         Thread
-          .new { listener.fetch_loop(delegator) }
+          .new { listener.fetch_loop }
           .tap { |thread| thread.abort_on_exception = true }
       end
 
@@ -25,7 +25,7 @@ module Karafka
     # If anything crashes here, we need to raise the error and crush the runner because it means
     # that something really bad happened
     rescue StandardError => e
-      Karafka.monitor.notice_error(self.class, e)
+      Karafka.monitor.instrument('fetcher.fetch_loop_error', self, error: e)
       Karafka::App.stop!
       raise e
     end
@@ -36,16 +36,6 @@ module Karafka
     def listeners
       @listeners ||= App.consumer_groups.active.map do |consumer_group|
         Karafka::Connection::Listener.new(consumer_group)
-      end
-    end
-
-    # @return [Proc] proc that should be executed when a messages arrive
-    # @yieldparam messages [Array<Kafka::FetchedMessage>] messages from kafka (raw)
-    # @note What happens here is a delegation of processing to a proper processor based on the
-    #   incoming messages characteristics
-    def delegator
-      lambda do |group_id, messages|
-        Karafka::Connection::Delegator.call(group_id, messages)
       end
     end
   end

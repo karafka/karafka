@@ -3,11 +3,11 @@
 module Karafka
   # Params namespace encapsulating all the logic that is directly related to params handling
   module Params
-    # Class-wrapper for hash with indifferent access with additional lazy loading feature
+    # Class-wrapper for hash with additional lazy loading feature
     # It provides lazy loading not only until the first usage, but also allows us to skip
     # using parser until we execute our logic. That way we can operate with
     # heavy-parsing data without slowing down the whole application.
-    class Params < HashWithIndifferentAccess
+    class Params < Hash
       # Kafka::FetchedMessage attributes that we want to use inside of params
       KAFKA_MESSAGE_ATTRIBUTES = %i[
         value
@@ -96,7 +96,7 @@ module Karafka
       # Overwritten merge! method - it behaves differently for keys that are the same in our hash
       #  and in a other_hash - it will not replace keys that are the same in our hash
       #  and in the other one
-      # @param other_hash [Hash, HashWithIndifferentAccess] hash that we want to merge into current
+      # @param other_hash [Hash] hash that we want to merge into current
       # @return [Karafka::Params::Params] our parameters hash with merged values
       # @example Merge with hash without same keys
       #   new(a: 1, b: 2).merge!(c: 3) #=> { a: 1, b: 2, c: 3 }
@@ -115,10 +115,11 @@ module Karafka
       # @return [Hash] parsed data or a hash with message key containing raw data if something
       #   went wrong during parsing
       def parse(value)
-        self[:parser].parse(value)
-        # We catch both of them, because for default JSON - we use JSON parser directly
+        Karafka.monitor.instrument('params.params.parse', self) do
+          self[:parser].parse(value)
+        end
       rescue ::Karafka::Errors::ParserError => e
-        Karafka.monitor.notice_error(self.class, e)
+        Karafka.monitor.instrument('params.params.parse_error', self, error: e)
         raise e
       ensure
         self[:parsed] = true

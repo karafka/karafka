@@ -43,7 +43,9 @@ module Karafka
 
     # Executes the default consumer flow.
     def call
-      process
+      Karafka.monitor.instrument('base_consumer.process', self) do
+        process
+      end
     end
 
     private
