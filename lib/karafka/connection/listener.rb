@@ -28,8 +28,8 @@ module Karafka
       #   propagate this far
       def fetch_loop
         client.fetch_loop do |raw_messages|
-          # @note What happens here is a delegation of processing to a proper processor based on the
-          #   incoming messages characteristics
+          # @note What happens here is a delegation of processing to a proper processor based
+          #   on the incoming messages characteristics
           Karafka::Connection::Delegator.call(consumer_group.id, raw_messages)
         end
         # This is on purpose - see the notes for this method

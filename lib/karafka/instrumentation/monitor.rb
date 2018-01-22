@@ -15,9 +15,9 @@ module Karafka
 
       # List of events that we support in the system and to which a monitor client can hook up
       # @note The non-error once support timestamp benchmarking
-      # @note Depending on Karafka extensions and additional engines, this might not be the complete
-      #   list of all the events. Please use the #available_events on fully loaded Karafka system
-      #   to determine all of the events you can use
+      # @note Depending on Karafka extensions and additional engines, this might not be the
+      #   complete list of all the events. Please use the #available_events on fully loaded
+      #   Karafka system to determine all of the events you can use
       BASE_EVENTS = %w[
         params.params.parse
         params.params.parse_error
@@ -35,21 +35,27 @@ module Karafka
       # @return [Karafka::Monitor] monitor instance for system instrumentation
       def initialize
         super(:karafka)
-        BASE_EVENTS.each &method(:register_event)
+        BASE_EVENTS.each(&method(:register_event))
       end
 
+      # Allows us to instrument a give piece of code
       # @param event [String] name of the event we want to instrument
-      # @param called [Object] object that calls the instrumentation (usually local self)
+      # @param caller [Object] object that calls the instrumentation (usually local self)
       # @param payload [Hash] any data we want to pass
       # @param block [Block] code that we want to instrument
       # @return Returns the intrumented block results
+      # @example
+      #   Karafka.monitor.instrument('registered.event_name', self, data: data) do
+      #     # code that we want to instrument
+      #   end
       def instrument(event, caller, payload = {}, &block)
         payload[:caller] = caller
         super(event, payload, &block)
       end
 
-      # @param event [String] name of the event we want to subscribe to
       # Allows us to subscribe to events with a code that will be yielded upon events
+      # @param event_or_listener [String, Object] name of the event we want to subscribe to
+      #   or a listener if we decide to go with object listener
       def subscribe(event_or_listener)
         return super unless event_or_listener.is_a?(String)
         return super if available_events.include?(event)
@@ -58,7 +64,7 @@ module Karafka
 
       # @return [Array<String>] names of available events to which we can subscribe
       def available_events
-        self.__bus__.events.keys
+        __bus__.events.keys
       end
     end
   end

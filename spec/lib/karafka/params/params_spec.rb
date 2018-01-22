@@ -43,7 +43,7 @@ RSpec.describe Karafka::Params::Params do
               create_time: create_time
             ),
             topic: topic,
-            partition: partition,
+            partition: partition
           )
         end
 

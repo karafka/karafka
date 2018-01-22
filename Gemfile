@@ -9,5 +9,4 @@ group :development, :test do
   gem 'simplecov'
   gem 'timecop'
   gem 'waterdrop'
-  gem 'byebug'
 end

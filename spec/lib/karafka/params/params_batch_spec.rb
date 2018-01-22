@@ -16,7 +16,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
         create_time: create_time
       ),
       topic: 'topic',
-      partition: 0,
+      partition: 0
     )
   end
 
@@ -29,7 +29,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
         create_time: create_time
       ),
       topic: 'topic',
-      partition: 0,
+      partition: 0
     )
   end
 

@@ -17,7 +17,7 @@ RSpec.describe Karafka::Connection::Delegator do
         create_time: Time.now
       ),
       topic: topic_id,
-      partition: 0,
+      partition: 0
     )
   end
   let(:raw_message2) do
@@ -29,7 +29,7 @@ RSpec.describe Karafka::Connection::Delegator do
         create_time: Time.now
       ),
       topic: topic_id,
-      partition: 0,
+      partition: 0
     )
   end
 
