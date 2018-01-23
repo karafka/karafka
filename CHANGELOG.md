@@ -19,7 +19,7 @@
 - Renamed Karafka::Connection::Consumer to Karafka::Connection::Client due to #274
 - #274 - Rename controllers to consumers
 - Removed HashWithIndifferentAccess in favor of a regular hash
-- JSON parsing defaults now to symbolized keys
+- JSON parsing defaults now to string keys
 - Lower memory usage due to less params data internal details
 - #262 - Error in the monitor code for NewRelic
 - #241 - Performance metrics
