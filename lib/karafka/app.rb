@@ -24,7 +24,7 @@ module Karafka
 
       Status.instance_methods(false).each do |delegated|
         define_method(delegated) do
-          Status.instance.public_send(delegated)
+          Status.instance.send(delegated)
         end
       end
 
@@ -36,7 +36,7 @@ module Karafka
         monitor
       ].each do |delegated|
         define_method(delegated) do
-          Karafka.public_send(delegated)
+          Karafka.send(delegated)
         end
       end
     end
