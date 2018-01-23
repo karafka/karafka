@@ -16,7 +16,7 @@ module Karafka
         def all
           # @note This does not need to be threadsafe (Hash) as it is always executed in a
           # current thread context
-          Thread.current[PERSISTENCE_SCOPE] ||= Hash.new { |hash, key| hash[key] = Hash.new }
+          Thread.current[PERSISTENCE_SCOPE] ||= Hash.new { |hash, key| hash[key] = {} }
         end
 
         # Used to build (if block given) and/or fetch a current consumer instance that will be
