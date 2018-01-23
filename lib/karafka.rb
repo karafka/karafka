@@ -14,7 +14,6 @@
   dry/monitor/notifications
   dry/inflector
   active_support/callbacks
-  active_support/descendants_tracker
   karafka/loader
 ].each(&method(:require))
 

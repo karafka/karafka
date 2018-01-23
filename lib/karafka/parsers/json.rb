@@ -10,7 +10,7 @@ module Karafka
       # @example
       #   Json.parse("{\"a\":1}") #=> { 'a' => 1 }
       def self.parse(content)
-        ::MultiJson.load(content, symbolize_keys: true)
+        ::MultiJson.load(content)
       rescue ::MultiJson::ParseError => e
         raise ::Karafka::Errors::ParserError, e
       end

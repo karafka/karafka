@@ -6,7 +6,7 @@ module Karafka
       def self.on_params_params_parse(event)
         topic = event[:caller].topic
         time = event[:time]
-        Karafka.logger.info "Params parsing for #{topic} successful in #{time} ms"
+        Karafka.logger.debug "Params parsing for #{topic} successful in #{time} ms"
       end
 
       def self.on_params_params_parse_error(event)
@@ -26,19 +26,15 @@ module Karafka
 #        Karafka.logger.fatal "Params parsing error for #{topic}: #{event[:error]}"
       end
 
-      def self.on_backends_inline_process(event)
-        count = event[:caller].send(:params_batch).count
+      def self.on_backends_inline_call(event)
+        count = event[:caller].send(:params_batch).to_a.count
         topic = event[:caller].topic.name
         time = event[:time]
-        Karafka.logger.fatal "Inline processing of #{topic} topic with #{count} messages took #{time} ms"
+        Karafka.logger.info "Inline processing of #{topic} topic with #{count} messages took #{time} ms"
       end
 
       def self.on_process_notice_signal(event)
  #       Karafka.logger.info "Params parsing for #{topic} successful in #{time} ms"
-      end
-
-      def self.on_base_consumer_process(event)
-  #      Karafka.logger.info "Params parsing for #{topic} successful in #{time} ms"
       end
 
       def self.on_consumers_responders_respond_with(event)

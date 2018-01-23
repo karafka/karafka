@@ -6,15 +6,17 @@ module Karafka
     # We use it in order not to build string instances and remap incoming topic upon each
     # message / message batches received
     class Topic
+      PERSISTENCE_SCOPE = :topics
+
       # @param group_id [String] group id for which we fetch a topic representation
       # @param raw_topic_name [String] raw topic name (before remapping) for which we fetch a
       #   topic representation
       # @return [Karafka::Routing::Topic] remapped topic representation that can be used further
       #   on when working with given parameters
       def self.fetch(group_id, raw_topic_name)
-        @base ||= Concurrent::Hash.new { |hash, key| hash[key] = Concurrent::Hash.new }
+        Thread.current[PERSISTENCE_SCOPE] ||= Hash.new { |hash, key| hash[key] = Hash.new }
 
-        @base[group_id][raw_topic_name] ||= begin
+        Thread.current[PERSISTENCE_SCOPE][group_id][raw_topic_name] ||= begin
           # We map from incoming topic name, as it might be namespaced, etc.
           # @see topic_mapper internal docs
           mapped_topic_name = Karafka::App.config.topic_mapper.incoming(raw_topic_name)

@@ -31,7 +31,7 @@ RSpec.describe Karafka::Params::Params do
             partition: partition,
             key: key,
             topic: topic,
-            create_time: create_time
+            created_at: create_time
           }
         end
         let(:message) do
@@ -221,7 +221,7 @@ RSpec.describe Karafka::Params::Params do
       partition
       offset
       key
-      create_time
+      created_at
     ].each do |key|
       describe "\##{key}" do
         let(:value) { rand }

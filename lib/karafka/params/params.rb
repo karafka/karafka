@@ -8,6 +8,20 @@ module Karafka
     # using parser until we execute our logic. That way we can operate with
     # heavy-parsing data without slowing down the whole application.
     class Params < Hash
+      # Params keys that are "our" and internal. We use this list for additional backends
+      # that don't allow sumbols to be transfered, to remap the interchanged params
+      # back into a valid form
+      SYSTEM_KEYS = %i[
+        parser
+        value
+        partition
+        offset
+        key
+        created_at
+        received_at
+        topic
+      ].freeze
+
       # Params attributes that should be available via a method call invocation for Kafka
       # client compatibility.
       # Kafka passes internally Kafka::FetchedMessage object and the ruby-kafka consumer
@@ -18,7 +32,7 @@ module Karafka
         partition
         offset
         key
-        create_time
+        created_at
       ].freeze
 
       private_constant :PARAMS_METHOD_ATTRIBUTES
@@ -40,13 +54,14 @@ module Karafka
           instance = new
           instance[:parser] = parser
 
-          # Hash case happens inside backends that interchange data
+          # Non kafka fetched message can happen when we interchange data with an
+          # additional backend
           if message.is_a?(Kafka::FetchedMessage)
             instance[:value] = message.value
             instance[:partition] = message.partition
             instance[:offset] = message.offset
             instance[:key] = message.key
-            instance[:create_time] = message.create_time
+            instance[:created_at] = message.create_time
             instance[:received_at] = Time.now
             # When we get raw messages, they might have a topic, that was modified by a
             # topic mapper. We need to "reverse" this change and map back to the non-modified

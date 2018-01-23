@@ -26,7 +26,6 @@ module Karafka
         fetcher.fetch_loop_error
         backends.inline.process
         process.notice_signal
-        base_consumer.process
         consumers.responders.respond_with
       ].freeze
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Fetcher do
-  subject(:fetcher) { described_class.new }
+  subject(:fetcher) { described_class }
 
   describe '#fetch_loop' do
     context 'when everything is ok' do
@@ -16,7 +16,7 @@ RSpec.describe Karafka::Fetcher do
       end
 
       it 'starts asynchronously consumption for each listener' do
-        fetcher.fetch_loop
+        fetcher.call
       end
     end
 
@@ -33,7 +33,7 @@ RSpec.describe Karafka::Fetcher do
       it 'stops the app and reraise' do
         expect(Karafka::App).to receive(:stop!)
         expect(Karafka.monitor).to receive(:instrument).with(*instrument_args)
-        expect { fetcher.fetch_loop }.to raise_error(error)
+        expect { fetcher.call }.to raise_error(error)
       end
     end
   end
