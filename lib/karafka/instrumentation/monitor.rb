@@ -37,21 +37,6 @@ module Karafka
         BASE_EVENTS.each(&method(:register_event))
       end
 
-      # Allows us to instrument a give piece of code
-      # @param event_name [String] name of the event we want to instrument
-      # @param caller [Object] object that calls the instrumentation (usually local self)
-      # @param payload [Hash] any data we want to pass
-      # @param block [Block] code that we want to instrument
-      # @return Returns the intrumented block results
-      # @example
-      #   Karafka.monitor.instrument('registered.event_name', self, data: data) do
-      #     # code that we want to instrument
-      #   end
-      def instrument(event_name, caller, payload = {}, &block)
-        payload[:caller] = caller
-        super(event_name, payload, &block)
-      end
-
       # Allows us to subscribe to events with a code that will be yielded upon events
       # @param event_name_or_listener [String, Object] name of the event we want to subscribe to
       #   or a listener if we decide to go with object listener

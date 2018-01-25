@@ -93,6 +93,7 @@ module Karafka
       #   parse it again.
       def retrieve!
         return self if self[:parsed]
+        self[:parsed] = true
 
         merge!(parse(delete(:value)))
       end
@@ -124,14 +125,12 @@ module Karafka
       # @return [Hash] parsed data or a hash with message key containing raw data if something
       #   went wrong during parsing
       def parse(value)
-        Karafka.monitor.instrument('params.params.parse', self) do
+        Karafka.monitor.instrument('params.params.parse', caller: self) do
           self[:parser].parse(value)
         end
       rescue ::Karafka::Errors::ParserError => e
-        Karafka.monitor.instrument('params.params.parse_error', self, error: e)
+        Karafka.monitor.instrument('params.params.parse_error', caller: self, error: e)
         raise e
-      ensure
-        self[:parsed] = true
       end
     end
   end

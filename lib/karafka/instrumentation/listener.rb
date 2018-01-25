@@ -46,7 +46,7 @@ module Karafka
         # Logs info about processing of a certain dataset with an inline backend
         # @param event [Dry::Events::Event] event details including payload
         def on_backends_inline_process(event)
-          count = event[:caller].send(:params_batch).to_a.count
+          count = event[:caller].send(:params_batch).to_a.size
           topic = event[:caller].topic.name
           time = event[:time]
           info "Inline processing of #{topic} topic with #{count} messages took #{time} ms"

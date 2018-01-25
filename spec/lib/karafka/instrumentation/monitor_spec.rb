@@ -14,7 +14,7 @@ RSpec.describe Karafka::Instrumentation::Monitor do
   end
 
   describe '#subscribe' do
-    context 'for a block based listener' do
+    context 'when we have a block based listener' do
       let(:subscription) { Karafka.monitor.subscribe(event_name) {} }
 
       context 'when we try to subscribe to an unsupported event' do
@@ -30,8 +30,11 @@ RSpec.describe Karafka::Instrumentation::Monitor do
       end
     end
 
-    context 'for an object listener' do
-      pending
+    context 'when we have an object listener' do
+      let(:subscription) { Karafka.monitor.subscribe(listener) }
+      let(:listener) { Class.new }
+
+      it { expect { subscription }.not_to raise_error }
     end
   end
 

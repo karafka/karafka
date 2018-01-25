@@ -25,14 +25,22 @@ module Karafka
       rescue Kafka::ProcessingError => e
         # If there was an error during consumption, we have to log it, pause current partition
         # and process other things
-        Karafka.monitor.instrument('connection.client.fetch_loop_error', self, error: e.cause)
+        Karafka.monitor.instrument(
+          'connection.client.fetch_loop_error',
+          caller: self,
+          error: e.cause
+        )
         pause(e.topic, e.partition)
         retry
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
-        Karafka.monitor.instrument('connection.client.fetch_loop_error', self, error: e)
+        Karafka.monitor.instrument(
+          'connection.client.fetch_loop_error',
+          caller: self,
+          error: e
+        )
         retry
       end
 

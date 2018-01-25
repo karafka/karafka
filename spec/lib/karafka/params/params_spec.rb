@@ -64,12 +64,8 @@ RSpec.describe Karafka::Params::Params do
         before { params[:parsed] = true }
 
         it 'expect not to parse again and return self' do
-          expect(params)
-            .not_to receive(:parse)
-
-          expect(params)
-            .not_to receive(:merge!)
-
+          expect(params).not_to receive(:parse)
+          expect(params).not_to receive(:merge!)
           expect(params.retrieve!).to eq params
         end
       end
@@ -90,6 +86,10 @@ RSpec.describe Karafka::Params::Params do
         it 'expect to merge with parsed stuff that is under value key and remove this key' do
           expect(params.retrieve![parsed_value.keys[0]]).to eq parsed_value.values[0]
           expect(params.keys).not_to include :value
+        end
+
+        it 'expect to mark as parsed' do
+          expect(params.retrieve![:parsed]).to eq true
         end
       end
 
@@ -132,34 +132,37 @@ RSpec.describe Karafka::Params::Params do
             .and_return(parsed_value)
         end
 
-        it 'expect to mark as parsed and return value in a message key' do
+        it 'expect to return value in a message key' do
           expect(params.send(:parse, value)).to eq parsed_value
-          expect(params[:parsed]).to eq true
         end
       end
 
       context 'when parsing fails' do
-        let(:instrument_args) { ['params.params.parse', params] }
+        let(:instrument_args) do
+          [
+            'params.params.parse',
+            caller: params
+          ]
+        end
         let(:instrument_error_args) do
           [
             'params.params.parse_error',
-            params,
+            caller: params,
             error: ::Karafka::Errors::ParserError
           ]
         end
 
         before do
-          expect(parser)
+          allow(parser)
             .to receive(:parse)
             .with(value)
             .and_raise(::Karafka::Errors::ParserError)
         end
 
-        it 'expect to monitor, mark as parsed and reraise' do
+        it 'expect to monitor and reraise' do
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_args).and_yield
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_error_args)
           expect { params.send(:parse, value) }.to raise_error(::Karafka::Errors::ParserError)
-          expect(params[:parsed]).to eq true
         end
       end
     end

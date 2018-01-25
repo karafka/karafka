@@ -35,7 +35,7 @@ module Karafka
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
-        Karafka.monitor.instrument('connection.listener.fetch_loop_error', self, error: e)
+        Karafka.monitor.instrument('connection.listener.fetch_loop_error', caller: self, error: e)
         # rubocop:enable RescueException
         @client&.stop
         retry if @client

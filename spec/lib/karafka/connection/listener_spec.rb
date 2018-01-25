@@ -27,7 +27,11 @@ RSpec.describe Karafka::Connection::Listener do
           # Lets silence exceptions printing
           expect(Karafka.monitor)
             .to receive(:instrument)
-            .with('connection.listener.fetch_loop_error', listener, error: error)
+            .with(
+              'connection.listener.fetch_loop_error',
+              caller: listener,
+              error: error
+            )
         end
 
         it 'notices the error and stop the client' do
