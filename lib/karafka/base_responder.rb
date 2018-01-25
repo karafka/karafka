@@ -75,7 +75,7 @@ module Karafka
       # @param options [Hash] hash with optional configuration details
       def topic(topic_name, options = {})
         self.topics ||= {}
-        topic_obj = Responders::Topic.new(topic_name, options.merge(registered: true))
+        topic_obj = Responders::Topic.new(topic_name.to_s, options.merge(registered: true))
         self.topics[topic_obj.name] = topic_obj
       end
 
@@ -182,6 +182,10 @@ module Karafka
     # @param options [Hash] options for waterdrop (e.g. partition_key)
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data, options = {})
+      # We normalize the format to string, as WaterDrop and Ruby-Kafka support only
+      # string topics
+      topic = topic.to_s
+
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
         @parser_class.generate(data),

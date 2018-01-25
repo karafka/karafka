@@ -3,43 +3,82 @@
 module Karafka
   module Instrumentation
     # Default listener that hooks up to our instrumentation and uses its events for logging
+    # It can be removed/replaced or anyhting without any harm to the Karafka app flow
     class Listener
-      def self.on_params_params_parse(event)
-        topic = event[:caller].topic
-        time = event[:time]
-        Karafka.logger.debug "Params parsing for #{topic} successful in #{time} ms"
-      end
+      class << self
+        # Logs details about each received message value parsing
+        # @param event [Dry::Events::Event] event details including payload
+        def on_params_params_parse(event)
+          topic = event[:caller].topic
+          time = event[:time]
+          debug "Params parsing for #{topic} successful in #{time} ms"
+        end
 
-      def self.on_params_params_parse_error(event)
-        topic = event[:caller].topic
-        Karafka.logger.error "Params parsing error for #{topic}: #{event[:error]}"
-      end
+        # Logs unsuccessful parsing attempts of incoming data
+        # @param event [Dry::Events::Event] event details including payload
+        def on_params_params_parse_error(event)
+          topic = event[:caller].topic
+          error "Params parsing error for #{topic}: #{event[:error]}"
+        end
 
-      def self.on_connection_listener_fetch_loop_error(event)
-        Karafka.logger.error "Listener fetch loop error: #{event[:error]}"
-      end
+        # Logs errors that occured in a listener fetch loop
+        # @param event [Dry::Events::Event] event details including payload
+        # @note It's an error as we can recover from it not a fatal
+        def on_connection_listener_fetch_loop_error(event)
+          error "Listener fetch loop error: #{event[:error]}"
+        end
 
-      def self.on_connection_client_fetch_loop_error(event)
-        Karafka.logger.error "Client fetch loop error: #{event[:error]}"
-      end
+        # Logs errors that are related to the connection itself
+        # @note Karafka will attempt to reconnect, so an error not a fatal
+        # @param event [Dry::Events::Event] event details including payload
+        def on_connection_client_fetch_loop_error(event)
+          error "Client fetch loop error: #{event[:error]}"
+        end
 
-      def self.on_fetcher_call_error(event)
-        Karafka.logger.fatal "Fetcher crash due to an error: #{event[:error]}"
-      end
+        # Logs info about crashed fetcher
+        # @note If this happens, Karafka will shutdown as it means a critical error
+        #   in one of the threads
+        # @param event [Dry::Events::Event] event details including payload
+        def on_fetcher_call_error(event)
+          fatal "Fetcher crash due to an error: #{event[:error]}"
+        end
 
-      def self.on_backends_inline_call(event)
-        count = event[:caller].send(:params_batch).to_a.count
-        topic = event[:caller].topic.name
-        time = event[:time]
-        Karafka.logger.info "Inline processing of #{topic} topic with #{count} messages took #{time} ms"
-      end
+        # Logs info about processing of a certain dataset with an inline backend
+        # @param event [Dry::Events::Event] event details including payload
+        def on_backends_inline_process(event)
+          count = event[:caller].send(:params_batch).to_a.count
+          topic = event[:caller].topic.name
+          time = event[:time]
+          info "Inline processing of #{topic} topic with #{count} messages took #{time} ms"
+        end
 
-      def self.on_process_notice_signal(event)
-        Karafka.logger.info "Karafka received #{event[:signal]} system signal"
-      end
+        # Logs info about system signals that Karafka received
+        # @param event [Dry::Events::Event] event details including payload
+        def on_process_notice_signal(event)
+          info "Received #{event[:signal]} system signal"
+        end
 
-      def self.on_consumers_responders_respond_with(event)
-   #     Karafka.logger.info "Params parsing for #{topic} successful in #{time} ms"
+        # Logs info about responder usage withing a controller flow
+        # @param event [Dry::Events::Event] event details including payload
+        def on_consumers_responders_respond_with(event)
+          calling = event[:caller].class
+          responder = calling.topic.responder
+          data = event[:data]
+          info "Responded from #{calling} using #{responder} with following data #{data}"
+        end
+
+        private
+
+        %i[
+          debug
+          info
+          error
+          fatal
+        ].each do |log_method|
+          define_method log_method do |*args|
+            Karafka.logger.send(log_method, *args)
+          end
+        end
       end
     end
   end

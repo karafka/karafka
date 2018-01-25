@@ -38,7 +38,7 @@ module Karafka
       end
 
       # Allows us to instrument a give piece of code
-      # @param event [String] name of the event we want to instrument
+      # @param event_name [String] name of the event we want to instrument
       # @param caller [Object] object that calls the instrumentation (usually local self)
       # @param payload [Hash] any data we want to pass
       # @param block [Block] code that we want to instrument
@@ -47,18 +47,18 @@ module Karafka
       #   Karafka.monitor.instrument('registered.event_name', self, data: data) do
       #     # code that we want to instrument
       #   end
-      def instrument(event, caller, payload = {}, &block)
+      def instrument(event_name, caller, payload = {}, &block)
         payload[:caller] = caller
-        super(event, payload, &block)
+        super(event_name, payload, &block)
       end
 
       # Allows us to subscribe to events with a code that will be yielded upon events
-      # @param event_or_listener [String, Object] name of the event we want to subscribe to
+      # @param event_name_or_listener [String, Object] name of the event we want to subscribe to
       #   or a listener if we decide to go with object listener
-      def subscribe(event_or_listener)
-        return super unless event_or_listener.is_a?(String)
-        return super if available_events.include?(event)
-        raise Errors::UnregisteredMonitorEvent, event
+      def subscribe(event_name_or_listener)
+        return super unless event_name_or_listener.is_a?(String)
+        return super if available_events.include?(event_name_or_listener)
+        raise Errors::UnregisteredMonitorEvent, event_name_or_listener
       end
 
       # @return [Array<String>] names of available events to which we can subscribe
