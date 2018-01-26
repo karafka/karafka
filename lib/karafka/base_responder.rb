@@ -75,7 +75,7 @@ module Karafka
       # @param options [Hash] hash with optional configuration details
       def topic(topic_name, options = {})
         self.topics ||= {}
-        topic_obj = Responders::Topic.new(topic_name.to_s, options.merge(registered: true))
+        topic_obj = Responders::Topic.new(topic_name, options.merge(registered: true))
         self.topics[topic_obj.name] = topic_obj
       end
 

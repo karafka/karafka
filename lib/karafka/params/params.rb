@@ -17,8 +17,8 @@ module Karafka
         partition
         offset
         key
-        created_at
-        received_at
+        create_time
+        receive_time
         topic
       ].freeze
 
@@ -32,7 +32,8 @@ module Karafka
         partition
         offset
         key
-        created_at
+        create_time
+        receive_time
       ].freeze
 
       private_constant :PARAMS_METHOD_ATTRIBUTES
@@ -61,8 +62,8 @@ module Karafka
             instance[:partition] = message.partition
             instance[:offset] = message.offset
             instance[:key] = message.key
-            instance[:created_at] = message.create_time
-            instance[:received_at] = Time.now
+            instance[:create_time] = message.create_time
+            instance[:receive_time] = Time.now
             # When we get raw messages, they might have a topic, that was modified by a
             # topic mapper. We need to "reverse" this change and map back to the non-modified
             # format, so our internal flow is not corrupted with the mapping

@@ -25,13 +25,13 @@ RSpec.describe Karafka::Params::Params do
         let(:params_attributes) do
           {
             parser: parser,
-            received_at: Time.now,
+            receive_time: Time.now,
             value: value,
             offset: offset,
             partition: partition,
             key: key,
             topic: topic,
-            created_at: create_time
+            create_time: create_time
           }
         end
         let(:message) do
@@ -95,7 +95,7 @@ RSpec.describe Karafka::Params::Params do
 
       context 'when params were not yet parsed and value does contain same keys' do
         let(:value) { double }
-        let(:parsed_value) { { received_at: rand } }
+        let(:parsed_value) { { receive_time: rand } }
 
         before do
           params[:value] = value
@@ -108,7 +108,7 @@ RSpec.describe Karafka::Params::Params do
 
         it 'expect not to overwrite existing keys' do
           params.retrieve!
-          expect(params[parsed_value[:received_at]]).not_to eq parsed_value[:received_at]
+          expect(params[parsed_value[:receive_time]]).not_to eq parsed_value[:receive_time]
           expect(params.keys).not_to include :value
         end
       end
@@ -224,7 +224,7 @@ RSpec.describe Karafka::Params::Params do
       partition
       offset
       key
-      created_at
+      create_time
     ].each do |key|
       describe "\##{key}" do
         let(:value) { rand }

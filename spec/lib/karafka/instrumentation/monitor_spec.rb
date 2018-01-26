@@ -5,7 +5,7 @@ RSpec.describe Karafka::Instrumentation::Monitor do
 
   describe '#instrument' do
     let(:result) { rand }
-    let(:instrumentation) { monitor.instrument(event_name, self) { result } }
+    let(:instrumentation) { monitor.instrument(event_name, call: self) { result } }
     let(:event_name) { monitor.available_events.sample }
 
     it 'expect to return blocks execution value' do

@@ -24,7 +24,7 @@ module Karafka
         threads.each { |thread| Karafka::Server.consumer_threads << thread }
         threads.each(&:join)
       # If anything crashes here, we need to raise the error and crush the runner because it means
-      # that something really bad happened
+      # that something terrible happened
       rescue StandardError => e
         Karafka.monitor.instrument('fetcher.call_error', caller: self, error: e)
         Karafka::App.stop!

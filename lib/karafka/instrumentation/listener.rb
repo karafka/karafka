@@ -3,7 +3,7 @@
 module Karafka
   module Instrumentation
     # Default listener that hooks up to our instrumentation and uses its events for logging
-    # It can be removed/replaced or anyhting without any harm to the Karafka app flow
+    # It can be removed/replaced or anything without any harm to the Karafka app flow
     class Listener
       class << self
         # Logs details about each received message value parsing
@@ -11,14 +11,14 @@ module Karafka
         def on_params_params_parse(event)
           topic = event[:caller].topic
           time = event[:time]
-          debug "Params parsing for #{topic} successful in #{time} ms"
+          debug "Params parsing for #{topic} topic successful in #{time} ms"
         end
 
         # Logs unsuccessful parsing attempts of incoming data
         # @param event [Dry::Events::Event] event details including payload
         def on_params_params_parse_error(event)
           topic = event[:caller].topic
-          error "Params parsing error for #{topic}: #{event[:error]}"
+          error "Params parsing error for #{topic} topic: #{event[:error]}"
         end
 
         # Logs errors that occured in a listener fetch loop

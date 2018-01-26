@@ -38,7 +38,7 @@ RSpec.describe Karafka::Persistence::Topic do
           .and_return(mapped_topic_name)
       end
 
-      it 'should remap and use remapped topic' do
+      it 'expect to remap and use remapped topic' do
         expect(Karafka::Routing::Router).to receive(:find).with(route_key).and_return(topic).once
         expect(persistence.fetch(group_id, raw_topic_name)).to eq topic
       end

@@ -44,5 +44,24 @@ RSpec.describe Karafka::Patches::RubyKafka do
         expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
       end
     end
+
+    context 'when there are consumer instances with callbacks' do
+      let(:consumer) do
+        ClassBuilder.inherit(Karafka::BaseConsumer) do
+          include Karafka::Consumers::Callbacks
+        end
+      end
+
+      before do
+        Karafka::Persistence::Consumer.fetch(
+          instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
+          0
+        )
+      end
+
+      it 'expect to yield the original base block' do
+        expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
+      end
+    end
   end
 end
