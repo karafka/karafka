@@ -57,6 +57,8 @@ RSpec.describe Karafka::Patches::RubyKafka do
           instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
           0
         )
+
+        allow(Karafka::App).to receive(:stopped?).and_return(false)
       end
 
       it 'expect to yield the original base block' do

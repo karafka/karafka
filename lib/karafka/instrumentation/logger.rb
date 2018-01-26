@@ -7,20 +7,20 @@ module Karafka
     class Logger < ::Logger
       include Singleton
 
-      # Map containing informations about log level for given environment
+      # Map containing information about log level for given environment
       ENV_MAP = {
         'production' => ::Logger::ERROR,
         'test' => ::Logger::ERROR,
         'development' => ::Logger::INFO,
         'debug' => ::Logger::DEBUG,
-        default: ::Logger::INFO
+        'default' => ::Logger::INFO
       }.freeze
 
       # Creates a new instance of logger ensuring that it has a place to write to
       def initialize(*_args)
         ensure_dir_exists
         super(target)
-        self.level = ENV_MAP[Karafka.env] || ENV_MAP[:default]
+        self.level = ENV_MAP[Karafka.env] || ENV_MAP['default']
       end
 
       private

@@ -14,6 +14,7 @@
 - #262 - Error in the monitor code for NewRelic
 - #241 - Performance metrics
 - #274 - Rename controllers to consumers
+- #184 - Seek to
 - Replaced some of the activesupport parts with dry-inflector
 - Lower ActiveSupport dependency
 - Remove configurators in favor of the after_init block configurator
@@ -26,6 +27,7 @@
 - Support multiple ```after_init``` blocks in favor of a single one
 - Renamed ```received_at``` to ```receive_time``` to follow ruby-kafka and WaterDrop conventions
 - Adjust internal setup to easier map Ruby-Kafka config changes
+- System callbacks reorganization
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format

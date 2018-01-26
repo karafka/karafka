@@ -7,14 +7,26 @@ module Karafka
     # @note Listener itself does nothing with the message - it will return to the block
     #   a raw Kafka::FetchedMessage
     class Listener
-      attr_reader :consumer_group
-
       # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group that holds details
       #   on what topics and with what settings should we listen
       # @return [Karafka::Connection::Listener] listener instance
       def initialize(consumer_group)
         @consumer_group = consumer_group
+        # This goes into the initialization, because we want to run it once even when client
+        # crashes, we don't to rerun callbacks. Also, callbacks should not interrupt with the
+        # main fetch loop
       end
+
+      # Runs prefetch callbacks and executes the main listener fetch loop
+      def call
+        Karafka::Callbacks.before_fetching(
+          @consumer_group,
+          client
+        )
+        fetch_loop
+      end
+
+      private
 
       # Opens connection, gets messages and calls a block for each of the incoming messages
       # @yieldparam [String] consumer group id
@@ -30,7 +42,7 @@ module Karafka
         client.fetch_loop do |raw_messages|
           # @note What happens here is a delegation of processing to a proper processor based
           #   on the incoming messages characteristics
-          Karafka::Connection::Delegator.call(consumer_group.id, raw_messages)
+          Karafka::Connection::Delegator.call(@consumer_group.id, raw_messages)
         end
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
@@ -41,12 +53,10 @@ module Karafka
         retry if @client
       end
 
-      private
-
       # @return [Karafka::Connection::Client] wrapped kafka consuming client for a given topic
       #   consumption
       def client
-        @client ||= Client.new(consumer_group)
+        @client ||= Client.new(@consumer_group)
       end
     end
   end

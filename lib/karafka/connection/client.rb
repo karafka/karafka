@@ -5,6 +5,10 @@ module Karafka
     # Class used as a wrapper around Ruby-Kafka client to simplify additional
     # features that we provide/might provide in future and to hide the internal implementation
     class Client
+      extend Forwardable
+
+      def_delegator :kafka_consumer, :seek
+
       # Creates a queue consumer client that will pull the data from Kafka
       # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group for which
       #   we create a client

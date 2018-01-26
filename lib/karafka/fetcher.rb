@@ -16,7 +16,7 @@ module Karafka
           # and if that happens, it means that something really bad happened and we should stop
           # the whole process
           Thread
-            .new { listener.fetch_loop }
+            .new { listener.call }
             .tap { |thread| thread.abort_on_exception = true }
         end
 

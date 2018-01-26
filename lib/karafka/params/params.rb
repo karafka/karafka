@@ -9,7 +9,7 @@ module Karafka
     # heavy-parsing data without slowing down the whole application.
     class Params < Hash
       # Params keys that are "our" and internal. We use this list for additional backends
-      # that don't allow sumbols to be transfered, to remap the interchanged params
+      # that don't allow symbols to be transferred, to remap the interchanged params
       # back into a valid form
       SYSTEM_KEYS = %i[
         parser

@@ -7,7 +7,7 @@ RSpec.describe Karafka::Fetcher do
     context 'when everything is ok' do
       let(:listeners) { [listener] }
       let(:async_scope) { listener }
-      let(:listener) { instance_double(Karafka::Connection::Listener, fetch_loop: nil) }
+      let(:listener) { instance_double(Karafka::Connection::Listener, call: nil) }
 
       before do
         allow(fetcher)

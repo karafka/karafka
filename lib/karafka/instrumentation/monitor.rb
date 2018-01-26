@@ -4,7 +4,7 @@ module Karafka
   # Namespace for all the things related with Karafka instrumentation process
   module Instrumentation
     # Monitor is used to hookup external monitoring services to monitor how Karafka works
-    # It provides a standarized API for checking incoming messages/enqueueing etc
+    # It provides a standardized API for checking incoming messages/enqueueing etc
     # Since it is a pub-sub based on dry-monitor, you can use as many subscribers/loggers at the
     # same time, which means that you might have for example file logging and newrelic at the same
     # time

@@ -13,6 +13,7 @@ module Karafka
     # @see Karafka::Setup::Configurators::Base for more details about configurators api
     class Config
       extend Dry::Configurable
+      extend Callbacks::Config
 
       # Available settings
       # option client_id [String] kafka client_id - used to provide
@@ -144,22 +145,12 @@ module Karafka
         setting :sasl_scram_mechanism, nil
       end
 
-      # option internal [Hash] - optional - internal karafka configuration settings that should
-      #   never be changed by users directly
-      setting :internal do
-        # option after_init [Array<Proc>] array of blocks that will be executed right after we
-        #   finish the bootstrap but before we run everything (server, console, etc)
-        setting :after_init, []
-      end
-
       class << self
         # Configurating method
         # @yield Runs a block of code providing a config singleton instance to it
         # @yieldparam [Karafka::Setup::Config] Karafka config instance
         def setup
-          configure do |config|
-            yield(config)
-          end
+          configure { |config| yield(config) }
         end
 
         # Everything that should be initialized after the setup
@@ -169,11 +160,6 @@ module Karafka
           [
             Configurators::WaterDrop
           ].each { |klass| klass.setup(config) }
-        end
-
-        # Executes the after init block with the fully loaded config
-        def after_init
-          config.internal.after_init.each { |after_block| after_block.call(config) }
         end
 
         # Validate config based on ConfigurationSchema

@@ -35,7 +35,6 @@ module Karafka
         # won't alarm or start new system process up until the current one is finished
         ObjectSpace.define_finalizer(self, proc { send(:clean) })
 
-        # After we fork, we can boot celluloid again
         Karafka::Server.run
       end
 

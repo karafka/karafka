@@ -9,16 +9,15 @@ module Karafka
         # Logs details about each received message value parsing
         # @param event [Dry::Events::Event] event details including payload
         def on_params_params_parse(event)
-          topic = event[:caller].topic
-          time = event[:time]
-          debug "Params parsing for #{topic} topic successful in #{time} ms"
+          # Keep in mind, that a caller here is a params object not a controller, so it returns
+          # a topic as a string, not a routing topic
+          debug "Params parsing for #{event[:caller].topic} topic successful in #{event[:time]} ms"
         end
 
         # Logs unsuccessful parsing attempts of incoming data
         # @param event [Dry::Events::Event] event details including payload
         def on_params_params_parse_error(event)
-          topic = event[:caller].topic
-          error "Params parsing error for #{topic} topic: #{event[:error]}"
+          error "Params parsing error for #{event[:caller].topic} topic: #{event[:error]}"
         end
 
         # Logs errors that occured in a listener fetch loop

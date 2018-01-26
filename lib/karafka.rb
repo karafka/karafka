@@ -13,6 +13,7 @@
   dry-validation
   dry/monitor/notifications
   dry/inflector
+  dry/monitor/notifications
   active_support/callbacks
   karafka/loader
 ].each(&method(:require))
