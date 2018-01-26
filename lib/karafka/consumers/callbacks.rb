@@ -10,7 +10,7 @@ module Karafka
     module Callbacks
       # Types of events on which we run callbacks
       TYPES = %i[
-        after_fetched
+        after_fetch
         after_poll
         before_poll
         before_stop
@@ -45,7 +45,7 @@ module Karafka
       # method of a proper backend. It is here because it interacts with the default Karafka
       # call flow and needs to be overwritten to support callbacks
       def call
-        run_callbacks :after_fetched do
+        run_callbacks :after_fetch do
           process
         end
       end

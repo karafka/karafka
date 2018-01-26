@@ -11,7 +11,7 @@ module Karafka
     # Types of system callbacks that we have that are not related to consumers
     TYPES = %i[
       after_init
-      before_fetching
+      before_fetch_loop
     ].freeze
 
     class << self

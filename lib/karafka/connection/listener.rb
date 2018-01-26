@@ -19,7 +19,7 @@ module Karafka
 
       # Runs prefetch callbacks and executes the main listener fetch loop
       def call
-        Karafka::Callbacks.before_fetching(
+        Karafka::Callbacks.before_fetch_loop(
           @consumer_group,
           client
         )

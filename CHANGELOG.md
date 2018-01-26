@@ -28,7 +28,8 @@
 - Renamed ```received_at``` to ```receive_time``` to follow ruby-kafka and WaterDrop conventions
 - Adjust internal setup to easier map Ruby-Kafka config changes
 - System callbacks reorganization
-- Added ```before_fetching``` configuration block for early client usage (```#seek```, etc)
+- Added ```before_fetch_loop``` configuration block for early client usage (```#seek```, etc)
+- Renamed ```after_fetched``` to ```after_fetch``` to normalize the naming convention
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format

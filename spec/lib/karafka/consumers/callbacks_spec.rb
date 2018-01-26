@@ -37,7 +37,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
     it { expect { base_consumer.send(:consume) }.to raise_error NotImplementedError }
   end
 
-  context 'when we want to use after_fetched callback' do
+  context 'when we want to use after_fetch callback' do
     describe '#call' do
       context 'when there are no callbacks' do
         it 'just schedules' do
@@ -48,7 +48,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
       end
     end
 
-    context 'when we have a block based after_fetched' do
+    context 'when we have a block based after_fetch' do
       let(:backend) { :inline }
 
       context 'when it throws abort to halt' do
@@ -59,7 +59,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
             include Karafka::Backends::Inline
             include described_scope
 
-            after_fetched do
+            after_fetch do
               throw(:abort)
             end
 
@@ -84,7 +84,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
             include Karafka::Backends::Inline
             include described_scope
 
-            after_fetched do
+            after_fetch do
               true
             end
 
@@ -103,7 +103,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
       end
     end
 
-    context 'when we have a method based after_fetched' do
+    context 'when we have a method based after_fetch' do
       let(:backend) { :inline }
 
       context 'when it throws abort to halt' do
@@ -113,7 +113,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
           ClassBuilder.inherit(Karafka::BaseConsumer) do
             include described_scope
 
-            after_fetched :method
+            after_fetch :method
 
             def consume
               self
@@ -140,7 +140,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
             include Karafka::Backends::Inline
             include described_scope
 
-            after_fetched :method
+            after_fetch :method
 
             def consume
               self

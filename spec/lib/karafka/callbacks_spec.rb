@@ -20,19 +20,19 @@ RSpec.describe Karafka::Callbacks do
     end
   end
 
-  describe '#before_fetching' do
+  describe '#before_fetch_loop' do
     subject(:callbacks) { described_class }
 
     let(:arg1) { rand }
     let(:arg2) { rand }
 
-    before {  Karafka::App.config.internal.before_fetching << ->(_arg1, _arg2) {} }
+    before {  Karafka::App.config.internal.before_fetch_loop << ->(_arg1, _arg2) {} }
 
-    it 'expect to call the before_fetching blocks' do
-      expect(Karafka::App.config.internal.before_fetching.first)
+    it 'expect to call the before_fetch_loop blocks' do
+      expect(Karafka::App.config.internal.before_fetch_loop.first)
         .to receive(:call).with(arg1, arg2)
 
-      callbacks.before_fetching(arg1, arg2)
+      callbacks.before_fetch_loop(arg1, arg2)
     end
   end
 end

@@ -13,12 +13,12 @@ RSpec.describe Karafka::Callbacks::Dsl do
     end
   end
 
-  describe '#before_fetching' do
+  describe '#before_fetch_loop' do
     let(:execution_block) { ->(_consumer_group, _client) {} }
 
     it 'expects to assing a block into internal settings array' do
-      app_class.before_fetching(&execution_block)
-      expect(app_class.config.internal.before_fetching).to include execution_block
+      app_class.before_fetch_loop(&execution_block)
+      expect(app_class.config.internal.before_fetch_loop).to include execution_block
     end
   end
 end

@@ -7,9 +7,9 @@ RSpec.describe Karafka::Callbacks::Config do
     it { expect(internal.after_init).to be_a(Array) }
   end
 
-  context 'before_fetching settings' do
+  context 'before_fetch_loop settings' do
     subject(:internal) { Karafka::App.config.internal }
 
-    it { expect(internal.before_fetching).to be_a(Array) }
+    it { expect(internal.before_fetch_loop).to be_a(Array) }
   end
 end
