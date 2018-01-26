@@ -5,7 +5,7 @@ module Karafka
     # App level dsl to define callbacks
     module Dsl
       Callbacks::TYPES.each do |callback_type|
-        # Allows us to define a block, that will be executed for a given momen
+        # Allows us to define a block, that will be executed for a given moment
         # @param [Block] block that should be executed after the initialization process
         define_method callback_type do |&block|
           config.internal.send(callback_type).push block

@@ -8,14 +8,14 @@ RSpec.describe Karafka::Server do
 
     context 'when we want to run in supervision' do
       before do
-        expect(Karafka::App).to receive(:run!)
-        expect(Karafka::Fetcher).to receive(:call)
         expect(Karafka::Process.instance).to receive(:on_sigint)
         expect(Karafka::Process.instance).to receive(:on_sigquit)
         expect(Karafka::Process.instance).to receive(:on_sigterm)
       end
 
       it 'runs in supervision, start consuming' do
+        expect(Karafka::App).to receive(:run!)
+        expect(Karafka::Fetcher).to receive(:call)
         expect(Karafka::Process.instance).to receive(:supervise).and_yield
       end
     end

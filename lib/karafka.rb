@@ -11,7 +11,6 @@
   require_all
   dry-configurable
   dry-validation
-  dry/monitor/notifications
   dry/inflector
   dry/monitor/notifications
   active_support/callbacks

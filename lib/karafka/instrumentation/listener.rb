@@ -9,8 +9,8 @@ module Karafka
         # Logs details about each received message value parsing
         # @param event [Dry::Events::Event] event details including payload
         def on_params_params_parse(event)
-          # Keep in mind, that a caller here is a params object not a controller, so it returns
-          # a topic as a string, not a routing topic
+          # Keep in mind, that a caller here is a param object not a controller,
+          # so it returns a topic as a string, not a routing topic
           debug "Params parsing for #{event[:caller].topic} topic successful in #{event[:time]} ms"
         end
 

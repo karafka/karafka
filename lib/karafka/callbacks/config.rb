@@ -11,7 +11,7 @@ module Karafka
         #   never be changed by users directly
         klass.setting :internal do
           Callbacks::TYPES.each do |callback_type|
-            # option [Array<Proc>] array of blocks that will be executed in a given moment
+            # option [Array<Proc>] an array of blocks that will be executed at a given moment
             #   depending on the callback type
             setting callback_type, []
           end

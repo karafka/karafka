@@ -12,9 +12,6 @@ module Karafka
       # @return [Karafka::Connection::Listener] listener instance
       def initialize(consumer_group)
         @consumer_group = consumer_group
-        # This goes into the initialization, because we want to run it once even when client
-        # crashes, we don't to rerun callbacks. Also, callbacks should not interrupt with the
-        # main fetch loop
       end
 
       # Runs prefetch callbacks and executes the main listener fetch loop
