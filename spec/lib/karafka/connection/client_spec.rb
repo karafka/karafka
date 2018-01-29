@@ -129,7 +129,7 @@ RSpec.describe Karafka::Connection::Client do
 
       before do
         count = 0
-        allow(client).to receive(:consume_each_message).exactly(2).times do
+        allow(kafka_consumer).to receive(:each_message).exactly(2).times do
           count += 1
           count == 1 ? raise(error) : true
         end
@@ -151,7 +151,7 @@ RSpec.describe Karafka::Connection::Client do
 
       before do
         count = 0
-        allow(client).to receive(:consume_each_message).exactly(2).times do
+        allow(kafka_consumer).to receive(:each_message).exactly(2).times do
           count += 1
           count == 1 ? raise(error) : true
         end
@@ -190,7 +190,7 @@ RSpec.describe Karafka::Connection::Client do
       end
 
       before do
-        expect(Kafka)
+        allow(Kafka)
           .to receive(:new)
           .with(
             logger: ::Karafka.logger,

@@ -23,6 +23,7 @@ module Karafka
         params.params.parse_error
         connection.listener.fetch_loop_error
         connection.client.fetch_loop_error
+        connection.delegator.call
         fetcher.call_error
         backends.inline.process
         process.notice_signal

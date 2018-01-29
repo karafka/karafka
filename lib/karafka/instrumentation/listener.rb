@@ -6,6 +6,15 @@ module Karafka
     # It can be removed/replaced or anything without any harm to the Karafka app flow
     class Listener
       class << self
+        # Logs details about incoming messages and with which consumer we will consume them
+        # @param event [Dry::Events::Event] event details including payload
+        def on_connection_delegator_call(event)
+          consumer = event[:consumer]
+          topic = consumer.topic.name
+          kafka_messages = event[:kafka_messages]
+          info "#{kafka_messages.count} messages on #{topic} topic delegated to #{consumer.class}"
+        end
+
         # Logs details about each received message value parsing
         # @param event [Dry::Events::Event] event details including payload
         def on_params_params_parse(event)

@@ -138,4 +138,21 @@ RSpec.describe Karafka::Instrumentation::Listener do
       trigger
     end
   end
+
+  describe '#on_connection_delegator_call' do
+    subject(:trigger) { described_class.on_connection_delegator_call(event) }
+
+    let(:payload) { { caller: caller, consumer: consumer, kafka_messages: kafka_messages } }
+    let(:kafka_messages) { Array.new(rand(2..10)) { rand } }
+    let(:caller) { Karafka::Connection::Delegator }
+    let(:consumer) { instance_double(Karafka::BaseConsumer, topic: topic) }
+    let(:message) do
+      "#{kafka_messages.count} messages on #{topic.name} topic delegated to #{consumer.class}"
+    end
+
+    it 'expect logger to log proper message' do
+      expect(Karafka.logger).to receive(:info).with(message)
+      trigger
+    end
+  end
 end

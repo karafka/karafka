@@ -11,6 +11,8 @@ module Karafka
         # @note We catch all the errors here, to make sure that none failures
         #   for a given consumption will affect other consumed messages
         #   If we wouldn't catch it, it would propagate up until killing the thread
+        # @note It is a one huge method, because of performance reasons. It is much faster then
+        #   using send or invoking additional methods
         # @param group_id [String] group_id of a group from which a given message came
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages fetched from kafka
         def call(group_id, kafka_messages)
@@ -19,34 +21,23 @@ module Karafka
           topic = Persistence::Topic.fetch(group_id, kafka_messages[0].topic)
           consumer = Persistence::Consumer.fetch(topic, kafka_messages[0].partition)
 
-          # Depending on a case (persisted or not) we might use new consumer instance per
-          # each batch, or use the same one for all of them (for implementing buffering, etc.)
-          send(
-            topic.batch_consuming ? :delegate_batch : :delegate_each,
-            consumer,
-            kafka_messages
-          )
-        end
-
-        private
-
-        # Delegates whole batch in one request (all at once)
-        # @param consumer [Karafka::BaseConsumer] base consumer descendant
-        # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages from kafka
-        def delegate_batch(consumer, kafka_messages)
-          consumer.params_batch = kafka_messages
-          consumer.call
-        end
-
-        # Delegates messages one by one (like with std http requests)
-        # @param consumer [Karafka::BaseConsumer] base consumer descendant
-        # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages from kafka
-        def delegate_each(consumer, kafka_messages)
-          kafka_messages.each do |kafka_message|
-            # @note This is a simple trick - we just delegate one after another, but in order
-            # not to handle everywhere both cases (single vs batch), we just "fake" batching with
-            # a single message for each
-            delegate_batch(consumer, [kafka_message])
+          Karafka.monitor.instrument(
+            'connection.delegator.call',
+            caller: self,
+            consumer: consumer,
+            kafka_messages: kafka_messages
+          ) do
+            # Depending on a case (persisted or not) we might use new consumer instance per
+            # each batch, or use the same one for all of them (for implementing buffering, etc.)
+            if topic.batch_consuming
+              consumer.params_batch = kafka_messages
+              consumer.call
+            else
+              kafka_messages.each do |kafka_message|
+                consumer.params_batch = [kafka_message]
+                consumer.call
+              end
+            end
           end
         end
       end
