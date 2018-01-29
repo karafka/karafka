@@ -190,7 +190,7 @@ RSpec.describe Karafka::Connection::Client do
       end
 
       before do
-        expect(Kafka)
+        allow(Kafka)
           .to receive(:new)
           .with(
             logger: ::Karafka.logger,
