@@ -40,7 +40,7 @@ RSpec.describe Karafka::Instrumentation::Monitor do
 
   describe '#available_events' do
     it 'expect to include registered events' do
-      expect(monitor.available_events.size).to eq 8
+      expect(monitor.available_events.size).to eq 9
     end
 
     it { expect(monitor.available_events).to include 'connection.listener.fetch_loop_error' }

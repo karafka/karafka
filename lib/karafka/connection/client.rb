@@ -23,9 +23,14 @@ module Karafka
       # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
       # @note This will yield with raw messages - no preprocessing or reformatting.
       def fetch_loop
-        send(
-          consumer_group.batch_fetching ? :consume_each_batch : :consume_each_message
-        ) { |messages| yield(messages) }
+        settings = ConfigAdapter.consuming(consumer_group)
+
+        if consumer_group.batch_fetching
+          kafka_consumer.each_batch(*settings) { |batch| yield(batch.messages) }
+        else
+          # always yield an array of messages, so we have consistent API (always a batch)
+          kafka_consumer.each_message(*settings) { |message| yield([message]) }
+        end
       rescue Kafka::ProcessingError => e
         # If there was an error during consumption, we have to log it, pause current partition
         # and process other things
@@ -77,27 +82,6 @@ module Karafka
       private
 
       attr_reader :consumer_group
-
-      # Consumes messages from Kafka in batches
-      # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
-      def consume_each_batch
-        kafka_consumer.each_batch(
-          *ConfigAdapter.consuming(consumer_group)
-        ) do |batch|
-          yield(batch.messages)
-        end
-      end
-
-      # Consumes messages from Kafka one by one
-      # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
-      def consume_each_message
-        kafka_consumer.each_message(
-          *ConfigAdapter.consuming(consumer_group)
-        ) do |message|
-          #   always yield an array of messages, so we have consistent API (always a batch)
-          yield([message])
-        end
-      end
 
       # @return [Kafka::Consumer] returns a ready to consume Kafka consumer
       #   that is set up to consume from topics of a given consumer group
