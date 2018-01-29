@@ -60,7 +60,7 @@ module Karafka
       def start_supervised
         process.supervise do
           Karafka::App.run!
-          Karafka::Fetcher.new.fetch_loop
+          Karafka::Fetcher.call
         end
       end
 

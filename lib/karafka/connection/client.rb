@@ -5,6 +5,10 @@ module Karafka
     # Class used as a wrapper around Ruby-Kafka client to simplify additional
     # features that we provide/might provide in future and to hide the internal implementation
     class Client
+      extend Forwardable
+
+      def_delegator :kafka_consumer, :seek
+
       # Creates a queue consumer client that will pull the data from Kafka
       # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group for which
       #   we create a client
@@ -25,14 +29,18 @@ module Karafka
       rescue Kafka::ProcessingError => e
         # If there was an error during consumption, we have to log it, pause current partition
         # and process other things
-        Karafka.monitor.notice_error(self.class, e.cause)
+        Karafka.monitor.instrument(
+          'connection.client.fetch_loop_error',
+          caller: self,
+          error: e.cause
+        )
         pause(e.topic, e.partition)
         retry
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
-        Karafka.monitor.notice_error(self.class, e)
+        Karafka.monitor.instrument('connection.client.fetch_loop_error', caller: self, error: e)
         retry
       end
 
@@ -74,7 +82,7 @@ module Karafka
       # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
       def consume_each_batch
         kafka_consumer.each_batch(
-          ConfigAdapter.consuming(consumer_group)
+          *ConfigAdapter.consuming(consumer_group)
         ) do |batch|
           yield(batch.messages)
         end
@@ -84,7 +92,7 @@ module Karafka
       # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
       def consume_each_message
         kafka_consumer.each_message(
-          ConfigAdapter.consuming(consumer_group)
+          *ConfigAdapter.consuming(consumer_group)
         ) do |message|
           #   always yield an array of messages, so we have consistent API (always a batch)
           yield([message])
@@ -95,7 +103,7 @@ module Karafka
       #   that is set up to consume from topics of a given consumer group
       def kafka_consumer
         @kafka_consumer ||= kafka.consumer(
-          ConfigAdapter.consumer(consumer_group)
+          *ConfigAdapter.consumer(consumer_group)
         ).tap do |consumer|
           consumer_group.topics.each do |topic|
             consumer.subscribe(*ConfigAdapter.subscription(topic))
@@ -114,7 +122,7 @@ module Karafka
       # @note We don't cache it internally because we cache kafka_consumer that uses kafka
       #   object instance
       def kafka
-        Kafka.new(ConfigAdapter.client(consumer_group))
+        Kafka.new(*ConfigAdapter.client(consumer_group))
       end
     end
   end

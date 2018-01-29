@@ -12,10 +12,19 @@ RSpec.describe Karafka::Connection::Listener do
     end
   end
 
+  describe '#call' do
+    let(:client) { listener.send(:client) }
+
+    it 'expects to run callbacks and start the main fetch loop' do
+      expect(Karafka::Callbacks).to receive(:before_fetch_loop).with(consumer_group, client)
+      expect(client).to receive(:fetch_loop)
+      listener.call
+    end
+  end
+
   describe '#fetch_loop' do
     let(:client) { double }
     let(:incoming_message) { double }
-    let(:action) { double }
 
     [
       StandardError,
@@ -27,8 +36,12 @@ RSpec.describe Karafka::Connection::Listener do
         before do
           # Lets silence exceptions printing
           expect(Karafka.monitor)
-            .to receive(:notice_error)
-            .with(described_class, error)
+            .to receive(:instrument)
+            .with(
+              'connection.listener.fetch_loop_error',
+              caller: listener,
+              error: error
+            )
         end
 
         it 'notices the error and stop the client' do
@@ -36,7 +49,7 @@ RSpec.describe Karafka::Connection::Listener do
             .to receive(:client)
             .and_raise(error.new)
 
-          expect { listener.fetch_loop(-> {}) }.not_to raise_error
+          expect { listener.send(:fetch_loop) }.not_to raise_error
         end
       end
     end
@@ -45,9 +58,8 @@ RSpec.describe Karafka::Connection::Listener do
       it 'expect to yield for each incoming message' do
         expect(listener).to receive(:client).and_return(client)
         expect(client).to receive(:fetch_loop).and_yield(incoming_message)
-        expect(action).to receive(:call).with(consumer_group.id, incoming_message)
 
-        listener.send(:fetch_loop, action)
+        listener.send(:fetch_loop)
       end
     end
   end

@@ -8,7 +8,9 @@ module Karafka
 
     # Signal types that we handle
     HANDLED_SIGNALS = %i[
-      SIGINT SIGQUIT SIGTERM
+      SIGINT
+      SIGQUIT
+      SIGTERM
     ].freeze
 
     HANDLED_SIGNALS.each do |signal|
@@ -55,7 +57,7 @@ module Karafka
     #   we have to spin up a new thread to do this
     def notice_signal(signal)
       Thread.new do
-        Karafka.monitor.notice(self.class, signal: signal)
+        Karafka.monitor.instrument('process.notice_signal', caller: self, signal: signal)
       end
     end
   end

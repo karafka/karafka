@@ -4,7 +4,7 @@ module Karafka
   module Params
     # Params batch represents a set of messages received from Kafka.
     # @note Params internally are lazy loaded before first use. That way we can skip parsing
-    #   process if we have after_fetched that rejects some incoming messages without using params
+    #   process if we have after_fetch that rejects some incoming messages without using params
     #   It can be also used when handling really heavy data (in terms of parsing).
     class ParamsBatch
       include Enumerable
@@ -13,7 +13,7 @@ module Karafka
       # @param messages_batch [Array<Kafka::FetchedMessage>] messages batch
       # @param topic_parser [Class] topic parser for unparsing messages values
       def initialize(messages_batch, topic_parser)
-        @params_batch = messages_batch.map do |message|
+        @params_batch = messages_batch.map! do |message|
           Karafka::Params::Params.build(message, topic_parser)
         end
       end

@@ -23,13 +23,4 @@ RSpec.describe Karafka::Setup::Dsl do
       app_class.setup
     end
   end
-
-  describe '#after_init' do
-    let(:execution_block) { ->(_config) {} }
-
-    it 'expects to assing a block into internal settings' do
-      app_class.after_init(&execution_block)
-      expect(app_class.config.internal.after_init).to eq execution_block
-    end
-  end
 end

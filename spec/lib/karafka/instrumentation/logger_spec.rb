@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Logger do
+RSpec.describe Karafka::Instrumentation::Logger do
   specify { expect(described_class).to be < ::Logger }
   subject(:logger) { described_class.instance }
 

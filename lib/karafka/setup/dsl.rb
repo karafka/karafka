@@ -13,13 +13,6 @@ module Karafka
         initialize!
       end
 
-      # Allows us to configure a block, that will be executed after everything is loaded
-      # and configured but before the code runs
-      # @param [Block] block that should be executed after the initialization process
-      def after_init(&block)
-        config.internal.after_init = block
-      end
-
       # @return [Karafka::Config] config instance
       def config
         Setup::Config.config

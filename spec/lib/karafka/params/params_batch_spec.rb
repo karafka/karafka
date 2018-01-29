@@ -8,31 +8,34 @@ RSpec.describe Karafka::Params::ParamsBatch do
   let(:topic_parser) { Karafka::Parsers::Json }
   let(:kafka_messages) { [kafka_message1, kafka_message2] }
   let(:kafka_message1) do
-    instance_double(
-      Kafka::FetchedMessage,
+    Kafka::FetchedMessage.new(
+      message: OpenStruct.new(
+        value: value,
+        key: nil,
+        offset: 0,
+        create_time: create_time
+      ),
       topic: 'topic',
-      value: value,
-      key: nil,
-      partition: 0,
-      offset: 0,
-      create_time: create_time
+      partition: 0
     )
   end
+
   let(:kafka_message2) do
-    instance_double(
-      Kafka::FetchedMessage,
+    Kafka::FetchedMessage.new(
+      message: OpenStruct.new(
+        value: value,
+        key: nil,
+        offset: 0,
+        create_time: create_time
+      ),
       topic: 'topic',
-      value: value,
-      key: nil,
-      partition: 0,
-      offset: 0,
-      create_time: create_time
+      partition: 0
     )
   end
 
   describe '#to_a' do
     it 'expect not to parse data and return raw params_batch' do
-      expect(params_batch.to_a.first[:parsed]).to eq false
+      expect(params_batch.to_a.first[:parsed]).to eq nil
     end
   end
 
@@ -48,7 +51,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
       params_batch.each_with_index do |params, index|
         expect(params[:parsed]).to eq true
         next if index > 0
-        expect(params_batch.to_a[index + 1][:parsed]).to eq false
+        expect(params_batch.to_a[index + 1][:parsed]).to eq nil
       end
     end
   end

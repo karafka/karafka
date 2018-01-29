@@ -16,13 +16,8 @@ module Karafka
         def call(group_id, kafka_messages)
           # @note We always get messages by topic and partition so we can take topic from the
           # first one and it will be valid for all the messages
-          # We map from incoming topic name, as it might be namespaced, etc.
-          # @see topic_mapper internal docs
-          mapped_topic_name = Karafka::App.config.topic_mapper.incoming(kafka_messages[0].topic)
-          topic = Routing::Router.find("#{group_id}_#{mapped_topic_name}")
-          consumer = Persistence::Consumer.fetch(topic, kafka_messages[0].partition) do
-            topic.consumer.new
-          end
+          topic = Persistence::Topic.fetch(group_id, kafka_messages[0].topic)
+          consumer = Persistence::Consumer.fetch(topic, kafka_messages[0].partition)
 
           # Depending on a case (persisted or not) we might use new consumer instance per
           # each batch, or use the same one for all of them (for implementing buffering, etc.)
@@ -40,7 +35,6 @@ module Karafka
         # @param kafka_messages [Array<Kafka::FetchedMessage>] raw messages from kafka
         def delegate_batch(consumer, kafka_messages)
           consumer.params_batch = kafka_messages
-          Karafka.monitor.notice(self, kafka_messages)
           consumer.call
         end
 

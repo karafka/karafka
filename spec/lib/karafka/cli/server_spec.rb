@@ -36,11 +36,11 @@ RSpec.describe Karafka::Cli::Server do
 
         allow(cli).to receive(:info)
 
-        expect(FileUtils)
+        allow(FileUtils)
           .to receive(:mkdir_p)
           .with(File.dirname(cli.options[:pid]))
 
-        expect(Karafka::Server).to receive(:run)
+        allow(Karafka::Server).to receive(:run)
       end
 
       it 'expect to print info, validate!, daemonize and clean' do

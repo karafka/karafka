@@ -20,10 +20,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
     let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
     let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s, persistent: false) }
 
-    before do
-      Karafka::Persistence::Client.write(client)
-      Karafka::Persistence::Consumer.fetch(topic, 0) { nil }
-    end
+    before { Karafka::Persistence::Client.write(client) }
 
     after { Thread.current[:client] = nil }
 
@@ -42,6 +39,27 @@ RSpec.describe Karafka::Patches::RubyKafka do
 
     context 'when karafka is running' do
       before { allow(Karafka::App).to receive(:stopped?).and_return(false) }
+
+      it 'expect to yield the original base block' do
+        expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
+      end
+    end
+
+    context 'when there are consumer instances with callbacks' do
+      let(:consumer) do
+        ClassBuilder.inherit(Karafka::BaseConsumer) do
+          include Karafka::Consumers::Callbacks
+        end
+      end
+
+      before do
+        Karafka::Persistence::Consumer.fetch(
+          instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
+          0
+        )
+
+        allow(Karafka::App).to receive(:stopped?).and_return(false)
+      end
 
       it 'expect to yield the original base block' do
         expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control

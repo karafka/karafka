@@ -5,19 +5,31 @@
 - #260 - Specs missing randomization
 - #251 - Shutdown upon non responding (unreachable) cluster is not possible
 - #258 - Investigate lowering requirements on activesupport
-- Replaced some of the activesupport parts with dry-inflector
 - #246 - Alias consumer#mark_as_consumed on controller
 - #259 - Allow forcing key/partition key on responders
 - #267 - Styling inconsistency
 - #242 - Support setting the max bytes to fetch per request
 - #247 - Support SCRAM once released
 - #271 - Provide an after_init option to pass a configuration block
+- #262 - Error in the monitor code for NewRelic
+- #241 - Performance metrics
+- #274 - Rename controllers to consumers
+- #184 - Seek to
+- Replaced some of the activesupport parts with dry-inflector
 - Lower ActiveSupport dependency
 - Remove configurators in favor of the after_init block configurator
 - Ruby 2.5.0 support
 - Renamed Karafka::Connection::Processor to Karafka::Connection::Delegator to match incoming naming conventions
 - Renamed Karafka::Connection::Consumer to Karafka::Connection::Client due to #274
-- #274 - Rename controllers to consumers
+- Removed HashWithIndifferentAccess in favor of a regular hash
+- JSON parsing defaults now to string keys
+- Lower memory usage due to less params data internal details
+- Support multiple ```after_init``` blocks in favor of a single one
+- Renamed ```received_at``` to ```receive_time``` to follow ruby-kafka and WaterDrop conventions
+- Adjust internal setup to easier map Ruby-Kafka config changes
+- System callbacks reorganization
+- Added ```before_fetch_loop``` configuration block for early client usage (```#seek```, etc)
+- Renamed ```after_fetched``` to ```after_fetch``` to normalize the naming convention
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format

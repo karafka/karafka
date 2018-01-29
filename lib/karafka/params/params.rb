@@ -3,18 +3,23 @@
 module Karafka
   # Params namespace encapsulating all the logic that is directly related to params handling
   module Params
-    # Class-wrapper for hash with indifferent access with additional lazy loading feature
+    # Class-wrapper for hash with additional lazy loading feature
     # It provides lazy loading not only until the first usage, but also allows us to skip
     # using parser until we execute our logic. That way we can operate with
     # heavy-parsing data without slowing down the whole application.
-    class Params < HashWithIndifferentAccess
-      # Kafka::FetchedMessage attributes that we want to use inside of params
-      KAFKA_MESSAGE_ATTRIBUTES = %i[
+    class Params < Hash
+      # Params keys that are "our" and internal. We use this list for additional backends
+      # that don't allow symbols to be transferred, to remap the interchanged params
+      # back into a valid form
+      SYSTEM_KEYS = %i[
+        parser
         value
         partition
         offset
         key
         create_time
+        receive_time
+        topic
       ].freeze
 
       # Params attributes that should be available via a method call invocation for Kafka
@@ -28,7 +33,10 @@ module Karafka
         offset
         key
         create_time
+        receive_time
       ].freeze
+
+      private_constant :PARAMS_METHOD_ATTRIBUTES
 
       class << self
         # We allow building instances only via the #build method
@@ -44,26 +52,27 @@ module Karafka
         # @example Build params instance from a Kafka::FetchedMessage object
         #   Karafka::Params::Params.build(message) #=> params object
         def build(message, parser)
-          # Hash case happens inside backends that interchange data
-          if message.is_a?(Hash)
-            new(parser: parser).send(:merge!, message)
-          else
-            # This happens inside Kafka::FetchedProcessor
-            new(
-              parser: parser,
-              parsed: false,
-              received_at: Time.now
-            ).tap do |instance|
-              KAFKA_MESSAGE_ATTRIBUTES.each do |attribute|
-                instance[attribute] = message.send(attribute)
-              end
+          instance = new
+          instance[:parser] = parser
 
-              # When we get raw messages, they might have a topic, that was modified by a
-              # topic mapper. We need to "reverse" this change and map back to the non-modified
-              # format, so our internal flow is not corrupted with the mapping
-              instance[:topic] = Karafka::App.config.topic_mapper.incoming(message.topic)
-            end
+          # Non kafka fetched message can happen when we interchange data with an
+          # additional backend
+          if message.is_a?(Kafka::FetchedMessage)
+            instance[:value] = message.value
+            instance[:partition] = message.partition
+            instance[:offset] = message.offset
+            instance[:key] = message.key
+            instance[:create_time] = message.create_time
+            instance[:receive_time] = Time.now
+            # When we get raw messages, they might have a topic, that was modified by a
+            # topic mapper. We need to "reverse" this change and map back to the non-modified
+            # format, so our internal flow is not corrupted with the mapping
+            instance[:topic] = Karafka::App.config.topic_mapper.incoming(message.topic)
+          else
+            instance.send(:merge!, message)
           end
+
+          instance
         end
 
         # Defines a method call accessor to a particular hash field.
@@ -85,6 +94,7 @@ module Karafka
       #   parse it again.
       def retrieve!
         return self if self[:parsed]
+        self[:parsed] = true
 
         merge!(parse(delete(:value)))
       end
@@ -95,8 +105,9 @@ module Karafka
 
       # Overwritten merge! method - it behaves differently for keys that are the same in our hash
       #  and in a other_hash - it will not replace keys that are the same in our hash
-      #  and in the other one
-      # @param other_hash [Hash, HashWithIndifferentAccess] hash that we want to merge into current
+      #  and in the other one. This protects some important Karafka params keys that cannot be
+      #  replaced with custom values from incoming Kafka message
+      # @param other_hash [Hash] hash that we want to merge into current
       # @return [Karafka::Params::Params] our parameters hash with merged values
       # @example Merge with hash without same keys
       #   new(a: 1, b: 2).merge!(c: 3) #=> { a: 1, b: 2, c: 3 }
@@ -115,13 +126,12 @@ module Karafka
       # @return [Hash] parsed data or a hash with message key containing raw data if something
       #   went wrong during parsing
       def parse(value)
-        self[:parser].parse(value)
-        # We catch both of them, because for default JSON - we use JSON parser directly
+        Karafka.monitor.instrument('params.params.parse', caller: self) do
+          self[:parser].parse(value)
+        end
       rescue ::Karafka::Errors::ParserError => e
-        Karafka.monitor.notice_error(self.class, e)
+        Karafka.monitor.instrument('params.params.parse_error', caller: self, error: e)
         raise e
-      ensure
-        self[:parsed] = true
       end
     end
   end

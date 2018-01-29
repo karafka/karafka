@@ -13,6 +13,7 @@ module Karafka
     # @see Karafka::Setup::Configurators::Base for more details about configurators api
     class Config
       extend Dry::Configurable
+      extend Callbacks::Config
 
       # Available settings
       # option client_id [String] kafka client_id - used to provide
@@ -21,9 +22,9 @@ module Karafka
       # What backend do we want to use to process messages
       setting :backend, :inline
       # option logger [Instance] logger that we want to use
-      setting :logger, -> { ::Karafka::Logger.instance }
+      setting :logger, -> { ::Karafka::Instrumentation::Logger.instance }
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
-      setting :monitor, -> { ::Karafka::Monitor.instance }
+      setting :monitor, -> { ::Karafka::Instrumentation::Monitor.instance }
       # Mapper used to remap consumer groups ids, so in case users migrate from other tools
       # or they need to maintain their own internal consumer group naming conventions, they
       # can easily do it, replacing the default client_id + consumer name pattern concept
@@ -144,22 +145,12 @@ module Karafka
         setting :sasl_scram_mechanism, nil
       end
 
-      # option internal [Hash] - optional - internal karafka configuration settings that should
-      #   never be changed by users directly
-      setting :internal do
-        # option after_init [Proc] block that will be executed right after we finish the bootstrap
-        #   but before we run everything (server, console, etc)
-        setting :after_init, ->(_config) {}
-      end
-
       class << self
         # Configurating method
         # @yield Runs a block of code providing a config singleton instance to it
         # @yieldparam [Karafka::Setup::Config] Karafka config instance
         def setup
-          configure do |config|
-            yield(config)
-          end
+          configure { |config| yield(config) }
         end
 
         # Everything that should be initialized after the setup
@@ -169,11 +160,6 @@ module Karafka
           [
             Configurators::WaterDrop
           ].each { |klass| klass.setup(config) }
-        end
-
-        # Executes the after init block with the fully loaded config
-        def after_init
-          config.internal.after_init.call(config)
         end
 
         # Validate config based on ConfigurationSchema

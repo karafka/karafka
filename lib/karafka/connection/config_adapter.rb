@@ -14,7 +14,10 @@ module Karafka
       class << self
         # Builds all the configuration settings for Kafka.new method
         # @param _consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
-        # @return [Hash] hash with all the settings required by Kafka.new method
+        # @return [Array<Hash>] Array with all the client arguments including hash with all
+        #   the settings required by Kafka.new method
+        # @note We return array, so we can inject any arguments we want, in case of changes in the
+        #   raw driver
         def client(_consumer_group)
           # This one is a default that takes all the settings except special
           # cases defined in the map
@@ -33,28 +36,30 @@ module Karafka
             settings[setting_name] = setting_value
           end
 
-          sanitize(settings)
+          [sanitize(settings)]
         end
 
         # Builds all the configuration settings for kafka#consumer method
         # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
-        # @return [Hash] hash with all the settings required by Kafka#consumer method
+        # @return [Array<Hash>] array with all the consumer arguments including hash with all
+        #   the settings required by Kafka#consumer
         def consumer(consumer_group)
           settings = { group_id: consumer_group.id }
           settings = fetch_for(:consumer, consumer_group, settings)
-          sanitize(settings)
+          [sanitize(settings)]
         end
 
         # Builds all the configuration settings for kafka consumer consume_each_batch and
         #   consume_each_message methods
         # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
-        # @return [Hash] hash with all the settings required by
+        # @return [Array<Hash>] Array with all the arguments required by consuming method
+        #   including hash with all the settings required by
         #   Kafka::Consumer#consume_each_message and Kafka::Consumer#consume_each_batch method
         def consuming(consumer_group)
           settings = {
             automatically_mark_as_processed: consumer_group.automatically_mark_as_consumed
           }
-          sanitize(fetch_for(:consuming, consumer_group, settings))
+          [sanitize(fetch_for(:consuming, consumer_group, settings))]
         end
 
         # Builds all the configuration settings for kafka consumer#subscribe method
