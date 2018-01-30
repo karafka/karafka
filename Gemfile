@@ -5,9 +5,9 @@ source 'https://rubygems.org'
 gemspec
 
 group :development, :test do
+  gem 'activesupport'
   gem 'rspec'
   gem 'simplecov'
   gem 'timecop'
   gem 'waterdrop'
-  gem 'activesupport'
 end

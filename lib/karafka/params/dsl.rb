@@ -43,6 +43,7 @@ module Karafka
 
       private_constant :METHOD_ATTRIBUTES
 
+      # Class methods required by params to work
       module ClassMethods
         # We allow building instances only via the #build method
 
@@ -149,6 +150,7 @@ module Karafka
       end
     end
 
+    # Temporary params non-dynamic hash declaration
     class Params < Hash
       include Dsl
     end
