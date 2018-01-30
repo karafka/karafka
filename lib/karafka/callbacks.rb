@@ -20,7 +20,7 @@ module Karafka
         define_method callback_type do |*args|
           Karafka::App
             .config
-            .internal
+            .callbacks
             .send(callback_type)
             .each { |block| block.call(*args) }
         end
