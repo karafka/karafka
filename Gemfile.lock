@@ -114,6 +114,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activesupport
   karafka!
   rspec
   simplecov
