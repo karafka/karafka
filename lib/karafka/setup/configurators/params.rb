@@ -8,7 +8,7 @@ module Karafka
       # the framework configuration. This is a configurator that does exactly that.
       class Params < Base
         # Builds up Karafka::Params::Params class with user defined parent class
-        # @param [Block] block configuration block
+        # @param config [Karafka::Setup::Config] Config we can user to setup things
         def self.setup(config)
           Karafka::Params.const_set(
             'Params',

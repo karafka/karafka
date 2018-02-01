@@ -95,7 +95,7 @@ RSpec.describe Karafka::Params::Dsl do
             before do
               params[:value] = value
 
-              expect(params)
+              allow(params)
                 .to receive(:parse)
                 .with(value)
                 .and_return(parsed_value)
@@ -118,7 +118,7 @@ RSpec.describe Karafka::Params::Dsl do
             before do
               params[:value] = value
 
-              expect(params)
+              allow(params)
                 .to receive(:parse)
                 .with(value)
                 .and_return(parsed_value)
@@ -144,7 +144,7 @@ RSpec.describe Karafka::Params::Dsl do
             let(:parsed_value) { { rand => rand } }
 
             before do
-              expect(parser)
+              allow(parser)
                 .to receive(:parse)
                 .with(value)
                 .and_return(parsed_value)
