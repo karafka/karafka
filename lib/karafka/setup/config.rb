@@ -145,7 +145,14 @@ module Karafka
         setting :sasl_scram_mechanism, nil
       end
 
+      # Internal settings that should not be changes unless you know what you are doing
+      # option internals [Hash] - optional - internal framework options
       setting :internals do
+        # option params_base_class [Class] base class for params class initialization
+        #   This can be either a Hash or a HashWithIndifferentAccess depending on your
+        #   requirements. Note, that by using HashWithIndifferentAccess, you remove some of the
+        #   performance in favor of convenience. This can be useful especially if you already use
+        #   it with Rails, etc
         setting :params_base_class, Hash
       end
 
