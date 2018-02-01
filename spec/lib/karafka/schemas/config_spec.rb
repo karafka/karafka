@@ -8,9 +8,7 @@ RSpec.describe Karafka::Schemas::Config do
       client_id: 'name',
       topic_mapper: Karafka::Routing::TopicMapper,
       shutdown_timeout: 10,
-      internals: {
-        params_base_class: Hash
-      }
+      params_base_class: Hash
     }
   end
 
@@ -52,17 +50,9 @@ RSpec.describe Karafka::Schemas::Config do
     end
   end
 
-  context 'when we validate internals' do
-    context 'when internals are missing' do
-      before { config[:internals] = nil }
-
-      it { expect(schema.call(config)).not_to be_success }
-    end
-  end
-
-  context 'when we validate internals params_base_class' do
-    context 'when internals params_base_class are missing' do
-      before { config[:internals][:params_base_class] = nil }
+  context 'when we validate params_base_class' do
+    context 'when params_base_class are missing' do
+      before { config[:params_base_class] = nil }
 
       it { expect(schema.call(config)).not_to be_success }
     end

@@ -13,7 +13,7 @@ module Karafka
           Karafka::Params.const_set(
             'Params',
             Class
-              .new(config.internals.params_base_class)
+              .new(config.params_base_class)
               .tap { |klass| klass.include(Karafka::Params::Dsl) }
           )
         end
