@@ -149,10 +149,5 @@ module Karafka
         raise e
       end
     end
-
-    # Temporary params non-dynamic hash declaration
-    class Params < Hash
-      include Dsl
-    end
   end
 end

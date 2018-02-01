@@ -145,6 +145,10 @@ module Karafka
         setting :sasl_scram_mechanism, nil
       end
 
+      setting :internals do
+        setting :params_base_class, Hash
+      end
+
       class << self
         # Configurating method
         # @yield Runs a block of code providing a config singleton instance to it
@@ -158,6 +162,7 @@ module Karafka
         # If you want to configure a next component, please add a proper file to config dir
         def setup_components
           [
+            Configurators::Params,
             Configurators::WaterDrop
           ].each { |klass| klass.setup(config) }
         end
