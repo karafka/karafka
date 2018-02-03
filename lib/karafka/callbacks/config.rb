@@ -9,7 +9,7 @@ module Karafka
       def self.extended(klass)
         # option internal [Hash] - optional - internal karafka configuration settings that should
         #   never be changed by users directly
-        klass.setting :internal do
+        klass.setting :callbacks do
           Callbacks::TYPES.each do |callback_type|
             # option [Array<Proc>] an array of blocks that will be executed at a given moment
             #   depending on the callback type

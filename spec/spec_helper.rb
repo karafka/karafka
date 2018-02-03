@@ -4,11 +4,14 @@ ENV['KARAFKA_ENV'] = 'test'
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
+# @note HashWithIndifferentAccess is just for testing the optional integration,
+# it is not used by default in the framework
 %w[
   simplecov
   timecop
   fiddle
   tempfile
+  active_support/hash_with_indifferent_access
 ].each do |lib|
   require lib
 end
@@ -70,3 +73,7 @@ module Karafka
     end
   end
 end
+
+# In order to spec karafka out, we need to boot it first to initialize all the
+# dynamic components
+Karafka::App.boot!

@@ -16,6 +16,8 @@ module Karafka
       required(:shutdown_timeout) { none? | (int? & gteq?(0)) }
       required(:consumer_mapper)
       required(:topic_mapper)
+      required(:params_base_class).filled
+
       optional(:backend).filled
     end
   end

@@ -15,6 +15,7 @@
 - #241 - Performance metrics
 - #274 - Rename controllers to consumers
 - #184 - Seek to
+- #284 - Dynamic Params parent class
 - Replaced some of the activesupport parts with dry-inflector
 - Lower ActiveSupport dependency
 - Remove configurators in favor of the after_init block configurator

@@ -56,6 +56,12 @@ module Karafka
       # @note Keep in mind, that if your business logic
       # @note If set to nil, it won't forcefully shutdown the process at all.
       setting :shutdown_timeout, 60
+      # option params_base_class [Class] base class for params class initialization
+      #   This can be either a Hash or a HashWithIndifferentAccess depending on your
+      #   requirements. Note, that by using HashWithIndifferentAccess, you remove some of the
+      #   performance in favor of convenience. This can be useful especially if you already use
+      #   it with Rails, etc
+      setting :params_base_class, Hash
 
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
@@ -158,6 +164,7 @@ module Karafka
         # If you want to configure a next component, please add a proper file to config dir
         def setup_components
           [
+            Configurators::Params,
             Configurators::WaterDrop
           ].each { |klass| klass.setup(config) }
         end

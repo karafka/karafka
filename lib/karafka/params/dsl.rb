@@ -3,11 +3,16 @@
 module Karafka
   # Params namespace encapsulating all the logic that is directly related to params handling
   module Params
-    # Class-wrapper for hash with additional lazy loading feature
+    # Dsl for Karafka params. We don't provide the params class here as we want to allow users to
+    # use either hash (default) or Rails hash with indifferent access as a base for their params
+    #
+    # We do that because both of them have their own advantages and we don't want to enforce users
+    # to handle things differently if they already use any of those
+    #
     # It provides lazy loading not only until the first usage, but also allows us to skip
     # using parser until we execute our logic. That way we can operate with
     # heavy-parsing data without slowing down the whole application.
-    class Params < Hash
+    module Dsl
       # Params keys that are "our" and internal. We use this list for additional backends
       # that don't allow symbols to be transferred, to remap the interchanged params
       # back into a valid form
@@ -27,7 +32,7 @@ module Karafka
       # Kafka passes internally Kafka::FetchedMessage object and the ruby-kafka consumer
       # uses those fields via method calls, so in order to be able to pass there our params
       # objects, have to have same api.
-      PARAMS_METHOD_ATTRIBUTES = %i[
+      METHOD_ATTRIBUTES = %i[
         topic
         partition
         offset
@@ -36,9 +41,10 @@ module Karafka
         receive_time
       ].freeze
 
-      private_constant :PARAMS_METHOD_ATTRIBUTES
+      private_constant :METHOD_ATTRIBUTES
 
-      class << self
+      # Class methods required by params to work
+      module ClassMethods
         # We allow building instances only via the #build method
 
         # @param message [Kafka::FetchedMessage, Hash] message that we get out of Kafka
@@ -74,18 +80,6 @@ module Karafka
 
           instance
         end
-
-        # Defines a method call accessor to a particular hash field.
-        # @note Won't work for complex key names that contain spaces, etc
-        # @param key [Symbol] name of a field that we want to retrieve with a method call
-        # @example
-        #   key_attr_reader :example
-        #   params.example #=> 'my example value'
-        def key_attr_reader(key)
-          define_method key do
-            self[key]
-          end
-        end
       end
 
       # @return [Karafka::Params::Params] this will trigger parser execution. If we decide to
@@ -99,7 +93,28 @@ module Karafka
         merge!(parse(delete(:value)))
       end
 
-      PARAMS_METHOD_ATTRIBUTES.each(&method(:key_attr_reader))
+      # Includes and extends the base params klass with everything that is needed by Karafka to
+      #   fully work in any conditions.
+      # @param params_klass [Karafka::Params::Params] initialized params class that we will
+      #   use for a given Karafka process
+      def self.included(params_klass)
+        params_klass.extend(Dsl::ClassMethods)
+
+        METHOD_ATTRIBUTES.each do |attr|
+          # Defines a method call accessor to a particular hash field.
+          # @note Won't work for complex key names that contain spaces, etc
+          # @param key [Symbol] name of a field that we want to retrieve with a method call
+          # @example
+          #   key_attr_reader :example
+          #   params.example #=> 'my example value'
+          params_klass.send :define_method, attr do
+            self[attr]
+          end
+        end
+
+        params_klass.send :private, :merge!
+        params_klass.send :private, :parse
+      end
 
       private
 

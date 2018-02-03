@@ -8,7 +8,7 @@ module Karafka
         # Allows us to define a block, that will be executed for a given moment
         # @param [Block] block that should be executed after the initialization process
         define_method callback_type do |&block|
-          config.internal.send(callback_type).push block
+          config.callbacks.send(callback_type).push block
         end
       end
     end
