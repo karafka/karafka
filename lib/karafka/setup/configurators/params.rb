@@ -10,6 +10,8 @@ module Karafka
         # Builds up Karafka::Params::Params class with user defined parent class
         # @param config [Karafka::Setup::Config] Config we can user to setup things
         def self.setup(config)
+          return if defined? Karafka::Params::Params
+
           Karafka::Params.const_set(
             'Params',
             Class
