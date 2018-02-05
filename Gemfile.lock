@@ -101,7 +101,7 @@ GEM
     thor (0.20.0)
     thread_safe (0.3.6)
     timecop (0.9.1)
-    tzinfo (1.2.4)
+    tzinfo (1.2.5)
       thread_safe (~> 0.1)
     waterdrop (1.0.1)
       delivery_boy (>= 0.2.2)
