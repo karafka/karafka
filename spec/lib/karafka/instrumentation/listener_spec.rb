@@ -81,7 +81,7 @@ RSpec.describe Karafka::Instrumentation::Listener do
     let(:params_batch) { [1] }
     let(:count) { params_batch.size }
     let(:message) do
-      "Inline processing of #{topic_name} topic with #{count} messages took #{time} ms"
+      "Inline processing of topic #{topic_name} with #{count} messages took #{time} ms"
     end
     let(:caller) do
       instance_double(

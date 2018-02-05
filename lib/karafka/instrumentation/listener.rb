@@ -57,7 +57,7 @@ module Karafka
           count = event[:caller].send(:params_batch).to_a.size
           topic = event[:caller].topic.name
           time = event[:time]
-          info "Inline processing of #{topic} topic with #{count} messages took #{time} ms"
+          info "Inline processing of topic #{topic} with #{count} messages took #{time} ms"
         end
 
         # Logs info about system signals that Karafka received
