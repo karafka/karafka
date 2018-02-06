@@ -53,7 +53,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
       end
 
       it 'expect to have all the keys as kafka requires' do
-        expect(config.last.keys.sort).to eq (expected_keys - %i[seed_brokers])
+        expect(config.last.keys.sort).to eq(expected_keys - %i[seed_brokers])
       end
     end
   end
