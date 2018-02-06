@@ -36,7 +36,10 @@ module Karafka
             settings[setting_name] = setting_value
           end
 
-          [sanitize(settings)]
+          settings_hash = sanitize(settings)
+
+          # Normalization for the way Kafka::Client accepts arguments from  0.5.3
+          [settings_hash.delete(:seed_brokers), settings_hash]
         end
 
         # Builds all the configuration settings for kafka#consumer method

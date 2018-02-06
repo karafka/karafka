@@ -25,10 +25,14 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
 
     it 'expect to have std kafka config keys' do
       expected = %i[
-        logger client_id seed_brokers connect_timeout socket_timeout sasl_plain_authzid
+        logger client_id connect_timeout socket_timeout sasl_plain_authzid
         ssl_ca_certs_from_system
       ]
       expect(config.last.keys.sort).to eq expected.sort
+    end
+
+    it 'expect to have as a first argument seed_brokers' do
+      expect(config.first).to eq %w[kafka://localhost:9092]
     end
 
     context 'when values of keys are not nil' do
@@ -49,7 +53,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
       end
 
       it 'expect to have all the keys as kafka requires' do
-        expect(config.last.keys.sort).to eq expected_keys
+        expect(config.last.keys.sort).to eq (expected_keys - %i[seed_brokers])
       end
     end
   end
