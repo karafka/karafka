@@ -26,6 +26,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
     it 'expect to have std kafka config keys' do
       expected = %i[
         logger client_id seed_brokers connect_timeout socket_timeout sasl_plain_authzid
+        ssl_ca_certs_from_system
       ]
       expect(config.last.keys.sort).to eq expected.sort
     end

@@ -129,6 +129,9 @@ module Karafka
         setting :ssl_ca_cert, nil
         # option ssl_ca_cert_file_path [String, nil] SSL CA certificate file path
         setting :ssl_ca_cert_file_path, nil
+        # option ssl_ca_certs_from_system [Boolean] Use the CA certs from your system's default
+        #   certificate store
+        setting :ssl_ca_certs_from_system, false
         # option ssl_client_cert [String, nil] SSL client certificate
         setting :ssl_client_cert, nil
         # option ssl_client_cert_key [String, nil] SSL client certificate password

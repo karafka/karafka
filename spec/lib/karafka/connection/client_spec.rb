@@ -198,7 +198,8 @@ RSpec.describe Karafka::Connection::Client do
             seed_brokers: ::Karafka::App.config.kafka.seed_brokers,
             socket_timeout: 30,
             connect_timeout: 10,
-            sasl_plain_authzid: ''
+            sasl_plain_authzid: '',
+            ssl_ca_certs_from_system: false
           )
           .and_return(kafka)
       end
