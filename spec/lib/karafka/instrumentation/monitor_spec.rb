@@ -43,6 +43,6 @@ RSpec.describe Karafka::Instrumentation::Monitor do
       expect(monitor.available_events.size).to eq 9
     end
 
-    it { expect(monitor.available_events).to include 'connection.listener.fetch_loop_error' }
+    it { expect(monitor.available_events).to include 'connection.listener.fetch_loop.error' }
   end
 end

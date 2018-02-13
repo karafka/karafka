@@ -164,7 +164,7 @@ RSpec.describe Karafka::Params::Dsl do
             end
             let(:instrument_error_args) do
               [
-                'params.params.parse_error',
+                'params.params.parse.error',
                 caller: params,
                 error: ::Karafka::Errors::ParserError
               ]

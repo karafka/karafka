@@ -38,7 +38,7 @@ RSpec.describe Karafka::Connection::Listener do
           expect(Karafka.monitor)
             .to receive(:instrument)
             .with(
-              'connection.listener.fetch_loop_error',
+              'connection.listener.fetch_loop.error',
               caller: listener,
               error: error
             )

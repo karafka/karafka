@@ -26,7 +26,7 @@ module Karafka
       # If anything crashes here, we need to raise the error and crush the runner because it means
       # that something terrible happened
       rescue StandardError => e
-        Karafka.monitor.instrument('fetcher.call_error', caller: self, error: e)
+        Karafka.monitor.instrument('fetcher.call.error', caller: self, error: e)
         Karafka::App.stop!
         raise e
       end

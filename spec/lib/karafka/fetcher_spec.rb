@@ -22,7 +22,7 @@ RSpec.describe Karafka::Fetcher do
 
     context 'when something goes wrong internaly' do
       let(:error) { StandardError }
-      let(:instrument_args) { ['fetcher.call_error', caller: fetcher, error: error] }
+      let(:instrument_args) { ['fetcher.call.error', caller: fetcher, error: error] }
 
       before do
         expect(fetcher)

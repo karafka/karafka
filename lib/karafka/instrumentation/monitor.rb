@@ -20,11 +20,11 @@ module Karafka
       #   Karafka system to determine all of the events you can use
       BASE_EVENTS = %w[
         params.params.parse
-        params.params.parse_error
-        connection.listener.fetch_loop_error
-        connection.client.fetch_loop_error
+        params.params.parse.error
+        connection.listener.fetch_loop.error
+        connection.client.fetch_loop.error
         connection.delegator.call
-        fetcher.call_error
+        fetcher.call.error
         backends.inline.process
         process.notice_signal
         consumers.responders.respond_with

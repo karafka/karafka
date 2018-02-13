@@ -35,7 +35,7 @@ module Karafka
         # If there was an error during consumption, we have to log it, pause current partition
         # and process other things
         Karafka.monitor.instrument(
-          'connection.client.fetch_loop_error',
+          'connection.client.fetch_loop.error',
           caller: self,
           error: e.cause
         )
@@ -45,7 +45,7 @@ module Karafka
         # rubocop:disable RescueException
       rescue Exception => e
         # rubocop:enable RescueException
-        Karafka.monitor.instrument('connection.client.fetch_loop_error', caller: self, error: e)
+        Karafka.monitor.instrument('connection.client.fetch_loop.error', caller: self, error: e)
         retry
       end
 

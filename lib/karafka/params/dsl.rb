@@ -145,7 +145,7 @@ module Karafka
           self[:parser].parse(value)
         end
       rescue ::Karafka::Errors::ParserError => e
-        Karafka.monitor.instrument('params.params.parse_error', caller: self, error: e)
+        Karafka.monitor.instrument('params.params.parse.error', caller: self, error: e)
         raise e
       end
     end
