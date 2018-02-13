@@ -32,7 +32,7 @@ module Karafka
 
       private_constant :BASE_EVENTS
 
-      # @return [Karafka::Monitor] monitor instance for system instrumentation
+      # @return [Karafka::Instrumentation::Monitor] monitor instance for system instrumentation
       def initialize
         super(:karafka)
         BASE_EVENTS.each(&method(:register_event))
