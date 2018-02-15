@@ -27,7 +27,7 @@ module Karafka
       @logger ||= App.config.logger
     end
 
-    # @return [::Karafka::Monitor] monitor that we want to use. Will use dummy monitor by default
+    # @return [::Karafka::Monitor] monitor that we want to use
     def monitor
       @monitor ||= App.config.monitor
     end

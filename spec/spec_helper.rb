@@ -77,3 +77,7 @@ end
 # In order to spec karafka out, we need to boot it first to initialize all the
 # dynamic components
 Karafka::App.boot!
+
+# We by default use the default listener for specs to check how it works and that
+# it does not break anything
+Karafka.monitor.subscribe(Karafka::Instrumentation::Listener)

@@ -5,8 +5,16 @@ RSpec.describe Karafka::Instrumentation::Monitor do
 
   describe '#instrument' do
     let(:result) { rand }
-    let(:instrumentation) { monitor.instrument(event_name, call: self) { result } }
     let(:event_name) { monitor.available_events.sample }
+    let(:consumer) { instance_double(Karafka::BaseConsumer, topic: rand.to_s) }
+    let(:instrumentation) do
+      monitor.instrument(
+        event_name,
+        caller: self,
+        consumer: consumer,
+        error: StandardError
+      ) { result }
+    end
 
     it 'expect to return blocks execution value' do
       expect(instrumentation).to eq result

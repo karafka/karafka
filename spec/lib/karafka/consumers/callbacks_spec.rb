@@ -152,6 +152,9 @@ RSpec.describe Karafka::Consumers::Callbacks do
           end.new
         end
 
+        # There cannot be a working consumer without a topic
+        before { base_consumer.class.topic = topic }
+
         it 'schedules to a backend' do
           expect(base_consumer).to receive(:consume)
 
