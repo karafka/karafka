@@ -5,14 +5,14 @@ RSpec.describe Karafka::Instrumentation::Monitor do
 
   describe '#instrument' do
     let(:result) { rand }
-    let(:event_name) { monitor.available_events.sample }
+    let(:event_name) { monitor.available_events[2] }
     let(:consumer) { instance_double(Karafka::BaseConsumer, topic: rand.to_s) }
     let(:instrumentation) do
       monitor.instrument(
         event_name,
         caller: self,
         consumer: consumer,
-        error: StandardError
+        error: StandardError,
       ) { result }
     end
 
