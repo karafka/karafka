@@ -12,7 +12,7 @@ RSpec.describe Karafka::Instrumentation::Monitor do
         event_name,
         caller: self,
         consumer: consumer,
-        error: StandardError,
+        error: StandardError
       ) { result }
     end
 
