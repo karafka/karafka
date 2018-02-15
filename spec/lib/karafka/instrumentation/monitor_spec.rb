@@ -5,7 +5,7 @@ RSpec.describe Karafka::Instrumentation::Monitor do
 
   describe '#instrument' do
     let(:result) { rand }
-    let(:event_name) { monitor.available_events[2] }
+    let(:event_name) { 'connection.listener.fetch_loop.error' }
     let(:consumer) { instance_double(Karafka::BaseConsumer, topic: rand.to_s) }
     let(:instrumentation) do
       monitor.instrument(
