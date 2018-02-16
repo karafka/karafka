@@ -25,6 +25,7 @@ module Karafka
         create_time
         receive_time
         topic
+        parsed
       ].freeze
 
       # Params attributes that should be available via a method call invocation for Kafka
