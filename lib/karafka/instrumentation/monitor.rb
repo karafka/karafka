@@ -17,7 +17,9 @@ module Karafka
       # @note The non-error once support timestamp benchmarking
       # @note Depending on Karafka extensions and additional engines, this might not be the
       #   complete list of all the events. Please use the #available_events on fully loaded
-      #   Karafka system to determine all of the events you can use
+      #   Karafka system to determine all of the events you can use.
+      #   Last 4 events are from WaterDrop but for convenience we use the same monitor for the
+      #   whole karafka ecosystem
       BASE_EVENTS = %w[
         params.params.parse
         params.params.parse.error
@@ -28,6 +30,10 @@ module Karafka
         backends.inline.process
         process.notice_signal
         consumers.responders.respond_with
+        async_producer.call.error
+        async_producer.call.retry
+        sync_producer.call.error
+        sync_producer.call.retry
       ].freeze
 
       private_constant :BASE_EVENTS

@@ -8,5 +8,5 @@ group :development, :test do
   gem 'rspec'
   gem 'simplecov'
   gem 'timecop'
-  gem 'waterdrop'
+  gem 'waterdrop', git: 'git@github.com:karafka/waterdrop.git'
 end

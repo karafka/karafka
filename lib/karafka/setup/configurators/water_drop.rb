@@ -7,6 +7,8 @@ module Karafka
       class WaterDrop < Base
         # Sets up a WaterDrop settings
         # @param config [Karafka::Setup::Config] Config we can user to setup things
+        # @note This will also inject Karafka monitor as a default monitor into WaterDrop,
+        #   so we have the same monitor within whole Karafka framework (same with logger)
         def self.setup(config)
           ::WaterDrop.setup do |water_config|
             water_config.deliver = true
