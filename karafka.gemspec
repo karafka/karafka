@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'require_all', '>= 1.4'
   spec.add_dependency 'ruby-kafka', '>= 0.5.3'
   spec.add_dependency 'thor', '~> 0.19'
-  spec.add_dependency 'waterdrop', '>= 1.2.0'
+  spec.add_dependency 'waterdrop', '>= 1.2.0.beta1'
 
   spec.required_ruby_version = '>= 2.3.0'
 
