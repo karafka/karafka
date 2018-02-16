@@ -3,10 +3,10 @@
 source 'https://rubygems.org'
 
 gemspec
+gem 'waterdrop', git: 'git@github.com:karafka/waterdrop.git'
 
 group :development, :test do
   gem 'rspec'
   gem 'simplecov'
   gem 'timecop'
-  gem 'waterdrop', git: 'git@github.com:karafka/waterdrop.git'
 end
