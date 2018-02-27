@@ -4,7 +4,7 @@
 
 Framework used to simplify Apache Kafka based Ruby applications development.
 
-It allows programmers to use approach similar to standard HTTP conventions (```params``` and ```params_batch```) when working with asynchronous Kafka messages.
+Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming and processing this data, without having to focus on things that are not your business domain.
 
 Karafka not only handles incoming messages but also provides tools for building complex data-flow applications that receive and send messages.
 
