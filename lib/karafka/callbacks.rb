@@ -22,7 +22,7 @@ module Karafka
             .config
             .callbacks
             .send(callback_type)
-            .each { |block| block.call(*args) }
+            .each { |callback| callback.call(*args) }
         end
       end
     end
