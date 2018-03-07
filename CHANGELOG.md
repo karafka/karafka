@@ -33,6 +33,7 @@
 - Added ```before_fetch_loop``` configuration block for early client usage (```#seek```, etc)
 - Renamed ```after_fetched``` to ```after_fetch``` to normalize the naming convention
 - Instrumentation on a connection delegator level
+- Added ```params_batch#last``` method to retrieve last element after unparsing
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format

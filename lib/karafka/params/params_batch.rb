@@ -32,6 +32,11 @@ module Karafka
         each(&:itself)
       end
 
+      # @return [Karafka::Params::Params] last element after the unparsing process
+      def last
+        @params_batch.last.retrieve!
+      end
+
       # @return [Array<Karafka::Params::Params>] pure array with params (not parsed)
       def to_a
         @params_batch

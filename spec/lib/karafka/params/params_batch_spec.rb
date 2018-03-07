@@ -55,4 +55,11 @@ RSpec.describe Karafka::Params::ParamsBatch do
       end
     end
   end
+
+  describe '#last' do
+    it 'expect to return last element after parsing' do
+      expect(params_batch.last).to eq params_batch.to_a[-1]
+      expect(params_batch.last[:parsed]).to eq true
+    end
+  end
 end
