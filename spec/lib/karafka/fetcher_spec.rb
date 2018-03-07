@@ -25,7 +25,7 @@ RSpec.describe Karafka::Fetcher do
       let(:instrument_args) { ['fetcher.call.error', caller: fetcher, error: error] }
 
       before do
-        expect(fetcher)
+        allow(fetcher)
           .to receive(:listeners)
           .and_raise(error)
       end

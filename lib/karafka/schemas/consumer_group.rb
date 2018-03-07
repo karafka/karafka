@@ -24,7 +24,7 @@ module Karafka
           uri = URI.parse(uri)
           URI_SCHEMES.include?(uri.scheme) && uri.port
         rescue URI::InvalidURIError
-          return false
+          false
         end
       end
 

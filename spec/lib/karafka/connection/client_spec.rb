@@ -214,8 +214,7 @@ RSpec.describe Karafka::Connection::Client do
     context 'when there was a kafka connection failure' do
       before do
         client.instance_variable_set(:'@kafka_consumer', nil)
-
-        expect(Kafka).to receive(:new).and_raise(Kafka::ConnectionError)
+        allow(Kafka).to receive(:new).and_raise(Kafka::ConnectionError)
       end
 
       it 'expect to sleep and reraise' do
