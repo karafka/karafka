@@ -42,7 +42,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
 
       before do
         hashed_details = ::Karafka::App.config.kafka.to_h
-        expect(::Karafka::App.config.kafka).to receive(:to_h).and_return(hashed_details)
+        allow(::Karafka::App.config.kafka).to receive(:to_h).and_return(hashed_details)
 
         expected_keys.each do |client_key|
           # This line will skip settings that are defined somewhere else (on config root level)
@@ -129,7 +129,7 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
         end
       end
 
-      before { expect(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
+      before { allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
 
       it { expect(config.first).to eq custom_mapper.outgoing(consumer_group.topics.first.name) }
     end
