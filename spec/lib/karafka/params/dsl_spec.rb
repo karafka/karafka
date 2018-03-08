@@ -79,7 +79,7 @@ RSpec.describe Karafka::Params::Dsl do
 
         describe '#retrieve!' do
           context 'when params are already parsed' do
-            before { params[:parsed] = true }
+            before { params['parsed'] = true }
 
             it 'expect not to parse again and return self' do
               expect(params).not_to receive(:parse)
@@ -93,7 +93,7 @@ RSpec.describe Karafka::Params::Dsl do
             let(:parsed_value) { { double => double } }
 
             before do
-              params[:value] = value
+              params['value'] = value
 
               allow(params)
                 .to receive(:parse)
@@ -107,16 +107,16 @@ RSpec.describe Karafka::Params::Dsl do
             end
 
             it 'expect to mark as parsed' do
-              expect(params.retrieve![:parsed]).to eq true
+              expect(params.retrieve!['parsed']).to eq true
             end
           end
 
           context 'when params were not yet parsed and value does contain same keys' do
             let(:value) { double }
-            let(:parsed_value) { { receive_time: rand } }
+            let(:parsed_value) { { 'receive_time' => rand } }
 
             before do
-              params[:value] = value
+              params['value'] = value
 
               allow(params)
                 .to receive(:parse)
@@ -126,8 +126,8 @@ RSpec.describe Karafka::Params::Dsl do
 
             it 'expect not to overwrite existing keys' do
               params.retrieve!
-              expect(params[parsed_value[:receive_time]]).not_to eq parsed_value[:receive_time]
-              expect(params.keys).not_to include :value
+              expect(params[parsed_value['receive_time']]).not_to eq parsed_value['receive_time']
+              expect(params.keys).not_to include 'value'
             end
           end
         end
@@ -137,7 +137,7 @@ RSpec.describe Karafka::Params::Dsl do
           let(:value) { double }
 
           before do
-            params[:parser] = parser
+            params['parser'] = parser
           end
 
           context 'when we are able to successfully parse' do
@@ -237,7 +237,7 @@ RSpec.describe Karafka::Params::Dsl do
           end
         end
 
-        %i[
+        %w[
           topic
           partition
           offset

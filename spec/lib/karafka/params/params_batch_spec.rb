@@ -35,23 +35,23 @@ RSpec.describe Karafka::Params::ParamsBatch do
 
   describe '#to_a' do
     it 'expect not to parse data and return raw params_batch' do
-      expect(params_batch.to_a.first[:parsed]).to eq nil
+      expect(params_batch.to_a.first['parsed']).to eq nil
     end
   end
 
   describe '#parsed' do
     it 'expect to parse all the messages and return parsed' do
       params_batch.parsed
-      params_batch.to_a.each { |params| expect(params[:parsed]).to eq true }
+      params_batch.to_a.each { |params| expect(params['parsed']).to eq true }
     end
   end
 
   describe '#each' do
     it 'expect to parse each at a time' do
       params_batch.each_with_index do |params, index|
-        expect(params[:parsed]).to eq true
+        expect(params['parsed']).to eq true
         next if index > 0
-        expect(params_batch.to_a[index + 1][:parsed]).to eq nil
+        expect(params_batch.to_a[index + 1]['parsed']).to eq nil
       end
     end
   end
@@ -59,7 +59,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
   describe '#last' do
     it 'expect to return last element after parsing' do
       expect(params_batch.last).to eq params_batch.to_a[-1]
-      expect(params_batch.last[:parsed]).to eq true
+      expect(params_batch.last['parsed']).to eq true
     end
   end
 end

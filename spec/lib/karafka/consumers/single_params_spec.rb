@@ -4,7 +4,7 @@ RSpec.describe Karafka::Consumers::SingleParams do
   subject(:consumer) { consumer_class.new }
 
   let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
-  let(:params_batch) { [{ value: {}.to_json }] }
+  let(:params_batch) { [{ 'value' => {}.to_json }] }
   let(:topic) do
     instance_double(
       Karafka::Routing::Topic,

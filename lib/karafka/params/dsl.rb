@@ -14,9 +14,8 @@ module Karafka
     # heavy-parsing data without slowing down the whole application.
     module Dsl
       # Params keys that are "our" and internal. We use this list for additional backends
-      # that don't allow symbols to be transferred, to remap the interchanged params
-      # back into a valid form
-      SYSTEM_KEYS = %i[
+      # that somehow operatae on those keys
+      SYSTEM_KEYS = %w[
         parser
         value
         partition
@@ -33,7 +32,7 @@ module Karafka
       # Kafka passes internally Kafka::FetchedMessage object and the ruby-kafka consumer
       # uses those fields via method calls, so in order to be able to pass there our params
       # objects, have to have same api.
-      METHOD_ATTRIBUTES = %i[
+      METHOD_ATTRIBUTES = %w[
         topic
         partition
         offset
@@ -60,21 +59,24 @@ module Karafka
         #   Karafka::Params::Params.build(message) #=> params object
         def build(message, parser)
           instance = new
-          instance[:parser] = parser
+          instance['parser'] = parser
 
           # Non kafka fetched message can happen when we interchange data with an
           # additional backend
           if message.is_a?(Kafka::FetchedMessage)
-            instance[:value] = message.value
-            instance[:partition] = message.partition
-            instance[:offset] = message.offset
-            instance[:key] = message.key
-            instance[:create_time] = message.create_time
-            instance[:receive_time] = Time.now
-            # When we get raw messages, they might have a topic, that was modified by a
-            # topic mapper. We need to "reverse" this change and map back to the non-modified
-            # format, so our internal flow is not corrupted with the mapping
-            instance[:topic] = Karafka::App.config.topic_mapper.incoming(message.topic)
+            instance.send(
+              :merge!,
+              'value' => message.value,
+              'partition' => message.partition,
+              'offset' => message.offset,
+              'key' => message.key,
+              'create_time' => message.create_time,
+              'receive_time' => Time.now,
+              # When we get raw messages, they might have a topic, that was modified by a
+              # topic mapper. We need to "reverse" this change and map back to the non-modified
+              # format, so our internal flow is not corrupted with the mapping
+              'topic' => Karafka::App.config.topic_mapper.incoming(message.topic)
+            )
           else
             instance.send(:merge!, message)
           end
@@ -88,10 +90,10 @@ module Karafka
       #   to the current object. This object will be also marked as already parsed, so we won't
       #   parse it again.
       def retrieve!
-        return self if self[:parsed]
-        self[:parsed] = true
+        return self if self['parsed']
+        self['parsed'] = true
 
-        merge!(parse(delete(:value)))
+        merge!(parse(delete('value')))
       end
 
       # Includes and extends the base params klass with everything that is needed by Karafka to
@@ -143,7 +145,7 @@ module Karafka
       #   went wrong during parsing
       def parse(value)
         Karafka.monitor.instrument('params.params.parse', caller: self) do
-          self[:parser].parse(value)
+          self['parser'].parse(value)
         end
       rescue ::Karafka::Errors::ParserError => e
         Karafka.monitor.instrument('params.params.parse.error', caller: self, error: e)

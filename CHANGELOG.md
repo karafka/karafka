@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 1.2.0
+## 1.2.0.beta4
 - Spec improvements
 - #260 - Specs missing randomization
 - #251 - Shutdown upon non responding (unreachable) cluster is not possible
@@ -34,6 +34,7 @@
 - Renamed ```after_fetched``` to ```after_fetch``` to normalize the naming convention
 - Instrumentation on a connection delegator level
 - Added ```params_batch#last``` method to retrieve last element after unparsing
+- All params keys are now strings
 
 ## 1.1.2
 - #256 - Default kafka.seed_brokers configuration is created in invalid format
