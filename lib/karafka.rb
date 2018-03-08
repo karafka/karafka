@@ -62,6 +62,17 @@ module Karafka
   end
 end
 
+%w[
+  callbacks
+  callbacks/*
+  setup/dsl
+  setup/config
+  status
+  schemas/config
+  schemas/consumer_group_topic
+  schemas/consumer_group
+].each { |path| require_all File.join(Karafka.core_root, path + '.rb') }
+
 Karafka::Loader.load!(Karafka.core_root)
 Kafka::Consumer.prepend(Karafka::Patches::RubyKafka)
 Dry::Configurable::Config.prepend(Karafka::Patches::DryConfigurable)
