@@ -10,7 +10,7 @@ PATH
       envlogic (~> 1.0)
       multi_json (>= 1.12)
       rake (>= 11.3)
-      require_all (~> 2.0)
+      require_all (>= 1.4)
       ruby-kafka (>= 0.5.3)
       thor (~> 0.19)
       waterdrop (~> 1.2)
