@@ -93,8 +93,8 @@ module Karafka
           Thread.new { info "Stopping Karafka server #{::Process.pid}" }
         end
 
-        # Logs an error that Karafka was unable to gracefully stop the server and it had to do a
-        #   force exit
+        # Logs an error that Karafka was unable to stop the server gracefully and it had to do a
+        #   forced exit
         # @param _event [Dry::Events::Event] event details including payload
         def on_server_stop_error(_event)
           # We use a separate thread as logging can't be called from trap context
