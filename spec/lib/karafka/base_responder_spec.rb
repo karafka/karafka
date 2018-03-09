@@ -3,6 +3,8 @@
 RSpec.describe Karafka::BaseResponder do
   let(:topic_name) { 'topic_123.abc-xyz' }
   let(:input_data) { rand }
+  let(:sync_producer) { WaterDrop::SyncProducer }
+  let(:async_producer) { WaterDrop::AsyncProducer }
 
   let(:working_class) do
     name = topic_name
@@ -194,28 +196,26 @@ RSpec.describe Karafka::BaseResponder do
         let(:messages_buffer) { {} }
 
         it 'expect to do nothing' do
-          expect(::WaterDrop::SyncProducer).not_to receive(:call)
+          expect(sync_producer).not_to receive(:call)
           responder.send(:deliver!)
         end
       end
 
-      context 'when there are messages to be delivered for sync producer' do
+      context 'when there are messages to be delivered for sync sync_producer' do
         let(:topic) { rand.to_s }
-        let(:messages_buffer) { { topic => [[rand, { topic: topic }]] } }
+        let(:messages_buffer) { { topic => data_elements } }
+        let(:data_elements) { [[rand, { topic: topic }]] }
 
         after { responder.send(:deliver!) }
 
         it 'expect to deliver them using waterdrop' do
-          messages_buffer.each_value do |data_elements|
-            data_elements.each do |data, options|
-              expect(::WaterDrop::SyncProducer)
-                .to receive(:call).with(data, options.merge(topic: topic))
-            end
+          data_elements.each do |data, options|
+            expect(sync_producer).to receive(:call).with(data, options.merge(topic: topic))
           end
         end
       end
 
-      context 'when there are messages to be delivered for async producer' do
+      context 'when there are messages to be delivered for async sync_producer' do
         let(:messages_buffer) { { rand => [[rand, { async: true }]] } }
 
         after { responder.send(:deliver!) }
@@ -223,11 +223,9 @@ RSpec.describe Karafka::BaseResponder do
         it 'expect to deliver them using waterdrop' do
           messages_buffer.each_value do |data_elements|
             data_elements.each do |data, options|
-              expect(::WaterDrop::SyncProducer)
-                .not_to receive(:call)
+              expect(sync_producer).not_to receive(:call)
 
-              expect(::WaterDrop::AsyncProducer)
-                .to receive(:call).with(data, options)
+              expect(async_producer).to receive(:call).with(data, options)
             end
           end
         end
