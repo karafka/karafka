@@ -31,21 +31,25 @@ module Karafka
           # always yield an array of messages, so we have consistent API (always a batch)
           kafka_consumer.each_message(*settings) { |message| yield([message]) }
         end
-      rescue Kafka::ProcessingError => e
+      rescue Kafka::ProcessingError => error
         # If there was an error during consumption, we have to log it, pause current partition
         # and process other things
         Karafka.monitor.instrument(
           'connection.client.fetch_loop.error',
           caller: self,
-          error: e.cause
+          error: error.cause
         )
-        pause(e.topic, e.partition)
+        pause(error.topic, error.partition)
         retry
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
-      rescue Exception => e
+      rescue Exception => error
         # rubocop:enable RescueException
-        Karafka.monitor.instrument('connection.client.fetch_loop.error', caller: self, error: e)
+        Karafka.monitor.instrument(
+          'connection.client.fetch_loop.error',
+          caller: self,
+          error: error
+        )
         retry
       end
 

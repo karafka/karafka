@@ -67,8 +67,9 @@ module Karafka
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)
       # If consumers won't stop in a given timeframe, it will force them to exit
       def stop_supervised
-        Karafka::App.stop!
+        Karafka.monitor.instrument('server.stop', {})
 
+        Karafka::App.stop!
         # If there is no shutdown timeout, we don't exit and wait until all the consumers
         # had done their work
         return unless Karafka::App.config.shutdown_timeout
@@ -81,8 +82,11 @@ module Karafka
           sleep SUPERVISION_SLEEP
         end
 
+        Karafka.monitor.instrument('server.stop.error', {})
         # We're done waiting, lets kill them!
         consumer_threads.each(&:terminate)
+
+        # exit is not within the instrumentation as it would not trigger due to exit
         Kernel.exit FORCEFUL_EXIT_CODE
       end
     end

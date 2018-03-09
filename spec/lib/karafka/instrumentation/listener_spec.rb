@@ -155,4 +155,32 @@ RSpec.describe Karafka::Instrumentation::Listener do
       trigger
     end
   end
+
+  describe '#on_server_stop' do
+    subject(:trigger) { described_class.on_server_stop(event) }
+
+    let(:payload) { {} }
+    let(:message) { "Stopping Karafka server #{::Process.pid}" }
+
+    it 'expect logger to log server stop' do
+      expect(Karafka.logger).to receive(:info).with(message)
+      trigger
+      # This sleep ensures that the threaded logger is able to finish
+      sleep 0.1
+    end
+  end
+
+  describe '#on_server_stop_error' do
+    subject(:trigger) { described_class.on_server_stop_error(event) }
+
+    let(:payload) { {} }
+    let(:message) { "Forceful Karafka server #{::Process.pid} stop" }
+
+    it 'expect logger to log server stop' do
+      expect(Karafka.logger).to receive(:error).with(message)
+      trigger
+      # This sleep ensures that the threaded logger is able to finish
+      sleep 0.1
+    end
+  end
 end
