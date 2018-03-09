@@ -17,6 +17,7 @@
 - #184 - Seek to
 - #284 - Dynamic Params parent class
 - #275 - ssl_ca_certs_from_system
+- #296 - Instrument forceful exit with an error
 - Replaced some of the activesupport parts with dry-inflector
 - Lower ActiveSupport dependency
 - Remove configurators in favor of the after_init block configurator

@@ -86,6 +86,21 @@ module Karafka
           info "Responded from #{calling} using #{responder} with following data #{data}"
         end
 
+        # Logs info that we're going to stop the Karafka server
+        # @param _event [Dry::Events::Event] event details including payload
+        def on_server_stop(_event)
+          # We use a separate thread as logging can't be called from trap context
+          Thread.new { info "Stopping Karafka server #{::Process.pid}" }
+        end
+
+        # Logs an error that Karafka was unable to stop the server gracefully and it had to do a
+        #   forced exit
+        # @param _event [Dry::Events::Event] event details including payload
+        def on_server_stop_error(_event)
+          # We use a separate thread as logging can't be called from trap context
+          Thread.new { error "Forceful Karafka server #{::Process.pid} stop" }
+        end
+
         USED_LOG_LEVELS.each do |log_level|
           define_method log_level do |*args|
             Karafka.logger.send(log_level, *args)
