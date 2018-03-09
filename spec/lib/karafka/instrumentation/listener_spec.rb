@@ -163,7 +163,9 @@ RSpec.describe Karafka::Instrumentation::Listener do
     let(:message) { "Stopping Karafka server #{::Process.pid}" }
 
     it 'expect logger to log server stop' do
-      expect(Karafka.logger).to receive(:info).with(message)
+      # We had to add at least once as it runs in a separate thread and can interact
+      # with other specs - this is a cheap workaround
+      expect(Karafka.logger).to receive(:info).with(message).at_least(:once)
       trigger
       # This sleep ensures that the threaded logger is able to finish
       sleep 0.1
@@ -177,7 +179,7 @@ RSpec.describe Karafka::Instrumentation::Listener do
     let(:message) { "Forceful Karafka server #{::Process.pid} stop" }
 
     it 'expect logger to log server stop' do
-      expect(Karafka.logger).to receive(:error).with(message)
+      expect(Karafka.logger).to receive(:error).with(message).at_least(:once)
       trigger
       # This sleep ensures that the threaded logger is able to finish
       sleep 0.1
