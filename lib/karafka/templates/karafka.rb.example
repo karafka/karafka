@@ -19,6 +19,8 @@ class KarafkaApp < Karafka::App
     config.client_id = 'example_app'
     config.backend = :inline
     config.batch_fetching = true
+    # Uncomment this for Rails app integration
+    # config.logger = Rails.logger
   end
 
   after_init do |config|
