@@ -8,7 +8,7 @@ Karafka allows you to capture everything that happens in your systems in large s
 
 Karafka not only handles incoming messages but also provides tools for building complex data-flow applications that receive and send messages.
 
-**Warning**: Wiki and all the docs refer to the 1.2.0.beta2. Sorry for the inconvenience. We will release the stable 1.2.0 version soon.
+**Warning**: Wiki and all the docs refer to the 1.2.0.beta4. Sorry for the inconvenience. We will release the stable 1.2.0 version soon.
 
 ## How does it work
 
