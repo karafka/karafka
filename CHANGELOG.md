@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 1.2.0.beta4
+## 1.2.0
 - Spec improvements
 - #260 - Specs missing randomization
 - #251 - Shutdown upon non responding (unreachable) cluster is not possible
