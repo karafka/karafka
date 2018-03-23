@@ -46,5 +46,8 @@ module Karafka
 
     # Raised when want to hook up to an event that is not registered and supported
     UnregisteredMonitorEvent = Class.new(BaseError)
+
+    # Raised when we've waited enough for shutting down an unresponding process
+    ForcefulShutdown = Class.new(BaseError)
   end
 end

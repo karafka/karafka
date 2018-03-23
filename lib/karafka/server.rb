@@ -82,7 +82,9 @@ module Karafka
           sleep SUPERVISION_SLEEP
         end
 
-        Karafka.monitor.instrument('server.stop.error', {})
+        raise Errors::ForcefulShutdown
+      rescue Errors::ForcefulShutdown => error
+        Karafka.monitor.instrument('server.stop.error', error: error)
         # We're done waiting, lets kill them!
         consumer_threads.each(&:terminate)
 

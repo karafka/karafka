@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- #304 - Unification of error instrumentation event details
+
 ## 1.2.0
 - Spec improvements
 - #260 - Specs missing randomization
