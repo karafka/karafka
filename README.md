@@ -12,11 +12,11 @@ Karafka not only handles incoming messages but also provides tools for building 
 
 ## How does it work
 
-Karafka provides a higher-level abstraction that allows you to focus on your business logic development, instead of focusing on implementing lower level abstraction layers. It provides developers with a set of tools that are dedicated for building multi-topic applications similarly to how Rails applications are being built.
+Karafka provides a higher-level abstraction that allows you to focus on your business logic development, instead of focusing on implementing lower level abstraction layers. It provides developers with a set of tools that are dedicated for building multi-topic applications similar to how Rails applications are being built.
 
 ### Some things you might wonder about:
 
-- You can integrate Karafka with **any** Ruby based application.
+- You can integrate Karafka with **any** Ruby-based application.
 - Karafka does **not** require Sidekiq or any other third party software (apart from Kafka itself).
 - Karafka works with Ruby on Rails but it is a **standalone** framework that can work without it.
 - Karafka has a **minimal** set of dependencies, so adding it won't be a huge burden for your already existing applications.
@@ -30,7 +30,7 @@ Karafka based applications can be easily deployed to any type of infrastructure,
 
 ## Support
 
-Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
+Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
 
 If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
 
@@ -69,7 +69,7 @@ Karafka framework and Karafka team are __not__ related to Kafka streaming servic
 
 First, thank you for considering contributing to Karafka! It's people like you that make the open source community such a great community!
 
-Each pull request must pass all the rspec specs and meet our quality requirements.
+Each pull request must pass all the RSpec specs and meet our quality requirements.
 
 To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation. Once you're done with your changes, submit a pull request.
 
