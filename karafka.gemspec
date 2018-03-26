@@ -18,6 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activesupport', '>= 4.0'
   spec.add_dependency 'dry-configurable', '~> 0.7'
+  spec.add_dependency 'dry-events', '~> 0.1'
   spec.add_dependency 'dry-inflector', '~> 0.1.1'
   spec.add_dependency 'dry-monitor', '~> 0.1'
   spec.add_dependency 'dry-validation', '~> 0.11'

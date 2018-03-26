@@ -11,6 +11,7 @@
   require_all
   dry-configurable
   dry-validation
+  dry/events/publisher
   dry/inflector
   dry/monitor/notifications
   active_support/callbacks
@@ -30,6 +31,11 @@ module Karafka
     # @return [::Karafka::Monitor] monitor that we want to use
     def monitor
       @monitor ||= App.config.monitor
+    end
+
+    # @return [::Karafka::EventPublisher] event publisher we want to use.
+    def event_publisher
+      @event_publisher ||= EventPublisher.new
     end
 
     # @return [String] root path of this gem
@@ -63,7 +69,6 @@ module Karafka
 end
 
 %w[
-  callbacks
   callbacks/*
   setup/dsl
   setup/config

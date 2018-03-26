@@ -16,7 +16,11 @@ RSpec.describe Karafka::Connection::Listener do
     let(:client) { listener.send(:client) }
 
     it 'expects to run callbacks and start the main fetch loop' do
-      expect(Karafka::Callbacks).to receive(:before_fetch_loop).with(consumer_group, client)
+      expect(Karafka.event_publisher).to receive(:publish).with(
+        'connection.listener.before_fetch_loop',
+        consumer_group: consumer_group,
+        client: client
+      )
       expect(client).to receive(:fetch_loop)
       listener.call
     end
