@@ -16,6 +16,8 @@ RSpec.describe Karafka::Patches::RubyKafka do
     klass
   end
 
+  before { Karafka::Persistence::Consumer.clear }
+
   describe '#consumer_loop' do
     let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
     let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s, persistent: false) }
@@ -35,6 +37,35 @@ RSpec.describe Karafka::Patches::RubyKafka do
         expect(client).to receive(:stop)
         kafka_consumer.consumer_loop
       end
+
+      context 'and there are consumer instances with before_stop callback' do
+        let(:verifier_double) { double }
+
+        let(:consumer) do
+          ClassBuilder.inherit(Karafka::BaseConsumer) do
+            include Karafka::Consumers::Callbacks
+
+            before_stop do
+              self.class.verifier.verify
+            end
+          end
+        end
+
+        before do
+          Karafka::Persistence::Consumer.fetch(
+            instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
+            0
+          )
+
+          allow(consumer).to receive(:verifier).and_return(verifier_double)
+        end
+
+        it 'expect to run the callback and not yield control' do
+          expect(verifier_double).to receive(:verify)
+
+          expect { |block| kafka_consumer.consumer_loop(&block) }.not_to yield_control
+        end
+      end
     end
 
     context 'when karafka is running' do
@@ -43,26 +74,54 @@ RSpec.describe Karafka::Patches::RubyKafka do
       it 'expect to yield the original base block' do
         expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
       end
-    end
 
-    context 'when there are consumer instances with callbacks' do
-      let(:consumer) do
-        ClassBuilder.inherit(Karafka::BaseConsumer) do
-          include Karafka::Consumers::Callbacks
+      context 'and there are consumer instances with callbacks' do
+        let(:verifier_double) { double }
+
+        before do
+          Karafka::Persistence::Consumer.fetch(
+            instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
+            0
+          )
+
+          allow(consumer).to receive(:verifier).and_return(verifier_double)
         end
-      end
 
-      before do
-        Karafka::Persistence::Consumer.fetch(
-          instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
-          0
-        )
+        context 'for before_poll callback' do
+          let(:consumer) do
+            ClassBuilder.inherit(Karafka::BaseConsumer) do
+              include Karafka::Consumers::Callbacks
 
-        allow(Karafka::App).to receive(:stopped?).and_return(false)
-      end
+              before_poll do
+                self.class.verifier.verify
+              end
+            end
+          end
 
-      it 'expect to yield the original base block' do
-        expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
+          it 'expect to run the callback and yield the original base block' do
+            expect(verifier_double).to receive(:verify)
+
+            expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
+          end
+        end
+
+        context 'for after_poll callback' do
+          let(:consumer) do
+            ClassBuilder.inherit(Karafka::BaseConsumer) do
+              include Karafka::Consumers::Callbacks
+
+              after_poll do
+                self.class.verifier.verify
+              end
+            end
+          end
+
+          it 'expect to run the callback and yield the original base block' do
+            expect(verifier_double).to receive(:verify)
+
+            expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
+          end
+        end
       end
     end
   end

@@ -16,7 +16,12 @@ module Karafka
         def all
           # @note This does not need to be threadsafe (Hash) as it is always executed in a
           # current thread context
-          Thread.current[PERSISTENCE_SCOPE] ||= Hash.new { |hash, key| hash[key] = {} }
+          Thread.current[PERSISTENCE_SCOPE] ||= initial_state
+        end
+
+        # Clears current thread persistence scope
+        def clear
+          Thread.current[PERSISTENCE_SCOPE] = initial_state
         end
 
         # Used to build (if block given) and/or fetch a current consumer instance that will be
@@ -32,7 +37,14 @@ module Karafka
             all[topic][partition] = topic.consumer.new
           end
         end
+
+        private
+
+        def initial_state
+          Hash.new { |hash, key| hash[key] = {} }
+        end
       end
     end
   end
 end
+
