@@ -6,19 +6,19 @@ module Karafka
     module Dsl
       # Allows us to define a block that will be executed after Karafka has been initialized
       # @param [Block] block that should be executed after the initialization process
-      def after_init(&block)
+      def after_init
         Karafka.event_publisher.subscribe('app.after_init') do |payload|
           # We have to unpack the payload to keep backward-compatibility
-          block.call(payload[:config])
+          yield payload[:config]
         end
       end
 
       # Allows us to define a block that will be executed before fetch_loop starts
       # @param [Block] block that should be executed after the initialization process
-      def before_fetch_loop(&block)
+      def before_fetch_loop
         Karafka.event_publisher.subscribe('connection.listener.before_fetch_loop') do |payload|
           # We have to unpack the payload to keep backward-compatibility
-          block.call(payload[:consumer_group], payload[:client])
+          yield payload[:consumer_group], payload[:client]
         end
       end
     end
