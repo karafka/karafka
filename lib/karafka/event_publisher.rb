@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
+  # EventPublisher is responsible for publishing events related to application lifecycle events.
   class EventPublisher
     include Dry::Events::Publisher[:karafka_event_publisher]
 

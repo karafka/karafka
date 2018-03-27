@@ -47,4 +47,3 @@ module Karafka
     end
   end
 end
-

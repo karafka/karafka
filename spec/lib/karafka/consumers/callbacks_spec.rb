@@ -59,7 +59,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
           include described_scope
 
           after_fetch do
-            self.verifier.verify
+            verifier.verify
           end
 
           def consume

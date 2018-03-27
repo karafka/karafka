@@ -19,7 +19,6 @@ module Karafka
       # Class methods needed to make callbacks run
       module ClassMethods
         TYPES.each do |type|
-
           # A Creates a callback wrapper
           # @param method_name [Symbol, String] method name or nil if we plan to provide a block
           # @yield A block with a code that should be executed before scheduling

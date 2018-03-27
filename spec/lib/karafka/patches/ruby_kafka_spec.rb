@@ -47,7 +47,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
         kafka_consumer.consumer_loop
       end
 
-      context 'and there are consumer instances with before_stop callback' do
+      context 'when there are consumer instances with before_stop callback' do
         let(:verifier_double) { double }
 
         let(:consumer) do
@@ -56,7 +56,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
 
             before_stop { verifier.verify }
           end
-				end
+        end
 
         it 'expect to run the callback and not yield control' do
           expect(consumer_instance).to receive(:verifier).and_return(verifier_double)
@@ -74,12 +74,12 @@ RSpec.describe Karafka::Patches::RubyKafka do
         expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
       end
 
-      context 'and there are consumer instances with callbacks' do
+      context 'when there are consumer instances with callbacks' do
         let(:verifier_double) { double }
 
-        before { expect(consumer_instance).to receive(:verifier).and_return(verifier_double) }
+        before { allow(consumer_instance).to receive(:verifier).and_return(verifier_double) }
 
-        context 'for before_poll callback' do
+        context 'when using before_poll callback' do
           let(:consumer) do
             ClassBuilder.inherit(Karafka::BaseConsumer) do
               include Karafka::Consumers::Callbacks
@@ -97,13 +97,13 @@ RSpec.describe Karafka::Patches::RubyKafka do
           end
         end
 
-        context 'for after_poll callback' do
+        context 'when using after_poll callback' do
           let(:consumer) do
             ClassBuilder.inherit(Karafka::BaseConsumer) do
               include Karafka::Consumers::Callbacks
 
               after_poll do
-               verifier.verify
+                verifier.verify
               end
             end
           end
