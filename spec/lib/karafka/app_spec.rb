@@ -17,9 +17,15 @@ RSpec.describe Karafka::App do
     it 'expect to run setup_components' do
       expect(Karafka::Setup::Config).to receive(:validate!).once
       expect(Karafka::Setup::Config).to receive(:setup_components).once
+
+      app_class.boot!
+    end
+
+    it 'expect to publish after_init event' do
       expect(Karafka.event_publisher).to(
         receive(:publish).with('app.after_init', instance_of(Hash))
       )
+
       app_class.boot!
     end
   end
