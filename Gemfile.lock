@@ -103,12 +103,12 @@ GEM
     timecop (0.9.1)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
-    waterdrop (1.2.0)
+    waterdrop (1.2.2)
       delivery_boy (~> 0.2)
       dry-configurable (~> 0.7)
       dry-monitor (~> 0.1)
       dry-validation (~> 0.11)
-      null-logger
+      null-logger (~> 0.1)
 
 PLATFORMS
   ruby
