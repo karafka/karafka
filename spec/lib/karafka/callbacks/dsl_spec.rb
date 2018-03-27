@@ -31,13 +31,9 @@ RSpec.describe Karafka::Callbacks::Dsl do
 
     it 'keeps backward-compatibility' do
       app_class.before_fetch_loop(&execution_block)
-
       expect do
-        Karafka.event_publisher.publish(
-          'connection.listener.before_fetch_loop',
-          consumer_group: double,
-          client: double
-        )
+        Karafka.event_publisher.publish('connection.listener.before_fetch_loop',
+                                        consumer_group: double, client: double)
       end.not_to raise_error
     end
   end
