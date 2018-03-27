@@ -22,7 +22,16 @@ RSpec.describe Karafka::Patches::RubyKafka do
     let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
     let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s, persistent: false) }
 
-    before { Karafka::Persistence::Client.write(client) }
+    let(:consumer_instance) do
+      Karafka::Persistence::Consumer.fetch(
+        instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
+        0
+      )
+    end
+
+    before do
+      Karafka::Persistence::Client.write(client)
+    end
 
     after { Thread.current[:client] = nil }
 
@@ -45,22 +54,12 @@ RSpec.describe Karafka::Patches::RubyKafka do
           ClassBuilder.inherit(Karafka::BaseConsumer) do
             include Karafka::Consumers::Callbacks
 
-            before_stop do
-              self.class.verifier.verify
-            end
+            before_stop { verifier.verify }
           end
-        end
-
-        before do
-          Karafka::Persistence::Consumer.fetch(
-            instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
-            0
-          )
-
-          allow(consumer).to receive(:verifier).and_return(verifier_double)
-        end
+				end
 
         it 'expect to run the callback and not yield control' do
+          expect(consumer_instance).to receive(:verifier).and_return(verifier_double)
           expect(verifier_double).to receive(:verify)
 
           expect { |block| kafka_consumer.consumer_loop(&block) }.not_to yield_control
@@ -78,14 +77,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
       context 'and there are consumer instances with callbacks' do
         let(:verifier_double) { double }
 
-        before do
-          Karafka::Persistence::Consumer.fetch(
-            instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
-            0
-          )
-
-          allow(consumer).to receive(:verifier).and_return(verifier_double)
-        end
+        before { expect(consumer_instance).to receive(:verifier).and_return(verifier_double) }
 
         context 'for before_poll callback' do
           let(:consumer) do
@@ -93,7 +85,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
               include Karafka::Consumers::Callbacks
 
               before_poll do
-                self.class.verifier.verify
+                verifier.verify
               end
             end
           end
@@ -111,7 +103,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
               include Karafka::Consumers::Callbacks
 
               after_poll do
-                self.class.verifier.verify
+               verifier.verify
               end
             end
           end

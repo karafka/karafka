@@ -19,11 +19,21 @@ module Karafka
       # Class methods needed to make callbacks run
       module ClassMethods
         TYPES.each do |type|
+
           # A Creates a callback wrapper
           # @param method_name [Symbol, String] method name or nil if we plan to provide a block
           # @yield A block with a code that should be executed before scheduling
-          define_method type do |method_name = nil, &block|
-            set_callback type, :before, method_name ? method_name : block
+          define_method(type) do |method_name = nil, &block|
+            register_event(type.to_s)
+            subscribe(type.to_s) do |event|
+              context = event[:context]
+
+              if method_name
+                context.instance_exec(method_name) { |meth| method(meth).call }
+              else
+                context.instance_eval(&block)
+              end
+            end
           end
         end
       end
@@ -32,12 +42,7 @@ module Karafka
       def self.included(consumer_class)
         consumer_class.class_eval do
           extend ClassMethods
-          include ActiveSupport::Callbacks
-
-          # The call method is wrapped with a set of callbacks
-          # We won't run process if any of the callbacks throw abort
-          # @see http://api.rubyonrails.org/classes/ActiveSupport/Callbacks/ClassMethods.html#method-i-get_callbacks
-          TYPES.each { |type| define_callbacks type }
+          include Dry::Events::Publisher[:"karafka_#{self}_event_publisher"]
         end
       end
 
@@ -45,9 +50,9 @@ module Karafka
       # method of a proper backend. It is here because it interacts with the default Karafka
       # call flow and needs to be overwritten to support callbacks
       def call
-        run_callbacks :after_fetch do
-          process
-        end
+        publish('after_fetch', context: self)
+
+        process
       end
     end
   end

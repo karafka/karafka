@@ -38,6 +38,8 @@ RSpec.describe Karafka::Consumers::Callbacks do
   end
 
   context 'when we want to use after_fetch callback' do
+    let(:verifier) { double }
+
     describe '#call' do
       context 'when there are no callbacks' do
         it 'just schedules' do
@@ -49,117 +51,87 @@ RSpec.describe Karafka::Consumers::Callbacks do
     end
 
     context 'when we have a block based after_fetch' do
-      let(:backend) { :inline }
+      subject(:base_consumer) do
+        described_scope = described_class
 
-      context 'when it throws abort to halt' do
-        subject(:base_consumer) do
-          described_scope = described_class
+        ClassBuilder.inherit(Karafka::BaseConsumer) do
+          include Karafka::Backends::Inline
+          include described_scope
 
-          ClassBuilder.inherit(Karafka::BaseConsumer) do
-            include Karafka::Backends::Inline
-            include described_scope
+          after_fetch do
+            self.verifier.verify
+          end
 
-            after_fetch do
-              throw(:abort)
-            end
-
-            def consume
-              self
-            end
-          end.new
-        end
-
-        it 'does not consume' do
-          expect(base_consumer).not_to receive(:consume)
-
-          base_consumer.call
-        end
+          def consume
+            self
+          end
+        end.new
       end
 
-      context 'when it does not throw abort to halt' do
-        subject(:base_consumer) do
-          described_scope = described_class
-
-          ClassBuilder.inherit(Karafka::BaseConsumer) do
-            include Karafka::Backends::Inline
-            include described_scope
-
-            after_fetch do
-              true
-            end
-
-            def consume
-              self
-            end
-          end.new
-        end
-
-        let(:params) { double }
-
-        it 'executes' do
-          expect(base_consumer).to receive(:process)
-          base_consumer.call
-        end
+      it 'calls after_fetch callback and executes' do
+        expect(base_consumer).to receive(:verifier).and_return(verifier)
+        expect(verifier).to receive(:verify)
+        expect(base_consumer).to receive(:process)
+        base_consumer.call
       end
     end
 
     context 'when we have a method based after_fetch' do
-      let(:backend) { :inline }
+      subject(:base_consumer) do
+        described_scope = described_class
 
-      context 'when it throws abort to halt' do
-        subject(:base_consumer) do
-          described_scope = described_class
+        ClassBuilder.inherit(Karafka::BaseConsumer) do
+          include Karafka::Backends::Inline
+          include described_scope
 
-          ClassBuilder.inherit(Karafka::BaseConsumer) do
-            include described_scope
+          after_fetch :after_fetch_method
 
-            after_fetch :method
+          def consume
+            self
+          end
 
-            def consume
-              self
-            end
-
-            def method
-              throw(:abort)
-            end
-          end.new
-        end
-
-        it 'does not consume' do
-          expect(base_consumer).not_to receive(:consume)
-
-          base_consumer.call
-        end
+          def after_fetch_method
+            verifier.verify
+          end
+        end.new
       end
 
-      context 'when it does not return false' do
-        subject(:base_consumer) do
-          described_scope = described_class
+      it 'calls after_fetch_method and executes' do
+        expect(base_consumer).to receive(:verifier).and_return(verifier)
+        expect(verifier).to receive(:verify)
+        expect(base_consumer).to receive(:process)
 
-          ClassBuilder.inherit(Karafka::BaseConsumer) do
-            include Karafka::Backends::Inline
-            include described_scope
+        base_consumer.call
+      end
+    end
 
-            after_fetch :method
+    context 'when we want to get local state with after_fetch' do
+      subject(:base_consumer) do
+        described_scope = described_class
 
-            def consume
-              self
-            end
+        ClassBuilder.inherit(Karafka::BaseConsumer) do
+          include Karafka::Backends::Inline
+          include described_scope
 
-            def method
-              true
-            end
-          end.new
-        end
+          attr_reader :instance_var
 
-        # There cannot be a working consumer without a topic
-        before { base_consumer.class.topic = topic }
+          after_fetch { @instance_var = 10 }
 
-        it 'schedules to a backend' do
-          expect(base_consumer).to receive(:consume)
+          def initialize
+            @instance_var = 0
+          end
 
-          base_consumer.call
-        end
+          def consume
+            self
+          end
+        end.new
+      end
+
+      it 'is possible to access local state' do
+        expect(base_consumer).to receive(:process)
+        base_consumer.call
+
+        expect(base_consumer.instance_var).to eq 10
       end
     end
   end
