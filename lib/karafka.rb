@@ -71,7 +71,6 @@ module Karafka
 end
 
 %w[
-  callbacks/*
   setup/dsl
   setup/config
   status

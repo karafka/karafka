@@ -4,7 +4,6 @@ module Karafka
   # App class
   class App
     extend Setup::Dsl
-    extend Callbacks::Dsl
 
     class << self
       # Sets up all the internal components and bootstrap whole app
