@@ -17,6 +17,7 @@ module Karafka
                       .all
                       .values
                       .flat_map(&:values)
+                      .select { |consumer| consumer.respond_to?(:publish) }
 
           if Karafka::App.stopped?
             consumers.each { |consumer| consumer.publish('before_stop', context: consumer) }
