@@ -2,6 +2,7 @@
 
 ## Unreleased
 - #304 - Unification of error instrumentation event details
+- #306 - Using file logger from within a trap context upon shutdown is impossible
 
 ## 1.2.0
 - Spec improvements
