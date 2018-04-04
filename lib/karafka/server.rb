@@ -67,7 +67,12 @@ module Karafka
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)
       # If consumers won't stop in a given timeframe, it will force them to exit
       def stop_supervised
-        Karafka.monitor.instrument('server.stop', {})
+        # Because this is called in the trap context, there is a chance that instrumentation
+        # listeners contain things that aren't allowed from within a trap context.
+        # To bypass that (instead of telling users not to do things they need to)
+        # we spin up a thread to instrument server.stop and server.stop.error and wait until
+        # they're finished
+        Thread.new { Karafka.monitor.instrument('server.stop', {}) }.join
 
         Karafka::App.stop!
         # If there is no shutdown timeout, we don't exit and wait until all the consumers
@@ -84,7 +89,7 @@ module Karafka
 
         raise Errors::ForcefulShutdown
       rescue Errors::ForcefulShutdown => error
-        Karafka.monitor.instrument('server.stop.error', error: error)
+        Thread.new { Karafka.monitor.instrument('server.stop.error', error: error) }.join
         # We're done waiting, lets kill them!
         consumer_threads.each(&:terminate)
 
