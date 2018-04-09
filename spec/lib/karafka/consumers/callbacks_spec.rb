@@ -15,6 +15,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
     topic.responder = responder_class
     topic
   end
+  let(:verifier) { double }
   let(:working_class) do
     described_scope = described_class
 
@@ -22,9 +23,14 @@ RSpec.describe Karafka::Consumers::Callbacks do
       include Karafka::Backends::Inline
       include Karafka::Consumers::Responders
       include described_scope
+      attr_accessor :verifier
 
       def consume
         self
+      end
+
+      def process
+        verifier.process
       end
     end
   end
@@ -38,12 +44,12 @@ RSpec.describe Karafka::Consumers::Callbacks do
   end
 
   context 'when we want to use after_fetch callback' do
-    let(:verifier) { double }
+    before { base_consumer.verifier = verifier }
 
     describe '#call' do
       context 'when there are no callbacks' do
         it 'just schedules' do
-          expect(base_consumer).to receive(:process)
+          expect(verifier).to receive(:process)
 
           base_consumer.call
         end
@@ -66,13 +72,16 @@ RSpec.describe Karafka::Consumers::Callbacks do
           def consume
             self
           end
+
+          def process
+            verifier.process
+          end
         end.new
       end
 
       it 'calls after_fetch callback and executes' do
-        base_consumer.verifier = verifier
         expect(verifier).to receive(:verify)
-        expect(base_consumer).to receive(:process)
+        expect(verifier).to receive(:process)
         base_consumer.call
       end
     end
@@ -95,13 +104,16 @@ RSpec.describe Karafka::Consumers::Callbacks do
           def after_fetch_method
             verifier.verify
           end
+
+          def process
+            verifier.process
+          end
         end.new
       end
 
       it 'calls after_fetch_method and executes' do
-        base_consumer.verifier = verifier
         expect(verifier).to receive(:verify)
-        expect(base_consumer).to receive(:process)
+        expect(verifier).to receive(:process)
 
         base_consumer.call
       end
@@ -115,6 +127,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
           include Karafka::Backends::Inline
           include described_scope
 
+          attr_accessor :verifier
           attr_reader :instance_var
 
           after_fetch { @instance_var = 10 }
@@ -126,11 +139,15 @@ RSpec.describe Karafka::Consumers::Callbacks do
           def consume
             self
           end
+
+          def process
+            verifier.process
+          end
         end.new
       end
 
       it 'is possible to access local state' do
-        expect(base_consumer).to receive(:process)
+        expect(verifier).to receive(:process)
         base_consumer.call
 
         expect(base_consumer.instance_var).to eq 10
