@@ -57,6 +57,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
         ClassBuilder.inherit(Karafka::BaseConsumer) do
           include Karafka::Backends::Inline
           include described_scope
+          attr_accessor :verifier
 
           after_fetch do
             verifier.verify
@@ -69,7 +70,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
       end
 
       it 'calls after_fetch callback and executes' do
-        expect(base_consumer).to receive(:verifier).and_return(verifier)
+        base_consumer.verifier = verifier
         expect(verifier).to receive(:verify)
         expect(base_consumer).to receive(:process)
         base_consumer.call
@@ -83,6 +84,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
         ClassBuilder.inherit(Karafka::BaseConsumer) do
           include Karafka::Backends::Inline
           include described_scope
+          attr_accessor :verifier
 
           after_fetch :after_fetch_method
 
@@ -97,7 +99,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
       end
 
       it 'calls after_fetch_method and executes' do
-        expect(base_consumer).to receive(:verifier).and_return(verifier)
+        base_consumer.verifier = verifier
         expect(verifier).to receive(:verify)
         expect(base_consumer).to receive(:process)
 
