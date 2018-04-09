@@ -16,7 +16,7 @@ module Karafka
 
       # Runs prefetch callbacks and executes the main listener fetch loop
       def call
-        Karafka.event_publisher.publish(
+        Karafka.events.publish(
           'connection.listener.before_fetch_loop',
           consumer_group: @consumer_group,
           client: client

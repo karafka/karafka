@@ -36,8 +36,8 @@ module Karafka
     end
 
     # @return [::Karafka::EventPublisher] event publisher we want to use.
-    def event_publisher
-      @event_publisher ||= EventPublisher.new
+    def events
+      @events ||= EventPublisher.new
     end
 
     # @return [String] root path of this gem

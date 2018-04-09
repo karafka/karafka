@@ -14,7 +14,7 @@ module Karafka
       def boot!
         Setup::Config.validate!
         Setup::Config.setup_components
-        event_publisher.publish('app.after_init', config: Karafka::App.config)
+        events.publish('app.after_init', config: Karafka::App.config)
       end
 
       # @return [Karafka::Routing::Builder] consumers builder instance
@@ -34,7 +34,7 @@ module Karafka
         env
         logger
         monitor
-        event_publisher
+        events
       ].each do |delegated|
         define_method(delegated) do
           Karafka.send(delegated)
