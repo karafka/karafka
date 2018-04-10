@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 1.2.2
 - #312 - Broken for ActiveSupport 5.2.0
 
 ## 1.2.1
