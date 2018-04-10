@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- #312 - Broken for ActiveSupport 5.2.0
+
 ## 1.2.1
 - #304 - Unification of error instrumentation event details
 - #306 - Using file logger from within a trap context upon shutdown is impossible

@@ -13,7 +13,7 @@ module Karafka
           ::WaterDrop.setup do |water_config|
             water_config.deliver = true
 
-            config.to_h.except(:kafka).each do |k, v|
+            config.to_h.reject { |k, v| k == :kafka }.each do |k, v|
               key_assignment = :"#{k}="
               next unless water_config.respond_to?(key_assignment)
               water_config.public_send(key_assignment, v)
