@@ -49,12 +49,8 @@ RSpec.describe Karafka::Routing::Topic do
       let(:default_inline) { rand }
       let(:backend) { nil }
 
-      before do
-        expect(Karafka::App.config).to receive(:backend)
-          .and_return(default_inline)
-      end
-
       it 'expect to use Karafka::App default' do
+        expect(Karafka::App.config).to receive(:backend).and_return(default_inline)
         expect(topic.backend).to eq default_inline
       end
     end

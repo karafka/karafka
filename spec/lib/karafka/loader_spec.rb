@@ -8,18 +8,12 @@ RSpec.describe Karafka::Loader do
     let(:lib_path) { '/lib' }
     let(:app_path) { '/app' }
 
-    before do
-      stub_const('Karafka::Loader::DIRS', %w[lib app])
-      expect(loader).to receive(:load!)
-        .with(File.join(Karafka.gem_root, 'lib'))
-        .and_return(double)
-
-      # This one does not exist so we expect to skip it
-      expect(loader).not_to receive(:load!)
-        .with(File.join(Karafka.gem_root, 'app'))
-    end
+    before { stub_const('Karafka::Loader::DIRS', %w[lib app]) }
 
     it 'load paths for all DIRS that exist' do
+      expect(loader).to receive(:load!).with(File.join(Karafka.gem_root, 'lib')).and_return(double)
+      # This one does not exist so we expect to skip it
+      expect(loader).not_to receive(:load!).with(File.join(Karafka.gem_root, 'app'))
       loader.load(relative_path)
     end
   end
