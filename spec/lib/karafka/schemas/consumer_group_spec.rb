@@ -118,6 +118,19 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it { expect(schema.call(config)).not_to be_success }
       it { expect { schema.call(config).errors }.not_to raise_error }
     end
+
+    %w[
+      kafka+ssl
+      kafka
+      plaintext
+      ssl
+    ].each do |schema_prefix|
+      context "when seed_broker is a #{schema_prefix} one" do
+        before { config[:seed_brokers] = ["#{schema_prefix}://localhost:9092"] }
+
+        it { expect(schema.call(config)).to be_success }
+      end
+    end
   end
 
   context 'when we validate session_timeout' do

@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- #313 - support PLAINTEXT and SSL for scheme
+
 ## 1.2.2
 - #312 - Broken for ActiveSupport 5.2.0
 

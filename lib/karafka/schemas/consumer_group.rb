@@ -7,7 +7,7 @@ module Karafka
       # Valid uri schemas of Kafka broker url
       # The ||= is due to the behavior of require_all that resolves dependencies
       # but someetimes loads things twice
-      URI_SCHEMES ||= %w[kafka kafka+ssl].freeze
+      URI_SCHEMES ||= %w[kafka kafka+ssl plaintext ssl].freeze
 
       # Available sasl scram mechanism of authentication (plus nil)
       SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
