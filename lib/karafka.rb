@@ -36,6 +36,8 @@ module Karafka
     end
 
     # @return [::Karafka::EventPublisher] event publisher we want to use.
+    # @note We don't need to ensure that it is not executed in a thread for the first time
+    # (assingment is not thread-safe) as it gets used during the non-threaded boot process.
     def events
       @events ||= EventPublisher.new
     end
