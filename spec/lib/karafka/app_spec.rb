@@ -23,7 +23,7 @@ RSpec.describe Karafka::App do
 
     it 'expect to publish after_init event' do
       expect(Karafka.events).to(
-        receive(:publish).with('app.after_init', instance_of(Hash))
+        receive(:publish).with('after_init', instance_of(Hash))
       )
 
       app_class.boot!

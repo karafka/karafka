@@ -7,8 +7,8 @@ module Karafka
 
     # List of Karafka application lifecycle events we support
     EVENTS = %w[
-      app.after_init
-      connection.listener.before_fetch_loop
+      after_init
+      before_fetch_loop
     ].freeze
 
     EVENTS.each { |event| register_event event }

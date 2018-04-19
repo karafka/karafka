@@ -14,7 +14,7 @@ module Karafka
       def boot!
         Setup::Config.validate!
         Setup::Config.setup_components
-        events.publish('app.after_init', config: Karafka::App.config)
+        events.publish('after_init', config: Karafka::App.config)
       end
 
       # @return [Karafka::Routing::Builder] consumers builder instance
