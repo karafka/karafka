@@ -4,7 +4,6 @@ module Karafka
   # App class
   class App
     extend Setup::Dsl
-    extend Callbacks::Dsl
 
     class << self
       # Sets up all the internal components and bootstrap whole app
@@ -15,7 +14,7 @@ module Karafka
       def boot!
         Setup::Config.validate!
         Setup::Config.setup_components
-        Callbacks.after_init(Karafka::App.config)
+        events.publish('after_init', config: Karafka::App.config)
       end
 
       # @return [Karafka::Routing::Builder] consumers builder instance
@@ -35,6 +34,7 @@ module Karafka
         env
         logger
         monitor
+        events
       ].each do |delegated|
         define_method(delegated) do
           Karafka.send(delegated)

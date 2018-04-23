@@ -17,15 +17,15 @@ module Karafka
                       .all
                       .values
                       .flat_map(&:values)
-                      .select { |ctrl| ctrl.respond_to?(:run_callbacks) }
+                      .select { |consumer| consumer.respond_to?(:publish) }
 
           if Karafka::App.stopped?
-            consumers.each { |ctrl| ctrl.run_callbacks :before_stop }
+            consumers.each { |consumer| consumer.publish('before_stop', context: consumer) }
             Karafka::Persistence::Client.read.stop
           else
-            consumers.each { |ctrl| ctrl.run_callbacks :before_poll }
+            consumers.each { |consumer| consumer.publish('before_poll', context: consumer) }
             yield
-            consumers.each { |ctrl| ctrl.run_callbacks :after_poll }
+            consumers.each { |consumer| consumer.publish('after_poll', context: consumer) }
           end
         end
       end
