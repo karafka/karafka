@@ -2,6 +2,7 @@
 
 ## Unreleased
 - #313 - support PLAINTEXT and SSL for scheme
+- #288 - drop activesupport callbacks in favor of notifications
 
 ## 1.2.2
 - #312 - Broken for ActiveSupport 5.2.0

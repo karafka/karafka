@@ -17,15 +17,25 @@ module Karafka
                       .all
                       .values
                       .flat_map(&:values)
-                      .select { |consumer| consumer.respond_to?(:publish) }
+                      .select { |consumer| consumer.class.respond_to?(:after_fetch) }
 
           if Karafka::App.stopped?
-            consumers.each { |consumer| consumer.publish('before_stop', context: consumer) }
+            consumers.each { |consumer|
+              key = "consumers.#{Helpers::Inflector.underscore(consumer.class)}.before_stop"
+              Karafka::App.events.publish(key, context: consumer)
+
+            }
             Karafka::Persistence::Client.read.stop
           else
-            consumers.each { |consumer| consumer.publish('before_poll', context: consumer) }
+            consumers.each { |consumer|
+              key = "consumers.#{Helpers::Inflector.underscore(consumer.class)}.before_poll"
+              Karafka::App.events.publish(key, context: consumer)
+            }
             yield
-            consumers.each { |consumer| consumer.publish('after_poll', context: consumer) }
+            consumers.each { |consumer|
+              key = "consumers.#{Helpers::Inflector.underscore(consumer.class)}.after_poll"
+              Karafka::App.events.publish(key, context: consumer)
+            }
           end
         end
       end

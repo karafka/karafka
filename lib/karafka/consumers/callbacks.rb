@@ -19,12 +19,15 @@ module Karafka
       # Class methods needed to make callbacks run
       module ClassMethods
         TYPES.each do |type|
-          # A Creates a callback wrapper
+          # Creates a callback wrapper
+          #
           # @param method_name [Symbol, String] method name or nil if we plan to provide a block
           # @yield A block with a code that should be executed before scheduling
           define_method(type) do |method_name = nil, &block|
-            register_event(type.to_s)
-            subscribe(type.to_s) do |event|
+            key = "consumers.#{Helpers::Inflector.underscore(self)}.#{type}"
+            Karafka::App.events.register_event(key)
+
+            Karafka::App.events.subscribe(key) do |event|
               context = event[:context]
 
               if method_name
@@ -41,7 +44,6 @@ module Karafka
       def self.included(consumer_class)
         consumer_class.class_eval do
           extend ClassMethods
-          include Dry::Events::Publisher[:"karafka_#{self}_event_publisher"]
         end
       end
 
@@ -49,7 +51,7 @@ module Karafka
       # method of a proper backend. It is here because it interacts with the default Karafka
       # call flow and needs to be overwritten to support callbacks
       def call
-        publish('after_fetch', context: self)
+        Karafka::App.events.publish("consumers.#{Helpers::Inflector.underscore(self.class)}.after_fetch", context: self)
 
         process
       end

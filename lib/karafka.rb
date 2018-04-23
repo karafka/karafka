@@ -39,7 +39,7 @@ module Karafka
     # @note We don't need to ensure that it is not executed in a thread for the first time
     # (assingment is not thread-safe) as it gets used during the non-threaded boot process.
     def events
-      @events ||= EventPublisher.new
+      @events ||= Instrumentation::EventPublisher.new
     end
 
     # @return [String] root path of this gem
