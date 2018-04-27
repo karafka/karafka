@@ -3,14 +3,15 @@
 module Karafka
   # Namespace for all the things related to Kafka connection
   module Connection
-    # Mapper used to convert our internal settings into ruby-kafka settings
+    # Mapper used to convert our internal settings into ruby-kafka settings based on their
+    # API requirements.
     # Since ruby-kafka has more and more options and there are few "levels" on which
     # we have to apply them (despite the fact, that in Karafka you configure all of it
     # in one place), we have to remap it into what ruby-kafka driver requires
     # @note The good thing about Kafka.new method is that it ignores all options that
     #   do nothing. So we don't have to worry about injecting our internal settings
     #   into the client and breaking stuff
-    module ConfigAdapter
+    module ApiAdapter
       class << self
         # Builds all the configuration settings for Kafka.new method
         # @param _consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
