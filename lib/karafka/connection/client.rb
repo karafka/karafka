@@ -66,10 +66,11 @@ module Karafka
       # @param topic [String] topic that we want to pause
       # @param partition [Integer] number partition that we want to pause
       def pause(topic, partition)
-        settings = ConfigAdapter.pausing(consumer_group)
-        timeout = settings[:timeout]
-        raise(Errors::InvalidPauseTimeout, timeout) unless timeout.positive?
-        kafka_consumer.pause(topic, partition, settings)
+        kafka_consumer.pause(
+          Karafka::App.config.topic_mapper.outgoing(topic),
+          partition,
+          ConfigAdapter.pausing(consumer_group)
+        )
       end
 
       # Marks a given message as consumed and commit the offsets
