@@ -14,7 +14,6 @@ module Karafka
     module ApiAdapter
       class << self
         # Builds all the configuration settings for Kafka.new method
-        # @param _consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
         # @return [Array<Hash>] Array with all the client arguments including hash with all
         #   the settings required by Kafka.new method
         # @note We return array, so we can inject any arguments we want, in case of changes in the
