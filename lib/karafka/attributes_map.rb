@@ -14,15 +14,15 @@ module Karafka
       # @note All other settings will be passed to Kafka.new method invocation.
       #   All elements in this hash are just edge cases
       # @return [Hash] hash with proper sections on what to proxy where in Ruby-Kafka
-      def config_adapter
+      def api_adapter
         {
           consumer: %i[
             session_timeout offset_commit_interval offset_commit_threshold
             offset_retention_time heartbeat_interval
           ],
           subscription: %i[start_from_beginning max_bytes_per_partition],
-          consuming: %i[min_bytes max_bytes max_wait_time],
-          pausing: %i[pause_timeout],
+          consumption: %i[min_bytes max_bytes max_wait_time],
+          pause: %i[pause_timeout],
           # All the options that are under kafka config namespace, but are not used
           # directly with kafka api, but from the Karafka user perspective, they are
           # still related to kafka. They should not be proxied anywhere
@@ -32,7 +32,7 @@ module Karafka
 
       # @return [Array<Symbol>] properties that can be set on a per topic level
       def topic
-        (config_adapter[:subscription] + %i[
+        (api_adapter[:subscription] + %i[
           backend
           name
           parser
@@ -48,10 +48,10 @@ module Karafka
       #   Thanks to this solution, if any new setting is available for ruby-kafka, we just need
       #   to add it to our configuration class and it will be handled automatically.
       def consumer_group
-        # @note We don't ignore the config_adapter[:ignored] values as they should be ignored
+        # @note We don't ignore the api_adapter[:ignored] values as they should be ignored
         #   only when proxying details go ruby-kafka. We use ignored fields internally in karafka
-        ignored_settings = config_adapter[:subscription]
-        defined_settings = config_adapter.values.flatten
+        ignored_settings = api_adapter[:subscription]
+        defined_settings = api_adapter.values.flatten
         karafka_settings = %i[batch_fetching]
         # This is a drity and bad hack of dry-configurable to get keys before setting values
         dynamically_proxied = Karafka::Setup::Config
