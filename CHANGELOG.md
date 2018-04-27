@@ -2,6 +2,7 @@
 
 ## Unreleased
 - #313 - support PLAINTEXT and SSL for scheme
+- Rename ConfigAdapter to ApiAdapter to better reflect what it does
 
 ## 1.2.2
 - #312 - Broken for ActiveSupport 5.2.0
