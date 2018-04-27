@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Connection::ConfigAdapter do
+RSpec.describe Karafka::Connection::ApiAdapter do
   let(:consumer) { Karafka::BaseConsumer }
   let(:topic) { rand.to_s }
   let(:attributes_map_values) { Karafka::AttributesMap.config_adapter }
