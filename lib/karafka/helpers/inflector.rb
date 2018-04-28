@@ -6,7 +6,7 @@ module Karafka
       ENGINE = Dry::Inflector.new
 
       def self.underscore(element)
-        ENGINE.underscore(element.to_s).sub('/', '_')
+        ENGINE.underscore(element.to_s).tr('/', '_')
       end
     end
   end
