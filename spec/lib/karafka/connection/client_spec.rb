@@ -62,7 +62,7 @@ RSpec.describe Karafka::Connection::Client do
 
       it 'expect to raise an exception' do
         expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
-        expect(client.send(:pause, topic, partition)).to eq true
+        expect(client.pause(topic, partition)).to eq true
       end
     end
 
@@ -72,7 +72,7 @@ RSpec.describe Karafka::Connection::Client do
 
       it 'expect to raise an exception' do
         expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
-        expect(client.send(:pause, topic, partition)).to eq true
+        expect(client.pause(topic, partition)).to eq true
       end
     end
 
@@ -81,7 +81,7 @@ RSpec.describe Karafka::Connection::Client do
 
       it 'expect to pause consumer_group' do
         expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
-        expect(client.send(:pause, topic, partition)).to eq true
+        expect(client.pause(topic, partition)).to eq true
       end
     end
 
@@ -102,7 +102,7 @@ RSpec.describe Karafka::Connection::Client do
 
       it 'expect to pause consumer_group for a remapped topic' do
         expect(kafka_consumer).to receive(:pause).with(r_topic, partition, timeout: pause_timeout)
-        expect(client.send(:pause, topic, partition)).to eq true
+        expect(client.pause(topic, partition)).to eq true
       end
     end
   end
