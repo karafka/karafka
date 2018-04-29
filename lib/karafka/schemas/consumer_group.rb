@@ -31,7 +31,7 @@ module Karafka
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
       required(:seed_brokers).filled { each(:broker_schema?) }
       required(:session_timeout).filled { int? | float? }
-      required(:pause_timeout).filled { (int? | float?) & gteq?(0) }
+      required(:pause_timeout) { none? | ((int? | float?) & gteq?(0)) }
       required(:offset_commit_interval) { int? | float? }
       required(:offset_commit_threshold).filled(:int?)
       required(:offset_retention_time) { none?.not > int? }

@@ -73,7 +73,7 @@ module Karafka
         # Time that a given partition will be paused from fetching messages, when message
         # consumption fails. It allows us to process other partitions, while the error is being
         # resolved and also "slows" things down, so it prevents from "eating" up all messages and
-        # consuming them with failed code
+        # consuming them with failed code. Use `nil` if you want to pause forever and never retry.
         setting :pause_timeout, 10
         # option offset_commit_interval [Integer] the interval between offset commits,
         #   in seconds.
