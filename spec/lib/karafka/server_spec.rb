@@ -6,12 +6,16 @@ RSpec.describe Karafka::Server do
   describe '#run' do
     after { server_class.run }
 
+    before do
+      allow(Karafka::App).to receive(:run!)
+      allow(Karafka::Fetcher).to receive(:call)
+    end
+
     context 'when we want to run in supervision' do
       it 'runs in supervision, start consuming' do
         expect(Karafka::Process.instance).to receive(:on_sigint)
         expect(Karafka::Process.instance).to receive(:on_sigquit)
         expect(Karafka::Process.instance).to receive(:on_sigterm)
-        expect(server_class).to receive(:start_supervised)
       end
     end
 
@@ -20,7 +24,6 @@ RSpec.describe Karafka::Server do
         allow(Karafka::Process.instance).to receive(:supervise)
         allow(Karafka::Process.instance).to receive(:on_sigquit)
         allow(Karafka::Process.instance).to receive(:on_sigterm)
-        allow(server_class).to receive(:start_supervised)
       end
 
       it 'defines a proper action for sigint' do
@@ -34,7 +37,6 @@ RSpec.describe Karafka::Server do
         allow(Karafka::Process.instance).to receive(:supervise)
         allow(Karafka::Process.instance).to receive(:on_sigint)
         allow(Karafka::Process.instance).to receive(:on_sigterm)
-        allow(server_class).to receive(:start_supervised)
       end
 
       it 'defines a proper action for sigquit' do
@@ -48,7 +50,6 @@ RSpec.describe Karafka::Server do
         allow(Karafka::Process.instance).to receive(:supervise)
         allow(Karafka::Process.instance).to receive(:on_sigint)
         allow(Karafka::Process.instance).to receive(:on_sigquit)
-        allow(server_class).to receive(:start_supervised)
       end
 
       it 'defines a proper action for sigterm' do
@@ -59,7 +60,7 @@ RSpec.describe Karafka::Server do
   end
 
   describe '#start_supervised' do
-    after { subject.send(:start_supervised) }
+    after { server_class.send(:start_supervised) }
 
     it 'expect to supervise and run' do
       expect(Karafka::Process.instance).to receive(:supervise)
