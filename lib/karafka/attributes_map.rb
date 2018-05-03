@@ -20,7 +20,7 @@ module Karafka
             session_timeout offset_commit_interval offset_commit_threshold
             offset_retention_time heartbeat_interval
           ],
-          subscription: %i[start_from_beginning max_bytes_per_partition],
+          subscribe: %i[start_from_beginning max_bytes_per_partition],
           consumption: %i[min_bytes max_bytes max_wait_time],
           pause: %i[pause_timeout],
           # All the options that are under kafka config namespace, but are not used
@@ -32,7 +32,7 @@ module Karafka
 
       # @return [Array<Symbol>] properties that can be set on a per topic level
       def topic
-        (api_adapter[:subscription] + %i[
+        (api_adapter[:subscribe] + %i[
           backend
           name
           parser
@@ -50,7 +50,7 @@ module Karafka
       def consumer_group
         # @note We don't ignore the api_adapter[:ignored] values as they should be ignored
         #   only when proxying details go ruby-kafka. We use ignored fields internally in karafka
-        ignored_settings = api_adapter[:subscription]
+        ignored_settings = api_adapter[:subscribe]
         defined_settings = api_adapter.values.flatten
         karafka_settings = %i[batch_fetching]
         # This is a drity and bad hack of dry-configurable to get keys before setting values

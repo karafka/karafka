@@ -5,6 +5,7 @@
 - #320 - Pausing indefinetely with nil pause timeout doesn't work
 - #318 - Partition pausing doesn't work with custom topic mappers
 - Rename ConfigAdapter to ApiAdapter to better reflect what it does
+- #317 - Manual offset committing doesn't work with custom topic mappers
 
 ## 1.2.2
 - #312 - Broken for ActiveSupport 5.2.0

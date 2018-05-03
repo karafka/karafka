@@ -74,7 +74,9 @@ module Karafka
       #   that offset commit happen asap in case of a crash
       # @param [Karafka::Params::Params] params message that we want to mark as processed
       def mark_as_consumed(params)
-        kafka_consumer.mark_message_as_processed(params)
+        kafka_consumer.mark_message_as_processed(
+          *ApiAdapter.mark_message_as_processed(params)
+        )
         # Trigger an immediate, blocking offset commit in order to minimize the risk of crashing
         # before the automatic triggers have kicked in.
         kafka_consumer.commit_offsets
@@ -91,7 +93,7 @@ module Karafka
           *ApiAdapter.consumer(consumer_group)
         ).tap do |consumer|
           consumer_group.topics.each do |topic|
-            consumer.subscribe(*ApiAdapter.subscription(topic))
+            consumer.subscribe(*ApiAdapter.subscribe(topic))
           end
         end
       rescue Kafka::ConnectionError
