@@ -2,6 +2,8 @@
 
 ## Unreleased
 - #313 - support PLAINTEXT and SSL for scheme
+- #320 - Pausing indefinetely with nil pause timeout doesn't work
+- #318 - Partition pausing doesn't work with custom topic mappers
 - Rename ConfigAdapter to ApiAdapter to better reflect what it does
 
 ## 1.2.2
