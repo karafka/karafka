@@ -3,22 +3,22 @@
 module Karafka
   # Namespace for all the things related to Kafka connection
   module Connection
-    # Mapper used to convert our internal settings into ruby-kafka settings
+    # Mapper used to convert our internal settings into ruby-kafka settings based on their
+    # API requirements.
     # Since ruby-kafka has more and more options and there are few "levels" on which
     # we have to apply them (despite the fact, that in Karafka you configure all of it
     # in one place), we have to remap it into what ruby-kafka driver requires
     # @note The good thing about Kafka.new method is that it ignores all options that
     #   do nothing. So we don't have to worry about injecting our internal settings
     #   into the client and breaking stuff
-    module ConfigAdapter
+    module ApiAdapter
       class << self
         # Builds all the configuration settings for Kafka.new method
-        # @param _consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
         # @return [Array<Hash>] Array with all the client arguments including hash with all
         #   the settings required by Kafka.new method
         # @note We return array, so we can inject any arguments we want, in case of changes in the
         #   raw driver
-        def client(_consumer_group)
+        def client
           # This one is a default that takes all the settings except special
           # cases defined in the map
           settings = {
@@ -29,9 +29,9 @@ module Karafka
           kafka_configs.each do |setting_name, setting_value|
             # All options for config adapter should be ignored as we're just interested
             # in what is left, as we want to pass all the options that are "typical"
-            # and not listed in the config_adapter special cases mapping. All the values
-            # from the config_adapter mapping go somewhere else, not to the client directly
-            next if AttributesMap.config_adapter.values.flatten.include?(setting_name)
+            # and not listed in the api_adapter special cases mapping. All the values
+            # from the api_adapter mapping go somewhere else, not to the client directly
+            next if AttributesMap.api_adapter.values.flatten.include?(setting_name)
 
             settings[setting_name] = setting_value
           end
@@ -58,26 +58,54 @@ module Karafka
         # @return [Array<Hash>] Array with all the arguments required by consuming method
         #   including hash with all the settings required by
         #   Kafka::Consumer#consume_each_message and Kafka::Consumer#consume_each_batch method
-        def consuming(consumer_group)
-          settings = {
-            automatically_mark_as_processed: consumer_group.automatically_mark_as_consumed
-          }
-          [sanitize(fetch_for(:consuming, consumer_group, settings))]
+        def consumption(consumer_group)
+          [
+            sanitize(
+              fetch_for(
+                :consumption,
+                consumer_group,
+                automatically_mark_as_processed: consumer_group.automatically_mark_as_consumed
+              )
+            )
+          ]
         end
 
         # Builds all the configuration settings for kafka consumer#subscribe method
         # @param topic [Karafka::Routing::Topic] topic that holds details for a given subscription
         # @return [Hash] hash with all the settings required by kafka consumer#subscribe method
-        def subscription(topic)
-          settings = fetch_for(:subscription, topic)
+        def subscribe(topic)
+          settings = fetch_for(:subscribe, topic)
           [Karafka::App.config.topic_mapper.outgoing(topic.name), sanitize(settings)]
         end
 
         # Builds all the configuration settings required by kafka consumer#pause method
+        # @param topic [String] topic that we want to pause
+        # @param partition [Integer] number partition that we want to pause
         # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
-        # @return [Hash] hash with all the settings required to pause kafka consumer
-        def pausing(consumer_group)
-          { timeout: consumer_group.pause_timeout }
+        # @return [Array] array with all the details required to pause kafka consumer
+        def pause(topic, partition, consumer_group)
+          [
+            Karafka::App.config.topic_mapper.outgoing(topic),
+            partition,
+            { timeout: consumer_group.pause_timeout }
+          ]
+        end
+
+        # Remaps topic details taking the topic mapper feature into consideration.
+        # @param params [Karafka::Params::Params] params instance
+        # @return [Array] array with all the details needed by ruby-kafka to mark message
+        #   as processed
+        # @note When default empty topic mapper is used, no need for any conversion as the
+        #   internal and external format are exactly the same
+        def mark_message_as_processed(params)
+          # Majority of non heroku users don't use custom topic mappers. No need to change
+          # anything when it is a default mapper that does not change anything
+          return [params] if Karafka::App.config.topic_mapper == Karafka::Routing::TopicMapper
+
+          # @note We don't use tap as it is around 13% slower than non-dup version
+          dupped = params.dup
+          dupped['topic'] = Karafka::App.config.topic_mapper.outgoing(params.topic)
+          [dupped]
         end
 
         private
@@ -90,7 +118,7 @@ module Karafka
         def fetch_for(namespace_key, route_layer, preexisting_settings = {})
           kafka_configs.each_key do |setting_name|
             # Ignore settings that are not related to our namespace
-            next unless AttributesMap.config_adapter[namespace_key].include?(setting_name)
+            next unless AttributesMap.api_adapter[namespace_key].include?(setting_name)
             # Ignore settings that are already initialized
             # In case they are in preexisting settings fetched differently
             next if preexisting_settings.keys.include?(setting_name)

@@ -223,6 +223,32 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
+  context 'when we validate pause_timeout' do
+    context 'when pause_timeout is nil' do
+      before { config[:pause_timeout] = nil }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_timeout is not integer' do
+      before { config[:pause_timeout] = 's' }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when pause_timeout is 0' do
+      before { config[:pause_timeout] = 0 }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_timeout is less than 0' do
+      before { config[:pause_timeout] = -1 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
   context 'when we validate socket_timeout' do
     context 'when socket_timeout is nil' do
       before { config[:socket_timeout] = nil }

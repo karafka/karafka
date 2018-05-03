@@ -23,7 +23,7 @@ module Karafka
       # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
       # @note This will yield with raw messages - no preprocessing or reformatting.
       def fetch_loop
-        settings = ConfigAdapter.consuming(consumer_group)
+        settings = ApiAdapter.consumption(consumer_group)
 
         if consumer_group.batch_fetching
           kafka_consumer.each_batch(*settings) { |batch| yield(batch.messages) }
@@ -66,10 +66,7 @@ module Karafka
       # @param topic [String] topic that we want to pause
       # @param partition [Integer] number partition that we want to pause
       def pause(topic, partition)
-        settings = ConfigAdapter.pausing(consumer_group)
-        timeout = settings[:timeout]
-        raise(Errors::InvalidPauseTimeout, timeout) unless timeout.positive?
-        kafka_consumer.pause(topic, partition, settings)
+        kafka_consumer.pause(*ApiAdapter.pause(topic, partition, consumer_group))
       end
 
       # Marks a given message as consumed and commit the offsets
@@ -77,7 +74,9 @@ module Karafka
       #   that offset commit happen asap in case of a crash
       # @param [Karafka::Params::Params] params message that we want to mark as processed
       def mark_as_consumed(params)
-        kafka_consumer.mark_message_as_processed(params)
+        kafka_consumer.mark_message_as_processed(
+          *ApiAdapter.mark_message_as_processed(params)
+        )
         # Trigger an immediate, blocking offset commit in order to minimize the risk of crashing
         # before the automatic triggers have kicked in.
         kafka_consumer.commit_offsets
@@ -91,10 +90,10 @@ module Karafka
       #   that is set up to consume from topics of a given consumer group
       def kafka_consumer
         @kafka_consumer ||= kafka.consumer(
-          *ConfigAdapter.consumer(consumer_group)
+          *ApiAdapter.consumer(consumer_group)
         ).tap do |consumer|
           consumer_group.topics.each do |topic|
-            consumer.subscribe(*ConfigAdapter.subscription(topic))
+            consumer.subscribe(*ApiAdapter.subscribe(topic))
           end
         end
       rescue Kafka::ConnectionError
@@ -110,7 +109,7 @@ module Karafka
       # @note We don't cache it internally because we cache kafka_consumer that uses kafka
       #   object instance
       def kafka
-        Kafka.new(*ConfigAdapter.client(consumer_group))
+        Kafka.new(*ApiAdapter.client)
       end
     end
   end

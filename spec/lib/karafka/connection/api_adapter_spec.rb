@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Connection::ConfigAdapter do
+RSpec.describe Karafka::Connection::ApiAdapter do
   let(:consumer) { Karafka::BaseConsumer }
   let(:topic) { rand.to_s }
-  let(:attributes_map_values) { Karafka::AttributesMap.config_adapter }
+  let(:attributes_map_values) { Karafka::AttributesMap.api_adapter }
   let(:consumer_group) do
     Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
       cg.public_send(:topic=, topic) do
@@ -12,14 +12,21 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
       end
     end
   end
+  let(:custom_mapper) do
+    ClassBuilder.build do
+      def self.outgoing(topic)
+        "remapped-#{topic}"
+      end
+    end
+  end
 
   describe '#client' do
-    subject(:config) { described_class.client(consumer_group) }
+    subject(:config) { described_class.client }
 
     let(:expected_keys) { (attributes_map_values[:consumer] + %i[group_id]).sort }
 
-    it 'not to have any config_adapter keys' do
-      keys = config.last.keys - Karafka::AttributesMap.config_adapter.values.flatten
+    it 'not to have any api_adapter keys' do
+      keys = config.last.keys - Karafka::AttributesMap.api_adapter.values.flatten
       expect(keys).to eq config.last.keys
     end
 
@@ -68,13 +75,13 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
     end
   end
 
-  describe '#consuming' do
-    subject(:config) { described_class.consuming(consumer_group) }
+  describe '#consumption' do
+    subject(:config) { described_class.consumption(consumer_group) }
 
-    let(:expected_keys) { attributes_map_values[:consuming].sort }
+    let(:expected_keys) { attributes_map_values[:consumption].sort }
 
     it 'expect to have consuming specific options and remap of automatically_mark_as_processed' do
-      expect(config.last.keys.sort).to eq([:automatically_mark_as_processed] + expected_keys)
+      expect(config.first.keys.sort).to eq([:automatically_mark_as_processed] + expected_keys)
     end
 
     it 'expect to get automatic marking from consume to processed' do
@@ -101,20 +108,39 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
     end
   end
 
-  describe '#pausing' do
-    subject(:config) { described_class.pausing(consumer_group) }
+  describe '#pause' do
+    subject(:config) { described_class.pause(topic, partition, consumer_group) }
 
-    it 'expect not to have anything else except timeout' do
-      expect(config.keys.sort).to eq %i[timeout]
+    let(:topic) { 'topic-name' }
+    let(:partition) { 0 }
+
+    it 'expect not to have anything else except timeout in the settings hash' do
+      expect(config.last.keys.sort).to eq %i[timeout]
+    end
+
+    it 'expect to have topic name as a first argument' do
+      expect(config[0]).to eq topic
+    end
+
+    it 'expect to have partition as a second argument' do
+      expect(config[1]).to eq partition
+    end
+
+    context 'when we use custom mapper for topic' do
+      before { allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
+
+      it 'expect to use it before passing data further to kafka' do
+        expect(config[0]).to eq "remapped-#{topic}"
+      end
     end
   end
 
-  describe '#subscription' do
-    subject(:config) { described_class.subscription(consumer_group.topics.first) }
+  describe '#subscribe' do
+    subject(:config) { described_class.subscribe(consumer_group.topics.first) }
 
-    let(:expected_keys) { attributes_map_values[:subscription].sort }
+    let(:expected_keys) { attributes_map_values[:subscribe].sort }
 
-    it 'expect not to have anything else than subscription specific options' do
+    it 'expect not to have anything else than subscribe specific options' do
       expect(config.last.keys.sort).to eq expected_keys
     end
 
@@ -132,6 +158,27 @@ RSpec.describe Karafka::Connection::ConfigAdapter do
       before { allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
 
       it { expect(config.first).to eq custom_mapper.outgoing(consumer_group.topics.first.name) }
+    end
+  end
+
+  describe '#mark_message_as_processed' do
+    subject(:config) { described_class.mark_message_as_processed(params) }
+
+    let(:params) { Karafka::Params::Params.new.tap { |params| params['topic'] = 'topic-name' } }
+
+    context 'when the default mapper is used' do
+      it 'expect to return exactly the same params instance as no changes needed' do
+        expect(config).to eql [params]
+      end
+    end
+
+    context 'when custom mapper is being used' do
+      before { allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
+
+      it 'expect to return w new params instance with remapped topic' do
+        expect(config).not_to eql [params]
+        expect(config.first.topic).to eq "remapped-#{params.topic}"
+      end
     end
   end
 end

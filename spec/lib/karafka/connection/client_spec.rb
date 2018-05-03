@@ -56,22 +56,53 @@ RSpec.describe Karafka::Connection::Client do
       allow(consumer_group).to receive(:pause_timeout).and_return(pause_timeout)
     end
 
+    context 'when pause_timeout is set to nil' do
+      let(:pause_timeout) { nil }
+      let(:error) { Karafka::Errors::InvalidPauseTimeout }
+
+      it 'expect to raise an exception' do
+        expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
+        expect(client.pause(topic, partition)).to eq true
+      end
+    end
+
     context 'when pause_timeout is set to 0' do
       let(:pause_timeout) { 0 }
       let(:error) { Karafka::Errors::InvalidPauseTimeout }
 
       it 'expect to raise an exception' do
-        expect(kafka_consumer).not_to receive(:pause)
-        expect { client.send(:pause, topic, partition) }.to raise_error(error)
+        expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
+        expect(client.pause(topic, partition)).to eq true
       end
     end
 
     context 'when pause_timeout is not set to 0' do
       let(:pause_timeout) { rand(1..100) }
 
-      it 'expect not to pause consumer_group' do
+      it 'expect to pause consumer_group' do
         expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
-        expect(client.send(:pause, topic, partition)).to eq true
+        expect(client.pause(topic, partition)).to eq true
+      end
+    end
+
+    context 'when pausing with a non-default morphing topic mapper' do
+      let(:pause_timeout) { rand(1..100) }
+      let(:r_topic) { custom_mapper.outgoing(topic) }
+      let(:custom_mapper) do
+        ClassBuilder.build do
+          def self.outgoing(topic)
+            "remapped-#{topic}"
+          end
+        end
+      end
+
+      before do
+        allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper)
+      end
+
+      it 'expect to pause consumer_group for a remapped topic' do
+        expect(kafka_consumer).to receive(:pause).with(r_topic, partition, timeout: pause_timeout)
+        expect(client.pause(topic, partition)).to eq true
       end
     end
   end
