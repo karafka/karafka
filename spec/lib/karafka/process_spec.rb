@@ -22,7 +22,7 @@ RSpec.describe Karafka::Process do
         expect(process).to receive(:trap_signal).with(signal)
       end
 
-      expect { |block| process.send(:supervise, &block) }.to yield_control
+      process.supervise
     end
   end
 

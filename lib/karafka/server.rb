@@ -19,9 +19,9 @@ module Karafka
 
       # Method which runs app
       def run
-        bind_on_sigint
-        bind_on_sigquit
-        bind_on_sigterm
+        process.on_sigint { stop_supervised }
+        process.on_sigquit { stop_supervised }
+        process.on_sigterm { stop_supervised }
         start_supervised
       end
 
@@ -39,29 +39,13 @@ module Karafka
         Karafka::Process.instance
       end
 
-      # What should happen when we decide to quit with sigint
-      def bind_on_sigint
-        process.on_sigint { stop_supervised }
-      end
-
-      # What should happen when we decide to quit with sigquit
-      def bind_on_sigquit
-        process.on_sigquit { stop_supervised }
-      end
-
-      # What should happen when we decide to quit with sigterm
-      def bind_on_sigterm
-        process.on_sigterm { stop_supervised }
-      end
-
       # Starts Karafka with a supervision
       # @note We don't need to sleep because Karafka::Fetcher is locking and waiting to
       # finish loop (and it won't happen until we explicitily want to stop)
       def start_supervised
-        process.supervise do
-          Karafka::App.run!
-          Karafka::Fetcher.call
-        end
+        process.supervise
+        Karafka::App.run!
+        Karafka::Fetcher.call
       end
 
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)
