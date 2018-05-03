@@ -7,16 +7,11 @@ RSpec.describe Karafka::Server do
     after { server_class.run }
 
     context 'when we want to run in supervision' do
-      before do
-        allow(Karafka::Process.instance).to receive(:on_sigint)
-        allow(Karafka::Process.instance).to receive(:on_sigquit)
-        allow(Karafka::Process.instance).to receive(:on_sigterm)
-      end
-
       it 'runs in supervision, start consuming' do
-        expect(Karafka::App).to receive(:run!)
-        expect(Karafka::Fetcher).to receive(:call)
-        expect(Karafka::Process.instance).to receive(:supervise).and_yield
+        expect(Karafka::Process.instance).to receive(:on_sigint)
+        expect(Karafka::Process.instance).to receive(:on_sigquit)
+        expect(Karafka::Process.instance).to receive(:on_sigterm)
+        expect(server_class).to receive(:start_supervised)
       end
     end
 
@@ -25,6 +20,7 @@ RSpec.describe Karafka::Server do
         allow(Karafka::Process.instance).to receive(:supervise)
         allow(Karafka::Process.instance).to receive(:on_sigquit)
         allow(Karafka::Process.instance).to receive(:on_sigterm)
+        allow(server_class).to receive(:start_supervised)
       end
 
       it 'defines a proper action for sigint' do
@@ -38,6 +34,7 @@ RSpec.describe Karafka::Server do
         allow(Karafka::Process.instance).to receive(:supervise)
         allow(Karafka::Process.instance).to receive(:on_sigint)
         allow(Karafka::Process.instance).to receive(:on_sigterm)
+        allow(server_class).to receive(:start_supervised)
       end
 
       it 'defines a proper action for sigquit' do
@@ -51,12 +48,23 @@ RSpec.describe Karafka::Server do
         allow(Karafka::Process.instance).to receive(:supervise)
         allow(Karafka::Process.instance).to receive(:on_sigint)
         allow(Karafka::Process.instance).to receive(:on_sigquit)
+        allow(server_class).to receive(:start_supervised)
       end
 
       it 'defines a proper action for sigterm' do
         expect(described_class).to receive(:stop_supervised)
         expect(Karafka::Process.instance).to receive(:on_sigterm).and_yield
       end
+    end
+  end
+
+  describe '#start_supervised' do
+    after { subject.send(:start_supervised) }
+
+    it 'expect to supervise and run' do
+      expect(Karafka::Process.instance).to receive(:supervise)
+      expect(Karafka::App).to receive(:run!)
+      expect(Karafka::Fetcher).to receive(:call)
     end
   end
 
