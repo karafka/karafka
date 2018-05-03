@@ -12,6 +12,13 @@ RSpec.describe Karafka::Connection::ApiAdapter do
       end
     end
   end
+  let(:custom_mapper) do
+    ClassBuilder.build do
+      def self.outgoing(topic)
+        "remapped-#{topic}"
+      end
+    end
+  end
 
   describe '#client' do
     subject(:config) { described_class.client }
@@ -120,17 +127,7 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     end
 
     context 'when we use custom mapper for topic' do
-      let(:custom_mapper) do
-        ClassBuilder.build do
-          def self.outgoing(topic)
-            "remapped-#{topic}"
-          end
-        end
-      end
-
-      before do
-        allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper)
-      end
+      before { allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
 
       it 'expect to use it before passing data further to kafka' do
         expect(config[0]).to eq "remapped-#{topic}"
@@ -138,12 +135,12 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     end
   end
 
-  describe '#subscription' do
-    subject(:config) { described_class.subscription(consumer_group.topics.first) }
+  describe '#subscribe' do
+    subject(:config) { described_class.subscribe(consumer_group.topics.first) }
 
-    let(:expected_keys) { attributes_map_values[:subscription].sort }
+    let(:expected_keys) { attributes_map_values[:subscribe].sort }
 
-    it 'expect not to have anything else than subscription specific options' do
+    it 'expect not to have anything else than subscribe specific options' do
       expect(config.last.keys.sort).to eq expected_keys
     end
 
@@ -161,6 +158,27 @@ RSpec.describe Karafka::Connection::ApiAdapter do
       before { allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
 
       it { expect(config.first).to eq custom_mapper.outgoing(consumer_group.topics.first.name) }
+    end
+  end
+
+  describe '#mark_message_as_processed' do
+    subject(:config) { described_class.mark_message_as_processed(params) }
+
+    let(:params) { Karafka::Params::Params.new.tap { |params| params['topic'] = 'topic-name' } }
+
+    context 'when the default mapper is used' do
+      it 'expect to return exactly the same params instance as no changes needed' do
+        expect(config).to eql [params]
+      end
+    end
+
+    context 'when custom mapper is being used' do
+      before { allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
+
+      it 'expect to return w new params instance with remapped topic' do
+        expect(config).not_to eql [params]
+        expect(config.first.topic).to eq "remapped-#{params.topic}"
+      end
     end
   end
 end

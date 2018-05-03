@@ -73,8 +73,8 @@ module Karafka
         # Builds all the configuration settings for kafka consumer#subscribe method
         # @param topic [Karafka::Routing::Topic] topic that holds details for a given subscription
         # @return [Hash] hash with all the settings required by kafka consumer#subscribe method
-        def subscription(topic)
-          settings = fetch_for(:subscription, topic)
+        def subscribe(topic)
+          settings = fetch_for(:subscribe, topic)
           [Karafka::App.config.topic_mapper.outgoing(topic.name), sanitize(settings)]
         end
 
@@ -89,6 +89,23 @@ module Karafka
             partition,
             { timeout: consumer_group.pause_timeout }
           ]
+        end
+
+        # Remaps topic details taking the topic mapper feature into consideration.
+        # @param params [Karafka::Params::Params] params instance
+        # @return [Array] array with all the details needed by ruby-kafka to mark message
+        #   as processed
+        # @note When default empty topic mapper is used, no need for any conversion as the
+        #   internal and external format are exactly the same
+        def mark_message_as_processed(params)
+          # Majority of non heroku users don't use custom topic mappers. No need to change
+          # anything when it is a default mapper that does not change anything
+          return [params] if Karafka::App.config.topic_mapper == Karafka::Routing::TopicMapper
+
+          # @note We don't use tap as it is around 13% slower than non-dup version
+          dupped = params.dup
+          dupped['topic'] = Karafka::App.config.topic_mapper.outgoing(params.topic)
+          [dupped]
         end
 
         private
