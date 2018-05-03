@@ -3,15 +3,15 @@
 RSpec.describe Karafka::AttributesMap do
   subject(:map) { described_class }
 
-  describe '#config_adapter' do
+  describe '#api_adapter' do
     it 'expect not to duplicate keys across targets' do
-      values = map.config_adapter.values.flatten
+      values = map.api_adapter.values.flatten
       expect(values.count).to eq values.uniq.count
     end
 
     it 'expect to have proper keys for actions' do
-      expected_keys = %i[consumer subscription consuming pausing ignored]
-      expect(map.config_adapter.keys).to eq(expected_keys)
+      expected_keys = %i[consumer subscribe consumption pause ignored]
+      expect(map.api_adapter.keys).to eq(expected_keys)
     end
   end
 
@@ -27,16 +27,16 @@ RSpec.describe Karafka::AttributesMap do
       ]
     end
 
-    it 'expect to include only subscription and per topic specific attributes' do
+    it 'expect to include only subscribe and per topic specific attributes' do
       attributes = map.topic + per_topic_specific_attributes
-      expect(map.config_adapter[:subscription] - attributes).to be_empty
+      expect(map.api_adapter[:subscribe] - attributes).to be_empty
     end
   end
 
   describe '#consumer_group' do
-    it 'expect not to contain any values from subscription' do
-      map.config_adapter[:subscription].each do |subscription_value|
-        expect(map.consumer_group).not_to include(subscription_value)
+    it 'expect not to contain any values from subscribe' do
+      map.api_adapter[:subscribe].each do |subscribe_value|
+        expect(map.consumer_group).not_to include(subscribe_value)
       end
     end
 
