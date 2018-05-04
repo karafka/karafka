@@ -89,7 +89,9 @@ module Karafka
       # @return [Kafka::Consumer] returns a ready to consume Kafka consumer
       #   that is set up to consume from topics of a given consumer group
       def kafka_consumer
-        @kafka_consumer ||= kafka.consumer(
+        # @note We don't cache the connection internally because we cache kafka_consumer that uses
+        #   kafka client object instance
+        @kafka_consumer ||= Builder.call.consumer(
           *ApiAdapter.consumer(consumer_group)
         ).tap do |consumer|
           consumer_group.topics.each do |topic|
@@ -103,13 +105,6 @@ module Karafka
         # We don't log and just reraise - this will be logged
         # down the road
         raise
-      end
-
-      # @return [Kafka] returns a Kafka
-      # @note We don't cache it internally because we cache kafka_consumer that uses kafka
-      #   object instance
-      def kafka
-        Kafka.new(*ApiAdapter.client)
       end
     end
   end

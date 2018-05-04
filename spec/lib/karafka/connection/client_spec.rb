@@ -210,7 +210,7 @@ RSpec.describe Karafka::Connection::Client do
     end
 
     context 'when kafka_consumer is not yet built' do
-      let(:kafka) { instance_double(Kafka::Client) }
+      let(:kafka_client) { instance_double(Kafka::Client) }
       let(:kafka_consumer) { instance_double(Kafka::Consumer) }
       let(:subscribe_params) do
         [
@@ -220,23 +220,10 @@ RSpec.describe Karafka::Connection::Client do
         ]
       end
 
-      before do
-        allow(Kafka)
-          .to receive(:new)
-          .with(
-            ::Karafka::App.config.kafka.seed_brokers,
-            logger: ::Karafka.logger,
-            client_id: ::Karafka::App.config.client_id,
-            socket_timeout: 30,
-            connect_timeout: 10,
-            sasl_plain_authzid: '',
-            ssl_ca_certs_from_system: false
-          )
-          .and_return(kafka)
-      end
+      before { allow(Karafka::Connection::Builder).to receive(:call).and_return(kafka_client) }
 
       it 'expect to build it and subscribe' do
-        expect(kafka).to receive(:consumer).and_return(kafka_consumer)
+        expect(kafka_client).to receive(:consumer).and_return(kafka_consumer)
         expect(kafka_consumer).to receive(:subscribe).with(*subscribe_params)
         expect(client.send(:kafka_consumer)).to eq kafka_consumer
       end
