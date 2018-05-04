@@ -18,6 +18,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       }
     ]
   end
+  let(:pause_details) do
+    {
+      pause_timeout: 10,
+      pause_max_timeout: nil,
+      pause_exponential_backoff: false
+    }
+  end
   let(:config) do
     {
       id: 'id',
@@ -36,15 +43,12 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       start_from_beginning: true,
       connect_timeout: 10,
       socket_timeout: 10,
-      pause_timeout: 10,
-      pause_max_timeout: nil,
-      pause_exponential_backoff: false,
       max_wait_time: 10,
       batch_fetching: true,
       topics: topics,
       min_bytes: 1,
       max_bytes: 2048
-    }
+    }.merge(pause_details)
   end
 
   context 'when config is valid' do
