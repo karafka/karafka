@@ -6,6 +6,7 @@
 - #318 - Partition pausing doesn't work with custom topic mappers
 - Rename ConfigAdapter to ApiAdapter to better reflect what it does
 - #317 - Manual offset committing doesn't work with custom topic mappers
+- #319 - Support for exponential backoff in pause
 
 ## 1.2.2
 - #312 - Broken for ActiveSupport 5.2.0
