@@ -35,7 +35,7 @@ RSpec.describe Karafka::Connection::Listener do
       context "when #{error} happens" do
         before do
           # Lets silence exceptions printing
-          expect(Karafka.monitor)
+          allow(Karafka.monitor)
             .to receive(:instrument)
             .with(
               'connection.listener.fetch_loop.error',
