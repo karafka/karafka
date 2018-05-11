@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.2.4
+- #332 - Fetcher for max queue size
+
 ## 1.2.3
 - #313 - support PLAINTEXT and SSL for scheme
 - #320 - Pausing indefinetely with nil pause timeout doesn't work

@@ -69,14 +69,14 @@ module Karafka
         setting :seed_brokers
         # option session_timeout [Integer] the number of seconds after which, if a client
         #   hasn't contacted the Kafka cluster, it will be kicked out of the group.
+        setting :pause_timeout, 10
+        # option offset_commit_interval [Integer] the interval between offset commits,
+        #   in seconds.
         setting :session_timeout, 30
         # Time that a given partition will be paused from fetching messages, when message
         # consumption fails. It allows us to process other partitions, while the error is being
         # resolved and also "slows" things down, so it prevents from "eating" up all messages and
         # consuming them with failed code. Use `nil` if you want to pause forever and never retry.
-        setting :pause_timeout, 10
-        # option offset_commit_interval [Integer] the interval between offset commits,
-        #   in seconds.
         setting :offset_commit_interval, 10
         # option offset_commit_threshold [Integer] the number of messages that can be
         #   processed before their offsets are committed. If zero, offset commits are
@@ -85,6 +85,13 @@ module Karafka
         # option heartbeat_interval [Integer] the interval between heartbeats; must be less
         #   than the session window.
         setting :heartbeat_interval, 10
+        # option offset_retention_time [Integer] The length of the retention window, known as
+        #   offset retention time
+        setting :offset_retention_time, nil
+        # option fetcher_max_queue_size [Integer] max number of items in the fetch queue that
+        #   are stored for further processing. Note, that each item in the queue represents a
+        #   response from a single broker
+        setting :fetcher_max_queue_size, 100
         # option max_bytes_per_partition [Integer] the maximum amount of data fetched
         #   from a single partition at a time.
         setting :max_bytes_per_partition, 1_048_576
@@ -111,9 +118,6 @@ module Karafka
         # option reconnect_timeout [Integer] How long should we wait before trying to reconnect to
         # Kafka cluster that went down (in seconds)
         setting :reconnect_timeout, 5
-        # option offset_retention_time [Integer] The length of the retention window, known as
-        #   offset retention time
-        setting :offset_retention_time, nil
         # option connect_timeout [Integer] Sets the number of seconds to wait while connecting to
         # a broker for the first time. When ruby-kafka initializes, it needs to connect to at
         # least one host.

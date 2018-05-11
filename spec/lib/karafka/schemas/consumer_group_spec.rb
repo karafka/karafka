@@ -33,6 +33,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       ssl_ca_certs_from_system: true,
       max_bytes_per_partition: 1_048_576,
       offset_retention_time: 1000,
+      fetcher_max_queue_size: 100,
       start_from_beginning: true,
       connect_timeout: 10,
       socket_timeout: 10,
@@ -178,6 +179,32 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
   context 'when we validate offset_retention_time' do
     context 'when offset_retention_time is not integer' do
       before { config[:offset_retention_time] = 's' }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate fetcher_max_queue_size' do
+    context 'when fetcher_max_queue_size is nil' do
+      before { config[:fetcher_max_queue_size] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when fetcher_max_queue_size is not integer' do
+      before { config[:fetcher_max_queue_size] = 's' }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when fetcher_max_queue_size is 0' do
+      before { config[:fetcher_max_queue_size] = 0 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when fetcher_max_queue_size is less than 0' do
+      before { config[:fetcher_max_queue_size] = -1 }
 
       it { expect(schema.call(config)).not_to be_success }
     end
