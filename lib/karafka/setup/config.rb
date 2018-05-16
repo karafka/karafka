@@ -71,6 +71,14 @@ module Karafka
         # consumption fails. It allows us to process other partitions, while the error is being
         # resolved and also "slows" things down, so it prevents from "eating" up all messages and
         # consuming them with failed code. Use `nil` if you want to pause forever and never retry.
+        setting :pause_timeout, 10
+        # option pause_max_timeout [Integer, nil] the maximum number of seconds to pause for,
+        #   or `nil` if no maximum should be enforced.
+        setting :pause_max_timeout, nil
+        # option pause_exponential_backoff [Boolean] whether to enable exponential backoff
+        setting :pause_exponential_backoff, false
+        # option offset_commit_interval [Integer] the interval between offset commits,
+        #   in seconds.
         setting :offset_commit_interval, 10
         # option offset_commit_threshold [Integer] the number of messages that can be
         #   processed before their offsets are committed. If zero, offset commits are
