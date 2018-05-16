@@ -87,7 +87,11 @@ module Karafka
           [
             Karafka::App.config.topic_mapper.outgoing(topic),
             partition,
-            { timeout: consumer_group.pause_timeout }
+            {
+              timeout: consumer_group.pause_timeout,
+              max_timeout: consumer_group.pause_max_timeout,
+              exponential_backoff: consumer_group.pause_exponential_backoff
+            }
           ]
         end
 
