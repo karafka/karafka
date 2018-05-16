@@ -71,7 +71,7 @@ module Karafka
               'topic' => Karafka::App.config.topic_mapper.incoming(message.topic)
             )
           else
-            instance.merge! message
+            instance.merge!(message)
           end
 
           instance
