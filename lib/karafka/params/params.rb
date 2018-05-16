@@ -33,7 +33,7 @@ module Karafka
         # @example
         #   key_attr_reader :example
         #   params.example #=> 'my example value'
-        define_method attr do
+        define_method(attr) do
           self[attr]
         end
       end
@@ -58,8 +58,7 @@ module Karafka
           # Non kafka fetched message can happen when we interchange data with an
           # additional backend
           if message.is_a?(Kafka::FetchedMessage)
-            instance.send(
-              :merge!,
+            instance.merge!(
               'value' => message.value,
               'partition' => message.partition,
               'offset' => message.offset,

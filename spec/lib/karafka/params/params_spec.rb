@@ -2,6 +2,7 @@
 
 RSpec.describe Karafka::Params::Params do
   let(:base_params_class) { described_class }
+
   describe 'class methods' do
     subject(:params_class) { base_params_class }
 

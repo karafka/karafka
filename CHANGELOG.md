@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.3-wip
+- #300 - Store value in a value key and replace its content with parsed version - without root merge
+
 ## 1.2.4
 - #332 - Fetcher for max queue size
 
