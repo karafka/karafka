@@ -156,8 +156,6 @@ RSpec.describe Karafka::Routing::Builder do
     end
 
     context 'when we define multiple consumer groups and one is without topics' do
-      let(:topic1) { builder.first.topics.first }
-
       subject(:drawing) do
         described_class.instance.draw do
           consumer_group :group_name1 do
