@@ -154,6 +154,22 @@ RSpec.describe Karafka::Routing::Builder do
 
       it { expect { invalid_route }.to raise_error(Karafka::Errors::InvalidConfiguration) }
     end
+
+    context 'when we define multiple consumer groups and one is without topics' do
+      let(:topic1) { builder.first.topics.first }
+
+      subject(:drawing) do
+        described_class.instance.draw do
+          consumer_group :group_name1 do
+            topic(:topic_name1) { consumer Class.new(Karafka::BaseConsumer) }
+          end
+
+          consumer_group(:group_name2) {}
+        end
+      end
+
+      it { expect { drawing }.to raise_error(Karafka::Errors::InvalidConfiguration) }
+    end
   end
 
   describe '#active' do
