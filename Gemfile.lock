@@ -73,7 +73,7 @@ GEM
       concurrent-ruby (~> 1.0)
     inflecto (0.0.2)
     json (2.1.0)
-    king_konf (0.3.2)
+    king_konf (0.3.4)
     minitest (5.11.3)
     multi_json (1.13.1)
     null-logger (0.1.5)
@@ -122,4 +122,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   1.16.1
+   1.16.2
