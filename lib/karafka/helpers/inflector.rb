@@ -5,8 +5,16 @@ module Karafka
     module Inflector
       ENGINE = Dry::Inflector.new
 
-      def self.underscore(element)
-        ENGINE.underscore(element.to_s).tr('/', '_')
+      @map = Concurrent::Hash.new
+
+      class << self
+        def map(element)
+          @map[element] ||= ENGINE.underscore(element.to_s).tr('/', '_')
+        end
+
+        def map!(attribute)
+          @map[attribute]
+        end
       end
     end
   end

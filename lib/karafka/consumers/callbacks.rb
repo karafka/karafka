@@ -24,7 +24,7 @@ module Karafka
           # @param method_name [Symbol, String] method name or nil if we plan to provide a block
           # @yield A block with a code that should be executed before scheduling
           define_method(type) do |method_name = nil, &block|
-            key = "consumers.#{Helpers::Inflector.underscore(self)}.#{type}"
+            key = "consumers.#{Helpers::Inflector.map(self)}.#{type}"
             Karafka::App.events.register_event(key)
 
             Karafka::App.events.subscribe(key) do |event|
@@ -51,7 +51,12 @@ module Karafka
       # method of a proper backend. It is here because it interacts with the default Karafka
       # call flow and needs to be overwritten to support callbacks
       def call
-        Karafka::App.events.publish("consumers.#{Helpers::Inflector.underscore(self.class)}.after_fetch", context: self)
+        if self.class.respond_to?(:after_fetch)
+          Karafka::App.events.publish(
+            "consumers.#{Helpers::Inflector.map!(self.class)}.after_fetch",
+            context: self
+          )
+        end
 
         process
       end
