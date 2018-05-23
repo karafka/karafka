@@ -15,10 +15,6 @@ RSpec.describe Karafka::Cli::Server do
         allow(Karafka::Server).to receive(:run)
       end
 
-      it 'expect to print info and expect to run Karafka application' do
-        expect { server_cli.call }.to output("Starting Karafka server\n").to_stdout
-      end
-
       it 'expect to validate!' do
         expect(server_cli).to receive(:validate!)
         server_cli.call
@@ -46,8 +42,7 @@ RSpec.describe Karafka::Cli::Server do
       it 'expect to print info, validate!, daemonize and clean' do
         expect(server_cli).to receive(:validate!)
         expect(server_cli).to receive(:daemonize)
-
-        expect { server_cli.call }.to output("Starting Karafka server\n").to_stdout
+        server_cli.call
       end
     end
   end

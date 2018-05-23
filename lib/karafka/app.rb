@@ -13,6 +13,7 @@ module Karafka
       # @raise [Karafka::Errors::InvalidConfiguration] raised when configuration
       #   doesn't match with ConfigurationSchema
       def boot!
+        initialize!
         Setup::Config.validate!
         Setup::Config.setup_components
         Callbacks.after_init(Karafka::App.config)

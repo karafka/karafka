@@ -5,7 +5,7 @@ RSpec.describe Karafka::Status do
 
   it 'by default expect to be in initialized state because it is bootstraped' do
     expect(status_manager.running?).to eq false
-    expect(status_manager.stopped?).to eq false
+    expect(status_manager.stopping?).to eq false
     expect(status_manager.initializing?).to eq true
   end
 
@@ -33,25 +33,25 @@ RSpec.describe Karafka::Status do
 
       it { expect(status_manager.running?).to eq true }
       it { expect(status_manager.initializing?).to eq false }
-      it { expect(status_manager.stopped?).to eq false }
+      it { expect(status_manager.stopping?).to eq false }
     end
   end
 
-  describe 'stopped?' do
-    context 'when status is not set to stopped' do
+  describe 'stopping?' do
+    context 'when status is not set to stopping' do
       before do
         status_manager.instance_variable_set(:'@status', rand)
       end
 
-      it { expect(status_manager.stopped?).to eq false }
+      it { expect(status_manager.stopping?).to eq false }
     end
 
-    context 'when status is set to stopped' do
+    context 'when status is set to stopping' do
       before do
-        status_manager.instance_variable_set(:'@status', :stopped)
+        status_manager.instance_variable_set(:'@status', :stopping)
       end
 
-      it { expect(status_manager.stopped?).to eq true }
+      it { expect(status_manager.stopping?).to eq true }
     end
   end
 
@@ -64,7 +64,7 @@ RSpec.describe Karafka::Status do
 
       it { expect(status_manager.running?).to eq false }
       it { expect(status_manager.initializing?).to eq false }
-      it { expect(status_manager.stopped?).to eq true }
+      it { expect(status_manager.stopping?).to eq true }
     end
   end
 
@@ -94,7 +94,7 @@ RSpec.describe Karafka::Status do
 
       it { expect(status_manager.running?).to eq false }
       it { expect(status_manager.initializing?).to eq true }
-      it { expect(status_manager.stopped?).to eq false }
+      it { expect(status_manager.stopping?).to eq false }
     end
   end
 end

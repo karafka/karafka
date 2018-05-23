@@ -24,10 +24,10 @@ RSpec.describe Karafka::Patches::RubyKafka do
 
     after { Thread.current[:client] = nil }
 
-    context 'when karafka app has stopped' do
-      before { allow(Karafka::App).to receive(:stopped?).and_return(true) }
+    context 'when karafka app has stopping' do
+      before { allow(Karafka::App).to receive(:stopping?).and_return(true) }
 
-      it 'expect to not yield the original block as it would process data when stopped' do
+      it 'expect to not yield the original block as it would process data when stopping' do
         expect { |block| kafka_consumer.consumer_loop(&block) }.not_to yield_control
       end
 
@@ -38,7 +38,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
     end
 
     context 'when karafka is running' do
-      before { allow(Karafka::App).to receive(:stopped?).and_return(false) }
+      before { allow(Karafka::App).to receive(:stopping?).and_return(false) }
 
       it 'expect to yield the original base block' do
         expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
@@ -58,7 +58,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
           0
         )
 
-        allow(Karafka::App).to receive(:stopped?).and_return(false)
+        allow(Karafka::App).to receive(:stopping?).and_return(false)
       end
 
       it 'expect to yield the original base block' do

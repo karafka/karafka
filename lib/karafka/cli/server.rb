@@ -13,10 +13,9 @@ module Karafka
 
       # Start the Karafka server
       def call
-        validate!
-
-        puts 'Starting Karafka server'
         cli.info
+
+        validate!
 
         if cli.options[:daemon]
           FileUtils.mkdir_p File.dirname(cli.options[:pid])

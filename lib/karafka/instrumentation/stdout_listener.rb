@@ -4,7 +4,7 @@ module Karafka
   module Instrumentation
     # Default listener that hooks up to our instrumentation and uses its events for logging
     # It can be removed/replaced or anything without any harm to the Karafka app flow
-    module Listener
+    module StdoutListener
       # Log levels that we use in this particular listener
       USED_LOG_LEVELS = %i[
         debug
@@ -86,9 +86,21 @@ module Karafka
           info "Responded from #{calling} using #{responder} with following data #{data}"
         end
 
+        # Logs info that we're initializing Karafka app
+        # @param _event [Dry::Events::Event] event details including payload
+        def on_app_initializing(_event)
+          info "Initializing Karafka server #{::Process.pid}"
+        end
+
+        # Logs info that we're running Karafka app
+        # @param _event [Dry::Events::Event] event details including payload
+        def on_app_running(_event)
+          info "Running Karafka server #{::Process.pid}"
+        end
+
         # Logs info that we're going to stop the Karafka server
         # @param _event [Dry::Events::Event] event details including payload
-        def on_server_stop(_event)
+        def on_app_stopping(_event)
           # We use a separate thread as logging can't be called from trap context
           Thread.new { info "Stopping Karafka server #{::Process.pid}" }
         end
@@ -96,7 +108,7 @@ module Karafka
         # Logs an error that Karafka was unable to stop the server gracefully and it had to do a
         #   forced exit
         # @param _event [Dry::Events::Event] event details including payload
-        def on_server_stop_error(_event)
+        def on_app_stopping_error(_event)
           # We use a separate thread as logging can't be called from trap context
           Thread.new { error "Forceful Karafka server #{::Process.pid} stop" }
         end
