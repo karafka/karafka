@@ -28,7 +28,8 @@ module Karafka
         # Sets a proper proc title with our constant prefix
         # @param status [String] any status we want to set
         def setproctitle(status)
-          ::Process.setproctitle("karafka (#{status})")
+          client_id = Karafka::App.config.client_id
+          ::Process.setproctitle("karafka #{client_id} (#{status})")
         end
       end
     end
