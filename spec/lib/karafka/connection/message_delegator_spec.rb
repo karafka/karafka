@@ -19,18 +19,6 @@ RSpec.describe Karafka::Connection::MessageDelegator do
       partition: 0
     )
   end
-
-  before do
-    allow(Karafka::Persistence::Topic).to receive(:fetch).and_return(consumer_group.topics[0])
-    allow(Karafka::Persistence::Consumer).to receive(:fetch).and_return(consumer_instance)
-    allow(consumer_instance)
-      .to receive(:params_batch=)
-      .with([raw_message])
-
-    allow(consumer_instance)
-      .to receive(:call)
-  end
-
   let(:consumer_group) do
     Karafka::Routing::Builder.instance.draw do
       topic :topic_name1 do
@@ -40,6 +28,13 @@ RSpec.describe Karafka::Connection::MessageDelegator do
     end
 
     Karafka::Routing::Builder.instance.last
+  end
+
+  before do
+    allow(Karafka::Persistence::Topic).to receive(:fetch).and_return(consumer_group.topics[0])
+    allow(Karafka::Persistence::Consumer).to receive(:fetch).and_return(consumer_instance)
+    allow(consumer_instance).to receive(:params_batch=).with([raw_message])
+    allow(consumer_instance).to receive(:call)
   end
 
   it 'expect to run without errors' do
