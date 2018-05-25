@@ -54,7 +54,7 @@ RSpec.describe Karafka::Connection::Listener do
     end
 
     context 'when no errors occur' do
-      context 'for delegating batch' do
+      context 'when delegating batch' do
         let(:kafka_batch) { instance_double(Kafka::FetchedBatch) }
 
         before do
@@ -69,7 +69,7 @@ RSpec.describe Karafka::Connection::Listener do
         end
       end
 
-      context 'for delegating batch' do
+      context 'when delegating message' do
         let(:kafka_message) { instance_double(Kafka::FetchedMessage) }
 
         before do

@@ -10,7 +10,7 @@ module Karafka
         # It will either schedule or run a proper processor action for the incoming message
         # @note This should be looped to obtain a constant delegating of new messages
         # @param group_id [String] group_id of a group from which a given message came
-        # @param kafka_batch [<Kafka::FetchedMessage>] raw message from kafka
+        # @param kafka_message [<Kafka::FetchedMessage>] raw message from kafka
         def call(group_id, kafka_message)
           topic = Persistence::Topic.fetch(group_id, kafka_message.topic)
           consumer = Persistence::Consumer.fetch(topic, kafka_message.partition)

@@ -75,15 +75,15 @@ RSpec.describe Karafka::Connection::BatchDelegator do
 
   context 'when batch_consuming false' do
     before do
-      expect(consumer_instance)
+      allow(consumer_instance)
         .to receive(:params_batch=)
         .with([raw_message1])
 
-      expect(consumer_instance)
+      allow(consumer_instance)
         .to receive(:params_batch=)
         .with([raw_message2])
 
-      expect(consumer_instance)
+      allow(consumer_instance)
         .to receive(:call)
         .twice
     end
