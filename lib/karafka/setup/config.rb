@@ -60,7 +60,7 @@ module Karafka
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
         # Array with at least one host
-        setting :seed_brokers
+        setting :seed_brokers, %w[kafka://127.0.0.1:9092]
         # option session_timeout [Integer] the number of seconds after which, if a client
         #   hasn't contacted the Kafka cluster, it will be kicked out of the group.
         setting :pause_timeout, 10
