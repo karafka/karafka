@@ -19,14 +19,14 @@ RSpec.describe Karafka::Errors do
     specify { expect(error).to be < described_class::BaseError }
   end
 
-  describe 'InvalidConfiguration' do
-    subject(:error) { described_class::InvalidConfiguration }
+  describe 'InvalidConfigurationError' do
+    subject(:error) { described_class::InvalidConfigurationError }
 
     specify { expect(error).to be < described_class::BaseError }
   end
 
-  describe 'MissingBootFile' do
-    subject(:error) { described_class::MissingBootFile }
+  describe 'MissingBootFileError' do
+    subject(:error) { described_class::MissingBootFileError }
 
     specify { expect(error).to be < described_class::BaseError }
   end

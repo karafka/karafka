@@ -51,7 +51,7 @@ RSpec.describe Karafka::BaseResponder do
 
     describe '#call' do
       context 'when execution goes with errors' do
-        let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
+        let(:expected_error) { Karafka::Errors::InvalidResponderUsageError }
 
         it 'expect to respond and validate' do
           expect(responder).to receive(:respond).with(input_data)
@@ -75,7 +75,7 @@ RSpec.describe Karafka::BaseResponder do
 
       context 'when we have a custom options schema and invalid data' do
         let(:input_data) { rand.to_s }
-        let(:expected_error) { Karafka::Errors::InvalidResponderMessageOptions }
+        let(:expected_error) { Karafka::Errors::InvalidResponderMessageOptionsError }
         let(:working_class) do
           name = topic_name
           ClassBuilder.inherit(described_class) do
@@ -184,7 +184,7 @@ RSpec.describe Karafka::BaseResponder do
       end
 
       it 'expect to use UsageValidator to validate usage' do
-        expected_error = Karafka::Errors::InvalidResponderUsage
+        expected_error = Karafka::Errors::InvalidResponderUsageError
         expect { responder.send(:validate_usage!) }.to raise_error(expected_error)
       end
     end
