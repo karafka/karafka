@@ -10,7 +10,7 @@ else
   # However when it is unavailable, we still want to be able to run help command
   # and install command as they don't require configured app itself to run
   raise(
-    Karafka::Errors::MissingBootFile,
+    Karafka::Errors::MissingBootFileError,
     Karafka.boot_file
   ) unless %w[-h install].include?(ARGV[0])
 end

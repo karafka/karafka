@@ -54,7 +54,7 @@ module Karafka
       def subscribe(event_name_or_listener)
         return super unless event_name_or_listener.is_a?(String)
         return super if available_events.include?(event_name_or_listener)
-        raise Errors::UnregisteredMonitorEvent, event_name_or_listener
+        raise Errors::UnregisteredMonitorEventError, event_name_or_listener
       end
 
       # @return [Array<String>] names of available events to which we can subscribe

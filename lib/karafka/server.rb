@@ -64,8 +64,8 @@ module Karafka
           sleep SUPERVISION_SLEEP
         end
 
-        raise Errors::ForcefulShutdown
-      rescue Errors::ForcefulShutdown => error
+        raise Errors::ForcefulShutdownError
+      rescue Errors::ForcefulShutdownError => error
         Thread.new { Karafka.monitor.instrument('app.stopping.error', error: error) }.join
         # We're done waiting, lets kill them!
         consumer_threads.each(&:terminate)
