@@ -3,8 +3,8 @@
 ## 1.3-wip
 - #300 - Store value in a value key and replace its content with parsed version - without root merge
 - #331 - Disallow building groups without topics
-- Instrumentation unification. Better and more consistent naming
-- Procline instrumentation for a nicer process name
+- #340 - Instrumentation unification. Better and more consistent naming
+- #340 - Procline instrumentation for a nicer process name
 
 ## 1.2.4
 - #332 - Fetcher for max queue size
