@@ -17,13 +17,21 @@ module Karafka
       extend WaterDrop::Instrumentation::Listener
 
       class << self
-        # Logs details about incoming messages and with which consumer we will consume them
+        # Logs details about incoming batches and with which consumer we will consume them
         # @param event [Dry::Events::Event] event details including payload
-        def on_connection_delegator_call(event)
+        def on_connection_batch_delegator_call(event)
           consumer = event[:consumer]
           topic = consumer.topic.name
-          kafka_messages = event[:kafka_messages]
+          kafka_messages = event[:kafka_batch].messages
           info "#{kafka_messages.count} messages on #{topic} topic delegated to #{consumer.class}"
+        end
+
+        # Logs details about incoming message and with which consumer we will consume it
+        # @param event [Dry::Events::Event] event details including payload
+        def on_connection_message_delegator_call(event)
+          consumer = event[:consumer]
+          topic = consumer.topic.name
+          info "1 message on #{topic} topic delegated to #{consumer.class}"
         end
 
         # Logs details about each received message value parsing

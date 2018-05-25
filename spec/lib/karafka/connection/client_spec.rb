@@ -155,25 +155,21 @@ RSpec.describe Karafka::Connection::Client do
 
     context 'when everything works smooth' do
       context 'with single message consumption mode' do
-        let(:messages) { [incoming_message] }
-
         it 'expect to use kafka_consumer to get each message and yield as an array of messages' do
           expect(kafka_consumer).to receive(:each_message).and_yield(incoming_message)
-          expect { |block| client.fetch_loop(&block) }.to yield_with_args(messages)
+          expect { |block| client.fetch_loop(&block) }
+            .to yield_with_args(incoming_message, :message)
         end
       end
 
       context 'with message batch consumption mode' do
         let(:batch_fetching) { true }
         let(:incoming_batch) { instance_double(Kafka::FetchedBatch) }
-        let(:incoming_messages) { [incoming_message, incoming_message] }
 
         it 'expect to use kafka_consumer to get messages and yield all of them' do
           expect(kafka_consumer).to receive(:each_batch).and_yield(incoming_batch)
-          expect(incoming_batch).to receive(:messages).and_return(incoming_messages)
-
           expect { |block| client.fetch_loop(&block) }
-            .to yield_successive_args(incoming_messages)
+            .to yield_successive_args([incoming_batch, :batch])
         end
       end
     end
