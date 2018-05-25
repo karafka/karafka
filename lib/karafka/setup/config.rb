@@ -93,7 +93,7 @@ module Karafka
         # option fetcher_max_queue_size [Integer] max number of items in the fetch queue that
         #   are stored for further processing. Note, that each item in the queue represents a
         #   response from a single broker
-        setting :fetcher_max_queue_size, 100
+        setting :fetcher_max_queue_size, 10
         # option max_bytes_per_partition [Integer] the maximum amount of data fetched
         #   from a single partition at a time.
         setting :max_bytes_per_partition, 1_048_576
