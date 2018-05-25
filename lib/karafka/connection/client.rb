@@ -20,16 +20,16 @@ module Karafka
       end
 
       # Opens connection, gets messages and calls a block for each of the incoming messages
-      # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
+      # @yieldparam [Array<Kafka::FetchedMessage>, Symbol] kafka response with an info about
+      #   the type of the fetcher that is being used
       # @note This will yield with raw messages - no preprocessing or reformatting.
       def fetch_loop
         settings = ApiAdapter.consumption(consumer_group)
 
         if consumer_group.batch_fetching
-          kafka_consumer.each_batch(*settings) { |batch| yield(batch.messages) }
+          kafka_consumer.each_batch(*settings) { |batch| yield(batch, :batch) }
         else
-          # always yield an array of messages, so we have consistent API (always a batch)
-          kafka_consumer.each_message(*settings) { |message| yield([message]) }
+          kafka_consumer.each_message(*settings) { |message| yield(message, :message) }
         end
       rescue Kafka::ProcessingError => error
         # If there was an error during consumption, we have to log it, pause current partition

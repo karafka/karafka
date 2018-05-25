@@ -24,7 +24,6 @@ RSpec.describe Karafka::Connection::Listener do
 
   describe '#fetch_loop' do
     let(:client) { double }
-    let(:incoming_message) { double }
 
     [
       StandardError,
@@ -55,11 +54,34 @@ RSpec.describe Karafka::Connection::Listener do
     end
 
     context 'when no errors occur' do
-      it 'expect to yield for each incoming message' do
-        expect(listener).to receive(:client).and_return(client)
-        expect(client).to receive(:fetch_loop).and_yield(incoming_message)
+      context 'when delegating batch' do
+        let(:kafka_batch) { instance_double(Kafka::FetchedBatch) }
 
-        listener.send(:fetch_loop)
+        before do
+          allow(listener).to receive(:client).and_return(client)
+          allow(client).to receive(:fetch_loop).and_yield(kafka_batch, :batch)
+        end
+
+        it 'expect to yield for each incoming message' do
+          expect(Karafka::Connection::BatchDelegator)
+            .to receive(:call).with(consumer_group.id, kafka_batch)
+          listener.send(:fetch_loop)
+        end
+      end
+
+      context 'when delegating message' do
+        let(:kafka_message) { instance_double(Kafka::FetchedMessage) }
+
+        before do
+          allow(listener).to receive(:client).and_return(client)
+          allow(client).to receive(:fetch_loop).and_yield(kafka_message, :message)
+        end
+
+        it 'expect to yield for each incoming message' do
+          expect(Karafka::Connection::MessageDelegator)
+            .to receive(:call).with(consumer_group.id, kafka_message)
+          listener.send(:fetch_loop)
+        end
       end
     end
   end

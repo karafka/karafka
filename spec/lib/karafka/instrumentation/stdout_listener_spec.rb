@@ -139,12 +139,13 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
     end
   end
 
-  describe '#on_connection_delegator_call' do
-    subject(:trigger) { described_class.on_connection_delegator_call(event) }
+  describe '#on_connection_batch_delegator_call' do
+    subject(:trigger) { described_class.on_connection_batch_delegator_call(event) }
 
-    let(:payload) { { caller: caller, consumer: consumer, kafka_messages: kafka_messages } }
+    let(:payload) { { caller: caller, consumer: consumer, kafka_batch: kafka_batch } }
     let(:kafka_messages) { Array.new(rand(2..10)) { rand } }
-    let(:caller) { Karafka::Connection::Delegator }
+    let(:kafka_batch) { instance_double(Kafka::FetchedBatch, messages: kafka_messages) }
+    let(:caller) { Karafka::Connection::BatchDelegator }
     let(:consumer) { instance_double(Karafka::BaseConsumer, topic: topic) }
     let(:message) do
       "#{kafka_messages.count} messages on #{topic.name} topic delegated to #{consumer.class}"
@@ -152,6 +153,49 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to receive(:info).with(message)
+      trigger
+    end
+  end
+
+  describe '#on_connection_message_delegator_call' do
+    subject(:trigger) { described_class.on_connection_message_delegator_call(event) }
+
+    let(:payload) { { caller: caller, consumer: consumer, kafka_message: kafka_message } }
+    let(:kafka_message) { rand }
+    let(:caller) { Karafka::Connection::MessageDelegator }
+    let(:consumer) { instance_double(Karafka::BaseConsumer, topic: topic) }
+    let(:message) { "1 message on #{topic.name} topic delegated to #{consumer.class}" }
+
+    it 'expect logger to log proper message' do
+      expect(Karafka.logger).to receive(:info).with(message)
+      trigger
+    end
+  end
+
+  describe '#on_app_initializing' do
+    subject(:trigger) { described_class.on_app_initializing(event) }
+
+    let(:payload) { {} }
+    let(:message) { "Initializing Karafka server #{::Process.pid}" }
+
+    it 'expect logger to log server initializing' do
+      # We had to add at least once as it runs in a separate thread and can interact
+      # with other specs - this is a cheap workaround
+      expect(Karafka.logger).to receive(:info).with(message).at_least(:once)
+      trigger
+    end
+  end
+
+  describe '#on_app_running' do
+    subject(:trigger) { described_class.on_app_running(event) }
+
+    let(:payload) { {} }
+    let(:message) { "Running Karafka server #{::Process.pid}" }
+
+    it 'expect logger to log server running' do
+      # We had to add at least once as it runs in a separate thread and can interact
+      # with other specs - this is a cheap workaround
+      expect(Karafka.logger).to receive(:info).with(message).at_least(:once)
       trigger
     end
   end
