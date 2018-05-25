@@ -3,6 +3,8 @@
 ## 1.3-wip
 - #300 - Store value in a value key and replace its content with parsed version - without root merge
 - #331 - Disallow building groups without topics
+- #340 - Instrumentation unification. Better and more consistent naming
+- #340 - Procline instrumentation for a nicer process name
 - #342 - Change default for `fetcher_max_queue_size` from `100` to `10` to lower max memory usage
 
 ## 1.2.4

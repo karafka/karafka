@@ -34,8 +34,10 @@ module Karafka
         async_producer.call.retry
         sync_producer.call.error
         sync_producer.call.retry
-        server.stop
-        server.stop.error
+        app.initializing
+        app.running
+        app.stopping
+        app.stopping.error
       ].freeze
 
       private_constant :BASE_EVENTS

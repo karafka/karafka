@@ -19,7 +19,7 @@ module Karafka
                       .flat_map(&:values)
                       .select { |ctrl| ctrl.respond_to?(:run_callbacks) }
 
-          if Karafka::App.stopped?
+          if Karafka::App.stopping?
             consumers.each { |ctrl| ctrl.run_callbacks :before_stop }
             Karafka::Persistence::Client.read.stop
           else

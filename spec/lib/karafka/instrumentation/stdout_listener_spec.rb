@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Instrumentation::Listener do
+RSpec.describe Karafka::Instrumentation::StdoutListener do
   let(:event) { Dry::Events::Event.new(rand, payload) }
   let(:time) { rand }
   let(:topic) { instance_double(Karafka::Routing::Topic, name: topic_name) }
@@ -156,8 +156,8 @@ RSpec.describe Karafka::Instrumentation::Listener do
     end
   end
 
-  describe '#on_server_stop' do
-    subject(:trigger) { described_class.on_server_stop(event) }
+  describe '#on_app_stopping' do
+    subject(:trigger) { described_class.on_app_stopping(event) }
 
     let(:payload) { {} }
     let(:message) { "Stopping Karafka server #{::Process.pid}" }
@@ -172,8 +172,8 @@ RSpec.describe Karafka::Instrumentation::Listener do
     end
   end
 
-  describe '#on_server_stop_error' do
-    subject(:trigger) { described_class.on_server_stop_error(event) }
+  describe '#on_app_stopping_error' do
+    subject(:trigger) { described_class.on_app_stopping_error(event) }
 
     let(:payload) { {} }
     let(:message) { "Forceful Karafka server #{::Process.pid} stop" }

@@ -9,7 +9,7 @@ module Karafka
     STATES = {
       initializing: :initialize!,
       running: :run!,
-      stopped: :stop!
+      stopping: :stop!
     }.freeze
 
     STATES.each do |state, transition|
@@ -19,6 +19,9 @@ module Karafka
 
       define_method transition do
         @status = state
+        # Trap context disallows to run certain things that we instrument
+        # so the state changes are executed from a separate thread
+        Thread.new { Karafka.monitor.instrument("app.#{state}", {}) }.join
       end
     end
   end
