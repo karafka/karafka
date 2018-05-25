@@ -6,6 +6,7 @@
 - #340 - Instrumentation unification. Better and more consistent naming
 - #340 - Procline instrumentation for a nicer process name
 - #342 - Change default for `fetcher_max_queue_size` from `100` to `10` to lower max memory usage
+- #345 - Cleanup exceptions names
 
 ## 1.2.4
 - #332 - Fetcher for max queue size
