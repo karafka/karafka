@@ -39,9 +39,9 @@ RSpec.describe Karafka::Params::ParamsBatch do
     end
   end
 
-  describe '#parsed' do
+  describe '#parse!' do
     it 'expect to parse all the messages and return parsed' do
-      params_batch.parsed
+      params_batch.parse!
       params_batch.to_a.each { |params| expect(params['parsed']).to eq true }
     end
   end

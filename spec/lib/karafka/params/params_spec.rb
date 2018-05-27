@@ -66,14 +66,14 @@ RSpec.describe Karafka::Params::Params do
   describe 'instance methods' do
     subject(:params) { base_params_class.send(:new) }
 
-    describe '#retrieve!' do
+    describe '#parse!' do
       context 'when params are already parsed' do
         before { params['parsed'] = true }
 
         it 'expect not to parse again and return self' do
           expect(params).not_to receive(:parse)
           expect(params).not_to receive(:merge!)
-          expect(params.retrieve!).to eq params
+          expect(params.parse!).to eq params
         end
       end
 
@@ -89,7 +89,7 @@ RSpec.describe Karafka::Params::Params do
             .with(value)
             .and_return(parsed_value)
 
-          params.retrieve!
+          params.parse!
         end
 
         it 'expect to merge with parsed stuff that is under value key and remove this key' do
@@ -97,7 +97,7 @@ RSpec.describe Karafka::Params::Params do
         end
 
         it 'expect to mark as parsed' do
-          expect(params.retrieve!['parsed']).to eq true
+          expect(params.parse!['parsed']).to eq true
         end
       end
     end
