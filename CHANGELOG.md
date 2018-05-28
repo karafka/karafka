@@ -8,7 +8,8 @@
 - #342 - Change default for `fetcher_max_queue_size` from `100` to `10` to lower max memory usage
 - #345 - Cleanup exceptions names
 - #341 - Split connection delegator into batch delegator and single_delegator
-- #351 - Rename `#retrieve!` to `#parse!` on params and `#parsed` to `parse!` on params batch. Adds '#first' with the same behavior as '#last' to the params batch object.
+- #351 - Rename `#retrieve!` to `#parse!` on params and `#parsed` to `parse!` on params batch.
+- #351 - Adds '#first' for params_batch that returns parsed first element from the params_batch object.
 
 ## 1.2.4
 - #332 - Fetcher for max queue size
