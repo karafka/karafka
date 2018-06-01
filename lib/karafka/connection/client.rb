@@ -69,14 +69,22 @@ module Karafka
         kafka_consumer.pause(*ApiAdapter.pause(topic, partition, consumer_group))
       end
 
-      # Marks a given message as consumed and commit the offsets
-      # @note In opposite to ruby-kafka, we commit the offset for each manual marking to be sure
-      #   that offset commit happen asap in case of a crash
+      # Marks given message as consumed
+      # @note This method won't trigger automatic offsets commits, rather relying on the ruby-kafka
+      #   offsets time-interval based committing
       # @param [Karafka::Params::Params] params message that we want to mark as processed
       def mark_as_consumed(params)
         kafka_consumer.mark_message_as_processed(
           *ApiAdapter.mark_message_as_processed(params)
         )
+      end
+
+      # Marks a given message as consumed and commit the offsets in a blocking way
+      # @note This method commits the offset for each manual marking to be sure
+      #   that offset commit happen asap in case of a crash
+      # @param [Karafka::Params::Params] params message that we want to mark as processed
+      def mark_as_consumed!(params)
+        mark_as_consumed(params)
         # Trigger an immediate, blocking offset commit in order to minimize the risk of crashing
         # before the automatic triggers have kicked in.
         kafka_consumer.commit_offsets

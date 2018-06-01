@@ -10,9 +10,14 @@ module Karafka
     # Allows us to mark messages as consumed for non-automatic mode without having
     # to use consumer client directly. We do this that way, because most of the people should not
     # mess with the client instance directly (just in case)
-    def_delegator :client, :mark_as_consumed
+    %i[
+      mark_as_consumed
+      mark_as_consumed!
+    ].each do |delegated_method_name|
+      def_delegator :client, delegated_method_name
 
-    private :mark_as_consumed
+      private delegated_method_name
+    end
 
     class << self
       attr_reader :topic

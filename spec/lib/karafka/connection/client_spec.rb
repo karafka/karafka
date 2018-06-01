@@ -141,10 +141,22 @@ RSpec.describe Karafka::Connection::Client do
 
     before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
+    it 'expect to forward to mark_message_as_processed and not to commit offsets' do
+      expect(kafka_consumer).to receive(:mark_message_as_processed).with(params)
+      expect(kafka_consumer).not_to receive(:commit_offsets)
+      client.mark_as_consumed(params)
+    end
+  end
+
+  describe '#mark_as_consumed!' do
+    let(:params) { instance_double(Karafka::Params::Params) }
+
+    before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
+
     it 'expect to forward to mark_message_as_processed and commit offsets' do
       expect(kafka_consumer).to receive(:mark_message_as_processed).with(params)
       expect(kafka_consumer).to receive(:commit_offsets)
-      client.mark_as_consumed(params)
+      client.mark_as_consumed!(params)
     end
   end
 
