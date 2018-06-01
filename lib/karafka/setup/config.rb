@@ -69,14 +69,14 @@ module Karafka
         setting :seed_brokers
         # option session_timeout [Integer] the number of seconds after which, if a client
         #   hasn't contacted the Kafka cluster, it will be kicked out of the group.
-        setting :pause_timeout, 10
-        # option offset_commit_interval [Integer] the interval between offset commits,
-        #   in seconds.
         setting :session_timeout, 30
         # Time that a given partition will be paused from fetching messages, when message
         # consumption fails. It allows us to process other partitions, while the error is being
         # resolved and also "slows" things down, so it prevents from "eating" up all messages and
         # consuming them with failed code. Use `nil` if you want to pause forever and never retry.
+        setting :pause_timeout, 10
+        # option offset_commit_interval [Integer] the interval between offset commits,
+        #   in seconds.
         setting :offset_commit_interval, 10
         # option offset_commit_threshold [Integer] the number of messages that can be
         #   processed before their offsets are committed. If zero, offset commits are
