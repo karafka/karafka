@@ -63,9 +63,6 @@ module Karafka
         setting :seed_brokers, %w[kafka://127.0.0.1:9092]
         # option session_timeout [Integer] the number of seconds after which, if a client
         #   hasn't contacted the Kafka cluster, it will be kicked out of the group.
-        setting :pause_timeout, 10
-        # option offset_commit_interval [Integer] the interval between offset commits,
-        #   in seconds.
         setting :session_timeout, 30
         # Time that a given partition will be paused from fetching messages, when message
         # consumption fails. It allows us to process other partitions, while the error is being
