@@ -10,6 +10,7 @@
 - #341 - Split connection delegator into batch delegator and single_delegator
 - #351 - Rename `#retrieve!` to `#parse!` on params and `#parsed` to `parse!` on params batch.
 - #351 - Adds '#first' for params_batch that returns parsed first element from the params_batch object.
+- #363 - Too shallow ruby-kafka version lock
 
 ## 1.2.4
 - #332 - Fetcher for max queue size
