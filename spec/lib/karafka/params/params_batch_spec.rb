@@ -3,14 +3,15 @@
 RSpec.describe Karafka::Params::ParamsBatch do
   subject(:params_batch) { described_class.new(kafka_messages, topic_parser) }
 
-  let(:value) { {}.to_json }
+  let(:unparsed_value) { { rand.to_s => rand.to_s } }
+  let(:parsed_value) { unparsed_value.to_json }
   let(:create_time) { Time.now }
   let(:topic_parser) { Karafka::Parsers::Json }
   let(:kafka_messages) { [kafka_message1, kafka_message2] }
   let(:kafka_message1) do
     Kafka::FetchedMessage.new(
       message: OpenStruct.new(
-        value: value,
+        value: parsed_value,
         key: nil,
         offset: 0,
         create_time: create_time
@@ -23,7 +24,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
   let(:kafka_message2) do
     Kafka::FetchedMessage.new(
       message: OpenStruct.new(
-        value: value,
+        value: parsed_value,
         key: nil,
         offset: 0,
         create_time: create_time
@@ -53,6 +54,27 @@ RSpec.describe Karafka::Params::ParamsBatch do
         next if index > 0
         expect(params_batch.to_a[index + 1]['parsed']).to eq nil
       end
+    end
+  end
+
+  describe '#values' do
+    it 'expect to return parsed values from params within params batch' do
+      expect(params_batch.values).to eq [unparsed_value, unparsed_value]
+    end
+
+    context 'when values were used for the first time' do
+      before { params_batch.values }
+
+      it 'expect to mark as unparsed all the params inside the batch' do
+        expect(params_batch.to_a.all? { |params| params['parsed'] }).to eq true
+      end
+    end
+  end
+
+  describe '#first' do
+    it 'expect to return first element after parsing' do
+      expect(params_batch.first).to eq params_batch.to_a[0]
+      expect(params_batch.first['parsed']).to eq true
     end
   end
 

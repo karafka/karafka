@@ -32,6 +32,12 @@ module Karafka
         each(&:itself)
       end
 
+      # @return [Array<Object>] array with parsed values. This method can be useful when we don't
+      #   care about metadata and just want to extract all the data values from the batch
+      def values
+        parse!.map(&:value)
+      end
+
       # @return [Karafka::Params::Params] first element after the parsing process
       def first
         @params_batch.first.parse!
