@@ -82,6 +82,12 @@ module Karafka
         kafka_consumer.commit_offsets
       end
 
+      # Triggers a non-optional blocking heartbeat that notifies Kafka about the fact, that this
+      # consumer / client is still up and running
+      def trigger_heartbeat
+        kafka_consumer.trigger_heartbeat!
+      end
+
       private
 
       attr_reader :consumer_group

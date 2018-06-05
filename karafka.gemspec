@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'multi_json', '>= 1.12'
   spec.add_dependency 'rake', '>= 11.3'
   spec.add_dependency 'require_all', '>= 1.4'
-  spec.add_dependency 'ruby-kafka', '>= 0.5.3'
+  spec.add_dependency 'ruby-kafka', '>= 0.6.4'
   spec.add_dependency 'thor', '~> 0.19'
   spec.add_dependency 'waterdrop', '~> 1.2'
 
