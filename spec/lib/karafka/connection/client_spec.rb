@@ -119,6 +119,15 @@ RSpec.describe Karafka::Connection::Client do
     end
   end
 
+  describe '#trigger_heartbeat' do
+    before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
+
+    it 'expect to use the consumers blocking trigger_heartbeat! method' do
+      expect(kafka_consumer).to receive(:trigger_heartbeat!)
+      client.trigger_heartbeat
+    end
+  end
+
   describe '#fetch_loop' do
     let(:incoming_message) { rand }
 
