@@ -7,7 +7,13 @@ module Karafka
     class Client
       extend Forwardable
 
-      def_delegator :kafka_consumer, :seek
+      %i[
+        seek
+        trigger_heartbeat
+        trigger_heartbeat!
+      ].each do |delegated_method|
+        def_delegator :kafka_consumer, delegated_method
+      end
 
       # Creates a queue consumer client that will pull the data from Kafka
       # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group for which
@@ -88,12 +94,6 @@ module Karafka
         # Trigger an immediate, blocking offset commit in order to minimize the risk of crashing
         # before the automatic triggers have kicked in.
         kafka_consumer.commit_offsets
-      end
-
-      # Triggers a non-optional blocking heartbeat that notifies Kafka about the fact, that this
-      # consumer / client is still up and running
-      def trigger_heartbeat
-        kafka_consumer.trigger_heartbeat!
       end
 
       private

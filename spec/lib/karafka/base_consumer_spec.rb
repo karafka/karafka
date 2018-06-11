@@ -117,4 +117,26 @@ RSpec.describe Karafka::BaseConsumer do
       base_consumer.send(:mark_as_consumed!, params)
     end
   end
+
+  describe 'trigger_heartbeat' do
+    let(:client) { instance_double(Karafka::Connection::Client) }
+
+    before { Karafka::Persistence::Client.write(client) }
+
+    it 'expect to proxy pass to client' do
+      expect(client).to receive(:trigger_heartbeat)
+      base_consumer.send(:trigger_heartbeat)
+    end
+  end
+
+  describe 'trigger_heartbeat!' do
+    let(:client) { instance_double(Karafka::Connection::Client) }
+
+    before { Karafka::Persistence::Client.write(client) }
+
+    it 'expect to proxy pass to client' do
+      expect(client).to receive(:trigger_heartbeat!)
+      base_consumer.send(:trigger_heartbeat!)
+    end
+  end
 end

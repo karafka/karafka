@@ -13,6 +13,8 @@ module Karafka
     %i[
       mark_as_consumed
       mark_as_consumed!
+      trigger_heartbeat
+      trigger_heartbeat!
     ].each do |delegated_method_name|
       def_delegator :client, delegated_method_name
 
