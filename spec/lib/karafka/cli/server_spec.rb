@@ -74,6 +74,7 @@ RSpec.describe Karafka::Cli::Server do
 
   describe '#daemonize' do
     before { cli.options = { pid: pid } }
+
     let(:file) { instance_double(File, write: true) }
 
     it 'expect to daemonize and creat pidfile' do

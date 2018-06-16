@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+  # frozen_string_literal: true
 
 module Karafka
   module Consumers
@@ -23,7 +23,7 @@ module Karafka
           # @param method_name [Symbol, String] method name or nil if we plan to provide a block
           # @yield A block with a code that should be executed before scheduling
           define_method type do |method_name = nil, &block|
-            set_callback type, :before, method_name ? method_name : block
+            set_callback type, :before, method_name || block
           end
         end
       end

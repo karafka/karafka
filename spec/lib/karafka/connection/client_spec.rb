@@ -169,7 +169,7 @@ RSpec.describe Karafka::Connection::Client do
 
       before do
         count = 0
-        allow(kafka_consumer).to receive(:each_message).exactly(2).times do
+        allow(kafka_consumer).to receive(:each_message).twice do
           count += 1
           count == 1 ? raise(error) : true
         end
@@ -191,7 +191,7 @@ RSpec.describe Karafka::Connection::Client do
 
       before do
         count = 0
-        allow(kafka_consumer).to receive(:each_message).exactly(2).times do
+        allow(kafka_consumer).to receive(:each_message).twice do
           count += 1
           count == 1 ? raise(error) : true
         end

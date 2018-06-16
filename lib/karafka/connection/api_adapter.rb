@@ -121,7 +121,7 @@ module Karafka
             next unless AttributesMap.api_adapter[namespace_key].include?(setting_name)
             # Ignore settings that are already initialized
             # In case they are in preexisting settings fetched differently
-            next if preexisting_settings.keys.include?(setting_name)
+            next if preexisting_settings.key?(setting_name)
             # Fetch all the settings from a given layer object. Objects can handle the fallback
             # to the kafka settings, so
             preexisting_settings[setting_name] = route_layer.send(setting_name)
