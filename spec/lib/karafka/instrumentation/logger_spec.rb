@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Instrumentation::Logger do
-  specify { expect(described_class).to be < ::Logger }
   subject(:logger) { described_class.instance }
+
+  specify { expect(described_class).to be < ::Logger }
 
   # We use a singleton logger that could be already initialized in other specs, so
   # in order to check all the behaviours we need to "reset" it to the initial state

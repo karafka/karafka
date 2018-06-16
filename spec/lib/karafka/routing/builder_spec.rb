@@ -10,6 +10,7 @@ RSpec.describe Karafka::Routing::Builder do
   ].freeze
 
   before { builder.clear }
+
   after { builder.clear }
 
   describe '#draw' do
