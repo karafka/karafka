@@ -55,17 +55,11 @@ module Karafka
       # @note Keep in mind, that if your business logic
       # @note If set to nil, it won't forcefully shutdown the process at all.
       setting :shutdown_timeout, 60
-      # option params_base_class [Class] base class for params class initialization
-      #   This can be either a Hash or a HashWithIndifferentAccess depending on your
-      #   requirements. Note, that by using HashWithIndifferentAccess, you remove some of the
-      #   performance in favor of convenience. This can be useful especially if you already use
-      #   it with Rails, etc
-      setting :params_base_class, Hash
 
       # option kafka [Hash] - optional - kafka configuration options
       setting :kafka do
         # Array with at least one host
-        setting :seed_brokers
+        setting :seed_brokers, %w[kafka://127.0.0.1:9092]
         # option session_timeout [Integer] the number of seconds after which, if a client
         #   hasn't contacted the Kafka cluster, it will be kicked out of the group.
         setting :session_timeout, 30
@@ -74,6 +68,11 @@ module Karafka
         # resolved and also "slows" things down, so it prevents from "eating" up all messages and
         # consuming them with failed code. Use `nil` if you want to pause forever and never retry.
         setting :pause_timeout, 10
+        # option pause_max_timeout [Integer, nil] the maximum number of seconds to pause for,
+        #   or `nil` if no maximum should be enforced.
+        setting :pause_max_timeout, nil
+        # option pause_exponential_backoff [Boolean] whether to enable exponential backoff
+        setting :pause_exponential_backoff, false
         # option offset_commit_interval [Integer] the interval between offset commits,
         #   in seconds.
         setting :offset_commit_interval, 10
@@ -84,6 +83,13 @@ module Karafka
         # option heartbeat_interval [Integer] the interval between heartbeats; must be less
         #   than the session window.
         setting :heartbeat_interval, 10
+        # option offset_retention_time [Integer] The length of the retention window, known as
+        #   offset retention time
+        setting :offset_retention_time, nil
+        # option fetcher_max_queue_size [Integer] max number of items in the fetch queue that
+        #   are stored for further processing. Note, that each item in the queue represents a
+        #   response from a single broker
+        setting :fetcher_max_queue_size, 10
         # option max_bytes_per_partition [Integer] the maximum amount of data fetched
         #   from a single partition at a time.
         setting :max_bytes_per_partition, 1_048_576
@@ -110,9 +116,6 @@ module Karafka
         # option reconnect_timeout [Integer] How long should we wait before trying to reconnect to
         # Kafka cluster that went down (in seconds)
         setting :reconnect_timeout, 5
-        # option offset_retention_time [Integer] The length of the retention window, known as
-        #   offset retention time
-        setting :offset_retention_time, nil
         # option connect_timeout [Integer] Sets the number of seconds to wait while connecting to
         # a broker for the first time. When ruby-kafka initializes, it needs to connect to at
         # least one host.
@@ -166,21 +169,20 @@ module Karafka
         # If you want to configure a next component, please add a proper file to config dir
         def setup_components
           [
-            Configurators::Params,
             Configurators::WaterDrop
           ].each { |klass| klass.setup(config) }
         end
 
         # Validate config based on ConfigurationSchema
         # @return [Boolean] true if configuration is valid
-        # @raise [Karafka::Errors::InvalidConfiguration] raised when configuration
+        # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
         #   doesn't match with ConfigurationSchema
         def validate!
           validation_result = Karafka::Schemas::Config.call(config.to_h)
 
           return true if validation_result.success?
 
-          raise Errors::InvalidConfiguration, validation_result.errors
+          raise Errors::InvalidConfigurationError, validation_result.errors
         end
       end
     end

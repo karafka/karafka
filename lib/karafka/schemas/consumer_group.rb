@@ -32,10 +32,13 @@ module Karafka
       required(:seed_brokers).filled { each(:broker_schema?) }
       required(:session_timeout).filled { int? | float? }
       required(:pause_timeout) { none? | ((int? | float?) & gteq?(0)) }
+      required(:pause_max_timeout) { none? | ((int? | float?) & gteq?(0)) }
+      required(:pause_exponential_backoff).filled(:bool?)
       required(:offset_commit_interval) { int? | float? }
       required(:offset_commit_threshold).filled(:int?)
       required(:offset_retention_time) { none?.not > int? }
       required(:heartbeat_interval).filled { (int? | float?) & gteq?(0) }
+      required(:fetcher_max_queue_size).filled(:int?, gt?: 0)
       required(:connect_timeout).filled { (int? | float?) & gt?(0) }
       required(:socket_timeout).filled { (int? | float?) & gt?(0) }
       required(:min_bytes).filled(:int?, gt?: 0)
@@ -43,6 +46,18 @@ module Karafka
       required(:max_wait_time).filled { (int? | float?) & gteq?(0) }
       required(:batch_fetching).filled(:bool?)
       required(:topics).filled { each { schema(ConsumerGroupTopic) } }
+
+      # If the exponential backoff is on, the max pause timeout needs to be equal or
+      # bigger than the default pause timeout from which we start
+      validate(
+        max_timeout_size_for_exponential: %i[
+          pause_timeout
+          pause_max_timeout
+          pause_exponential_backoff
+        ]
+      ) do |pause_timeout, pause_max_timeout, pause_exponential_backoff|
+        pause_exponential_backoff ? pause_timeout.to_i <= pause_max_timeout.to_i : true
+      end
 
       # Max wait time cannot exceed socket_timeout - wouldn't make sense
       rule(

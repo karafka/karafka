@@ -18,6 +18,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       }
     ]
   end
+  let(:pause_details) do
+    {
+      pause_timeout: 10,
+      pause_max_timeout: nil,
+      pause_exponential_backoff: false
+    }
+  end
   let(:config) do
     {
       id: 'id',
@@ -33,16 +40,16 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       ssl_ca_certs_from_system: true,
       max_bytes_per_partition: 1_048_576,
       offset_retention_time: 1000,
+      fetcher_max_queue_size: 100,
       start_from_beginning: true,
       connect_timeout: 10,
       socket_timeout: 10,
-      pause_timeout: 10,
       max_wait_time: 10,
       batch_fetching: true,
       topics: topics,
       min_bytes: 1,
       max_bytes: 2048
-    }
+    }.merge(pause_details)
   end
 
   context 'when config is valid' do
@@ -183,6 +190,32 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
+  context 'when we validate fetcher_max_queue_size' do
+    context 'when fetcher_max_queue_size is nil' do
+      before { config[:fetcher_max_queue_size] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when fetcher_max_queue_size is not integer' do
+      before { config[:fetcher_max_queue_size] = 's' }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when fetcher_max_queue_size is 0' do
+      before { config[:fetcher_max_queue_size] = 0 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when fetcher_max_queue_size is less than 0' do
+      before { config[:fetcher_max_queue_size] = -1 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
   context 'when we validate heartbeat_interval' do
     context 'when heartbeat_interval is nil' do
       before { config[:heartbeat_interval] = nil }
@@ -246,6 +279,98 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       before { config[:pause_timeout] = -1 }
 
       it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate pause_max_timeout' do
+    context 'when pause_max_timeout is nil' do
+      before { config[:pause_max_timeout] = nil }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_max_timeout is not integer' do
+      before { config[:pause_max_timeout] = 's' }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when pause_max_timeout is 0' do
+      before { config[:pause_max_timeout] = 0 }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_max_timeout is less than 0' do
+      before { config[:pause_max_timeout] = -1 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate pause_exponential_backoff' do
+    context 'when pause_exponential_backoff is not a bool' do
+      before { config[:pause_exponential_backoff] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we use pause_exponential_backoff' do
+    before do
+      config[:pause_exponential_backoff] = true
+      config[:pause_timeout] = pause_timeout
+      config[:pause_max_timeout] = pause_max_timeout
+    end
+
+    context 'when the pause_timeout is more than pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout - 1 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when pause_timeout is same as pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_timeout is less than pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout + 1 }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+  end
+
+  context 'when we dont use pause_exponential_backoff' do
+    before do
+      config[:pause_exponential_backoff] = false
+      config[:pause_timeout] = pause_timeout
+      config[:pause_max_timeout] = pause_max_timeout
+    end
+
+    context 'when the pause_timeout is more than pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout - 1 }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_timeout is same as pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_timeout is less than pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout + 1 }
+
+      it { expect(schema.call(config)).to be_success }
     end
   end
 

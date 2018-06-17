@@ -1,12 +1,35 @@
 # Karafka framework changelog
 
-## Unreleased
+## 1.3-wip
+- #300 - Store value in a value key and replace its content with parsed version - without root merge
+- #331 - Disallow building groups without topics
+- #340 - Instrumentation unification. Better and more consistent naming
+- #340 - Procline instrumentation for a nicer process name
+- #342 - Change default for `fetcher_max_queue_size` from `100` to `10` to lower max memory usage
+- #345 - Cleanup exceptions names
+- #341 - Split connection delegator into batch delegator and single_delegator
+- #351 - Rename `#retrieve!` to `#parse!` on params and `#parsed` to `parse!` on params batch.
+- #351 - Adds '#first' for params_batch that returns parsed first element from the params_batch object.
+- #360 - Single params consuming mode automatically parses data specs
+- #359 - Divide mark_as_consumed into mark_as_consumed and mark_as_consumed!
+- #356 - Provide a `#values` for params_batch to extract only values of objects from the params_batch
+- #363 - Too shallow ruby-kafka version lock
+- #354 - Expose consumer heartbeat
+
+## 1.2.5
+- #354 - Expose consumer heartbeat
+
+## 1.2.4
+- #332 - Fetcher for max queue size
+
+## 1.2.3
 - #313 - support PLAINTEXT and SSL for scheme
 - #288 - drop activesupport callbacks in favor of notifications
 - #320 - Pausing indefinetely with nil pause timeout doesn't work
 - #318 - Partition pausing doesn't work with custom topic mappers
 - Rename ConfigAdapter to ApiAdapter to better reflect what it does
 - #317 - Manual offset committing doesn't work with custom topic mappers
+- #319 - Support for exponential backoff in pause
 
 ## 1.2.2
 - #312 - Broken for ActiveSupport 5.2.0

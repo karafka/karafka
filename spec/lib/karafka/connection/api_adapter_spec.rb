@@ -115,7 +115,7 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     let(:partition) { 0 }
 
     it 'expect not to have anything else except timeout in the settings hash' do
-      expect(config.last.keys.sort).to eq %i[timeout]
+      expect(config.last.keys.sort).to eq %i[timeout max_timeout exponential_backoff].sort
     end
 
     it 'expect to have topic name as a first argument' do

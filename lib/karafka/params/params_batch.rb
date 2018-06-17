@@ -22,19 +22,30 @@ module Karafka
       # @note Invocation of this method will cause loading and parsing each param after another.
       #   If you want to get access without parsing, please access params_batch directly
       def each
-        @params_batch.each { |param| yield(param.retrieve!) }
+        @params_batch.each { |param| yield(param.parse!) }
       end
 
       # @return [Array<Karafka::Params::Params>] returns all the params in a loaded state, so they
       #   can be used for batch insert, etc. Without invoking all, up until first use, they won't
       #   be parsed
-      def parsed
+      def parse!
         each(&:itself)
       end
 
-      # @return [Karafka::Params::Params] last element after the unparsing process
+      # @return [Array<Object>] array with parsed values. This method can be useful when we don't
+      #   care about metadata and just want to extract all the data values from the batch
+      def values
+        parse!.map(&:value)
+      end
+
+      # @return [Karafka::Params::Params] first element after the parsing process
+      def first
+        @params_batch.first.parse!
+      end
+
+      # @return [Karafka::Params::Params] last element after the parsing process
       def last
-        @params_batch.last.retrieve!
+        @params_batch.last.parse!
       end
 
       # @return [Array<Karafka::Params::Params>] pure array with params (not parsed)

@@ -16,6 +16,8 @@ module Karafka
       # @note After it is done drawing it will store and validate all the routes to make sure that
       #   they are correct and that there are no topic/group duplications (this is forbidden)
       # @yield Evaluates provided block in a builder context so we can describe routes
+      # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
+      #   doesn't match with ConfigurationSchema
       # @example
       #   draw do
       #     topic :xyz do
@@ -27,8 +29,8 @@ module Karafka
         each do |consumer_group|
           hashed_group = consumer_group.to_h
           validation_result = Karafka::Schemas::ConsumerGroup.call(hashed_group)
-          return if validation_result.success?
-          raise Errors::InvalidConfiguration, validation_result.errors
+          next if validation_result.success?
+          raise Errors::InvalidConfigurationError, validation_result.errors
         end
       end
 

@@ -15,10 +15,10 @@ module Karafka
       end
 
       # @return [Karafka::Connection::Client] persisted messages consumer client
-      # @raise [Karafka::Errors::MissingConsumer] raised when no thread messages consumer
+      # @raise [Karafka::Errors::MissingClientError] raised when no thread messages consumer
       #   client but we try to use it anyway
       def self.read
-        Thread.current[PERSISTENCE_SCOPE] || raise(Errors::MissingClient)
+        Thread.current[PERSISTENCE_SCOPE] || raise(Errors::MissingClientError)
       end
     end
   end
