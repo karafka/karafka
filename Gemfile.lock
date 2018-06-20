@@ -25,7 +25,7 @@ GEM
       tzinfo (~> 1.1)
     benchmark-ips (2.7.2)
     concurrent-ruby (1.0.5)
-    delivery_boy (0.2.6)
+    delivery_boy (0.2.7)
       king_konf (~> 0.2)
       ruby-kafka (~> 0.5)
     diff-lcs (1.3)
