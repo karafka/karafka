@@ -29,7 +29,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
 
     before do
       Karafka::Persistence::Client.write(client)
-      Thread.current[:consumers].clear
+      Thread.current[:consumers]&.clear
     end
 
     after { Thread.current[:client] = nil }
