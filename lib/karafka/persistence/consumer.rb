@@ -19,11 +19,6 @@ module Karafka
           Thread.current[PERSISTENCE_SCOPE] ||= initial_state
         end
 
-        # Clears current thread's persistence scope
-        def clear
-          Thread.current[PERSISTENCE_SCOPE] = initial_state
-        end
-
         # Used to build (if block given) and/or fetch a current consumer instance that will be
         #   used to process messages from a given topic and partition
         # @return [Karafka::BaseConsumer] base consumer descendant
