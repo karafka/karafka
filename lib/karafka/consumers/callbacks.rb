@@ -24,7 +24,7 @@ module Karafka
           # @param method_name [Symbol, String] method name or nil if we plan to provide a block
           # @yield A block with a code that should be executed before scheduling
           define_method(type) do |method_name = nil, &block|
-            key = "consumers.#{Helpers::Inflector.map(self)}.#{type}"
+            key = "consumers.#{Helpers::Inflector.map(to_s)}.#{type}"
             Karafka::App.events.register_event(key)
 
             Karafka::App.events.subscribe(key) do |event|
@@ -53,7 +53,7 @@ module Karafka
       def call
         if self.class.respond_to?(:after_fetch)
           Karafka::App.events.publish(
-            "consumers.#{Helpers::Inflector.map!(self.class)}.after_fetch",
+            "consumers.#{Helpers::Inflector.map(self.class.to_s)}.after_fetch",
             context: self
           )
         end
