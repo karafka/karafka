@@ -4,6 +4,7 @@ PATH
     karafka (1.2.5)
       activesupport (>= 4.0)
       dry-configurable (~> 0.7)
+      dry-events (~> 0.1)
       dry-inflector (~> 0.1.1)
       dry-monitor (~> 0.1)
       dry-validation (~> 0.11)

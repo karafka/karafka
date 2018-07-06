@@ -20,7 +20,17 @@ RSpec.describe Karafka::Patches::RubyKafka do
     let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
     let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s, persistent: false) }
 
-    before { Karafka::Persistence::Client.write(client) }
+    let(:consumer_instance) do
+      Karafka::Persistence::Consumer.fetch(
+        instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
+        0
+      )
+    end
+
+    before do
+      Karafka::Persistence::Client.write(client)
+      Thread.current[:consumers]&.clear
+    end
 
     after { Thread.current[:client] = nil }
 
@@ -35,34 +45,85 @@ RSpec.describe Karafka::Patches::RubyKafka do
         expect(client).to receive(:stop)
         kafka_consumer.consumer_loop
       end
+
+      context 'when there are consumer instances with before_stop callback' do
+        let(:verifier_double) { double }
+
+        let(:consumer) do
+          ClassBuilder.inherit(Karafka::BaseConsumer) do
+            include Karafka::Consumers::Callbacks
+
+            before_stop { verifier.verify }
+          end
+        end
+
+        it 'expect to run the callback and not yield control' do
+          expect(consumer_instance).to receive(:verifier).and_return(verifier_double)
+          expect(verifier_double).to receive(:verify)
+
+          expect { |block| kafka_consumer.consumer_loop(&block) }.not_to yield_control
+        end
+      end
     end
 
     context 'when karafka is running' do
       before { allow(Karafka::App).to receive(:stopping?).and_return(false) }
 
-      it 'expect to yield the original base block' do
-        expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
-      end
-    end
+      context 'when there are consumer instances without callbacks' do
+        let(:consumer) do
+          ClassBuilder.inherit(Karafka::BaseConsumer) do
+          end
+        end
 
-    context 'when there are consumer instances with callbacks' do
-      let(:consumer) do
-        ClassBuilder.inherit(Karafka::BaseConsumer) do
-          include Karafka::Consumers::Callbacks
+        it 'expect to yield the original base block' do
+          # Make sure Consumer cache contains the instance of our consumer
+          consumer_instance
+
+          expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
         end
       end
 
-      before do
-        Karafka::Persistence::Consumer.fetch(
-          instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
-          0
-        )
+      context 'when there are consumer instances with callbacks' do
+        let(:verifier_double) { double }
 
-        allow(Karafka::App).to receive(:stopping?).and_return(false)
-      end
+        before { allow(consumer_instance).to receive(:verifier).and_return(verifier_double) }
 
-      it 'expect to yield the original base block' do
-        expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
+        context 'when using before_poll callback' do
+          let(:consumer) do
+            ClassBuilder.inherit(Karafka::BaseConsumer) do
+              include Karafka::Consumers::Callbacks
+
+              before_poll do
+                verifier.verify
+              end
+            end
+          end
+
+          it 'expect to run the callback and yield the original base block' do
+            expect(verifier_double).to receive(:verify)
+            expect(Karafka::App).to receive(:stopping?).and_return(false)
+
+            expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
+          end
+        end
+
+        context 'when using after_poll callback' do
+          let(:consumer) do
+            ClassBuilder.inherit(Karafka::BaseConsumer) do
+              include Karafka::Consumers::Callbacks
+
+              after_poll do
+                verifier.verify
+              end
+            end
+          end
+
+          it 'expect to run the callback and yield the original base block' do
+            expect(verifier_double).to receive(:verify)
+
+            expect { |block| kafka_consumer.consumer_loop(&block) }.to yield_control
+          end
+        end
       end
     end
   end

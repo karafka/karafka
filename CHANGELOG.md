@@ -24,6 +24,7 @@
 
 ## 1.2.3
 - #313 - support PLAINTEXT and SSL for scheme
+- #288 - drop activesupport callbacks in favor of notifications
 - #320 - Pausing indefinetely with nil pause timeout doesn't work
 - #318 - Partition pausing doesn't work with custom topic mappers
 - Rename ConfigAdapter to ApiAdapter to better reflect what it does

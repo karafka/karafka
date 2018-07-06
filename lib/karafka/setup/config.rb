@@ -13,7 +13,6 @@ module Karafka
     # @see Karafka::Setup::Configurators::Base for more details about configurators api
     class Config
       extend Dry::Configurable
-      extend Callbacks::Config
 
       # Available settings
       # option client_id [String] kafka client_id - used to provide

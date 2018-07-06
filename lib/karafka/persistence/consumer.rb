@@ -12,7 +12,7 @@ module Karafka
       PERSISTENCE_SCOPE = :consumers
 
       class << self
-        # @return [Hash] current thread persistence scope hash with all the consumers
+        # @return [Hash] current thread's persistence scope hash with all the consumers
         def all
           # @note This does not need to be threadsafe (Hash) as it is always executed in a
           # current thread context
