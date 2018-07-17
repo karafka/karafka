@@ -2,6 +2,7 @@
 
 ## 1.2.5 Unreleased
 - #354 - Expose consumer heartbeat
+- #373 - Async producer not working properly with responders
 
 ## 1.2.4
 - #332 - Fetcher for max queue size
