@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 1.2.5 Unreleased
+## 1.2.5
 - #354 - Expose consumer heartbeat
 - #373 - Async producer not working properly with responders
 
