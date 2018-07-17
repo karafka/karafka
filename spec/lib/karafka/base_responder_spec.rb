@@ -190,44 +190,45 @@ RSpec.describe Karafka::BaseResponder do
     end
 
     describe '#deliver!' do
-      before { responder.instance_variable_set(:'@messages_buffer', messages_buffer) }
+      context 'when there are messages to be delivered in a sync way' do
+        let(:topic_name) { rand.to_s }
+        let(:message) { { rand.to_s => rand.to_s } }
+        let(:working_class) do
+          name = topic_name
+          ClassBuilder.inherit(described_class) do
+            topic name
 
-      context 'when there is nothing to deliver' do
-        let(:messages_buffer) { {} }
-
-        it 'expect to do nothing' do
-          expect(sync_producer).not_to receive(:call)
-          responder.send(:deliver!)
-        end
-      end
-
-      context 'when there are messages to be delivered for sync sync_producer' do
-        let(:topic) { rand.to_s }
-        let(:messages_buffer) { { topic => data_elements } }
-        let(:data_elements) { [[rand, { topic: topic }]] }
-
-        after { responder.send(:deliver!) }
-
-        it 'expect to deliver them using waterdrop' do
-          data_elements.each do |data, options|
-            expect(sync_producer).to receive(:call).with(data, options.merge(topic: topic))
-          end
-        end
-      end
-
-      context 'when there are messages to be delivered for async sync_producer' do
-        let(:messages_buffer) { { rand => [[rand, { async: true }]] } }
-
-        after { responder.send(:deliver!) }
-
-        it 'expect to deliver them using waterdrop' do
-          messages_buffer.each_value do |data_elements|
-            data_elements.each do |data, options|
-              expect(sync_producer).not_to receive(:call)
-
-              expect(async_producer).to receive(:call).with(data, options)
+            define_method :respond do |data|
+              respond_to name, data
             end
           end
+        end
+
+        after { working_class.call(message) }
+
+        it 'expect to deliver them using waterdrop sync producer' do
+          expect(sync_producer).to receive(:call).with(message.to_json, topic: topic_name)
+        end
+      end
+
+      context 'when there are messages to be delivered in an async way' do
+        let(:topic_name) { rand.to_s }
+        let(:message) { { rand.to_s => rand.to_s } }
+        let(:working_class) do
+          name = topic_name
+          ClassBuilder.inherit(described_class) do
+            topic name, async: true
+
+            define_method :respond do |data|
+              respond_to name, data
+            end
+          end
+        end
+
+        after { working_class.call(message) }
+
+        it 'expect to deliver them using waterdrop sync producer' do
+          expect(async_producer).to receive(:call).with(message.to_json, topic: topic_name)
         end
       end
     end
