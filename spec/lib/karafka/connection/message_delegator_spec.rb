@@ -5,7 +5,8 @@ RSpec.describe Karafka::Connection::MessageDelegator do
 
   let(:group_id) { consumer_group.id }
   let(:topic_id) { consumer_group.topics[0].name }
-  let(:consumer_instance) { consumer_group.topics[0].consumer.new }
+  let(:topic) { Karafka::Routing::Topic.new(rand, consumer_group) }
+  let(:consumer_instance) { consumer_group.topics[0].consumer.new(topic) }
   let(:raw_message_value) { rand }
   let(:raw_message) do
     Kafka::FetchedMessage.new(

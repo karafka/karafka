@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Consumers::Callbacks do
-  subject(:base_consumer) { working_class.new }
+  subject(:base_consumer) { working_class.new(topic) }
 
   let(:topic_name) { "topic#{rand}" }
   let(:backend) { :inline }
@@ -34,8 +34,6 @@ RSpec.describe Karafka::Consumers::Callbacks do
       end
     end
   end
-
-  before { working_class.topic = topic }
 
   describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(Karafka::BaseConsumer) }
@@ -76,7 +74,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
           def process
             verifier.process
           end
-        end.new
+        end.new(topic)
       end
 
       it 'calls after_fetch callback and executes' do
@@ -108,7 +106,7 @@ RSpec.describe Karafka::Consumers::Callbacks do
           def process
             verifier.process
           end
-        end.new
+        end.new(topic)
       end
 
       it 'calls after_fetch_method and executes' do

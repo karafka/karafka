@@ -88,10 +88,10 @@ module Karafka
         # Logs info about responder usage withing a controller flow
         # @param event [Dry::Events::Event] event details including payload
         def on_consumers_responders_respond_with(event)
-          calling = event[:caller].class
+          calling = event[:caller]
           responder = calling.topic.responder
           data = event[:data]
-          info "Responded from #{calling} using #{responder} with following data #{data}"
+          info "Responded from #{calling.class} using #{responder} with following data #{data}"
         end
 
         # Logs info that we're initializing Karafka app

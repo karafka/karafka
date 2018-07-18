@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Consumers::SingleParams do
-  subject(:consumer) { consumer_class.new }
+  subject(:consumer) { consumer_class.new(topic) }
 
   let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
   let(:params_batch) { [{ 'value' => {}.to_json }] }
@@ -17,8 +17,7 @@ RSpec.describe Karafka::Consumers::SingleParams do
   end
 
   before do
-    consumer_class.include(described_class)
-    consumer_class.topic = topic
+    consumer.extend(described_class)
     consumer.params_batch = params_batch
   end
 

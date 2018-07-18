@@ -20,22 +20,15 @@ module Karafka
       private delegated_method_name
     end
 
-    class << self
-      attr_reader :topic
-
-      # Assigns a topic to a consumer and builds up proper consumer functionalities
-      #   so that it can cooperate with the topic settings
-      # @param topic [Karafka::Routing::Topic]
-      # @return [Karafka::Routing::Topic] assigned topic
-      def topic=(topic)
-        @topic = topic
-        Consumers::Includer.call(self)
-      end
-    end
-
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
-    def topic
-      self.class.topic
+    attr_reader :topic
+
+    # Assigns a topic to a consumer and builds up proper consumer functionalities
+    #   so that it can cooperate with the topic settings
+    # @param topic [Karafka::Routing::Topic]
+    def initialize(topic)
+      @topic = topic
+      Consumers::Includer.call(self)
     end
 
     # Creates lazy loaded params batch object
