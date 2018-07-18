@@ -9,7 +9,7 @@ RSpec.describe Karafka::Persistence::Consumer do
     let(:topic) do
       Karafka::Routing::Topic.new(
         rand,
-        Karafka::Routing::ConsumerGroup.new(rand),
+        Karafka::Routing::ConsumerGroup.new(rand)
       ).tap do |topic|
         topic.consumer = Class.new(Karafka::BaseConsumer)
       end
