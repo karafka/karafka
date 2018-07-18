@@ -56,11 +56,8 @@ RSpec.describe Karafka::Params::Params do
 
         it 'expect to build with additional values and value' do
           Timecop.freeze do
-            # We symbolize keys as hash with indifferent access will compare with
-            # a hash against string keys. This does not matter when accessing via
-            # string or symbols for single arguments
             params = params_class.build(message, parser)
-            expect(params.symbolize_keys).to eq params_attributes
+            expect(params.transform_keys(&:to_sym)).to eq params_attributes
           end
         end
       end
