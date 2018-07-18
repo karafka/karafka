@@ -38,7 +38,6 @@ module Karafka
           parser
           responder
           batch_consuming
-          persistent
         ]).uniq
       end
 
