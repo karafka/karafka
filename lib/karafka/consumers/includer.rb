@@ -27,7 +27,7 @@ module Karafka
         # @param topic [Karafka::Routing::Topic] topic of a consumer class
         def bind_backend(consumer, topic)
           backend = Kernel.const_get("::Karafka::Backends::#{topic.backend.to_s.capitalize}")
-          consumer.extend backend
+          consumer.extend(backend)
         end
 
         # Adds a single #params support for non batch processed topics
@@ -35,7 +35,7 @@ module Karafka
         # @param topic [Karafka::Routing::Topic] topic of a consumer class
         def bind_params(consumer, topic)
           return if topic.batch_consuming
-          consumer.extend SingleParams
+          consumer.extend(SingleParams)
         end
 
         # Adds responders support for topics and consumers with responders defined for them
@@ -43,7 +43,7 @@ module Karafka
         # @param topic [Karafka::Routing::Topic] topic of a consumer class
         def bind_responders(consumer, topic)
           return unless topic.responder
-          consumer.extend Responders
+          consumer.extend(Responders)
         end
       end
     end
