@@ -18,11 +18,11 @@ RSpec.describe Karafka::Patches::RubyKafka do
 
   describe '#consumer_loop' do
     let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
-    let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s, persistent: false) }
+    let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s) }
 
     let(:consumer_instance) do
       Karafka::Persistence::Consumer.fetch(
-        instance_double(Karafka::Routing::Topic, consumer: consumer, persistent: true),
+        instance_double(Karafka::Routing::Topic, consumer: consumer),
         0
       )
     end

@@ -25,12 +25,7 @@ module Karafka
         # @param topic [Karafka::Routing::Topic] topic instance for which we might cache
         # @param partition [Integer] number of partition for which we want to cache
         def fetch(topic, partition)
-          # We always store a current instance for callback reasons
-          if topic.persistent
-            all[topic][partition] ||= topic.consumer.new
-          else
-            all[topic][partition] = topic.consumer.new
-          end
+          all[topic][partition] ||= topic.consumer.new
         end
       end
     end
