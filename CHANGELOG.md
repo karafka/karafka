@@ -16,6 +16,7 @@
 - #363 - Too shallow ruby-kafka version lock
 - #354 - Expose consumer heartbeat
 - #377 - Remove the persistent setup in favor of persistence
+- #375 - Sidekiq Backend parser mismatch
 
 ## 1.2.5
 - #354 - Expose consumer heartbeat
