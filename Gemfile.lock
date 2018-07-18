@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     karafka (1.2.5)
-      activesupport (>= 4.0)
       dry-configurable (~> 0.7)
       dry-events (~> 0.1)
       dry-inflector (~> 0.1.1)
@@ -19,11 +18,6 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (5.2.0)
-      concurrent-ruby (~> 1.0, >= 1.0.2)
-      i18n (>= 0.7, < 2)
-      minitest (~> 5.1)
-      tzinfo (~> 1.1)
     benchmark-ips (2.7.2)
     concurrent-ruby (1.0.5)
     delivery_boy (0.2.7)
@@ -69,11 +63,8 @@ GEM
       dry-types (~> 0.13.1)
     envlogic (1.1.0)
       dry-inflector (~> 0.1)
-    i18n (1.0.1)
-      concurrent-ruby (~> 1.0)
     json (2.1.0)
     king_konf (0.3.6)
-    minitest (5.11.3)
     multi_json (1.13.1)
     null-logger (0.1.5)
     rake (12.3.1)
@@ -99,10 +90,7 @@ GEM
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
     thor (0.20.0)
-    thread_safe (0.3.6)
     timecop (0.9.1)
-    tzinfo (1.2.5)
-      thread_safe (~> 0.1)
     waterdrop (1.2.2)
       delivery_boy (~> 0.2)
       dry-configurable (~> 0.7)

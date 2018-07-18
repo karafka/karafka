@@ -11,7 +11,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   timecop
   fiddle
   tempfile
-  active_support/hash_with_indifferent_access
 ].each do |lib|
   require lib
 end

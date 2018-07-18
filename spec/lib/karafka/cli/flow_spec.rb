@@ -30,7 +30,12 @@ RSpec.describe Karafka::Cli::Flow do
       end
 
       let(:consumer_groups) { [consumer_group] }
-      let(:responder) { instance_double(Karafka::BaseResponder, topics: topics) }
+      let(:responder) do
+        declared_topics = topics
+        Class.new(Karafka::BaseResponder) do
+          declared_topics.each(&method(:topic))
+        end
+      end
       let(:topic) { "topic#{rand(1000)}" }
 
       before do
@@ -38,7 +43,7 @@ RSpec.describe Karafka::Cli::Flow do
       end
 
       context 'when they are without outgoing topics' do
-        let(:topics) { nil }
+        let(:topics) { [] }
 
         it 'expect to print that the flow is terminated' do
           expect(flow_cli).to receive(:puts).with("#{topic} => (nothing)")

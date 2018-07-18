@@ -18,6 +18,7 @@
 - #377 - Remove the persistent setup in favor of persistence
 - #375 - Sidekiq Backend parser mismatch
 - #369 - Single consumer can support more than one topic
+- #288 - Drop dependency on `activesupport` gem
 
 ## 1.2.5
 - #354 - Expose consumer heartbeat
