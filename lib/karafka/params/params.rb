@@ -53,7 +53,6 @@ module Karafka
         #   Karafka::Params::Params.build(message) #=> params object
         def build(message, parser)
           instance = new
-          instance['parser'] = parser
 
           # Non kafka fetched message can happen when we interchange data with an
           # additional backend
@@ -73,6 +72,9 @@ module Karafka
           else
             instance.merge!(message)
           end
+
+          # This needs to be set last, so it won't be overwritten in case of message merge
+          instance['parser'] = parser
 
           instance
         end

@@ -15,6 +15,7 @@
 - #356 - Provide a `#values` for params_batch to extract only values of objects from the params_batch
 - #363 - Too shallow ruby-kafka version lock
 - #354 - Expose consumer heartbeat
+- #375 - Sidekiq Backend parser mismatch
 
 ## 1.2.5
 - #354 - Expose consumer heartbeat
