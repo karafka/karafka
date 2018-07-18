@@ -56,8 +56,9 @@ RSpec.describe Karafka::Params::Params do
 
         it 'expect to build with additional values and value' do
           Timecop.freeze do
-            params = params_class.build(message, parser)
-            expect(params.transform_keys(&:to_sym)).to eq params_attributes
+            stringified = {}
+            params_class.build(message, parser).each { |k, v| stringified[k.to_sym] = v }
+            expect(stringified).to eq params_attributes
           end
         end
       end
