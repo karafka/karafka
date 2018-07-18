@@ -10,11 +10,15 @@ RSpec.describe Karafka::Params::Params do
       let(:parser) { Karafka::Parsers::Json }
 
       context 'when we build from a hash' do
-        let(:message) { { rand => rand } }
+        let(:message) { { rand => rand, 'parser' => rand.to_s } }
+        let(:params) { params_class.build(message, parser) }
 
         it 'expect to build based on a message' do
-          params = params_class.build(message, parser)
-          expect(params.symbolize_keys).to eq message.merge(parser: parser)
+          expect(params).to eq message.merge('parser' => parser)
+        end
+
+        it 'expect not to overwrite parser' do
+          expect(params['parser']).to eq parser
         end
       end
 
