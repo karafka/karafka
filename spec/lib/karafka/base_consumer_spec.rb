@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::BaseConsumer do
-  subject(:base_consumer) { working_class.new }
+  subject(:base_consumer) { working_class.new(topic) }
 
   let(:topic_name) { "topic#{rand}" }
   let(:backend) { :inline }
@@ -25,8 +25,6 @@ RSpec.describe Karafka::BaseConsumer do
     end
   end
 
-  before { working_class.topic = topic }
-
   describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(described_class) }
 
@@ -46,9 +44,8 @@ RSpec.describe Karafka::BaseConsumer do
     let(:params_batch) { instance_double(Karafka::Params::ParamsBatch) }
     let(:topic_parser) { Karafka::Parsers::Json }
     let(:p_args) { [messages, topic_parser] }
-
-    before do
-      working_class.topic = instance_double(
+    let(:topic) do
+      instance_double(
         Karafka::Routing::Topic,
         parser: topic_parser,
         backend: :inline,

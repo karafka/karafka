@@ -7,11 +7,12 @@ RSpec.describe Karafka::Persistence::Consumer do
     let(:partition) { 1 }
     let(:topic_id) { rand.to_s }
     let(:topic) do
-      instance_double(
-        Karafka::Routing::Topic,
-        id: topic_id,
-        consumer: Karafka::BaseConsumer
-      )
+      Karafka::Routing::Topic.new(
+        rand,
+        Karafka::Routing::ConsumerGroup.new(rand),
+      ).tap do |topic|
+        topic.consumer = Class.new(Karafka::BaseConsumer)
+      end
     end
 
     it 'expect to cache it' do

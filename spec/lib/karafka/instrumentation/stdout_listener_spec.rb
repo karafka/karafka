@@ -112,18 +112,14 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   describe '#on_consumers_responders_respond_with' do
     subject(:trigger) { described_class.on_consumers_responders_respond_with(event) }
 
-    let(:controller_instance) { controller_class.new }
+    let(:consumer_instance) { consumer_class.new(topic) }
     let(:data) { [rand] }
-    let(:payload) { { caller: controller_instance, data: data } }
+    let(:payload) { { caller: consumer_instance, data: data } }
     let(:responder) { Karafka::BaseResponder }
     let(:message) do
-      "Responded from #{controller_instance.class} using #{responder} with following data #{data}"
+      "Responded from #{consumer_instance.class} using #{responder} with following data #{data}"
     end
-    let(:controller_class) do
-      ClassBuilder.inherit(Karafka::BaseConsumer).tap do |klass|
-        klass.topic = topic
-      end
-    end
+    let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
     let(:topic) do
       instance_double(
         Karafka::Routing::Topic,

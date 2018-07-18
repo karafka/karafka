@@ -29,7 +29,6 @@ module Karafka
       # example for Sidekiq
       def build
         Karafka::AttributesMap.topic.each { |attr| send(attr) }
-        consumer&.topic = self
         self
       end
 

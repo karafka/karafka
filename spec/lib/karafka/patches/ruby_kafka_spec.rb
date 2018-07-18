@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Patches::RubyKafka do
-  subject(:kafka_consumer) { kafka_consumer_class.new }
+  subject(:kafka_consumer) { kafka_consumer_class.new(topic) }
 
   # It would be really heavy to test out kafka, so instead of that we just can
   # stub whole kafka consumer and just check that our behavior is as we expect
   let(:kafka_consumer_class) do
-    klass = ClassBuilder.build do
+    klass = ClassBuilder.inherit(Karafka::BaseConsumer) do
       def consumer_loop
         yield
       end
@@ -18,13 +18,14 @@ RSpec.describe Karafka::Patches::RubyKafka do
 
   describe '#consumer_loop' do
     let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
-    let(:topic) { instance_double(Karafka::Routing::Topic, id: rand.to_s) }
-
-    let(:consumer_instance) do
-      Karafka::Persistence::Consumer.fetch(
-        instance_double(Karafka::Routing::Topic, consumer: consumer),
-        0
-      )
+    let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
+    let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand) }
+    let(:consumer_instance) { Karafka::Persistence::Consumer.fetch(topic, 0) }
+    let(:topic) do
+      consumer = consumer_class
+      Karafka::Routing::Topic
+        .new(rand, consumer_group)
+        .tap { |topic| topic.consumer = consumer }
     end
 
     before do
@@ -49,7 +50,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
       context 'when there are consumer instances with before_stop callback' do
         let(:verifier_double) { double }
 
-        let(:consumer) do
+        let(:consumer_class) do
           ClassBuilder.inherit(Karafka::BaseConsumer) do
             include Karafka::Consumers::Callbacks
 
@@ -70,7 +71,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
       before { allow(Karafka::App).to receive(:stopping?).and_return(false) }
 
       context 'when there are consumer instances without callbacks' do
-        let(:consumer) do
+        let(:consumer_class) do
           ClassBuilder.inherit(Karafka::BaseConsumer) do
           end
         end
@@ -89,7 +90,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
         before { allow(consumer_instance).to receive(:verifier).and_return(verifier_double) }
 
         context 'when using before_poll callback' do
-          let(:consumer) do
+          let(:consumer_class) do
             ClassBuilder.inherit(Karafka::BaseConsumer) do
               include Karafka::Consumers::Callbacks
 
@@ -108,7 +109,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
         end
 
         context 'when using after_poll callback' do
-          let(:consumer) do
+          let(:consumer_class) do
             ClassBuilder.inherit(Karafka::BaseConsumer) do
               include Karafka::Consumers::Callbacks
 
