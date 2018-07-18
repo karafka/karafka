@@ -4,7 +4,6 @@
 module Karafka
   # Base consumer from which all Karafka consumers should inherit
   class BaseConsumer
-    extend ActiveSupport::DescendantsTracker
     extend Forwardable
 
     # Allows us to mark messages as consumed for non-automatic mode without having
