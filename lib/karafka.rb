@@ -17,11 +17,13 @@
   karafka/loader
 ].each(&method(:require))
 
-Rails.logger.extend(
-  ActiveSupport::Logger.broadcast(
-    ActiveSupport::Logger.new($stdout)
+if Rails.env.development?
+  Rails.logger.extend(
+    ActiveSupport::Logger.broadcast(
+      ActiveSupport::Logger.new($stdout)
+    )
   )
-) if Rails.env.development?
+end
 
 # Karafka library
 module Karafka
