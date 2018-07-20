@@ -19,6 +19,7 @@
 - #375 - Sidekiq Backend parser mismatch
 - #369 - Single consumer can support more than one topic
 - #288 - Drop dependency on `activesupport` gem
+- #382 - Full logging with AR, etc for development mode when there is Rails integration
 
 ## 1.2.5
 - #354 - Expose consumer heartbeat
