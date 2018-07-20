@@ -7,11 +7,20 @@ Bundler.require(:default, ENV['KARAFKA_ENV'])
 Karafka::Loader.load(Karafka::App.root)
 
 # Ruby on Rails setup
-# Remove whole non-Rails setup that is above and uncomment the 4 lines below
+# Remove whole non-Rails setup that is above and uncomment the lines below
 # ENV['RAILS_ENV'] ||= 'development'
 # ENV['KARAFKA_ENV'] = ENV['RAILS_ENV']
 # require ::File.expand_path('../config/environment', __FILE__)
 # Rails.application.eager_load!
+#
+# This lines will make Karafka print to stdout like puma or unicorn
+# if Rails.env.development?
+#   Rails.logger.extend(
+#     ActiveSupport::Logger.broadcast(
+#       ActiveSupport::Logger.new($stdout)
+#     )
+#   )
+# end
 
 class KarafkaApp < Karafka::App
   setup do |config|

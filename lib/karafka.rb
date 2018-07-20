@@ -17,14 +17,6 @@
   karafka/loader
 ].each(&method(:require))
 
-if Rails.env.development?
-  Rails.logger.extend(
-    ActiveSupport::Logger.broadcast(
-      ActiveSupport::Logger.new($stdout)
-    )
-  )
-end
-
 # Karafka library
 module Karafka
   extend Envlogic
