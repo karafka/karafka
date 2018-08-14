@@ -4,32 +4,31 @@
 module Karafka
   # Base consumer from which all Karafka consumers should inherit
   class BaseConsumer
-    extend ActiveSupport::DescendantsTracker
     extend Forwardable
 
     # Allows us to mark messages as consumed for non-automatic mode without having
     # to use consumer client directly. We do this that way, because most of the people should not
     # mess with the client instance directly (just in case)
-    def_delegator :client, :mark_as_consumed
+    %i[
+      mark_as_consumed
+      mark_as_consumed!
+      trigger_heartbeat
+      trigger_heartbeat!
+    ].each do |delegated_method_name|
+      def_delegator :client, delegated_method_name
 
-    private :mark_as_consumed
-
-    class << self
-      attr_reader :topic
-
-      # Assigns a topic to a consumer and builds up proper consumer functionalities
-      #   so that it can cooperate with the topic settings
-      # @param topic [Karafka::Routing::Topic]
-      # @return [Karafka::Routing::Topic] assigned topic
-      def topic=(topic)
-        @topic = topic
-        Consumers::Includer.call(self)
-      end
+      private delegated_method_name
     end
 
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
-    def topic
-      self.class.topic
+    attr_reader :topic
+
+    # Assigns a topic to a consumer and builds up proper consumer functionalities
+    #   so that it can cooperate with the topic settings
+    # @param topic [Karafka::Routing::Topic]
+    def initialize(topic)
+      @topic = topic
+      Consumers::Includer.call(self)
     end
 
     # Creates lazy loaded params batch object

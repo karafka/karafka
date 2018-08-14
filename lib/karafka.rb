@@ -11,9 +11,9 @@
   require_all
   dry-configurable
   dry-validation
+  dry/events/publisher
   dry/inflector
   dry/monitor/notifications
-  active_support/callbacks
   karafka/loader
 ].each(&method(:require))
 
@@ -30,6 +30,13 @@ module Karafka
     # @return [::Karafka::Monitor] monitor that we want to use
     def monitor
       @monitor ||= App.config.monitor
+    end
+
+    # @return [::Karafka::EventPublisher] event publisher we want to use.
+    # @note We don't need to ensure that it is not executed in a thread for the first time
+    # (assingment is not thread-safe) as it gets used during the non-threaded boot process.
+    def events
+      @events ||= Instrumentation::EventPublisher.new
     end
 
     # @return [String] root path of this gem
@@ -63,8 +70,6 @@ module Karafka
 end
 
 %w[
-  callbacks
-  callbacks/*
   setup/dsl
   setup/config
   status

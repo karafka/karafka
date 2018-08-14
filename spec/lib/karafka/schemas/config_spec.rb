@@ -7,8 +7,7 @@ RSpec.describe Karafka::Schemas::Config do
     {
       client_id: 'name',
       topic_mapper: Karafka::Routing::TopicMapper,
-      shutdown_timeout: 10,
-      params_base_class: Hash
+      shutdown_timeout: 10
     }
   end
 
@@ -45,14 +44,6 @@ RSpec.describe Karafka::Schemas::Config do
 
     context 'when shutdown_timeout is less then 0' do
       before { config[:shutdown_timeout] = -2 }
-
-      it { expect(schema.call(config)).not_to be_success }
-    end
-  end
-
-  context 'when we validate params_base_class' do
-    context 'when params_base_class are missing' do
-      before { config[:params_base_class] = nil }
 
       it { expect(schema.call(config)).not_to be_success }
     end

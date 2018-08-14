@@ -59,17 +59,14 @@ module Karafka
   #     end
   #   end
   class BaseResponder
-    # Definitions of all topics that we want to be able to use in this responder should go here
-    class_attribute :topics
-
-    # Schema that we can use to control and/or require some additional details upon options
-    # that are being passed to the producer. This can be in particular useful if we want to make
-    # sure that for example partition_key is always present.
-    class_attribute :options_schema
-
-    attr_reader :messages_buffer
-
     class << self
+      # Definitions of all topics that we want to be able to use in this responder should go here
+      attr_accessor :topics
+      # Schema that we can use to control and/or require some additional details upon options
+      # that are being passed to the producer. This can be in particular useful if we want to make
+      # sure that for example partition_key is always present.
+      attr_accessor :options_schema
+
       # Registers a topic as on to which we will be able to respond
       # @param topic_name [Symbol, String] name of topic to which we want to respond
       # @param options [Hash] hash with optional configuration details
@@ -92,6 +89,8 @@ module Karafka
         new.call(*data)
       end
     end
+
+    attr_reader :messages_buffer
 
     # Creates a responder object
     # @param parser_class [Class] parser class that we can use to generate appropriate string
@@ -141,7 +140,7 @@ module Karafka
 
       return if result.success?
 
-      raise Karafka::Errors::InvalidResponderUsage, result.errors
+      raise Karafka::Errors::InvalidResponderUsageError, result.errors
     end
 
     # Checks if we met all the options requirements before sending them to the producer.
@@ -152,7 +151,7 @@ module Karafka
         messages_set.each do |message_data|
           result = self.class.options_schema.call(message_data.last)
           next if result.success?
-          raise Karafka::Errors::InvalidResponderMessageOptions, result.errors
+          raise Karafka::Errors::InvalidResponderMessageOptionsError, result.errors
         end
       end
     end

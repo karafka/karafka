@@ -59,8 +59,8 @@ RSpec.describe Karafka::Server do
     end
   end
 
-  describe '#start_supervised' do
-    after { server_class.send(:start_supervised) }
+  describe '#run_supervised' do
+    after { server_class.send(:run_supervised) }
 
     it 'expect to supervise and run' do
       expect(Karafka::Process.instance).to receive(:supervise)

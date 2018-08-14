@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::BaseConsumer do
-  subject(:base_consumer) { working_class.new }
+  subject(:base_consumer) { working_class.new(topic) }
 
   let(:topic_name) { "topic#{rand}" }
   let(:backend) { :inline }
@@ -25,8 +25,6 @@ RSpec.describe Karafka::BaseConsumer do
     end
   end
 
-  before { working_class.topic = topic }
-
   describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(described_class) }
 
@@ -46,9 +44,8 @@ RSpec.describe Karafka::BaseConsumer do
     let(:params_batch) { instance_double(Karafka::Params::ParamsBatch) }
     let(:topic_parser) { Karafka::Parsers::Json }
     let(:p_args) { [messages, topic_parser] }
-
-    before do
-      working_class.topic = instance_double(
+    let(:topic) do
+      instance_double(
         Karafka::Routing::Topic,
         parser: topic_parser,
         backend: :inline,
@@ -103,6 +100,40 @@ RSpec.describe Karafka::BaseConsumer do
     it 'expect to proxy pass to client' do
       expect(client).to receive(:mark_as_consumed).with(params)
       base_consumer.send(:mark_as_consumed, params)
+    end
+  end
+
+  describe '#mark_as_consumed!' do
+    let(:client) { instance_double(Karafka::Connection::Client) }
+    let(:params) { instance_double(Karafka::Params::Params) }
+
+    before { Karafka::Persistence::Client.write(client) }
+
+    it 'expect to proxy pass to client' do
+      expect(client).to receive(:mark_as_consumed!).with(params)
+      base_consumer.send(:mark_as_consumed!, params)
+    end
+  end
+
+  describe 'trigger_heartbeat' do
+    let(:client) { instance_double(Karafka::Connection::Client) }
+
+    before { Karafka::Persistence::Client.write(client) }
+
+    it 'expect to proxy pass to client' do
+      expect(client).to receive(:trigger_heartbeat)
+      base_consumer.send(:trigger_heartbeat)
+    end
+  end
+
+  describe 'trigger_heartbeat!' do
+    let(:client) { instance_double(Karafka::Connection::Client) }
+
+    before { Karafka::Persistence::Client.write(client) }
+
+    it 'expect to proxy pass to client' do
+      expect(client).to receive(:trigger_heartbeat!)
+      base_consumer.send(:trigger_heartbeat!)
     end
   end
 end

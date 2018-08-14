@@ -11,7 +11,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   timecop
   fiddle
   tempfile
-  active_support/hash_with_indifferent_access
 ].each do |lib|
   require lib
 end
@@ -80,4 +79,4 @@ Karafka::App.boot!
 
 # We by default use the default listener for specs to check how it works and that
 # it does not break anything
-Karafka.monitor.subscribe(Karafka::Instrumentation::Listener)
+Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener)

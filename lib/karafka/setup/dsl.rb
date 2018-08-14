@@ -10,7 +10,6 @@ module Karafka
       # @param [Block] block configuration block
       def setup(&block)
         Setup::Config.setup(&block)
-        initialize!
       end
 
       # @return [Karafka::Config] config instance
