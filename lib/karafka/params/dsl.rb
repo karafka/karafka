@@ -25,6 +25,7 @@ module Karafka
         receive_time
         topic
         parsed
+        headers
       ].freeze
 
       # Params attributes that should be available via a method call invocation for Kafka
@@ -39,6 +40,7 @@ module Karafka
         key
         create_time
         receive_time
+        headers
       ].freeze
 
       private_constant :METHOD_ATTRIBUTES
@@ -72,6 +74,7 @@ module Karafka
               'key' => message.key,
               'create_time' => message.create_time,
               'receive_time' => Time.now,
+              'headers' => message.headers,
               # When we get raw messages, they might have a topic, that was modified by a
               # topic mapper. We need to "reverse" this change and map back to the non-modified
               # format, so our internal flow is not corrupted with the mapping

@@ -156,6 +156,8 @@ module Karafka
         setting :sasl_scram_password, nil
         # option sasl_scram_mechanism [String, nil] Scram mechanism, either 'sha256' or 'sha512'
         setting :sasl_scram_mechanism, nil
+        # option sasl_over_ssl [Boolean] whether to enforce SSL with SASL
+        setting :sasl_over_ssl, true
       end
 
       class << self

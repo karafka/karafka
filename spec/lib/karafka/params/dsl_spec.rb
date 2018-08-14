@@ -45,7 +45,8 @@ RSpec.describe Karafka::Params::Dsl do
                 partition: partition,
                 key: key,
                 topic: topic,
-                create_time: create_time
+                create_time: create_time,
+                headers: nil
               }
             end
             let(:message) do
@@ -54,7 +55,8 @@ RSpec.describe Karafka::Params::Dsl do
                   value: value,
                   key: key,
                   offset: offset,
-                  create_time: create_time
+                  create_time: create_time,
+                  headers: nil
                 ),
                 topic: topic,
                 partition: partition

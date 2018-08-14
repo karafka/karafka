@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## 1.2.6
+- Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
+- Update ruby-kafka to the 0.7 version
+- Support messages headers receiving
+
 ## 1.2.5
 - #354 - Expose consumer heartbeat
 - #373 - Async producer not working properly with responders
