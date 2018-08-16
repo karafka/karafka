@@ -38,6 +38,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       ssl_client_cert: 'client_cert',
       ssl_client_cert_key: 'client_cert_key',
       ssl_ca_certs_from_system: true,
+      sasl_over_ssl: true,
       max_bytes_per_partition: 1_048_576,
       offset_retention_time: 1000,
       fetcher_max_queue_size: 100,
@@ -501,6 +502,14 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
   context 'when we validate ssl_ca_certs_from_system' do
     context 'when ssl_ca_certs_from_system is not a bool' do
       before { config[:ssl_ca_certs_from_system] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate sasl_over_ssl' do
+    context 'when sasl_over_ssl is not a bool' do
+      before { config[:sasl_over_ssl] = 2 }
 
       it { expect(schema.call(config)).not_to be_success }
     end

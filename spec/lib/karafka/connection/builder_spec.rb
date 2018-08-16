@@ -13,7 +13,8 @@ RSpec.describe Karafka::Connection::Builder do
         socket_timeout: 30,
         connect_timeout: 10,
         sasl_plain_authzid: '',
-        ssl_ca_certs_from_system: false
+        ssl_ca_certs_from_system: false,
+        sasl_over_ssl: true
       ]
     end
 
