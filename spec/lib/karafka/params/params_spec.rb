@@ -38,7 +38,8 @@ RSpec.describe Karafka::Params::Params do
             partition: partition,
             key: key,
             topic: topic,
-            create_time: create_time
+            create_time: create_time,
+            headers: {}
           }
         end
         let(:message) do
