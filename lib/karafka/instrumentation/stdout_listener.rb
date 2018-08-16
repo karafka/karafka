@@ -14,7 +14,7 @@ module Karafka
       ].freeze
 
       # Injects WaterDrop listener logger actions
-      extend WaterDrop::Instrumentation::Listener
+      extend WaterDrop::Instrumentation::StdoutListener
 
       class << self
         # Logs details about incoming batches and with which consumer we will consume them

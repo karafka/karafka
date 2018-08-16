@@ -1,5 +1,6 @@
 # Karafka framework changelog
 
+<<<<<<< HEAD
 ## 1.3-wip
 - #300 - Store value in a value key and replace its content with parsed version - without root merge
 - #331 - Disallow building groups without topics
@@ -19,6 +20,11 @@
 - #375 - Sidekiq Backend parser mismatch
 - #369 - Single consumer can support more than one topic
 - #288 - Drop dependency on `activesupport` gem
+=======
+## 1.2.6
+- Lock WaterDrop to 1.2.3
+- Lock Ruby-Kafka to 0.6.x (support for 0.7 will be added in Karafka 1.3)
+>>>>>>> master
 
 ## 1.2.5
 - #354 - Expose consumer heartbeat
