@@ -22,6 +22,7 @@
 - #375 - Sidekiq Backend parser mismatch
 - #369 - Single consumer can support more than one topic
 - #288 - Drop dependency on `activesupport` gem
+- #371 - SASL over SSL
 
 ## 1.2.6
 - Lock WaterDrop to 1.2.3
