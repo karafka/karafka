@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 1.2.6
+- Lock WaterDrop to 1.2.3
+- Lock Ruby-Kafka to 0.6.x (support for 0.7 will be added in Karafka 1.3)
+
 ## 1.2.5
 - #354 - Expose consumer heartbeat
 - #373 - Async producer not working properly with responders
