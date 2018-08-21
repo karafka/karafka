@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'waterdrop', git: 'git@github.com:karafka/waterdrop.git', branch: '1.3-wip'
+gem 'waterdrop', git: 'https://github.com/karafka/waterdrop', branch: '1.3-wip'
 
 group :development, :test do
   gem 'benchmark-ips'
