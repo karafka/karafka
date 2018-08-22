@@ -78,6 +78,7 @@ module Karafka
         sasl_plain_password
         sasl_scram_username
         sasl_scram_password
+        ssl_client_cert_chain
       ].each do |encryption_attribute|
         optional(encryption_attribute).maybe(:str?)
       end
@@ -88,6 +89,30 @@ module Karafka
       # It's not with other encryptions as it has some more rules
       optional(:sasl_scram_mechanism)
         .maybe(:str?, included_in?: Karafka::Schemas::SASL_SCRAM_MECHANISMS)
+
+      rule(
+        ssl_client_cert_with_ssl_client_cert_key: %i[ssl_client_cert ssl_client_cert_key]
+      ) do |ssl_client_cert, ssl_client_cert_key|
+        ssl_client_cert.filled? > ssl_client_cert_key.filled?
+      end
+
+      rule(
+        ssl_client_cert_key_with_ssl_client_cert: %i[ssl_client_cert ssl_client_cert_key]
+      ) do |ssl_client_cert, ssl_client_cert_key|
+        ssl_client_cert_key.filled? > ssl_client_cert.filled?
+      end
+
+      rule(
+        ssl_client_cert_chain_with_ssl_client_cert: %i[ssl_client_cert ssl_client_cert_chain]
+      ) do |ssl_client_cert, ssl_client_cert_chain|
+        ssl_client_cert_chain.filled? > ssl_client_cert.filled?
+      end
+
+      rule(
+        ssl_client_cert_chain_with_ssl_client_cert_key: %i[ssl_client_cert_chain ssl_client_cert_key]
+      ) do |ssl_client_cert_chain, ssl_client_cert_key|
+        ssl_client_cert_chain.filled? > ssl_client_cert_key.filled?
+      end
     end
   end
 end
