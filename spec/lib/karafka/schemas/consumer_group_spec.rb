@@ -25,6 +25,16 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       pause_exponential_backoff: false
     }
   end
+  let(:ssl_details) do
+    {
+      ssl_ca_cert: 'ca_cert',
+      ssl_client_cert: 'client_cert',
+      ssl_client_cert_key: 'client_cert_key',
+      ssl_ca_certs_from_system: true,
+      ssl_client_cert_chain: nil,
+      sasl_over_ssl: true
+    }
+  end
   let(:config) do
     {
       id: 'id',
@@ -34,12 +44,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       offset_commit_threshold: 1,
       heartbeat_interval: 1,
       session_timeout: 1,
-      ssl_ca_cert: 'ca_cert',
-      ssl_client_cert: 'client_cert',
-      ssl_client_cert_key: 'client_cert_key',
-      ssl_ca_certs_from_system: true,
-      ssl_client_cert_chain: nil,
-      sasl_over_ssl: true,
       max_bytes_per_partition: 1_048_576,
       offset_retention_time: 1000,
       fetcher_max_queue_size: 100,
@@ -51,7 +55,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       topics: topics,
       min_bytes: 1,
       max_bytes: 2048
-    }.merge(pause_details)
+    }.merge(pause_details).merge(ssl_details)
   end
 
   context 'when config is valid' do
@@ -499,8 +503,8 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
-  context "when we validate ssl_client_cert" do
-    context "when ssl_client_cert is nil and ssl_client_cert_key is nil" do
+  context 'when we validate ssl_client_cert' do
+    context 'when ssl_client_cert is nil and ssl_client_cert_key is nil' do
       before do
         config[:ssl_client_cert] = nil
         config[:ssl_client_cert_key] = nil
@@ -509,21 +513,21 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it { expect(schema.call(config)).to be_success }
     end
 
-    context "when ssl_client_cert is nil and ssl_client_cert_key is not nil" do
+    context 'when ssl_client_cert is nil and ssl_client_cert_key is not nil' do
       before { config[:ssl_client_cert] = nil }
 
       it { expect(schema.call(config)).not_to be_success }
     end
 
-    context "when ssl_client_cert is not a string" do
+    context 'when ssl_client_cert is not a string' do
       before { config[:ssl_client_cert] = 2 }
 
       it { expect(schema.call(config)).not_to be_success }
     end
   end
 
-  context "when we validate ssl_client_cert_key" do
-    context "when ssl_client_cert_key is nil and ssl_client_cert is nil" do
+  context 'when we validate ssl_client_cert_key' do
+    context 'when ssl_client_cert_key is nil and ssl_client_cert is nil' do
       before do
         config[:ssl_client_cert_key] = nil
         config[:ssl_client_cert] = nil
@@ -532,21 +536,21 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it { expect(schema.call(config)).to be_success }
     end
 
-    context "when ssl_client_cert_key is nil and ssl_client_cert is not nil" do
+    context 'when ssl_client_cert_key is nil and ssl_client_cert is not nil' do
       before { config[:ssl_client_cert_key] = nil }
 
       it { expect(schema.call(config)).not_to be_success }
     end
 
-    context "when ssl_client_cert_key is not a string" do
+    context 'when ssl_client_cert_key is not a string' do
       before { config[:ssl_client_cert_key] = 2 }
 
       it { expect(schema.call(config)).not_to be_success }
     end
   end
 
-  context "when we validate ssl_client_cert_chain" do
-    context "when ssl_client_cert_chain is nil and ssl_client_cert is nil" do
+  context 'when we validate ssl_client_cert_chain' do
+    context 'when ssl_client_cert_chain is nil and ssl_client_cert is nil' do
       before do
         config[:ssl_client_cert_chain] = nil
         config[:ssl_client_cert] = nil
@@ -556,7 +560,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it { expect(schema.call(config)).to be_success }
     end
 
-    context "when ssl_client_cert_chain is present but ssl_client_cert is nil" do
+    context 'when ssl_client_cert_chain is present but ssl_client_cert is nil' do
       before do
         config[:ssl_client_cert_chain] = 'chain'
         config[:ssl_client_cert] = nil
@@ -565,7 +569,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it { expect(schema.call(config)).not_to be_success }
     end
 
-    context "when ssl_client_cert_chain is present but ssl_client_cert_key is nil" do
+    context 'when ssl_client_cert_chain is present but ssl_client_cert_key is nil' do
       before do
         config[:ssl_client_cert_chain] = 'chain'
         config[:ssl_client_cert_key] = nil
@@ -574,7 +578,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it { expect(schema.call(config)).not_to be_success }
     end
 
-    context "when ssl_client_cert_chain is not a string" do
+    context 'when ssl_client_cert_chain is not a string' do
       before { config[:ssl_client_cert_chain] = 2 }
 
       it { expect(schema.call(config)).not_to be_success }
