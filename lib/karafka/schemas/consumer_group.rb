@@ -71,6 +71,7 @@ module Karafka
         ssl_ca_cert_file_path
         ssl_client_cert
         ssl_client_cert_key
+        ssl_client_cert_chain
         sasl_gssapi_principal
         sasl_gssapi_keytab
         sasl_plain_authzid
@@ -78,7 +79,6 @@ module Karafka
         sasl_plain_password
         sasl_scram_username
         sasl_scram_password
-        ssl_client_cert_chain
       ].each do |encryption_attribute|
         optional(encryption_attribute).maybe(:str?)
       end
