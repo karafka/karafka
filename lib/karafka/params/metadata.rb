@@ -5,28 +5,35 @@ module Karafka
     # Simple metadata object that stores all non-message information received from Kafka cluster
     # while fetching the data
     class Metadata < Hash
-      attr_reader :topic
-      attr_reader :batch_size
-      attr_reader :partition
-      attr_reader :offset_lag
-      attr_reader :group_id
-      attr_reader :last_offset
-      attr_reader :highwater_mark_offset
-      attr_reader :offset_lag
-      attr_reader :first_offset
+      METHOD_ATTRIBUTES = %w[
+        topic
+        batch_size
+        partition
+        offset_lag
+        group_id
+        last_offset
+        highwater_mark_offset
+        offset_lag
+        first_offset
+      ].freeze
 
-      def initialize(batch)
+      private_constant :METHOD_ATTRIBUTES
 
+      METHOD_ATTRIBUTES.each do |attr|
+        # Defines a method call accessor to a particular hash field.
+        # @note Won't work for complex key names that contain spaces, etc
+        # @param key [Symbol] name of a field that we want to retrieve with a method call
+        # @example
+        #   key_attr_reader :example
+        #   params.example #=> 'my example value'
+        define_method(attr) do
+          self[attr]
+        end
       end
 
       def unknown_last_offset?
         false
       end
-
-#           batch_size: batch.messages.count,
-#           partition: batch.partition,
-# offset_lag: batch.offset_lag,
-# { listener_id: id, group_id: group_id, topic: topic, handler: handler_class.to_s }
     end
   end
 end

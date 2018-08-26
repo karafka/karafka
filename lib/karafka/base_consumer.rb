@@ -22,6 +22,10 @@ module Karafka
 
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
     attr_reader :topic
+    # @return [Karafka::Params::Metadata] current metadata object
+    attr_accessor :metadata
+    # @return [Karafka::Params:ParamsBatch] current params batch
+    attr_accessor :params_batch
 
     # Assigns a topic to a consumer and builds up proper consumer functionalities
     #   so that it can cooperate with the topic settings
@@ -31,30 +35,12 @@ module Karafka
       Consumers::Includer.call(self)
     end
 
-    def metadata=(message_or_batch)
-      @metadata = message_or_batch
-      #@metadata = Karafka::Params::Metadata.new(message_or_batch)
-    end
-
-    # Creates lazy loaded params batch object
-    # @note Until first params usage, it won't parse data at all
-    # @param messages [Array<Kafka::FetchedMessage>, Array<Hash>] messages with raw
-    #   content (from Kafka) or messages inside a hash (from backend, etc)
-    # @return [Karafka::Params::ParamsBatch] lazy loaded params batch
-    def params_batch=(messages)
-      @params_batch = Karafka::Params::ParamsBatch.new(messages, topic)
-    end
-
     # Executes the default consumer flow.
     def call
       process
     end
 
     private
-
-    # We make it private as it should be accessible only from the inside of a consumer
-    attr_reader :params_batch
-    attr_reader :metadata
 
     # @return [Karafka::Connection::Client] messages consuming client that can be used to
     #    commit manually offset or pause / stop consumer based on the business logic

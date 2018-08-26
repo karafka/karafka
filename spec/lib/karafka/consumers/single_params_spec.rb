@@ -26,6 +26,6 @@ RSpec.describe Karafka::Consumers::SingleParams do
   end
 
   it 'expect not to parse the value inside' do
-    expect(consumer.send(:params)['parsed']).to be true
+    expect(consumer.send(:params)['parsed']).to be nil
   end
 end

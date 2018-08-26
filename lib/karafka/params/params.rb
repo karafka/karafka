@@ -39,42 +39,6 @@ module Karafka
         end
       end
 
-      class << self
-        # We allow building instances only via the #build method
-
-        # @param message [Kafka::FetchedMessage, Hash] message that we get out of Kafka
-        #   in case of building params inside main Karafka process in
-        #   Karafka::Connection::Consumer, or a hash when we retrieve data that is already parsed
-        # @param topic [(Karafka::Routing::Topic] topic for which we received this batch
-        # @return [Karafka::Params::Params] Karafka params object not yet used parser for
-        #   retrieving data that we've got from Kafka
-        def build(message, topic)
-          instance = new
-
-          # Non kafka fetched message can happen when we interchange data with an
-          # additional backend
-          if message.is_a?(Kafka::FetchedMessage)
-            instance.merge!(
-              'value' => message.value,
-              'partition' => message.partition,
-              'offset' => message.offset,
-              'key' => message.key,
-              'create_time' => message.create_time,
-              'receive_time' => Time.now,
-              'headers' => message.headers || {},
-              'topic' => topic.name
-            )
-          else
-            instance.merge!(message)
-          end
-
-          # This needs to be set last, so it won't be overwritten in case of message merge
-          instance['parser'] = topic.parser
-
-          instance
-        end
-      end
-
       # @return [Karafka::Params::Params] This method will trigger parser execution. If we decide
       #   to retrieve data, parser will be executed to parse data. Output of parsing will be merged
       #   to the current object. This object will be also marked as already parsed, so we won't
