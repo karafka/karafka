@@ -43,7 +43,7 @@ RSpec.describe Karafka::BaseConsumer do
     let(:messages) { [rand] }
     let(:params_batch) { instance_double(Karafka::Params::ParamsBatch) }
     let(:topic_parser) { Karafka::Parsers::Json }
-    let(:p_args) { [messages, topic_parser] }
+    let(:p_args) { [messages, topic] }
     let(:topic) do
       instance_double(
         Karafka::Routing::Topic,
@@ -54,7 +54,7 @@ RSpec.describe Karafka::BaseConsumer do
       )
     end
 
-    it 'expect to build params batch using messages and parser' do
+    it 'expect to build params batch using messages and topic' do
       expect(Karafka::Params::ParamsBatch).to receive(:new).with(*p_args).and_return(params_batch)
       base_consumer.params_batch = messages
       expect(base_consumer.send(:params_batch)).to eq params_batch

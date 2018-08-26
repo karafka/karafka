@@ -7,23 +7,28 @@ RSpec.describe Karafka::Params::Params do
     subject(:params_class) { base_params_class }
 
     describe '#build' do
-      let(:parser) { Karafka::Parsers::Json }
+      let(:topic) do
+        instance_double(
+          Karafka::Routing::Topic,
+          parser: Karafka::Parsers::Json,
+          name: 'topic'
+        )
+      end
 
       context 'when we build from a hash' do
         let(:message) { { rand => rand, 'parser' => rand.to_s } }
-        let(:params) { params_class.build(message, parser) }
+        let(:params) { params_class.build(message, topic) }
 
         it 'expect to build based on a message' do
-          expect(params).to eq message.merge('parser' => parser)
+          expect(params).to eq message.merge('parser' => topic.parser)
         end
 
         it 'expect not to overwrite parser' do
-          expect(params['parser']).to eq parser
+          expect(params['parser']).to eq topic.parser
         end
       end
 
       context 'when we build based on Kafka::FetchedMessage' do
-        let(:topic) { rand.to_s }
         let(:value) { rand.to_s }
         let(:key) { nil }
         let(:offset) { rand(1000) }
@@ -31,13 +36,13 @@ RSpec.describe Karafka::Params::Params do
         let(:create_time) { Time.now }
         let(:params_attributes) do
           {
-            parser: parser,
+            parser: topic.parser,
             receive_time: Time.now,
             value: value,
             offset: offset,
             partition: partition,
             key: key,
-            topic: topic,
+            topic: topic.name,
             create_time: create_time,
             headers: {}
           }
@@ -50,7 +55,7 @@ RSpec.describe Karafka::Params::Params do
               offset: offset,
               create_time: create_time
             ),
-            topic: topic,
+            topic: topic.name,
             partition: partition
           )
         end
@@ -58,7 +63,7 @@ RSpec.describe Karafka::Params::Params do
         it 'expect to build with additional values and value' do
           Timecop.freeze do
             stringified = {}
-            params_class.build(message, parser).each { |k, v| stringified[k.to_sym] = v }
+            params_class.build(message, topic).each { |k, v| stringified[k.to_sym] = v }
             expect(stringified).to eq params_attributes
           end
         end

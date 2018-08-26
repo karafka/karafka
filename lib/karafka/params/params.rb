@@ -45,14 +45,10 @@ module Karafka
         # @param message [Kafka::FetchedMessage, Hash] message that we get out of Kafka
         #   in case of building params inside main Karafka process in
         #   Karafka::Connection::Consumer, or a hash when we retrieve data that is already parsed
-        # @param parser [Class] parser class that we will use to unparse data
+        # @param topic [(Karafka::Routing::Topic] topic for which we received this batch
         # @return [Karafka::Params::Params] Karafka params object not yet used parser for
         #   retrieving data that we've got from Kafka
-        # @example Build params instance from a hash
-        #   Karafka::Params::Params.build({ key: 'value' }) #=> params object
-        # @example Build params instance from a Kafka::FetchedMessage object
-        #   Karafka::Params::Params.build(message) #=> params object
-        def build(message, parser)
+        def build(message, topic)
           instance = new
 
           # Non kafka fetched message can happen when we interchange data with an
@@ -66,17 +62,14 @@ module Karafka
               'create_time' => message.create_time,
               'receive_time' => Time.now,
               'headers' => message.headers || {},
-              # When we get raw messages, they might have a topic, that was modified by a
-              # topic mapper. We need to "reverse" this change and map back to the non-modified
-              # format, so our internal flow is not corrupted with the mapping
-              'topic' => Karafka::App.config.topic_mapper.incoming(message.topic)
+              'topic' => topic.name
             )
           else
             instance.merge!(message)
           end
 
           # This needs to be set last, so it won't be overwritten in case of message merge
-          instance['parser'] = parser
+          instance['parser'] = topic.parser
 
           instance
         end

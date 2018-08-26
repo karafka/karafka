@@ -31,13 +31,16 @@ module Karafka
       Consumers::Includer.call(self)
     end
 
+    def metadata=
+    end
+
     # Creates lazy loaded params batch object
     # @note Until first params usage, it won't parse data at all
     # @param messages [Array<Kafka::FetchedMessage>, Array<Hash>] messages with raw
     #   content (from Kafka) or messages inside a hash (from backend, etc)
     # @return [Karafka::Params::ParamsBatch] lazy loaded params batch
     def params_batch=(messages)
-      @params_batch = Karafka::Params::ParamsBatch.new(messages, topic.parser)
+      @params_batch = Karafka::Params::ParamsBatch.new(messages, topic)
     end
 
     # Executes the default consumer flow.

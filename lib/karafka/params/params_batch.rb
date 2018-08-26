@@ -11,10 +11,10 @@ module Karafka
 
       # Builds up a params batch based on raw kafka messages
       # @param messages_batch [Array<Kafka::FetchedMessage>] messages batch
-      # @param topic_parser [Class] topic parser for unparsing messages values
-      def initialize(messages_batch, topic_parser)
+      # @param topic [(Karafka::Routing::Topic] topic for which we received this batch
+      def initialize(messages_batch, topic)
         @params_batch = messages_batch.map! do |message|
-          Karafka::Params::Params.build(message, topic_parser)
+          Karafka::Params::Params.build(message, topic)
         end
       end
 

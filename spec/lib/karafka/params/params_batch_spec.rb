@@ -1,12 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Params::ParamsBatch do
-  subject(:params_batch) { described_class.new(kafka_messages, topic_parser) }
+  subject(:params_batch) { described_class.new(kafka_messages, topic) }
 
   let(:unparsed_value) { { rand.to_s => rand.to_s } }
   let(:parsed_value) { unparsed_value.to_json }
   let(:create_time) { Time.now }
-  let(:topic_parser) { Karafka::Parsers::Json }
+  let(:topic) do
+    instance_double(
+      Karafka::Routing::Topic,
+      parser: Karafka::Parsers::Json,
+      name: 'topic'
+    )
+  end
   let(:kafka_messages) { [kafka_message1, kafka_message2] }
   let(:kafka_message1) do
     Kafka::FetchedMessage.new(
