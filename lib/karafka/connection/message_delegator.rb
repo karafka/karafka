@@ -21,6 +21,7 @@ module Karafka
             consumer: consumer,
             kafka_message: kafka_message
           ) do
+            consumer.metadata = kafka_message
             # @note We always get a single message within single delegator, which means that
             # we don't care if user marked it as a batch consumed or not.
             consumer.params_batch = [kafka_message]

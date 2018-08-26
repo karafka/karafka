@@ -31,7 +31,9 @@ module Karafka
       Consumers::Includer.call(self)
     end
 
-    def metadata=
+    def metadata=(message_or_batch)
+      @metadata = message_or_batch
+      #@metadata = Karafka::Params::Metadata.new(message_or_batch)
     end
 
     # Creates lazy loaded params batch object
@@ -52,6 +54,7 @@ module Karafka
 
     # We make it private as it should be accessible only from the inside of a consumer
     attr_reader :params_batch
+    attr_reader :metadata
 
     # @return [Karafka::Connection::Client] messages consuming client that can be used to
     #    commit manually offset or pause / stop consumer based on the business logic

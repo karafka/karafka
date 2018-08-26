@@ -23,7 +23,7 @@ module Karafka
             consumer: consumer,
             kafka_batch: kafka_batch
           ) do
-            # consumer.headers = [kafka_batch, group_id]
+            consumer.metadata = kafka_batch
 
             # Depending on a case (persisted or not) we might use new consumer instance per
             # each batch, or use the same one for all of them (for implementing buffering, etc.)
