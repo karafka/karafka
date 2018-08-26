@@ -21,18 +21,13 @@ module Karafka
 
       METHOD_ATTRIBUTES.each do |attr|
         # Defines a method call accessor to a particular hash field.
-        # @note Won't work for complex key names that contain spaces, etc
-        # @param key [Symbol] name of a field that we want to retrieve with a method call
-        # @example
-        #   key_attr_reader :example
-        #   params.example #=> 'my example value'
         define_method(attr) do
           self[attr]
         end
       end
 
       def unknown_last_offset?
-        false
+        self['unknown_last_offset']
       end
     end
   end

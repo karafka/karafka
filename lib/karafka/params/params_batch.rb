@@ -9,6 +9,8 @@ module Karafka
     class ParamsBatch
       include Enumerable
 
+      # @param params_array [Array<Karafka::Params::Params>] array with karafka params
+      # @return [Karafka::Params::ParamsBatch] lazy evaluated params batch object
       def initialize(params_array)
         @params_array = params_array
       end

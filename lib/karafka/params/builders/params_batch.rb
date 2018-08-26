@@ -3,6 +3,7 @@
 module Karafka
   module Params
     module Builders
+      # Builder for creating params batch instances
       module ParamsBatch
         class << self
           def from_kafka_messages(kafka_messages, topic)
