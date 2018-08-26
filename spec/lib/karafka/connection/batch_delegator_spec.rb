@@ -48,14 +48,7 @@ RSpec.describe Karafka::Connection::BatchDelegator do
   end
 
   context 'when batch_consuming true' do
-    before do
-      expect(consumer_instance)
-        .to receive(:params_batch=)
-        .with([raw_message1, raw_message2])
-
-      expect(consumer_instance)
-        .to receive(:call)
-    end
+    before { expect(consumer_instance).to receive(:call) }
 
     let(:consumer_group) do
       Karafka::Routing::Builder.instance.draw do
@@ -74,11 +67,7 @@ RSpec.describe Karafka::Connection::BatchDelegator do
   end
 
   context 'when batch_consuming false' do
-    before do
-      allow(consumer_instance).to receive(:params_batch=).with([raw_message1])
-      allow(consumer_instance).to receive(:params_batch=).with([raw_message2])
-      allow(consumer_instance).to receive(:call).twice
-    end
+    before { allow(consumer_instance).to receive(:call).twice }
 
     let(:consumer_group) do
       Karafka::Routing::Builder.instance.draw do

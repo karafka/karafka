@@ -21,7 +21,7 @@ module Karafka
             consumer: consumer,
             kafka_message: kafka_message
           ) do
-            consumer.metadata = Params::Builders::Metadata.from_kafka_message(kafka_batch, topic)
+            consumer.metadata = Params::Builders::Metadata.from_kafka_message(kafka_message, topic)
             # @note We always get a single message within single delegator, which means that
             # we don't care if user marked it as a batch consumed or not.
             consumer.params_batch = Params::Builders::ParamsBatch.from_kafka_messages([kafka_message], topic)
