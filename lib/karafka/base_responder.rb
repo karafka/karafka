@@ -197,9 +197,11 @@ module Karafka
     # @param options [Hash] options for waterdrop
     # @return [Class] WaterDrop producer (sync or async based on the settings)
     def producer(options)
-      self.class.topics[
-        options[:topic]
-      ].async? ? WaterDrop::AsyncProducer : WaterDrop::SyncProducer
+      if self.class.topics[options[:topic]].async?
+        WaterDrop::AsyncProducer
+      else
+        WaterDrop::SyncProducer
+      end
     end
   end
 end

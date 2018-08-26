@@ -96,9 +96,7 @@ RSpec.describe Karafka::Connection::Listener do
       end
 
       it 'just returns it' do
-        expect(Karafka::Connection::Client)
-          .to receive(:new)
-          .never
+        expect(Karafka::Connection::Client).not_to receive(:new)
         expect(listener.send(:client)).to eq client
       end
     end
