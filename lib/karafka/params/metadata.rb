@@ -5,6 +5,7 @@ module Karafka
     # Simple metadata object that stores all non-message information received from Kafka cluster
     # while fetching the data
     class Metadata < Hash
+      # Attributes that should be accessible as methods as well (not only hash)
       METHOD_ATTRIBUTES = %w[
         topic
         batch_size
