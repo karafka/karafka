@@ -194,7 +194,7 @@ RSpec.describe Karafka::Connection::Client do
 
       context 'with message batch consumption mode' do
         let(:batch_fetching) { true }
-        let(:incoming_batch) { instance_double(Kafka::FetchedBatch) }
+        let(:incoming_batch) { build(:kafka_fetched_batch) }
 
         it 'expect to use kafka_consumer to get messages and yield all of them' do
           expect(kafka_consumer).to receive(:each_batch).and_yield(incoming_batch)

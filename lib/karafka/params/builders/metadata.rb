@@ -11,8 +11,19 @@ module Karafka
           # @param _kafka_batch [Kafka::FetchedBatch] kafka batch details
           # @param _topic [Karafka::Routing::Topic] topic for which we've fetched the batch
           # @return [Karafka::Params::Metadata] metadata object
-          def from_kafka_batch(_kafka_batch, _topic)
-            Karafka::Params::Metadata.new
+          def from_kafka_batch(kafka_batch, topic)
+            Karafka::Params::Metadata
+              .new
+              .merge!(
+                topic: topic.name,
+                batch_size: kafka_batch.messages.count,
+                partition: kafka_batch.partition,
+                offset_lag: kafka_batch.offset_lag,
+                last_offset: kafka_batch.last_offset,
+                highwater_mark_offset: kafka_batch.highwater_mark_offset,
+                unknown_last_offset: kafka_batch.unknown_last_offset?,
+                first_offset: kafka_batch.first_offset
+              )
           end
 
           # Creates metadata based on a single kafka message (for a single mode)

@@ -56,7 +56,7 @@ RSpec.describe Karafka::Connection::Listener do
 
     context 'when no errors occur' do
       context 'when delegating batch' do
-        let(:kafka_batch) { instance_double(Kafka::FetchedBatch) }
+        let(:kafka_batch) { build(:kafka_fetched_batch) }
 
         before do
           allow(listener).to receive(:client).and_return(client)
@@ -71,7 +71,7 @@ RSpec.describe Karafka::Connection::Listener do
       end
 
       context 'when delegating message' do
-        let(:kafka_message) { instance_double(Kafka::FetchedMessage) }
+        let(:kafka_message) { build(:kafka_fetched_message) }
 
         before do
           allow(listener).to receive(:client).and_return(client)

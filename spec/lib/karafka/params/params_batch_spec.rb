@@ -5,7 +5,6 @@ RSpec.describe Karafka::Params::ParamsBatch do
 
   let(:unparsed_value) { { rand.to_s => rand.to_s } }
   let(:parsed_value) { unparsed_value.to_json }
-  let(:create_time) { Time.now }
   let(:topic) do
     instance_double(
       Karafka::Routing::Topic,
@@ -13,30 +12,8 @@ RSpec.describe Karafka::Params::ParamsBatch do
       name: 'topic'
     )
   end
-  let(:kafka_message1) do
-    Kafka::FetchedMessage.new(
-      message: OpenStruct.new(
-        value: parsed_value,
-        key: nil,
-        offset: 0,
-        create_time: create_time
-      ),
-      topic: 'topic',
-      partition: 0
-    )
-  end
-  let(:kafka_message2) do
-    Kafka::FetchedMessage.new(
-      message: OpenStruct.new(
-        value: parsed_value,
-        key: nil,
-        offset: 0,
-        create_time: create_time
-      ),
-      topic: 'topic',
-      partition: 0
-    )
-  end
+  let(:kafka_message1) { build(:kafka_fetched_message, value: parsed_value) }
+  let(:kafka_message2) { build(:kafka_fetched_message, value: parsed_value) }
   let(:params_array) do
     [
       Karafka::Params::Builders::Params.from_kafka_message(kafka_message1, topic),

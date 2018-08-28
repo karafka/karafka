@@ -4,43 +4,9 @@ RSpec.describe Karafka::Connection::BatchDelegator do
   subject(:delegator) { described_class }
 
   let(:group_id) { consumer_group.id }
-  let(:topic_id) { consumer_group.topics[0].name }
   let(:topic) { Karafka::Routing::Topic.new(rand, consumer_group) }
   let(:consumer_instance) { consumer_group.topics[0].consumer.new(topic) }
-  let(:kafka_messages) { [raw_message1, raw_message2] }
-  let(:raw_message_value) { rand }
-  let(:kafka_batch) do
-    instance_double(
-      Kafka::FetchedBatch,
-      messages: kafka_messages,
-      topic: topic_id,
-      partition: 0
-    )
-  end
-  let(:raw_message1) do
-    Kafka::FetchedMessage.new(
-      message: OpenStruct.new(
-        value: raw_message_value,
-        key: nil,
-        offset: 0,
-        create_time: Time.now
-      ),
-      topic: topic_id,
-      partition: 0
-    )
-  end
-  let(:raw_message2) do
-    Kafka::FetchedMessage.new(
-      message: OpenStruct.new(
-        value: raw_message_value,
-        key: nil,
-        offset: 0,
-        create_time: Time.now
-      ),
-      topic: topic_id,
-      partition: 0
-    )
-  end
+  let(:kafka_batch) { build(:kafka_fetched_batch) }
 
   before do
     allow(Karafka::Persistence::Topic).to receive(:fetch).and_return(consumer_group.topics[0])

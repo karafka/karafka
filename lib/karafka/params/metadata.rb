@@ -11,10 +11,8 @@ module Karafka
         batch_size
         partition
         offset_lag
-        group_id
         last_offset
         highwater_mark_offset
-        offset_lag
         first_offset
       ].freeze
 
