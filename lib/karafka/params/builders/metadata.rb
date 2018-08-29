@@ -8,8 +8,8 @@ module Karafka
       module Metadata
         class << self
           # Creates metadata based on the kafka batch data
-          # @param _kafka_batch [Kafka::FetchedBatch] kafka batch details
-          # @param _topic [Karafka::Routing::Topic] topic for which we've fetched the batch
+          # @param kafka_batch [Kafka::FetchedBatch] kafka batch details
+          # @param topic [Karafka::Routing::Topic] topic for which we've fetched the batch
           # @return [Karafka::Params::Metadata] metadata object
           def from_kafka_batch(kafka_batch, topic)
             Karafka::Params::Metadata
