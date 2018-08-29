@@ -3,11 +3,11 @@
 RSpec.describe Karafka::Instrumentation::Logger do
   subject(:logger) { described_class.instance }
 
-  specify { expect(described_class).to be < ::Logger }
-
   # We use a singleton logger that could be already initialized in other specs, so
   # in order to check all the behaviours we need to "reset" it to the initial state
   before { logger.instance_variable_set('@file', nil) }
+
+  specify { expect(described_class).to be < ::Logger }
 
   describe '#instance' do
     let(:target) { double }
