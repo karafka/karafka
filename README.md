@@ -25,6 +25,7 @@ Karafka based applications can be easily deployed to any type of infrastructure,
 * Heroku
 * Capistrano
 * Docker
+* Terraform
 
 ## Support
 
