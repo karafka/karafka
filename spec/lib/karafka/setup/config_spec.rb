@@ -31,13 +31,6 @@ RSpec.describe Karafka::Setup::Config do
         end
       end
 
-      it 'raise InvalidConfiguration exception' do
-        expect { config_class.send(:validate!) }.to raise_error do |error|
-          expect(error).to be_a(error_class)
-          expect(error.message).to eq(error_message)
-        end
-      end
-
       after do
         module Karafka
           class App
@@ -45,6 +38,13 @@ RSpec.describe Karafka::Setup::Config do
               config.client_id = rand(100).to_s
             end
           end
+        end
+      end
+
+      it 'raise InvalidConfiguration exception' do
+        expect { config_class.send(:validate!) }.to raise_error do |error|
+          expect(error).to be_a(error_class)
+          expect(error.message).to eq(error_message)
         end
       end
     end

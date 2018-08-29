@@ -74,8 +74,7 @@ RSpec.describe Karafka::Connection::Listener do
 
       it 'just returns it' do
         expect(Karafka::Connection::Client)
-          .to receive(:new)
-          .never
+          .not_to receive(:new)
         expect(listener.send(:client)).to eq client
       end
     end
