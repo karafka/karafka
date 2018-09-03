@@ -23,6 +23,7 @@ module Karafka
         topic
         parsed
         headers
+        is_control_record
       ].freeze
 
       private_constant :METHOD_ATTRIBUTES

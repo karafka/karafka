@@ -24,6 +24,7 @@ module Karafka
                 'create_time' => message.create_time,
                 'receive_time' => Time.now,
                 'headers' => message.headers || {},
+                'is_control_record' => message.is_control_record,
                 'topic' => topic.name,
                 'parser' => topic.parser
               )

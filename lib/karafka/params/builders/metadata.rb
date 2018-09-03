@@ -25,14 +25,6 @@ module Karafka
                 first_offset: kafka_batch.first_offset
               )
           end
-
-          # Creates metadata based on a single kafka message (for a single mode)
-          # @param _kafka_message [Kafka::FetchedMessage] message received from kafka
-          # @param _topic [Karafka::Routing::Topic] topic for which we've fetched the batch
-          # @return [Karafka::Params::Metadata] metadata object
-          def from_kafka_message(_kafka_message, _topic)
-            Karafka::Params::Metadata.new
-          end
         end
       end
     end
