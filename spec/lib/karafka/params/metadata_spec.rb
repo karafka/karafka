@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Params::Builders::Metadata do
+RSpec.describe Karafka::Params::Metadata do
   describe '#topic' do
     pending
   end
