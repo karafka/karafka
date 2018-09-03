@@ -23,11 +23,13 @@ module Karafka
             consumer: consumer,
             kafka_batch: kafka_batch
           ) do
-            consumer.metadata = Params::Builders::Metadata.from_kafka_batch(kafka_batch, topic)
 
             # Depending on a case (persisted or not) we might use new consumer instance per
             # each batch, or use the same one for all of them (for implementing buffering, etc.)
             if topic.batch_consuming
+              # Due to how ruby-kafka is built, we have the metadata that is stored on the batch
+              # level only available for batch consuming
+              consumer.metadata = Params::Builders::Metadata.from_kafka_batch(kafka_batch, topic)
               consumer.params_batch = Params::Builders::ParamsBatch.from_kafka_messages(
                 kafka_messages,
                 topic
