@@ -15,14 +15,14 @@ module Karafka
             Karafka::Params::Metadata
               .new
               .merge!(
-                topic: topic.name,
-                batch_size: kafka_batch.messages.count,
-                partition: kafka_batch.partition,
-                offset_lag: kafka_batch.offset_lag,
-                last_offset: kafka_batch.last_offset,
-                highwater_mark_offset: kafka_batch.highwater_mark_offset,
-                unknown_last_offset: kafka_batch.unknown_last_offset?,
-                first_offset: kafka_batch.first_offset
+                'topic' => topic.name,
+                'batch_size' => kafka_batch.messages.count,
+                'partition' => kafka_batch.partition,
+                'offset_lag' => kafka_batch.offset_lag,
+                'last_offset' => kafka_batch.last_offset,
+                'highwater_mark_offset' => kafka_batch.highwater_mark_offset,
+                'unknown_last_offset' => kafka_batch.unknown_last_offset?,
+                'first_offset' => kafka_batch.first_offset
               )
           end
         end

@@ -25,6 +25,7 @@ module Karafka
         end
       end
 
+      # @return [Boolean] is the last offset known or unknown
       def unknown_last_offset?
         self['unknown_last_offset']
       end
