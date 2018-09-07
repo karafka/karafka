@@ -14,7 +14,7 @@ RSpec.describe Karafka::Connection::BatchDelegator do
   end
 
   context 'when batch_consuming true' do
-    before { expect(consumer_instance).to receive(:call) }
+    before { allow(consumer_instance).to receive(:call) }
 
     let(:consumer_group) do
       Karafka::Routing::Builder.instance.draw do
