@@ -5,16 +5,7 @@ RSpec.describe Karafka::Consumers::SingleParams do
 
   let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
   let(:params_batch) { [{ 'value' => {}.to_json }] }
-  let(:topic) do
-    instance_double(
-      Karafka::Routing::Topic,
-      id: rand.to_s,
-      backend: :inline,
-      batch_consuming: true,
-      responder: nil,
-      parser: Karafka::Parsers::Json
-    )
-  end
+  let(:topic) { build(:routing_topic) }
 
   before do
     consumer.extend(described_class)

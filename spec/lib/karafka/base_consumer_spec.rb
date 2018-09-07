@@ -3,14 +3,9 @@
 RSpec.describe Karafka::BaseConsumer do
   subject(:base_consumer) { working_class.new(topic) }
 
-  let(:topic_name) { "topic#{rand}" }
-  let(:backend) { :inline }
   let(:responder_class) { nil }
-  let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand.to_s) }
   let(:topic) do
-    topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
-    topic.consumer = Class.new(described_class)
-    topic.backend = backend
+    topic = build(:routing_topic)
     topic.responder = responder_class
     topic
   end

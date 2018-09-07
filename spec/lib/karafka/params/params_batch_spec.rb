@@ -5,13 +5,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
 
   let(:unparsed_value) { { rand.to_s => rand.to_s } }
   let(:parsed_value) { unparsed_value.to_json }
-  let(:topic) do
-    instance_double(
-      Karafka::Routing::Topic,
-      parser: Karafka::Parsers::Json,
-      name: 'topic'
-    )
-  end
+  let(:topic) { build(:routing_topic) }
   let(:kafka_message1) { build(:kafka_fetched_message, value: parsed_value) }
   let(:kafka_message2) { build(:kafka_fetched_message, value: parsed_value) }
   let(:params_array) do

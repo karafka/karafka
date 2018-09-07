@@ -4,7 +4,7 @@ RSpec.describe Karafka::Connection::BatchDelegator do
   subject(:delegator) { described_class }
 
   let(:group_id) { consumer_group.id }
-  let(:topic) { Karafka::Routing::Topic.new(rand, consumer_group) }
+  let(:topic) { build(:routing_topic) }
   let(:consumer_instance) { consumer_group.topics[0].consumer.new(topic) }
   let(:kafka_batch) { build(:kafka_fetched_batch) }
 

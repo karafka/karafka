@@ -5,15 +5,7 @@ RSpec.describe Karafka::Persistence::Consumer do
 
   describe '#fetch' do
     let(:partition) { 1 }
-    let(:topic_id) { rand.to_s }
-    let(:topic) do
-      Karafka::Routing::Topic.new(
-        rand,
-        Karafka::Routing::ConsumerGroup.new(rand)
-      ).tap do |topic|
-        topic.consumer = Class.new(Karafka::BaseConsumer)
-      end
-    end
+    let(:topic) { build(:routing_topic) }
 
     it 'expect to cache it' do
       r1 = persistence.fetch(topic, partition)

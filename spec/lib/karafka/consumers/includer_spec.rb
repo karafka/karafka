@@ -8,12 +8,12 @@ RSpec.describe Karafka::Consumers::Includer do
   let(:features_scope) { Karafka::Consumers }
   let(:backends_scope) { Karafka::Backends }
   let(:topic) do
-    instance_double(
-      Karafka::Routing::Topic,
-      backend: backend,
-      batch_consuming: batch_consuming,
-      responder: responder
-    )
+    build(:routing_topic)
+      .tap do |topic|
+        topic.backend = backend
+        topic.batch_consuming = batch_consuming
+        topic.responder = responder
+      end
   end
 
   describe 'inline with batch consuming' do

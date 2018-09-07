@@ -3,18 +3,10 @@
 RSpec.describe Karafka::Consumers::Callbacks do
   subject(:base_consumer) { working_class.new(topic) }
 
-  let(:topic_name) { "topic#{rand}" }
   let(:backend) { :inline }
   let(:responder_class) { nil }
   let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand.to_s) }
-  let(:topic) do
-    topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
-    topic.consumer = Class.new(Karafka::BaseConsumer)
-    topic.consumer.include described_class
-    topic.backend = backend
-    topic.responder = responder_class
-    topic
-  end
+  let(:topic) { build(:routing_topic) }
   let(:verifier) { double }
   let(:working_class) do
     described_scope = described_class

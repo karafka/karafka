@@ -4,7 +4,7 @@ RSpec.describe Karafka::Backends::Inline do
   subject(:consumer) { consumer_class.new(topic) }
 
   let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand) }
-  let(:topic) { Karafka::Routing::Topic.new(rand, consumer_group) }
+  let(:topic) { build(:routing_topic) }
   let(:consumer_class) do
     ClassBuilder.inherit(Karafka::BaseConsumer) do
       def consume
