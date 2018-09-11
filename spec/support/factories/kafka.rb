@@ -22,7 +22,7 @@ FactoryBot.define do
           headers: headers
         ),
         topic: topic,
-        partition: partition,
+        partition: partition
       )
     end
   end

@@ -19,7 +19,6 @@ RSpec.describe Karafka::Params::Builders::Params do
     it { expect(result.create_time).to eq fetched_message.create_time }
 
     context 'when message does not have headers' do
-
       it { expect(result.headers).to eq({}) }
     end
 
