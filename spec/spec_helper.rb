@@ -45,8 +45,6 @@ end
 # jruby counts coverage a bit differently, so we ignore that
 SimpleCov.minimum_coverage jruby? ? 95 : 100
 
-Timecop.safe_mode = true
-
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|

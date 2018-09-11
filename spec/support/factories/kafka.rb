@@ -8,6 +8,7 @@ FactoryBot.define do
     create_time { Time.now }
     topic { rand.to_s }
     partition { 0 }
+    headers { nil }
 
     skip_create
 
@@ -17,10 +18,11 @@ FactoryBot.define do
           value: value,
           key: key,
           offset: offset,
-          create_time: create_time
+          create_time: create_time,
+          headers: headers
         ),
         topic: topic,
-        partition: partition
+        partition: partition,
       )
     end
   end
