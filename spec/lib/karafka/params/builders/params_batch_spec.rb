@@ -9,6 +9,6 @@ RSpec.describe Karafka::Params::Builders::ParamsBatch do
   describe '#from_kafka_messages' do
     subject(:result) { described_class.from_kafka_messages(kafka_messages, routing_topic) }
 
-    it { is_expected.to be_a Karafka::Params::ParamsBatch }
+    it { is_expected.to be_a(Karafka::Params::ParamsBatch) }
   end
 end

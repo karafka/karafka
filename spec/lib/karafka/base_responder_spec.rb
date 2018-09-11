@@ -23,7 +23,7 @@ RSpec.describe Karafka::BaseResponder do
         end
 
         it 'expect to build a topic object' do
-          expect(responder_class.topics[topic_name]).to be_a Karafka::Responders::Topic
+          expect(responder_class.topics[topic_name]).to be_a(Karafka::Responders::Topic)
         end
       end
     end
