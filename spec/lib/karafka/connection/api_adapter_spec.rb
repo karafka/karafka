@@ -55,6 +55,7 @@ RSpec.describe Karafka::Connection::ApiAdapter do
           # This line will skip settings that are defined somewhere else (on config root level)
           # or new not supported settings
           next unless Karafka::App.config.kafka.respond_to?(client_key)
+
           hashed_details[client_key] = rand.to_s
         end
       end

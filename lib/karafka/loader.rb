@@ -15,6 +15,7 @@ module Karafka
       DIRS.each do |dir|
         path = File.join(root, dir)
         next unless File.exist?(path)
+
         load!(path)
       end
     end

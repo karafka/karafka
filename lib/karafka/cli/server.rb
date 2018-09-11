@@ -44,6 +44,7 @@ module Karafka
       def validate!
         result = Schemas::ServerCliOptions.call(cli.options)
         return if result.success?
+
         raise Errors::InvalidConfigurationError, result.errors
       end
 

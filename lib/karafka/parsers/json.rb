@@ -31,6 +31,7 @@ module Karafka
       def self.generate(content)
         return content if content.is_a?(String)
         return content.to_json if content.respond_to?(:to_json)
+
         raise Karafka::Errors::ParserError, content
       end
     end

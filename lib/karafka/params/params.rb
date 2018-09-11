@@ -46,6 +46,7 @@ module Karafka
       #   parse it again.
       def parse!
         return self if self['parsed']
+
         self['parsed'] = true
         self['value'] = parse(self['value'])
         self

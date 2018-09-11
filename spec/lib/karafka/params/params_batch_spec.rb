@@ -33,6 +33,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
       params_batch.each_with_index do |params, index|
         expect(params['parsed']).to eq true
         next if index > 0
+
         expect(params_batch.to_a[index + 1]['parsed']).to eq nil
       end
     end

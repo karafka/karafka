@@ -151,6 +151,7 @@ module Karafka
         messages_set.each do |message_data|
           result = self.class.options_schema.call(message_data.last)
           next if result.success?
+
           raise Karafka::Errors::InvalidResponderMessageOptionsError, result.errors
         end
       end
