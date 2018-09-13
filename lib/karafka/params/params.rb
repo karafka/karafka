@@ -13,17 +13,17 @@ module Karafka
       # uses those fields via method calls, so in order to be able to pass there our params
       # objects, have to have same api.
       METHOD_ATTRIBUTES = %w[
-        parser
-        value
-        partition
-        offset
-        key
         create_time
-        receive_time
-        topic
-        parsed
         headers
         is_control_record
+        key
+        offset
+        parser
+        parsed
+        partition
+        receive_time
+        topic
+        value
       ].freeze
 
       private_constant :METHOD_ATTRIBUTES

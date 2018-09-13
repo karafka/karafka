@@ -17,16 +17,16 @@ module Karafka
             Karafka::Params::Params
               .new
               .merge!(
-                'value' => message.value,
-                'partition' => message.partition,
-                'offset' => message.offset,
-                'key' => message.key,
                 'create_time' => message.create_time,
-                'receive_time' => Time.now,
                 'headers' => message.headers || {},
                 'is_control_record' => message.is_control_record,
+                'key' => message.key,
+                'offset' => message.offset,
+                'parser' => topic.parser,
+                'partition' => message.partition,
+                'receive_time' => Time.now,
                 'topic' => topic.name,
-                'parser' => topic.parser
+                'value' => message.value
               )
           end
         end

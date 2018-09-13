@@ -7,13 +7,13 @@ module Karafka
     class Metadata < Hash
       # Attributes that should be accessible as methods as well (not only hash)
       METHOD_ATTRIBUTES = %w[
-        topic
         batch_size
-        partition
-        offset_lag
-        last_offset
-        highwater_mark_offset
         first_offset
+        highwater_mark_offset
+        last_offset
+        offset_lag
+        partition
+        topic
       ].freeze
 
       private_constant :METHOD_ATTRIBUTES
