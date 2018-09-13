@@ -24,6 +24,8 @@
 - #369 - Single consumer can support more than one topic
 - #288 - Drop dependency on `activesupport` gem
 - #371 - SASL over SSL
+- #392 - Move params redundant data to metadata
+- #335 - Metadata access from within the consumer
 
 ## 1.2.6
 - Lock WaterDrop to 1.2.3

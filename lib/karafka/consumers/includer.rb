@@ -35,6 +35,7 @@ module Karafka
         # @param topic [Karafka::Routing::Topic] topic of a consumer class
         def bind_params(consumer, topic)
           return if topic.batch_consuming
+
           consumer.extend(SingleParams)
         end
 
@@ -43,6 +44,7 @@ module Karafka
         # @param topic [Karafka::Routing::Topic] topic of a consumer class
         def bind_responders(consumer, topic)
           return unless topic.responder
+
           consumer.extend(Responders)
         end
       end

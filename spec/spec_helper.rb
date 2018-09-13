@@ -7,10 +7,11 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 # @note HashWithIndifferentAccess is just for testing the optional integration,
 # it is not used by default in the framework
 %w[
-  simplecov
-  timecop
+  factory_bot
   fiddle
+  simplecov
   tempfile
+  timecop
 ].each do |lib|
   require lib
 end
@@ -44,11 +45,10 @@ end
 # jruby counts coverage a bit differently, so we ignore that
 SimpleCov.minimum_coverage jruby? ? 95 : 100
 
-Timecop.safe_mode = true
-
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
+  config.include FactoryBot::Syntax::Methods
   config.disable_monkey_patching!
   config.order = :random
 

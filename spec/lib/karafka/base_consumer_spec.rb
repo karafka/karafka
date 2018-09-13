@@ -3,14 +3,9 @@
 RSpec.describe Karafka::BaseConsumer do
   subject(:base_consumer) { working_class.new(topic) }
 
-  let(:topic_name) { "topic#{rand}" }
-  let(:backend) { :inline }
   let(:responder_class) { nil }
-  let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand.to_s) }
   let(:topic) do
-    topic = Karafka::Routing::Topic.new(topic_name, consumer_group)
-    topic.consumer = Class.new(described_class)
-    topic.backend = backend
+    topic = build(:routing_topic)
     topic.responder = responder_class
     topic
   end
@@ -39,26 +34,12 @@ RSpec.describe Karafka::BaseConsumer do
     end
   end
 
-  describe '#params_batch=' do
-    let(:messages) { [rand] }
-    let(:params_batch) { instance_double(Karafka::Params::ParamsBatch) }
-    let(:topic_parser) { Karafka::Parsers::Json }
-    let(:p_args) { [messages, topic_parser] }
-    let(:topic) do
-      instance_double(
-        Karafka::Routing::Topic,
-        parser: topic_parser,
-        backend: :inline,
-        batch_consuming: false,
-        responder: false
-      )
-    end
+  describe '#metadata' do
+    let(:metadata) { instance_double(Karafka::Params::Metadata) }
 
-    it 'expect to build params batch using messages and parser' do
-      expect(Karafka::Params::ParamsBatch).to receive(:new).with(*p_args).and_return(params_batch)
-      base_consumer.params_batch = messages
-      expect(base_consumer.send(:params_batch)).to eq params_batch
-    end
+    before { base_consumer.instance_variable_set(:@metadata, metadata) }
+
+    it { expect(base_consumer.send(:metadata)).to eq metadata }
   end
 
   describe '#params_batch' do

@@ -61,6 +61,7 @@ module Karafka
         # shutdown process will take place
         Karafka::App.config.shutdown_timeout.to_i.times do
           return if consumer_threads.count(&:alive?).zero?
+
           sleep SUPERVISION_SLEEP
         end
 

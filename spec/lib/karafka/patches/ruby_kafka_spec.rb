@@ -19,14 +19,8 @@ RSpec.describe Karafka::Patches::RubyKafka do
   describe '#consumer_loop' do
     let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
     let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
-    let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand) }
     let(:consumer_instance) { Karafka::Persistence::Consumer.fetch(topic, 0) }
-    let(:topic) do
-      consumer = consumer_class
-      Karafka::Routing::Topic
-        .new(rand, consumer_group)
-        .tap { |topic| topic.consumer = consumer }
-    end
+    let(:topic) { build(:routing_topic, consumer: consumer_class) }
 
     before do
       Karafka::Persistence::Client.write(client)

@@ -8,8 +8,8 @@ RSpec.describe Karafka::Consumers::Includer do
   let(:features_scope) { Karafka::Consumers }
   let(:backends_scope) { Karafka::Backends }
   let(:topic) do
-    instance_double(
-      Karafka::Routing::Topic,
+    build(
+      :routing_topic,
       backend: backend,
       batch_consuming: batch_consuming,
       responder: responder

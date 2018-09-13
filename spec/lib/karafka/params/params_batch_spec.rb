@@ -1,37 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Params::ParamsBatch do
-  subject(:params_batch) { described_class.new(kafka_messages, topic_parser) }
+  subject(:params_batch) { described_class.new(params_array) }
 
   let(:unparsed_value) { { rand.to_s => rand.to_s } }
   let(:parsed_value) { unparsed_value.to_json }
-  let(:create_time) { Time.now }
-  let(:topic_parser) { Karafka::Parsers::Json }
-  let(:kafka_messages) { [kafka_message1, kafka_message2] }
-  let(:kafka_message1) do
-    Kafka::FetchedMessage.new(
-      message: OpenStruct.new(
-        value: parsed_value,
-        key: nil,
-        offset: 0,
-        create_time: create_time
-      ),
-      topic: 'topic',
-      partition: 0
-    )
-  end
-
-  let(:kafka_message2) do
-    Kafka::FetchedMessage.new(
-      message: OpenStruct.new(
-        value: parsed_value,
-        key: nil,
-        offset: 0,
-        create_time: create_time
-      ),
-      topic: 'topic',
-      partition: 0
-    )
+  let(:topic) { build(:routing_topic) }
+  let(:kafka_message1) { build(:kafka_fetched_message, value: parsed_value) }
+  let(:kafka_message2) { build(:kafka_fetched_message, value: parsed_value) }
+  let(:params_array) do
+    [
+      Karafka::Params::Builders::Params.from_kafka_message(kafka_message1, topic),
+      Karafka::Params::Builders::Params.from_kafka_message(kafka_message2, topic)
+    ]
   end
 
   describe '#to_a' do
@@ -52,6 +33,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
       params_batch.each_with_index do |params, index|
         expect(params['parsed']).to eq true
         next if index > 0
+
         expect(params_batch.to_a[index + 1]['parsed']).to eq nil
       end
     end

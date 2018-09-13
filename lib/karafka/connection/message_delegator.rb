@@ -23,7 +23,10 @@ module Karafka
           ) do
             # @note We always get a single message within single delegator, which means that
             # we don't care if user marked it as a batch consumed or not.
-            consumer.params_batch = [kafka_message]
+            consumer.params_batch = Params::Builders::ParamsBatch.from_kafka_messages(
+              [kafka_message],
+              topic
+            )
             consumer.call
           end
         end

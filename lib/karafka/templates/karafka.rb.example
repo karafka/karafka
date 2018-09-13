@@ -32,11 +32,6 @@ class KarafkaApp < Karafka::App
     # config.logger = Rails.logger
   end
 
-  after_init do |config|
-    # Put here all the things you want to do after the Karafka framework
-    # initialization
-  end
-
   # Comment out this part if you are not using instrumentation and/or you are not
   # interested in logging events for certain environments. Since instrumentation
   # notifications add extra boilerplate, if you want to achieve max performance,
@@ -58,6 +53,11 @@ class KarafkaApp < Karafka::App
     #   end
     # end
   end
+end
+
+Karafka.monitor.subscribe('app.running') do
+  # Put here all the things you want to do after the Karafka framework
+  # initialization
 end
 
 KarafkaApp.boot!

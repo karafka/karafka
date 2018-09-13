@@ -30,6 +30,7 @@ module Karafka
       def match
         return nil if name.empty?
         return nil unless scope.const_defined?(name)
+
         matching = scope.const_get(name)
         same_scope?(matching) ? matching : nil
       end
@@ -65,6 +66,7 @@ module Karafka
       def scope_of(klass)
         enclosing = klass.to_s.split('::')[0...-1]
         return ::Object if enclosing.empty?
+
         ::Object.const_get(enclosing.join('::'))
       end
 

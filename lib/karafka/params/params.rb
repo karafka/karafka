@@ -13,16 +13,17 @@ module Karafka
       # uses those fields via method calls, so in order to be able to pass there our params
       # objects, have to have same api.
       METHOD_ATTRIBUTES = %w[
-        parser
-        value
-        partition
-        offset
-        key
         create_time
+        headers
+        is_control_record
+        key
+        offset
+        parser
+        parsed
+        partition
         receive_time
         topic
-        parsed
-        headers
+        value
       ].freeze
 
       private_constant :METHOD_ATTRIBUTES
@@ -39,55 +40,13 @@ module Karafka
         end
       end
 
-      class << self
-        # We allow building instances only via the #build method
-
-        # @param message [Kafka::FetchedMessage, Hash] message that we get out of Kafka
-        #   in case of building params inside main Karafka process in
-        #   Karafka::Connection::Consumer, or a hash when we retrieve data that is already parsed
-        # @param parser [Class] parser class that we will use to unparse data
-        # @return [Karafka::Params::Params] Karafka params object not yet used parser for
-        #   retrieving data that we've got from Kafka
-        # @example Build params instance from a hash
-        #   Karafka::Params::Params.build({ key: 'value' }) #=> params object
-        # @example Build params instance from a Kafka::FetchedMessage object
-        #   Karafka::Params::Params.build(message) #=> params object
-        def build(message, parser)
-          instance = new
-
-          # Non kafka fetched message can happen when we interchange data with an
-          # additional backend
-          if message.is_a?(Kafka::FetchedMessage)
-            instance.merge!(
-              'value' => message.value,
-              'partition' => message.partition,
-              'offset' => message.offset,
-              'key' => message.key,
-              'create_time' => message.create_time,
-              'receive_time' => Time.now,
-              'headers' => message.headers || {},
-              # When we get raw messages, they might have a topic, that was modified by a
-              # topic mapper. We need to "reverse" this change and map back to the non-modified
-              # format, so our internal flow is not corrupted with the mapping
-              'topic' => Karafka::App.config.topic_mapper.incoming(message.topic)
-            )
-          else
-            instance.merge!(message)
-          end
-
-          # This needs to be set last, so it won't be overwritten in case of message merge
-          instance['parser'] = parser
-
-          instance
-        end
-      end
-
       # @return [Karafka::Params::Params] This method will trigger parser execution. If we decide
       #   to retrieve data, parser will be executed to parse data. Output of parsing will be merged
       #   to the current object. This object will be also marked as already parsed, so we won't
       #   parse it again.
       def parse!
         return self if self['parsed']
+
         self['parsed'] = true
         self['value'] = parse(self['value'])
         self

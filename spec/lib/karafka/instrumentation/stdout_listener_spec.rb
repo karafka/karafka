@@ -3,7 +3,7 @@
 RSpec.describe Karafka::Instrumentation::StdoutListener do
   let(:event) { Dry::Events::Event.new(rand, payload) }
   let(:time) { rand }
-  let(:topic) { instance_double(Karafka::Routing::Topic, name: topic_name) }
+  let(:topic) { build(:routing_topic, name: topic_name) }
   let(:topic_name) { rand.to_s }
 
   describe '#on_params_params_parse' do
@@ -121,12 +121,9 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
     end
     let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
     let(:topic) do
-      instance_double(
-        Karafka::Routing::Topic,
-        responder: responder,
-        backend: :inline,
-        batch_consuming: false
-      )
+      build(:routing_topic).tap do |topic|
+        topic.responder = responder
+      end
     end
 
     it 'expect logger to log proper message' do

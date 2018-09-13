@@ -16,12 +16,14 @@ module Karafka
             config.to_h.reject { |k, _v| k == :kafka }.each do |k, v|
               key_assignment = :"#{k}="
               next unless water_config.respond_to?(key_assignment)
+
               water_config.public_send(key_assignment, v)
             end
 
             config.kafka.to_h.each do |k, v|
               key_assignment = :"#{k}="
               next unless water_config.kafka.respond_to?(key_assignment)
+
               water_config.kafka.public_send(key_assignment, v)
             end
           end

@@ -7,7 +7,7 @@ RSpec.describe Karafka::Persistence::Topic do
   let(:raw_topic_name) { rand.to_s }
   let(:mapped_topic_name) { raw_topic_name }
   let(:route_key) { "#{group_id}_#{mapped_topic_name}" }
-  let(:topic) { instance_double(Karafka::Routing::Topic) }
+  let(:topic) { build(:routing_topic) }
 
   describe '#fetch' do
     context 'when given topic has not been cached yet' do

@@ -151,6 +151,7 @@ module Karafka
         messages_set.each do |message_data|
           result = self.class.options_schema.call(message_data.last)
           next if result.success?
+
           raise Karafka::Errors::InvalidResponderMessageOptionsError, result.errors
         end
       end
@@ -197,9 +198,11 @@ module Karafka
     # @param options [Hash] options for waterdrop
     # @return [Class] WaterDrop producer (sync or async based on the settings)
     def producer(options)
-      self.class.topics[
-        options[:topic]
-      ].async? ? WaterDrop::AsyncProducer : WaterDrop::SyncProducer
+      if self.class.topics[options[:topic]].async?
+        WaterDrop::AsyncProducer
+      else
+        WaterDrop::SyncProducer
+      end
     end
   end
 end

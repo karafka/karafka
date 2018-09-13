@@ -9,20 +9,17 @@ module Karafka
     class ParamsBatch
       include Enumerable
 
-      # Builds up a params batch based on raw kafka messages
-      # @param messages_batch [Array<Kafka::FetchedMessage>] messages batch
-      # @param topic_parser [Class] topic parser for unparsing messages values
-      def initialize(messages_batch, topic_parser)
-        @params_batch = messages_batch.map! do |message|
-          Karafka::Params::Params.build(message, topic_parser)
-        end
+      # @param params_array [Array<Karafka::Params::Params>] array with karafka params
+      # @return [Karafka::Params::ParamsBatch] lazy evaluated params batch object
+      def initialize(params_array)
+        @params_array = params_array
       end
 
       # @yieldparam [Karafka::Params::Params] each parsed and loaded params instance
       # @note Invocation of this method will cause loading and parsing each param after another.
-      #   If you want to get access without parsing, please access params_batch directly
+      #   If you want to get access without parsing, please access params_array directly
       def each
-        @params_batch.each { |param| yield(param.parse!) }
+        @params_array.each { |param| yield(param.parse!) }
       end
 
       # @return [Array<Karafka::Params::Params>] returns all the params in a loaded state, so they
@@ -40,17 +37,17 @@ module Karafka
 
       # @return [Karafka::Params::Params] first element after the parsing process
       def first
-        @params_batch.first.parse!
+        @params_array.first.parse!
       end
 
       # @return [Karafka::Params::Params] last element after the parsing process
       def last
-        @params_batch.last.parse!
+        @params_array.last.parse!
       end
 
       # @return [Array<Karafka::Params::Params>] pure array with params (not parsed)
       def to_a
-        @params_batch
+        @params_array
       end
     end
   end
