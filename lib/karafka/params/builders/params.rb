@@ -10,23 +10,23 @@ module Karafka
       # Builder for params
       module Params
         class << self
-          # @param [Kafka::FetchedMessage] message fetched from Kafka
-          # @param [Karafka::Routing::Topic] topic for which this message was fetched
+          # @param kafka_message [Kafka::FetchedMessage] message fetched from Kafka
+          # @param topic [Karafka::Routing::Topic] topic for which this message was fetched
           # @return [Karafka::Params::Params] params object
-          def from_kafka_message(message, topic)
+          def from_kafka_message(kafka_message, topic)
             Karafka::Params::Params
               .new
               .merge!(
-                'create_time' => message.create_time,
-                'headers' => message.headers || {},
-                'is_control_record' => message.is_control_record,
-                'key' => message.key,
-                'offset' => message.offset,
+                'create_time' => kafka_message.create_time,
+                'headers' => kafka_message.headers || {},
+                'is_control_record' => kafka_message.is_control_record,
+                'key' => kafka_message.key,
+                'offset' => kafka_message.offset,
                 'parser' => topic.parser,
-                'partition' => message.partition,
+                'partition' => kafka_message.partition,
                 'receive_time' => Time.now,
                 'topic' => topic.name,
-                'value' => message.value
+                'value' => kafka_message.value
               )
           end
         end
