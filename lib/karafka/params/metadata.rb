@@ -12,6 +12,7 @@ module Karafka
         highwater_mark_offset
         last_offset
         offset_lag
+        parser
         partition
         topic
       ].freeze
