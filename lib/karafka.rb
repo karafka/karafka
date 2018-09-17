@@ -71,8 +71,6 @@ end
 
 %w[
   parsers/json
-  routing/consumer_mapper
-  routing/topic_mapper
   setup/dsl
   setup/config
   status

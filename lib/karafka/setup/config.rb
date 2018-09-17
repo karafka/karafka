@@ -27,15 +27,15 @@ module Karafka
       # Mapper used to remap consumer groups ids, so in case users migrate from other tools
       # or they need to maintain their own internal consumer group naming conventions, they
       # can easily do it, replacing the default client_id + consumer name pattern concept
-      setting :consumer_mapper, Routing::ConsumerMapper.new
+      setting :consumer_mapper, -> { Routing::ConsumerMapper.new }
       # Mapper used to remap names of topics, so we can have a clean internal topic namings
       # despite using any Kafka provider that uses namespacing, etc
       # It needs to implement two methods:
       #   - #incoming - for remapping from the incoming message to our internal format
       #   - #outgoing - for remapping from internal topic name into outgoing message
-      setting :topic_mapper, Routing::TopicMapper.new
+      setting :topic_mapper, -> { Routing::TopicMapper.new }
       # Default parser for parsing and unparsing incoming and outgoing data
-      setting :parser, Karafka::Parsers::Json.new
+      setting :parser, -> { Karafka::Parsers::Json.new }
       # If batch_fetching is true, we will fetch kafka messages in batches instead of 1 by 1
       # @note Fetching does not equal consuming, see batch_consuming description for details
       setting :batch_fetching, true
