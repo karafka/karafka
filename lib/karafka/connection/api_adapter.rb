@@ -104,7 +104,7 @@ module Karafka
         def mark_message_as_processed(params)
           # Majority of non heroku users don't use custom topic mappers. No need to change
           # anything when it is a default mapper that does not change anything
-          return [params] if Karafka::App.config.topic_mapper == Karafka::Routing::TopicMapper
+          return [params] if Karafka::App.config.topic_mapper.is_a?(Karafka::Routing::TopicMapper)
 
           # @note We don't use tap as it is around 13% slower than non-dup version
           dupped = params.dup

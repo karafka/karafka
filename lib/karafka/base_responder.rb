@@ -93,11 +93,11 @@ module Karafka
     attr_reader :messages_buffer
 
     # Creates a responder object
-    # @param parser_class [Class] parser class that we can use to generate appropriate string
+    # @param parser [Object] parser that we can use to generate appropriate string
     #   or nothing if we want to default to Karafka::Parsers::Json
     # @return [Karafka::BaseResponder] base responder descendant responder
-    def initialize(parser_class = Karafka::App.config.parser)
-      @parser_class = parser_class
+    def initialize(parser = Karafka::App.config.parser)
+      @parser = parser
       @messages_buffer = {}
     end
 
@@ -188,7 +188,7 @@ module Karafka
 
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
-        @parser_class.generate(data),
+        @parser.generate(data),
         # We map this topic name, so it will match namespaced/etc topic in Kafka
         # @note By default will not change topic (if default mapper used)
         options.merge(topic: Karafka::App.config.topic_mapper.outgoing(topic))

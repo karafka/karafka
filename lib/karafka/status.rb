@@ -12,6 +12,8 @@ module Karafka
       stopping: :stop!
     }.freeze
 
+    private_constant :STATES
+
     STATES.each do |state, transition|
       define_method :"#{state}?" do
         @status == state

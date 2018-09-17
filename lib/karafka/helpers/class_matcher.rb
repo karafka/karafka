@@ -10,6 +10,8 @@ module Karafka
       # class name (if defined dynamically, etc)
       CONSTANT_REGEXP = %r{[?!=+\-\*/\^\|&\[\]<>%~\#\:\s\(\)]}
 
+      private_constant :CONSTANT_REGEXP
+
       # @param klass [Class] class to which we want to find a corresponding class
       # @param from [String] what type of object is it (based on postfix name part)
       # @param to [String] what are we looking for (based on a postfix name part)

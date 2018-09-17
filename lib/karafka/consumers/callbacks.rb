@@ -16,6 +16,8 @@ module Karafka
         before_stop
       ].freeze
 
+      private_constant :TYPES
+
       # Class methods needed to make callbacks run
       module ClassMethods
         TYPES.each do |type|
@@ -40,10 +42,12 @@ module Karafka
         end
       end
 
-      # @param consumer_class [Class] consumer class that we extend with callbacks
-      def self.included(consumer_class)
-        consumer_class.class_eval do
-          extend ClassMethods
+      class << self
+        # @param consumer_class [Class] consumer class that we extend with callbacks
+        def included(consumer_class)
+          consumer_class.class_eval do
+            extend ClassMethods
+          end
         end
       end
 

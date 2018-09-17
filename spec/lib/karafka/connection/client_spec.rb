@@ -109,11 +109,13 @@ RSpec.describe Karafka::Connection::Client do
       let(:pause_timeout) { rand(1..100) }
       let(:r_topic) { custom_mapper.outgoing(topic) }
       let(:custom_mapper) do
-        ClassBuilder.build do
-          def self.outgoing(topic)
+        klass = ClassBuilder.build do
+          def outgoing(topic)
             "remapped-#{topic}"
           end
         end
+
+        klass.new
       end
       let(:pause_args) do
         [
