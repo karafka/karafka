@@ -2,6 +2,8 @@
 
 module Karafka
   module Setup
+    # Configurators are used to post setup some of the components of Karafka after the core
+    # framework is initialized
     class Configurators
       # Class responsible for setting up WaterDrop configuration
       module WaterDrop
