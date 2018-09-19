@@ -102,7 +102,7 @@ RSpec.describe Karafka::Routing::Topic do
       let(:parser) { nil }
 
       it 'expect to use default one' do
-        expect(topic.parser).to eq Karafka::Parsers::Json
+        expect(topic.parser).to be_a Karafka::Parsers::Json
       end
     end
 

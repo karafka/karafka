@@ -7,7 +7,6 @@ module Karafka
     # Multidelegator is used to delegate calls to multiple targets
     class MultiDelegator
       # @param targets to which we want to delegate methods
-      #
       def initialize(*targets)
         @targets = targets
       end

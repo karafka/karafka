@@ -14,8 +14,10 @@ RSpec.describe Karafka::Connection::ApiAdapter do
   end
   let(:custom_mapper) do
     ClassBuilder.build do
-      def self.outgoing(topic)
-        "remapped-#{topic}"
+      class << self
+        def outgoing(topic)
+          "remapped-#{topic}"
+        end
       end
     end
   end
@@ -150,8 +152,10 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     context 'with a custom topic mapper' do
       let(:custom_mapper) do
         ClassBuilder.build do
-          def self.outgoing(topic)
-            "prefix.#{topic}"
+          class << self
+            def outgoing(topic)
+              "prefix.#{topic}"
+            end
           end
         end
       end
