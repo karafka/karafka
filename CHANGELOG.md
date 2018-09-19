@@ -4,6 +4,7 @@
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
 - Update ruby-kafka to the 0.7 version
 - Support messages headers receiving
+- Message bus unification
 - #388 - ssl_client_cert_chain sync
 - #300 - Store value in a value key and replace its content with parsed version - without root merge
 - #331 - Disallow building groups without topics
@@ -26,6 +27,8 @@
 - #371 - SASL over SSL
 - #392 - Move params redundant data to metadata
 - #335 - Metadata access from within the consumer
+- #402 - Delayed reconnection upon critical failures
+- #405 - `reconnect_timeout` value is now being validated
 
 ## 1.2.6
 - Lock WaterDrop to 1.2.3
