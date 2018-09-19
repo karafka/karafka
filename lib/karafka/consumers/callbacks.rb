@@ -16,6 +16,8 @@ module Karafka
         before_stop
       ].freeze
 
+      private_constant :TYPES
+
       # Class methods needed to make callbacks run
       module ClassMethods
         TYPES.each do |type|
@@ -23,6 +25,8 @@ module Karafka
           #
           # @param method_name [Symbol, String] method name or nil if we plan to provide a block
           # @yield A block with a code that should be executed before scheduling
+          # @note We don't have to optimize the key fetching here as those are class methods that
+          #   are evaluated once upon start
           define_method(type) do |method_name = nil, &block|
             key = "consumers.#{Helpers::Inflector.map(to_s)}.#{type}"
             Karafka::App.monitor.register_event(key)
@@ -31,7 +35,7 @@ module Karafka
               context = event[:context]
 
               if method_name
-                context.instance_exec(method_name) { |meth| method(meth).call }
+                context.send(method_name)
               else
                 context.instance_eval(&block)
               end
@@ -40,10 +44,12 @@ module Karafka
         end
       end
 
-      # @param consumer_class [Class] consumer class that we extend with callbacks
-      def self.included(consumer_class)
-        consumer_class.class_eval do
-          extend ClassMethods
+      class << self
+        # @param consumer_class [Class] consumer class that we extend with callbacks
+        def included(consumer_class)
+          consumer_class.class_eval do
+            extend ClassMethods
+          end
         end
       end
 

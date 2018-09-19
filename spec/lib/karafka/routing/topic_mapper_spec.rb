@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Routing::TopicMapper do
-  subject(:mapper) { described_class }
+  subject(:mapper) { described_class.new }
 
   let(:topic) { rand.to_s }
 

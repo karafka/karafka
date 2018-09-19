@@ -16,6 +16,8 @@ module Karafka
         'default' => ::Logger::INFO
       }.freeze
 
+      private_constant :ENV_MAP
+
       # Creates a new instance of logger ensuring that it has a place to write to
       def initialize(*_args)
         ensure_dir_exists

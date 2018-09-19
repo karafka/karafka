@@ -37,16 +37,16 @@ RSpec.describe Karafka::BaseResponder do
   end
 
   context 'when we want to use instance methods' do
-    subject(:responder) { working_class.new(parser_class) }
+    subject(:responder) { working_class.new(parser) }
 
-    let(:parser_class) { Karafka::Parsers::Json }
+    let(:parser) { Karafka::Parsers::Json.new }
 
     describe 'default responder' do
       subject(:responder) { working_class.new }
 
-      let(:default_parser) { Karafka::Parsers::Json }
+      let(:default_parser_class) { Karafka::Parsers::Json }
 
-      it { expect(responder.instance_variable_get(:'@parser_class')).to eq default_parser }
+      it { expect(responder.instance_variable_get(:'@parser')).to be_a default_parser_class }
     end
 
     describe '#call' do
@@ -144,8 +144,10 @@ RSpec.describe Karafka::BaseResponder do
         let(:mapped_topic) { "prefix.#{topic_name}" }
         let(:custom_mapper) do
           ClassBuilder.build do
-            def self.outgoing(topic)
-              "prefix.#{topic}"
+            class << self
+              def outgoing(topic)
+                "prefix.#{topic}"
+              end
             end
           end
         end

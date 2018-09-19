@@ -10,6 +10,8 @@ module Karafka
     # What system exit code should we use when we terminated forcefully
     FORCEFUL_EXIT_CODE = 2
 
+    private_constant :SUPERVISION_SLEEP, :FORCEFUL_EXIT_CODE
+
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
       attr_accessor :consumer_threads
