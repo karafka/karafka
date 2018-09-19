@@ -25,9 +25,9 @@ module Karafka
           # @yield A block with a code that should be executed before scheduling
           define_method(type) do |method_name = nil, &block|
             key = "consumers.#{Helpers::Inflector.map(to_s)}.#{type}"
-            Karafka::App.events.register_event(key)
+            Karafka::App.monitor.register_event(key)
 
-            Karafka::App.events.subscribe(key) do |event|
+            Karafka::App.monitor.subscribe(key) do |event|
               context = event[:context]
 
               if method_name
@@ -52,7 +52,7 @@ module Karafka
       # call flow and needs to be overwritten to support callbacks
       def call
         if self.class.respond_to?(:after_fetch)
-          Karafka::App.events.publish(
+          Karafka::App.monitor.instrument(
             "consumers.#{Helpers::Inflector.map(self.class.to_s)}.after_fetch",
             context: self
           )

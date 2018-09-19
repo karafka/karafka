@@ -14,10 +14,16 @@ RSpec.describe Karafka::Connection::Listener do
 
   describe '#call' do
     let(:client) { listener.send(:client) }
+    let(:listener_args) do
+      [
+        'connection.listener.before_fetch_loop',
+        consumer_group: consumer_group,
+        client: client
+      ]
+    end
 
     it 'expects to run callbacks and start the main fetch loop' do
-      expect(Karafka.events).to receive(:publish)
-        .with('before_fetch_loop', consumer_group: consumer_group, client: client)
+      expect(Karafka.monitor).to receive(:instrument).with(*listener_args)
       expect(client).to receive(:fetch_loop)
       listener.call
     end
@@ -91,9 +97,7 @@ RSpec.describe Karafka::Connection::Listener do
     context 'when client is already created' do
       let(:client) { double }
 
-      before do
-        listener.instance_variable_set(:'@client', client)
-      end
+      before { listener.instance_variable_set(:'@client', client) }
 
       it 'just returns it' do
         expect(Karafka::Connection::Client).not_to receive(:new)
@@ -104,9 +108,7 @@ RSpec.describe Karafka::Connection::Listener do
     context 'when client is not yet created' do
       let(:client) { double }
 
-      before do
-        listener.instance_variable_set(:'@client', nil)
-      end
+      before { listener.instance_variable_set(:'@client', nil) }
 
       it 'creates an instance and return' do
         expect(Karafka::Connection::Client)

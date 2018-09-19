@@ -16,8 +16,8 @@ module Karafka
 
       # Runs prefetch callbacks and executes the main listener fetch loop
       def call
-        Karafka.events.publish(
-          'before_fetch_loop',
+        Karafka.monitor.instrument(
+          'connection.listener.before_fetch_loop',
           consumer_group: @consumer_group,
           client: client
         )
@@ -46,8 +46,13 @@ module Karafka
       rescue Exception => e
         Karafka.monitor.instrument('connection.listener.fetch_loop.error', caller: self, error: e)
         # rubocop:enable RescueException
-        @client&.stop
-        retry if @client
+        if @client
+          # We can stop client without a problem, as it reinitialize itself when running the
+          # `fetch_loop` again
+          @client.stop
+          sleep(@consumer_group.reconnect_timeout)
+          retry
+        end
       end
 
       # @return [Karafka::Connection::Client] wrapped kafka consuming client for a given topic
