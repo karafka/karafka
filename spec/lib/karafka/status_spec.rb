@@ -7,11 +7,11 @@ RSpec.describe Karafka::Status do
 
   before { status_manager.instance_variable_set(:'@status', status) }
 
-  it 'by default expect to be in initialized state because it is bootstraped' do
-    expect(status_manager.running?).to eq false
-    expect(status_manager.stopping?).to eq false
-    expect(status_manager.initialized?).to eq false
-    expect(status_manager.initializing?).to eq false
+  context 'when we start with a default state' do
+    it { expect(status_manager.running?).to eq false }
+    it { expect(status_manager.stopping?).to eq false }
+    it { expect(status_manager.initialized?).to eq false }
+    it { expect(status_manager.initializing?).to eq false }
   end
 
   describe 'running?' do
