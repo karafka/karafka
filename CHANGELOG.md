@@ -32,6 +32,9 @@
 - #402 - Delayed reconnection upon critical failures
 - #405 - `reconnect_timeout` value is now being validated
 
+## 1.2.7
+- Unlock Ruby-kafka version with a warning
+
 ## 1.2.6
 - Lock WaterDrop to 1.2.3
 - Lock Ruby-Kafka to 0.6.x (support for 0.7 will be added in Karafka 1.3)
