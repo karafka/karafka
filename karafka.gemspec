@@ -25,9 +25,14 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'multi_json', '>= 1.12'
   spec.add_dependency 'rake', '>= 11.3'
   spec.add_dependency 'require_all', '>= 1.4'
-  spec.add_dependency 'ruby-kafka', '~> 0.6.8'
+  spec.add_dependency 'ruby-kafka', '>= 0.6'
   spec.add_dependency 'thor', '~> 0.19'
-  spec.add_dependency 'waterdrop', '~> 1.2.3'
+  spec.add_dependency 'waterdrop', '~> 1.2.4'
+
+  spec.post_install_message = <<~MSG
+    \e[93mWarning:\e[0m If you're using Kafka 0.10, please lock ruby-kafka in your Gemfile to version '0.6.8':
+    gem 'ruby-kafka', '~> 0.6.8'
+  MSG
 
   spec.required_ruby_version = '>= 2.3.0'
 
