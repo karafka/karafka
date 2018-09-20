@@ -9,7 +9,7 @@ module Karafka
       # @return [Hash] hash with parsed JSON data
       # @example
       #   Json.parse("{\"a\":1}") #=> { 'a' => 1 }
-      def self.parse(content)
+      def parse(content)
         ::MultiJson.load(content)
       rescue ::MultiJson::ParseError => e
         raise ::Karafka::Errors::ParserError, e
@@ -28,7 +28,7 @@ module Karafka
       #   Json.generate(Repository.first) #=> "{\"repository\":{\"id\":\"04b504e0\"}}"
       # @example From a string (no changes)
       #   Json.generate("{\"a\":1}") #=> "{\"a\":1}"
-      def self.generate(content)
+      def generate(content)
         return content if content.is_a?(String)
         return content.to_json if content.respond_to?(:to_json)
 

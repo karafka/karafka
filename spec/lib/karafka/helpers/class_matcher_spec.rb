@@ -148,7 +148,7 @@ RSpec.describe Karafka::Helpers::ClassMatcher do
 
     context 'when klass is anonymous' do
       let(:klass) { Class.new }
-      let(:expected_name) { klass.to_s.gsub(described_class::CONSTANT_REGEXP, '') }
+      let(:expected_name) { klass.to_s.gsub(/[\#<>:]*/, '') }
 
       it { expect(matcher.name).to eq expected_name }
     end

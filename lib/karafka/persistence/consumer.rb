@@ -11,6 +11,8 @@ module Karafka
       # Thread.current scope under which we store consumers data
       PERSISTENCE_SCOPE = :consumers
 
+      private_constant :PERSISTENCE_SCOPE
+
       class << self
         # @return [Hash] current thread's persistence scope hash with all the consumers
         def all

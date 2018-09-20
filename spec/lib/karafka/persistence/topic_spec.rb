@@ -29,10 +29,15 @@ RSpec.describe Karafka::Persistence::Topic do
     end
 
     context 'when we use custom topic mapper' do
+      let(:topic_mapper) { Karafka::Routing::TopicMapper.new }
       let(:mapped_topic_name) { "#{raw_topic_name}-remapped" }
 
       before do
-        allow(Karafka::App.config.topic_mapper)
+        allow(Karafka::App.config)
+          .to receive(:topic_mapper)
+          .and_return(topic_mapper)
+
+        allow(topic_mapper)
           .to receive(:incoming)
           .with(raw_topic_name)
           .and_return(mapped_topic_name)
