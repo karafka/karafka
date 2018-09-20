@@ -27,6 +27,9 @@
 - #392 - Move params redundant data to metadata
 - #335 - Metadata access from within the consumer
 
+## 1.2.7
+- Unlock Ruby-kafka version with a warning
+
 ## 1.2.6
 - Lock WaterDrop to 1.2.3
 - Lock Ruby-Kafka to 0.6.x (support for 0.7 will be added in Karafka 1.3)
