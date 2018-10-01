@@ -154,7 +154,7 @@ RSpec.describe Karafka::BaseResponder do
             topic_name => [
               [
                 input_data.to_json,
-                { topic: mapped_topic }
+                { topic: topic_name }
               ]
             ]
           }
@@ -229,6 +229,41 @@ RSpec.describe Karafka::BaseResponder do
 
         it 'expect to deliver them using waterdrop sync producer' do
           expect(async_producer).to receive(:call).with(message.to_json, topic: topic_name)
+        end
+      end
+
+      context 'with a mapped topic' do
+        let(:mapped_topic) { "prefix.#{topic_name}" }
+        let(:custom_mapper) do
+          ClassBuilder.build do
+            def self.outgoing(topic)
+              "prefix.#{topic}"
+            end
+          end
+        end
+        let(:topic_name) { rand.to_s }
+        let(:message) { { rand.to_s => rand.to_s } }
+        let(:working_class) do
+          name = topic_name
+          ClassBuilder.inherit(described_class) do
+            topic name
+
+            define_method :respond do |data|
+              respond_to name, data
+            end
+          end
+        end
+
+        before do
+          allow(Karafka::App.config)
+            .to receive(:topic_mapper)
+            .and_return(custom_mapper)
+        end
+
+        after { working_class.call(message) }
+
+        it 'sends the message' do
+          expect(sync_producer).to receive(:call).with(message.to_json, topic: mapped_topic)
         end
       end
     end

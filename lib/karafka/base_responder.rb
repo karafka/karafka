@@ -163,7 +163,11 @@ module Karafka
     def deliver!
       messages_buffer.each_value do |data_elements|
         data_elements.each do |data, options|
-          producer(options).call(data, options)
+          # We map this topic name, so it will match namespaced/etc topic in Kafka
+          # @note By default will not change topic (if default mapper used)
+          mapped_topic = Karafka::App.config.topic_mapper.outgoing(options[:topic])
+          external_options = options.merge(topic: mapped_topic)
+          producer(options).call(data, external_options)
         end
       end
     end
@@ -189,9 +193,7 @@ module Karafka
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
         @parser_class.generate(data),
-        # We map this topic name, so it will match namespaced/etc topic in Kafka
-        # @note By default will not change topic (if default mapper used)
-        options.merge(topic: Karafka::App.config.topic_mapper.outgoing(topic))
+        options.merge(topic: topic)
       ]
     end
 
