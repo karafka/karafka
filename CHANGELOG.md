@@ -29,6 +29,9 @@
 - #392 - Move params redundant data to metadata
 - #335 - Metadata access from within the consumer
 
+## 1.2.8
+- #408 - Responder Topic Lookup Bug on Heroku
+
 ## 1.2.7
 - Unlock Ruby-kafka version with a warning
 
