@@ -32,6 +32,9 @@
 - #402 - Delayed reconnection upon critical failures
 - #405 - `reconnect_timeout` value is now being validated
 
+## 1.2.8
+- #408 - Responder Topic Lookup Bug on Heroku
+
 ## 1.2.7
 - Unlock Ruby-kafka version with a warning
 
