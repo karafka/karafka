@@ -1,7 +1,9 @@
 # Karafka framework changelog
 
-## 1.2.7
+## 1.2.8
+- #408 - Responder Topic Lookup Bug on Heroku
 
+## 1.2.7
 - Unlock Ruby-kafka version with a warning
 
 ## 1.2.6
