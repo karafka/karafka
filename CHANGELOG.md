@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- #412 - Fix dry-inflector dependency lock in gemspec
+
 ## 1.2.8
 - #408 - Responder Topic Lookup Bug on Heroku
 
