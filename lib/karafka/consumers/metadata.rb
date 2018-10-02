@@ -2,14 +2,9 @@
 
 module Karafka
   module Consumers
+    # Brings the metadata into consumers that suport batch_fetching
     module Metadata
-      def metadata=(metadata)
-        @metadata = metadata
-      end
-
-      def metadata
-        @metadata
-      end
+      attr_accessor :metadata
     end
   end
 end
