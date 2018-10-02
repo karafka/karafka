@@ -3,6 +3,7 @@
 RSpec.describe Karafka::Connection::Listener do
   subject(:listener) { described_class.new(consumer_group) }
 
+  let(:client) { Karafka::Connection::Client.new(consumer_group) }
   let(:consumer_group) do
     Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
       cg.public_send(:topic=, rand.to_s) do
@@ -11,6 +12,8 @@ RSpec.describe Karafka::Connection::Listener do
       end
     end
   end
+
+  before { allow(Karafka::Connection::Client).to receive(:new).and_return(client) }
 
   describe '#call' do
     let(:client) { listener.send(:client) }
@@ -48,13 +51,14 @@ RSpec.describe Karafka::Connection::Listener do
               caller: listener,
               error: error
             )
+
+          allow(client).to receive(:fetch_loop).and_raise(error.new)
+          allow(client).to receive(:stop)
+          # Trick not to fall into infinite loop
+          allow(listener).to receive(:sleep).and_return(false)
         end
 
         it 'notices the error and stop the client' do
-          expect(listener)
-            .to receive(:client)
-            .and_raise(error.new)
-
           expect { listener.send(:fetch_loop) }.not_to raise_error
         end
       end

@@ -46,13 +46,10 @@ module Karafka
       rescue Exception => e
         Karafka.monitor.instrument('connection.listener.fetch_loop.error', caller: self, error: e)
         # rubocop:enable RescueException
-        if @client
-          # We can stop client without a problem, as it will reinitialize itself when running the
-          # `fetch_loop` again
-          @client.stop
-          sleep(@consumer_group.reconnect_timeout)
-          retry
-        end
+        # We can stop client without a problem, as it will reinitialize itself when running the
+        # `fetch_loop` again
+        @client.stop
+        sleep(@consumer_group.reconnect_timeout) && retry
       end
 
       # @return [Karafka::Connection::Client] wrapped kafka consuming client for a given topic
