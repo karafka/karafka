@@ -3,6 +3,7 @@
 RSpec.describe Karafka::Connection::Listener do
   subject(:listener) { described_class.new(consumer_group) }
 
+  let(:client) { Karafka::Connection::Client.new(consumer_group) }
   let(:consumer_group) do
     Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
       cg.public_send(:topic=, rand.to_s) do
@@ -12,9 +13,9 @@ RSpec.describe Karafka::Connection::Listener do
     end
   end
 
-  describe '#call' do
-    let(:client) { listener.send(:client) }
+  before { allow(Karafka::Connection::Client).to receive(:new).and_return(client) }
 
+  describe '#call' do
     it 'expects to run callbacks and start the main fetch loop' do
       expect(Karafka::Callbacks).to receive(:before_fetch_loop).with(consumer_group, client)
       expect(client).to receive(:fetch_loop)
@@ -23,7 +24,6 @@ RSpec.describe Karafka::Connection::Listener do
   end
 
   describe '#fetch_loop' do
-    let(:client) { double }
     let(:incoming_message) { double }
 
     [
@@ -42,21 +42,29 @@ RSpec.describe Karafka::Connection::Listener do
               caller: listener,
               error: error
             )
+          allow(client).to receive(:fetch_loop).and_raise(error.new)
+          allow(client).to receive(:stop)
+          # Trick not to fall into infinite loop
+          allow(listener).to receive(:sleep).and_return(false)
         end
 
         it 'notices the error and stop the client' do
-          expect(listener)
-            .to receive(:client)
-            .and_raise(error.new)
-
           expect { listener.send(:fetch_loop) }.not_to raise_error
         end
       end
     end
 
     context 'when no errors occur' do
+      before do
+        allow(listener)
+          .to receive(:client)
+          .and_return(client)
+        allow(Karafka::Connection::Delegator)
+          .to receive(:call)
+          .with(consumer_group.id, incoming_message)
+      end
+
       it 'expect to yield for each incoming message' do
-        expect(listener).to receive(:client).and_return(client)
         expect(client).to receive(:fetch_loop).and_yield(incoming_message)
 
         listener.send(:fetch_loop)
