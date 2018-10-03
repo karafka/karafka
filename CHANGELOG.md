@@ -32,8 +32,9 @@
 - #402 - Delayed reconnection upon critical failures
 - #405 - `reconnect_timeout` value is now being validated
 
-## Unreleased
+## 1.2.9 Unreleased
 - #412 - Fix dry-inflector dependency lock in gemspec
+- #414 - Backport to 1.2 the delayed retry upon failure
 
 ## 1.2.8
 - #408 - Responder Topic Lookup Bug on Heroku
