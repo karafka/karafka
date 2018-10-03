@@ -55,7 +55,7 @@ class KarafkaApp < Karafka::App
   end
 end
 
-Karafka.monitor.subscribe('app.running') do
+Karafka.monitor.subscribe('app.initialized') do
   # Put here all the things you want to do after the Karafka framework
   # initialization
 end

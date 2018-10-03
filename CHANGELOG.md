@@ -4,6 +4,7 @@
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
 - Update ruby-kafka to the 0.7 version
 - Support messages headers receiving
+- Message bus unification
 - Parser available in metadata
 - Cleanup towards moving to a non-global state app management
 - #388 - ssl_client_cert_chain sync
@@ -28,6 +29,8 @@
 - #371 - SASL over SSL
 - #392 - Move params redundant data to metadata
 - #335 - Metadata access from within the consumer
+- #402 - Delayed reconnection upon critical failures
+- #405 - `reconnect_timeout` value is now being validated
 
 ## 1.2.8
 - #408 - Responder Topic Lookup Bug on Heroku

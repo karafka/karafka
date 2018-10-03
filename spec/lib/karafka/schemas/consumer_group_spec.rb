@@ -49,6 +49,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       fetcher_max_queue_size: 100,
       start_from_beginning: true,
       connect_timeout: 10,
+      reconnect_timeout: 10,
       socket_timeout: 10,
       max_wait_time: 10,
       batch_fetching: true,

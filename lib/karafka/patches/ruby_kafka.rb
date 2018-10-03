@@ -38,7 +38,7 @@ module Karafka
       def publish_event(consumers, event_name)
         consumers.each do |consumer|
           key = "consumers.#{Helpers::Inflector.map(consumer.class.to_s)}.#{event_name}"
-          Karafka::App.events.publish(key, context: consumer)
+          Karafka::App.monitor.instrument(key, context: consumer)
         end
       end
     end

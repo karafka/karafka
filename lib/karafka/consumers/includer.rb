@@ -16,6 +16,7 @@ module Karafka
 
           bind_backend(consumer, topic)
           bind_params(consumer, topic)
+          bind_metadata(consumer, topic)
           bind_responders(consumer, topic)
         end
 
@@ -37,6 +38,15 @@ module Karafka
           return if topic.batch_consuming
 
           consumer.extend(SingleParams)
+        end
+
+        # Adds an option to work with metadata for consumer instances that have batch fetching
+        # @param consumer [Karafka::BaseConsumer] consumer instance
+        # @param topic [Karafka::Routing::Topic] topic of a consumer class
+        def bind_metadata(consumer, topic)
+          return unless topic.batch_fetching
+
+          consumer.extend(Metadata)
         end
 
         # Adds responders support for topics and consumers with responders defined for them

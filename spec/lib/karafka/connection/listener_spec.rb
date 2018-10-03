@@ -3,6 +3,7 @@
 RSpec.describe Karafka::Connection::Listener do
   subject(:listener) { described_class.new(consumer_group) }
 
+  let(:client) { Karafka::Connection::Client.new(consumer_group) }
   let(:consumer_group) do
     Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
       cg.public_send(:topic=, rand.to_s) do
@@ -12,12 +13,20 @@ RSpec.describe Karafka::Connection::Listener do
     end
   end
 
+  before { allow(Karafka::Connection::Client).to receive(:new).and_return(client) }
+
   describe '#call' do
     let(:client) { listener.send(:client) }
+    let(:listener_args) do
+      [
+        'connection.listener.before_fetch_loop',
+        consumer_group: consumer_group,
+        client: client
+      ]
+    end
 
     it 'expects to run callbacks and start the main fetch loop' do
-      expect(Karafka.events).to receive(:publish)
-        .with('before_fetch_loop', consumer_group: consumer_group, client: client)
+      expect(Karafka.monitor).to receive(:instrument).with(*listener_args)
       expect(client).to receive(:fetch_loop)
       listener.call
     end
@@ -42,13 +51,14 @@ RSpec.describe Karafka::Connection::Listener do
               caller: listener,
               error: error
             )
+
+          allow(client).to receive(:fetch_loop).and_raise(error.new)
+          allow(client).to receive(:stop)
+          # Trick not to fall into infinite loop
+          allow(listener).to receive(:sleep).and_return(false)
         end
 
         it 'notices the error and stop the client' do
-          expect(listener)
-            .to receive(:client)
-            .and_raise(error.new)
-
           expect { listener.send(:fetch_loop) }.not_to raise_error
         end
       end
@@ -91,9 +101,7 @@ RSpec.describe Karafka::Connection::Listener do
     context 'when client is already created' do
       let(:client) { double }
 
-      before do
-        listener.instance_variable_set(:'@client', client)
-      end
+      before { listener.instance_variable_set(:'@client', client) }
 
       it 'just returns it' do
         expect(Karafka::Connection::Client).not_to receive(:new)
@@ -104,9 +112,7 @@ RSpec.describe Karafka::Connection::Listener do
     context 'when client is not yet created' do
       let(:client) { double }
 
-      before do
-        listener.instance_variable_set(:'@client', nil)
-      end
+      before { listener.instance_variable_set(:'@client', nil) }
 
       it 'creates an instance and return' do
         expect(Karafka::Connection::Client)

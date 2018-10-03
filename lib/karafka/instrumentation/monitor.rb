@@ -23,6 +23,7 @@ module Karafka
       BASE_EVENTS = %w[
         params.params.parse
         params.params.parse.error
+        connection.listener.before_fetch_loop
         connection.listener.fetch_loop.error
         connection.client.fetch_loop.error
         connection.batch_delegator.call
@@ -36,6 +37,7 @@ module Karafka
         sync_producer.call.error
         sync_producer.call.retry
         app.initializing
+        app.initialized
         app.running
         app.stopping
         app.stopping.error
