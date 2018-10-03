@@ -3,25 +3,24 @@
 RSpec.describe Karafka::Status do
   subject(:status_manager) { described_class.instance }
 
-  it 'by default expect to be in initialized state because it is bootstraped' do
-    expect(status_manager.running?).to eq false
-    expect(status_manager.stopping?).to eq false
-    expect(status_manager.initializing?).to eq true
+  let(:status) { rand }
+
+  before { status_manager.instance_variable_set(:'@status', status) }
+
+  context 'when we start with a default state' do
+    it { expect(status_manager.running?).to eq false }
+    it { expect(status_manager.stopping?).to eq false }
+    it { expect(status_manager.initialized?).to eq false }
+    it { expect(status_manager.initializing?).to eq false }
   end
 
   describe 'running?' do
     context 'when status is not set to running' do
-      before do
-        status_manager.instance_variable_set(:'@status', rand)
-      end
-
       it { expect(status_manager.running?).to eq false }
     end
 
     context 'when status is set to running' do
-      before do
-        status_manager.instance_variable_set(:'@status', :running)
-      end
+      let(:status) { :running }
 
       it { expect(status_manager.running?).to eq true }
     end
@@ -68,19 +67,25 @@ RSpec.describe Karafka::Status do
     end
   end
 
+  describe 'initialized?' do
+    context 'when status is not set to initialized' do
+      it { expect(status_manager.initialized?).to eq false }
+    end
+
+    context 'when status is set to initialized' do
+      let(:status) { :initialized }
+
+      it { expect(status_manager.initialized?).to eq true }
+    end
+  end
+
   describe 'initializing?' do
     context 'when status is not set to initializing' do
-      before do
-        status_manager.instance_variable_set(:'@status', rand)
-      end
-
       it { expect(status_manager.initializing?).to eq false }
     end
 
     context 'when status is set to initializing' do
-      before do
-        status_manager.instance_variable_set(:'@status', :initializing)
-      end
+      let(:status) { :initializing }
 
       it { expect(status_manager.initializing?).to eq true }
     end

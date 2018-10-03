@@ -34,14 +34,6 @@ RSpec.describe Karafka::BaseConsumer do
     end
   end
 
-  describe '#metadata' do
-    let(:metadata) { instance_double(Karafka::Params::Metadata) }
-
-    before { base_consumer.instance_variable_set(:@metadata, metadata) }
-
-    it { expect(base_consumer.send(:metadata)).to eq metadata }
-  end
-
   describe '#params_batch' do
     let(:params_batch) { instance_double(Karafka::Params::ParamsBatch) }
 

@@ -22,8 +22,6 @@ module Karafka
 
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
     attr_reader :topic
-    # @return [Karafka::Params::Metadata] current metadata object
-    attr_accessor :metadata
     # @return [Karafka::Params:ParamsBatch] current params batch
     attr_accessor :params_batch
 

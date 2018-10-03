@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :routing_topic, class: 'Karafka::Routing::Topic' do
-    consumer_group { Karafka::Routing::ConsumerGroup.new('group-name') }
+    consumer_group { build(:routing_consumer_group) }
     name { 'test' }
     consumer { Class.new(Karafka::BaseConsumer) }
     backend { :inline }

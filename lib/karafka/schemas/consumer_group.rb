@@ -13,9 +13,7 @@ module Karafka
       SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
 
       configure do
-        config.messages_file = File.join(
-          Karafka.gem_root, 'config', 'errors.yml'
-        )
+        config.messages_file = File.join(Karafka.gem_root, 'config', 'errors.yml')
 
         # Uri validator to check if uri is in a Karafka acceptable format
         # @param uri [String] uri we want to validate
@@ -40,6 +38,7 @@ module Karafka
       required(:heartbeat_interval).filled { (int? | float?) & gteq?(0) }
       required(:fetcher_max_queue_size).filled(:int?, gt?: 0)
       required(:connect_timeout).filled { (int? | float?) & gt?(0) }
+      required(:reconnect_timeout).filled { (int? | float?) & gteq?(0) }
       required(:socket_timeout).filled { (int? | float?) & gt?(0) }
       required(:min_bytes).filled(:int?, gt?: 0)
       required(:max_bytes).filled(:int?, gt?: 0)
