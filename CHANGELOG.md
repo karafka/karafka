@@ -29,6 +29,9 @@
 - #392 - Move params redundant data to metadata
 - #335 - Metadata access from within the consumer
 
+## Unreleased
+- #412 - Fix dry-inflector dependency lock in gemspec
+
 ## 1.2.8
 - #408 - Responder Topic Lookup Bug on Heroku
 
