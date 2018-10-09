@@ -37,6 +37,8 @@ module Karafka
         else
           kafka_consumer.each_message(*settings) { |message| yield(message, :message) }
         end
+      # @note We catch only the processing errors as any other are considered critical (exceptions)
+      #   and should require a client restart with a backoff
       rescue Kafka::ProcessingError => error
         # If there was an error during consumption, we have to log it, pause current partition
         # and process other things
@@ -46,16 +48,6 @@ module Karafka
           error: error.cause
         )
         pause(error.topic, error.partition)
-        retry
-        # This is on purpose - see the notes for this method
-        # rubocop:disable RescueException
-      rescue Exception => error
-        # rubocop:enable RescueException
-        Karafka.monitor.instrument(
-          'connection.client.fetch_loop.error',
-          caller: self,
-          error: error
-        )
         retry
       end
 
