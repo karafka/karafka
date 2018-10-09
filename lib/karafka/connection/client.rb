@@ -41,16 +41,6 @@ module Karafka
         )
         pause(error.topic, error.partition)
         retry
-        # This is on purpose - see the notes for this method
-        # rubocop:disable RescueException
-      rescue Exception => error
-        # rubocop:enable RescueException
-        Karafka.monitor.instrument(
-          'connection.client.fetch_loop.error',
-          caller: self,
-          error: error
-        )
-        retry
       end
 
       # Gracefuly stops topic consumption
