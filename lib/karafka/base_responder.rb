@@ -39,7 +39,7 @@ module Karafka
   #
   # @example Multiple times used topic
   #   class Responder < BaseResponder
-  #     topic :required_topic, multiple_usage: true
+  #     topic :required_topic
   #
   #     def respond(data)
   #       data.each do |subset|

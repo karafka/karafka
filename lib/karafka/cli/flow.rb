@@ -18,7 +18,6 @@ module Karafka
             topic.responder.topics.each_value do |responder_topic|
               features = []
               features << (responder_topic.required? ? 'always' : 'conditionally')
-              features << (responder_topic.multiple_usage? ? 'one or more' : 'exactly once')
 
               print responder_topic.name, "(#{features.join(', ')})"
             end
