@@ -7,6 +7,7 @@
 - Message bus unification
 - Parser available in metadata
 - Cleanup towards moving to a non-global state app management
+- #393 - Reorganize responders - removed `multiple_usage` constrain
 - #388 - ssl_client_cert_chain sync
 - #300 - Store value in a value key and replace its content with parsed version - without root merge
 - #331 - Disallow building groups without topics
