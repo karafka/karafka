@@ -250,7 +250,7 @@ RSpec.describe Karafka::Connection::Client do
           .with(described_class, error)
       end
 
-      it 'notices and not reraise error' do
+      it 'notices and reraises error' do
         expect(kafka_consumer).not_to receive(:pause)
         expect { client.fetch_loop {} }.to raise_error(error)
       end
