@@ -42,29 +42,10 @@ RSpec.describe Karafka::Responders::Topic do
     end
   end
 
-  describe '#required?' do
-    context 'when topic is for multiple usage' do
-      let(:options) { { multiple_usage: true } }
-
-      it { expect(topic.multiple_usage?).to eq true }
-    end
-
-    context 'when topic has no options (default)' do
-      it { expect(topic.multiple_usage?).to eq false }
-    end
-
-    context 'when topic is not for multiple usage' do
-      let(:options) { { multiple_usage: false } }
-
-      it { expect(topic.multiple_usage?).to eq false }
-    end
-  end
-
   describe '#to_h' do
     let(:hashed_topic) { topic.to_h }
 
     it { expect(hashed_topic[:name]).to eq name }
     it { expect(hashed_topic[:required]).to eq topic.required? }
-    it { expect(hashed_topic[:multiple_usage]).to eq topic.multiple_usage? }
   end
 end
