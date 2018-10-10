@@ -15,7 +15,6 @@ module Karafka
           topic = Persistence::Topic.fetch(group_id, kafka_batch.topic)
           consumer = Persistence::Consumer.fetch(topic, kafka_batch.partition)
 
-
           Karafka.monitor.instrument(
             'connection.batch_delegator.call',
             caller: self,
