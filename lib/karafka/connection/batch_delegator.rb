@@ -15,7 +15,6 @@ module Karafka
           topic = Persistence::Topic.fetch(group_id, kafka_batch.topic)
           consumer = Persistence::Consumer.fetch(topic, kafka_batch.partition)
 
-          kafka_messages = kafka_batch.messages
 
           Karafka.monitor.instrument(
             'connection.batch_delegator.call',
@@ -26,6 +25,7 @@ module Karafka
             # Due to how ruby-kafka is built, we have the metadata that is stored on the batch
             # level only available for batch consuming
             consumer.metadata = Params::Builders::Metadata.from_kafka_batch(kafka_batch, topic)
+            kafka_messages = kafka_batch.messages
 
             # Depending on a case (persisted or not) we might use new consumer instance per
             # each batch, or use the same one for all of them (for implementing buffering, etc.)
