@@ -36,7 +36,6 @@ GEM
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
-    benchmark-ips (2.7.2)
     concurrent-ruby (1.0.5)
     concurrent-ruby (1.0.5-java)
     delivery_boy (0.2.7)
@@ -128,7 +127,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  benchmark-ips
   factory_bot
   karafka!
   rspec
