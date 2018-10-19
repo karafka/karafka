@@ -77,9 +77,6 @@ module Karafka
         # option heartbeat_interval [Integer] the interval between heartbeats; must be less
         #   than the session window.
         setting :heartbeat_interval, 10
-        # option offset_retention_time [Integer] The length of the retention window, known as
-        #   offset retention time
-        setting :offset_retention_time, nil
         # option fetcher_max_queue_size [Integer] max number of items in the fetch queue that
         #   are stored for further processing. Note, that each item in the queue represents a
         #   response from a single broker

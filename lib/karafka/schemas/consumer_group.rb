@@ -34,7 +34,6 @@ module Karafka
       required(:pause_exponential_backoff).filled(:bool?)
       required(:offset_commit_interval) { int? | float? }
       required(:offset_commit_threshold).filled(:int?)
-      required(:offset_retention_time) { none?.not > int? }
       required(:heartbeat_interval).filled { (int? | float?) & gteq?(0) }
       required(:fetcher_max_queue_size).filled(:int?, gt?: 0)
       required(:connect_timeout).filled { (int? | float?) & gt?(0) }

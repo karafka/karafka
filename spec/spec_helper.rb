@@ -66,7 +66,6 @@ module Karafka
     setup do |config|
       config.kafka.seed_brokers = ['kafka://localhost:9092']
       config.client_id = rand.to_s
-      config.kafka.offset_retention_time = -1
       config.kafka.max_bytes_per_partition = 1_048_576
       config.kafka.start_from_beginning = true
     end

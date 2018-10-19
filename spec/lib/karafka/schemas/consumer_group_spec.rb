@@ -45,7 +45,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       heartbeat_interval: 1,
       session_timeout: 1,
       max_bytes_per_partition: 1_048_576,
-      offset_retention_time: 1000,
       fetcher_max_queue_size: 100,
       start_from_beginning: true,
       connect_timeout: 10,
@@ -184,14 +183,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
     context 'when offset_commit_threshold is not integer' do
       before { config[:offset_commit_threshold] = 's' }
-
-      it { expect(schema.call(config)).not_to be_success }
-    end
-  end
-
-  context 'when we validate offset_retention_time' do
-    context 'when offset_retention_time is not integer' do
-      before { config[:offset_retention_time] = 's' }
 
       it { expect(schema.call(config)).not_to be_success }
     end
