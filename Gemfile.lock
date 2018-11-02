@@ -87,7 +87,7 @@ GEM
       concurrent-ruby (~> 1.0)
     json (2.1.0)
     json (2.1.0-java)
-    king_konf (0.3.6)
+    king_konf (0.3.7)
     minitest (5.11.3)
     multi_json (1.13.1)
     null-logger (0.1.5)
@@ -107,7 +107,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.8.0)
     rspec-support (3.8.0)
-    ruby-kafka (0.7.2)
+    ruby-kafka (0.7.3)
       digest-crc
     simplecov (0.16.1)
       docile (~> 1.1)
@@ -133,4 +133,4 @@ DEPENDENCIES
   waterdrop!
 
 BUNDLED WITH
-   1.16.6
+   1.17.1
