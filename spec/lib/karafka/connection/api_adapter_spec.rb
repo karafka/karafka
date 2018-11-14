@@ -43,7 +43,7 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     end
 
     context 'when values of keys are not nil' do
-      let(:unsupported_keys) { %i[sasl_over_ssl ssl_client_cert_chain] }
+      let(:unsupported_keys) { %i[sasl_over_ssl ssl_client_cert_chain ssl_client_cert_key_password] }
       let(:expected_keys) do
         Kafka::Client.instance_method(:initialize).parameters.map(&:last).sort
       end
