@@ -488,6 +488,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     sasl_scram_password
     sasl_scram_mechanism
     ssl_client_cert_chain
+    ssl_client_cert_key_password
   ].each do |encryption_attribute|
     context "when we validate #{encryption_attribute}" do
       context "when #{encryption_attribute} is nil" do
@@ -581,6 +582,42 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
     context 'when ssl_client_cert_chain is not a string' do
       before { config[:ssl_client_cert_chain] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate ssl_client_cert_key_password' do
+    context 'when ssl_client_cert_key_password is nil and ssl_client_cert is nil' do
+      before do
+        config[:ssl_client_cert_key_password] = nil
+        config[:ssl_client_cert] = nil
+        config[:ssl_client_cert_key] = nil
+      end
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when ssl_client_cert_key_password is present but ssl_client_cert is nil' do
+      before do
+        config[:ssl_client_cert_key_password] = 'chain'
+        config[:ssl_client_cert] = nil
+      end
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_key_password is present but ssl_client_cert_key is nil' do
+      before do
+        config[:ssl_client_cert_key_password] = 'chain'
+        config[:ssl_client_cert_key] = nil
+      end
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_key_password is not a string' do
+      before { config[:ssl_client_cert_key_password] = 2 }
 
       it { expect(schema.call(config)).not_to be_success }
     end
