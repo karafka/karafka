@@ -32,6 +32,7 @@
 - #335 - Metadata access from within the consumer
 - #402 - Delayed reconnection upon critical failures
 - #405 - `reconnect_timeout` value is now being validated
+- #426 - ssl client cert key password
 
 ## 1.2.9 Unreleased
 - Critical exceptions now will cause consumer to stop instead of retrying without a break

@@ -152,6 +152,9 @@ module Karafka
         setting :sasl_over_ssl, true
         # option ssl_client_cert_chain [String, nil] client cert chain or nil if not used
         setting :ssl_client_cert_chain, nil
+        # option ssl_client_cert_key_password [String, nil] the password required to read
+        #   the ssl_client_cert_key
+        setting :ssl_client_cert_key_password, nil
       end
 
       class << self
