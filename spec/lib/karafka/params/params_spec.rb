@@ -51,10 +51,11 @@ RSpec.describe Karafka::Params::Params do
           allow(params)
             .to receive(:parse)
             .and_raise(Karafka::Errors::ParserError)
+
+          params.parse! rescue false
         end
 
         it 'expect to keep the raw value within the params hash' do
-          params.parse! rescue false
           expect(params['value']).to eq(value)
         end
       end
