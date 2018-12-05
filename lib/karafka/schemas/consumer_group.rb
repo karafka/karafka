@@ -71,6 +71,7 @@ module Karafka
         ssl_client_cert
         ssl_client_cert_key
         ssl_client_cert_chain
+        ssl_client_cert_key_password
         sasl_gssapi_principal
         sasl_gssapi_keytab
         sasl_plain_authzid
@@ -123,6 +124,15 @@ module Karafka
         ]
       ) do |ssl_client_cert_chain, ssl_client_cert_key|
         ssl_client_cert_chain.filled? > ssl_client_cert_key.filled?
+      end
+
+      rule(
+        ssl_client_cert_key_password_with_ssl_client_cert_key: %i[
+          ssl_client_cert_key_password
+          ssl_client_cert_key
+        ]
+      ) do |ssl_client_cert_key_password, ssl_client_cert_key|
+        ssl_client_cert_key_password.filled? > ssl_client_cert_key.filled?
       end
     end
   end
