@@ -130,6 +130,25 @@ RSpec.describe Karafka::Params::Dsl do
               expect(params.keys).not_to include 'value'
             end
           end
+
+          context 'when params were not yet parsed and there os a parsing error' do
+            let(:value) { double }
+            let(:parsed_value) { { 'receive_time' => rand } }
+
+            before do
+              params['value'] = value
+
+              allow(params)
+                .to receive(:parse)
+                .and_raise(Karafka::Errors::ParserError)
+
+              params.retrieve! rescue false
+            end
+
+            it 'expect not to remove the original value' do
+              expect(params['value']).to eq value
+            end
+          end
         end
 
         describe '#parse' do

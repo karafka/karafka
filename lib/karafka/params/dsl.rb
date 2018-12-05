@@ -93,7 +93,9 @@ module Karafka
         return self if self['parsed']
         self['parsed'] = true
 
-        merge!(parse(delete('value')))
+        parsed_data = parse(self['value'])
+        delete('value')
+        merge!(parsed_data)
       end
 
       # Includes and extends the base params klass with everything that is needed by Karafka to
