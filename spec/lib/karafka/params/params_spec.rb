@@ -40,6 +40,25 @@ RSpec.describe Karafka::Params::Params do
           expect(params.parse!['parsed']).to eq true
         end
       end
+
+      context 'when parsing error occurs' do
+        let(:value) { double }
+        let(:parsed_value) { { double => double } }
+
+        before do
+          params['value'] = value
+
+          allow(params)
+            .to receive(:parse)
+            .and_raise(Karafka::Errors::ParserError)
+
+          params.parse! rescue false
+        end
+
+        it 'expect to keep the raw value within the params hash' do
+          expect(params['value']).to eq(value)
+        end
+      end
     end
 
     describe '#parse' do
