@@ -76,7 +76,7 @@ GEM
     minitest (5.11.3)
     multi_json (1.13.1)
     null-logger (0.1.5)
-    rake (12.3.1)
+    rake (12.3.2)
     require_all (2.0.0)
     rouge (2.2.1)
     rspec (3.8.0)
