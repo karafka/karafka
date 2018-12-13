@@ -69,7 +69,7 @@ GEM
       dry-types (~> 0.13.1)
     envlogic (1.1.0)
       dry-inflector (~> 0.1)
-    i18n (1.1.1)
+    i18n (1.2.0)
       concurrent-ruby (~> 1.0)
     json (2.1.0)
     king_konf (0.3.7)
@@ -123,4 +123,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   1.17.1
+   1.17.2
