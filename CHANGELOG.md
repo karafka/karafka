@@ -34,10 +34,11 @@
 - #405 - `reconnect_timeout` value is now being validated
 - #426 - ssl client cert key password
 
-## 1.2.9 Unreleased
+## 1.2.9
 - Critical exceptions now will cause consumer to stop instead of retrying without a break
 - #412 - Fix dry-inflector dependency lock in gemspec
 - #414 - Backport to 1.2 the delayed retry upon failure
+- #437 - Raw message is no longer added to params after ParserError raised
 
 ## 1.2.8
 - #408 - Responder Topic Lookup Bug on Heroku
