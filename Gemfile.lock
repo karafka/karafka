@@ -53,7 +53,7 @@ GEM
       dry-equalizer (~> 0.2)
       dry-events (~> 0.1)
       rouge (~> 2.0, >= 2.2.1)
-    dry-types (0.13.3)
+    dry-types (0.13.4)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.3)
       dry-core (~> 0.4, >= 0.4.4)
@@ -69,7 +69,7 @@ GEM
       dry-types (~> 0.13.1)
     envlogic (1.1.0)
       dry-inflector (~> 0.1)
-    i18n (1.2.0)
+    i18n (1.3.0)
       concurrent-ruby (~> 1.0)
     json (2.1.0)
     king_konf (0.3.7)
@@ -123,4 +123,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   1.17.2
+   1.17.3
