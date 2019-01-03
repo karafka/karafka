@@ -34,6 +34,7 @@
 - #405 - `reconnect_timeout` value is now being validated
 - #437 - Specs ensuring that the `#437` won't occur in the `1.3` release
 - #426 - ssl client cert key password
+- #444 - add certificate and private key validation
 
 ## 1.2.9
 - Critical exceptions now will cause consumer to stop instead of retrying without a break

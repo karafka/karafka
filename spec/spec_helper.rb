@@ -74,6 +74,9 @@ module Karafka
   end
 end
 
+# Set certificates path
+CERTS_PATH = "#{File.dirname(__FILE__)}/support/certificates"
+
 # In order to spec karafka out, we need to boot it first to initialize all the
 # dynamic components
 Karafka::App.boot!

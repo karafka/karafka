@@ -2,7 +2,6 @@
 
 RSpec.describe Karafka::Schemas::ConsumerGroup do
   let(:schema) { described_class }
-
   let(:topics) do
     [
       {
@@ -27,11 +26,12 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
   end
   let(:ssl_details) do
     {
-      ssl_ca_cert: 'ca_cert',
-      ssl_client_cert: 'client_cert',
-      ssl_client_cert_key: 'client_cert_key',
+      ssl_ca_cert: File.read("#{CERTS_PATH}/ca.crt"),
+      ssl_ca_cert_file_path: "#{CERTS_PATH}/ca.crt",
+      ssl_client_cert: File.read("#{CERTS_PATH}/client.crt"),
+      ssl_client_cert_key: File.read("#{CERTS_PATH}/client.key"),
       ssl_ca_certs_from_system: true,
-      ssl_client_cert_chain: nil,
+      ssl_client_cert_chain: File.read("#{CERTS_PATH}/client.chain"),
       sasl_over_ssl: true
     }
   end
@@ -510,6 +510,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       before do
         config[:ssl_client_cert] = nil
         config[:ssl_client_cert_key] = nil
+        config[:ssl_client_cert_chain] = nil
       end
 
       it { expect(schema.call(config)).to be_success }
@@ -526,13 +527,26 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
       it { expect(schema.call(config)).not_to be_success }
     end
+
+    context 'when ssl_client_cert is a invalid string' do
+      before { config[:ssl_client_cert] = 'invalid' }
+
+      it { expect(schema.call(config)).not_to be_success }
+      it { expect(schema.call(config).errors).to have_key(:ssl_client_cert_valid_ceritificate) }
+      it do
+        expect(
+          schema.call(config).errors[:ssl_client_cert_valid_ceritificate]
+        ).to eq([schema.message_compiler.messages.data['en.errors.valid_certificate?']])
+      end
+    end
   end
 
   context 'when we validate ssl_client_cert_key' do
     context 'when ssl_client_cert_key is nil and ssl_client_cert is nil' do
       before do
-        config[:ssl_client_cert_key] = nil
         config[:ssl_client_cert] = nil
+        config[:ssl_client_cert_key] = nil
+        config[:ssl_client_cert_chain] = nil
       end
 
       it { expect(schema.call(config)).to be_success }
@@ -549,6 +563,18 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
       it { expect(schema.call(config)).not_to be_success }
     end
+
+    context 'when ssl_client_cert_key is a invalid string' do
+      before { config[:ssl_client_cert_key] = 'invalid' }
+
+      it { expect(schema.call(config)).not_to be_success }
+      it { expect(schema.call(config).errors).to have_key(:ssl_client_cert_key_valid_private_key) }
+      it do
+        expect(
+          schema.call(config).errors[:ssl_client_cert_key_valid_private_key]
+        ).to eq([schema.message_compiler.messages.data['en.errors.valid_private_key?']])
+      end
+    end
   end
 
   context 'when we validate ssl_client_cert_chain' do
@@ -564,7 +590,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
     context 'when ssl_client_cert_chain is present but ssl_client_cert is nil' do
       before do
-        config[:ssl_client_cert_chain] = 'chain'
         config[:ssl_client_cert] = nil
       end
 
@@ -573,7 +598,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
     context 'when ssl_client_cert_chain is present but ssl_client_cert_key is nil' do
       before do
-        config[:ssl_client_cert_chain] = 'chain'
         config[:ssl_client_cert_key] = nil
       end
 
@@ -585,14 +609,27 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
       it { expect(schema.call(config)).not_to be_success }
     end
+
+    context 'when ssl_client_cert_chain is a invalid string' do
+      before { config[:ssl_client_cert_chain] = 'invalid' }
+
+      it { expect(schema.call(config)).not_to be_success }
+      it { expect(schema.call(config).errors).to have_key(:ssl_client_cert_chain_ceritificate) }
+      it do
+        expect(
+          schema.call(config).errors[:ssl_client_cert_chain_ceritificate]
+        ).to eq([schema.message_compiler.messages.data['en.errors.valid_certificate?']])
+      end
+    end
   end
 
   context 'when we validate ssl_client_cert_key_password' do
     context 'when ssl_client_cert_key_password is nil and ssl_client_cert is nil' do
       before do
-        config[:ssl_client_cert_key_password] = nil
         config[:ssl_client_cert] = nil
         config[:ssl_client_cert_key] = nil
+        config[:ssl_client_cert_key_password] = nil
+        config[:ssl_client_cert_chain] = nil
       end
 
       it { expect(schema.call(config)).to be_success }
@@ -600,8 +637,8 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
     context 'when ssl_client_cert_key_password is present but ssl_client_cert is nil' do
       before do
-        config[:ssl_client_cert_key_password] = 'chain'
         config[:ssl_client_cert] = nil
+        config[:ssl_client_cert_key_password] = 'password'
       end
 
       it { expect(schema.call(config)).not_to be_success }
@@ -609,8 +646,8 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
 
     context 'when ssl_client_cert_key_password is present but ssl_client_cert_key is nil' do
       before do
-        config[:ssl_client_cert_key_password] = 'chain'
         config[:ssl_client_cert_key] = nil
+        config[:ssl_client_cert_key_password] = 'password'
       end
 
       it { expect(schema.call(config)).not_to be_success }
