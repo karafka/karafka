@@ -7,6 +7,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 # @note HashWithIndifferentAccess is just for testing the optional integration,
 # it is not used by default in the framework
 %w[
+  byebug
   factory_bot
   fiddle
   simplecov
