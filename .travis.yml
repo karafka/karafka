@@ -1,17 +1,45 @@
+services:
+  - docker
+
 dist: trusty
 sudo: false
-language: ruby
 cache: bundler
 
-rvm:
-  - 2.3.8
-  - 2.4.5
-  - 2.5.3
-  - 2.6.0
-  - ruby-head
+git:
+  depth: false
 
-before_install:
-  - gem install bundler
-  - gem update --system
+test: &test
+  stage: Test
+  language: ruby
+  before_install:
+    - gem install bundler
+    - gem update --system
+  script: bundle exec rspec
 
-script: bundle exec rspec
+jobs:
+  include:
+    - <<: *test
+      rvm: 2.6.0
+    - <<: *test
+      rvm: 2.5.3
+    - <<: *test
+      rvm: 2.4.5
+    - <<: *test
+      rvm: 2.3.8
+
+    - stage: coditsu
+      language: script
+      before_script:
+        - docker create -v /sources --name sources alpine:3.4 /bin/true
+        - docker cp ./ sources:/sources
+      script: >
+        docker run
+        -e CODITSU_API_KEY
+        -e CODITSU_API_SECRET
+        -e CODITSU_REPOSITORY_ID
+        --volumes-from sources
+        coditsu/build-runner:latest
+
+stages:
+  - coditsu
+  - test
