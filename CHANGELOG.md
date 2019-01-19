@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## master
+- [#453](https://github.com/karafka/karafka/pull/453) require `Forwardable` module
+
 ## 1.2.9
 - Critical exceptions now will cause consumer to stop instead of retrying without a break
 - #412 - Fix dry-inflector dependency lock in gemspec
