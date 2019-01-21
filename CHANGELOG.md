@@ -35,6 +35,9 @@
 - #437 - Specs ensuring that the `#437` won't occur in the `1.3` release
 - #426 - ssl client cert key password
 
+## 1.2.10
+- [#453](https://github.com/karafka/karafka/pull/453) require `Forwardable` module
+
 ## 1.2.9
 - Critical exceptions now will cause consumer to stop instead of retrying without a break
 - #412 - Fix dry-inflector dependency lock in gemspec

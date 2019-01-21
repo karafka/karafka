@@ -6,6 +6,7 @@
   kafka
   envlogic
   thor
+  forwardable
   fileutils
   multi_json
   require_all
