@@ -7,6 +7,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 # @note HashWithIndifferentAccess is just for testing the optional integration,
 # it is not used by default in the framework
 %w[
+  byebug
   factory_bot
   fiddle
   simplecov
@@ -72,6 +73,9 @@ module Karafka
     end
   end
 end
+
+# Set certificates path
+CERTS_PATH = "#{File.dirname(__FILE__)}/support/certificates"
 
 # In order to spec karafka out, we need to boot it first to initialize all the
 # dynamic components

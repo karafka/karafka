@@ -36,6 +36,7 @@ GEM
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
+    byebug (10.0.2)
     concurrent-ruby (1.1.4)
     delivery_boy (0.2.7)
       king_konf (~> 0.2)
@@ -123,6 +124,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  byebug
   factory_bot
   karafka!
   rspec

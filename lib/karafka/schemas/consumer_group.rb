@@ -24,6 +24,39 @@ module Karafka
         rescue URI::InvalidURIError
           false
         end
+
+        # Validates private key from a string
+        #
+        # @param private_key [String] private key string
+        #
+        # @return [Boolean] true if it is a valid private key, otherwise false
+        def valid_private_key?(private_key)
+          OpenSSL::PKey::RSA.new(private_key)
+          true
+        rescue OpenSSL::PKey::RSAError
+          false
+        end
+
+        # Validates certificate from string
+        #
+        # @param certificate [String] certificate string
+        #
+        # @return [Boolean] true if it is a valid certificate, otherwise false
+        def valid_certificate?(certificate)
+          OpenSSL::X509::Certificate.new(certificate)
+          true
+        rescue OpenSSL::X509::CertificateError
+          false
+        end
+
+        # Validates certificate from path
+        #
+        # @param file_path [String] path to certificate
+        #
+        # @return [Boolean] true if it is a valid certificate, otherwise false
+        def valid_certificate_from_path?(file_path)
+          File.exist?(file_path) && valid_certificate?(File.read(file_path))
+        end
       end
 
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
@@ -133,6 +166,34 @@ module Karafka
         ]
       ) do |ssl_client_cert_key_password, ssl_client_cert_key|
         ssl_client_cert_key_password.filled? > ssl_client_cert_key.filled?
+      end
+
+      rule(ssl_ca_cert_valid_ceritificate: %i[ssl_ca_cert]) do |ssl_ca_cert|
+        ssl_ca_cert.filled? > ssl_ca_cert.valid_certificate?
+      end
+
+      rule(
+        ssl_ca_cert_file_path_valid_ceritificate: %i[ssl_ca_cert_file_path]
+      ) do |ssl_ca_cert_file_path|
+        ssl_ca_cert_file_path.filled? > ssl_ca_cert_file_path.valid_certificate_from_path?
+      end
+
+      rule(
+        ssl_client_cert_valid_ceritificate: %i[ssl_client_cert]
+      ) do |ssl_client_cert|
+        ssl_client_cert.filled? > ssl_client_cert.valid_certificate?
+      end
+
+      rule(
+        ssl_client_cert_key_valid_private_key: %i[ssl_client_cert_key]
+      ) do |ssl_client_cert_key|
+        ssl_client_cert_key.filled? > ssl_client_cert_key.valid_private_key?
+      end
+
+      rule(
+        ssl_client_cert_chain_ceritificate: %i[ssl_client_cert_chain]
+      ) do |ssl_client_cert_chain|
+        ssl_client_cert_chain.filled? > ssl_client_cert_chain.valid_certificate?
       end
     end
   end
