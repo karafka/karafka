@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (1.2.9)
+    karafka (1.2.10)
       activesupport (>= 4.0)
       dry-configurable (~> 0.7)
       dry-inflector (~> 0.1)
@@ -123,4 +123,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   1.17.3
+   2.0.1

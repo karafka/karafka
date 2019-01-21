@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## master
+## 1.2.10
 - [#453](https://github.com/karafka/karafka/pull/453) require `Forwardable` module
 
 ## 1.2.9
