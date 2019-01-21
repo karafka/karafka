@@ -11,10 +11,9 @@ git:
 test: &test
   stage: Test
   language: ruby
-  rvm: 2.6.0
   before_install:
-    - gem update --system
     - gem install bundler
+    - gem update --system
   script: bundle exec rspec
 
 jobs:
@@ -29,7 +28,8 @@ jobs:
       rvm: 2.3.8
 
     - stage: coditsu
-      language: script
+      language: ruby
+      rvm: 2.6.0
       before_script:
         - gem update --system
         - gem install bundler
