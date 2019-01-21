@@ -12,8 +12,8 @@ test: &test
   stage: Test
   language: ruby
   before_install:
-    - gem install bundler
     - gem update --system
+    - gem install bundler
   script: bundle exec rspec
 
 jobs:
@@ -30,6 +30,7 @@ jobs:
     - stage: coditsu
       language: script
       before_script:
+        - gem update --system
         - gem install bundler
         - docker create -v /sources --name sources alpine:3.4 /bin/true
         - docker cp ./ sources:/sources
