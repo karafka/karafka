@@ -18,22 +18,22 @@ RSpec.describe Karafka::Params::Params do
       end
 
       context 'when params were not yet parseds' do
-        let(:value) { double }
-        let(:parsed_value) { { double => double } }
+        let(:payload) { double }
+        let(:parsed_payload) { { double => double } }
 
         before do
-          params['value'] = value
+          params['payload'] = payload
 
           allow(params)
             .to receive(:parse)
-            .with(value)
-            .and_return(parsed_value)
+            .with(payload)
+            .and_return(parsed_payload)
 
           params.parse!
         end
 
-        it 'expect to merge with parsed stuff that is under value key and remove this key' do
-          expect(params.value).to eq parsed_value
+        it 'expect to merge with parsed stuff that is under payload key and remove this key' do
+          expect(params.payload).to eq parsed_payload
         end
 
         it 'expect to mark as parsed' do
@@ -42,11 +42,11 @@ RSpec.describe Karafka::Params::Params do
       end
 
       context 'when parsing error occurs' do
-        let(:value) { double }
-        let(:parsed_value) { { double => double } }
+        let(:payload) { double }
+        let(:parsed_payload) { { double => double } }
 
         before do
-          params['value'] = value
+          params['payload'] = payload
 
           allow(params)
             .to receive(:parse)
@@ -55,32 +55,32 @@ RSpec.describe Karafka::Params::Params do
           params.parse! rescue false
         end
 
-        it 'expect to keep the raw value within the params hash' do
-          expect(params['value']).to eq(value)
+        it 'expect to keep the raw payload within the params hash' do
+          expect(params['payload']).to eq(payload)
         end
       end
     end
 
     describe '#parse' do
       let(:parser) { double }
-      let(:value) { double }
+      let(:payload) { double }
 
       before do
         params['parser'] = parser
       end
 
       context 'when we are able to successfully parse' do
-        let(:parsed_value) { { rand => rand } }
+        let(:parsed_payload) { { rand => rand } }
 
         before do
           allow(parser)
             .to receive(:parse)
-            .with(value)
-            .and_return(parsed_value)
+            .with(payload)
+            .and_return(parsed_payload)
         end
 
-        it 'expect to return value in a message key' do
-          expect(params.send(:parse, value)).to eq parsed_value
+        it 'expect to return payload in a message key' do
+          expect(params.send(:parse, payload)).to eq parsed_payload
         end
       end
 
@@ -102,14 +102,14 @@ RSpec.describe Karafka::Params::Params do
         before do
           allow(parser)
             .to receive(:parse)
-            .with(value)
+            .with(payload)
             .and_raise(::Karafka::Errors::ParserError)
         end
 
         it 'expect to monitor and reraise' do
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_args).and_yield
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_error_args)
-          expect { params.send(:parse, value) }.to raise_error(::Karafka::Errors::ParserError)
+          expect { params.send(:parse, payload) }.to raise_error(::Karafka::Errors::ParserError)
         end
       end
     end
@@ -122,9 +122,9 @@ RSpec.describe Karafka::Params::Params do
       create_time
     ].each do |key|
       describe "\##{key}" do
-        let(:value) { rand }
+        let(:payload) { rand }
 
-        before { params[key] = value }
+        before { params[key] = payload }
 
         it { expect(params.public_send(key)).to eq params[key] }
       end
