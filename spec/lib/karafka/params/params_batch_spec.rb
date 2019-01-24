@@ -3,11 +3,11 @@
 RSpec.describe Karafka::Params::ParamsBatch do
   subject(:params_batch) { described_class.new(params_array) }
 
-  let(:unparsed_value) { { rand.to_s => rand.to_s } }
-  let(:parsed_value) { unparsed_value.to_json }
+  let(:unparsed_payload) { { rand.to_s => rand.to_s } }
+  let(:parsed_payload) { unparsed_payload.to_json }
   let(:topic) { build(:routing_topic) }
-  let(:kafka_message1) { build(:kafka_fetched_message, value: parsed_value) }
-  let(:kafka_message2) { build(:kafka_fetched_message, value: parsed_value) }
+  let(:kafka_message1) { build(:kafka_fetched_message, value: parsed_payload) }
+  let(:kafka_message2) { build(:kafka_fetched_message, value: parsed_payload) }
   let(:params_array) do
     [
       Karafka::Params::Builders::Params.from_kafka_message(kafka_message1, topic),
@@ -39,13 +39,13 @@ RSpec.describe Karafka::Params::ParamsBatch do
     end
   end
 
-  describe '#values' do
-    it 'expect to return parsed values from params within params batch' do
-      expect(params_batch.values).to eq [unparsed_value, unparsed_value]
+  describe '#payloads' do
+    it 'expect to return parsed payloads from params within params batch' do
+      expect(params_batch.payloads).to eq [unparsed_payload, unparsed_payload]
     end
 
-    context 'when values were used for the first time' do
-      before { params_batch.values }
+    context 'when payloads were used for the first time' do
+      before { params_batch.payloads }
 
       it 'expect to mark as unparsed all the params inside the batch' do
         expect(params_batch.to_a.all? { |params| params['parsed'] }).to eq true

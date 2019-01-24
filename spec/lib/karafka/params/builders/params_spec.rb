@@ -12,7 +12,7 @@ RSpec.describe Karafka::Params::Builders::Params do
     after { Timecop.return }
 
     it { is_expected.to be_a(Karafka::Params::Params) }
-    it { expect(result.value).to eq fetched_message.value }
+    it { expect(result.payload).to eq fetched_message.value }
     it { expect(result.partition).to eq fetched_message.partition }
     it { expect(result.offset).to eq fetched_message.offset }
     it { expect(result.key).to eq fetched_message.key }

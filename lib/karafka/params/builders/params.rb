@@ -26,7 +26,7 @@ module Karafka
                 'partition' => kafka_message.partition,
                 'receive_time' => Time.now,
                 'topic' => topic.name,
-                'value' => kafka_message.value
+                'payload' => kafka_message.value
               )
           end
         end
