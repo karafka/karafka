@@ -23,7 +23,7 @@ module Karafka
         partition
         receive_time
         topic
-        value
+        payload
       ].freeze
 
       private_constant :METHOD_ATTRIBUTES
@@ -34,7 +34,7 @@ module Karafka
         # @param key [Symbol] name of a field that we want to retrieve with a method call
         # @example
         #   key_attr_reader :example
-        #   params.example #=> 'my example value'
+        #   params.example #=> 'my example payload'
         define_method(attr) do
           self[attr]
         end
@@ -48,19 +48,19 @@ module Karafka
         return self if self['parsed']
 
         self['parsed'] = true
-        self['value'] = parse(self['value'])
+        self['payload'] = parse(self['payload'])
         self
       end
 
       private
 
-      # @param value [String] Raw data that we want to parse using consumer parser
+      # @param payload [String] Raw data that we want to parse using consumer parser
       # @note If something goes wrong, it will return raw data in a hash with a message key
       # @return [Hash] parsed data or a hash with message key containing raw data if something
       #   went wrong during parsing
-      def parse(value)
+      def parse(payload)
         Karafka.monitor.instrument('params.params.parse', caller: self) do
-          self['parser'].parse(value)
+          self['parser'].parse(payload)
         end
       rescue ::Karafka::Errors::ParserError => e
         Karafka.monitor.instrument('params.params.parse.error', caller: self, error: e)
