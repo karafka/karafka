@@ -41,12 +41,29 @@ RSpec.describe Karafka::BaseResponder do
 
     let(:parser) { Karafka::Parsers::Json.new }
 
-    describe 'default responder' do
-      subject(:responder) { working_class.new }
+    describe '#generator_class' do
+      let(:instance) { working_class.new }
+      subject(:responder) { instance.generator_class }
 
       let(:default_parser_class) { Karafka::Parsers::Json }
 
-      it { expect(responder.instance_variable_get(:'@parser')).to be_a default_parser_class }
+      it { expect(responder).to eq default_parser }
+
+      context 'when a class is assigned to the constructor' do
+        let(:parser_class) { Class.new(default_parser) }
+        let(:instance) { working_class.new(parser_class) }
+
+        it { expect(responder).to eq parser_class }
+
+        context 'when the responder has overridden default_generator_class()' do
+          let(:override_parser_class) { Class.new(default_parser) }
+          before do
+            allow(instance).to receive(:default_generator_class) { override_parser_class }
+          end
+
+          it { expect(responder).to eq override_parser_class }
+        end
+      end
     end
 
     describe '#call' do
@@ -171,6 +188,15 @@ RSpec.describe Karafka::BaseResponder do
         it 'expect to cast to json, and buffer in messages buffer' do
           responder.send(:respond_to, topic_name, input_data)
           expect(responder.messages_buffer).to eq(expected_buffer_state)
+        end
+      end
+
+      context 'when we pass in a generator' do
+        let(:generator_override) { Class.new(parser_class) }
+
+        it 'uses that generator' do
+          expect(generator_override).to receive(:generate).with(input_data)
+          responder.send(:respond_to, topic_name, input_data, generator: generator_override)
         end
       end
     end

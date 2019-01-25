@@ -96,8 +96,8 @@ module Karafka
     # @param parser [Object] parser that we can use to generate appropriate string
     #   or nothing if we want to default to Karafka::Parsers::Json
     # @return [Karafka::BaseResponder] base responder descendant responder
-    def initialize(parser = Karafka::App.config.parser)
-      @parser = parser
+    def initialize(consumer_topic_parser = Karafka::App.config.parser)
+      @consumer_topic_parser = consumer_topic_parser
       @messages_buffer = {}
     end
 
@@ -115,6 +115,10 @@ module Karafka
       validate_usage!
       validate_options!
       deliver!
+    end
+
+    def generator_class
+      default_generator_class || @consumer_topic_parser
     end
 
     private
@@ -183,18 +187,25 @@ module Karafka
     # as many times as we need. Especially when we have 1:n flow
     # @param topic [Symbol, String] topic to which we want to respond
     # @param data [String, Object] string or object that we want to send
-    # @param options [Hash] options for waterdrop (e.g. partition_key)
+    # @param options [Hash] options for waterdrop (e.g. partition_key) and a generator override.
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data, options = {})
       # We normalize the format to string, as WaterDrop and Ruby-Kafka support only
       # string topics
       topic = topic.to_s
 
+      generator = options.delete(:generator) { generator_class }
+
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
-        @parser.generate(data),
+        generator.generate(data),
         options.merge(topic: topic)
       ]
+    end
+
+    # Override this method in a subclass to set a default parser for your responder.
+    # Otherwise, responder falls back to using the same parser as the consumer.
+    def default_generator_class
     end
 
     # @param options [Hash] options for waterdrop
