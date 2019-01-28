@@ -59,6 +59,12 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
 
       it { expect(schema.call(config)).not_to be_success }
     end
+
+    context 'when name is a regexp' do
+      before { config[:name] = /user_*/ }
+
+      it { expect(schema.call(config)).to be_success }
+    end
   end
 
   context 'when we validate backend' do

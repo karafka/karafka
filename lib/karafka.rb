@@ -68,6 +68,7 @@ end
   setup/dsl
   setup/config
   status
+  schemas/predicates/regexp
   schemas/config
   schemas/consumer_group_topic
   schemas/consumer_group

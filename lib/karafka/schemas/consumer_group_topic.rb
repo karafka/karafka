@@ -4,8 +4,10 @@ module Karafka
   module Schemas
     # Consumer group topic validation rules
     ConsumerGroupTopic = Dry::Validation.Schema do
+      configure { predicates(Predicates::Regexp) }
+
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
-      required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
+      required(:name).filled { (str? & format?(Karafka::Schemas::TOPIC_REGEXP)) | regexp? }
       required(:backend).filled(included_in?: %i[inline sidekiq])
       required(:consumer).filled
       required(:parser).filled
