@@ -9,6 +9,7 @@ module Karafka
       required(:usage_count).filled(:int?, gteq?: 0)
       required(:registered).filled(eql?: true)
       required(:async).filled(:bool?)
+      required(:serializer).filled
 
       rule(
         required_usage: %i[required usage_count]

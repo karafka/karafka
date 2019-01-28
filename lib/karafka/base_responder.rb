@@ -48,6 +48,17 @@ module Karafka
   #     end
   #   end
   #
+  # @example Specify serializer for a topic
+  #   class Responder < BaseResponder
+  #     topic :xml_topic, serializer: MyXMLSerializer
+  #
+  #     def respond(data)
+  #       data.each do |subset|
+  #         respond_to :xml_topic, subset
+  #       end
+  #     end
+  #   end
+  #
   # @example Accept multiple arguments to a respond method
   #   class Responder < BaseResponder
   #     topic :users_actions
@@ -71,6 +82,8 @@ module Karafka
       # @param topic_name [Symbol, String] name of topic to which we want to respond
       # @param options [Hash] hash with optional configuration details
       def topic(topic_name, options = {})
+        options[:serializer] ||= Karafka::App.config.serializer
+        options[:registered] = true
         self.topics ||= {}
         topic_obj = Responders::Topic.new(topic_name, options.merge(registered: true))
         self.topics[topic_obj.name] = topic_obj
@@ -95,7 +108,6 @@ module Karafka
     # Creates a responder object
     # @return [Karafka::BaseResponder] base responder descendant responder
     def initialize
-      @serializer = Karafka::App.config.serializer
       @messages_buffer = {}
     end
 
@@ -181,7 +193,7 @@ module Karafka
     # as many times as we need. Especially when we have 1:n flow
     # @param topic [Symbol, String] topic to which we want to respond
     # @param data [String, Object] string or object that we want to send
-    # @param options [Hash] options for waterdrop (e.g. partition_key)
+    # @param options [Hash] options for waterdrop (e.g. partition_key).
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data, options = {})
       # We normalize the format to string, as WaterDrop and Ruby-Kafka support only
@@ -190,7 +202,7 @@ module Karafka
 
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
-        @serializer.call(data),
+        self.class.topics[topic].serializer.call(data),
         options.merge(topic: topic)
       ]
     end

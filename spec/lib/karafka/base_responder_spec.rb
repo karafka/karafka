@@ -5,11 +5,13 @@ RSpec.describe Karafka::BaseResponder do
   let(:input_data) { rand }
   let(:sync_producer) { WaterDrop::SyncProducer }
   let(:async_producer) { WaterDrop::AsyncProducer }
+  let(:serializer) { nil }
 
   let(:working_class) do
     name = topic_name
+    serializer_name = serializer
     ClassBuilder.inherit(described_class) do
-      topic name
+      topic name, serializer: serializer_name
     end
   end
 
@@ -39,14 +41,15 @@ RSpec.describe Karafka::BaseResponder do
   context 'when we want to use instance methods' do
     subject(:responder) { working_class.new }
 
-    let(:serializer) { Karafka::Parsers::Json.new }
+    let(:serializer) { Karafka::Serialization::Json::Serializer.new }
 
-    describe 'default responder' do
-      subject(:responder) { working_class.new }
+    describe '#serializer' do
+      subject(:topic_serializer) { instance.class.topics[topic_name].serializer }
 
+      let(:instance) { working_class.new }
       let(:serializer_class) { Karafka::Serialization::Json::Serializer }
 
-      it { expect(responder.instance_variable_get(:'@serializer')).to be_a serializer_class }
+      it { expect(topic_serializer).to be_a serializer_class }
     end
 
     describe '#call' do
