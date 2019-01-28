@@ -44,9 +44,9 @@ RSpec.describe Karafka::BaseResponder do
     describe 'default responder' do
       subject(:responder) { working_class.new }
 
-      let(:default_serializer_class) { Karafka::Serialization::Json::Serializer }
+      let(:serializer_class) { Karafka::Serialization::Json::Serializer }
 
-      it { expect(responder.instance_variable_get(:'@serializer')).to be_a default_serializer_class }
+      it { expect(responder.instance_variable_get(:'@serializer')).to be_a serializer_class }
     end
 
     describe '#call' do

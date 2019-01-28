@@ -32,7 +32,7 @@ RSpec.describe Karafka::Params::Params do
           params.deserialize!
         end
 
-        it 'expect to merge with deserialized stuff that is under payload key and remove this key' do
+        it 'expect to merge with deserialized data that is under payload key' do
           expect(params.payload).to eq deserialized_payload
         end
 
@@ -85,6 +85,7 @@ RSpec.describe Karafka::Params::Params do
       end
 
       context 'when deserialization fails' do
+        let(:expected_error) { ::Karafka::Errors::DeserializationError }
         let(:instrument_args) do
           [
             'params.params.deserialize',
@@ -109,7 +110,7 @@ RSpec.describe Karafka::Params::Params do
         it 'expect to monitor and reraise' do
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_args).and_yield
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_error_args)
-          expect { params.send(:deserialize, payload) }.to raise_error(::Karafka::Errors::DeserializationError)
+          expect { params.send(:deserialize, payload) }.to raise_error(expected_error)
         end
       end
     end

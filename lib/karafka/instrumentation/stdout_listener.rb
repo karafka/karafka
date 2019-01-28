@@ -23,7 +23,13 @@ module Karafka
           consumer = event[:consumer]
           topic = consumer.topic.name
           kafka_messages = event[:kafka_batch].messages
-          info "#{kafka_messages.count} messages on #{topic} topic delegated to #{consumer.class}"
+          info(
+            <<~MSG.chomp.tr("\n", " ")
+            #{kafka_messages.count} messages
+            on #{topic} topic
+            delegated to #{consumer.class}
+            MSG
+          )
         end
 
         # Logs details about incoming message and with which consumer we will consume it
@@ -39,7 +45,12 @@ module Karafka
         def on_params_params_deserialize(event)
           # Keep in mind, that a caller here is a param object not a controller,
           # so it returns a topic as a string, not a routing topic
-          debug "Params deserialization for #{event[:caller].topic} topic successful in #{event[:time]} ms"
+          debug(
+            <<~MSG.chomp.tr("\n", " ")
+              Params deserialization for #{event[:caller].topic} topic
+              successful in #{event[:time]} ms
+            MSG
+          )
         end
 
         # Logs unsuccessful deserialization attempts of incoming data
