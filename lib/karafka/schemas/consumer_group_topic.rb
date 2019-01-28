@@ -5,6 +5,8 @@ module Karafka
     # Consumer group topic validation rules
     ConsumerGroupTopic = Dry::Validation.Schema do
       configure do
+        # @param value [Object] any object that we want to check if it is a regexp
+        # @return [Boolean] true if object is an regexp, otherwise false
         def regexp?(value)
           value.is_a?(::Regexp)
         end
