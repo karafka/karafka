@@ -24,10 +24,10 @@ module Karafka
           topic = consumer.topic.name
           kafka_messages = event[:kafka_batch].messages
           info(
-            <<~MSG.chomp.tr("\n", " ")
-            #{kafka_messages.count} messages
-            on #{topic} topic
-            delegated to #{consumer.class}
+            <<~MSG.chomp.tr("\n", ' ')
+              #{kafka_messages.count} messages
+              on #{topic} topic
+              delegated to #{consumer.class}
             MSG
           )
         end
@@ -46,7 +46,7 @@ module Karafka
           # Keep in mind, that a caller here is a param object not a controller,
           # so it returns a topic as a string, not a routing topic
           debug(
-            <<~MSG.chomp.tr("\n", " ")
+            <<~MSG.chomp.tr("\n", ' ')
               Params deserialization for #{event[:caller].topic} topic
               successful in #{event[:time]} ms
             MSG

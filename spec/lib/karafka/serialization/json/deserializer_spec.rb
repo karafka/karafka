@@ -15,9 +15,10 @@ RSpec.describe Karafka::Serialization::Json::Deserializer do
 
     context 'when content is malformatted' do
       let(:content) { 'abc' }
+      let(:expected_error) { ::Karafka::Errors::DeserializationError }
 
       it 'expect to raise with Karafka internal deserializing error' do
-        expect { deserializer.call(content) }.to raise_error(::Karafka::Errors::DeserializationError)
+        expect { deserializer.call(content) }.to raise_error(expected_error)
       end
     end
   end
