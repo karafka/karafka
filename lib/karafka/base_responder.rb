@@ -93,11 +93,9 @@ module Karafka
     attr_reader :messages_buffer
 
     # Creates a responder object
-    # @param serializer [Object] serializer that we can use to generate appropriate string
-    #   or nothing if we want to default to Karafka::Parsers::Json
     # @return [Karafka::BaseResponder] base responder descendant responder
-    def initialize(serializer = Karafka::App.config.serializer)
-      @serializer = serializer
+    def initialize
+      @serializer = Karafka::App.config.serializer
       @messages_buffer = {}
     end
 
