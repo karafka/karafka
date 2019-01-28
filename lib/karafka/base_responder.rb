@@ -104,7 +104,7 @@ module Karafka
     attr_reader :messages_buffer
 
     # Creates a responder object
-    # @param parser [Object] parser that we can use to generate appropriate string
+    # @param consumer_topic_parser [Object] parser that we can use to generate appropriate string
     #   or nothing if we want to default to Karafka::Parsers::Json
     # @return [Karafka::BaseResponder] base responder descendant responder
     def initialize(consumer_topic_parser = Karafka::App.config.parser)
@@ -128,6 +128,8 @@ module Karafka
       deliver!
     end
 
+    # @param topic [Symbol, String] topic to which we want to respond
+    # @return [Object, Class] serializer for serialization of the outgoing data per topic
     def serializer(topic)
       self.class.topics[topic].serializer || @consumer_topic_parser
     end
@@ -201,14 +203,13 @@ module Karafka
     # @param options [Hash] options for waterdrop (e.g. partition_key).
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data, options = {})
-      serializer = serializer(topic)
       # We normalize the format to string, as WaterDrop and Ruby-Kafka support only
       # string topics
       topic = topic.to_s
 
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
-        serializer.generate(data),
+        serializer(topic).generate(data),
         options.merge(topic: topic)
       ]
     end

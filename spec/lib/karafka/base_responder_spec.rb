@@ -47,9 +47,9 @@ RSpec.describe Karafka::BaseResponder do
       let(:instance) { working_class.new }
       subject(:responder) { instance.serializer(topic_name) }
 
-      let(:default_parser_class) { Karafka::Parsers::Json }
+      let(:default_parser) { Karafka::Parsers::Json }
 
-      it { expect(responder).to eq default_parser }
+      it { expect(responder).to be_a default_parser }
 
       context 'when a class is assigned to the constructor' do
         let(:parser_class) { Class.new(default_parser) }
