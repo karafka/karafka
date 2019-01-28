@@ -5,11 +5,13 @@ RSpec.describe Karafka::BaseResponder do
   let(:input_data) { rand }
   let(:sync_producer) { WaterDrop::SyncProducer }
   let(:async_producer) { WaterDrop::AsyncProducer }
+  let(:serializer) { nil }
 
   let(:working_class) do
     name = topic_name
+    serializer_name = serializer
     ClassBuilder.inherit(described_class) do
-      topic name
+      topic name, serializer: serializer_name
     end
   end
 
@@ -41,9 +43,9 @@ RSpec.describe Karafka::BaseResponder do
 
     let(:parser) { Karafka::Parsers::Json.new }
 
-    describe '#generator_class' do
+    describe '#serializer' do
       let(:instance) { working_class.new }
-      subject(:responder) { instance.generator_class }
+      subject(:responder) { instance.serializer(topic_name) }
 
       let(:default_parser_class) { Karafka::Parsers::Json }
 
@@ -55,13 +57,10 @@ RSpec.describe Karafka::BaseResponder do
 
         it { expect(responder).to eq parser_class }
 
-        context 'when the responder has overridden default_generator_class()' do
-          let(:override_parser_class) { Class.new(default_parser) }
-          before do
-            allow(instance).to receive(:default_generator_class) { override_parser_class }
-          end
+        context 'when the responder has assigned a serializer for the topic' do
+          let(:serializer) { Class.new(default_parser) }
 
-          it { expect(responder).to eq override_parser_class }
+          it { expect(responder).to eq serializer }
         end
       end
     end
@@ -188,15 +187,6 @@ RSpec.describe Karafka::BaseResponder do
         it 'expect to cast to json, and buffer in messages buffer' do
           responder.send(:respond_to, topic_name, input_data)
           expect(responder.messages_buffer).to eq(expected_buffer_state)
-        end
-      end
-
-      context 'when we pass in a generator' do
-        let(:generator_override) { Class.new(parser_class) }
-
-        it 'uses that generator' do
-          expect(generator_override).to receive(:generate).with(input_data)
-          responder.send(:respond_to, topic_name, input_data, generator: generator_override)
         end
       end
     end

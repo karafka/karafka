@@ -48,6 +48,17 @@ module Karafka
   #     end
   #   end
   #
+  # @example Specify serializer for a topic
+  #   class Responder < BaseResponder
+  #     topic :xml_topic, serializer: MyXMLSerializer
+  #
+  #     def respond(data)
+  #       data.each do |subset|
+  #         respond_to :xml_topic, subset
+  #       end
+  #     end
+  #   end
+  #
   # @example Accept multiple arguments to a respond method
   #   class Responder < BaseResponder
   #     topic :users_actions
@@ -117,8 +128,8 @@ module Karafka
       deliver!
     end
 
-    def generator_class
-      default_generator_class || @consumer_topic_parser
+    def serializer(topic)
+      self.class.topics[topic].serializer || @consumer_topic_parser
     end
 
     private
@@ -187,25 +198,19 @@ module Karafka
     # as many times as we need. Especially when we have 1:n flow
     # @param topic [Symbol, String] topic to which we want to respond
     # @param data [String, Object] string or object that we want to send
-    # @param options [Hash] options for waterdrop (e.g. partition_key) and a generator override.
+    # @param options [Hash] options for waterdrop (e.g. partition_key).
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data, options = {})
+      serializer = serializer(topic)
       # We normalize the format to string, as WaterDrop and Ruby-Kafka support only
       # string topics
       topic = topic.to_s
 
-      generator = options.delete(:generator) { generator_class }
-
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
-        generator.generate(data),
+        serializer.generate(data),
         options.merge(topic: topic)
       ]
-    end
-
-    # Override this method in a subclass to set a default parser for your responder.
-    # Otherwise, responder falls back to using the same parser as the consumer.
-    def default_generator_class
     end
 
     # @param options [Hash] options for waterdrop

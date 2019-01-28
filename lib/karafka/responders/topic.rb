@@ -29,6 +29,11 @@ module Karafka
         @options[:registered] == true
       end
 
+      # @return [Class] Class to use to serialize messages for this topic
+      def serializer
+        @options[:serializer]
+      end
+
       # @return [Boolean] do we want to use async producer. Defaults to false as the sync producer
       #   is safer and introduces less problems
       def async?
@@ -41,6 +46,7 @@ module Karafka
           name: name,
           required: required?,
           registered: registered?,
+          serializer: serializer,
           async: async?
         }
       end
