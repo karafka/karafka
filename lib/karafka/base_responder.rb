@@ -77,10 +77,10 @@ module Karafka
       end
 
       # A simple alias for easier standalone responder usage.
-      # Instead of building it with new.call it allows (in case of usin JSON parser)
+      # Instead of building it with new.call it allows (in case of using JSON serializer)
       # to just run it directly from the class level
       # @param data Anything that we want to respond with
-      # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
+      # @example Send user data with a responder
       #   UsersCreatedResponder.call(@created_user)
       def call(*data)
         # Just in case there were no topics defined for a responder, we initialize with
@@ -93,11 +93,11 @@ module Karafka
     attr_reader :messages_buffer
 
     # Creates a responder object
-    # @param parser [Object] parser that we can use to generate appropriate string
+    # @param serializer [Object] serializer that we can use to generate appropriate string
     #   or nothing if we want to default to Karafka::Parsers::Json
     # @return [Karafka::BaseResponder] base responder descendant responder
-    def initialize(parser = Karafka::App.config.parser)
-      @parser = parser
+    def initialize(serializer = Karafka::App.config.serializer)
+      @serializer = serializer
       @messages_buffer = {}
     end
 
@@ -106,7 +106,7 @@ module Karafka
     # @note We know that validators should be executed also before sending data to topics, however
     #   the implementation gets way more complicated then, that's why we check after everything
     #   was sent using responder
-    # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
+    # @example Send user data with a responder
     #   UsersCreatedResponder.new.call(@created_user)
     # @example Send user data with a responder using non default Parser
     #   UsersCreatedResponder.new(MyParser).call(@created_user)
@@ -192,7 +192,7 @@ module Karafka
 
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
-        @parser.generate(data),
+        @serializer.call(data),
         options.merge(topic: topic)
       ]
     end

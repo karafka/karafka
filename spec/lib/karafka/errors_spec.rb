@@ -7,8 +7,14 @@ RSpec.describe Karafka::Errors do
     specify { expect(error).to be < StandardError }
   end
 
-  describe 'ParserError' do
-    subject(:error) { described_class::ParserError }
+  describe 'SerializationError' do
+    subject(:error) { described_class::SerializationError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe 'DeserializationError' do
+    subject(:error) { described_class::DeserializationError }
 
     specify { expect(error).to be < described_class::BaseError }
   end

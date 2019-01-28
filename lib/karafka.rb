@@ -64,7 +64,8 @@ module Karafka
 end
 
 %w[
-  parsers/json
+  serialization/json/serializer
+  serialization/json/deserializer
   setup/dsl
   setup/config
   status

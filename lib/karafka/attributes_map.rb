@@ -35,7 +35,7 @@ module Karafka
         (api_adapter[:subscribe] + %i[
           backend
           name
-          parser
+          deserializer
           responder
           batch_consuming
         ]).uniq

@@ -6,13 +6,13 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   let(:topic) { build(:routing_topic, name: topic_name) }
   let(:topic_name) { rand.to_s }
 
-  describe '#on_params_params_parse' do
-    subject(:trigger) { described_class.on_params_params_parse(event) }
+  describe '#on_params_params_deserialize' do
+    subject(:trigger) { described_class.on_params_params_deserialize(event) }
 
     let(:topic) { rand.to_s }
     let(:payload) { { caller: caller, time: time } }
     let(:caller) { instance_double(Karafka::Params::Params, topic: topic) }
-    let(:message) { "Params parsing for #{topic} topic successful in #{time} ms" }
+    let(:message) { "Params deserialization for #{topic} topic successful in #{time} ms" }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to receive(:debug).with(message)
@@ -20,14 +20,14 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
     end
   end
 
-  describe '#on_params_params_parse_error' do
-    subject(:trigger) { described_class.on_params_params_parse_error(event) }
+  describe '#on_params_params_deserialize_error' do
+    subject(:trigger) { described_class.on_params_params_deserialize_error(event) }
 
     let(:topic_name) { rand.to_s }
     let(:payload) { { caller: caller, time: time, error: error } }
-    let(:error) { Karafka::Errors::ParserError }
+    let(:error) { Karafka::Errors::DeserializationError }
     let(:caller) { instance_double(Karafka::Params::Params, topic: topic_name) }
-    let(:message) { "Params parsing error for #{topic_name} topic: #{error}" }
+    let(:message) { "Params deserialization error for #{topic_name} topic: #{error}" }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to receive(:error).with(message)

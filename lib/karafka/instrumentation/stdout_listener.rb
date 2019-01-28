@@ -34,18 +34,18 @@ module Karafka
           info "1 message on #{topic} topic delegated to #{consumer.class}"
         end
 
-        # Logs details about each received message value parsing
+        # Logs details about each received message value deserialization
         # @param event [Dry::Events::Event] event details including payload
-        def on_params_params_parse(event)
+        def on_params_params_deserialize(event)
           # Keep in mind, that a caller here is a param object not a controller,
           # so it returns a topic as a string, not a routing topic
-          debug "Params parsing for #{event[:caller].topic} topic successful in #{event[:time]} ms"
+          debug "Params deserialization for #{event[:caller].topic} topic successful in #{event[:time]} ms"
         end
 
-        # Logs unsuccessful parsing attempts of incoming data
+        # Logs unsuccessful deserialization attempts of incoming data
         # @param event [Dry::Events::Event] event details including payload
-        def on_params_params_parse_error(event)
-          error "Params parsing error for #{event[:caller].topic} topic: #{event[:error]}"
+        def on_params_params_deserialize_error(event)
+          error "Params deserialization error for #{event[:caller].topic} topic: #{event[:error]}"
         end
 
         # Logs errors that occured in a listener fetch loop

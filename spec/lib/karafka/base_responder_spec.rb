@@ -37,16 +37,16 @@ RSpec.describe Karafka::BaseResponder do
   end
 
   context 'when we want to use instance methods' do
-    subject(:responder) { working_class.new(parser) }
+    subject(:responder) { working_class.new }
 
-    let(:parser) { Karafka::Parsers::Json.new }
+    let(:serializer) { Karafka::Parsers::Json.new }
 
     describe 'default responder' do
       subject(:responder) { working_class.new }
 
-      let(:default_parser_class) { Karafka::Parsers::Json }
+      let(:default_serializer_class) { Karafka::Serialization::Json::Serializer }
 
-      it { expect(responder.instance_variable_get(:'@parser')).to be_a default_parser_class }
+      it { expect(responder.instance_variable_get(:'@serializer')).to be_a default_serializer_class }
     end
 
     describe '#call' do
