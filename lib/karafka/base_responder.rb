@@ -48,6 +48,17 @@ module Karafka
   #     end
   #   end
   #
+  # @example Specify serializer for a topic
+  #   class Responder < BaseResponder
+  #     topic :xml_topic, serializer: MyXMLSerializer
+  #
+  #     def respond(data)
+  #       data.each do |subset|
+  #         respond_to :xml_topic, subset
+  #       end
+  #     end
+  #   end
+  #
   # @example Accept multiple arguments to a respond method
   #   class Responder < BaseResponder
   #     topic :users_actions
@@ -93,11 +104,11 @@ module Karafka
     attr_reader :messages_buffer
 
     # Creates a responder object
-    # @param parser [Object] parser that we can use to generate appropriate string
+    # @param consumer_topic_parser [Object] parser that we can use to generate appropriate string
     #   or nothing if we want to default to Karafka::Parsers::Json
     # @return [Karafka::BaseResponder] base responder descendant responder
-    def initialize(parser = Karafka::App.config.parser)
-      @parser = parser
+    def initialize(consumer_topic_parser = Karafka::App.config.parser)
+      @consumer_topic_parser = consumer_topic_parser
       @messages_buffer = {}
     end
 
@@ -115,6 +126,12 @@ module Karafka
       validate_usage!
       validate_options!
       deliver!
+    end
+
+    # @param topic [Symbol, String] topic to which we want to respond
+    # @return [Object, Class] serializer for serialization of the outgoing data per topic
+    def serializer(topic)
+      self.class.topics[topic].serializer || @consumer_topic_parser
     end
 
     private
@@ -183,7 +200,7 @@ module Karafka
     # as many times as we need. Especially when we have 1:n flow
     # @param topic [Symbol, String] topic to which we want to respond
     # @param data [String, Object] string or object that we want to send
-    # @param options [Hash] options for waterdrop (e.g. partition_key)
+    # @param options [Hash] options for waterdrop (e.g. partition_key).
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data, options = {})
       # We normalize the format to string, as WaterDrop and Ruby-Kafka support only
@@ -192,7 +209,7 @@ module Karafka
 
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
-        @parser.generate(data),
+        serializer(topic).generate(data),
         options.merge(topic: topic)
       ]
     end

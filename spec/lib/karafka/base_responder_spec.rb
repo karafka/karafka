@@ -5,11 +5,13 @@ RSpec.describe Karafka::BaseResponder do
   let(:input_data) { rand }
   let(:sync_producer) { WaterDrop::SyncProducer }
   let(:async_producer) { WaterDrop::AsyncProducer }
+  let(:serializer) { nil }
 
   let(:working_class) do
     name = topic_name
+    serializer_name = serializer
     ClassBuilder.inherit(described_class) do
-      topic name
+      topic name, serializer: serializer_name
     end
   end
 
@@ -41,12 +43,26 @@ RSpec.describe Karafka::BaseResponder do
 
     let(:parser) { Karafka::Parsers::Json.new }
 
-    describe 'default responder' do
-      subject(:responder) { working_class.new }
+    describe '#serializer' do
+      let(:instance) { working_class.new }
+      subject(:responder) { instance.serializer(topic_name) }
 
-      let(:default_parser_class) { Karafka::Parsers::Json }
+      let(:default_parser) { Karafka::Parsers::Json }
 
-      it { expect(responder.instance_variable_get(:'@parser')).to be_a default_parser_class }
+      it { expect(responder).to be_a default_parser }
+
+      context 'when a class is assigned to the constructor' do
+        let(:parser_class) { Class.new(default_parser) }
+        let(:instance) { working_class.new(parser_class) }
+
+        it { expect(responder).to eq parser_class }
+
+        context 'when the responder has assigned a serializer for the topic' do
+          let(:serializer) { Class.new(default_parser) }
+
+          it { expect(responder).to eq serializer }
+        end
+      end
     end
 
     describe '#call' do
