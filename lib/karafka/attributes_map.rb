@@ -54,7 +54,7 @@ module Karafka
         karafka_settings = %i[batch_fetching]
         # This is a drity and bad hack of dry-configurable to get keys before setting values
         dynamically_proxied = Karafka::Setup::Config
-                              ._settings
+                                ._settings
                               .find { |s| s.name == :kafka }
                               .value
                               .instance_variable_get('@klass').settings
