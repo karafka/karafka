@@ -11,7 +11,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
           'topic1',
           registered: true,
           usage_count: 1,
-          serializer: ->{}
+          serializer: -> {}
         )
       ],
       registered_topics: [
@@ -19,7 +19,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
           'topic1',
           registered: true,
           usage_count: 1,
-          serializer: ->{}
+          serializer: -> {}
         )
       ]
     }
@@ -47,7 +47,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
         registered: registered,
         required: required,
         async: async,
-        serializer: ->(){}
+        serializer: -> {}
       ).to_h.merge!(usage_count: usage_count)
     end
 
