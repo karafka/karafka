@@ -12,7 +12,7 @@ RSpec.describe Karafka::Serialization::Json::Serializer do
       end
     end
 
-    context 'when content can be serialied with #to_json' do
+    context 'when content can be serialized with #to_json' do
       let(:content) { { rand.to_s => rand.to_s } }
 
       it 'expect to serialize it that way' do
@@ -20,7 +20,7 @@ RSpec.describe Karafka::Serialization::Json::Serializer do
       end
     end
 
-    context 'when content cannot be serialied with #to_json' do
+    context 'when content cannot be serialized with #to_json' do
       let(:content) { instance_double(Class, respond_to?: false) }
 
       it 'expect to raise serialization error' do
