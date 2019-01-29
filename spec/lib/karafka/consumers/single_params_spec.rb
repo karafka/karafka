@@ -16,7 +16,7 @@ RSpec.describe Karafka::Consumers::SingleParams do
     expect(consumer.send(:params)).to eq consumer.send(:params_batch).first
   end
 
-  it 'expect not to parse the value inside' do
-    expect(consumer.send(:params)['parsed']).to be nil
+  it 'expect not to deserialize the value inside' do
+    expect(consumer.send(:params)['deserialized']).to be nil
   end
 end

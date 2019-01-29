@@ -39,30 +39,17 @@ RSpec.describe Karafka::BaseResponder do
   end
 
   context 'when we want to use instance methods' do
-    subject(:responder) { working_class.new(parser) }
+    subject(:responder) { working_class.new }
 
-    let(:parser) { Karafka::Parsers::Json.new }
+    let(:serializer) { Karafka::Serialization::Json::Serializer.new }
 
     describe '#serializer' do
+      subject(:topic_serializer) { instance.class.topics[topic_name].serializer }
+
       let(:instance) { working_class.new }
-      subject(:responder) { instance.serializer(topic_name) }
+      let(:serializer_class) { Karafka::Serialization::Json::Serializer }
 
-      let(:default_parser) { Karafka::Parsers::Json }
-
-      it { expect(responder).to be_a default_parser }
-
-      context 'when a class is assigned to the constructor' do
-        let(:parser_class) { Class.new(default_parser) }
-        let(:instance) { working_class.new(parser_class) }
-
-        it { expect(responder).to eq parser_class }
-
-        context 'when the responder has assigned a serializer for the topic' do
-          let(:serializer) { Class.new(default_parser) }
-
-          it { expect(responder).to eq serializer }
-        end
-      end
+      it { expect(topic_serializer).to be_a serializer_class }
     end
 
     describe '#call' do

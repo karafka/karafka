@@ -4,8 +4,8 @@ module Karafka
   # Params namespace encapsulating all the logic that is directly related to params handling
   module Params
     # It provides lazy loading not only until the first usage, but also allows us to skip
-    # using parser until we execute our logic. That way we can operate with
-    # heavy-parsing data without slowing down the whole application.
+    # using deserializer until we execute our logic. That way we can operate with
+    # heavy-deserialization data without slowing down the whole application.
     class Params < Hash
       # Params attributes that should be available via a method call invocation for Kafka
       # client compatibility.
@@ -18,8 +18,8 @@ module Karafka
         is_control_record
         key
         offset
-        parser
-        parsed
+        deserializer
+        deserialized
         partition
         receive_time
         topic
@@ -40,30 +40,28 @@ module Karafka
         end
       end
 
-      # @return [Karafka::Params::Params] This method will trigger parser execution. If we decide
-      #   to retrieve data, parser will be executed to parse data. Output of parsing will be merged
-      #   to the current object. This object will be also marked as already parsed, so we won't
-      #   parse it again.
-      def parse!
-        return self if self['parsed']
+      # @return [Karafka::Params::Params] This method will trigger deserializer execution. If we
+      #   decide to retrieve data, deserializer will be executed to get data. Output of that will
+      #   be merged to the current object. This object will be also marked as already deserialized,
+      #   so we won't deserialize it again.
+      def deserialize!
+        return self if self['deserialized']
 
-        self['parsed'] = true
-        self['payload'] = parse(self['payload'])
+        self['deserialized'] = true
+        self['payload'] = deserialize(self['payload'])
         self
       end
 
       private
 
-      # @param payload [String] Raw data that we want to parse using consumer parser
-      # @note If something goes wrong, it will return raw data in a hash with a message key
-      # @return [Hash] parsed data or a hash with message key containing raw data if something
-      #   went wrong during parsing
-      def parse(payload)
-        Karafka.monitor.instrument('params.params.parse', caller: self) do
-          self['parser'].parse(payload)
+      # @param payload [String] Raw data that we want to deserialize using consumer deserializer
+      # @return [Object] deserialized data
+      def deserialize(payload)
+        Karafka.monitor.instrument('params.params.deserialize', caller: self) do
+          self['deserializer'].call(payload)
         end
-      rescue ::Karafka::Errors::ParserError => e
-        Karafka.monitor.instrument('params.params.parse.error', caller: self, error: e)
+      rescue ::StandardError => e
+        Karafka.monitor.instrument('params.params.deserialize.error', caller: self, error: e)
         raise e
       end
     end

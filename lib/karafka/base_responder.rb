@@ -82,16 +82,18 @@ module Karafka
       # @param topic_name [Symbol, String] name of topic to which we want to respond
       # @param options [Hash] hash with optional configuration details
       def topic(topic_name, options = {})
+        options[:serializer] ||= Karafka::App.config.serializer
+        options[:registered] = true
         self.topics ||= {}
-        topic_obj = Responders::Topic.new(topic_name, options.merge(registered: true))
+        topic_obj = Responders::Topic.new(topic_name, options)
         self.topics[topic_obj.name] = topic_obj
       end
 
       # A simple alias for easier standalone responder usage.
-      # Instead of building it with new.call it allows (in case of usin JSON parser)
+      # Instead of building it with new.call it allows (in case of using JSON serializer)
       # to just run it directly from the class level
       # @param data Anything that we want to respond with
-      # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
+      # @example Send user data with a responder
       #   UsersCreatedResponder.call(@created_user)
       def call(*data)
         # Just in case there were no topics defined for a responder, we initialize with
@@ -104,11 +106,8 @@ module Karafka
     attr_reader :messages_buffer
 
     # Creates a responder object
-    # @param consumer_topic_parser [Object] parser that we can use to generate appropriate string
-    #   or nothing if we want to default to Karafka::Parsers::Json
     # @return [Karafka::BaseResponder] base responder descendant responder
-    def initialize(consumer_topic_parser = Karafka::App.config.parser)
-      @consumer_topic_parser = consumer_topic_parser
+    def initialize
       @messages_buffer = {}
     end
 
@@ -117,7 +116,7 @@ module Karafka
     # @note We know that validators should be executed also before sending data to topics, however
     #   the implementation gets way more complicated then, that's why we check after everything
     #   was sent using responder
-    # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
+    # @example Send user data with a responder
     #   UsersCreatedResponder.new.call(@created_user)
     # @example Send user data with a responder using non default Parser
     #   UsersCreatedResponder.new(MyParser).call(@created_user)
@@ -126,12 +125,6 @@ module Karafka
       validate_usage!
       validate_options!
       deliver!
-    end
-
-    # @param topic [Symbol, String] topic to which we want to respond
-    # @return [Object, Class] serializer for serialization of the outgoing data per topic
-    def serializer(topic)
-      self.class.topics[topic].serializer || @consumer_topic_parser
     end
 
     private
@@ -209,7 +202,7 @@ module Karafka
 
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
-        serializer(topic).generate(data),
+        self.class.topics[topic].serializer.call(data),
         options.merge(topic: topic)
       ]
     end

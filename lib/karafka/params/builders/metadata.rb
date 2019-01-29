@@ -20,7 +20,7 @@ module Karafka
                 'highwater_mark_offset' => kafka_batch.highwater_mark_offset,
                 'last_offset' => kafka_batch.last_offset,
                 'offset_lag' => kafka_batch.offset_lag,
-                'parser' => topic.parser,
+                'deserializer' => topic.deserializer,
                 'partition' => kafka_batch.partition,
                 'topic' => kafka_batch.topic,
                 'unknown_last_offset' => kafka_batch.unknown_last_offset?

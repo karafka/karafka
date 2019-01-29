@@ -21,8 +21,8 @@ module Karafka
       #   Last 4 events are from WaterDrop but for convenience we use the same monitor for the
       #   whole karafka ecosystem
       BASE_EVENTS = %w[
-        params.params.parse
-        params.params.parse.error
+        params.params.deserialize
+        params.params.deserialize.error
         connection.listener.before_fetch_loop
         connection.listener.fetch_loop.error
         connection.client.fetch_loop.error

@@ -22,7 +22,7 @@ module Karafka
                 'is_control_record' => kafka_message.is_control_record,
                 'key' => kafka_message.key,
                 'offset' => kafka_message.offset,
-                'parser' => topic.parser,
+                'deserializer' => topic.deserializer,
                 'partition' => kafka_message.partition,
                 'receive_time' => Time.now,
                 'topic' => kafka_message.topic,
