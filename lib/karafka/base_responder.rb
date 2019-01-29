@@ -85,7 +85,7 @@ module Karafka
         options[:serializer] ||= Karafka::App.config.serializer
         options[:registered] = true
         self.topics ||= {}
-        topic_obj = Responders::Topic.new(topic_name, options.merge(registered: true))
+        topic_obj = Responders::Topic.new(topic_name, options)
         self.topics[topic_obj.name] = topic_obj
       end
 
