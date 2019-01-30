@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.2.11
+- Dependencies update (mostly dry libraries)
+
 ## 1.2.10
 - [#453](https://github.com/karafka/karafka/pull/453) require `Forwardable` module
 
