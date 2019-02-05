@@ -56,9 +56,11 @@ module Karafka
         # This is a drity and bad hack of dry-configurable to get keys before setting values
         dynamically_proxied = Karafka::Setup::Config
                               ._settings
+                              .settings
                               .find { |s| s.name == :kafka }
                               .value
-                              .instance_variable_get('@klass').settings
+                              .names
+                              .to_a
 
         (defined_settings + dynamically_proxied).uniq + karafka_settings - ignored_settings
       end
