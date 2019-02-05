@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.2.11
+- [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8
+
 ## 1.2.10
 - [#453](https://github.com/karafka/karafka/pull/453) require `Forwardable` module
 

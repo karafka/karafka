@@ -17,16 +17,16 @@ Gem::Specification.new do |spec|
   spec.license     = 'MIT'
 
   spec.add_dependency 'activesupport', '>= 4.0'
-  spec.add_dependency 'dry-configurable', '~> 0.7'
+  spec.add_dependency 'dry-configurable', '~> 0.8'
   spec.add_dependency 'dry-inflector', '~> 0.1'
-  spec.add_dependency 'dry-monitor', '~> 0.1'
+  spec.add_dependency 'dry-monitor', '~> 0.3'
   spec.add_dependency 'dry-validation', '~> 0.11'
   spec.add_dependency 'envlogic', '~> 1.0'
   spec.add_dependency 'multi_json', '>= 1.12'
   spec.add_dependency 'rake', '>= 11.3'
   spec.add_dependency 'require_all', '>= 1.4'
   spec.add_dependency 'ruby-kafka', '>= 0.6'
-  spec.add_dependency 'thor', '~> 0.19'
+  spec.add_dependency 'thor', '~> 0.20'
   spec.add_dependency 'waterdrop', '~> 1.2.4'
 
   spec.post_install_message = <<~MSG

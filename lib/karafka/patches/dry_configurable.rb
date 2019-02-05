@@ -10,10 +10,8 @@ module Karafka
       # Unfortunately it does not provide an on call proc evaluation, so
       # this feature had to be added here on demand/
       # @param args Any arguments that DryConfigurable::Config accepts
-      def initialize(*args)
-        super
-
-        @config.each_key(&method(:rebuild))
+      def define!(*args)
+        super.tap { @config.each_key(&method(:rebuild)) }
       end
 
       private
