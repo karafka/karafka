@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (1.2.10)
+    karafka (1.2.11)
       activesupport (>= 4.0)
       dry-configurable (~> 0.8)
       dry-inflector (~> 0.1)
