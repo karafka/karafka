@@ -37,6 +37,7 @@ class KarafkaApp < Karafka::App
   # notifications add extra boilerplate, if you want to achieve max performance,
   # listen to only what you really need for given environment.
   Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener)
+  Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener)
 
   consumer_groups.draw do
     # topic :example do
