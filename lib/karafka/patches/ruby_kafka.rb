@@ -17,16 +17,28 @@ module Karafka
                       .all
                       .values
                       .flat_map(&:values)
-                      .select { |ctrl| ctrl.respond_to?(:run_callbacks) }
+                      .select { |consumer| consumer.class.respond_to?(:after_fetch) }
 
-          if Karafka::App.stopped?
-            consumers.each { |ctrl| ctrl.run_callbacks :before_stop }
+          if Karafka::App.stopping?
+            publish_event(consumers, 'before_stop')
             Karafka::Persistence::Client.read.stop
           else
-            consumers.each { |ctrl| ctrl.run_callbacks :before_poll }
+            publish_event(consumers, 'before_poll')
             yield
-            consumers.each { |ctrl| ctrl.run_callbacks :after_poll }
+            publish_event(consumers, 'after_poll')
           end
+        end
+      end
+
+      private
+
+      # Notifies consumers about particular events happening
+      # @param consumers [Array<Object>] all consumers that want to be notified about an event
+      # @param event_name [String] name of the event that happened
+      def publish_event(consumers, event_name)
+        consumers.each do |consumer|
+          key = "consumers.#{Helpers::Inflector.map(consumer.class.to_s)}.#{event_name}"
+          Karafka::App.monitor.instrument(key, context: consumer)
         end
       end
     end

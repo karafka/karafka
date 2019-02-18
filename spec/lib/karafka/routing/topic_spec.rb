@@ -89,27 +89,27 @@ RSpec.describe Karafka::Routing::Topic do
     end
   end
 
-  describe '#parser=' do
-    let(:parser) { double }
+  describe '#deserializer=' do
+    let(:deserializer) { double }
 
-    it { expect { topic.parser = parser }.not_to raise_error }
+    it { expect { topic.deserializer = deserializer }.not_to raise_error }
   end
 
-  describe '#parser' do
-    before { topic.parser = parser }
+  describe '#deserializer' do
+    before { topic.deserializer = deserializer }
 
-    context 'when parser is not set' do
-      let(:parser) { nil }
+    context 'when deserializer is not set' do
+      let(:deserializer) { nil }
 
       it 'expect to use default one' do
-        expect(topic.parser).to eq Karafka::Parsers::Json
+        expect(topic.deserializer).to be_a Karafka::Serialization::Json::Deserializer
       end
     end
 
-    context 'when parser is set' do
-      let(:parser) { double }
+    context 'when deserializer is set' do
+      let(:deserializer) { double }
 
-      it { expect(topic.parser).to eq parser }
+      it { expect(topic.deserializer).to eq deserializer }
     end
   end
 

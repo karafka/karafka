@@ -5,6 +5,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'karafka/version'
 
+# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |spec|
   spec.name        = 'karafka'
   spec.version     = ::Karafka::VERSION
@@ -16,7 +17,6 @@ Gem::Specification.new do |spec|
   spec.description = 'Framework used to simplify Apache Kafka based Ruby applications development'
   spec.license     = 'MIT'
 
-  spec.add_dependency 'activesupport', '>= 4.0'
   spec.add_dependency 'dry-configurable', '~> 0.8'
   spec.add_dependency 'dry-inflector', '~> 0.1'
   spec.add_dependency 'dry-monitor', '~> 0.3'
@@ -25,14 +25,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'multi_json', '>= 1.12'
   spec.add_dependency 'rake', '>= 11.3'
   spec.add_dependency 'require_all', '>= 1.4'
-  spec.add_dependency 'ruby-kafka', '>= 0.6'
+  spec.add_dependency 'ruby-kafka', '>= 0.7.1'
   spec.add_dependency 'thor', '~> 0.20'
-  spec.add_dependency 'waterdrop', '~> 1.2.4'
-
-  spec.post_install_message = <<~MSG
-    \e[93mWarning:\e[0m If you're using Kafka 0.10, please lock ruby-kafka in your Gemfile to version '0.6.8':
-    gem 'ruby-kafka', '~> 0.6.8'
-  MSG
+  spec.add_dependency 'waterdrop', '~> 1.3'
 
   spec.required_ruby_version = '>= 2.3.0'
 
@@ -40,3 +35,4 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = %w[lib]
 end
+# rubocop:enable Metrics/BlockLength

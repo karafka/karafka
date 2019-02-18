@@ -16,7 +16,7 @@ module Karafka
         ) do
           # @note we build a new instance of responder each time, as a long-running (persisted)
           #   consumers can respond multiple times during the lifecycle
-          topic.responder.new(topic.parser).call(*data)
+          topic.responder.new.call(*data)
         end
       end
     end

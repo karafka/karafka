@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Instrumentation::Listener do
+RSpec.describe Karafka::Instrumentation::StdoutListener do
   let(:event) { Dry::Events::Event.new(rand, payload) }
   let(:time) { rand }
-  let(:topic) { instance_double(Karafka::Routing::Topic, name: topic_name) }
+  let(:topic) { build(:routing_topic, name: topic_name) }
   let(:topic_name) { rand.to_s }
 
-  describe '#on_params_params_parse' do
-    subject(:trigger) { described_class.on_params_params_parse(event) }
+  describe '#on_params_params_deserialize' do
+    subject(:trigger) { described_class.on_params_params_deserialize(event) }
 
     let(:topic) { rand.to_s }
     let(:payload) { { caller: caller, time: time } }
     let(:caller) { instance_double(Karafka::Params::Params, topic: topic) }
-    let(:message) { "Params parsing for #{topic} topic successful in #{time} ms" }
+    let(:message) { "Params deserialization for #{topic} topic successful in #{time} ms" }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to receive(:debug).with(message)
@@ -20,14 +20,14 @@ RSpec.describe Karafka::Instrumentation::Listener do
     end
   end
 
-  describe '#on_params_params_parse_error' do
-    subject(:trigger) { described_class.on_params_params_parse_error(event) }
+  describe '#on_params_params_deserialize_error' do
+    subject(:trigger) { described_class.on_params_params_deserialize_error(event) }
 
     let(:topic_name) { rand.to_s }
     let(:payload) { { caller: caller, time: time, error: error } }
-    let(:error) { Karafka::Errors::ParserError }
+    let(:error) { Karafka::Errors::DeserializationError }
     let(:caller) { instance_double(Karafka::Params::Params, topic: topic_name) }
-    let(:message) { "Params parsing error for #{topic_name} topic: #{error}" }
+    let(:message) { "Params deserialization error for #{topic_name} topic: #{error}" }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to receive(:error).with(message)
@@ -112,25 +112,18 @@ RSpec.describe Karafka::Instrumentation::Listener do
   describe '#on_consumers_responders_respond_with' do
     subject(:trigger) { described_class.on_consumers_responders_respond_with(event) }
 
-    let(:controller_instance) { controller_class.new }
+    let(:consumer_instance) { consumer_class.new(topic) }
     let(:data) { [rand] }
-    let(:payload) { { caller: controller_instance, data: data } }
+    let(:payload) { { caller: consumer_instance, data: data } }
     let(:responder) { Karafka::BaseResponder }
     let(:message) do
-      "Responded from #{controller_instance.class} using #{responder} with following data #{data}"
+      "Responded from #{consumer_instance.class} using #{responder} with following data #{data}"
     end
-    let(:controller_class) do
-      ClassBuilder.inherit(Karafka::BaseConsumer).tap do |klass|
-        klass.topic = topic
-      end
-    end
+    let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
     let(:topic) do
-      instance_double(
-        Karafka::Routing::Topic,
-        responder: responder,
-        backend: :inline,
-        batch_consuming: false
-      )
+      build(:routing_topic).tap do |topic|
+        topic.responder = responder
+      end
     end
 
     it 'expect logger to log proper message' do
@@ -139,12 +132,13 @@ RSpec.describe Karafka::Instrumentation::Listener do
     end
   end
 
-  describe '#on_connection_delegator_call' do
-    subject(:trigger) { described_class.on_connection_delegator_call(event) }
+  describe '#on_connection_batch_delegator_call' do
+    subject(:trigger) { described_class.on_connection_batch_delegator_call(event) }
 
-    let(:payload) { { caller: caller, consumer: consumer, kafka_messages: kafka_messages } }
+    let(:payload) { { caller: caller, consumer: consumer, kafka_batch: kafka_batch } }
     let(:kafka_messages) { Array.new(rand(2..10)) { rand } }
-    let(:caller) { Karafka::Connection::Delegator }
+    let(:kafka_batch) { instance_double(Kafka::FetchedBatch, messages: kafka_messages) }
+    let(:caller) { Karafka::Connection::BatchDelegator }
     let(:consumer) { instance_double(Karafka::BaseConsumer, topic: topic) }
     let(:message) do
       "#{kafka_messages.count} messages on #{topic.name} topic delegated to #{consumer.class}"
@@ -156,8 +150,51 @@ RSpec.describe Karafka::Instrumentation::Listener do
     end
   end
 
-  describe '#on_server_stop' do
-    subject(:trigger) { described_class.on_server_stop(event) }
+  describe '#on_connection_message_delegator_call' do
+    subject(:trigger) { described_class.on_connection_message_delegator_call(event) }
+
+    let(:payload) { { caller: caller, consumer: consumer, kafka_message: kafka_message } }
+    let(:kafka_message) { rand }
+    let(:caller) { Karafka::Connection::MessageDelegator }
+    let(:consumer) { instance_double(Karafka::BaseConsumer, topic: topic) }
+    let(:message) { "1 message on #{topic.name} topic delegated to #{consumer.class}" }
+
+    it 'expect logger to log proper message' do
+      expect(Karafka.logger).to receive(:info).with(message)
+      trigger
+    end
+  end
+
+  describe '#on_app_initializing' do
+    subject(:trigger) { described_class.on_app_initializing(event) }
+
+    let(:payload) { {} }
+    let(:message) { "Initializing Karafka server #{::Process.pid}" }
+
+    it 'expect logger to log server initializing' do
+      # We had to add at least once as it runs in a separate thread and can interact
+      # with other specs - this is a cheap workaround
+      expect(Karafka.logger).to receive(:info).with(message).at_least(:once)
+      trigger
+    end
+  end
+
+  describe '#on_app_running' do
+    subject(:trigger) { described_class.on_app_running(event) }
+
+    let(:payload) { {} }
+    let(:message) { "Running Karafka server #{::Process.pid}" }
+
+    it 'expect logger to log server running' do
+      # We had to add at least once as it runs in a separate thread and can interact
+      # with other specs - this is a cheap workaround
+      expect(Karafka.logger).to receive(:info).with(message).at_least(:once)
+      trigger
+    end
+  end
+
+  describe '#on_app_stopping' do
+    subject(:trigger) { described_class.on_app_stopping(event) }
 
     let(:payload) { {} }
     let(:message) { "Stopping Karafka server #{::Process.pid}" }
@@ -172,8 +209,8 @@ RSpec.describe Karafka::Instrumentation::Listener do
     end
   end
 
-  describe '#on_server_stop_error' do
-    subject(:trigger) { described_class.on_server_stop_error(event) }
+  describe '#on_app_stopping_error' do
+    subject(:trigger) { described_class.on_app_stopping_error(event) }
 
     let(:payload) { {} }
     let(:message) { "Forceful Karafka server #{::Process.pid} stop" }

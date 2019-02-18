@@ -14,8 +14,10 @@ RSpec.describe Karafka::Connection::ApiAdapter do
   end
   let(:custom_mapper) do
     ClassBuilder.build do
-      def self.outgoing(topic)
-        "remapped-#{topic}"
+      class << self
+        def outgoing(topic)
+          "remapped-#{topic}"
+        end
       end
     end
   end
@@ -33,7 +35,7 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     it 'expect to have std kafka config keys' do
       expected = %i[
         logger client_id connect_timeout socket_timeout sasl_plain_authzid
-        ssl_ca_certs_from_system
+        ssl_ca_certs_from_system sasl_over_ssl
       ]
       expect(config.last.keys.sort).to eq expected.sort
     end
@@ -43,7 +45,6 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     end
 
     context 'when values of keys are not nil' do
-      let(:unsupported_keys) { %i[sasl_over_ssl ssl_client_cert_chain ssl_client_cert_key_password] }
       let(:expected_keys) do
         Kafka::Client.instance_method(:initialize).parameters.map(&:last).sort
       end
@@ -56,12 +57,13 @@ RSpec.describe Karafka::Connection::ApiAdapter do
           # This line will skip settings that are defined somewhere else (on config root level)
           # or new not supported settings
           next unless Karafka::App.config.kafka.respond_to?(client_key)
+
           hashed_details[client_key] = rand.to_s
         end
       end
 
       it 'expect to have all the keys as kafka requires' do
-        expect(config.last.keys.sort).to eq(expected_keys - %i[seed_brokers] - unsupported_keys)
+        expect(config.last.keys.sort).to eq(expected_keys - %i[seed_brokers])
       end
     end
   end
@@ -116,7 +118,7 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     let(:partition) { 0 }
 
     it 'expect not to have anything else except timeout in the settings hash' do
-      expect(config.last.keys.sort).to eq %i[timeout]
+      expect(config.last.keys.sort).to eq %i[timeout max_timeout exponential_backoff].sort
     end
 
     it 'expect to have topic name as a first argument' do
@@ -150,8 +152,10 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     context 'with a custom topic mapper' do
       let(:custom_mapper) do
         ClassBuilder.build do
-          def self.outgoing(topic)
-            "prefix.#{topic}"
+          class << self
+            def outgoing(topic)
+              "prefix.#{topic}"
+            end
           end
         end
       end

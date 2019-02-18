@@ -7,9 +7,12 @@ module Karafka
     # It is a part of Karafka's DSL
     class Topic
       extend Helpers::ConfigRetriever
+      extend Forwardable
 
       attr_reader :id, :consumer_group
       attr_accessor :consumer
+
+      def_delegator :@consumer_group, :batch_fetching
 
       # @param [String, Symbol] name of a topic on which we want to listen
       # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
@@ -29,7 +32,6 @@ module Karafka
       # example for Sidekiq
       def build
         Karafka::AttributesMap.topic.each { |attr| send(attr) }
-        consumer&.topic = self
         self
       end
 

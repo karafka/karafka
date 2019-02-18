@@ -29,7 +29,7 @@ module Karafka
 
       # Builds a topic representation inside of a current consumer group route
       # @param name [String, Symbol] name of topic to which we want to subscribe
-      # @yield Evaluates a given block in a topic context
+      # @param block [Proc] block that we want to evaluate in the topic context
       # @return [Karafka::Routing::Topic] newly built topic instance
       def topic=(name, &block)
         topic = Topic.new(name, self)

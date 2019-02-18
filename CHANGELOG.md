@@ -1,5 +1,43 @@
 # Karafka framework changelog
 
+## 1.3 Unreleased
+- Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
+- Update ruby-kafka to the 0.7 version
+- Support messages headers receiving
+- Message bus unification
+- Parser available in metadata
+- Cleanup towards moving to a non-global state app management
+- #393 - Reorganize responders - removed `multiple_usage` constrain
+- #388 - ssl_client_cert_chain sync
+- #300 - Store value in a value key and replace its content with parsed version - without root merge
+- #331 - Disallow building groups without topics
+- #340 - Instrumentation unification. Better and more consistent naming
+- #340 - Procline instrumentation for a nicer process name
+- #342 - Change default for `fetcher_max_queue_size` from `100` to `10` to lower max memory usage
+- #345 - Cleanup exceptions names
+- #341 - Split connection delegator into batch delegator and single_delegator
+- #351 - Rename `#retrieve!` to `#parse!` on params and `#parsed` to `parse!` on params batch.
+- #351 - Adds '#first' for params_batch that returns parsed first element from the params_batch object.
+- #360 - Single params consuming mode automatically parses data specs
+- #359 - Divide mark_as_consumed into mark_as_consumed and mark_as_consumed!
+- #356 - Provide a `#values` for params_batch to extract only values of objects from the params_batch
+- #363 - Too shallow ruby-kafka version lock
+- #354 - Expose consumer heartbeat
+- #377 - Remove the persistent setup in favor of persistence
+- #375 - Sidekiq Backend parser mismatch
+- #369 - Single consumer can support more than one topic
+- #288 - Drop dependency on `activesupport` gem
+- #371 - SASL over SSL
+- #392 - Move params redundant data to metadata
+- #335 - Metadata access from within the consumer
+- #402 - Delayed reconnection upon critical failures
+- #405 - `reconnect_timeout` value is now being validated
+- #437 - Specs ensuring that the `#437` won't occur in the `1.3` release
+- #426 - ssl client cert key password
+- #444 - add certificate and private key validation
+- #460 - Decouple responder "parser" (generator?) from topic.parser (benissimo)
+- #463 - Split parsers into serializers / deserializers
+
 ## 1.2.11
 - [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8
 
@@ -21,6 +59,7 @@
 ## 1.2.6
 - Lock WaterDrop to 1.2.3
 - Lock Ruby-Kafka to 0.6.x (support for 0.7 will be added in Karafka 1.3)
+- #382 - Full logging with AR, etc for development mode when there is Rails integration
 
 ## 1.2.5
 - #354 - Expose consumer heartbeat
@@ -31,10 +70,12 @@
 
 ## 1.2.3
 - #313 - support PLAINTEXT and SSL for scheme
+- #288 - drop activesupport callbacks in favor of notifications
 - #320 - Pausing indefinetely with nil pause timeout doesn't work
 - #318 - Partition pausing doesn't work with custom topic mappers
 - Rename ConfigAdapter to ApiAdapter to better reflect what it does
 - #317 - Manual offset committing doesn't work with custom topic mappers
+- #319 - Support for exponential backoff in pause
 
 ## 1.2.2
 - #312 - Broken for ActiveSupport 5.2.0

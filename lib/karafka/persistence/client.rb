@@ -7,18 +7,22 @@ module Karafka
       # Thread.current key under which we store current thread messages consumer client
       PERSISTENCE_SCOPE = :client
 
-      # @param client [Karafka::Connection::Client] messages consumer client of
-      #   a current thread
-      # @return [Karafka::Connection::Client] persisted messages consumer client
-      def self.write(client)
-        Thread.current[PERSISTENCE_SCOPE] = client
-      end
+      private_constant :PERSISTENCE_SCOPE
 
-      # @return [Karafka::Connection::Client] persisted messages consumer client
-      # @raise [Karafka::Errors::MissingConsumer] raised when no thread messages consumer
-      #   client but we try to use it anyway
-      def self.read
-        Thread.current[PERSISTENCE_SCOPE] || raise(Errors::MissingClient)
+      class << self
+        # @param client [Karafka::Connection::Client] messages consumer client of
+        #   a current thread
+        # @return [Karafka::Connection::Client] persisted messages consumer client
+        def write(client)
+          Thread.current[PERSISTENCE_SCOPE] = client
+        end
+
+        # @return [Karafka::Connection::Client] persisted messages consumer client
+        # @raise [Karafka::Errors::MissingClientError] raised when no thread messages consumer
+        #   client but we try to use it anyway
+        def read
+          Thread.current[PERSISTENCE_SCOPE] || raise(Errors::MissingClientError)
+        end
       end
     end
   end

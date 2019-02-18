@@ -51,17 +51,37 @@ RSpec.describe Karafka::Connection::Client do
   end
 
   describe '#pause' do
+    let(:pause_timeout) { rand }
+    let(:pause_max_timeout) { rand }
+    let(:pause_exponential_backoff) { false }
+    let(:pause_args) do
+      [
+        topic,
+        partition,
+        timeout: pause_timeout,
+        max_timeout: pause_max_timeout,
+        exponential_backoff: pause_exponential_backoff
+      ]
+    end
+
     before do
       client.instance_variable_set(:'@kafka_consumer', kafka_consumer)
-      allow(consumer_group).to receive(:pause_timeout).and_return(pause_timeout)
+      allow(consumer_group)
+        .to receive(:pause_timeout)
+        .and_return(pause_timeout)
+      allow(consumer_group)
+        .to receive(:pause_max_timeout)
+        .and_return(pause_max_timeout)
+      allow(consumer_group)
+        .to receive(:pause_exponential_backoff)
+        .and_return(pause_exponential_backoff)
     end
 
     context 'when pause_timeout is set to nil' do
-      let(:pause_timeout) { nil }
       let(:error) { Karafka::Errors::InvalidPauseTimeout }
 
       it 'expect to raise an exception' do
-        expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
+        expect(kafka_consumer).to receive(:pause).with(*pause_args)
         expect(client.pause(topic, partition)).to eq true
       end
     end
@@ -71,7 +91,7 @@ RSpec.describe Karafka::Connection::Client do
       let(:error) { Karafka::Errors::InvalidPauseTimeout }
 
       it 'expect to raise an exception' do
-        expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
+        expect(kafka_consumer).to receive(:pause).with(*pause_args)
         expect(client.pause(topic, partition)).to eq true
       end
     end
@@ -80,7 +100,7 @@ RSpec.describe Karafka::Connection::Client do
       let(:pause_timeout) { rand(1..100) }
 
       it 'expect to pause consumer_group' do
-        expect(kafka_consumer).to receive(:pause).with(topic, partition, timeout: pause_timeout)
+        expect(kafka_consumer).to receive(:pause).with(*pause_args)
         expect(client.pause(topic, partition)).to eq true
       end
     end
@@ -89,11 +109,22 @@ RSpec.describe Karafka::Connection::Client do
       let(:pause_timeout) { rand(1..100) }
       let(:r_topic) { custom_mapper.outgoing(topic) }
       let(:custom_mapper) do
-        ClassBuilder.build do
-          def self.outgoing(topic)
+        klass = ClassBuilder.build do
+          def outgoing(topic)
             "remapped-#{topic}"
           end
         end
+
+        klass.new
+      end
+      let(:pause_args) do
+        [
+          r_topic,
+          partition,
+          timeout: pause_timeout,
+          max_timeout: pause_max_timeout,
+          exponential_backoff: pause_exponential_backoff
+        ]
       end
 
       before do
@@ -101,7 +132,7 @@ RSpec.describe Karafka::Connection::Client do
       end
 
       it 'expect to pause consumer_group for a remapped topic' do
-        expect(kafka_consumer).to receive(:pause).with(r_topic, partition, timeout: pause_timeout)
+        expect(kafka_consumer).to receive(:pause).with(*pause_args)
         expect(client.pause(topic, partition)).to eq true
       end
     end
@@ -112,19 +143,40 @@ RSpec.describe Karafka::Connection::Client do
 
     before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
+    it 'expect to forward to mark_message_as_processed and not to commit offsets' do
+      expect(kafka_consumer).to receive(:mark_message_as_processed).with(params)
+      expect(kafka_consumer).not_to receive(:commit_offsets)
+      client.mark_as_consumed(params)
+    end
+  end
+
+  describe '#mark_as_consumed!' do
+    let(:params) { instance_double(Karafka::Params::Params) }
+
+    before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
+
     it 'expect to forward to mark_message_as_processed and commit offsets' do
       expect(kafka_consumer).to receive(:mark_message_as_processed).with(params)
       expect(kafka_consumer).to receive(:commit_offsets)
-      client.mark_as_consumed(params)
+      client.mark_as_consumed!(params)
     end
   end
 
   describe '#trigger_heartbeat' do
     before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
 
+    it 'expect to use the consumers non blocking trigger_heartbeat method' do
+      expect(kafka_consumer).to receive(:trigger_heartbeat)
+      client.trigger_heartbeat
+    end
+  end
+
+  describe '#trigger_heartbeat!' do
+    before { client.instance_variable_set(:'@kafka_consumer', kafka_consumer) }
+
     it 'expect to use the consumers blocking trigger_heartbeat! method' do
       expect(kafka_consumer).to receive(:trigger_heartbeat!)
-      client.trigger_heartbeat
+      client.trigger_heartbeat!
     end
   end
 
@@ -135,25 +187,21 @@ RSpec.describe Karafka::Connection::Client do
 
     context 'when everything works smooth' do
       context 'with single message consumption mode' do
-        let(:messages) { [incoming_message] }
-
         it 'expect to use kafka_consumer to get each message and yield as an array of messages' do
           expect(kafka_consumer).to receive(:each_message).and_yield(incoming_message)
-          expect { |block| client.fetch_loop(&block) }.to yield_with_args(messages)
+          expect { |block| client.fetch_loop(&block) }
+            .to yield_with_args(incoming_message, :message)
         end
       end
 
       context 'with message batch consumption mode' do
         let(:batch_fetching) { true }
-        let(:incoming_batch) { instance_double(Kafka::FetchedBatch) }
-        let(:incoming_messages) { [incoming_message, incoming_message] }
+        let(:incoming_batch) { build(:kafka_fetched_batch) }
 
         it 'expect to use kafka_consumer to get messages and yield all of them' do
           expect(kafka_consumer).to receive(:each_batch).and_yield(incoming_batch)
-          expect(incoming_batch).to receive(:messages).and_return(incoming_messages)
-
           expect { |block| client.fetch_loop(&block) }
-            .to yield_successive_args(incoming_messages)
+            .to yield_successive_args([incoming_batch, :batch])
         end
       end
     end
@@ -202,7 +250,7 @@ RSpec.describe Karafka::Connection::Client do
           .with(described_class, error)
       end
 
-      it 'notices and not reraise error' do
+      it 'notices and reraises error' do
         expect(kafka_consumer).not_to receive(:pause)
         expect { client.fetch_loop {} }.to raise_error(error)
       end

@@ -4,3 +4,21 @@ en:
       has an invalid format.
       Expected schema, host and port number.
       Example: kafka://127.0.0.1:9092 or kafka+ssl://127.0.0.1:9092
+    valid_certificate?: >
+      is not a valid certificate
+    valid_certificate_from_path?: >
+      is not a valid certificate
+    valid_private_key?: >
+      is not a valid private key
+    max_timeout_size_for_exponential: >
+      pause_timeout cannot be more than pause_max_timeout.
+    ssl_client_cert_with_ssl_client_cert_key: >
+      Both ssl_client_cert and ssl_client_cert_key need to be provided.
+    ssl_client_cert_key_with_ssl_client_cert: >
+      Both ssl_client_cert_key and ssl_client_cert need to be provided.
+    ssl_client_cert_chain_with_ssl_client_cert: >
+      Both ssl_client_cert_chain and ssl_client_cert need to be provided.
+    ssl_client_cert_chain_with_ssl_client_cert_key: >
+      Both ssl_client_cert_chain and ssl_client_cert_key need to be provided.
+    ssl_client_cert_key_password_with_ssl_client_cert_key: >
+      Both ssl_client_cert_key_password and ssl_client_cert_key need to be provided.

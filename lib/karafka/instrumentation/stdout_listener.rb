@@ -4,7 +4,7 @@ module Karafka
   module Instrumentation
     # Default listener that hooks up to our instrumentation and uses its events for logging
     # It can be removed/replaced or anything without any harm to the Karafka app flow
-    module Listener
+    module StdoutListener
       # Log levels that we use in this particular listener
       USED_LOG_LEVELS = %i[
         debug
@@ -14,30 +14,49 @@ module Karafka
       ].freeze
 
       # Injects WaterDrop listener logger actions
-      extend WaterDrop::Instrumentation::Listener
+      extend WaterDrop::Instrumentation::StdoutListener
 
       class << self
-        # Logs details about incoming messages and with which consumer we will consume them
+        # Logs details about incoming batches and with which consumer we will consume them
         # @param event [Dry::Events::Event] event details including payload
-        def on_connection_delegator_call(event)
+        def on_connection_batch_delegator_call(event)
           consumer = event[:consumer]
           topic = consumer.topic.name
-          kafka_messages = event[:kafka_messages]
-          info "#{kafka_messages.count} messages on #{topic} topic delegated to #{consumer.class}"
+          kafka_messages = event[:kafka_batch].messages
+          info(
+            <<~MSG.chomp.tr("\n", ' ')
+              #{kafka_messages.count} messages
+              on #{topic} topic
+              delegated to #{consumer.class}
+            MSG
+          )
         end
 
-        # Logs details about each received message value parsing
+        # Logs details about incoming message and with which consumer we will consume it
         # @param event [Dry::Events::Event] event details including payload
-        def on_params_params_parse(event)
+        def on_connection_message_delegator_call(event)
+          consumer = event[:consumer]
+          topic = consumer.topic.name
+          info "1 message on #{topic} topic delegated to #{consumer.class}"
+        end
+
+        # Logs details about each received message value deserialization
+        # @param event [Dry::Events::Event] event details including payload
+        def on_params_params_deserialize(event)
           # Keep in mind, that a caller here is a param object not a controller,
           # so it returns a topic as a string, not a routing topic
-          debug "Params parsing for #{event[:caller].topic} topic successful in #{event[:time]} ms"
+          debug(
+            <<~MSG.chomp.tr("\n", ' ')
+              Params deserialization for #{event[:caller].topic} topic
+              successful in #{event[:time]} ms
+            MSG
+          )
         end
 
-        # Logs unsuccessful parsing attempts of incoming data
+        # Logs unsuccessful deserialization attempts of incoming data
         # @param event [Dry::Events::Event] event details including payload
-        def on_params_params_parse_error(event)
-          error "Params parsing error for #{event[:caller].topic} topic: #{event[:error]}"
+        def on_params_params_deserialize_error(event)
+          error "Params deserialization error for #{event[:caller].topic} topic: #{event[:error]}"
         end
 
         # Logs errors that occured in a listener fetch loop
@@ -80,15 +99,27 @@ module Karafka
         # Logs info about responder usage withing a controller flow
         # @param event [Dry::Events::Event] event details including payload
         def on_consumers_responders_respond_with(event)
-          calling = event[:caller].class
+          calling = event[:caller]
           responder = calling.topic.responder
           data = event[:data]
-          info "Responded from #{calling} using #{responder} with following data #{data}"
+          info "Responded from #{calling.class} using #{responder} with following data #{data}"
+        end
+
+        # Logs info that we're initializing Karafka app
+        # @param _event [Dry::Events::Event] event details including payload
+        def on_app_initializing(_event)
+          info "Initializing Karafka server #{::Process.pid}"
+        end
+
+        # Logs info that we're running Karafka app
+        # @param _event [Dry::Events::Event] event details including payload
+        def on_app_running(_event)
+          info "Running Karafka server #{::Process.pid}"
         end
 
         # Logs info that we're going to stop the Karafka server
         # @param _event [Dry::Events::Event] event details including payload
-        def on_server_stop(_event)
+        def on_app_stopping(_event)
           # We use a separate thread as logging can't be called from trap context
           Thread.new { info "Stopping Karafka server #{::Process.pid}" }
         end
@@ -96,7 +127,7 @@ module Karafka
         # Logs an error that Karafka was unable to stop the server gracefully and it had to do a
         #   forced exit
         # @param _event [Dry::Events::Event] event details including payload
-        def on_server_stop_error(_event)
+        def on_app_stopping_error(_event)
           # We use a separate thread as logging can't be called from trap context
           Thread.new { error "Forceful Karafka server #{::Process.pid} stop" }
         end

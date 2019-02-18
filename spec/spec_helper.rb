@@ -7,11 +7,12 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 # @note HashWithIndifferentAccess is just for testing the optional integration,
 # it is not used by default in the framework
 %w[
-  simplecov
-  timecop
+  byebug
+  factory_bot
   fiddle
+  simplecov
   tempfile
-  active_support/hash_with_indifferent_access
+  timecop
 ].each do |lib|
   require lib
 end
@@ -45,11 +46,10 @@ end
 # jruby counts coverage a bit differently, so we ignore that
 SimpleCov.minimum_coverage jruby? ? 95 : 100
 
-Timecop.safe_mode = true
-
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
+  config.include FactoryBot::Syntax::Methods
   config.disable_monkey_patching!
   config.order = :random
 
@@ -74,10 +74,13 @@ module Karafka
   end
 end
 
+# Set certificates path
+CERTS_PATH = "#{File.dirname(__FILE__)}/support/certificates"
+
 # In order to spec karafka out, we need to boot it first to initialize all the
 # dynamic components
 Karafka::App.boot!
 
 # We by default use the default listener for specs to check how it works and that
 # it does not break anything
-Karafka.monitor.subscribe(Karafka::Instrumentation::Listener)
+Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener)

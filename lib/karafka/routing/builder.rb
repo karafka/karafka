@@ -16,6 +16,8 @@ module Karafka
       # @note After it is done drawing it will store and validate all the routes to make sure that
       #   they are correct and that there are no topic/group duplications (this is forbidden)
       # @yield Evaluates provided block in a builder context so we can describe routes
+      # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
+      #   doesn't match with ConfigurationSchema
       # @example
       #   draw do
       #     topic :xyz do
@@ -27,8 +29,9 @@ module Karafka
         each do |consumer_group|
           hashed_group = consumer_group.to_h
           validation_result = Karafka::Schemas::ConsumerGroup.call(hashed_group)
-          return if validation_result.success?
-          raise Errors::InvalidConfiguration, validation_result.errors
+          next if validation_result.success?
+
+          raise Errors::InvalidConfigurationError, validation_result.errors
         end
       end
 
@@ -43,14 +46,14 @@ module Karafka
 
       # Builds and saves given consumer group
       # @param group_id [String, Symbol] name for consumer group
-      # @yield Evaluates a given block in a consumer group context
+      # @param block [Proc] proc that should be executed in the proxy context
       def consumer_group(group_id, &block)
         consumer_group = ConsumerGroup.new(group_id.to_s)
         self << Proxy.new(consumer_group, &block).target
       end
 
       # @param topic_name [String, Symbol] name of a topic from which we want to consumer
-      # @yield Evaluates a given block in a topic context
+      # @param block [Proc] proc we want to evaluate in the topic context
       def topic(topic_name, &block)
         consumer_group(topic_name) do
           topic(topic_name, &block).tap(&:build)

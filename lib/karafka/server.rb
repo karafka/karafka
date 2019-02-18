@@ -10,6 +10,8 @@ module Karafka
     # What system exit code should we use when we terminated forcefully
     FORCEFUL_EXIT_CODE = 2
 
+    private_constant :SUPERVISION_SLEEP, :FORCEFUL_EXIT_CODE
+
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
       attr_accessor :consumer_threads
@@ -22,7 +24,7 @@ module Karafka
         process.on_sigint { stop_supervised }
         process.on_sigquit { stop_supervised }
         process.on_sigterm { stop_supervised }
-        start_supervised
+        run_supervised
       end
 
       # @return [Array<String>] array with names of consumer groups that should be consumed in a
@@ -42,7 +44,7 @@ module Karafka
       # Starts Karafka with a supervision
       # @note We don't need to sleep because Karafka::Fetcher is locking and waiting to
       # finish loop (and it won't happen until we explicitily want to stop)
-      def start_supervised
+      def run_supervised
         process.supervise
         Karafka::App.run!
         Karafka::Fetcher.call
@@ -51,13 +53,6 @@ module Karafka
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)
       # If consumers won't stop in a given timeframe, it will force them to exit
       def stop_supervised
-        # Because this is called in the trap context, there is a chance that instrumentation
-        # listeners contain things that aren't allowed from within a trap context.
-        # To bypass that (instead of telling users not to do things they need to)
-        # we spin up a thread to instrument server.stop and server.stop.error and wait until
-        # they're finished
-        Thread.new { Karafka.monitor.instrument('server.stop', {}) }.join
-
         Karafka::App.stop!
         # If there is no shutdown timeout, we don't exit and wait until all the consumers
         # had done their work
@@ -68,12 +63,13 @@ module Karafka
         # shutdown process will take place
         Karafka::App.config.shutdown_timeout.to_i.times do
           return if consumer_threads.count(&:alive?).zero?
+
           sleep SUPERVISION_SLEEP
         end
 
-        raise Errors::ForcefulShutdown
-      rescue Errors::ForcefulShutdown => error
-        Thread.new { Karafka.monitor.instrument('server.stop.error', error: error) }.join
+        raise Errors::ForcefulShutdownError
+      rescue Errors::ForcefulShutdownError => error
+        Thread.new { Karafka.monitor.instrument('app.stopping.error', error: error) }.join
         # We're done waiting, lets kill them!
         consumer_threads.each(&:terminate)
 

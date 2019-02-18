@@ -39,11 +39,22 @@ module Karafka
   #
   # @example Multiple times used topic
   #   class Responder < BaseResponder
-  #     topic :required_topic, multiple_usage: true
+  #     topic :required_topic
   #
   #     def respond(data)
   #       data.each do |subset|
   #         respond_to :required_topic, subset
+  #       end
+  #     end
+  #   end
+  #
+  # @example Specify serializer for a topic
+  #   class Responder < BaseResponder
+  #     topic :xml_topic, serializer: MyXMLSerializer
+  #
+  #     def respond(data)
+  #       data.each do |subset|
+  #         respond_to :xml_topic, subset
   #       end
   #     end
   #   end
@@ -59,31 +70,30 @@ module Karafka
   #     end
   #   end
   class BaseResponder
-    # Definitions of all topics that we want to be able to use in this responder should go here
-    class_attribute :topics
-
-    # Schema that we can use to control and/or require some additional details upon options
-    # that are being passed to the producer. This can be in particular useful if we want to make
-    # sure that for example partition_key is always present.
-    class_attribute :options_schema
-
-    attr_reader :messages_buffer
-
     class << self
+      # Definitions of all topics that we want to be able to use in this responder should go here
+      attr_accessor :topics
+      # Schema that we can use to control and/or require some additional details upon options
+      # that are being passed to the producer. This can be in particular useful if we want to make
+      # sure that for example partition_key is always present.
+      attr_accessor :options_schema
+
       # Registers a topic as on to which we will be able to respond
       # @param topic_name [Symbol, String] name of topic to which we want to respond
       # @param options [Hash] hash with optional configuration details
       def topic(topic_name, options = {})
+        options[:serializer] ||= Karafka::App.config.serializer
+        options[:registered] = true
         self.topics ||= {}
-        topic_obj = Responders::Topic.new(topic_name, options.merge(registered: true))
+        topic_obj = Responders::Topic.new(topic_name, options)
         self.topics[topic_obj.name] = topic_obj
       end
 
       # A simple alias for easier standalone responder usage.
-      # Instead of building it with new.call it allows (in case of usin JSON parser)
+      # Instead of building it with new.call it allows (in case of using JSON serializer)
       # to just run it directly from the class level
       # @param data Anything that we want to respond with
-      # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
+      # @example Send user data with a responder
       #   UsersCreatedResponder.call(@created_user)
       def call(*data)
         # Just in case there were no topics defined for a responder, we initialize with
@@ -93,12 +103,11 @@ module Karafka
       end
     end
 
+    attr_reader :messages_buffer
+
     # Creates a responder object
-    # @param parser_class [Class] parser class that we can use to generate appropriate string
-    #   or nothing if we want to default to Karafka::Parsers::Json
     # @return [Karafka::BaseResponder] base responder descendant responder
-    def initialize(parser_class = Karafka::App.config.parser)
-      @parser_class = parser_class
+    def initialize
       @messages_buffer = {}
     end
 
@@ -107,7 +116,7 @@ module Karafka
     # @note We know that validators should be executed also before sending data to topics, however
     #   the implementation gets way more complicated then, that's why we check after everything
     #   was sent using responder
-    # @example Send user data with a responder (uses default Karafka::Parsers::Json parser)
+    # @example Send user data with a responder
     #   UsersCreatedResponder.new.call(@created_user)
     # @example Send user data with a responder using non default Parser
     #   UsersCreatedResponder.new(MyParser).call(@created_user)
@@ -141,7 +150,7 @@ module Karafka
 
       return if result.success?
 
-      raise Karafka::Errors::InvalidResponderUsage, result.errors
+      raise Karafka::Errors::InvalidResponderUsageError, result.errors
     end
 
     # Checks if we met all the options requirements before sending them to the producer.
@@ -152,7 +161,8 @@ module Karafka
         messages_set.each do |message_data|
           result = self.class.options_schema.call(message_data.last)
           next if result.success?
-          raise Karafka::Errors::InvalidResponderMessageOptions, result.errors
+
+          raise Karafka::Errors::InvalidResponderMessageOptionsError, result.errors
         end
       end
     end
@@ -183,7 +193,7 @@ module Karafka
     # as many times as we need. Especially when we have 1:n flow
     # @param topic [Symbol, String] topic to which we want to respond
     # @param data [String, Object] string or object that we want to send
-    # @param options [Hash] options for waterdrop (e.g. partition_key)
+    # @param options [Hash] options for waterdrop (e.g. partition_key).
     # @note Respond to does not accept multiple data arguments.
     def respond_to(topic, data, options = {})
       # We normalize the format to string, as WaterDrop and Ruby-Kafka support only
@@ -192,7 +202,7 @@ module Karafka
 
       messages_buffer[topic] ||= []
       messages_buffer[topic] << [
-        @parser_class.generate(data),
+        self.class.topics[topic].serializer.call(data),
         options.merge(topic: topic)
       ]
     end
@@ -200,9 +210,11 @@ module Karafka
     # @param options [Hash] options for waterdrop
     # @return [Class] WaterDrop producer (sync or async based on the settings)
     def producer(options)
-      self.class.topics[
-        options[:topic]
-      ].async? ? WaterDrop::AsyncProducer : WaterDrop::SyncProducer
+      if self.class.topics[options[:topic]].async?
+        WaterDrop::AsyncProducer
+      else
+        WaterDrop::SyncProducer
+      end
     end
   end
 end

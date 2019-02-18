@@ -16,15 +16,24 @@ RSpec.describe Karafka::Connection::Listener do
   before { allow(Karafka::Connection::Client).to receive(:new).and_return(client) }
 
   describe '#call' do
+    let(:client) { listener.send(:client) }
+    let(:listener_args) do
+      [
+        'connection.listener.before_fetch_loop',
+        consumer_group: consumer_group,
+        client: client
+      ]
+    end
+
     it 'expects to run callbacks and start the main fetch loop' do
-      expect(Karafka::Callbacks).to receive(:before_fetch_loop).with(consumer_group, client)
+      expect(Karafka.monitor).to receive(:instrument).with(*listener_args)
       expect(client).to receive(:fetch_loop)
       listener.call
     end
   end
 
   describe '#fetch_loop' do
-    let(:incoming_message) { double }
+    let(:client) { double }
 
     [
       StandardError,
@@ -42,6 +51,7 @@ RSpec.describe Karafka::Connection::Listener do
               caller: listener,
               error: error
             )
+
           allow(client).to receive(:fetch_loop).and_raise(error.new)
           allow(client).to receive(:stop)
           # Trick not to fall into infinite loop
@@ -55,19 +65,34 @@ RSpec.describe Karafka::Connection::Listener do
     end
 
     context 'when no errors occur' do
-      before do
-        allow(listener)
-          .to receive(:client)
-          .and_return(client)
-        allow(Karafka::Connection::Delegator)
-          .to receive(:call)
-          .with(consumer_group.id, incoming_message)
+      context 'when delegating batch' do
+        let(:kafka_batch) { build(:kafka_fetched_batch) }
+
+        before do
+          allow(listener).to receive(:client).and_return(client)
+          allow(client).to receive(:fetch_loop).and_yield(kafka_batch, :batch)
+        end
+
+        it 'expect to yield for each incoming message' do
+          expect(Karafka::Connection::BatchDelegator)
+            .to receive(:call).with(consumer_group.id, kafka_batch)
+          listener.send(:fetch_loop)
+        end
       end
 
-      it 'expect to yield for each incoming message' do
-        expect(client).to receive(:fetch_loop).and_yield(incoming_message)
+      context 'when delegating message' do
+        let(:kafka_message) { build(:kafka_fetched_message) }
 
-        listener.send(:fetch_loop)
+        before do
+          allow(listener).to receive(:client).and_return(client)
+          allow(client).to receive(:fetch_loop).and_yield(kafka_message, :message)
+        end
+
+        it 'expect to yield for each incoming message' do
+          expect(Karafka::Connection::MessageDelegator)
+            .to receive(:call).with(consumer_group.id, kafka_message)
+          listener.send(:fetch_loop)
+        end
       end
     end
   end
@@ -76,13 +101,10 @@ RSpec.describe Karafka::Connection::Listener do
     context 'when client is already created' do
       let(:client) { double }
 
-      before do
-        listener.instance_variable_set(:'@client', client)
-      end
+      before { listener.instance_variable_set(:'@client', client) }
 
       it 'just returns it' do
-        expect(Karafka::Connection::Client)
-          .not_to receive(:new)
+        expect(Karafka::Connection::Client).not_to receive(:new)
         expect(listener.send(:client)).to eq client
       end
     end
@@ -90,9 +112,7 @@ RSpec.describe Karafka::Connection::Listener do
     context 'when client is not yet created' do
       let(:client) { double }
 
-      before do
-        listener.instance_variable_set(:'@client', nil)
-      end
+      before { listener.instance_variable_set(:'@client', nil) }
 
       it 'creates an instance and return' do
         expect(Karafka::Connection::Client)

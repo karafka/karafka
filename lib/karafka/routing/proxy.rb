@@ -14,8 +14,10 @@ module Karafka
         !
       ].freeze
 
+      private_constant :IGNORED_POSTFIXES
+
       # @param target [Object] target object to which we proxy any DSL call
-      # @yield Evaluates block in the proxy context
+      # @param block [Proc] block that we want to evaluate in the proxy context
       def initialize(target, &block)
         @target = target
         instance_eval(&block)
@@ -24,12 +26,14 @@ module Karafka
       # Translates the no "=" DSL of routing into elements assignments on target
       def method_missing(method_name, *arguments, &block)
         return super unless respond_to_missing?(method_name)
+
         @target.public_send(:"#{method_name}=", *arguments, &block)
       end
 
       # Tells whether or not a given element exists on the target
       def respond_to_missing?(method_name, include_private = false)
         return false if IGNORED_POSTFIXES.any? { |postfix| method_name.to_s.end_with?(postfix) }
+
         @target.respond_to?(:"#{method_name}=", include_private) || super
       end
     end

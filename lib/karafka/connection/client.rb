@@ -7,7 +7,13 @@ module Karafka
     class Client
       extend Forwardable
 
-      def_delegator :kafka_consumer, :seek
+      %i[
+        seek
+        trigger_heartbeat
+        trigger_heartbeat!
+      ].each do |delegated_method|
+        def_delegator :kafka_consumer, delegated_method
+      end
 
       # Creates a queue consumer client that will pull the data from Kafka
       # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group for which
@@ -20,17 +26,19 @@ module Karafka
       end
 
       # Opens connection, gets messages and calls a block for each of the incoming messages
-      # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
+      # @yieldparam [Array<Kafka::FetchedMessage>, Symbol] kafka response with an info about
+      #   the type of the fetcher that is being used
       # @note This will yield with raw messages - no preprocessing or reformatting.
       def fetch_loop
         settings = ApiAdapter.consumption(consumer_group)
 
         if consumer_group.batch_fetching
-          kafka_consumer.each_batch(*settings) { |batch| yield(batch.messages) }
+          kafka_consumer.each_batch(*settings) { |batch| yield(batch, :batch) }
         else
-          # always yield an array of messages, so we have consistent API (always a batch)
-          kafka_consumer.each_message(*settings) { |message| yield([message]) }
+          kafka_consumer.each_message(*settings) { |message| yield(message, :message) }
         end
+      # @note We catch only the processing errors as any other are considered critical (exceptions)
+      #   and should require a client restart with a backoff
       rescue Kafka::ProcessingError => error
         # If there was an error during consumption, we have to log it, pause current partition
         # and process other things
@@ -59,23 +67,25 @@ module Karafka
         kafka_consumer.pause(*ApiAdapter.pause(topic, partition, consumer_group))
       end
 
-      # Marks a given message as consumed and commit the offsets
-      # @note In opposite to ruby-kafka, we commit the offset for each manual marking to be sure
-      #   that offset commit happen asap in case of a crash
+      # Marks given message as consumed
+      # @note This method won't trigger automatic offsets commits, rather relying on the ruby-kafka
+      #   offsets time-interval based committing
       # @param [Karafka::Params::Params] params message that we want to mark as processed
       def mark_as_consumed(params)
         kafka_consumer.mark_message_as_processed(
           *ApiAdapter.mark_message_as_processed(params)
         )
+      end
+
+      # Marks a given message as consumed and commit the offsets in a blocking way
+      # @note This method commits the offset for each manual marking to be sure
+      #   that offset commit happen asap in case of a crash
+      # @param [Karafka::Params::Params] params message that we want to mark as processed
+      def mark_as_consumed!(params)
+        mark_as_consumed(params)
         # Trigger an immediate, blocking offset commit in order to minimize the risk of crashing
         # before the automatic triggers have kicked in.
         kafka_consumer.commit_offsets
-      end
-
-      # Triggers a non-optional blocking heartbeat that notifies Kafka about the fact, that this
-      # consumer / client is still up and running
-      def trigger_heartbeat
-        kafka_consumer.trigger_heartbeat!
       end
 
       private
@@ -95,7 +105,7 @@ module Karafka
           end
         end
       rescue Kafka::ConnectionError
-        # If we would not wait it would totally spam log file with failed
+        # If we would not wait it will spam log file with failed
         # attempts if Kafka is down
         sleep(consumer_group.reconnect_timeout)
         # We don't log and just reraise - this will be logged

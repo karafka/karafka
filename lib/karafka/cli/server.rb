@@ -13,10 +13,9 @@ module Karafka
 
       # Start the Karafka server
       def call
-        validate!
-
-        puts 'Starting Karafka server'
         cli.info
+
+        validate!
 
         if cli.options[:daemon]
           FileUtils.mkdir_p File.dirname(cli.options[:pid])
@@ -45,7 +44,8 @@ module Karafka
       def validate!
         result = Schemas::ServerCliOptions.call(cli.options)
         return if result.success?
-        raise Errors::InvalidConfiguration, result.errors
+
+        raise Errors::InvalidConfigurationError, result.errors
       end
 
       # Detaches current process into background and writes its pidfile

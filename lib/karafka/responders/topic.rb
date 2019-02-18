@@ -7,8 +7,6 @@ module Karafka
     #   Karafka::Responders::Topic.new(:topic_name, {}) #=> #<Karafka::Responders::Topic...
     # @example Define optional topic
     #   Karafka::Responders::Topic.new(:topic_name, required: false)
-    # @example Define topic that on which we want to respond multiple times
-    #   Karafka::Responders::Topic.new(:topic_name, multiple_usage: true)
     class Topic
       # Name of the topic on which we want to respond
       attr_reader :name
@@ -26,14 +24,14 @@ module Karafka
         @options.key?(:required) ? @options[:required] : true
       end
 
-      # @return [Boolean] do we expect to use it multiple times in a single respond flow
-      def multiple_usage?
-        @options[:multiple_usage] || false
-      end
-
       # @return [Boolean] was usage of this topic registered or not
       def registered?
         @options[:registered] == true
+      end
+
+      # @return [Class] Class to use to serialize messages for this topic
+      def serializer
+        @options[:serializer]
       end
 
       # @return [Boolean] do we want to use async producer. Defaults to false as the sync producer
@@ -46,9 +44,9 @@ module Karafka
       def to_h
         {
           name: name,
-          multiple_usage: multiple_usage?,
           required: required?,
           registered: registered?,
+          serializer: serializer,
           async: async?
         }
       end

@@ -5,11 +5,13 @@ RSpec.describe Karafka::BaseResponder do
   let(:input_data) { rand }
   let(:sync_producer) { WaterDrop::SyncProducer }
   let(:async_producer) { WaterDrop::AsyncProducer }
+  let(:serializer) { nil }
 
   let(:working_class) do
     name = topic_name
+    serializer_name = serializer
     ClassBuilder.inherit(described_class) do
-      topic name
+      topic name, serializer: serializer_name
     end
   end
 
@@ -23,7 +25,7 @@ RSpec.describe Karafka::BaseResponder do
         end
 
         it 'expect to build a topic object' do
-          expect(responder_class.topics[topic_name]).to be_a Karafka::Responders::Topic
+          expect(responder_class.topics[topic_name]).to be_a(Karafka::Responders::Topic)
         end
       end
     end
@@ -37,21 +39,22 @@ RSpec.describe Karafka::BaseResponder do
   end
 
   context 'when we want to use instance methods' do
-    subject(:responder) { working_class.new(parser_class) }
+    subject(:responder) { working_class.new }
 
-    let(:parser_class) { Karafka::Parsers::Json }
+    let(:serializer) { Karafka::Serialization::Json::Serializer.new }
 
-    describe 'default responder' do
-      subject(:responder) { working_class.new }
+    describe '#serializer' do
+      subject(:topic_serializer) { instance.class.topics[topic_name].serializer }
 
-      let(:default_parser) { Karafka::Parsers::Json }
+      let(:instance) { working_class.new }
+      let(:serializer_class) { Karafka::Serialization::Json::Serializer }
 
-      it { expect(responder.instance_variable_get(:'@parser_class')).to eq default_parser }
+      it { expect(topic_serializer).to be_a serializer_class }
     end
 
     describe '#call' do
       context 'when execution goes with errors' do
-        let(:expected_error) { Karafka::Errors::InvalidResponderUsage }
+        let(:expected_error) { Karafka::Errors::InvalidResponderUsageError }
 
         it 'expect to respond and validate' do
           expect(responder).to receive(:respond).with(input_data)
@@ -75,7 +78,7 @@ RSpec.describe Karafka::BaseResponder do
 
       context 'when we have a custom options schema and invalid data' do
         let(:input_data) { rand.to_s }
-        let(:expected_error) { Karafka::Errors::InvalidResponderMessageOptions }
+        let(:expected_error) { Karafka::Errors::InvalidResponderMessageOptionsError }
         let(:working_class) do
           name = topic_name
           ClassBuilder.inherit(described_class) do
@@ -144,8 +147,10 @@ RSpec.describe Karafka::BaseResponder do
         let(:mapped_topic) { "prefix.#{topic_name}" }
         let(:custom_mapper) do
           ClassBuilder.build do
-            def self.outgoing(topic)
-              "prefix.#{topic}"
+            class << self
+              def outgoing(topic)
+                "prefix.#{topic}"
+              end
             end
           end
         end
@@ -184,7 +189,7 @@ RSpec.describe Karafka::BaseResponder do
       end
 
       it 'expect to use UsageValidator to validate usage' do
-        expected_error = Karafka::Errors::InvalidResponderUsage
+        expected_error = Karafka::Errors::InvalidResponderUsageError
         expect { responder.send(:validate_usage!) }.to raise_error(expected_error)
       end
     end

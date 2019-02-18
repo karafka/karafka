@@ -87,7 +87,11 @@ module Karafka
           [
             Karafka::App.config.topic_mapper.outgoing(topic),
             partition,
-            { timeout: consumer_group.pause_timeout }
+            {
+              timeout: consumer_group.pause_timeout,
+              max_timeout: consumer_group.pause_max_timeout,
+              exponential_backoff: consumer_group.pause_exponential_backoff
+            }
           ]
         end
 
@@ -100,7 +104,7 @@ module Karafka
         def mark_message_as_processed(params)
           # Majority of non heroku users don't use custom topic mappers. No need to change
           # anything when it is a default mapper that does not change anything
-          return [params] if Karafka::App.config.topic_mapper == Karafka::Routing::TopicMapper
+          return [params] if Karafka::App.config.topic_mapper.is_a?(Karafka::Routing::TopicMapper)
 
           # @note We don't use tap as it is around 13% slower than non-dup version
           dupped = params.dup
@@ -119,9 +123,11 @@ module Karafka
           kafka_configs.each_key do |setting_name|
             # Ignore settings that are not related to our namespace
             next unless AttributesMap.api_adapter[namespace_key].include?(setting_name)
+
             # Ignore settings that are already initialized
             # In case they are in preexisting settings fetched differently
             next if preexisting_settings.key?(setting_name)
+
             # Fetch all the settings from a given layer object. Objects can handle the fallback
             # to the kafka settings, so
             preexisting_settings[setting_name] = route_layer.send(setting_name)

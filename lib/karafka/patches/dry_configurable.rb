@@ -25,6 +25,7 @@ module Karafka
           value = super()
           return value unless value.is_a?(Proc)
           return value unless value.parameters.empty?
+
           value.call
         end
       end

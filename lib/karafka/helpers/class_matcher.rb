@@ -8,7 +8,9 @@ module Karafka
     class ClassMatcher
       # Regexp used to remove any non classy like characters that might be in the consumer
       # class name (if defined dynamically, etc)
-      CONSTANT_REGEXP = %r{[?!=+\-\*/\^\|&\[\]<>%~\#\:\s\(\)]}
+      CONSTANT_REGEXP = %r{[?!=+\-\*/\^\|&\[\]<>%~\#\:\s\(\)]}.freeze
+
+      private_constant :CONSTANT_REGEXP
 
       # @param klass [Class] class to which we want to find a corresponding class
       # @param from [String] what type of object is it (based on postfix name part)
@@ -30,6 +32,7 @@ module Karafka
       def match
         return nil if name.empty?
         return nil unless scope.const_defined?(name)
+
         matching = scope.const_get(name)
         same_scope?(matching) ? matching : nil
       end
@@ -65,6 +68,7 @@ module Karafka
       def scope_of(klass)
         enclosing = klass.to_s.split('::')[0...-1]
         return ::Object if enclosing.empty?
+
         ::Object.const_get(enclosing.join('::'))
       end
 

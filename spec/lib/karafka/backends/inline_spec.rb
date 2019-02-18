@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Backends::Inline do
-  subject(:consumer) { consumer_class.new }
+  subject(:consumer) { consumer_class.new(topic) }
 
-  let(:topic) { instance_double(Karafka::Routing::Topic, name: rand.to_s) }
+  let(:consumer_group) { Karafka::Routing::ConsumerGroup.new(rand) }
+  let(:topic) { build(:routing_topic) }
   let(:consumer_class) do
     ClassBuilder.inherit(Karafka::BaseConsumer) do
       def consume
@@ -12,10 +13,7 @@ RSpec.describe Karafka::Backends::Inline do
     end
   end
 
-  before do
-    consumer_class.include(described_class)
-    allow(consumer_class).to receive(:topic).and_return(topic)
-  end
+  before { consumer.extend(described_class) }
 
   it 'expect to call' do
     # This is the value returned from the #consume method. We check the result instead

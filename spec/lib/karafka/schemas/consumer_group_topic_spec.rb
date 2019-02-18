@@ -9,7 +9,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
       name: 'name',
       backend: :inline,
       consumer: Class.new,
-      parser: Class.new,
+      deserializer: Class.new,
       max_bytes_per_partition: 1,
       start_from_beginning: true,
       batch_consuming: true,
@@ -111,9 +111,9 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     end
   end
 
-  context 'when we validate parser' do
+  context 'when we validate deserializer' do
     context 'when it is not present' do
-      before { config[:parser] = nil }
+      before { config[:deserializer] = nil }
 
       it { expect(schema.call(config)).not_to be_success }
     end

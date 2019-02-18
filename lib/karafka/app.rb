@@ -4,18 +4,18 @@ module Karafka
   # App class
   class App
     extend Setup::Dsl
-    extend Callbacks::Dsl
 
     class << self
       # Sets up all the internal components and bootstrap whole app
       # We need to know details about consumers in order to setup components,
       # that's why we don't setup them after std setup is done
-      # @raise [Karafka::Errors::InvalidConfiguration] raised when configuration
+      # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
       #   doesn't match with ConfigurationSchema
       def boot!
+        initialize!
         Setup::Config.validate!
         Setup::Config.setup_components
-        Callbacks.after_init(Karafka::App.config)
+        initialized!
       end
 
       # @return [Karafka::Routing::Builder] consumers builder instance

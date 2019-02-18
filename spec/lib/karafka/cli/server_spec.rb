@@ -15,10 +15,6 @@ RSpec.describe Karafka::Cli::Server do
         allow(Karafka::Server).to receive(:run)
       end
 
-      it 'expect to print info and expect to run Karafka application' do
-        expect { server_cli.call }.to output("Starting Karafka server\n").to_stdout
-      end
-
       it 'expect to validate!' do
         expect(server_cli).to receive(:validate!)
         server_cli.call
@@ -46,15 +42,14 @@ RSpec.describe Karafka::Cli::Server do
       it 'expect to print info, validate!, daemonize and clean' do
         expect(server_cli).to receive(:validate!)
         expect(server_cli).to receive(:daemonize)
-
-        expect { server_cli.call }.to output("Starting Karafka server\n").to_stdout
+        server_cli.call
       end
     end
   end
 
   describe '#validate!' do
     context 'when server cli options are not valid' do
-      let(:expected_error) { Karafka::Errors::InvalidConfiguration }
+      let(:expected_error) { Karafka::Errors::InvalidConfigurationError }
 
       before { cli.options = { daemon: true, pid: nil } }
 

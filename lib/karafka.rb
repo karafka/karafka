@@ -12,9 +12,9 @@
   require_all
   dry-configurable
   dry-validation
+  dry/events/publisher
   dry/inflector
   dry/monitor/notifications
-  active_support/callbacks
   karafka/loader
 ].each(&method(:require))
 
@@ -64,8 +64,8 @@ module Karafka
 end
 
 %w[
-  callbacks
-  callbacks/*
+  serialization/json/serializer
+  serialization/json/deserializer
   setup/dsl
   setup/config
   status

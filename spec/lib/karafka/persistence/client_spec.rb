@@ -41,7 +41,7 @@ RSpec.describe Karafka::Persistence::Client do
       before { persistence.write(nil) }
 
       it 'expect to raise error' do
-        expect { persistence.read }.to raise_error Karafka::Errors::MissingClient
+        expect { persistence.read }.to raise_error Karafka::Errors::MissingClientError
       end
     end
   end

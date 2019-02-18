@@ -52,6 +52,6 @@ RSpec.describe Karafka::Fetcher do
         .with(consumer_group)
     end
 
-    it { expect(fetcher.send(:listeners)).to be_a Array }
+    it { expect(fetcher.send(:listeners)).to be_a(Array) }
   end
 end

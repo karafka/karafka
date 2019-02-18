@@ -4,11 +4,12 @@ source 'https://rubygems.org'
 
 gemspec
 
-group :development, :test do
-  gem 'benchmark-ips'
-end
+gem 'waterdrop', git: 'https://github.com/karafka/waterdrop', branch: '1.3-wip'
 
 group :test do
+  gem 'activesupport'
+  gem 'byebug'
+  gem 'factory_bot'
   gem 'rspec'
   gem 'simplecov'
   gem 'timecop'

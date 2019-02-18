@@ -24,11 +24,12 @@ RSpec.describe Karafka::Instrumentation::Monitor do
   describe '#subscribe' do
     context 'when we have a block based listener' do
       let(:subscription) { Karafka.monitor.subscribe(event_name) {} }
+      let(:exception) { Karafka::Errors::UnregisteredMonitorEventError }
 
       context 'when we try to subscribe to an unsupported event' do
         let(:event_name) { 'unsupported' }
 
-        it { expect { subscription }.to raise_error Karafka::Errors::UnregisteredMonitorEvent }
+        it { expect { subscription }.to raise_error exception }
       end
 
       context 'when we try to subscribe to a supported event' do
@@ -48,7 +49,7 @@ RSpec.describe Karafka::Instrumentation::Monitor do
 
   describe '#available_events' do
     it 'expect to include registered events' do
-      expect(monitor.available_events.size).to eq 15
+      expect(monitor.available_events).not_to be_empty
     end
 
     it { expect(monitor.available_events).to include 'connection.listener.fetch_loop.error' }

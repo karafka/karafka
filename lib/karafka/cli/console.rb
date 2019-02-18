@@ -8,15 +8,17 @@ module Karafka
       desc 'Start the Karafka console (short-cut alias: "c")'
       option aliases: 'c'
 
-      # @return [String] Console executing command
-      # @example
-      #   Karafka::Cli::Console.command #=> 'KARAFKA_CONSOLE=true bundle exec irb...'
-      def self.command
-        envs = [
-          "IRBRC='#{Karafka.gem_root}/.console_irbrc'",
-          'KARAFKA_CONSOLE=true'
-        ]
-        "#{envs.join(' ')} bundle exec irb"
+      class << self
+        # @return [String] Console executing command
+        # @example
+        #   Karafka::Cli::Console.command #=> 'KARAFKA_CONSOLE=true bundle exec irb...'
+        def command
+          envs = [
+            "IRBRC='#{Karafka.gem_root}/.console_irbrc'",
+            'KARAFKA_CONSOLE=true'
+          ]
+          "#{envs.join(' ')} bundle exec irb"
+        end
       end
 
       # Start the Karafka console

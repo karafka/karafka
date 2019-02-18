@@ -5,7 +5,7 @@ RSpec.describe Karafka::Routing::Builder do
 
   ATTRIBUTES = %i[
     consumer
-    parser
+    deserializer
     responder
   ].freeze
 
@@ -26,7 +26,7 @@ RSpec.describe Karafka::Routing::Builder do
             consumer Class.new(Karafka::BaseConsumer)
             backend :inline
             name 'name1'
-            parser :parser1
+            deserializer :deserializer1
             responder :responder1
           end
         end
@@ -37,7 +37,7 @@ RSpec.describe Karafka::Routing::Builder do
             consumer Class.new(Karafka::BaseConsumer)
             backend :inline
             name 'name2'
-            parser :parser2
+            deserializer :deserializer2
             responder :responder2
           end
         end
@@ -74,7 +74,7 @@ RSpec.describe Karafka::Routing::Builder do
               consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name1'
-              parser :parser1
+              deserializer :deserializer1
               responder :responder1
             end
           end
@@ -89,7 +89,7 @@ RSpec.describe Karafka::Routing::Builder do
               consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name2'
-              parser :parser2
+              deserializer :deserializer2
               responder :responder2
             end
           end
@@ -121,7 +121,7 @@ RSpec.describe Karafka::Routing::Builder do
               consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name1'
-              parser :parser1
+              deserializer :deserializer1
               responder :responder1
             end
 
@@ -129,7 +129,7 @@ RSpec.describe Karafka::Routing::Builder do
               consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name2'
-              parser :parser2
+              deserializer :deserializer2
               responder :responder2
             end
           end
@@ -153,7 +153,21 @@ RSpec.describe Karafka::Routing::Builder do
         end
       end
 
-      it { expect { invalid_route }.to raise_error(Karafka::Errors::InvalidConfiguration) }
+      it { expect { invalid_route }.to raise_error(Karafka::Errors::InvalidConfigurationError) }
+    end
+
+    context 'when we define multiple consumer groups and one is without topics' do
+      subject(:drawing) do
+        described_class.instance.draw do
+          consumer_group :group_name1 do
+            topic(:topic_name1) { consumer Class.new(Karafka::BaseConsumer) }
+          end
+
+          consumer_group(:group_name2) {}
+        end
+      end
+
+      it { expect { drawing }.to raise_error(Karafka::Errors::InvalidConfigurationError) }
     end
   end
 

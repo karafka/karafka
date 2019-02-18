@@ -16,9 +16,10 @@ module Karafka
 
       # Runs prefetch callbacks and executes the main listener fetch loop
       def call
-        Karafka::Callbacks.before_fetch_loop(
-          @consumer_group,
-          client
+        Karafka.monitor.instrument(
+          'connection.listener.before_fetch_loop',
+          consumer_group: @consumer_group,
+          client: client
         )
         fetch_loop
       end
@@ -26,9 +27,6 @@ module Karafka
       private
 
       # Opens connection, gets messages and calls a block for each of the incoming messages
-      # @yieldparam [String] consumer group id
-      # @yieldparam [Array<Kafka::FetchedMessage>] kafka fetched messages
-      # @note This will yield with a raw message - no preprocessing or reformatting
       # @note We catch all the errors here, so they don't affect other listeners (or this one)
       #   so we will be able to listen and consume other incoming messages.
       #   Since it is run inside Karafka::Connection::ActorCluster - catching all the exceptions
@@ -36,16 +34,20 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far
       def fetch_loop
-        client.fetch_loop do |raw_messages|
-          # @note What happens here is a delegation of processing to a proper processor based
-          #   on the incoming messages characteristics
-          Karafka::Connection::Delegator.call(@consumer_group.id, raw_messages)
+        delegators = { message: MessageDelegator, batch: BatchDelegator }
+
+        # @note What happens here is a delegation of processing to a proper processor based
+        #   on the incoming messages characteristics
+        client.fetch_loop do |raw_data, type|
+          delegators[type].call(@consumer_group.id, raw_data)
         end
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException
       rescue Exception => e
         Karafka.monitor.instrument('connection.listener.fetch_loop.error', caller: self, error: e)
         # rubocop:enable RescueException
+        # We can stop client without a problem, as it will reinitialize itself when running the
+        # `fetch_loop` again
         @client.stop
         sleep(@consumer_group.reconnect_timeout) && retry
       end

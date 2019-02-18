@@ -21,11 +21,13 @@ module Karafka
       #   Last 4 events are from WaterDrop but for convenience we use the same monitor for the
       #   whole karafka ecosystem
       BASE_EVENTS = %w[
-        params.params.parse
-        params.params.parse.error
+        params.params.deserialize
+        params.params.deserialize.error
+        connection.listener.before_fetch_loop
         connection.listener.fetch_loop.error
         connection.client.fetch_loop.error
-        connection.delegator.call
+        connection.batch_delegator.call
+        connection.message_delegator.call
         fetcher.call.error
         backends.inline.process
         process.notice_signal
@@ -34,8 +36,11 @@ module Karafka
         async_producer.call.retry
         sync_producer.call.error
         sync_producer.call.retry
-        server.stop
-        server.stop.error
+        app.initializing
+        app.initialized
+        app.running
+        app.stopping
+        app.stopping.error
       ].freeze
 
       private_constant :BASE_EVENTS
@@ -52,7 +57,8 @@ module Karafka
       def subscribe(event_name_or_listener)
         return super unless event_name_or_listener.is_a?(String)
         return super if available_events.include?(event_name_or_listener)
-        raise Errors::UnregisteredMonitorEvent, event_name_or_listener
+
+        raise Errors::UnregisteredMonitorEventError, event_name_or_listener
       end
 
       # @return [Array<String>] names of available events to which we can subscribe

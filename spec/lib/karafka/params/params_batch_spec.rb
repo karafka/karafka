@@ -1,65 +1,69 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Params::ParamsBatch do
-  subject(:params_batch) { described_class.new(kafka_messages, topic_parser) }
+  subject(:params_batch) { described_class.new(params_array) }
 
-  let(:value) { {}.to_json }
-  let(:create_time) { Time.now }
-  let(:topic_parser) { Karafka::Parsers::Json }
-  let(:kafka_messages) { [kafka_message1, kafka_message2] }
-  let(:kafka_message1) do
-    Kafka::FetchedMessage.new(
-      message: OpenStruct.new(
-        value: value,
-        key: nil,
-        offset: 0,
-        create_time: create_time
-      ),
-      topic: 'topic',
-      partition: 0
-    )
-  end
-
-  let(:kafka_message2) do
-    Kafka::FetchedMessage.new(
-      message: OpenStruct.new(
-        value: value,
-        key: nil,
-        offset: 0,
-        create_time: create_time
-      ),
-      topic: 'topic',
-      partition: 0
-    )
+  let(:serialized_payload) { { rand.to_s => rand.to_s } }
+  let(:deserialized_payload) { serialized_payload.to_json }
+  let(:topic) { build(:routing_topic) }
+  let(:kafka_message1) { build(:kafka_fetched_message, value: deserialized_payload) }
+  let(:kafka_message2) { build(:kafka_fetched_message, value: deserialized_payload) }
+  let(:params_array) do
+    [
+      Karafka::Params::Builders::Params.from_kafka_message(kafka_message1, topic),
+      Karafka::Params::Builders::Params.from_kafka_message(kafka_message2, topic)
+    ]
   end
 
   describe '#to_a' do
-    it 'expect not to parse data and return raw params_batch' do
-      expect(params_batch.to_a.first['parsed']).to eq nil
+    it 'expect not to deserialize data and return raw params_batch' do
+      expect(params_batch.to_a.first['deserialized']).to eq nil
     end
   end
 
-  describe '#parsed' do
-    it 'expect to parse all the messages and return parsed' do
-      params_batch.parsed
-      params_batch.to_a.each { |params| expect(params['parsed']).to eq true }
+  describe '#deserialize!' do
+    it 'expect to deserialize all the messages and return deserialized' do
+      params_batch.deserialize!
+      params_batch.to_a.each { |params| expect(params['deserialized']).to eq true }
     end
   end
 
   describe '#each' do
-    it 'expect to parse each at a time' do
+    it 'expect to deserialize each at a time' do
       params_batch.each_with_index do |params, index|
-        expect(params['parsed']).to eq true
+        expect(params['deserialized']).to eq true
         next if index > 0
-        expect(params_batch.to_a[index + 1]['parsed']).to eq nil
+
+        expect(params_batch.to_a[index + 1]['deserialized']).to eq nil
       end
     end
   end
 
+  describe '#payloads' do
+    it 'expect to return deserialized payloads from params within params batch' do
+      expect(params_batch.payloads).to eq [serialized_payload, serialized_payload]
+    end
+
+    context 'when payloads were used for the first time' do
+      before { params_batch.payloads }
+
+      it 'expect to mark as serialized all the params inside the batch' do
+        expect(params_batch.to_a.all? { |params| params['deserialized'] }).to eq true
+      end
+    end
+  end
+
+  describe '#first' do
+    it 'expect to return first element after deserializing' do
+      expect(params_batch.first).to eq params_batch.to_a[0]
+      expect(params_batch.first['deserialized']).to eq true
+    end
+  end
+
   describe '#last' do
-    it 'expect to return last element after parsing' do
+    it 'expect to return last element after deserializing' do
       expect(params_batch.last).to eq params_batch.to_a[-1]
-      expect(params_batch.last['parsed']).to eq true
+      expect(params_batch.last['deserialized']).to eq true
     end
   end
 end

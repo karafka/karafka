@@ -10,14 +10,16 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
         Karafka::Responders::Topic.new(
           'topic1',
           registered: true,
-          usage_count: 1
+          usage_count: 1,
+          serializer: -> {}
         )
       ],
       registered_topics: [
         Karafka::Responders::Topic.new(
           'topic1',
           registered: true,
-          usage_count: 1
+          usage_count: 1,
+          serializer: -> {}
         )
       ]
     }
@@ -37,7 +39,6 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
     let(:name) { 'topic1' }
     let(:registered) { true }
     let(:usage_count) { 1 }
-    let(:multiple_usage) { false }
     let(:required) { true }
     let(:async) { false }
     let(:topic_data) do
@@ -45,8 +46,8 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
         name,
         registered: registered,
         required: required,
-        multiple_usage: multiple_usage,
-        async: async
+        async: async,
+        serializer: -> {}
       ).to_h.merge!(usage_count: usage_count)
     end
 
@@ -94,14 +95,6 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
       end
     end
 
-    context 'when we validate multiple_usage' do
-      context 'when multiple_usage is not a bool' do
-        let(:multiple_usage) { 2 }
-
-        it { expect(subschema.call(topic_data)).not_to be_success }
-      end
-    end
-
     context 'when we didnt use required topic' do
       let(:required) { true }
       let(:usage_count) { 0 }
@@ -116,52 +109,25 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
       it { expect(subschema.call(topic_data)).to be_success }
     end
 
-    context 'when we didnt use required topic with multiple_usage' do
+    context 'when we didnt use required topic' do
       let(:required) { true }
       let(:usage_count) { 0 }
-      let(:multiple_usage) { true }
 
       it { expect(subschema.call(topic_data)).not_to be_success }
     end
 
-    context 'when we did use required topic with multiple_usage once' do
-      let(:required) { true }
-      let(:usage_count) { 1 }
-      let(:multiple_usage) { true }
-
-      it { expect(subschema.call(topic_data)).to be_success }
-    end
-
-    context 'when we did use required topic with multiple_usage twice' do
-      let(:required) { true }
-      let(:usage_count) { 2 }
-      let(:multiple_usage) { true }
-
-      it { expect(subschema.call(topic_data)).to be_success }
-    end
-
-    context 'when we didnt use optional topic with multiple_usage' do
+    context 'when we didnt use optional topic' do
       let(:required) { false }
       let(:usage_count) { 2 }
-      let(:multiple_usage) { true }
 
       it { expect(subschema.call(topic_data)).to be_success }
     end
 
-    context 'when we did use required topic without multiple_usage once' do
+    context 'when we did use required topic' do
       let(:required) { true }
       let(:usage_count) { 1 }
-      let(:multiple_usage) { false }
 
       it { expect(subschema.call(topic_data)).to be_success }
-    end
-
-    context 'when we did use required topic without multiple_usage twice' do
-      let(:required) { true }
-      let(:usage_count) { 2 }
-      let(:multiple_usage) { false }
-
-      it { expect(subschema.call(topic_data)).not_to be_success }
     end
   end
 end

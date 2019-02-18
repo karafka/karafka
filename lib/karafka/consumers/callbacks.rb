@@ -16,28 +16,40 @@ module Karafka
         before_stop
       ].freeze
 
+      private_constant :TYPES
+
       # Class methods needed to make callbacks run
       module ClassMethods
         TYPES.each do |type|
-          # A Creates a callback wrapper
+          # Creates a callback wrapper
+          #
           # @param method_name [Symbol, String] method name or nil if we plan to provide a block
           # @yield A block with a code that should be executed before scheduling
-          define_method type do |method_name = nil, &block|
-            set_callback type, :before, method_name || block
+          # @note We don't have to optimize the key fetching here as those are class methods that
+          #   are evaluated once upon start
+          define_method(type) do |method_name = nil, &block|
+            key = "consumers.#{Helpers::Inflector.map(to_s)}.#{type}"
+            Karafka::App.monitor.register_event(key)
+
+            Karafka::App.monitor.subscribe(key) do |event|
+              context = event[:context]
+
+              if method_name
+                context.send(method_name)
+              else
+                context.instance_eval(&block)
+              end
+            end
           end
         end
       end
 
-      # @param consumer_class [Class] consumer class that we extend with callbacks
-      def self.included(consumer_class)
-        consumer_class.class_eval do
-          extend ClassMethods
-          include ActiveSupport::Callbacks
-
-          # The call method is wrapped with a set of callbacks
-          # We won't run process if any of the callbacks throw abort
-          # @see http://api.rubyonrails.org/classes/ActiveSupport/Callbacks/ClassMethods.html#method-i-get_callbacks
-          TYPES.each { |type| define_callbacks type }
+      class << self
+        # @param consumer_class [Class] consumer class that we extend with callbacks
+        def included(consumer_class)
+          consumer_class.class_eval do
+            extend ClassMethods
+          end
         end
       end
 
@@ -45,9 +57,14 @@ module Karafka
       # method of a proper backend. It is here because it interacts with the default Karafka
       # call flow and needs to be overwritten to support callbacks
       def call
-        run_callbacks :after_fetch do
-          process
+        if self.class.respond_to?(:after_fetch)
+          Karafka::App.monitor.instrument(
+            "consumers.#{Helpers::Inflector.map(self.class.to_s)}.after_fetch",
+            context: self
+          )
         end
+
+        process
       end
     end
   end

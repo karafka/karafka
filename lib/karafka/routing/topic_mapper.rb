@@ -8,7 +8,7 @@ module Karafka
     # routes and responders
     #
     # @example Mapper for mapping prefixed topics
-    #   module MyMapper
+    #   class MyMapper
     #     PREFIX = "my_user_name."
     #
     #     def incoming(topic)
@@ -21,7 +21,7 @@ module Karafka
     #   end
     #
     # @example Mapper for replacing "." with "_" in topic names
-    #   module MyMapper
+    #   class MyMapper
     #     PREFIX = "my_user_name."
     #
     #     def incoming(topic)
@@ -32,23 +32,21 @@ module Karafka
     #       topic.to_s.gsub('_', '.')
     #     end
     #   end
-    module TopicMapper
-      class << self
-        # @param topic [String, Symbol] topic
-        # @return [String, Symbol] same topic as on input
-        # @example
-        #   incoming('topic_name') #=> 'topic_name'
-        def incoming(topic)
-          topic
-        end
+    class TopicMapper
+      # @param topic [String, Symbol] topic
+      # @return [String, Symbol] same topic as on input
+      # @example
+      #   incoming('topic_name') #=> 'topic_name'
+      def incoming(topic)
+        topic
+      end
 
-        # @param topic [String, Symbol] topic
-        # @return [String, Symbol] same topic as on input
-        # @example
-        #   outgoing('topic_name') #=> 'topic_name'
-        def outgoing(topic)
-          topic
-        end
+      # @param topic [String, Symbol] topic
+      # @return [String, Symbol] same topic as on input
+      # @example
+      #   outgoing('topic_name') #=> 'topic_name'
+      def outgoing(topic)
+        topic
       end
     end
   end

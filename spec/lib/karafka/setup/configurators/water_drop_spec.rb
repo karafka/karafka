@@ -5,10 +5,8 @@ RSpec.describe Karafka::Setup::Configurators::WaterDrop do
 
   let(:config) { Karafka::App.config }
 
-  specify { expect(described_class).to be < Karafka::Setup::Configurators::Base }
-
-  describe '.setup' do
-    before { water_drop_configurator.setup(config) }
+  describe '.call' do
+    before { water_drop_configurator.call(config) }
 
     it { expect(WaterDrop.config.deliver).to eq true }
     it { expect(WaterDrop.config.kafka.seed_brokers).to eq config.kafka.seed_brokers }

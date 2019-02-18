@@ -4,7 +4,8 @@ module Karafka
   # Namespace for all the validation schemas that we use to check input
   module Schemas
     # Regexp for validating format of groups and topics
-    TOPIC_REGEXP = /\A(\w|\-|\.)+\z/
+    # @note It is not nested inside of the schema, as it is used by couple schemas
+    TOPIC_REGEXP = /\A(\w|\-|\.)+\z/.freeze
 
     # Schema with validation rules for Karafka configuration details
     # @note There are many more configuration options inside of the
@@ -16,7 +17,6 @@ module Karafka
       required(:shutdown_timeout) { none? | (int? & gteq?(0)) }
       required(:consumer_mapper)
       required(:topic_mapper)
-      required(:params_base_class).filled
 
       optional(:backend).filled
     end

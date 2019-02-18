@@ -2,7 +2,6 @@
 
 RSpec.describe Karafka::Schemas::ConsumerGroup do
   let(:schema) { described_class }
-
   let(:topics) do
     [
       {
@@ -10,13 +9,31 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         name: 'name',
         backend: :inline,
         consumer: Class.new,
-        parser: Class.new,
+        deserializer: Class.new,
         max_bytes_per_partition: 1,
         start_from_beginning: true,
         batch_consuming: true,
         persistent: false
       }
     ]
+  end
+  let(:pause_details) do
+    {
+      pause_timeout: 10,
+      pause_max_timeout: nil,
+      pause_exponential_backoff: false
+    }
+  end
+  let(:ssl_details) do
+    {
+      ssl_ca_cert: File.read("#{CERTS_PATH}/ca.crt"),
+      ssl_ca_cert_file_path: "#{CERTS_PATH}/ca.crt",
+      ssl_client_cert: File.read("#{CERTS_PATH}/client.crt"),
+      ssl_client_cert_key: File.read("#{CERTS_PATH}/client.key"),
+      ssl_ca_certs_from_system: true,
+      ssl_client_cert_chain: File.read("#{CERTS_PATH}/client.chain"),
+      sasl_over_ssl: true
+    }
   end
   let(:config) do
     {
@@ -27,23 +44,19 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       offset_commit_threshold: 1,
       heartbeat_interval: 1,
       session_timeout: 1,
-      ssl_ca_cert: 'ca_cert',
-      ssl_client_cert: 'client_cert',
-      ssl_client_cert_key: 'client_cert_key',
-      ssl_ca_certs_from_system: true,
       max_bytes_per_partition: 1_048_576,
       offset_retention_time: 1000,
       fetcher_max_queue_size: 100,
       start_from_beginning: true,
       connect_timeout: 10,
+      reconnect_timeout: 10,
       socket_timeout: 10,
-      pause_timeout: 10,
       max_wait_time: 10,
       batch_fetching: true,
       topics: topics,
       min_bytes: 1,
       max_bytes: 2048
-    }
+    }.merge(pause_details).merge(ssl_details)
   end
 
   context 'when config is valid' do
@@ -276,6 +289,98 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
+  context 'when we validate pause_max_timeout' do
+    context 'when pause_max_timeout is nil' do
+      before { config[:pause_max_timeout] = nil }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_max_timeout is not integer' do
+      before { config[:pause_max_timeout] = 's' }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when pause_max_timeout is 0' do
+      before { config[:pause_max_timeout] = 0 }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_max_timeout is less than 0' do
+      before { config[:pause_max_timeout] = -1 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate pause_exponential_backoff' do
+    context 'when pause_exponential_backoff is not a bool' do
+      before { config[:pause_exponential_backoff] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we use pause_exponential_backoff' do
+    before do
+      config[:pause_exponential_backoff] = true
+      config[:pause_timeout] = pause_timeout
+      config[:pause_max_timeout] = pause_max_timeout
+    end
+
+    context 'when the pause_timeout is more than pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout - 1 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when pause_timeout is same as pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_timeout is less than pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout + 1 }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+  end
+
+  context 'when we dont use pause_exponential_backoff' do
+    before do
+      config[:pause_exponential_backoff] = false
+      config[:pause_timeout] = pause_timeout
+      config[:pause_max_timeout] = pause_max_timeout
+    end
+
+    context 'when the pause_timeout is more than pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout - 1 }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_timeout is same as pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when pause_timeout is less than pause_max_timeout' do
+      let(:pause_timeout) { 10 }
+      let(:pause_max_timeout) { pause_timeout + 1 }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+  end
+
   context 'when we validate socket_timeout' do
     context 'when socket_timeout is nil' do
       before { config[:socket_timeout] = nil }
@@ -374,8 +479,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
   %i[
     ssl_ca_cert
     ssl_ca_cert_file_path
-    ssl_client_cert
-    ssl_client_cert_key
     sasl_gssapi_principal
     sasl_gssapi_keytab
     sasl_plain_authzid
@@ -384,6 +487,8 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     sasl_scram_username
     sasl_scram_password
     sasl_scram_mechanism
+    ssl_client_cert_chain
+    ssl_client_cert_key_password
   ].each do |encryption_attribute|
     context "when we validate #{encryption_attribute}" do
       context "when #{encryption_attribute} is nil" do
@@ -400,9 +505,172 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
+  context 'when we validate ssl_client_cert' do
+    context 'when ssl_client_cert is nil and ssl_client_cert_key is nil' do
+      before do
+        config[:ssl_client_cert] = nil
+        config[:ssl_client_cert_key] = nil
+        config[:ssl_client_cert_chain] = nil
+      end
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when ssl_client_cert is nil and ssl_client_cert_key is not nil' do
+      before { config[:ssl_client_cert] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert is not a string' do
+      before { config[:ssl_client_cert] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert is a invalid string' do
+      before { config[:ssl_client_cert] = 'invalid' }
+
+      it { expect(schema.call(config)).not_to be_success }
+      it { expect(schema.call(config).errors).to have_key(:ssl_client_cert_valid_ceritificate) }
+      it do
+        expect(
+          schema.call(config).errors[:ssl_client_cert_valid_ceritificate]
+        ).to eq([schema.message_compiler.messages.data['en.errors.valid_certificate?']])
+      end
+    end
+  end
+
+  context 'when we validate ssl_client_cert_key' do
+    context 'when ssl_client_cert_key is nil and ssl_client_cert is nil' do
+      before do
+        config[:ssl_client_cert] = nil
+        config[:ssl_client_cert_key] = nil
+        config[:ssl_client_cert_chain] = nil
+      end
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when ssl_client_cert_key is nil and ssl_client_cert is not nil' do
+      before { config[:ssl_client_cert_key] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_key is not a string' do
+      before { config[:ssl_client_cert_key] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_key is a invalid string' do
+      before { config[:ssl_client_cert_key] = 'invalid' }
+
+      it { expect(schema.call(config)).not_to be_success }
+      it { expect(schema.call(config).errors).to have_key(:ssl_client_cert_key_valid_private_key) }
+      it do
+        expect(
+          schema.call(config).errors[:ssl_client_cert_key_valid_private_key]
+        ).to eq([schema.message_compiler.messages.data['en.errors.valid_private_key?']])
+      end
+    end
+  end
+
+  context 'when we validate ssl_client_cert_chain' do
+    context 'when ssl_client_cert_chain is nil and ssl_client_cert is nil' do
+      before do
+        config[:ssl_client_cert_chain] = nil
+        config[:ssl_client_cert] = nil
+        config[:ssl_client_cert_key] = nil
+      end
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when ssl_client_cert_chain is present but ssl_client_cert is nil' do
+      before do
+        config[:ssl_client_cert] = nil
+      end
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_chain is present but ssl_client_cert_key is nil' do
+      before do
+        config[:ssl_client_cert_key] = nil
+      end
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_chain is not a string' do
+      before { config[:ssl_client_cert_chain] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_chain is a invalid string' do
+      before { config[:ssl_client_cert_chain] = 'invalid' }
+
+      it { expect(schema.call(config)).not_to be_success }
+      it { expect(schema.call(config).errors).to have_key(:ssl_client_cert_chain_ceritificate) }
+      it do
+        expect(
+          schema.call(config).errors[:ssl_client_cert_chain_ceritificate]
+        ).to eq([schema.message_compiler.messages.data['en.errors.valid_certificate?']])
+      end
+    end
+  end
+
+  context 'when we validate ssl_client_cert_key_password' do
+    context 'when ssl_client_cert_key_password is nil and ssl_client_cert is nil' do
+      before do
+        config[:ssl_client_cert] = nil
+        config[:ssl_client_cert_key] = nil
+        config[:ssl_client_cert_key_password] = nil
+        config[:ssl_client_cert_chain] = nil
+      end
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when ssl_client_cert_key_password is present but ssl_client_cert is nil' do
+      before do
+        config[:ssl_client_cert] = nil
+        config[:ssl_client_cert_key_password] = 'password'
+      end
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_key_password is present but ssl_client_cert_key is nil' do
+      before do
+        config[:ssl_client_cert_key] = nil
+        config[:ssl_client_cert_key_password] = 'password'
+      end
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_key_password is not a string' do
+      before { config[:ssl_client_cert_key_password] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
   context 'when we validate ssl_ca_certs_from_system' do
     context 'when ssl_ca_certs_from_system is not a bool' do
       before { config[:ssl_ca_certs_from_system] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate sasl_over_ssl' do
+    context 'when sasl_over_ssl is not a bool' do
+      before { config[:sasl_over_ssl] = 2 }
 
       it { expect(schema.call(config)).not_to be_success }
     end

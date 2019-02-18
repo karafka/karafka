@@ -14,10 +14,17 @@ RSpec.describe Karafka::App do
   describe '#boot!' do
     let(:config) { double }
 
+    before { allow(Karafka.monitor).to receive(:instrument) }
+
     it 'expect to run setup_components' do
       expect(Karafka::Setup::Config).to receive(:validate!).once
       expect(Karafka::Setup::Config).to receive(:setup_components).once
-      expect(Karafka::Callbacks).to receive(:after_init).once
+
+      app_class.boot!
+    end
+
+    it 'expect to publish app.initialized event' do
+      expect(Karafka.monitor).to receive(:instrument).with('app.initialized', instance_of(Hash))
 
       app_class.boot!
     end

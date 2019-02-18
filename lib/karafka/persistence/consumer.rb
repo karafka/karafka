@@ -11,8 +11,10 @@ module Karafka
       # Thread.current scope under which we store consumers data
       PERSISTENCE_SCOPE = :consumers
 
+      private_constant :PERSISTENCE_SCOPE
+
       class << self
-        # @return [Hash] current thread persistence scope hash with all the consumers
+        # @return [Hash] current thread's persistence scope hash with all the consumers
         def all
           # @note This does not need to be threadsafe (Hash) as it is always executed in a
           # current thread context
@@ -25,12 +27,7 @@ module Karafka
         # @param topic [Karafka::Routing::Topic] topic instance for which we might cache
         # @param partition [Integer] number of partition for which we want to cache
         def fetch(topic, partition)
-          # We always store a current instance for callback reasons
-          if topic.persistent
-            all[topic][partition] ||= topic.consumer.new
-          else
-            all[topic][partition] = topic.consumer.new
-          end
+          all[topic][partition] ||= topic.consumer.new(topic)
         end
       end
     end

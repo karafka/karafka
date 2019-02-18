@@ -9,15 +9,17 @@ module Karafka
       configure do
         option :consumer_groups
 
-        def self.messages
-          super.merge(
-            en: {
-              errors: {
-                consumer_groups_inclusion: 'Unknown consumer group.',
-                pid_existence: 'Pidfile already exists.'
+        class << self
+          def messages
+            super.merge(
+              en: {
+                errors: {
+                  consumer_groups_inclusion: 'Unknown consumer group.',
+                  pid_existence: 'Pidfile already exists.'
+                }
               }
-            }
-          )
+            )
+          end
         end
       end
 

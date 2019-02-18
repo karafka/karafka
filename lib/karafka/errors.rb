@@ -6,10 +6,11 @@ module Karafka
     # Base class for all the Karafka internal errors
     BaseError = Class.new(StandardError)
 
-    # Should be raised when we attemp to parse incoming params but parsing fails
-    #   If this error (or its descendant) is detected, we will pass the raw message
-    #   into params and proceed further
-    ParserError = Class.new(BaseError)
+    # Should be raised when we have that that we cannot serialize
+    SerializationError = Class.new(BaseError)
+
+    # Should be raised when we tried to deserialize incoming data but we failed
+    DeserializationError = Class.new(BaseError)
 
     # Raised when router receives topic name which does not correspond with any routes
     # This can only happen in a case when:
@@ -25,26 +26,26 @@ module Karafka
 
     # Raised when we don't use or use responder not in the way it expected to based on the
     # topics usage definitions
-    InvalidResponderUsage = Class.new(BaseError)
+    InvalidResponderUsageError = Class.new(BaseError)
 
     # Raised when options that we provide to the responder to respond aren't what the schema
     # requires
-    InvalidResponderMessageOptions = Class.new(BaseError)
+    InvalidResponderMessageOptionsError = Class.new(BaseError)
 
     # Raised when configuration doesn't match with validation schema
-    InvalidConfiguration = Class.new(BaseError)
+    InvalidConfigurationError = Class.new(BaseError)
 
     # Raised when we try to use Karafka CLI commands (except install) without a bootfile
-    MissingBootFile = Class.new(BaseError)
+    MissingBootFileError = Class.new(BaseError)
 
     # Raised when we want to read a persisted thread messages consumer but it is unavailable
     # This should never happen and if it does, please contact us
-    MissingClient = Class.new(BaseError)
+    MissingClientError = Class.new(BaseError)
 
     # Raised when want to hook up to an event that is not registered and supported
-    UnregisteredMonitorEvent = Class.new(BaseError)
+    UnregisteredMonitorEventError = Class.new(BaseError)
 
     # Raised when we've waited enough for shutting down an unresponding process
-    ForcefulShutdown = Class.new(BaseError)
+    ForcefulShutdownError = Class.new(BaseError)
   end
 end
