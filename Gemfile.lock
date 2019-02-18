@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/karafka/waterdrop
-  revision: 42a5616b65f6479815f5aef6660d75ba994a77e9
+  revision: 03d4ae58274a8c9472c934ee55a03da9e67cf3b4
   specs:
     waterdrop (1.3.0)
       delivery_boy (~> 0.2)
