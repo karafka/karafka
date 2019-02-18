@@ -27,15 +27,6 @@ Karafka based applications can be easily deployed to any type of infrastructure,
 * Docker
 * Terraform
 
-## Kafka 0.10 or prior
-
-If you're using Kafka 0.10, please lock `ruby-kafka` gem in your Gemfile to version `0.6.8`:
-
-```ruby
-gem 'karafka'
-gem 'ruby-kafka', '~> 0.6.8'
-```
-
 ## Support
 
 Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
