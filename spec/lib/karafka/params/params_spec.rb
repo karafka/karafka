@@ -6,53 +6,53 @@ RSpec.describe Karafka::Params::Params do
   describe 'instance methods' do
     subject(:params) { base_params_class.send(:new) }
 
-    describe '#parse!' do
-      context 'when params are already parsed' do
-        before { params['parsed'] = true }
+    describe '#deserialize!' do
+      context 'when params are already deserialized' do
+        before { params['deserialized'] = true }
 
-        it 'expect not to parse again and return self' do
-          expect(params).not_to receive(:parse)
+        it 'expect not to deserialize again and return self' do
+          expect(params).not_to receive(:deserialize)
           expect(params).not_to receive(:merge!)
-          expect(params.parse!).to eq params
+          expect(params.deserialize!).to eq params
         end
       end
 
-      context 'when params were not yet parseds' do
+      context 'when params were not yet deserializeds' do
         let(:payload) { double }
-        let(:parsed_payload) { { double => double } }
+        let(:deserialized_payload) { { double => double } }
 
         before do
           params['payload'] = payload
 
           allow(params)
-            .to receive(:parse)
+            .to receive(:deserialize)
             .with(payload)
-            .and_return(parsed_payload)
+            .and_return(deserialized_payload)
 
-          params.parse!
+          params.deserialize!
         end
 
-        it 'expect to merge with parsed stuff that is under payload key and remove this key' do
-          expect(params.payload).to eq parsed_payload
+        it 'expect to merge with deserialized data that is under payload key' do
+          expect(params.payload).to eq deserialized_payload
         end
 
-        it 'expect to mark as parsed' do
-          expect(params.parse!['parsed']).to eq true
+        it 'expect to mark as deserialized' do
+          expect(params.deserialize!['deserialized']).to eq true
         end
       end
 
-      context 'when parsing error occurs' do
+      context 'when deserialization error occurs' do
         let(:payload) { double }
-        let(:parsed_payload) { { double => double } }
+        let(:deserialized_payload) { { double => double } }
 
         before do
           params['payload'] = payload
 
           allow(params)
-            .to receive(:parse)
-            .and_raise(Karafka::Errors::ParserError)
+            .to receive(:deserialize)
+            .and_raise(Karafka::Errors::DeserializationError)
 
-          params.parse! rescue false
+          params.deserialize! rescue false
         end
 
         it 'expect to keep the raw payload within the params hash' do
@@ -61,55 +61,56 @@ RSpec.describe Karafka::Params::Params do
       end
     end
 
-    describe '#parse' do
-      let(:parser) { double }
+    describe '#deserialize' do
+      let(:deserializer) { double }
       let(:payload) { double }
 
       before do
-        params['parser'] = parser
+        params['deserializer'] = deserializer
       end
 
-      context 'when we are able to successfully parse' do
-        let(:parsed_payload) { { rand => rand } }
+      context 'when we are able to successfully deserialize' do
+        let(:deserialized_payload) { { rand => rand } }
 
         before do
-          allow(parser)
-            .to receive(:parse)
+          allow(deserializer)
+            .to receive(:call)
             .with(payload)
-            .and_return(parsed_payload)
+            .and_return(deserialized_payload)
         end
 
         it 'expect to return payload in a message key' do
-          expect(params.send(:parse, payload)).to eq parsed_payload
+          expect(params.send(:deserialize, payload)).to eq deserialized_payload
         end
       end
 
-      context 'when parsing fails' do
+      context 'when deserialization fails' do
+        let(:expected_error) { ::Karafka::Errors::DeserializationError }
         let(:instrument_args) do
           [
-            'params.params.parse',
+            'params.params.deserialize',
             caller: params
           ]
         end
         let(:instrument_error_args) do
           [
-            'params.params.parse.error',
+            'params.params.deserialize.error',
             caller: params,
-            error: ::Karafka::Errors::ParserError
+            error: ::Karafka::Errors::DeserializationError
           ]
         end
 
         before do
-          allow(parser)
-            .to receive(:parse)
+          allow(deserializer)
+            .to receive(:call)
             .with(payload)
-            .and_raise(::Karafka::Errors::ParserError)
+            .and_raise(::Karafka::Errors::DeserializationError)
         end
 
         it 'expect to monitor and reraise' do
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_args).and_yield
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_error_args)
-          expect { params.send(:parse, payload) }.to raise_error(::Karafka::Errors::ParserError)
+          expect { params.send(:deserialize, payload) }.to raise_error(expected_error)
         end
       end
     end

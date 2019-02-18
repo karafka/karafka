@@ -17,7 +17,7 @@ module Karafka
       private_constant :IGNORED_POSTFIXES
 
       # @param target [Object] target object to which we proxy any DSL call
-      # @yield Evaluates block in the proxy context
+      # @param block [Proc] block that we want to evaluate in the proxy context
       def initialize(target, &block)
         @target = target
         instance_eval(&block)

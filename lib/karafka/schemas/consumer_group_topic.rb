@@ -16,7 +16,7 @@ module Karafka
       required(:name).filled { (str? & format?(Karafka::Schemas::TOPIC_REGEXP)) | regexp? }
       required(:backend).filled(included_in?: %i[inline sidekiq])
       required(:consumer).filled
-      required(:parser).filled
+      required(:deserializer).filled
       required(:max_bytes_per_partition).filled(:int?, gteq?: 0)
       required(:start_from_beginning).filled(:bool?)
       required(:batch_consuming).filled(:bool?)

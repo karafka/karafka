@@ -21,7 +21,7 @@ RSpec.describe Karafka::AttributesMap do
         name
         consumer
         backend
-        parser
+        deserializer
         responder
         batch_consuming
       ]

@@ -5,7 +5,7 @@ RSpec.describe Karafka::Routing::Builder do
 
   ATTRIBUTES = %i[
     consumer
-    parser
+    deserializer
     responder
   ].freeze
 
@@ -26,7 +26,7 @@ RSpec.describe Karafka::Routing::Builder do
             consumer Class.new(Karafka::BaseConsumer)
             backend :inline
             name 'name1'
-            parser :parser1
+            deserializer :deserializer1
             responder :responder1
           end
         end
@@ -37,7 +37,7 @@ RSpec.describe Karafka::Routing::Builder do
             consumer Class.new(Karafka::BaseConsumer)
             backend :inline
             name 'name2'
-            parser :parser2
+            deserializer :deserializer2
             responder :responder2
           end
         end
@@ -74,7 +74,7 @@ RSpec.describe Karafka::Routing::Builder do
               consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name1'
-              parser :parser1
+              deserializer :deserializer1
               responder :responder1
             end
           end
@@ -89,7 +89,7 @@ RSpec.describe Karafka::Routing::Builder do
               consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name2'
-              parser :parser2
+              deserializer :deserializer2
               responder :responder2
             end
           end
@@ -121,7 +121,7 @@ RSpec.describe Karafka::Routing::Builder do
               consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name1'
-              parser :parser1
+              deserializer :deserializer1
               responder :responder1
             end
 
@@ -129,7 +129,7 @@ RSpec.describe Karafka::Routing::Builder do
               consumer Class.new(Karafka::BaseConsumer)
               backend :inline
               name 'name2'
-              parser :parser2
+              deserializer :deserializer2
               responder :responder2
             end
           end

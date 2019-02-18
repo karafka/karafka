@@ -6,10 +6,11 @@ module Karafka
     # Base class for all the Karafka internal errors
     BaseError = Class.new(StandardError)
 
-    # Should be raised when we attemp to parse incoming params but parsing fails
-    #   If this error (or its descendant) is detected, we will pass the raw message
-    #   into params and proceed further
-    ParserError = Class.new(BaseError)
+    # Should be raised when we have that that we cannot serialize
+    SerializationError = Class.new(BaseError)
+
+    # Should be raised when we tried to deserialize incoming data but we failed
+    DeserializationError = Class.new(BaseError)
 
     # Raised when router receives topic name which does not correspond with any routes
     # This can only happen in a case when:

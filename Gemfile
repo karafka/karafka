@@ -4,9 +4,10 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'waterdrop', git: 'https://github.com/karafka/waterdrop', branch: '1.3-wip'
+gem 'waterdrop', git: 'https://github.com/karafka/waterdrop'
 
 group :test do
+  gem 'activesupport'
   gem 'byebug'
   gem 'factory_bot'
   gem 'rspec'

@@ -35,6 +35,11 @@
 - #437 - Specs ensuring that the `#437` won't occur in the `1.3` release
 - #426 - ssl client cert key password
 - #444 - add certificate and private key validation
+- #460 - Decouple responder "parser" (generator?) from topic.parser (benissimo)
+- #463 - Split parsers into serializers / deserializers
+
+## 1.2.11
+- [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8
 
 ## 1.2.10
 - [#453](https://github.com/karafka/karafka/pull/453) require `Forwardable` module
