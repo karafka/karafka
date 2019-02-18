@@ -43,7 +43,7 @@ If you're completely new to the subject, you can start with our "Kafka on Rails"
 If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to just clone our example repository:
 
 ```bash
-git clone https://github.com/karafka/karafka-example-app ./example_app
+git clone https://github.com/karafka/example-app ./example_app
 ```
 
 then, just bundle install all the dependencies:
@@ -53,7 +53,7 @@ cd ./example_app
 bundle install
 ```
 
-and follow the instructions from the [example app Wiki](https://github.com/karafka/karafka-example-app/blob/master/README.md).
+and follow the instructions from the [example app Wiki](https://github.com/karafka/example-app/blob/master/README.md).
 
 **Note**: you need to ensure, that you have Kafka up and running and you need to configure Kafka seed_brokers in the ```karafka.rb``` file.
 
