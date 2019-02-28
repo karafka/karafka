@@ -20,7 +20,7 @@ end
 # Some object patches are here
 class Object
   # This is a workaround class for thor patches, so it won' bother us
-  # with nonexisting method namespace (that we don't use)
+  # with nonexistent method namespace (that we don't use)
   def namespace
     raise
   end
