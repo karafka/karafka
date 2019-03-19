@@ -66,6 +66,16 @@ module Karafka
         def respond_to_token?(object)
           object.respond_to?(:token)
         end
+
+        # Validates, that we don't have same topic defined twice withing a single consumer group
+        #
+        # @param topics [Array<Hash>] array with topics details
+        #
+        # @return [Boolean] true if all the topics are unique
+        def unique_topics_names?(topics)
+          names = topics.map { |topic| topic[:name] }
+          names.size == names.uniq.size
+        end
       end
 
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
@@ -86,7 +96,7 @@ module Karafka
       required(:max_bytes).filled(:int?, gt?: 0)
       required(:max_wait_time).filled { (int? | float?) & gteq?(0) }
       required(:batch_fetching).filled(:bool?)
-      required(:topics).filled { each { schema(ConsumerGroupTopic) } }
+      required(:topics).filled { each { schema(ConsumerGroupTopic) } & unique_topics_names? }
 
       # If the exponential backoff is on, the max pause timeout needs to be equal or
       # bigger than the default pause timeout from which we start

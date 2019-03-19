@@ -12,6 +12,8 @@ en:
       is not a valid private key
     max_timeout_size_for_exponential: >
       pause_timeout cannot be more than pause_max_timeout.
+    unique_topics_names?: >
+      all topic names within a single consumer group must be unique.
     ssl_client_cert_with_ssl_client_cert_key: >
       Both ssl_client_cert and ssl_client_cert_key need to be provided.
     ssl_client_cert_key_with_ssl_client_cert: >
