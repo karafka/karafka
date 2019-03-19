@@ -57,6 +57,15 @@ module Karafka
         def valid_certificate_from_path?(file_path)
           File.exist?(file_path) && valid_certificate?(File.read(file_path))
         end
+
+        # Checks if the provided objecti implements a #token method
+        #
+        # @param object [Object] an object that is suppose to respond to #token method
+        #
+        # @return [Boolean] true if an object responds to #token method
+        def respond_to_token?(object)
+          object.respond_to?(:token)
+        end
       end
 
       required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
@@ -118,6 +127,7 @@ module Karafka
 
       optional(:ssl_ca_certs_from_system).maybe(:bool?)
       optional(:sasl_over_ssl).maybe(:bool?)
+      optional(:sasl_oauth_token_provider).maybe
 
       # It's not with other encryptions as it has some more rules
       optional(:sasl_scram_mechanism)
@@ -194,6 +204,14 @@ module Karafka
         ssl_client_cert_chain_ceritificate: %i[ssl_client_cert_chain]
       ) do |ssl_client_cert_chain|
         ssl_client_cert_chain.filled? > ssl_client_cert_chain.valid_certificate?
+      end
+
+      rule(
+        sasl_oauth_token_provider_respond_to_token: %i[
+          sasl_oauth_token_provider
+        ]
+      ) do |sasl_oauth_token_provider|
+        sasl_oauth_token_provider.filled? > sasl_oauth_token_provider.respond_to_token?
       end
     end
   end

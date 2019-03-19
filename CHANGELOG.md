@@ -37,6 +37,7 @@
 - #444 - add certificate and private key validation
 - #460 - Decouple responder "parser" (generator?) from topic.parser (benissimo)
 - #463 - Split parsers into serializers / deserializers
+- #473 - Support SASL OAuthBearer Authentication
 
 ## 1.2.11
 - [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8

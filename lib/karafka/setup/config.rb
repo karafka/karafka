@@ -157,6 +157,9 @@ module Karafka
         # option ssl_client_cert_key_password [String, nil] the password required to read
         #   the ssl_client_cert_key
         setting :ssl_client_cert_key_password, nil
+        # @param sasl_oauth_token_provider [Object, nil] OAuthBearer Token Provider instance that
+        #   implements method token.
+        setting :sasl_oauth_token_provider, nil
       end
 
       class << self
