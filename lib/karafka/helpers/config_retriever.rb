@@ -5,7 +5,7 @@ module Karafka
     # A helper method that allows us to build methods that try to get a given
     # attribute from its instance value and if it fails, will fallback to
     # the default config or config.kafka value for a given attribute.
-    # It is used to simplify the checkings.
+    # It is used to simplify the checks.
     # @note Worth noticing, that the value might be equal to false, so even
     #   then we need to return it. That's why we check for nil?
     # @example Define config retried attribute for start_from_beginning

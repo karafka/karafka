@@ -6,7 +6,7 @@ module Karafka
     ConsumerGroup = Dry::Validation.Schema do
       # Valid uri schemas of Kafka broker url
       # The ||= is due to the behavior of require_all that resolves dependencies
-      # but someetimes loads things twice
+      # but sometimes loads things twice
       URI_SCHEMES ||= %w[kafka kafka+ssl plaintext ssl].freeze
 
       # Available sasl scram mechanism of authentication (plus nil)

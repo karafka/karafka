@@ -52,7 +52,7 @@ module Karafka
         ignored_settings = api_adapter[:subscribe]
         defined_settings = api_adapter.values.flatten
         karafka_settings = %i[batch_fetching]
-        # This is a drity and bad hack of dry-configurable to get keys before setting values
+        # This is a dirty and bad hack of dry-configurable to get keys before setting values
         dynamically_proxied = Karafka::Setup::Config
                               ._settings
                               .settings

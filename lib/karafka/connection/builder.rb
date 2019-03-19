@@ -5,7 +5,7 @@ module Karafka
     # Builder used to construct Kafka client
     module Builder
       class << self
-        # Builds a Kafka::Cient instance that we use to work with Kafka cluster
+        # Builds a Kafka::Client instance that we use to work with Kafka cluster
         # @return [::Kafka::Client] returns a Kafka client
         def call
           Kafka.new(*ApiAdapter.client)

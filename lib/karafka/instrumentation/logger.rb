@@ -28,7 +28,7 @@ module Karafka
       private
 
       # @return [Karafka::Helpers::MultiDelegator] multi delegator instance
-      #   to which we will be writtng logs
+      #   to which we will be writing logs
       # We use this approach to log stuff to file and to the STDOUT at the same time
       def target
         Karafka::Helpers::MultiDelegator

@@ -4,7 +4,7 @@ module Karafka
   module Params
     # Due to the fact, that we create params related objects in couple contexts / places
     # plus backends can build up them their own way we have this namespace.
-    # It allows to isolate actual params objects from their building prcess that can be
+    # It allows to isolate actual params objects from their building process that can be
     # context dependent.
     module Builders
       # Builder for params
