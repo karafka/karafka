@@ -93,7 +93,6 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
-
   context 'when we validate id' do
     context 'when id is nil' do
       before { config[:id] = nil }
