@@ -17,7 +17,7 @@ module Karafka
     #   - you've received a message and we cannot match it with a consumer
     #   - you've changed the routing, so router can no longer associate your topic to
     #     any consumer
-    #   - or in a case when you do a lot of metaprogramming and you change routing/etc on runtime
+    #   - or in a case when you do a lot of meta-programming and you change routing/etc on runtime
     #
     # In case this happens, you will have to create a temporary route that will allow
     # you to "eat" everything from the Sidekiq queue.
@@ -35,7 +35,7 @@ module Karafka
     # Raised when configuration doesn't match with validation schema
     InvalidConfigurationError = Class.new(BaseError)
 
-    # Raised when we try to use Karafka CLI commands (except install) without a bootfile
+    # Raised when we try to use Karafka CLI commands (except install) without a boot file
     MissingBootFileError = Class.new(BaseError)
 
     # Raised when we want to read a persisted thread messages consumer but it is unavailable
@@ -45,7 +45,7 @@ module Karafka
     # Raised when want to hook up to an event that is not registered and supported
     UnregisteredMonitorEventError = Class.new(BaseError)
 
-    # Raised when we've waited enough for shutting down an unresponding process
+    # Raised when we've waited enough for shutting down a non-responsive process
     ForcefulShutdownError = Class.new(BaseError)
   end
 end

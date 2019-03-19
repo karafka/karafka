@@ -22,7 +22,7 @@ module Karafka
         @attributes = {}
         # @note We use identifier related to the consumer group that owns a topic, because from
         #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can
-        #   have same topic name across mutliple Kafkas
+        #   have same topic name across multiple Kafkas
         @id = "#{consumer_group.id}_#{@name}"
       end
 
@@ -36,7 +36,7 @@ module Karafka
       end
 
       # @return [Class, nil] Class (not an instance) of a responder that should respond from
-      #   consumer back to Kafka (usefull for piping dataflows)
+      #   consumer back to Kafka (useful for piping data flows)
       def responder
         @responder ||= Karafka::Responders::Builder.new(consumer).build
       end

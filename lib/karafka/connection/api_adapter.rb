@@ -102,8 +102,9 @@ module Karafka
         # @note When default empty topic mapper is used, no need for any conversion as the
         #   internal and external format are exactly the same
         def mark_message_as_processed(params)
-          # Majority of non heroku users don't use custom topic mappers. No need to change
-          # anything when it is a default mapper that does not change anything
+          # Majority of users don't use custom topic mappers. No need to change anything when it
+          # is a default mapper that does not change anything. Only some cloud providers require
+          # topics to be remapped
           return [params] if Karafka::App.config.topic_mapper.is_a?(Karafka::Routing::TopicMapper)
 
           # @note We don't use tap as it is around 13% slower than non-dup version

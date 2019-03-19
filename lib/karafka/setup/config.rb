@@ -8,7 +8,7 @@ module Karafka
     # @note If you want to do some configurations after all of this is done, please add to
     #   karafka/config a proper file (needs to inherit from Karafka::Setup::Configurators::Base
     #   and implement setup method) after that everything will happen automatically
-    # @note This config object allows to create a 1 level nestings (nodes) only. This should be
+    # @note This config object allows to create a 1 level nesting (nodes) only. This should be
     #   enough and will still keep the code simple
     # @see Karafka::Setup::Configurators::Base for more details about configurators api
     class Config
@@ -28,7 +28,7 @@ module Karafka
       # or they need to maintain their own internal consumer group naming conventions, they
       # can easily do it, replacing the default client_id + consumer name pattern concept
       setting :consumer_mapper, -> { Routing::ConsumerMapper.new }
-      # Mapper used to remap names of topics, so we can have a clean internal topic namings
+      # Mapper used to remap names of topics, so we can have a clean internal topic naming
       # despite using any Kafka provider that uses namespacing, etc
       # It needs to implement two methods:
       #   - #incoming - for remapping from the incoming message to our internal format
@@ -160,7 +160,7 @@ module Karafka
       end
 
       class << self
-        # Configurating method
+        # Configuring method
         # @yield Runs a block of code providing a config singleton instance to it
         # @yieldparam [Karafka::Setup::Config] Karafka config instance
         def setup

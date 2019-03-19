@@ -7,7 +7,7 @@ module Karafka
       # This patch allows us to inject business logic in between fetches and before the consumer
       # stop, so we can perform stop commit or anything else that we need since
       # ruby-kafka fetch loop does not allow that directly
-      # We don't wan't to use poll ruby-kafka api as it brings many more problems that we would
+      # We don't won't to use poll ruby-kafka api as it brings many more problems that we would
       # have to take care of. That way, nothing like that ever happens but we get the control
       # over the stopping process that we need (since we're the once that initiate it for each
       # thread)

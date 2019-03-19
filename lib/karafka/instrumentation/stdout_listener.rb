@@ -59,7 +59,7 @@ module Karafka
           error "Params deserialization error for #{event[:caller].topic} topic: #{event[:error]}"
         end
 
-        # Logs errors that occured in a listener fetch loop
+        # Logs errors that occurred in a listener fetch loop
         # @param event [Dry::Events::Event] event details including payload
         # @note It's an error as we can recover from it not a fatal
         def on_connection_listener_fetch_loop_error(event)
