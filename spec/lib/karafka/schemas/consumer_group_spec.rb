@@ -63,16 +63,34 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     it { expect(schema.call(config)).to be_success }
   end
 
-  context 'when topics is an empty array' do
-    before { config[:topics] = [] }
+  context 'when we validate topics' do
+    context 'when topics is an empty array' do
+      before { config[:topics] = [] }
 
-    it { expect(schema.call(config)).not_to be_success }
-  end
+      it { expect(schema.call(config)).not_to be_success }
+    end
 
-  context 'when topics is not an array' do
-    before { config[:topics] = nil }
+    context 'when topics is not an array' do
+      before { config[:topics] = nil }
 
-    it { expect(schema.call(config)).not_to be_success }
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when topics names are not unique' do
+      before { config[:topics][1] = config[:topics][0].dup }
+
+      it { expect(schema.call(config)).not_to be_success }
+      it { expect { schema.call(config).errors }.not_to raise_error }
+    end
+
+    context 'when topics names are unique' do
+      before do
+        config[:topics][1] = config[:topics][0].dup
+        config[:topics][1][:name] = rand.to_s
+      end
+
+      it { expect(schema.call(config)).to be_success }
+    end
   end
 
   context 'when we validate id' do
