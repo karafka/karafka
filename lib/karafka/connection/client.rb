@@ -51,7 +51,7 @@ module Karafka
         retry
       end
 
-      # Gracefuly stops topic consumption
+      # Gracefully stops topic consumption
       # @note Stopping running consumers without a really important reason is not recommended
       #   as until all the consumers are stopped, the server will keep running serving only
       #   part of the messages
@@ -108,7 +108,7 @@ module Karafka
         # If we would not wait it will spam log file with failed
         # attempts if Kafka is down
         sleep(consumer_group.reconnect_timeout)
-        # We don't log and just reraise - this will be logged
+        # We don't log and just re-raise - this will be logged
         # down the road
         raise
       end

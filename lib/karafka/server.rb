@@ -43,7 +43,7 @@ module Karafka
 
       # Starts Karafka with a supervision
       # @note We don't need to sleep because Karafka::Fetcher is locking and waiting to
-      # finish loop (and it won't happen until we explicitily want to stop)
+      # finish loop (and it won't happen until we explicitly want to stop)
       def run_supervised
         process.supervise
         Karafka::App.run!
@@ -51,7 +51,7 @@ module Karafka
       end
 
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)
-      # If consumers won't stop in a given timeframe, it will force them to exit
+      # If consumers won't stop in a given time frame, it will force them to exit
       def stop_supervised
         Karafka::App.stop!
         # If there is no shutdown timeout, we don't exit and wait until all the consumers
