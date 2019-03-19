@@ -22,3 +22,5 @@ en:
       Both ssl_client_cert_chain and ssl_client_cert_key need to be provided.
     ssl_client_cert_key_password_with_ssl_client_cert_key: >
       Both ssl_client_cert_key_password and ssl_client_cert_key need to be provided.
+    sasl_oauth_token_provider_respond_to_token: >
+      sasl_oauth_token_provider needs to respond to a #token method.

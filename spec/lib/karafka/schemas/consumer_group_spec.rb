@@ -707,4 +707,25 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it { expect(schema.call(config)).to be_success }
     end
   end
+
+  context 'when we validate sasl_oauth_token_provider' do
+    context 'when sasl_oauth_token_provider is nil' do
+      before { config[:sasl_oauth_token_provider] = nil }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when sasl_oauth_token_provider is an object without token method' do
+      before { config[:sasl_oauth_token_provider] = Struct.new(:test).new }
+
+      it { expect(schema.call(config)).to be_failure }
+      it { expect { schema.call(config).errors }.not_to raise_error }
+    end
+
+    context 'when sasl_oauth_token_provider is an object with token method' do
+      before { config[:sasl_oauth_token_provider] = Struct.new(:token).new }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+  end
 end
