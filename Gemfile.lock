@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/karafka/waterdrop
-  revision: bf0a8e1a3f4592579e3efbf1b10e4225454c8dc9
+  revision: 94cbba090ee0c313c2cea03a75c24ff815ecd6b0
   specs:
     waterdrop (1.3.0)
       delivery_boy (~> 0.2)
@@ -64,7 +64,7 @@ GEM
       dry-core (~> 0.4)
       dry-equalizer (~> 0.2)
       dry-events (~> 0.1)
-    dry-types (0.14.0)
+    dry-types (0.14.1)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.3)
       dry-core (~> 0.4, >= 0.4.4)
