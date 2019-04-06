@@ -6,6 +6,7 @@
 app.god
 
 # minimal Rails specific artifacts
+/.coditsu/local.yml
 db/*.sqlite3
 /log/development.log
 /log/production.log
