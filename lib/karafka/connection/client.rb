@@ -39,15 +39,15 @@ module Karafka
         end
       # @note We catch only the processing errors as any other are considered critical (exceptions)
       #   and should require a client restart with a backoff
-      rescue Kafka::ProcessingError => error
+      rescue Kafka::ProcessingError => e
         # If there was an error during consumption, we have to log it, pause current partition
         # and process other things
         Karafka.monitor.instrument(
           'connection.client.fetch_loop.error',
           caller: self,
-          error: error.cause
+          error: e.cause
         )
-        pause(error.topic, error.partition)
+        pause(e.topic, e.partition)
         retry
       end
 

@@ -68,8 +68,8 @@ module Karafka
         end
 
         raise Errors::ForcefulShutdownError
-      rescue Errors::ForcefulShutdownError => error
-        Thread.new { Karafka.monitor.instrument('app.stopping.error', error: error) }.join
+      rescue Errors::ForcefulShutdownError => e
+        Thread.new { Karafka.monitor.instrument('app.stopping.error', error: e) }.join
         # We're done waiting, lets kill them!
         consumer_threads.each(&:terminate)
 

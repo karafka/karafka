@@ -58,7 +58,7 @@ module Karafka
           File.exist?(file_path) && valid_certificate?(File.read(file_path))
         end
 
-        # Checks if the provided objecti implements a #token method
+        # Checks if the provided object implements a #token method
         #
         # @param object [Object] an object that is suppose to respond to #token method
         #
