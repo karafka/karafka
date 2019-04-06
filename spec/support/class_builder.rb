@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Class builder helps creating anonymous classes that we can use to spec our aspector
+# Class builder helps creating anonymous classes that we can use to spec our code
 # We need co create new class instances to have an "empty" and "clear" class for each spec
 # This module acts as an interface to create classes
 module ClassBuilder
