@@ -6,11 +6,14 @@ module Karafka
     @consumer_threads = Concurrent::Array.new
 
     # How long should we sleep between checks on shutting down consumers
-    SUPERVISION_SLEEP = 1
+    SUPERVISION_SLEEP = 0.1
     # What system exit code should we use when we terminated forcefully
     FORCEFUL_EXIT_CODE = 2
+    # This factor allows us to calculate how many times we have to sleep before
+    # a forceful shutdown
+    SUPERVISION_CHECK_FACTOR = (1 / SUPERVISION_SLEEP)
 
-    private_constant :SUPERVISION_SLEEP, :FORCEFUL_EXIT_CODE
+    private_constant :SUPERVISION_SLEEP, :FORCEFUL_EXIT_CODE, :SUPERVISION_CHECK_FACTOR
 
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
@@ -54,17 +57,10 @@ module Karafka
       # If consumers won't stop in a given time frame, it will force them to exit
       def stop_supervised
         Karafka::App.stop!
-        # If there is no shutdown timeout, we don't exit and wait until all the consumers
-        # had done their work
-        unless Karafka::App.config.shutdown_timeout
-          Thread.new { Karafka.monitor.instrument('app.stopped', {}) }.join
-          return
-        end
 
-        # If there is a timeout, we check every 1 second (for the timeout period) if all
-        # the threads finished their work and if so, we can just return and normal
-        # shutdown process will take place
-        Karafka::App.config.shutdown_timeout.to_i.times do
+        # We check from time to time (for the timeout period) if all the threads finished
+        # their work and if so, we can just return and normal shutdown process will take place
+        (Karafka::App.config.shutdown_timeout * SUPERVISION_CHECK_FACTOR).to_i.times do
           if consumer_threads.count(&:alive?).zero?
             Thread.new { Karafka.monitor.instrument('app.stopped', {}) }.join
             return
