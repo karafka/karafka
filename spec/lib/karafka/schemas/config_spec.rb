@@ -33,7 +33,7 @@ RSpec.describe Karafka::Schemas::Config do
     context 'when shutdown_timeout is nil' do
       before { config[:shutdown_timeout] = nil }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(schema.call(config)).not_to be_success }
     end
 
     context 'when shutdown_timeout is not an int' do

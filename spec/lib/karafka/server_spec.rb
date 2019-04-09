@@ -79,25 +79,6 @@ RSpec.describe Karafka::Server do
       Karafka::App.initialize!
     end
 
-    context 'when there is no shutdown timeout' do
-      let(:timeout) { nil }
-
-      it 'expect stop and not exit' do
-        expect(Karafka::App).to receive(:stop!)
-        expect(Kernel).not_to receive(:exit)
-      end
-    end
-
-    context 'when shutdown time is 0' do
-      let(:timeout) { 0 }
-
-      it 'expect stop and exit without sleep' do
-        expect(Karafka::App).to receive(:stop!)
-        expect(described_class).not_to receive(:sleep)
-        expect(Kernel).to receive(:exit).with(2)
-      end
-    end
-
     context 'when shutdown time is more then 1' do
       let(:timeout) { rand(5..15) }
 
@@ -116,7 +97,7 @@ RSpec.describe Karafka::Server do
 
         it 'expect stop and exit with sleep' do
           expect(Karafka::App).to receive(:stop!)
-          expect(described_class).to receive(:sleep).with(1).exactly(timeout).times
+          expect(described_class).to receive(:sleep).with(0.1).exactly(timeout * 10).times
           expect(Kernel).to receive(:exit).with(2)
         end
       end
