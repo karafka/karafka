@@ -41,6 +41,7 @@ module Karafka
         app.running
         app.stopping
         app.stopping.error
+        app.stopped
       ].freeze
 
       private_constant :BASE_EVENTS
