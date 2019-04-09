@@ -51,6 +51,11 @@ module Karafka
       def to_a
         @params_array
       end
+
+      # @return [Integer] number of messages in the batch
+      def size
+        @params_array.size
+      end
     end
   end
 end
