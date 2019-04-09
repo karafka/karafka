@@ -56,13 +56,19 @@ module Karafka
         Karafka::App.stop!
         # If there is no shutdown timeout, we don't exit and wait until all the consumers
         # had done their work
-        return unless Karafka::App.config.shutdown_timeout
+        unless Karafka::App.config.shutdown_timeout
+          Thread.new { Karafka.monitor.instrument('app.stopped', {}) }.join
+          return
+        end
 
         # If there is a timeout, we check every 1 second (for the timeout period) if all
         # the threads finished their work and if so, we can just return and normal
         # shutdown process will take place
         Karafka::App.config.shutdown_timeout.to_i.times do
-          return if consumer_threads.count(&:alive?).zero?
+          if consumer_threads.count(&:alive?).zero?
+            Thread.new { Karafka.monitor.instrument('app.stopped', {}) }.join
+            return
+          end
 
           sleep SUPERVISION_SLEEP
         end
