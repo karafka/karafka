@@ -81,7 +81,8 @@ CERTS_PATH = "#{File.dirname(__FILE__)}/support/certificates"
 # dynamic components
 Karafka::App.boot!
 
-# We by default use the default listener for specs to check how it works and that
-# it does not break anything
+# We by default use the default listeners for specs to check how they work and that
+# they don't not break anything
+Karafka.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener.new)
 Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
 Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
