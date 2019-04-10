@@ -41,6 +41,7 @@
 - #473 - Support SASL OAuthBearer Authentication
 - #475 - Disallow subscribing to the same topic with multiple consumers
 - #485 - Setting shutdown_timeout to nil kills the app without waiting for anything
+- #487 - Make listeners as instances
 
 ## 1.2.11
 - [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8
