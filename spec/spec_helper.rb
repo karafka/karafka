@@ -83,4 +83,5 @@ Karafka::App.boot!
 
 # We by default use the default listener for specs to check how it works and that
 # it does not break anything
-Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener)
+Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
+Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)

@@ -36,8 +36,8 @@ class KarafkaApp < Karafka::App
   # interested in logging events for certain environments. Since instrumentation
   # notifications add extra boilerplate, if you want to achieve max performance,
   # listen to only what you really need for given environment.
-  Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener)
-  Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener)
+  Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
+  Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
 
   consumer_groups.draw do
     # topic :example do

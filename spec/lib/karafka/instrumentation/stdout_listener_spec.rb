@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Instrumentation::StdoutListener do
+  subject(:listener) { described_class.new }
+
   let(:event) { Dry::Events::Event.new(rand, payload) }
   let(:time) { rand }
   let(:topic) { build(:routing_topic, name: topic_name) }
   let(:topic_name) { rand.to_s }
 
   describe '#on_params_params_deserialize' do
-    subject(:trigger) { described_class.on_params_params_deserialize(event) }
+    subject(:trigger) { listener.on_params_params_deserialize(event) }
 
     let(:topic) { rand.to_s }
     let(:payload) { { caller: caller, time: time } }
@@ -21,7 +23,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_params_params_deserialize_error' do
-    subject(:trigger) { described_class.on_params_params_deserialize_error(event) }
+    subject(:trigger) { listener.on_params_params_deserialize_error(event) }
 
     let(:topic_name) { rand.to_s }
     let(:payload) { { caller: caller, time: time, error: error } }
@@ -36,7 +38,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_connection_listener_fetch_loop_error' do
-    subject(:trigger) { described_class.on_connection_listener_fetch_loop_error(event) }
+    subject(:trigger) { listener.on_connection_listener_fetch_loop_error(event) }
 
     let(:payload) { { caller: caller, error: error } }
     let(:error) { StandardError }
@@ -49,7 +51,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_connection_client_fetch_loop_error' do
-    subject(:trigger) { described_class.on_connection_client_fetch_loop_error(event) }
+    subject(:trigger) { listener.on_connection_client_fetch_loop_error(event) }
 
     let(:payload) { { caller: caller, error: error } }
     let(:error) { StandardError }
@@ -62,7 +64,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_fetcher_call_error' do
-    subject(:trigger) { described_class.on_fetcher_call_error(event) }
+    subject(:trigger) { listener.on_fetcher_call_error(event) }
 
     let(:payload) { { caller: caller, error: error } }
     let(:error) { StandardError }
@@ -75,7 +77,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_backends_inline_process' do
-    subject(:trigger) { described_class.on_backends_inline_process(event) }
+    subject(:trigger) { listener.on_backends_inline_process(event) }
 
     let(:payload) { { caller: caller, time: time } }
     let(:params_batch) { [1] }
@@ -98,7 +100,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_process_notice_signal' do
-    subject(:trigger) { described_class.on_process_notice_signal(event) }
+    subject(:trigger) { listener.on_process_notice_signal(event) }
 
     let(:payload) { { signal: -1 } }
     let(:message) { "Received #{event[:signal]} system signal" }
@@ -110,7 +112,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_consumers_responders_respond_with' do
-    subject(:trigger) { described_class.on_consumers_responders_respond_with(event) }
+    subject(:trigger) { listener.on_consumers_responders_respond_with(event) }
 
     let(:consumer_instance) { consumer_class.new(topic) }
     let(:data) { [rand] }
@@ -133,7 +135,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_connection_batch_delegator_call' do
-    subject(:trigger) { described_class.on_connection_batch_delegator_call(event) }
+    subject(:trigger) { listener.on_connection_batch_delegator_call(event) }
 
     let(:payload) { { caller: caller, consumer: consumer, kafka_batch: kafka_batch } }
     let(:kafka_messages) { Array.new(rand(2..10)) { rand } }
@@ -151,7 +153,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_connection_message_delegator_call' do
-    subject(:trigger) { described_class.on_connection_message_delegator_call(event) }
+    subject(:trigger) { listener.on_connection_message_delegator_call(event) }
 
     let(:payload) { { caller: caller, consumer: consumer, kafka_message: kafka_message } }
     let(:kafka_message) { rand }
@@ -166,7 +168,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_app_initializing' do
-    subject(:trigger) { described_class.on_app_initializing(event) }
+    subject(:trigger) { listener.on_app_initializing(event) }
 
     let(:payload) { {} }
     let(:message) { "Initializing Karafka server #{::Process.pid}" }
@@ -180,7 +182,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_app_running' do
-    subject(:trigger) { described_class.on_app_running(event) }
+    subject(:trigger) { listener.on_app_running(event) }
 
     let(:payload) { {} }
     let(:message) { "Running Karafka server #{::Process.pid}" }
@@ -194,7 +196,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_app_stopping' do
-    subject(:trigger) { described_class.on_app_stopping(event) }
+    subject(:trigger) { listener.on_app_stopping(event) }
 
     let(:payload) { {} }
     let(:message) { "Stopping Karafka server #{::Process.pid}" }
@@ -210,7 +212,7 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   end
 
   describe '#on_app_stopping_error' do
-    subject(:trigger) { described_class.on_app_stopping_error(event) }
+    subject(:trigger) { listener.on_app_stopping_error(event) }
 
     let(:payload) { {} }
     let(:message) { "Forceful Karafka server #{::Process.pid} stop" }
