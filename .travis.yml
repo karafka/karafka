@@ -39,6 +39,7 @@ jobs:
         -e CODITSU_API_KEY
         -e CODITSU_API_SECRET
         -e CODITSU_REPOSITORY_ID
+        -e CODITSU_BUILD_BRANCH=$TRAVIS_BRANCH
         --volumes-from sources
         coditsu/build-runner:latest
 
