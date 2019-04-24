@@ -45,6 +45,7 @@ module Karafka
       #   matcher.name #=> Super2Responder
       def name
         inflected = @klass.to_s.split('::').last.to_s
+        inflected += @from unless inflected.include?(@from)
         inflected.gsub!(@from, @to)
         inflected.gsub!(CONSTANT_REGEXP, '')
         inflected

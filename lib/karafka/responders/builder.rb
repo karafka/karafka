@@ -3,7 +3,7 @@
 module Karafka
   # Responders namespace encapsulates all the internal responder implementation parts
   module Responders
-    # Responders builder is used to finding (based on the consumer class name) a responder
+    # Responders builder is used for finding (based on the consumer class name) a responder
     # that match the consumer. We use it when user does not provide a responder inside routing,
     # but he still names responder with the same convention (and namespaces) as consumer
     #
