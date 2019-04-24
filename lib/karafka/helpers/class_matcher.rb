@@ -45,7 +45,13 @@ module Karafka
       #   matcher.name #=> Super2Responder
       def name
         inflected = @klass.to_s.split('::').last.to_s
-        inflected += @from unless inflected.include?(@from)
+        # We inject the from into the name just in case it is missing as in a case like that
+        # it would just sanitize the name without adding the "to" postfix
+        # This could create cases when we want to build for example a responder to a consumer
+        # that does not have the "Consumer" postfix and would actually do nothing returning the
+        # same name. That would be really bad as the matching classes shouldn't be matched to
+        # themselves
+        inflected << @from unless inflected.include?(@from)
         inflected.gsub!(@from, @to)
         inflected.gsub!(CONSTANT_REGEXP, '')
         inflected
