@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.2.12
+- #29 - Consumer class names must have the word "Consumer" in it in order to work (Sidekiq backend)
+
 ## 1.2.11
 - [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8
 
