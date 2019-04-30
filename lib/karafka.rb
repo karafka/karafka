@@ -9,13 +9,12 @@
   forwardable
   fileutils
   multi_json
-  require_all
   dry-configurable
   dry-validation
   dry/events/publisher
   dry/inflector
   dry/monitor/notifications
-  karafka/loader
+  zeitwerk
 ].each(&method(:require))
 
 # Karafka library
@@ -63,17 +62,10 @@ module Karafka
   end
 end
 
-%w[
-  serialization/json/serializer
-  serialization/json/deserializer
-  setup/dsl
-  setup/config
-  status
-  schemas/config
-  schemas/consumer_group_topic
-  schemas/consumer_group
-].each { |path| require_all File.join(Karafka.core_root, path + '.rb') }
+Zeitwerk::Loader
+  .for_gem
+  .tap(&:setup)
+  .tap(&:eager_load)
 
-Karafka::Loader.load!(Karafka.core_root)
 Kafka::Consumer.prepend(Karafka::Patches::RubyKafka)
 Dry::Configurable::Config.prepend(Karafka::Patches::DryConfigurable)

@@ -15,6 +15,7 @@ module Karafka
       # Used to draw routes for Karafka
       # @note After it is done drawing it will store and validate all the routes to make sure that
       #   they are correct and that there are no topic/group duplications (this is forbidden)
+      # @param block [Proc] block we will evaluate within the builder context
       # @yield Evaluates provided block in a builder context so we can describe routes
       # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
       #   doesn't match with ConfigurationSchema
