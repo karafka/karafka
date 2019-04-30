@@ -19,6 +19,8 @@ module Karafka
       private_constant :ENV_MAP
 
       # Creates a new instance of logger ensuring that it has a place to write to
+      # @param _args Any arguments that we don't care about but that are needed in order to
+      #   make this logger compatible with the default Ruby one
       def initialize(*_args)
         ensure_dir_exists
         super(target)
