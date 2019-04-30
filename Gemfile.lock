@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/karafka/waterdrop
-  revision: 7d17dc312b7abbf4d85b631e2e9f3a0f48d29b9f
+  revision: 971ed2d6f894ede2dc5552c22c52b5e2c02cbb1b
   specs:
     waterdrop (1.3.0)
       delivery_boy (~> 0.2)
@@ -8,6 +8,7 @@ GIT
       dry-monitor (~> 0.3)
       dry-validation (~> 0.11)
       ruby-kafka (>= 0.7.1)
+      zeitwerk (~> 2.1)
 
 PATH
   remote: .
@@ -117,6 +118,7 @@ GEM
     timecop (0.9.1)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
+    zeitwerk (2.1.5)
 
 PLATFORMS
   ruby
