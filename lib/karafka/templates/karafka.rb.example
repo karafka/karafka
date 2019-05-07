@@ -4,7 +4,20 @@
 ENV['RACK_ENV'] ||= 'development'
 ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
 Bundler.require(:default, ENV['KARAFKA_ENV'])
-Karafka::Loader.load(Karafka::App.root)
+
+# Zeitwerk custom loader for loading the app components before the whole
+# Karafka framework configuration
+APP_LOADER = Zeitwerk::Loader.new
+
+%w[
+  lib
+  app/consumers
+  app/responders
+  app/workers
+].each(&APP_LOADER.method(:push_dir))
+
+APP_LOADER.setup
+APP_LOADER.eager_load
 
 # Ruby on Rails setup
 # Remove whole non-Rails setup that is above and uncomment the lines below
