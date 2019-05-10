@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/karafka/waterdrop
-  revision: e0741d152e847200eea662470082ff7003d6b1da
+  revision: ec42285de5a48c051f356bcc535c7df21e56cc5d
   specs:
     waterdrop (1.3.0)
       delivery_boy (~> 0.2)
@@ -105,7 +105,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.8.0)
     rspec-support (3.8.0)
-    ruby-kafka (0.7.6)
+    ruby-kafka (0.7.7)
       digest-crc
     simplecov (0.16.1)
       docile (~> 1.1)
