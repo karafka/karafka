@@ -46,6 +46,7 @@
 - #487 - Make listeners as instances
 - #29 - Consumer class names must have the word "Consumer" in it in order to work (Sidekiq backend)
 - #491 - irb is missing for console to work
+- #502 - Karafka process hangs when sending multiple sigkills
 
 ## 1.2.11
 - [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8

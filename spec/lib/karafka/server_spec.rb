@@ -86,7 +86,7 @@ RSpec.describe Karafka::Server do
         it 'expect stop without exit or sleep' do
           expect(Karafka::App).to receive(:stop!)
           expect(described_class).not_to receive(:sleep)
-          expect(Kernel).not_to receive(:exit)
+          expect(Kernel).not_to receive(:exit!)
         end
       end
 
@@ -98,7 +98,7 @@ RSpec.describe Karafka::Server do
         it 'expect stop and exit with sleep' do
           expect(Karafka::App).to receive(:stop!)
           expect(described_class).to receive(:sleep).with(0.1).exactly(timeout * 10).times
-          expect(Kernel).to receive(:exit).with(2)
+          expect(Kernel).to receive(:exit!).with(2)
         end
       end
     end
