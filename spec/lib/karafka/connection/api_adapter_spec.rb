@@ -33,7 +33,7 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     it 'expect to have std kafka config keys' do
       expected = %i[
         logger client_id connect_timeout socket_timeout sasl_plain_authzid
-        ssl_ca_certs_from_system
+        ssl_ca_certs_from_system sasl_over_ssl
       ]
       expect(config.last.keys.sort).to eq expected.sort
     end
@@ -44,7 +44,7 @@ RSpec.describe Karafka::Connection::ApiAdapter do
 
     context 'when values of keys are not nil' do
       let(:unsupported_keys) do
-        %i[sasl_over_ssl ssl_client_cert_chain ssl_client_cert_key_password sasl_oauth_token_provider]
+        %i[ssl_client_cert_chain ssl_client_cert_key_password sasl_oauth_token_provider]
       end
       let(:expected_keys) do
         Kafka::Client.instance_method(:initialize).parameters.map(&:last).sort
