@@ -69,6 +69,7 @@ module Karafka
       end
 
       optional(:ssl_ca_certs_from_system).maybe(:bool?)
+      optional(:sasl_over_ssl).maybe(:bool?)
 
       # It's not with other encryptions as it has some more rules
       optional(:sasl_scram_mechanism)
