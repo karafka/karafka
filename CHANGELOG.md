@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.2.13
+- Add support for parameter sasl_over_ssl in ruby-kafka
+
 ## 1.2.12
 - #29 - Consumer class names must have the word "Consumer" in it in order to work (Sidekiq backend)
 
