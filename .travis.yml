@@ -31,18 +31,7 @@ jobs:
       before_install:
         - gem update --system
         - gem install bundler
-      before_script:
-        - docker create -v /sources --name sources alpine:3.4 /bin/true
-        - docker cp ./ sources:/sources
-      script: >
-        docker run
-        -e CODITSU_API_KEY
-        -e CODITSU_API_SECRET
-        -e CODITSU_REPOSITORY_ID
-        -e CODITSU_BUILD_BRANCH=$TRAVIS_BRANCH
-        -e CODITSU_ENV=ci
-        --volumes-from sources
-        coditsu/build-runner:latest
+      script: \curl -sSL https://api.coditsu.io/run/travis | bash
 
 stages:
   - coditsu
