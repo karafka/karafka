@@ -128,6 +128,8 @@ module Karafka
         # option ssl_ca_certs_from_system [Boolean] Use the CA certs from your system's default
         #   certificate store
         setting :ssl_ca_certs_from_system, false
+        # option ssl_verify_hostname [Boolean] Verify the hostname for client certs
+        setting :ssl_verify_hostname, true
         # option ssl_client_cert [String, nil] SSL client certificate
         setting :ssl_client_cert, nil
         # option ssl_client_cert_key [String, nil] SSL client certificate password
