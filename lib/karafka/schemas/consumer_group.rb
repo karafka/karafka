@@ -135,6 +135,7 @@ module Karafka
         optional(encryption_attribute).maybe(:str?)
       end
 
+      optional(:ssl_verify_hostname).maybe(:bool?)
       optional(:ssl_ca_certs_from_system).maybe(:bool?)
       optional(:sasl_over_ssl).maybe(:bool?)
       optional(:sasl_oauth_token_provider).maybe

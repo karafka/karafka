@@ -678,6 +678,14 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
+  context 'when we validate ssl_verify_hostname' do
+    context 'when ssl_verify_hostname is not a bool' do
+      before { config[:ssl_verify_hostname] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
   context 'when we validate ssl_ca_certs_from_system' do
     context 'when ssl_ca_certs_from_system is not a bool' do
       before { config[:ssl_ca_certs_from_system] = 2 }
