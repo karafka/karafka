@@ -533,6 +533,12 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     end
   end
 
+  context 'when ssl_ca_cert_file_path does not exist' do
+    before { config[:ssl_ca_cert_file_path] = rand.to_s }
+
+    it { expect(check).not_to be_success }
+  end
+
   context 'when ssl_ca_cert is invalid' do
     before { config[:ssl_ca_cert] = rand.to_s }
 
