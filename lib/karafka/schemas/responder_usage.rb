@@ -16,9 +16,7 @@ module Karafka
       end
 
       rule(:required, :usage_count) do
-        if values[:required] && values[:usage_count] < 1
-          key(:name).failure(:required_usage_count)
-        end
+        key(:name).failure(:required_usage_count) if values[:required] && values[:usage_count] < 1
       end
     end
 
