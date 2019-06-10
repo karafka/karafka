@@ -24,8 +24,8 @@ module Karafka
         required(:topics).value(:array, :filled?)
         required(:seed_brokers).value(:array, :filled?)
         required(:session_timeout).filled { int? | float? }
-        required(:pause_timeout).maybe([:integer, :float]) { filled? > gteq?(0) }
-        required(:pause_max_timeout).maybe([:integer, :float]) { filled? > gteq?(0) }
+        required(:pause_timeout).maybe(%i[integer float]) { filled? > gteq?(0) }
+        required(:pause_max_timeout).maybe(%i[integer float]) { filled? > gteq?(0) }
         required(:pause_exponential_backoff).filled(:bool?)
         required(:offset_commit_interval) { int? | float? }
         required(:offset_commit_threshold).filled(:int?)
@@ -70,23 +70,21 @@ module Karafka
 
       # Uri rule to check if uri is in a Karafka acceptable format
       rule(:seed_brokers) do
-        if value && value.is_a?(Array) && !value.all?(&method(:kafka_uri?))
+        if value&.is_a?(Array) && !value.all?(&method(:kafka_uri?))
           key.failure(:invalid_broker_schema)
         end
       end
 
       rule(:topics) do
-        if value && value.is_a?(Array)
+        if value&.is_a?(Array)
           names = value.map { |topic| topic[:name] }
 
-          unless names.size == names.uniq.size
-            key.failure(:topics_names_not_unique)
-          end
+          key.failure(:topics_names_not_unique) if names.size != names.uniq.size
         end
       end
 
       rule(:topics) do
-        if value && value.is_a?(Array)
+        if value&.is_a?(Array)
           value.each_with_index do |topic, index|
             TOPIC_SCHEMA.call(topic).errors.each do |error|
               key([:topics, index, error.path[0]]).failure(error.text)
@@ -126,23 +124,17 @@ module Karafka
       end
 
       rule(:ssl_ca_cert) do
-        if value && !valid_certificate?(value)
-          key.failure(:invalid_certificate)
-        end
+        key.failure(:invalid_certificate) if value && !valid_certificate?(value)
       end
 
       rule(:ssl_client_cert) do
-        if value && !valid_certificate?(value)
-          key.failure(:invalid_certificate)
-        end
+        key.failure(:invalid_certificate) if value && !valid_certificate?(value)
       end
 
       rule(:ssl_ca_cert_file_path) do
         if value
           if File.exist?(value)
-            unless valid_certificate?(File.read(value))
-              key.failure(:invalid_certificate_from_path)
-            end
+            key.failure(:invalid_certificate_from_path) unless valid_certificate?(File.read(value))
           else
             key.failure(:does_not_exist)
           end
@@ -150,21 +142,15 @@ module Karafka
       end
 
       rule(:ssl_client_cert_key) do
-        if value && !valid_private_key?(value)
-          key.failure(:invalid_private_key)
-        end
+        key.failure(:invalid_private_key) if value && !valid_private_key?(value)
       end
 
       rule(:ssl_client_cert_chain) do
-        if value && !valid_certificate?(value)
-          key.failure(:invalid_certificate)
-        end
+        key.failure(:invalid_certificate) if value && !valid_certificate?(value)
       end
 
       rule(:sasl_oauth_token_provider) do
-        if value && !value.respond_to?(:token)
-          key.failure(:does_not_respond_to_token)
-        end
+        key.failure(:does_not_respond_to_token) if value && !value.respond_to?(:token)
       end
 
       rule(:max_wait_time, :socket_timeout) do
