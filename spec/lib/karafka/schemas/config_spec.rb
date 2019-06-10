@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Schemas::Config do
-  let(:schema) { described_class }
+  subject(:schema) { described_class.new }
 
   let(:config) do
     {
       client_id: 'name',
-      topic_mapper: Karafka::Routing::TopicMapper,
-      shutdown_timeout: 10
+      topic_mapper: Karafka::Routing::TopicMapper.new,
+      shutdown_timeout: 10,
+      consumer_mapper: Karafka::Routing::ConsumerMapper.new
     }
   end
 

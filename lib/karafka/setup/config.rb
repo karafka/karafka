@@ -14,6 +14,8 @@ module Karafka
     class Config
       extend Dry::Configurable
 
+      SCHEMA = Karafka::Schemas::Config.new.freeze
+
       # Available settings
       # option client_id [String] kafka client_id - used to provide
       #   default Kafka groups namespaces and identify that app in kafka
@@ -184,11 +186,11 @@ module Karafka
         # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
         #   doesn't match with ConfigurationSchema
         def validate!
-          validation_result = Karafka::Schemas::Config.call(config.to_h)
+          validation_result = SCHEMA.call(config.to_h)
 
           return true if validation_result.success?
 
-          raise Errors::InvalidConfigurationError, validation_result.errors
+          raise Errors::InvalidConfigurationError, validation_result.errors.to_h
         end
       end
     end
