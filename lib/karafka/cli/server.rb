@@ -5,6 +5,11 @@ module Karafka
   class Cli < Thor
     # Server Karafka Cli action
     class Server < Base
+      # Server config settings schema
+      SCHEMA = Schemas::ServerCliOptions.new.freeze
+
+      private_constant :SCHEMA
+
       desc 'Start the Karafka server (short-cut alias: "s")'
       option aliases: 's'
       option :daemon, default: false, type: :boolean, aliases: :d
@@ -42,10 +47,10 @@ module Karafka
       # Checks the server cli configuration
       # options validations in terms of app setup (topics, pid existence, etc)
       def validate!
-        result = Schemas::ServerCliOptions.call(cli.options)
+        result = SCHEMA.call(cli.options)
         return if result.success?
 
-        raise Errors::InvalidConfigurationError, result.errors
+        raise Errors::InvalidConfigurationError, result.errors.to_h
       end
 
       # Detaches current process into background and writes its pidfile

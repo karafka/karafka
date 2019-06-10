@@ -3,7 +3,9 @@
 module Karafka
   module Schemas
     # Schema for single full route (consumer group + topics) validation.
-    ConsumerGroup = Dry::Validation.Schema do
+    class ConsumerGroup < Dry::Validation::Contract
+      config.messages.load_paths << File.join(Karafka .gem_root, 'config', 'errors.yml')
+
       # Valid uri schemas of Kafka broker url
       # The ||= is due to the behavior of require_all that resolves dependencies
       # but sometimes loads things twice
@@ -12,217 +14,186 @@ module Karafka
       # Available sasl scram mechanism of authentication (plus nil)
       SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
 
-      configure do
-        config.messages_file = File.join(Karafka.gem_root, 'config', 'errors.yml')
+      # Internal schema for sub-validating topics schema
+      TOPIC_SCHEMA = ConsumerGroupTopic.new.freeze
 
-        # Uri validator to check if uri is in a Karafka acceptable format
-        # @param uri [String] uri we want to validate
-        # @return [Boolean] true if it is a valid uri, otherwise false
-        def broker_schema?(uri)
-          uri = URI.parse(uri)
-          URI_SCHEMES.include?(uri.scheme) && uri.port
-        rescue URI::InvalidURIError
-          false
-        end
+      private_constant :TOPIC_SCHEMA
 
-        # Validates private key from a string
-        #
-        # @param private_key [String] private key string
-        #
-        # @return [Boolean] true if it is a valid private key, otherwise false
-        def valid_private_key?(private_key)
-          OpenSSL::PKey::RSA.new(private_key)
-          true
-        rescue OpenSSL::PKey::RSAError
-          false
-        end
+      params do
+        required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
+        required(:topics).value(:array, :filled?)
+        required(:seed_brokers).value(:array, :filled?)
+        required(:session_timeout).filled { int? | float? }
+        required(:pause_timeout).maybe(%i[integer float]) { filled? > gteq?(0) }
+        required(:pause_max_timeout).maybe(%i[integer float]) { filled? > gteq?(0) }
+        required(:pause_exponential_backoff).filled(:bool?)
+        required(:offset_commit_interval) { int? | float? }
+        required(:offset_commit_threshold).filled(:int?)
+        required(:offset_retention_time).maybe(:integer)
+        required(:heartbeat_interval).filled { (int? | float?) & gteq?(0) }
+        required(:fetcher_max_queue_size).filled(:int?, gt?: 0)
+        required(:connect_timeout).filled { (int? | float?) & gt?(0) }
+        required(:reconnect_timeout).filled { (int? | float?) & gteq?(0) }
+        required(:socket_timeout).filled { (int? | float?) & gt?(0) }
+        required(:min_bytes).filled(:int?, gt?: 0)
+        required(:max_bytes).filled(:int?, gt?: 0)
+        required(:max_wait_time).filled { (int? | float?) & gteq?(0) }
+        required(:batch_fetching).filled(:bool?)
 
-        # Validates certificate from string
-        #
-        # @param certificate [String] certificate string
-        #
-        # @return [Boolean] true if it is a valid certificate, otherwise false
-        def valid_certificate?(certificate)
-          OpenSSL::X509::Certificate.new(certificate)
-          true
-        rescue OpenSSL::X509::CertificateError
-          false
-        end
-
-        # Validates certificate from path
-        #
-        # @param file_path [String] path to certificate
-        #
-        # @return [Boolean] true if it is a valid certificate, otherwise false
-        def valid_certificate_from_path?(file_path)
-          File.exist?(file_path) && valid_certificate?(File.read(file_path))
-        end
-
-        # Checks if the provided object implements a #token method
-        #
-        # @param object [Object] an object that is suppose to respond to #token method
-        #
-        # @return [Boolean] true if an object responds to #token method
-        def respond_to_token?(object)
-          object.respond_to?(:token)
-        end
-
-        # Validates, that we don't have same topic defined twice withing a single consumer group
-        #
-        # @param topics [Array<Hash>] array with topics details
-        #
-        # @return [Boolean] true if all the topics are unique
-        def unique_topics_names?(topics)
-          names = topics.map { |topic| topic[:name] }
-          names.size == names.uniq.size
-        end
-      end
-
-      required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
-      required(:seed_brokers).filled { each(:broker_schema?) }
-      required(:session_timeout).filled { int? | float? }
-      required(:pause_timeout) { none? | ((int? | float?) & gteq?(0)) }
-      required(:pause_max_timeout) { none? | ((int? | float?) & gteq?(0)) }
-      required(:pause_exponential_backoff).filled(:bool?)
-      required(:offset_commit_interval) { int? | float? }
-      required(:offset_commit_threshold).filled(:int?)
-      required(:offset_retention_time) { none?.not > int? }
-      required(:heartbeat_interval).filled { (int? | float?) & gteq?(0) }
-      required(:fetcher_max_queue_size).filled(:int?, gt?: 0)
-      required(:connect_timeout).filled { (int? | float?) & gt?(0) }
-      required(:reconnect_timeout).filled { (int? | float?) & gteq?(0) }
-      required(:socket_timeout).filled { (int? | float?) & gt?(0) }
-      required(:min_bytes).filled(:int?, gt?: 0)
-      required(:max_bytes).filled(:int?, gt?: 0)
-      required(:max_wait_time).filled { (int? | float?) & gteq?(0) }
-      required(:batch_fetching).filled(:bool?)
-      required(:topics).filled { each { schema(ConsumerGroupTopic) } & unique_topics_names? }
-
-      # If the exponential backoff is on, the max pause timeout needs to be equal or
-      # bigger than the default pause timeout from which we start
-      validate(
-        max_timeout_size_for_exponential: %i[
-          pause_timeout
-          pause_max_timeout
-          pause_exponential_backoff
-        ]
-      ) do |pause_timeout, pause_max_timeout, pause_exponential_backoff|
-        pause_exponential_backoff ? pause_timeout.to_i <= pause_max_timeout.to_i : true
-      end
-
-      # Max wait time cannot exceed socket_timeout - wouldn't make sense
-      rule(
-        max_wait_time_limit: %i[max_wait_time socket_timeout]
-      ) do |max_wait_time, socket_timeout|
-        socket_timeout.int? > max_wait_time.lteq?(value(:socket_timeout))
-      end
-
-      %i[
-        ssl_ca_cert
-        ssl_ca_cert_file_path
-        ssl_client_cert
-        ssl_client_cert_key
-        ssl_client_cert_chain
-        ssl_client_cert_key_password
-        sasl_gssapi_principal
-        sasl_gssapi_keytab
-        sasl_plain_authzid
-        sasl_plain_username
-        sasl_plain_password
-        sasl_scram_username
-        sasl_scram_password
-      ].each do |encryption_attribute|
-        optional(encryption_attribute).maybe(:str?)
-      end
-
-      optional(:ssl_verify_hostname).maybe(:bool?)
-      optional(:ssl_ca_certs_from_system).maybe(:bool?)
-      optional(:sasl_over_ssl).maybe(:bool?)
-      optional(:sasl_oauth_token_provider).maybe
-
-      # It's not with other encryptions as it has some more rules
-      optional(:sasl_scram_mechanism)
-        .maybe(:str?, included_in?: Karafka::Schemas::SASL_SCRAM_MECHANISMS)
-
-      rule(
-        ssl_client_cert_with_ssl_client_cert_key: %i[
+        %i[
+          ssl_ca_cert
+          ssl_ca_cert_file_path
           ssl_client_cert
           ssl_client_cert_key
-        ]
-      ) do |ssl_client_cert, ssl_client_cert_key|
-        ssl_client_cert.filled? > ssl_client_cert_key.filled?
-      end
-
-      rule(
-        ssl_client_cert_key_with_ssl_client_cert: %i[
-          ssl_client_cert
-          ssl_client_cert_key
-        ]
-      ) do |ssl_client_cert, ssl_client_cert_key|
-        ssl_client_cert_key.filled? > ssl_client_cert.filled?
-      end
-
-      rule(
-        ssl_client_cert_chain_with_ssl_client_cert: %i[
-          ssl_client_cert
           ssl_client_cert_chain
-        ]
-      ) do |ssl_client_cert, ssl_client_cert_chain|
-        ssl_client_cert_chain.filled? > ssl_client_cert.filled?
-      end
-
-      rule(
-        ssl_client_cert_chain_with_ssl_client_cert_key: %i[
-          ssl_client_cert_chain
-          ssl_client_cert_key
-        ]
-      ) do |ssl_client_cert_chain, ssl_client_cert_key|
-        ssl_client_cert_chain.filled? > ssl_client_cert_key.filled?
-      end
-
-      rule(
-        ssl_client_cert_key_password_with_ssl_client_cert_key: %i[
           ssl_client_cert_key_password
-          ssl_client_cert_key
-        ]
-      ) do |ssl_client_cert_key_password, ssl_client_cert_key|
-        ssl_client_cert_key_password.filled? > ssl_client_cert_key.filled?
+          sasl_gssapi_principal
+          sasl_gssapi_keytab
+          sasl_plain_authzid
+          sasl_plain_username
+          sasl_plain_password
+          sasl_scram_username
+          sasl_scram_password
+        ].each do |encryption_attribute|
+          optional(encryption_attribute).maybe(:str?)
+        end
+
+        optional(:ssl_verify_hostname).maybe(:bool?)
+        optional(:ssl_ca_certs_from_system).maybe(:bool?)
+        optional(:sasl_over_ssl).maybe(:bool?)
+        optional(:sasl_oauth_token_provider).value(:any)
+
+        # It's not with other encryptions as it has some more rules
+        optional(:sasl_scram_mechanism)
+          .maybe(:str?, included_in?: SASL_SCRAM_MECHANISMS)
       end
 
-      rule(ssl_ca_cert_valid_ceritificate: %i[ssl_ca_cert]) do |ssl_ca_cert|
-        ssl_ca_cert.filled? > ssl_ca_cert.valid_certificate?
+      # Uri rule to check if uri is in a Karafka acceptable format
+      rule(:seed_brokers) do
+        if value&.is_a?(Array) && !value.all?(&method(:kafka_uri?))
+          key.failure(:invalid_broker_schema)
+        end
       end
 
-      rule(
-        ssl_ca_cert_file_path_valid_ceritificate: %i[ssl_ca_cert_file_path]
-      ) do |ssl_ca_cert_file_path|
-        ssl_ca_cert_file_path.filled? > ssl_ca_cert_file_path.valid_certificate_from_path?
+      rule(:topics) do
+        if value&.is_a?(Array)
+          names = value.map { |topic| topic[:name] }
+
+          key.failure(:topics_names_not_unique) if names.size != names.uniq.size
+        end
       end
 
-      rule(
-        ssl_client_cert_valid_ceritificate: %i[ssl_client_cert]
-      ) do |ssl_client_cert|
-        ssl_client_cert.filled? > ssl_client_cert.valid_certificate?
+      rule(:topics) do
+        if value&.is_a?(Array)
+          value.each_with_index do |topic, index|
+            TOPIC_SCHEMA.call(topic).errors.each do |error|
+              key([:topics, index, error.path[0]]).failure(error.text)
+            end
+          end
+        end
       end
 
-      rule(
-        ssl_client_cert_key_valid_private_key: %i[ssl_client_cert_key]
-      ) do |ssl_client_cert_key|
-        ssl_client_cert_key.filled? > ssl_client_cert_key.valid_private_key?
+      rule(:ssl_client_cert, :ssl_client_cert_key) do
+        if values[:ssl_client_cert] && !values[:ssl_client_cert_key]
+          key(:ssl_client_cert_key).failure(:ssl_client_cert_with_ssl_client_cert_key)
+        end
       end
 
-      rule(
-        ssl_client_cert_chain_ceritificate: %i[ssl_client_cert_chain]
-      ) do |ssl_client_cert_chain|
-        ssl_client_cert_chain.filled? > ssl_client_cert_chain.valid_certificate?
+      rule(:ssl_client_cert, :ssl_client_cert_key) do
+        if values[:ssl_client_cert_key] && !values[:ssl_client_cert]
+          key(:ssl_client_cert).failure(:ssl_client_cert_key_with_ssl_client_cert)
+        end
       end
 
-      rule(
-        sasl_oauth_token_provider_respond_to_token: %i[
-          sasl_oauth_token_provider
-        ]
-      ) do |sasl_oauth_token_provider|
-        sasl_oauth_token_provider.filled? > sasl_oauth_token_provider.respond_to_token?
+      rule(:ssl_client_cert, :ssl_client_cert_chain) do
+        if values[:ssl_client_cert_chain] && !values[:ssl_client_cert]
+          key(:ssl_client_cert).failure(:ssl_client_cert_chain_with_ssl_client_cert)
+        end
+      end
+
+      rule(:ssl_client_cert_chain, :ssl_client_cert_key) do
+        if values[:ssl_client_cert_chain] && !values[:ssl_client_cert]
+          key(:ssl_client_cert).failure(:ssl_client_cert_chain_with_ssl_client_cert_key)
+        end
+      end
+
+      rule(:ssl_client_cert_key_password, :ssl_client_cert_key) do
+        if values[:ssl_client_cert_key_password] && !values[:ssl_client_cert_key]
+          key(:ssl_client_cert_key).failure(:ssl_client_cert_key_password_with_ssl_client_cert_key)
+        end
+      end
+
+      rule(:ssl_ca_cert) do
+        key.failure(:invalid_certificate) if value && !valid_certificate?(value)
+      end
+
+      rule(:ssl_client_cert) do
+        key.failure(:invalid_certificate) if value && !valid_certificate?(value)
+      end
+
+      rule(:ssl_ca_cert_file_path) do
+        if value
+          if File.exist?(value)
+            key.failure(:invalid_certificate_from_path) unless valid_certificate?(File.read(value))
+          else
+            key.failure(:does_not_exist)
+          end
+        end
+      end
+
+      rule(:ssl_client_cert_key) do
+        key.failure(:invalid_private_key) if value && !valid_private_key?(value)
+      end
+
+      rule(:ssl_client_cert_chain) do
+        key.failure(:invalid_certificate) if value && !valid_certificate?(value)
+      end
+
+      rule(:sasl_oauth_token_provider) do
+        key.failure(:does_not_respond_to_token) if value && !value.respond_to?(:token)
+      end
+
+      rule(:max_wait_time, :socket_timeout) do
+        max_wait_time = values[:max_wait_time]
+        socket_timeout = values[:socket_timeout]
+
+        if socket_timeout.is_a?(Numeric) &&
+           max_wait_time.is_a?(Numeric) &&
+           max_wait_time > socket_timeout
+
+          key(:max_wait_time).failure(:max_wait_time_limit)
+        end
+      end
+
+      rule(:pause_timeout, :pause_max_timeout, :pause_exponential_backoff) do
+        if values[:pause_exponential_backoff]
+          if values[:pause_timeout].to_i > values[:pause_max_timeout].to_i
+            key(:pause_max_timeout).failure(:max_timeout_size_for_exponential)
+          end
+        end
+      end
+
+      private
+
+      def valid_private_key?(value)
+        OpenSSL::PKey::RSA.new(value)
+        true
+      rescue OpenSSL::PKey::RSAError
+        false
+      end
+
+      def valid_certificate?(value)
+        OpenSSL::X509::Certificate.new(value)
+        true
+      rescue OpenSSL::X509::CertificateError
+        false
+      end
+
+      def kafka_uri?(value)
+        uri = URI.parse(value)
+        URI_SCHEMES.include?(uri.scheme) && uri.port
+      rescue URI::InvalidURIError
+        false
       end
     end
   end

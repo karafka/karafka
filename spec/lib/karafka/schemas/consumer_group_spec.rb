@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Schemas::ConsumerGroup do
-  let(:schema) { described_class }
+  subject(:check) { described_class.new.call(config) }
+
   let(:topics) do
     [
       {
@@ -60,27 +61,27 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
   end
 
   context 'when config is valid' do
-    it { expect(schema.call(config)).to be_success }
+    it { expect(check).to be_success }
   end
 
   context 'when we validate topics' do
     context 'when topics is an empty array' do
       before { config[:topics] = [] }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when topics is not an array' do
       before { config[:topics] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when topics names are not unique' do
       before { config[:topics][1] = config[:topics][0].dup }
 
-      it { expect(schema.call(config)).not_to be_success }
-      it { expect { schema.call(config).errors }.not_to raise_error }
+      it { expect(check).not_to be_success }
+      it { expect { check.errors }.not_to raise_error }
     end
 
     context 'when topics names are unique' do
@@ -89,7 +90,16 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:topics][1][:name] = rand.to_s
       end
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
+    end
+
+    context 'when topics do not comply with the internal schema' do
+      before do
+        config[:topics][1] = config[:topics][0].dup
+        config[:topics][1][:name] = nil
+      end
+
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -97,19 +107,19 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when id is nil' do
       before { config[:id] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when id is not a string' do
       before { config[:id] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when id is an invalid string' do
       before { config[:id] = '%^&*(' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -117,38 +127,38 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when seed_brokers is nil' do
       before { config[:seed_brokers] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when seed_brokers is an empty array' do
       before { config[:seed_brokers] = [] }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when seed_brokers is not an array' do
       before { config[:seed_brokers] = 'timeout' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when seed_broker does not have a proper uri schema' do
       before { config[:seed_brokers] = ['https://github.com/karafka:80'] }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when seed_broker does not have a port defined' do
       before { config[:seed_brokers] = ['kafka://github.com/karafka'] }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when seed_broker is not an uri' do
       before { config[:seed_brokers] = ['#$%^&*()'] }
 
-      it { expect(schema.call(config)).not_to be_success }
-      it { expect { schema.call(config).errors }.not_to raise_error }
+      it { expect(check).not_to be_success }
+      it { expect { check.errors }.not_to raise_error }
     end
 
     %w[
@@ -160,7 +170,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       context "when seed_broker is a #{schema_prefix} one" do
         before { config[:seed_brokers] = ["#{schema_prefix}://localhost:9092"] }
 
-        it { expect(schema.call(config)).to be_success }
+        it { expect(check).to be_success }
       end
     end
   end
@@ -169,13 +179,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when session_timeout is nil' do
       before { config[:session_timeout] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when session_timeout is not integer' do
       before { config[:session_timeout] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -183,13 +193,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when offset_commit_interval is nil' do
       before { config[:offset_commit_interval] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when offset_commit_interval is not integer' do
       before { config[:offset_commit_interval] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -197,13 +207,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when offset_commit_threshold is nil' do
       before { config[:offset_commit_threshold] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when offset_commit_threshold is not integer' do
       before { config[:offset_commit_threshold] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -211,7 +221,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when offset_retention_time is not integer' do
       before { config[:offset_retention_time] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -219,25 +229,25 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when fetcher_max_queue_size is nil' do
       before { config[:fetcher_max_queue_size] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when fetcher_max_queue_size is not integer' do
       before { config[:fetcher_max_queue_size] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when fetcher_max_queue_size is 0' do
       before { config[:fetcher_max_queue_size] = 0 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when fetcher_max_queue_size is less than 0' do
       before { config[:fetcher_max_queue_size] = -1 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -245,13 +255,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when heartbeat_interval is nil' do
       before { config[:heartbeat_interval] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when heartbeat_interval is not integer' do
       before { config[:heartbeat_interval] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -259,25 +269,25 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when connect_timeout is nil' do
       before { config[:connect_timeout] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when connect_timeout is not integer' do
       before { config[:connect_timeout] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when connect_timeout is 0' do
       before { config[:connect_timeout] = 0 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when connect_timeout is less than 0' do
       before { config[:connect_timeout] = -1 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -285,25 +295,25 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when pause_timeout is nil' do
       before { config[:pause_timeout] = nil }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when pause_timeout is not integer' do
       before { config[:pause_timeout] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when pause_timeout is 0' do
       before { config[:pause_timeout] = 0 }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when pause_timeout is less than 0' do
       before { config[:pause_timeout] = -1 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -311,25 +321,25 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when pause_max_timeout is nil' do
       before { config[:pause_max_timeout] = nil }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when pause_max_timeout is not integer' do
       before { config[:pause_max_timeout] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when pause_max_timeout is 0' do
       before { config[:pause_max_timeout] = 0 }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when pause_max_timeout is less than 0' do
       before { config[:pause_max_timeout] = -1 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -337,7 +347,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when pause_exponential_backoff is not a bool' do
       before { config[:pause_exponential_backoff] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -352,21 +362,21 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       let(:pause_timeout) { 10 }
       let(:pause_max_timeout) { pause_timeout - 1 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when pause_timeout is same as pause_max_timeout' do
       let(:pause_timeout) { 10 }
       let(:pause_max_timeout) { pause_timeout }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when pause_timeout is less than pause_max_timeout' do
       let(:pause_timeout) { 10 }
       let(:pause_max_timeout) { pause_timeout + 1 }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
   end
 
@@ -381,21 +391,21 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       let(:pause_timeout) { 10 }
       let(:pause_max_timeout) { pause_timeout - 1 }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when pause_timeout is same as pause_max_timeout' do
       let(:pause_timeout) { 10 }
       let(:pause_max_timeout) { pause_timeout }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when pause_timeout is less than pause_max_timeout' do
       let(:pause_timeout) { 10 }
       let(:pause_max_timeout) { pause_timeout + 1 }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
   end
 
@@ -403,25 +413,25 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when socket_timeout is nil' do
       before { config[:socket_timeout] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when socket_timeout is not integer' do
       before { config[:socket_timeout] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when socket_timeout is 0' do
       before { config[:socket_timeout] = 0 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when socket_timeout is less than 0' do
       before { config[:socket_timeout] = -1 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -429,19 +439,19 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when max_wait_time is nil' do
       before { config[:max_wait_time] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when max_wait_time is not integer' do
       before { config[:max_wait_time] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when max_wait_time is less than 0' do
       before { config[:max_wait_time] = -1 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -449,25 +459,25 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when min_bytes is nil' do
       before { config[:min_bytes] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when min_bytes is not integer' do
       before { config[:min_bytes] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when min_bytes is less than 1' do
       before { config[:min_bytes] = 0 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when min_bytes is a float' do
       before { config[:min_bytes] = rand(100) + 0.1 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -475,13 +485,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when batch_fetching is nil' do
       before { config[:batch_fetching] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when batch_fetching is not a bool' do
       before { config[:batch_fetching] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -491,7 +501,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       config[:socket_timeout] = 1
     end
 
-    it { expect(schema.call(config)).not_to be_success }
+    it { expect(check).not_to be_success }
   end
 
   %i[
@@ -512,15 +522,27 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       context "when #{encryption_attribute} is nil" do
         before { config[encryption_attribute] = nil }
 
-        it { expect(schema.call(config)).to be_success }
+        it { expect(check).to be_success }
       end
 
       context "when #{encryption_attribute} is not a string" do
         before { config[encryption_attribute] = 2 }
 
-        it { expect(schema.call(config)).not_to be_success }
+        it { expect(check).not_to be_success }
       end
     end
+  end
+
+  context 'when ssl_ca_cert_file_path does not exist' do
+    before { config[:ssl_ca_cert_file_path] = rand.to_s }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when ssl_ca_cert is invalid' do
+    before { config[:ssl_ca_cert] = rand.to_s }
+
+    it { expect(check).not_to be_success }
   end
 
   context 'when we validate ssl_client_cert' do
@@ -531,31 +553,26 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:ssl_client_cert_chain] = nil
       end
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when ssl_client_cert is nil and ssl_client_cert_key is not nil' do
       before { config[:ssl_client_cert] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when ssl_client_cert is not a string' do
       before { config[:ssl_client_cert] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when ssl_client_cert is a invalid string' do
       before { config[:ssl_client_cert] = 'invalid' }
 
-      it { expect(schema.call(config)).not_to be_success }
-      it { expect(schema.call(config).errors).to have_key(:ssl_client_cert_valid_ceritificate) }
-      it do
-        expect(
-          schema.call(config).errors[:ssl_client_cert_valid_ceritificate]
-        ).to eq([schema.message_compiler.messages.data['en.errors.valid_certificate?']])
-      end
+      it { expect(check).not_to be_success }
+      it { expect(check.errors.to_h.key?(:ssl_client_cert)).to eq true }
     end
   end
 
@@ -567,31 +584,26 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:ssl_client_cert_chain] = nil
       end
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when ssl_client_cert_key is nil and ssl_client_cert is not nil' do
       before { config[:ssl_client_cert_key] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when ssl_client_cert_key is not a string' do
       before { config[:ssl_client_cert_key] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when ssl_client_cert_key is a invalid string' do
       before { config[:ssl_client_cert_key] = 'invalid' }
 
-      it { expect(schema.call(config)).not_to be_success }
-      it { expect(schema.call(config).errors).to have_key(:ssl_client_cert_key_valid_private_key) }
-      it do
-        expect(
-          schema.call(config).errors[:ssl_client_cert_key_valid_private_key]
-        ).to eq([schema.message_compiler.messages.data['en.errors.valid_private_key?']])
-      end
+      it { expect(check).not_to be_success }
+      it { expect(check.errors.to_h.key?(:ssl_client_cert_key)).to eq true }
     end
   end
 
@@ -603,7 +615,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:ssl_client_cert_key] = nil
       end
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when ssl_client_cert_chain is present but ssl_client_cert is nil' do
@@ -611,7 +623,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:ssl_client_cert] = nil
       end
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when ssl_client_cert_chain is present but ssl_client_cert_key is nil' do
@@ -619,25 +631,20 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:ssl_client_cert_key] = nil
       end
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when ssl_client_cert_chain is not a string' do
       before { config[:ssl_client_cert_chain] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when ssl_client_cert_chain is a invalid string' do
       before { config[:ssl_client_cert_chain] = 'invalid' }
 
-      it { expect(schema.call(config)).not_to be_success }
-      it { expect(schema.call(config).errors).to have_key(:ssl_client_cert_chain_ceritificate) }
-      it do
-        expect(
-          schema.call(config).errors[:ssl_client_cert_chain_ceritificate]
-        ).to eq([schema.message_compiler.messages.data['en.errors.valid_certificate?']])
-      end
+      it { expect(check).not_to be_success }
+      it { expect(check.errors.to_h.key?(:ssl_client_cert_chain)).to eq true }
     end
   end
 
@@ -650,7 +657,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:ssl_client_cert_chain] = nil
       end
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when ssl_client_cert_key_password is present but ssl_client_cert is nil' do
@@ -659,7 +666,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:ssl_client_cert_key_password] = 'password'
       end
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when ssl_client_cert_key_password is present but ssl_client_cert_key is nil' do
@@ -668,13 +675,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
         config[:ssl_client_cert_key_password] = 'password'
       end
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when ssl_client_cert_key_password is not a string' do
       before { config[:ssl_client_cert_key_password] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -682,7 +689,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when ssl_verify_hostname is not a bool' do
       before { config[:ssl_verify_hostname] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -690,7 +697,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when ssl_ca_certs_from_system is not a bool' do
       before { config[:ssl_ca_certs_from_system] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -698,7 +705,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when sasl_over_ssl is not a bool' do
       before { config[:sasl_over_ssl] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
   end
 
@@ -706,31 +713,31 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when sasl_scram_mechanism is nil' do
       before { config[:sasl_scram_mechanism] = nil }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when sasl_scram_mechanism is not a string' do
       before { config[:sasl_scram_mechanism] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when sasl_scram_mechanism is an invalid string' do
       before { config[:sasl_scram_mechanism] = rand.to_s }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(check).not_to be_success }
     end
 
     context 'when sasl_scram_mechanism is sha256' do
       before { config[:sasl_scram_mechanism] = 'sha256' }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when sasl_scram_mechanism is sha512' do
       before { config[:sasl_scram_mechanism] = 'sha512' }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
   end
 
@@ -738,20 +745,20 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
     context 'when sasl_oauth_token_provider is nil' do
       before { config[:sasl_oauth_token_provider] = nil }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
 
     context 'when sasl_oauth_token_provider is an object without token method' do
       before { config[:sasl_oauth_token_provider] = Struct.new(:test).new }
 
-      it { expect(schema.call(config)).to be_failure }
-      it { expect { schema.call(config).errors }.not_to raise_error }
+      it { expect(check).to be_failure }
+      it { expect { check.errors }.not_to raise_error }
     end
 
     context 'when sasl_oauth_token_provider is an object with token method' do
       before { config[:sasl_oauth_token_provider] = Struct.new(:token).new }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(check).to be_success }
     end
   end
 end

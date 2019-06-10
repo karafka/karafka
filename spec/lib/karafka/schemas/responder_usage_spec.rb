@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Schemas::ResponderUsage do
-  subject(:schema) { described_class }
+  subject(:schema) { described_class.new }
 
   let(:responder_usage) do
     {
@@ -34,7 +34,7 @@ RSpec.describe Karafka::Schemas::ResponderUsage do
   end
 
   context 'when particular topics validations happen' do
-    subject(:subschema) { Karafka::Schemas::ResponderUsageTopic }
+    subject(:subschema) { Karafka::Schemas::ResponderUsageTopic.new }
 
     let(:name) { 'topic1' }
     let(:registered) { true }
