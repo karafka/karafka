@@ -70,7 +70,10 @@ module Karafka
   #     end
   #   end
   class BaseResponder
+    # Responder usage schema
     SCHEMA = Karafka::Schemas::ResponderUsage.new.freeze
+
+    private_constant :SCHEMA
 
     class << self
       # Definitions of all topics that we want to be able to use in this responder should go here

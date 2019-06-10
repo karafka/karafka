@@ -6,8 +6,6 @@ module Karafka
     class ResponderUsageTopic < Dry::Validation::Contract
       config.messages.load_paths << File.join(Karafka .gem_root, 'config', 'errors.yml')
 
-      EMPTY_ARRAY = [].freeze
-
       params do
         required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
         required(:required).filled(:bool?)
@@ -26,7 +24,10 @@ module Karafka
 
     # Validator to check that everything in a responder flow matches responder rules
     class ResponderUsage < Dry::Validation::Contract
-      SUBSCHEMA = ResponderUsageTopic.new.freeze
+      # Schema for verifying the topic usage details
+      TOPIC_SCHEMA = ResponderUsageTopic.new.freeze
+
+      private_constant :TOPIC_SCHEMA
 
       params do
         required(:used_topics)
@@ -34,20 +35,16 @@ module Karafka
       end
 
       rule(:used_topics) do
-        (value || EMPTY_ARRAY).each do |used_topic|
-          SUBSCHEMA.call(used_topic).errors.each do |error|
+        (value || Schemas::EMPTY_ARRAY).each do |used_topic|
+          TOPIC_SCHEMA.call(used_topic).errors.each do |error|
             key([:used_topics, used_topic, error.path[0]]).failure(error.text)
           end
-        end
-
-        unless value.empty?
-
         end
       end
 
       rule(:registered_topics) do
-        (value || EMPTY_ARRAY).each do |used_topic|
-          SUBSCHEMA.call(used_topic).errors.each do |error|
+        (value || Schemas::EMPTY_ARRAY).each do |used_topic|
+          TOPIC_SCHEMA.call(used_topic).errors.each do |error|
             key([:registered_topics, used_topic, error.path[0]]).failure(error.text)
           end
         end

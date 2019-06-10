@@ -12,7 +12,10 @@ module Karafka
     class Builder < Array
       include Singleton
 
+      # Consumer group consistency checking schema
       SCHEMA = Karafka::Schemas::ConsumerGroup.new.freeze
+
+      private_constant :SCHEMA
 
       # Used to draw routes for Karafka
       # @note After it is done drawing it will store and validate all the routes to make sure that

@@ -14,7 +14,10 @@ module Karafka
     class Config
       extend Dry::Configurable
 
+      # Schema for checking the config provided by the user
       SCHEMA = Karafka::Schemas::Config.new.freeze
+
+      private_constant :SCHEMA
 
       # Available settings
       # option client_id [String] kafka client_id - used to provide

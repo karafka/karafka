@@ -5,7 +5,10 @@ module Karafka
   class Cli < Thor
     # Server Karafka Cli action
     class Server < Base
+      # Server config settings schema
       SCHEMA = Schemas::ServerCliOptions.new.freeze
+
+      private_constant :SCHEMA
 
       desc 'Start the Karafka server (short-cut alias: "s")'
       option aliases: 's'

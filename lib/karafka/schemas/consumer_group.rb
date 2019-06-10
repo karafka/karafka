@@ -14,7 +14,10 @@ module Karafka
       # Available sasl scram mechanism of authentication (plus nil)
       SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
 
+      # Internal schema for sub-validating topics schema
       TOPIC_SCHEMA = ConsumerGroupTopic.new.freeze
+
+      private_constant :TOPIC_SCHEMA
 
       params do
         required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
