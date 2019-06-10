@@ -48,6 +48,7 @@
 - #491 - irb is missing for console to work
 - #502 - Karafka process hangs when sending multiple sigkills
 - #506 - ssl_verify_hostname sync
+- #483 - Upgrade dry-validation before releasing 1.3
 
 ## 1.2.11
 - [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8
