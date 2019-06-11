@@ -4,7 +4,7 @@ module Karafka
   module Schemas
     # Validator to check responder topic usage
     class ResponderUsageTopic < Dry::Validation::Contract
-      config.messages.load_paths << File.join(Karafka .gem_root, 'config', 'errors.yml')
+      config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
 
       params do
         required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
