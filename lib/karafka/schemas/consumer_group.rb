@@ -4,7 +4,7 @@ module Karafka
   module Schemas
     # Schema for single full route (consumer group + topics) validation.
     class ConsumerGroup < Dry::Validation::Contract
-      config.messages.load_paths << File.join(Karafka .gem_root, 'config', 'errors.yml')
+      config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
 
       # Valid uri schemas of Kafka broker url
       # The ||= is due to the behavior of require_all that resolves dependencies
