@@ -19,7 +19,7 @@ RSpec.describe Karafka::Patches::RubyKafka do
   describe '#consumer_loop' do
     let(:client) { instance_double(Karafka::Connection::Client, stop: true) }
     let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
-    let(:consumer_instance) { Karafka::Persistence::Consumer.fetch(topic, 0) }
+    let(:consumer_instance) { Karafka::Persistence::Consumers.fetch(topic, 0) }
     let(:topic) { build(:routing_topic, consumer: consumer_class) }
 
     before do

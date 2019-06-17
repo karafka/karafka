@@ -19,7 +19,7 @@ RSpec.describe Karafka::Connection::MessageDelegator do
 
   before do
     allow(Karafka::Persistence::Topic).to receive(:fetch).and_return(consumer_group.topics[0])
-    allow(Karafka::Persistence::Consumer).to receive(:fetch).and_return(consumer_instance)
+    allow(Karafka::Persistence::Consumers).to receive(:fetch).and_return(consumer_instance)
     allow(consumer_instance).to receive(:call)
   end
 
