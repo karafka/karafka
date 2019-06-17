@@ -2,8 +2,8 @@ en:
   dry_validation:
     errors:
       invalid_broker_schema: >
-        has an invalid format.
-        Expected schema, host and port number.
+        has an invalid format
+        Expected schema, host and port number
         Example: kafka://127.0.0.1:9092 or kafka+ssl://127.0.0.1:9092
       invalid_certificate: >
         is not a valid certificate
@@ -12,28 +12,28 @@ en:
       invalid_private_key: >
         is not a valid private key
       max_timeout_size_for_exponential: >
-        pause_timeout cannot be more than pause_max_timeout.
+        pause_timeout cannot be more than pause_max_timeout
       max_wait_time_limit:
-        max_wait_time cannot be more than socket_timeout.
+        max_wait_time cannot be more than socket_timeout
       topics_names_not_unique: >
-        all topic names within a single consumer group must be unique.
+        all topic names within a single consumer group must be unique
       ssl_client_cert_with_ssl_client_cert_key: >
-        Both ssl_client_cert and ssl_client_cert_key need to be provided.
+        Both ssl_client_cert and ssl_client_cert_key need to be provided
       ssl_client_cert_key_with_ssl_client_cert: >
-        Both ssl_client_cert_key and ssl_client_cert need to be provided.
+        Both ssl_client_cert_key and ssl_client_cert need to be provided
       ssl_client_cert_chain_with_ssl_client_cert: >
-        Both ssl_client_cert_chain and ssl_client_cert need to be provided.
+        Both ssl_client_cert_chain and ssl_client_cert need to be provided
       ssl_client_cert_chain_with_ssl_client_cert_key: >
-        Both ssl_client_cert_chain and ssl_client_cert_key need to be provided.
+        Both ssl_client_cert_chain and ssl_client_cert_key need to be provided
       ssl_client_cert_key_password_with_ssl_client_cert_key: >
-        Both ssl_client_cert_key_password and ssl_client_cert_key need to be provided.
+        Both ssl_client_cert_key_password and ssl_client_cert_key need to be provided
       does_not_respond_to_token: >
-        needs to respond to a #token method.
+        needs to respond to a #token method
       required_usage_count: >
-        Given topic must be used at least once.
+        Given topic must be used at least once
       pid_already_exists: >
-        Pidfile already exists.
+        Pidfile already exists
       consumer_groups_inclusion: >
-        Unknown consumer group.
+        Unknown consumer group
       does_not_exist:
-        Given file does not exist or cannot be read.
+        Given file does not exist or cannot be read
