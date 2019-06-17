@@ -66,4 +66,8 @@ RSpec.describe Karafka::Params::ParamsBatch do
       expect(params_batch.last['deserialized']).to eq true
     end
   end
+
+  describe '#size' do
+    it { expect(params_batch.size).to eq params_batch.to_a.size }
+  end
 end

@@ -52,7 +52,11 @@ RSpec.describe Karafka::Params::Params do
             .to receive(:deserialize)
             .and_raise(Karafka::Errors::DeserializationError)
 
-          params.deserialize! rescue false
+          begin
+            params.deserialize!
+          rescue Karafka::Errors::DeserializationError
+            false
+          end
         end
 
         it 'expect to keep the raw payload within the params hash' do

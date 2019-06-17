@@ -2,6 +2,14 @@
 
 [![Build Status](https://travis-ci.org/karafka/karafka.svg?branch=master)](https://travis-ci.org/karafka/karafka)
 
+## New release in progress!
+
+**Note**: Documentation presented here refers to not yet released Karafka `1.3.0`. We're in the process of crafting the gems.
+
+If you are looking for the documentation for Karafka `1.2.*`, it can be found [here](https://github.com/karafka/wiki/tree/1.2).
+
+## About Karafka
+
 Framework used to simplify Apache Kafka based Ruby applications development.
 
 Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming and processing this data, without having to focus on things that are not your business domain.

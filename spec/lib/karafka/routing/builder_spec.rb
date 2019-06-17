@@ -21,7 +21,7 @@ RSpec.describe Karafka::Routing::Builder do
         described_class.instance.draw do
           topic :topic_name1 do
             # Here we should have instance doubles, etc but it takes
-            # shitload of time to setup to pass to instance eval from instance variables,
+            # shitload of time to setup instance evaluation from instance variables,
             # so instead we check against constant names
             consumer Class.new(Karafka::BaseConsumer)
             backend :inline

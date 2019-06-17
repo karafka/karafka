@@ -5,40 +5,24 @@ module Karafka
     # Schema for validating correctness of the server cli command options
     # We validate some basics + the list of consumer_groups on which we want to use, to make
     # sure that all of them are defined, plus that a pidfile does not exist
-    ServerCliOptions = Dry::Validation.Schema do
-      configure do
-        option :consumer_groups
-
-        class << self
-          def messages
-            super.merge(
-              en: {
-                errors: {
-                  consumer_groups_inclusion: 'Unknown consumer group.',
-                  pid_existence: 'Pidfile already exists.'
-                }
-              }
-            )
-          end
-        end
+    class ServerCliOptions < Dry::Validation::Contract
+      params do
+        optional(:pid).filled(:str?)
+        optional(:daemon).filled(:bool?)
+        optional(:consumer_groups).value(:array, :filled?)
       end
 
-      optional(:pid).filled(:str?)
-      optional(:daemon).filled(:bool?)
-      optional(:consumer_groups).filled(:array?)
+      rule(:pid) do
+        key(:pid).failure(:pid_already_exists) if value && File.exist?(value)
+      end
 
-      validate(consumer_groups_inclusion: :consumer_groups) do |consumer_groups|
+      rule(:consumer_groups) do
         # If there were no consumer_groups declared in the server cli, it means that we will
         # run all of them and no need to validate them here at all
-        if consumer_groups.nil?
-          true
-        else
-          (consumer_groups - Karafka::Routing::Builder.instance.map(&:name)).empty?
+        if !value.nil? &&
+           !(value - Karafka::Routing::Builder.instance.map(&:name)).empty?
+          key(:consumer_groups).failure(:consumer_groups_inclusion)
         end
-      end
-
-      validate(pid_existence: :pid) do |pid|
-        pid ? !File.exist?(pid) : true
       end
     end
   end

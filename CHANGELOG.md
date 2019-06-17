@@ -7,6 +7,9 @@
 - Message bus unification
 - Parser available in metadata
 - Cleanup towards moving to a non-global state app management
+- Drop Ruby 2.3 support
+- Support for Ruby 2.6.3
+- `Karafka::Loader` has been removed in favor of Zeitwerk
 - #393 - Reorganize responders - removed `multiple_usage` constrain
 - #388 - ssl_client_cert_chain sync
 - #300 - Store value in a value key and replace its content with parsed version - without root merge
@@ -37,6 +40,15 @@
 - #444 - add certificate and private key validation
 - #460 - Decouple responder "parser" (generator?) from topic.parser (benissimo)
 - #463 - Split parsers into serializers / deserializers
+- #473 - Support SASL OAuthBearer Authentication
+- #475 - Disallow subscribing to the same topic with multiple consumers
+- #485 - Setting shutdown_timeout to nil kills the app without waiting for anything
+- #487 - Make listeners as instances
+- #29 - Consumer class names must have the word "Consumer" in it in order to work (Sidekiq backend)
+- #491 - irb is missing for console to work
+- #502 - Karafka process hangs when sending multiple sigkills
+- #506 - ssl_verify_hostname sync
+- #483 - Upgrade dry-validation before releasing 1.3
 
 ## 1.2.11
 - [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8

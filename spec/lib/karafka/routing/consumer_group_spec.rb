@@ -24,7 +24,7 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
   end
 
   # We don't cover batch mode and topic mapper here as they don't come from kafka namespace of
-  # configs but from the main namespace
+  # config but from the main namespace
   (
     Karafka::AttributesMap.consumer_group - %i[batch_fetching]
   ).each do |attribute|

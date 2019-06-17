@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Schemas::Config do
-  let(:schema) { described_class }
+  subject(:schema) { described_class.new }
 
   let(:config) do
     {
       client_id: 'name',
-      topic_mapper: Karafka::Routing::TopicMapper,
-      shutdown_timeout: 10
+      topic_mapper: Karafka::Routing::TopicMapper.new,
+      shutdown_timeout: 10,
+      consumer_mapper: Karafka::Routing::ConsumerMapper.new
     }
   end
 
@@ -33,7 +34,7 @@ RSpec.describe Karafka::Schemas::Config do
     context 'when shutdown_timeout is nil' do
       before { config[:shutdown_timeout] = nil }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(schema.call(config)).not_to be_success }
     end
 
     context 'when shutdown_timeout is not an int' do

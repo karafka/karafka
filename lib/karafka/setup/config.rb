@@ -8,11 +8,16 @@ module Karafka
     # @note If you want to do some configurations after all of this is done, please add to
     #   karafka/config a proper file (needs to inherit from Karafka::Setup::Configurators::Base
     #   and implement setup method) after that everything will happen automatically
-    # @note This config object allows to create a 1 level nestings (nodes) only. This should be
+    # @note This config object allows to create a 1 level nesting (nodes) only. This should be
     #   enough and will still keep the code simple
     # @see Karafka::Setup::Configurators::Base for more details about configurators api
     class Config
       extend Dry::Configurable
+
+      # Schema for checking the config provided by the user
+      SCHEMA = Karafka::Schemas::Config.new.freeze
+
+      private_constant :SCHEMA
 
       # Available settings
       # option client_id [String] kafka client_id - used to provide
@@ -28,7 +33,7 @@ module Karafka
       # or they need to maintain their own internal consumer group naming conventions, they
       # can easily do it, replacing the default client_id + consumer name pattern concept
       setting :consumer_mapper, -> { Routing::ConsumerMapper.new }
-      # Mapper used to remap names of topics, so we can have a clean internal topic namings
+      # Mapper used to remap names of topics, so we can have a clean internal topic naming
       # despite using any Kafka provider that uses namespacing, etc
       # It needs to implement two methods:
       #   - #incoming - for remapping from the incoming message to our internal format
@@ -46,10 +51,8 @@ module Karafka
       # process them in batches
       setting :batch_consuming, false
       # option shutdown_timeout [Integer, nil] the number of seconds after which Karafka no
-      #   longer wait for the consumers to stop gracefully but instead we force
-      #   terminate everything.
-      # @note Keep in mind, that if your business logic
-      # @note If set to nil, it won't forcefully shutdown the process at all.
+      #   longer wait for the consumers to stop gracefully but instead we force terminate
+      #   everything.
       setting :shutdown_timeout, 60
 
       # option kafka [Hash] - optional - kafka configuration options
@@ -130,6 +133,8 @@ module Karafka
         # option ssl_ca_certs_from_system [Boolean] Use the CA certs from your system's default
         #   certificate store
         setting :ssl_ca_certs_from_system, false
+        # option ssl_verify_hostname [Boolean] Verify the hostname for client certs
+        setting :ssl_verify_hostname, true
         # option ssl_client_cert [String, nil] SSL client certificate
         setting :ssl_client_cert, nil
         # option ssl_client_cert_key [String, nil] SSL client certificate password
@@ -157,10 +162,13 @@ module Karafka
         # option ssl_client_cert_key_password [String, nil] the password required to read
         #   the ssl_client_cert_key
         setting :ssl_client_cert_key_password, nil
+        # @param sasl_oauth_token_provider [Object, nil] OAuthBearer Token Provider instance that
+        #   implements method token.
+        setting :sasl_oauth_token_provider, nil
       end
 
       class << self
-        # Configurating method
+        # Configuring method
         # @yield Runs a block of code providing a config singleton instance to it
         # @yieldparam [Karafka::Setup::Config] Karafka config instance
         def setup
@@ -181,11 +189,11 @@ module Karafka
         # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
         #   doesn't match with ConfigurationSchema
         def validate!
-          validation_result = Karafka::Schemas::Config.call(config.to_h)
+          validation_result = SCHEMA.call(config.to_h)
 
           return true if validation_result.success?
 
-          raise Errors::InvalidConfigurationError, validation_result.errors
+          raise Errors::InvalidConfigurationError, validation_result.errors.to_h
         end
       end
     end

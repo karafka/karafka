@@ -19,30 +19,19 @@ test: &test
 jobs:
   include:
     - <<: *test
-      rvm: 2.6.1
+      rvm: 2.6.3
     - <<: *test
-      rvm: 2.5.3
+      rvm: 2.5.5
     - <<: *test
       rvm: 2.4.5
-    - <<: *test
-      rvm: 2.3.8
 
     - stage: coditsu
       language: ruby
-      rvm: 2.6.1
+      rvm: 2.6.3
       before_install:
         - gem update --system
         - gem install bundler
-      before_script:
-        - docker create -v /sources --name sources alpine:3.4 /bin/true
-        - docker cp ./ sources:/sources
-      script: >
-        docker run
-        -e CODITSU_API_KEY
-        -e CODITSU_API_SECRET
-        -e CODITSU_REPOSITORY_ID
-        --volumes-from sources
-        coditsu/build-runner:latest
+      script: \curl -sSL https://api.coditsu.io/run/travis | bash
 
 stages:
   - coditsu

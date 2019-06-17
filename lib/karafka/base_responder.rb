@@ -70,6 +70,11 @@ module Karafka
   #     end
   #   end
   class BaseResponder
+    # Responder usage schema
+    SCHEMA = Karafka::Schemas::ResponderUsage.new.freeze
+
+    private_constant :SCHEMA
+
     class << self
       # Definitions of all topics that we want to be able to use in this responder should go here
       attr_accessor :topics
@@ -143,14 +148,14 @@ module Karafka
         topic.to_h.merge!(usage_count: usage.count)
       end
 
-      result = Karafka::Schemas::ResponderUsage.call(
+      result = SCHEMA.call(
         registered_topics: registered_topics,
         used_topics: used_topics
       )
 
       return if result.success?
 
-      raise Karafka::Errors::InvalidResponderUsageError, result.errors
+      raise Karafka::Errors::InvalidResponderUsageError, result.errors.to_h
     end
 
     # Checks if we met all the options requirements before sending them to the producer.
@@ -162,7 +167,7 @@ module Karafka
           result = self.class.options_schema.call(message_data.last)
           next if result.success?
 
-          raise Karafka::Errors::InvalidResponderMessageOptionsError, result.errors
+          raise Karafka::Errors::InvalidResponderMessageOptionsError, result.errors.to_h
         end
       end
     end

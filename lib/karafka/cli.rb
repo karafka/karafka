@@ -37,7 +37,7 @@ end
 # This is kinda trick - since we don't have a autoload and other magic stuff
 # like Rails does, so instead this method allows us to replace currently running
 # console with a new one via Kernel.exec. It will start console with new code loaded
-# Yes we know that it is not turbofast, however it is turbo convinient and small
+# Yes, we know that it is not turbo fast, however it is turbo convenient and small
 #
 # Also - the KARAFKA_CONSOLE is used to detect that we're executing the irb session
 # so this method is only available when the Karafka console is running

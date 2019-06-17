@@ -17,7 +17,7 @@ module Karafka
             "IRBRC='#{Karafka.gem_root}/.console_irbrc'",
             'KARAFKA_CONSOLE=true'
           ]
-          "#{envs.join(' ')} bundle exec irb"
+          "#{envs.join(' ')} bundle exec irb -r #{Karafka.boot_file}"
         end
       end
 

@@ -82,9 +82,13 @@ RSpec.describe Karafka::BaseResponder do
         let(:working_class) do
           name = topic_name
           ClassBuilder.inherit(described_class) do
-            self.options_schema = Dry::Validation.Schema do
-              required(:key).filled(:str?)
+            schema_class = Class.new(Dry::Validation::Contract) do
+              params do
+                required(:key).filled(:str?)
+              end
             end
+
+            self.options_schema = schema_class.new
 
             topic name
 

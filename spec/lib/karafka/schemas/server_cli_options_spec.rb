@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Schemas::ServerCliOptions do
-  let(:schema) { described_class }
+  subject(:schema) { described_class.new }
 
-  let(:config) do
-    {
-      pid: 'name'
-    }
-  end
+  let(:config) { { pid: 'name' } }
 
   context 'when config is valid' do
     it { expect(schema.call(config)).to be_success }

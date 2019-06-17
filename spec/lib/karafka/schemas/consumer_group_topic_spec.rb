@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
-  let(:schema) { described_class }
+  subject(:schema) { described_class.new }
 
   let(:config) do
     {

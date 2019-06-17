@@ -5,6 +5,11 @@ module Karafka
   class Cli < Thor
     # Server Karafka Cli action
     class Server < Base
+      # Server config settings schema
+      SCHEMA = Schemas::ServerCliOptions.new.freeze
+
+      private_constant :SCHEMA
+
       desc 'Start the Karafka server (short-cut alias: "s")'
       option aliases: 's'
       option :daemon, default: false, type: :boolean, aliases: :d
@@ -30,7 +35,7 @@ module Karafka
         # We want to delay the moment in which the pidfile is removed as much as we can,
         # so instead of removing it after the server stops running, we rely on the gc moment
         # when this object gets removed (it is a bit later), so it is closer to the actual
-        # system process end. We do that, so monitoring and deployment tools that rely on pids
+        # system process end. We do that, so monitoring and deployment tools that rely on a pid
         # won't alarm or start new system process up until the current one is finished
         ObjectSpace.define_finalizer(self, proc { send(:clean) })
 
@@ -42,10 +47,10 @@ module Karafka
       # Checks the server cli configuration
       # options validations in terms of app setup (topics, pid existence, etc)
       def validate!
-        result = Schemas::ServerCliOptions.call(cli.options)
+        result = SCHEMA.call(cli.options)
         return if result.success?
 
-        raise Errors::InvalidConfigurationError, result.errors
+        raise Errors::InvalidConfigurationError, result.errors.to_h
       end
 
       # Detaches current process into background and writes its pidfile

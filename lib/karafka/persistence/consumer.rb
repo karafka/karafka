@@ -16,7 +16,7 @@ module Karafka
       class << self
         # @return [Hash] current thread's persistence scope hash with all the consumers
         def all
-          # @note This does not need to be threadsafe (Hash) as it is always executed in a
+          # @note This does not need to be thread safe (Hash) as it is always executed in a
           # current thread context
           Thread.current[PERSISTENCE_SCOPE] ||= Hash.new { |hash, key| hash[key] = {} }
         end

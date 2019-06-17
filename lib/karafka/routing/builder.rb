@@ -12,9 +12,15 @@ module Karafka
     class Builder < Array
       include Singleton
 
+      # Consumer group consistency checking schema
+      SCHEMA = Karafka::Schemas::ConsumerGroup.new.freeze
+
+      private_constant :SCHEMA
+
       # Used to draw routes for Karafka
       # @note After it is done drawing it will store and validate all the routes to make sure that
       #   they are correct and that there are no topic/group duplications (this is forbidden)
+      # @param block [Proc] block we will evaluate within the builder context
       # @yield Evaluates provided block in a builder context so we can describe routes
       # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
       #   doesn't match with ConfigurationSchema
@@ -28,10 +34,10 @@ module Karafka
 
         each do |consumer_group|
           hashed_group = consumer_group.to_h
-          validation_result = Karafka::Schemas::ConsumerGroup.call(hashed_group)
+          validation_result = SCHEMA.call(hashed_group)
           next if validation_result.success?
 
-          raise Errors::InvalidConfigurationError, validation_result.errors
+          raise Errors::InvalidConfigurationError, validation_result.errors.to_h
         end
       end
 
