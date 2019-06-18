@@ -203,7 +203,7 @@ RSpec.describe Karafka::Routing::Builder do
       consumer_group
     end
 
-    it { expect { builder.reload }.to(change { builder.to_a }) }
+    it { expect { builder.reload }.to change(builder, :to_a) }
     it { expect { builder.reload }.to(change { builder[0].topics[0].consumer }) }
   end
 end
