@@ -22,6 +22,8 @@ module Karafka
 
     # Validator to check that everything in a responder flow matches responder rules
     class ResponderUsage < Dry::Validation::Contract
+      include Dry::Core::Constants
+
       # Schema for verifying the topic usage details
       TOPIC_SCHEMA = ResponderUsageTopic.new.freeze
 
