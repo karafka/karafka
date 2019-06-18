@@ -37,6 +37,8 @@ module Karafka
         # @note What happens here is a delegation of processing to a proper processor based
         #   on the incoming messages characteristics
         client.fetch_loop do |raw_data, type|
+          Karafka.monitor.instrument('connection.listener.fetch_loop', {})
+
           case type
           when :message
             MessageDelegator.call(@consumer_group.id, raw_data)

@@ -36,7 +36,7 @@ module Karafka
         def clear
           Thread
             .list
-            .select { |thread| !thread[PERSISTENCE_SCOPE].nil? }
+            .select { |thread| thread[PERSISTENCE_SCOPE] }
             .each { |thread| thread[PERSISTENCE_SCOPE].clear }
         end
       end

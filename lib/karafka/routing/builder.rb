@@ -62,7 +62,7 @@ module Karafka
 
       # Redraws all the routes for the in-process code reloading.
       # @note This won't allow registration of new topics without process restart but will trigger
-      #   cache invalidation so all the classes, etc are refetched after code reload
+      #   cache invalidation so all the classes, etc are re-fetched after code reload
       def reload
         draws = @draws.dup
         clear
