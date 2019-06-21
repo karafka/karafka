@@ -24,7 +24,7 @@ module Karafka
         @status = state
         # Trap context disallows to run certain things that we instrument
         # so the state changes are executed from a separate thread
-        Thread.new { Karafka.monitor.instrument("app.#{state}", {}) }.join
+        Thread.new { Karafka.monitor.instrument("app.#{state}") }.join
       end
     end
   end
