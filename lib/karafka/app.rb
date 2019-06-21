@@ -27,8 +27,8 @@ module Karafka
       # in-development hot code reloading without Karafka process restart
       def reload
         Karafka::Persistence::Consumers.clear
+        Karafka::Persistence::Topics.clear
         Karafka::Routing::Builder.instance.reload
-        Karafka::Persistence::Topic.clear
       end
 
       Status.instance_methods(false).each do |delegated|

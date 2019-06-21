@@ -9,7 +9,7 @@ RSpec.describe Karafka::Connection::BatchDelegator do
   let(:kafka_batch) { build(:kafka_fetched_batch) }
 
   before do
-    allow(Karafka::Persistence::Topic).to receive(:fetch).and_return(consumer_group.topics[0])
+    allow(Karafka::Persistence::Topics).to receive(:fetch).and_return(consumer_group.topics[0])
     allow(Karafka::Persistence::Consumers).to receive(:fetch).and_return(consumer_instance)
   end
 
