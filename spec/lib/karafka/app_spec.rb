@@ -24,7 +24,7 @@ RSpec.describe Karafka::App do
     end
 
     it 'expect to publish app.initialized event' do
-      expect(Karafka.monitor).to receive(:instrument).with('app.initialized', instance_of(Hash))
+      expect(Karafka.monitor).to receive(:instrument).with('app.initialized')
 
       app_class.boot!
     end

@@ -62,7 +62,7 @@ module Karafka
         # their work and if so, we can just return and normal shutdown process will take place
         (Karafka::App.config.shutdown_timeout * SUPERVISION_CHECK_FACTOR).to_i.times do
           if consumer_threads.count(&:alive?).zero?
-            Thread.new { Karafka.monitor.instrument('app.stopped', {}) }.join
+            Thread.new { Karafka.monitor.instrument('app.stopped') }.join
             return
           end
 
