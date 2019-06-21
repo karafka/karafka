@@ -49,15 +49,15 @@ RSpec.describe Karafka::App do
 
     context 'when we trigger reload' do
       it 'expect to invalidate the consumers cache' do
-        expect { Karafka::App.reload }.to change(Karafka::Persistence::Consumers, :current)
+        expect { app_class.reload }.to change(Karafka::Persistence::Consumers, :current)
       end
 
       it 'expect to invalidate the topics cache' do
-        expect { Karafka::App.reload }.to change(Karafka::Persistence::Topics, :current)
+        expect { app_class.reload }.to change(Karafka::Persistence::Topics, :current)
       end
 
       it 'expect to redraw routes' do
-        expect { Karafka::App.reload }.to change(Karafka::Routing::Builder, :instance)
+        expect { app_class.reload }.to change(Karafka::Routing::Builder, :instance)
       end
     end
   end
