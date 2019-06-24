@@ -31,7 +31,7 @@ jobs:
       before_install:
         - gem update --system
         - gem install bundler
-      script: \curl -sSL https://api.coditsu.io/run/travis | bash
+      script: \curl -sSL https://api.coditsu.io/run/ci | bash
 
 stages:
   - coditsu
