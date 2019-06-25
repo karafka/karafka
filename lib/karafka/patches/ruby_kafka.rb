@@ -13,8 +13,8 @@ module Karafka
       # thread)
       def consumer_loop
         super do
-          consumers = Karafka::Persistence::Consumer
-                      .all
+          consumers = Karafka::Persistence::Consumers
+                      .current
                       .values
                       .flat_map(&:values)
                       .select { |consumer| consumer.class.respond_to?(:after_fetch) }

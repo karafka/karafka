@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Persistence::Consumer do
+RSpec.describe Karafka::Persistence::Consumers do
   subject(:persistence) { described_class }
 
   describe '#fetch' do

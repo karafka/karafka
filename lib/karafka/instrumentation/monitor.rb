@@ -24,6 +24,7 @@ module Karafka
         params.params.deserialize
         params.params.deserialize.error
         connection.listener.before_fetch_loop
+        connection.listener.fetch_loop
         connection.listener.fetch_loop.error
         connection.client.fetch_loop.error
         connection.batch_delegator.call

@@ -7,7 +7,7 @@ module Karafka
     # Module used to provide a persistent cache across batch requests for a given
     # topic and partition to store some additional details when the persistent mode
     # for a given topic is turned on
-    class Consumer
+    class Consumers
       # Thread.current scope under which we store consumers data
       PERSISTENCE_SCOPE = :consumers
 
@@ -15,10 +15,10 @@ module Karafka
 
       class << self
         # @return [Hash] current thread's persistence scope hash with all the consumers
-        def all
-          # @note This does not need to be thread safe (Hash) as it is always executed in a
-          # current thread context
-          Thread.current[PERSISTENCE_SCOPE] ||= Hash.new { |hash, key| hash[key] = {} }
+        def current
+          Thread.current[PERSISTENCE_SCOPE] ||= Concurrent::Hash.new do |hash, key|
+            hash[key] = Concurrent::Hash.new
+          end
         end
 
         # Used to build (if block given) and/or fetch a current consumer instance that will be
@@ -27,7 +27,17 @@ module Karafka
         # @param topic [Karafka::Routing::Topic] topic instance for which we might cache
         # @param partition [Integer] number of partition for which we want to cache
         def fetch(topic, partition)
-          all[topic][partition] ||= topic.consumer.new(topic)
+          current[topic][partition] ||= topic.consumer.new(topic)
+        end
+
+        # Removes all persisted instances of consumers from the consumer cache
+        # @note This is used to reload consumers instances when code reloading in development mode
+        #   is present. This should not be used in production.
+        def clear
+          Thread
+            .list
+            .select { |thread| thread[PERSISTENCE_SCOPE] }
+            .each { |thread| thread[PERSISTENCE_SCOPE].clear }
         end
       end
     end

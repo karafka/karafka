@@ -34,12 +34,17 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far
       def fetch_loop
-        delegators = { message: MessageDelegator, batch: BatchDelegator }
-
         # @note What happens here is a delegation of processing to a proper processor based
         #   on the incoming messages characteristics
         client.fetch_loop do |raw_data, type|
-          delegators[type].call(@consumer_group.id, raw_data)
+          Karafka.monitor.instrument('connection.listener.fetch_loop')
+
+          case type
+          when :message
+            MessageDelegator.call(@consumer_group.id, raw_data)
+          when :batch
+            BatchDelegator.call(@consumer_group.id, raw_data)
+          end
         end
         # This is on purpose - see the notes for this method
         # rubocop:disable RescueException

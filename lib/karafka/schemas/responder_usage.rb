@@ -22,6 +22,8 @@ module Karafka
 
     # Validator to check that everything in a responder flow matches responder rules
     class ResponderUsage < Dry::Validation::Contract
+      include Dry::Core::Constants
+
       # Schema for verifying the topic usage details
       TOPIC_SCHEMA = ResponderUsageTopic.new.freeze
 
@@ -33,7 +35,7 @@ module Karafka
       end
 
       rule(:used_topics) do
-        (value || Schemas::EMPTY_ARRAY).each do |used_topic|
+        (value || EMPTY_ARRAY).each do |used_topic|
           TOPIC_SCHEMA.call(used_topic).errors.each do |error|
             key([:used_topics, used_topic, error.path[0]]).failure(error.text)
           end
@@ -41,7 +43,7 @@ module Karafka
       end
 
       rule(:registered_topics) do
-        (value || Schemas::EMPTY_ARRAY).each do |used_topic|
+        (value || EMPTY_ARRAY).each do |used_topic|
           TOPIC_SCHEMA.call(used_topic).errors.each do |error|
             key([:registered_topics, used_topic, error.path[0]]).failure(error.text)
           end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Persistence::Topic do
+RSpec.describe Karafka::Persistence::Topics do
   subject(:persistence) { described_class }
 
   let(:group_id) { rand.to_s }

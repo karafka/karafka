@@ -9,13 +9,17 @@ module Karafka
     #       consumer NewVideosConsumer
     #     end
     #   end
-    class Builder < Array
+    class Builder < Concurrent::Array
       include Singleton
 
       # Consumer group consistency checking schema
       SCHEMA = Karafka::Schemas::ConsumerGroup.new.freeze
 
       private_constant :SCHEMA
+
+      def initialize
+        @draws = Concurrent::Array.new
+      end
 
       # Used to draw routes for Karafka
       # @note After it is done drawing it will store and validate all the routes to make sure that
@@ -30,6 +34,8 @@ module Karafka
       #     end
       #   end
       def draw(&block)
+        @draws << block
+
         instance_eval(&block)
 
         each do |consumer_group|
@@ -46,6 +52,21 @@ module Karafka
       #   to pick only those consumer groups that should be active in our given process context
       def active
         select(&:active?)
+      end
+
+      # Clears the builder and the draws memory
+      def clear
+        @draws.clear
+        super
+      end
+
+      # Redraws all the routes for the in-process code reloading.
+      # @note This won't allow registration of new topics without process restart but will trigger
+      #   cache invalidation so all the classes, etc are re-fetched after code reload
+      def reload
+        draws = @draws.dup
+        clear
+        draws.each { |block| draw(&block) }
       end
 
       private

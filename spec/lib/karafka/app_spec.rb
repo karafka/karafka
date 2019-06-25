@@ -30,6 +30,38 @@ RSpec.describe Karafka::App do
     end
   end
 
+  describe '#reload' do
+    let(:topic) { build(:routing_topic) }
+    let(:consumers_persistence) { Karafka::Persistence::Consumers }
+    let(:topics_persistence) { Karafka::Persistence::Topics }
+
+    before do
+      Karafka::Routing::Builder.instance.draw do
+        topic :topic do
+          consumer Class.new(Karafka::BaseConsumer)
+        end
+      end
+
+      allow(Karafka::Routing::Router).to receive(:find).and_return(topic)
+      consumers_persistence.fetch(topic, 0)
+      topics_persistence.fetch(topic.consumer_group.id, topic.name)
+    end
+
+    context 'when we trigger reload' do
+      it 'expect to invalidate the consumers cache' do
+        expect { app_class.reload }.to change(Karafka::Persistence::Consumers, :current)
+      end
+
+      it 'expect to invalidate the topics cache' do
+        expect { app_class.reload }.to change(Karafka::Persistence::Topics, :current)
+      end
+
+      it 'expect to redraw routes' do
+        expect { app_class.reload }.to change(Karafka::Routing::Builder, :instance)
+      end
+    end
+  end
+
   describe 'Karafka delegations' do
     %i[
       root

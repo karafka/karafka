@@ -18,7 +18,7 @@ RSpec.describe Karafka::Routing::Builder do
       let(:topic1) { builder.first.topics.first }
       let(:topic2) { builder.last.topics.first }
       let(:consumer_group1) do
-        described_class.instance.draw do
+        builder.draw do
           topic :topic_name1 do
             # Here we should have instance doubles, etc but it takes
             # shitload of time to setup instance evaluation from instance variables,
@@ -32,7 +32,7 @@ RSpec.describe Karafka::Routing::Builder do
         end
       end
       let(:consumer_group2) do
-        described_class.instance.draw do
+        builder.draw do
           topic :topic_name2 do
             consumer Class.new(Karafka::BaseConsumer)
             backend :inline
@@ -66,7 +66,7 @@ RSpec.describe Karafka::Routing::Builder do
       let(:topic1) { builder.first.topics.first }
       let(:topic2) { builder.last.topics.first }
       let(:consumer_group1) do
-        described_class.instance.draw do
+        builder.draw do
           consumer_group :group_name1 do
             seed_brokers ['kafka://localhost:9092']
 
@@ -81,7 +81,7 @@ RSpec.describe Karafka::Routing::Builder do
         end
       end
       let(:consumer_group2) do
-        described_class.instance.draw do
+        builder.draw do
           consumer_group :group_name2 do
             seed_brokers ['kafka://localhost:9093']
 
@@ -113,7 +113,7 @@ RSpec.describe Karafka::Routing::Builder do
       let(:topic2) { builder.first.topics.last }
 
       before do
-        described_class.instance.draw do
+        builder.draw do
           consumer_group :group_name1 do
             seed_brokers ['kafka://localhost:9092']
 
@@ -144,7 +144,7 @@ RSpec.describe Karafka::Routing::Builder do
 
     context 'when we define invalid route' do
       let(:invalid_route) do
-        described_class.instance.draw do
+        builder.draw do
           consumer_group '$%^&*(' do
             topic :topic_name1 do
               backend :inline
@@ -158,7 +158,7 @@ RSpec.describe Karafka::Routing::Builder do
 
     context 'when we define multiple consumer groups and one is without topics' do
       subject(:drawing) do
-        described_class.instance.draw do
+        builder.draw do
           consumer_group :group_name1 do
             topic(:topic_name1) { consumer Class.new(Karafka::BaseConsumer) }
           end
@@ -183,5 +183,27 @@ RSpec.describe Karafka::Routing::Builder do
     it 'expect to select only active consumer groups' do
       expect(builder.active).to eq [active_group]
     end
+  end
+
+  describe '#reload' do
+    let(:consumer_group) do
+      builder.draw do
+        consumer_group :group_name1 do
+          topic :topic_name1 do
+            consumer Class.new(Karafka::BaseConsumer)
+            backend :inline
+            name 'name1'
+          end
+        end
+      end
+    end
+
+    before do
+      builder.clear
+      consumer_group
+    end
+
+    it { expect { builder.reload }.to change(builder, :to_a) }
+    it { expect { builder.reload }.to(change { builder[0].topics[0].consumer }) }
   end
 end

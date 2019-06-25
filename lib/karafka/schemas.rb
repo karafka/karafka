@@ -6,8 +6,5 @@ module Karafka
     # Regexp for validating format of groups and topics
     # @note It is not nested inside of the schema, as it is used by couple schemas
     TOPIC_REGEXP = /\A(\w|\-|\.)+\z/.freeze
-
-    # Frozen array for internal usage
-    EMPTY_ARRAY = [].freeze
   end
 end

@@ -12,8 +12,8 @@ module Karafka
         # @param group_id [String] group_id of a group from which a given message came
         # @param kafka_message [<Kafka::FetchedMessage>] raw message from kafka
         def call(group_id, kafka_message)
-          topic = Persistence::Topic.fetch(group_id, kafka_message.topic)
-          consumer = Persistence::Consumer.fetch(topic, kafka_message.partition)
+          topic = Persistence::Topics.fetch(group_id, kafka_message.topic)
+          consumer = Persistence::Consumers.fetch(topic, kafka_message.partition)
 
           Karafka.monitor.instrument(
             'connection.message_delegator.call',
