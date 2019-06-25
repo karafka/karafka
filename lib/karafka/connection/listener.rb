@@ -54,6 +54,10 @@ module Karafka
         # We can stop client without a problem, as it will reinitialize itself when running the
         # `fetch_loop` again
         @client.stop
+        # We need to clear the consumers cache for current connection when fatal error happens and
+        # we reset the connection. Otherwise for consumers with manual offset management, the
+        # persistence might have stored some data that would be reprocessed
+        Karafka::Persistence::Consumers.clear
         sleep(@consumer_group.reconnect_timeout) && retry
       end
 
