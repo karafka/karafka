@@ -4,6 +4,7 @@ RSpec.describe Karafka::Connection::Listener do
   subject(:listener) { described_class.new(consumer_group) }
 
   let(:client) { Karafka::Connection::Client.new(consumer_group) }
+  let(:topic) { build(:routing_topic) }
   let(:consumer_group) do
     Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
       cg.public_send(:topic=, rand.to_s) do
@@ -40,9 +41,12 @@ RSpec.describe Karafka::Connection::Listener do
       Exception
     ].each do |error|
       let(:proxy) { double }
+      let(:fetch_loop) { listener.send(:fetch_loop) }
 
       context "when #{error} happens" do
         before do
+          Karafka::Persistence::Consumers.fetch(topic, 0)
+
           # Lets silence exceptions printing
           allow(Karafka.monitor)
             .to receive(:instrument)
@@ -59,7 +63,11 @@ RSpec.describe Karafka::Connection::Listener do
         end
 
         it 'notices the error and stop the client' do
-          expect { listener.send(:fetch_loop) }.not_to raise_error
+          expect { fetch_loop }.not_to raise_error
+        end
+
+        it 'expect to clear consumers cache' do
+          expect { fetch_loop }.to change(Karafka::Persistence::Consumers, :current).to({})
         end
       end
     end
