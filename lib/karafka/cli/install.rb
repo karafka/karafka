@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'erb'
+
 module Karafka
   # Karafka framework Cli
   class Cli < Thor
@@ -18,9 +20,9 @@ module Karafka
 
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
-        'karafka.rb.example' => Karafka.boot_file.basename,
-        'application_consumer.rb.example' => 'app/consumers/application_consumer.rb',
-        'application_responder.rb.example' => 'app/responders/application_responder.rb'
+        'karafka.rb.erb' => Karafka.boot_file.basename,
+        'application_controller.rb.erb' => 'app/consumers/application_consumers.rb',
+        'application_responder.rb.erb' => 'app/responders/application_responder.rb'
       }.freeze
 
       # Install all required things for Karafka application in current directory
@@ -33,9 +35,18 @@ module Karafka
           target = Karafka.root.join(target)
           next if File.exist?(target)
 
-          source = Karafka.core_root.join("templates/#{source}")
-          FileUtils.cp_r(source, target)
+          template = File.read Karafka.core_root.join("templates/#{source}")
+          render = ::ERB.new(template).tap(&:run).result
+
+          File.open(target, 'w'){ |file| file.write render  }
         end
+      end
+
+      # @return [Boolean] true if we have Rails loaded
+      # This allows us to generate customized karafka.rb template with some tweaks specific for
+      # Rails
+      def rails?
+        self.class.const_defined?('::Rails')
       end
     end
   end
