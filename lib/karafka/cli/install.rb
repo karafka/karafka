@@ -21,7 +21,7 @@ module Karafka
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
         'karafka.rb.erb' => Karafka.boot_file.basename,
-        'application_controller.rb.erb' => 'app/consumers/application_consumers.rb',
+        'application_consumer.rb.erb' => 'app/consumers/application_consumer.rb',
         'application_responder.rb.erb' => 'app/responders/application_responder.rb'
       }.freeze
 
@@ -33,12 +33,11 @@ module Karafka
 
         INSTALL_FILES_MAP.each do |source, target|
           target = Karafka.root.join(target)
-          next if File.exist?(target)
 
           template = File.read Karafka.core_root.join("templates/#{source}")
-          render = ::ERB.new(template).tap(&:run).result
+          render = ::ERB.new(template, nil, '-').result(binding)
 
-          File.open(target, 'w'){ |file| file.write render  }
+          File.open(target, 'w') { |file| file.write render }
         end
       end
 

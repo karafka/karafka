@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-<% if rails? %>
+
+<% if rails? -%>
 ENV['RAILS_ENV'] ||= 'development'
 ENV['KARAFKA_ENV'] = ENV['RAILS_ENV']
 require ::File.expand_path('../config/environment', __FILE__)
@@ -13,7 +14,7 @@ if Rails.env.development?
     )
   )
 end
-<% else %>
+<% else -%>
 # This file is auto-generated during the install process.
 # If by any chance you've wanted a setup for Rails app, either run the `karafka:install`
 # command again or refer to the install templates available in the source codes
@@ -35,14 +36,15 @@ APP_LOADER = Zeitwerk::Loader.new
 
 APP_LOADER.setup
 APP_LOADER.eager_load
-<% end %>
+<% end -%>
 
 class KarafkaApp < Karafka::App
   setup do |config|
     config.kafka.seed_brokers = %w[kafka://127.0.0.1:9092]
     config.client_id = 'example_app'
-    config.backend = :inline
-    <%= 'config.logger = Rails.logger' if rails? %>
+<% if rails? -%>
+    config.logger = Rails.logger
+<% end -%>
   end
 
   # Comment out this part if you are not using instrumentation and/or you are not
@@ -60,7 +62,7 @@ class KarafkaApp < Karafka::App
   #
   # Karafka.monitor.subscribe(
   #   Karafka::CodeReloader.new(
-  #     <%= rails? ? 'Rails.loader' : 'APP_LOADER' %>
+  #     <%= rails? ? '*Rails.application.reloaders' : 'APP_LOADER' %>
   #   )
   # )
 

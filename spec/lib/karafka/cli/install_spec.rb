@@ -21,12 +21,9 @@ RSpec.describe Karafka::Cli::Install do
           .with(Karafka.root.join(target))
           .and_return(false)
 
-        allow(FileUtils)
-          .to receive(:cp_r)
-          .with(
-            Karafka.core_root.join("templates/#{source}"),
-            Karafka.root.join(target)
-          )
+        allow(File)
+          .to receive(:open)
+          .with(Karafka.root.join(target), 'w')
       end
     end
 
