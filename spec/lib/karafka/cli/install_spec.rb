@@ -15,7 +15,7 @@ RSpec.describe Karafka::Cli::Install do
           .with(Karafka.root.join(dir))
       end
 
-      described_class::INSTALL_FILES_MAP.each do |source, target|
+      described_class::INSTALL_FILES_MAP.each do |_source, target|
         allow(File)
           .to receive(:exist?)
           .with(Karafka.root.join(target))

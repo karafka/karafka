@@ -34,7 +34,7 @@ module Karafka
         INSTALL_FILES_MAP.each do |source, target|
           target = Karafka.root.join(target)
 
-          template = File.read(Karafka.core_root.join("templates/#{source}"))
+          template = File.read Karafka.core_root.join("templates/#{source}")
           render = ::ERB.new(template, trim_mode: '-').result(binding)
 
           File.open(target, 'w') { |file| file.write render }
