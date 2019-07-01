@@ -27,10 +27,12 @@ module Karafka
     #   batches will be buffered on a newly created "per fetch" instance.
     def on_connection_listener_fetch_loop(_event)
       MUTEX.synchronize do
+        # Rails reloaders
         @user_code_loaders
           .select { |loader| loader.respond_to?(:reload!) }
           .each(&:reload!)
 
+        # Zeitwerk and other reloaders
         @user_code_loaders
           .select { |loader| loader.respond_to?(:reload) }
           .each(&:reload)
