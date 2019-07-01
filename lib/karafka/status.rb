@@ -3,8 +3,6 @@
 module Karafka
   # App status monitor
   class Status
-    include Singleton
-
     # Available states and their transitions
     STATES = {
       initializing: :initialize!,

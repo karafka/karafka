@@ -5,10 +5,10 @@ module Karafka
   class Cli < Thor
     # Server Karafka Cli action
     class Server < Base
-      # Server config settings schema
-      SCHEMA = Schemas::ServerCliOptions.new.freeze
+      # Server config settings contract
+      CONTRACT = Contracts::ServerCliOptions.new.freeze
 
-      private_constant :SCHEMA
+      private_constant :CONTRACT
 
       desc 'Start the Karafka server (short-cut alias: "s")'
       option aliases: 's'
@@ -47,7 +47,7 @@ module Karafka
       # Checks the server cli configuration
       # options validations in terms of app setup (topics, pid existence, etc)
       def validate!
-        result = SCHEMA.call(cli.options)
+        result = CONTRACT.call(cli.options)
         return if result.success?
 
         raise Errors::InvalidConfigurationError, result.errors.to_h

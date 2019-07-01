@@ -17,14 +17,14 @@ RSpec.describe Karafka::Connection::BatchDelegator do
     before { allow(consumer_instance).to receive(:call) }
 
     let(:consumer_group) do
-      Karafka::Routing::Builder.instance.draw do
+      Karafka::App.config.internal.routing_builder.draw do
         topic :topic_name1 do
           consumer Class.new(Karafka::BaseConsumer)
           batch_consuming true
         end
       end
 
-      Karafka::Routing::Builder.instance.last
+      Karafka::App.config.internal.routing_builder.last
     end
 
     it 'expect to run without errors' do
@@ -36,14 +36,14 @@ RSpec.describe Karafka::Connection::BatchDelegator do
     before { allow(consumer_instance).to receive(:call).twice }
 
     let(:consumer_group) do
-      Karafka::Routing::Builder.instance.draw do
+      Karafka::App.config.internal.routing_builder.draw do
         topic :topic_name1 do
           consumer Class.new(Karafka::BaseConsumer)
           batch_consuming false
         end
       end
 
-      Karafka::Routing::Builder.instance.last
+      Karafka::App.config.internal.routing_builder.last
     end
 
     it 'expect to run without errors' do

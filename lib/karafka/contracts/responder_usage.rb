@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Schemas
+  module Contracts
     # Validator to check responder topic usage
     class ResponderUsageTopic < Dry::Validation::Contract
       config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
 
       params do
-        required(:name).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
+        required(:name).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
         required(:required).filled(:bool?)
         required(:usage_count).filled(:int?, gteq?: 0)
         required(:registered).filled(eql?: true)
@@ -24,10 +24,10 @@ module Karafka
     class ResponderUsage < Dry::Validation::Contract
       include Dry::Core::Constants
 
-      # Schema for verifying the topic usage details
-      TOPIC_SCHEMA = ResponderUsageTopic.new.freeze
+      # Contract for verifying the topic usage details
+      TOPIC_CONTRACT = ResponderUsageTopic.new.freeze
 
-      private_constant :TOPIC_SCHEMA
+      private_constant :TOPIC_CONTRACT
 
       params do
         required(:used_topics)
@@ -36,7 +36,7 @@ module Karafka
 
       rule(:used_topics) do
         (value || EMPTY_ARRAY).each do |used_topic|
-          TOPIC_SCHEMA.call(used_topic).errors.each do |error|
+          TOPIC_CONTRACT.call(used_topic).errors.each do |error|
             key([:used_topics, used_topic, error.path[0]]).failure(error.text)
           end
         end
@@ -44,7 +44,7 @@ module Karafka
 
       rule(:registered_topics) do
         (value || EMPTY_ARRAY).each do |used_topic|
-          TOPIC_SCHEMA.call(used_topic).errors.each do |error|
+          TOPIC_CONTRACT.call(used_topic).errors.each do |error|
             key([:registered_topics, used_topic, error.path[0]]).failure(error.text)
           end
         end

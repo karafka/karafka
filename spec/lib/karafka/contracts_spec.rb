@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Schemas do
+RSpec.describe Karafka::Contracts do
   describe '#TOPIC_REGEXP' do
     subject(:match) { input.match? described_class::TOPIC_REGEXP }
 

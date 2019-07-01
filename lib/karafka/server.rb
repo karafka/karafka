@@ -41,7 +41,7 @@ module Karafka
 
       # @return [Karafka::Process] process wrapper instance used to catch system signal calls
       def process
-        Karafka::Process.instance
+        Karafka::App.config.internal.process
       end
 
       # Starts Karafka with a supervision
@@ -50,7 +50,7 @@ module Karafka
       def run_supervised
         process.supervise
         Karafka::App.run!
-        Karafka::Fetcher.call
+        Karafka::App.config.internal.fetcher.call
       end
 
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)

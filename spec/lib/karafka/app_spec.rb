@@ -4,7 +4,7 @@ RSpec.describe Karafka::App do
   subject(:app_class) { described_class }
 
   describe '#consumer_groups' do
-    let(:builder) { Karafka::Routing::Builder.instance }
+    let(:builder) { Karafka::App.config.internal.routing_builder }
 
     it 'returns consumer_groups builder' do
       expect(app_class.consumer_groups).to eq builder
@@ -36,7 +36,7 @@ RSpec.describe Karafka::App do
     let(:topics_persistence) { Karafka::Persistence::Topics }
 
     before do
-      Karafka::Routing::Builder.instance.draw do
+      Karafka::App.config.internal.routing_builder.draw do
         topic :topic do
           consumer Class.new(Karafka::BaseConsumer)
         end
@@ -57,7 +57,7 @@ RSpec.describe Karafka::App do
       end
 
       it 'expect to redraw routes' do
-        expect { app_class.reload }.to change(Karafka::Routing::Builder, :instance)
+        expect { app_class.reload }.to change(Karafka::App.config.internal, :routing_builder)
       end
     end
   end
@@ -91,7 +91,7 @@ RSpec.describe Karafka::App do
         let(:return_value) { double }
 
         it "expect to delegate #{delegation} method to Karafka module" do
-          expect(Karafka::Status.instance)
+          expect(Karafka::App.config.internal.status)
             .to receive(delegation)
             .and_return(return_value)
 

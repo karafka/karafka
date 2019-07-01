@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Schemas
-    # Schema for single full route (consumer group + topics) validation.
+  module Contracts
+    # Contract for single full route (consumer group + topics) validation.
     class ConsumerGroup < Dry::Validation::Contract
       config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
 
@@ -14,13 +14,13 @@ module Karafka
       # Available sasl scram mechanism of authentication (plus nil)
       SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
 
-      # Internal schema for sub-validating topics schema
-      TOPIC_SCHEMA = ConsumerGroupTopic.new.freeze
+      # Internal contract for sub-validating topics schema
+      TOPIC_CONTRACT = ConsumerGroupTopic.new.freeze
 
-      private_constant :TOPIC_SCHEMA
+      private_constant :TOPIC_CONTRACT
 
       params do
-        required(:id).filled(:str?, format?: Karafka::Schemas::TOPIC_REGEXP)
+        required(:id).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
         required(:topics).value(:array, :filled?)
         required(:seed_brokers).value(:array, :filled?)
         required(:session_timeout).filled { int? | float? }
@@ -86,7 +86,7 @@ module Karafka
       rule(:topics) do
         if value&.is_a?(Array)
           value.each_with_index do |topic, index|
-            TOPIC_SCHEMA.call(topic).errors.each do |error|
+            TOPIC_CONTRACT.call(topic).errors.each do |error|
               key([:topics, index, error.path[0]]).failure(error.text)
             end
           end

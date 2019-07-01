@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Karafka
-  module Schemas
-    # Schema for validating correctness of the server cli command options
+  module Contracts
+    # Contract for validating correctness of the server cli command options
     # We validate some basics + the list of consumer_groups on which we want to use, to make
     # sure that all of them are defined, plus that a pidfile does not exist
     class ServerCliOptions < Dry::Validation::Contract
@@ -20,7 +20,7 @@ module Karafka
         # If there were no consumer_groups declared in the server cli, it means that we will
         # run all of them and no need to validate them here at all
         if !value.nil? &&
-           !(value - Karafka::Routing::Builder.instance.map(&:name)).empty?
+           !(value - Karafka::App.config.internal.routing_builder.map(&:name)).empty?
           key(:consumer_groups).failure(:consumer_groups_inclusion)
         end
       end

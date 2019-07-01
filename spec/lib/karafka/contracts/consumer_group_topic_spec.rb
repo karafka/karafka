@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
-  subject(:schema) { described_class.new }
+RSpec.describe Karafka::Contracts::ConsumerGroupTopic do
+  subject(:contract) { described_class.new }
 
   let(:config) do
     {
@@ -18,26 +18,26 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
   end
 
   context 'when config is valid' do
-    it { expect(schema.call(config)).to be_success }
+    it { expect(contract.call(config)).to be_success }
   end
 
   context 'when we validate id' do
     context 'when it is nil' do
       before { config[:id] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     context 'when it is not a string' do
       before { config[:id] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     context 'when it is an invalid string' do
       before { config[:id] = '%^&*(' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
   end
 
@@ -45,19 +45,19 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     context 'when it is nil' do
       before { config[:name] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     context 'when it is not a string' do
       before { config[:name] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     context 'when it is an invalid string' do
       before { config[:name] = '%^&*(' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
   end
 
@@ -65,7 +65,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     context 'when it is nil' do
       before { config[:backend] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
   end
 
@@ -73,19 +73,19 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     context 'when it is nil' do
       before { config[:max_bytes_per_partition] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     context 'when it is not integer' do
       before { config[:max_bytes_per_partition] = 's' }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     context 'when it is less than 0' do
       before { config[:max_bytes_per_partition] = -1 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
   end
 
@@ -93,13 +93,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     context 'when it is nil' do
       before { config[:start_from_beginning] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     context 'when it is not a bool' do
       before { config[:start_from_beginning] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
   end
 
@@ -107,7 +107,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     context 'when it is not present' do
       before { config[:consumer] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
   end
 
@@ -115,7 +115,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     context 'when it is not present' do
       before { config[:deserializer] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
   end
 
@@ -123,13 +123,13 @@ RSpec.describe Karafka::Schemas::ConsumerGroupTopic do
     context 'when it is nil' do
       before { config[:batch_consuming] = nil }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     context 'when it is not a bool' do
       before { config[:batch_consuming] = 2 }
 
-      it { expect(schema.call(config)).not_to be_success }
+      it { expect(contract.call(config)).not_to be_success }
     end
   end
 end

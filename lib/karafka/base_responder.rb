@@ -70,18 +70,18 @@ module Karafka
   #     end
   #   end
   class BaseResponder
-    # Responder usage schema
-    SCHEMA = Karafka::Schemas::ResponderUsage.new.freeze
+    # Responder usage contract
+    CONTRACT = Karafka::Contracts::ResponderUsage.new.freeze
 
-    private_constant :SCHEMA
+    private_constant :CONTRACT
 
     class << self
       # Definitions of all topics that we want to be able to use in this responder should go here
       attr_accessor :topics
-      # Schema that we can use to control and/or require some additional details upon options
+      # Contract that we can use to control and/or require some additional details upon options
       # that are being passed to the producer. This can be in particular useful if we want to make
       # sure that for example partition_key is always present.
-      attr_accessor :options_schema
+      attr_accessor :options_contract
 
       # Registers a topic as on to which we will be able to respond
       # @param topic_name [Symbol, String] name of topic to which we want to respond
@@ -148,7 +148,7 @@ module Karafka
         topic.to_h.merge!(usage_count: usage.count)
       end
 
-      result = SCHEMA.call(
+      result = CONTRACT.call(
         registered_topics: registered_topics,
         used_topics: used_topics
       )
@@ -160,11 +160,11 @@ module Karafka
 
     # Checks if we met all the options requirements before sending them to the producer.
     def validate_options!
-      return true unless self.class.options_schema
+      return true unless self.class.options_contract
 
       messages_buffer.each_value do |messages_set|
         messages_set.each do |message_data|
-          result = self.class.options_schema.call(message_data.last)
+          result = self.class.options_contract.call(message_data.last)
           next if result.success?
 
           raise Karafka::Errors::InvalidResponderMessageOptionsError, result.errors.to_h

@@ -14,10 +14,10 @@ module Karafka
     class Config
       extend Dry::Configurable
 
-      # Schema for checking the config provided by the user
-      SCHEMA = Karafka::Schemas::Config.new.freeze
+      # Contract for checking the config provided by the user
+      CONTRACT = Karafka::Contracts::Config.new.freeze
 
-      private_constant :SCHEMA
+      private_constant :CONTRACT
 
       # Available settings
       # option client_id [String] kafka client_id - used to provide
@@ -26,23 +26,23 @@ module Karafka
       # What backend do we want to use to process messages
       setting :backend, :inline
       # option logger [Instance] logger that we want to use
-      setting :logger, -> { ::Karafka::Instrumentation::Logger.instance }
+      setting :logger, ::Karafka::Instrumentation::Logger.new
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
-      setting :monitor, -> { ::Karafka::Instrumentation::Monitor.instance }
+      setting :monitor, ::Karafka::Instrumentation::Monitor.new
       # Mapper used to remap consumer groups ids, so in case users migrate from other tools
       # or they need to maintain their own internal consumer group naming conventions, they
       # can easily do it, replacing the default client_id + consumer name pattern concept
-      setting :consumer_mapper, -> { Routing::ConsumerMapper.new }
+      setting :consumer_mapper, Routing::ConsumerMapper.new
       # Mapper used to remap names of topics, so we can have a clean internal topic naming
       # despite using any Kafka provider that uses namespacing, etc
       # It needs to implement two methods:
       #   - #incoming - for remapping from the incoming message to our internal format
       #   - #outgoing - for remapping from internal topic name into outgoing message
-      setting :topic_mapper, -> { Routing::TopicMapper.new }
+      setting :topic_mapper, Routing::TopicMapper.new
       # Default serializer for converting whatever we want to send to kafka to json
-      setting :serializer, -> { Karafka::Serialization::Json::Serializer.new }
+      setting :serializer, Karafka::Serialization::Json::Serializer.new
       # Default deserializer for converting incoming data into ruby objects
-      setting :deserializer, -> { Karafka::Serialization::Json::Deserializer.new }
+      setting :deserializer, Karafka::Serialization::Json::Deserializer.new
       # If batch_fetching is true, we will fetch kafka messages in batches instead of 1 by 1
       # @note Fetching does not equal consuming, see batch_consuming description for details
       setting :batch_fetching, true
@@ -167,6 +167,25 @@ module Karafka
         setting :sasl_oauth_token_provider, nil
       end
 
+      # Namespace for internal settings that should not be modified
+      # It's a temporary step to "declassify" several things internally before we move to a
+      # non global state
+      setting :internal do
+        # option routing_builder [Karafka::Routing::Builder] builder instance
+        setting :routing_builder, Routing::Builder.new
+        # option status [Karafka::Status] app status
+        setting :status, Status.new
+        # option process [Karafka::Process] process status
+        # @note In the future, we need to have a single process representation for all the karafka
+        #   instances
+        setting :process, Process.new
+        # option fetcher [Karafka::Fetcher] fetcher instance
+        setting :fetcher, Fetcher.new
+        # option configurators [Array<Object>] all configurators that we want to run after
+        #   the setup
+        setting :configurators, [Configurators::WaterDrop.new]
+      end
+
       class << self
         # Configuring method
         # @yield Runs a block of code providing a config singleton instance to it
@@ -179,17 +198,18 @@ module Karafka
         # Components are in karafka/config directory and are all loaded one by one
         # If you want to configure a next component, please add a proper file to config dir
         def setup_components
-          [
-            Configurators::WaterDrop
-          ].each { |configurator| configurator.call(config) }
+          config
+            .internal
+            .configurators
+            .each { |configurator| configurator.call(config) }
         end
 
-        # Validate config based on ConfigurationSchema
+        # Validate config based on the config contract
         # @return [Boolean] true if configuration is valid
         # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
-        #   doesn't match with ConfigurationSchema
+        #   doesn't match with the config contract
         def validate!
-          validation_result = SCHEMA.call(config.to_h)
+          validation_result = CONTRACT.call(config.to_h)
 
           return true if validation_result.success?
 

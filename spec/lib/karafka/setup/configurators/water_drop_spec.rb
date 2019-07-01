@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Setup::Configurators::WaterDrop do
-  subject(:water_drop_configurator) { described_class }
+  subject(:water_drop_configurator) { described_class.new }
 
   let(:config) { Karafka::App.config }
 

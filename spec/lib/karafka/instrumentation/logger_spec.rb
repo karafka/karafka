@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Instrumentation::Logger do
-  subject(:logger) { described_class.instance }
+  subject(:logger) { described_class.new }
 
   # We use a singleton logger that could be already initialized in other specs, so
   # in order to check all the behaviours we need to "reset" it to the initial state
@@ -9,9 +9,8 @@ RSpec.describe Karafka::Instrumentation::Logger do
 
   specify { expect(described_class).to be < ::Logger }
 
-  describe '#instance' do
+  describe '#new' do
     let(:target) { double }
-    let(:logger) { described_class.instance }
     let(:log_file) { Karafka::App.root.join('log', "#{Karafka.env}.log") }
     # A Pathname, because this is what is returned by File.join
     let(:log_dir) { File.dirname(log_file) }
