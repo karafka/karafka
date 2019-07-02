@@ -25,6 +25,7 @@ module Karafka
         'application_responder.rb.erb' => 'app/responders/application_responder.rb'
       }.freeze
 
+      # @param args [Array] all the things that Thor CLI accepts
       def initialize(*args)
         super
         @rails = Bundler::LockfileParser.new(
