@@ -25,6 +25,15 @@ module Karafka
         'application_responder.rb.erb' => 'app/responders/application_responder.rb'
       }.freeze
 
+      def initialize(*args)
+        super
+        @rails = Bundler::LockfileParser.new(
+          Bundler.read_file(
+            Bundler.default_lockfile
+          )
+        ).dependencies.key?('rails')
+      end
+
       # Install all required things for Karafka application in current directory
       def call
         INSTALL_DIRS.each do |dir|
@@ -45,7 +54,7 @@ module Karafka
       # This allows us to generate customized karafka.rb template with some tweaks specific for
       # Rails
       def rails?
-        self.class.const_defined?('::Rails')
+        @rails
       end
     end
   end
