@@ -30,8 +30,8 @@ module Karafka
       MUTEX.synchronize do
         # Rails reloaders
         @user_code_loaders
-          .select { |loader| loader.respond_to?(:reload!) }
-          .each(&:reload!)
+          .select { |loader| loader.respond_to?(:execute) }
+          .each(&:execute)
 
         # Zeitwerk and other reloaders
         @user_code_loaders
