@@ -14,10 +14,10 @@ module Karafka
 
     private_constant :MUTEX
 
-    # @param user_code_loaders [Object] any code loaders that we use in this app. Whether it is
+    # @param reloaders [Object] any code loaders that we use in this app. Whether it is
     #  the Rails loader, Zeitwerk or anything else that allows reloading triggering
-    def initialize(*user_code_loaders)
-      @user_code_loaders = user_code_loaders
+    def initialize(*reloaders)
+      @reloaders = reloaders
     end
 
     # Binds to the instrumentation events and triggers the user code loaders as well as Karafka app
@@ -27,14 +27,20 @@ module Karafka
     #   batches will be buffered on a newly created "per fetch" instance.
     # @param _event [Dry::Event] empty dry event
     def on_connection_listener_fetch_loop(_event)
+      reload
+    end
+
+    private
+
+    def reload
       MUTEX.synchronize do
         # Rails reloaders
-        @user_code_loaders
+        @reloaders
           .select { |loader| loader.respond_to?(:execute) }
           .each(&:execute)
 
         # Zeitwerk and other reloaders
-        @user_code_loaders
+        @reloaders
           .select { |loader| loader.respond_to?(:reload) }
           .each(&:reload)
 
