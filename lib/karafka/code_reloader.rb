@@ -20,8 +20,7 @@ module Karafka
       @reloaders = reloaders
     end
 
-    # Binds to the instrumentation events and triggers the user code loaders as well as Karafka app
-    # after each fetched batch
+    # Binds to the instrumentation events and triggers reload
     # @note Since we de-register all the user defined objects and redraw routes, it means that
     #   we won't be able to do a multi-batch buffering in the development mode as each of the
     #   batches will be buffered on a newly created "per fetch" instance.
@@ -32,6 +31,8 @@ module Karafka
 
     private
 
+    # Triggers reload of both standard and Rails reloaders as well as expires all internals of
+    # Karafka, so it can be rediscovered and rebuilt
     def reload
       MUTEX.synchronize do
         # Rails reloaders
