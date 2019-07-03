@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Process do
-  subject(:process) { described_class.instance }
+  subject(:process) { described_class.new }
 
   before { process.instance_variable_set(:@callbacks, Hash.new { |hsh, key| hsh[key] = [] }) }
 

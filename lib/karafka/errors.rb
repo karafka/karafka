@@ -28,11 +28,11 @@ module Karafka
     # topics usage definitions
     InvalidResponderUsageError = Class.new(BaseError)
 
-    # Raised when options that we provide to the responder to respond aren't what the schema
+    # Raised when options that we provide to the responder to respond aren't what the contract
     # requires
     InvalidResponderMessageOptionsError = Class.new(BaseError)
 
-    # Raised when configuration doesn't match with validation schema
+    # Raised when configuration doesn't match with validation contract
     InvalidConfigurationError = Class.new(BaseError)
 
     # Raised when we try to use Karafka CLI commands (except install) without a boot file

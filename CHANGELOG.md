@@ -10,6 +10,7 @@
 - Drop Ruby 2.3 support
 - Support for Ruby 2.6.3
 - `Karafka::Loader` has been removed in favor of Zeitwerk
+- Schemas are now contracts
 - #393 - Reorganize responders - removed `multiple_usage` constrain
 - #388 - ssl_client_cert_chain sync
 - #300 - Store value in a value key and replace its content with parsed version - without root merge

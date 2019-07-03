@@ -15,23 +15,42 @@ RSpec.describe Karafka::Cli::Install do
           .with(Karafka.root.join(dir))
       end
 
-      described_class::INSTALL_FILES_MAP.each do |source, target|
+      described_class::INSTALL_FILES_MAP.each do |_source, target|
         allow(File)
           .to receive(:exist?)
           .with(Karafka.root.join(target))
           .and_return(false)
 
-        allow(FileUtils)
-          .to receive(:cp_r)
-          .with(
-            Karafka.core_root.join("templates/#{source}"),
-            Karafka.root.join(target)
-          )
+        allow(Bundler)
+          .to receive(:read_file)
+          .and_return('')
+
+        allow(File)
+          .to receive(:open)
+          .with(Karafka.root.join(target), 'w')
       end
     end
 
     it 'expect to create proper dirs and copy template files' do
       expect { install_cli.call }.not_to raise_error
+    end
+  end
+
+  describe '#rails?' do
+    subject(:is_rails) { described_class.new(cli).rails? }
+
+    before { allow(Bundler).to receive(:read_file).and_return(gemfile) }
+
+    context 'when rails is not in the gemfile' do
+      let(:gemfile) { '' }
+
+      it { expect(is_rails).to eq false }
+    end
+
+    context 'when rails is in the gemfile' do
+      let(:gemfile) { "DEPENDENCIES\n  rails" }
+
+      it { expect(is_rails).to eq true }
     end
   end
 end

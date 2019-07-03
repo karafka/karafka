@@ -10,12 +10,10 @@ module Karafka
     #     end
     #   end
     class Builder < Concurrent::Array
-      include Singleton
+      # Consumer group consistency checking contract
+      CONTRACT = Karafka::Contracts::ConsumerGroup.new.freeze
 
-      # Consumer group consistency checking schema
-      SCHEMA = Karafka::Schemas::ConsumerGroup.new.freeze
-
-      private_constant :SCHEMA
+      private_constant :CONTRACT
 
       def initialize
         @draws = Concurrent::Array.new
@@ -27,7 +25,7 @@ module Karafka
       # @param block [Proc] block we will evaluate within the builder context
       # @yield Evaluates provided block in a builder context so we can describe routes
       # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
-      #   doesn't match with ConfigurationSchema
+      #   doesn't match with the config contract
       # @example
       #   draw do
       #     topic :xyz do
@@ -40,7 +38,7 @@ module Karafka
 
         each do |consumer_group|
           hashed_group = consumer_group.to_h
-          validation_result = SCHEMA.call(hashed_group)
+          validation_result = CONTRACT.call(hashed_group)
           next if validation_result.success?
 
           raise Errors::InvalidConfigurationError, validation_result.errors.to_h

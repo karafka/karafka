@@ -76,19 +76,19 @@ RSpec.describe Karafka::BaseResponder do
         end
       end
 
-      context 'when we have a custom options schema and invalid data' do
+      context 'when we have a custom options contract and invalid data' do
         let(:input_data) { rand.to_s }
         let(:expected_error) { Karafka::Errors::InvalidResponderMessageOptionsError }
         let(:working_class) do
           name = topic_name
           ClassBuilder.inherit(described_class) do
-            schema_class = Class.new(Dry::Validation::Contract) do
+            contract_class = Class.new(Dry::Validation::Contract) do
               params do
                 required(:key).filled(:str?)
               end
             end
 
-            self.options_schema = schema_class.new
+            self.options_contract = contract_class.new
 
             topic name
 

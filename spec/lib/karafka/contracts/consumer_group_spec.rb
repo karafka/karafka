@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Schemas::ConsumerGroup do
+RSpec.describe Karafka::Contracts::ConsumerGroup do
   subject(:check) { described_class.new.call(config) }
 
   let(:topics) do
@@ -93,7 +93,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it { expect(check).to be_success }
     end
 
-    context 'when topics do not comply with the internal schema' do
+    context 'when topics do not comply with the internal contract' do
       before do
         config[:topics][1] = config[:topics][0].dup
         config[:topics][1][:name] = nil
@@ -142,7 +142,7 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       it { expect(check).not_to be_success }
     end
 
-    context 'when seed_broker does not have a proper uri schema' do
+    context 'when seed_broker does not have a proper uri contract' do
       before { config[:seed_brokers] = ['https://github.com/karafka:80'] }
 
       it { expect(check).not_to be_success }
@@ -166,9 +166,9 @@ RSpec.describe Karafka::Schemas::ConsumerGroup do
       kafka
       plaintext
       ssl
-    ].each do |schema_prefix|
-      context "when seed_broker is a #{schema_prefix} one" do
-        before { config[:seed_brokers] = ["#{schema_prefix}://localhost:9092"] }
+    ].each do |contract_prefix|
+      context "when seed_broker is a #{contract_prefix} one" do
+        before { config[:seed_brokers] = ["#{contract_prefix}://localhost:9092"] }
 
         it { expect(check).to be_success }
       end

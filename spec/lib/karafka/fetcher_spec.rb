@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Karafka::Fetcher do
-  subject(:fetcher) { described_class }
+  subject(:fetcher) { described_class.new }
 
   describe '#fetch_loop' do
     context 'when everything is ok' do

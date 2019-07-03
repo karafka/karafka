@@ -10,7 +10,7 @@ module Karafka
       # We need to know details about consumers in order to setup components,
       # that's why we don't setup them after std setup is done
       # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
-      #   doesn't match with ConfigurationSchema
+      #   doesn't match with the config contract
       def boot!
         initialize!
         Setup::Config.validate!
@@ -20,7 +20,7 @@ module Karafka
 
       # @return [Karafka::Routing::Builder] consumers builder instance
       def consumer_groups
-        Routing::Builder.instance
+        config.internal.routing_builder
       end
 
       # Triggers reload of all cached Karafka app components, so we can use in-process
@@ -28,12 +28,12 @@ module Karafka
       def reload
         Karafka::Persistence::Consumers.clear
         Karafka::Persistence::Topics.clear
-        Karafka::Routing::Builder.instance.reload
+        config.internal.routing_builder.reload
       end
 
       Status.instance_methods(false).each do |delegated|
         define_method(delegated) do
-          Status.instance.send(delegated)
+          App.config.internal.status.send(delegated)
         end
       end
 

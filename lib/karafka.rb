@@ -69,4 +69,3 @@ Zeitwerk::Loader
   .tap(&:eager_load)
 
 Kafka::Consumer.prepend(Karafka::Patches::RubyKafka)
-Dry::Configurable::Config.prepend(Karafka::Patches::DryConfigurable)
