@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
+  # Namespace for various other libs patches
   module Patches
     # Patches for Ruby Kafka gem
     module RubyKafka

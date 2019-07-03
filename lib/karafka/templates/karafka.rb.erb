@@ -1,6 +1,24 @@
 # frozen_string_literal: true
 
-# Non Ruby on Rails setup
+<% if rails? -%>
+ENV['RAILS_ENV'] ||= 'development'
+ENV['KARAFKA_ENV'] = ENV['RAILS_ENV']
+require ::File.expand_path('../config/environment', __FILE__)
+Rails.application.eager_load!
+
+# This lines will make Karafka print to stdout like puma or unicorn
+if Rails.env.development?
+  Rails.logger.extend(
+    ActiveSupport::Logger.broadcast(
+      ActiveSupport::Logger.new($stdout)
+    )
+  )
+end
+<% else -%>
+# This file is auto-generated during the install process.
+# If by any chance you've wanted a setup for Rails app, either run the `karafka:install`
+# command again or refer to the install templates available in the source codes
+
 ENV['RACK_ENV'] ||= 'development'
 ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
 Bundler.require(:default, ENV['KARAFKA_ENV'])
@@ -18,31 +36,15 @@ APP_LOADER = Zeitwerk::Loader.new
 
 APP_LOADER.setup
 APP_LOADER.eager_load
-
-# Ruby on Rails setup
-# Remove whole non-Rails setup that is above and uncomment the lines below
-# ENV['RAILS_ENV'] ||= 'development'
-# ENV['KARAFKA_ENV'] = ENV['RAILS_ENV']
-# require ::File.expand_path('../config/environment', __FILE__)
-# Rails.application.eager_load!
-#
-# This lines will make Karafka print to stdout like puma or unicorn
-# if Rails.env.development?
-#   Rails.logger.extend(
-#     ActiveSupport::Logger.broadcast(
-#       ActiveSupport::Logger.new($stdout)
-#     )
-#   )
-# end
+<% end -%>
 
 class KarafkaApp < Karafka::App
   setup do |config|
     config.kafka.seed_brokers = %w[kafka://127.0.0.1:9092]
     config.client_id = 'example_app'
-    config.backend = :inline
-    config.batch_fetching = true
-    # Uncomment this for Rails app integration
-    # config.logger = Rails.logger
+<% if rails? -%>
+    config.logger = Rails.logger
+<% end -%>
   end
 
   # Comment out this part if you are not using instrumentation and/or you are not
@@ -52,6 +54,17 @@ class KarafkaApp < Karafka::App
   Karafka.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener.new)
   Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
   Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
+
+  # Uncomment that in order to achieve code reload in development mode
+  # Be aware, that this might have some side-effects. Please refer to the wiki
+  # for more details on benefits and downsides of the code reload in the
+  # development mode
+  #
+  # Karafka.monitor.subscribe(
+  #   Karafka::CodeReloader.new(
+  #     <%= rails? ? '*Rails.application.reloaders' : 'APP_LOADER' %>
+  #   )
+  # )
 
   consumer_groups.draw do
     # topic :example do

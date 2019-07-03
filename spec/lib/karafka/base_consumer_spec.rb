@@ -14,7 +14,15 @@ RSpec.describe Karafka::BaseConsumer do
       include Karafka::Backends::Inline
       include Karafka::Consumers::Responders
 
+      attr_reader :consumed
+
+      def initialize(*args)
+        super
+        @consumed = false
+      end
+
       def consume
+        @consumed = true
         self
       end
     end
@@ -28,9 +36,7 @@ RSpec.describe Karafka::BaseConsumer do
 
   describe '#call' do
     it 'just consumes' do
-      expect(base_consumer).to receive(:consume)
-
-      base_consumer.call
+      expect { base_consumer.call }.to change(base_consumer, :consumed)
     end
   end
 

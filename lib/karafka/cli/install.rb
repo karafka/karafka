@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'erb'
+
 module Karafka
   # Karafka framework Cli
   class Cli < Thor
@@ -18,10 +20,20 @@ module Karafka
 
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
-        'karafka.rb.example' => Karafka.boot_file.basename,
-        'application_consumer.rb.example' => 'app/consumers/application_consumer.rb',
-        'application_responder.rb.example' => 'app/responders/application_responder.rb'
+        'karafka.rb.erb' => Karafka.boot_file.basename,
+        'application_consumer.rb.erb' => 'app/consumers/application_consumer.rb',
+        'application_responder.rb.erb' => 'app/responders/application_responder.rb'
       }.freeze
+
+      # @param args [Array] all the things that Thor CLI accepts
+      def initialize(*args)
+        super
+        @rails = Bundler::LockfileParser.new(
+          Bundler.read_file(
+            Bundler.default_lockfile
+          )
+        ).dependencies.key?('rails')
+      end
 
       # Install all required things for Karafka application in current directory
       def call
@@ -31,11 +43,21 @@ module Karafka
 
         INSTALL_FILES_MAP.each do |source, target|
           target = Karafka.root.join(target)
-          next if File.exist?(target)
 
-          source = Karafka.core_root.join("templates/#{source}")
-          FileUtils.cp_r(source, target)
+          template = File.read(Karafka.core_root.join("templates/#{source}"))
+          # @todo Replace with the keyword argument version once we don't have to support
+          # Ruby < 2.6
+          render = ::ERB.new(template, nil, '-').result(binding)
+
+          File.open(target, 'w') { |file| file.write(render) }
         end
+      end
+
+      # @return [Boolean] true if we have Rails loaded
+      # This allows us to generate customized karafka.rb template with some tweaks specific for
+      # Rails
+      def rails?
+        @rails
       end
     end
   end
