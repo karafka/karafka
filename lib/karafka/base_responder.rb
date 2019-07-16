@@ -189,6 +189,7 @@ module Karafka
 
     # Method that needs to be implemented in a subclass. It should handle responding
     #   on registered topics
+    # @param _data [Object] anything that we want to use to send to Kafka
     # @raise [NotImplementedError] This method needs to be implemented in a subclass
     def respond(*_data)
       raise NotImplementedError, 'Implement this in a subclass'

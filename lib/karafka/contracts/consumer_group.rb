@@ -175,6 +175,8 @@ module Karafka
 
       private
 
+      # @param value [String] potential RSA key value
+      # @return [Boolean] is the given string a valid RSA key
       def valid_private_key?(value)
         OpenSSL::PKey::RSA.new(value)
         true
@@ -182,6 +184,8 @@ module Karafka
         false
       end
 
+      # @param value [String] potential X509 cert value
+      # @return [Boolean] is the given string a valid X509 cert
       def valid_certificate?(value)
         OpenSSL::X509::Certificate.new(value)
         true
@@ -189,6 +193,8 @@ module Karafka
         false
       end
 
+      # @param value [String] potential kafka uri
+      # @return [Boolean] true if it is a kafka uri, otherwise false
       def kafka_uri?(value)
         uri = URI.parse(value)
         URI_SCHEMES.include?(uri.scheme) && uri.port
