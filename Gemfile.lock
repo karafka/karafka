@@ -123,7 +123,6 @@ GEM
     simplecov-html (0.10.2)
     thor (0.20.3)
     thread_safe (0.3.6)
-    timecop (0.9.1)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     zeitwerk (2.1.8)
@@ -138,7 +137,6 @@ DEPENDENCIES
   karafka!
   rspec
   simplecov
-  timecop
   waterdrop!
 
 BUNDLED WITH

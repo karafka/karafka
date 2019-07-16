@@ -7,10 +7,6 @@ RSpec.describe Karafka::Params::Builders::Params do
   describe '#from_kafka_message' do
     subject(:result) { described_class.from_kafka_message(fetched_message, routing_topic) }
 
-    before { Timecop.freeze }
-
-    after { Timecop.return }
-
     it { is_expected.to be_a(Karafka::Params::Params) }
     it { expect(result.payload).to eq fetched_message.value }
     it { expect(result.partition).to eq fetched_message.partition }

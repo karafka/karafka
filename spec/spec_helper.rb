@@ -12,7 +12,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   fiddle
   simplecov
   tempfile
-  timecop
 ].each do |lib|
   require lib
 end
