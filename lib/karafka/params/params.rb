@@ -55,10 +55,11 @@ module Karafka
       private
 
       # @param payload [String] Raw data that we want to deserialize using consumer deserializer
+      # option headers [Hash] - optional - Kafka message headers
       # @return [Object] deserialized data
       def deserialize(payload)
         Karafka.monitor.instrument('params.params.deserialize', caller: self) do
-          self['deserializer'].call(payload)
+          self['deserializer'].call(payload, self['headers'])
         end
       rescue ::StandardError => e
         Karafka.monitor.instrument('params.params.deserialize.error', caller: self, error: e)
