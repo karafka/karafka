@@ -52,6 +52,7 @@
 - #483 - Upgrade dry-validation before releasing 1.3
 - #492 - Use Zeitwerk for code reload in development
 - #508 - Reset the consumers instances upon reconnecting to a cluster
+- [#530](https://github.com/karafka/karafka/pull/530) - expose ruby and ruby-kafka version
 
 ## 1.2.11
 - [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8
