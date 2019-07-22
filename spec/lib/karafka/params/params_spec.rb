@@ -2,6 +2,7 @@
 
 RSpec.describe Karafka::Params::Params do
   let(:base_params_class) { described_class }
+  let(:headers) { { message_type: 'test' } }
 
   describe 'instance methods' do
     subject(:params) { base_params_class.send(:new) }
@@ -23,6 +24,7 @@ RSpec.describe Karafka::Params::Params do
 
         before do
           params['payload'] = payload
+          params['headers'] = headers
 
           allow(params)
             .to receive(:deserialize)
@@ -47,6 +49,7 @@ RSpec.describe Karafka::Params::Params do
 
         before do
           params['payload'] = payload
+          params['headers'] = headers
 
           allow(params)
             .to receive(:deserialize)
@@ -71,6 +74,7 @@ RSpec.describe Karafka::Params::Params do
 
       before do
         params['deserializer'] = deserializer
+        params['headers'] = headers
       end
 
       context 'when we are able to successfully deserialize' do
@@ -79,7 +83,7 @@ RSpec.describe Karafka::Params::Params do
         before do
           allow(deserializer)
             .to receive(:call)
-            .with(payload)
+            .with(payload, headers)
             .and_return(deserialized_payload)
         end
 
@@ -107,7 +111,7 @@ RSpec.describe Karafka::Params::Params do
         before do
           allow(deserializer)
             .to receive(:call)
-            .with(payload)
+            .with(payload, headers)
             .and_raise(::Karafka::Errors::DeserializationError)
         end
 
@@ -123,6 +127,7 @@ RSpec.describe Karafka::Params::Params do
       topic
       partition
       offset
+      headers
       key
       create_time
     ].each do |key|
