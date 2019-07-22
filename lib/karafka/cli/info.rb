@@ -12,7 +12,9 @@ module Karafka
         config = Karafka::App.config
 
         info = [
-          "Karafka framework version: #{Karafka::VERSION}",
+          "Karafka version: #{Karafka::VERSION}",
+          "Ruby version: #{RUBY_VERSION}",
+          "Ruby-kafka version: #{::Kafka::VERSION}",
           "Application client id: #{config.client_id}",
           "Backend: #{config.backend}",
           "Batch fetching: #{config.batch_fetching}",

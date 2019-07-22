@@ -10,7 +10,9 @@ RSpec.describe Karafka::Cli::Info do
   describe '#call' do
     let(:info) do
       [
-        "Karafka framework version: #{Karafka::VERSION}",
+        "Karafka version: #{Karafka::VERSION}",
+        "Ruby version: #{RUBY_VERSION}",
+        "Ruby-kafka version: #{::Kafka::VERSION}",
         "Application client id: #{Karafka::App.config.client_id}",
         "Backend: #{Karafka::App.config.backend}",
         "Batch fetching: #{Karafka::App.config.batch_fetching}",
