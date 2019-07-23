@@ -6,10 +6,10 @@ RSpec.describe Karafka::Serialization::Json::Deserializer do
   describe '.call' do
     context 'when we can deserialize given content' do
       let(:content_source) { { rand.to_s => rand.to_s } }
-      let(:content) { content_source.to_json }
+      let(:params) { { 'payload' => content_source.to_json } }
 
       it 'expect to deserialize' do
-        expect(deserializer.call(content)).to eq content_source
+        expect(deserializer.call(params)).to eq content_source
       end
     end
 

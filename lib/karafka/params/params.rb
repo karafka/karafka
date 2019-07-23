@@ -48,21 +48,21 @@ module Karafka
         return self if self['deserialized']
 
         self['deserialized'] = true
-        self['payload'] = deserialize(self['payload'])
+        self['payload'] = deserialize(self)
         self
       end
 
       private
 
-      # @param payload [String] Raw data that we want to deserialize using consumer deserializer
-      # option headers [Hash] - optional - Kafka message headers
+      # @param params [Karafka::Params::Params] Full params object that we want to
+      # deserialize using consumer deserializer
       # @return [Object] deserialized data
-      def deserialize(payload)
-        Karafka.monitor.instrument('params.params.deserialize', caller: self) do
-          self['deserializer'].call(payload, self['headers'])
+      def deserialize(params)
+        Karafka.monitor.instrument('params.params.deserialize', caller: params) do
+          params['deserializer'].call(params)
         end
       rescue ::StandardError => e
-        Karafka.monitor.instrument('params.params.deserialize.error', caller: self, error: e)
+        Karafka.monitor.instrument('params.params.deserialize.error', caller: params, error: e)
         raise e
       end
     end
