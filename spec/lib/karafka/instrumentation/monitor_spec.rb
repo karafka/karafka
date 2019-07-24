@@ -43,7 +43,7 @@ RSpec.describe Karafka::Instrumentation::Monitor do
       let(:subscription) { Karafka.monitor.subscribe(listener.new) }
       let(:listener) do
         Class.new do
-          def on_connection_listener_fetch_loop_error(event)
+          def on_connection_listener_fetch_loop_error(_event)
             true
           end
         end
