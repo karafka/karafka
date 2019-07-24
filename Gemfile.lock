@@ -52,7 +52,7 @@ GEM
     dry-core (0.4.8)
       concurrent-ruby (~> 1.0)
     dry-equalizer (0.2.2)
-    dry-events (0.1.1)
+    dry-events (0.2.0)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.4)
       dry-equalizer (~> 0.2)

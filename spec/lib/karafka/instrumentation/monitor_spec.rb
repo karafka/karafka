@@ -40,8 +40,14 @@ RSpec.describe Karafka::Instrumentation::Monitor do
     end
 
     context 'when we have an object listener' do
-      let(:subscription) { Karafka.monitor.subscribe(listener) }
-      let(:listener) { Class.new }
+      let(:subscription) { Karafka.monitor.subscribe(listener.new) }
+      let(:listener) do
+        Class.new do
+          def on_connection_listener_fetch_loop_error(event)
+            true
+          end
+        end
+      end
 
       it { expect { subscription }.not_to raise_error }
     end
