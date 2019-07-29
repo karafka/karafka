@@ -28,7 +28,6 @@ RSpec.describe Karafka::Params::Params do
 
           allow(params)
             .to receive(:deserialize)
-            .with(params)
             .and_return(deserialized_payload)
 
           params.deserialize!
@@ -88,7 +87,7 @@ RSpec.describe Karafka::Params::Params do
         end
 
         it 'expect to return payload in a message key' do
-          expect(params.send(:deserialize, params)).to eq deserialized_payload
+          expect(params.send(:deserialize)).to eq deserialized_payload
         end
       end
 
@@ -118,7 +117,7 @@ RSpec.describe Karafka::Params::Params do
         it 'expect to monitor and reraise' do
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_args).and_yield
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_error_args)
-          expect { params.send(:deserialize, params) }.to raise_error(expected_error)
+          expect { params.send(:deserialize) }.to raise_error(expected_error)
         end
       end
     end
