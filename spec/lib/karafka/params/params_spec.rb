@@ -2,6 +2,7 @@
 
 RSpec.describe Karafka::Params::Params do
   let(:base_params_class) { described_class }
+  let(:headers) { { message_type: 'test' } }
 
   describe 'instance methods' do
     subject(:params) { base_params_class.send(:new) }
@@ -23,10 +24,10 @@ RSpec.describe Karafka::Params::Params do
 
         before do
           params['payload'] = payload
+          params['headers'] = headers
 
           allow(params)
             .to receive(:deserialize)
-            .with(payload)
             .and_return(deserialized_payload)
 
           params.deserialize!
@@ -47,6 +48,7 @@ RSpec.describe Karafka::Params::Params do
 
         before do
           params['payload'] = payload
+          params['headers'] = headers
 
           allow(params)
             .to receive(:deserialize)
@@ -71,6 +73,7 @@ RSpec.describe Karafka::Params::Params do
 
       before do
         params['deserializer'] = deserializer
+        params['headers'] = headers
       end
 
       context 'when we are able to successfully deserialize' do
@@ -79,12 +82,12 @@ RSpec.describe Karafka::Params::Params do
         before do
           allow(deserializer)
             .to receive(:call)
-            .with(payload)
+            .with(params)
             .and_return(deserialized_payload)
         end
 
         it 'expect to return payload in a message key' do
-          expect(params.send(:deserialize, payload)).to eq deserialized_payload
+          expect(params.send(:deserialize)).to eq deserialized_payload
         end
       end
 
@@ -107,14 +110,14 @@ RSpec.describe Karafka::Params::Params do
         before do
           allow(deserializer)
             .to receive(:call)
-            .with(payload)
+            .with(params)
             .and_raise(::Karafka::Errors::DeserializationError)
         end
 
         it 'expect to monitor and reraise' do
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_args).and_yield
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_error_args)
-          expect { params.send(:deserialize, payload) }.to raise_error(expected_error)
+          expect { params.send(:deserialize) }.to raise_error(expected_error)
         end
       end
     end
@@ -123,6 +126,7 @@ RSpec.describe Karafka::Params::Params do
       topic
       partition
       offset
+      headers
       key
       create_time
     ].each do |key|
