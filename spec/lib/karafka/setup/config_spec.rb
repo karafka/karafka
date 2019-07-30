@@ -22,22 +22,14 @@ RSpec.describe Karafka::Setup::Config do
       let(:error_message) { { client_id: ['must be filled'] }.to_s }
 
       before do
-        module Karafka
-          class App
-            setup do |config|
-              config.client_id = nil
-            end
-          end
+        Karafka::App.setup do |config|
+          config.client_id = nil
         end
       end
 
       after do
-        module Karafka
-          class App
-            setup do |config|
-              config.client_id = rand(100).to_s
-            end
-          end
+        Karafka::App.setup do |config|
+          config.client_id = rand(100).to_s
         end
       end
 

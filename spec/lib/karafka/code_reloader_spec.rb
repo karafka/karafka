@@ -16,6 +16,10 @@ RSpec.describe Karafka::CodeReloader do
           def execute
             @executed = true
           end
+
+          def updated?
+            true
+          end
         end.new
       end
 

@@ -12,8 +12,8 @@ RSpec.describe Karafka::Responders::Builder do
 
     context 'when we use named consumer' do
       context 'when matching responder exists' do
-        let(:responder_class) { class MatchingResponder; self end }
-        let(:consumer_class) { class MatchingConsumer; self end }
+        let(:responder_class) { stub_const('MatchingResponder', Class.new) }
+        let(:consumer_class) { stub_const('MatchingConsumer', Class.new) }
 
         before { responder_class }
 
@@ -21,7 +21,7 @@ RSpec.describe Karafka::Responders::Builder do
       end
 
       context 'when no matching responder' do
-        let(:consumer_class) { class Matching2Consumer; self end }
+        let(:consumer_class) { stub_const('Matching2Consumer', Class.new) }
 
         it { expect(builder.build).to eq nil }
       end

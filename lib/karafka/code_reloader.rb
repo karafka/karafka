@@ -16,12 +16,13 @@ module Karafka
 
     # @param reloaders [Array<Object>] any code loaders that we use in this app. Whether it is
     #  the Rails loader, Zeitwerk or anything else that allows reloading triggering
-    # @param [Proc] yields given block just before reloading. This can be used to hook custom
+    # @param block [Proc] yields given block just before reloading. This can be used to hook custom
     #   reloading stuff, that ain't reloaders (for example for resetting dry-events registry)
     def initialize(*reloaders, &block)
       @reloaders = reloaders
       @block = block
     end
+
     # Binds to the instrumentation events and triggers reload
     # @note Since we de-register all the user defined objects and redraw routes, it means that
     #   we won't be able to do a multi-batch buffering in the development mode as each of the
@@ -49,17 +50,17 @@ module Karafka
     def reload_with_rails
       updatable = @reloaders.select(&:updated?)
 
-      unless updatable.empty?
-        updatable.each(&:execute)
-        @block.call if @block
-        Karafka::App.reload
-      end
+      return if updatable.empty?
+
+      updatable.each(&:execute)
+      @block&.call
+      Karafka::App.reload
     end
 
     # Zeitwerk and other reloaders
     def reload_without_rails
       @reloaders.each(&:reload)
-      @block.call if @block
+      @block&.call
       Karafka::App.reload
     end
   end

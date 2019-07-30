@@ -11,33 +11,13 @@ RSpec.describe Karafka::Helpers::ClassMatcher do
   let(:to) { 'Matching' }
   let(:matching) { nil }
 
-  let(:mod_klass) do
-    module TestModule
-      class Super2Base
-        self
-      end
-    end
-  end
+  let(:mod_klass) { stub_const('TestModule::Super2Base', Class.new) }
+  let(:mod_matching) { stub_const('TestModule::Super2Matching', Class.new) }
+  let(:mod_non_klass) { stub_const('TestModule::SuperNonBase', Class.new) }
 
-  let(:mod_matching) do
-    module TestModule
-      class Super2Matching
-        self
-      end
-    end
-  end
-
-  let(:mod_non_klass) do
-    module TestModule
-      class SuperNonBase
-        self
-      end
-    end
-  end
-
-  let(:root_klass) { class SuperBase; self end }
-  let(:root_matching) { class SuperMatching; self end }
-  let(:root_non_klass) { class SuperNonBase; self end }
+  let(:root_klass) { stub_const('SuperBase', Class.new) }
+  let(:root_matching) { stub_const('SuperMatching', Class.new) }
+  let(:root_non_klass) { stub_const('SuperNonBase', Class.new) }
 
   before { matching }
 
@@ -80,16 +60,9 @@ RSpec.describe Karafka::Helpers::ClassMatcher do
 
     context 'when names match but not namespaces' do
       context 'when matching does not exist' do
-        let(:klass) do
-          module TestModule
-            class SuperRandBase
-              self
-            end
-          end
-        end
-
-        let(:root_klass) { class SuperRandBase; self end }
-        let(:root_matching) { class SuperRandMatching; self end }
+        let(:klass) { stub_const('TestModule::SuperRandBase', Class.new) }
+        let(:root_klass) { stub_const('SuperRandBase', Class.new) }
+        let(:root_matching) { stub_const('SuperRandMatching', Class.new) }
 
         before do
           Object.send(:remove_const, :TestModule) if defined?(TestModule)
@@ -102,24 +75,10 @@ RSpec.describe Karafka::Helpers::ClassMatcher do
       end
 
       context 'when matching does exist' do
-        let(:klass) do
-          module TestModule
-            class SuperRandBase
-              self
-            end
-          end
-        end
-
-        let(:matching) do
-          module TestModule
-            class SuperRandMatching
-              self
-            end
-          end
-        end
-
-        let(:root_klass) { class SuperRandBase; self end }
-        let(:root_matching) { class SuperRandMatching; self end }
+        let(:klass) { stub_const('TestModule::SuperRandBase', Class.new) }
+        let(:matching) { stub_const('TestModule::SuperRandMatching', Class.new) }
+        let(:root_klass) { stub_const('SuperRandBase', Class.new) }
+        let(:root_matching) { stub_const('SuperRandMatching', Class.new) }
 
         before do
           klass
