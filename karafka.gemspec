@@ -27,11 +27,16 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rake', '>= 11.3'
   spec.add_dependency 'ruby-kafka', '>= 0.7.8'
   spec.add_dependency 'thor', '~> 0.20'
-  spec.add_dependency 'waterdrop', '~> 1.3'
+  spec.add_dependency 'waterdrop', '~> 1.3.0.rc1'
   spec.add_dependency 'zeitwerk', '~> 2.1'
 
   spec.required_ruby_version = '>= 2.4.0'
 
+  if $PROGRAM_NAME.end_with?('gem')
+    spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
+  end
+
+  spec.cert_chain    = %w[certs/mensfeld.pem]
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = %w[lib]
