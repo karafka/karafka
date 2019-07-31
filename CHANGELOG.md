@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 1.3 Unreleased
+## 1.3.0.rc1 (31.07.2019)
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
 - Update ruby-kafka to the 0.7 version
 - Support messages headers receiving

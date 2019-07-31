@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'waterdrop', git: 'https://github.com/karafka/waterdrop'
+gem 'waterdrop', '1.3.0.rc1'
 
 group :test do
   gem 'activesupport'
