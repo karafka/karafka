@@ -26,6 +26,7 @@ Bundler.require(:default, ENV['KARAFKA_ENV'])
 # Zeitwerk custom loader for loading the app components before the whole
 # Karafka framework configuration
 APP_LOADER = Zeitwerk::Loader.new
+APP_LOADER.enable_reloading
 
 %w[
   lib
