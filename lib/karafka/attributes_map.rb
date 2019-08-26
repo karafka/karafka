@@ -11,9 +11,9 @@ module Karafka
   module AttributesMap
     class << self
       # What settings should go where in ruby-kafka
+      # @return [Hash] hash with proper sections on what to proxy where in Ruby-Kafka
       # @note All other settings will be passed to Kafka.new method invocation.
       #   All elements in this hash are just edge cases
-      # @return [Hash] hash with proper sections on what to proxy where in Ruby-Kafka
       def api_adapter
         {
           consumer: %i[

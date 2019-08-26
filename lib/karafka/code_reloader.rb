@@ -24,10 +24,10 @@ module Karafka
     end
 
     # Binds to the instrumentation events and triggers reload
+    # @param _event [Dry::Event] empty dry event
     # @note Since we de-register all the user defined objects and redraw routes, it means that
     #   we won't be able to do a multi-batch buffering in the development mode as each of the
     #   batches will be buffered on a newly created "per fetch" instance.
-    # @param _event [Dry::Event] empty dry event
     def on_connection_listener_fetch_loop(_event)
       reload
     end

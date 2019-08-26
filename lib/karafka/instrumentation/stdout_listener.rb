@@ -63,16 +63,16 @@ module Karafka
       end
 
       # Logs errors that are related to the connection itself
-      # @note Karafka will attempt to reconnect, so an error not a fatal
       # @param event [Dry::Events::Event] event details including payload
+      # @note Karafka will attempt to reconnect, so an error not a fatal
       def on_connection_client_fetch_loop_error(event)
         error "Client fetch loop error: #{event[:error]}"
       end
 
       # Logs info about crashed fetcher
+      # @param event [Dry::Events::Event] event details including payload
       # @note If this happens, Karafka will shutdown as it means a critical error
       #   in one of the threads
-      # @param event [Dry::Events::Event] event details including payload
       def on_fetcher_call_error(event)
         fatal "Fetcher crash due to an error: #{event[:error]}"
       end

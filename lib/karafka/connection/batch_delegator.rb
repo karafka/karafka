@@ -8,9 +8,9 @@ module Karafka
       class << self
         # Delegates messages (does something with them)
         # It will either schedule or run a proper processor action for messages
-        # @note This should be looped to obtain a constant delegating of new messages
         # @param group_id [String] group_id of a group from which a given message came
         # @param kafka_batch [<Kafka::FetchedBatch>] raw messages fetched batch
+        # @note This should be looped to obtain a constant delegating of new messages
         def call(group_id, kafka_batch)
           topic = Persistence::Topics.fetch(group_id, kafka_batch.topic)
           consumer = Persistence::Consumers.fetch(topic, kafka_batch.partition)

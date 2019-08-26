@@ -23,9 +23,9 @@ module Karafka
 
         # Used to build (if block given) and/or fetch a current consumer instance that will be
         #   used to process messages from a given topic and partition
-        # @return [Karafka::BaseConsumer] base consumer descendant
         # @param topic [Karafka::Routing::Topic] topic instance for which we might cache
         # @param partition [Integer] number of partition for which we want to cache
+        # @return [Karafka::BaseConsumer] base consumer descendant
         def fetch(topic, partition)
           current[topic][partition] ||= topic.consumer.new(topic)
         end

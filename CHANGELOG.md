@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## Unreleased
+- Drop support for Ruby 2.4
+- YARD docs tags cleanup
+
 ## 1.3.0.rc1 (31.07.2019)
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
 - Update ruby-kafka to the 0.7 version
