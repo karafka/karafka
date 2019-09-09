@@ -2,9 +2,9 @@
 
 [![Build Status](https://travis-ci.org/karafka/karafka.svg?branch=master)](https://travis-ci.org/karafka/karafka)
 
-## New release in progress!
-
 **Note**: Documentation presented here refers to Karafka `1.3.0`.
+
+If you're upgrading from `1.2.0`, please refer to our [Upgrade Notes article](https://mensfeld.pl/2019/09/karafka-framework-1-3-0-release-notes-ruby-kafka/).
 
 If you are looking for the documentation for Karafka `1.2.*`, it can be found [here](https://github.com/karafka/wiki/tree/1.2).
 
