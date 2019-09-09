@@ -4,7 +4,7 @@
 
 ## New release in progress!
 
-**Note**: Documentation presented here refers to Karafka `1.3.0.rc1`.
+**Note**: Documentation presented here refers to Karafka `1.3.0`.
 
 If you are looking for the documentation for Karafka `1.2.*`, it can be found [here](https://github.com/karafka/wiki/tree/1.2).
 
