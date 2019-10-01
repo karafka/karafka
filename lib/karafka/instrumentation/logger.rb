@@ -39,7 +39,11 @@ module Karafka
       # Makes sure the log directory exists
       def ensure_dir_exists
         dir = File.dirname(log_path)
-        FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
+        FileUtils.mkdir_p(dir) if writable_dir?
+      end
+      
+      def writable_dir?
+        File.world_writable?(dir) && !Dir.exist?(dir)
       end
 
       # @return [Pathname] Path to a file to which we should log
