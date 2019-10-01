@@ -47,10 +47,10 @@ module Karafka
           end
         end
         # This is on purpose - see the notes for this method
-        # rubocop:disable RescueException
+        # rubocop:disable Lint/RescueException
       rescue Exception => e
         Karafka.monitor.instrument('connection.listener.fetch_loop.error', caller: self, error: e)
-        # rubocop:enable RescueException
+        # rubocop:enable Lint/RescueException
         # We can stop client without a problem, as it will reinitialize itself when running the
         # `fetch_loop` again
         @client.stop
