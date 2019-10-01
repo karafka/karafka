@@ -14,9 +14,29 @@ RSpec.describe Karafka::Instrumentation::Logger do
     let(:log_file) { Karafka::App.root.join('log', "#{Karafka.env}.log") }
     # A Pathname, because this is what is returned by File.join
     let(:log_dir) { File.dirname(log_file) }
+    let(:parent_dir) { File.dirname(log_dir) }
 
     it 'expect to be of a proper level' do
       expect(logger.level).to eq ::Logger::ERROR
+    end
+
+    context 'when the dir does not exist' do
+      before do
+        logger.instance_variable_set(:'@log_path', log_path)
+        logger.send(:ensure_dir_exists)
+      end
+
+      context 'when it is not writable' do
+        let(:log_path) { '/non-existing/test.log' }
+
+        it { expect(File.exist?('/non-existing/')).to eq(false) }
+      end
+
+      context 'when it is writable' do
+        let(:log_path) { '/tmp/non-existing/test.log' }
+
+        it { expect(File.exist?(File.dirname(log_path))).to eq(true) }
+      end
     end
   end
 
