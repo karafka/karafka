@@ -87,7 +87,7 @@ GEM
     irb (1.0.0)
     json (2.2.0)
     king_konf (0.3.7)
-    minitest (5.12.2)
+    minitest (5.13.0)
     multi_json (1.14.1)
     rake (13.0.0)
     rspec (3.9.0)
