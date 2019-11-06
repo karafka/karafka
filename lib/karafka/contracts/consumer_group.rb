@@ -178,9 +178,9 @@ module Karafka
       # @param value [String] potential RSA key value
       # @return [Boolean] is the given string a valid RSA key
       def valid_private_key?(value)
-        OpenSSL::PKey::RSA.new(value)
+        OpenSSL::PKey.read(value)
         true
-      rescue OpenSSL::PKey::RSAError
+      rescue OpenSSL::PKey::PKeyError
         false
       end
 

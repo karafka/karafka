@@ -3,6 +3,7 @@
 ## Unreleased (master)
 - #545 - Makes sure the log directory exists when is possible (robertomiranda)
 - Ruby 2.6.5 support
+- #551 - add support for DSA keys
 
 ## 1.3.0 (2019-09-09)
 - Drop support for Ruby 2.4

@@ -29,8 +29,8 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
     {
       ssl_ca_cert: File.read("#{CERTS_PATH}/ca.crt"),
       ssl_ca_cert_file_path: "#{CERTS_PATH}/ca.crt",
-      ssl_client_cert: File.read("#{CERTS_PATH}/client.crt"),
-      ssl_client_cert_key: File.read("#{CERTS_PATH}/client.key"),
+      ssl_client_cert: File.read("#{CERTS_PATH}/rsa/client.crt"),
+      ssl_client_cert_key: File.read("#{CERTS_PATH}/rsa/valid.key"),
       ssl_ca_certs_from_system: true,
       ssl_client_cert_chain: File.read("#{CERTS_PATH}/client.chain"),
       sasl_over_ssl: true
@@ -577,7 +577,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
   end
 
   context 'when we validate ssl_client_cert_key' do
-    context 'when ssl_client_cert_key is nil and ssl_client_cert is nil' do
+    context 'with nil and ssl_client_cert is nil' do
       before do
         config[:ssl_client_cert] = nil
         config[:ssl_client_cert_key] = nil
@@ -587,28 +587,60 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
       it { expect(check).to be_success }
     end
 
-    context 'when ssl_client_cert_key is nil and ssl_client_cert is not nil' do
+    context 'with nil and ssl_client_cert is not nil' do
       before { config[:ssl_client_cert_key] = nil }
 
       it { expect(check).not_to be_success }
     end
 
-    context 'when ssl_client_cert_key is not a string' do
+    context 'when it is not a string' do
       before { config[:ssl_client_cert_key] = 2 }
 
       it { expect(check).not_to be_success }
     end
 
-    context 'when ssl_client_cert_key is a invalid string' do
+    context 'when it is a invalid string' do
       before { config[:ssl_client_cert_key] = 'invalid' }
 
       it { expect(check).not_to be_success }
       it { expect(check.errors.to_h.key?(:ssl_client_cert_key)).to eq true }
     end
+
+    context 'when it is a valid RSA' do
+      before do
+        config[:ssl_client_cert_key] = File.read("#{CERTS_PATH}/rsa/valid.key")
+      end
+
+      it { expect(check).to be_success }
+    end
+
+    context 'when it is a broken RSA' do
+      before do
+        config[:ssl_client_cert_key] = File.read("#{CERTS_PATH}/rsa/broken.key")
+      end
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when it is a valid DSA' do
+      before do
+        config[:ssl_client_cert_key] = File.read("#{CERTS_PATH}/dsa/valid.key")
+      end
+
+      it { expect(check).to be_success }
+    end
+
+    context 'when it is a broken DSA' do
+      before do
+        config[:ssl_client_cert_key] = File.read("#{CERTS_PATH}/dsa/broken.key")
+      end
+
+      it { expect(check).not_to be_success }
+    end
   end
 
   context 'when we validate ssl_client_cert_chain' do
-    context 'when ssl_client_cert_chain is nil and ssl_client_cert is nil' do
+    context 'with nil and ssl_client_cert is nil' do
       before do
         config[:ssl_client_cert_chain] = nil
         config[:ssl_client_cert] = nil
@@ -618,29 +650,25 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
       it { expect(check).to be_success }
     end
 
-    context 'when ssl_client_cert_chain is present but ssl_client_cert is nil' do
-      before do
-        config[:ssl_client_cert] = nil
-      end
+    context 'when it is present but ssl_client_cert is nil' do
+      before { config[:ssl_client_cert] = nil }
 
       it { expect(check).not_to be_success }
     end
 
-    context 'when ssl_client_cert_chain is present but ssl_client_cert_key is nil' do
-      before do
-        config[:ssl_client_cert_key] = nil
-      end
+    context 'when it is present but ssl_client_cert_key is nil' do
+      before { config[:ssl_client_cert_key] = nil }
 
       it { expect(check).not_to be_success }
     end
 
-    context 'when ssl_client_cert_chain is not a string' do
+    context 'when it is not a string' do
       before { config[:ssl_client_cert_chain] = 2 }
 
       it { expect(check).not_to be_success }
     end
 
-    context 'when ssl_client_cert_chain is a invalid string' do
+    context 'when it is a invalid string' do
       before { config[:ssl_client_cert_chain] = 'invalid' }
 
       it { expect(check).not_to be_success }
@@ -649,7 +677,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
   end
 
   context 'when we validate ssl_client_cert_key_password' do
-    context 'when ssl_client_cert_key_password is nil and ssl_client_cert is nil' do
+    context 'with nil and ssl_client_cert is nil' do
       before do
         config[:ssl_client_cert] = nil
         config[:ssl_client_cert_key] = nil
@@ -660,7 +688,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
       it { expect(check).to be_success }
     end
 
-    context 'when ssl_client_cert_key_password is present but ssl_client_cert is nil' do
+    context 'when it is present but ssl_client_cert is nil' do
       before do
         config[:ssl_client_cert] = nil
         config[:ssl_client_cert_key_password] = 'password'
@@ -669,7 +697,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
       it { expect(check).not_to be_success }
     end
 
-    context 'when ssl_client_cert_key_password is present but ssl_client_cert_key is nil' do
+    context 'when it is present but ssl_client_cert_key is nil' do
       before do
         config[:ssl_client_cert_key] = nil
         config[:ssl_client_cert_key_password] = 'password'
@@ -678,7 +706,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
       it { expect(check).not_to be_success }
     end
 
-    context 'when ssl_client_cert_key_password is not a string' do
+    context 'when it is not a string' do
       before { config[:ssl_client_cert_key_password] = 2 }
 
       it { expect(check).not_to be_success }
@@ -686,7 +714,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
   end
 
   context 'when we validate ssl_verify_hostname' do
-    context 'when ssl_verify_hostname is not a bool' do
+    context 'when it is not a bool' do
       before { config[:ssl_verify_hostname] = 2 }
 
       it { expect(check).not_to be_success }
@@ -694,7 +722,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
   end
 
   context 'when we validate ssl_ca_certs_from_system' do
-    context 'when ssl_ca_certs_from_system is not a bool' do
+    context 'when it is not a bool' do
       before { config[:ssl_ca_certs_from_system] = 2 }
 
       it { expect(check).not_to be_success }
@@ -702,7 +730,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
   end
 
   context 'when we validate sasl_over_ssl' do
-    context 'when sasl_over_ssl is not a bool' do
+    context 'when it is not a bool' do
       before { config[:sasl_over_ssl] = 2 }
 
       it { expect(check).not_to be_success }
@@ -710,31 +738,31 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
   end
 
   context 'when we validate sasl_scram_mechanism' do
-    context 'when sasl_scram_mechanism is nil' do
+    context 'with nil' do
       before { config[:sasl_scram_mechanism] = nil }
 
       it { expect(check).to be_success }
     end
 
-    context 'when sasl_scram_mechanism is not a string' do
+    context 'when it is not a string' do
       before { config[:sasl_scram_mechanism] = 2 }
 
       it { expect(check).not_to be_success }
     end
 
-    context 'when sasl_scram_mechanism is an invalid string' do
+    context 'when it is an invalid string' do
       before { config[:sasl_scram_mechanism] = rand.to_s }
 
       it { expect(check).not_to be_success }
     end
 
-    context 'when sasl_scram_mechanism is sha256' do
+    context 'when it is sha256' do
       before { config[:sasl_scram_mechanism] = 'sha256' }
 
       it { expect(check).to be_success }
     end
 
-    context 'when sasl_scram_mechanism is sha512' do
+    context 'when it is sha512' do
       before { config[:sasl_scram_mechanism] = 'sha512' }
 
       it { expect(check).to be_success }
@@ -742,20 +770,20 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
   end
 
   context 'when we validate sasl_oauth_token_provider' do
-    context 'when sasl_oauth_token_provider is nil' do
+    context 'with nil' do
       before { config[:sasl_oauth_token_provider] = nil }
 
       it { expect(check).to be_success }
     end
 
-    context 'when sasl_oauth_token_provider is an object without token method' do
+    context 'when it is an object without token method' do
       before { config[:sasl_oauth_token_provider] = Struct.new(:test).new }
 
       it { expect(check).to be_failure }
       it { expect { check.errors }.not_to raise_error }
     end
 
-    context 'when sasl_oauth_token_provider is an object with token method' do
+    context 'when it is an object with token method' do
       before { config[:sasl_oauth_token_provider] = Struct.new(:token).new }
 
       it { expect(check).to be_success }
