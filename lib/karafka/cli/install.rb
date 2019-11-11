@@ -13,7 +13,9 @@ module Karafka
       INSTALL_DIRS = %w[
         app/consumers
         app/responders
+        app/workers
         config
+        lib
         log
         tmp/pids
       ].freeze
