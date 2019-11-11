@@ -1,6 +1,8 @@
 # Karafka framework changelog
 
 ## Unreleased (master)
+
+## 1.3.1 (2019-11-11)
 - #545 - Makes sure the log directory exists when is possible (robertomiranda)
 - Ruby 2.6.5 support
 - #551 - add support for DSA keys
