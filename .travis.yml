@@ -21,7 +21,7 @@ jobs:
     - <<: *test
       rvm: 2.6.5
     - <<: *test
-      rvm: 2.5.5
+      rvm: 2.5.7
 
     - stage: coditsu
       language: ruby
