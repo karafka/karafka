@@ -100,7 +100,7 @@
 ## 1.2.3
 - #313 - support PLAINTEXT and SSL for scheme
 - #288 - drop activesupport callbacks in favor of notifications
-- #320 - Pausing indefinetely with nil pause timeout doesn't work
+- #320 - Pausing indefinitely with nil pause timeout doesn't work
 - #318 - Partition pausing doesn't work with custom topic mappers
 - Rename ConfigAdapter to ApiAdapter to better reflect what it does
 - #317 - Manual offset committing doesn't work with custom topic mappers
@@ -229,7 +229,7 @@
 - Switch to multi json so everyone can use their favourite JSON parser
 - Added jruby support in general and in Travis
 - #196 - Topic mapper does not map topics when subscribing thanks to @webandtech
-- #96 - Karafka server - possiblity to run it only for a certain topics
+- #96 - Karafka server - possibility to run it only for a certain topics
 - ~~karafka worker cli option is removed (please use sidekiq directly)~~ - restored, bad idea
 - (optional) pausing upon processing failures ```pause_timeout```
 - Karafka console main process no longer intercepts irb errors
@@ -237,7 +237,7 @@
 - #204 - Long running controllers
 - Better internal API to handle multiple usage cases using ```Karafka::Controllers::Includer```
 - #207 - Rename before_enqueued to after_received
-- #147 - Deattach Karafka from Sidekiq by extracting Sidekiq backend
+- #147 - De-attach Karafka from Sidekiq by extracting Sidekiq backend
 
 ### New features and improvements
 
@@ -322,7 +322,7 @@
 - Waterdrop 0.3.2.1 with kafka.hosts instead of kafka_hosts
 - #105 - Karafka::Monitor#caller_label not working with inherited monitors
 - #99 - Standalone mode (without Sidekiq)
-- #97 - Buffer responders single topics before send (prevalidation)
+- #97 - Buffer responders single topics before send (pre-validation)
 - Better control over consumer thanks to additional config options
 - #111 - Dynamic worker assignment based on the income params
 - Long shutdown time fix
@@ -330,7 +330,7 @@
 ## 0.5.0
 - Removed Zookeeper totally as dependency
 - Better group and partition rebalancing
-- Automatic thread management (no need for tunning) - each topic is a separate actor/thread
+- Automatic thread management (no need for tuning) - each topic is a separate actor/thread
 - Moved from Poseidon into Ruby-Kafka
 - No more max_concurrency setting
 - After you define your App class and routes (and everything else) you need to add execute App.boot!
@@ -346,14 +346,14 @@
 - Ruby 2.2.* support dropped
 - Using App name as a Kafka client_id
 - Automatic Capistrano integration
-- Responders support for handling better responses pipelining and better responses flow description and design (see README for more details)
+- Responders support for handling better responses pipe-lining and better responses flow description and design (see README for more details)
 - Gem bump
 - Readme updates
 - karafka flow CLI command for printing the application flow
-- Some internal refactorings
+- Some internal refactoring
 
 ## 0.4.2
-- #87 - Reconsume mode with crone for better Rails/Rack integration
+- #87 - Re-consume mode with crone for better Rails/Rack integration
 - Moved Karafka server related stuff into separate Karafka::Server class
 - Renamed Karafka::Runner into Karafka::Fetcher
 - Gem bump
@@ -365,7 +365,7 @@
 
 ## 0.4.1
 - Explicit throw(:abort) required to halt before_enqueue (like in Rails 5)
-- #61 - Autodiscover Kafka brokers based on Zookeeper data
+- #61 - autodiscovery of Kafka brokers based on Zookeeper data
 - #63 - Graceful shutdown with current offset state during data processing
 - #65 - Example of NewRelic monitor is outdated
 - #71 - Setup should be executed after user code is loaded
@@ -421,7 +421,7 @@
 - Added Karafka::Monitoring that allows to add custom logging and monitoring with external libraries and systems
 - Moved logging functionality into Karafka::Monitoring default monitoring
 - Added possibility to provide own monitoring as long as in responds to #notice and #notice_error
-- Standarized logging format for all logs
+- Standardized logging format for all logs
 
 ## 0.3.0
 - Switched from custom ParserError for each parser to general catching of Karafka::Errors::ParseError and its descendants
@@ -438,7 +438,7 @@
 
 ## 0.1.19
 - Internal call - schedule naming change
-- Enqueue to perform_async naming in controller to follow Sidekiqs naming convention
+- Enqueue to perform_async naming in controller to follow Sidekiq naming convention
 - Gem bump
 
 ## 0.1.18
@@ -449,7 +449,7 @@
 - Changed Karafka::Connection::Cluster tp Karafka::Connection::ActorCluster to distinguish between a single thread actor cluster for multiple topic connection and a future feature that will allow process clusterization.
 - Add an ability to use user-defined parsers for a messages
 - Lazy load params for before callbacks
-- Automatic loading/initializng all workers classes during startup (so Sidekiq won't fail with unknown workers exception)
+- Automatic loading/initializing all workers classes during startup (so Sidekiq won't fail with unknown workers exception)
 - Params are now private to controller
 - Added bootstrap method to app.rb
 
@@ -490,7 +490,7 @@
 - Added worker logger
 
 ## 0.1.8
-- Droped local env suppot in favour of [Envlogic](https://github.com/karafka/envlogic) - no changes in API
+- Dropped local env support in favour of [Envlogic](https://github.com/karafka/envlogic) - no changes in API
 
 ## 0.1.7
 - Karafka option for Redis hosts (not localhost only)
@@ -520,7 +520,7 @@
 
 ## 0.1.1
 - README updates
-- Raketasks updates
+- Rake tasks updates
 - Rake installation task
 - Changelog file added
 
