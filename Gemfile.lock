@@ -89,7 +89,7 @@ GEM
     king_konf (0.3.7)
     minitest (5.13.0)
     multi_json (1.14.1)
-    rake (13.0.0)
+    rake (13.0.1)
     rspec (3.9.0)
       rspec-core (~> 3.9.0)
       rspec-expectations (~> 3.9.0)
