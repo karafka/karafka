@@ -84,7 +84,7 @@ GEM
       activesupport (>= 4.2.0)
     i18n (1.7.0)
       concurrent-ruby (~> 1.0)
-    irb (1.1.0)
+    irb (1.2.0)
       reline (>= 0.0.1)
     json (2.2.0)
     king_konf (0.3.7)
