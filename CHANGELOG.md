@@ -1,7 +1,7 @@
 # Karafka framework changelog
 
 ## 1.3.2 (2019-12-23)
-- #561 - Allow `thor` 1.0.x usage in Karafka
+- #561 - Allow `thor` 1.0.x usage in Karafka (chaadow)
 
 ## 1.3.1 (2019-11-11)
 - #545 - Makes sure the log directory exists when is possible (robertomiranda)
