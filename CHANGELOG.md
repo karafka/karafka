@@ -1,7 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased (master)
-
+## 1.3.2 (2019-12-23)
 - #561 - Allow `thor` 1.0.x usage in Karafka
 
 ## 1.3.1 (2019-11-11)
