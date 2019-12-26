@@ -1,7 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased (master)
-
+## 1.3.2 (2019-12-23)
 - #561 - Allow `thor` 1.0.x usage in Karafka
 - #567 - Ruby 2.7.0 support + unfreeze of a frozen string fix
 
