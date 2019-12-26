@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 %w[
+  delegate
   English
   waterdrop
   kafka
