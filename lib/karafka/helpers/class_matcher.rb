@@ -44,7 +44,7 @@ module Karafka
       # @example From Namespaced::Super2Consumer matching responder
       #   matcher.name #=> Super2Responder
       def name
-        inflected = @klass.to_s.split('::').last.to_s
+        inflected = +@klass.to_s.split('::').last.to_s
         # We inject the from into the name just in case it is missing as in a situation like
         # that it would just sanitize the name without adding the "to" postfix.
         # It could create cases when we want to build for example a responder to a consumer

@@ -3,6 +3,7 @@
 ## Unreleased (master)
 
 - #561 - Allow `thor` 1.0.x usage in Karafka
+- #567 - Ruby 2.7.0 support + unfreeze of a frozen string fix
 
 ## 1.3.1 (2019-11-11)
 - #545 - Makes sure the log directory exists when is possible (robertomiranda)
