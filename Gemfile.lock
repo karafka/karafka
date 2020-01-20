@@ -24,7 +24,7 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
       zeitwerk (~> 2.2)
-    byebug (11.0.1)
+    byebug (11.1.0)
     concurrent-ruby (1.1.5)
     delivery_boy (1.0.0)
       king_konf (~> 0.3)
