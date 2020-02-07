@@ -70,7 +70,7 @@ RSpec.describe Karafka::Cli::Flow do
     it 'expect to printf nicely' do
       expect(flow_cli)
         .to receive(:printf)
-        .with("%-25s %s\n", "  - #{label}:", value)
+        .with("%<label>-25s %<value>s\n", label: "  - #{label}:", value: value)
 
       flow_cli.send(:print, label, value)
     end

@@ -38,7 +38,11 @@ module Karafka
       # @param label [String] label describing value
       # @param value [String] value that should be printed
       def print(label, value)
-        printf "%-25s %s\n", "  - #{label}:", value
+        printf(
+          "%<label>-25s %<value>s\n",
+          label: "  - #{label}:",
+          value: value
+        )
       end
     end
   end

@@ -45,7 +45,9 @@ end
 # jruby counts coverage a bit differently, so we ignore that
 SimpleCov.minimum_coverage jruby? ? 95 : 100
 
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
+  .sort
+  .each { |f| require f }
 
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
