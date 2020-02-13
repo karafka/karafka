@@ -108,10 +108,10 @@ GEM
     rspec-support (3.9.2)
     ruby-kafka (0.7.10)
       digest-crc
-    simplecov (0.18.1)
+    simplecov (0.18.2)
       docile (~> 1.1)
-      simplecov-html (~> 0.11.0)
-    simplecov-html (0.11.0)
+      simplecov-html (~> 0.11)
+    simplecov-html (0.12.0)
     thor (1.0.1)
     thread_safe (0.3.6)
     tzinfo (1.2.6)
