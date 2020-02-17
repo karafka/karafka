@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 1.3.4 (2020-02-17)
+- `dry-configurable` upgrade (solnic)
+- Remove temporary `thor` patches that are no longer needed
+
 ## 1.3.3 (2019-12-23)
 - Require `delegate` to fix missing dependency in `ruby-kafka`
 

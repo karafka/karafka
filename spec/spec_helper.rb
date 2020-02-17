@@ -16,15 +16,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   require lib
 end
 
-# Some object patches are here
-class Object
-  # This is a workaround class for thor patches, so it won' bother us
-  # with nonexistent method namespace (that we don't use)
-  def namespace
-    raise
-  end
-end
-
 # @return [Boolean] true if we run against jruby
 def jruby?
   (ENV['RUBY_VERSION'] || RUBY_ENGINE).include?('jruby')
