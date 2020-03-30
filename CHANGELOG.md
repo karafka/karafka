@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## master
+- #578 - ThreadError: can't be called from trap context patch
+
 ## 1.3.4 (2020-02-17)
 - `dry-configurable` upgrade (solnic)
 - Remove temporary `thor` patches that are no longer needed

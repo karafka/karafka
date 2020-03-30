@@ -58,9 +58,12 @@ module Karafka
       def stop_supervised
         Karafka::App.stop!
 
+        # Temporary patch until https://github.com/dry-rb/dry-configurable/issues/93 is fixed
+        timeout = Thread.new { Karafka::App.config.shutdown_timeout }.join.value
+
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
-        (Karafka::App.config.shutdown_timeout * SUPERVISION_CHECK_FACTOR).to_i.times do
+        (timeout * SUPERVISION_CHECK_FACTOR).to_i.times do
           if consumer_threads.count(&:alive?).zero?
             Thread.new { Karafka.monitor.instrument('app.stopped') }.join
             return
