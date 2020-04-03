@@ -18,15 +18,15 @@ test: &test
 jobs:
   include:
     - <<: *test
-      rvm: 2.7.0
+      rvm: 2.7.1
     - <<: *test
-      rvm: 2.6.5
+      rvm: 2.6.6
     - <<: *test
-      rvm: 2.5.7
+      rvm: 2.5.8
 
     - stage: coditsu
       language: ruby
-      rvm: 2.7.0
+      rvm: 2.7.1
       before_install:
         - yes | gem update --system
       script: \curl -sSL https://api.coditsu.io/run/ci | bash
