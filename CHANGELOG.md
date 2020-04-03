@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## master
+## 1.3.5 (2020-04-02)
 - #578 - ThreadError: can't be called from trap context patch
 
 ## 1.3.4 (2020-02-17)
