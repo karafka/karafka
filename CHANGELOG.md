@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- #583 - Use Karafka.logger for CLI messages (prikha)
+
 ## 1.3.5 (2020-04-02)
 - #578 - ThreadError: can't be called from trap context patch
 

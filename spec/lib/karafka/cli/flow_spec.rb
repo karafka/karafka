@@ -65,7 +65,7 @@ RSpec.describe Karafka::Cli::Flow do
 
   describe '#format' do
     subject(:formatted) { flow_cli.send(:format, 'label', 'value') }
-    
+
     it 'expect to format nicely' do
       expect(formatted).to eq('  - label:                value')
     end
