@@ -46,7 +46,7 @@ RSpec.describe Karafka::Cli::Flow do
         let(:topics) { [] }
 
         it 'expect to print that the flow is terminated' do
-          expect(flow_cli).to receive(:puts).with("#{topic} => (nothing)")
+          expect(Karafka.logger).to receive(:info).with("#{topic} => (nothing)")
           flow_cli.call
         end
       end
@@ -54,25 +54,20 @@ RSpec.describe Karafka::Cli::Flow do
       context 'when they are with outgoing topics' do
         let(:topics) { { topic => Karafka::Responders::Topic.new(topic, {}) } }
 
-        it 'expect to print flow details' do
-          expect(flow_cli).to receive(:puts)
-          expect(flow_cli).to receive(:print)
+        it 'expect to log flow details' do
+          expect(Karafka.logger).to receive(:info).once
+          expect(flow_cli).to receive(:format)
           expect { flow_cli.call }.not_to raise_error
         end
       end
     end
   end
 
-  describe '#print' do
-    let(:label) { rand.to_s }
-    let(:value) { rand.to_s }
-
-    it 'expect to printf nicely' do
-      expect(flow_cli)
-        .to receive(:printf)
-        .with("%<label>-25s %<value>s\n", label: "  - #{label}:", value: value)
-
-      flow_cli.send(:print, label, value)
+  describe '#format' do
+    subject(:formatted) { flow_cli.send(:format, 'label', 'value') }
+    
+    it 'expect to format nicely' do
+      expect(formatted).to eq('  - label:                value')
     end
   end
 end

@@ -24,7 +24,7 @@ module Karafka
           "Kafka seed brokers: #{config.kafka.seed_brokers}"
         ]
 
-        puts(info.join("\n"))
+        Karafka.logger.info(info.join("\n"))
       end
     end
   end

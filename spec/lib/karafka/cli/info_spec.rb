@@ -20,11 +20,12 @@ RSpec.describe Karafka::Cli::Info do
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
         "Kafka seed brokers: #{Karafka::App.config.kafka.seed_brokers}"
-      ]
+      ].join("\n")
     end
 
     it 'expect to print details of this Karafka app instance' do
-      expect { info_cli.call }.to output(info.join("\n") + "\n").to_stdout
+      expect(Karafka.logger).to receive(:info).with(info)
+      info_cli.call
     end
   end
 end

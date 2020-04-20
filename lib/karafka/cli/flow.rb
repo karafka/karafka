@@ -11,19 +11,22 @@ module Karafka
       def call
         topics.each do |topic|
           any_topics = !topic.responder&.topics.nil?
+          log_messages = []
 
           if any_topics
-            puts "#{topic.name} =>"
+            log_messages << "#{topic.name} =>"
 
             topic.responder.topics.each_value do |responder_topic|
               features = []
               features << (responder_topic.required? ? 'always' : 'conditionally')
 
-              print responder_topic.name, "(#{features.join(', ')})"
+              log_messages << format(responder_topic.name, "(#{features.join(', ')})")
             end
           else
-            puts "#{topic.name} => (nothing)"
+            log_messages << "#{topic.name} => (nothing)"
           end
+
+          Karafka.logger.info(log_messages.join("\n"))
         end
       end
 
@@ -34,15 +37,11 @@ module Karafka
         Karafka::App.consumer_groups.map(&:topics).flatten.sort_by(&:name)
       end
 
-      # Prints a given value with label in a nice way
+      # Formats a given value with label in a nice way
       # @param label [String] label describing value
       # @param value [String] value that should be printed
-      def print(label, value)
-        printf(
-          "%<label>-25s %<value>s\n",
-          label: "  - #{label}:",
-          value: value
-        )
+      def format(label, value)
+        "  - #{label}:                #{value}"
       end
     end
   end

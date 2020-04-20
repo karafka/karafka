@@ -47,7 +47,7 @@ end
 if ENV['KARAFKA_CONSOLE']
   # Reloads Karafka irb console session
   def reload!
-    puts "Reloading...\n"
+    Karafka.logger.info "Reloading...\n"
     Kernel.exec Karafka::Cli::Console.command
   end
 end
