@@ -23,7 +23,7 @@ RSpec.describe Karafka::Connection::ApiAdapter do
   end
 
   describe '#client' do
-    subject(:config) { described_class.client }
+    subject(:config) { described_class.client(consumer_group) }
 
     let(:expected_keys) { (attributes_map_values[:consumer] + %i[group_id]).sort }
 
@@ -58,12 +58,25 @@ RSpec.describe Karafka::Connection::ApiAdapter do
           # or new not supported settings
           next unless Karafka::App.config.kafka.respond_to?(client_key)
 
-          hashed_details[client_key] = rand.to_s
+          key_value = rand.to_s
+
+          consumer_group.public_send(:"#{client_key}=", key_value)
+          hashed_details[client_key] = key_value
         end
       end
 
       it 'expect to have all the keys as kafka requires' do
         expect(config.last.keys.sort).to eq(expected_keys - %i[seed_brokers])
+      end
+    end
+
+    context 'when seed_brokers are defined per consumer group' do
+      let(:seed_brokers) { %w[kafka://not.a.localhost:9091] }
+
+      before { consumer_group.seed_brokers = seed_brokers }
+
+      it 'expect to use them instead of system default' do
+        expect(config.first).to eq seed_brokers
       end
     end
   end
