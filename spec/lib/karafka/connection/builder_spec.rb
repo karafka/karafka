@@ -18,10 +18,18 @@ RSpec.describe Karafka::Connection::Builder do
         sasl_over_ssl: true
       ]
     end
+    let(:consumer_group) do
+      Karafka::Routing::ConsumerGroup.new(rand.to_s).tap do |cg|
+        cg.public_send(:topic=, rand.to_s) do
+          consumer Class.new(Karafka::BaseConsumer)
+          backend :inline
+        end
+      end
+    end
 
     it 'expect to build proper instance' do
       expect(Kafka).to receive(:new).with(*kafka_client_args).and_return(kafka_client)
-      expect(builder.call).to eq kafka_client
+      expect(builder.call(consumer_group)).to eq kafka_client
     end
   end
 end

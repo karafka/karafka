@@ -97,7 +97,7 @@ module Karafka
       def kafka_consumer
         # @note We don't cache the connection internally because we cache kafka_consumer that uses
         #   kafka client object instance
-        @kafka_consumer ||= Builder.call.consumer(
+        @kafka_consumer ||= Builder.call(consumer_group).consumer(
           *ApiAdapter.consumer(consumer_group)
         ).tap do |consumer|
           consumer_group.topics.each do |topic|

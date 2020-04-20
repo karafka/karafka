@@ -14,11 +14,12 @@ module Karafka
     module ApiAdapter
       class << self
         # Builds all the configuration settings for Kafka.new method
+        # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
         # @return [Array<Hash>] Array with all the client arguments including hash with all
         #   the settings required by Kafka.new method
         # @note We return array, so we can inject any arguments we want, in case of changes in the
         #   raw driver
-        def client
+        def client(consumer_group)
           # This one is a default that takes all the settings except special
           # cases defined in the map
           settings = {
@@ -33,7 +34,9 @@ module Karafka
             # from the api_adapter mapping go somewhere else, not to the client directly
             next if AttributesMap.api_adapter.values.flatten.include?(setting_name)
 
-            settings[setting_name] = setting_value
+            # Select the setting from the consumer group or fallback to the app defaults if
+            # something was not configured on a consumer group level
+            settings[setting_name] = consumer_group.to_h.fetch(setting_name) || setting_value
           end
 
           settings_hash = sanitize(settings)
