@@ -58,7 +58,10 @@ RSpec.describe Karafka::Connection::ApiAdapter do
           # or new not supported settings
           next unless Karafka::App.config.kafka.respond_to?(client_key)
 
-          hashed_details[client_key] = rand.to_s
+          key_value = rand.to_s
+
+          consumer_group.public_send(:"#{client_key}=", key_value)
+          hashed_details[client_key] = key_value
         end
       end
 
