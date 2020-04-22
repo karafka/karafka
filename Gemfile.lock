@@ -79,7 +79,7 @@ GEM
       dry-equalizer (~> 0.2)
       dry-initializer (~> 3.0)
       dry-schema (~> 1.5)
-    envlogic (1.1.0)
+    envlogic (1.1.1)
       dry-inflector (~> 0.1)
     factory_bot (5.1.2)
       activesupport (>= 4.2.0)
