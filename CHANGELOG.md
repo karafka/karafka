@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 1.3.6 (2020-04-24)
 - #583 - Use Karafka.logger for CLI messages (prikha)
 - #582 - Cannot only define seed brokers in consumer groups
 
