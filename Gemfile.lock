@@ -89,7 +89,7 @@ GEM
     irb (1.2.4)
       reline (>= 0.0.1)
     king_konf (0.3.7)
-    minitest (5.14.0)
+    minitest (5.14.1)
     multi_json (1.14.1)
     rake (13.0.1)
     reline (0.1.4)
