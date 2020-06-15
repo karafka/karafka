@@ -107,7 +107,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.9.0)
     rspec-support (3.9.3)
-    ruby-kafka (1.0.0)
+    ruby-kafka (1.1.0)
       digest-crc
     simplecov (0.18.5)
       docile (~> 1.1)
