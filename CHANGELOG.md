@@ -82,6 +82,7 @@
 - #508 - Reset the consumers instances upon reconnecting to a cluster
 - [#530](https://github.com/karafka/karafka/pull/530) - expose ruby and ruby-kafka version
 - [534](https://github.com/karafka/karafka/pull/534) - Allow to use headers in the deserializer object
+- [#319](https://github.com/karafka/karafka/pull/328) - Support for exponential backoff in pause
 
 ## 1.2.11
 - [#470](https://github.com/karafka/karafka/issues/470) Karafka not working with dry-configurable 0.8
@@ -120,7 +121,6 @@
 - #318 - Partition pausing doesn't work with custom topic mappers
 - Rename ConfigAdapter to ApiAdapter to better reflect what it does
 - #317 - Manual offset committing doesn't work with custom topic mappers
-- #319 - Support for exponential backoff in pause
 
 ## 1.2.2
 - #312 - Broken for ActiveSupport 5.2.0
