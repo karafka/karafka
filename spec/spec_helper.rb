@@ -16,11 +16,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   require lib
 end
 
-# @return [Boolean] true if we run against jruby
-def jruby?
-  (ENV['RUBY_VERSION'] || RUBY_ENGINE).include?('jruby')
-end
-
 # Don't include unnecessary stuff into rcov
 SimpleCov.start do
   add_filter '/vendor/'
@@ -33,8 +28,7 @@ SimpleCov.start do
   merge_timeout 600
 end
 
-# jruby counts coverage a bit differently, so we ignore that
-SimpleCov.minimum_coverage jruby? ? 95 : 100
+SimpleCov.minimum_coverage(100)
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
   .sort
