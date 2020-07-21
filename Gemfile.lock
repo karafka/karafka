@@ -84,7 +84,7 @@ GEM
       dry-inflector (~> 0.1)
     factory_bot (6.1.0)
       activesupport (>= 5.0.0)
-    i18n (1.8.3)
+    i18n (1.8.4)
       concurrent-ruby (~> 1.0)
     io-console (0.5.6)
     irb (1.2.4)
