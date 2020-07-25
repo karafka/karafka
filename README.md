@@ -98,4 +98,4 @@ This project exists thanks to all the people who contribute.
 
 We are looking for sustainable sponsorship. If your company is relying on Karafka framework or simply want to see Karafka evolve faster to meet your requirements, please consider backing the project.
 
-Please contact [Maciej Mensfeld](mailto:maciej@coditsu.io) directly for more details.
+Please contact [Maciej Mensfeld](mailto:maciej@mensfeld.pl) directly for more details.
