@@ -3,11 +3,11 @@
 RSpec.describe Karafka::Params::ParamsBatch do
   subject(:params_batch) { described_class.new(params_array) }
 
-  let(:serialized_payload) { { rand.to_s => rand.to_s } }
-  let(:deserialized_payload) { serialized_payload.to_json }
+  let(:deserialized_payload) { { rand.to_s => rand.to_s } }
+  let(:serialized_payload) { deserialized_payload.to_json }
   let(:topic) { build(:routing_topic) }
-  let(:kafka_message1) { build(:kafka_fetched_message, value: deserialized_payload) }
-  let(:kafka_message2) { build(:kafka_fetched_message, value: deserialized_payload) }
+  let(:kafka_message1) { build(:kafka_fetched_message, value: serialized_payload) }
+  let(:kafka_message2) { build(:kafka_fetched_message, value: serialized_payload) }
   let(:params_array) do
     [
       Karafka::Params::Builders::Params.from_kafka_message(kafka_message1, topic),
@@ -41,7 +41,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
 
   describe '#payloads' do
     it 'expect to return deserialized payloads from params within params batch' do
-      expect(params_batch.payloads).to eq [serialized_payload, serialized_payload]
+      expect(params_batch.payloads).to eq [deserialized_payload, deserialized_payload]
     end
 
     context 'when payloads were used for the first time' do
