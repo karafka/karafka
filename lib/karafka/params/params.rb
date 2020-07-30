@@ -40,6 +40,14 @@ module Karafka
         end
       end
 
+      # override Hash#[] to allow lazy deserialization of payload
+      # @param key [String, Symbol] hash key
+      # @return [any]
+      def [](key)
+        deserialize! if key == 'payload'
+        super
+      end
+
       # @return [Karafka::Params::Params] This method will trigger deserializer execution. If we
       #   decide to retrieve data, deserializer will be executed to get data. Output of that will
       #   be merged to the current object. This object will be also marked as already deserialized,
