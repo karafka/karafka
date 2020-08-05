@@ -40,10 +40,12 @@ module Karafka
         end
       end
 
-      # override Hash#[] to allow lazy deserialization of payload
+      # Overrides `Hash#[]` to allow lazy deserialization of payload. This allows us to fetch
+      # metadata without actually triggering deserialization of the payload until it is needed
       # @param key [String, Symbol] hash key
-      # @return [any]
+      # @return [Object] content of a given params key
       def [](key)
+        # Payload will be deserialized only when we request for it.
         deserialize! if key == 'payload'
         super
       end
