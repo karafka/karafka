@@ -2,6 +2,7 @@
 
 ## master
 - #599 - Allow metadata access without deserialization attempt (rabotyaga)
+- Sync with ruby-kafka `1.2.0` api
 
 ## 1.3.6 (2020-04-24)
 - #583 - Use Karafka.logger for CLI messages (prikha)
