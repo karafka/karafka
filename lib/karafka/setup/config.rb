@@ -124,6 +124,8 @@ module Karafka
         # will be killed. Note that some Kafka operations are by definition long-running, such as
         # waiting for new messages to arrive in a partition, so don't set this value too low
         setting :socket_timeout, 30
+        # option partitioner [Object, nil] the partitioner that should be used by the client
+        setting :partitioner, nil
 
         # SSL authentication related settings
         # option ca_cert [String, nil] SSL CA certificate
