@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## master
+## 1.3.7 (2020-08-11)
 - #599 - Allow metadata access without deserialization attempt (rabotyaga)
 - Sync with ruby-kafka `1.2.0` api
 
