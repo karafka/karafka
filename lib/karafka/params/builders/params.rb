@@ -15,15 +15,15 @@ module Karafka
           # @return [Karafka::Params::Params] params object with payload and message metadata
           def from_kafka_message(kafka_message, topic)
             metadata = Karafka::Params::Metadata.new(
-              kafka_message.create_time,
-              kafka_message.headers || {},
-              kafka_message.is_control_record,
-              kafka_message.key,
-              kafka_message.offset,
-              topic.deserializer,
-              kafka_message.partition,
-              Time.now,
-              topic.name
+              create_time: kafka_message.create_time,
+              headers: kafka_message.headers || {},
+              is_control_record: kafka_message.is_control_record,
+              key: kafka_message.key,
+              offset: kafka_message.offset,
+              deserializer: topic.deserializer,
+              partition: kafka_message.partition,
+              receive_time: Time.now,
+              topic: topic.name
             ).freeze
 
             Karafka::Params::Params.new(

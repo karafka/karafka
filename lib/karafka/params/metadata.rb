@@ -13,7 +13,8 @@ module Karafka
       :deserializer,
       :partition,
       :receive_time,
-      :topic
+      :topic,
+      keyword_init: true
     )
   end
 end

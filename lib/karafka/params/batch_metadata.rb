@@ -14,7 +14,8 @@ module Karafka
       :offset_lag,
       :deserializer,
       :partition,
-      :topic
+      :topic,
+      keyword_init: true
     ) do
       # @return [Boolean] is the last offset known or unknown
       def unknown_last_offset?
