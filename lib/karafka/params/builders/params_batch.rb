@@ -16,7 +16,7 @@ module Karafka
               Karafka::Params::Builders::Params.from_kafka_message(message, topic)
             end
 
-            Karafka::Params::ParamsBatch.new(params_array)
+            Karafka::Params::ParamsBatch.new(params_array).freeze
           end
         end
       end
