@@ -18,7 +18,7 @@ module Karafka
         @payload = nil
       end
 
-      # @return [Object] lazy-deserializedd data (deserialized upon first request)
+      # @return [Object] lazy-deserialized data (deserialized upon first request)
       def payload
         return @payload if deserialized?
 
