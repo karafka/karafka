@@ -26,6 +26,6 @@ RSpec.describe Karafka::Consumers::SingleParams do
   end
 
   it 'expect not to deserialize the value inside' do
-    expect(consumer.send(:params)['deserialized']).to be nil
+    expect(consumer.send(:params).deserialized?).to eq false
   end
 end

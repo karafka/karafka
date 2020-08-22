@@ -15,46 +15,45 @@ module Karafka
         @params_array = params_array
       end
 
-      # @yieldparam [Karafka::Params::Params] each deserialized and loaded params instance
-      # @note Invocation of this method will cause loading and deserializing each param after
-      #   another. If you want to get access without deserializing, please access params_array
-      #   directly
+      # @yieldparam [Karafka::Params::Params] each params instance
+      # @note Invocation of this method will not cause loading and deserializing each param after
+      #   another.
       def each
-        @params_array.each { |param| yield(param.deserialize!) }
+        @params_array.each { |param| yield(param) }
       end
 
       # @return [Array<Karafka::Params::Params>] returns all the params in a loaded state, so they
       #   can be used for batch insert, etc. Without invoking all, up until first use, they won't
       #   be deserialized
       def deserialize!
-        each(&:itself)
+        each(&:payload)
       end
 
       # @return [Array<Object>] array with deserialized payloads. This method can be useful when
       #   we don't care about metadata and just want to extract all the data payloads from the
       #   batch
       def payloads
-        deserialize!.map(&:payload)
+        map(&:payload)
       end
 
-      # @return [Karafka::Params::Params] first element after the deserialization process
+      # @return [Karafka::Params::Params] first element
       def first
-        @params_array.first.deserialize!
+        @params_array.first
       end
 
-      # @return [Karafka::Params::Params] last element after the deserialization process
+      # @return [Karafka::Params::Params] last element
       def last
-        @params_array.last.deserialize!
-      end
-
-      # @return [Array<Karafka::Params::Params>] pure array with params (not deserialized)
-      def to_a
-        @params_array
+        @params_array.last
       end
 
       # @return [Integer] number of messages in the batch
       def size
         @params_array.size
+      end
+
+      # @return [Array<Karafka::Params::Params>] pure array with params
+      def to_a
+        @params_array
       end
     end
   end

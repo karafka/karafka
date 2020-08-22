@@ -13,7 +13,8 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
 
     let(:topic) { rand.to_s }
     let(:payload) { { caller: caller, time: time } }
-    let(:caller) { instance_double(Karafka::Params::Params, topic: topic) }
+    let(:caller) { instance_double(Karafka::Params::Params, metadata: metadata) }
+    let(:metadata) { instance_double(Karafka::Params::Metadata, topic: topic) }
     let(:message) { "Params deserialization for #{topic} topic successful in #{time} ms" }
 
     it 'expect logger to log proper message' do
@@ -28,7 +29,8 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
     let(:topic_name) { rand.to_s }
     let(:payload) { { caller: caller, time: time, error: error } }
     let(:error) { Karafka::Errors::DeserializationError }
-    let(:caller) { instance_double(Karafka::Params::Params, topic: topic_name) }
+    let(:caller) { instance_double(Karafka::Params::Params, metadata: metadata) }
+    let(:metadata) { instance_double(Karafka::Params::Metadata, topic: topic_name) }
     let(:message) { "Params deserialization error for #{topic_name} topic: #{error}" }
 
     it 'expect logger to log proper message' do

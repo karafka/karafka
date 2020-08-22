@@ -11,6 +11,7 @@ module Karafka
         batch_size
         first_offset
         highwater_mark_offset
+        unknown_last_offset
         last_offset
         offset_lag
         deserializer
