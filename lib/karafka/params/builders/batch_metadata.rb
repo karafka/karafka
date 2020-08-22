@@ -3,16 +3,15 @@
 module Karafka
   module Params
     module Builders
-      # Builder for creating metadata object based on the message or batch informations
-      # @note We have 2 ways of creating metadata based on the way ruby-kafka operates
-      module Metadata
+      # Builder for creating batch metadata object based on the batch informations
+      module BatchMetadata
         class << self
           # Creates metadata based on the kafka batch data
           # @param kafka_batch [Kafka::FetchedBatch] kafka batch details
           # @param topic [Karafka::Routing::Topic] topic for which we've fetched the batch
-          # @return [Karafka::Params::Metadata] metadata object
+          # @return [Karafka::Params::BatchMetadata] batch metadata object
           def from_kafka_batch(kafka_batch, topic)
-            Karafka::Params::Metadata
+            Karafka::Params::BatchMetadata
               .new
               .merge!(
                 'batch_size' => kafka_batch.messages.count,
