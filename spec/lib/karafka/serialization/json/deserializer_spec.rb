@@ -4,9 +4,12 @@ RSpec.describe Karafka::Serialization::Json::Deserializer do
   subject(:deserializer) { described_class.new }
 
   let(:params) do
+    metadata = ::Karafka::Params::Metadata.new
+    metadata['deserializer'] = deserializer
+
     ::Karafka::Params::Params.new(
       raw_payload,
-      ::Karafka::Params::Metadata.new.merge!('deserializer' => deserializer)
+      metadata
     )
   end
 

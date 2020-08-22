@@ -9,7 +9,9 @@ RSpec.describe Karafka::Params::Params do
 
     let(:deserializer) { ->(_) { 1 } }
     let(:metadata) do
-      ::Karafka::Params::Metadata.new.merge!('deserializer' => deserializer)
+      ::Karafka::Params::Metadata.new.tap do |metadata|
+        metadata['deserializer'] = deserializer
+      end
     end
 
     describe '#deserialize!' do

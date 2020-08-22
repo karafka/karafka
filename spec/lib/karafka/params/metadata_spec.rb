@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Params::ParamsBatch do
+RSpec.describe Karafka::Params::Metadata do
   pending
 end

@@ -20,7 +20,7 @@ module Karafka
               kafka_batch.offset_lag,
               topic.deserializer,
               kafka_batch.partition,
-              topic.name,
+              topic.name
             ).freeze
           end
         end

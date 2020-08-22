@@ -183,10 +183,10 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     subject(:config) { described_class.mark_message_as_processed(params) }
 
     let(:params) do
-      Karafka::Params::Params.new(
-        '',
-        Karafka::Params::Metadata.new.merge!('topic' => 'topic-name')
-      )
+      metadata = Karafka::Params::Metadata.new
+      metadata['topic'] = 'topic-name'
+
+      Karafka::Params::Params.new('', metadata)
     end
 
     context 'when the default mapper is used' do
