@@ -29,14 +29,14 @@ module Karafka
         @payload
       end
 
-      # @return [Boolean] did givem params payload were deserialized already
+      # @return [Boolean] did given params payload were deserialized already
       def deserialized?
         @deserialized
       end
 
       private
 
-      # @return [Object] tries deserializes data
+      # @return [Object] tries de-serializes data
       def deserialize
         Karafka.monitor.instrument('params.params.deserialize', caller: self) do
           metadata.deserializer.call(self)

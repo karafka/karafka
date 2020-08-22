@@ -48,7 +48,7 @@ RSpec.describe Karafka::Params::ParamsBatch do
       before { params_batch.payloads }
 
       it 'expect to mark as serialized all the params inside the batch' do
-        expect(params_batch.to_a.all? { |params| params.deserialized? }).to eq true
+        expect(params_batch.to_a.all?(&:deserialized?)).to eq true
       end
     end
   end

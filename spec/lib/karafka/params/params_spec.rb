@@ -7,7 +7,7 @@ RSpec.describe Karafka::Params::Params do
   describe 'instance methods' do
     subject(:params) { base_params_class.new(raw_payload, metadata) }
 
-    let(:deserializer) { ->(params){ 1 } }
+    let(:deserializer) { ->(_) { 1 } }
     let(:metadata) do
       ::Karafka::Params::Metadata.new.merge!('deserializer' => deserializer)
     end

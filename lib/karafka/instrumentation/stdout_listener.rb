@@ -52,7 +52,9 @@ module Karafka
       # Logs unsuccessful deserialization attempts of incoming data
       # @param event [Dry::Events::Event] event details including payload
       def on_params_params_deserialize_error(event)
-        error "Params deserialization error for #{event[:caller].metadata.topic} topic: #{event[:error]}"
+        topic = event[:caller].metadata.topic
+        error = event[:error]
+        error "Params deserialization error for #{topic} topic: #{error}"
       end
 
       # Logs errors that occurred in a listener fetch loop
