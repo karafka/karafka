@@ -15,5 +15,7 @@ RSpec.describe Karafka::Params::Builders::BatchMetadata do
     it { expect(result.highwater_mark_offset).to eq kafka_batch.highwater_mark_offset }
     it { expect(result.unknown_last_offset?).to eq kafka_batch.unknown_last_offset? }
     it { expect(result.first_offset).to eq kafka_batch.first_offset }
+    it { expect(result.topic).to eq routing_topic.name }
+    it { expect(result).to be_frozen }
   end
 end
