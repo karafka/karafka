@@ -2,9 +2,10 @@
 
 module Karafka
   module Params
-    # Simple metadata object that stores all non-message information received from Kafka cluster
-    # while fetching the data
-    class Metadata < Hash
+    # Simple batch metadata object that stores all non-message information received from Kafka
+    # cluster while fetching the data
+    # @note This metadata object refers to per batch metadata, not `#params.metadata`
+    class BatchMetadata < Hash
       # Attributes that should be accessible as methods as well (not only hash)
       METHOD_ATTRIBUTES = %w[
         batch_size
