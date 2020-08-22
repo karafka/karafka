@@ -23,7 +23,7 @@ module Karafka
               'deserializer' => topic.deserializer,
               'partition' => kafka_message.partition,
               'receive_time' => Time.now,
-              'topic' => Karafka::App.config.topic_mapper.incoming(kafka_message.topic)
+              'topic' => topic.name
             )
 
             Karafka::Params::Params.new(
