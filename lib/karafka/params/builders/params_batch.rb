@@ -12,7 +12,7 @@ module Karafka
           # @param topic [Karafka::Routing::Topic] topic for which we're received messages
           # @return [Karafka::Params::ParamsBatch<Karafka::Params::Params>] batch with params
           def from_kafka_messages(kafka_messages, topic)
-            params_array = kafka_messages.map! do |message|
+            params_array = kafka_messages.map do |message|
               Karafka::Params::Builders::Params.from_kafka_message(message, topic)
             end
 
