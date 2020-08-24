@@ -43,7 +43,7 @@ module Karafka
         # so it returns a topic as a string, not a routing topic
         debug(
           <<~MSG.chomp.tr("\n", ' ')
-            Params deserialization for #{event[:caller].topic} topic
+            Params deserialization for #{event[:caller].metadata.topic} topic
             successful in #{event[:time]} ms
           MSG
         )
@@ -52,7 +52,9 @@ module Karafka
       # Logs unsuccessful deserialization attempts of incoming data
       # @param event [Dry::Events::Event] event details including payload
       def on_params_params_deserialize_error(event)
-        error "Params deserialization error for #{event[:caller].topic} topic: #{event[:error]}"
+        topic = event[:caller].metadata.topic
+        error = event[:error]
+        error "Params deserialization error for #{topic} topic: #{error}"
       end
 
       # Logs errors that occurred in a listener fetch loop

@@ -41,6 +41,12 @@ RSpec.describe Karafka::Params::BatchMetadata do
     it { expect(metadata.highwater_mark_offset).to eq rand_value }
   end
 
+  describe '#deserializer' do
+    before { metadata['deserializer'] = rand_value }
+
+    it { expect(metadata.deserializer).to eq rand_value }
+  end
+
   describe '#first_offset' do
     before { metadata['first_offset'] = rand_value }
 

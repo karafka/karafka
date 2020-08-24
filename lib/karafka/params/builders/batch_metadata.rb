@@ -11,19 +11,17 @@ module Karafka
           # @param topic [Karafka::Routing::Topic] topic for which we've fetched the batch
           # @return [Karafka::Params::BatchMetadata] batch metadata object
           def from_kafka_batch(kafka_batch, topic)
-            Karafka::Params::BatchMetadata
-              .new
-              .merge!(
-                'batch_size' => kafka_batch.messages.count,
-                'first_offset' => kafka_batch.first_offset,
-                'highwater_mark_offset' => kafka_batch.highwater_mark_offset,
-                'last_offset' => kafka_batch.last_offset,
-                'offset_lag' => kafka_batch.offset_lag,
-                'deserializer' => topic.deserializer,
-                'partition' => kafka_batch.partition,
-                'topic' => kafka_batch.topic,
-                'unknown_last_offset' => kafka_batch.unknown_last_offset?
-              )
+            Karafka::Params::BatchMetadata.new(
+              batch_size: kafka_batch.messages.count,
+              first_offset: kafka_batch.first_offset,
+              highwater_mark_offset: kafka_batch.highwater_mark_offset,
+              unknown_last_offset: kafka_batch.unknown_last_offset?,
+              last_offset: kafka_batch.last_offset,
+              offset_lag: kafka_batch.offset_lag,
+              deserializer: topic.deserializer,
+              partition: kafka_batch.partition,
+              topic: topic.name
+            ).freeze
           end
         end
       end

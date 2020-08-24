@@ -17,24 +17,24 @@ RSpec.describe Karafka::Params::ParamsBatch do
 
   describe '#to_a' do
     it 'expect not to deserialize data and return raw params_batch' do
-      expect(params_batch.to_a.first['deserialized']).to eq nil
+      expect(params_batch.to_a.first.deserialized?).to eq false
     end
   end
 
   describe '#deserialize!' do
     it 'expect to deserialize all the messages and return deserialized' do
       params_batch.deserialize!
-      params_batch.to_a.each { |params| expect(params['deserialized']).to eq true }
+      params_batch.to_a.each { |params| expect(params.deserialized?).to eq true }
     end
   end
 
   describe '#each' do
-    it 'expect to deserialize each at a time' do
+    it 'expect not to deserialize each at a time' do
       params_batch.each_with_index do |params, index|
-        expect(params['deserialized']).to eq true
+        expect(params.deserialized?).to eq false
         next if index > 0
 
-        expect(params_batch.to_a[index + 1]['deserialized']).to eq nil
+        expect(params_batch.to_a[index + 1].deserialized?).to eq false
       end
     end
   end
@@ -48,22 +48,22 @@ RSpec.describe Karafka::Params::ParamsBatch do
       before { params_batch.payloads }
 
       it 'expect to mark as serialized all the params inside the batch' do
-        expect(params_batch.to_a.all? { |params| params['deserialized'] }).to eq true
+        expect(params_batch.to_a.all?(&:deserialized?)).to eq true
       end
     end
   end
 
   describe '#first' do
-    it 'expect to return first element after deserializing' do
+    it 'expect to return first element without deserializing' do
       expect(params_batch.first).to eq params_batch.to_a[0]
-      expect(params_batch.first['deserialized']).to eq true
+      expect(params_batch.first.deserialized?).to eq false
     end
   end
 
   describe '#last' do
-    it 'expect to return last element after deserializing' do
+    it 'expect to return last element without deserializing' do
       expect(params_batch.last).to eq params_batch.to_a[-1]
-      expect(params_batch.last['deserialized']).to eq true
+      expect(params_batch.last.deserialized?).to eq false
     end
   end
 

@@ -17,7 +17,7 @@ module Karafka
         #   }
         #   Deserializer.call(params) #=> { 'a' => 1 }
         def call(params)
-          ::MultiJson.load(params['payload'])
+          ::MultiJson.load(params.raw_payload)
         rescue ::MultiJson::ParseError => e
           raise ::Karafka::Errors::DeserializationError, e
         end

@@ -5,32 +5,35 @@ RSpec.describe Karafka::Params::Params do
   let(:headers) { { message_type: 'test' } }
 
   describe 'instance methods' do
-    subject(:params) { base_params_class.send(:new) }
+    subject(:params) { base_params_class.new(raw_payload, metadata) }
+
+    let(:deserializer) { ->(_) { 1 } }
+    let(:metadata) do
+      ::Karafka::Params::Metadata.new.tap do |metadata|
+        metadata['deserializer'] = deserializer
+      end
+    end
 
     describe '#deserialize!' do
+      let(:raw_payload) { rand }
+
       context 'when params are already deserialized' do
-        before { params['deserialized'] = true }
+        before { params.payload }
 
         it 'expect not to deserialize again and return self' do
           expect(params).not_to receive(:deserialize)
-          expect(params).not_to receive(:merge!)
-          expect(params.deserialize!).to eq params
+          expect(params.payload).to eq 1
         end
       end
 
       context 'when params were not yet deserializeds' do
-        let(:payload) { double }
+        let(:raw_payload) { double }
         let(:deserialized_payload) { { double => double } }
 
         before do
-          params['payload'] = payload
-          params['headers'] = headers
-
           allow(params)
             .to receive(:deserialize)
             .and_return(deserialized_payload)
-
-          params.deserialize!
         end
 
         it 'expect to merge with deserialized data that is under payload key' do
@@ -38,7 +41,8 @@ RSpec.describe Karafka::Params::Params do
         end
 
         it 'expect to mark as deserialized' do
-          expect(params.deserialize!['deserialized']).to eq true
+          params.payload
+          expect(params.deserialized?).to eq true
         end
       end
 
@@ -47,34 +51,26 @@ RSpec.describe Karafka::Params::Params do
         let(:deserialized_payload) { { double => double } }
 
         before do
-          params['payload'] = payload
-          params['headers'] = headers
-
           allow(params)
             .to receive(:deserialize)
             .and_raise(Karafka::Errors::DeserializationError)
 
           begin
-            params.deserialize!
+            params.payload
           rescue Karafka::Errors::DeserializationError
             false
           end
         end
 
-        it 'expect to keep the raw payload within the params hash' do
-          expect(params['payload']).to eq(payload)
+        it 'expect not to mark raw payload as deserialized' do
+          expect(params.deserialized?).to eq false
         end
       end
     end
 
     describe '#deserialize' do
       let(:deserializer) { double }
-      let(:payload) { double }
-
-      before do
-        params['deserializer'] = deserializer
-        params['headers'] = headers
-      end
+      let(:raw_payload) { double }
 
       context 'when we are able to successfully deserialize' do
         let(:deserialized_payload) { { rand => rand } }
@@ -119,23 +115,6 @@ RSpec.describe Karafka::Params::Params do
           expect(Karafka.monitor).to receive(:instrument).with(*instrument_error_args)
           expect { params.send(:deserialize) }.to raise_error(expected_error)
         end
-      end
-    end
-
-    %w[
-      topic
-      partition
-      offset
-      headers
-      key
-      create_time
-    ].each do |key|
-      describe "\##{key}" do
-        let(:payload) { rand }
-
-        before { params[key] = payload }
-
-        it { expect(params.public_send(key)).to eq params[key] }
       end
     end
   end
