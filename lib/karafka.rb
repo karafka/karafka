@@ -6,10 +6,10 @@
   waterdrop
   kafka
   envlogic
+  json
   thor
   forwardable
   fileutils
-  multi_json
   dry-configurable
   dry-validation
   dry/events/publisher
