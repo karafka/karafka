@@ -17,7 +17,7 @@ module Karafka
         #   }
         #   Deserializer.call(params) #=> { 'a' => 1 }
         def call(params)
-          ::JSON.parse(params.raw_payload)
+          params.raw_payload.nil? ? nil : ::JSON.parse(params.raw_payload)
         rescue ::JSON::ParserError => e
           raise ::Karafka::Errors::DeserializationError, e
         end

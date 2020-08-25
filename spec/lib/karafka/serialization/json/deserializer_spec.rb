@@ -31,5 +31,14 @@ RSpec.describe Karafka::Serialization::Json::Deserializer do
         expect { params.payload }.to raise_error(expected_error)
       end
     end
+
+    context 'when we deserialize nil that can be used for log compaction' do
+      let(:content_source) { nil }
+      let(:raw_payload) { nil }
+
+      it 'expect to deserialize' do
+        expect(params.payload).to eq content_source
+      end
+    end
   end
 end
