@@ -8,7 +8,7 @@ module Karafka
 
       # @return [Karafka::Params::Params] params instance for non batch consumption consumers
       def params
-        params_batch.to_a.first
+        params_batch.first
       end
     end
   end

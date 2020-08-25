@@ -6,68 +6,40 @@ module Karafka
     # It provides lazy loading not only until the first usage, but also allows us to skip
     # using deserializer until we execute our logic. That way we can operate with
     # heavy-deserialization data without slowing down the whole application.
-    class Params < Hash
-      # Params attributes that should be available via a method call invocation for Kafka
-      # client compatibility.
-      # Kafka passes internally Kafka::FetchedMessage object and the ruby-kafka consumer
-      # uses those fields via method calls, so in order to be able to pass there our params
-      # objects, have to have same api.
-      METHOD_ATTRIBUTES = %w[
-        create_time
-        headers
-        is_control_record
-        key
-        offset
-        deserializer
-        deserialized
-        partition
-        receive_time
-        topic
-        payload
-      ].freeze
+    class Params
+      attr_reader :raw_payload, :metadata
 
-      private_constant :METHOD_ATTRIBUTES
-
-      METHOD_ATTRIBUTES.each do |attr|
-        # Defines a method call accessor to a particular hash field.
-        # @note Won't work for complex key names that contain spaces, etc
-        # @param key [Symbol] name of a field that we want to retrieve with a method call
-        # @example
-        #   key_attr_reader :example
-        #   params.example #=> 'my example payload'
-        define_method(attr) do
-          self[attr]
-        end
+      # @param raw_payload [Object] incoming payload before deserialization
+      # @param metadata [Karafka::Params::Metadata] message metadata object
+      def initialize(raw_payload, metadata)
+        @raw_payload = raw_payload
+        @metadata = metadata
+        @deserialized = false
+        @payload = nil
       end
 
-      # Overrides `Hash#[]` to allow lazy deserialization of payload. This allows us to fetch
-      # metadata without actually triggering deserialization of the payload until it is needed
-      # @param key [String, Symbol] hash key
-      # @return [Object] content of a given params key
-      def [](key)
-        # Payload will be deserialized only when we request for it.
-        deserialize! if key == 'payload'
-        super
+      # @return [Object] lazy-deserialized data (deserialized upon first request)
+      def payload
+        return @payload if deserialized?
+
+        @payload = deserialize
+        # We mark deserialization as successful after deserialization, as in case of an error
+        # this won't be falsely set to true
+        @deserialized = true
+        @payload
       end
 
-      # @return [Karafka::Params::Params] This method will trigger deserializer execution. If we
-      #   decide to retrieve data, deserializer will be executed to get data. Output of that will
-      #   be merged to the current object. This object will be also marked as already deserialized,
-      #   so we won't deserialize it again.
-      def deserialize!
-        return self if self['deserialized']
-
-        self['deserialized'] = true
-        self['payload'] = deserialize
-        self
+      # @return [Boolean] did given params payload were deserialized already
+      def deserialized?
+        @deserialized
       end
 
       private
 
-      # @return [Object] deserialized data
+      # @return [Object] tries de-serializes data
       def deserialize
         Karafka.monitor.instrument('params.params.deserialize', caller: self) do
-          self['deserializer'].call(self)
+          metadata.deserializer.call(self)
         end
       rescue ::StandardError => e
         Karafka.monitor.instrument('params.params.deserialize.error', caller: self, error: e)

@@ -3,22 +3,41 @@
 RSpec.describe Karafka::Serialization::Json::Deserializer do
   subject(:deserializer) { described_class.new }
 
+  let(:params) do
+    metadata = ::Karafka::Params::Metadata.new
+    metadata['deserializer'] = deserializer
+
+    ::Karafka::Params::Params.new(
+      raw_payload,
+      metadata
+    )
+  end
+
   describe '.call' do
-    context 'when we can deserialize given content' do
+    context 'when we can deserialize given raw_payload' do
       let(:content_source) { { rand.to_s => rand.to_s } }
-      let(:params) { { 'payload' => content_source.to_json } }
+      let(:raw_payload) { content_source.to_json }
 
       it 'expect to deserialize' do
-        expect(deserializer.call(params)).to eq content_source
+        expect(params.payload).to eq content_source
       end
     end
 
-    context 'when content is malformatted' do
-      let(:content) { 'abc' }
+    context 'when raw_payload is malformatted' do
+      let(:raw_payload) { 'abc' }
       let(:expected_error) { ::Karafka::Errors::DeserializationError }
 
       it 'expect to raise with Karafka internal deserializing error' do
-        expect { deserializer.call(content) }.to raise_error(expected_error)
+        expect { params.payload }.to raise_error(expected_error)
+      end
+    end
+
+    context 'when we deserialize nil that can be used for log compaction' do
+      let(:content_source) { nil }
+      let(:raw_payload) { nil }
+
+      it 'expect to deserialize' do
+        expect(params.payload).to eq content_source
       end
     end
   end

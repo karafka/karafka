@@ -27,7 +27,7 @@ RSpec.describe Karafka::Consumers::Includer do
     it { expect(consumer.singleton_class.include?(backends_scope::Inline)).to eq true }
     it { expect(consumer.singleton_class.include?(features_scope::SingleParams)).to eq false }
     it { expect(consumer.singleton_class.include?(features_scope::Responders)).to eq false }
-    it { expect(consumer.singleton_class.include?(features_scope::Metadata)).to eq false }
+    it { expect(consumer.singleton_class.include?(features_scope::BatchMetadata)).to eq false }
   end
 
   describe 'inline with batch fetching' do
@@ -39,7 +39,7 @@ RSpec.describe Karafka::Consumers::Includer do
     it { expect(consumer.singleton_class.include?(backends_scope::Inline)).to eq true }
     it { expect(consumer.singleton_class.include?(features_scope::SingleParams)).to eq false }
     it { expect(consumer.singleton_class.include?(features_scope::Responders)).to eq false }
-    it { expect(consumer.singleton_class.include?(features_scope::Metadata)).to eq true }
+    it { expect(consumer.singleton_class.include?(features_scope::BatchMetadata)).to eq true }
   end
 
   describe 'inline without batch consuming' do
@@ -51,7 +51,7 @@ RSpec.describe Karafka::Consumers::Includer do
     it { expect(consumer.singleton_class.include?(backends_scope::Inline)).to eq true }
     it { expect(consumer.singleton_class.include?(features_scope::SingleParams)).to eq true }
     it { expect(consumer.singleton_class.include?(features_scope::Responders)).to eq false }
-    it { expect(consumer.singleton_class.include?(features_scope::Metadata)).to eq false }
+    it { expect(consumer.singleton_class.include?(features_scope::BatchMetadata)).to eq false }
   end
 
   describe 'inline with responder' do
@@ -63,6 +63,6 @@ RSpec.describe Karafka::Consumers::Includer do
     it { expect(consumer.singleton_class.include?(backends_scope::Inline)).to eq true }
     it { expect(consumer.singleton_class.include?(features_scope::SingleParams)).to eq true }
     it { expect(consumer.singleton_class.include?(features_scope::Responders)).to eq true }
-    it { expect(consumer.singleton_class.include?(features_scope::Metadata)).to eq false }
+    it { expect(consumer.singleton_class.include?(features_scope::BatchMetadata)).to eq false }
   end
 end

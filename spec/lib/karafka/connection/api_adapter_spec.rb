@@ -182,20 +182,25 @@ RSpec.describe Karafka::Connection::ApiAdapter do
   describe '#mark_message_as_processed' do
     subject(:config) { described_class.mark_message_as_processed(params) }
 
-    let(:params) { Karafka::Params::Params.new.tap { |params| params['topic'] = 'topic-name' } }
+    let(:params) do
+      metadata = Karafka::Params::Metadata.new
+      metadata['topic'] = 'topic-name'
+
+      Karafka::Params::Params.new('', metadata)
+    end
 
     context 'when the default mapper is used' do
-      it 'expect to return exactly the same params instance as no changes needed' do
-        expect(config).to eql [params]
+      it 'expect to return exactly the same params metadata instance as no changes needed' do
+        expect(config).to eql [params.metadata]
       end
     end
 
     context 'when custom mapper is being used' do
       before { allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
 
-      it 'expect to return w new params instance with remapped topic' do
-        expect(config).not_to eql [params]
-        expect(config.first.topic).to eq "remapped-#{params.topic}"
+      it 'expect to return w new params metadata instance with remapped topic' do
+        expect(config).not_to eql [params.metadata]
+        expect(config.first.topic).to eq "remapped-#{params.metadata.topic}"
       end
     end
   end

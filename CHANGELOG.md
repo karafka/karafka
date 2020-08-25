@@ -1,5 +1,23 @@
 # Karafka framework changelog
 
+## 1.4.0-rc1 (unreleased)
+- Rename `Karafka::Params::Metadata` to `Karafka::Params::BatchMetadata`
+` Rename consumer `#metadata` to `#batch_metadata`
+- Separate metadata (including Karafka native metadata) from the root of params
+- Remove metadata hash dependency
+- Remove params dependency on a hash in favour of PORO
+- Remove batch metadata dependency on a hash
+- Remove MultiJson in favour of JSON in the default deserializer
+- allow accessing all the metadata without accessing the payload
+- freeze params and underlying elements except for the mutable payload
+- provide access to raw payload after serialization
+- fixes a bug where a non-deserializable (error) params would be marked as deserialized after first unsuccessful deserialization attempt
+- fixes bug where karafka would mutate internal ruby-kafka state
+- fixes bug where topic name in metadata would not be mapped using topic mappers
+- simplifies the params and params batch API, before `#payload` usage, it won't be deserialized
+- removes the `#[]` API from params to prevent from accessing raw data in a different way than #raw_payload
+- makes the params batch operations consistent as params payload is deserialized only when accessed explicitly
+
 ## 1.3.7 (2020-08-11)
 - #599 - Allow metadata access without deserialization attempt (rabotyaga)
 - Sync with ruby-kafka `1.2.0` api

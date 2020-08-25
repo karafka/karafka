@@ -12,22 +12,24 @@ module Karafka
         class << self
           # @param kafka_message [Kafka::FetchedMessage] message fetched from Kafka
           # @param topic [Karafka::Routing::Topic] topic for which this message was fetched
-          # @return [Karafka::Params::Params] params object
+          # @return [Karafka::Params::Params] params object with payload and message metadata
           def from_kafka_message(kafka_message, topic)
-            Karafka::Params::Params
-              .new
-              .merge!(
-                'create_time' => kafka_message.create_time,
-                'headers' => kafka_message.headers || {},
-                'is_control_record' => kafka_message.is_control_record,
-                'key' => kafka_message.key,
-                'offset' => kafka_message.offset,
-                'deserializer' => topic.deserializer,
-                'partition' => kafka_message.partition,
-                'receive_time' => Time.now,
-                'topic' => kafka_message.topic,
-                'payload' => kafka_message.value
-              )
+            metadata = Karafka::Params::Metadata.new(
+              create_time: kafka_message.create_time,
+              headers: kafka_message.headers || {},
+              is_control_record: kafka_message.is_control_record,
+              key: kafka_message.key,
+              offset: kafka_message.offset,
+              deserializer: topic.deserializer,
+              partition: kafka_message.partition,
+              receive_time: Time.now,
+              topic: topic.name
+            ).freeze
+
+            Karafka::Params::Params.new(
+              kafka_message.value,
+              metadata
+            )
           end
         end
       end
