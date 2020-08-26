@@ -7,7 +7,11 @@ module Karafka
     # using deserializer until we execute our logic. That way we can operate with
     # heavy-deserialization data without slowing down the whole application.
     class Params
+      extend Forwardable
+
       attr_reader :raw_payload, :metadata
+
+      def_delegators :metadata, *Metadata.members
 
       # @param raw_payload [Object] incoming payload before deserialization
       # @param metadata [Karafka::Params::Metadata] message metadata object
