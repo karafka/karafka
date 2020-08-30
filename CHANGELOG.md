@@ -3,7 +3,7 @@
 ## 1.4.0.rc2 (2020-08-25)
 - Rename `Karafka::Params::Metadata` to `Karafka::Params::BatchMetadata`
 ` Rename consumer `#metadata` to `#batch_metadata`
-- Separate metadata (including Karafka native metadata) from the root of params (backwards compatibility preseverd thanks to rabotyaga)
+- Separate metadata (including Karafka native metadata) from the root of params (backwards compatibility preserved thanks to rabotyaga)
 - Remove metadata hash dependency
 - Remove params dependency on a hash in favour of PORO
 - Remove batch metadata dependency on a hash
