@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (1.4.0.rc2)
+    karafka (1.4.0)
       dry-configurable (~> 0.8)
       dry-inflector (~> 0.1)
       dry-monitor (~> 0.3)
@@ -72,13 +72,13 @@ GEM
       dry-equalizer (~> 0.3)
       dry-inflector (~> 0.1, >= 0.1.2)
       dry-logic (~> 1.0, >= 1.0.2)
-    dry-validation (1.5.5)
+    dry-validation (1.5.6)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.7, >= 0.7.1)
       dry-core (~> 0.4)
       dry-equalizer (~> 0.2)
       dry-initializer (~> 3.0)
-      dry-schema (~> 1.5)
+      dry-schema (~> 1.5, >= 1.5.2)
     envlogic (1.1.2)
       dry-inflector (~> 0.1)
     factory_bot (6.1.0)

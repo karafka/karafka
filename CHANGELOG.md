@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 1.4.0.rc2 (2020-08-25)
+## 1.4.0 (2020-09-05)
 - Rename `Karafka::Params::Metadata` to `Karafka::Params::BatchMetadata`
 ` Rename consumer `#metadata` to `#batch_metadata`
 - Separate metadata (including Karafka native metadata) from the root of params (backwards compatibility preserved thanks to rabotyaga)
