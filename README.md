@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/karafka/karafka.svg?branch=master)](https://travis-ci.org/karafka/karafka)
 
-**Note**: Documentation presented here refers to **not yet** released Karafka `1.4.x`.
+**Note**: Documentation presented here refers to a **release candidate 2** of Karafka `1.4`.
 
 If you are looking for the documentation for Karafka `1.3.x`, it can be found [here](https://github.com/karafka/wiki/tree/1.3).
 
