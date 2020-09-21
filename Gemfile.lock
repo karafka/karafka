@@ -86,7 +86,7 @@ GEM
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
     io-console (0.5.6)
-    irb (1.2.6)
+    irb (1.2.7)
       reline (>= 0.1.5)
     king_konf (0.3.7)
     minitest (5.14.2)
