@@ -16,6 +16,10 @@ RSpec.describe Karafka::Cli do
     end
   end
 
+  describe '.exit_on_failure?' do
+    it { expect(cli.exit_on_failure?).to eq(true) }
+  end
+
   describe '.cli_commands' do
     let(:available_commands) do
       [
@@ -23,6 +27,7 @@ RSpec.describe Karafka::Cli do
         Karafka::Cli::Flow,
         Karafka::Cli::Info,
         Karafka::Cli::Install,
+        Karafka::Cli::Missingno,
         Karafka::Cli::Server
       ].map(&:to_s).sort
     end
