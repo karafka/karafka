@@ -8,7 +8,7 @@ module Karafka
     class ClassMatcher
       # Regexp used to remove any non classy like characters that might be in the consumer
       # class name (if defined dynamically, etc)
-      CONSTANT_REGEXP = %r{[?!=+\-\*/\^\|&\[\]<>%~\#\:\s\(\)]}.freeze
+      CONSTANT_REGEXP = %r{[?!=+\-*/\^|&\[\]<>%~\#:\s()]}.freeze
 
       private_constant :CONSTANT_REGEXP
 

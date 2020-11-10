@@ -92,14 +92,16 @@ RSpec.describe Karafka::Params::Params do
         let(:instrument_args) do
           [
             'params.params.deserialize',
-            caller: params
+            { caller: params }
           ]
         end
         let(:instrument_error_args) do
           [
             'params.params.deserialize.error',
-            caller: params,
-            error: ::Karafka::Errors::DeserializationError
+            {
+              caller: params,
+              error: ::Karafka::Errors::DeserializationError
+            }
           ]
         end
 

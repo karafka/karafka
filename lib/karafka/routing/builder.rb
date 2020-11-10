@@ -16,6 +16,7 @@ module Karafka
       private_constant :CONTRACT
 
       def initialize
+        super
         @draws = Concurrent::Array.new
       end
 

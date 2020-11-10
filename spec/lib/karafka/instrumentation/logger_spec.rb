@@ -43,12 +43,12 @@ RSpec.describe Karafka::Instrumentation::Logger do
   describe '#target' do
     let(:delegate_scope) { double }
 
-    it 'delegates write and close to STDOUT and file' do
+    it 'delegates write and close to $stdout and file' do
       expect(Karafka::Helpers::MultiDelegator).to receive(:delegate)
         .with(:write, :close)
         .and_return(delegate_scope)
 
-      expect(delegate_scope).to receive(:to).with(STDOUT, logger.send(:file))
+      expect(delegate_scope).to receive(:to).with($stdout, logger.send(:file))
 
       logger.send(:target)
     end

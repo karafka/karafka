@@ -29,11 +29,11 @@ module Karafka
 
       # @return [Karafka::Helpers::MultiDelegator] multi delegator instance
       #   to which we will be writing logs
-      # We use this approach to log stuff to file and to the STDOUT at the same time
+      # We use this approach to log stuff to file and to the $stdout at the same time
       def target
         Karafka::Helpers::MultiDelegator
           .delegate(:write, :close)
-          .to(STDOUT, file)
+          .to($stdout, file)
       end
 
       # Makes sure the log directory exists as long as we can write to it

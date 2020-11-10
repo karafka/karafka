@@ -21,8 +21,10 @@ RSpec.describe Karafka::Connection::Listener do
     let(:listener_args) do
       [
         'connection.listener.before_fetch_loop',
-        consumer_group: consumer_group,
-        client: client
+        {
+          consumer_group: consumer_group,
+          client: client
+        }
       ]
     end
 

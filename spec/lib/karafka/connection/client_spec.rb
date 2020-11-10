@@ -58,9 +58,11 @@ RSpec.describe Karafka::Connection::Client do
       [
         topic,
         partition,
-        timeout: pause_timeout,
-        max_timeout: pause_max_timeout,
-        exponential_backoff: pause_exponential_backoff
+        {
+          timeout: pause_timeout,
+          max_timeout: pause_max_timeout,
+          exponential_backoff: pause_exponential_backoff
+        }
       ]
     end
 
@@ -121,9 +123,11 @@ RSpec.describe Karafka::Connection::Client do
         [
           r_topic,
           partition,
-          timeout: pause_timeout,
-          max_timeout: pause_max_timeout,
-          exponential_backoff: pause_exponential_backoff
+          {
+            timeout: pause_timeout,
+            max_timeout: pause_max_timeout,
+            exponential_backoff: pause_exponential_backoff
+          }
         ]
       end
 
@@ -274,8 +278,10 @@ RSpec.describe Karafka::Connection::Client do
       let(:subscribe_params) do
         [
           consumer_group.topics.first.name,
-          start_from_beginning: start_from_beginning,
-          max_bytes_per_partition: 1_048_576
+          {
+            start_from_beginning: start_from_beginning,
+            max_bytes_per_partition: 1_048_576
+          }
         ]
       end
 
