@@ -43,7 +43,7 @@ module Karafka
         end
 
         # Allows to set description of a given cli command
-        # @param desc [Array] All the arguments that Thor desc method accepts
+        # @param args [Array] All the arguments that Thor desc method accepts
         def desc(*args)
           @desc ||= args
         end
