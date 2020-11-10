@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- Return non-zero exit code when printing usage
+
 ## 1.4.0 (2020-09-05)
 - Rename `Karafka::Params::Metadata` to `Karafka::Params::BatchMetadata`
 ` Rename consumer `#metadata` to `#batch_metadata`

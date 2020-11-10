@@ -43,16 +43,16 @@ module Karafka
         end
 
         # Allows to set description of a given cli command
-        # @param desc [String] Description of a given cli command
-        def desc(desc)
-          @desc ||= desc
+        # @param args [Array] All the arguments that Thor desc method accepts
+        def desc(*args)
+          @desc ||= args
         end
 
         # This method will bind a given Cli command into Karafka Cli
         # This method is a wrapper to way Thor defines its commands
         # @param cli_class [Karafka::Cli] Karafka cli_class
         def bind_to(cli_class)
-          cli_class.desc name, @desc
+          cli_class.desc name, *@desc
 
           (@options || []).each { |option| cli_class.option(*option) }
 
