@@ -10,6 +10,8 @@ module Karafka
   class Cli < Thor
     package_name 'Karafka'
 
+    default_task :missingno
+
     class << self
       # Loads all Cli commands into Thor framework
       # This method should be executed before we run Karafka::Cli.start, otherwise we won't
@@ -18,6 +20,12 @@ module Karafka
         cli_commands.each do |action|
           action.bind_to(self)
         end
+      end
+
+      # When there is a CLI crash, exit
+      # @return [true]
+      def exit_on_failure?
+        true
       end
 
       private
