@@ -123,9 +123,11 @@ RSpec.describe Karafka::Connection::Client do
         [
           r_topic,
           partition,
-          timeout: pause_timeout,
-          max_timeout: pause_max_timeout,
-          exponential_backoff: pause_exponential_backoff
+          {
+            timeout: pause_timeout,
+            max_timeout: pause_max_timeout,
+            exponential_backoff: pause_exponential_backoff
+          }
         ]
       end
 

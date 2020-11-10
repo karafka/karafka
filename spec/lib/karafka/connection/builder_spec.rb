@@ -8,14 +8,16 @@ RSpec.describe Karafka::Connection::Builder do
     let(:kafka_client_args) do
       [
         ::Karafka::App.config.kafka.seed_brokers,
-        logger: ::Karafka.logger,
-        client_id: ::Karafka::App.config.client_id,
-        socket_timeout: 30,
-        connect_timeout: 10,
-        sasl_plain_authzid: '',
-        ssl_ca_certs_from_system: false,
-        ssl_verify_hostname: true,
-        sasl_over_ssl: true
+        {
+          logger: ::Karafka.logger,
+          client_id: ::Karafka::App.config.client_id,
+          socket_timeout: 30,
+          connect_timeout: 10,
+          sasl_plain_authzid: '',
+          ssl_ca_certs_from_system: false,
+          ssl_verify_hostname: true,
+          sasl_over_ssl: true
+        }
       ]
     end
     let(:consumer_group) do
