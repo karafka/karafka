@@ -8,9 +8,11 @@ module Karafka
     class ConsumerGroup
       extend Helpers::ConfigRetriever
 
-      attr_reader :topics
-      attr_reader :id
-      attr_reader :name
+      attr_reader(
+        :topics,
+        :id,
+        :name
+      )
 
       # @param name [String, Symbol] raw name of this consumer group. Raw means, that it does not
       #   yet have an application client_id namespace, this will be added here by default.

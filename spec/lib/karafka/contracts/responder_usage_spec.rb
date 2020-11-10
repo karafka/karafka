@@ -95,37 +95,23 @@ RSpec.describe Karafka::Contracts::ResponderUsage do
       end
     end
 
-    context 'when we didnt use required topic' do
+    context 'when we didnt use required topic and no usage' do
       let(:required) { true }
       let(:usage_count) { 0 }
 
       it { expect(subcontract.call(topic_data)).not_to be_success }
     end
 
-    context 'when we did use required topic' do
+    context 'when we did use required topic and usage' do
       let(:required) { true }
       let(:usage_count) { 1 }
 
       it { expect(subcontract.call(topic_data)).to be_success }
-    end
-
-    context 'when we didnt use required topic' do
-      let(:required) { true }
-      let(:usage_count) { 0 }
-
-      it { expect(subcontract.call(topic_data)).not_to be_success }
     end
 
     context 'when we didnt use optional topic' do
       let(:required) { false }
       let(:usage_count) { 2 }
-
-      it { expect(subcontract.call(topic_data)).to be_success }
-    end
-
-    context 'when we did use required topic' do
-      let(:required) { true }
-      let(:usage_count) { 1 }
 
       it { expect(subcontract.call(topic_data)).to be_success }
     end
