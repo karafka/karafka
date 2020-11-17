@@ -253,12 +253,6 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
   end
 
   context 'when we validate assignment_strategy' do
-    context 'with nil' do
-      before { config[:assignment_strategy] = nil }
-
-      it { expect(check).to be_success }
-    end
-
     context 'when it is an object without call method' do
       before { config[:assignment_strategy] = Struct.new(:test).new }
 
