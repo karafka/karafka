@@ -48,7 +48,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
       max_bytes_per_partition: 1_048_576,
       offset_retention_time: 1000,
       fetcher_max_queue_size: 100,
-      assignment_strategy: Kafka::RoundRobinAssignmentStrategy.new,
+      assignment_strategy: Karafka::AssignmentStrategies::RoundRobin.new,
       start_from_beginning: true,
       connect_timeout: 10,
       reconnect_timeout: 10,
