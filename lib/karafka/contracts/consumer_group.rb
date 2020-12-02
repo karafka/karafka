@@ -95,7 +95,7 @@ module Karafka
       end
 
       rule(:assignment_strategy) do
-        key.failure(:does_not_respond_to_call) if !value.respond_to?(:call)
+        key.failure(:does_not_respond_to_call) unless value.respond_to?(:call)
       end
 
       rule(:ssl_client_cert, :ssl_client_cert_key) do
