@@ -32,6 +32,7 @@ module Karafka
         required(:offset_retention_time).maybe(:integer)
         required(:heartbeat_interval).filled { (int? | float?) & gteq?(0) }
         required(:fetcher_max_queue_size).filled(:int?, gt?: 0)
+        required(:assignment_strategy).value(:any)
         required(:connect_timeout).filled { (int? | float?) & gt?(0) }
         required(:reconnect_timeout).filled { (int? | float?) & gteq?(0) }
         required(:socket_timeout).filled { (int? | float?) & gt?(0) }
@@ -91,6 +92,10 @@ module Karafka
             end
           end
         end
+      end
+
+      rule(:assignment_strategy) do
+        key.failure(:does_not_respond_to_call) if !value.respond_to?(:call)
       end
 
       rule(:ssl_client_cert, :ssl_client_cert_key) do

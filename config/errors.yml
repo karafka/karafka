@@ -37,3 +37,5 @@ en:
         Unknown consumer group
       does_not_exist:
         Given file does not exist or cannot be read
+      does_not_respond_to_call: >
+        needs to respond to a #call method

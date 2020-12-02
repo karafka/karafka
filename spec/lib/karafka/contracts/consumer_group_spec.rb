@@ -48,6 +48,7 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
       max_bytes_per_partition: 1_048_576,
       offset_retention_time: 1000,
       fetcher_max_queue_size: 100,
+      assignment_strategy: Karafka::AssignmentStrategies::RoundRobin.new,
       start_from_beginning: true,
       connect_timeout: 10,
       reconnect_timeout: 10,
@@ -248,6 +249,21 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
       before { config[:fetcher_max_queue_size] = -1 }
 
       it { expect(check).not_to be_success }
+    end
+  end
+
+  context 'when we validate assignment_strategy' do
+    context 'when it is an object without call method' do
+      before { config[:assignment_strategy] = Struct.new(:test).new }
+
+      it { expect(check).to be_failure }
+      it { expect { check.errors }.not_to raise_error }
+    end
+
+    context 'when it is an object with call method' do
+      before { config[:assignment_strategy] = Struct.new(:call).new }
+
+      it { expect(check).to be_success }
     end
   end
 

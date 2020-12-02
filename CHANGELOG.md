@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Return non-zero exit code when printing usage
+- Add support for :assignment_strategy for consumers
 
 ## 1.4.0 (2020-09-05)
 - Rename `Karafka::Params::Metadata` to `Karafka::Params::BatchMetadata`

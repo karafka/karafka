@@ -89,6 +89,9 @@ module Karafka
         #   are stored for further processing. Note, that each item in the queue represents a
         #   response from a single broker
         setting :fetcher_max_queue_size, 10
+        # option assignment_strategy [Object] a strategy determining the assignment of
+        #   partitions to the consumers.
+        setting :assignment_strategy, Karafka::AssignmentStrategies::RoundRobin.new
         # option max_bytes_per_partition [Integer] the maximum amount of data fetched
         #   from a single partition at a time.
         setting :max_bytes_per_partition, 1_048_576
