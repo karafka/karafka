@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 1.4.1 (2020-12-04)
 - Return non-zero exit code when printing usage
 - Add support for :assignment_strategy for consumers
 
