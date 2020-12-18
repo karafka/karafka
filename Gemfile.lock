@@ -115,7 +115,7 @@ GEM
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.2)
     thor (1.0.1)
-    tzinfo (2.0.3)
+    tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     waterdrop (1.4.0)
       delivery_boy (>= 0.2, < 2.x)
@@ -138,4 +138,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   2.2.1
+   2.2.2
