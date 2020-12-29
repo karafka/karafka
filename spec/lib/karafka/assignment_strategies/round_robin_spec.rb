@@ -9,6 +9,10 @@ RSpec.describe Karafka::AssignmentStrategies::RoundRobin do
     let(:members) { Hash[(1..5).map { |i| ["member#{i}", nil] }] }
     let(:delegator) { strategy.__getobj__ }
 
+    let(:original_result) do
+      delegator.call(cluster: cluster, members: members, partitions: partitions)
+    end
+
     let(:partitions) do
       (1..10).map do |i|
         OpenStruct.new(name: "partition#{i}", topic: 'greetings', partition_id: i)
@@ -42,7 +46,8 @@ RSpec.describe Karafka::AssignmentStrategies::RoundRobin do
 
     it 'is delegated to Kafka::RoundRobinAssignmentStrategy' do
       expect(delegator).to receive(:call)
-        .with(cluster: cluster, members: members, partitions: partitions).and_call_original
+        .with(cluster: cluster, members: members, partitions: partitions)
+        .and_return(original_result)
 
       expect(call).to eq expected_result
     end
