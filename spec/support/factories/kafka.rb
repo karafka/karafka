@@ -39,6 +39,6 @@ FactoryBot.define do
       ]
     end
 
-    initialize_with { new(attributes) }
+    initialize_with { new(**attributes) }
   end
 end

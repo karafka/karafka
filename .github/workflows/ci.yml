@@ -12,11 +12,12 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.0'
           - '2.7'
           - '2.6'
           - '2.5'
         include:
-          - ruby: '2.7'
+          - ruby: '3.0'
             coverage: 'true'
     steps:
       - uses: actions/checkout@v2
