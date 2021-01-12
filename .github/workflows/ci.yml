@@ -8,6 +8,7 @@ on:
 jobs:
   specs:
     runs-on: ubuntu-latest
+    needs: diffend
     strategy:
       fail-fast: false
       matrix:
@@ -41,6 +42,26 @@ jobs:
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}
         run: bundle exec rspec
+
+  diffend:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0
+      - name: Install latest bundler
+        run: gem install bundler --no-document
+      - name: Install Diffend plugin
+        run: bundle plugin install diffend
+      - name: Bundle Secure
+        run: bundle secure
+
   coditsu:
     runs-on: ubuntu-latest
     strategy:
