@@ -39,7 +39,7 @@ module Karafka
       # Makes sure the log directory exists as long as we can write to it
       def ensure_dir_exists
         FileUtils.mkdir_p(File.dirname(log_path))
-      rescue Errno::EACCES
+      rescue Errno::EACCES, Errno::EROFS
         nil
       end
 
