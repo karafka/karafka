@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.4.2 (2021-02-16)
+- Rescue Errno::EROFS in ensure_dir_exists (unasuke)
+
 ## 1.4.1 (2020-12-04)
 - Return non-zero exit code when printing usage
 - Add support for :assignment_strategy for consumers
