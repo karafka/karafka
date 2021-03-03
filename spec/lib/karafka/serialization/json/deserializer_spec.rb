@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Serialization::Json::Deserializer do
+RSpec.describe_current do
   subject(:deserializer) { described_class.new }
 
   let(:params) do
-    metadata = ::Karafka::Params::Metadata.new
+    metadata = ::Karafka::Messages::Metadata.new
     metadata['deserializer'] = deserializer
 
-    ::Karafka::Params::Params.new(
+    ::Karafka::Messages::Message.new(
       raw_payload,
       metadata
     )
@@ -25,7 +25,7 @@ RSpec.describe Karafka::Serialization::Json::Deserializer do
 
     context 'when raw_payload is malformatted' do
       let(:raw_payload) { 'abc' }
-      let(:expected_error) { ::Karafka::Errors::DeserializationError }
+      let(:expected_error) { JSON::ParserError }
 
       it 'expect to raise with Karafka internal deserializing error' do
         expect { params.payload }.to raise_error(expected_error)

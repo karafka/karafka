@@ -10,7 +10,7 @@ module Karafka
       # Find a proper topic based on full topic id
       # @param topic_id [String] proper topic id (already mapped, etc) for which we want to find
       #   routing topic
-      # @return [Karafka::Routing::Route] proper route details
+      # @return [Karafka::Routing::Topic] proper route details
       # @raise [Karafka::Topic::NonMatchingTopicError] raised if topic name does not match
       #   any route defined by user using routes.draw
       def find(topic_id)

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Helpers::MultiDelegator do
+RSpec.describe_current do
   let(:methods) { [:"m1#{rand(1000)}", :"m2#{rand(1000)}"] }
 
   2.times do |i|
@@ -21,12 +21,19 @@ RSpec.describe Karafka::Helpers::MultiDelegator do
         .to(target1, target2)
     end
 
+    before do
+      methods.each do |mname|
+        allow(target1).to receive(mname)
+        allow(target2).to receive(mname)
+      end
+    end
+
     it 'delegates to all' do
       methods.each do |mname|
-        expect(target1).to receive(mname)
-        expect(target2).to receive(mname)
-
         delegator.send(mname)
+
+        expect(target1).to have_received(mname)
+        expect(target2).to have_received(mname)
       end
     end
   end

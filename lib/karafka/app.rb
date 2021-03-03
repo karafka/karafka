@@ -14,21 +14,22 @@ module Karafka
       def boot!
         initialize!
         Setup::Config.validate!
-        Setup::Config.setup_components
+        Setup::Config.configure_components
         initialized!
       end
 
-      # @return [Karafka::Routing::Builder] consumers builder instance
+      # @return [Karafka::Routing::Builder] consumers builder instance alias
       def consumer_groups
-        config.internal.routing_builder
+        config
+          .internal
+          .routing_builder
       end
 
-      # Triggers reload of all cached Karafka app components, so we can use in-process
-      # in-development hot code reloading without Karafka process restart
-      def reload
-        Karafka::Persistence::Consumers.clear
-        Karafka::Persistence::Topics.clear
-        config.internal.routing_builder.reload
+      # @return [Array<Karafka::Routing::SubscriptionGroup>] active subscription groups
+      def subscription_groups
+        consumer_groups
+          .active
+          .flat_map(&:subscription_groups)
       end
 
       Status.instance_methods(false).each do |delegated|
@@ -42,6 +43,7 @@ module Karafka
         root
         env
         logger
+        producer
         monitor
       ].each do |delegated|
         define_method(delegated) do

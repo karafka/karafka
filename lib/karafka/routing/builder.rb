@@ -17,6 +17,7 @@ module Karafka
 
       def initialize
         @draws = Concurrent::Array.new
+        super
       end
 
       # Used to draw routes for Karafka
@@ -39,6 +40,7 @@ module Karafka
         each do |consumer_group|
           hashed_group = consumer_group.to_h
           validation_result = CONTRACT.call(hashed_group)
+
           next if validation_result.success?
 
           raise Errors::InvalidConfigurationError, validation_result.errors.to_h
@@ -58,15 +60,6 @@ module Karafka
         super
       end
 
-      # Redraws all the routes for the in-process code reloading.
-      # @note This won't allow registration of new topics without process restart but will trigger
-      #   cache invalidation so all the classes, etc are re-fetched after code reload
-      def reload
-        draws = @draws.dup
-        clear
-        draws.each { |block| draw(&block) }
-      end
-
       private
 
       # Builds and saves given consumer group
@@ -81,7 +74,7 @@ module Karafka
       # @param block [Proc] proc we want to evaluate in the topic context
       def topic(topic_name, &block)
         consumer_group(topic_name) do
-          topic(topic_name, &block).tap(&:build)
+          topic(topic_name, &block)
         end
       end
     end

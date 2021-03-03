@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Routing::Builder do
+RSpec.describe_current do
   subject(:builder) { described_class.new }
 
   before { builder.clear }
@@ -18,10 +18,7 @@ RSpec.describe Karafka::Routing::Builder do
             # shitload of time to setup instance evaluation from instance variables,
             # so instead we check against constant names
             consumer Class.new(Karafka::BaseConsumer)
-            backend :inline
-            name 'name1'
             deserializer :deserializer1
-            responder :responder1
           end
         end
       end
@@ -29,10 +26,7 @@ RSpec.describe Karafka::Routing::Builder do
         builder.draw do
           topic :topic_name2 do
             consumer Class.new(Karafka::BaseConsumer)
-            backend :inline
-            name 'name2'
             deserializer :deserializer2
-            responder :responder2
           end
         end
       end
@@ -48,10 +42,8 @@ RSpec.describe Karafka::Routing::Builder do
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_topic_name1_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_topic_name2_topic_name2" }
       it { expect(builder.size).to eq 2 }
-      it { expect(topic1.name).to eq 'name1' }
-      it { expect(topic1.backend).to eq :inline }
-      it { expect(topic2.name).to eq 'name2' }
-      it { expect(topic2.backend).to eq :inline }
+      it { expect(topic1.name).to eq 'topic_name1' }
+      it { expect(topic2.name).to eq 'topic_name2' }
       it { expect(builder.first.id).to eq "#{Karafka::App.config.client_id}_topic_name1" }
       it { expect(builder.last.id).to eq "#{Karafka::App.config.client_id}_topic_name2" }
     end
@@ -62,14 +54,10 @@ RSpec.describe Karafka::Routing::Builder do
       let(:consumer_group1) do
         builder.draw do
           consumer_group :group_name1 do
-            seed_brokers ['kafka://localhost:9092']
-
             topic :topic_name1 do
+              kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)
-              backend :inline
-              name 'name1'
               deserializer :deserializer1
-              responder :responder1
             end
           end
         end
@@ -77,14 +65,10 @@ RSpec.describe Karafka::Routing::Builder do
       let(:consumer_group2) do
         builder.draw do
           consumer_group :group_name2 do
-            seed_brokers ['kafka://localhost:9093']
-
             topic :topic_name2 do
+              kafka('bootstrap.servers' => 'localhost:9093')
               consumer Class.new(Karafka::BaseConsumer)
-              backend :inline
-              name 'name2'
               deserializer :deserializer2
-              responder :responder2
             end
           end
         end
@@ -97,8 +81,6 @@ RSpec.describe Karafka::Routing::Builder do
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
-      it { expect(builder.first.seed_brokers).to eq ['kafka://localhost:9092'] }
-      it { expect(builder.last.seed_brokers).to eq ['kafka://localhost:9093'] }
       it { expect(builder.size).to eq 2 }
     end
 
@@ -109,22 +91,16 @@ RSpec.describe Karafka::Routing::Builder do
       before do
         builder.draw do
           consumer_group :group_name1 do
-            seed_brokers ['kafka://localhost:9092']
-
             topic :topic_name1 do
+              kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)
-              backend :inline
-              name 'name1'
               deserializer :deserializer1
-              responder :responder1
             end
 
             topic :topic_name2 do
+              kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)
-              backend :inline
-              name 'name2'
               deserializer :deserializer2
-              responder :responder2
             end
           end
         end
@@ -132,7 +108,6 @@ RSpec.describe Karafka::Routing::Builder do
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name2" }
-      it { expect(builder.first.seed_brokers).to eq ['kafka://localhost:9092'] }
       it { expect(builder.size).to eq 1 }
     end
 
@@ -141,7 +116,7 @@ RSpec.describe Karafka::Routing::Builder do
         builder.draw do
           consumer_group '$%^&*(' do
             topic :topic_name1 do
-              backend :inline
+              deserializer :deserializer1
             end
           end
         end
@@ -177,27 +152,5 @@ RSpec.describe Karafka::Routing::Builder do
     it 'expect to select only active consumer groups' do
       expect(builder.active).to eq [active_group]
     end
-  end
-
-  describe '#reload' do
-    let(:consumer_group) do
-      builder.draw do
-        consumer_group :group_name1 do
-          topic :topic_name1 do
-            consumer Class.new(Karafka::BaseConsumer)
-            backend :inline
-            name 'name1'
-          end
-        end
-      end
-    end
-
-    before do
-      builder.clear
-      consumer_group
-    end
-
-    it { expect { builder.reload }.to change(builder, :to_a) }
-    it { expect { builder.reload }.to(change { builder[0].topics[0].consumer }) }
   end
 end

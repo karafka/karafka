@@ -1,19 +1,10 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Setup::Config do
+RSpec.describe_current do
   subject(:config_class) { described_class }
 
   describe '#setup' do
     it { expect { |block| config_class.setup(&block) }.to yield_with_args }
-  end
-
-  describe '#setup_components' do
-    it 'expect to run setup for waterdrop' do
-      expect(Karafka::App.config.internal.configurators[0])
-        .to receive(:call).with(config_class.config)
-                          .at_least(:once)
-      config_class.send :setup_components
-    end
   end
 
   describe '#validate!' do

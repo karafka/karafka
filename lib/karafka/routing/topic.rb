@@ -2,17 +2,23 @@
 
 module Karafka
   module Routing
-    # Topic stores all the details on how we should interact with Kafka given topic
+    # Topic stores all the details on how we should interact with Kafka given topic.
     # It belongs to a consumer group as from 0.6 all the topics can work in the same consumer group
-    # It is a part of Karafka's DSL
+    # It is a part of Karafka's DSL.
     class Topic
-      extend Helpers::ConfigRetriever
-      extend Forwardable
-
-      attr_reader :id, :consumer_group
+      attr_reader :id, :name, :consumer_group
       attr_accessor :consumer
 
-      def_delegator :@consumer_group, :batch_fetching
+      # Attributes we can inherit from the root unless they were defined on this level
+      INHERITABLE_ATTRIBUTES = %i[
+        kafka
+        deserializer
+        manual_offset_management
+        max_messages
+        max_wait_time
+      ].freeze
+
+      private_constant :INHERITABLE_ATTRIBUTES
 
       # @param [String, Symbol] name of a topic on which we want to listen
       # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
@@ -22,40 +28,37 @@ module Karafka
         @attributes = {}
         # @note We use identifier related to the consumer group that owns a topic, because from
         #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can
-        #   have same topic name across multiple Kafkas
+        #   have same topic name across multiple consumer groups
         @id = "#{consumer_group.id}_#{@name}"
       end
 
-      # Initializes default values for all the options that support defaults if their values are
-      # not yet specified. This is need to be done (cannot be lazy loaded on first use) because
-      # everywhere except Karafka server command, those would not be initialized on time - for
-      # example for Sidekiq
-      def build
-        Karafka::AttributesMap.topic.each { |attr| send(attr) }
-        self
-      end
+      INHERITABLE_ATTRIBUTES.each do |attribute|
+        attr_writer attribute
 
-      # @return [Class, nil] Class (not an instance) of a responder that should respond from
-      #   consumer back to Kafka (useful for piping data flows)
-      def responder
-        @responder ||= Karafka::Responders::Builder.new(consumer).build
-      end
+        define_method attribute do
+          current_value = instance_variable_get(:"@#{attribute}")
 
-      Karafka::AttributesMap.topic.each do |attribute|
-        config_retriever_for(attribute)
+          return current_value unless current_value.nil?
+
+          value = Karafka::App.config.send(attribute)
+
+          instance_variable_set(:"@#{attribute}", value)
+        end
       end
 
       # @return [Hash] hash with all the topic attributes
       # @note This is being used when we validate the consumer_group and its topics
       def to_h
-        map = Karafka::AttributesMap.topic.map do |attribute|
+        map = INHERITABLE_ATTRIBUTES.map do |attribute|
           [attribute, public_send(attribute)]
         end
 
         Hash[map].merge!(
           id: id,
-          consumer: consumer
-        )
+          name: name,
+          consumer: consumer,
+          consumer_group_id: consumer_group.id
+        ).freeze
       end
     end
   end

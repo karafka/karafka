@@ -5,6 +5,6 @@ module Karafka
   module Contracts
     # Regexp for validating format of groups and topics
     # @note It is not nested inside of the contracts, as it is used by couple of them
-    TOPIC_REGEXP = /\A(\w|\-|\.)+\z/.freeze
+    TOPIC_REGEXP = /\A(\w|-|\.)+\z/
   end
 end

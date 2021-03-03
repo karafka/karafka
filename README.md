@@ -1,43 +1,24 @@
 ![karafka logo](https://raw.githubusercontent.com/karafka/misc/master/logo/karafka_logotype_transparent2.png)
 
-[![Build Status](https://travis-ci.org/karafka/karafka.svg?branch=master)](https://travis-ci.org/karafka/karafka)
+[![Build Status](https://github.com/karafka/karafka/actions/workflows/ci.yml/badge.svg)](https://github.com/karafka/karafka/actions/workflows/ci.yml)
+[![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
+[![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka)
 
-**Note**: Documentation presented here refers to Karafka `1.4`.
-
-If you are looking for the documentation for Karafka `1.3.x`, it can be found [here](https://github.com/karafka/wiki/tree/1.3).
+**Note**: All of the documentation here refers to Karafka `2.0`. If you are looking for the documentation to Karafka `1.4` please click here (TBA).
 
 ## About Karafka
 
-Framework used to simplify Apache Kafka based Ruby applications development.
+Karafka is a framework used to simplify Apache Kafka based Ruby and Ruby on Rails applications development.
 
 Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming and processing this data, without having to focus on things that are not your business domain.
 
-Karafka not only handles incoming messages but also provides tools for building complex data-flow applications that receive and send messages.
-
-## How does it work
-
-Karafka provides a higher-level abstraction that allows you to focus on your business logic development, instead of focusing on implementing lower level abstraction layers. It provides developers with a set of tools that are dedicated for building multi-topic applications similar to how Rails applications are being built.
-
-### Some things you might wonder about:
+Karafka uses threads to handle many messages at the same time in the same process. It does not require Rails but will integrate tightly with Rails to make event processing dead simple.
 
 - You can integrate Karafka with **any** Ruby-based application.
-- Karafka does **not** require Sidekiq or any other third party software (apart from Kafka itself).
+- Karafka **is** multi-threaded.
 - Karafka works with Ruby on Rails but it is a **standalone** framework that can work without it.
 - Karafka has a **minimal** set of dependencies, so adding it won't be a huge burden for your already existing applications.
 - Karafka processes can be executed for a **given subset** of consumer groups and/or topics, so you can fine tune it depending on your business logic.
-
-Karafka based applications can be easily deployed to any type of infrastructure, including those based on:
-
-* Heroku
-* Capistrano
-* Docker
-* Terraform
-
-## Support
-
-Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
-
-If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
 
 ## Getting started
 
@@ -65,27 +46,25 @@ and follow the instructions from the [example app Wiki](https://github.com/karaf
 
 If you need more details and know how on how to start Karafka with a clean installation, read the [Getting started page](https://github.com/karafka/karafka/wiki/Getting-started) section of our Wiki.
 
-## Notice
+## Support
 
-Karafka framework and Karafka team are __not__ related to Kafka streaming service called CloudKarafka in any matter. We don't recommend nor discourage usage of their platform.
+Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
+
+If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
 
 ## References
 
 * [Karafka framework](https://github.com/karafka/karafka)
-* [Karafka Travis CI](https://travis-ci.org/karafka/karafka)
+* [Karafka GitHub Actions](https://github.com/karafka/karafka/actions)
 * [Karafka Coditsu](https://app.coditsu.io/karafka/repositories/karafka)
 
 ## Note on contributions
 
 First, thank you for considering contributing to Karafka! It's people like you that make the open source community such a great community!
 
-Each pull request must pass all the RSpec specs and meet our quality requirements.
+Each pull request must pass all the RSpec specs, integration tests and meet our quality requirements.
 
-To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation. Once you're done with your changes, submit a pull request.
-
-Coditsu will automatically check your work against our quality standards. You can find your commit check results on the [builds page](https://app.coditsu.io/karafka/commit_builds) of Karafka organization.
-
-[![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/commit_builds)
+Fork it, update and wait for the Github Actions results.
 
 ## Contributors
 

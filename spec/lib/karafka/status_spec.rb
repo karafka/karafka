@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Status do
+RSpec.describe_current do
   subject(:status_manager) { described_class.new }
 
   let(:status) { rand }

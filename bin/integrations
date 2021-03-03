@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+
+# Runner to run integration specs in parallel
+
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
+require ROOT_PATH.join('spec/integrations_helper.rb')
+
+# Raised from the parent process if any of the integration tests fails
+IntegrationTestError = Class.new(StandardError)
+
+# There are rare cases where Karafka may force shutdown for some of the integration cases
+# This includes exactly those
+EXIT_CODES = {
+  default: [0],
+  'worker_critical_error_behaviour.rb' => [0, 2].freeze,
+  'on_hanging_jobs_and_a_shutdown.rb' => [2].freeze,
+  'on_hanging_on_shutdown_job_and_a_shutdown.rb' => [2].freeze
+}.freeze
+
+# How many child processes with integration specs do we want to run in parallel
+# When the value is high, there's a problem with thread allocation on Github
+CONCURRENCY = 5
+
+# Simple hash to keep track of active integration forks running with info on which test scenario
+# is running
+pids = {}
+
+# Test scenarios processes exit codes
+exits = {}
+
+# Waits for any of the processes to be finished and tracks exit codes
+#
+# @param pids [Hash] active forks pids
+# @param exits [Hash] finished forks exit codes
+def wait_and_track(pids, exits)
+  pid, status = Process.wait2
+
+  integration_test = pids.delete pid
+
+  exits[integration_test] = [pid, status]
+end
+
+# Run particular spec or all
+specs = ARGV[0] || 'spec/integrations/**/*.rb'
+
+# Randomize order
+Dir[ROOT_PATH.join(specs)].shuffle.each do |integration_test|
+  pid = fork do
+    puts "Starting #{integration_test} - [#{Process.pid}]"
+    exec("bundle exec ruby #{integration_test}")
+  end
+
+  pids[pid] = integration_test
+
+  wait_and_track(pids, exits) if pids.size >= CONCURRENCY
+end
+
+wait_and_track(pids, exits) while !pids.empty?
+
+puts
+
+exits.transform_keys! do |integration_test|
+  integration_test.gsub("#{ROOT_PATH}/spec/integrations/", '')
+end
+
+exits.each do |integration_test, details|
+  expected_exit_codes = EXIT_CODES[integration_test] || EXIT_CODES[:default]
+
+  exit_code = details[1].exitstatus
+  pid = details[0]
+
+  result = expected_exit_codes.include?(exit_code) ? 'OK' : 'FAILED'
+  puts "#{integration_test} [#{pid}] - #{result} - #{exit_code} - #{details[1]}"
+end
+
+puts
+
+# Fail all if any of the tests does not have expected exit code
+exits.each do |integration_test, details|
+  expected_exit_codes = EXIT_CODES[integration_test] || EXIT_CODES[:default]
+
+  exit_code = details[1].exitstatus
+
+  raise IntegrationTestError unless expected_exit_codes.include?(exit_code)
+end

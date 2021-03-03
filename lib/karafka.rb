@@ -3,9 +3,8 @@
 %w[
   delegate
   English
+  rdkafka
   waterdrop
-  kafka
-  envlogic
   json
   thor
   forwardable
@@ -13,20 +12,34 @@
   dry-configurable
   dry-validation
   dry/events/publisher
-  dry/inflector
   dry/monitor/notifications
-  dry/core/constants
   zeitwerk
 ].each(&method(:require))
 
-# Karafka library
+# Karafka framework main namespace
 module Karafka
-  extend Envlogic
-
   class << self
+    # @return [Karafka::Env] env instance that allows us to check environment
+    def env
+      @env ||= Env.new
+    end
+
+    # @param environment [String, Symbol] new environment that we want to set
+    # @return [Karafka::Env] env instance
+    # @example Assign new environment to Karafka::App
+    #   Karafka::App.env = :production
+    def env=(environment)
+      env.replace(environment.to_s)
+    end
+
     # @return [Logger] logger that we want to use. Will use ::Karafka::Logger by default
     def logger
       @logger ||= App.config.logger
+    end
+
+    # @return [WaterDrop::Producer] waterdrop messages producer
+    def producer
+      @producer ||= App.config.producer
     end
 
     # @return [::Karafka::Monitor] monitor that we want to use
@@ -68,5 +81,3 @@ Zeitwerk::Loader
   .for_gem
   .tap(&:setup)
   .tap(&:eager_load)
-
-Kafka::Consumer.prepend(Karafka::Patches::RubyKafka)

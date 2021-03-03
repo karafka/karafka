@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Cli::Install do
+RSpec.describe_current do
   subject(:install_cli) { described_class.new(cli) }
 
   let(:cli) { Karafka::Cli.new }
@@ -16,11 +16,6 @@ RSpec.describe Karafka::Cli::Install do
       end
 
       described_class::INSTALL_FILES_MAP.each do |_source, target|
-        allow(File)
-          .to receive(:exist?)
-          .with(Karafka.root.join(target))
-          .and_return(false)
-
         allow(Bundler)
           .to receive(:read_file)
           .and_return('')

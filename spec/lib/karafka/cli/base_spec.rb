@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Cli::Base do
+RSpec.describe_current do
   describe 'instance methods' do
     subject(:base_cli) { described_class.new(cli) }
 

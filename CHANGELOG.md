@@ -1,5 +1,64 @@
 # Karafka framework changelog
 
+## 2.0.0-alpha1 (Unreleased)
+- Switch from `ruby-kafka` to `librdkafk` as an underlying driver
+- Introduce fully automatic integration tests that go through the whole server lifecycle
+- Integrate WaterDrop tightly with autoconfiguration inheritance
+- Change license to `LGPL-3.0`
+- Multi-threaded support for concurrent jobs consumption (when in separate topics and/or partitions)
+- Introduce concept of workers for concurrency
+- Remove hot-code reload due to issues with handling Kafka reconnections
+- Introduce subscriptions groups concept for better resources management
+- Remove completely all the callbacks in favour of finalizer method `#on_shutdown`
+- Remove single message consumption mode in favour of documentation on how to do it easily
+- Provide `on_revoked` method for actions upon topic revoking
+- Provide sync and async offset management with async preferred
+- Introduce seamless Ruby on Rails integration via `Rails::Railte`
+- Update `cli info` to reflect the `2.0` details
+- Remove responders in favour of WaterDrop `2.0` producer
+- Remove pidfiles support
+- Remove daemonization support
+- Stop validating `kafka` configuration beyond minimum as it is handled by `librdkafk`
+- Remove topics mappers concept
+- Improve environment auto-detection
+- Reorganize monitoring to match new concepts
+- Notify on fatal worker processing errors
+- Rename `Karafka::Params::BatchMetadata` to `Karafka::Messages::BatchMetadata`
+- Rename `Karafka::Params::Params` to `Karafka::Messages::Message`
+- Rename `#params_batch` in consumers to `#messages`
+- Rename `Karafka::Params::Metadata` to `Karafka::Messages::Metadata`
+- Use jobs for consumers work execution
+- Abort on critical worker errors
+- Allow for processing work of multiple consumer groups from the same worker poll
+- Rename `Karafka::Fetcher` to `Karafka::Runner` and align notifications key names
+- Update install templates
+
+## 1.4.7 (2021-09-04)
+- Update ruby-kafka to `1.4.0`
+- Support for `resolve_seed_brokers` option (with Azdaroth)
+- Set minimum `ruby-kafka` requirement to `1.3.0`
+
+## 1.4.6 (2021-08-05)
+- #700 Fix Ruby 3 compatibility issues in Connection::Client#pause (MmKolodziej)
+
+## 1.4.5 (2021-06-16)
+- Fixup logger checks for non-writeable logfile (ojab)
+- #689 - Update the stdout initialization message for framework initialization
+
+## 1.4.4 (2021-04-19)
+- Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
+- Remove rake dependency
+
+## 1.4.3 (2021-03-24)
+- Fixes for Ruby 3.0 compatibility
+
+## 1.4.2 (2021-02-16)
+- Rescue Errno::EROFS in ensure_dir_exists (unasuke)
+
+## 1.4.1 (2020-12-04)
+- Return non-zero exit code when printing usage
+- Add support for :assignment_strategy for consumers
+
 ## 1.4.0 (2020-09-05)
 - Rename `Karafka::Params::Metadata` to `Karafka::Params::BatchMetadata`
 ` Rename consumer `#metadata` to `#batch_metadata`

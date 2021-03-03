@@ -24,11 +24,11 @@ SimpleCov.start do
   add_filter '/doc/'
   add_filter '/spec/'
   add_filter '/config/'
-  add_filter '/lib/karafka/tasks'
+  add_filter '/lib/karafka/railtie'
   merge_timeout 600
 end
 
-SimpleCov.minimum_coverage(100)
+SimpleCov.minimum_coverage(93)
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
   .sort
@@ -42,6 +42,11 @@ RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
+
+  # When we test things, we subscribe sometimes with one-off monitors, they need to always be
+  # cleared not to spam and break test-suit
+  config.before { Karafka.monitor.__bus__.listeners.clear }
+  config.after { Karafka.monitor.__bus__.listeners.clear }
 end
 
 require 'karafka'
@@ -51,17 +56,16 @@ module Karafka
   # Configuration for test env
   class App
     setup do |config|
-      config.kafka.seed_brokers = ['kafka://localhost:9092']
+      config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092' }
       config.client_id = rand.to_s
-      config.kafka.offset_retention_time = -1
-      config.kafka.max_bytes_per_partition = 1_048_576
-      config.kafka.start_from_beginning = true
+      config.pause_timeout = 1
+      config.pause_max_timeout = 1
+      config.pause_with_exponential_backoff = false
     end
   end
 end
 
-# Set certificates path
-CERTS_PATH = "#{File.dirname(__FILE__)}/support/certificates"
+RSpec.extend RSpecLocator.new(__FILE__)
 
 # In order to spec karafka out, we need to boot it first to initialize all the
 # dynamic components
@@ -69,6 +73,5 @@ Karafka::App.boot!
 
 # We by default use the default listeners for specs to check how they work and that
 # they don't not break anything
-Karafka.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener.new)
 Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
 Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
