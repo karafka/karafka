@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Process do
+RSpec.describe_current do
   subject(:process) { described_class.new }
 
   before { process.instance_variable_set(:@callbacks, Hash.new { |hsh, key| hsh[key] = [] }) }
@@ -17,12 +17,14 @@ RSpec.describe Karafka::Process do
   end
 
   describe '#supervise' do
-    it 'traps signals and yield' do
-      described_class::HANDLED_SIGNALS.each do |signal|
-        expect(process).to receive(:trap_signal).with(signal)
-      end
+    before { allow(process).to receive(:trap_signal) }
 
+    it 'traps signals and yield' do
       process.supervise
+
+      described_class::HANDLED_SIGNALS.each do |signal|
+        expect(process).to have_received(:trap_signal).with(signal)
+      end
     end
   end
 
@@ -44,7 +46,7 @@ RSpec.describe Karafka::Process do
 
   describe '#notice_signal' do
     let(:signal) { rand.to_s }
-    let(:instrument_args) { ['process.notice_signal', caller: process, signal: signal] }
+    let(:instrument_args) { ['process.notice_signal', { caller: process, signal: signal }] }
 
     it 'logs info with signal code into Karafka logger' do
       expect(Thread).to receive(:new).and_yield

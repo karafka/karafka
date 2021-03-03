@@ -4,47 +4,64 @@
 module Karafka
   # Base consumer from which all Karafka consumers should inherit
   class BaseConsumer
-    extend Forwardable
-
-    # Allows us to mark messages as consumed for non-automatic mode without having
-    # to use consumer client directly. We do this that way, because most of the people should not
-    # mess with the client instance directly (just in case)
-    %i[
-      mark_as_consumed
-      mark_as_consumed!
-      trigger_heartbeat
-      trigger_heartbeat!
-    ].each do |delegated_method_name|
-      def_delegator :client, delegated_method_name
-
-      private delegated_method_name
-    end
-
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
-    attr_reader :topic
-    # @return [Karafka::Params:ParamsBatch] current params batch
-    attr_accessor :params_batch
-
-    # Assigns a topic to a consumer and builds up proper consumer functionalities
-    #   so that it can cooperate with the topic settings
-    # @param topic [Karafka::Routing::Topic]
-    def initialize(topic)
-      @topic = topic
-      Consumers::Includer.call(self)
-    end
+    attr_accessor :topic
+    # @return [Karafka::Messages::Messages] current messages batch
+    attr_accessor :messages
+    # @return [Karafka::Connection::Client] kafka connection client
+    attr_accessor :client
+    # @return [Karafka::TimeTrackers::Pause] current topic partition pause
+    attr_accessor :pause
+    # @return [Waterdrop::Producer] producer instance
+    attr_accessor :producer
 
     # Executes the default consumer flow.
-    def call
-      process
+    #
+    # @note We keep the seek offset tracking, and use it to compensate for async offset flushing
+    #   that may not yet kick in when error occurs. That way we pause always on the last processed
+    #   message.
+    def on_consume
+      Karafka.monitor.instrument('consumer.consume', caller: self) do
+        consume
+      end
+
+      pause.reset
+
+      # Mark as consumed only if manual offset management is not on
+      return if topic.manual_offset_management
+
+      # We use the non-blocking one here. If someone needs the blocking one, can implement it with
+      # manual offset management
+      mark_as_consumed(messages.last)
+    rescue StandardError => e
+      Karafka.monitor.instrument('consumer.consume.error', caller: self, error: e)
+      client.pause(topic.name, messages.first.partition, @seek_offset || messages.first.offset)
+      pause.pause
+    end
+
+    # Trigger method for running on shutdown.
+    #
+    # @private
+    def on_revoked
+      Karafka.monitor.instrument('consumer.revoked', caller: self) do
+        revoked
+      end
+    rescue StandardError => e
+      Karafka.monitor.instrument('consumer.revoked.error', caller: self, error: e)
+    end
+
+    # Trigger method for running on shutdown.
+    #
+    # @private
+    def on_shutdown
+      Karafka.monitor.instrument('consumer.shutdown', caller: self) do
+        shutdown
+      end
+    rescue StandardError => e
+      Karafka.monitor.instrument('consumer.shutdown.error', caller: self, error: e)
     end
 
     private
-
-    # @return [Karafka::Connection::Client] messages consuming client that can be used to
-    #    commit manually offset or pause / stop consumer based on the business logic
-    def client
-      Persistence::Client.read
-    end
 
     # Method that will perform business logic and on data received from Kafka (it will consume
     #   the data)
@@ -52,6 +69,43 @@ module Karafka
     #   someone forgets about it or makes on with typo
     def consume
       raise NotImplementedError, 'Implement this in a subclass'
+    end
+
+    # Method that will be executed when a given topic partition is revoked. You can use it for
+    # some teardown procedures (closing file handler, etc).
+    def revoked; end
+
+    # Method that will be executed when the process is shutting down. You can use it for
+    # some teardown procedures (closing file handler, etc).
+    def shutdown; end
+
+    # Marks message as consumed in an async way.
+    #
+    # @param message [Messages::Message] last successfully processed message.
+    def mark_as_consumed(message)
+      client.mark_as_consumed(message)
+      @seek_offset = message.offset + 1
+    end
+
+    # Marks message as consumed in a sync way.
+    #
+    # @param message [Messages::Message] last successfully processed message.
+    def mark_as_consumed!(message)
+      client.mark_as_consumed!(message)
+      @seek_offset = message.offset + 1
+    end
+
+    # Seeks in the context of current topic and partition
+    #
+    # @param offset [Integer] offset where we want to seek
+    def seek(offset)
+      client.seek(
+        Karafka::Messages::Seek.new(
+          messages.metadata.topic,
+          messages.metadata.partition,
+          offset
+        )
+      )
     end
   end
 end

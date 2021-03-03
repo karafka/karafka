@@ -1,7 +1,22 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka do
+RSpec.describe_current do
   subject(:karafka) { described_class }
+
+  describe '.env' do
+    it { expect(karafka.env).to eq('test') }
+  end
+
+  describe '.env=' do
+    let(:new_env) { rand.to_s }
+
+    before { karafka.env = new_env }
+
+    after { karafka.env = 'test' }
+
+    it { expect(karafka.env).to eq(new_env) }
+    it { expect(karafka.env).to be_a(Karafka::Env) }
+  end
 
   describe '.logger' do
     it 'expect to use app logger' do
@@ -27,11 +42,14 @@ RSpec.describe Karafka do
     context 'when we want to get app root path' do
       let(:root_dir_env) { nil }
 
-      before { allow(ENV).to receive(:[]).with('KARAFKA_ROOT_DIR').and_return(root_dir_env) }
+      before do
+        allow(ENV).to receive(:[]).with('KARAFKA_ROOT_DIR').and_return(root_dir_env)
+        allow(ENV).to receive(:[]).with('BUNDLE_GEMFILE').and_return('/Gemfile')
+      end
 
       it do
-        expect(ENV).to receive(:[]).with('BUNDLE_GEMFILE').and_return('/Gemfile')
         expect(karafka.root.to_path).to eq '/'
+        expect(ENV).to have_received(:[]).with('BUNDLE_GEMFILE')
       end
 
       context 'when KARAFKA_ROOT_DIR is specified' do

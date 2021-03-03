@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Routing::ConsumerGroup do
+RSpec.describe_current do
   subject(:consumer_group) { described_class.new(name) }
 
   let(:name) { rand.to_s }
@@ -14,34 +14,12 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
   describe '#id' do
     it 'expect to namespace id with application client_id' do
       old_client_id = Karafka::App.config.client_id
-      Karafka::App.config.client_id = 'ExampleClient'
+      Karafka::App.config.client_id = 'example_client'
 
       consumer_group = described_class.new('consumers')
       expect(consumer_group.id).to eq('example_client_consumers')
 
       Karafka::App.config.client_id = old_client_id
-    end
-  end
-
-  # We don't cover batch mode and topic mapper here as they don't come from kafka namespace of
-  # config but from the main namespace
-  (
-    Karafka::AttributesMap.consumer_group - %i[batch_fetching]
-  ).each do |attribute|
-    context attribute.to_s do
-      it 'by default expect to fallback to a kafka config value' do
-        expected_config_value = Karafka::App.config.kafka.public_send(attribute)
-        expect(consumer_group.public_send(attribute)).to eq expected_config_value
-      end
-    end
-  end
-
-  %i[batch_fetching].each do |attribute|
-    context attribute.to_s do
-      it 'by default expect to fallback to a main config value' do
-        expected_config_value = Karafka::App.config.public_send(attribute)
-        expect(consumer_group.public_send(attribute)).to eq expected_config_value
-      end
     end
   end
 
@@ -57,6 +35,25 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
 
     it { expect(consumer_group.topics.count).to eq 1 }
     it { expect(built_topic.name).to eq :topic_name.to_s }
+  end
+
+  describe '#subscription_groups' do
+    context 'when there are not topics defined' do
+      it { expect(consumer_group.subscription_groups).to eq([]) }
+    end
+
+    context 'when there are some topics defined' do
+      let(:subscription_group) { consumer_group.subscription_groups.first }
+      let(:built_topic) do
+        consumer_group.public_send(:topic=, :topic_name) do
+          consumer Class.new(Karafka::BaseConsumer)
+        end
+      end
+
+      before { built_topic }
+
+      it { expect(subscription_group).to be_a(Karafka::Routing::SubscriptionGroup) }
+    end
   end
 
   describe '#active?' do
@@ -83,10 +80,6 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
 
   describe '#to_h' do
     let(:casted_consumer_group) { consumer_group.to_h }
-
-    Karafka::AttributesMap.consumer_group.each do |cg_attribute|
-      it { expect(casted_consumer_group.keys).to include(cg_attribute) }
-    end
 
     it { expect(casted_consumer_group.keys).to include(:topics) }
     it { expect(casted_consumer_group.keys).to include(:id) }

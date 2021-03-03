@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Module containing classes and methods that provide some additional functionalities
+  # Module containing classes and methods that provide some additional helper functionalities.
   module Helpers
     # @note Taken from http://stackoverflow.com/questions/6407141
-    # Multidelegator is used to delegate calls to multiple targets
+    # Multidelegator is used to delegate calls to multiple targets.
     class MultiDelegator
       # @param targets to which we want to delegate methods
       def initialize(*targets)

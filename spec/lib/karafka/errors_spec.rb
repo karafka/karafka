@@ -1,22 +1,10 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Errors do
+RSpec.describe_current do
   describe 'BaseError' do
     subject(:error) { described_class::BaseError }
 
     specify { expect(error).to be < StandardError }
-  end
-
-  describe 'SerializationError' do
-    subject(:error) { described_class::SerializationError }
-
-    specify { expect(error).to be < described_class::BaseError }
-  end
-
-  describe 'DeserializationError' do
-    subject(:error) { described_class::DeserializationError }
-
-    specify { expect(error).to be < described_class::BaseError }
   end
 
   describe 'NonMatchingRouteError' do
@@ -33,6 +21,18 @@ RSpec.describe Karafka::Errors do
 
   describe 'MissingBootFileError' do
     subject(:error) { described_class::MissingBootFileError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe 'UnregisteredMonitorEventError' do
+    subject(:error) { described_class::UnregisteredMonitorEventError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe 'ForcefulShutdownError' do
+    subject(:error) { described_class::ForcefulShutdownError }
 
     specify { expect(error).to be < described_class::BaseError }
   end

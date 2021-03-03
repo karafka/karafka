@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Status do
+RSpec.describe_current do
   subject(:status_manager) { described_class.new }
 
   let(:status) { rand }
@@ -10,7 +10,7 @@ RSpec.describe Karafka::Status do
   context 'when we start with a default state' do
     it { expect(status_manager.running?).to eq false }
     it { expect(status_manager.stopping?).to eq false }
-    it { expect(status_manager.initialized?).to eq false }
+    it { expect(status_manager.stopped?).to eq false }
     it { expect(status_manager.initializing?).to eq false }
   end
 
@@ -33,6 +33,7 @@ RSpec.describe Karafka::Status do
       it { expect(status_manager.running?).to eq true }
       it { expect(status_manager.initializing?).to eq false }
       it { expect(status_manager.stopping?).to eq false }
+      it { expect(status_manager.stopped?).to eq false }
     end
   end
 
@@ -43,6 +44,7 @@ RSpec.describe Karafka::Status do
       end
 
       it { expect(status_manager.stopping?).to eq false }
+      it { expect(status_manager.stopped?).to eq false }
     end
 
     context 'when status is set to stopping' do
@@ -51,6 +53,7 @@ RSpec.describe Karafka::Status do
       end
 
       it { expect(status_manager.stopping?).to eq true }
+      it { expect(status_manager.stopped?).to eq false }
     end
   end
 
@@ -64,18 +67,22 @@ RSpec.describe Karafka::Status do
       it { expect(status_manager.running?).to eq false }
       it { expect(status_manager.initializing?).to eq false }
       it { expect(status_manager.stopping?).to eq true }
+      it { expect(status_manager.stopped?).to eq false }
     end
   end
 
-  describe 'initialized?' do
-    context 'when status is not set to initialized' do
-      it { expect(status_manager.initialized?).to eq false }
-    end
+  describe 'stopped!' do
+    context 'when we set it to stopped' do
+      before do
+        status_manager.run!
+        status_manager.stop!
+        status_manager.stopped!
+      end
 
-    context 'when status is set to initialized' do
-      let(:status) { :initialized }
-
-      it { expect(status_manager.initialized?).to eq true }
+      it { expect(status_manager.running?).to eq false }
+      it { expect(status_manager.initializing?).to eq false }
+      it { expect(status_manager.stopping?).to eq false }
+      it { expect(status_manager.stopped?).to eq true }
     end
   end
 

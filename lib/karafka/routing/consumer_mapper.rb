@@ -26,8 +26,7 @@ module Karafka
       # @param raw_consumer_group_name [String, Symbol] string or symbolized consumer group name
       # @return [String] remapped final consumer group name
       def call(raw_consumer_group_name)
-        client_name = Karafka::Helpers::Inflector.map(Karafka::App.config.client_id.to_s)
-        "#{client_name}_#{raw_consumer_group_name}"
+        "#{Karafka::App.config.client_id}_#{raw_consumer_group_name}"
       end
     end
   end

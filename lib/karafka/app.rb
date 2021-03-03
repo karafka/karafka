@@ -6,30 +6,22 @@ module Karafka
     extend Setup::Dsl
 
     class << self
-      # Sets up all the internal components and bootstrap whole app
-      # We need to know details about consumers in order to setup components,
-      # that's why we don't setup them after std setup is done
-      # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
-      #   doesn't match with the config contract
-      def boot!
-        initialize!
-        Setup::Config.validate!
-        Setup::Config.setup_components
-        initialized!
-      end
-
-      # @return [Karafka::Routing::Builder] consumers builder instance
+      # @return [Karafka::Routing::Builder] consumers builder instance alias
       def consumer_groups
-        config.internal.routing_builder
+        config
+          .internal
+          .routing_builder
       end
 
-      # Triggers reload of all cached Karafka app components, so we can use in-process
-      # in-development hot code reloading without Karafka process restart
-      def reload
-        Karafka::Persistence::Consumers.clear
-        Karafka::Persistence::Topics.clear
-        config.internal.routing_builder.reload
+      # @return [Array<Karafka::Routing::SubscriptionGroup>] active subscription groups
+      def subscription_groups
+        consumer_groups
+          .active
+          .flat_map(&:subscription_groups)
       end
+
+      # Just a nicer name for the consumer groups
+      alias routes consumer_groups
 
       Status.instance_methods(false).each do |delegated|
         define_method(delegated) do
@@ -42,6 +34,7 @@ module Karafka
         root
         env
         logger
+        producer
         monitor
       ].each do |delegated|
         define_method(delegated) do

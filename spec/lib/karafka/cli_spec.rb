@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Cli do
+RSpec.describe_current do
   subject(:cli) { described_class }
 
   describe '.prepare' do
@@ -20,7 +20,6 @@ RSpec.describe Karafka::Cli do
     let(:available_commands) do
       [
         Karafka::Cli::Console,
-        Karafka::Cli::Flow,
         Karafka::Cli::Info,
         Karafka::Cli::Install,
         Karafka::Cli::Server

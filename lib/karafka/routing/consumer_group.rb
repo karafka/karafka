@@ -5,12 +5,10 @@ module Karafka
     # Object used to describe a single consumer group that is going to subscribe to
     # given topics
     # It is a part of Karafka's DSL
+    # @note A single consumer group represents Kafka consumer group, but it may not match 1:1 with
+    #   subscription groups. There can be more subscription groups than consumer groups
     class ConsumerGroup
-      extend Helpers::ConfigRetriever
-
-      attr_reader :topics
-      attr_reader :id
-      attr_reader :name
+      attr_reader :id, :topics, :name
 
       # @param name [String, Symbol] raw name of this consumer group. Raw means, that it does not
       #   yet have an application client_id namespace, this will be added here by default.
@@ -33,28 +31,24 @@ module Karafka
       # @return [Karafka::Routing::Topic] newly built topic instance
       def topic=(name, &block)
         topic = Topic.new(name, self)
-        @topics << Proxy.new(topic, &block).target.tap(&:build)
+        @topics << Proxy.new(topic, &block).target
         @topics.last
       end
 
-      Karafka::AttributesMap.consumer_group.each do |attribute|
-        config_retriever_for(attribute)
+      # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
+      #   the consumer group topics
+      def subscription_groups
+        App.config.internal.subscription_groups_builder.call(topics)
       end
 
       # Hashed version of consumer group that can be used for validation purposes
       # @return [Hash] hash with consumer group attributes including serialized to hash
       # topics inside of it.
       def to_h
-        result = {
+        {
           topics: topics.map(&:to_h),
           id: id
-        }
-
-        Karafka::AttributesMap.consumer_group.each do |attribute|
-          result[attribute] = public_send(attribute)
-        end
-
-        result
+        }.freeze
       end
     end
   end

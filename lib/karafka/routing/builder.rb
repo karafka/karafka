@@ -17,6 +17,7 @@ module Karafka
 
       def initialize
         @draws = Concurrent::Array.new
+        super
       end
 
       # Used to draw routes for Karafka
@@ -39,6 +40,7 @@ module Karafka
         each do |consumer_group|
           hashed_group = consumer_group.to_h
           validation_result = CONTRACT.call(hashed_group)
+
           next if validation_result.success?
 
           raise Errors::InvalidConfigurationError, validation_result.errors.to_h
@@ -58,30 +60,30 @@ module Karafka
         super
       end
 
-      # Redraws all the routes for the in-process code reloading.
-      # @note This won't allow registration of new topics without process restart but will trigger
-      #   cache invalidation so all the classes, etc are re-fetched after code reload
-      def reload
-        draws = @draws.dup
-        clear
-        draws.each { |block| draw(&block) }
-      end
-
       private
 
       # Builds and saves given consumer group
       # @param group_id [String, Symbol] name for consumer group
       # @param block [Proc] proc that should be executed in the proxy context
       def consumer_group(group_id, &block)
-        consumer_group = ConsumerGroup.new(group_id.to_s)
-        self << Proxy.new(consumer_group, &block).target
+        consumer_group = find { |cg| cg.name == group_id.to_s }
+
+        if consumer_group
+          Proxy.new(consumer_group, &block).target
+        else
+          consumer_group = ConsumerGroup.new(group_id.to_s)
+          self << Proxy.new(consumer_group, &block).target
+        end
       end
 
+      # In case we use simple style of routing, all topics will be assigned to the same consumer
+      # group that will be based on the client_id
+      #
       # @param topic_name [String, Symbol] name of a topic from which we want to consumer
       # @param block [Proc] proc we want to evaluate in the topic context
       def topic(topic_name, &block)
-        consumer_group(topic_name) do
-          topic(topic_name, &block).tap(&:build)
+        consumer_group('app') do
+          topic(topic_name, &block)
         end
       end
     end

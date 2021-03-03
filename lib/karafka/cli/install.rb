@@ -12,29 +12,27 @@ module Karafka
       # Directories created by default
       INSTALL_DIRS = %w[
         app/consumers
-        app/responders
-        app/workers
         config
-        lib
         log
-        tmp/pids
       ].freeze
 
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
         'karafka.rb.erb' => Karafka.boot_file.basename,
         'application_consumer.rb.erb' => 'app/consumers/application_consumer.rb',
-        'application_responder.rb.erb' => 'app/responders/application_responder.rb'
+        'example_consumer.rb.erb' => 'app/consumers/example_consumer.rb'
       }.freeze
 
       # @param args [Array] all the things that Thor CLI accepts
       def initialize(*args)
         super
-        @rails = Bundler::LockfileParser.new(
+        dependencies = Bundler::LockfileParser.new(
           Bundler.read_file(
             Bundler.default_lockfile
           )
-        ).dependencies.key?('rails')
+        ).dependencies
+
+        @rails = dependencies.key?('railties') || dependencies.key?('rails')
       end
 
       # Install all required things for Karafka application in current directory
@@ -47,9 +45,7 @@ module Karafka
           target = Karafka.root.join(target)
 
           template = File.read(Karafka.core_root.join("templates/#{source}"))
-          # @todo Replace with the keyword argument version once we don't have to support
-          # Ruby < 2.6
-          render = ::ERB.new(template, nil, '-').result(binding)
+          render = ::ERB.new(template, trim_mode: '-').result(binding)
 
           File.open(target, 'w') { |file| file.write(render) }
         end

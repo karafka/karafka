@@ -1,43 +1,42 @@
 ![karafka logo](https://raw.githubusercontent.com/karafka/misc/master/logo/karafka_logotype_transparent2.png)
 
-[![Build Status](https://travis-ci.org/karafka/karafka.svg?branch=master)](https://travis-ci.org/karafka/karafka)
+[![Build Status](https://github.com/karafka/karafka/actions/workflows/ci.yml/badge.svg)](https://github.com/karafka/karafka/actions/workflows/ci.yml)
+[![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
+[![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
-**Note**: Documentation presented here refers to Karafka `1.4`.
-
-If you are looking for the documentation for Karafka `1.3.x`, it can be found [here](https://github.com/karafka/wiki/tree/1.3).
+**Note**: All of the documentation here refers to Karafka `2.0`. If you are looking for the documentation to Karafka `1.4` please click here (TBA).
 
 ## About Karafka
 
-Framework used to simplify Apache Kafka based Ruby applications development.
+Karafka is a framework used to simplify Apache Kafka based Ruby and Ruby on Rails applications development.
 
-Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming and processing this data, without having to focus on things that are not your business domain.
+```ruby
+# Define what topics you want to consume with which consumers in karafka.rb
+Karafka::App.routes.draw do
+  topic 'system_events' do
+    consumer EventsConsumer
+  end
+end
 
-Karafka not only handles incoming messages but also provides tools for building complex data-flow applications that receive and send messages.
+# And create your consumers, within which your messages will be processed
+class EventsConsumer < ApplicationConsumer
+  # Example that utilizes ActiveRecord#insert_all and Karafka batch processing
+  def consume
+    # Store all of the incoming Kafka events locally in an efficient way
+    Event.insert_all messages.payloads
+  end
+end
+```
 
-## How does it work
+Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming, processing and producing data, without having to focus on things that are not your business domain.
 
-Karafka provides a higher-level abstraction that allows you to focus on your business logic development, instead of focusing on implementing lower level abstraction layers. It provides developers with a set of tools that are dedicated for building multi-topic applications similar to how Rails applications are being built.
-
-### Some things you might wonder about:
+Karafka uses threads to handle many messages at the same time in the same process. It does not require Rails but will integrate tightly with Rails to make event processing dead simple.
 
 - You can integrate Karafka with **any** Ruby-based application.
-- Karafka does **not** require Sidekiq or any other third party software (apart from Kafka itself).
+- Karafka **is** multi-threaded.
 - Karafka works with Ruby on Rails but it is a **standalone** framework that can work without it.
 - Karafka has a **minimal** set of dependencies, so adding it won't be a huge burden for your already existing applications.
 - Karafka processes can be executed for a **given subset** of consumer groups and/or topics, so you can fine tune it depending on your business logic.
-
-Karafka based applications can be easily deployed to any type of infrastructure, including those based on:
-
-* Heroku
-* Capistrano
-* Docker
-* Terraform
-
-## Support
-
-Karafka has a [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
-
-If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
 
 ## Getting started
 
@@ -46,54 +45,20 @@ If you're completely new to the subject, you can start with our "Kafka on Rails"
 - [Kafka on Rails: Using Kafka with Ruby on Rails – Part 1 – Kafka basics and its advantages](https://mensfeld.pl/2017/11/kafka-on-rails-using-kafka-with-ruby-on-rails-part-1-kafka-basics-and-its-advantages/)
 - [Kafka on Rails: Using Kafka with Ruby on Rails – Part 2 – Getting started with Ruby and Kafka](https://mensfeld.pl/2018/01/kafka-on-rails-using-kafka-with-ruby-on-rails-part-2-getting-started-with-ruby-and-kafka/)
 
-If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to just clone our example repository:
+If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to visit our [Getting started](https://github.com/karafka/karafka/wiki/Getting-started) guides and the [example apps repository](https://github.com/karafka/example-apps).
 
-```bash
-git clone https://github.com/karafka/example-app ./example_app
-```
+We also maintain many [integration specs](https://github.com/karafka/karafka/tree/master/spec/integrations) illustrating various use-cases and features of the framework.
 
-then, just bundle install all the dependencies:
+## Support
 
-```bash
-cd ./example_app
-bundle install
-```
+Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
 
-and follow the instructions from the [example app Wiki](https://github.com/karafka/example-app/blob/master/README.md).
-
-**Note**: you need to ensure, that you have Kafka up and running and you need to configure Kafka seed_brokers in the ```karafka.rb``` file.
-
-If you need more details and know how on how to start Karafka with a clean installation, read the [Getting started page](https://github.com/karafka/karafka/wiki/Getting-started) section of our Wiki.
-
-## Notice
-
-Karafka framework and Karafka team are __not__ related to Kafka streaming service called CloudKarafka in any matter. We don't recommend nor discourage usage of their platform.
-
-## References
-
-* [Karafka framework](https://github.com/karafka/karafka)
-* [Karafka Travis CI](https://travis-ci.org/karafka/karafka)
-* [Karafka Coditsu](https://app.coditsu.io/karafka/repositories/karafka)
+If you have any questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) channel.
 
 ## Note on contributions
 
-First, thank you for considering contributing to Karafka! It's people like you that make the open source community such a great community!
+First, thank you for considering contributing to the Karafka ecosystem! It's people like you that make the open source community such a great community!
 
-Each pull request must pass all the RSpec specs and meet our quality requirements.
+Each pull request must pass all the RSpec specs, integration tests and meet our quality requirements.
 
-To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation. Once you're done with your changes, submit a pull request.
-
-Coditsu will automatically check your work against our quality standards. You can find your commit check results on the [builds page](https://app.coditsu.io/karafka/commit_builds) of Karafka organization.
-
-[![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/commit_builds)
-
-## Contributors
-
-This project exists thanks to all the people who contribute.
-<a href="https://github.com/karafka/karafka/graphs/contributors"><img src="https://opencollective.com/karafka/contributors.svg?width=890" /></a>
-
-## Sponsors
-
-We are looking for sustainable sponsorship. If your company is relying on Karafka framework or simply want to see Karafka evolve faster to meet your requirements, please consider backing the project.
-
-Please contact [Maciej Mensfeld](mailto:maciej@mensfeld.pl) directly for more details.
+Fork it, update and wait for the Github Actions results.

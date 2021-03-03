@@ -2,6 +2,7 @@
 
 module Karafka
   # Karafka framework Cli
+  #
   # If you want to add/modify command that belongs to CLI, please review all commands
   # available in cli/ directory inside Karafka source code.
   #
@@ -11,9 +12,9 @@ module Karafka
     package_name 'Karafka'
 
     class << self
-      # Loads all Cli commands into Thor framework
+      # Loads all Cli commands into Thor framework.
       # This method should be executed before we run Karafka::Cli.start, otherwise we won't
-      # have any Cli commands available
+      # have any Cli commands available.
       def prepare
         cli_commands.each do |action|
           action.bind_to(self)
@@ -34,7 +35,7 @@ module Karafka
   end
 end
 
-# This is kinda trick - since we don't have a autoload and other magic stuff
+# This is kinda tricky - since we don't have an autoload and other magic stuff
 # like Rails does, so instead this method allows us to replace currently running
 # console with a new one via Kernel.exec. It will start console with new code loaded
 # Yes, we know that it is not turbo fast, however it is turbo convenient and small

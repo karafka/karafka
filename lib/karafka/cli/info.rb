@@ -14,14 +14,12 @@ module Karafka
         info = [
           "Karafka version: #{Karafka::VERSION}",
           "Ruby version: #{RUBY_VERSION}",
-          "Ruby-kafka version: #{::Kafka::VERSION}",
+          "Rdkafka version: #{::Rdkafka::VERSION}",
+          "Subscription groups count: #{Karafka::App.subscription_groups.size}",
+          "Workers count: #{Karafka::App.config.concurrency}",
           "Application client id: #{config.client_id}",
-          "Backend: #{config.backend}",
-          "Batch fetching: #{config.batch_fetching}",
-          "Batch consuming: #{config.batch_consuming}",
           "Boot file: #{Karafka.boot_file}",
-          "Environment: #{Karafka.env}",
-          "Kafka seed brokers: #{config.kafka.seed_brokers}"
+          "Environment: #{Karafka.env}"
         ]
 
         Karafka.logger.info(info.join("\n"))
