@@ -1,0 +1,48 @@
+# frozen_string_literal: true
+
+module Karafka
+  # Class used to run the Karafka listeners in separate threads
+  class Runner
+    # Starts listening on all the listeners asynchronously
+    # Fetch loop should never end. If they do, it is a critical error
+    def call
+      threads = listeners.map do |listener|
+        # We abort on exception because there should be an exception handling developed for
+        # each listener running in separate threads, so the exceptions should never leak
+        # and if that happens, it means that something really bad happened and we should stop
+        # the whole process
+        Thread
+          .new { listener.call }
+          .tap { |thread| thread.abort_on_exception = true }
+      end
+
+      # We aggregate threads here for a supervised shutdown process
+      threads.each { |thread| Karafka::Server.consumer_threads << thread }
+      threads.each(&:join)
+    # If anything crashes here, we need to raise the error and crush the runner because it means
+    # that something terrible happened
+    rescue StandardError => e
+      Karafka.monitor.instrument('fetcher.call.error', caller: self, error: e)
+      Karafka::App.stop!
+      raise e
+    end
+
+    private
+
+    # @return [Array<Karafka::Connection::Listener>] listeners that will consume messages for each
+    #   of the subscription groups
+    def listeners
+      # Despite possiblity of having several independent listeners, we aim to have one queue for
+      # jobs across and one workers poll for that
+      jobs_queue = Processing::JobsQueue.new
+
+      workers_batch = Processing::WorkersBatch.new(jobs_queue)
+
+      App
+        .subscription_groups
+        .map do |subscription_group|
+          Karafka::Connection::Listener.new(subscription_group, jobs_queue, workers_batch)
+        end
+    end
+  end
+end

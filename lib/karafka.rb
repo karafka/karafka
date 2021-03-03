@@ -4,7 +4,7 @@
   delegate
   English
   waterdrop
-  kafka
+  rdkafka
   envlogic
   json
   thor
@@ -68,5 +68,3 @@ Zeitwerk::Loader
   .for_gem
   .tap(&:setup)
   .tap(&:eager_load)
-
-Kafka::Consumer.prepend(Karafka::Patches::RubyKafka)

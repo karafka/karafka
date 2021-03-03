@@ -12,9 +12,7 @@ module Karafka
         required(:client_id).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
         required(:shutdown_timeout) { (int? & gt?(0)) }
         required(:consumer_mapper)
-        required(:topic_mapper)
-
-        optional(:backend).filled
+        #required(:batch_consuming)
       end
     end
   end

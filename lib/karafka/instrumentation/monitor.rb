@@ -28,9 +28,7 @@ module Karafka
         connection.batch_delegator.call
         connection.message_delegator.call
         fetcher.call.error
-        backends.inline.process
         process.notice_signal
-        consumers.responders.respond_with
         async_producer.call.error
         async_producer.call.retry
         sync_producer.call.error

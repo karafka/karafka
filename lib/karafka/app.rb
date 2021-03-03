@@ -18,16 +18,21 @@ module Karafka
         initialized!
       end
 
-      # @return [Karafka::Routing::Builder] consumers builder instance
+      # @return [Karafka::Routing::Builder] consumers builder instance alias
       def consumer_groups
         config.internal.routing_builder
+      end
+
+      def subscription_groups
+        consumer_groups
+          .active
+          .flat_map(&:subscription_groups)
       end
 
       # Triggers reload of all cached Karafka app components, so we can use in-process
       # in-development hot code reloading without Karafka process restart
       def reload
-        Karafka::Persistence::Consumers.clear
-        Karafka::Persistence::Topics.clear
+        # todo reload builders
         config.internal.routing_builder.reload
       end
 

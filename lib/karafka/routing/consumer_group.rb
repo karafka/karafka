@@ -5,6 +5,8 @@ module Karafka
     # Object used to describe a single consumer group that is going to subscribe to
     # given topics
     # It is a part of Karafka's DSL
+    # @note A single consumer group represents Kafka consumer group, but it may not match 1:1 with
+    #   subscription groups. There can be more subscription groups than consumer groups
     class ConsumerGroup
       extend Helpers::ConfigRetriever
 
@@ -39,6 +41,12 @@ module Karafka
 
       Karafka::AttributesMap.consumer_group.each do |attribute|
         config_retriever_for(attribute)
+      end
+
+      # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
+      #   the consumer group topics
+      def subscription_groups
+        App.config.internal.subscription_groups_builder.call(topics)
       end
 
       # Hashed version of consumer group that can be used for validation purposes

@@ -50,7 +50,7 @@ module Karafka
       def run_supervised
         process.supervise
         Karafka::App.run!
-        Karafka::App.config.internal.fetcher.call
+        Karafka::Runner.new.call
       end
 
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)

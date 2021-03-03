@@ -12,8 +12,6 @@ module Karafka
       # Directories created by default
       INSTALL_DIRS = %w[
         app/consumers
-        app/responders
-        app/workers
         config
         lib
         log
@@ -24,7 +22,6 @@ module Karafka
       INSTALL_FILES_MAP = {
         'karafka.rb.erb' => Karafka.boot_file.basename,
         'application_consumer.rb.erb' => 'app/consumers/application_consumer.rb',
-        'application_responder.rb.erb' => 'app/responders/application_responder.rb'
       }.freeze
 
       # @param args [Array] all the things that Thor CLI accepts

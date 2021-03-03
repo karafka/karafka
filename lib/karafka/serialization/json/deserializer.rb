@@ -7,19 +7,10 @@ module Karafka
     module Json
       # Default Karafka Json deserializer for loading JSON data
       class Deserializer
-        # @param params [Karafka::Params::Params] Full params object that we want to deserialize
+        # @param params [Karafka::Messages::Message] Message object that we want to deserialize
         # @return [Hash] hash with deserialized JSON data
-        # @example
-        #   params = {
-        #     'payload' => "{\"a\":1}",
-        #     'topic' => 'my-topic',
-        #     'headers' => { 'message_type' => :test }
-        #   }
-        #   Deserializer.call(params) #=> { 'a' => 1 }
-        def call(params)
-          params.raw_payload.nil? ? nil : ::JSON.parse(params.raw_payload)
-        rescue ::JSON::ParserError => e
-          raise ::Karafka::Errors::DeserializationError, e
+        def call(message)
+          message.raw_payload.nil? ? nil : ::JSON.parse(message.raw_payload)
         end
       end
     end

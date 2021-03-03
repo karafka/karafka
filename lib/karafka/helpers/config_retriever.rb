@@ -35,7 +35,7 @@ module Karafka
           value = if Karafka::App.config.respond_to?(attribute)
                     Karafka::App.config.send(attribute)
                   else
-                    Karafka::App.config.kafka.send(attribute)
+                    return
                   end
 
           instance_variable_set(:"@#{attribute}", value)

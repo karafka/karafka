@@ -7,12 +7,9 @@ module Karafka
     # It is a part of Karafka's DSL
     class Topic
       extend Helpers::ConfigRetriever
-      extend Forwardable
 
-      attr_reader :id, :consumer_group
+      attr_reader :id, :name, :consumer_group
       attr_accessor :consumer
-
-      def_delegator :@consumer_group, :batch_fetching
 
       # @param [String, Symbol] name of a topic on which we want to listen
       # @param consumer_group [Karafka::Routing::ConsumerGroup] owning consumer group of this topic
@@ -22,7 +19,7 @@ module Karafka
         @attributes = {}
         # @note We use identifier related to the consumer group that owns a topic, because from
         #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can
-        #   have same topic name across multiple Kafkas
+        #   have same topic name across multiple consumer groups
         @id = "#{consumer_group.id}_#{@name}"
       end
 
@@ -33,12 +30,6 @@ module Karafka
       def build
         Karafka::AttributesMap.topic.each { |attr| send(attr) }
         self
-      end
-
-      # @return [Class, nil] Class (not an instance) of a responder that should respond from
-      #   consumer back to Kafka (useful for piping data flows)
-      def responder
-        @responder ||= Karafka::Responders::Builder.new(consumer).build
       end
 
       Karafka::AttributesMap.topic.each do |attribute|
@@ -54,7 +45,9 @@ module Karafka
 
         Hash[map].merge!(
           id: id,
-          consumer: consumer
+          name: name,
+          consumer: consumer,
+          consumer_group_id: consumer_group.id
         )
       end
     end

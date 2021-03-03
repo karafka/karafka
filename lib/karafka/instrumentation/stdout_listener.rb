@@ -18,7 +18,7 @@ module Karafka
       def on_connection_batch_delegator_call(event)
         consumer = event[:consumer]
         topic = consumer.topic.name
-        kafka_messages = event[:kafka_batch].messages
+        kafka_messages = event[:kafka_batch]
         info(
           <<~MSG.chomp.tr("\n", ' ')
             #{kafka_messages.count} messages
@@ -92,15 +92,6 @@ module Karafka
       # @param event [Dry::Events::Event] event details including payload
       def on_process_notice_signal(event)
         info "Received #{event[:signal]} system signal"
-      end
-
-      # Logs info about responder usage withing a controller flow
-      # @param event [Dry::Events::Event] event details including payload
-      def on_consumers_responders_respond_with(event)
-        calling = event[:caller]
-        responder = calling.topic.responder
-        data = event[:data]
-        info "Responded from #{calling.class} using #{responder} with following data #{data}"
       end
 
       # Logs info that we're initializing Karafka app
