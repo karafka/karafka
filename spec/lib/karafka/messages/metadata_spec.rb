@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Params::Metadata do
+RSpec.describe Karafka::Messages::Metadata do
   subject(:metadata) { described_class.new }
 
   let(:rand_value) { rand }

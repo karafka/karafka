@@ -51,11 +51,8 @@ module Karafka
   # Configuration for test env
   class App
     setup do |config|
-      config.kafka.seed_brokers = ['kafka://localhost:9092']
+      config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
       config.client_id = rand.to_s
-      config.kafka.offset_retention_time = -1
-      config.kafka.max_bytes_per_partition = 1_048_576
-      config.kafka.start_from_beginning = true
     end
   end
 end
@@ -69,6 +66,5 @@ Karafka::App.boot!
 
 # We by default use the default listeners for specs to check how they work and that
 # they don't not break anything
-Karafka.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener.new)
 Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
 Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)

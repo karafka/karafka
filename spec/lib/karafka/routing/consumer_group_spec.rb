@@ -25,16 +25,16 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
 
   # We don't cover batch mode and topic mapper here as they don't come from kafka namespace of
   # config but from the main namespace
-  (
-    Karafka::AttributesMap.consumer_group - %i[batch_fetching]
-  ).each do |attribute|
-    context attribute.to_s do
-      it 'by default expect to fallback to a kafka config value' do
-        expected_config_value = Karafka::App.config.kafka.public_send(attribute)
-        expect(consumer_group.public_send(attribute)).to eq expected_config_value
-      end
-    end
-  end
+  #(
+  #  Karafka::AttributesMap.consumer_group - %i[batch_fetching]
+  #).each do |attribute|
+  #  context attribute.to_s do
+  #    it 'by default expect to fallback to a kafka config value' do
+  #      expected_config_value = Karafka::App.config.kafka.public_send(attribute)
+  #      expect(consumer_group.public_send(attribute)).to eq expected_config_value
+  #    end
+  #  end
+  #end
 
   %i[batch_fetching].each do |attribute|
     context attribute.to_s do
@@ -84,9 +84,9 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
   describe '#to_h' do
     let(:casted_consumer_group) { consumer_group.to_h }
 
-    Karafka::AttributesMap.consumer_group.each do |cg_attribute|
-      it { expect(casted_consumer_group.keys).to include(cg_attribute) }
-    end
+    #Karafka::AttributesMap.consumer_group.each do |cg_attribute|
+    #  it { expect(casted_consumer_group.keys).to include(cg_attribute) }
+    #end
 
     it { expect(casted_consumer_group.keys).to include(:topics) }
     it { expect(casted_consumer_group.keys).to include(:id) }

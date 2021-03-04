@@ -4,14 +4,16 @@ RSpec.describe Karafka::Server do
   subject(:server_class) { described_class }
 
   let(:process) { Karafka::App.config.internal.process }
+  let(:runner) { Karafka::Runner.new.call }
+
+  before do
+    allow(Karafka::App).to receive(:run!)
+    allow(Karafka::Runner).to receive(:new).and_return(runner)
+    allow(runner).to receive(:call)
+  end
 
   describe '#run' do
     after { server_class.run }
-
-    before do
-      allow(Karafka::App).to receive(:run!)
-      allow(Karafka::App.config.internal.fetcher).to receive(:call)
-    end
 
     context 'when we want to run in supervision' do
       it 'runs in supervision, start consuming' do
@@ -67,12 +69,12 @@ RSpec.describe Karafka::Server do
     it 'expect to supervise and run' do
       expect(process).to receive(:supervise)
       expect(Karafka::App).to receive(:run!)
-      expect(Karafka::App.config.internal.fetcher).to receive(:call)
+      expect(runner).to receive(:call)
     end
   end
 
   describe '#stop_supervised' do
-    before { Karafka::App.config.shutdown_timeout = timeout }
+    before { Karafka::App.config.shutdown_timeout = timeout_ms }
 
     after do
       server_class.send(:stop_supervised)
@@ -82,7 +84,8 @@ RSpec.describe Karafka::Server do
     end
 
     context 'when shutdown time is more then 1' do
-      let(:timeout) { rand(5..15) }
+      let(:timeout_sec) { rand(5..15) }
+      let(:timeout_ms) { timeout_sec * 1_000 }
 
       context 'when there are no active threads (all shutdown ok)' do
         it 'expect stop without exit or sleep' do
@@ -99,7 +102,7 @@ RSpec.describe Karafka::Server do
 
         it 'expect stop and exit with sleep' do
           expect(Karafka::App).to receive(:stop!)
-          expect(described_class).to receive(:sleep).with(0.1).exactly(timeout * 10).times
+          expect(described_class).to receive(:sleep).with(0.1).exactly(timeout_sec * 10).times
           expect(Kernel).to receive(:exit!).with(2)
         end
       end

@@ -3,7 +3,6 @@
 %w[
   delegate
   English
-  waterdrop
   rdkafka
   envlogic
   json

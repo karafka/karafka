@@ -7,15 +7,6 @@ RSpec.describe Karafka::Setup::Config do
     it { expect { |block| config_class.setup(&block) }.to yield_with_args }
   end
 
-  describe '#setup_components' do
-    it 'expect to run setup for waterdrop' do
-      expect(Karafka::App.config.internal.configurators[0])
-        .to receive(:call).with(config_class.config)
-                          .at_least(:once)
-      config_class.send :setup_components
-    end
-  end
-
   describe '#validate!' do
     context 'when configuration has errors' do
       let(:error_class) { ::Karafka::Errors::InvalidConfigurationError }

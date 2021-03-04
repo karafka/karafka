@@ -16,13 +16,6 @@ RSpec.describe Karafka::App do
 
     before { allow(Karafka.monitor).to receive(:instrument) }
 
-    it 'expect to run setup_components' do
-      expect(Karafka::Setup::Config).to receive(:validate!).once
-      expect(Karafka::Setup::Config).to receive(:setup_components).once
-
-      app_class.boot!
-    end
-
     it 'expect to publish app.initialized event' do
       expect(Karafka.monitor).to receive(:instrument).with('app.initialized')
 
@@ -32,8 +25,6 @@ RSpec.describe Karafka::App do
 
   describe '#reload' do
     let(:topic) { build(:routing_topic) }
-    let(:consumers_persistence) { Karafka::Persistence::Consumers }
-    let(:topics_persistence) { Karafka::Persistence::Topics }
 
     before do
       described_class.config.internal.routing_builder.draw do
@@ -43,18 +34,10 @@ RSpec.describe Karafka::App do
       end
 
       allow(Karafka::Routing::Router).to receive(:find).and_return(topic)
-      consumers_persistence.fetch(topic, 0)
-      topics_persistence.fetch(topic.consumer_group.id, topic.name)
     end
 
     context 'when we trigger reload' do
-      it 'expect to invalidate the consumers cache' do
-        expect { app_class.reload }.to change(Karafka::Persistence::Consumers, :current)
-      end
-
-      it 'expect to invalidate the topics cache' do
-        expect { app_class.reload }.to change(Karafka::Persistence::Topics, :current)
-      end
+      pending
 
       it 'expect to redraw routes' do
         expect { app_class.reload }.to change(described_class.config.internal, :routing_builder)

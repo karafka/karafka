@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Params::Builders::Params do
+RSpec.describe Karafka::Messages::Builders::Message do
   let(:routing_topic) { build(:routing_topic) }
   let(:fetched_message) { build(:kafka_fetched_message) }
 
   describe '#from_kafka_message' do
     subject(:result) { described_class.from_kafka_message(fetched_message, routing_topic) }
 
-    it { is_expected.to be_a(Karafka::Params::Params) }
+    it { is_expected.to be_a(Karafka::Messages::Message) }
     it { expect(result.raw_payload).to eq fetched_message.value }
     it { expect(result.payload).to eq fetched_message.value.to_f }
     it { expect(result.metadata.partition).to eq fetched_message.partition }

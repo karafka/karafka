@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Params::Params do
+RSpec.describe Karafka::Messages::Message do
   let(:base_params_class) { described_class }
   let(:headers) { { message_type: 'test' } }
 
@@ -9,7 +9,7 @@ RSpec.describe Karafka::Params::Params do
 
     let(:deserializer) { ->(_) { 1 } }
     let(:metadata) do
-      ::Karafka::Params::Metadata.new.tap do |metadata|
+      ::Karafka::Messages::Metadata.new.tap do |metadata|
         metadata['deserializer'] = deserializer
       end
     end

@@ -39,6 +39,7 @@ module Karafka
 
         kafka['client.id'] ||= 'karafka'
         kafka['group.id'] ||= consumer_group.id
+        kafka['auto.offset.reset'] ||= 'earliest'
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
         # rdkafka offset auto-storing
         kafka['enable.auto.offset.store'] = 'false'

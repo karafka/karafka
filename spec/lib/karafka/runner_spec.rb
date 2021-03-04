@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Fetcher do
+RSpec.describe Karafka::Runner do
   subject(:fetcher) { described_class.new }
 
   describe '#fetch_loop' do

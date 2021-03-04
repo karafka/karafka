@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Params::BatchMetadata do
+RSpec.describe Karafka::Messages::BatchMetadata do
   subject(:metadata) { described_class.new }
 
   let(:rand_value) { rand }

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Params::ParamsBatch do
+RSpec.describe Karafka::Messages::Messages do
   subject(:params_batch) { described_class.new(params_array) }
 
   let(:deserialized_payload) { { rand.to_s => rand.to_s } }
@@ -10,8 +10,8 @@ RSpec.describe Karafka::Params::ParamsBatch do
   let(:kafka_message2) { build(:kafka_fetched_message, value: serialized_payload) }
   let(:params_array) do
     [
-      Karafka::Params::Builders::Params.from_kafka_message(kafka_message1, topic),
-      Karafka::Params::Builders::Params.from_kafka_message(kafka_message2, topic)
+      Karafka::Messages::Builders::Messages.from_kafka_message(kafka_message1, topic),
+      Karafka::Messages::Builders::Messages.from_kafka_message(kafka_message2, topic)
     ]
   end
 

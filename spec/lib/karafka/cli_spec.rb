@@ -20,7 +20,6 @@ RSpec.describe Karafka::Cli do
     let(:available_commands) do
       [
         Karafka::Cli::Console,
-        Karafka::Cli::Flow,
         Karafka::Cli::Info,
         Karafka::Cli::Install,
         Karafka::Cli::Server

@@ -15,11 +15,8 @@ RSpec.describe Karafka::Cli::Info do
         "Ruby-kafka version: #{::Kafka::VERSION}",
         "Application client id: #{Karafka::App.config.client_id}",
         "Backend: #{Karafka::App.config.backend}",
-        "Batch fetching: #{Karafka::App.config.batch_fetching}",
-        "Batch consuming: #{Karafka::App.config.batch_consuming}",
         "Boot file: #{Karafka.boot_file}",
         "Environment: #{Karafka.env}",
-        "Kafka seed brokers: #{Karafka::App.config.kafka.seed_brokers}"
       ].join("\n")
     end
 

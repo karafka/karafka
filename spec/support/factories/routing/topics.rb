@@ -5,9 +5,6 @@ FactoryBot.define do
     consumer_group { build(:routing_consumer_group) }
     name { 'test' }
     consumer { Class.new(Karafka::BaseConsumer) }
-    backend { :inline }
-    batch_consuming { true }
-    responder { nil }
 
     skip_create
 
@@ -16,9 +13,6 @@ FactoryBot.define do
 
       instance.tap do |topic|
         topic.consumer = consumer
-        topic.backend = backend
-        topic.batch_consuming = batch_consuming
-        topic.responder = responder
       end
     end
   end

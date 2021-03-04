@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Params::Builders::ParamsBatch do
+RSpec.describe Karafka::Messages::Builders::Messages do
   let(:message1) { build(:kafka_fetched_message) }
   let(:message2) { build(:kafka_fetched_message) }
   let(:kafka_messages) { [message1, message2] }
@@ -9,6 +9,6 @@ RSpec.describe Karafka::Params::Builders::ParamsBatch do
   describe '#from_kafka_messages' do
     subject(:result) { described_class.from_kafka_messages(kafka_messages, routing_topic) }
 
-    it { is_expected.to be_a(Karafka::Params::ParamsBatch) }
+    it { is_expected.to be_a(Karafka::Messages::Messages) }
   end
 end
