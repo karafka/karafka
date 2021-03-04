@@ -74,8 +74,7 @@ module Karafka
 
       class << self
         # Configuring method
-        # @yield Runs a block of code providing a config singleton instance to it
-        # @yieldparam [Karafka::Setup::Config] Karafka config instance
+        # @param block [Proc] block we want to execute with the config instance
         def setup(&block)
           configure(&block)
         end

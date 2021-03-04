@@ -16,6 +16,7 @@ module Karafka
         @metadata = metadata
       end
 
+      # @param block [Proc] block we want to execute per each message
       # @note Invocation of this method will not cause loading and deserializing of messages.
       def each(&block)
         @messages_array.each(&block)
