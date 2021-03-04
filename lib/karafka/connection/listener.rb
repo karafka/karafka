@@ -64,8 +64,6 @@ module Karafka
         # This is on purpose - see the notes for this method
         # rubocop:disable Lint/RescueException
       rescue Exception => e
-        p e
-        raise e
         Karafka.monitor.instrument('connection.listener.fetch_loop.error', caller: self, error: e)
         # rubocop:enable Lint/RescueException
 
