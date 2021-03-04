@@ -9,13 +9,7 @@ module Karafka
       config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
 
       params do
-        optional(:pid).filled(:str?)
-        optional(:daemon).filled(:bool?)
         optional(:consumer_groups).value(:array, :filled?)
-      end
-
-      rule(:pid) do
-        key(:pid).failure(:pid_already_exists) if value && File.exist?(value)
       end
 
       rule(:consumer_groups) do

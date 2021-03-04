@@ -2,20 +2,28 @@
 
 module Karafka
   module Processing
+    # Buffer for executors of a given subscription group. It wraps around the concept of building
+    # and caching them, so we can re-use them instead of creating new each time.
     class ExecutorsBuffer
-      def initialize(client, subscription_group, jobs_queue)
+      # @param client [Connection::Client]
+      # @param subscription_group [Routing::SubscriptionGroup]
+      # @return [ExecutorsBuffer]
+      def initialize(client, subscription_group)
         @subscription_group = subscription_group
-        @jobs_queue = jobs_queue
-        @buffer = Hash.new { |h, k| h[k] = Hash.new  }
         @client = client
+        @buffer = Hash.new { |h, k| h[k] = Hash.new  }
       end
 
+      # @param topic []
+      # @param partition []
+      # @pause []
       def fetch(
         topic,
         partition,
         pause
       )
         @buffer[topic][partition] ||= Executor.new(
+          @subscription_group.id,
           @client,
           @subscription_group.topics.find { |ktopic| ktopic.name == topic },
           pause
@@ -27,7 +35,6 @@ module Karafka
       end
 
       def clear
-        @buffer.values { |runner| @jobs_queue.clear(runner) }
         @buffer.clear
       end
     end

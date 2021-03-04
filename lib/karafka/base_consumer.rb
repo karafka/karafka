@@ -14,26 +14,33 @@ module Karafka
     attr_accessor :pause
 
     # Executes the default consumer flow.
-    def call
-      Karafka.monitor.instrument('consuming.call', caller: self) do
+    def on_consume
+      Karafka.monitor.instrument('consumer.consume', caller: self) do
         consume
       end
 
       pause.reset
 
-      # TODO offset management (mark as consumed here)
+      # Mark as consumed only if manual offset management is not on
+      return if topic.manual_offset_management
+
+      mark_as_consumed(messages.last)
     rescue StandardError => e
       Karafka.monitor.instrument('consuming.error', caller: self, error: e)
       client.pause(topic.name, messages.first.partition, @seek_offset || messages.first.offset)
       pause.pause
     end
 
-    def revoked
-      #
+    def on_revoked
+      Karafka.monitor.instrument('consumer.revoked', caller: self) do
+        revoked
+      end
     end
 
-    def shutdown
-      #
+    def on_shutdown
+      Karafka.monitor.instrument('consumer.shutdown', caller: self) do
+        shutdown
+      end
     end
 
     private
@@ -44,6 +51,14 @@ module Karafka
     #   someone forgets about it or makes on with typo
     def consume
       raise NotImplementedError, 'Implement this in a subclass'
+    end
+
+    def revoked
+      #
+    end
+
+    def shutdown
+      #
     end
 
     def mark_as_consumed(message)

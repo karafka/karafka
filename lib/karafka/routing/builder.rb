@@ -42,9 +42,7 @@ module Karafka
 
           next if validation_result.success?
 
-          p 'we need to update the config validator!'
-
-#          raise Errors::InvalidConfigurationError, validation_result.errors.to_h
+          raise Errors::InvalidConfigurationError, validation_result.errors.to_h
         end
       end
 

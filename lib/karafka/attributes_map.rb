@@ -15,6 +15,7 @@ module Karafka
         %i[
           kafka
           deserializer
+          manual_offset_management
         ]
       end
 
@@ -27,9 +28,9 @@ module Karafka
         %i[
           kafka
           deserializer
+          manual_offset_management
           max_messages
           max_wait_time
-          max_poll_retries
         ]
       end
     end

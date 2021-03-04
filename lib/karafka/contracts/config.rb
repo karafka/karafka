@@ -10,9 +10,20 @@ module Karafka
     class Config < Dry::Validation::Contract
       params do
         required(:client_id).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
-        required(:shutdown_timeout) { (int? & gt?(0)) }
-        required(:consumer_mapper)
-        #required(:batch_consuming)
+        required(:concurrency) { int? & gt?(0) }
+        required(:consumer_mapper).filled
+        required(:pause_timeout).maybe(%i[integer float]) { filled? > gteq?(0) }
+        required(:pause_max_timeout).maybe(%i[integer float]) { filled? > gteq?(0) }
+        required(:pause_with_exponential_backoff).filled(:bool?)
+        required(:shutdown_timeout) { int? & gt?(0) }
+      end
+
+      rule(:pause_timeout, :pause_max_timeout, :pause_with_exponential_backoff) do
+        if values[:pause_with_exponential_backoff]
+          if values[:pause_timeout].to_i > values[:pause_max_timeout].to_i
+            key(:pause_max_timeout).failure(:max_timeout_size_for_exponential)
+          end
+        end
       end
     end
   end

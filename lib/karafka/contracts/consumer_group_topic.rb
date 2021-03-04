@@ -5,12 +5,12 @@ module Karafka
     # Consumer group topic validation rules
     class ConsumerGroupTopic < Dry::Validation::Contract
       params do
-        required(:id).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
-        required(:name).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
-        required(:backend).filled(included_in?: %i[inline sidekiq])
         required(:consumer).filled
         required(:deserializer).filled
-        required(:batch_consuming).filled(:bool?)
+        required(:id).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
+        required(:kafka)
+        required(:manual_offset_management).filled(:bool?)
+        required(:name).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
       end
     end
   end

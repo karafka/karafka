@@ -11,7 +11,9 @@ module Karafka
       # Fake message that we use to tell rdkafka to pause in a given place
       PauseMessage = Struct.new(:topic, :partition, :offset)
 
-      private_constant :PauseMessage
+      MAX_POLL_RETRIES = 10
+
+      private_constant :PauseMessage, :MAX_POLL_RETRIES
 
       # Creates a new consumer instance
       # @param subscription_group [Karafka::Routing::SubscriptionGroup] subscription group
@@ -201,7 +203,7 @@ module Karafka
 
         @kafka.poll(time_poll.remaining)
       rescue ::Rdkafka::RdkafkaError => e
-        raise if time_poll.attempts > @subscription_group.max_poll_retries
+        raise if time_poll.attempts > MAX_POLL_RETRIES
         raise unless time_poll.retryable?
 
         case e.code

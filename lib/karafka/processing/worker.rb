@@ -15,7 +15,7 @@ module Karafka
       private
 
       def process
-        job = @queue.fetch
+        job = @queue.pop
 
         if job
           job.call

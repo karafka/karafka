@@ -33,29 +33,28 @@ module Karafka
       setting :consumer_mapper, Routing::ConsumerMapper.new
       # Default deserializer for converting incoming data into ruby objects
       setting :deserializer, Karafka::Serialization::Json::Deserializer.new
-      # option shutdown_timeout [Integer, nil] the number of seconds after which Karafka no
-      #   longer wait for the consumers to stop gracefully but instead we force terminate
-      #   everything.
-      setting :shutdown_timeout, 60
+      # option [Boolean] should we leave offset management to the user
+      setting :manual_offset_management, false
       # options max_messages [Integer] how many messages do we want to fetch from Kafka in one go
       setting :max_messages, 100_000
-      # option [Integer] number of seconds we can wait while fetching data
+      # option [Integer] number of milliseconds we can wait while fetching data
       setting :max_wait_time, 10_000
+      # option shutdown_timeout [Integer] the number of milliseconds after which Karafka no
+      #   longer waits for the consumers to stop gracefully but instead we force terminate
+      #   everything.
+      setting :shutdown_timeout, 60_000
+      # option [Integer] number of threads in which we want to do parallel processing
+      setting :concurrency, 5
+      # option [Integer]
+      setting :pause_timeout, 1_000
+
+      setting :pause_max_timeout, 30_000
+
+      setting :pause_with_exponential_backoff, true
 
       # rdkafka default options
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, {}
-
-      setting :processing do
-        # option [Integer] number of threads in which we want to do parallel processing
-        setting :concurrency, 5
-
-        setting :pause_timeout, 1_000
-
-        setting :pause_max_timeout, 30_000
-
-        setting :pause_with_exponential_backoff, true
-      end
 
       # Namespace for internal settings that should not be modified
       # It's a temporary step to "declassify" several things internally before we move to a

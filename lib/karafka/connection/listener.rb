@@ -9,13 +9,12 @@ module Karafka
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs [Karafka::Processing::JobsQueue] queue where we should push work
       # @return [Karafka::Connection::Listener] listener instance
-      def initialize(subscription_group, jobs, workers)
+      def initialize(subscription_group, jobs_queue)
         @subscription_group = subscription_group
-        @jobs = jobs
-        @workers = workers
+        @jobs_queue = jobs_queue
         @pauses_manager = PausesManager.new
         @client = Client.new(@subscription_group)
-        @executors = Processing::ExecutorsBuffer.new(@client, subscription_group, jobs)
+        @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
       end
 
       # Runs the main listener fetch loop
@@ -51,7 +50,7 @@ module Karafka
           # we should not get any data from them, thus there is no risk of a race-condition
           revoke_lost_partitions_consumers
           distribute_partitions_jobs(messages_buffer)
-          @jobs.wait
+          @jobs_queue.wait(@subscription_group.id)
           # We don't use the `commit_offsets!` here for performance reasons. This can be achieved
           # if needed by using manual offset management
           @client.commit_offsets
@@ -62,7 +61,6 @@ module Karafka
         # This is on purpose - see the notes for this method
         # rubocop:disable Lint/RescueException
       rescue Exception => e
-        p e
         Karafka.monitor.instrument('connection.listener.fetch_loop.error', caller: self, error: e)
         # rubocop:enable Lint/RescueException
 
@@ -88,7 +86,7 @@ module Karafka
           partitions.each do |partition|
             pause = @pauses_manager.fetch(topic, partition)
             executor = @executors.fetch(topic, partition, pause)
-            @jobs << Processing::Jobs::Revoked.new(executor)
+            @jobs_queue << Processing::Jobs::Revoked.new(executor)
           end
         end
       end
@@ -104,14 +102,14 @@ module Karafka
 
           executor = @executors.fetch(topic, partition, pause)
 
-          @jobs << Processing::Jobs::Call.new(executor, messages)
+          @jobs_queue << Processing::Jobs::Consume.new(executor, messages)
         end
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
       # stops kafka client
       def shutdown
-        @jobs.stop
+        @jobs_queue.stop
         @executors.shutdown
         @client.commit_offsets!
         @client.stop
@@ -125,8 +123,8 @@ module Karafka
         # If there was any problem with processing, before we reset things we need to make sure,
         # there are no jobs in the queue. Otherwise it could lead to leakage in between client
         # resetting
-        @jobs.wait
-        @jobs.clear
+        @jobs_queue.wait(@subscription_group.id)
+        @jobs_queue.clear(@subscription_group.id)
         @client.reset
         @pauses_manager.clear
         @executors.clear

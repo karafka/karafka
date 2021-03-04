@@ -13,7 +13,6 @@ module Karafka
         kafka
         max_messages
         max_wait_time
-        max_poll_retries
       ].freeze
 
       private_constant :DISTRIBUTION_KEYS
