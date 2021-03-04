@@ -45,11 +45,11 @@ module Karafka
       setting :shutdown_timeout, 60_000
       # option [Integer] number of threads in which we want to do parallel processing
       setting :concurrency, 5
-      # option [Integer]
+      # option [Integer] how long should we wait upon processing error
       setting :pause_timeout, 1_000
-
+      # option [Integer] what is the max timeout in case of an exponential backoff
       setting :pause_max_timeout, 30_000
-
+      # option [Boolean] should we use exponential backoff
       setting :pause_with_exponential_backoff, true
 
       # rdkafka default options
@@ -68,9 +68,6 @@ module Karafka
         # @note In the future, we need to have a single process representation for all the karafka
         #   instances
         setting :process, Process.new
-        # option configurators [Array<Object>] all configurators that we want to run after
-        #   the setup
-        setting :configurators, [Configurators::WaterDrop.new]
         # option []
         setting :subscription_groups_builder, Routing::SubscriptionGroupsBuilder.new
       end
@@ -81,16 +78,6 @@ module Karafka
         # @yieldparam [Karafka::Setup::Config] Karafka config instance
         def setup
           configure { |config| yield(config) }
-        end
-
-        # Everything that should be initialized after the setup
-        # Components are in karafka/config directory and are all loaded one by one
-        # If you want to configure a next component, please add a proper file to config dir
-        def setup_components
-          config
-            .internal
-            .configurators
-            .each { |configurator| configurator.call(config) }
         end
 
         # Validate config based on the config contract

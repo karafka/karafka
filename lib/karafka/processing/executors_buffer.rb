@@ -14,9 +14,10 @@ module Karafka
         @buffer = Hash.new { |h, k| h[k] = Hash.new  }
       end
 
-      # @param topic []
-      # @param partition []
-      # @pause []
+      # @param topic [String] topic name
+      # @param partition [Integer] partition number
+      # @pause [TimeTrackers::Pause] pause corresponding with provided topic and partition
+      # @return [Executor] consumer executor
       def fetch(
         topic,
         partition,
@@ -30,10 +31,12 @@ module Karafka
         )
       end
 
+      # Runs the shutdown on all active executors.
       def shutdown
         @buffer.values.map(&:values).flatten.each(&:shutdown)
       end
 
+      # Clears the executors buffer. Useful for critical errors recovery.
       def clear
         @buffer.clear
       end

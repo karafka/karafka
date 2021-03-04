@@ -3,11 +3,12 @@
 module Karafka
   module Messages
     module Builders
-      # Builder for creating memessage batch instances
+      # Builder for creating message batch instances.
       module Messages
         class << self
           # Creates messages batch with messages inside based on the incoming messages and the
-          # topic from which it comes
+          # topic from which it comes.
+          #
           # @param kafka_messages [Array<Rdkafka::Consumer::Message>] raw fetched messages
           # @param topic [Karafka::Routing::Topic] topic for which we're received messages
           # @param received_at [Time] moment in time when the messages were received

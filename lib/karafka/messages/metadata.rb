@@ -2,7 +2,7 @@
 
 module Karafka
   module Messages
-    # Single message metadata details that can be accessed without the need of deserialization
+    # Single message metadata details that can be accessed without the need of deserialization.
     Metadata = Struct.new(
       :timestamp,
       :headers,

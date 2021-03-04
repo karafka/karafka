@@ -3,13 +3,9 @@ en:
     errors:
       max_timeout_size_for_exponential: >
         pause_timeout cannot be more than pause_max_timeout
-      max_wait_time_limit:
-        max_wait_time cannot be more than socket_timeout
       topics_names_not_unique: >
         all topic names within a single consumer group must be unique
       required_usage_count: >
         Given topic must be used at least once
       consumer_groups_inclusion: >
         Unknown consumer group
-      does_not_exist:
-        Given file does not exist or cannot be read

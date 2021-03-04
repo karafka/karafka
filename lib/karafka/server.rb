@@ -62,6 +62,7 @@ module Karafka
 
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
+        # We divide it by 1000 because we use time in ms.
         ((timeout / 1_000) * SUPERVISION_CHECK_FACTOR).to_i.times do
           if consumer_threads.count(&:alive?).zero?
             Thread.new { Karafka.monitor.instrument('app.stopped') }.join

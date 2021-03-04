@@ -15,7 +15,6 @@ module Karafka
         config
         lib
         log
-        tmp/pids
       ].freeze
 
       # Where should we map proper files from templates

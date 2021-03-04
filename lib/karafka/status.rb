@@ -3,7 +3,7 @@
 module Karafka
   # App status monitor
   class Status
-    # Available states and their transitions
+    # Available states and their transitions.
     STATES = {
       initializing: :initialize!,
       initialized: :initialized!,

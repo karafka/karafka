@@ -14,6 +14,17 @@ module Karafka
       attr_reader :id
       attr_reader :name
 
+      # Attributes we can inherit from the root unless they were redefined on this level
+      INHERITABLE_ATTRIBUTES = %w[
+        kafka
+        deserializer
+        manual_offset_management
+        max_messages
+        max_wait_time
+      ].freeze
+
+      private_constant :INHERITABLE_ATTRIBUTES
+
       # @param name [String, Symbol] raw name of this consumer group. Raw means, that it does not
       #   yet have an application client_id namespace, this will be added here by default.
       #   We add it to make a multi-system development easier for people that don't use
@@ -39,7 +50,7 @@ module Karafka
         @topics.last
       end
 
-      Karafka::AttributesMap.consumer_group.each do |attribute|
+      INHERITABLE_ATTRIBUTES.each do |attribute|
         config_retriever_for(attribute)
       end
 
@@ -58,7 +69,7 @@ module Karafka
           id: id
         }
 
-        Karafka::AttributesMap.consumer_group.each do |attribute|
+        INHERITABLE_ATTRIBUTES.each do |attribute|
           result[attribute] = public_send(attribute)
         end
 

@@ -19,7 +19,7 @@
   zeitwerk
 ].each(&method(:require))
 
-# Karafka library
+# Karafka framework main namespace
 module Karafka
   extend Envlogic
 

@@ -6,9 +6,6 @@ module Karafka
     # Base class for all the Karafka internal errors
     BaseError = Class.new(StandardError)
 
-    # Should be raised when we have that that we cannot serialize
-    SerializationError = Class.new(BaseError)
-
     # Raised when router receives topic name which does not correspond with any routes
     # This can only happen in a case when:
     #   - you've received a message and we cannot match it with a consumer
@@ -27,17 +24,10 @@ module Karafka
     # Raised when we try to use Karafka CLI commands (except install) without a boot file
     MissingBootFileError = Class.new(BaseError)
 
-    # Raised when we want to read a persisted thread messages consumer but it is unavailable
-    # This should never happen and if it does, please contact us
-    MissingClientError = Class.new(BaseError)
-
     # Raised when want to hook up to an event that is not registered and supported
     UnregisteredMonitorEventError = Class.new(BaseError)
 
     # Raised when we've waited enough for shutting down a non-responsive process
     ForcefulShutdownError = Class.new(BaseError)
-
-    # Raised when you want to operate on an already closed consumer
-    ConsumerAlreadyClosed = Class.new(BaseError)
   end
 end

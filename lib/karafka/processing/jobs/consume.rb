@@ -4,7 +4,7 @@ module Karafka
   module Processing
     module Jobs
       # The main job type. It runs the executor that triggers given topic partition messages
-      # processing in an underlying consumer instance
+      # processing in an underlying consumer instance.
       class Consume < Base
         # @param executor [Karafka::Processing::Executor] executor that is suppose to run a given
         #   job
@@ -17,7 +17,7 @@ module Karafka
           @created_at = Time.now
         end
 
-        # Runs the given executor
+        # Runs the given executor.
         def call
           executor.consume(@messages, @created_at)
         end

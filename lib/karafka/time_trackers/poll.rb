@@ -3,6 +3,7 @@
 module Karafka
   module TimeTrackers
     # Object used to keep track of time we've used running certain operations.
+    #
     # @example Keep track of sleeping and stop after 3 seconds of 0.1 sleep intervals
     #   time_poll = Poll.new(3000)
     #   time_poll.start
@@ -28,13 +29,13 @@ module Karafka
         @remaining <= 0
       end
 
-      # Starts time tracking
+      # Starts time tracking.
       def start
         @attempts += 1
         @started_at = now
       end
 
-      # Stops time tracking of a given piece of code and updates the remaining time
+      # Stops time tracking of a given piece of code and updates the remaining time.
       def checkpoint
         @remaining = @remaining - (now - @started_at)
       end
@@ -46,7 +47,7 @@ module Karafka
       end
 
       # Sleeps for amount of time matching attempt, so we sleep more with each attempt in case of
-      #   a retry
+      #   a retry.
       def backoff
         # Sleep requires seconds not ms
         sleep(100 * attempts / 1000)

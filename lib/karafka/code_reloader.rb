@@ -2,14 +2,14 @@
 
 module Karafka
   # Special type of a listener, that is not an instrumentation one, but one that triggers
-  # code reload in the development mode after each fetched batch (or message)
+  # code reload in the development mode after each fetched batch (or message).
   #
   # Please refer to the development code reload sections for details on the benefits and downsides
-  # of the in-process code reloading
+  # of the in-process code reloading.
   class CodeReloader
     # This mutex is needed as we might have an application that has multiple consumer groups
     # running in separate threads and we should not trigger reload before fully reloading the app
-    # in previous thread
+    # in previous thread.
     MUTEX = Mutex.new
 
     private_constant :MUTEX
@@ -23,7 +23,8 @@ module Karafka
       @block = block
     end
 
-    # Binds to the instrumentation events and triggers reload
+    # Binds to the instrumentation events and triggers reload.
+    #
     # @param _event [Dry::Event] empty dry event
     # @note Since we de-register all the user defined objects and redraw routes, it means that
     #   we won't be able to do a multi-batch buffering in the development mode as each of the
@@ -35,7 +36,7 @@ module Karafka
     private
 
     # Triggers reload of both standard and Rails reloaders as well as expires all internals of
-    # Karafka, so it can be rediscovered and rebuilt
+    # Karafka, so it can be rediscovered and rebuilt.
     def reload
       MUTEX.synchronize do
         if @reloaders[0].respond_to?(:execute)
@@ -46,7 +47,7 @@ module Karafka
       end
     end
 
-    # Rails reloading procedure
+    # Rails reloading procedure.
     def reload_with_rails
       updatable = @reloaders.select(&:updated?)
 
@@ -57,7 +58,7 @@ module Karafka
       Karafka::App.reload
     end
 
-    # Zeitwerk and other reloaders
+    # Zeitwerk and other reloaders.
     def reload_without_rails
       @reloaders.each(&:reload)
       @block&.call

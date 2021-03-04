@@ -16,6 +16,7 @@ module Karafka
           "Ruby version: #{RUBY_VERSION}",
           "Rdkafka version: #{::Rdkafka::VERSION}",
           "Subscription groups count: #{Karafka::App.subscription_groups.size}",
+          "Workers count: #{Karafka::App.config.concurrency}",
           "Application client id: #{config.client_id}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",

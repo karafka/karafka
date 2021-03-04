@@ -4,10 +4,10 @@ module Karafka
   module Messages
     # Builders encapsulate logic related to creating messages related objects.
     module Builders
-      # Builder of a single message
+      # Builder of a single message based on raw rdkafka message.
       module Message
         class << self
-          # @param kafka_message [Kafka::FetchedMessage] message fetched from Kafka
+          # @param kafka_message [Kafka::FetchedMessage] raw message fetched from Kafka
           # @param topic [Karafka::Routing::Topic] topic for which this message was fetched
           # @return [Karafka::Messages::Message] message object with payload and metadata
           def call(kafka_message, topic)

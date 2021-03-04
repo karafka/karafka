@@ -3,7 +3,7 @@
 module Karafka
   module Helpers
     # Inflector provides inflection for the whole Karafka framework with additional inflection
-    # caching (due to the fact, that Dry::Inflector is slow)
+    # caching (due to the fact, that Dry::Inflector is slow).
     module Inflector
       # What inflection engine do we want to use
       ENGINE = Dry::Inflector.new

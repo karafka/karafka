@@ -2,7 +2,7 @@
 
 module Karafka
   module TimeTrackers
-    # Handles Kafka topic partition pausing and resuming with exponential backoffs
+    # Handles Kafka topic partition pausing and resuming with exponential backoffs.
     class Pause < Base
       attr_reader :count
 
@@ -39,14 +39,14 @@ module Karafka
       end
 
       # Pauses the processing from now till the end of the interval (backoff or non-backoff)
-      # and records the count
+      # and records the count.
       def pause
         @started_at = now
         @ends_at = @started_at + backoff_interval
         @count += 1
       end
 
-      # Marks the pause as resumed
+      # Marks the pause as resumed.
       def resume
         @started_at = nil
         @ends_at = nil
@@ -62,7 +62,7 @@ module Karafka
         @ends_at ? now >= @ends_at : true
       end
 
-      # Resets the pause counter
+      # Resets the pause counter.
       def reset
         @count = 0
       end

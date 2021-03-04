@@ -2,13 +2,18 @@
 
 module Karafka
   module Routing
-    # rdkafka allows us to group topics subscriptions when they have same settings
+    # rdkafka allows us to group topics subscriptions when they have same settings.
     # This builder groups topics from a single consumer group into subscription groups that can be
     # subscribed with one rdkafka connection.
     # This way we save resources as having several rdkafka consumers under the hood is not the
-    # cheapest thing in bigger systems
+    # cheapest thing in a bigger system.
+    #
+    # In general, if we can, we try to subscribe to as many topics with one rdkafka connection as
+    # possible, but if not possible, we divide.
     class SubscriptionGroupsBuilder
-      # Keys used to build up a hash for subscription groups distribution
+      # Keys used to build up a hash for subscription groups distribution.
+      # In order to be able to use the same rdkafka connection for several topics, those keys need
+      # to have same values.
       DISTRIBUTION_KEYS = %i[
         kafka
         max_messages

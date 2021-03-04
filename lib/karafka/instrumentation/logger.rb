@@ -2,7 +2,8 @@
 
 module Karafka
   module Instrumentation
-    # Default logger for Event Delegator
+    # Default logger for Event Delegator.
+    #
     # @note It uses ::Logger features - providing basic logging
     class Logger < ::Logger
       # Map containing information about log level for given environment

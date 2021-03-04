@@ -2,26 +2,32 @@
 
 module Karafka
   module Routing
-    # Object representing a set of topics that can be subscribed together with one kafka connection
+    # Object representing a set of topics that can be subscribed together with one connection.
+    #
+    # @note One subscription group will always belong to one consumer group, but one consumer
+    #   group can have multiple subscription groups.
     class SubscriptionGroup
       attr_reader :id
       attr_reader :topics
 
-      # @param [Array<Karafka::Routing::Topic>] all the topics that share the same kafka settings
-      # @return [Karafka::Routing::SubscriptionGroup] built subscription group
+      # @param [Array<Topic>] all the topics that share the same key settings
+      # @return [SubscriptionGroup] built subscription group
       def initialize(topics)
         @id = SecureRandom.uuid
         @topics = topics
       end
 
+      # @return [Integer] max messages fetched in a single go
       def max_messages
         consumer_group.max_messages
       end
 
+      # @return [Integer] max milliseconds we can wait for incoming messages
       def max_wait_time
         consumer_group.max_wait_time
       end
 
+      # @return [ConsumerGroup] consumer group of this subscription group
       def consumer_group
         @topics.first.consumer_group
       end

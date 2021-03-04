@@ -2,9 +2,7 @@
 
 module Karafka
   module Contracts
-    # Contract for validating correctness of the server cli command options
-    # We validate some basics + the list of consumer_groups on which we want to use, to make
-    # sure that all of them are defined, plus that a pidfile does not exist
+    # Contract for validating correctness of the server cli command options.
     class ServerCliOptions < Dry::Validation::Contract
       config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
 

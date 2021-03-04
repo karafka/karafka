@@ -2,9 +2,10 @@
 
 module Karafka
   module Connection
-    # An abstraction layer on top of the rdkafka consumer
+    # An abstraction layer on top of the rdkafka consumer.
+    #
     # It is threadsafe and provides some security measures so we won't end up operating on a
-    # closed consumer instance as it causes Ruby VM process to crash
+    # closed consumer instance as it causes Ruby VM process to crash.
     class Client
       attr_reader :rebalance_manager
 
@@ -15,7 +16,8 @@ module Karafka
 
       private_constant :PauseMessage, :MAX_POLL_RETRIES
 
-      # Creates a new consumer instance
+      # Creates a new consumer instance.
+      #
       # @param subscription_group [Karafka::Routing::SubscriptionGroup] subscription group
       #   with all the configuration details needed for us to create a client
       # @return [Karafka::Connection::Rdk::Consumer]
@@ -31,7 +33,8 @@ module Karafka
         @offsetting = false
       end
 
-      # Fetches messages within boundaries defined by the settings (time, size, topics, etc)
+      # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
+      #
       # @return [Karafka::Connection::MessagesBuffer] messages buffer that holds messages per topic
       #   partition
       # @note This method should not be executed from many threads at the same time
@@ -62,7 +65,8 @@ module Karafka
         @buffer
       end
 
-      # Stores offset for a given partition of a given topic based on the provided message
+      # Stores offset for a given partition of a given topic based on the provided message.
+      #
       # @param message [?] Kafka message
       def store_offset(message)
         @mutex.synchronize do
@@ -71,8 +75,9 @@ module Karafka
         end
       end
 
-      # Commits the offset on a current consumer in a non-blocking or blocking way
-      # Ignoring a case where there would not be an offset (for example when rebalance occurs)
+      # Commits the offset on a current consumer in a non-blocking or blocking way.
+      # Ignoring a case where there would not be an offset (for example when rebalance occurs).
+      #
       # @param async [Boolean] should the commit happen async or sync (async by default)
       # @note This will commit all the offsets for the whole consumer. In order to achieve
       #   granular control over where the offset should be for particular topic partitions, the
@@ -92,13 +97,15 @@ module Karafka
         @mutex.unlock
       end
 
-      # Commits offset in a synchronious way
+      # Commits offset in a synchronious way.
+      #
       # @see `#commit_offset` for more details
       def commit_offsets!
         commit_offsets(async: false)
       end
 
-      # Pauses given partition and moves back to last successful offset processed
+      # Pauses given partition and moves back to last successful offset processed.
+      #
       # @param topic [String] topic name
       # @param partition [Integer] partition
       # @param offset [Integer] offset of the message on which we want to pause (this messsage will
@@ -123,7 +130,8 @@ module Karafka
         @mutex.unlock
       end
 
-      # Resumes processing of a give topic partition after it was paused
+      # Resumes processing of a give topic partition after it was paused.
+      #
       # @param topic [String] topic name
       # @param partition [Integer] partition
       def resume(topic, partition)
@@ -140,7 +148,8 @@ module Karafka
         @mutex.unlock
       end
 
-      # Gracefully stops topic consumption
+      # Gracefully stops topic consumption.
+      #
       # @note Stopping running consumers without a really important reason is not recommended
       #   as until all the consumers are stopped, the server will keep running serving only
       #   part of the messages
@@ -148,7 +157,8 @@ module Karafka
         close
       end
 
-      # Marks given message as consumed
+      # Marks given message as consumed.
+      #
       # @param [Karafka::Messages::Message] message that we want to mark as processed
       # @note This method won't trigger automatic offsets commits, rather relying on the offset
       #   checkpointing trigger that happens with each batch processed
@@ -156,14 +166,15 @@ module Karafka
         store_offset(message)
       end
 
-      # Marks a given message as consumed and commits the offsets in a blocking way
+      # Marks a given message as consumed and commits the offsets in a blocking way.
+      #
       # @param [Karafka::Messages::Message] message that we want to mark as processed
       def mark_as_consumed!(message)
         mark_as_consumed(message)
         commit_offsets!
       end
 
-      # Closes and resets the client completely
+      # Closes and resets the client completely.
       def reset
         close
 
@@ -176,7 +187,7 @@ module Karafka
 
       private
 
-      # Commits the stored offsets in a sync way and closes the consumer
+      # Commits the stored offsets in a sync way and closes the consumer.
       def close
         commit_offsets!
 

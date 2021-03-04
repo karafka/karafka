@@ -1,12 +1,16 @@
+# frozen_string_literal: true
 
 module Karafka
   module Connection
-    # Manager for tracking changes in the partitions assignment
+    # Manager for tracking changes in the partitions assignment.
+    #
     # We need tracking of those to clean up consumers that will no longer process given partitions
-    # as they were taken away
+    # as they were taken away.
+    #
     # @note Since this does not happen really often, we try to stick with same objects for the
     #   empty states most of the time, so we don't create many objects during the manager life
     class RebalanceManager
+      # @return [RebalanceManager]
       def initialize
         @assigned = {}
         @revoked = {}
@@ -34,7 +38,8 @@ module Karafka
         result
       end
 
-      # Callback that kicks in inside of rdkafka, when new partitions are assigned
+      # Callback that kicks in inside of rdkafka, when new partitions are assigned.
+      #
       # @param _ [Rdkafka::Consumer]
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       # @private
@@ -42,7 +47,8 @@ module Karafka
         @assigned = partitions.to_h.transform_values { |part| part.map(&:partition) }
       end
 
-      # Callback that kicks in inside of rdkafka, when partitions are revoked
+      # Callback that kicks in inside of rdkafka, when partitions are revoked.
+      #
       # @param _ [Rdkafka::Consumer]
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       # @private
