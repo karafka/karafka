@@ -2,7 +2,7 @@
 
 module Karafka
   module TimeTrackers
-    # Handles Kafka topic partition pausing and resuming with exponential backoffs.
+    # Handles Kafka topic partition pausing and resuming with exponential back-offs.
     class Pause < Base
       attr_reader :count
 
@@ -36,6 +36,7 @@ module Karafka
         @timeout = timeout
         @max_timeout = max_timeout
         @exponential_backoff = exponential_backoff
+        super()
       end
 
       # Pauses the processing from now till the end of the interval (backoff or non-backoff)

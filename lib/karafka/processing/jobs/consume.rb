@@ -15,6 +15,7 @@ module Karafka
           @executor = executor
           @messages = messages
           @created_at = Time.now
+          super()
         end
 
         # Runs the given executor.

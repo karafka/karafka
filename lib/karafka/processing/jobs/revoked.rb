@@ -9,6 +9,7 @@ module Karafka
         # @return [Revoked]
         def initialize(executor)
           @executor = executor
+          super()
         end
 
         # Runs the revoking job via an executor.

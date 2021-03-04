@@ -9,16 +9,16 @@ module Karafka
       attr_reader :metadata
 
       # @param messages_array [Array<Karafka::Messages::Message>] array with karafka messages
+      # @param metadata [Karafka::Messages::BatchMetadata]
       # @return [Karafka::Messages::Messages] lazy evaluated messages batch object
       def initialize(messages_array, metadata)
         @messages_array = messages_array
         @metadata = metadata
       end
 
-      # @yieldparam [Karafka::Messages::Message] each message instance
       # @note Invocation of this method will not cause loading and deserializing of messages.
-      def each
-        @messages_array.each { |param| yield(param) }
+      def each(&block)
+        @messages_array.each(&block)
       end
 
       # Runs deserialization of all the messages and returns them

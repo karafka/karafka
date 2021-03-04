@@ -10,6 +10,7 @@ module Karafka
         # @return [Shutdown]
         def initialize(executor)
           @executor = executor
+          super()
         end
 
         # Runs the shutdown job via an executor.

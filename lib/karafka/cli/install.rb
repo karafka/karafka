@@ -20,7 +20,7 @@ module Karafka
       # Where should we map proper files from templates
       INSTALL_FILES_MAP = {
         'karafka.rb.erb' => Karafka.boot_file.basename,
-        'application_consumer.rb.erb' => 'app/consumers/application_consumer.rb',
+        'application_consumer.rb.erb' => 'app/consumers/application_consumer.rb'
       }.freeze
 
       # @param args [Array] all the things that Thor CLI accepts

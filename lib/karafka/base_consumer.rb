@@ -79,7 +79,6 @@ module Karafka
     #
     # @param message [Messages::Message] last successfully processed message.
     def mark_as_consumed(message)
-      byebug
       client.mark_as_consumed(message)
       @seek_offset = message.offset + 1
     end

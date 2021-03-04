@@ -19,7 +19,7 @@ module Karafka
           "Workers count: #{Karafka::App.config.concurrency}",
           "Application client id: #{config.client_id}",
           "Boot file: #{Karafka.boot_file}",
-          "Environment: #{Karafka.env}",
+          "Environment: #{Karafka.env}"
         ]
 
         Karafka.logger.info(info.join("\n"))

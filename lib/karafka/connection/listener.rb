@@ -42,7 +42,7 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far.
       def fetch_loop
-        until Karafka::App.stopping? do
+        until Karafka::App.stopping?
           resume_paused_partitions
           # We need to fetch data before we revoke lost partitions details as during the polling
           # the callbacks for tracking lost partitions are triggered. Otherwise we would be always
@@ -64,6 +64,8 @@ module Karafka
         # This is on purpose - see the notes for this method
         # rubocop:disable Lint/RescueException
       rescue Exception => e
+        p e
+        raise e
         Karafka.monitor.instrument('connection.listener.fetch_loop.error', caller: self, error: e)
         # rubocop:enable Lint/RescueException
 
@@ -71,8 +73,6 @@ module Karafka
 
         sleep(1) && retry
       end
-
-      private
 
       # Resumes processing of partitions that were paused due to an error.
       def resume_paused_partitions

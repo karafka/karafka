@@ -7,10 +7,9 @@ module Karafka
     # @note One subscription group will always belong to one consumer group, but one consumer
     #   group can have multiple subscription groups.
     class SubscriptionGroup
-      attr_reader :id
-      attr_reader :topics
+      attr_reader :id, :topics
 
-      # @param [Array<Topic>] all the topics that share the same key settings
+      # @param topics [Array<Topic>] all the topics that share the same key settings
       # @return [SubscriptionGroup] built subscription group
       def initialize(topics)
         @id = SecureRandom.uuid

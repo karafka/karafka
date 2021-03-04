@@ -13,9 +13,9 @@ module Karafka
 
       # Attributes we can inherit from the root unless they were redefined on this level
       INHERITABLE_ATTRIBUTES = %w[
-          kafka
-          deserializer
-          manual_offset_management
+        kafka
+        deserializer
+        manual_offset_management
       ].freeze
 
       private_constant :INHERITABLE_ATTRIBUTES

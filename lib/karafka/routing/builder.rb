@@ -17,6 +17,7 @@ module Karafka
 
       def initialize
         @draws = Concurrent::Array.new
+        super
       end
 
       # Used to draw routes for Karafka

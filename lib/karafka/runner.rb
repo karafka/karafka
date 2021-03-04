@@ -6,7 +6,7 @@ module Karafka
     # Starts listening on all the listeners asynchronously
     # Fetch loop should never end. If they do, it is a critical error
     def call
-      # Despite possiblity of having several independent listeners, we aim to have one queue for
+      # Despite possibility of having several independent listeners, we aim to have one queue for
       # jobs across and one workers poll for that
       jobs_queue = Processing::JobsQueue.new
 
@@ -35,7 +35,7 @@ module Karafka
 
     private
 
-    # @param jobs_queue [Processing:JobsQueue] the main processing queue
+    # @param jobs_queue [Processing::JobsQueue] the main processing queue
     # @return [Array<Karafka::Connection::Listener>] listeners that will consume messages for each
     #   of the subscription groups
     def listeners(jobs_queue)

@@ -76,8 +76,8 @@ module Karafka
         # Configuring method
         # @yield Runs a block of code providing a config singleton instance to it
         # @yieldparam [Karafka::Setup::Config] Karafka config instance
-        def setup
-          configure { |config| yield(config) }
+        def setup(&block)
+          configure(&block)
         end
 
         # Validate config based on the config contract

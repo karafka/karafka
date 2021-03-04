@@ -8,15 +8,14 @@ module Karafka
     #
     # @note This buffer is NOT threadsafe for addition operations.
     class MessagesBuffer
-      attr_reader :size
-      attr_reader :groups
+      attr_reader :size, :groups
 
       # @return [Karafka::Connection::MessagesBuffer] buffer instance
       def initialize
         @size = 0
         @groups = Hash.new do |topic_groups, topic|
           topic_groups[topic] = Hash.new do |partition_groups, partition|
-            partition_groups[partition] = Array.new
+            partition_groups[partition] = []
           end
         end
       end

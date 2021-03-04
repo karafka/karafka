@@ -12,6 +12,7 @@ module Karafka
       # Fake message that we use to tell rdkafka to pause in a given place
       PauseMessage = Struct.new(:topic, :partition, :offset)
 
+      # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 10
 
       private_constant :PauseMessage, :MAX_POLL_RETRIES
@@ -67,7 +68,7 @@ module Karafka
 
       # Stores offset for a given partition of a given topic based on the provided message.
       #
-      # @param message [?] Kafka message
+      # @param message [Karafka::Messages::Message]
       def store_offset(message)
         @mutex.synchronize do
           @offsetting = true
@@ -97,7 +98,7 @@ module Karafka
         @mutex.unlock
       end
 
-      # Commits offset in a synchronious way.
+      # Commits offset in a synchronous way.
       #
       # @see `#commit_offset` for more details
       def commit_offsets!
@@ -108,7 +109,7 @@ module Karafka
       #
       # @param topic [String] topic name
       # @param partition [Integer] partition
-      # @param offset [Integer] offset of the message on which we want to pause (this messsage will
+      # @param offset [Integer] offset of the message on which we want to pause (this message will
       #   be reprocessed after getting back to processing)
       # @note This will pause indefinitely and requires manual `#resume`
       def pause(topic, partition, offset)
@@ -161,7 +162,7 @@ module Karafka
       #
       # @param [Karafka::Messages::Message] message that we want to mark as processed
       # @note This method won't trigger automatic offsets commits, rather relying on the offset
-      #   checkpointing trigger that happens with each batch processed
+      #   check-pointing trigger that happens with each batch processed
       def mark_as_consumed(message)
         store_offset(message)
       end
@@ -197,14 +198,24 @@ module Karafka
         end
       end
 
+      # @param topic [String]
+      # @param partition [Integer]
+      # @return [Rdkafka::Consumer::TopicPartitionList]
       def topic_partition_list(topic, partition)
-        rdkafka_partition = @kafka.assignment.to_h[topic]&.detect { |part| part.partition == partition }
+        rdkafka_partition = @kafka
+                            .assignment
+                            .to_h[topic]
+                            &.detect { |part| part.partition == partition }
 
         return unless rdkafka_partition
 
         Rdkafka::Consumer::TopicPartitionList.new({ topic => [rdkafka_partition] })
       end
 
+      # Performs a single poll operation.
+      #
+      # @param timeout [Integer] timeout for a single poll
+      # @return [Array<Rdkafka::Consumer::Message>] fetched messages
       def poll(timeout)
         time_poll ||= TimeTrackers::Poll.new(timeout)
 
@@ -235,6 +246,8 @@ module Karafka
         retry
       end
 
+      # Builds a new rdkafka consumer instance based on the subscription group configuration
+      # @return [Rdkafka::Consumer]
       def build_consumer
         config = ::Rdkafka::Config.new(@subscription_group.kafka)
         config.consumer_rebalance_listener = @rebalance_manager

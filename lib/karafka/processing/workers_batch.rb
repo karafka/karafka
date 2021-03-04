@@ -7,11 +7,7 @@ module Karafka
       # @param jobs_queue [JobsQueue]
       # @return [WorkersBatch]
       def initialize(jobs_queue)
-        @batch = App
-                 .config
-                 .concurrency
-                 .times
-                 .map { Processing::Worker.new(jobs_queue) }
+        @batch = Array.new(App.config.concurrency) { Processing::Worker.new(jobs_queue) }
       end
     end
   end

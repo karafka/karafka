@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 module Karafka
   module Connection
@@ -7,7 +8,7 @@ module Karafka
       # @return [Karafka::Connection::PausesManager] pauses manager
       def initialize
         @pauses = Hash.new do |h, k|
-          h[k] = Hash.new
+          h[k] = {}
         end
       end
 

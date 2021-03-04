@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
+  # Namespace that encapsulates all the logic related to processing data.
   module Processing
     # Executors:
     # - run consumers code with provided messages batch (for `#call`) or run given teardown
@@ -17,11 +18,10 @@ module Karafka
       # @return [String] subscription group id to which a given executor belongs
       attr_reader :group_id
 
+      # @param group_id [String] id of the subscription group to which the executor belongs
       # @param client [Karafka::Connection::Client] kafka client
       # @param topic [Karafka::Routing::Topic] topic for which this executor will run
       # @param pause [Karafka::TimeTrackers::Pause] fetch pause object for crash pausing
-      # @param jobs_queue [Karafka::Processing::JobsQueue] jobs queue (needed as we need to clear
-      #   it in case of a processing error)
       def initialize(group_id, client, topic, pause)
         @id = SecureRandom.uuid
         @group_id = group_id
@@ -46,7 +46,7 @@ module Karafka
         # We run the consumer client logic...
         consumer.on_consume
       rescue StandardError => e
-        # TODO insturmentacja here
+        # TODO: insturmentacja here
 
         p e
       end
@@ -60,7 +60,8 @@ module Karafka
         consumer.on_revoked if @consumer
         @consumer = nil
       rescue StandardError => e
-        # TODO insturmentacja here
+        # TODO: insturmentacja here
+
         p e
       end
 
@@ -75,7 +76,8 @@ module Karafka
         consumer.on_shutdown if @consumer
         @consumer = nil
       rescue StandardError => e
-        # TODO insturmentacja here
+        # TODO: insturmentacja here
+
         p e
       end
 

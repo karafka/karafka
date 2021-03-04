@@ -11,12 +11,12 @@ module Karafka
       def initialize(client, subscription_group)
         @subscription_group = subscription_group
         @client = client
-        @buffer = Hash.new { |h, k| h[k] = Hash.new  }
+        @buffer = Hash.new { |h, k| h[k] = {} }
       end
 
       # @param topic [String] topic name
       # @param partition [Integer] partition number
-      # @pause [TimeTrackers::Pause] pause corresponding with provided topic and partition
+      # @param pause [TimeTrackers::Pause] pause corresponding with provided topic and partition
       # @return [Executor] consumer executor
       def fetch(
         topic,

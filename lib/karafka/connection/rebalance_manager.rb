@@ -22,6 +22,7 @@ module Karafka
       #   for new assigned partitions are set only during a state change
       def assigned_partitions
         return @assigned if @assigned.empty?
+
         result = @assigned.dup
         @assigned.clear
         result
@@ -33,6 +34,7 @@ module Karafka
       #   for new revoked partitions are set only during a state change
       def revoked_partitions
         return @revoked if @revoked.empty?
+
         result = @revoked.dup
         @revoked.clear
         result
@@ -40,18 +42,18 @@ module Karafka
 
       # Callback that kicks in inside of rdkafka, when new partitions are assigned.
       #
+      # @private
       # @param _ [Rdkafka::Consumer]
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
-      # @private
       def on_partitions_assigned(_, partitions)
         @assigned = partitions.to_h.transform_values { |part| part.map(&:partition) }
       end
 
       # Callback that kicks in inside of rdkafka, when partitions are revoked.
       #
+      # @private
       # @param _ [Rdkafka::Consumer]
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
-      # @private
       def on_partitions_revoked(_, partitions)
         @revoked = partitions.to_h.transform_values { |part| part.map(&:partition) }
       end

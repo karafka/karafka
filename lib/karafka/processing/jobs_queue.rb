@@ -18,7 +18,7 @@ module Karafka
       # @return [Karafka::Processing::JobsQueue]
       def initialize
         @queue = ::Queue.new
-        @in_processing = Hash.new { |h, k| h[k] = Hash.new  }
+        @in_processing = Hash.new { |h, k| h[k] = {} }
         @mutex = Mutex.new
       end
 
@@ -48,13 +48,15 @@ module Karafka
 
       # Marks a given job from a given group as completed. When there are no more jobs from a given
       # group to be executed, we won't wait.
+      #
+      # @param [Jobs::Base] job that was completed
       def complete(job)
         @mutex.synchronize do
           @in_processing[job.group_id].delete(job.id)
         end
       end
 
-      # Clears the processing states for a provided grup. Useful when a recovery happens and we
+      # Clears the processing states for a provided group. Useful when a recovery happens and we
       # need to clean up state but only for a given subscription group.
       #
       # @param group_id [String]

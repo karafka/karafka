@@ -10,9 +10,7 @@ module Karafka
     class ConsumerGroup
       extend Helpers::ConfigRetriever
 
-      attr_reader :topics
-      attr_reader :id
-      attr_reader :name
+      attr_reader :id, :topics, :name
 
       # Attributes we can inherit from the root unless they were redefined on this level
       INHERITABLE_ATTRIBUTES = %w[

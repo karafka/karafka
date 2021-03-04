@@ -22,6 +22,7 @@ module Karafka
       def initialize(total_time)
         @remaining = total_time
         @attempts = 0
+        super()
       end
 
       # @return [Boolean] did we exceed the time limit
@@ -37,7 +38,7 @@ module Karafka
 
       # Stops time tracking of a given piece of code and updates the remaining time.
       def checkpoint
-        @remaining = @remaining - (now - @started_at)
+        @remaining -= (now - @started_at)
       end
 
       # @return [Boolean] If anything went wrong, can we retry after a backoff period or not
