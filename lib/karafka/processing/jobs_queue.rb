@@ -6,11 +6,11 @@ module Karafka
     # jobs in parallel while operating within more than one subscription group.
     #
     # We need to take into consideration fact, that more than one subscription group can operate
-    # on this queue, that's why internally we keep track of processing per group
+    # on this queue, that's why internally we keep track of processing per group.
     #
     # We work with the assumption, that partitions data is evenly distributed.
     class JobsQueue
-      # How many things we can have in the buffer per executor before triggering `#wait`
+      # How many things we can have in the buffer per executor before triggering `#wait`.
       BUFFERS_LIMIT = 5
 
       private_constant :BUFFERS_LIMIT
@@ -23,7 +23,7 @@ module Karafka
       end
 
       # Adds the job to the internal main queue, scheduling it for execution in a worker and marks
-      # this job as in processing pipeline
+      # this job as in processing pipeline.
       #
       # @param job [Jobs::Base] job that we want to run
       def <<(job)
@@ -40,7 +40,7 @@ module Karafka
 
       # @return [Jobs::Base, nil] waits for a job from the main queue and returns it once available
       #   or returns nil if the queue has been stopped and there won't be anything more to process
-      #   ever
+      #   ever.
       # @note This command is blocking and will wait until any job is available on the main queue
       def pop
         @queue.pop
@@ -55,7 +55,7 @@ module Karafka
       end
 
       # Clears the processing states for a provided grup. Useful when a recovery happens and we
-      # need to clean up state but only for a given subscription group
+      # need to clean up state but only for a given subscription group.
       #
       # @param group_id [String]
       def clear(group_id)
@@ -64,12 +64,12 @@ module Karafka
         end
       end
 
-      # Stops the whole processing queue
+      # Stops the whole processing queue.
       def stop
         @queue.close unless @queue.closed?
       end
 
-      # @param group_id [String]
+      # @param group_id [String] id of the group in which jobs we're interested.
       # @note Blocking
       def wait(group_id)
         while wait?(group_id)
@@ -80,6 +80,8 @@ module Karafka
 
       private
 
+      # @param group_id [String] id of the group in which jobs we're interested.
+      # @return [Boolean] should we keep waiting or not
       def wait?(group_id)
         return false if Karafka::App.stopping?
         return false if @queue.closed?

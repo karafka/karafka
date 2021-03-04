@@ -3,7 +3,7 @@
 module Karafka
   module Instrumentation
     # Default listener that hooks up to our instrumentation and uses its events for logging
-    # It can be removed/replaced or anything without any harm to the Karafka app flow
+    # It can be removed/replaced or anything without any harm to the Karafka app flow.
     class StdoutListener
       # Log levels that we use in this particular listener
       USED_LOG_LEVELS = %i[
@@ -13,7 +13,8 @@ module Karafka
         fatal
       ].freeze
 
-      # Logs details about incoming batches and with which consumer we will consume them
+      # Logs details about incoming batches and with which consumer we will consume them.
+      #
       # @param event [Dry::Events::Event] event details including payload
       def on_connection_batch_delegator_call(event)
         consumer = event[:consumer]
@@ -28,7 +29,8 @@ module Karafka
         )
       end
 
-      # Logs details about incoming message and with which consumer we will consume it
+      # Logs details about incoming message and with which consumer we will consume it.
+      #
       # @param event [Dry::Events::Event] event details including payload
       def on_connection_message_delegator_call(event)
         consumer = event[:consumer]
@@ -36,7 +38,8 @@ module Karafka
         info "1 message on #{topic} topic delegated to #{consumer.class}"
       end
 
-      # Logs details about each received message value deserialization
+      # Logs details about each received message value deserialization.
+      #
       # @param event [Dry::Events::Event] event details including payload
       def on_params_params_deserialize(event)
         # Keep in mind, that a caller here is a param object not a controller,
@@ -49,7 +52,8 @@ module Karafka
         )
       end
 
-      # Logs unsuccessful deserialization attempts of incoming data
+      # Logs unsuccessful deserialization attempts of incoming data.
+      #
       # @param event [Dry::Events::Event] event details including payload
       def on_params_params_deserialize_error(event)
         topic = event[:caller].metadata.topic
@@ -57,21 +61,24 @@ module Karafka
         error "Params deserialization error for #{topic} topic: #{error}"
       end
 
-      # Logs errors that occurred in a listener fetch loop
+      # Logs errors that occurred in a listener fetch loop.
+      #
       # @param event [Dry::Events::Event] event details including payload
       # @note It's an error as we can recover from it not a fatal
       def on_connection_listener_fetch_loop_error(event)
         error "Listener fetch loop error: #{event[:error]}"
       end
 
-      # Logs errors that are related to the connection itself
+      # Logs errors that are related to the connection itself.
+      #
       # @param event [Dry::Events::Event] event details including payload
       # @note Karafka will attempt to reconnect, so an error not a fatal
       def on_connection_client_fetch_loop_error(event)
         error "Client fetch loop error: #{event[:error]}"
       end
 
-      # Logs info about crashed fetcher
+      # Logs info about crashed fetcher.
+      #
       # @param event [Dry::Events::Event] event details including payload
       # @note If this happens, Karafka will shutdown as it means a critical error
       #   in one of the threads
@@ -79,7 +86,8 @@ module Karafka
         fatal "Fetcher crash due to an error: #{event[:error]}"
       end
 
-      # Logs info about processing of a certain dataset with an inline backend
+      # Logs info about processing of a certain dataset with an inline backend.
+      #
       # @param event [Dry::Events::Event] event details including payload
       def on_backends_inline_process(event)
         count = event[:caller].send(:params_batch).to_a.size
@@ -88,25 +96,29 @@ module Karafka
         info "Inline processing of topic #{topic} with #{count} messages took #{time} ms"
       end
 
-      # Logs info about system signals that Karafka received
+      # Logs info about system signals that Karafka received.
+      #
       # @param event [Dry::Events::Event] event details including payload
       def on_process_notice_signal(event)
         info "Received #{event[:signal]} system signal"
       end
 
-      # Logs info that we're initializing Karafka app
+      # Logs info that we're initializing Karafka app.
+      #
       # @param _event [Dry::Events::Event] event details including payload
       def on_app_initializing(_event)
         info "Initializing Karafka server #{::Process.pid}"
       end
 
-      # Logs info that we're running Karafka app
+      # Logs info that we're running Karafka app.
+      #
       # @param _event [Dry::Events::Event] event details including payload
       def on_app_running(_event)
         info "Running Karafka server #{::Process.pid}"
       end
 
-      # Logs info that we're going to stop the Karafka server
+      # Logs info that we're going to stop the Karafka server.
+      #
       # @param _event [Dry::Events::Event] event details including payload
       def on_app_stopping(_event)
         # We use a separate thread as logging can't be called from trap context
@@ -114,7 +126,7 @@ module Karafka
       end
 
       # Logs an error that Karafka was unable to stop the server gracefully and it had to do a
-      #   forced exit
+      #   forced exit.
       # @param _event [Dry::Events::Event] event details including payload
       def on_app_stopping_error(_event)
         # We use a separate thread as logging can't be called from trap context

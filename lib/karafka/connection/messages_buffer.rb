@@ -2,7 +2,7 @@
 
 module Karafka
   module Connection
-    # Buffer for messages
+    # Buffer for messages.
     # When message is added to this buffer, it gets assigned to an array with other messages from
     # the same topic and partition.
     #
@@ -21,7 +21,8 @@ module Karafka
         end
       end
 
-      # Iterates over aggregated data `roviding messages per topic partition
+      # Iterates over aggregated data providing messages per topic partition.
+      #
       # @yieldparam [String] topic name
       # @yieldparam [Integer] partition number
       # @yieldparam [Array<Rdkafka::Consumer::Message>] topic partition aggregated results
@@ -33,7 +34,8 @@ module Karafka
         end
       end
 
-      # Adds a message to the buffer
+      # Adds a message to the buffer.
+      #
       # @param message [Rdkafka::Consumer::Message] raw rdkafka message
       # @return [Array<Rdkafka::Consumer::Message>] given partition topic sub-buffer array
       def <<(message)
@@ -41,7 +43,8 @@ module Karafka
         @groups[message.topic][message.partition] << message
       end
 
-      # Removes all the data from the buffer
+      # Removes all the data from the buffer.
+      #
       # @note We do not clear the whole groups hash but rather we clear the partition hashes, so
       #   we save ourselves some objects allocations. We cannot clear the underlying arrays as they
       #   may be used in other threads for data processing, thus if we would clear it, we could

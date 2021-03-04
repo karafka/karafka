@@ -2,7 +2,10 @@
 
 module Karafka
   module Processing
+    # Abstraction layer around workers batch.
     class WorkersBatch
+      # @param jobs_queue [JobsQueue]
+      # @return [WorkersBatch]
       def initialize(jobs_queue)
         @batch = App
                  .config

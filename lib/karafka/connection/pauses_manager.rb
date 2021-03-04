@@ -1,10 +1,9 @@
 
 module Karafka
   module Connection
-    # Partitions pauses management abstraction layer
-    # It aggregates all the pauses for all the partitions that we're working with
+    # Partitions pauses management abstraction layer.
+    # It aggregates all the pauses for all the partitions that we're working with.
     class PausesManager
-      # @param client [Karafka::Connection::Client] client used to resu
       # @return [Karafka::Connection::PausesManager] pauses manager
       def initialize
         @pauses = Hash.new do |h, k|
@@ -12,7 +11,8 @@ module Karafka
         end
       end
 
-      # Creates or fetches pause of a given topic partition
+      # Creates or fetches pause of a given topic partition.
+      #
       # @param topic [String] topic name
       # @param partition [Integer] partition number
       # @return [Karafka::TimeTrackers::Pause] pause instance
@@ -24,7 +24,8 @@ module Karafka
         )
       end
 
-      # Resumes processing of partitions for which pause time has ended
+      # Resumes processing of partitions for which pause time has ended.
+      #
       # @yieldparam [String] topic name
       # @yieldparam [Integer] partition number
       def resume
@@ -40,7 +41,8 @@ module Karafka
         end
       end
 
-      # Clears all the pauses
+      # Clears all the pauses.
+      #
       # @note Clearing does not mean resuming. It means all the pauses for all the partitions will
       #   be forgotten and new pauses will be created upon demand.
       def clear

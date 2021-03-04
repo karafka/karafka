@@ -3,7 +3,8 @@
 module Karafka
   module Messages
     # Simple batch metadata object that stores all non-message information received from Kafka
-    # cluster while fetching the data
+    # cluster while fetching the data.
+    #
     # @note This metadata object refers to per batch metadata, not `#message.metadata`
     BatchMetadata = Struct.new(
       :size,
