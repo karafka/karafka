@@ -13,8 +13,8 @@ module Karafka
         required(:client_id).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
         required(:concurrency) { int? & gt?(0) }
         required(:consumer_mapper).filled
-        required(:pause_timeout).maybe(%i[integer float]) { filled? > gteq?(0) }
-        required(:pause_max_timeout).maybe(%i[integer float]) { filled? > gteq?(0) }
+        required(:pause_timeout) { int? & gt?(0) }
+        required(:pause_max_timeout) { int? & gt?(0) }
         required(:pause_with_exponential_backoff).filled(:bool?)
         required(:shutdown_timeout) { int? & gt?(0) }
       end
