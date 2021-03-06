@@ -1,6 +1,6 @@
 ![karafka logo](https://raw.githubusercontent.com/karafka/misc/master/logo/karafka_logotype_transparent2.png)
 
-[![Build Status](https://travis-ci.org/karafka/karafka.svg?branch=master)](https://travis-ci.org/karafka/karafka)
+[![Build Status](https://github.com/karafka/karafka/actions/workflows/ci.yml/badge.svg)](https://github.com/karafka/karafka/actions/workflows/ci.yml)
 
 **Note**: Documentation presented here refers to Karafka `1.4`.
 
@@ -72,7 +72,7 @@ Karafka framework and Karafka team are __not__ related to Kafka streaming servic
 ## References
 
 * [Karafka framework](https://github.com/karafka/karafka)
-* [Karafka Travis CI](https://travis-ci.org/karafka/karafka)
+* [Karafka GitHub Actions](https://github.com/karafka/karafka/actions)
 * [Karafka Coditsu](https://app.coditsu.io/karafka/repositories/karafka)
 
 ## Note on contributions
