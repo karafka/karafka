@@ -4,9 +4,9 @@
 [![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
 [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka)
 
-**Note**: Documentation presented here refers to Karafka `1.4`.
-
-If you are looking for the documentation for Karafka `1.3.x`, it can be found [here](https://github.com/karafka/wiki/tree/1.3).
+**Note**: We're finishing the new Karafka `2.0` but for now, please use `1.4`. All the documentation presented here refers to `1.4`
+..
+Documentation presented here refers to Karafka `1.4`.
 
 ## About Karafka
 
