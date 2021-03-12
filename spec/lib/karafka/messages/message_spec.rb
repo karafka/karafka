@@ -53,11 +53,11 @@ RSpec.describe Karafka::Messages::Message do
         before do
           allow(params)
             .to receive(:deserialize)
-            .and_raise(Karafka::Errors::DeserializationError)
+            .and_raise(Karafka::Errors::BaseError)
 
           begin
             params.payload
-          rescue Karafka::Errors::DeserializationError
+          rescue Karafka::Errors::BaseError
             false
           end
         end
@@ -84,36 +84,6 @@ RSpec.describe Karafka::Messages::Message do
 
         it 'expect to return payload in a message key' do
           expect(params.send(:deserialize)).to eq deserialized_payload
-        end
-      end
-
-      context 'when deserialization fails' do
-        let(:expected_error) { ::Karafka::Errors::DeserializationError }
-        let(:instrument_args) do
-          [
-            'params.params.deserialize',
-            caller: params
-          ]
-        end
-        let(:instrument_error_args) do
-          [
-            'params.params.deserialize.error',
-            caller: params,
-            error: ::Karafka::Errors::DeserializationError
-          ]
-        end
-
-        before do
-          allow(deserializer)
-            .to receive(:call)
-            .with(params)
-            .and_raise(::Karafka::Errors::DeserializationError)
-        end
-
-        it 'expect to monitor and reraise' do
-          expect(Karafka.monitor).to receive(:instrument).with(*instrument_args).and_yield
-          expect(Karafka.monitor).to receive(:instrument).with(*instrument_error_args)
-          expect { params.send(:deserialize) }.to raise_error(expected_error)
         end
       end
     end

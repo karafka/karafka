@@ -8,37 +8,6 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
   let(:topic) { build(:routing_topic, name: topic_name) }
   let(:topic_name) { rand.to_s }
 
-  describe '#on_params_params_deserialize' do
-    subject(:trigger) { listener.on_params_params_deserialize(event) }
-
-    let(:topic) { rand.to_s }
-    let(:payload) { { caller: caller, time: time } }
-    let(:caller) { instance_double(Karafka::Params::Params, metadata: metadata) }
-    let(:metadata) { instance_double(Karafka::Params::Metadata, topic: topic) }
-    let(:message) { "Params deserialization for #{topic} topic successful in #{time} ms" }
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:debug).with(message)
-      trigger
-    end
-  end
-
-  describe '#on_params_params_deserialize_error' do
-    subject(:trigger) { listener.on_params_params_deserialize_error(event) }
-
-    let(:topic_name) { rand.to_s }
-    let(:payload) { { caller: caller, time: time, error: error } }
-    let(:error) { Karafka::Errors::DeserializationError }
-    let(:caller) { instance_double(Karafka::Params::Params, metadata: metadata) }
-    let(:metadata) { instance_double(Karafka::Params::Metadata, topic: topic_name) }
-    let(:message) { "Params deserialization error for #{topic_name} topic: #{error}" }
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:error).with(message)
-      trigger
-    end
-  end
-
   describe '#on_connection_listener_fetch_loop_error' do
     subject(:trigger) { listener.on_connection_listener_fetch_loop_error(event) }
 
@@ -65,38 +34,15 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
     end
   end
 
-  describe '#on_fetcher_call_error' do
-    subject(:trigger) { listener.on_fetcher_call_error(event) }
+  describe '#on_runner_call_error' do
+    subject(:trigger) { listener.on_runner_call_error(event) }
 
     let(:payload) { { caller: caller, error: error } }
     let(:error) { StandardError }
-    let(:message) { "Fetcher crash due to an error: #{error}" }
+    let(:message) { "Runner crash due to an error: #{error}" }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to receive(:fatal).with(message)
-      trigger
-    end
-  end
-
-  describe '#on_backends_inline_process' do
-    subject(:trigger) { listener.on_backends_inline_process(event) }
-
-    let(:payload) { { caller: caller, time: time } }
-    let(:params_batch) { [1] }
-    let(:count) { params_batch.size }
-    let(:message) do
-      "Inline processing of topic #{topic_name} with #{count} messages took #{time} ms"
-    end
-    let(:caller) do
-      instance_double(
-        Karafka::BaseConsumer,
-        params_batch: params_batch,
-        topic: topic
-      )
-    end
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:info).with(message)
       trigger
     end
   end
@@ -106,62 +52,6 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
 
     let(:payload) { { signal: -1 } }
     let(:message) { "Received #{event[:signal]} system signal" }
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:info).with(message)
-      trigger
-    end
-  end
-
-  describe '#on_consumers_responders_respond_with' do
-    subject(:trigger) { listener.on_consumers_responders_respond_with(event) }
-
-    let(:consumer_instance) { consumer_class.new(topic) }
-    let(:data) { [rand] }
-    let(:payload) { { caller: consumer_instance, data: data } }
-    let(:responder) { Karafka::BaseResponder }
-    let(:message) do
-      "Responded from #{consumer_instance.class} using #{responder} with following data #{data}"
-    end
-    let(:consumer_class) { Class.new(Karafka::BaseConsumer) }
-    let(:topic) do
-      build(:routing_topic).tap do |topic|
-        topic.responder = responder
-      end
-    end
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:info).with(message)
-      trigger
-    end
-  end
-
-  describe '#on_connection_batch_delegator_call' do
-    subject(:trigger) { listener.on_connection_batch_delegator_call(event) }
-
-    let(:payload) { { caller: caller, consumer: consumer, kafka_batch: kafka_batch } }
-    let(:kafka_messages) { Array.new(rand(2..10)) { rand } }
-    let(:kafka_batch) { instance_double(Kafka::FetchedBatch, messages: kafka_messages) }
-    let(:caller) { Karafka::Connection::BatchDelegator }
-    let(:consumer) { instance_double(Karafka::BaseConsumer, topic: topic) }
-    let(:message) do
-      "#{kafka_messages.count} messages on #{topic.name} topic delegated to #{consumer.class}"
-    end
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:info).with(message)
-      trigger
-    end
-  end
-
-  describe '#on_connection_message_delegator_call' do
-    subject(:trigger) { listener.on_connection_message_delegator_call(event) }
-
-    let(:payload) { { caller: caller, consumer: consumer, kafka_message: kafka_message } }
-    let(:kafka_message) { rand }
-    let(:caller) { Karafka::Connection::MessageDelegator }
-    let(:consumer) { instance_double(Karafka::BaseConsumer, topic: topic) }
-    let(:message) { "1 message on #{topic.name} topic delegated to #{consumer.class}" }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to receive(:info).with(message)
