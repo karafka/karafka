@@ -9,7 +9,6 @@ RSpec.describe Karafka::Routing::Router do
     Karafka::App.config.internal.routing_builder.draw do
       topic :topic_name1 do
         consumer Class.new(Karafka::BaseConsumer)
-        batch_consuming true
       end
     end
   end

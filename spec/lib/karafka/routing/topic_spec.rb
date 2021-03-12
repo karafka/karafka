@@ -11,19 +11,24 @@ RSpec.describe Karafka::Routing::Topic do
   before { topic.consumer = consumer }
 
   describe '#build' do
-    pending
-    #Karafka::AttributesMap.topic.each do |attr|
-    #  context "for #{attr}" do
-    #    let(:attr_value) { attr == :backend ? :inline : rand.to_s }
-#
-#    #    it 'expect to invoke it and store' do
-#    #      # Some values are build from other, so we add at least once as they
-#    #      # might be used internally
-#    #      expect(topic).to receive(attr).and_return(attr_value).at_least(:once)
-#    #      topic.build
-#    #    end
-#    #  end
-    #end
+    %w[
+      kafka
+      deserializer
+      manual_offset_management
+    ].each do |attr|
+      context "for #{attr}" do
+        let(:attr_value) { rand.to_s }
+
+        it 'expect to invoke it and store' do
+          # Some values are build from other, so we add at least once as they
+          # might be used internally
+          expect(topic).to receive(attr).and_return(attr_value).at_least(:once)
+          topic.build
+        end
+
+        it { expect(topic.build).to be_a(described_class) }
+      end
+    end
   end
 
   describe '#name' do
@@ -38,53 +43,6 @@ RSpec.describe Karafka::Routing::Topic do
 
   describe '#id' do
     it { expect(topic.id).to eq "#{consumer_group.id}_#{name}" }
-  end
-
-  describe '#backend' do
-    before { topic.backend = backend }
-
-    context 'when backend is not set' do
-      let(:default_inline) { rand }
-      let(:backend) { nil }
-
-      it 'expect to use Karafka::App default' do
-        expect(Karafka::App.config).to receive(:backend).and_return(default_inline)
-        expect(topic.backend).to eq default_inline
-      end
-    end
-
-    context 'when backend per topic is set to inline' do
-      let(:backend) { :inline }
-
-      it { expect(topic.backend).to eq backend }
-    end
-  end
-
-  describe '#responder' do
-    let(:consumer) { double }
-
-    before do
-      topic.responder = responder
-      topic.consumer = consumer
-    end
-
-    context 'when responder is not set' do
-      let(:responder) { nil }
-      let(:built_responder) { double }
-      let(:builder) { double }
-
-      it 'expect to build responder using builder' do
-        expect(Karafka::Responders::Builder).to receive(:new).with(consumer).and_return(builder)
-        expect(builder).to receive(:build).and_return(built_responder)
-        expect(topic.responder).to eq built_responder
-      end
-    end
-
-    context 'when responder is set' do
-      let(:responder) { double }
-
-      it { expect(topic.responder).to eq responder }
-    end
   end
 
   describe '#deserializer=' do
@@ -111,16 +69,17 @@ RSpec.describe Karafka::Routing::Topic do
     end
   end
 
-  #Karafka::AttributesMap.topic.each do |attribute|
-  #  it { expect(topic).to respond_to(attribute) }
-  #  it { expect(topic).to respond_to(:"#{attribute}=") }
-  #end
+  %w[kafka manual_offset_management].each do |attribute|
+    it { expect(topic).to respond_to(attribute) }
+    it { expect(topic).to respond_to(:"#{attribute}=") }
+  end
 
   describe '#to_h' do
-    pending
-    #it 'expect to contain all the topic map attributes plus id and consumer' do
-    #  expected = (Karafka::AttributesMap.topic + %i[id consumer]).sort
-    #  expect(topic.to_h.keys.sort).to eq(expected)
-    #end
+    it 'expect to contain all the topic attrs plus id, name, consumer and consumer_group_id' do
+      expected = (
+        %w[kafka deserializer manual_offset_management] + %i[id name consumer consumer_group_id]
+      )
+      expect(topic.to_h.keys).to eq(expected)
+    end
   end
 end
