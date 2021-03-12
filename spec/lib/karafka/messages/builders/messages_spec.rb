@@ -5,9 +5,10 @@ RSpec.describe Karafka::Messages::Builders::Messages do
   let(:message2) { build(:kafka_fetched_message) }
   let(:kafka_messages) { [message1, message2] }
   let(:routing_topic) { build(:routing_topic) }
+  let(:received_at) { Time.new }
 
-  describe '#from_kafka_messages' do
-    subject(:result) { described_class.from_kafka_messages(kafka_messages, routing_topic) }
+  describe '#call' do
+    subject(:result) { described_class.call(kafka_messages, routing_topic, received_at) }
 
     it { is_expected.to be_a(Karafka::Messages::Messages) }
   end

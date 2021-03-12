@@ -8,7 +8,7 @@ module Karafka
         class << self
           # Creates metadata based on the kafka batch data.
           #
-          # @param kafka_batch [Kafka::FetchedBatch] kafka batch details
+          # @param kafka_batch [Array<Rdkafka::Consumer::Message>] raw fetched messages
           # @param topic [Karafka::Routing::Topic] topic for which we've fetched the batch
           # @param scheduled_at [Time] moment when the batch was scheduled for processing
           # @return [Karafka::Messages::BatchMetadata] batch metadata object
