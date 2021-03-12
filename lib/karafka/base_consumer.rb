@@ -6,7 +6,7 @@ module Karafka
   class BaseConsumer
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
     attr_accessor :topic
-    # @return [Karafka::Params:ParamsBatch] current messages batch
+    # @return [Karafka::Messages::Messages] current messages batch
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
