@@ -31,14 +31,6 @@ module Karafka
         # part of the topics
         Karafka::Server.consumer_groups = cli.options[:consumer_groups]
 
-        # Remove pidfile on stop, just before the server instance is going to be GCed
-        # We want to delay the moment in which the pidfile is removed as much as we can,
-        # so instead of removing it after the server stops running, we rely on the gc moment
-        # when this object gets removed (it is a bit later), so it is closer to the actual
-        # system process end. We do that, so monitoring and deployment tools that rely on a pid
-        # won't alarm or start new system process up until the current one is finished
-        ObjectSpace.define_finalizer(self, proc { send(:clean) })
-
         Karafka::Server.run
       end
 
@@ -60,6 +52,14 @@ module Karafka
           cli.options[:pid],
           'w'
         ) { |file| file.write(::Process.pid) }
+
+        # Remove pidfile on stop, just before the server instance is going to be GCed
+        # We want to delay the moment in which the pidfile is removed as much as we can,
+        # so instead of removing it after the server stops running, we rely on the gc moment
+        # when this object gets removed (it is a bit later), so it is closer to the actual
+        # system process end. We do that, so monitoring and deployment tools that rely on a pid
+        # won't alarm or start new system process up until the current one is finished
+        ObjectSpace.define_finalizer(self, proc { send(:clean) })
       end
 
       # Removes a pidfile (if exist)
