@@ -34,7 +34,7 @@ module Karafka
           Bundler.read_file(
             Bundler.default_lockfile
           )
-        ).dependencies.key?('rails')
+        ).dependencies.key?('railties')
       end
 
       # Install all required things for Karafka application in current directory
