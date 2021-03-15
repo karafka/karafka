@@ -58,7 +58,7 @@ module Karafka
       def stop_supervised
         Karafka::App.stop!
 
-        # Temporary patch until https://github.com/dry-rb/dry-configurable/issues/93 is fixed
+        # See https://github.com/dry-rb/dry-configurable/issues/93
         timeout = Thread.new { Karafka::App.config.shutdown_timeout }.join.value
 
         # We check from time to time (for the timeout period) if all the threads finished
