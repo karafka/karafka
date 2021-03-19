@@ -31,12 +31,9 @@ module Karafka
         define_method attribute do
           current_value = instance_variable_get(:"@#{attribute}")
           return current_value unless current_value.nil?
+          return unless Karafka::App.config.respond_to?(attribute)
 
-          value = if Karafka::App.config.respond_to?(attribute)
-                    Karafka::App.config.send(attribute)
-                  else
-                    return
-                  end
+          value = Karafka::App.config.send(attribute)
 
           instance_variable_set(:"@#{attribute}", value)
         end

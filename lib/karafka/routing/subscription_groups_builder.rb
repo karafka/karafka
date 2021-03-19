@@ -27,11 +27,11 @@ module Karafka
       # @return [Array<SubscriptionGroup>] all subscription groups we need in separate threads
       def call(topics)
         topics
-          .map { [checksum(_1), _1] }
+          .map { |topic| [checksum(topic), topic] }
           .group_by(&:first)
           .values
-          .map { _1.map(&:last) }
-          .map { SubscriptionGroup.new(_1) }
+          .map { |value| value.map(&:last) }
+          .map { |grouped_topics| SubscriptionGroup.new(grouped_topics) }
       end
 
       private
@@ -42,7 +42,7 @@ module Karafka
       def checksum(topic)
         accu = {}
 
-        DISTRIBUTION_KEYS.each { accu[_1] = topic.to_h[_1] }
+        DISTRIBUTION_KEYS.each { |key| accu[key] = topic.to_h[key] }
 
         accu.hash
       end
