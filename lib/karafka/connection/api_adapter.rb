@@ -48,30 +48,28 @@ module Karafka
 
         # Builds all the configuration settings for kafka#consumer method
         # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
-        # @return [Array<Hash>] array with all the consumer arguments including hash with all
+        # @return [Hash] all the consumer keyword arguments including hash with all
         #   the settings required by Kafka#consumer
         def consumer(consumer_group)
           settings = { group_id: consumer_group.id }
           settings = fetch_for(:consumer, consumer_group, settings)
-          [sanitize(settings)]
+          sanitize(settings)
         end
 
         # Builds all the configuration settings for kafka consumer consume_each_batch and
         #   consume_each_message methods
         # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
-        # @return [Array<Hash>] Array with all the arguments required by consuming method
-        #   including hash with all the settings required by
+        # @return [Hash] hash with all the arguments required by consuming method
+        #   including all the settings required by
         #   Kafka::Consumer#consume_each_message and Kafka::Consumer#consume_each_batch method
         def consumption(consumer_group)
-          [
-            sanitize(
-              fetch_for(
-                :consumption,
-                consumer_group,
-                automatically_mark_as_processed: consumer_group.automatically_mark_as_consumed
-              )
+          sanitize(
+            fetch_for(
+              :consumption,
+              consumer_group,
+              automatically_mark_as_processed: consumer_group.automatically_mark_as_consumed
             )
-          ]
+          )
         end
 
         # Builds all the configuration settings for kafka consumer#subscribe method
