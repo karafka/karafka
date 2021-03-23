@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- Fixes for Ruby 3.0 compatibility
+
 ## 1.4.2 (2021-02-16)
 - Rescue Errno::EROFS in ensure_dir_exists (unasuke)
 
