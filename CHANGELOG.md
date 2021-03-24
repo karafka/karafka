@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 1.4.3 (2021-03-24)
 - Fixes for Ruby 3.0 compatibility
 
 ## 1.4.2 (2021-02-16)
