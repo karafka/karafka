@@ -10,7 +10,12 @@ module Karafka
         #   to have a new Kafka client
         # @return [::Kafka::Client] returns a Kafka client
         def call(consumer_group)
-          Kafka.new(*ApiAdapter.client(consumer_group))
+          settings = ApiAdapter.client(consumer_group)
+
+          Kafka.new(
+            settings[0],
+            **settings[1]
+          )
         end
       end
     end

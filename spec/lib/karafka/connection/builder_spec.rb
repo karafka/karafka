@@ -33,5 +33,9 @@ RSpec.describe Karafka::Connection::Builder do
       expect(Kafka).to receive(:new).with(*kafka_client_args).and_return(kafka_client)
       expect(builder.call(consumer_group)).to eq kafka_client
     end
+
+    it 'expect to create kafka instance without problems' do
+      expect { builder.call(consumer_group) }.not_to raise_error
+    end
   end
 end
