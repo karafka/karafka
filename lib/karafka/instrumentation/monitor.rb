@@ -16,18 +16,12 @@ module Karafka
       # @note Depending on Karafka extensions and additional engines, this might not be the
       #   complete list of all the events. Please use the #available_events on fully loaded
       #   Karafka system to determine all of the events you can use.
-      #   Last 4 events are from WaterDrop but for convenience we use the same monitor for the
-      #   whole karafka ecosystem
       BASE_EVENTS = %w[
-        params.params.deserialize
-        params.params.deserialize.error
         connection.listener.before_fetch_loop
         connection.listener.fetch_loop
         connection.listener.fetch_loop.error
         connection.client.fetch_loop.error
-        connection.batch_delegator.call
-        connection.message_delegator.call
-        fetcher.call.error
+        runner.call.error
         process.notice_signal
         async_producer.call.error
         async_producer.call.retry

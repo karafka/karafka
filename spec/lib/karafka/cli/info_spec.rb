@@ -12,11 +12,12 @@ RSpec.describe Karafka::Cli::Info do
       [
         "Karafka version: #{Karafka::VERSION}",
         "Ruby version: #{RUBY_VERSION}",
-        "Ruby-kafka version: #{::Kafka::VERSION}",
+        "Rdkafka version: #{::Rdkafka::VERSION}",
+        "Subscription groups count: #{Karafka::App.subscription_groups.size}",
+        "Workers count: #{Karafka::App.config.concurrency}",
         "Application client id: #{Karafka::App.config.client_id}",
-        "Backend: #{Karafka::App.config.backend}",
         "Boot file: #{Karafka.boot_file}",
-        "Environment: #{Karafka.env}",
+        "Environment: #{Karafka.env}"
       ].join("\n")
     end
 

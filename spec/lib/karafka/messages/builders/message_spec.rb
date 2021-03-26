@@ -4,20 +4,20 @@ RSpec.describe Karafka::Messages::Builders::Message do
   let(:routing_topic) { build(:routing_topic) }
   let(:fetched_message) { build(:kafka_fetched_message) }
 
-  describe '#from_kafka_message' do
-    subject(:result) { described_class.from_kafka_message(fetched_message, routing_topic) }
+  describe '#call' do
+    subject(:result) { described_class.call(fetched_message, routing_topic) }
 
     it { is_expected.to be_a(Karafka::Messages::Message) }
-    it { expect(result.raw_payload).to eq fetched_message.value }
-    it { expect(result.payload).to eq fetched_message.value.to_f }
+    it { expect(result.raw_payload).to eq fetched_message.payload }
+    it { expect(result.payload).to eq fetched_message.payload.to_f }
     it { expect(result.metadata.partition).to eq fetched_message.partition }
     it { expect(result.partition).to eq fetched_message.partition }
     it { expect(result.metadata.offset).to eq fetched_message.offset }
     it { expect(result.offset).to eq fetched_message.offset }
     it { expect(result.metadata.key).to eq fetched_message.key }
     it { expect(result.key).to eq fetched_message.key }
-    it { expect(result.metadata.create_time).to eq fetched_message.create_time }
-    it { expect(result.create_time).to eq fetched_message.create_time }
+    it { expect(result.metadata.timestamp).to eq fetched_message.timestamp }
+    it { expect(result.timestamp).to eq fetched_message.timestamp }
 
     context 'when message does not have headers' do
       it { expect(result.metadata.headers).to eq({}) }

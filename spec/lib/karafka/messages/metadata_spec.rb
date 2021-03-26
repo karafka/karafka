@@ -6,14 +6,13 @@ RSpec.describe Karafka::Messages::Metadata do
   let(:rand_value) { rand }
 
   %w[
-    create_time
+    timestamp
     headers
-    is_control_record
     key
     offset
     deserializer
     partition
-    receive_time
+    received_at
     topic
   ].each do |attribute|
     describe "##{attribute}" do

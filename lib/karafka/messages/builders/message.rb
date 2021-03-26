@@ -7,7 +7,7 @@ module Karafka
       # Builder of a single message based on raw rdkafka message.
       module Message
         class << self
-          # @param kafka_message [Kafka::FetchedMessage] raw message fetched from Kafka
+          # @param kafka_message [Rdkafka::Consumer::Message] raw fetched message
           # @param topic [Karafka::Routing::Topic] topic for which this message was fetched
           # @return [Karafka::Messages::Message] message object with payload and metadata
           def call(kafka_message, topic)

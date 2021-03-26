@@ -4,7 +4,7 @@ RSpec.describe Karafka::Server do
   subject(:server_class) { described_class }
 
   let(:process) { Karafka::App.config.internal.process }
-  let(:runner) { Karafka::Runner.new.call }
+  let(:runner) { Karafka::Runner.new }
 
   before do
     allow(Karafka::App).to receive(:run!)
