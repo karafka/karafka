@@ -45,7 +45,7 @@ module Karafka
           template = File.read(Karafka.core_root.join("templates/#{source}"))
           # @todo Replace with the keyword argument version once we don't have to support
           # Ruby < 2.6
-          render = ::ERB.new(template, nil, '-').result(binding)
+          render = ::ERB.new(template, trim_mode: '-').result(binding)
 
           File.open(target, 'w') { |file| file.write(render) }
         end
