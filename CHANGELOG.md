@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
+
 ## 1.4.3 (2021-03-24)
 - Fixes for Ruby 3.0 compatibility
 
