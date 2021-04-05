@@ -52,6 +52,25 @@ RSpec.describe Karafka::Routing::ConsumerGroup do
     it { expect(built_topic.name).to eq :topic_name.to_s }
   end
 
+  describe '#subscription_groups' do
+    context 'when there are not topics defined' do
+      it { expect(consumer_group.subscription_groups).to eq([]) }
+    end
+
+    context 'when there are some topics defined' do
+      let(:subscription_group) { consumer_group.subscription_groups.first }
+      let(:built_topic) do
+        consumer_group.public_send(:topic=, :topic_name) do
+          consumer Class.new(Karafka::BaseConsumer)
+        end
+      end
+
+      before { built_topic }
+
+      it { expect(subscription_group).to be_a(Karafka::Routing::SubscriptionGroup) }
+    end
+  end
+
   describe '#active?' do
     context 'when there are no topics in the consumer group' do
       it { expect(consumer_group.active?).to eq false }
