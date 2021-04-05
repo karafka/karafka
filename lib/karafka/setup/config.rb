@@ -68,7 +68,8 @@ module Karafka
         # @note In the future, we need to have a single process representation for all the karafka
         #   instances
         setting :process, Process.new
-        # option []
+        # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
+        #   group builder
         setting :subscription_groups_builder, Routing::SubscriptionGroupsBuilder.new
       end
 

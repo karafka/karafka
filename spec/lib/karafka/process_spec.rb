@@ -44,7 +44,7 @@ RSpec.describe Karafka::Process do
 
   describe '#notice_signal' do
     let(:signal) { rand.to_s }
-    let(:instrument_args) { ['process.notice_signal', caller: process, signal: signal] }
+    let(:instrument_args) { ['process.notice_signal', { caller: process, signal: signal }] }
 
     it 'logs info with signal code into Karafka logger' do
       expect(Thread).to receive(:new).and_yield

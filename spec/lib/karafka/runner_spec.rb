@@ -22,7 +22,7 @@ RSpec.describe Karafka::Runner do
 
     context 'when something goes wrong internaly' do
       let(:error) { StandardError }
-      let(:instrument_args) { ['runner.call.error', caller: runner, error: error] }
+      let(:instrument_args) { ['runner.call.error', { caller: runner, error: error }] }
 
       before do
         allow(runner)

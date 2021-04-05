@@ -9,6 +9,8 @@ module Karafka
     #   validated per each route (topic + consumer_group) because they can be overwritten,
     #   so we validate all of that once all the routes are defined and ready.
     class Config < Dry::Validation::Contract
+      config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
+
       params do
         required(:client_id).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
         required(:concurrency) { int? & gt?(0) }

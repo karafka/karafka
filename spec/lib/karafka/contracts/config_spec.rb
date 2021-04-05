@@ -93,6 +93,16 @@ RSpec.describe Karafka::Contracts::Config do
 
       it { expect(contract.call(config)).not_to be_success }
     end
+
+    context 'when pause_timeout is more than pause_max_timeout' do
+      before do
+        config[:pause_timeout] = 2
+        config[:pause_max_timeout] = 1
+        config[:pause_with_exponential_backoff] = true
+      end
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
   end
 
   context 'when we validate concurrency' do

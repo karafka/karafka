@@ -74,10 +74,8 @@ module Karafka
       # @param group_id [String] id of the group in which jobs we're interested.
       # @note Blocking
       def wait(group_id)
-        while wait?(group_id)
-          Thread.pass
-          sleep(0.01)
-        end
+        # Go doing other things while we cannot process
+        Thread.pass while wait?(group_id)
       end
 
       private
