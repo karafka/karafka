@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Helpers::ConfigRetriever do
+RSpec.describe_current do
   context 'when a given attribute accessor is already defined' do
     subject(:extended_instance) do
       described = described_class

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Serialization::Json::Deserializer do
+RSpec.describe_current do
   subject(:deserializer) { described_class.new }
 
   let(:params) do

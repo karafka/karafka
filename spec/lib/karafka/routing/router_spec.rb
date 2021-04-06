@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Routing::Router do
+RSpec.describe_current do
   subject(:router) { described_class }
 
   before do

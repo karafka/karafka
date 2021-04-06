@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Instrumentation::Monitor do
+RSpec.describe_current do
   subject(:monitor) { described_class.new }
 
   describe '#instrument' do

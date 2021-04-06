@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Messages::Builders::Message do
+RSpec.describe_current do
   let(:routing_topic) { build(:routing_topic) }
   let(:fetched_message) { build(:kafka_fetched_message) }
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Instrumentation::ProctitleListener do
+RSpec.describe_current do
   subject(:listener) { described_class.new }
 
   describe '#on_app_initializing' do

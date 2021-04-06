@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Runner do
+RSpec.describe_current do
   subject(:runner) { described_class.new }
 
   describe '#call' do

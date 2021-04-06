@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Messages::Builders::Messages do
+RSpec.describe_current do
   let(:message1) { build(:kafka_fetched_message) }
   let(:message2) { build(:kafka_fetched_message) }
   let(:kafka_messages) { [message1, message2] }

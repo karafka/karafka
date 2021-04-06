@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::App do
+RSpec.describe_current do
   subject(:app_class) { described_class }
 
   describe '#consumer_groups' do

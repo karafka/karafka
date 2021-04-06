@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Contracts::Config do
+RSpec.describe_current do
   subject(:contract) { described_class.new }
 
   let(:config) do

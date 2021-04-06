@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Messages::Builders::BatchMetadata do
+RSpec.describe_current do
   let(:routing_topic) { build(:routing_topic) }
   let(:message1) { build(:kafka_fetched_message) }
   let(:message2) { build(:kafka_fetched_message) }

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Messages::Message do
+RSpec.describe_current do
   let(:base_params_class) { described_class }
   let(:headers) { { message_type: 'test' } }
 

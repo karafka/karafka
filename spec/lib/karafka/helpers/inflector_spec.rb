@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Helpers::Inflector do
+RSpec.describe_current do
   describe '#map' do
     subject(:map) { described_class.map(string) }
 

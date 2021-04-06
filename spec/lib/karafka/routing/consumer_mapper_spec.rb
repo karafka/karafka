@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Routing::ConsumerMapper do
+RSpec.describe_current do
   subject(:instance) { described_class.new }
 
   describe '#call' do

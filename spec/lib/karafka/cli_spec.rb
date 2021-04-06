@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Cli do
+RSpec.describe_current do
   subject(:cli) { described_class }
 
   describe '.prepare' do

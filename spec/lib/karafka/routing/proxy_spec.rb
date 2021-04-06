@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Routing::Proxy do
+RSpec.describe_current do
   let(:target) { OpenStruct.new }
 
   describe 'std method proxy' do

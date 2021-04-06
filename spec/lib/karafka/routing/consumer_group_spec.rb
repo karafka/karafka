@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Routing::ConsumerGroup do
+RSpec.describe_current do
   subject(:consumer_group) { described_class.new(name) }
 
   let(:name) { rand.to_s }

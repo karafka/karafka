@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Instrumentation::Logger do
+RSpec.describe_current do
   subject(:logger) { described_class.new }
 
   # We use a singleton logger that could be already initialized in other specs, so

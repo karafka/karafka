@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Server do
+RSpec.describe_current do
   subject(:server_class) { described_class }
 
   let(:process) { Karafka::App.config.internal.process }

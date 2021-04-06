@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::BaseConsumer do
+RSpec.describe_current do
   subject(:base_consumer) { working_class.new }
 
   let(:topic) { build(:routing_topic) }

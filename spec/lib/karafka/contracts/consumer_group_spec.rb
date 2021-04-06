@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Contracts::ConsumerGroup do
+RSpec.describe_current do
   subject(:check) { described_class.new.call(config) }
 
   let(:topics) do

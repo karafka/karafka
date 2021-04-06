@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Setup::Dsl do
+RSpec.describe_current do
   # App gets dsl, so it is easier to test against it
   subject(:app_class) { Karafka::App }
 

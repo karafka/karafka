@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Helpers::MultiDelegator do
+RSpec.describe_current do
   let(:methods) { [:"m1#{rand(1000)}", :"m2#{rand(1000)}"] }
 
   2.times do |i|

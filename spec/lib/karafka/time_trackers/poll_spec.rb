@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::TimeTrackers::Poll do
+RSpec.describe_current do
   subject(:tracker) { described_class.new(200) }
 
   context 'when we still have time after 2 ms and it is first attempt' do

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka::Messages::Messages do
+RSpec.describe_current do
   subject(:messages) do
     Karafka::Messages::Builders::Messages.call(kafka_messages, topic, received_at)
   end
