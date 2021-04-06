@@ -44,20 +44,20 @@ module Karafka
       # @return [Boolean] If anything went wrong, can we retry after a backoff period or not
       #   (do we have enough time)
       def retryable?
-        remaining > backoff_time
+        remaining > backoff_interval
       end
 
       # Sleeps for amount of time matching attempt, so we sleep more with each attempt in case of
       #   a retry.
       def backoff
         # Sleep requires seconds not ms
-        sleep(backoff_time / 1_000.0)
+        sleep(backoff_interval / 1_000.0)
       end
 
       private
 
       # @return [Integer] milliseconds of the backoff time
-      def backoff_time
+      def backoff_interval
         100 * attempts
       end
     end
