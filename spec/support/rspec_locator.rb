@@ -42,7 +42,7 @@ class RSpecLocator < Module
       .gsub('_spec.rb', '')
       .split('/')
       .delete_if(&:empty?)
-      .itself[1..-1]
+      .itself[1..]
       .join('/')
       .camelize
       .constantize
