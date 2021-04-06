@@ -6,11 +6,11 @@ RSpec.describe_current do
   let(:executor) { build(:processing_executor) }
 
   before do
-    allow(executor).to receive(:shutdown)
+    allow(executor).to receive(:revoked)
     job.call
   end
 
-  it 'expect to run shutdown on the executor' do
-    expect(executor).to have_received(:shutdown).with(no_args).once
+  it 'expect to run revoked on the executor' do
+    expect(executor).to have_received(:revoked).with(no_args).once
   end
 end
