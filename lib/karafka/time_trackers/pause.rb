@@ -7,7 +7,7 @@ module Karafka
       attr_reader :count
 
       # @param timeout [Integer] how long should we wait when anything went wrong (in ms)
-      # @param max_timeout [Integer] if exponential is on, what is the max value we can reach
+      # @param max_timeout [Integer, nil] if exponential is on, what is the max value we can reach
       #   exponentially on which we will stay
       # @param exponential_backoff [Boolean] should we wait exponentially or with the same
       #   timeout value
@@ -74,11 +74,10 @@ module Karafka
       # @return [Integer] backoff in milliseconds
       def backoff_interval
         backoff_factor = @exponential_backoff ? 2**@count : 1
+
         timeout = backoff_factor * @timeout
 
-        timeout = @max_timeout if @max_timeout && timeout > @max_timeout
-
-        timeout
+        @max_timeout && timeout > @max_timeout ? @max_timeout : timeout
       end
     end
   end
