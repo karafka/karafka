@@ -8,6 +8,14 @@ RSpec.describe_current do
   let(:topic) { build(:routing_topic, name: topic_name) }
   let(:topic_name) { rand.to_s }
 
+  before do
+    allow(Karafka.logger).to receive(:info)
+    allow(Karafka.logger).to receive(:error)
+    allow(Karafka.logger).to receive(:fatal)
+
+    trigger
+  end
+
   describe '#on_connection_listener_fetch_loop_error' do
     subject(:trigger) { listener.on_connection_listener_fetch_loop_error(event) }
 
@@ -16,8 +24,7 @@ RSpec.describe_current do
     let(:message) { "Listener fetch loop error: #{error}" }
 
     it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:error).with(message)
-      trigger
+      expect(Karafka.logger).to have_received(:error).with(message)
     end
   end
 
@@ -29,8 +36,7 @@ RSpec.describe_current do
     let(:message) { "Client fetch loop error: #{error}" }
 
     it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:error).with(message)
-      trigger
+      expect(Karafka.logger).to have_received(:error).with(message)
     end
   end
 
@@ -42,8 +48,7 @@ RSpec.describe_current do
     let(:message) { "Runner crash due to an error: #{error}" }
 
     it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:fatal).with(message)
-      trigger
+      expect(Karafka.logger).to have_received(:fatal).with(message)
     end
   end
 
@@ -54,8 +59,7 @@ RSpec.describe_current do
     let(:message) { "Received #{event[:signal]} system signal" }
 
     it 'expect logger to log proper message' do
-      expect(Karafka.logger).to receive(:info).with(message)
-      trigger
+      expect(Karafka.logger).to have_received(:info).with(message)
     end
   end
 
@@ -68,8 +72,7 @@ RSpec.describe_current do
     it 'expect logger to log server initializing' do
       # We had to add at least once as it runs in a separate thread and can interact
       # with other specs - this is a cheap workaround
-      expect(Karafka.logger).to receive(:info).with(message).at_least(:once)
-      trigger
+      expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
     end
   end
 
@@ -82,8 +85,7 @@ RSpec.describe_current do
     it 'expect logger to log server running' do
       # We had to add at least once as it runs in a separate thread and can interact
       # with other specs - this is a cheap workaround
-      expect(Karafka.logger).to receive(:info).with(message).at_least(:once)
-      trigger
+      expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
     end
   end
 
@@ -94,12 +96,11 @@ RSpec.describe_current do
     let(:message) { "Stopping Karafka server #{::Process.pid}" }
 
     it 'expect logger to log server stop' do
-      # We had to add at least once as it runs in a separate thread and can interact
-      # with other specs - this is a cheap workaround
-      expect(Karafka.logger).to receive(:info).with(message).at_least(:once)
-      trigger
       # This sleep ensures that the threaded logger is able to finish
       sleep 0.1
+      # We had to add at least once as it runs in a separate thread and can interact
+      # with other specs - this is a cheap workaround
+      expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
     end
   end
 
@@ -110,10 +111,9 @@ RSpec.describe_current do
     let(:message) { "Forceful Karafka server #{::Process.pid} stop" }
 
     it 'expect logger to log server stop' do
-      expect(Karafka.logger).to receive(:error).with(message).at_least(:once)
-      trigger
       # This sleep ensures that the threaded logger is able to finish
       sleep 0.1
+      expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
     end
   end
 end
