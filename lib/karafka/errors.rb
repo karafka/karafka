@@ -29,5 +29,10 @@ module Karafka
 
     # Raised when we've waited enough for shutting down a non-responsive process
     ForcefulShutdownError = Class.new(BaseError)
+
+    # Raised when the jobs queue receives a job that should not be received as it would cause
+    # the processing to go out of sync. We should never process in parallel data from the same
+    # topic partition (unless virtual partitions apply)
+    JobsQueueSynchronizationError = Class.new(BaseError)
   end
 end

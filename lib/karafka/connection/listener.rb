@@ -110,7 +110,7 @@ module Karafka
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
       # stops kafka client.
       def shutdown
-        @jobs_queue.stop
+        @jobs_queue.close
         @executors.shutdown
         @client.commit_offsets!
         @client.stop

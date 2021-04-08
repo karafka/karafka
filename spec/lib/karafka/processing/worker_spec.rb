@@ -10,7 +10,7 @@ RSpec.describe_current do
   before { worker }
 
   describe '#join' do
-    before { queue.stop }
+    before { queue.close }
 
     it { expect { worker.join }.not_to raise_error }
   end
@@ -19,7 +19,7 @@ RSpec.describe_current do
     before { allow(queue).to receive(:complete) }
 
     context 'when the job is a queue closing operation' do
-      before { queue.stop }
+      before { queue.close }
 
       it { expect(queue).not_to have_received(:complete) }
     end
@@ -33,6 +33,7 @@ RSpec.describe_current do
         # Force the background job work, so we can validate the expectation as the thread will
         # execute correctly the given job
         Thread.pass
+        sleep(0.05)
       end
 
       it { expect(job).to have_received(:call).with(no_args) }

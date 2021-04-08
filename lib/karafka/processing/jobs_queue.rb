@@ -10,16 +10,18 @@ module Karafka
     #
     # We work with the assumption, that partitions data is evenly distributed.
     class JobsQueue
-      # How many things we can have in the buffer per executor before triggering `#wait`.
-      BUFFERS_LIMIT = 5
-
-      private_constant :BUFFERS_LIMIT
-
       # @return [Karafka::Processing::JobsQueue]
       def initialize
         @queue = ::Queue.new
         @in_processing = Hash.new { |h, k| h[k] = {} }
         @mutex = Mutex.new
+      end
+
+      # Returns number of jobs that are either enqueued or in processing (but not finished)
+      # @return [Integer] number of elements in the queue
+      # @note Using `#pop` won't decrease this number as only marking job as completed does this
+      def size
+        @in_processing.values.map(&:size).sum
       end
 
       # Adds the job to the internal main queue, scheduling it for execution in a worker and marks
@@ -32,7 +34,11 @@ module Karafka
         return if @queue.closed?
 
         @mutex.synchronize do
-          @in_processing[job.group_id][job.id] = true
+          group = @in_processing[job.group_id]
+
+          raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.key?(job.id)
+
+          group[job.id] = true
         end
 
         @queue << job
@@ -67,7 +73,7 @@ module Karafka
       end
 
       # Stops the whole processing queue.
-      def stop
+      def close
         @queue.close unless @queue.closed?
       end
 
