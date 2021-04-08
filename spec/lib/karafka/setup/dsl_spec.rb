@@ -23,7 +23,6 @@ RSpec.describe_current do
     end
 
     it 'delegates it to Config setup and set framework to initializing state' do
-
       expect(Karafka::Setup::Config).to have_received(:setup)
     end
   end
