@@ -7,12 +7,16 @@ RSpec.describe_current do
   describe '#config' do
     let(:config) { double }
 
-    it 'aliases to Config' do
-      expect(Karafka::Setup::Config)
+    before do
+      allow(Karafka::Setup::Config)
         .to receive(:config)
         .and_return(config)
+    end
 
+    it 'aliases to Config' do
       expect(app_class.config).to eq config
+
+      expect(Karafka::Setup::Config).to have_received(:config)
     end
   end
 
