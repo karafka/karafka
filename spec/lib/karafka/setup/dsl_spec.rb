@@ -18,7 +18,7 @@ RSpec.describe_current do
 
   describe '#setup' do
     it 'delegates it to Config setup and set framework to initializing state' do
-      expect(Karafka::Setup::Config).to receive(:setup).once
+      expect(Karafka::Setup::Config).to receive(:setup)
 
       app_class.setup
     end

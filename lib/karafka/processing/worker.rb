@@ -22,7 +22,7 @@ module Karafka
       # Fetches a single job, processes it and marks as completed.
       #
       # @note We do not have error handling here, as no errors should propagate this far. If they
-      #   do, it is a critical error and should bubble up
+      #   do, it is a critical error and should bubble up.
       #
       # @note Upon closing the jobs queue, worker will close it's thread
       def process

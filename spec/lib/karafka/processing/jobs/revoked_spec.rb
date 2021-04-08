@@ -11,6 +11,6 @@ RSpec.describe_current do
   end
 
   it 'expect to run revoked on the executor' do
-    expect(executor).to have_received(:revoked).with(no_args).once
+    expect(executor).to have_received(:revoked).with(no_args)
   end
 end

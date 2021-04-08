@@ -14,6 +14,5 @@ RSpec.describe_current do
   end
 
   it 'expect to run consumption on the executor with time and messages' do
-    expect(executor).to have_received(:consume).with(messages, time_now).once
-  end
+    expect(executor).to have_received(:consume).with(messages, time_now)  end
 end
