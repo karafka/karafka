@@ -14,12 +14,13 @@ RSpec.describe_current do
   describe '#boot!' do
     let(:config) { double }
 
-    before { allow(Karafka.monitor).to receive(:instrument) }
+    before do
+      allow(Karafka.monitor).to receive(:instrument)
+      app_class.boot!
+    end
 
     it 'expect to publish app.initialized event' do
-      expect(Karafka.monitor).to receive(:instrument).with('app.initialized')
-
-      app_class.boot!
+      expect(Karafka.monitor).to have_received(:instrument).with('app.initialized')
     end
   end
 
