@@ -44,11 +44,11 @@ RSpec.describe_current do
     let(:subscription_groups) { [subscription_group] }
 
     before do
-      expect(Karafka::App)
+      allow(Karafka::App)
         .to receive(:subscription_groups)
         .and_return(subscription_groups)
 
-      expect(Karafka::Connection::Listener)
+      allow(Karafka::Connection::Listener)
         .to receive(:new)
         .with(subscription_group, jobs_queue)
     end

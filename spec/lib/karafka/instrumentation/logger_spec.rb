@@ -43,14 +43,19 @@ RSpec.describe_current do
   describe '#target' do
     let(:delegate_scope) { double }
 
-    it 'delegates write and close to $stdout and file' do
-      expect(Karafka::Helpers::MultiDelegator).to receive(:delegate)
+    before do
+      allow(Karafka::Helpers::MultiDelegator).to receive(:delegate)
         .with(:write, :close)
         .and_return(delegate_scope)
 
-      expect(delegate_scope).to receive(:to).with($stdout, logger.send(:file))
+      allow(delegate_scope).to receive(:to)
+    end
 
+    it 'delegates write and close to $stdout and file' do
       logger.send(:target)
+
+      expect(Karafka::Helpers::MultiDelegator).to have_received(:delegate).with(:write, :close)
+      expect(delegate_scope).to have_received(:to).with($stdout, logger.send(:file))
     end
   end
 
