@@ -25,15 +25,15 @@ RSpec.describe_current do
       let(:instrument_args) { ['runner.call.error', { caller: runner, error: error }] }
 
       before do
-        allow(runner)
-          .to receive(:listeners)
-          .and_raise(error)
+        allow(runner).to receive(:listeners).and_raise(error)
+        allow(Karafka::App).to receive(:stop!)
+        allow(Karafka.monitor).to receive(:instrument)
       end
 
       it 'stops the app and reraise' do
-        expect(Karafka::App).to receive(:stop!)
-        expect(Karafka.monitor).to receive(:instrument).with(*instrument_args)
         expect { runner.call }.to raise_error(error)
+        expect(Karafka.monitor).to have_received(:instrument).with(*instrument_args)
+        expect(Karafka::App).to have_received(:stop!).with(no_args)
       end
     end
   end
