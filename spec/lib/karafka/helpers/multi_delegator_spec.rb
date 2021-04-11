@@ -21,12 +21,19 @@ RSpec.describe_current do
         .to(target1, target2)
     end
 
+    before do
+      methods.each do |mname|
+        allow(target1).to receive(mname)
+        allow(target2).to receive(mname)
+      end
+    end
+
     it 'delegates to all' do
       methods.each do |mname|
-        expect(target1).to receive(mname)
-        expect(target2).to receive(mname)
-
         delegator.send(mname)
+
+        expect(target1).to have_received(mname)
+        expect(target2).to have_received(mname)
       end
     end
   end

@@ -19,11 +19,13 @@ RSpec.describe_current do
       context "for #{attr}" do
         let(:attr_value) { rand.to_s }
 
+        before { allow(topic).to receive(attr).and_return(attr_value).at_least(:once) }
+
         it 'expect to invoke it and store' do
+          topic.build
           # Some values are build from other, so we add at least once as they
           # might be used internally
-          expect(topic).to receive(attr).and_return(attr_value).at_least(:once)
-          topic.build
+          expect(topic).to have_received(attr).at_least(:once)
         end
 
         it { expect(topic.build).to be_a(described_class) }
