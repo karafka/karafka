@@ -46,15 +46,53 @@ RSpec.describe_current do
   end
 
   describe '#complete' do
-    pending
+    before do
+      queue << job1
+      queue << job2
+    end
+
+    context 'when there is a job in the queue and we mark it as completed' do
+      it { expect { queue.complete(job1) }.to change(queue, :size).from(2).to(1) }
+    end
   end
 
   describe '#clear' do
-    pending
+    before do
+      queue << job1
+      queue << job2
+    end
+
+    it 'expect to clear a given group only' do
+      expect { queue.clear(job1.group_id) }.to change(queue, :size).from(2).to(1)
+    end
   end
 
-  describe '#stop' do
-    pending
+  describe '#close' do
+    let(:internal_queue) { ::Queue.new }
+
+    before { allow(::Queue).to receive(:new).and_return(internal_queue) }
+
+    context 'when queue is closed already' do
+      before { internal_queue.close }
+
+      it { expect { queue.close }.not_to raise_error }
+
+      it 'expect not to close internal queue again' do
+        allow(internal_queue).to receive(:close)
+        queue.close
+        expect(internal_queue).not_to have_received(:close)
+      end
+    end
+
+    context 'when queue is not yet closed' do
+      it { expect { queue.close }.not_to raise_error }
+
+      it 'expect close internal queue' do
+        allow(internal_queue).to receive(:close)
+        queue.close
+        expect(internal_queue).to have_received(:close)
+      end
+    end
   end
 
   describe '#wait' do
@@ -62,6 +100,29 @@ RSpec.describe_current do
   end
 
   describe '#size' do
-    pending
+    context 'when there are no jobs' do
+      it { expect(queue.size).to eq(0) }
+    end
+
+    context 'when there are jobs from one group' do
+      let(:job1) { OpenStruct.new(group_id: 1, id: 1, call: true) }
+      let(:job2) { OpenStruct.new(group_id: 1, id: 2, call: true) }
+
+      before do
+        queue << job1
+        queue << job2
+      end
+
+      it { expect(queue.size).to eq(2) }
+    end
+
+    context 'when there are jobs from multiple groups' do
+      before do
+        queue << job1
+        queue << job2
+      end
+
+      it { expect(queue.size).to eq(2) }
+    end
   end
 end
