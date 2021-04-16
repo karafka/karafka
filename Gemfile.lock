@@ -8,7 +8,6 @@ PATH
       dry-validation (~> 1.2)
       envlogic (~> 1.1)
       irb (~> 1.0)
-      rake (>= 11.3)
       ruby-kafka (>= 1.0.0)
       thor (>= 0.20)
       waterdrop (~> 1.4.0)
@@ -123,6 +122,7 @@ GEM
     zeitwerk (2.4.2)
 
 PLATFORMS
+  ruby
   x86_64-linux
 
 DEPENDENCIES
