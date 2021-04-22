@@ -96,7 +96,52 @@ RSpec.describe_current do
   end
 
   describe '#wait' do
-    pending
+    # Closing it after the call will emulate the status change without having to run separate
+    # thread just for the status change
+    before { allow(Thread).to receive(:pass) { queue.close } }
+
+    context 'when we do not have to wait' do
+      it 'expect not to pass on the thread execution' do
+        queue.wait(job1.group_id)
+        expect(Thread).not_to receive(:pass)
+      end
+    end
+
+    context 'when we have to wait' do
+      before { queue << job1 }
+
+      it 'expect to pass until no longer needing to wait' do
+        queue.wait(job1.group_id)
+        expect(Thread).to have_received(:pass).once
+      end
+    end
+
+    context 'when Karafka is stopping' do
+      before { allow(Karafka::App).to receive(:stopping?).and_return(true) }
+
+      it 'expect not to wait' do
+        queue.wait(job1.group_id)
+        expect(Thread).not_to have_received(:pass)
+      end
+    end
+
+    context 'when queue is closed' do
+      before { queue.close }
+
+      it 'expect not to wait' do
+        queue.wait(job1.group_id)
+        expect(Thread).not_to have_received(:pass)
+      end
+    end
+
+    context 'when there are no jobs of a given group' do
+      let(:group_id) { SecureRandom.uuid }
+
+      it 'expect not to wait' do
+        queue.wait(group_id)
+        expect(Thread).not_to have_received(:pass)
+      end
+    end
   end
 
   describe '#size' do
