@@ -77,7 +77,6 @@ module Karafka
         @queue.close unless @queue.closed?
       end
 
-
       # Blocks when there are things in the queue in a given group and waits until all the jobs
       #   from a given group are completed
       # @param group_id [String] id of the group in which jobs we're interested.

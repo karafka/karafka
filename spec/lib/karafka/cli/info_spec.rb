@@ -21,9 +21,11 @@ RSpec.describe_current do
       ].join("\n")
     end
 
+    before { allow(Karafka.logger).to receive(:info) }
+
     it 'expect to print details of this Karafka app instance' do
-      expect(Karafka.logger).to receive(:info).with(info)
       info_cli.call
+      expect(Karafka.logger).to have_received(:info).with(info)
     end
   end
 end
