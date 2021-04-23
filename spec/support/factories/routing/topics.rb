@@ -5,6 +5,7 @@ FactoryBot.define do
     consumer_group { build(:routing_consumer_group) }
     name { 'test' }
     consumer { Class.new(Karafka::BaseConsumer) }
+    kafka { {} }
 
     skip_create
 

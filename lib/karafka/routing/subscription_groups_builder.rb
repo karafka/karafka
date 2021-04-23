@@ -42,6 +42,8 @@ module Karafka
       def checksum(topic)
         accu = {}
 
+        p topic.to_h['kafka']
+
         DISTRIBUTION_KEYS.each { |key| accu[key] = topic.to_h[key] }
 
         accu.hash
