@@ -72,7 +72,7 @@ GEM
       dry-equalizer (~> 0.2)
       dry-initializer (~> 3.0)
       dry-schema (~> 1.5, >= 1.5.2)
-    envlogic (1.1.2)
+    envlogic (1.1.3)
       dry-inflector (~> 0.1)
     factory_bot (6.1.0)
       activesupport (>= 5.0.0)
@@ -120,6 +120,8 @@ GEM
     zeitwerk (2.4.2)
 
 PLATFORMS
+  x86_64-darwin
+  x86_64-darwin-19
   x86_64-linux
 
 DEPENDENCIES
