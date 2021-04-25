@@ -83,7 +83,7 @@ module Karafka
       # @param block [Proc] proc we want to evaluate in the topic context
       def topic(topic_name, &block)
         consumer_group(topic_name) do
-          topic(topic_name, &block).tap(&:build)
+          topic(topic_name, &block)
         end
       end
     end

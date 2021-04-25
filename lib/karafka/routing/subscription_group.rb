@@ -19,12 +19,12 @@ module Karafka
 
       # @return [Integer] max messages fetched in a single go
       def max_messages
-        consumer_group.max_messages
+        @topics.first.max_messages
       end
 
       # @return [Integer] max milliseconds we can wait for incoming messages
       def max_wait_time
-        consumer_group.max_wait_time
+        @topics.first.max_wait_time
       end
 
       # @return [ConsumerGroup] consumer group of this subscription group

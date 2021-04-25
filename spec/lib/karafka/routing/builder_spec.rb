@@ -54,9 +54,8 @@ RSpec.describe_current do
       let(:consumer_group1) do
         builder.draw do
           consumer_group :group_name1 do
-            kafka('bootstrap.servers' => 'localhost:9092')
-
             topic :topic_name1 do
+              kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)
               deserializer :deserializer1
             end
@@ -66,9 +65,8 @@ RSpec.describe_current do
       let(:consumer_group2) do
         builder.draw do
           consumer_group :group_name2 do
-            kafka('bootstrap.servers' => 'localhost:9093')
-
             topic :topic_name2 do
+              kafka('bootstrap.servers' => 'localhost:9093')
               consumer Class.new(Karafka::BaseConsumer)
               deserializer :deserializer2
             end
@@ -83,8 +81,6 @@ RSpec.describe_current do
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
-      it { expect(builder.first.kafka['bootstrap.servers']).to eq 'localhost:9092' }
-      it { expect(builder.last.kafka['bootstrap.servers']).to eq 'localhost:9093' }
       it { expect(builder.size).to eq 2 }
     end
 
@@ -95,14 +91,15 @@ RSpec.describe_current do
       before do
         builder.draw do
           consumer_group :group_name1 do
-            kafka('bootstrap.servers' => 'localhost:9092')
 
             topic :topic_name1 do
+              kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)
               deserializer :deserializer1
             end
 
             topic :topic_name2 do
+              kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)
               deserializer :deserializer2
             end
@@ -112,7 +109,6 @@ RSpec.describe_current do
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name2" }
-      it { expect(builder.first.kafka['bootstrap.servers']).to eq 'localhost:9092' }
       it { expect(builder.size).to eq 1 }
     end
 

@@ -8,19 +8,7 @@ module Karafka
     # @note A single consumer group represents Kafka consumer group, but it may not match 1:1 with
     #   subscription groups. There can be more subscription groups than consumer groups
     class ConsumerGroup
-      extend Helpers::ConfigRetriever
-
       attr_reader :id, :topics, :name
-
-      # Attributes we can inherit from the root unless they were redefined on this level
-      INHERITABLE_ATTRIBUTES = %w[
-        kafka
-        deserializer
-        max_messages
-        max_wait_time
-      ].freeze
-
-      private_constant :INHERITABLE_ATTRIBUTES
 
       # @param name [String, Symbol] raw name of this consumer group. Raw means, that it does not
       #   yet have an application client_id namespace, this will be added here by default.
@@ -43,12 +31,8 @@ module Karafka
       # @return [Karafka::Routing::Topic] newly built topic instance
       def topic=(name, &block)
         topic = Topic.new(name, self)
-        @topics << Proxy.new(topic, &block).target.tap(&:build)
+        @topics << Proxy.new(topic, &block).target
         @topics.last
-      end
-
-      INHERITABLE_ATTRIBUTES.each do |attribute|
-        config_retriever_for(attribute)
       end
 
       # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
@@ -61,16 +45,10 @@ module Karafka
       # @return [Hash] hash with consumer group attributes including serialized to hash
       # topics inside of it.
       def to_h
-        result = {
+        {
           topics: topics.map(&:to_h),
           id: id
-        }
-
-        INHERITABLE_ATTRIBUTES.each do |attribute|
-          result[attribute] = public_send(attribute)
-        end
-
-        result
+        }.freeze
       end
     end
   end

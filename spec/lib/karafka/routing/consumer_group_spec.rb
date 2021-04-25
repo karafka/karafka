@@ -23,20 +23,6 @@ RSpec.describe_current do
     end
   end
 
-  %w[
-    kafka
-    deserializer
-    max_messages
-    max_wait_time
-  ].each do |attribute|
-    context attribute.to_s do
-      it 'by default expect to fallback to a kafka config value' do
-        expected_config_value = Karafka::App.config.public_send(attribute)
-        expect(consumer_group.public_send(attribute)).to eq expected_config_value
-      end
-    end
-  end
-
   describe '#topic=' do
     let(:built_topic) do
       # assigning block to a "=" method does not work normally
@@ -94,15 +80,6 @@ RSpec.describe_current do
 
   describe '#to_h' do
     let(:casted_consumer_group) { consumer_group.to_h }
-
-    %w[
-      kafka
-      deserializer
-      max_messages
-      max_wait_time
-    ].each do |cg_attribute|
-      it { expect(casted_consumer_group.keys).to include(cg_attribute) }
-    end
 
     it { expect(casted_consumer_group.keys).to include(:topics) }
     it { expect(casted_consumer_group.keys).to include(:id) }

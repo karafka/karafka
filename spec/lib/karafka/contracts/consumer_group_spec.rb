@@ -10,8 +10,10 @@ RSpec.describe_current do
         name: 'name',
         consumer: Class.new,
         deserializer: Class.new,
-        manual_offset_management: false,
-        kafka: { 'bootstrap.servers' => 'localhost:9092' }
+        kafka: { 'bootstrap.servers' => 'localhost:9092' },
+        max_wait_time: 10_000,
+        max_messages: 10,
+        manual_offset_management: true
       }
     ]
   end
@@ -19,10 +21,6 @@ RSpec.describe_current do
     {
       id: 'id',
       deserializer: Class.new,
-      kafka: { 'bootstrap.servers' => 'localhost:9092' },
-      max_messages: 100_000,
-      max_wait_time: 10,
-      manual_offset_management: false,
       topics: topics
     }
   end
@@ -85,62 +83,6 @@ RSpec.describe_current do
 
     context 'when id is an invalid string' do
       before { config[:id] = '%^&*(' }
-
-      it { expect(check).not_to be_success }
-    end
-  end
-
-  context 'when we validate max_wait_time' do
-    context 'when max_wait_time is nil' do
-      before { config[:max_wait_time] = nil }
-
-      it { expect(check).not_to be_success }
-    end
-
-    context 'when max_wait_time is not integer' do
-      before { config[:max_wait_time] = 's' }
-
-      it { expect(check).not_to be_success }
-    end
-
-    context 'when max_wait_time is less than 0' do
-      before { config[:max_wait_time] = -1 }
-
-      it { expect(check).not_to be_success }
-    end
-  end
-
-  context 'when we validate max_messages' do
-    context 'when max_messages is nil' do
-      before { config[:max_messages] = nil }
-
-      it { expect(check).not_to be_success }
-    end
-
-    context 'when max_messages is not integer' do
-      before { config[:max_messages] = 's' }
-
-      it { expect(check).not_to be_success }
-    end
-
-    context 'when max_messages is less than 1' do
-      before { config[:max_messages] = -1 }
-
-      it { expect(check).not_to be_success }
-    end
-  end
-
-  context 'when we validate deserializer' do
-    context 'when it is not present' do
-      before { config[:deserializer] = nil }
-
-      it { expect(check).not_to be_success }
-    end
-  end
-
-  context 'when we validate kafka' do
-    context 'when it is not present' do
-      before { config.delete(:kafka) }
 
       it { expect(check).not_to be_success }
     end

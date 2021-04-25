@@ -10,29 +10,6 @@ RSpec.describe_current do
 
   before { topic.consumer = consumer }
 
-  describe '#build' do
-    %i[
-      kafka
-      deserializer
-      manual_offset_management
-    ].each do |attr|
-      context "for #{attr}" do
-        let(:attr_value) { rand.to_s }
-
-        before { allow(topic).to receive(attr).and_return(attr_value).at_least(:once) }
-
-        it 'expect to invoke it and store' do
-          topic.build
-          # Some values are build from other, so we add at least once as they
-          # might be used internally
-          expect(topic).to have_received(attr).at_least(:once)
-        end
-
-        it { expect(topic.build).to be_a(described_class) }
-      end
-    end
-  end
-
   describe '#name' do
     it 'expect to return stringified topic' do
       expect(topic.name).to eq name.to_s
@@ -71,7 +48,7 @@ RSpec.describe_current do
     end
   end
 
-  %w[kafka manual_offset_management].each do |attribute|
+  %w[kafka manual_offset_management deserializer max_messages max_wait_time].each do |attribute|
     it { expect(topic).to respond_to(attribute) }
     it { expect(topic).to respond_to(:"#{attribute}=") }
   end

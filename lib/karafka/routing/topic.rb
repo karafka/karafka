@@ -6,12 +6,10 @@ module Karafka
     # It belongs to a consumer group as from 0.6 all the topics can work in the same consumer group
     # It is a part of Karafka's DSL.
     class Topic
-      extend Helpers::ConfigRetriever
-
       attr_reader :id, :name, :consumer_group
       attr_accessor :consumer
 
-      # Attributes we can inherit from the root unless they were redefined on this level
+      # Attributes we can inherit from the root unless they were defined on this level
       INHERITABLE_ATTRIBUTES = %i[
         kafka
         deserializer
@@ -35,15 +33,17 @@ module Karafka
       end
 
       INHERITABLE_ATTRIBUTES.each do |attribute|
-        config_retriever_for(attribute)
-      end
+        attr_writer attribute
 
-      # Initializes default values for all the options that support defaults if their values are
-      # not yet specified. This is needed to be done (cannot be lazy loaded on first use) because
-      # everywhere except Karafka server command, those would not be initialized on boot time.
-      def build
-        INHERITABLE_ATTRIBUTES.each { |attr| send(attr) }
-        self
+        define_method attribute do
+          current_value = instance_variable_get(:"@#{attribute}")
+
+          return current_value unless current_value.nil?
+
+          value = Karafka::App.config.send(attribute)
+
+          instance_variable_set(:"@#{attribute}", value)
+        end
       end
 
       # @return [Hash] hash with all the topic attributes
@@ -58,7 +58,7 @@ module Karafka
           name: name,
           consumer: consumer,
           consumer_group_id: consumer_group.id
-        )
+        ).freeze
       end
     end
   end

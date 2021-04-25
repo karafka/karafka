@@ -10,7 +10,9 @@ RSpec.describe_current do
       consumer: Class.new,
       deserializer: Class.new,
       manual_offset_management: false,
-      kafka: { 'bootstrap.servers' => 'localhost:9092' }
+      kafka: { 'bootstrap.servers' => 'localhost:9092' },
+      max_messages: 10,
+      max_wait_time: 10_000
     }
   end
 
