@@ -11,7 +11,7 @@ RSpec.describe_current do
   before { topic.consumer = consumer }
 
   describe '#build' do
-    %w[
+    %i[
       kafka
       deserializer
       manual_offset_management
@@ -77,11 +77,13 @@ RSpec.describe_current do
   end
 
   describe '#to_h' do
-    it 'expect to contain all the topic attrs plus id, name, consumer and consumer_group_id' do
-      expected = (
-        %w[kafka deserializer manual_offset_management] + %i[id name consumer consumer_group_id]
-      )
-      expect(topic.to_h.keys).to eq(expected)
+    let(:expected_keys) do
+      %i[kafka deserializer manual_offset_management max_messages max_wait_time] +
+        %i[id name consumer consumer_group_id]
+    end
+
+    it 'expect to contain all the topic attrs plus some inherited' do
+      expect(topic.to_h.keys).to eq(expected_keys)
     end
   end
 end

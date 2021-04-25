@@ -12,10 +12,12 @@ module Karafka
       attr_accessor :consumer
 
       # Attributes we can inherit from the root unless they were redefined on this level
-      INHERITABLE_ATTRIBUTES = %w[
+      INHERITABLE_ATTRIBUTES = %i[
         kafka
         deserializer
         manual_offset_management
+        max_messages
+        max_wait_time
       ].freeze
 
       private_constant :INHERITABLE_ATTRIBUTES
@@ -32,17 +34,16 @@ module Karafka
         @id = "#{consumer_group.id}_#{@name}"
       end
 
+      INHERITABLE_ATTRIBUTES.each do |attribute|
+        config_retriever_for(attribute)
+      end
+
       # Initializes default values for all the options that support defaults if their values are
-      # not yet specified. This is need to be done (cannot be lazy loaded on first use) because
-      # everywhere except Karafka server command, those would not be initialized on time - for
-      # example for Sidekiq.
+      # not yet specified. This is needed to be done (cannot be lazy loaded on first use) because
+      # everywhere except Karafka server command, those would not be initialized on boot time.
       def build
         INHERITABLE_ATTRIBUTES.each { |attr| send(attr) }
         self
-      end
-
-      INHERITABLE_ATTRIBUTES.each do |attribute|
-        config_retriever_for(attribute)
       end
 
       # @return [Hash] hash with all the topic attributes
