@@ -8,7 +8,7 @@ module Karafka
     #
     # @note This buffer is NOT threadsafe for addition operations.
     class MessagesBuffer
-      attr_reader :size, :groups
+      attr_reader :size
 
       # @return [Karafka::Connection::MessagesBuffer] buffer instance
       def initialize
