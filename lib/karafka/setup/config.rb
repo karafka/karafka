@@ -22,7 +22,7 @@ module Karafka
       # Available settings
       # option client_id [String] kafka client_id - used to provide
       #   default Kafka groups namespaces and identify that app in kafka
-      setting :client_id
+      setting :client_id, 'karafka'
       # option logger [Instance] logger that we want to use
       setting :logger, ::Karafka::Instrumentation::Logger.new
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)

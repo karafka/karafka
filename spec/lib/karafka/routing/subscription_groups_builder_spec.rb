@@ -18,8 +18,8 @@ RSpec.describe_current do
   end
 
   context 'when there are topics but they have different kafka settings' do
-    let(:topic1) { build(:routing_topic, kafka: { seed_brokers: rand }) }
-    let(:topic2) { build(:routing_topic, kafka: { seed_brokers: rand }) }
+    let(:topic1) { build(:routing_topic, kafka: { 'bootstrap.servers' => rand.to_s }) }
+    let(:topic2) { build(:routing_topic, kafka: { 'bootstrap.servers' => rand.to_s }) }
 
     it { expect(groups.size).to eq(2) }
   end

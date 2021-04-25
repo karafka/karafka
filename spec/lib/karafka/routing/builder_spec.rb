@@ -91,7 +91,6 @@ RSpec.describe_current do
       before do
         builder.draw do
           consumer_group :group_name1 do
-
             topic :topic_name1 do
               kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)

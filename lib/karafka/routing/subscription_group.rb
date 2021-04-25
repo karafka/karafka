@@ -15,6 +15,7 @@ module Karafka
       def initialize(topics)
         @id = SecureRandom.uuid
         @topics = topics
+        freeze
       end
 
       # @return [Integer] max messages fetched in a single go
@@ -27,23 +28,19 @@ module Karafka
         @topics.first.max_wait_time
       end
 
-      # @return [ConsumerGroup] consumer group of this subscription group
-      def consumer_group
-        @topics.first.consumer_group
-      end
-
       # @return [Hash] kafka settings are a bit special. They are exactly the same for all of the
       #   topics but they lack the group.id (unless explicitly) provided. To make it compatible
       #   with our routing engine, we inject it before it will go to the consumer
       def kafka
-        kafka = @topics.first.kafka
+        kafka = @topics.first.kafka.dup
 
-        kafka['client.id'] ||= 'karafka'
-        kafka['group.id'] ||= consumer_group.id
+        kafka['client.id'] ||= Karafka::App.config.client_id
+        kafka['group.id'] ||= @topics.first.consumer_group.id
         kafka['auto.offset.reset'] ||= 'earliest'
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
         # rdkafka offset auto-storing
         kafka['enable.auto.offset.store'] = 'false'
+        kafka.freeze
         kafka
       end
     end

@@ -6,6 +6,8 @@ FactoryBot.define do
     name { 'test' }
     consumer { Class.new(Karafka::BaseConsumer) }
     kafka { {} }
+    max_messages { 1000 }
+    max_wait_time { 10_000 }
 
     skip_create
 

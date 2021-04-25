@@ -40,7 +40,7 @@ APP_LOADER.eager_load
 
 class KarafkaApp < Karafka::App
   setup do |config|
-    config.kafka.seed_brokers = %w[kafka://127.0.0.1:9092]
+    config.kafka = { 'bootstrap.servers' => 'kafka://127.0.0.1:9092' }
     config.client_id = 'example_app'
 <% if rails? -%>
     config.logger = Rails.logger
