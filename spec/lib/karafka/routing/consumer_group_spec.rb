@@ -26,7 +26,6 @@ RSpec.describe_current do
   %w[
     kafka
     deserializer
-    manual_offset_management
     max_messages
     max_wait_time
   ].each do |attribute|
@@ -99,7 +98,6 @@ RSpec.describe_current do
     %w[
       kafka
       deserializer
-      manual_offset_management
       max_messages
       max_wait_time
     ].each do |cg_attribute|

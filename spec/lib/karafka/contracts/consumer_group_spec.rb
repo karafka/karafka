@@ -138,20 +138,6 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we validate manual_offset_management' do
-    context 'when it is not present' do
-      before { config.delete(:manual_offset_management) }
-
-      it { expect(check).not_to be_success }
-    end
-
-    context 'when it is not boolean' do
-      before { config[:manual_offset_management] = nil }
-
-      it { expect(check).not_to be_success }
-    end
-  end
-
   context 'when we validate kafka' do
     context 'when it is not present' do
       before { config.delete(:kafka) }

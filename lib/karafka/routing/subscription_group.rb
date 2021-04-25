@@ -2,7 +2,8 @@
 
 module Karafka
   module Routing
-    # Object representing a set of topics that can be subscribed together with one connection.
+    # Object representing a set of single consumer group topics that can be subscribed together
+    # with one connection.
     #
     # @note One subscription group will always belong to one consumer group, but one consumer
     #   group can have multiple subscription groups.

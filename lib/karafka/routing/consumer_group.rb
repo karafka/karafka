@@ -16,7 +16,6 @@ module Karafka
       INHERITABLE_ATTRIBUTES = %w[
         kafka
         deserializer
-        manual_offset_management
         max_messages
         max_wait_time
       ].freeze
