@@ -11,6 +11,7 @@ RSpec.describe Karafka do
     let(:new_env) { rand.to_s }
 
     before { karafka.env = new_env }
+
     after { karafka.env = 'test' }
 
     it { expect(karafka.env).to eq(new_env) }
