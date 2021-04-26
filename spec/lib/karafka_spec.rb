@@ -3,6 +3,20 @@
 RSpec.describe Karafka do
   subject(:karafka) { described_class }
 
+  describe '.env' do
+    it { expect(karafka.env).to eq('test') }
+  end
+
+  describe '.env=' do
+    let(:new_env) { rand.to_s }
+
+    before { karafka.env = new_env }
+    after { karafka.env = 'test' }
+
+    it { expect(karafka.env).to eq(new_env) }
+    it { expect(karafka.env).to be_a(Karafka::Env) }
+  end
+
   describe '.logger' do
     it 'expect to use app logger' do
       expect(karafka.logger).to eq described_class::App.config.logger

@@ -28,7 +28,7 @@ module Karafka
     # @example Assign new environment to Karafka::App
     #   Karafka::App.env = :production
     def env=(environment)
-      env.update(environment.to_s)
+      env.replace(environment.to_s)
     end
 
     # @return [Logger] logger that we want to use. Will use ::Karafka::Logger by default
