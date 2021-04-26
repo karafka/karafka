@@ -1,5 +1,4 @@
 # frozen_string_literal: true
 
-RSpec.describe_current do
-  pending
-end
+# Empty stub for Diffend
+RSpec.describe_current {}

@@ -10,6 +10,9 @@ RSpec.describe_current do
     job.call
   end
 
+  it { expect(job.id).to eq(executor.id) }
+  it { expect(job.group_id).to eq(executor.group_id) }
+
   it 'expect to run shutdown on the executor' do
     expect(executor).to have_received(:shutdown).with(no_args)
   end
