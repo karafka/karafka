@@ -12,9 +12,7 @@
   dry-configurable
   dry-validation
   dry/events/publisher
-  dry/inflector
   dry/monitor/notifications
-  dry/core/constants
   zeitwerk
 ].each(&method(:require))
 

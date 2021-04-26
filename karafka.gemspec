@@ -18,7 +18,6 @@ Gem::Specification.new do |spec|
   spec.license     = 'LGPL-3.0'
 
   spec.add_dependency 'dry-configurable', '~> 0.8'
-  spec.add_dependency 'dry-inflector', '~> 0.1'
   spec.add_dependency 'dry-monitor', '~> 0.3'
   spec.add_dependency 'dry-validation', '~> 1.2'
   spec.add_dependency 'envlogic', '~> 1.1'

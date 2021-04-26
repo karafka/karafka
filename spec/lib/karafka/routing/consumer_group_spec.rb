@@ -14,7 +14,7 @@ RSpec.describe_current do
   describe '#id' do
     it 'expect to namespace id with application client_id' do
       old_client_id = Karafka::App.config.client_id
-      Karafka::App.config.client_id = 'ExampleClient'
+      Karafka::App.config.client_id = 'example_client'
 
       consumer_group = described_class.new('consumers')
       expect(consumer_group.id).to eq('example_client_consumers')
