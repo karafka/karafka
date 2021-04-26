@@ -5,7 +5,6 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'karafka/version'
 
-# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |spec|
   spec.name        = 'karafka'
   spec.version     = ::Karafka::VERSION
@@ -20,7 +19,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-configurable', '~> 0.8'
   spec.add_dependency 'dry-monitor', '~> 0.3'
   spec.add_dependency 'dry-validation', '~> 1.2'
-  spec.add_dependency 'envlogic', '~> 1.1'
   spec.add_dependency 'irb', '~> 1.0'
   spec.add_dependency 'rdkafka', '>= 0.8.0'
   spec.add_dependency 'thor', '>= 0.20'
@@ -37,4 +35,3 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = %w[lib]
 end
-# rubocop:enable Metrics/BlockLength

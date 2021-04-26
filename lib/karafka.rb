@@ -4,7 +4,6 @@
   delegate
   English
   rdkafka
-  envlogic
   json
   thor
   forwardable
@@ -18,9 +17,20 @@
 
 # Karafka framework main namespace
 module Karafka
-  extend Envlogic
-
   class << self
+    # @return [Karafka::Env] env instance that allows us to check environment
+    def env
+      @env ||= Env.new
+    end
+
+    # @param environment [String, Symbol] new environment that we want to set
+    # @return [Karafka::Env] env instance
+    # @example Assign new environment to Karafka::App
+    #   Karafka::App.env = :production
+    def env=(environment)
+      env.update(environment.to_s)
+    end
+
     # @return [Logger] logger that we want to use. Will use ::Karafka::Logger by default
     def logger
       @logger ||= App.config.logger
