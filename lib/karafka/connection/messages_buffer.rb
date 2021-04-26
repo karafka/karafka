@@ -6,7 +6,7 @@ module Karafka
     # When message is added to this buffer, it gets assigned to an array with other messages from
     # the same topic and partition.
     #
-    # @note This buffer is NOT threadsafe for addition operations.
+    # @note This buffer is NOT threadsafe.
     class MessagesBuffer
       attr_reader :size
 

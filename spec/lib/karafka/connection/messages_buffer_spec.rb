@@ -88,6 +88,13 @@ RSpec.describe_current do
   end
 
   describe '#clear' do
-    pending
+    before { buffer << build(:messages_message) }
+
+    it { expect { buffer.clear }.to change(buffer, :size).from(1).to(0) }
+
+    it 'expect not to have anything to process after cleaning' do
+      buffer.clear
+      expect { |block| buffer.each(&block) }.not_to yield_control
+    end
   end
 end
