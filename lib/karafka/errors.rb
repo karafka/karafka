@@ -34,5 +34,8 @@ module Karafka
     # the processing to go out of sync. We should never process in parallel data from the same
     # topic partition (unless virtual partitions apply)
     JobsQueueSynchronizationError = Class.new(BaseError)
+
+    # Raised when given topic is not found while expected
+    TopicNotFound = Class.new(BaseError)
   end
 end
