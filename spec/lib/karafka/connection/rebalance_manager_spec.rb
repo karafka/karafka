@@ -15,7 +15,7 @@ RSpec.describe_current do
       before { manager.on_partitions_assigned(nil, partitions) }
 
       it 'expect to clear the assigment after returning it' do
-        expect(manager.assigned_partitions).to eq({'topic_name' => [partition.partition]})
+        expect(manager.assigned_partitions).to eq({ 'topic_name' => [partition.partition] })
         expect(manager.assigned_partitions).to eq({})
       end
     end
@@ -30,7 +30,7 @@ RSpec.describe_current do
       before { manager.on_partitions_revoked(nil, partitions) }
 
       it 'expect to clear the assigment after returning it' do
-        expect(manager.revoked_partitions).to eq({'topic_name' => [partition.partition]})
+        expect(manager.revoked_partitions).to eq({ 'topic_name' => [partition.partition] })
         expect(manager.revoked_partitions).to eq({})
       end
     end
