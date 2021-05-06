@@ -53,6 +53,9 @@ module Karafka
     setup do |config|
       config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
       config.client_id = rand.to_s
+      config.pause_timeout = 1
+      config.pause_max_timeout = 1
+      config.pause_with_exponential_backoff = false
     end
   end
 end
