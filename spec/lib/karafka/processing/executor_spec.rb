@@ -27,8 +27,7 @@ RSpec.describe_current do
     let(:received_at) { Time.now }
     let(:consumer) do
       ClassBuilder.inherit(topic.consumer) do
-        def consume
-        end
+        def consume; end
       end.new
     end
 
