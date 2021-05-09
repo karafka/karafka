@@ -45,10 +45,6 @@ module Karafka
 
         # We run the consumer client logic...
         consumer.on_consume
-      rescue StandardError => e
-        # TODO: insturmentacja here
-
-        p e
       end
 
       # Runs the controller `#revoked` method that should be triggered when a given consumer is
@@ -59,10 +55,6 @@ module Karafka
       def revoked
         consumer.on_revoked if @consumer
         @consumer = nil
-      rescue StandardError => e
-        # TODO: insturmentacja here
-
-        p e
       end
 
       # Runs the controller `#shutdown` method that should be triggered when a given consumer is
@@ -75,10 +67,6 @@ module Karafka
         # that we do not build a new instance and shutdown should not be triggered.
         consumer.on_shutdown if @consumer
         @consumer = nil
-      rescue StandardError => e
-        # TODO: insturmentacja here
-
-        p e
       end
 
       private
