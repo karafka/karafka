@@ -7,6 +7,15 @@ RSpec.describe_current do
   let(:client) { instance_double(Karafka::Connection::Client) }
   let(:topic) { build(:routing_topic) }
   let(:pause) { Karafka::TimeTrackers::Pause.new }
+  let(:messages) { [build(:kafka_fetched_message)] }
+  let(:received_at) { Time.now }
+  let(:consumer) do
+    ClassBuilder.inherit(topic.consumer) do
+      def consume; end
+    end.new
+  end
+
+  before { allow(topic.consumer).to receive(:new).and_return(consumer) }
 
   describe '#id' do
     let(:executor2) { described_class.new(group_id, client, topic, pause) }
@@ -23,18 +32,7 @@ RSpec.describe_current do
   end
 
   describe '#consume' do
-    let(:messages) { [build(:kafka_fetched_message)] }
-    let(:received_at) { Time.now }
-    let(:consumer) do
-      ClassBuilder.inherit(topic.consumer) do
-        def consume; end
-      end.new
-    end
-
-    before do
-      allow(topic.consumer).to receive(:new).and_return(consumer)
-      allow(consumer).to receive(:on_consume)
-    end
+    before { allow(consumer).to receive(:on_consume) }
 
     it { expect { executor.consume(messages, received_at) }.not_to raise_error }
 
@@ -56,10 +54,50 @@ RSpec.describe_current do
   end
 
   describe '#revoked' do
-    pending
+    before { allow(consumer).to receive(:on_revoked) }
+
+    context 'when the consumer was not yet used' do
+      before { executor.revoked }
+
+      it 'expect not to run consumer as it never received any messages' do
+        expect(consumer).not_to have_received(:on_revoked)
+      end
+    end
+
+    context 'when the consumer was in use and exists' do
+      before do
+        allow(consumer).to receive(:on_consume)
+        executor.consume(messages, received_at)
+        executor.revoked
+      end
+
+      it 'expect to run consumer' do
+        expect(consumer).to have_received(:on_revoked).with(no_args)
+      end
+    end
   end
 
   describe '#shutdown' do
-    pending
+    before { allow(consumer).to receive(:on_shutdown) }
+
+    context 'when the consumer was not yet used' do
+      before { executor.shutdown }
+
+      it 'expect not to run consumer as it never received any messages' do
+        expect(consumer).not_to have_received(:on_shutdown)
+      end
+    end
+
+    context 'when the consumer was in use and exists' do
+      before do
+        allow(consumer).to receive(:on_consume)
+        executor.consume(messages, received_at)
+        executor.shutdown
+      end
+
+      it 'expect to run consumer' do
+        expect(consumer).to have_received(:on_shutdown).with(no_args)
+      end
+    end
   end
 end
