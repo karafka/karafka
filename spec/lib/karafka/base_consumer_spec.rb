@@ -52,7 +52,6 @@ RSpec.describe_current do
   end
 
   describe '#on_consume' do
-
     before { consumer.pause = pause }
 
     context 'when everything went ok on consume with manual offset management' do
