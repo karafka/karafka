@@ -17,22 +17,25 @@ module Karafka
       #   complete list of all the events. Please use the #available_events on fully loaded
       #   Karafka system to determine all of the events you can use.
       BASE_EVENTS = %w[
-        connection.listener.before_fetch_loop
-        connection.listener.fetch_loop
-        connection.listener.fetch_loop.error
-        connection.client.fetch_loop.error
-        runner.call.error
+        consumer.consume
+        consumer.consume.error
+        consumer.revoked
+        consumer.revoked.error
+        consumer.shutdown
+        consumer.shutdown.error
         process.notice_signal
-        async_producer.call.error
-        async_producer.call.retry
-        sync_producer.call.error
-        sync_producer.call.retry
+        runner.call.error
         app.initializing
         app.initialized
         app.running
         app.stopping
         app.stopping.error
         app.stopped
+
+        connection.listener.before_fetch_loop
+        connection.listener.fetch_loop
+        connection.listener.fetch_loop.error
+        connection.client.fetch_loop.error
       ].freeze
 
       private_constant :BASE_EVENTS

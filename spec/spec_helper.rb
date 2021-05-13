@@ -42,6 +42,10 @@ RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
+
+  # When we test things, we subscribe sometimes with one-off monitors, they need to always be
+  # cleared not to spam and break test-suit
+  config.after(:each) { Karafka.monitor.__bus__.listeners.clear }
 end
 
 require 'karafka'
