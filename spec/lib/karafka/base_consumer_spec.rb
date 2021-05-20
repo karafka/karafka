@@ -11,9 +11,13 @@ RSpec.describe_current do
   let(:pause) { build(:time_trackers_pause) }
   let(:topic) { build(:routing_topic) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
-  let(:message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
-  let(:messages) { instance_double(Karafka::Messages::Messages, first: message) }
+  let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
+  let(:last_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:offset) { 123 }
+
+  let(:messages) do
+    instance_double(Karafka::Messages::Messages, first: first_message, last: last_message)
+  end
 
   let(:working_class) do
     ClassBuilder.inherit(described_class) do
@@ -55,6 +59,8 @@ RSpec.describe_current do
     before do
       consumer.pause = pause
       consumer.client = client
+      consumer.messages = messages
+      allow(pause).to receive(:pause)
     end
 
     context 'when everything went ok on consume with manual offset management' do
@@ -93,16 +99,11 @@ RSpec.describe_current do
         end
       end
 
-      before do
-        consumer.messages = messages
-        allow(pause).to receive(:pause)
-      end
-
       it { expect { consumer.on_consume }.not_to raise_error }
 
       it 'expect to pause based on the message offset' do
         consumer.on_consume
-        expect(client).to have_received(:pause).with(topic.name, message.partition, offset)
+        expect(client).to have_received(:pause).with(topic.name, first_message.partition, offset)
       end
 
       it 'expect to pause with time tracker' do
@@ -119,7 +120,25 @@ RSpec.describe_current do
     end
 
     context 'when everything went ok on consume with automatic offset management' do
-      pending
+      before do
+        topic.manual_offset_management = false
+        allow(client).to receive(:mark_as_consumed)
+      end
+
+      it { expect { consumer.on_consume }.not_to raise_error }
+
+      it 'expect to run proper instrumentation' do
+        Karafka.monitor.subscribe('consumer.consume') do |event|
+          expect(event.payload[:caller]).to eq(consumer)
+        end
+
+        consumer.on_consume
+      end
+
+      it 'expect to never run consumption marking' do
+        consumer.on_consume
+        expect(client).to have_received(:mark_as_consumed).with(last_message)
+      end
     end
 
     context 'when there was an error on consume with automatic offset management' do
@@ -203,11 +222,11 @@ RSpec.describe_current do
 
       allow(client).to receive(:mark_as_consumed)
 
-      consumer.send(:mark_as_consumed, message)
+      consumer.send(:mark_as_consumed, last_message)
     end
 
     it 'expect to proxy pass to client' do
-      expect(client).to have_received(:mark_as_consumed).with(message)
+      expect(client).to have_received(:mark_as_consumed).with(last_message)
     end
 
     it 'epxect to increase seek_offset' do
@@ -221,11 +240,11 @@ RSpec.describe_current do
 
       allow(client).to receive(:mark_as_consumed!)
 
-      consumer.send(:mark_as_consumed!, message)
+      consumer.send(:mark_as_consumed!, last_message)
     end
 
     it 'expect to proxy pass to client' do
-      expect(client).to have_received(:mark_as_consumed!).with(message)
+      expect(client).to have_received(:mark_as_consumed!).with(last_message)
     end
 
     it 'epxect to increase seek_offset' do
