@@ -109,6 +109,13 @@ RSpec.describe_current do
         consumer.on_consume
         expect(pause).to have_received(:pause)
       end
+
+      it 'expect to track this with an instrumentation' do
+        Karafka.monitor.subscribe('consumer.consume.error') do |event|
+          expect(event.payload[:caller]).to eq(consumer)
+          expect(event.payload[:error]).to eq(StandardError)
+        end
+      end
     end
 
     context 'when everything went ok on consume with automatic offset management' do
