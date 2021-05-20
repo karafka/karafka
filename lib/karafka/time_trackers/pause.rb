@@ -30,7 +30,7 @@ module Karafka
       #   pause.paused? #=> false
       #   pause.reset
       #   pause.count #=> 0
-      def initialize(timeout: nil, max_timeout: nil, exponential_backoff: false)
+      def initialize(timeout:, max_timeout:, exponential_backoff:)
         @started_at = nil
         @count = 0
         @timeout = timeout

@@ -8,8 +8,12 @@ RSpec.describe_current do
     instance
   end
 
-  let(:pause) { Karafka::TimeTrackers::Pause.new }
+  let(:pause) { build(:time_trackers_pause) }
   let(:topic) { build(:routing_topic) }
+  let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
+  let(:message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
+  let(:messages) { instance_double(Karafka::Messages::Messages, first: message) }
+  let(:offset) { 123 }
 
   let(:working_class) do
     ClassBuilder.inherit(described_class) do
@@ -34,16 +38,12 @@ RSpec.describe_current do
   end
 
   describe '#messages' do
-    let(:messages) { instance_double(Karafka::Messages::Messages) }
-
     before { consumer.messages = messages }
 
     it { expect(consumer.messages).to eq messages }
   end
 
   describe '#client' do
-    let(:client) { instance_double(Karafka::Connection::Client) }
-
     before { consumer.client = client }
 
     it 'expect to return current persisted client' do
@@ -52,7 +52,10 @@ RSpec.describe_current do
   end
 
   describe '#on_consume' do
-    before { consumer.pause = pause }
+    before do
+      consumer.pause = pause
+      consumer.client = client
+    end
 
     context 'when everything went ok on consume with manual offset management' do
       before { topic.manual_offset_management = true }
@@ -75,7 +78,37 @@ RSpec.describe_current do
     end
 
     context 'when there was an error on consume with manual offset management' do
-      pending
+      let(:working_class) do
+        ClassBuilder.inherit(described_class) do
+          attr_reader :consumed
+
+          def initialize
+            super
+            @consumed = false
+          end
+
+          def consume
+            raise StandardError
+          end
+        end
+      end
+
+      before do
+        consumer.messages = messages
+        allow(pause).to receive(:pause)
+      end
+
+      it { expect { consumer.on_consume }.not_to raise_error }
+
+      it 'expect to pause based on the message offset' do
+        consumer.on_consume
+        expect(client).to have_received(:pause).with(topic.name, message.partition, offset)
+      end
+
+      it 'expect to pause with time tracker' do
+        consumer.on_consume
+        expect(pause).to have_received(:pause)
+      end
     end
 
     context 'when everything went ok on consume with automatic offset management' do
@@ -158,10 +191,6 @@ RSpec.describe_current do
   end
 
   describe '#mark_as_consumed' do
-    let(:client) { instance_double(Karafka::Connection::Client) }
-    let(:message) { instance_double(Karafka::Messages::Message, offset: offset) }
-    let(:offset) { rand.to_i }
-
     before do
       consumer.client = client
 
@@ -180,10 +209,6 @@ RSpec.describe_current do
   end
 
   describe '#mark_as_consumed!' do
-    let(:client) { instance_double(Karafka::Connection::Client) }
-    let(:message) { instance_double(Karafka::Messages::Message, offset: offset) }
-    let(:offset) { rand.to_i }
-
     before do
       consumer.client = client
 
