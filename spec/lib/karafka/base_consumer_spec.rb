@@ -142,7 +142,41 @@ RSpec.describe_current do
     end
 
     context 'when there was an error on consume with automatic offset management' do
-      pending
+      before { topic.manual_offset_management = false }
+
+      let(:working_class) do
+        ClassBuilder.inherit(described_class) do
+          attr_reader :consumed
+
+          def initialize
+            super
+            @consumed = false
+          end
+
+          def consume
+            raise StandardError
+          end
+        end
+      end
+
+      it { expect { consumer.on_consume }.not_to raise_error }
+
+      it 'expect to pause based on the message offset' do
+        consumer.on_consume
+        expect(client).to have_received(:pause).with(topic.name, first_message.partition, offset)
+      end
+
+      it 'expect to pause with time tracker' do
+        consumer.on_consume
+        expect(pause).to have_received(:pause)
+      end
+
+      it 'expect to track this with an instrumentation' do
+        Karafka.monitor.subscribe('consumer.consume.error') do |event|
+          expect(event.payload[:caller]).to eq(consumer)
+          expect(event.payload[:error]).to eq(StandardError)
+        end
+      end
     end
   end
 
