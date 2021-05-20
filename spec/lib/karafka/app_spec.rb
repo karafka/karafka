@@ -54,12 +54,11 @@ RSpec.describe_current do
       describe "##{delegation}" do
         let(:return_value) { double }
 
-        it "expect to delegate #{delegation} method to Karafka module" do
-          expect(Karafka)
-            .to receive(delegation)
-            .and_return(return_value)
+        before { allow(Karafka).to receive(delegation).and_return(return_value) }
 
+        it "expect to delegate #{delegation} method to Karafka module" do
           expect(app_class.public_send(delegation)).to eq return_value
+          expect(Karafka).to have_received(delegation)
         end
       end
     end
