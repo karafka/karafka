@@ -84,26 +84,41 @@ RSpec.describe_current do
     end
 
     context 'when shutdown time is more then 1' do
-      let(:timeout_sec) { rand(5..15) }
-      let(:timeout_ms) { timeout_sec * 1_000 }
+      let(:timeout_s) { rand(5..15) }
+      let(:timeout_ms) { timeout_s * 1_000 }
+
+      before do
+        allow(Karafka::App).to receive(:stop!)
+        allow(described_class).to receive(:sleep)
+        allow(Kernel).to receive(:exit!)
+      end
 
       context 'when there are no active threads (all shutdown ok)' do
+        before do
+          server_class.send(:stop_supervised)
+          described_class.consumer_threads.clear
+        end
+
         it 'expect stop without exit or sleep' do
-          expect(Karafka::App).to receive(:stop!)
-          expect(described_class).not_to receive(:sleep)
-          expect(Kernel).not_to receive(:exit!)
+          expect(Karafka::App).to have_received(:stop!)
+          expect(described_class).not_to have_received(:sleep)
+          expect(Kernel).not_to have_received(:exit!)
         end
       end
 
       context 'when there are active threads (processing too long)' do
         let(:active_thread) { instance_double(Thread, alive?: true, terminate: true) }
 
-        before { described_class.consumer_threads << active_thread }
+        before do
+          described_class.consumer_threads << active_thread
+          server_class.send(:stop_supervised)
+          described_class.consumer_threads.clear
+        end
 
         it 'expect stop and exit with sleep' do
-          expect(Karafka::App).to receive(:stop!)
-          expect(described_class).to receive(:sleep).with(0.1).exactly(timeout_sec * 10).times
-          expect(Kernel).to receive(:exit!).with(2)
+          expect(Karafka::App).to have_received(:stop!)
+          expect(described_class).to have_received(:sleep).with(0.1).exactly(timeout_s * 10).times
+          expect(Kernel).to have_received(:exit!).with(2)
         end
       end
     end
