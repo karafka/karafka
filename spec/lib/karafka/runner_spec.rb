@@ -39,8 +39,8 @@ RSpec.describe_current do
   end
 
   describe '#listeners' do
-    let(:jobs_queue) { double }
-    let(:subscription_group) { double }
+    let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
+    let(:subscription_group) { build(:routing_subscription_group) }
     let(:subscription_groups) { [subscription_group] }
 
     before do
