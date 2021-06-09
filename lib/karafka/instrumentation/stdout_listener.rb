@@ -15,7 +15,7 @@ module Karafka
 
       # Logs each messages fetching attempt
       #
-      # @param event [Dry::Events::Event] event details including payload
+      # @param _event [Dry::Events::Event] event details including payload
       def on_connection_listener_fetch_loop(_event)
         info 'Receiving new messages from Kafka...'
       end
