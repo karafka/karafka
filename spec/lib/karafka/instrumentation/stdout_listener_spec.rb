@@ -20,7 +20,7 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_connection_listener_fetch_loop_error(event) }
 
     let(:payload) { { caller: caller, error: error } }
-    let(:error) { StandardError }
+    let(:error) { StandardError.new }
     let(:message) { "Listener fetch loop error: #{error}" }
 
     it 'expect logger to log proper message' do
@@ -28,12 +28,36 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_connection_client_fetch_loop_error' do
-    subject(:trigger) { listener.on_connection_client_fetch_loop_error(event) }
+  describe '#on_consumer_consume_error' do
+    subject(:trigger) { listener.on_consumer_consume_error(event) }
 
     let(:payload) { { caller: caller, error: error } }
-    let(:error) { StandardError }
-    let(:message) { "Client fetch loop error: #{error}" }
+    let(:error) { StandardError.new }
+    let(:message) { "Consuming failed due to an error: #{error}" }
+
+    it 'expect logger to log proper message' do
+      expect(Karafka.logger).to have_received(:error).with(message)
+    end
+  end
+
+  describe '#on_consumer_revoked_error' do
+    subject(:trigger) { listener.on_consumer_revoked_error(event) }
+
+    let(:payload) { { caller: caller, error: error } }
+    let(:error) { StandardError.new }
+    let(:message) { "Revoking failed due to an error: #{error}" }
+
+    it 'expect logger to log proper message' do
+      expect(Karafka.logger).to have_received(:error).with(message)
+    end
+  end
+
+  describe '#on_consumer_shutdown_error' do
+    subject(:trigger) { listener.on_consumer_shutdown_error(event) }
+
+    let(:payload) { { caller: caller, error: error } }
+    let(:error) { StandardError.new }
+    let(:message) { "Shutting down failed due to an error: #{error}" }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to have_received(:error).with(message)
@@ -44,7 +68,7 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_runner_call_error(event) }
 
     let(:payload) { { caller: caller, error: error } }
-    let(:error) { StandardError }
+    let(:error) { StandardError.new }
     let(:message) { "Runner crash due to an error: #{error}" }
 
     it 'expect logger to log proper message' do
@@ -67,9 +91,9 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_app_initializing(event) }
 
     let(:payload) { {} }
-    let(:message) { "Initializing Karafka server #{::Process.pid}" }
+    let(:message) { 'Initializing Karafka framework' }
 
-    it 'expect logger to log server initializing' do
+    it 'expect logger to log framework initializing' do
       # We had to add at least once as it runs in a separate thread and can interact
       # with other specs - this is a cheap workaround
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
@@ -80,7 +104,7 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_app_running(event) }
 
     let(:payload) { {} }
-    let(:message) { "Running Karafka server #{::Process.pid}" }
+    let(:message) { 'Running Karafka server' }
 
     it 'expect logger to log server running' do
       # We had to add at least once as it runs in a separate thread and can interact
@@ -93,7 +117,7 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_app_stopping(event) }
 
     let(:payload) { {} }
-    let(:message) { "Stopping Karafka server #{::Process.pid}" }
+    let(:message) { 'Stopping Karafka server' }
 
     it 'expect logger to log server stop' do
       # This sleep ensures that the threaded logger is able to finish
@@ -108,7 +132,7 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_app_stopping_error(event) }
 
     let(:payload) { {} }
-    let(:message) { "Forceful Karafka server #{::Process.pid} stop" }
+    let(:message) { 'Forceful Karafka server stop' }
 
     it 'expect logger to log server stop' do
       # This sleep ensures that the threaded logger is able to finish

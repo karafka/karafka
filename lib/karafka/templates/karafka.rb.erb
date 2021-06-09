@@ -4,16 +4,6 @@
 ENV['RAILS_ENV'] ||= 'development'
 ENV['KARAFKA_ENV'] = ENV['RAILS_ENV']
 require ::File.expand_path('../config/environment', __FILE__)
-Rails.application.eager_load!
-
-# This lines will make Karafka print to stdout like puma or unicorn
-if Rails.env.development?
-  Rails.logger.extend(
-    ActiveSupport::Logger.broadcast(
-      ActiveSupport::Logger.new($stdout)
-    )
-  )
-end
 <% else -%>
 # This file is auto-generated during the install process.
 # If by any chance you've wanted a setup for Rails app, either run the `karafka:install`
@@ -40,11 +30,8 @@ APP_LOADER.eager_load
 
 class KarafkaApp < Karafka::App
   setup do |config|
-    config.kafka = { 'bootstrap.servers' => 'kafka://127.0.0.1:9092' }
+    config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092' }
     config.client_id = 'example_app'
-<% if rails? -%>
-    config.logger = Rails.logger
-<% end -%>
   end
 
   # Comment out this part if you are not using instrumentation and/or you are not
@@ -55,9 +42,9 @@ class KarafkaApp < Karafka::App
   Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
 
   consumer_groups.draw do
-    # topic :example do
-    #   consumer ExampleConsumer
-    # end
+    topic :example do
+      consumer ExampleConsumer
+    end
 
     # consumer_group :bigger_group do
     #   topic :test do
@@ -69,11 +56,6 @@ class KarafkaApp < Karafka::App
     #   end
     # end
   end
-end
-
-Karafka.monitor.subscribe('app.initialized') do
-  # Put here all the things you want to do after the Karafka framework
-  # initialization
 end
 
 KarafkaApp.boot!
