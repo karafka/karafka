@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# This file contains Railtie for auto-configuration
 begin
   require 'karafka'
   require 'rails'
@@ -30,6 +31,7 @@ begin
     end
   end
 rescue LoadError
+  # Without defining this in any way, Zeitwerk ain't happy so we do it that way
   module Karafka
     class Railtie
     end
