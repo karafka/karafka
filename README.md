@@ -5,8 +5,6 @@
 [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka)
 
 **Note**: We're finishing the new Karafka `2.0` but for now, please use `1.4`. All the documentation presented here refers to `1.4`
-..
-Documentation presented here refers to Karafka `1.4`.
 
 ## About Karafka
 
