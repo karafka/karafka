@@ -100,6 +100,7 @@ module Karafka
         def configure_components
           config.producer ||= ::WaterDrop::Producer.new do |producer_config|
             producer_config.kafka = config.kafka
+            producer_config.logger = config.logger
           end
         end
       end

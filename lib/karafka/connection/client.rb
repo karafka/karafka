@@ -250,6 +250,7 @@ module Karafka
       # Builds a new rdkafka consumer instance based on the subscription group configuration
       # @return [Rdkafka::Consumer]
       def build_consumer
+        ::Rdkafka::Config.logger = ::Karafka::App.config.logger
         config = ::Rdkafka::Config.new(@subscription_group.kafka)
         config.consumer_rebalance_listener = @rebalance_manager
         consumer = config.consumer
