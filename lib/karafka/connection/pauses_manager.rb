@@ -41,14 +41,6 @@ module Karafka
           end
         end
       end
-
-      # Clears all the pauses.
-      #
-      # @note Clearing does not mean resuming. It means all the pauses for all the partitions will
-      #   be forgotten and new pauses will be created upon demand.
-      def clear
-        @pauses.clear
-      end
     end
   end
 end

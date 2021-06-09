@@ -64,12 +64,18 @@ RSpec.describe_current do
   end
 
   describe '#run_supervised' do
-    after { server_class.send(:run_supervised) }
+    before do
+      allow(process).to receive(:supervise)
+      allow(Karafka::App).to receive(:run!)
+      allow(runner).to receive(:call)
+
+      server_class.send(:run_supervised)
+    end
 
     it 'expect to supervise and run' do
-      expect(process).to receive(:supervise)
-      expect(Karafka::App).to receive(:run!)
-      expect(runner).to receive(:call)
+      expect(process).to have_received(:supervise)
+      expect(Karafka::App).to have_received(:run!)
+      expect(runner).to have_received(:call)
     end
   end
 

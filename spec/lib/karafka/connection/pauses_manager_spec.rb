@@ -45,13 +45,4 @@ RSpec.describe_current do
       end
     end
   end
-
-  describe '#clear' do
-    before { fetched_pause }
-
-    it 'expect to clear and force pauses regeneration' do
-      manager.clear
-      expect(fetched_pause).not_to eq(manager.fetch(topic, partition))
-    end
-  end
 end

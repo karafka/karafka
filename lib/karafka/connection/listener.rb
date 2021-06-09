@@ -24,6 +24,7 @@ module Karafka
       def call
         Karafka.monitor.instrument(
           'connection.listener.before_fetch_loop',
+          caller: self,
           subscription_group: @subscription_group,
           client: @client
         )
@@ -127,8 +128,8 @@ module Karafka
         @jobs_queue.wait(@subscription_group.id)
         @jobs_queue.clear(@subscription_group.id)
         @client.reset
-        @pauses_manager.clear
-        @executors.clear
+        @pauses_manager = PausesManager.new
+        @executors = Processing::ExecutorsBuffer.new(@client, @subscription_group)
       end
     end
   end
