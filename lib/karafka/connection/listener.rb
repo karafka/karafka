@@ -53,8 +53,10 @@ module Karafka
           # we should not get any data from them, thus there is no risk of a race-condition.
           revoke_lost_partitions_consumers
           distribute_partitions_jobs(messages_buffer)
+
           # We wait only on jobs from our subscription group. Other groups are independent.
           @jobs_queue.wait(@subscription_group.id)
+
           # We don't use the `#commit_offsets!` here for performance reasons. This can be achieved
           # if needed by using manual offset management.
           @client.commit_offsets
