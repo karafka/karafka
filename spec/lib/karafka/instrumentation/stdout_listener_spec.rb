@@ -28,6 +28,28 @@ RSpec.describe_current do
     end
   end
 
+  describe '#on_connection_listener_fetch_loop' do
+    subject(:trigger) { listener.on_connection_listener_fetch_loop(event) }
+
+    let(:payload) { { caller: caller } }
+    let(:message) { 'Receiving new messages from Kafka...' }
+
+    it 'expect logger to log proper message' do
+      expect(Karafka.logger).to have_received(:info).with(message)
+    end
+  end
+
+  describe '#on_connection_listener_fetch_loop_received' do
+    subject(:trigger) { listener.on_connection_listener_fetch_loop_received(event) }
+
+    let(:payload) { { caller: caller, messages_buffer: Array.new(5) } }
+    let(:message) { 'Received 5 new messages from Kafka' }
+
+    it 'expect logger to log proper message' do
+      expect(Karafka.logger).to have_received(:info).with(message)
+    end
+  end
+
   describe '#on_consumer_consume_error' do
     subject(:trigger) { listener.on_consumer_consume_error(event) }
 

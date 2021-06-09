@@ -44,11 +44,23 @@ module Karafka
       #   propagate this far.
       def fetch_loop
         until Karafka::App.stopping?
+          Karafka.monitor.instrument(
+            'connection.listener.fetch_loop',
+            caller: self
+          )
+
           resume_paused_partitions
           # We need to fetch data before we revoke lost partitions details as during the polling
           # the callbacks for tracking lost partitions are triggered. Otherwise we would be always
           # one batch behind.
           messages_buffer = @client.batch_poll
+
+          Karafka.monitor.instrument(
+            'connection.listener.fetch_loop.received',
+            caller: self,
+            messages_buffer: messages_buffer
+          )
+
           # We don't have to wait for the revoke jobs to be done, because since they are revoked,
           # we should not get any data from them, thus there is no risk of a race-condition.
           revoke_lost_partitions_consumers

@@ -37,6 +37,7 @@ module Karafka
 
         connection.listener.before_fetch_loop
         connection.listener.fetch_loop
+        connection.listener.fetch_loop.received
         connection.listener.fetch_loop.error
       ].freeze
 

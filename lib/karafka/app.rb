@@ -43,6 +43,7 @@ module Karafka
         root
         env
         logger
+        producer
         monitor
       ].each do |delegated|
         define_method(delegated) do

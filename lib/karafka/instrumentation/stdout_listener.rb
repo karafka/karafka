@@ -13,6 +13,20 @@ module Karafka
         fatal
       ].freeze
 
+      # Logs each messages fetching attempt
+      #
+      # @param event [Dry::Events::Event] event details including payload
+      def on_connection_listener_fetch_loop(_event)
+        info 'Receiving new messages from Kafka...'
+      end
+
+      # Logs about messages that we've received from Kafka
+      #
+      # @param event [Dry::Events::Event] event details including payload
+      def on_connection_listener_fetch_loop_received(event)
+        info "Received #{event[:messages_buffer].size} new messages from Kafka"
+      end
+
       # Logs errors that occurred in a listener fetch loop.
       #
       # @param event [Dry::Events::Event] event details including payload

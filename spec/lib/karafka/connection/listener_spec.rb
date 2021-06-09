@@ -6,24 +6,7 @@ RSpec.describe_current do
   let(:subscription_group) { build(:routing_subscription_group, topics: [routing_topic]) }
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:client) { Karafka::Connection::Client.new(subscription_group) }
-  let(:routing_topic) { build(:routing_topic, consumer: working_consumer_class) }
-
-  let(:working_consumer_class) do
-    ClassBuilder.inherit(Karafka::BaseConsumer) do
-      attr_reader :consumed
-
-      def initialize
-        p 'a'
-        super
-        @consumed = false
-      end
-
-      def consume
-        @consumed = true
-        self
-      end
-    end
-  end
+  let(:routing_topic) { build(:routing_topic) }
 
   before do
     Karafka::Processing::WorkersBatch.new(jobs_queue)

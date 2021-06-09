@@ -78,7 +78,7 @@ module Karafka
           consumer.topic = @topic
           consumer.client = @client
           consumer.pause = @pause
-          consumer.producer = ::Karafka::App.config.producer
+          consumer.producer = ::Karafka::App.producer
           consumer
         end
       end
