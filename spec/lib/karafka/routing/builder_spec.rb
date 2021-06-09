@@ -153,24 +153,4 @@ RSpec.describe_current do
       expect(builder.active).to eq [active_group]
     end
   end
-
-  describe '#reload' do
-    let(:consumer_group) do
-      builder.draw do
-        consumer_group :group_name1 do
-          topic :topic_name1 do
-            consumer Class.new(Karafka::BaseConsumer)
-          end
-        end
-      end
-    end
-
-    before do
-      builder.clear
-      consumer_group
-    end
-
-    it { expect { builder.reload }.to change(builder, :to_a) }
-    it { expect { builder.reload }.to(change { builder[0].topics[0].consumer }) }
-  end
 end

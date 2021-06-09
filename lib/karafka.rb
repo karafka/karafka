@@ -4,6 +4,7 @@
   delegate
   English
   rdkafka
+  waterdrop
   json
   thor
   forwardable

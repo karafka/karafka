@@ -12,6 +12,8 @@ module Karafka
     attr_accessor :client
     # @return [Karafka::TimeTrackers::Pause] current topic partition pause
     attr_accessor :pause
+    # @return [Waterdrop::Producer] producer instance
+    attr_accessor :producer
 
     # Executes the default consumer flow.
     #

@@ -51,6 +51,9 @@ module Karafka
       setting :pause_max_timeout, 30_000
       # option [Boolean] should we use exponential backoff
       setting :pause_with_exponential_backoff, true
+      # option [::WaterDrop::Producer, nil]
+      # Unless configured, will be created once Karafka is configured based on user Karafka setup
+      setting :producer, nil
 
       # rdkafka default options
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
@@ -90,6 +93,14 @@ module Karafka
           return true if validation_result.success?
 
           raise Errors::InvalidConfigurationError, validation_result.errors.to_h
+        end
+
+        # Sets up all the components that are based on the user configuration
+        # @note At the moment it is only WaterDrop
+        def configure_components
+          config.producer ||= ::WaterDrop::Producer.new do |producer_config|
+            producer_config.kafka = config.kafka
+          end
         end
       end
     end

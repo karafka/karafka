@@ -14,6 +14,7 @@ module Karafka
       def boot!
         initialize!
         Setup::Config.validate!
+        Setup::Config.configure_components
         initialized!
       end
 
@@ -29,12 +30,6 @@ module Karafka
         consumer_groups
           .active
           .flat_map(&:subscription_groups)
-      end
-
-      # Triggers reload of all cached Karafka app components, so we can use in-process
-      # in-development hot code reloading without Karafka process restart
-      def reload
-        config.internal.routing_builder.reload
       end
 
       Status.instance_methods(false).each do |delegated|

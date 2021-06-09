@@ -60,15 +60,6 @@ module Karafka
         super
       end
 
-      # Redraws all the routes for the in-process code reloading.
-      # @note This won't allow registration of new topics without process restart but will trigger
-      #   cache invalidation so all the classes, etc are re-fetched after code reload
-      def reload
-        draws = @draws.dup
-        clear
-        draws.each { |block| draw(&block) }
-      end
-
       private
 
       # Builds and saves given consumer group

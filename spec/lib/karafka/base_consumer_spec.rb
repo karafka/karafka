@@ -191,6 +191,15 @@ RSpec.describe_current do
 
         consumer.on_revoked
       end
+
+      it 'expect not to run error instrumentation' do
+        Karafka.monitor.subscribe('consumer.revoked.error') do |event|
+          expect(event.payload[:caller]).not_to eq(consumer)
+          expect(event.payload[:error]).not_to be_a(StandardError)
+        end
+
+        consumer.on_revoked
+      end
     end
 
     context 'when something goes wrong on revoked' do
@@ -222,6 +231,15 @@ RSpec.describe_current do
       it 'expect to run proper instrumentation' do
         Karafka.monitor.subscribe('consumer.shutdown') do |event|
           expect(event.payload[:caller]).to eq(consumer)
+        end
+
+        consumer.on_shutdown
+      end
+
+      it 'expect not to run error instrumentation' do
+        Karafka.monitor.subscribe('consumer.shutdown.error') do |event|
+          expect(event.payload[:caller]).not_to eq(consumer)
+          expect(event.payload[:error]).not_to be_a(StandardError)
         end
 
         consumer.on_shutdown

@@ -24,28 +24,6 @@ RSpec.describe_current do
     end
   end
 
-  describe '#reload' do
-    let(:topic) { build(:routing_topic) }
-
-    before do
-      described_class.config.internal.routing_builder.draw do
-        topic :topic do
-          consumer Class.new(Karafka::BaseConsumer)
-        end
-      end
-
-      allow(Karafka::Routing::Router).to receive(:find).and_return(topic)
-    end
-
-    context 'when we trigger reload' do
-      pending
-
-      it 'expect to redraw routes' do
-        expect { app_class.reload }.to change(described_class.config.internal, :routing_builder)
-      end
-    end
-  end
-
   describe 'Karafka delegations' do
     %i[
       root

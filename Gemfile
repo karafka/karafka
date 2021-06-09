@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 
 plugin 'diffend'
 
+gem 'waterdrop', path: '/home/mencio/Software/Github/karafka/waterdrop'
+
 gemspec
 
 group :test do
