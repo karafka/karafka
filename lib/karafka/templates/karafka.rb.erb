@@ -54,7 +54,7 @@ class KarafkaApp < Karafka::App
   # listen to only what you really need for given environment.
   Karafka.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener.new)
   Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
-  Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
+  # Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
 
   # Uncomment that in order to achieve code reload in development mode
   # Be aware, that this might have some side-effects. Please refer to the wiki
