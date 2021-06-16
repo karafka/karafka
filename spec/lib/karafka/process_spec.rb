@@ -17,12 +17,18 @@ RSpec.describe Karafka::Process do
   end
 
   describe '#supervise' do
-    it 'traps signals and yield' do
+    before do
       described_class::HANDLED_SIGNALS.each do |signal|
-        expect(process).to receive(:trap_signal).with(signal)
+        allow(process).to receive(:trap_signal)
       end
+    end
 
+    it 'traps signals and yield' do
       process.supervise
+
+      described_class::HANDLED_SIGNALS.each do |signal|
+        expect(process).to have_received(:trap_signal).with(signal)
+      end
     end
   end
 
