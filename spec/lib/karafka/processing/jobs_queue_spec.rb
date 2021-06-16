@@ -116,12 +116,24 @@ RSpec.describe_current do
       end
     end
 
-    context 'when Karafka is stopping' do
+    context 'when Karafka is stopping and the queue is empty' do
       before { allow(Karafka::App).to receive(:stopping?).and_return(true) }
 
       it 'expect not to wait' do
         queue.wait(job1.group_id)
         expect(Thread).not_to have_received(:pass)
+      end
+    end
+
+    context 'when Karafka is stopping and the queue is not empty' do
+      before do
+        allow(Karafka::App).to receive(:stopping?).and_return(true)
+        queue << job1
+      end
+
+      it 'expect to wait' do
+        queue.wait(job1.group_id)
+        expect(Thread).to have_received(:pass).once
       end
     end
 
