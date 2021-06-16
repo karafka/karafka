@@ -173,9 +173,9 @@ RSpec.describe Karafka::Instrumentation::StdoutListener do
     subject(:trigger) { listener.on_app_initializing(event) }
 
     let(:payload) { {} }
-    let(:message) { "Initializing Karafka server #{::Process.pid}" }
+    let(:message) { "Initializing Karafka framework #{::Process.pid}" }
 
-    it 'expect logger to log server initializing' do
+    it 'expect logger to log framework initializing' do
       # We had to add at least once as it runs in a separate thread and can interact
       # with other specs - this is a cheap workaround
       expect(Karafka.logger).to receive(:info).with(message).at_least(:once)

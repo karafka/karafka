@@ -103,10 +103,10 @@ module Karafka
         info "Responded from #{calling.class} using #{responder} with following data #{data}"
       end
 
-      # Logs info that we're initializing Karafka app
+      # Logs info that we're initializing Karafka framework components
       # @param _event [Dry::Events::Event] event details including payload
       def on_app_initializing(_event)
-        info "Initializing Karafka server #{::Process.pid}"
+        info "Initializing Karafka framework #{::Process.pid}"
       end
 
       # Logs info that we're running Karafka app

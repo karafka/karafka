@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- #689 - Update the stdout initialization message for framework initialization
+
 ## 1.4.4 (2021-04-19)
 - Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
 - Remove rake dependency
