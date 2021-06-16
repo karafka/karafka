@@ -20,7 +20,6 @@ module Karafka
       # @param _args Any arguments that we don't care about but that are needed in order to
       #   make this logger compatible with the default Ruby one
       def initialize(*_args)
-        ensure_dir_exists
         super(target)
         self.level = ENV_MAP[Karafka.env] || ENV_MAP['default']
       end
@@ -33,14 +32,7 @@ module Karafka
       def target
         Karafka::Helpers::MultiDelegator
           .delegate(:write, :close)
-          .to($stdout, file)
-      end
-
-      # Makes sure the log directory exists as long as we can write to it
-      def ensure_dir_exists
-        FileUtils.mkdir_p(File.dirname(log_path))
-      rescue Errno::EACCES, Errno::EROFS
-        nil
+          .to(*[$stdout, file].compact)
       end
 
       # @return [Pathname] Path to a file to which we should log
@@ -51,7 +43,11 @@ module Karafka
       # @return [File] file to which we want to write our logs
       # @note File is being opened in append mode ('a')
       def file
+        FileUtils.mkdir_p(File.dirname(log_path))
+
         @file ||= File.open(log_path, 'a')
+      rescue Errno::EACCES, Errno::EROFS
+        nil
       end
     end
   end
