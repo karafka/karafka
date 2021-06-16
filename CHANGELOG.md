@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 1.4.5 (2021-06-16)
 - Fixup logger checks for non-writeable logfile (ojab)
 - #689 - Update the stdout initialization message for framework initialization
 
