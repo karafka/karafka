@@ -31,7 +31,7 @@ RSpec.describe_current do
       end
 
       it 'defines a proper action for sigint' do
-        expect(described_class).to receive(:stop_supervised)
+        expect(described_class).to receive(:stop)
         expect(process).to receive(:on_sigint).and_yield
       end
     end
@@ -44,7 +44,7 @@ RSpec.describe_current do
       end
 
       it 'defines a proper action for sigquit' do
-        expect(described_class).to receive(:stop_supervised)
+        expect(described_class).to receive(:stop)
         expect(process).to receive(:on_sigquit).and_yield
       end
     end
@@ -57,19 +57,19 @@ RSpec.describe_current do
       end
 
       it 'defines a proper action for sigterm' do
-        expect(described_class).to receive(:stop_supervised)
+        expect(described_class).to receive(:stop)
         expect(process).to receive(:on_sigterm).and_yield
       end
     end
   end
 
-  describe '#run_supervised' do
+  describe '#start' do
     before do
       allow(process).to receive(:supervise)
       allow(Karafka::App).to receive(:run!)
       allow(runner).to receive(:call)
 
-      server_class.send(:run_supervised)
+      server_class.start
     end
 
     it 'expect to supervise and run' do
@@ -79,11 +79,11 @@ RSpec.describe_current do
     end
   end
 
-  describe '#stop_supervised' do
+  describe '#stop' do
     before { Karafka::App.config.shutdown_timeout = timeout_ms }
 
     after do
-      server_class.send(:stop_supervised)
+      server_class.stop
       described_class.consumer_threads.clear
       # After shutdown we need to reinitialize the app for other specs
       Karafka::App.initialize!
@@ -101,7 +101,7 @@ RSpec.describe_current do
 
       context 'when there are no active threads (all shutdown ok)' do
         before do
-          server_class.send(:stop_supervised)
+          server_class.stop
           described_class.consumer_threads.clear
         end
 
@@ -117,7 +117,7 @@ RSpec.describe_current do
 
         before do
           described_class.consumer_threads << active_thread
-          server_class.send(:stop_supervised)
+          server_class.stop
           described_class.consumer_threads.clear
         end
 

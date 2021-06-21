@@ -24,10 +24,10 @@ module Karafka
 
       # Method which runs app
       def run
-        process.on_sigint { stop_supervised }
-        process.on_sigquit { stop_supervised }
-        process.on_sigterm { stop_supervised }
-        run_supervised
+        process.on_sigint { stop }
+        process.on_sigquit { stop }
+        process.on_sigterm { stop }
+        start
       end
 
       # @return [Array<String>] array with names of consumer groups that should be consumed in a
@@ -37,17 +37,10 @@ module Karafka
         @consumer_groups ||= Karafka::App.consumer_groups.map(&:name).freeze
       end
 
-      private
-
-      # @return [Karafka::Process] process wrapper instance used to catch system signal calls
-      def process
-        Karafka::App.config.internal.process
-      end
-
       # Starts Karafka with a supervision
       # @note We don't need to sleep because Karafka::Fetcher is locking and waiting to
       # finish loop (and it won't happen until we explicitly want to stop)
-      def run_supervised
+      def start
         process.supervise
         Karafka::App.run!
         Karafka::Runner.new.call
@@ -55,7 +48,7 @@ module Karafka
 
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)
       # If consumers won't stop in a given time frame, it will force them to exit
-      def stop_supervised
+      def stop
         Karafka::App.stop!
 
         timeout = Thread.new { Karafka::App.config.shutdown_timeout }.join.value
@@ -80,6 +73,13 @@ module Karafka
 
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit! FORCEFUL_EXIT_CODE
+      end
+
+      private
+
+      # @return [Karafka::Process] process wrapper instance used to catch system signal calls
+      def process
+        Karafka::App.config.internal.process
       end
     end
   end
