@@ -12,6 +12,10 @@ module Karafka
     #   do nothing. So we don't have to worry about injecting our internal settings
     #   into the client and breaking stuff
     module ApiAdapter
+      # Settings that are not accepted by `ruby-kafka` for consumer, but allowed for producer
+      PRODUCER_ONLY_SETTINGS = %i[idempotent transactional transactional_timeout].freeze
+      private_constant :PRODUCER_ONLY_SETTINGS
+
       class << self
         # Builds all the configuration settings for Kafka.new method
         # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
@@ -41,6 +45,7 @@ module Karafka
           end
 
           settings_hash = sanitize(settings)
+          PRODUCER_ONLY_SETTINGS.each { |x| settings_hash.delete(x) }
 
           # Normalization for the way Kafka::Client accepts arguments from  0.5.3
           [settings_hash.delete(:seed_brokers), settings_hash]

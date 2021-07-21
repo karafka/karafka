@@ -805,4 +805,46 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
       it { expect(check).to be_success }
     end
   end
+
+  context 'when we validate idempotent' do
+    context 'when it is not a bool' do
+      before { config[:idempotent] = 2 }
+
+      it { expect(check).not_to be_success }
+    end
+  end
+
+  context 'when we validate transactional' do
+    context 'when it is not a bool' do
+      before { config[:transactional] = 2 }
+
+      it { expect(check).not_to be_success }
+    end
+  end
+
+  context 'when we validate transactional_timeout' do
+    context 'when transactional_timeout is nil' do
+      before { config[:transactional_timeout] = nil }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when min_bytes is not integer' do
+      before { config[:transactional_timeout] = 's' }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when min_bytes is less than 0' do
+      before { config[:transactional_timeout] = -1 }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when min_bytes is a float' do
+      before { config[:transactional_timeout] = rand(100) + 0.1 }
+
+      it { expect(check).to be_success }
+    end
+  end
 end

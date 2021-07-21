@@ -173,6 +173,12 @@ module Karafka
         # @param sasl_oauth_token_provider [Object, nil] OAuthBearer Token Provider instance that
         #   implements method token.
         setting :sasl_oauth_token_provider, nil
+        # option [Boolean]
+        setting :idempotent, false
+        # option [Boolean]
+        setting :transactional, false
+        # option [Integer]
+        setting :transactional_timeout, 60
       end
 
       # Namespace for internal settings that should not be modified

@@ -67,6 +67,10 @@ module Karafka
         # It's not with other encryptions as it has some more rules
         optional(:sasl_scram_mechanism)
           .maybe(:str?, included_in?: SASL_SCRAM_MECHANISMS)
+
+        optional(:idempotent).maybe(:bool?)
+        optional(:transactional).maybe(:bool?)
+        optional(:transactional_timeout).filled { (int? | float?) & gteq?(0) }
       end
 
       # Uri rule to check if uri is in a Karafka acceptable format
