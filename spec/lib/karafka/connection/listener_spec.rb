@@ -7,9 +7,10 @@ RSpec.describe_current do
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:client) { Karafka::Connection::Client.new(subscription_group) }
   let(:routing_topic) { build(:routing_topic) }
+  let(:workers_batch) { Karafka::Processing::WorkersBatch.new(jobs_queue) }
 
   before do
-    Karafka::Processing::WorkersBatch.new(jobs_queue)
+    workers_batch
 
     allow(client.class).to receive(:new).and_return(client)
     allow(Karafka::App).to receive(:stopping?).and_return(false, true)
@@ -32,6 +33,52 @@ RSpec.describe_current do
 
     it 'expect client to commit offsets' do
       expect(client).to have_received(:commit_offsets).exactly(3).times
+    end
+  end
+
+  context 'when we have lost partitions during rebalance' do
+    let(:revoked_partitions) { { routing_topic.name => [2] } }
+    # We do not create workers in this spec as we want to check the content of the queue afterwards
+    # and with the workers running, it could be consumed before we would have a chance to check it
+    let(:workers_batch) { [] }
+
+    before do
+      allow(client)
+        .to receive(:commit_offsets)
+
+      allow(client.rebalance_manager)
+        .to receive(:revoked_partitions)
+        .and_return(revoked_partitions)
+
+      allow(jobs_queue).to receive(:wait)
+
+      listener.call
+    end
+
+    it { expect(jobs_queue.size).to eq(1) }
+    it { expect(jobs_queue.pop).to be_a(Karafka::Processing::Jobs::Revoked) }
+    it { expect(client).to have_received(:commit_offsets).exactly(3).times }
+  end
+
+  context 'when we have lost partitions during rebalance and actions need to be taken' do
+    let(:revoked_partitions) { { routing_topic.name => [2] } }
+
+    before do
+      allow(client)
+        .to receive(:commit_offsets)
+
+      allow(client.rebalance_manager)
+        .to receive(:revoked_partitions)
+        .and_return(revoked_partitions)
+
+      listener.call
+
+      # Giving enough time to consume the job
+      sleep(0.5)
+    end
+
+    it 'expect the revoke job to be consumed meanwhile' do
+      expect(jobs_queue.size).to eq(0)
     end
   end
 

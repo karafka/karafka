@@ -52,6 +52,9 @@ module Karafka
       #
       # @note Clearing the consumer will ensure, that if we get the partition back, it will be
       #   handled with a consumer with a clean state.
+      #
+      # @note We run it only when consumer was present, because presence indicates, that at least
+      #   a single message has been consumed.
       def revoked
         consumer.on_revoked if @consumer
         @consumer = nil
