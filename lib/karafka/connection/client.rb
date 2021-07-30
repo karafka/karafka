@@ -106,6 +106,14 @@ module Karafka
         commit_offsets(async: false)
       end
 
+      # Seek to a particular message. The next poll on the topic/partition will return the
+      # message at the given offset.
+      #
+      # @param message [Messages::Message, PauseMessage] message to which we want to seek to
+      def seek(message)
+        @kafka.seek(message)
+      end
+
       # Pauses given partition and moves back to last successful offset processed.
       #
       # @param topic [String] topic name
@@ -127,7 +135,7 @@ module Karafka
 
         pause_msg = PauseMessage.new(topic, partition, offset)
 
-        @kafka.seek(pause_msg)
+        seek(pause_msg)
       ensure
         @mutex.unlock
       end
