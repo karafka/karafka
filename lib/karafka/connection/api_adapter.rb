@@ -84,17 +84,16 @@ module Karafka
         # @param topic [String] topic that we want to pause
         # @param partition [Integer] number partition that we want to pause
         # @param consumer_group [Karafka::Routing::ConsumerGroup] consumer group details
-        # @return [Array] array with all the details required to pause kafka consumer
+        # @return [Hash] hash with all the details required to pause kafka consumer
         def pause(topic, partition, consumer_group)
-          [
-            Karafka::App.config.topic_mapper.outgoing(topic),
-            partition,
-            {
+          {
+            args: [Karafka::App.config.topic_mapper.outgoing(topic), partition],
+            kwargs: {
               timeout: consumer_group.pause_timeout,
               max_timeout: consumer_group.pause_max_timeout,
               exponential_backoff: consumer_group.pause_exponential_backoff
             }
-          ]
+          }
         end
 
         # Remaps topic details taking the topic mapper feature into consideration.

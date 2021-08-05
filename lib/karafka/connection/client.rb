@@ -64,7 +64,8 @@ module Karafka
       # @param topic [String] topic that we want to pause
       # @param partition [Integer] number partition that we want to pause
       def pause(topic, partition)
-        kafka_consumer.pause(*ApiAdapter.pause(topic, partition, consumer_group))
+        args, kwargs = ApiAdapter.pause(topic, partition, consumer_group).values_at(:args, :kwargs)
+        kafka_consumer.pause(*args, **kwargs)
       end
 
       # Marks given message as consumed
