@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.4.6 (2021-08-05)
+- #700 Fix Ruby 3 compatibility issues in Connection::Client#pause (MmKolodziej)
+
 ## 1.4.5 (2021-06-16)
 - Fixup logger checks for non-writeable logfile (ojab)
 - #689 - Update the stdout initialization message for framework initialization
