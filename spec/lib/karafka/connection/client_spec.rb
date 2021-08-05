@@ -54,16 +54,13 @@ RSpec.describe Karafka::Connection::Client do
     let(:pause_timeout) { rand }
     let(:pause_max_timeout) { rand }
     let(:pause_exponential_backoff) { false }
-    let(:pause_args) do
-      [
-        topic,
-        partition,
-        {
-          timeout: pause_timeout,
-          max_timeout: pause_max_timeout,
-          exponential_backoff: pause_exponential_backoff
-        }
-      ]
+    let(:pause_args) { [topic, partition] }
+    let(:pause_kwargs) do
+      {
+        timeout: pause_timeout,
+        max_timeout: pause_max_timeout,
+        exponential_backoff: pause_exponential_backoff
+      }
     end
 
     before do
@@ -83,7 +80,7 @@ RSpec.describe Karafka::Connection::Client do
       let(:error) { Karafka::Errors::InvalidPauseTimeout }
 
       it 'expect to raise an exception' do
-        expect(kafka_consumer).to receive(:pause).with(*pause_args)
+        expect(kafka_consumer).to receive(:pause).with(*pause_args, **pause_kwargs)
         expect(client.pause(topic, partition)).to eq true
       end
     end
@@ -93,7 +90,7 @@ RSpec.describe Karafka::Connection::Client do
       let(:error) { Karafka::Errors::InvalidPauseTimeout }
 
       it 'expect to raise an exception' do
-        expect(kafka_consumer).to receive(:pause).with(*pause_args)
+        expect(kafka_consumer).to receive(:pause).with(*pause_args, **pause_kwargs)
         expect(client.pause(topic, partition)).to eq true
       end
     end
@@ -102,7 +99,7 @@ RSpec.describe Karafka::Connection::Client do
       let(:pause_timeout) { rand(1..100) }
 
       it 'expect to pause consumer_group' do
-        expect(kafka_consumer).to receive(:pause).with(*pause_args)
+        expect(kafka_consumer).to receive(:pause).with(*pause_args, **pause_kwargs)
         expect(client.pause(topic, partition)).to eq true
       end
     end
@@ -119,24 +116,14 @@ RSpec.describe Karafka::Connection::Client do
 
         klass.new
       end
-      let(:pause_args) do
-        [
-          r_topic,
-          partition,
-          {
-            timeout: pause_timeout,
-            max_timeout: pause_max_timeout,
-            exponential_backoff: pause_exponential_backoff
-          }
-        ]
-      end
+      let(:pause_args) { [r_topic, partition] }
 
       before do
         allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper)
       end
 
       it 'expect to pause consumer_group for a remapped topic' do
-        expect(kafka_consumer).to receive(:pause).with(*pause_args)
+        expect(kafka_consumer).to receive(:pause).with(*pause_args, **pause_kwargs)
         expect(client.pause(topic, partition)).to eq true
       end
     end

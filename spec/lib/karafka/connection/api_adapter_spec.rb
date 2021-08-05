@@ -131,22 +131,22 @@ RSpec.describe Karafka::Connection::ApiAdapter do
     let(:partition) { 0 }
 
     it 'expect not to have anything else except timeout in the settings hash' do
-      expect(config.last.keys.sort).to eq %i[timeout max_timeout exponential_backoff].sort
+      expect(config[:kwargs].keys.sort).to eq %i[timeout max_timeout exponential_backoff].sort
     end
 
     it 'expect to have topic name as a first argument' do
-      expect(config[0]).to eq topic
+      expect(config.dig(:args, 0)).to eq topic
     end
 
     it 'expect to have partition as a second argument' do
-      expect(config[1]).to eq partition
+      expect(config.dig(:args, 1)).to eq partition
     end
 
     context 'when we use custom mapper for topic' do
       before { allow(Karafka::App.config).to receive(:topic_mapper).and_return(custom_mapper) }
 
       it 'expect to use it before passing data further to kafka' do
-        expect(config[0]).to eq "remapped-#{topic}"
+        expect(config.dig(:args, 0)).to eq "remapped-#{topic}"
       end
     end
   end
