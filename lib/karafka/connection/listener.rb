@@ -55,6 +55,8 @@ module Karafka
           # one batch behind.
           messages_buffer = @client.batch_poll
 
+          p messages_buffer
+
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop.received',
             caller: self,

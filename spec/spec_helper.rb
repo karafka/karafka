@@ -28,7 +28,7 @@ SimpleCov.start do
   merge_timeout 600
 end
 
-SimpleCov.minimum_coverage(93)
+SimpleCov.minimum_coverage(94)
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
   .sort
@@ -56,7 +56,8 @@ module Karafka
   # Configuration for test env
   class App
     setup do |config|
-      config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+      config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092',
+      'auto.offset.reset' => 'earliest' }
       config.client_id = rand.to_s
       config.pause_timeout = 1
       config.pause_max_timeout = 1
