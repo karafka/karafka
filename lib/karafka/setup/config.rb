@@ -97,6 +97,9 @@ module Karafka
         setting :max_bytes_per_partition, 1_048_576
         #  whether to consume messages starting at the beginning or to just consume new messages
         setting :start_from_beginning, true
+        # option resolve_seed_brokers [Boolean] whether to resolve each hostname of the seed
+        # brokers
+        setting :resolve_seed_brokers, false
         # option min_bytes [Integer] the minimum number of bytes to read before
         #   returning messages from the server; if `max_wait_time` is reached, this
         #   is ignored.
