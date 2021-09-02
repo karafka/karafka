@@ -244,6 +244,8 @@ module Karafka
           reset
         when :rebalance_in_progress # -27
           reset
+        when :not_coordinator
+          reset # 16
         end
 
         time_poll.checkpoint

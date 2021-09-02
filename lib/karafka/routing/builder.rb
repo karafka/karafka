@@ -47,6 +47,14 @@ module Karafka
         end
       end
 
+      # Clears the routes and re-draws them. Useful in integration specs.
+      # @param block [Proc] routes
+      def re_draw(&block)
+        clear
+
+        draw(&block)
+      end
+
       # @return [Array<Karafka::Routing::ConsumerGroup>] only active consumer groups that
       #   we want to use. Since Karafka supports multi-process setup, we need to be able
       #   to pick only those consumer groups that should be active in our given process context
