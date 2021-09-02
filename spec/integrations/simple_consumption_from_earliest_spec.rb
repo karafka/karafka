@@ -19,6 +19,8 @@ RSpec.describe(
   before do
     topic_consumer = consumer_class
 
+    Karafka::Server.consumer_groups = nil
+
     Karafka::App.consumer_groups.re_draw do
       consumer_group DataCollector.topic do
         topic DataCollector.topic do

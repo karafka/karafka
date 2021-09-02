@@ -33,7 +33,7 @@ module Karafka
       # @return [Array<String>] array with names of consumer groups that should be consumed in a
       #   current server context
       def consumer_groups
-        # If not specified, a server will listed on all the topics
+        # If not specified, a server will listen on all the topics
         @consumer_groups ||= Karafka::App.consumer_groups.map(&:name).freeze
       end
 
