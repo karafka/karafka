@@ -38,7 +38,7 @@ class DataCollector
 
   # Creates a collector
   def initialize
-    @topics = Array.new(100) { |i| "t-#{i}-#{Time.now.to_f}" }
+    @topics = Concurrent::Array.new(100) { |i| SecureRandom.uuid }
     @consumer_groups = @topics
     @data = Concurrent::Hash.new { |hash, key| hash[key] = Concurrent::Array.new }
   end

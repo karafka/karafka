@@ -21,7 +21,7 @@ require root_path.join('spec/integrations_helper.rb')
 
 # How many child processes with integration specs do we want to run in parallel
 # We can run many in parallel as they do a lot of IO, thus the CPU utilization is not a lot
-CONCURRENCY = Etc.nprocessors * 2
+CONCURRENCY = Etc.nprocessors
 
 # Simple hash to keep track of active integration forks running with info on which test scenario
 # is running

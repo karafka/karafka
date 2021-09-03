@@ -8,6 +8,7 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..'))
 
 require 'singleton'
+require 'securerandom'
 require 'test/unit'
 require 'byebug'
 require 'lib/karafka'
@@ -17,14 +18,17 @@ include Test::Unit::Assertions
 
 # Test setup for the framework
 def setup_karafka
+  test_name = caller_locations.first.path.split('/').last
+
   Karafka::App.setup do |config|
     # Use some decent defaults
     config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092' }
-    config.client_id = rand.to_s
+    config.client_id = test_name
     config.pause_timeout = 1
     config.pause_max_timeout = 1
     config.pause_with_exponential_backoff = false
     config.max_wait_time = 500
+    config.shutdown_timeout = 1_000
 
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?
@@ -40,9 +44,9 @@ end
 
 # Waits until block yields true
 def wait_until
-  Thread.pass until yield
+  sleep(0.01) until yield
 
-  Karafka::App.stop!
+  Karafka::Server.stop
 end
 
 # Starts Karafka and waits until the block evaluates to true. Then it stops Karafka.

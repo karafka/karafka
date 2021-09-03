@@ -162,4 +162,16 @@ RSpec.describe_current do
       expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
     end
   end
+
+  describe '#on_worker_process_error' do
+    subject(:trigger) { listener.on_worker_process_error(event) }
+
+    let(:payload) { { caller: caller, error: error } }
+    let(:error) { Exception.new }
+    let(:message) { "Worker processing failed due to an error: #{error}" }
+
+    it 'expect logger to log proper message' do
+      expect(Karafka.logger).to have_received(:fatal).with(message)
+    end
+  end
 end

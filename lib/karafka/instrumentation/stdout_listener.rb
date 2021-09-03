@@ -106,6 +106,14 @@ module Karafka
         Thread.new { error 'Forceful Karafka server stop' }
       end
 
+      # Logs that there has been an exception in the worker
+      #
+      # @param event [Dry::Events::Event] event details including payload
+      def on_worker_process_error(event)
+        fatal "Worker processing failed due to an error: #{event[:error]}"
+        fatal (event[:error].backtrace || []).join("\n")
+      end
+
       USED_LOG_LEVELS.each do |log_level|
         define_method log_level do |*args|
           Karafka.logger.send(log_level, *args)

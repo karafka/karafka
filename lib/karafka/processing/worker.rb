@@ -9,7 +9,12 @@ module Karafka
       # @return [Worker]
       def initialize(jobs_queue)
         @jobs_queue = jobs_queue
-        @thread = Thread.new { loop { break unless process } }
+        @thread = Thread.new do
+          # If anything goes wrong in this worker thread, it means something went really wrong and
+          # we should terminate.
+          @thread.abort_on_exception = true
+          loop { break unless process }
+        end
       end
 
       # Waits for the underlying thread to stop.
@@ -34,6 +39,12 @@ module Karafka
         else
           false
         end
+      # We signal critical exceptions and let the worker fail.
+      # Critical means critical and should be handled by the framework users
+      rescue Exception => e
+        Karafka.monitor.instrument('worker.process.error', caller: self, error: e)
+
+        raise e
       ensure
         # job can be nil when the queue is being closed
         @jobs_queue.complete(job) if job
