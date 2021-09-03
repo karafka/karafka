@@ -3,9 +3,10 @@
 RSpec.describe_current do
   let(:routing_topic) { build(:routing_topic) }
   let(:fetched_message) { build(:kafka_fetched_message) }
+  let(:received_at) { Time.now }
 
   describe '#call' do
-    subject(:result) { described_class.call(fetched_message, routing_topic) }
+    subject(:result) { described_class.call(fetched_message, routing_topic, received_at) }
 
     it { is_expected.to be_a(Karafka::Messages::Message) }
     it { expect(result.raw_payload).to eq fetched_message.payload }
@@ -18,6 +19,7 @@ RSpec.describe_current do
     it { expect(result.key).to eq fetched_message.key }
     it { expect(result.metadata.timestamp).to eq fetched_message.timestamp }
     it { expect(result.timestamp).to eq fetched_message.timestamp }
+    it { expect(result.received_at).to eq received_at }
 
     context 'when message does not have headers' do
       it { expect(result.metadata.headers).to eq({}) }

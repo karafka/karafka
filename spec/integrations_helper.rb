@@ -9,6 +9,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..'))
 
 require 'singleton'
 require 'test/unit'
+require 'byebug'
 require 'lib/karafka'
 require 'spec/support/data_collector'
 
@@ -35,4 +36,30 @@ def setup_karafka
   Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
 
   Karafka::App.boot!
+end
+
+def wait_until(&block)
+  Thread.pass until block.call
+
+  Karafka::App.stop!
+end
+
+# Starts Karafka and waits unlti the block evaluates to true. Then it stops Karafka.
+def start_karafka_and_wait_until(&block)
+  Thread.new { wait_until(&block) }
+
+  Karafka::Server.run
+end
+
+# Sends data to Kafka in a sync way
+# @param topic [String] topic name
+# @param payload [String] data we want to send
+# @param details [Hash] other details
+def produce(topic, payload, details = {})
+  Karafka::App.producer.produce_async(
+    **details.merge(
+      topic: topic,
+      payload: payload
+    )
+  )
 end

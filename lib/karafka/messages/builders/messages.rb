@@ -15,7 +15,11 @@ module Karafka
           # @return [Karafka::Messages::Messages] messages batch object
           def call(kafka_messages, topic, received_at)
             messages_array = kafka_messages.map do |message|
-              Karafka::Messages::Builders::Message.call(message, topic)
+              Karafka::Messages::Builders::Message.call(
+                message,
+                topic,
+                received_at
+              )
             end
 
             metadata = BatchMetadata.call(
@@ -24,7 +28,10 @@ module Karafka
               received_at
             ).freeze
 
-            Karafka::Messages::Messages.new(messages_array, metadata).freeze
+            Karafka::Messages::Messages.new(
+              messages_array,
+              metadata
+            ).freeze
           end
         end
       end

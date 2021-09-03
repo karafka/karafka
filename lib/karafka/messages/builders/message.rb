@@ -9,8 +9,9 @@ module Karafka
         class << self
           # @param kafka_message [Rdkafka::Consumer::Message] raw fetched message
           # @param topic [Karafka::Routing::Topic] topic for which this message was fetched
+          # @param received_at [Time] moment when we've received the message
           # @return [Karafka::Messages::Message] message object with payload and metadata
-          def call(kafka_message, topic)
+          def call(kafka_message, topic, received_at)
             metadata = Karafka::Messages::Metadata.new(
               timestamp: kafka_message.timestamp,
               headers: kafka_message.headers,
@@ -18,7 +19,8 @@ module Karafka
               offset: kafka_message.offset,
               deserializer: topic.deserializer,
               partition: kafka_message.partition,
-              topic: topic.name
+              topic: topic.name,
+              received_at: received_at
             ).freeze
 
             Karafka::Messages::Message.new(

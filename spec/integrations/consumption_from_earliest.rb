@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Karafka should be able to easily consume all the messages from earliest (default)
+
 setup_karafka
 
 numbers = Array.new(100) { rand.to_s }
@@ -13,26 +15,18 @@ class Consumer < Karafka::BaseConsumer
 end
 
 Karafka::App.consumer_groups.draw do
-  consumer_group DataCollector.topic do
+  consumer_group DataCollector.consumer_group do
     topic DataCollector.topic do
       consumer Consumer
     end
   end
 end
 
-Thread.new do
-  sleep(0.1) while DataCollector.data[0].size < 100
-  Karafka::App.stop!
-end
+numbers.each { |data| produce(DataCollector.topic, data) }
 
-numbers.each do |number|
-  Karafka::App.producer.produce_async(
-    topic: DataCollector.topic,
-    payload: number
-  )
+start_karafka_and_wait_until do
+  DataCollector.data[0].size >= 100
 end
-
-Karafka::Server.run
 
 assert_equal DataCollector.data[0], numbers
 assert_equal DataCollector.data.size, 1

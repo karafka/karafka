@@ -7,7 +7,7 @@
 class DataCollector
   include Singleton
 
-  attr_reader :topics, :data
+  attr_reader :topics, :consumer_groups, :data
 
   class << self
     # @return [String] topic we want to use in the context of the current spec
@@ -15,20 +15,37 @@ class DataCollector
       instance.topic
     end
 
+    def topics
+      instance.topics
+    end
+
     # @return [ConcurrentHash] structure for aggregating data
     def data
       instance.data
+    end
+
+    def consumer_group
+      instance.consumer_group
+    end
+
+    def consumer_groups
+      instance.consumer_groups
     end
   end
 
   # Creates a collector
   def initialize
     @topics = Array.new(100) { |i| "t-#{i}-#{Time.now.to_f}" }
+    @consumer_groups = @topics
     @data = Concurrent::Hash.new { |hash, key| hash[key] = Concurrent::Array.new }
   end
 
   # @return [String] first topic name
   def topic
+    topics.first
+  end
+
+  def consumer_group
     topics.first
   end
 end
