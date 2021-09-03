@@ -2,6 +2,8 @@
 
 # Runner to run integration specs in parallel
 
+require 'etc'
+
 # Raised from the parent process if any of the integration tests fails
 IntegrationTestError = Class.new(StandardError)
 
@@ -18,7 +20,8 @@ root_path = Pathname.new(root_path)
 require root_path.join('spec/integrations_helper.rb')
 
 # How many child processes with integration specs do we want to run in parallel
-CONCURRENCY = 3
+# We can run many in parallel as they do a lot of IO, thus the CPU utilization is not a lot
+CONCURRENCY = Etc.nprocessors * 2
 
 # Simple hash to keep track of active integration forks running with info on which test scenario
 # is running
@@ -32,15 +35,18 @@ exits = {}
 # @param pids [Hash] active forks pids
 # @param exits [Hash] finished forks exit codes
 def wait_and_track(pids, exits)
-  integration_test = pids.delete Process.wait
+  pid, status = Process.wait2
 
-  exits[integration_test] = $CHILD_STATUS.exitstatus
+  integration_test = pids.delete pid
+
+  exits[integration_test] = status.exitstatus
 end
 
 # Run particular spec or all
 specs = ARGV[0] || 'spec/integrations/**/*.rb'
 
-Dir[root_path.join(specs)].each do |integration_test|
+# Randomize order
+Dir[root_path.join(specs)].shuffle.each do |integration_test|
     pid = fork do
       require integration_test
     end
@@ -51,7 +57,6 @@ Dir[root_path.join(specs)].each do |integration_test|
 end
 
 wait_and_track(pids, exits) while !pids.empty?
-
 
 puts
 

@@ -14,7 +14,7 @@ class Consumer < Karafka::BaseConsumer
     messages.each { |message| DataCollector.data[0] << message.raw_payload }
     DataCollector.data[1] << object_id
 
-    raise StandardError if @count == 2
+    raise StandardError if @count == 1
   end
 end
 
