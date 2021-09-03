@@ -11,7 +11,8 @@ class Consumer < Karafka::BaseConsumer
     # This will simulate, that the thread is busy in a bit random way, so more worker threads can
     # be occupied
     sleep(0.1)
-    messages.each do |message|
+
+    messages.each do
       DataCollector.data[topic.name] << Thread.current.object_id
     end
   end

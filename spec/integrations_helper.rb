@@ -39,13 +39,13 @@ def setup_karafka
 end
 
 # Waits until block yields true
-def wait_until(&block)
-  Thread.pass until block.call
+def wait_until
+  Thread.pass until yield
 
   Karafka::App.stop!
 end
 
-# Starts Karafka and waits unlti the block evaluates to true. Then it stops Karafka.
+# Starts Karafka and waits until the block evaluates to true. Then it stops Karafka.
 def start_karafka_and_wait_until(&block)
   Thread.new { wait_until(&block) }
 
