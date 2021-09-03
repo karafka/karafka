@@ -7,7 +7,7 @@
 class DataCollector
   include Singleton
 
-  attr_reader :topic, :topics, :data
+  attr_reader :topics, :data
 
   class << self
     # @return [String] topic we want to use in the context of the current spec
@@ -19,11 +19,6 @@ class DataCollector
     def data
       instance.data
     end
-
-    # Clears the collector
-    def reset
-      instance.reset
-    end
   end
 
   # Creates a collector
@@ -32,13 +27,8 @@ class DataCollector
     @data = Concurrent::Hash.new { |hash, key| hash[key] = Concurrent::Array.new }
   end
 
+  # @return [String] first topic name
   def topic
     topics.first
-  end
-
-  # Clears the collector
-  def reset
-    @topics = Array.new(100) { |i| "t-#{i}-#{Time.now.to_f}" }
-    @data = Concurrent::Hash.clear
   end
 end
