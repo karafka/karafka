@@ -2,9 +2,25 @@
 
 # Karafka should not recover from critical errors that happened in the workers while consuming
 # jobs. Those should be handled by the users and the worker with the process should abort.
+#
+# @note This test is a bit special as due to how Karafka operates, when unexpected issue happens
+#   in particular moments, it can bubble up and exit 2
+
+root_path = File.expand_path(
+  File.join(
+    File.dirname(__FILE__),
+    '../../'
+  )
+)
+
+root_path = Pathname.new(root_path)
+
+# We require it here, so when forked, all those things are already in the child processes
+require root_path.join('spec/integrations_helper.rb')
 
 setup_karafka do |config|
   config.concurrency = 1
+  config.shutdown_timeout = 1_000
 end
 
 class Listener

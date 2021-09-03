@@ -28,6 +28,11 @@ module Karafka
         process.on_sigquit { stop }
         process.on_sigterm { stop }
         start
+      # Try its best to shutdown underlying components before re-raising
+      rescue Exception => e
+        stop
+
+        raise e
       end
 
       # @return [Array<String>] array with names of consumer groups that should be consumed in a
@@ -68,11 +73,15 @@ module Karafka
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
         Thread.new { Karafka.monitor.instrument('app.stopping.error', error: e) }.join
+
         # We're done waiting, lets kill them!
         consumer_threads.each(&:terminate)
 
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit! FORCEFUL_EXIT_CODE
+      ensure
+        # Always try to close the producer, without it we may have a segmentation fault
+        Karafka::App.producer.close
       end
 
       private
