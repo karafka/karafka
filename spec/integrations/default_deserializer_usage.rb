@@ -28,5 +28,5 @@ start_karafka_and_wait_until do
   DataCollector.data[0].size >= 100
 end
 
-assert_equal DataCollector.data[0], jsons
-assert_equal DataCollector.data.size, 1
+assert_equal jsons, DataCollector.data[0]
+assert_equal 1, DataCollector.data.size

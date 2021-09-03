@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-# Karafka should be able to consume two topics with same consumer group
+# Karafka should be able to consume multiple topics with one worker
 
-setup_karafka
+setup_karafka do |config|
+  config.concurrency = 1
+end
 
 topic1 = DataCollector.topics[0]
 topic2 = DataCollector.topics[1]
-topic1_data = Array.new(10) { { rand.to_s => rand.to_s } }
-topic2_data = Array.new(10) { { rand.to_s => rand.to_s } }
 
 class Consumer1 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[topic.name] << message.payload
+      DataCollector.data[Thread.current.object_id] << true
     end
   end
 end
@@ -20,7 +20,7 @@ end
 class Consumer2 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[topic.name] << message.payload
+      DataCollector.data[Thread.current.object_id] << true
     end
   end
 end
@@ -37,13 +37,12 @@ Karafka::App.consumer_groups.draw do
   end
 end
 
-topic1_data.each { |data| produce(topic1, data.to_json) }
-topic2_data.each { |data| produce(topic2, data.to_json) }
+10.times { produce(topic1, rand.to_s) }
+10.times { produce(topic2, rand.to_s) }
 
 start_karafka_and_wait_until do
   DataCollector.data.values.flatten.size >= 20
 end
 
-assert_equal topic1_data, DataCollector.data[topic1]
-assert_equal topic2_data, DataCollector.data[topic2]
-assert_equal 2, DataCollector.data.size
+assert_equal 1, DataCollector.data.keys.uniq.size
+assert_equal 20, DataCollector.data.values.flatten.size

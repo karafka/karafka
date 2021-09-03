@@ -37,7 +37,6 @@ end
 
 keys = DataCollector.data.keys
 
-assert_equal DataCollector.data[keys[0]], jsons
-assert_equal DataCollector.data[keys[1]], jsons
-assert_equal DataCollector.data.size, 2
-assert_equal keys.sort, keys.sort
+assert_equal jsons, DataCollector.data[keys[0]]
+assert_equal jsons, DataCollector.data[keys[1]]
+assert_equal 2, DataCollector.data.size

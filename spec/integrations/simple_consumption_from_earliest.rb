@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Karafka should be able to consume all the data from beginning
+
 setup_karafka
 
 numbers = Array.new(100) { rand.to_s }
@@ -34,5 +36,5 @@ end
 
 Karafka::Server.run
 
-assert_equal DataCollector.data[0], numbers
-assert_equal DataCollector.data.size, 1
+assert_equal numbers, DataCollector.data[0]
+assert_equal 1, DataCollector.data.size

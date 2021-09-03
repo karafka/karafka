@@ -29,16 +29,16 @@ start_karafka_and_wait_until do
 end
 
 DataCollector.data[0].each_with_index do |message, index|
-  assert_equal message.class, Karafka::Messages::Message
-  assert_equal message.metadata.class, Karafka::Messages::Metadata
-  assert_equal message.raw_payload.class, String
-  assert_equal message.received_at.class, Time
-  assert_equal message.metadata.received_at.class, Time
-  assert_equal message.partition, 0
-  assert_equal message.timestamp.class, Time
-  assert_equal message.offset, index
-  assert_equal message.topic, DataCollector.topic
-  assert_equal message.headers, {}
-  assert_equal message.key, nil
-  assert_equal message.deserialized?, false
+  assert_equal Karafka::Messages::Message, message.class,
+  assert_equal Karafka::Messages::Metadata, message.metadata.class
+  assert_equal String, message.raw_payload.class
+  assert_equal Time, message.received_at.class
+  assert_equal Time, message.metadata.received_at.class
+  assert_equal 0, message.partition
+  assert_equal Time, message.timestamp.class
+  assert_equal index, message.offset
+  assert_equal DataCollector.topic, message.topic
+  assert_equal {}, message.headers
+  assert_equal nil, message.key
+  assert_equal false, message.deserialized?
 end

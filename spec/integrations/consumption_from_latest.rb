@@ -41,5 +41,5 @@ wait_until do
   DataCollector.data[0].size >= 10
 end
 
-assert_equal DataCollector.data[0], after
-assert_equal DataCollector.data.size, 1
+assert_equal after, DataCollector.data[0]
+assert_equal 1, DataCollector.data.size
