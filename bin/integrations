@@ -2,8 +2,6 @@
 
 # Runner to run integration specs in parallel
 
-require 'etc'
-
 # Raised from the parent process if any of the integration tests fails
 IntegrationTestError = Class.new(StandardError)
 
@@ -28,8 +26,8 @@ EXIT_CODES = {
 require ROOT_PATH.join('spec/integrations_helper.rb')
 
 # How many child processes with integration specs do we want to run in parallel
-# We can run many in parallel as they do a lot of IO, thus the CPU utilization is not a lot
-CONCURRENCY = Etc.nprocessors
+# When the value is high, there's a problem with thread allocation on Github
+CONCURRENCY = 2
 
 # Simple hash to keep track of active integration forks running with info on which test scenario
 # is running
