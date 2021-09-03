@@ -11,6 +11,9 @@ gemspec
 group :test do
   gem 'byebug'
   gem 'factory_bot'
+  # Used for unit testing
   gem 'rspec'
   gem 'simplecov'
+  # Used for integration testing
+  gem 'test-unit'
 end
