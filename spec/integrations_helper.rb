@@ -38,6 +38,7 @@ def setup_karafka
   Karafka::App.boot!
 end
 
+# Waits until block yields true
 def wait_until(&block)
   Thread.pass until block.call
 

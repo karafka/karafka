@@ -15,6 +15,7 @@ class DataCollector
       instance.topic
     end
 
+    # @return [Array<String>] available topics
     def topics
       instance.topics
     end
@@ -24,10 +25,12 @@ class DataCollector
       instance.data
     end
 
+    # @return [String] first consumer group
     def consumer_group
       instance.consumer_group
     end
 
+    # @return [Array<String>] available consumer groups
     def consumer_groups
       instance.consumer_groups
     end
@@ -45,6 +48,7 @@ class DataCollector
     topics.first
   end
 
+  # @return [String] first consumer group
   def consumer_group
     topics.first
   end

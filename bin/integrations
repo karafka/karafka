@@ -20,6 +20,7 @@ require root_path.join('spec/integrations_helper.rb')
 # How many child processes with integration specs do we want to run in parallel
 CONCURRENCY = 3
 
+<<<<<<< HEAD
 # Simple hash to keep track of active integration forks running with info on which test scenario
 # is running
 pids = {}
@@ -47,11 +48,34 @@ Dir[root_path.join(specs)].each do |integration_test|
 
     pids[pid] = integration_test
 
+=======
+# Simple array to keep track of active integration forks running
+pids = []
+
+exits = []
+
+# Waits for any of the processes to be finished and tracks exit codes
+#
+# @param pids [Array<Integer>] active forks pids
+# @param exits [Array<Integer>] finished forks exit codes
+def wait_and_track(pids, exits)
+  pids.delete Process.wait
+
+  exits << $CHILD_STATUS.exitstatus
+end
+
+Dir[root_path.join('spec/integrations/**/*.rb')].each do |integration_test|
+    pids << fork do
+      require 'spec/integrations/simple_consumption_from_earliest'
+    end
+
+>>>>>>> 2.0-wip
   wait_and_track(pids, exits) if pids.size >= CONCURRENCY
 end
 
 wait_and_track(pids, exits) while !pids.empty?
 
+<<<<<<< HEAD
 puts
 
 exits.each do |integration_test, exit_code|
@@ -64,3 +88,7 @@ puts
 
 # Fail all if any test failed
 raise IntegrationTestError unless exits.values.all?(&:zero?)
+=======
+# Fail all if any test failed
+raise IntegrationTestError unless exits.all?(&:zero?)
+>>>>>>> 2.0-wip
