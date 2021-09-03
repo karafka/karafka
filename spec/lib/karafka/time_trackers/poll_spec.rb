@@ -12,7 +12,8 @@ RSpec.describe_current do
 
     it { expect(tracker.exceeded?).to eq(false) }
     it { expect(tracker.retryable?).to eq(true) }
-    it { expect(tracker.remaining).to  be_within(1).of(197) }
+    # Compensate for slow CI
+    it { expect(tracker.remaining).to  be_within(5).of(197) }
     it { expect(tracker.attempts).to eq(1) }
 
     context 'when needing to backoff' do
@@ -58,7 +59,7 @@ RSpec.describe_current do
 
     it { expect(tracker.exceeded?).to eq(false) }
     it { expect(tracker.retryable?).to eq(false) }
-    it { expect(tracker.remaining).to be_within(1).of(185) }
+    it { expect(tracker.remaining).to be_within(5).of(185) }
     it { expect(tracker.attempts).to eq(3) }
 
     context 'when needing to backoff' do
