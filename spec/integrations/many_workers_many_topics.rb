@@ -2,6 +2,9 @@
 
 # Karafka should use more than one thread to consume independent topics partitions
 
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../')))
+require ROOT_PATH.join('spec/integrations_helper.rb')
+
 setup_karafka do |config|
   config.concurrency = 10
 end

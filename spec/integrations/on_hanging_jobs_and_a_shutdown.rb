@@ -2,6 +2,9 @@
 
 # When Karafka is being shutdown and the consumer is hanging, it should force a shutdown
 
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../')))
+require ROOT_PATH.join('spec/integrations_helper.rb')
+
 setup_karafka { |config| config.shutdown_timeout = 1_000 }
 
 class Consumer < Karafka::BaseConsumer

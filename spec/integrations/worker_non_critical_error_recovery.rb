@@ -2,6 +2,9 @@
 
 # Karafka should be able to recover from non-critical error with same consumer instance
 
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../')))
+require ROOT_PATH.join('spec/integrations_helper.rb')
+
 setup_karafka
 
 numbers = Array.new(5) { rand.to_s }

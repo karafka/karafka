@@ -6,17 +6,8 @@
 # @note This test is a bit special as due to how Karafka operates, when unexpected issue happens
 #   in particular moments, it can bubble up and exit 2
 
-root_path = File.expand_path(
-  File.join(
-    File.dirname(__FILE__),
-    '../../'
-  )
-)
-
-root_path = Pathname.new(root_path)
-
-# We require it here, so when forked, all those things are already in the child processes
-require root_path.join('spec/integrations_helper.rb')
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../')))
+require ROOT_PATH.join('spec/integrations_helper.rb')
 
 setup_karafka do |config|
   config.concurrency = 1

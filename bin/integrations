@@ -2,17 +2,11 @@
 
 # Runner to run integration specs in parallel
 
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
+require ROOT_PATH.join('spec/integrations_helper.rb')
+
 # Raised from the parent process if any of the integration tests fails
 IntegrationTestError = Class.new(StandardError)
-
-ROOT_PATH = Pathname.new(
-  File.expand_path(
-    File.join(
-      File.dirname(__FILE__),
-      '../'
-    )
-  )
-)
 
 # There are rare cases where Karafka may force shutdown for some of the integration cases
 # This includes exactly those
@@ -21,9 +15,6 @@ EXIT_CODES = {
   'worker_critical_error_behaviour.rb' => [0, 2].freeze,
   'on_hanging_jobs_and_a_shutdown.rb' => [2].freeze
 }.freeze
-
-# We require it here, so when forked, all those things are already in the child processes
-require ROOT_PATH.join('spec/integrations_helper.rb')
 
 # How many child processes with integration specs do we want to run in parallel
 # When the value is high, there's a problem with thread allocation on Github
@@ -53,7 +44,9 @@ specs = ARGV[0] || 'spec/integrations/**/*.rb'
 
 # Randomize order
 Dir[ROOT_PATH.join(specs)].shuffle.each do |integration_test|
-  pid = fork { require integration_test }
+  pid = fork do
+    exec("bundle exec ruby #{integration_test}")
+  end
 
   pids[pid] = integration_test
 
