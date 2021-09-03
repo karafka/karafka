@@ -40,5 +40,4 @@ DataCollector.data[0].each_with_index do |message, index|
   assert_equal DataCollector.topic, message.topic
   assert_equal nil, message.key
   assert_equal false, message.deserialized?
-  assert_equal Hash.new, message.headers
 end
