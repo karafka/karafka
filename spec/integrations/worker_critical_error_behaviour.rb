@@ -24,7 +24,7 @@ setup_karafka do |config|
 end
 
 class Listener
-  def on_worker_process_error(event)
+  def on_worker_process_error(_event)
     DataCollector.data[0] << 1
   end
 end

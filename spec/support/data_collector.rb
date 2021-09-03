@@ -38,7 +38,7 @@ class DataCollector
 
   # Creates a collector
   def initialize
-    @topics = Concurrent::Array.new(100) { |i| SecureRandom.uuid }
+    @topics = Concurrent::Array.new(100) { SecureRandom.uuid }
     @consumer_groups = @topics
     @data = Concurrent::Hash.new { |hash, key| hash[key] = Concurrent::Array.new }
   end

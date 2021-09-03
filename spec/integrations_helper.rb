@@ -18,12 +18,10 @@ include Test::Unit::Assertions
 
 # Test setup for the framework
 def setup_karafka
-  test_name = caller_locations.first.path.split('/').last
-
   Karafka::App.setup do |config|
     # Use some decent defaults
     config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092' }
-    config.client_id = test_name
+    config.client_id = caller_locations(1..1).first.path.split('/').last
     config.pause_timeout = 1
     config.pause_max_timeout = 1
     config.pause_with_exponential_backoff = false
