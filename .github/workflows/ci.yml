@@ -7,42 +7,6 @@ on:
     - cron:  '0 1 * * *'
 
 jobs:
-  specs:
-    runs-on: ubuntu-latest
-    needs: diffend
-    strategy:
-      fail-fast: false
-      matrix:
-        ruby:
-          - '3.0'
-          - '2.7'
-          - '2.6'
-        include:
-          - ruby: '3.0'
-            coverage: 'true'
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install package dependencies
-        run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{matrix.ruby}}
-      - name: Install latest bundler
-        run: |
-          gem install bundler --no-document
-          bundle config set without 'tools benchmarks docs'
-      - name: Bundle install
-        run: |
-          bundle config set without development
-          bundle install --jobs 4 --retry 3
-      - name: Run Kafka with docker-compose
-        run: docker-compose up -d
-      - name: Run all tests
-        env:
-          GITHUB_COVERAGE: ${{matrix.coverage}}
-        run: bundle exec rspec
-
   diffend:
     runs-on: ubuntu-latest
     strategy:
@@ -72,3 +36,49 @@ jobs:
           fetch-depth: 0
       - name: Run Coditsu
         run: \curl -sSL https://api.coditsu.io/run/ci | bash
+
+  specs:
+    runs-on: ubuntu-latest
+    needs: diffend
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '3.0'
+          - '2.7'
+          - '2.6'
+        include:
+          - ruby: '3.0'
+            coverage: 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install package dependencies
+        run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{matrix.ruby}}
+
+      - name: Install latest Bundler
+        run: |
+          gem install bundler --no-document
+          bundle config set without 'tools benchmarks docs'
+
+      - name: Bundle install
+        run: |
+          bundle config set without development
+          bundle install --jobs 4 --retry 3
+
+      - name: Run Kafka with docker-compose
+        run: docker-compose up -d
+
+      - name: Run all specs
+        env:
+          GITHUB_COVERAGE: ${{matrix.coverage}}
+        run: bundle exec rspec
+
+      - name: Run integration tests
+        env:
+          GITHUB_COVERAGE: ${{matrix.coverage}}
+        run: bundle exec bin/integrations

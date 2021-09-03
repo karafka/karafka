@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+# Runner to run integration specs in parallel
+
+# Raised from the parent process if any of the integration tests fails
+IntegrationTestError = Class.new(StandardError)
+
+root_path = File.expand_path(
+  File.join(
+    File.dirname(__FILE__),
+    '../'
+  )
+)
+
+root_path = Pathname.new(root_path)
+
+# We require it here, so when forked, all those things are already in the child processes
+require root_path.join('spec/integrations_helper.rb')
+
+# How many child processes with integration specs do we want to run in parallel
+CONCURRENCY = 3
+
+# Simple array to keep track of active integration forks running
+pids = []
+
+exits = []
+
+# Waits for any of the processes to be finished and tracks exit codes
+#
+# @param pids [Array<Integer>] active forks pids
+# @param exits [Array<Integer>] finished forks exit codes
+def wait_and_track(pids, exits)
+  pids.delete Process.wait
+
+  exits << $CHILD_STATUS.exitstatus
+end
+
+Dir[root_path.join('spec/integrations/**/*.rb')].each do |integration_test|
+    pids << fork do
+      require 'spec/integrations/simple_consumption_from_earliest'
+    end
+
+  wait_and_track(pids, exits) if pids.size >= CONCURRENCY
+end
+
+wait_and_track(pids, exits) while !pids.empty?
+
+# Fail all if any test failed
+raise IntegrationTestError unless exits.all?(&:zero?)
