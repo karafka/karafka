@@ -18,7 +18,7 @@ EXIT_CODES = {
 
 # How many child processes with integration specs do we want to run in parallel
 # When the value is high, there's a problem with thread allocation on Github
-CONCURRENCY = 2
+CONCURRENCY = 1
 
 # Simple hash to keep track of active integration forks running with info on which test scenario
 # is running
