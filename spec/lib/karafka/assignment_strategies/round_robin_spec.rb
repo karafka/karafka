@@ -6,7 +6,7 @@ RSpec.describe Karafka::AssignmentStrategies::RoundRobin do
 
     let(:strategy) { described_class.new }
     let(:cluster) { instance_double(Array) }
-    let(:members) { Hash[(1..5).map { |i| ["member#{i}", nil] }] }
+    let(:members) { Hash[(1..5).map {|i| ["member#{i}", double(topics: ['greetings'])] }] }
     let(:delegator) { strategy.__getobj__ }
 
     let(:original_result) do
@@ -22,7 +22,7 @@ RSpec.describe Karafka::AssignmentStrategies::RoundRobin do
     let(:expected_result) do
       {
         'member1' => [
-          OpenStruct.new(name: 'partition1', topic: 'greetings', partition_id: 1),
+          OpenStruct.new(name: 'partition10', topic: 'greetings', partition_id: 10),
           OpenStruct.new(name: 'partition6', topic: 'greetings', partition_id: 6)
         ],
         'member2' => [
@@ -39,7 +39,7 @@ RSpec.describe Karafka::AssignmentStrategies::RoundRobin do
         ],
         'member5' => [
           OpenStruct.new(name: 'partition5', topic: 'greetings', partition_id: 5),
-          OpenStruct.new(name: 'partition10', topic: 'greetings', partition_id: 10)
+          OpenStruct.new(name: 'partition1', topic: 'greetings', partition_id: 1)
         ]
       }
     end
@@ -48,7 +48,7 @@ RSpec.describe Karafka::AssignmentStrategies::RoundRobin do
       expect(delegator).to receive(:call)
         .with(cluster: cluster, members: members, partitions: partitions)
         .and_return(original_result)
-
+      
       expect(call).to eq expected_result
     end
   end
