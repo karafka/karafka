@@ -6,7 +6,7 @@ RSpec.describe Karafka::AssignmentStrategies::RoundRobin do
 
     let(:strategy) { described_class.new }
     let(:cluster) { instance_double(Array) }
-    let(:members) { Hash[(1..5).map {|i| ["member#{i}", double(topics: ['greetings'])] }] }
+    let(:members) { Hash[(1..5).map { |i| ["member#{i}", OpenStruct.new(topics: ['greetings'])] }] }
     let(:delegator) { strategy.__getobj__ }
 
     let(:original_result) do
