@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 1.4.7 (Unreleased)
+- Update ruby-kafka to `1.4.0`
+- Support for `resolve_seed_brokers` option
+
 ## 1.4.6 (2021-08-05)
 - #700 Fix Ruby 3 compatibility issues in Connection::Client#pause (MmKolodziej)
 
