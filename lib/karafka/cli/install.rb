@@ -30,11 +30,12 @@ module Karafka
       # @param args [Array] all the things that Thor CLI accepts
       def initialize(*args)
         super
-        @rails = Bundler::LockfileParser.new(
+        dependencies = Bundler::LockfileParser.new(
           Bundler.read_file(
             Bundler.default_lockfile
           )
-        ).dependencies.key?('railties')
+        ).dependencies
+        @rails = dependencies.key?('railties') || dependencies.key?('rails')
       end
 
       # Install all required things for Karafka application in current directory
