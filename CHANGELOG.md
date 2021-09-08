@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 1.4.8 (2021-09-08)
+- Allow 'rails' in Gemfile to enable rails-aware generator (rewritten)
+
 ## 1.4.7 (2021-09-04)
 - Update ruby-kafka to `1.4.0`
 - Support for `resolve_seed_brokers` option (with Azdaroth)
