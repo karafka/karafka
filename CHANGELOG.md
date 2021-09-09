@@ -3,15 +3,15 @@
 ## 2.0.0-alpha1 (Unreleased)
 - Switch from `ruby-kafka` to `librdkafk` as an underlying driver
 - Introduce fully automatic integration tests that go through the whole server lifecycle
-- Integrate WaterDrop tightly with autoconfiguration inheritance
+- Integrate WaterDrop tightly with autoconfiguration inheritance and an option to redefine it
 - Change license to `LGPL-3.0`
 - Multi-threaded support for concurrent jobs consumption (when in separate topics and/or partitions)
 - Introduce concept of workers for concurrency
-- Remove hot-code reload due to issues with handling Kafka reconnections
+- Remove hot-code reload due to issues with handling Kafka reconnections (may reappear in 2.1)
 - Introduce subscriptions groups concept for better resources management
 - Remove completely all the callbacks in favour of finalizer method `#on_shutdown`
-- Remove single message consumption mode in favour of documentation on how to do it easily
-- Provide `on_revoked` method for actions upon topic revoking
+- Remove single message consumption mode in favour of documentation on how to do it easily by yourself
+- Provide `on_revoked` method for taking actions upon topic revoke
 - Provide sync and async offset management with async preferred
 - Introduce seamless Ruby on Rails integration via `Rails::Railte`
 - Update `cli info` to reflect the `2.0` details
@@ -28,8 +28,7 @@
 - Rename `#params_batch` in consumers to `#messages`
 - Rename `Karafka::Params::Metadata` to `Karafka::Messages::Metadata`
 - Use jobs for consumers work execution
-- Abort on critical worker errors
-- Allow for processing work of multiple consumer groups from the same worker poll
+- Allow for processing work of multiple consumer groups by the same worker poll
 - Rename `Karafka::Fetcher` to `Karafka::Runner` and align notifications key names
 - Update install templates
 
