@@ -22,58 +22,58 @@ module Karafka
       # Available settings
       # option client_id [String] kafka client_id - used to provide
       #   default Kafka groups namespaces and identify that app in kafka
-      setting :client_id, 'karafka'
+      setting :client_id, default: 'karafka'
       # option logger [Instance] logger that we want to use
-      setting :logger, ::Karafka::Instrumentation::Logger.new
+      setting :logger, default: ::Karafka::Instrumentation::Logger.new
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
-      setting :monitor, ::Karafka::Instrumentation::Monitor.new
+      setting :monitor, default: ::Karafka::Instrumentation::Monitor.new
       # Mapper used to remap consumer groups ids, so in case users migrate from other tools
       # or they need to maintain their own internal consumer group naming conventions, they
       # can easily do it, replacing the default client_id + consumer name pattern concept
-      setting :consumer_mapper, Routing::ConsumerMapper.new
+      setting :consumer_mapper, default: Routing::ConsumerMapper.new
       # Default deserializer for converting incoming data into ruby objects
-      setting :deserializer, Karafka::Serialization::Json::Deserializer.new
+      setting :deserializer, default: Karafka::Serialization::Json::Deserializer.new
       # option [Boolean] should we leave offset management to the user
-      setting :manual_offset_management, false
+      setting :manual_offset_management, default: false
       # options max_messages [Integer] how many messages do we want to fetch from Kafka in one go
-      setting :max_messages, 100_000
+      setting :max_messages, default: 100_000
       # option [Integer] number of milliseconds we can wait while fetching data
-      setting :max_wait_time, 10_000
+      setting :max_wait_time, default: 10_000
       # option shutdown_timeout [Integer] the number of milliseconds after which Karafka no
       #   longer waits for the consumers to stop gracefully but instead we force terminate
       #   everything.
-      setting :shutdown_timeout, 60_000
+      setting :shutdown_timeout, default: 60_000
       # option [Integer] number of threads in which we want to do parallel processing
-      setting :concurrency, 5
+      setting :concurrency, default: 5
       # option [Integer] how long should we wait upon processing error
-      setting :pause_timeout, 1_000
+      setting :pause_timeout, default: 1_000
       # option [Integer] what is the max timeout in case of an exponential backoff
-      setting :pause_max_timeout, 30_000
+      setting :pause_max_timeout, default: 30_000
       # option [Boolean] should we use exponential backoff
-      setting :pause_with_exponential_backoff, true
+      setting :pause_with_exponential_backoff, default: true
       # option [::WaterDrop::Producer, nil]
       # Unless configured, will be created once Karafka is configured based on user Karafka setup
-      setting :producer, nil
+      setting :producer, default: nil
 
       # rdkafka default options
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
-      setting :kafka, {}
+      setting :kafka, default: {}
 
       # Namespace for internal settings that should not be modified
       # It's a temporary step to "declassify" several things internally before we move to a
       # non global state
       setting :internal do
         # option routing_builder [Karafka::Routing::Builder] builder instance
-        setting :routing_builder, Routing::Builder.new
+        setting :routing_builder, default: Routing::Builder.new
         # option status [Karafka::Status] app status
-        setting :status, Status.new
+        setting :status, default: Status.new
         # option process [Karafka::Process] process status
         # @note In the future, we need to have a single process representation for all the karafka
         #   instances
-        setting :process, Process.new
+        setting :process, default: Process.new
         # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
         #   group builder
-        setting :subscription_groups_builder, Routing::SubscriptionGroupsBuilder.new
+        setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
       end
 
       class << self
@@ -81,6 +81,8 @@ module Karafka
         # @param block [Proc] block we want to execute with the config instance
         def setup(&block)
           configure(&block)
+          validate!
+          configure_components
         end
 
         # Validate config based on the config contract

@@ -94,5 +94,18 @@ module Karafka
       client.mark_as_consumed!(message)
       @seek_offset = message.offset + 1
     end
+
+    # Seeks in the context of current topic and partition
+    #
+    # @param offset [Integer] offset where we want to seek
+    def seek(offset)
+      client.seek(
+        Karafka::Messages::Seek.new(
+          messages.metadata.topic,
+          messages.metadata.partition,
+          offset
+        )
+      )
+    end
   end
 end

@@ -2,13 +2,31 @@
 
 [![Build Status](https://github.com/karafka/karafka/actions/workflows/ci.yml/badge.svg)](https://github.com/karafka/karafka/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
-[![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka)
+[![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
 **Note**: All of the documentation here refers to Karafka `2.0`. If you are looking for the documentation to Karafka `1.4` please click here (TBA).
 
 ## About Karafka
 
 Karafka is a framework used to simplify Apache Kafka based Ruby and Ruby on Rails applications development.
+
+```ruby
+# Define what topics you want to consume with which consumers
+Karafka::App.consumer_groups.draw do
+  topic 'system_events' do
+    consumer EventsConsumer
+  end
+end
+
+# And create your consumers, within which your messages will be processed
+class EventsConsumer < ApplicationConsumer
+  # Example that utilizes ActiveRecord#insert_all and Karafka batch processing
+  def consume
+    # Store all of the incoming Kafka events locally in an efficient way
+    Event.insert_all messages.payloads
+  end
+end
+```
 
 Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming and processing this data, without having to focus on things that are not your business domain.
 
@@ -33,24 +51,17 @@ If you want to get started with Kafka and Karafka as fast as possible, then the 
 git clone https://github.com/karafka/example-app ./example_app
 ```
 
-then, just bundle install all the dependencies:
-
-```bash
-cd ./example_app
-bundle install
-```
-
 and follow the instructions from the [example app Wiki](https://github.com/karafka/example-app/blob/master/README.md).
 
-**Note**: you need to ensure, that you have Kafka up and running and you need to configure Kafka seed_brokers in the ```karafka.rb``` file.
-
 If you need more details and know how on how to start Karafka with a clean installation, read the [Getting started page](https://github.com/karafka/karafka/wiki/Getting-started) section of our Wiki.
+
+We also maintain many [integration specs](https://github.com/karafka/karafka/tree/master/spec/integrations) illustrating various use-cases and features of the framework.
 
 ## Support
 
 Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
 
-If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
+If you have any questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) channel.
 
 ## References
 
@@ -60,19 +71,8 @@ If you have any questions about using Karafka, feel free to join our [Gitter](ht
 
 ## Note on contributions
 
-First, thank you for considering contributing to Karafka! It's people like you that make the open source community such a great community!
+First, thank you for considering contributing to the Karafka ecosystem! It's people like you that make the open source community such a great community!
 
 Each pull request must pass all the RSpec specs, integration tests and meet our quality requirements.
 
 Fork it, update and wait for the Github Actions results.
-
-## Contributors
-
-This project exists thanks to all the people who contribute.
-<a href="https://github.com/karafka/karafka/graphs/contributors"><img src="https://opencollective.com/karafka/contributors.svg?width=890" /></a>
-
-## Sponsors
-
-We are looking for sustainable sponsorship. If your company is relying on Karafka framework or simply want to see Karafka evolve faster to meet your requirements, please consider backing the project.
-
-Please contact [Maciej Mensfeld](mailto:maciej@mensfeld.pl) directly for more details.

@@ -15,7 +15,7 @@ module Karafka
 
     private_constant :LOOKUP_ENV_KEYS, :DEFAULT_ENV
 
-    # @return [Karafka::Env] env object]
+    # @return [Karafka::Env] env object
     # @note Will load appropriate environment automatically
     def initialize
       super('')

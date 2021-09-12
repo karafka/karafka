@@ -8,24 +8,30 @@ RSpec.describe_current do
   end
 
   describe '#validate!' do
-    context 'when configuration has errors' do
-      let(:error_class) { ::Karafka::Errors::InvalidConfigurationError }
-      let(:error_message) { { client_id: ['must be filled'] }.to_s }
-
-      before do
+    let(:invalid_configure) do
+      lambda do
         Karafka::App.setup do |config|
           config.client_id = nil
         end
       end
+    end
 
-      after do
+    let(:valid_configure) do
+      lambda do
         Karafka::App.setup do |config|
           config.client_id = rand(100).to_s
         end
       end
+    end
+
+    after { valid_configure.call }
+
+    context 'when configuration has errors' do
+      let(:error_class) { ::Karafka::Errors::InvalidConfigurationError }
+      let(:error_message) { { client_id: ['must be filled'] }.to_s }
 
       it 'raise InvalidConfigurationError exception' do
-        expect { config_class.send(:validate!) }.to raise_error do |error|
+        expect { invalid_configure.call }.to raise_error do |error|
           expect(error).to be_a(error_class)
           expect(error.message).to eq(error_message)
         end
@@ -34,8 +40,7 @@ RSpec.describe_current do
 
     context 'when configuration is valid' do
       it 'not raise InvalidConfigurationError exception' do
-        expect { config_class.send(:validate!) }
-          .not_to raise_error
+        expect { valid_configure.call }.not_to raise_error
       end
     end
   end

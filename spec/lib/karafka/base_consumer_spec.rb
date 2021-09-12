@@ -16,7 +16,16 @@ RSpec.describe_current do
   let(:offset) { 123 }
 
   let(:messages) do
-    instance_double(Karafka::Messages::Messages, first: first_message, last: last_message)
+    instance_double(
+      Karafka::Messages::Messages,
+      first: first_message,
+      last: last_message,
+      metadata: instance_double(
+        Karafka::Messages::BatchMetadata,
+        topic: topic.name,
+        partition: 0
+      )
+    )
   end
 
   let(:working_class) do
@@ -301,6 +310,24 @@ RSpec.describe_current do
 
     it 'epxect to increase seek_offset' do
       expect(consumer.instance_variable_get(:@seek_offset)).to eq(offset + 1)
+    end
+  end
+
+  describe '#seek' do
+    let(:new_offset) { rand(0.100) }
+    let(:seek) { Karafka::Messages::Seek.new(topic.name, 0, new_offset) }
+
+    before do
+      consumer.client = client
+      consumer.messages = messages
+
+      allow(client).to receive(:seek)
+
+      consumer.send(:seek, new_offset)
+    end
+
+    it 'expect to forward to client using current execution context data' do
+      expect(client).to have_received(:seek).with(seek)
     end
   end
 end

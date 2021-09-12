@@ -11,19 +11,6 @@ RSpec.describe_current do
     end
   end
 
-  describe '#boot!' do
-    let(:config) { double }
-
-    before do
-      allow(Karafka.monitor).to receive(:instrument)
-      app_class.boot!
-    end
-
-    it 'expect to publish app.initialized event' do
-      expect(Karafka.monitor).to have_received(:instrument).with('app.initialized')
-    end
-  end
-
   describe 'Karafka delegations' do
     %i[
       root
