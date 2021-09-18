@@ -91,7 +91,7 @@ If you need more details and know how on how to start Karafka with a clean insta
 
 ## Note on contributions
 
-First, thank you for considering contributing to Karafka! It's people like you that make the open source community such a great community!
+First, thank you for considering contributing to the Karafka ecosystem! It's people like you that make the open source community such a great community!
 
 Each pull request must pass all the RSpec specs, integration tests and meet our quality requirements.
 
