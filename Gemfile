@@ -4,8 +4,6 @@ source 'https://rubygems.org'
 
 plugin 'diffend'
 
-gem 'waterdrop'
-
 gemspec
 
 group :test do

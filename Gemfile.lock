@@ -120,7 +120,6 @@ DEPENDENCIES
   karafka!
   rspec
   simplecov
-  waterdrop
 
 BUNDLED WITH
-   2.2.25
+   2.2.27
