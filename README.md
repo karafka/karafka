@@ -2,13 +2,31 @@
 
 [![Build Status](https://github.com/karafka/karafka/actions/workflows/ci.yml/badge.svg)](https://github.com/karafka/karafka/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
-[![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka)
+[![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
 **Note**: We're finishing the new Karafka `2.0` but for now, please use `1.4`. All the documentation presented here refers to `1.4`
 
 ## About Karafka
 
 Framework used to simplify Apache Kafka based Ruby applications development.
+
+```ruby
+# Define what topics you want to consume with which consumers
+Karafka::App.consumer_groups.draw do
+  topic 'system_events' do
+    consumer EventsConsumer
+  end
+end
+
+# And create your consumers, within which your messages will be processed
+class EventsConsumer < ApplicationConsumer
+  # Example that utilizes ActiveRecord#insert_all and Karafka batch processing
+  def consume
+    # Store all of the incoming Kafka events locally in an efficient way
+    Event.insert_all params_batch.payloads
+  end
+end
+```
 
 Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming and processing this data, without having to focus on things that are not your business domain.
 
@@ -65,10 +83,6 @@ and follow the instructions from the [example app Wiki](https://github.com/karaf
 
 If you need more details and know how on how to start Karafka with a clean installation, read the [Getting started page](https://github.com/karafka/karafka/wiki/Getting-started) section of our Wiki.
 
-## Notice
-
-Karafka framework and Karafka team are __not__ related to Kafka streaming service called CloudKarafka in any matter. We don't recommend nor discourage usage of their platform.
-
 ## References
 
 * [Karafka framework](https://github.com/karafka/karafka)
@@ -79,21 +93,6 @@ Karafka framework and Karafka team are __not__ related to Kafka streaming servic
 
 First, thank you for considering contributing to Karafka! It's people like you that make the open source community such a great community!
 
-Each pull request must pass all the RSpec specs and meet our quality requirements.
+Each pull request must pass all the RSpec specs, integration tests and meet our quality requirements.
 
-To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation. Once you're done with your changes, submit a pull request.
-
-Coditsu will automatically check your work against our quality standards. You can find your commit check results on the [builds page](https://app.coditsu.io/karafka/commit_builds) of Karafka organization.
-
-[![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/commit_builds)
-
-## Contributors
-
-This project exists thanks to all the people who contribute.
-<a href="https://github.com/karafka/karafka/graphs/contributors"><img src="https://opencollective.com/karafka/contributors.svg?width=890" /></a>
-
-## Sponsors
-
-We are looking for sustainable sponsorship. If your company is relying on Karafka framework or simply want to see Karafka evolve faster to meet your requirements, please consider backing the project.
-
-Please contact [Maciej Mensfeld](mailto:maciej@mensfeld.pl) directly for more details.
+Fork it, update and wait for the Github Actions results.
