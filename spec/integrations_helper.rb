@@ -44,8 +44,6 @@ def setup_karafka
 
   Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
   Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
-
-  Karafka::App.boot!
 end
 
 # Waits until block yields true

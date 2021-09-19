@@ -81,6 +81,8 @@ module Karafka
         # @param block [Proc] block we want to execute with the config instance
         def setup(&block)
           configure(&block)
+          validate!
+          configure_components
         end
 
         # Validate config based on the config contract

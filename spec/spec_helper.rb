@@ -67,10 +67,6 @@ end
 
 RSpec.extend RSpecLocator.new(__FILE__)
 
-# In order to spec karafka out, we need to boot it first to initialize all the
-# dynamic components
-Karafka::App.boot!
-
 # We by default use the default listeners for specs to check how they work and that
 # they don't not break anything
 Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)

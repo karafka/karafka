@@ -10,7 +10,6 @@ RSpec.describe_current do
   context 'when we start with a default state' do
     it { expect(status_manager.running?).to eq false }
     it { expect(status_manager.stopping?).to eq false }
-    it { expect(status_manager.initialized?).to eq false }
     it { expect(status_manager.initializing?).to eq false }
   end
 
@@ -64,18 +63,6 @@ RSpec.describe_current do
       it { expect(status_manager.running?).to eq false }
       it { expect(status_manager.initializing?).to eq false }
       it { expect(status_manager.stopping?).to eq true }
-    end
-  end
-
-  describe 'initialized?' do
-    context 'when status is not set to initialized' do
-      it { expect(status_manager.initialized?).to eq false }
-    end
-
-    context 'when status is set to initialized' do
-      let(:status) { :initialized }
-
-      it { expect(status_manager.initialized?).to eq true }
     end
   end
 
