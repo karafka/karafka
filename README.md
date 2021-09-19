@@ -51,13 +51,6 @@ If you want to get started with Kafka and Karafka as fast as possible, then the 
 git clone https://github.com/karafka/example-app ./example_app
 ```
 
-then, just bundle install all the dependencies:
-
-```bash
-cd ./example_app
-bundle install
-```
-
 and follow the instructions from the [example app Wiki](https://github.com/karafka/example-app/blob/master/README.md).
 
 If you need more details and know how on how to start Karafka with a clean installation, read the [Getting started page](https://github.com/karafka/karafka/wiki/Getting-started) section of our Wiki.
