@@ -6,7 +6,6 @@ module Karafka
     # Available states and their transitions.
     STATES = {
       initializing: :initialize!,
-      initialized: :initialized!,
       running: :run!,
       stopping: :stop!
     }.freeze
