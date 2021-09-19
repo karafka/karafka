@@ -12,9 +12,6 @@ module Karafka
       # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
       #   doesn't match with the config contract
       def boot!
-        initialize!
-        Setup::Config.validate!
-        Setup::Config.configure_components
         initialized!
       end
 
