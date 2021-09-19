@@ -10,13 +10,10 @@ module Karafka
     class Client
       attr_reader :rebalance_manager
 
-      # Fake message that we use to tell rdkafka to pause in a given place
-      PauseMessage = Struct.new(:topic, :partition, :offset)
-
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 10
 
-      private_constant :PauseMessage, :MAX_POLL_RETRIES
+      private_constant :MAX_POLL_RETRIES
 
       # Creates a new consumer instance.
       #
@@ -109,7 +106,7 @@ module Karafka
       # Seek to a particular message. The next poll on the topic/partition will return the
       # message at the given offset.
       #
-      # @param message [Messages::Message, PauseMessage] message to which we want to seek to
+      # @param message [Messages::Message, Messages::Seek] message to which we want to seek to
       def seek(message)
         @kafka.seek(message)
       end
@@ -133,7 +130,7 @@ module Karafka
 
         @kafka.pause(tpl)
 
-        pause_msg = PauseMessage.new(topic, partition, offset)
+        pause_msg = Messages::Seek.new(topic, partition, offset)
 
         seek(pause_msg)
       ensure

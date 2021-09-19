@@ -46,7 +46,8 @@ module Karafka
         until Karafka::App.stopping?
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop',
-            caller: self
+            caller: self,
+            client: @client
           )
 
           resume_paused_partitions
