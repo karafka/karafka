@@ -16,6 +16,7 @@ services:
       KAFKA_CREATE_TOPICS:
         "part1_0:1:1,\
          part3_0:3:1,\
+         part3_1:3:1,\
          part10_0:10:1,\
          part10_1:10:1,\
          part10_2:10:1,\
