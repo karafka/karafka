@@ -89,8 +89,6 @@ module Karafka
           # We're done waiting, lets kill them!
           workers.each(&:terminate)
           consumer_threads.each(&:terminate)
-          workers.each(&:join)
-          consumer_threads.each(&:join)
 
           Karafka::App.producer.close
         end

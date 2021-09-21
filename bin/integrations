@@ -14,7 +14,8 @@ EXIT_CODES = {
   default: [0],
   'worker_critical_error_behaviour.rb' => [0, 2].freeze,
   'on_hanging_jobs_and_a_shutdown.rb' => [2].freeze,
-  'on_hanging_on_shutdown_job_and_a_shutdown.rb' => [2].freeze
+  'on_hanging_on_shutdown_job_and_a_shutdown.rb' => [2].freeze,
+  'on_hanging_poll_and_shutdown.rb' => [2].freeze
 }.freeze
 
 # How many child processes with integration specs do we want to run in parallel
