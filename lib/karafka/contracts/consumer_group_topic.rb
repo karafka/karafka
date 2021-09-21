@@ -16,6 +16,14 @@ module Karafka
         required(:manual_offset_management).filled(:bool?)
         required(:name).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
       end
+
+      rule(:kafka) do
+      # This will trigger rdkafka validations that we catch and re-map the info and use dry
+      # compatible format
+        Rdkafka::Config.new(value).send(:native_config)
+      rescue Rdkafka::Config::ConfigError => e
+        key(:kafka).failure(e.message)
+      end
     end
   end
 end
