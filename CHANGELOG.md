@@ -31,6 +31,9 @@
 - Allow for processing work of multiple consumer groups by the same worker poll
 - Rename `Karafka::Fetcher` to `Karafka::Runner` and align notifications key names
 - Update install templates
+- `sidekiq-backend` is no longer supported
+- `testing` gem for RSpec has been updated
+- `WaterDrop` `2.0` support
 
 ## 1.4.7 (2021-09-04)
 - Update ruby-kafka to `1.4.0`
