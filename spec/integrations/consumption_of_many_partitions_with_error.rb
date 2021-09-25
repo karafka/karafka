@@ -32,7 +32,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.consumer_groups.draw do
+Karafka::App.routes.draw do
   consumer_group DataCollector.consumer_group do
     # Special topic with 10 partitions available
     topic 'part10_0' do

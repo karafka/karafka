@@ -11,8 +11,8 @@
 Karafka is a framework used to simplify Apache Kafka based Ruby and Ruby on Rails applications development.
 
 ```ruby
-# Define what topics you want to consume with which consumers
-Karafka::App.consumer_groups.draw do
+# Define what topics you want to consume with which consumers in consumer groups
+Karafka::App.routes.draw do
   topic 'system_events' do
     consumer EventsConsumer
   end

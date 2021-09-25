@@ -21,7 +21,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.consumer_groups.draw do
+Karafka::App.routes.draw do
   consumer_group DataCollector.consumer_group do
     DataCollector.topics.first(10).each do |topic_name|
       topic topic_name do
