@@ -40,7 +40,7 @@ class KarafkaApp < Karafka::App
   Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
   # Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
 
-  consumer_groups.draw do
+  routes.draw do
     topic :example do
       consumer ExampleConsumer
     end

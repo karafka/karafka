@@ -20,6 +20,9 @@ module Karafka
           .flat_map(&:subscription_groups)
       end
 
+      # Just a nicer name for the consumer groups
+      alias routes consumer_groups
+
       Status.instance_methods(false).each do |delegated|
         define_method(delegated) do
           App.config.internal.status.send(delegated)
