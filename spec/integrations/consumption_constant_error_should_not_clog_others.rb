@@ -47,7 +47,7 @@ Karafka::App.routes.draw do
 end
 
 start_karafka_and_wait_until do
-  # We substract 3 as 3 values are from the offsets
+  # We subtract 3 as 3 values are from the offsets
   (DataCollector.data.values.map(&:size).sum - 3) >= 200
 end
 

@@ -1,7 +1,7 @@
 # Karafka framework changelog
 
 ## 2.0.0-alpha1 (Unreleased)
-- Switch from `ruby-kafka` to `librdkafk` as an underlying driver
+- Switch from `ruby-kafka` to `librdkafka` as an underlying driver
 - Introduce fully automatic integration tests that go through the whole server lifecycle
 - Integrate WaterDrop tightly with autoconfiguration inheritance and an option to redefine it
 - Change license to `LGPL-3.0`
@@ -18,7 +18,7 @@
 - Remove responders in favour of WaterDrop `2.0` producer
 - Remove pidfiles support
 - Remove daemonization support
-- Stop validating `kafka` configuration beyond minimum as it is handled by `librdkafk`
+- Stop validating `kafka` configuration beyond minimum as it is handled by `librdkafka`
 - Remove topics mappers concept
 - Improve environment auto-detection
 - Reorganize monitoring to match new concepts
