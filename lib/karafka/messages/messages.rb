@@ -35,6 +35,11 @@ module Karafka
         map(&:payload)
       end
 
+      # @return [Array<String>] array with raw, not deserialized payloads
+      def raw_payloads
+        map(&:raw_payload)
+      end
+
       # @return [Karafka::Messages::Message] first message
       def first
         @messages_array.first
