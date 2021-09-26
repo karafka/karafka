@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- fix `dry-configurable` deprecation warnings for default value as positional argument
+
 ## 1.4.8 (2021-09-08)
 - Allow 'rails' in Gemfile to enable rails-aware generator (rewritten)
 
