@@ -13,6 +13,7 @@ elements = Array.new(100) { SecureRandom.uuid }
 
 class Consumer < Karafka::BaseConsumer
   def initialize
+    super
     # Karafka never uses same consumer instance for multiple partitions of the same topic, thus we
     # do not need thread safe structures here
     @buffer = []
@@ -22,7 +23,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     @batches += 1
 
-    messages.each do |message|
+    messages.each do
       DataCollector.data[0] << true
     end
 
@@ -52,4 +53,4 @@ end
 
 assert_equal 50, DataCollector.data[:batches]
 assert_equal elements, DataCollector.data[:buffer].flatten
-assert_equal true, DataCollector.data[:buffer].all? { |sub| sub.size < 3 }
+assert_equal true, (DataCollector.data[:buffer].all? { |sub| sub.size < 3 })
