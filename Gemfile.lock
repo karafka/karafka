@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (1.4.8)
+    karafka (1.4.9)
       dry-configurable (~> 0.8)
       dry-inflector (~> 0.1)
       dry-monitor (~> 0.3)
@@ -108,7 +108,7 @@ GEM
     thor (1.1.0)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
-    waterdrop (1.4.2)
+    waterdrop (1.4.3)
       delivery_boy (>= 0.2, < 2.x)
       dry-configurable (~> 0.8)
       dry-monitor (~> 0.3)
