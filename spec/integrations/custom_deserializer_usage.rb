@@ -23,7 +23,7 @@ class CustomDeserializer
   end
 end
 
-Karafka::App.consumer_groups.draw do
+Karafka::App.routes.draw do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topic do
       consumer Consumer

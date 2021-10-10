@@ -11,7 +11,7 @@ setup_karafka
 guarded = []
 
 begin
-  Karafka::App.consumer_groups.draw do
+  Karafka::App.routes.draw do
     consumer_group 'regular' do
       topic '#$%^&*(' do
         consumer Class.new
@@ -23,7 +23,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 begin
-  Karafka::App.consumer_groups.draw do
+  Karafka::App.routes.draw do
     consumer_group '#$%^&*(' do
       topic 'regular' do
         consumer Class.new

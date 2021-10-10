@@ -11,8 +11,8 @@
 Karafka is a framework used to simplify Apache Kafka based Ruby and Ruby on Rails applications development.
 
 ```ruby
-# Define what topics you want to consume with which consumers
-Karafka::App.consumer_groups.draw do
+# Define what topics you want to consume with which consumers in karafka.rb
+Karafka::App.routes.draw do
   topic 'system_events' do
     consumer EventsConsumer
   end
@@ -28,7 +28,7 @@ class EventsConsumer < ApplicationConsumer
 end
 ```
 
-Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming and processing this data, without having to focus on things that are not your business domain.
+Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming, processing and producing data, without having to focus on things that are not your business domain.
 
 Karafka uses threads to handle many messages at the same time in the same process. It does not require Rails but will integrate tightly with Rails to make event processing dead simple.
 
@@ -45,15 +45,7 @@ If you're completely new to the subject, you can start with our "Kafka on Rails"
 - [Kafka on Rails: Using Kafka with Ruby on Rails – Part 1 – Kafka basics and its advantages](https://mensfeld.pl/2017/11/kafka-on-rails-using-kafka-with-ruby-on-rails-part-1-kafka-basics-and-its-advantages/)
 - [Kafka on Rails: Using Kafka with Ruby on Rails – Part 2 – Getting started with Ruby and Kafka](https://mensfeld.pl/2018/01/kafka-on-rails-using-kafka-with-ruby-on-rails-part-2-getting-started-with-ruby-and-kafka/)
 
-If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to just clone our example repository:
-
-```bash
-git clone https://github.com/karafka/example-app ./example_app
-```
-
-and follow the instructions from the [example app Wiki](https://github.com/karafka/example-app/blob/master/README.md).
-
-If you need more details and know how on how to start Karafka with a clean installation, read the [Getting started page](https://github.com/karafka/karafka/wiki/Getting-started) section of our Wiki.
+If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to visit our [Getting started](https://github.com/karafka/karafka/wiki/Getting-started) guides and the [example apps repository](https://github.com/karafka/example-apps).
 
 We also maintain many [integration specs](https://github.com/karafka/karafka/tree/master/spec/integrations) illustrating various use-cases and features of the framework.
 
@@ -62,12 +54,6 @@ We also maintain many [integration specs](https://github.com/karafka/karafka/tre
 Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
 
 If you have any questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) channel.
-
-## References
-
-* [Karafka framework](https://github.com/karafka/karafka)
-* [Karafka GitHub Actions](https://github.com/karafka/karafka/actions)
-* [Karafka Coditsu](https://app.coditsu.io/karafka/repositories/karafka)
 
 ## Note on contributions
 

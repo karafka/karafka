@@ -38,15 +38,29 @@ RSpec.describe_current do
   end
 
   describe '#payloads' do
-    it 'expect to return deserialized payloads from params within params batch' do
+    it 'expect to return deserialized payloads from messages within a batch' do
       expect(messages.payloads).to eq [deserialized_payload, deserialized_payload]
     end
 
     context 'when payloads were used for the first time' do
       before { messages.payloads }
 
-      it 'expect to mark as serialized all the params inside the batch' do
+      it 'expect to mark as serialized all the messages inside the batch' do
         expect(messages.to_a.all?(&:deserialized?)).to eq true
+      end
+    end
+  end
+
+  describe '#raw_payloads' do
+    it 'expect to return raw payloads from messages within a batch' do
+      expect(messages.raw_payloads).to eq [serialized_payload, serialized_payload]
+    end
+
+    context 'when payloads were used for the first time' do
+      before { messages.payloads }
+
+      it 'expect to still keep the raw references' do
+        expect(messages.raw_payloads).to eq [serialized_payload, serialized_payload]
       end
     end
   end

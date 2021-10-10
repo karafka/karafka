@@ -8,10 +8,10 @@ RSpec.describe_current do
   after { builder.clear }
 
   describe '#draw' do
-    context 'when we use 0.5 compatible simple topic style' do
+    context 'when we use simple topic style' do
       let(:topic1) { builder.first.topics.first }
-      let(:topic2) { builder.last.topics.first }
-      let(:consumer_group1) do
+      let(:topic2) { builder.last.topics.last }
+      let(:draw1) do
         builder.draw do
           topic :topic_name1 do
             # Here we should have instance doubles, etc but it takes
@@ -22,7 +22,7 @@ RSpec.describe_current do
           end
         end
       end
-      let(:consumer_group2) do
+      let(:draw2) do
         builder.draw do
           topic :topic_name2 do
             consumer Class.new(Karafka::BaseConsumer)
@@ -32,20 +32,19 @@ RSpec.describe_current do
       end
 
       before do
-        consumer_group1
-        consumer_group2
+        draw1
+        draw2
       end
 
       # This needs to have twice same name as for a non grouped in consumer group topics,
-      # we build id based on the consumer group id, here it is virtual and built based on the
-      # topic name
-      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_topic_name1_topic_name1" }
-      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_topic_name2_topic_name2" }
-      it { expect(builder.size).to eq 2 }
+      # we build id based on the consumer group id, here it is virtual and built with 'app' as a
+      # group name
+      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_app_topic_name1" }
+      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_app_topic_name2" }
+      it { expect(builder.size).to eq 1 }
       it { expect(topic1.name).to eq 'topic_name1' }
       it { expect(topic2.name).to eq 'topic_name2' }
-      it { expect(builder.first.id).to eq "#{Karafka::App.config.client_id}_topic_name1" }
-      it { expect(builder.last.id).to eq "#{Karafka::App.config.client_id}_topic_name2" }
+      it { expect(builder.first.id).to eq "#{Karafka::App.config.client_id}_app" }
     end
 
     context 'when we use 0.6 simple topic style single topic groups' do
