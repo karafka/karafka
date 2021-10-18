@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## master
+- update gems requirements in the gemspec
+
 ## 1.4.9 (2021-09-29)
 - fix `dry-configurable` deprecation warnings for default value as positional argument
 
