@@ -27,6 +27,8 @@ module Karafka
       def initialize(subscription_group)
         @mutex = Mutex.new
         @closed = false
+        # Name is set when we build consumer
+        @name = ''
         @subscription_group = subscription_group
         @buffer = MessagesBuffer.new
         @rebalance_manager = RebalanceManager.new
@@ -34,7 +36,6 @@ module Karafka
         # Marks if we need to offset. If we did not store offsets, we should not commit the offset
         # position as it will crash rdkafka
         @offsetting = false
-        @name
       end
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
