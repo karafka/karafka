@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'irb', '~> 1.0'
   spec.add_dependency 'rdkafka', '>= 0.10'
   spec.add_dependency 'thor', '>= 0.20'
-  spec.add_dependency 'waterdrop', '~> 2.0'
+  spec.add_dependency 'waterdrop', '>= 2.0.5', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   spec.required_ruby_version = '>= 2.6.0'

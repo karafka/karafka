@@ -8,7 +8,7 @@ PATH
       irb (~> 1.0)
       rdkafka (>= 0.10)
       thor (>= 0.20)
-      waterdrop (~> 2.0)
+      waterdrop (>= 2.0.5, < 3.0.0)
       zeitwerk (~> 2.3)
 
 GEM
@@ -74,10 +74,10 @@ GEM
     mini_portile2 (2.7.1)
     minitest (5.14.4)
     rake (13.0.6)
-    rdkafka (0.10.0)
-      ffi (~> 1.9)
-      mini_portile2 (~> 2.1)
-      rake (>= 12.3)
+    rdkafka (0.11.1)
+      ffi (~> 1.15)
+      mini_portile2 (~> 2.6)
+      rake (> 12)
     reline (0.2.7)
       io-console (~> 0.5)
     rspec (3.10.0)
@@ -102,7 +102,7 @@ GEM
     thor (1.1.0)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
-    waterdrop (2.0.4)
+    waterdrop (2.0.5)
       concurrent-ruby (>= 1.1)
       dry-configurable (~> 0.13)
       dry-monitor (~> 0.5)
@@ -122,4 +122,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   2.2.30
+   2.2.32
