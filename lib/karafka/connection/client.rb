@@ -10,6 +10,10 @@ module Karafka
     class Client
       attr_reader :rebalance_manager
 
+      # @return [String] underlying consumer name
+      # @note Consumer name may change in case we regenerate it
+      attr_reader :name
+
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 10
 
@@ -23,6 +27,8 @@ module Karafka
       def initialize(subscription_group)
         @mutex = Mutex.new
         @closed = false
+        # Name is set when we build consumer
+        @name = ''
         @subscription_group = subscription_group
         @buffer = MessagesBuffer.new
         @rebalance_manager = RebalanceManager.new
@@ -264,6 +270,7 @@ module Karafka
         config.consumer_rebalance_listener = @rebalance_manager
         consumer = config.consumer
         consumer.subscribe(*@subscription_group.topics.map(&:name))
+        @name = consumer.name
         consumer
       end
     end
