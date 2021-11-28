@@ -10,6 +10,10 @@ module Karafka
     class Client
       attr_reader :rebalance_manager
 
+      # @return [String] underlying consumer name
+      # @note Consumer name may change in case we regenerate it
+      attr_reader :name
+
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 10
 
@@ -30,6 +34,7 @@ module Karafka
         # Marks if we need to offset. If we did not store offsets, we should not commit the offset
         # position as it will crash rdkafka
         @offsetting = false
+        @name
       end
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -264,6 +269,7 @@ module Karafka
         config.consumer_rebalance_listener = @rebalance_manager
         consumer = config.consumer
         consumer.subscribe(*@subscription_group.topics.map(&:name))
+        @name = consumer.name
         consumer
       end
     end
