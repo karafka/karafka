@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.platform    = Gem::Platform::RUBY
   spec.authors     = ['Maciej Mensfeld']
   spec.email       = %w[maciej@mensfeld.pl]
-  spec.homepage    = 'https://github.com/karafka/karafka'
+  spec.homepage    = 'https://karafka.io'
   spec.summary     = 'Ruby based framework for working with Apache Kafka'
   spec.description = 'Framework used to simplify Apache Kafka based Ruby applications development'
   spec.license     = 'LGPL-3.0'
