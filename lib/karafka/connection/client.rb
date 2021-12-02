@@ -279,8 +279,8 @@ module Karafka
 
         # Register statistics runner for this particular type of callbacks
         ::Karafka::Instrumentation.statistics_callbacks.add(
-           @subscription_group.id,
-           Instrumentation::Callbacks::Statistics.new(
+          @subscription_group.id,
+          Instrumentation::Callbacks::Statistics.new(
             @subscription_group.id,
             @name,
             ::Karafka::App.config.monitor
