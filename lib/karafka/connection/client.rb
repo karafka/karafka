@@ -25,10 +25,10 @@ module Karafka
       #   with all the configuration details needed for us to create a client
       # @return [Karafka::Connection::Rdk::Consumer]
       def initialize(subscription_group)
-        @mutex = Mutex.new
-        @closed = false
         # Name is set when we build consumer
         @name = ''
+        @mutex = Mutex.new
+        @closed = false
         @subscription_group = subscription_group
         @buffer = MessagesBuffer.new
         @rebalance_manager = RebalanceManager.new
@@ -206,6 +206,11 @@ module Karafka
 
         @mutex.synchronize do
           @closed = true
+
+          # Remove callbacks runners that were registered
+          ::Karafka::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
+          ::Karafka::Instrumentation.error_callbacks.delete(@subscription_group.id)
+
           @kafka.close
         end
       end
@@ -271,6 +276,27 @@ module Karafka
         consumer = config.consumer
         consumer.subscribe(*@subscription_group.topics.map(&:name))
         @name = consumer.name
+
+        # Register statistics runner for this particular type of callbacks
+        ::Karafka::Instrumentation.statistics_callbacks.add(
+           @subscription_group.id,
+           Instrumentation::Callbacks::Statistics.new(
+            @subscription_group.id,
+            @name,
+            ::Karafka::App.config.monitor
+          )
+        )
+
+        # Register error tracking callback
+        ::Karafka::Instrumentation.error_callbacks.add(
+          @id,
+          Instrumentation::Callbacks::Error.new(
+            @subscription_group.id,
+            @name,
+            ::Karafka::App.config.monitor
+          )
+        )
+
         consumer
       end
     end

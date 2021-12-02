@@ -21,7 +21,10 @@ def setup_karafka
     # Use some decent defaults
     caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.uuid].join('-')
 
-    config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092' }
+    config.kafka = {
+      'bootstrap.servers' => '127.0.0.1:9092',
+  #    'statistics.interval.ms' => 100
+    }
     config.client_id = caller_id
     config.pause_timeout = 1
     config.pause_max_timeout = 1
