@@ -3,6 +3,7 @@
 # Runner to run integration specs in parallel
 
 require 'open3'
+require 'fileutils'
 
 ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
 require ROOT_PATH.join('spec/integrations_helper.rb')
@@ -10,28 +11,35 @@ require ROOT_PATH.join('spec/integrations_helper.rb')
 # Raised from the parent process if any of the integration tests fails
 IntegrationTestError = Class.new(StandardError)
 
-# There are rare cases where Karafka may force shutdown for some of the integration cases
-# This includes exactly those
-EXIT_CODES = {
-  default: [0],
-  'worker_critical_error_behaviour.rb' => [0, 2].freeze,
-  'shutdown/on_hanging_jobs_and_a_shutdown.rb' => [2].freeze,
-  'shutdown/on_hanging_on_shutdown_job_and_a_shutdown.rb' => [2].freeze,
-  'shutdown/on_hanging_poll_and_shutdown.rb' => [2].freeze
-}.freeze
-
 # How many child processes with integration specs do we want to run in parallel
 # When the value is high, there's a problem with thread allocation on Github
 CONCURRENCY = 5
 
 # Abstraction around a single test scenario execution process
 class Scenario
+  # How long a scenario can run before we kill it
+  # This is a fail-safe just in case something would hang
+  MAX_RUN_TIME = 60 * 5
+
+  # There are rare cases where Karafka may force shutdown for some of the integration cases
+  # This includes exactly those
+  EXIT_CODES = {
+    default: [0],
+    'worker_critical_error_behaviour.rb' => [0, 2].freeze,
+    'shutdown/on_hanging_jobs_and_a_shutdown.rb' => [2].freeze,
+    'shutdown/on_hanging_on_shutdown_job_and_a_shutdown.rb' => [2].freeze,
+    'shutdown/on_hanging_poll_and_shutdown.rb' => [2].freeze
+  }.freeze
+
+  private_constant :MAX_RUN_TIME, :EXIT_CODES
+
   # Creates scenario instance and runs in the background process
   #
   # @param path [String] path to the scenarios file
   def initialize(path)
     @path = path
     @stdin, @stdout, @stderr, @wait_thr = Open3.popen3("bundle exec ruby #{path}")
+    @started_at = current_time
   end
 
   # @return [String] integration spec name
@@ -41,6 +49,16 @@ class Scenario
 
   # @return [Boolean] did this scenario finished or is it still running
   def finished?
+    # We read it so it won't grow as we use our default logger that prints to both test.log and
+    # to stdout. Otherwise after reaching the buffer size, it would hang
+    @stdout.read_nonblock(10_240, exception: false)
+
+    # If the thread is running too long, kill it
+    if current_time - @started_at > MAX_RUN_TIME
+      @wait_thr.kill
+      Process.kill('TERM', pid)
+    end
+
     !@wait_thr.alive?
   end
 
@@ -51,7 +69,8 @@ class Scenario
 
   # @return [Integer] exit code of the process running given scenario
   def exit_code
-    @wait_thr.value.exitstatus
+    # There may be no exit status if we killed the thread
+    @wait_thr.value&.exitstatus || 123
   end
 
   # @return [Boolean] did this scenario finish successfully or not
@@ -66,8 +85,14 @@ class Scenario
     result = success? ? "\e[#{32}m#{'OK'}\e[0m" : "\e[#{31}m#{'FAILED'}\e[0m"
 
     puts "#{result} #{name}"
-    puts @stdout.read unless success?
     puts @stderr.read unless success?
+  end
+
+  private
+
+  # @return [Float] current machine time
+  def current_time
+    Process.clock_gettime(Process::CLOCK_MONOTONIC)
   end
 end
 
