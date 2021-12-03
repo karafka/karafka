@@ -36,16 +36,15 @@ end
 # Make sure that we have enough events from all the subscription groups
 start_karafka_and_wait_until do
   error_events.size >= 2 &&
-  error_events.values.all? { |errors| errors.size >= 2 }
+    error_events.values.all? { |errors| errors.size >= 2 }
 end
 
 unique = error_events
-           .values
-           .flatten
-           .map { |event| event.payload[:subscription_group_id] }
-           .group_by(&:itself)
-           .map { |group, errors| [group, errors.count] }
-           .to_h
+         .values
+         .flatten
+         .map { |event| event.payload[:subscription_group_id] }
+         .group_by(&:itself)
+         .transform_values { |errors| errors.count }
 
 assert_equal 2, error_events.keys.size
 # Each error published, should be published only once

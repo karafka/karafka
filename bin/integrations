@@ -28,7 +28,7 @@ CONCURRENCY = 5
 class Scenario
   # Creates scenario instance and runs in the background process
   #
-  # @param path [String] path to the scenarion file
+  # @param path [String] path to the scenarios file
   def initialize(path)
     @path = path
     @stdin, @stdout, @stderr, @wait_thr = Open3.popen3("bundle exec ruby #{path}")
