@@ -30,8 +30,8 @@ event = statistics_events.first
 assert_not_equal 0, statistics_events.size
 assert_equal true, event.is_a?(Dry::Events::Event)
 assert_equal 'statistics.emitted', event.id
-assert_not_equal '', event.payload[:subscription_group_id]
-assert_equal true, event.payload[:consumer_group_id].include?(DataCollector.consumer_groups.first)
-assert_equal true, event.payload[:statistics].is_a?(Hash)
-assert_equal 0, event.payload[:statistics]['txmsgs_d']
-assert_equal true, event.payload[:statistics]['name'].include?('karafka')
+assert_not_equal '', event[:subscription_group_id]
+assert_equal true, event[:consumer_group_id].include?(DataCollector.consumer_groups.first)
+assert_equal true, event[:statistics].is_a?(Hash)
+assert_equal 0, event[:statistics]['txmsgs_d']
+assert_equal true, event[:statistics]['name'].include?('karafka')

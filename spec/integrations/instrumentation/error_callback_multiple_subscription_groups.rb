@@ -29,8 +29,8 @@ end
 error_events = {}
 
 Karafka::App.monitor.subscribe('error.emitted') do |event|
-  error_events[event.payload[:subscription_group_id]] ||= []
-  error_events[event.payload[:subscription_group_id]] << event
+  error_events[event[:subscription_group_id]] ||= []
+  error_events[event[:subscription_group_id]] << event
 end
 
 # Make sure that we have enough events from all the subscription groups
@@ -42,7 +42,7 @@ end
 unique = error_events
          .values
          .flatten
-         .map { |event| event.payload[:subscription_group_id] }
+         .map { |event| event[:subscription_group_id] }
          .group_by(&:itself)
          .transform_values { |errors| errors.count }
 

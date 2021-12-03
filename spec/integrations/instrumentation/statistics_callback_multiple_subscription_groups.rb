@@ -26,8 +26,8 @@ end
 statistics_events = {}
 
 Karafka::App.monitor.subscribe('statistics.emitted') do |event|
-  statistics_events[event.payload[:subscription_group_id]] ||= []
-  statistics_events[event.payload[:subscription_group_id]] << event
+  statistics_events[event[:subscription_group_id]] ||= []
+  statistics_events[event[:subscription_group_id]] << event
 end
 
 # Make sure that we have enough events from all the subscription groups
@@ -38,7 +38,7 @@ end
 
 # Within a single group, all events should come from the same client
 statistics_events.each do |group, stats|
-  names = stats.map(&:payload).map { |payload| payload[:statistics]['name'] }.uniq
+  names = stats.map { |event| event[:statistics]['name'] }.uniq
   assert_equal 1, names.uniq.size
 end
 
