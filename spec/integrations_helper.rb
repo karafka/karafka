@@ -41,14 +41,20 @@ def setup_karafka
       producer_config.max_wait_timeout = 120 # 2 minutes
     end
 
+
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?
   end
 
   Karafka.logger.level = 'debug'
 
+  # We turn on all the instrumentation just to make sure it works also in the integration specs
   Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
   Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
+
+  # We turn on also WaterDrop instrumentation the same way and for the same reasons as above
+  listener = ::WaterDrop::Instrumentation::StdoutListener.new(Karafka.logger)
+  Karafka.producer.monitor.subscribe(listener)
 end
 
 # Waits until block yields true
