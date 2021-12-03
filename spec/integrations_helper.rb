@@ -32,7 +32,9 @@ def setup_karafka
     config.max_wait_time = 500
     config.shutdown_timeout = 30_000
     config.producer = ::WaterDrop::Producer.new do |producer_config|
-      producer_config.kafka = config.kafka
+      # In some cases WaterDrop updates the config and we don't want our consumer config to be
+      # polluted by those updates, that's why we copy
+      producer_config.kafka = config.kafka.dup
       producer_config.logger = config.logger
       # We need to wait a lot sometimes because we create a lot of new topics and this can take
       # time
