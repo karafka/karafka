@@ -1,9 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:callback) { described_class.new(subscription_group_id, client_name, monitor) }
+  subject(:callback) do
+    described_class.new(
+      subscription_group_id,
+      consumer_group_id,
+      client_name,
+      monitor
+    )
+  end
 
   let(:subscription_group_id) { SecureRandom.uuid }
+  let(:consumer_group_id) { SecureRandom.uuid }
   let(:client_name) { SecureRandom.uuid }
   let(:monitor) { ::Karafka::Instrumentation::Monitor.new }
   let(:error) { ::Rdkafka::RdkafkaError.new(1, []) }
@@ -20,7 +28,9 @@ RSpec.describe_current do
     end
 
     context 'when emitted error refer different producer' do
-      subject(:callback) { described_class.new(subscription_group_id, 'other', monitor) }
+      subject(:callback) do
+        described_class.new(subscription_group_id, consumer_group_id, 'other', monitor)
+      end
 
       it 'expect not to emit them' do
         expect(changed).to be_empty
@@ -48,6 +58,7 @@ RSpec.describe_current do
 
     it { expect(event.id).to eq('error.emitted') }
     it { expect(event[:subscription_group_id]).to eq(subscription_group_id) }
+    it { expect(event[:consumer_group_id]).to eq(consumer_group_id) }
     it { expect(event[:error]).to eq(error) }
   end
 end

@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:callback) { described_class.new(subscription_group_id, client_name, monitor) }
+  subject(:callback) do
+    described_class.new(subscription_group_id, consumer_group_id, client_name, monitor)
+  end
 
   let(:subscription_group_id) { SecureRandom.uuid }
+  let(:consumer_group_id) { SecureRandom.uuid }
   let(:client_name) { SecureRandom.uuid }
   let(:monitor) { ::Karafka::Instrumentation::Monitor.new }
 

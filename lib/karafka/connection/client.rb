@@ -282,6 +282,7 @@ module Karafka
           @subscription_group.id,
           Instrumentation::Callbacks::Statistics.new(
             @subscription_group.id,
+            @subscription_group.consumer_group_id,
             @name,
             ::Karafka::App.config.monitor
           )
@@ -289,9 +290,10 @@ module Karafka
 
         # Register error tracking callback
         ::Karafka::Instrumentation.error_callbacks.add(
-          @id,
+          @subscription_group.id,
           Instrumentation::Callbacks::Error.new(
             @subscription_group.id,
+            @subscription_group.consumer_group_id,
             @name,
             ::Karafka::App.config.monitor
           )

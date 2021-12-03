@@ -6,11 +6,13 @@ module Karafka
     module Callbacks
       # Callback that kicks in when consumer error occurs and is published in a background thread
       class Error
-        # @param subscription_group_id [String] id of the current subscription group
+        # @param subscription_group_id [String] id of the current subscription group instance
+        # @param consumer_group_id [String] id of the current consumer group
         # @param client_name [String] rdkafka client name
         # @param monitor [WaterDrop::Instrumentation::Monitor] monitor we are using
-        def initialize(subscription_group_id, client_name, monitor)
+        def initialize(subscription_group_id, consumer_group_id, client_name, monitor)
           @subscription_group_id = subscription_group_id
+          @consumer_group_id = consumer_group_id
           @client_name = client_name
           @monitor = monitor
         end
@@ -27,6 +29,7 @@ module Karafka
           @monitor.instrument(
             'error.emitted',
             subscription_group_id: @subscription_group_id,
+            consumer_group_id: @consumer_group_id,
             error: error
           )
         end
