@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 1.4.11 (2021-12-03)
+## 1.4.11 (2021-12-04)
 - Source code metadata url added to the gemspec
 - Gem bump
 
