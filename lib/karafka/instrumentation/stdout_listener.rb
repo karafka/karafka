@@ -114,6 +114,15 @@ module Karafka
         fatal (event[:error].backtrace || []).join("\n")
       end
 
+      # Logs info about error that happened in a consumer background thread
+      #
+      # @param event [Dry::Events::Event] event details including payload
+      def on_emitted_error(event)
+        error = event[:error]
+
+        error "Background thread error emitted: #{event[:error]}"
+      end
+
       USED_LOG_LEVELS.each do |log_level|
         define_method log_level do |*args|
           Karafka.logger.send(log_level, *args)

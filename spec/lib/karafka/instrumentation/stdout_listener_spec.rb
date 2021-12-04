@@ -174,4 +174,16 @@ RSpec.describe_current do
       expect(Karafka.logger).to have_received(:fatal).with(message)
     end
   end
+
+  describe '#on_emitted_error' do
+    subject(:trigger) { listener.on_emitted_error(event) }
+
+    let(:payload) { { caller: caller, error: error } }
+    let(:error) { Exception.new }
+    let(:message) { "Background thread error emitted: #{error}" }
+
+    it 'expect logger to log proper message' do
+      expect(Karafka.logger).to have_received(:error).with(message)
+    end
+  end
 end
