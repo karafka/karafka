@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 1.4.11 (2021-12-04)
+- Source code metadata url added to the gemspec
+- Gem bump
+
 ## 1.4.10 (2021-10-30)
 - update gems requirements in the gemspec (nijikon)
 

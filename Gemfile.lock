@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (1.4.10)
+    karafka (1.4.11)
       dry-configurable (~> 0.13)
       dry-inflector (~> 0.2)
       dry-monitor (~> 0.5)
