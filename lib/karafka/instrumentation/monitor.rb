@@ -39,6 +39,10 @@ module Karafka
         connection.listener.fetch_loop.error
 
         worker.process.error
+
+        statistics.emitted
+
+        error.emitted
       ].freeze
 
       private_constant :BASE_EVENTS

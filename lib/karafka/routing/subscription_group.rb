@@ -18,6 +18,11 @@ module Karafka
         freeze
       end
 
+      # @return [String] consumer group id
+      def consumer_group_id
+        kafka['group.id']
+      end
+
       # @return [Integer] max messages fetched in a single go
       def max_messages
         @topics.first.max_messages

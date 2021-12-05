@@ -17,7 +17,12 @@ module Karafka
       # Contract for checking the config provided by the user
       CONTRACT = Karafka::Contracts::Config.new.freeze
 
-      private_constant :CONTRACT
+      # Defaults for kafka settings, that will be overwritten only if not present already
+      KAFKA_DEFAULTS = {
+        'client.id' => 'karafka'
+      }.freeze
+
+      private_constant :CONTRACT, :KAFKA_DEFAULTS
 
       # Available settings
       # option client_id [String] kafka client_id - used to provide
@@ -81,8 +86,23 @@ module Karafka
         # @param block [Proc] block we want to execute with the config instance
         def setup(&block)
           configure(&block)
+          merge_kafka_defaults!(config)
           validate!
           configure_components
+        end
+
+        private
+
+        # Propagates the kafka setting defaults unless they are already present
+        # This makes it easier to set some values that users usually don't change but still allows them
+        # to overwrite the whole hash if they want to
+        # @param config [Dry::Configurable::Config] dry config of this producer
+        def merge_kafka_defaults!(config)
+          KAFKA_DEFAULTS.each do |key, value|
+            next if config.kafka.key?(key)
+
+            config.kafka[key] = value
+          end
         end
 
         # Validate config based on the config contract
