@@ -102,7 +102,7 @@ GEM
     thor (1.1.0)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
-    waterdrop (2.0.6)
+    waterdrop (2.0.7)
       concurrent-ruby (>= 1.1)
       dry-configurable (~> 0.13)
       dry-monitor (~> 0.5)
@@ -122,4 +122,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   2.2.31
+   2.2.32
