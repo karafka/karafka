@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# When we connect for the first time with cluster from a new consumer group and start consuming
+# from earliest and an error occurs on a first message, we should pause and retry consumption
+# until we can process this message. No messages should be skipped or ignored.
+
 ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
 require ROOT_PATH.join('spec/integrations_helper.rb')
 
