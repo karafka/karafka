@@ -118,8 +118,6 @@ module Karafka
       #
       # @param event [Dry::Events::Event] event details including payload
       def on_emitted_error(event)
-        error = event[:error]
-
         error "Background thread error emitted: #{event[:error]}"
       end
 

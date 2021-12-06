@@ -252,9 +252,9 @@ module Karafka
           reset
         when :rebalance_in_progress # -27
           reset
-        when :not_coordinator #16
+        when :not_coordinator # 16
           reset
-        when :network_exception #13
+        when :network_exception # 13
           reset
         end
 

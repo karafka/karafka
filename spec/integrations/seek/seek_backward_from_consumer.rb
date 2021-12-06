@@ -26,14 +26,10 @@ class Consumer < Karafka::BaseConsumer
       DataCollector.data[messages.metadata.partition] << message.offset
       seek(message.offset - 1)
 
-      if message.offset.zero?
-        @ignore = true
-      end
-    else
-      if messages.last.offset == 9
-        @backwards = true
-        seek(9)
-      end
+      @ignore = true if message.offset.zero?
+    elsif messages.last.offset == 9
+      @backwards = true
+      seek(9)
     end
   end
 end

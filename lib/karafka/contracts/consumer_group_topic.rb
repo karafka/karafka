@@ -18,8 +18,8 @@ module Karafka
       end
 
       rule(:kafka) do
-      # This will trigger rdkafka validations that we catch and re-map the info and use dry
-      # compatible format
+        # This will trigger rdkafka validations that we catch and re-map the info and use dry
+        # compatible format
         Rdkafka::Config.new(value).send(:native_config)
       rescue Rdkafka::Config::ConfigError => e
         key(:kafka).failure(e.message)

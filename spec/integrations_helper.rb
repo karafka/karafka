@@ -41,7 +41,6 @@ def setup_karafka
       producer_config.max_wait_timeout = 120 # 2 minutes
     end
 
-
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?
   end

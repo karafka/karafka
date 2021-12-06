@@ -32,7 +32,7 @@ module Karafka
       # Try its best to shutdown underlying components before re-raising
       # rubocop:disable Lint/RescueException
       rescue Exception => e
-      # rubocop:enable Lint/RescueException
+        # rubocop:enable Lint/RescueException
         stop
 
         raise e
