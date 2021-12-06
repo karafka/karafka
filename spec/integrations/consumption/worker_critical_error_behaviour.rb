@@ -6,7 +6,7 @@
 # @note This test is a bit special as due to how Karafka operates, when unexpected issue happens
 #   in particular moments, it can bubble up and exit 2
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../')))
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
 require ROOT_PATH.join('spec/integrations_helper.rb')
 
 setup_karafka do |config|
