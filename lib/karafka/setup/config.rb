@@ -94,8 +94,8 @@ module Karafka
         private
 
         # Propagates the kafka setting defaults unless they are already present
-        # This makes it easier to set some values that users usually don't change but still allows them
-        # to overwrite the whole hash if they want to
+        # This makes it easier to set some values that users usually don't change but still allows
+        # them to overwrite the whole hash if they want to
         # @param config [Dry::Configurable::Config] dry config of this producer
         def merge_kafka_defaults!(config)
           KAFKA_DEFAULTS.each do |key, value|

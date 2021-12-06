@@ -37,7 +37,7 @@ start_karafka_and_wait_until do
 end
 
 # Within a single group, all events should come from the same client
-statistics_events.each do |group, stats|
+statistics_events.each do |_group, stats|
   names = stats.map { |event| event[:statistics]['name'] }.uniq
   assert_equal 1, names.uniq.size
 end

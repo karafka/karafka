@@ -44,7 +44,7 @@ unique = error_events
          .flatten
          .map { |event| event[:subscription_group_id] }
          .group_by(&:itself)
-         .transform_values { |errors| errors.count }
+         .transform_values(&:count)
 
 assert_equal 2, error_events.keys.size
 # Each error published, should be published only once

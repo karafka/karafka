@@ -27,9 +27,11 @@ def names(stats_events)
     .freeze
 end
 
+SuperException = Class.new(Exception)
+
 # This will force listener to reload client (hacky, but works)
-Karafka::App.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
-  raise Exception
+Karafka::App.monitor.subscribe('connection.listener.fetch_loop.received') do
+  raise SuperException
 end
 
 Karafka::App.monitor.subscribe('statistics.emitted') do |event|
