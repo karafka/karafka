@@ -58,8 +58,7 @@ Karafka::App.routes.draw do
   end
 end
 
-
-# We needed a new producer since Karafka closed the regular one when it stopeed
+# We needed a new producer since Karafka closed the regular one when it stopped
 producer = ::WaterDrop::Producer.new do |config|
   config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092' }
 end
