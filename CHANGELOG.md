@@ -39,6 +39,19 @@
 - Hook for underlying statistics emitted from librdkafka have been added.
 - Hook for underlying async errors emitted from  librdkafka have been added.
 
+## 1.4.11 (2021-12-04)
+- Source code metadata url added to the gemspec
+- Gem bump
+
+## 1.4.10 (2021-10-30)
+- update gems requirements in the gemspec (nijikon)
+
+## 1.4.9 (2021-09-29)
+- fix `dry-configurable` deprecation warnings for default value as positional argument
+
+## 1.4.8 (2021-09-08)
+- Allow 'rails' in Gemfile to enable rails-aware generator (rewritten)
+
 ## 1.4.7 (2021-09-04)
 - Update ruby-kafka to `1.4.0`
 - Support for `resolve_seed_brokers` option (with Azdaroth)
