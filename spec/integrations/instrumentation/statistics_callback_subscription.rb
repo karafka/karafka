@@ -2,9 +2,6 @@
 
 # Karafka should publish async errors from the client via a dedicated instrumentation hook
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka
 
 Karafka::App.routes.draw do

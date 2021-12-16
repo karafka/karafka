@@ -3,9 +3,6 @@
 # Karafka should be able to recover from non-critical error with same consumer instance and it
 # also should emit an event with error details that can be logged
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 class Listener
   def on_consumer_consume_error(event)
     DataCollector.data[:error] << event

@@ -3,9 +3,6 @@
 # When consuming on multiple workers, when one receives a non-critical exception, others should
 # continue processing and the one should be retried
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka do |config|
   config.concurrency = 10
   config.kafka['auto.offset.reset'] = 'latest'

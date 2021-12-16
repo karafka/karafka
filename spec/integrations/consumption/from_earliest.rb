@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 # Karafka should be able to easily consume all the messages from earliest (default)
 
 setup_karafka

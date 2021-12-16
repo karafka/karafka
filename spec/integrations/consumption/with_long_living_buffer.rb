@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 # Karafka should allow to create a long living buffer that we can use and fill as we go, beyond
 # a single batch of data
 

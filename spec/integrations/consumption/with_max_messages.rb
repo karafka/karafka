@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 # Karafka should not return more messages than defined with `max_messages`
 
 setup_karafka

@@ -3,9 +3,6 @@
 # Karafka should be able to consume messages for given amount of time (10 seconds) and then stop
 # While Karafka is designed as a long running process, it can be used as recurring job as well
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka
 
 # How long do we want to process stuff before shutting down Karafka process

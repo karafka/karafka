@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 # Karafka should allow to use the '.routes' alias for routing builder and it should support a case
 # where there is a single consumer group with multiple topics
+
 setup_karafka
 
 Karafka::App.routes.draw do

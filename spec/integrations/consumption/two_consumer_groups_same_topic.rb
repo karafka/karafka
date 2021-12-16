@@ -2,9 +2,6 @@
 
 # Karafka should be able to consume same topic using two consumer groups
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka
 
 jsons = Array.new(100) { { SecureRandom.uuid => rand.to_s } }

@@ -4,14 +4,14 @@
 
 ENV['KARAFKA_ENV'] = 'test'
 
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..'))
+require 'bundler'
+Bundler.setup(:default, :test)
 
 require 'singleton'
 require 'securerandom'
 require 'byebug'
-require 'lib/karafka'
-require 'spec/support/data_collector'
+require_relative '../lib/karafka'
+require_relative './support/data_collector'
 
 Thread.abort_on_exception = true
 

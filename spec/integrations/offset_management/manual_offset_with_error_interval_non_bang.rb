@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 # When manual offset management is on, upon error Karafka should start again from the place
 # it had in the checkpoint, not from the beginning. We check here that this works well when we
 # commit "from time to time", not every message

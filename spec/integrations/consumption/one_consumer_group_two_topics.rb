@@ -2,9 +2,6 @@
 
 # Karafka should be able to consume two topics with same consumer group
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka
 
 topic1 = DataCollector.topics[0]

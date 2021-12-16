@@ -3,9 +3,6 @@
 # When on one partition topic an error occurs, other topics should be processed and given
 # partition should catch up on recovery after the pause timeout
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka do |config|
   config.concurrency = 1
   # We sleep more to check if when sleeping other topic messages are processed

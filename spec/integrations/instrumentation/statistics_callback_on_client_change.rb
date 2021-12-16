@@ -3,9 +3,6 @@
 # Karafka should not only recover from critical errors that happened but it also should reload
 # the underlying client and keep publishing statistics from the new librdkafka client
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka
 
 Karafka::App.routes.draw do
