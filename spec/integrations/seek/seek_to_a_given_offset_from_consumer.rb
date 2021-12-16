@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 # Karafka should be able to easily consume from a given offset, instead of starting from 0.
 # Karafka makes sure, we do not process in parallel incoming data from the same partition
 # ahead, so we can easily rewind the offset and then the client queue will be cleared. What that

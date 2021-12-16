@@ -4,9 +4,6 @@
 # Workers should not hang when a job within them fails but should be available for other jobs
 # Workers should not be clogged by a failing job
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka do |config|
   config.concurrency = 1
 end

@@ -4,9 +4,6 @@
 # hooks and they should not collide with each other.
 # If they would, events would be published twice.
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka
 
 Karafka::App.routes.draw do

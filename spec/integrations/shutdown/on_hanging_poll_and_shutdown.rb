@@ -3,9 +3,6 @@
 # When Karafka is being shutdown and the consumer thread is hanging for too long, it should force
 # a shutdown despite having active connections to Kafka
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka { |config| config.shutdown_timeout = 1_000 }
 
 produce(DataCollector.topic, '1')

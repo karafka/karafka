@@ -2,9 +2,6 @@
 
 # Karafka should be able to use custom deserializers on messages after they are declared
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka
 
 messages = Array.new(100) { |i| "message#{i}" }

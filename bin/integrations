@@ -4,9 +4,9 @@
 
 require 'open3'
 require 'fileutils'
+require 'pathname'
 
 ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
 
 # Raised from the parent process if any of the integration tests fails
 IntegrationTestError = Class.new(StandardError)
@@ -38,7 +38,9 @@ class Scenario
   # @param path [String] path to the scenarios file
   def initialize(path)
     @path = path
-    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3("bundle exec ruby #{path}")
+    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(
+      "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
+    )
     @started_at = current_time
   end
 
@@ -121,11 +123,16 @@ def wait_and_track(active_scenarios, finished_scenarios)
   end
 end
 
-# Run particular spec or all
-specs = ARGV[0] || 'spec/integrations/**/*.rb'
+# Load all the specs
+specs = Dir[ROOT_PATH.join('spec/integrations/**/*.rb')]
+
+# If filter is provided, apply
+specs.delete_if { |name| !name.include?(ARGV[0]) } if ARGV[0]
+
+raise ArgumentError, "No integration specs with filter: #{ARGV[0]}" if specs.empty?
 
 # Randomize order
-Dir[ROOT_PATH.join(specs)].shuffle.each do |integration_test|
+specs.shuffle.each do |integration_test|
   scenario = Scenario.new(integration_test)
 
   active_scenarios << scenario

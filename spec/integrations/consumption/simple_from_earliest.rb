@@ -2,9 +2,6 @@
 
 # Karafka should be able to consume all the data from beginning
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 setup_karafka
 
 elements = Array.new(100) { SecureRandom.uuid }

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../../')))
-require ROOT_PATH.join('spec/integrations_helper.rb')
-
 # Karafka should use rdkafka errors raised when invalid sub-settings after routing is defined
 # We do it after the routing, so any overwrites are also handled
 
