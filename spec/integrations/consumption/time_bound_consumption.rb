@@ -44,7 +44,6 @@ Karafka::Server.run
 
 time_after = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
-
 assert_equal elements, DataCollector.data[0]
 assert_equal 1, DataCollector.data.size
 # We will give Karafka 2 seconds to stop
