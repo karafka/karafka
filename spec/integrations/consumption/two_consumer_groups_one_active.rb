@@ -33,8 +33,11 @@ end
 # Listen only on one consumer group
 Karafka::Server.consumer_groups = [DataCollector.consumer_groups.first]
 
-jsons.each { |data| produce(DataCollector.topics.first, data.to_json) }
-jsons.each { |data| produce(DataCollector.topics.last, data.to_json) }
+# We send same messages to both topics, but except only one to run and consume
+jsons.each do |data|
+  produce(DataCollector.topics.first, data.to_json)
+  produce(DataCollector.topics.last, data.to_json)
+end
 
 start_karafka_and_wait_until do
   DataCollector.data.values.flatten.size >= 10
