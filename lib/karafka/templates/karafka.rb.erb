@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 <% if rails? -%>
-ENV['RAILS_ENV'] ||= 'development'
-ENV['KARAFKA_ENV'] = ENV['RAILS_ENV']
 require ::File.expand_path('../config/environment', __FILE__)
 <% else -%>
 # This file is auto-generated during the install process.
@@ -21,7 +19,7 @@ APP_LOADER.enable_reloading
 %w[
   lib
   app/consumers
-].each(&APP_LOADER.method(:push_dir))
+].each { |dir| APP_LOADER.push_dir(dir) }
 
 APP_LOADER.setup
 APP_LOADER.eager_load
@@ -44,15 +42,5 @@ class KarafkaApp < Karafka::App
     topic :example do
       consumer ExampleConsumer
     end
-
-    topic :test do
-      consumer TestConsumer
-    end
-
-    topic :test2 do
-      consumer Test2Consumer
-    end
   end
 end
-
-KarafkaApp.boot!

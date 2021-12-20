@@ -13,7 +13,6 @@ module Karafka
       INSTALL_DIRS = %w[
         app/consumers
         config
-        lib
         log
       ].freeze
 

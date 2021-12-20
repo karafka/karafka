@@ -77,7 +77,8 @@ module Karafka
   end
 end
 
-Zeitwerk::Loader
-  .for_gem
-  .tap(&:setup)
-  .tap(&:eager_load)
+loader = Zeitwerk::Loader.for_gem
+# Do not load Rails extensions by default, this will be handled by Railtie if they are needed
+loader.do_not_eager_load(Karafka.gem_root.join('lib/active_job'))
+loader.setup
+loader.eager_load
