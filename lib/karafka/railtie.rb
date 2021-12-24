@@ -1,21 +1,30 @@
 # frozen_string_literal: true
 
 # This file contains Railtie for auto-configuration
+
+rails = false
+
 begin
-  # Try to load Rails and if exists it will continue
-  require 'rails'
+  # We check this instead of rails as that way we can support piecemeal rails setup
+  require 'railties'
+
+  rails = true
+rescue LoadError
+  # Without defining this in any way, Zeitwerk ain't happy so we do it that way
+  module Karafka
+    class Railtie
+    end
+  end
+end
+
+if rails
   # Load Karafka
   require 'karafka'
   # Load ActiveJob adapter
-  require 'active_job/queue_adapters/karafka_adapter'
-  require 'active_job/consumer'
-  require 'active_job/routing_extensions'
+  require 'active_job/karafka'
 
   # Setup env if configured (may be configured later by .net, etc)
   ENV['KARAFKA_ENV'] ||= ENV['RAILS_ENV'] if ENV.key?('RAILS_ENV')
-
-  # We extend routing builder by adding a simple wrapper for easier jobs topics defining
-  ::Karafka::Routing::Builder.include ActiveJob::RoutingExtensions
 
   module Karafka
     # Railtie for setting up Rails integration
@@ -43,12 +52,6 @@ begin
           require Rails.root.join(Karafka.boot_file.to_s).to_s
         end
       end
-    end
-  end
-rescue LoadError
-  # Without defining this in any way, Zeitwerk ain't happy so we do it that way
-  module Karafka
-    class Railtie
     end
   end
 end

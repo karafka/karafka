@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_job'
-require 'active_job/queue_adapters'
-
 # ActiveJob components to allow for jobs consumption with Karafka
 module ActiveJob
   # ActiveJob queue adapters

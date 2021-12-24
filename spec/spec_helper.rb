@@ -48,6 +48,7 @@ RSpec.configure do |config|
 end
 
 require 'karafka'
+require 'active_job/karafka'
 
 # Test setup for the framework
 module Karafka
