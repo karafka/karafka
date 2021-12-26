@@ -9,6 +9,9 @@ module ActiveJob
     def consume
       messages.each do |message|
         ActiveJob::Base.execute(
+          # We technically speaking could set this as deserializer and reference it from the
+          # message instead of using the `#raw_payload`. This is not done on purpose to simplify
+          # the ActiveJob setup here
           ActiveSupport::JSON.decode(message.raw_payload)
         )
 
