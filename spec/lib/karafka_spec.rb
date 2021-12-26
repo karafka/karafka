@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Karafka do
+RSpec.describe_current do
   subject(:karafka) { described_class }
 
   describe '.env' do

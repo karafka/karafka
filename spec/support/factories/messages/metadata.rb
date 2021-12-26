@@ -6,9 +6,10 @@ FactoryBot.define do
 
     partition { 0 }
     topic { 'topic' }
+    offset { 0 }
 
     initialize_with do
-      new(partition: partition, topic: topic)
+      new(partition: partition, topic: topic, offset: 0)
     end
   end
 end

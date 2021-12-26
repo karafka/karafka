@@ -38,6 +38,7 @@
 - Example apps were updated
 - Hook for underlying statistics emitted from librdkafka have been added.
 - Hook for underlying async errors emitted from  librdkafka have been added.
+- ActiveJob Rails adapter.
 
 ## 1.4.11 (2021-12-04)
 - Source code metadata url added to the gemspec

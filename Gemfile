@@ -6,6 +6,10 @@ plugin 'diffend'
 
 gemspec
 
+# Karafka gem does not require this but we add it here so we can test the integration with
+# ActiveJob much easier
+gem 'activejob'
+
 group :test do
   gem 'byebug'
   gem 'factory_bot'

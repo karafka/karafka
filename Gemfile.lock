@@ -14,6 +14,9 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    activejob (6.1.4.1)
+      activesupport (= 6.1.4.1)
+      globalid (>= 0.3.6)
     activesupport (6.1.4.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
@@ -66,6 +69,8 @@ GEM
     factory_bot (6.2.0)
       activesupport (>= 5.0.0)
     ffi (1.15.4)
+    globalid (1.0.0)
+      activesupport (>= 5.0)
     i18n (1.8.11)
       concurrent-ruby (~> 1.0)
     io-console (0.5.9)
@@ -115,6 +120,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  activejob
   byebug
   factory_bot
   karafka!

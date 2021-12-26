@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 <% if rails? -%>
-ENV['RAILS_ENV'] ||= 'development'
-ENV['KARAFKA_ENV'] = ENV['RAILS_ENV']
 require ::File.expand_path('../config/environment', __FILE__)
 <% else -%>
 # This file is auto-generated during the install process.
@@ -21,7 +19,7 @@ APP_LOADER.enable_reloading
 %w[
   lib
   app/consumers
-].each(&APP_LOADER.method(:push_dir))
+].each { |dir| APP_LOADER.push_dir(dir) }
 
 APP_LOADER.setup
 APP_LOADER.eager_load
@@ -41,18 +39,13 @@ class KarafkaApp < Karafka::App
   # Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
 
   routes.draw do
+<% if rails? -%>
+    # Uncomment this if you use Karafka with ActiveJob
+    # You ned to define the topic per each queue name you use
+    # active_job_topic :default
+<% end -%>
     topic :example do
       consumer ExampleConsumer
     end
-
-    topic :test do
-      consumer TestConsumer
-    end
-
-    topic :test2 do
-      consumer Test2Consumer
-    end
   end
 end
-
-KarafkaApp.boot!
