@@ -8,7 +8,7 @@ module Karafka
     def call
       # Despite possibility of having several independent listeners, we aim to have one queue for
       # jobs across and one workers poll for that
-      jobs_queue = Processing::JobsQueue.new
+      jobs_queue = Karafka::App.config.internal.jobs_queue
 
       Karafka::Server.workers = Processing::WorkersBatch.new(jobs_queue)
 

@@ -14,12 +14,14 @@ RSpec.describe_current do
       end
 
       it { expect(queue.size).to eq(0) }
+      it { expect(queue.statistics).to eq('cnt' => 5, 'q_cnt' => 0, 'busy_cnt' => 0) }
     end
 
     context 'when the queue is not closed' do
       before { queue << job1 }
 
       it { expect(queue.size).to eq(1) }
+      it { expect(queue.statistics).to eq('cnt' => 5, 'q_cnt' => 1, 'busy_cnt' => 0) }
     end
 
     context 'when we want to add a job from a group that is in processing' do
@@ -28,6 +30,7 @@ RSpec.describe_current do
       before { queue << job1 }
 
       it { expect { queue << job1 }.to raise_error(expected_error) }
+      it { expect(queue.statistics).to eq('cnt' => 5, 'q_cnt' => 1, 'busy_cnt' => 0) }
     end
 
     context 'when we want to add a job from a group that is not in processing' do
@@ -35,6 +38,7 @@ RSpec.describe_current do
 
       it { expect { queue << job2 }.not_to raise_error }
       it { expect { queue << job2 }.to change(queue, :size).from(1).to(2) }
+      it { expect(queue.statistics).to eq('cnt' => 5, 'q_cnt' => 1, 'busy_cnt' => 0) }
     end
   end
 
@@ -43,6 +47,12 @@ RSpec.describe_current do
 
     it { expect(queue.pop).to eq(job1) }
     it { expect { queue.pop }.not_to change(queue, :size) }
+
+    it 'expect to reflect the fact that job is in processing in metrics' do
+      queue.pop
+
+      expect(queue.statistics).to eq('cnt' => 5, 'q_cnt' => 0, 'busy_cnt' => 1)
+    end
   end
 
   describe '#complete' do
@@ -51,8 +61,17 @@ RSpec.describe_current do
       queue << job2
     end
 
+    it { expect(queue.statistics).to eq('cnt' => 5, 'q_cnt' => 2, 'busy_cnt' => 0) }
+
     context 'when there is a job in the queue and we mark it as completed' do
       it { expect { queue.complete(job1) }.to change(queue, :size).from(2).to(1) }
+    end
+
+    it 'expect to reflect the fact that job is no logner in processing in metrics' do
+      queue.pop
+      queue.complete(job1)
+
+      expect(queue.statistics).to eq('cnt' => 5, 'q_cnt' => 1, 'busy_cnt' => 0)
     end
   end
 
@@ -91,6 +110,12 @@ RSpec.describe_current do
         allow(internal_queue).to receive(:close)
         queue.close
         expect(internal_queue).to have_received(:close)
+      end
+
+      it 'expect to reflect clearing in statistics' do
+        queue.close
+
+        expect(queue.statistics).to eq('cnt' => 5, 'q_cnt' => 0, 'busy_cnt' => 0)
       end
     end
   end

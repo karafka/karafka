@@ -16,7 +16,8 @@ module Karafka
           @consumer_group_id = consumer_group_id
           @client_name = client_name
           @monitor = monitor
-          # We decorate both Karafka and WaterDrop statistics the same way
+          # We decorate both Karafka and WaterDrop statistics the same way using a diff computing
+          # decorator.
           @statistics_decorator = ::WaterDrop::Instrumentation::Callbacks::StatisticsDecorator.new
         end
 
@@ -28,6 +29,11 @@ module Karafka
           # emit only stats that are related to current producer. Otherwise we would emit all of
           # all the time.
           return unless @client_name == statistics['name']
+
+          # We take rdkafka statistics and merge our worker statistics to them that we take from
+          # the jobs queue. That way we obtain a single source of stats for users to use with all
+          # the needed info
+          statistics['workers'] = Karafka::App.config.internal.jobs_queue.statistics
 
           @monitor.instrument(
             'statistics.emitted',

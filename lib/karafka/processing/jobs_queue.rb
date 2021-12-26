@@ -13,7 +13,7 @@ module Karafka
       # @return [Karafka::Processing::JobsQueue]
       def initialize
         @queue = ::Queue.new
-        @in_processing = Hash.new { |h, k| h[k] = {} }
+        @in_pipeline = Hash.new { |h, k| h[k] = {} }
         @mutex = Mutex.new
       end
 
@@ -21,7 +21,20 @@ module Karafka
       # @return [Integer] number of elements in the queue
       # @note Using `#pop` won't decrease this number as only marking job as completed does this
       def size
-        @in_processing.values.map(&:size).sum
+        @in_pipeline.values.map(&:size).sum
+      end
+
+      # @return [Hash<String, Numeric>] basic statistics about this job queue and its jobs
+      #   processing within workers
+      def statistics
+        {
+          # How many workers do we have
+          'cnt' => Karafka::App.config.concurrency,
+          # How many jobs do we have in the queue that are not in the processing state atm
+          'q_cnt' => @queue.size,
+          # How many jobs are actually being processed (how many workers are busy)
+          'busy_cnt' => size - @queue.size
+        }
       end
 
       # Adds the job to the internal main queue, scheduling it for execution in a worker and marks
@@ -34,7 +47,7 @@ module Karafka
         return if @queue.closed?
 
         @mutex.synchronize do
-          group = @in_processing[job.group_id]
+          group = @in_pipeline[job.group_id]
 
           raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.key?(job.id)
 
@@ -58,7 +71,7 @@ module Karafka
       # @param [Jobs::Base] job that was completed
       def complete(job)
         @mutex.synchronize do
-          @in_processing[job.group_id].delete(job.id)
+          @in_pipeline[job.group_id].delete(job.id)
         end
       end
 
@@ -68,7 +81,7 @@ module Karafka
       # @param group_id [String]
       def clear(group_id)
         @mutex.synchronize do
-          @in_processing[group_id].clear
+          @in_pipeline[group_id].clear
         end
       end
 
@@ -93,9 +106,9 @@ module Karafka
       def wait?(group_id)
         # If it is stopping, all the previous messages that are processed at the moment need to
         # finish. Otherwise we may risk closing the client and committing offsets afterwards
-        return false if Karafka::App.stopping? && @in_processing[group_id].empty?
+        return false if Karafka::App.stopping? && @in_pipeline[group_id].empty?
         return false if @queue.closed?
-        return false if @in_processing[group_id].empty?
+        return false if @in_pipeline[group_id].empty?
 
         true
       end

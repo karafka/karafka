@@ -79,6 +79,9 @@ module Karafka
         # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
         #   group builder
         setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
+        # option jobs_queue [Processing::JobsQueue] jobs queue that handles jobs distribution
+        # across workers
+        setting :jobs_queue, default: Processing::JobsQueue.new
       end
 
       class << self

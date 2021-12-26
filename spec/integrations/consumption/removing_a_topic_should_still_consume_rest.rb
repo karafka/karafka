@@ -69,6 +69,10 @@ elements2.each do |data|
   producer.produce_sync(topic: DataCollector.topics.last, payload: data)
 end
 
+# Karafka server is not meant to be stopped and started multiple times with a single jobs queue
+# without restarting the whole process, so we need to "fake" it here
+Karafka::App.config.internal.jobs_queue = Karafka::Processing::JobsQueue.new
+
 start_karafka_and_wait_until do
   DataCollector.data[1].size >= 20
 end
