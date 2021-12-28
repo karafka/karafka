@@ -48,7 +48,6 @@ jobs:
         ruby:
           - '3.0'
           - '2.7'
-          - '2.6'
         include:
           - ruby: '3.0'
             coverage: 'true'
