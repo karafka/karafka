@@ -5,8 +5,7 @@
 rails = false
 
 begin
-  # We check this instead of rails as that way we can support piecemeal rails setup
-  require 'railties'
+  require 'rails'
 
   rails = true
 rescue LoadError
