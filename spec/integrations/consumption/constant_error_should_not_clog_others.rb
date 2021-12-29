@@ -13,7 +13,7 @@ end
 # 300 messages to consume tops from all 3 partitions
 # There can be more if we run this in development several times
 300.times do |i|
-  result = produce('part3_1', SecureRandom.uuid, partition: i % 3)
+  result = produce('integrations3_1', SecureRandom.uuid, partition: i % 3)
   DataCollector.data[:last_offsets][result.partition] = result.offset
 end
 
@@ -37,7 +37,7 @@ end
 Karafka::App.routes.draw do
   consumer_group DataCollector.consumer_group do
     # Special topic with 3 partitions available
-    topic 'part3_1' do
+    topic 'integrations3_1' do
       consumer Consumer
     end
   end
