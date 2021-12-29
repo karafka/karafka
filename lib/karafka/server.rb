@@ -56,6 +56,10 @@ module Karafka
 
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)
       # If consumers or workers won't stop in a given time frame, it will force them to exit
+      #
+      # @note This method is not async. It should not be executed from the workers as it will
+      #   lock them forever. If you need to run Karafka shutdown from within workers threads,
+      #   please start a separate thread to do so.
       def stop
         Karafka::App.stop!
 
