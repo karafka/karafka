@@ -8,6 +8,7 @@ RSpec.describe_current do
 
   before do
     allow(Karafka::App).to receive(:run!)
+    allow(Karafka::App).to receive(:stopped?).and_return(true)
     allow(Karafka::Runner).to receive(:new).and_return(runner)
     allow(runner).to receive(:call)
     described_class.consumer_threads = []

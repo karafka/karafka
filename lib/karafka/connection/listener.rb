@@ -127,6 +127,8 @@ module Karafka
       # stops kafka client.
       def shutdown
         @jobs_queue.close
+        # This runs synchronously, making sure we finish all the shutdowns before we stop the
+        # client.
         @executors.shutdown
         @client.commit_offsets!
         @client.stop

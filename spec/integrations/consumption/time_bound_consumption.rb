@@ -32,7 +32,7 @@ elements.each { |data| produce(DataCollector.topic, data) }
 # Stop after 10 seconds
 Thread.new do
   sleep(MAX_TIME)
-  Karafka::App.stop!
+  Karafka::Server.stop
 end
 
 time_before = Process.clock_gettime(Process::CLOCK_MONOTONIC)

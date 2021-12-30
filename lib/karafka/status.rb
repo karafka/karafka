@@ -7,7 +7,8 @@ module Karafka
     STATES = {
       initializing: :initialize!,
       running: :run!,
-      stopping: :stop!
+      stopping: :stop!,
+      stopped: :stopped!
     }.freeze
 
     private_constant :STATES

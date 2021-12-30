@@ -26,7 +26,7 @@ end
 Karafka::App.routes.draw do
   consumer_group DataCollector.consumer_group do
     # Special topic with 10 partitions available
-    topic 'integrations10_1' do
+    topic 'integrations_1_10' do
       consumer Consumer
     end
   end
@@ -40,7 +40,7 @@ sleep(5)
 
 # We send only one message to each topic partition, so when messages are consumed, it forces them
 # to be in separate worker threads
-10.times { |i| produce('integrations10_1', SecureRandom.uuid, partition: i) }
+10.times { |i| produce('integrations_1_10', SecureRandom.uuid, partition: i) }
 
 wait_until do
   DataCollector.data.values.flatten.size >= 10

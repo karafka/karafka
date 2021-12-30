@@ -98,6 +98,14 @@ module Karafka
         Thread.new { info 'Stopping Karafka server' }
       end
 
+      # Logs info that we stopped the Karafka server.
+      #
+      # @param _event [Dry::Events::Event] event details including payload
+      def on_app_stopped(_event)
+        # We use a separate thread as logging can't be called from trap context
+        Thread.new { info 'Stopped Karafka server' }
+      end
+
       # Logs an error that Karafka was unable to stop the server gracefully and it had to do a
       #   forced exit.
       # @param _event [Dry::Events::Event] event details including payload

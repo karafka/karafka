@@ -121,7 +121,9 @@ module Karafka
         # @note At the moment it is only WaterDrop
         def configure_components
           config.producer ||= ::WaterDrop::Producer.new do |producer_config|
-            producer_config.kafka = config.kafka
+            # In some cases WaterDrop updates the config and we don't want our consumer config to
+            # be polluted by those updates, that's why we copy
+            producer_config.kafka = config.kafka.dup
             producer_config.logger = config.logger
           end
         end
