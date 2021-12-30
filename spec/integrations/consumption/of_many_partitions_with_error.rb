@@ -32,7 +32,7 @@ end
 Karafka::App.routes.draw do
   consumer_group DataCollector.consumer_group do
     # Special topic with 10 partitions available
-    topic 'integrations10_0' do
+    topic 'integrations_0_10' do
       consumer Consumer
     end
   end
@@ -44,7 +44,7 @@ Thread.new { Karafka::Server.run }
 # Give it some time to boot and connect before dispatching messages
 sleep(5)
 
-10.times { |i| produce('integrations10_0', SecureRandom.uuid, partition: i) }
+10.times { |i| produce('integrations_0_10', SecureRandom.uuid, partition: i) }
 
 wait_until do
   DataCollector.data.values.flatten.size >= 11

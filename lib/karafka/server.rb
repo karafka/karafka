@@ -28,7 +28,14 @@ module Karafka
         process.on_sigint { stop }
         process.on_sigquit { stop }
         process.on_sigterm { stop }
+
+        # Start is blocking until stop is called and when we stop, it will wait until
+        # all of the things are ready to stop
         start
+
+        # We always need to wait for Karafka to stop here since we should wait for the stop running
+        # in a separate thread (or trap context) to indicate everything is closed
+        Thread.pass until Karafka::App.stopped?
       # Try its best to shutdown underlying components before re-raising
       # rubocop:disable Lint/RescueException
       rescue Exception => e
@@ -72,12 +79,7 @@ module Karafka
           if consumer_threads.count(&:alive?).zero? &&
              workers.count(&:alive?).zero?
 
-            thread = Thread.new do
-              Karafka::App.producer.close
-              Karafka.monitor.instrument('app.stopped')
-            end
-
-            thread.join
+            Thread.new { Karafka::App.producer.close }.join
 
             return
           end
@@ -101,6 +103,8 @@ module Karafka
 
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit! FORCEFUL_EXIT_CODE
+      ensure
+        Karafka::App.stopped!
       end
 
       private

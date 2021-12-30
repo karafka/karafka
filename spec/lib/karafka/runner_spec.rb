@@ -4,6 +4,11 @@ RSpec.describe_current do
   subject(:runner) { described_class.new }
 
   describe '#call' do
+    # We need to set it to 0 as otherwise the listener would always wait for workers threads that
+    # would never stop without shutting down whole framework
+    before { Karafka::App.config.concurrency = 0 }
+    after { Karafka::App.config.concurrency = 5 }
+
     context 'when everything is ok' do
       let(:listeners) { [listener] }
       let(:async_scope) { listener }
@@ -13,6 +18,8 @@ RSpec.describe_current do
         allow(runner)
           .to receive(:listeners)
           .and_return(listeners)
+
+        Karafka::App.stop!
       end
 
       it 'starts asynchronously consumption for each listener' do

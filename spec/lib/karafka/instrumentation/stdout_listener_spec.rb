@@ -150,6 +150,18 @@ RSpec.describe_current do
     end
   end
 
+  describe '#on_app_stopped' do
+    subject(:trigger) { listener.on_app_stopped(event) }
+
+    let(:payload) { {} }
+    let(:message) { 'Stopped Karafka server' }
+
+    it 'expect logger to log server stopped' do
+      sleep 0.1
+      expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
+    end
+  end
+
   describe '#on_app_stopping_error' do
     subject(:trigger) { listener.on_app_stopping_error(event) }
 

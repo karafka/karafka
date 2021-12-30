@@ -24,7 +24,7 @@ end
 
 Thread.new do
   sleep(0.1) while DataCollector.data[0].size < 100
-  Karafka::App.stop!
+  Karafka::Server.stop
 end
 
 elements.each { |data| produce(DataCollector.topic, data) }
