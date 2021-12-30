@@ -86,7 +86,6 @@ RSpec.describe_current do
     end
   end
 
-
   describe 'initializing?' do
     context 'when status is not set to initializing' do
       it { expect(status_manager.initializing?).to eq false }
