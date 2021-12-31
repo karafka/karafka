@@ -18,7 +18,6 @@ services:
          integrations_0_10:10:1,\
          integrations_1_10:10:1,\
          benchmarks_0_01:1:1,\
-         benchmarks_0_02:2:1,\
          benchmarks_0_05:5:1,\
          benchmarks_0_10:10:1"
     volumes:
