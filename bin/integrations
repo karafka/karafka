@@ -87,7 +87,11 @@ class Scenario
     result = success? ? "\e[#{32}m#{'OK'}\e[0m" : "\e[#{31}m#{'FAILED'}\e[0m"
 
     puts "#{result} #{name}"
-    puts @stderr.read unless success?
+
+    unless success?
+      puts "Exit code: #{exit_code}"
+      puts @stderr.read
+    end
   end
 
   private
