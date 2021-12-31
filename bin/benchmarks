@@ -61,7 +61,7 @@ end
 
 # Selects requested benchmarks and runs them one after another
 benchmarks.each do |benchmark_path|
-  puts "Running #{benchmark_path.gsub("#{ROOT_PATH}/", '')}"
+  puts "Running #{benchmark_path.gsub("#{ROOT_PATH}/spec/benchmarks/", '')}"
 
   benchmark = "bundle exec ruby -r ./spec/benchmarks_helper.rb #{benchmark_path}"
 
