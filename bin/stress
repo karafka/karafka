@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Runs integration specs in an endless loop
+# This allows us to ensure (after long enough time) that the integrations test suit is stable and
+# that there are no anomalies when running it for a long period of time
+
+set -e
+
+while :
+do
+  reset
+  bundle exec bin/integrations
+done
