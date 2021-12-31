@@ -132,7 +132,11 @@ specs.delete_if { |name| !name.include?(ARGV[0]) } if ARGV[0]
 raise ArgumentError, "No integration specs with filter: #{ARGV[0]}" if specs.empty?
 
 # Randomize order
-specs.shuffle.each do |integration_test|
+seed = (ENV['SEED'] || rand(0..10_000)).to_i
+
+puts "Random seed: #{seed}"
+
+specs.shuffle(random: Random.new(seed)).each do |integration_test|
   scenario = Scenario.new(integration_test)
 
   active_scenarios << scenario
