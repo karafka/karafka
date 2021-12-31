@@ -9,12 +9,15 @@ setup_karafka do |config|
   config.concurrency = 10
 end
 
+# How many messages we want to consume per partition before stop
 MAX_MESSAGES_PER_PARTITION = 1_000
 
+# How many partitions do we have
 PARTITIONS_COUNT = 10
 
 Process.fork_supervised do
-  1000.times do |iter|
+  # Dispatch 1000 messages to each partition
+  1_000.times do
     PARTITIONS_COUNT.times do |i|
       Karafka.producer.buffer(topic: 'benchmarks_0_10', payload: 'a', partition: i)
     end
@@ -23,28 +26,30 @@ Process.fork_supervised do
   Karafka.producer.flush_sync
 end
 
+# Benchmarked consumer
 class Consumer < Karafka::BaseConsumer
   def initialize
+    super
     $start ||= Time.monotonic
     @count = 0
   end
 
+  # Benchmarked consumption
   def consume
     @count += messages.size
 
     # Assume each message persistence takes 1ms
     sleep(messages.count / 1_000.to_f)
 
-    #p [@count, messages.metadata.partition, DataCollector.data[:completed].size]
-
     if @count >= MAX_MESSAGES_PER_PARTITION
       DataCollector.data[:completed] << messages.metadata.partition
     end
 
-    if DataCollector.data[:completed].size == PARTITIONS_COUNT && !$stop
-      $stop = Time.monotonic
-      Thread.new { Karafka::Server.stop }
-    end
+    return if DataCollector.data[:completed].size != PARTITIONS_COUNT
+    return if $stop
+
+    $stop = Time.monotonic
+    Thread.new { Karafka::Server.stop }
   end
 end
 

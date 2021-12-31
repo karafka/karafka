@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-# We use the same initialization and control flow for bencharks as for specs, that's why we require
-# it that way
+# We use the same initialization and control flow for benchmarks as for specs, that's why we
+# require it that way
 
 require_relative 'integrations_helper'
 
 # We set stdout to sync so all the messages from the benchmarks are visible immediately
 $stdout.sync = true
 
+# Sets up karafka with benchmark expected defaults (low logging, etc)
 def setup_karafka
   Karafka::App.setup do |config|
     # Use some decent defaults
@@ -87,10 +88,11 @@ class Tracker
     # Runs what we are interested in, collects results and prints stats
     # @param iterations [Integer]
     # @param messages_count [Integer] how many messages did we process overall
-    def run(iterations: 10, messages_count:)
+    # @param block [Proc] code we want to run in iterations
+    def run(messages_count:, iterations: 10, &block)
       instance = new(iterations: iterations, messages_count: messages_count)
 
-      instance.iterate { yield }
+      instance.iterate { block.call }
 
       instance.report
     end
@@ -106,7 +108,6 @@ class Tracker
 
   # Runs iterations of the code we want and prints the iteration number and stores the end result
   #   internally as we expect it to be time taken
-  # @param iterations [Integer] how many iterations do we want
   def iterate
     @iterations.times do |i|
       puts "Running iteration: #{i + 1}"

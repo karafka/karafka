@@ -5,10 +5,12 @@
 
 setup_karafka { |config| config.concurrency = 1 }
 
+# After how many messages should we stop
 MAX_MESSAGES = 100_000
 
 class Consumer < Karafka::BaseConsumer
   def initialize
+    super
     $start ||= Time.monotonic
     @count = 0
   end
@@ -16,10 +18,11 @@ class Consumer < Karafka::BaseConsumer
   def consume
     @count += messages.size
 
-    if @count >= MAX_MESSAGES && !$stop
-      $stop = Time.monotonic
-      Thread.new { Karafka::Server.stop }
-    end
+    return if @count < MAX_MESSAGES
+    return if $stop
+
+    $stop = Time.monotonic
+    Thread.new { Karafka::Server.stop }
   end
 end
 

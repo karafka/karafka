@@ -10,6 +10,7 @@ PARTITIONS_COUNT = 5
 
 class Consumer < Karafka::BaseConsumer
   def initialize
+    super
     $start ||= Time.monotonic
     @count = 0
   end
@@ -21,10 +22,11 @@ class Consumer < Karafka::BaseConsumer
       DataCollector.data[:completed] << messages.metadata.partition
     end
 
-    if DataCollector.data[:completed].size == PARTITIONS_COUNT && !$stop
-      $stop = Time.monotonic
-      Thread.new { Karafka::Server.stop }
-    end
+    return if DataCollector.data[:completed].size != PARTITIONS_COUNT
+    return if $stop
+
+    $stop = Time.monotonic
+    Thread.new { Karafka::Server.stop }
   end
 end
 
