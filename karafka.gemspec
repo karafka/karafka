@@ -19,7 +19,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-configurable', '~> 0.13'
   spec.add_dependency 'dry-monitor', '~> 0.5'
   spec.add_dependency 'dry-validation', '~> 1.7'
-  spec.add_dependency 'irb', '~> 1.0'
   spec.add_dependency 'rdkafka', '>= 0.10'
   spec.add_dependency 'thor', '>= 0.20'
   spec.add_dependency 'waterdrop', '>= 2.0.6', '< 3.0.0'
