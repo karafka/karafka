@@ -20,7 +20,7 @@ RSpec.describe_current do
     let(:changed) { [] }
 
     before do
-      monitor.subscribe('error.emitted') do |event|
+      monitor.subscribe('error.occurred') do |event|
         changed << event[:error]
       end
 
@@ -49,14 +49,14 @@ RSpec.describe_current do
     let(:event) { changed.first }
 
     before do
-      monitor.subscribe('error.emitted') do |stat|
+      monitor.subscribe('error.occurred') do |stat|
         changed << stat
       end
 
       callback.call(client_name, error)
     end
 
-    it { expect(event.id).to eq('error.emitted') }
+    it { expect(event.id).to eq('error.occurred') }
     it { expect(event[:subscription_group_id]).to eq(subscription_group_id) }
     it { expect(event[:consumer_group_id]).to eq(consumer_group_id) }
     it { expect(event[:error]).to eq(error) }

@@ -4,13 +4,15 @@
 
 ENV['KARAFKA_ENV'] = 'test'
 
-require 'bundler'
-Bundler.setup(:default, :test, :integrations)
+unless ENV['PRISTINE_MODE']
+  require 'bundler'
+  Bundler.setup(:default, :test, :integrations)
+  require_relative '../lib/karafka'
+  require 'byebug'
+end
 
 require 'singleton'
 require 'securerandom'
-require 'byebug'
-require_relative '../lib/karafka'
 require_relative './support/data_collector'
 
 Thread.abort_on_exception = true
@@ -22,8 +24,8 @@ def setup_karafka
     caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.uuid].join('-')
 
     config.kafka = {
-      'bootstrap.servers' => '127.0.0.1:9092',
-      'statistics.interval.ms' => 100
+      'bootstrap.servers': '127.0.0.1:9092',
+      'statistics.interval.ms': 100
     }
     config.client_id = caller_id
     config.pause_timeout = 1
@@ -46,17 +48,56 @@ def setup_karafka
   Karafka.logger.level = 'debug'
 
   # We turn on all the instrumentation just to make sure it works also in the integration specs
-  Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
+  Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
   Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
 
   # We turn on also WaterDrop instrumentation the same way and for the same reasons as above
-  listener = ::WaterDrop::Instrumentation::StdoutListener.new(Karafka.logger)
+  listener = ::WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
   Karafka.producer.monitor.subscribe(listener)
+end
+
+# Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup
+def setup_active_job
+  require 'active_job'
+  require 'active_job/karafka'
+
+  # This is done in Railtie but here we use only ActiveJob, not Rails
+  ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
+  ActiveJob::Base.queue_adapter = :karafka
+end
+
+# Sets up default routes (mostly used in integration specs) or allows to configure custom routes
+# by providing a block
+# @param consumer_class [Class, nil] consumer class we want to use if going with defaults
+# @param block [Proc] block with routes we want to draw if going with complex routes setup
+def draw_routes(consumer_class = nil, &block)
+  Karafka::App.routes.draw do
+    if block
+      instance_eval(&block)
+    else
+      consumer_group DataCollector.consumer_group do
+        topic DataCollector.topic do
+          consumer consumer_class
+        end
+      end
+    end
+  end
 end
 
 # Waits until block yields true
 def wait_until
-  sleep(0.01) until yield
+  started_at = Time.now
+  stop = false
+
+  until stop
+    stop = yield
+
+    # Stop if it was running for 2 minutes and nothing changed
+    # This prevent from hanging in case of specs instability
+    raise StandardError, 'Execution expired' if (Time.now - started_at) > 120
+
+    sleep(0.01)
+  end
 
   Karafka::Server.stop
 
@@ -101,6 +142,11 @@ def assert_equal(expected, received)
   raise AssertionFailedError, "#{received} does not equal to #{expected}"
 end
 
+# @return [String] valid pro license token that we use in the integration tests
+def pro_license_token
+  ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+end
+
 # Checks that what we've received and what we do not expect is not equal
 #
 # @param not_expected [Object] what we do not expect
@@ -109,4 +155,14 @@ def assert_not_equal(not_expected, received)
   return if not_expected != received
 
   raise AssertionFailedError, "#{received} equals to #{not_expected}"
+end
+
+# Checks if a given constant can be accessed
+# @param const_name [String] string with potential class / module name
+# @return [Boolean] true if accessible
+def const_visible?(const_name)
+  Kernel.const_get(const_name)
+  true
+rescue NameError
+  false
 end

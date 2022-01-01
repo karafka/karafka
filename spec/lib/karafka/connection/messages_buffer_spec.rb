@@ -97,4 +97,102 @@ RSpec.describe_current do
       expect { |block| buffer.each(&block) }.not_to yield_control
     end
   end
+
+  describe '#delete' do
+    let(:message1) { build(:messages_message) }
+    let(:message2) { build(:messages_message) }
+
+    before { buffer << message1 }
+
+    context 'when given topic does not exist' do
+      it 'expect not to remove anything' do
+        expect { buffer.delete('na', 0) }.not_to change(buffer, :size)
+      end
+    end
+
+    context 'when given partition does not exist' do
+      it 'expect not to remove anything' do
+        expect { buffer.delete(message1.topic, 100) }.not_to change(buffer, :size)
+      end
+    end
+
+    context 'when given partition exists and is the only one' do
+      it 'expect change the buffer size to reflect the change' do
+        expect { buffer.delete(message1.topic, 0) }.to change(buffer, :size).by(-1)
+      end
+
+      it 'expect to completely remove the topic when no other partitions present' do
+        buffer.delete(message1.topic, 0)
+
+        expect { |block| buffer.each(&block) }.not_to yield_control
+      end
+    end
+
+    context 'when given partition exists and is not the only one' do
+      let(:message2) { OpenStruct.new(topic: message1.topic, partition: 1) }
+
+      before { buffer << message2 }
+
+      it 'expect change the buffer size to reflect the change' do
+        expect { buffer.delete(message1.topic, 0) }.to change(buffer, :size).by(-1)
+      end
+
+      it 'expect to recalculate the buffer size' do
+        expect(buffer.size).to eq(2)
+        buffer.delete(message1.topic, 0)
+        expect(buffer.size).to eq(1)
+      end
+
+      it 'expect not to mix the topics' do
+        buffer.delete(message1.topic, 0)
+
+        buffer.each do |topic, _, _|
+          expect(topic).to eq(message2.topic)
+        end
+      end
+
+      it 'expect not to mix partitions' do
+        buffer.delete(message1.topic, 0)
+
+        buffer.each do |_, partition, _|
+          expect(partition).to eq(message2.partition)
+        end
+      end
+
+      it 'expect not to mix messages in the buffer' do
+        buffer.delete(message1.topic, 0)
+
+        buffer.each do |_, _, messages|
+          expect(messages).to eq([message2])
+        end
+      end
+    end
+  end
+
+  describe 'uniq!' do
+    let(:message1) { build(:messages_message) }
+    let(:message2) { build(:messages_message) }
+    let(:message3) { build(:messages_message) }
+    let(:message4) { build(:messages_message) }
+
+    context 'when we have same message twice for the same topic partition' do
+      before do
+        buffer << message1
+        buffer << message2
+        buffer << message1
+        buffer << message3
+        buffer << message4
+      end
+
+      it { expect { buffer.uniq! }.to change(buffer, :size).by(-1) }
+
+      it 'expect to maintain messages order' do
+        buffer.uniq!
+
+        buffer.each do |_, _, messages|
+          expect(messages).to eq([message1, message2, message3, message4])
+        end
+      end
+    end
+  end
 end

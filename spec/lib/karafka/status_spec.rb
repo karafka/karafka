@@ -8,6 +8,7 @@ RSpec.describe_current do
   before { status_manager.instance_variable_set(:'@status', status) }
 
   context 'when we start with a default state' do
+    it { expect(status_manager.initialized?).to eq false }
     it { expect(status_manager.running?).to eq false }
     it { expect(status_manager.stopping?).to eq false }
     it { expect(status_manager.stopped?).to eq false }
@@ -22,6 +23,7 @@ RSpec.describe_current do
     context 'when status is set to running' do
       let(:status) { :running }
 
+      it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.running?).to eq true }
     end
   end
@@ -32,6 +34,7 @@ RSpec.describe_current do
 
       it { expect(status_manager.running?).to eq true }
       it { expect(status_manager.initializing?).to eq false }
+      it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq false }
       it { expect(status_manager.stopped?).to eq false }
     end
@@ -43,6 +46,7 @@ RSpec.describe_current do
         status_manager.instance_variable_set(:'@status', rand)
       end
 
+      it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq false }
       it { expect(status_manager.stopped?).to eq false }
     end
@@ -52,6 +56,7 @@ RSpec.describe_current do
         status_manager.instance_variable_set(:'@status', :stopping)
       end
 
+      it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq true }
       it { expect(status_manager.stopped?).to eq false }
     end
@@ -66,6 +71,7 @@ RSpec.describe_current do
 
       it { expect(status_manager.running?).to eq false }
       it { expect(status_manager.initializing?).to eq false }
+      it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq true }
       it { expect(status_manager.stopped?).to eq false }
     end
@@ -81,6 +87,7 @@ RSpec.describe_current do
 
       it { expect(status_manager.running?).to eq false }
       it { expect(status_manager.initializing?).to eq false }
+      it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq false }
       it { expect(status_manager.stopped?).to eq true }
     end
@@ -95,6 +102,7 @@ RSpec.describe_current do
       let(:status) { :initializing }
 
       it { expect(status_manager.initializing?).to eq true }
+      it { expect(status_manager.initialized?).to eq false }
     end
   end
 
@@ -106,6 +114,19 @@ RSpec.describe_current do
 
       it { expect(status_manager.running?).to eq false }
       it { expect(status_manager.initializing?).to eq true }
+      it { expect(status_manager.stopping?).to eq false }
+    end
+  end
+
+  describe 'initialized!' do
+    context 'when we set it to initialized' do
+      before do
+        status_manager.initialized!
+      end
+
+      it { expect(status_manager.initialized?).to eq true }
+      it { expect(status_manager.running?).to eq false }
+      it { expect(status_manager.initializing?).to eq false }
       it { expect(status_manager.stopping?).to eq false }
     end
   end

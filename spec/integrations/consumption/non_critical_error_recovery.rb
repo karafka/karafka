@@ -4,8 +4,8 @@
 # also should emit an event with error details that can be logged
 
 class Listener
-  def on_consumer_consume_error(event)
-    DataCollector.data[:error] << event
+  def on_error_occurred(event)
+    DataCollector.data[:errors] << event
   end
 end
 
@@ -27,7 +27,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topic do
       consumer Consumer
@@ -44,5 +44,7 @@ end
 
 assert_equal true, DataCollector.data[0].size >= 6
 assert_equal 1, DataCollector.data[1].uniq.size
-assert_equal StandardError, DataCollector.data[:error].first[:error].class
+assert_equal StandardError, DataCollector.data[:errors].first[:error].class
+assert_equal 'consumer.consume.error', DataCollector.data[:errors].first[:type]
+assert_equal 'error.occurred', DataCollector.data[:errors].first.id
 assert_equal 5, DataCollector.data[0].uniq.size

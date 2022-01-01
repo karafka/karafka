@@ -26,7 +26,7 @@ SimpleCov.start do
   merge_timeout 600
 end
 
-SimpleCov.minimum_coverage(94.5)
+SimpleCov.minimum_coverage(94)
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
   .sort
@@ -50,12 +50,15 @@ end
 require 'karafka'
 require 'active_job/karafka'
 
+# We extend this manually since it's done by a Railtie that we do not run here
+ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
+
 # Test setup for the framework
 module Karafka
   # Configuration for test env
   class App
     setup do |config|
-      config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092' }
+      config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
       config.client_id = rand.to_s
       config.pause_timeout = 1
       config.pause_max_timeout = 1
@@ -68,5 +71,5 @@ RSpec.extend RSpecLocator.new(__FILE__)
 
 # We by default use the default listeners for specs to check how they work and that
 # they don't not break anything
-Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
+Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
 Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)

@@ -20,7 +20,7 @@ module Karafka
 
       # @return [String] consumer group id
       def consumer_group_id
-        kafka['group.id']
+        kafka[:'group.id']
       end
 
       # @return [Integer] max messages fetched in a single go
@@ -39,12 +39,12 @@ module Karafka
       def kafka
         kafka = @topics.first.kafka.dup
 
-        kafka['client.id'] ||= Karafka::App.config.client_id
-        kafka['group.id'] ||= @topics.first.consumer_group.id
-        kafka['auto.offset.reset'] ||= 'earliest'
+        kafka[:'client.id'] ||= Karafka::App.config.client_id
+        kafka[:'group.id'] ||= @topics.first.consumer_group.id
+        kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
         # rdkafka offset auto-storing
-        kafka['enable.auto.offset.store'] = 'false'
+        kafka[:'enable.auto.offset.store'] = 'false'
         kafka.freeze
         kafka
       end

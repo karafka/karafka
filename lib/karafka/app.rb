@@ -36,6 +36,7 @@ module Karafka
         logger
         producer
         monitor
+        pro?
       ].each do |delegated|
         define_method(delegated) do
           Karafka.send(delegated)

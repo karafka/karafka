@@ -16,7 +16,7 @@ module Karafka
         @thread = Thread.new do
           # If anything goes wrong in this worker thread, it means something went really wrong and
           # we should terminate.
-          @thread.abort_on_exception = true
+          Thread.current.abort_on_exception = true
           loop { break unless process }
         end
       end
@@ -41,12 +41,16 @@ module Karafka
       # We signal critical exceptions, notify and do not allow worker to fail
       # rubocop:disable Lint/RescueException
       rescue Exception => e
-      # rubocop:enable Lint/RescueException
-        Karafka.monitor.instrument('worker.process.error', caller: self, error: e)
+        # rubocop:enable Lint/RescueException
+        Karafka.monitor.instrument(
+          'error.occurred',
+          caller: self,
+          error: e,
+          type: 'worker.process.error'
+        )
       ensure
         # job can be nil when the queue is being closed
         @jobs_queue.complete(job) if job
-        Thread.pass
       end
     end
   end

@@ -14,7 +14,7 @@ def setup_karafka
     # Use some decent defaults
     caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.uuid].join('-')
 
-    config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092' }
+    config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
     config.client_id = caller_id
     config.pause_timeout = 1
     config.pause_max_timeout = 1
@@ -26,7 +26,7 @@ def setup_karafka
     yield(config) if block_given?
   end
 
-  Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
+  Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
 end
 
 # Alias for drawing routes in the same way across benchmarks
@@ -87,9 +87,10 @@ class Tracker
   class << self
     # Runs what we are interested in, collects results and prints stats
     # @param iterations [Integer]
-    # @param messages_count [Integer] how many messages did we process overall
+    # @param messages_count [Integer, nil] how many messages did we process overall or nil if
+    #   the benchmark is not per message data related
     # @param block [Proc] code we want to run in iterations
-    def run(messages_count:, iterations: 10, &block)
+    def run(messages_count: nil, iterations: 10, &block)
       instance = new(iterations: iterations, messages_count: messages_count)
 
       instance.iterate { block.call }
@@ -119,7 +120,7 @@ class Tracker
   # Prints summary of measurements
   def report
     puts "Time taken: #{average}"
-    puts "Messages per second: #{@messages_count / average}"
+    puts "Messages per second: #{@messages_count / average}" if @messages_count
   end
 
   private

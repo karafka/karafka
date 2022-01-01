@@ -4,7 +4,7 @@
 
 setup_karafka
 
-elements = Array.new(20) { SecureRandom.uuid }
+elements = Array.new(40) { SecureRandom.uuid }
 
 elements.each { |data| produce(DataCollector.topic, data) }
 
@@ -14,7 +14,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topic do
       max_messages 5
@@ -25,8 +25,8 @@ Karafka::App.routes.draw do
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data[:counts].size >= 4
+  DataCollector.data[:counts].size >= 8
 end
 
-assert_equal [5], DataCollector.data[:counts].uniq
-assert_equal 4, DataCollector.data[:counts].size
+assert_equal 5, DataCollector.data[:counts].max
+assert_equal 8, DataCollector.data[:counts].size

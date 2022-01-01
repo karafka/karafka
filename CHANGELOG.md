@@ -1,17 +1,45 @@
 # Karafka framework changelog
 
-## 2.0.0-alpha1 (Unreleased)
+## 2.0.0-alpha6 (Unreleased)
+- Fix a bug, where upon missing boot file and Rails, railtie would fail with a generic exception (#818) 
+- Fix an issue with parallel pristine specs colliding with each other during `bundle install` (#820)
+- Replace `consumer.consume` with `consumer.consumed` event to match the behaviour
+- Make sure, that offset committing happens before the `consumer.consumed` event is propagated
+- Fix for failing when not installed (just a dependency) (#817)
+- Evict messages from partitions that were lost upon rebalancing (#825)
+- Do **not** run `#revoked` on partitions that were lost and assigned back upon rebalancing (#825)
+- Remove potential duplicated that could occur upon rebalance with re-assigned partitions (#825)
+- Optimize integration test suite additional consumers shutdown process (#828)
+- Optimize messages eviction and duplicates removal on poll stopped due to lack of messages
+- Add static group membership integration spec
+
+## 2.0.0-alpha5 (2022-04-03)
+- Rename StdoutListener to LoggerListener (#811)
+
+## 2.0.0-alpha4 (2022-03-20)
+- Rails support without ActiveJob queue adapter usage (#805)
+
+## 2.0.0-alpha3 (2022-03-16)
+- Restore 'app.initialized' state and add notification on it
+- Fix the installation flow for Rails and add integration tests for this scenario
+- Add more integration tests covering some edge cases
+
+## 2.0.0-alpha2 (2022-02-19)
+- Require `kafka` keys to be symbols
+- Added ActiveJob Pro adapter
+- Small updates to the license and docs
+
+## 2.0.0-alpha1 (2022-01-30)
+- Change license to `LGPL-3.0`
+- Introduce a Pro subscription
 - Switch from `ruby-kafka` to `librdkafka` as an underlying driver
 - Introduce fully automatic integration tests that go through the whole server lifecycle
 - Integrate WaterDrop tightly with autoconfiguration inheritance and an option to redefine it
-- Change license to `LGPL-3.0`
 - Multi-threaded support for concurrent jobs consumption (when in separate topics and/or partitions)
-- Introduce concept of workers for concurrency
-- Remove hot-code reload due to issues with handling Kafka reconnections (may reappear in 2.1)
 - Introduce subscriptions groups concept for better resources management
 - Remove completely all the callbacks in favour of finalizer method `#on_shutdown`
-- Remove single message consumption mode in favour of documentation on how to do it easily by yourself
 - Provide `on_revoked` method for taking actions upon topic revoke
+- Remove single message consumption mode in favour of documentation on how to do it easily by yourself
 - Provide sync and async offset management with async preferred
 - Introduce seamless Ruby on Rails integration via `Rails::Railte`
 - Update `cli info` to reflect the `2.0` details
@@ -20,26 +48,25 @@
 - Remove daemonization support
 - Stop validating `kafka` configuration beyond minimum as it is handled by `librdkafka`
 - Remove topics mappers concept
-- Improve environment auto-detection
 - Reorganize monitoring to match new concepts
 - Notify on fatal worker processing errors
 - Rename `Karafka::Params::BatchMetadata` to `Karafka::Messages::BatchMetadata`
 - Rename `Karafka::Params::Params` to `Karafka::Messages::Message`
 - Rename `#params_batch` in consumers to `#messages`
 - Rename `Karafka::Params::Metadata` to `Karafka::Messages::Metadata`
-- Use jobs for consumers work execution
 - Allow for processing work of multiple consumer groups by the same worker poll
 - Rename `Karafka::Fetcher` to `Karafka::Runner` and align notifications key names
 - Update install templates
 - `sidekiq-backend` is no longer supported
 - `testing` gem for RSpec has been updated
-- `WaterDrop` `2.0` support
+- `WaterDrop` `2.1+` support
 - Simple routing style (`0.5`) now builds a single consumer group instead of one per topic
 - Example apps were updated
-- Hook for underlying statistics emitted from librdkafka have been added.
-- Hook for underlying async errors emitted from  librdkafka have been added.
-- ActiveJob Rails adapter.
-- Added benchmarks that can be used to profile Karafka.
+- Hook for underlying statistics emitted from librdkafka have been added
+- Hook for underlying async errors emitted from  librdkafka have been added
+- ActiveJob Rails adapter
+- Added benchmarks that can be used to profile Karafka
+- Standardize error hook for all error reporting
 
 ## 1.4.11 (2021-12-04)
 - Source code metadata url added to the gemspec

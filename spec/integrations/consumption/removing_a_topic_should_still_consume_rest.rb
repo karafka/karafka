@@ -24,7 +24,7 @@ class Consumer2 < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topics.first do
       consumer Consumer1
@@ -47,7 +47,7 @@ end
 # Clear all the routes so later we can subscribe to only one topic
 Karafka::App.routes.clear
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topics.last do
       consumer Consumer2
@@ -57,7 +57,7 @@ end
 
 # We needed a new producer since Karafka closed the regular one when it stopped
 producer = ::WaterDrop::Producer.new do |config|
-  config.kafka = { 'bootstrap.servers' => '127.0.0.1:9092' }
+  config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
 end
 
 # We publish again and we will check that only one topic got consumed afterwards

@@ -78,7 +78,7 @@ RSpec.describe_current do
       it { expect { consumer.on_consume }.not_to raise_error }
 
       it 'expect to run proper instrumentation' do
-        Karafka.monitor.subscribe('consumer.consume') do |event|
+        Karafka.monitor.subscribe('consumer.consumed') do |event|
           expect(event.payload[:caller]).to eq(consumer)
         end
 
@@ -121,9 +121,10 @@ RSpec.describe_current do
       end
 
       it 'expect to track this with an instrumentation' do
-        Karafka.monitor.subscribe('consumer.consume.error') do |event|
+        Karafka.monitor.subscribe('error.occurred') do |event|
           expect(event.payload[:caller]).to eq(consumer)
           expect(event.payload[:error]).to eq(StandardError)
+          expect(event.payload[:type]).to eq('consumer.consume.error')
         end
       end
     end
@@ -137,7 +138,7 @@ RSpec.describe_current do
       it { expect { consumer.on_consume }.not_to raise_error }
 
       it 'expect to run proper instrumentation' do
-        Karafka.monitor.subscribe('consumer.consume') do |event|
+        Karafka.monitor.subscribe('consumer.consumed') do |event|
           expect(event.payload[:caller]).to eq(consumer)
         end
 
@@ -181,9 +182,10 @@ RSpec.describe_current do
       end
 
       it 'expect to track this with an instrumentation' do
-        Karafka.monitor.subscribe('consumer.consume.error') do |event|
+        Karafka.monitor.subscribe('error.occurred') do |event|
           expect(event.payload[:caller]).to eq(consumer)
           expect(event.payload[:error]).to eq(StandardError)
+          expect(event.payload[:type]).to eq('consumer.consume.error')
         end
       end
     end
@@ -202,9 +204,10 @@ RSpec.describe_current do
       end
 
       it 'expect not to run error instrumentation' do
-        Karafka.monitor.subscribe('consumer.revoked.error') do |event|
+        Karafka.monitor.subscribe('error.occurred') do |event|
           expect(event.payload[:caller]).not_to eq(consumer)
           expect(event.payload[:error]).not_to be_a(StandardError)
+          expect(event.payload[:type]).to eq('consumer.revoked.error')
         end
 
         consumer.on_revoked
@@ -223,9 +226,10 @@ RSpec.describe_current do
       it { expect { consumer.on_revoked }.not_to raise_error }
 
       it 'expect to run the error instrumentation' do
-        Karafka.monitor.subscribe('consumer.revoked.error') do |event|
+        Karafka.monitor.subscribe('error.occurred') do |event|
           expect(event.payload[:caller]).to eq(consumer)
           expect(event.payload[:error]).to be_a(StandardError)
+          expect(event.payload[:type]).to eq('consumer.revoked.error')
         end
 
         consumer.on_revoked
@@ -246,9 +250,10 @@ RSpec.describe_current do
       end
 
       it 'expect not to run error instrumentation' do
-        Karafka.monitor.subscribe('consumer.shutdown.error') do |event|
+        Karafka.monitor.subscribe('error.occurred') do |event|
           expect(event.payload[:caller]).not_to eq(consumer)
           expect(event.payload[:error]).not_to be_a(StandardError)
+          expect(event.payload[:type]).to eq('consumer.shutdown.error')
         end
 
         consumer.on_shutdown
@@ -267,9 +272,10 @@ RSpec.describe_current do
       it { expect { consumer.on_shutdown }.not_to raise_error }
 
       it 'expect to run the error instrumentation' do
-        Karafka.monitor.subscribe('consumer.shutdown.error') do |event|
+        Karafka.monitor.subscribe('error.occurred') do |event|
           expect(event.payload[:caller]).to eq(consumer)
           expect(event.payload[:error]).to be_a(StandardError)
+          expect(event.payload[:type]).to eq('consumer.shutdown.error')
         end
 
         consumer.on_shutdown

@@ -5,7 +5,7 @@
 # by sleeping 1ms per message to benchmark parallel processing.
 
 setup_karafka do |config|
-  config.kafka['auto.offset.reset'] = 'latest'
+  config.kafka[:'auto.offset.reset'] = 'latest'
   config.concurrency = 10
 end
 

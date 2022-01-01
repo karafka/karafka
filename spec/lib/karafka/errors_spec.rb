@@ -36,4 +36,16 @@ RSpec.describe_current do
 
     specify { expect(error).to be < described_class::BaseError }
   end
+
+  describe 'TopicNotFoundError' do
+    subject(:error) { described_class::TopicNotFoundError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe 'InvalidLicenseTokenError' do
+    subject(:error) { described_class::InvalidLicenseTokenError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
 end

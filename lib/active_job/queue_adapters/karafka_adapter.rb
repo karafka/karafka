@@ -5,16 +5,13 @@ module ActiveJob
   # ActiveJob queue adapters
   module QueueAdapters
     # Karafka adapter for enqueuing jobs
+    # This is here for ease of integration with ActiveJob.
     class KarafkaAdapter
-      # Enqueues the job by sending all the payload to a dedicated topic in Kafka that will be
-      # later on consumed by a special ActiveJob consumer
+      # Enqueues the job using the configured dispatcher
       #
       # @param job [Object] job that should be enqueued
       def enqueue(job)
-        ::Karafka.producer.produce_async(
-          topic: job.queue_name,
-          payload: ActiveSupport::JSON.encode(job.serialize)
-        )
+        ::Karafka::App.config.internal.active_job.dispatcher.call(job)
       end
 
       # Raises info, that Karafka backend does not support scheduling jobs

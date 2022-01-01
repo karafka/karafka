@@ -1,0 +1,17 @@
+Copyright (c) Maciej Mensfeld
+
+Karafka is an Open Source project licensed under the terms of
+the LGPLv3 license. Please see <https://github.com/karafka/karafka/blob/master/LGPL>
+for license text.
+
+Karafka has also commercial-friendly license, commercial support and commercial components.
+
+All of the commercial components are present in the lib/karafka/pro directory of this repository
+and their usage requires commercial license agreement.
+
+By sending a pull request to the pro components, you are agreeing to transfer the copyright of your
+code to Maciej Mensfeld.
+
+You can find the commercial license in LICENSE-COM.
+
+Please see https://karafka.io for purchasing options.

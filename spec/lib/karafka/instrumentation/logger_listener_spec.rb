@@ -16,18 +16,6 @@ RSpec.describe_current do
     trigger
   end
 
-  describe '#on_connection_listener_fetch_loop_error' do
-    subject(:trigger) { listener.on_connection_listener_fetch_loop_error(event) }
-
-    let(:payload) { { caller: caller, error: error } }
-    let(:error) { StandardError.new }
-    let(:message) { "Listener fetch loop error: #{error}" }
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to have_received(:error).with(message)
-    end
-  end
-
   describe '#on_connection_listener_fetch_loop' do
     subject(:trigger) { listener.on_connection_listener_fetch_loop(event) }
 
@@ -47,54 +35,6 @@ RSpec.describe_current do
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to have_received(:info).with(message)
-    end
-  end
-
-  describe '#on_consumer_consume_error' do
-    subject(:trigger) { listener.on_consumer_consume_error(event) }
-
-    let(:payload) { { caller: caller, error: error } }
-    let(:error) { StandardError.new }
-    let(:message) { "Consuming failed due to an error: #{error}" }
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to have_received(:error).with(message)
-    end
-  end
-
-  describe '#on_consumer_revoked_error' do
-    subject(:trigger) { listener.on_consumer_revoked_error(event) }
-
-    let(:payload) { { caller: caller, error: error } }
-    let(:error) { StandardError.new }
-    let(:message) { "Revoking failed due to an error: #{error}" }
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to have_received(:error).with(message)
-    end
-  end
-
-  describe '#on_consumer_shutdown_error' do
-    subject(:trigger) { listener.on_consumer_shutdown_error(event) }
-
-    let(:payload) { { caller: caller, error: error } }
-    let(:error) { StandardError.new }
-    let(:message) { "Shutting down failed due to an error: #{error}" }
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to have_received(:error).with(message)
-    end
-  end
-
-  describe '#on_runner_call_error' do
-    subject(:trigger) { listener.on_runner_call_error(event) }
-
-    let(:payload) { { caller: caller, error: error } }
-    let(:error) { StandardError.new }
-    let(:message) { "Runner crash due to an error: #{error}" }
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to have_received(:fatal).with(message)
     end
   end
 
@@ -162,40 +102,82 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_app_stopping_error' do
-    subject(:trigger) { listener.on_app_stopping_error(event) }
+  describe '#on_error_occurred' do
+    subject(:trigger) { listener.on_error_occurred(event) }
 
-    let(:payload) { {} }
-    let(:message) { 'Forceful Karafka server stop' }
+    let(:payload) { { caller: caller, error: error, type: type } }
+    let(:error) { StandardError.new }
 
-    it 'expect logger to log server stop' do
-      # This sleep ensures that the threaded logger is able to finish
-      sleep 0.1
-      expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
+    context 'when it is a connection.listener.fetch_loop.error' do
+      let(:message) { "Listener fetch loop error: #{error}" }
+      let(:type) { 'connection.listener.fetch_loop.error' }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
-  end
 
-  describe '#on_worker_process_error' do
-    subject(:trigger) { listener.on_worker_process_error(event) }
+    context 'when it is a consumer.consume.error' do
+      let(:type) { 'consumer.consume.error' }
+      let(:message) { "Consumer consuming error: #{error}" }
 
-    let(:payload) { { caller: caller, error: error } }
-    let(:error) { Exception.new }
-    let(:message) { "Worker processing failed due to an error: #{error}" }
-
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to have_received(:fatal).with(message)
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
-  end
 
-  describe '#on_emitted_error' do
-    subject(:trigger) { listener.on_emitted_error(event) }
+    context 'when it is a consumer.revoked.error' do
+      let(:type) { 'consumer.revoked.error' }
+      let(:message) { "Consumer on revoked failed due to an error: #{error}" }
 
-    let(:payload) { { caller: caller, error: error } }
-    let(:error) { Exception.new }
-    let(:message) { "Background thread error emitted: #{error}" }
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
 
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to have_received(:error).with(message)
+    context 'when it is a consumer.shutdown.error' do
+      let(:type) { 'consumer.shutdown.error' }
+      let(:message) { "Consumer on shutdown failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a runner.call.error' do
+      let(:type) { 'runner.call.error' }
+      let(:message) { "Runner crashed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:fatal).with(message) }
+    end
+
+    context 'when it is an app.stopping.error' do
+      let(:type) { 'app.stopping.error' }
+      let(:payload) { { type: type, error: Karafka::Errors::ForcefulShutdownError.new } }
+      let(:message) { 'Forceful Karafka server stop' }
+
+      it 'expect logger to log server stop' do
+        # This sleep ensures that the threaded logger is able to finish
+        sleep 0.1
+        expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
+      end
+    end
+
+    context 'when it is a worker.process.error' do
+      let(:type) { 'worker.process.error' }
+      let(:message) { "Worker processing failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:fatal).with(message) }
+    end
+
+    context 'when it is a librdkafka.error' do
+      let(:type) { 'librdkafka.error' }
+      let(:message) { "librdkafka internal error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is an unsupported error type' do
+      subject(:error_trigger) { listener.on_error_occurred(event) }
+
+      # We use the before { trigger } for all other cases and not worth duplicating, that's why
+      # we overwrite it here
+      let(:trigger) { nil }
+      let(:type) { 'unsupported.error' }
+
+      it { expect { error_trigger }.to raise_error(Karafka::Errors::UnsupportedCaseError) }
     end
   end
 end

@@ -13,7 +13,8 @@ RSpec.describe_current do
         kafka: { 'bootstrap.servers' => 'localhost:9092' },
         max_wait_time: 10_000,
         max_messages: 10,
-        manual_offset_management: true
+        manual_offset_management: true,
+        initial_offset: 'earliest'
       }
     ]
   end

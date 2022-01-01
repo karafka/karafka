@@ -15,8 +15,8 @@ elements1 = Array.new(10) { SecureRandom.uuid }
 elements2 = Array.new(10) { SecureRandom.uuid }
 
 class Listener
-  def on_consumer_consume_error(event)
-    DataCollector.data[:error] << event
+  def on_error_occurred(event)
+    DataCollector.data[:errors] << event
   end
 end
 
@@ -49,7 +49,7 @@ class Consumer2 < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topics.first do
       consumer Consumer1
@@ -76,10 +76,12 @@ start_karafka_and_wait_until do
 end
 
 assert_equal true, DataCollector.data[0].size >= 10
-assert_equal true, DataCollector.data[:error].size == 2
+assert_equal true, DataCollector.data[:errors].size == 2
 assert_equal 1, DataCollector.data[1].uniq.size
 assert_equal 1, DataCollector.data[3].uniq.size
-assert_equal StandardError, DataCollector.data[:error].first[:error].class
+assert_equal StandardError, DataCollector.data[:errors].first[:error].class
+assert_equal 'consumer.consume.error', DataCollector.data[:errors].first[:type]
+assert_equal 'error.occurred', DataCollector.data[:errors].first.id
 assert_equal 10, DataCollector.data[0].uniq.size
 assert_equal 10, DataCollector.data[2].uniq.size
 # Same worker from the same thread should process both

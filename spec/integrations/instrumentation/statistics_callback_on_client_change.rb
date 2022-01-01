@@ -5,13 +5,7 @@
 
 setup_karafka
 
-Karafka::App.routes.draw do
-  consumer_group DataCollector.consumer_groups.first do
-    topic DataCollector.topic do
-      consumer Class.new
-    end
-  end
-end
+draw_routes(Class.new)
 
 stats_events = []
 

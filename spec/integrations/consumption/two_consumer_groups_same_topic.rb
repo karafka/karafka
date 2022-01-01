@@ -15,7 +15,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_groups.first do
     topic DataCollector.topic do
       consumer Consumer
@@ -37,6 +37,8 @@ end
 
 keys = DataCollector.data.keys
 
+assert_equal 2, DataCollector.data.size
+assert_equal 100, DataCollector.data[keys[0]].size
+assert_equal 100, DataCollector.data[keys[1]].size
 assert_equal jsons, DataCollector.data[keys[0]]
 assert_equal jsons, DataCollector.data[keys[1]]
-assert_equal 2, DataCollector.data.size

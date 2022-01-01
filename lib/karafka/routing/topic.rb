@@ -7,7 +7,7 @@ module Karafka
     # It is a part of Karafka's DSL.
     class Topic
       attr_reader :id, :name, :consumer_group
-      attr_accessor :consumer
+      attr_writer :consumer
 
       # Attributes we can inherit from the root unless they were defined on this level
       INHERITABLE_ATTRIBUTES = %i[
@@ -16,6 +16,7 @@ module Karafka
         manual_offset_management
         max_messages
         max_wait_time
+        initial_offset
       ].freeze
 
       private_constant :INHERITABLE_ATTRIBUTES
@@ -43,6 +44,25 @@ module Karafka
           value = Karafka::App.config.send(attribute)
 
           instance_variable_set(:"@#{attribute}", value)
+        end
+      end
+
+      # @return [Class] consumer class that we should use
+      def consumer
+        if Karafka::App.config.consumer_persistence
+          # When persistence of consumers is on, no need to reload them
+          @consumer
+        else
+          # In order to support code reload without having to change the topic api, we re-fetch the
+          # class of a consumer based on its class name. This will support all the cases where the
+          # consumer class is defined with a name. It won't support code reload for anonymous
+          # consumer classes, but this is an edge case
+          begin
+            ::Object.const_get(@consumer.to_s)
+          rescue NameError
+            # It will only fail if the in case of anonymous classes
+            @consumer
+          end
         end
       end
 

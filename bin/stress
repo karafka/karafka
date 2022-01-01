@@ -9,5 +9,5 @@ set -e
 while :
 do
   reset
-  bundle exec bin/integrations
+  bin/integrations $1
 done

@@ -19,10 +19,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-configurable', '~> 0.13'
   spec.add_dependency 'dry-monitor', '~> 0.5'
   spec.add_dependency 'dry-validation', '~> 1.7'
-  spec.add_dependency 'irb', '~> 1.0'
   spec.add_dependency 'rdkafka', '>= 0.10'
   spec.add_dependency 'thor', '>= 0.20'
-  spec.add_dependency 'waterdrop', '>= 2.0.6', '< 3.0.0'
+  spec.add_dependency 'waterdrop', '>= 2.3.0', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   spec.required_ruby_version = '>= 2.6.0'
@@ -35,5 +34,9 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = %w[karafka]
   spec.require_paths = %w[lib]
-  spec.metadata      = { 'source_code_uri' => 'https://github.com/karafka/karafka' }
+
+  spec.metadata = {
+    'source_code_uri' => 'https://github.com/karafka/karafka',
+    'rubygems_mfa_required' => 'true'
+  }
 end

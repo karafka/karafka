@@ -5,6 +5,9 @@ RSpec.describe_current do
 
   let(:job1) { OpenStruct.new(group_id: 1, id: 1, call: true) }
   let(:job2) { OpenStruct.new(group_id: 2, id: 1, call: true) }
+  let(:internal_queue) { ::Queue.new }
+
+  before { queue.instance_variable_set('@queue', internal_queue) }
 
   describe '#<<' do
     context 'when queue is closed' do
@@ -68,11 +71,7 @@ RSpec.describe_current do
   end
 
   describe '#close' do
-    let(:internal_queue) { ::Queue.new }
-
-    before { allow(::Queue).to receive(:new).and_return(internal_queue) }
-
-    context 'when queue is closed already' do
+    context 'when queues are closed already' do
       before { internal_queue.close }
 
       it { expect { queue.close }.not_to raise_error }
@@ -95,15 +94,12 @@ RSpec.describe_current do
     end
   end
 
+  # Each of those specs would hang forever if something would be wrong, that's why we can easily
+  # just run and see if finished. No need for assertions.
   describe '#wait' do
-    # Closing it after the call will emulate the status change without having to run separate
-    # thread just for the status change
-    before { allow(Thread).to receive(:pass) { queue.close } }
-
     context 'when we do not have to wait' do
       it 'expect not to pass on the thread execution' do
         queue.wait(job1.group_id)
-        expect(Thread).not_to receive(:pass)
       end
     end
 
@@ -111,8 +107,13 @@ RSpec.describe_current do
       before { queue << job1 }
 
       it 'expect to pass until no longer needing to wait' do
+        Thread.new do
+          # We need to close it in order to unlock
+          sleep(0.01)
+          queue.close
+        end
+
         queue.wait(job1.group_id)
-        expect(Thread).to have_received(:pass).once
       end
     end
 
@@ -121,7 +122,6 @@ RSpec.describe_current do
 
       it 'expect not to wait' do
         queue.wait(job1.group_id)
-        expect(Thread).not_to have_received(:pass)
       end
     end
 
@@ -132,8 +132,13 @@ RSpec.describe_current do
       end
 
       it 'expect to wait' do
+        Thread.new do
+          # We need to close it in order to unlock
+          sleep(0.01)
+          queue.close
+        end
+
         queue.wait(job1.group_id)
-        expect(Thread).to have_received(:pass).once
       end
     end
 
@@ -142,7 +147,6 @@ RSpec.describe_current do
 
       it 'expect not to wait' do
         queue.wait(job1.group_id)
-        expect(Thread).not_to have_received(:pass)
       end
     end
 
@@ -151,7 +155,6 @@ RSpec.describe_current do
 
       it 'expect not to wait' do
         queue.wait(group_id)
-        expect(Thread).not_to have_received(:pass)
       end
     end
   end

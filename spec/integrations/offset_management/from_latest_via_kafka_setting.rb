@@ -3,7 +3,7 @@
 # Karafka should be able to start consuming from the latest offset
 
 setup_karafka do |config|
-  config.kafka['auto.offset.reset'] = 'latest'
+  config.initial_offset = 'latest'
 end
 
 before = Array.new(10) { SecureRandom.uuid }
@@ -20,13 +20,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
-      consumer Consumer
-    end
-  end
-end
+draw_routes(Consumer)
 
 # Start Karafka
 Thread.new { Karafka::Server.run }

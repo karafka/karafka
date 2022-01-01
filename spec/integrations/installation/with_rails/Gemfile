@@ -1,0 +1,6 @@
+# frozen_string_literal: true
+
+source 'https://rubygems.org'
+
+gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
+gem 'rails'

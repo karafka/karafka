@@ -14,17 +14,30 @@ module Karafka
     class Config
       extend Dry::Configurable
 
-      # Contract for checking the config provided by the user
-      CONTRACT = Karafka::Contracts::Config.new.freeze
-
       # Defaults for kafka settings, that will be overwritten only if not present already
       KAFKA_DEFAULTS = {
-        'client.id' => 'karafka'
+        'client.id': 'karafka'
       }.freeze
 
-      private_constant :CONTRACT, :KAFKA_DEFAULTS
+      private_constant :KAFKA_DEFAULTS
 
       # Available settings
+
+      # Namespace for Pro version related license management. If you use LGPL, no need to worry
+      #   about any of this
+      setting :license do
+        # option token [String, false] - license token issued when you acquire a Pro license
+        # Leave false if using the LGPL version and all is going to work just fine :)
+        #
+        # @note By using the commercial components, you accept the LICENSE-COMM commercial license
+        #   terms and conditions
+        setting :token, default: false
+        # option entity [String] for whom we did issue the license
+        setting :entity, default: ''
+        # option expires_on [Date] date when the license expires
+        setting :expires_on, default: Date.parse('2100-01-01')
+      end
+
       # option client_id [String] kafka client_id - used to provide
       #   default Kafka groups namespaces and identify that app in kafka
       setting :client_id, default: 'karafka'
@@ -36,12 +49,18 @@ module Karafka
       # or they need to maintain their own internal consumer group naming conventions, they
       # can easily do it, replacing the default client_id + consumer name pattern concept
       setting :consumer_mapper, default: Routing::ConsumerMapper.new
+      # option [Boolean] should we reload consumers with each incoming batch thus effectively
+      # supporting code reload (if someone reloads code) or should we keep the persistence
+      setting :consumer_persistence, default: true
       # Default deserializer for converting incoming data into ruby objects
       setting :deserializer, default: Karafka::Serialization::Json::Deserializer.new
+      # option [String] should we start with the earliest possible offset or latest
+      # This will set the `auto.offset.reset` value unless present in the kafka scope
+      setting :initial_offset, default: 'earliest'
       # option [Boolean] should we leave offset management to the user
       setting :manual_offset_management, default: false
       # options max_messages [Integer] how many messages do we want to fetch from Kafka in one go
-      setting :max_messages, default: 100_000
+      setting :max_messages, default: 1_000
       # option [Integer] number of milliseconds we can wait while fetching data
       setting :max_wait_time, default: 10_000
       # option shutdown_timeout [Integer] the number of milliseconds after which Karafka no
@@ -65,8 +84,6 @@ module Karafka
       setting :kafka, default: {}
 
       # Namespace for internal settings that should not be modified
-      # It's a temporary step to "declassify" several things internally before we move to a
-      # non global state
       setting :internal do
         # option routing_builder [Karafka::Routing::Builder] builder instance
         setting :routing_builder, default: Routing::Builder.new
@@ -79,6 +96,17 @@ module Karafka
         # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
         #   group builder
         setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
+
+        # Karafka components for ActiveJob
+        setting :active_job do
+          # option dispatcher [Karafka::ActiveJob::Dispatcher] default dispatcher for ActiveJob
+          setting :dispatcher, default: ActiveJob::Dispatcher.new
+          # option job_options_contract [Karafka::Contracts::JobOptionsContract] contract for
+          #   ensuring, that extra job options defined are valid
+          setting :job_options_contract, default: ActiveJob::JobOptionsContract.new
+          # option consumer [Class] consumer class that should be used to consume ActiveJob data
+          setting :consumer, default: ActiveJob::Consumer
+        end
       end
 
       class << self
@@ -87,8 +115,14 @@ module Karafka
         def setup(&block)
           configure(&block)
           merge_kafka_defaults!(config)
-          validate!
+          Contracts::Config.new.validate!(config.to_h)
+
+          # Check the license presence (if needed) and
+          Licenser.new.verify(config.license)
+
           configure_components
+
+          Karafka::App.initialized!
         end
 
         private
@@ -105,18 +139,6 @@ module Karafka
           end
         end
 
-        # Validate config based on the config contract
-        # @return [Boolean] true if configuration is valid
-        # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
-        #   doesn't match with the config contract
-        def validate!
-          validation_result = CONTRACT.call(config.to_h)
-
-          return true if validation_result.success?
-
-          raise Errors::InvalidConfigurationError, validation_result.errors.to_h
-        end
-
         # Sets up all the components that are based on the user configuration
         # @note At the moment it is only WaterDrop
         def configure_components
@@ -126,6 +148,12 @@ module Karafka
             producer_config.kafka = config.kafka.dup
             producer_config.logger = config.logger
           end
+
+          return unless Karafka.pro?
+
+          # Runs the pro loader that includes all the pro components
+          require 'karafka/pro/loader'
+          Pro::Loader.setup(config)
         end
       end
     end

@@ -2,9 +2,15 @@
 
 # Runner to run integration specs in parallel
 
+# Part of integration specs run pristine without bundler.
+# If we would run bundle exec when running this code, bundler would inject its own context
+# into them, messing things up heavily
+raise 'This code needs to be executed WITHOUT bundle exec' if Kernel.const_defined?(:Bundler)
+
 require 'open3'
 require 'fileutils'
 require 'pathname'
+require 'tmpdir'
 
 ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
 
@@ -13,13 +19,13 @@ IntegrationTestError = Class.new(StandardError)
 
 # How many child processes with integration specs do we want to run in parallel
 # When the value is high, there's a problem with thread allocation on Github
-CONCURRENCY = 5
+CONCURRENCY = 4
 
 # Abstraction around a single test scenario execution process
 class Scenario
   # How long a scenario can run before we kill it
   # This is a fail-safe just in case something would hang
-  MAX_RUN_TIME = 60 * 5
+  MAX_RUN_TIME = 60 * 2
 
   # There are rare cases where Karafka may force shutdown for some of the integration cases
   # This includes exactly those
@@ -38,9 +44,13 @@ class Scenario
   # @param path [String] path to the scenarios file
   def initialize(path)
     @path = path
-    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(
-      "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
-    )
+    # Last 1024 characters from stdout
+    @stdout_tail = ''
+  end
+
+  # Starts running given scenario in a separate process
+  def start
+    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(init_and_build_cmd)
     @started_at = current_time
   end
 
@@ -49,19 +59,38 @@ class Scenario
     @path.gsub("#{ROOT_PATH}/spec/integrations/", '')
   end
 
+  # @return [Boolean] true if spec is pristine
+  def pristine?
+    scenario_dir = File.dirname(@path)
+
+    # If there is a Gemfile in a scenario directory, it means it is a pristine spec and we need
+    # to run bundle install, etc in order to run it
+    File.exist?(File.join(scenario_dir, 'Gemfile'))
+  end
+
   # @return [Boolean] did this scenario finished or is it still running
   def finished?
-    # We read it so it won't grow as we use our default logger that prints to both test.log and
-    # to stdout. Otherwise after reaching the buffer size, it would hang
-    @stdout.read_nonblock(10_240, exception: false)
-
     # If the thread is running too long, kill it
     if current_time - @started_at > MAX_RUN_TIME
       @wait_thr.kill
       Process.kill('TERM', pid)
     end
 
+    # We read it so it won't grow as we use our default logger that prints to both test.log and
+    # to stdout. Otherwise after reaching the buffer size, it would hang
+    buffer = ''
+    @stdout.read_nonblock(10_240, buffer, exception: false)
+    @stdout_tail << buffer
+    @stdout_tail = @stdout_tail[-10_024..-1] || @stdout_tail
+
     !@wait_thr.alive?
+  end
+
+  # @return [Boolean] did this scenario finish successfully or not
+  def success?
+    expected_exit_codes = EXIT_CODES[name] || EXIT_CODES[:default]
+
+    expected_exit_codes.include?(exit_code)
   end
 
   # @return [Integer] pid of the process of this scenario
@@ -75,13 +104,6 @@ class Scenario
     @wait_thr.value&.exitstatus || 123
   end
 
-  # @return [Boolean] did this scenario finish successfully or not
-  def success?
-    expected_exit_codes = EXIT_CODES[name] || EXIT_CODES[:default]
-
-    expected_exit_codes.include?(exit_code)
-  end
-
   # Prints a status report when scenario is finished and stdout if it failed
   def report
     result = success? ? "\e[#{32}m#{'OK'}\e[0m" : "\e[#{31}m#{'FAILED'}\e[0m"
@@ -90,11 +112,40 @@ class Scenario
 
     unless success?
       puts "Exit code: #{exit_code}"
+      puts @stdout_tail
       puts @stderr.read
     end
   end
 
   private
+
+  # Sets up a proper environment for a given spec to run and returns the run command
+  # @return [String] run command
+  def init_and_build_cmd
+    # If there is a Gemfile in a scenario directory, it means it is a pristine spec and we need
+    # to run bundle install, etc in order to run it
+    if pristine?
+      scenario_dir = File.dirname(@path)
+      # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
+      temp_dir = Dir.mktmpdir
+      file_name = File.basename(@path)
+
+      FileUtils.cp_r("#{scenario_dir}/.", temp_dir)
+
+      <<~CMD
+        cd #{temp_dir} &&
+        KARAFKA_GEM_DIR=#{ROOT_PATH} \
+        BUNDLE_AUTO_INSTALL=true \
+        PRISTINE_MODE=true \
+        bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{file_name}
+      CMD
+    else
+      <<~CMD
+        KARAFKA_GEM_DIR=#{ROOT_PATH} \
+        bundle exec ruby -r ./spec/integrations_helper.rb #{@path}
+      CMD
+    end
+  end
 
   # @return [Float] current machine time
   def current_time
@@ -102,53 +153,56 @@ class Scenario
   end
 end
 
-# Simple array to keep track of active integration processes thread running with info on which
-# test scenario is running
-active_scenarios = []
-
-# Finished runners
-finished_scenarios = []
-
-# Waits for any of the processes to be finished and tracks exit codes
-#
-# @param active_scenarios [Array] active runners
-# @param finished_scenarios [Hash] finished forks exit codes
-def wait_and_track(active_scenarios, finished_scenarios)
-  exited = active_scenarios.find(&:finished?)
-
-  if exited
-    scenario = active_scenarios.delete(exited)
-
-    scenario.report
-
-    finished_scenarios << scenario
-  else
-    Thread.pass
-  end
-end
-
 # Load all the specs
 specs = Dir[ROOT_PATH.join('spec/integrations/**/*.rb')]
 
-# If filter is provided, apply
-specs.delete_if { |name| !name.include?(ARGV[0]) } if ARGV[0]
+# If filters is provided, apply
+# Allows to provide several filters one after another and applies all of them
+ARGV.each do |filter|
+  specs.delete_if { |name| !name.include?(filter) }
+end
 
-raise ArgumentError, "No integration specs with filter: #{ARGV[0]}" if specs.empty?
+raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
 
 # Randomize order
 seed = (ENV['SEED'] || rand(0..10_000)).to_i
 
 puts "Random seed: #{seed}"
 
-specs.shuffle(random: Random.new(seed)).each do |integration_test|
-  scenario = Scenario.new(integration_test)
+scenarios = specs
+            .shuffle(random: Random.new(seed))
+            .map { |integration_test| Scenario.new(integration_test) }
 
-  active_scenarios << scenario
+regulars = scenarios.reject(&:pristine?)
+pristine = scenarios.select(&:pristine?)
 
-  wait_and_track(active_scenarios, finished_scenarios) until active_scenarios.size < CONCURRENCY
+active_scenarios = []
+finished_scenarios = []
+
+while finished_scenarios.size < scenarios.size
+  # If we have space to run another scenario, we add it
+  if active_scenarios.size < CONCURRENCY
+    scenario = nil
+    # We can run only one pristine at the same time due to concurrency issues within bundler
+    # Since they usually take longer than others, we try to run them as fast as possible when there
+    # is a slot
+    scenario = pristine.pop unless active_scenarios.any?(&:pristine?)
+    scenario ||= regulars.pop
+
+    if scenario
+      scenario.start
+      active_scenarios << scenario
+    end
+  end
+
+  active_scenarios.select(&:finished?).each do |exited|
+    scenario = active_scenarios.delete(exited)
+    scenario.report
+    finished_scenarios << scenario
+  end
+
+  sleep(0.1)
 end
-
-wait_and_track(active_scenarios, finished_scenarios) while !active_scenarios.empty?
 
 # Fail all if any of the tests does not have expected exit code
 raise IntegrationTestError unless finished_scenarios.all?(&:success?)

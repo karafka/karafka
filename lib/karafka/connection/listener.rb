@@ -62,13 +62,16 @@ module Karafka
             messages_buffer: messages_buffer
           )
 
-          # We don't have to wait for the revoke jobs to be done, because since they are revoked,
-          # we should not get any data from them, thus there is no risk of a race-condition.
-          revoke_lost_partitions_consumers
+          # If there were revoked partitions, we need to wait on their jobs to finish before
+          # distributing consuming jobs as upon revoking, we might get assigned to the same
+          # partitions, thus getting their jobs. The revoking jobs need to finish before
+          # appropriate consumers are taken down and re-created
+          wait(@subscription_group) if distribute_revoke_lost_partitions_jobs
+
           distribute_partitions_jobs(messages_buffer)
 
           # We wait only on jobs from our subscription group. Other groups are independent.
-          @jobs_queue.wait(@subscription_group.id)
+          wait(@subscription_group)
 
           # We don't use the `#commit_offsets!` here for performance reasons. This can be achieved
           # if needed by using manual offset management.
@@ -80,8 +83,13 @@ module Karafka
         # This is on purpose - see the notes for this method
         # rubocop:disable Lint/RescueException
       rescue Exception => e
-        Karafka.monitor.instrument('connection.listener.fetch_loop.error', caller: self, error: e)
         # rubocop:enable Lint/RescueException
+        Karafka.monitor.instrument(
+          'error.occurred',
+          caller: self,
+          error: e,
+          type: 'connection.listener.fetch_loop.error'
+        )
 
         restart
 
@@ -94,10 +102,11 @@ module Karafka
       end
 
       # Enqueues revoking jobs for partitions that were taken away from the running process.
-      def revoke_lost_partitions_consumers
+      # @return [Boolean] was there anything to revoke
+      def distribute_revoke_lost_partitions_jobs
         revoked_partitions = @client.rebalance_manager.revoked_partitions
 
-        return if revoked_partitions.empty?
+        return false if revoked_partitions.empty?
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
@@ -106,6 +115,8 @@ module Karafka
             @jobs_queue << Processing::Jobs::Revoked.new(executor)
           end
         end
+
+        true
       end
 
       # Takes the messages per topic partition and enqueues processing jobs in threads.
@@ -121,6 +132,12 @@ module Karafka
 
           @jobs_queue << Processing::Jobs::Consume.new(executor, messages)
         end
+      end
+
+      # Waits for all the jobs from a given subscription group to finish before moving forward
+      # @param subscription_group [Karafka::Routing::SubscriptionGroup]
+      def wait(subscription_group)
+        @jobs_queue.wait(subscription_group.id)
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and

@@ -11,8 +11,8 @@ setup_karafka do |config|
 end
 
 class Listener
-  def on_worker_process_error(_event)
-    DataCollector.data[0] << 1
+  def on_error_occurred(event)
+    DataCollector.data[:errors] << event
   end
 end
 
@@ -28,13 +28,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
-      consumer Consumer
-    end
-  end
-end
+draw_routes(Consumer)
 
 elements.each { |data| produce(DataCollector.topic, data) }
 
@@ -43,11 +37,13 @@ raised = false
 begin
   start_karafka_and_wait_until do
     # This means, that listener received critical error
-    DataCollector.data[0].size >= 1
+    DataCollector.data[:errors].size >= 1
   end
 rescue SuperException
   raised = true
 end
 
 assert_equal false, raised
-assert_equal 1, DataCollector.data[0].size
+assert_equal 1, DataCollector.data[:errors].size
+assert_equal 'error.occurred', DataCollector.data[:errors].first.id
+assert_equal 'worker.process.error', DataCollector.data[:errors].first.payload[:type]

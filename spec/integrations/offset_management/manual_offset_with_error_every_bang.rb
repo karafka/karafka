@@ -2,7 +2,7 @@
 
 # When manual offset management is on, upon error Karafka should start again from the place
 # it had in the checkpoint. If we checkpoint after each message is processed (here adding to array)
-# it should not have any duplicates as the error happens befor checkpointing
+# it should not have any duplicates as the error happens before checkpointing
 
 setup_karafka do |config|
   config.manual_offset_management = true
@@ -26,13 +26,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
-      consumer Consumer
-    end
-  end
-end
+draw_routes(Consumer)
 
 elements.each { |data| produce(DataCollector.topic, data) }
 

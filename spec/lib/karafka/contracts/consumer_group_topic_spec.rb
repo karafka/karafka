@@ -12,7 +12,8 @@ RSpec.describe_current do
       manual_offset_management: false,
       kafka: { 'bootstrap.servers' => 'localhost:9092' },
       max_messages: 10,
-      max_wait_time: 10_000
+      max_wait_time: 10_000,
+      initial_offset: 'earliest'
     }
   end
 
@@ -94,5 +95,31 @@ RSpec.describe_current do
     before { config[:kafka] = { 'message.max.bytes' => 0 } }
 
     it { expect(check).not_to be_success }
+  end
+
+  context 'when we validate initial_offset' do
+    context 'when it is not present' do
+      before { config[:initial_offset] = nil }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when earliest' do
+      before { config[:initial_offset] = 'earliest' }
+
+      it { expect(check).to be_success }
+    end
+
+    context 'when latest' do
+      before { config[:initial_offset] = 'latest' }
+
+      it { expect(check).to be_success }
+    end
+
+    context 'when not supported' do
+      before { config[:initial_offset] = rand.to_s }
+
+      it { expect(check).not_to be_success }
+    end
   end
 end

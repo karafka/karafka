@@ -90,7 +90,12 @@ module Karafka
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
         thread = Thread.new do
-          Karafka.monitor.instrument('app.stopping.error', error: e)
+          Karafka.monitor.instrument(
+            'error.occurred',
+            caller: self,
+            error: e,
+            type: 'app.stopping.error'
+          )
 
           # We're done waiting, lets kill them!
           workers.each(&:terminate)

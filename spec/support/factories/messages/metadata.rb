@@ -6,7 +6,7 @@ FactoryBot.define do
 
     partition { 0 }
     topic { 'topic' }
-    offset { 0 }
+    sequence(:offset) { |nr| nr }
 
     initialize_with do
       new(partition: partition, topic: topic, offset: 0)

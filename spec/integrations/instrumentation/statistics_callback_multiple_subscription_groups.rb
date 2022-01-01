@@ -6,7 +6,7 @@
 
 setup_karafka
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_groups.first do
     topic DataCollector.topic do
       consumer Class.new

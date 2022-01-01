@@ -4,7 +4,7 @@
 
 setup_karafka do |config|
   config.concurrency = 10
-  config.kafka['auto.offset.reset'] = 'latest'
+  config.initial_offset = 'latest'
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -23,7 +23,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     # Special topic with 10 partitions available
     topic 'integrations_1_10' do

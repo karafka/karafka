@@ -94,9 +94,10 @@ RSpec.describe_current do
     end
 
     it 'expect to run proper instrumentation' do
-      Karafka.monitor.subscribe('connection.listener.fetch_loop.error') do |event|
+      Karafka.monitor.subscribe('error.occurred') do |event|
         expect(event.payload[:caller]).to eq(listener)
         expect(event.payload[:error]).to eq(error)
+        expect(event.payload[:type]).to eq('connection.listener.fetch_loop.error')
       end
     end
 

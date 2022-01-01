@@ -18,6 +18,7 @@ module Karafka
         kafka
         max_messages
         max_wait_time
+        initial_offset
       ].freeze
 
       private_constant :DISTRIBUTION_KEYS
