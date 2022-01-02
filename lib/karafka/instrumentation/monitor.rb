@@ -19,30 +19,21 @@ module Karafka
       BASE_EVENTS = %w[
         app.running
         app.stopping
-        app.stopping.error
         app.stopped
 
         consumer.consume
-        consumer.consume.error
         consumer.revoked
-        consumer.revoked.error
         consumer.shutdown
-        consumer.shutdown.error
 
         process.notice_signal
-
-        runner.call.error
 
         connection.listener.before_fetch_loop
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
-        connection.listener.fetch_loop.error
-
-        worker.process.error
 
         statistics.emitted
 
-        error.emitted
+        error.occurred
       ].freeze
 
       private_constant :BASE_EVENTS

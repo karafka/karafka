@@ -28,7 +28,10 @@ RSpec.describe_current do
 
     context 'when something goes wrong internaly' do
       let(:error) { StandardError }
-      let(:instrument_args) { ['runner.call.error', { caller: runner, error: error }] }
+
+      let(:instrument_args) do
+        ['error.occurred', { caller: runner, error: error, type: 'runner.call.error' }]
+      end
 
       before do
         allow(runner).to receive(:listeners).and_raise(error)

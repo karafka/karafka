@@ -42,7 +42,12 @@ module Karafka
       # rubocop:disable Lint/RescueException
       rescue Exception => e
       # rubocop:enable Lint/RescueException
-        Karafka.monitor.instrument('worker.process.error', caller: self, error: e)
+        Karafka.monitor.instrument(
+          'error.occurred',
+          caller: self,
+          error: e,
+          type: 'worker.process.error'
+        )
       ensure
         # job can be nil when the queue is being closed
         @jobs_queue.complete(job) if job

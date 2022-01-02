@@ -27,9 +27,10 @@ module Karafka
           return unless @client_name == client_name
 
           @monitor.instrument(
-            'error.emitted',
+            'error.occurred',
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
+            type: 'librdkafka.error',
             error: error
           )
         end

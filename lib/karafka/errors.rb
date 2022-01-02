@@ -37,5 +37,8 @@ module Karafka
 
     # Raised when given topic is not found while expected
     TopicNotFound = Class.new(BaseError)
+
+    # This should never happen. Please open an issue if it does.
+    UnsupportedCase = Class.new(BaseError)
   end
 end

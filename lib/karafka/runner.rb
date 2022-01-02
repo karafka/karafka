@@ -33,7 +33,12 @@ module Karafka
     # If anything crashes here, we need to raise the error and crush the runner because it means
     # that something terrible happened
     rescue StandardError => e
-      Karafka.monitor.instrument('runner.call.error', caller: self, error: e)
+      Karafka.monitor.instrument(
+        'error.occurred',
+        caller: self,
+        error: e,
+        type: 'runner.call.error'
+      )
       Karafka::App.stop!
       raise e
     end
