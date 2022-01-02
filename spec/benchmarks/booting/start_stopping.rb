@@ -6,8 +6,14 @@
 
 setup_karafka
 
+# How many topics connection tracking we want to benchmark
+TOPICS = 5
+
 100.times do
-  Karafka.producer.buffer(topic: DataCollector.topic, payload: 'a')
+  TOPICS.times do |i|
+    Karafka.producer.buffer(topic: DataCollector.topics[i], payload: 'a')
+  end
+
   Karafka.producer.flush_sync
 end
 
@@ -18,7 +24,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 Karafka::App.routes.draw do
-  1.times do |i|
+  TOPICS.times do |i|
     topic DataCollector.topics[i] do
       max_messages 1
       max_wait_time 1000
