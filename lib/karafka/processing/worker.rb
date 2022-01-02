@@ -16,7 +16,7 @@ module Karafka
         @thread = Thread.new do
           # If anything goes wrong in this worker thread, it means something went really wrong and
           # we should terminate.
-          @thread.abort_on_exception = true
+          Thread.current.abort_on_exception = true
           loop { break unless process }
         end
       end
