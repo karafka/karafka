@@ -46,3 +46,5 @@ unique = error_events
 assert_equal 2, error_events.keys.size
 # Each error published, should be published only once
 assert_equal [2], unique.values.uniq
+assert_equal 'error.occurred', error_events.values.first.first.id
+assert_equal 'librdkafka.error', error_events.values.first.first[:type]
