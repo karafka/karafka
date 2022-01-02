@@ -232,7 +232,7 @@ module Karafka
       # Performs a single poll operation.
       #
       # @param timeout [Integer] timeout for a single poll
-      # @return [Array<Rdkafka::Consumer::Message>] fetched messages
+      # @return [Array<Rdkafka::Consumer::Message>, nil] fetched messages or nil if nothing polled
       def poll(timeout)
         time_poll ||= TimeTrackers::Poll.new(timeout)
 
