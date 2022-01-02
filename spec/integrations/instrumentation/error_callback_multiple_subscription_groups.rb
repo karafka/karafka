@@ -25,7 +25,7 @@ end
 
 error_events = {}
 
-Karafka::App.monitor.subscribe('error.emitted') do |event|
+Karafka::App.monitor.subscribe('error.occurred') do |event|
   error_events[event[:subscription_group_id]] ||= []
   error_events[event[:subscription_group_id]] << event
 end

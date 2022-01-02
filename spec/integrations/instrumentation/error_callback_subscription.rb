@@ -17,7 +17,7 @@ end
 
 error_events = []
 
-Karafka::App.monitor.subscribe('error.emitted') do |event|
+Karafka::App.monitor.subscribe('error.occurred') do |event|
   error_events << event
 end
 
@@ -29,7 +29,7 @@ event = error_events.first
 
 assert_not_equal 0, error_events.size
 assert_equal true, event.is_a?(Dry::Events::Event)
-assert_equal 'error.emitted', event.id
+assert_equal 'error.occurred', event.id
 assert_equal true, event[:error].is_a?(Rdkafka::RdkafkaError)
 assert_equal false, event[:subscription_group_id].empty?
 # We remap the consumer group id to a consumer group, thus the raw name is just a part of the
