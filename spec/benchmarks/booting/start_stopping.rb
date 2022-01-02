@@ -13,14 +13,17 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    @done ||= Thread.new { Karafka::Server.stop }
+    @consume ||= Thread.new { Karafka::Server.stop }
   end
 end
 
 Karafka::App.routes.draw do
-  topic DataCollector.topic do
-    max_messages 1
-    consumer Consumer
+  1.times do |i|
+    topic DataCollector.topics[i] do
+      max_messages 1
+      max_wait_time 1000
+      consumer Consumer
+    end
   end
 end
 
