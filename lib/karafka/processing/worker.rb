@@ -51,7 +51,6 @@ module Karafka
       ensure
         # job can be nil when the queue is being closed
         @jobs_queue.complete(job) if job
-        Thread.pass
       end
     end
   end

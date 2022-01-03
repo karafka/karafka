@@ -13,6 +13,14 @@ module Karafka
       # @return [Karafka::Processing::JobsQueue]
       def initialize
         @queue = ::Queue.new
+        # Those queues will act as a semaphores internally. Since we need an indicator for waiting
+        # we could use Thread.pass but this is expensive. Instead we can just lock until any
+        # of the workers finishes their work and we can re-check. This means that in the worse
+        # scenario, we will context switch 10 times per poll instead of getting this thread
+        # scheduled by Ruby hundreds of thousands of times per group.
+        # We cannot use a single semaphore as it could potentially block in listeners that should
+        # process with their data and also could unlock when a given group needs to remain locked
+        @semaphores = Hash.new { |h, k| h[k] = Queue.new }
         @in_processing = Hash.new { |h, k| h[k] = {} }
         @mutex = Mutex.new
       end
@@ -59,6 +67,7 @@ module Karafka
       def complete(job)
         @mutex.synchronize do
           @in_processing[job.group_id].delete(job.id)
+          @semaphores[job.group_id] << true
         end
       end
 
@@ -69,12 +78,19 @@ module Karafka
       def clear(group_id)
         @mutex.synchronize do
           @in_processing[group_id].clear
+          # We unlock it just in case it was blocked when clearing started
+          @semaphores[group_id] << true
         end
       end
 
       # Stops the whole processing queue.
       def close
-        @queue.close unless @queue.closed?
+        @mutex.synchronize do
+          return if @queue.closed?
+
+          @queue.close
+          @semaphores.values.each(&:close)
+        end
       end
 
       # Blocks when there are things in the queue in a given group and waits until all the jobs
@@ -82,8 +98,9 @@ module Karafka
       # @param group_id [String] id of the group in which jobs we're interested.
       # @note This method is blocking.
       def wait(group_id)
-        # Go doing other things while we cannot process
-        Thread.pass while wait?(group_id)
+        # Go doing other things while we cannot process and wait for anyone to finish their work
+        # and re-check the wait status
+        @semaphores[group_id].pop while wait?(group_id)
       end
 
       private

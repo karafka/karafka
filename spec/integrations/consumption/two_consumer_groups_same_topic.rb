@@ -37,6 +37,8 @@ end
 
 keys = DataCollector.data.keys
 
+assert_equal 2, DataCollector.data.size
+assert_equal 100, DataCollector.data[keys[0]].size
+assert_equal 100, DataCollector.data[keys[1]].size
 assert_equal jsons, DataCollector.data[keys[0]]
 assert_equal jsons, DataCollector.data[keys[1]]
-assert_equal 2, DataCollector.data.size
