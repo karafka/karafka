@@ -20,7 +20,7 @@ module Karafka
         # scheduled by Ruby hundreds of thousands of times per group.
         # We cannot use a single semaphore as it could potentially block in listeners that should
         # process with their data and also could unlock when a given group needs to remain locked
-        @semaphores = Hash.new { ::Queue.new }
+        @semaphores = Hash.new { |h, k| h[k] = Queue.new }
         @in_processing = Hash.new { |h, k| h[k] = {} }
         @mutex = Mutex.new
       end
@@ -89,7 +89,7 @@ module Karafka
           return if @queue.closed?
 
           @queue.close
-          @semaphores.each(&:close)
+          @semaphores.values.each(&:close)
         end
       end
 
@@ -100,7 +100,7 @@ module Karafka
       def wait(group_id)
         # Go doing other things while we cannot process and wait for anyone to finish their work
         # and re-check the wait status
-        @semaphores[group_id] << true while wait?(group_id)
+        @semaphores[group_id].pop while wait?(group_id)
       end
 
       private
