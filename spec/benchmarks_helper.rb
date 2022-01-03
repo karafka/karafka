@@ -87,9 +87,10 @@ class Tracker
   class << self
     # Runs what we are interested in, collects results and prints stats
     # @param iterations [Integer]
-    # @param messages_count [Integer] how many messages did we process overall
+    # @param messages_count [Integer, nil] how many messages did we process overall or nil if
+    #   the benchmark is not per message data related
     # @param block [Proc] code we want to run in iterations
-    def run(messages_count:, iterations: 10, &block)
+    def run(messages_count: nil, iterations: 10, &block)
       instance = new(iterations: iterations, messages_count: messages_count)
 
       instance.iterate { block.call }
@@ -119,7 +120,7 @@ class Tracker
   # Prints summary of measurements
   def report
     puts "Time taken: #{average}"
-    puts "Messages per second: #{@messages_count / average}"
+    puts "Messages per second: #{@messages_count / average}" if @messages_count
   end
 
   private
