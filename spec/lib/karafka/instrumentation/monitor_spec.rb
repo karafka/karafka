@@ -43,7 +43,7 @@ RSpec.describe_current do
       let(:subscription) { Karafka.monitor.subscribe(listener.new) }
       let(:listener) do
         Class.new do
-          def on_connection_listener_fetch_loop_error(_event)
+          def on_error_occurred(_event)
             true
           end
         end
@@ -58,6 +58,6 @@ RSpec.describe_current do
       expect(monitor.available_events).not_to be_empty
     end
 
-    it { expect(monitor.available_events).to include 'connection.listener.fetch_loop.error' }
+    it { expect(monitor.available_events).to include 'error.occurred' }
   end
 end

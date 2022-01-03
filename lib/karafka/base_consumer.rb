@@ -34,7 +34,12 @@ module Karafka
       # manual offset management
       mark_as_consumed(messages.last)
     rescue StandardError => e
-      Karafka.monitor.instrument('consumer.consume.error', caller: self, error: e)
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.consume.error'
+      )
       client.pause(topic.name, messages.first.partition, @seek_offset || messages.first.offset)
       pause.pause
     end
@@ -47,7 +52,12 @@ module Karafka
         revoked
       end
     rescue StandardError => e
-      Karafka.monitor.instrument('consumer.revoked.error', caller: self, error: e)
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.revoked.error'
+      )
     end
 
     # Trigger method for running on shutdown.
@@ -58,7 +68,12 @@ module Karafka
         shutdown
       end
     rescue StandardError => e
-      Karafka.monitor.instrument('consumer.shutdown.error', caller: self, error: e)
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.shutdown.error'
+      )
     end
 
     private

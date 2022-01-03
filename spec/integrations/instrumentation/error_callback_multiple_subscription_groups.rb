@@ -25,7 +25,7 @@ end
 
 error_events = {}
 
-Karafka::App.monitor.subscribe('error.emitted') do |event|
+Karafka::App.monitor.subscribe('error.occurred') do |event|
   error_events[event[:subscription_group_id]] ||= []
   error_events[event[:subscription_group_id]] << event
 end
@@ -46,3 +46,5 @@ unique = error_events
 assert_equal 2, error_events.keys.size
 # Each error published, should be published only once
 assert_equal [2], unique.values.uniq
+assert_equal 'error.occurred', error_events.values.first.first.id
+assert_equal 'librdkafka.error', error_events.values.first.first[:type]
