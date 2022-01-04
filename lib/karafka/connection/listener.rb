@@ -66,7 +66,7 @@ module Karafka
           # distributing consuming jobs as upon revoking, we might get assigned to the same
           # partitions, thus getting their jobs. The revoking jobs need to finish before
           # appropriate consumers are taken down and re-created
-          wait(@subscription_group) if distribue_revoke_lost_partitions_jobs
+          wait(@subscription_group) if distribute_revoke_lost_partitions_jobs
 
           distribute_partitions_jobs(messages_buffer)
 
@@ -103,7 +103,7 @@ module Karafka
 
       # Enqueues revoking jobs for partitions that were taken away from the running process.
       # @return [Boolean] was there anything to revoke
-      def distribue_revoke_lost_partitions_jobs
+      def distribute_revoke_lost_partitions_jobs
         revoked_partitions = @client.rebalance_manager.revoked_partitions
 
         return false if revoked_partitions.empty?
