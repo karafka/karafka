@@ -35,15 +35,16 @@ end
 
 elements.each { |data| produce('integrations_1_03', data, partition: rand(0..2)) }
 
-Thread.new do
-  sleep 5
+config = {
+  'bootstrap.servers': 'localhost:9092',
+  'group.id': Karafka::App.consumer_groups.first.id,
+  'auto.offset.reset': 'earliest'
+}
+consumer = Rdkafka::Config.new(config).consumer
 
-  config = {
-    :"bootstrap.servers" => "localhost:9092",
-    :"group.id" => Karafka::App.consumer_groups.first.id,
-    'auto.offset.reset' => 'earliest'
-  }
-  consumer = Rdkafka::Config.new(config).consumer
+Thread.new do
+  sleep(2)
+
   consumer.subscribe('integrations_1_03')
   consumer.each {}
 end
@@ -52,4 +53,16 @@ start_karafka_and_wait_until do
   !DataCollector.data[:post].empty?
 end
 
-p DataCollector.data
+consumer.close
+
+# Rebalance revokes all that were assigned
+assert_equal 3, DataCollector.data[:revoked].size
+assert_equal [0, 1, 2], DataCollector.data[:revoked].flat_map(&:keys).sort
+assert_equal [0, 1, 2], DataCollector.data[:pre].to_a.sort
+
+re_assigned = DataCollector.data[:post].to_a.sort
+
+# After rebalance we should not get all partitions back as now there are two consumers
+assert_not_equal [0, 1, 2], re_assigned
+# It may get either one or two partitions back
+assert_equal true, re_assigned.size == 1 || re_assigned.size == 2
