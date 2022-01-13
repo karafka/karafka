@@ -1,7 +1,8 @@
 # Karafka framework changelog
 
-## Unreleased
+## 1.4.12 (2022-01-13)
 - Ruby 3.1 support
+- `irb` dependency removal (vbyno)
 
 ## 1.4.11 (2021-12-04)
 - Source code metadata url added to the gemspec
