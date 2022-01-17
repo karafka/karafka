@@ -36,6 +36,12 @@ module Karafka
       # @param received_at [Time] the moment we've received the batch (actually the moment we've)
       #   enqueued it, but good enough
       def consume(messages, received_at)
+        # Recreate consumer with each batch if persistence is not enabled
+        # We reload the consumers with each batch instead of relying on some external signals
+        # when needed for consistency. That way devs may have it on or off and not in this
+        # middle state, where re-creation of a consumer instance would occur only sometimes
+        @consumer = nil unless ::Karafka::App.config.consumer_persistence
+
         # First we build messages batch...
         consumer.messages = Messages::Builders::Messages.call(
           messages,

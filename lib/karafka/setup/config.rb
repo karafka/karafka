@@ -36,6 +36,9 @@ module Karafka
       # or they need to maintain their own internal consumer group naming conventions, they
       # can easily do it, replacing the default client_id + consumer name pattern concept
       setting :consumer_mapper, default: Routing::ConsumerMapper.new
+      # option [Boolean] should we reload consumers with each incoming batch thus effectively
+      # supporting code reload (if someone reloads code) or should we keep the persistence
+      setting :consumer_persistence, default: true
       # Default deserializer for converting incoming data into ruby objects
       setting :deserializer, default: Karafka::Serialization::Json::Deserializer.new
       # option [Boolean] should we leave offset management to the user

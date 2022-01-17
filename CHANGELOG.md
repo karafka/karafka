@@ -7,7 +7,6 @@
 - Change license to `LGPL-3.0`
 - Multi-threaded support for concurrent jobs consumption (when in separate topics and/or partitions)
 - Introduce concept of workers for concurrency
-- Remove hot-code reload due to issues with handling Kafka reconnections (may reappear in 2.1)
 - Introduce subscriptions groups concept for better resources management
 - Remove completely all the callbacks in favour of finalizer method `#on_shutdown`
 - Remove single message consumption mode in favour of documentation on how to do it easily by yourself
