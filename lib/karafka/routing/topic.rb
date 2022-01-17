@@ -48,7 +48,7 @@ module Karafka
 
       # @return [Class] consumer class that we should use
       def consumer
-        if Karafka::App.config.customer_persistence
+        if Karafka::App.config.consumer_persistence
           # When persistence of consumers is on, no need to reload them
           @consumer
         else
