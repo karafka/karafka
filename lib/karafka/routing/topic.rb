@@ -46,6 +46,25 @@ module Karafka
         end
       end
 
+      # @return [Class] consumer class that we should use
+      def consumer
+        if Karafka::App.config.customer_persistence
+          # When persistence of consumers is on, no need to reload them
+          @consumer
+        else
+          # In order to support code reload without having to change the topic api, we re-fetch the
+          # class of a consumer based on its class name. This will support all the cases where the
+          # consumer class is defined with a name. It won't support code reload for anonymous
+          # consumer classes, but this is an edge case
+          begin
+            ::Object.const_get(@consumer.to_s)
+          rescue NameError
+            # It will only fail if the in case of anonymous classes
+            @consumer
+          end
+        end
+      end
+
       # @return [Hash] hash with all the topic attributes
       # @note This is being used when we validate the consumer_group and its topics
       def to_h

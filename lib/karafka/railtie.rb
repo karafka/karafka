@@ -44,6 +44,15 @@ if rails
               ActiveSupport::Logger.new($stdout)
             )
           )
+
+          # We can have many listeners, but it does not matter in which we will reload the code as
+          # long as all the consumers will be re-created as Rails reload is thread-safe
+          ::Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
+            # Reload code each time there is a change in the code
+            next unless Rails.application.reloaders.any?(&:updated?)
+
+            Rails.application.reloader.reload!
+          end
         end
 
         app.reloader.to_prepare do

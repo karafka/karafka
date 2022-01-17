@@ -8,6 +8,7 @@ RSpec.describe_current do
       client_id: 'name',
       shutdown_timeout: 10,
       consumer_mapper: Karafka::Routing::ConsumerMapper.new,
+      consumer_persistence: true,
       pause_max_timeout: 1_000,
       pause_timeout: 1_000,
       pause_with_exponential_backoff: false,
@@ -56,6 +57,20 @@ RSpec.describe_current do
   context 'when we validate consumer_mapper' do
     context 'when consumer_mapper is nil' do
       before { config[:consumer_mapper] = nil }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate consumer_persistence' do
+    context 'when consumer_persistence is nil' do
+      before { config[:consumer_persistence] = nil }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when consumer_persistence is not a bool' do
+      before { config[:consumer_persistence] = 2.1 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
