@@ -1,16 +1,15 @@
 # Karafka framework changelog
 
 ## 2.0.0-alpha1 (Unreleased)
+- Change license to `LGPL-3.0`
 - Switch from `ruby-kafka` to `librdkafka` as an underlying driver
 - Introduce fully automatic integration tests that go through the whole server lifecycle
 - Integrate WaterDrop tightly with autoconfiguration inheritance and an option to redefine it
-- Change license to `LGPL-3.0`
 - Multi-threaded support for concurrent jobs consumption (when in separate topics and/or partitions)
-- Introduce concept of workers for concurrency
 - Introduce subscriptions groups concept for better resources management
 - Remove completely all the callbacks in favour of finalizer method `#on_shutdown`
-- Remove single message consumption mode in favour of documentation on how to do it easily by yourself
 - Provide `on_revoked` method for taking actions upon topic revoke
+- Remove single message consumption mode in favour of documentation on how to do it easily by yourself
 - Provide sync and async offset management with async preferred
 - Introduce seamless Ruby on Rails integration via `Rails::Railte`
 - Update `cli info` to reflect the `2.0` details
@@ -19,27 +18,25 @@
 - Remove daemonization support
 - Stop validating `kafka` configuration beyond minimum as it is handled by `librdkafka`
 - Remove topics mappers concept
-- Improve environment auto-detection
 - Reorganize monitoring to match new concepts
 - Notify on fatal worker processing errors
 - Rename `Karafka::Params::BatchMetadata` to `Karafka::Messages::BatchMetadata`
 - Rename `Karafka::Params::Params` to `Karafka::Messages::Message`
 - Rename `#params_batch` in consumers to `#messages`
 - Rename `Karafka::Params::Metadata` to `Karafka::Messages::Metadata`
-- Use jobs for consumers work execution
 - Allow for processing work of multiple consumer groups by the same worker poll
 - Rename `Karafka::Fetcher` to `Karafka::Runner` and align notifications key names
 - Update install templates
 - `sidekiq-backend` is no longer supported
 - `testing` gem for RSpec has been updated
-- `WaterDrop` `2.0` support
+- `WaterDrop` `2.1+` support
 - Simple routing style (`0.5`) now builds a single consumer group instead of one per topic
 - Example apps were updated
-- Hook for underlying statistics emitted from librdkafka have been added.
-- Hook for underlying async errors emitted from  librdkafka have been added.
-- ActiveJob Rails adapter.
-- Added benchmarks that can be used to profile Karafka.
-- Standardize error hook for all error reporting.
+- Hook for underlying statistics emitted from librdkafka have been added
+- Hook for underlying async errors emitted from  librdkafka have been added
+- ActiveJob Rails adapter
+- Added benchmarks that can be used to profile Karafka
+- Standardize error hook for all error reporting
 
 ## 1.4.11 (2021-12-04)
 - Source code metadata url added to the gemspec
