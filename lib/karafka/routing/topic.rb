@@ -7,7 +7,7 @@ module Karafka
     # It is a part of Karafka's DSL.
     class Topic
       attr_reader :id, :name, :consumer_group
-      attr_accessor :consumer
+      attr_writer :consumer
 
       # Attributes we can inherit from the root unless they were defined on this level
       INHERITABLE_ATTRIBUTES = %i[
