@@ -37,6 +37,10 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = %w[lib]
-  spec.metadata      = { 'source_code_uri' => 'https://github.com/karafka/karafka' }
+
+  spec.metadata = {
+    'source_code_uri' => 'https://github.com/karafka/karafka',
+    'rubygems_mfa_required' => 'true'
+  }
 end
 # rubocop:enable Metrics/BlockLength
