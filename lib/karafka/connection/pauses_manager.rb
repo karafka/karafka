@@ -35,9 +35,9 @@ module Karafka
             next unless pause.paused?
             next unless pause.expired?
 
-            yield(topic, partition)
-
             pause.resume
+
+            yield(topic, partition)
           end
         end
       end

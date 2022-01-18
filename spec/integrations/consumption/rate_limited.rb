@@ -8,6 +8,7 @@
 setup_karafka do |config|
   # Throttle for a second
   config.pause_timeout = 1_000
+  config.pause_max_timeout = 1_000
   config.max_wait_time = 500
   config.max_messages = 1
   config.concurrency = 1
@@ -32,11 +33,10 @@ class Consumer < Karafka::BaseConsumer
       next unless @seconds_available.zero?
 
       DataCollector.data[:pauses] << Time.now.to_f
+
       @seconds_available = 5
       client.pause(topic.name, message.partition, message.offset + 1)
       pause.pause
-      sleep(0.1)
-
       break
     end
   end
@@ -69,16 +69,13 @@ DataCollector.data[:pauses].each do |pause_time|
   if previous_pause_time
     distance = pause_time - previous_pause_time
 
-    p distance
-
     assert_equal true, distance >= 1
-    assert_equal true, distance <= 2
+    # We add 2 seconds of tolerance as under heavy load, it can take that much time
+    assert_equal true, distance <= 3
   end
 
   previous_pause_time = pause_time
 end
-
-p (Time.now.to_f - started_at)
 
 assert_equal true, (Time.now.to_f - started_at) >= 9
 assert_equal elements, DataCollector.data[0]
