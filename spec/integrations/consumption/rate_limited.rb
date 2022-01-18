@@ -10,6 +10,7 @@ setup_karafka do |config|
   config.pause_timeout = 1_000
   config.max_wait_time = 500
   config.max_messages = 1
+  config.concurrency = 1
 end
 
 elements = Array.new(50) { SecureRandom.uuid }
@@ -34,6 +35,7 @@ class Consumer < Karafka::BaseConsumer
       @seconds_available = 5
       client.pause(topic.name, message.partition, message.offset + 1)
       pause.pause
+      sleep(0.1)
 
       break
     end
@@ -60,16 +62,6 @@ end
 # assuming, that all the other things take 0 time (since the pause after last is irrelevant as
 # we shutdown)
 
-p (Time.now.to_f - started_at)
-
-assert_equal true, (Time.now.to_f - started_at) >= 9
-assert_equal elements, DataCollector.data[0]
-# We should pause 10 times, once every 5 messages
-assert_equal 10, DataCollector.data[:pauses].count
-
-# Distance in between pauses should be more or less 1 second
-previous_pause_time = nil
-
 DataCollector.data[:pauses].each do |pause_time|
   if previous_pause_time
     distance = pause_time - previous_pause_time
@@ -82,3 +74,13 @@ DataCollector.data[:pauses].each do |pause_time|
 
   previous_pause_time = pause_time
 end
+
+p (Time.now.to_f - started_at)
+
+assert_equal true, (Time.now.to_f - started_at) >= 9
+assert_equal elements, DataCollector.data[0]
+# We should pause 10 times, once every 5 messages
+assert_equal 10, DataCollector.data[:pauses].count
+
+# Distance in between pauses should be more or less 1 second
+previous_pause_time = nil
