@@ -58,6 +58,9 @@ start_karafka_and_wait_until do
   DataCollector.data[0].size >= 50
 end
 
+# Distance in between pauses should be more or less 1 second
+previous_pause_time = nil
+
 # Since we have 5 messages and we sleep 1, for 50 messages it would mean at least 9 seconds
 # assuming, that all the other things take 0 time (since the pause after last is irrelevant as
 # we shutdown)
@@ -81,6 +84,3 @@ assert_equal true, (Time.now.to_f - started_at) >= 9
 assert_equal elements, DataCollector.data[0]
 # We should pause 10 times, once every 5 messages
 assert_equal 10, DataCollector.data[:pauses].count
-
-# Distance in between pauses should be more or less 1 second
-previous_pause_time = nil
