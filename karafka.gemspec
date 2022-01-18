@@ -40,7 +40,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata = {
     'source_code_uri' => 'https://github.com/karafka/karafka',
-    'rubygems_mfa_required' => true
+    'rubygems_mfa_required' => 'true'
   }
 end
 # rubocop:enable Metrics/BlockLength
