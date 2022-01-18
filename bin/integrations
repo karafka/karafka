@@ -42,6 +42,8 @@ class Scenario
       "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
     )
     @started_at = current_time
+    # Last 1024 characters from stdout
+    @stdout_tail = ''
   end
 
   # @return [String] integration spec name
@@ -51,15 +53,18 @@ class Scenario
 
   # @return [Boolean] did this scenario finished or is it still running
   def finished?
-    # We read it so it won't grow as we use our default logger that prints to both test.log and
-    # to stdout. Otherwise after reaching the buffer size, it would hang
-    @stdout.read_nonblock(10_240, exception: false)
-
     # If the thread is running too long, kill it
     if current_time - @started_at > MAX_RUN_TIME
       @wait_thr.kill
       Process.kill('TERM', pid)
     end
+
+    # We read it so it won't grow as we use our default logger that prints to both test.log and
+    # to stdout. Otherwise after reaching the buffer size, it would hang
+    buffer = ''
+    @stdout.read_nonblock(10_240, buffer, exception: false)
+    @stdout_tail << buffer
+    @stdout_tail = @stdout_tail[-1_024..-1] || @stdout_tail
 
     !@wait_thr.alive?
   end
@@ -90,6 +95,7 @@ class Scenario
 
     unless success?
       puts "Exit code: #{exit_code}"
+      puts @stdout_tail
       puts @stderr.read
     end
   end
