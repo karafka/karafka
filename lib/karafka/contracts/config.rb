@@ -22,10 +22,9 @@ module Karafka
         required(:shutdown_timeout) { int? & gt?(0) }
       end
 
-      rule(:pause_timeout, :pause_max_timeout, :pause_with_exponential_backoff) do
-        if values[:pause_with_exponential_backoff] &&
-           values[:pause_timeout].to_i > values[:pause_max_timeout].to_i
-          key(:pause_max_timeout).failure(:max_timeout_size_for_exponential)
+      rule(:pause_timeout, :pause_max_timeout) do
+        if values[:pause_timeout].to_i > values[:pause_max_timeout].to_i
+          key(:pause_timeout).failure(:max_timeout_vs_pause_max_timeout)
         end
       end
     end
