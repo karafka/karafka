@@ -64,7 +64,7 @@ class Scenario
     buffer = ''
     @stdout.read_nonblock(10_240, buffer, exception: false)
     @stdout_tail << buffer
-    @stdout_tail = @stdout_tail[-1_024..-1] || @stdout_tail
+    @stdout_tail = @stdout_tail[-10_024..-1] || @stdout_tail
 
     !@wait_thr.alive?
   end
