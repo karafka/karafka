@@ -17,7 +17,7 @@ module Karafka
       # Start the Karafka server
       def call
         # Print our banner and info in the dev mode
-        print_marketing if Karafka::App.env.development?
+        print_marketing_info if Karafka::App.env.development?
 
         validate!
 
@@ -30,7 +30,8 @@ module Karafka
 
       private
 
-      def print_marketing
+      # Prints marketing info
+      def print_marketing_info
         Karafka.logger.info Info::BANNER
 
         if Karafka::App.config.license.token

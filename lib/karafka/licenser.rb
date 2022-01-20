@@ -17,7 +17,7 @@ module Karafka
       public_key = OpenSSL::PKey::RSA.new(File.read(PUBLIC_KEY_LOCATION))
 
       # We gsub and strip in case someone copy-pasted it as a multi line string
-      formatted_token = license_config.token.strip.gsub("\n", '').gsub(' ', '')
+      formatted_token = license_config.token.strip.delete("\n").delete(' ')
       decoded_token = Base64.decode64(formatted_token)
 
       begin
@@ -42,7 +42,7 @@ module Karafka
     def raise_invalid_license_token
       raise(
         Errors::InvalidLicenseTokenError,
-        <<~MSG.gsub("\n", ' ')
+        <<~MSG.tr("\n", ' ')
           License key you provided is invalid.
           Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
         MSG
@@ -54,7 +54,7 @@ module Karafka
     # @param expires_on [Date] when the license expires
     def notify_if_license_expired(expires_on)
       Karafka.logger.error(
-        <<~MSG.gsub("\n", ' ')
+        <<~MSG.tr("\n", ' ')
           Your license expired on #{expires_on}.
           Karafka no longer uses any Pro capabilities.
           Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
