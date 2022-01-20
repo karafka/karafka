@@ -36,9 +36,12 @@ module Karafka
     JobsQueueSynchronizationError = Class.new(BaseError)
 
     # Raised when given topic is not found while expected
-    TopicNotFound = Class.new(BaseError)
+    TopicNotFoundError = Class.new(BaseError)
 
     # This should never happen. Please open an issue if it does.
-    UnsupportedCase = Class.new(BaseError)
+    UnsupportedCaseError = Class.new(BaseError)
+
+    # Raised when the license token is not valid
+    InvalidLicenseTokenError = Class.new(BaseError)
   end
 end

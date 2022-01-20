@@ -30,13 +30,7 @@ end
 
 Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming, processing and producing data, without having to focus on things that are not your business domain.
 
-Karafka uses threads to handle many messages at the same time in the same process. It does not require Rails but will integrate tightly with Rails to make event processing dead simple.
-
-- You can integrate Karafka with **any** Ruby-based application.
-- Karafka **is** multi-threaded.
-- Karafka works with Ruby on Rails but it is a **standalone** framework that can work without it.
-- Karafka has a **minimal** set of dependencies, so adding it won't be a huge burden for your already existing applications.
-- Karafka processes can be executed for a **given subset** of consumer groups and/or topics, so you can fine tune it depending on your business logic.
+Karafka **uses** threads to handle many messages at the same time in the same process. It does not require Rails but will integrate tightly with any Ruby on Rails applications to make event processing dead simple.
 
 ## Getting started
 
@@ -48,6 +42,14 @@ If you're completely new to the subject, you can start with our "Kafka on Rails"
 If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to visit our [Getting started](https://github.com/karafka/karafka/wiki/Getting-started) guides and the [example apps repository](https://github.com/karafka/example-apps).
 
 We also maintain many [integration specs](https://github.com/karafka/karafka/tree/master/spec/integrations) illustrating various use-cases and features of the framework.
+
+## Want to Upgrade? LGPL is not for you? Want to help?
+
+I also sell Karafka Pro subscription. It includes commercial-friendly license, priority support, architecture consultations, and high throughput data processing-related features (under development).
+
+**25%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
+
+Help me provide high-quality open-source software. Please see the Karafka [homepage](https://karafka.io) for more details.
 
 ## Support
 

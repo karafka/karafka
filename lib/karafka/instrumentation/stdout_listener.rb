@@ -99,7 +99,7 @@ module Karafka
           error details
         else
           # This should never happen. Please contact the maintainers
-          raise Errors::UnsupportedCase, event
+          raise Errors::UnsupportedCaseError, event
         end
       end
 

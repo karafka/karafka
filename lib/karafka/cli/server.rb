@@ -16,7 +16,8 @@ module Karafka
 
       # Start the Karafka server
       def call
-        cli.info
+        # Print our banner and info in the dev mode
+        print_marketing if Karafka::App.env.development?
 
         validate!
 
@@ -28,6 +29,16 @@ module Karafka
       end
 
       private
+
+      def print_marketing
+        Karafka.logger.info Info::BANNER
+
+        if Karafka::App.config.license.token
+          Karafka.logger.info "\033[0;32mThank you for investing in the Karafka Pro subscription!\033[0m\n"
+        else
+          Karafka.logger.info "\033[0;31mIf you rely on Karafka, please consider getting a Pro subscription!\033[0m\n"
+        end
+      end
 
       # Checks the server cli configuration
       # options validations in terms of app setup (topics, pid existence, etc)
