@@ -47,7 +47,7 @@ We also maintain many [integration specs](https://github.com/karafka/karafka/tre
 
 I also sell Karafka Pro subscription. It includes commercial-friendly license, priority support, architecture consultations and high throughput data processing-related features (under development).
 
-**25%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
+**20%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
 
 Help me provide high-quality open-source software. Please see the Karafka [homepage](https://karafka.io) for more details.
 
