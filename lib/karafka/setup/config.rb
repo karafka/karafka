@@ -29,7 +29,7 @@ module Karafka
       # Namespace for Pro version related license management. If you use LGPL, no need to worry
       #   about any of this
       setting :license do
-        # option license_token [String, false] - license token issued when you acquire a Pro license
+        # option token [String, false] - license token issued when you acquire a Pro license
         # Leave false if using the LGPL version and all is going to work just fine :)
         #
         # @note By using the commercial components, you accept the LICENSE-COMM commercial license

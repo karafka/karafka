@@ -22,7 +22,7 @@ module Karafka
 
       begin
         data = public_key.public_decrypt(decoded_token)
-      rescue OpenSSL::OpenSSLError => e
+      rescue OpenSSL::OpenSSLError
         data = nil
       end
 

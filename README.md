@@ -45,7 +45,7 @@ We also maintain many [integration specs](https://github.com/karafka/karafka/tre
 
 ## Want to Upgrade? LGPL is not for you? Want to help?
 
-I also sell Karafka Pro subscription. It includes commercial-friendly license, priority support, architecture consultations, and high throughput data processing-related features (under development).
+I also sell Karafka Pro subscription. It includes commercial-friendly license, priority support, architecture consultations and high throughput data processing-related features (under development).
 
 **25%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
 
@@ -53,7 +53,7 @@ Help me provide high-quality open-source software. Please see the Karafka [homep
 
 ## Support
 
-Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
+Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
 
 If you have any questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) channel.
 

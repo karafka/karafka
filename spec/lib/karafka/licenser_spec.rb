@@ -37,8 +37,8 @@ RSpec.describe_current do
     before { license_config.token = expired_token }
 
     it { expect { verify }.not_to raise_error }
-    it { expect { verify }.to change { license_config.entity }.to('CI') }
-    it { expect { verify }.to change { license_config.expires_on }.to(Date.parse('2021-01-01')) }
+    it { expect { verify }.to(change { license_config.entity }.to('CI')) }
+    it { expect { verify }.to(change { license_config.expires_on }.to(Date.parse('2021-01-01'))) }
 
     it 'expect to print an error info' do
       allow(Karafka::App.logger).to receive(:error)

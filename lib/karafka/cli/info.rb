@@ -49,7 +49,7 @@ module Karafka
       def license_info
         config = Karafka::App.config
 
-        license = if config.license.token
+        if config.license.token
           [
             'License: Commercial',
             "License entity: #{config.license.entity}",

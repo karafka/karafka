@@ -34,9 +34,13 @@ module Karafka
         Karafka.logger.info Info::BANNER
 
         if Karafka::App.config.license.token
-          Karafka.logger.info "\033[0;32mThank you for investing in the Karafka Pro subscription!\033[0m\n"
+          Karafka.logger.info(
+            "\033[0;32mThank you for investing in the Karafka Pro subscription!\033[0m\n"
+          )
         else
-          Karafka.logger.info "\033[0;31mIf you rely on Karafka, please consider getting a Pro subscription!\033[0m\n"
+          Karafka.logger.info(
+            "\033[0;31mYou like Karafka? Please consider getting a Pro subscription!\033[0m\n"
+          )
         end
       end
 
