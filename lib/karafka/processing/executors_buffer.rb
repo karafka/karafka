@@ -25,7 +25,7 @@ module Karafka
       )
         topic = @subscription_group.topics.find { |ktopic| ktopic.name == topic }
 
-        topic || raise(Errors::TopicNotFound, topic)
+        topic || raise(Errors::TopicNotFoundError, topic)
 
         @buffer[topic][partition] ||= Executor.new(
           @subscription_group.id,

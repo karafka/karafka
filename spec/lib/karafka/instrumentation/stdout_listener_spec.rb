@@ -177,7 +177,7 @@ RSpec.describe_current do
       let(:trigger) { nil }
       let(:type) { 'unsupported.error' }
 
-      it { expect { error_trigger }.to raise_error(Karafka::Errors::UnsupportedCase) }
+      it { expect { error_trigger }.to raise_error(Karafka::Errors::UnsupportedCaseError) }
     end
   end
 end

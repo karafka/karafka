@@ -12,12 +12,43 @@ RSpec.describe_current do
       pause_max_timeout: 1_000,
       pause_timeout: 1_000,
       pause_with_exponential_backoff: false,
-      concurrency: 5
+      concurrency: 5,
+      license: {
+        token: false,
+        entity: '',
+        expires_on: Date.parse('2100-01-01')
+      }
     }
   end
 
   context 'when config is valid' do
     it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when validating license related components' do
+    context 'when license is missing completely' do
+      before { config.delete(:license) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when token is nil' do
+      before { config[:license][:token] = nil }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when entity token is nil' do
+      before { config[:license][:entity] = nil }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when expires_on is nil' do
+      before { config[:license][:expires_on] = nil }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
   end
 
   context 'when we validate client_id' do

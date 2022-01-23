@@ -25,6 +25,22 @@ module Karafka
       private_constant :CONTRACT, :KAFKA_DEFAULTS
 
       # Available settings
+
+      # Namespace for Pro version related license management. If you use LGPL, no need to worry
+      #   about any of this
+      setting :license do
+        # option token [String, false] - license token issued when you acquire a Pro license
+        # Leave false if using the LGPL version and all is going to work just fine :)
+        #
+        # @note By using the commercial components, you accept the LICENSE-COMM commercial license
+        #   terms and conditions
+        setting :token, default: false
+        # option entity [String] for whom we did issue the license
+        setting :entity, default: ''
+        # option expires_on [Date] date when the license expires
+        setting :expires_on, default: Date.parse('2100-01-01')
+      end
+
       # option client_id [String] kafka client_id - used to provide
       #   default Kafka groups namespaces and identify that app in kafka
       setting :client_id, default: 'karafka'
@@ -91,6 +107,10 @@ module Karafka
           configure(&block)
           merge_kafka_defaults!(config)
           validate!
+
+          # Check the license presence (if needed) and
+          Licenser.new.verify(config.license)
+
           configure_components
         end
 

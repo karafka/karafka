@@ -2,6 +2,7 @@
 
 ## 2.0.0-alpha1 (Unreleased)
 - Change license to `LGPL-3.0`
+- Introduce a Pro subscription
 - Switch from `ruby-kafka` to `librdkafka` as an underlying driver
 - Introduce fully automatic integration tests that go through the whole server lifecycle
 - Integrate WaterDrop tightly with autoconfiguration inheritance and an option to redefine it

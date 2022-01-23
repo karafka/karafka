@@ -12,6 +12,13 @@ module Karafka
       config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
 
       params do
+        # License validity happens in the licenser. Here we do only the simple consistency checks
+        required(:license).schema do
+          required(:token) { bool? | str? }
+          required(:entity) { str? }
+          required(:expires_on) { date? }
+        end
+
         required(:client_id).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
         required(:concurrency) { int? & gt?(0) }
         required(:consumer_mapper).filled
