@@ -30,4 +30,4 @@ start_karafka_and_wait_until do
   DataCollector.data[0].size >= 100
 end
 
-assert_equal 100, DataCollector.data[0].size
+assert_equal 100, DataCollector.data[0].uniq.size
