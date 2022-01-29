@@ -216,7 +216,7 @@ RSpec.describe Karafka::BaseResponder do
         after { working_class.call(message) }
 
         it 'expect to deliver them using waterdrop sync producer' do
-          expect(sync_producer).to receive(:call).with(message.to_json, topic: topic_name)
+          expect(sync_producer).to receive(:call).with(message.to_json, { topic: topic_name })
         end
       end
 
@@ -237,7 +237,7 @@ RSpec.describe Karafka::BaseResponder do
         after { working_class.call(message) }
 
         it 'expect to deliver them using waterdrop sync producer' do
-          expect(async_producer).to receive(:call).with(message.to_json, topic: topic_name)
+          expect(async_producer).to receive(:call).with(message.to_json, { topic: topic_name })
         end
       end
 
@@ -272,7 +272,7 @@ RSpec.describe Karafka::BaseResponder do
         after { working_class.call(message) }
 
         it 'sends the message' do
-          expect(sync_producer).to receive(:call).with(message.to_json, topic: mapped_topic)
+          expect(sync_producer).to receive(:call).with(message.to_json, { topic: mapped_topic })
         end
       end
     end
