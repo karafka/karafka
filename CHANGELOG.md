@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.0-alpha1 (Unreleased)
+## 2.0.0-alpha1 (2022-01-30)
 - Change license to `LGPL-3.0`
 - Introduce a Pro subscription
 - Switch from `ruby-kafka` to `librdkafka` as an underlying driver
