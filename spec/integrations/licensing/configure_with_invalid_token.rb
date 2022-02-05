@@ -13,3 +13,4 @@ rescue Karafka::Errors::InvalidLicenseTokenError
 end
 
 assert_equal true, failed_as_expected
+assert_equal false, Karafka.pro?

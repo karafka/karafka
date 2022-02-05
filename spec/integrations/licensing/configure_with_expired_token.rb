@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 # Karafka should not crash with expired token but should print an error message
+# It also should work the way it works. We do not want to crash anyone processes running and
+# for example restarting.
 
 LOGS = StringIO.new
 
@@ -25,3 +27,4 @@ logs = LOGS.read
 
 assert_equal true, logs.include?('] ERROR -- : Your license expired on 2021-01-01')
 assert_equal true, logs.include?('Please reach us at contact@karafka.io')
+assert_equal true, Karafka.pro?
