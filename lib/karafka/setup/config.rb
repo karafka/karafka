@@ -149,6 +149,12 @@ module Karafka
             producer_config.kafka = config.kafka.dup
             producer_config.logger = config.logger
           end
+
+          return unless Karafka.pro?
+
+          # Runs the pro loader that includes all the pro components
+          require 'karafka/pro/loader'
+          Pro::Loader.run
         end
       end
     end

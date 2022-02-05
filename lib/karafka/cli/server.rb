@@ -34,7 +34,7 @@ module Karafka
       def print_marketing_info
         Karafka.logger.info Info::BANNER
 
-        if Karafka::App.config.license.token
+        if Karafka.pro?
           Karafka.logger.info(
             "\033[0;32mThank you for investing in the Karafka Pro subscription!\033[0m\n"
           )

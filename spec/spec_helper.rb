@@ -50,6 +50,10 @@ end
 require 'karafka'
 require 'active_job/karafka'
 
+# We etend this manually since it's done by a Railtie that we do not run here
+
+ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
+
 # Test setup for the framework
 module Karafka
   # Configuration for test env

@@ -19,6 +19,7 @@ end
 if rails
   # Load Karafka
   require 'karafka'
+
   # Load ActiveJob adapter
   require 'active_job/karafka'
 
@@ -30,6 +31,13 @@ if rails
     class Railtie < Rails::Railtie
       railtie_name :karafka
 
+      initializer 'karafka.active_job_integration' do
+        ActiveSupport.on_load(:active_job) do
+          # Extend ActiveJob with some Karafka specific ActiveJob magic
+          extend ::Karafka::ActiveJob::JobExtensions
+        end
+      end
+
       initializer 'karafka.configure_rails_initialization' do |app|
         # Consumers should autoload by default in the Rails app so they are visible
         app.config.autoload_paths += %w[app/consumers]
@@ -37,8 +45,10 @@ if rails
         # Make Karafka use Rails logger
         ::Karafka::App.config.logger = Rails.logger
 
-        # This lines will make Karafka print to stdout like puma or unicorn
-        if Rails.env.development?
+        # This lines will make Karafka print to stdout like puma or unicorn when we run karafka
+        # server + will support code reloading with each fetched loop. We do it only for karafka
+        # based commands as Rails processes and console will have it enabled already
+        if Rails.env.development? && ENV.key?('KARAFKA_CLI')
           Rails.logger.extend(
             ActiveSupport::Logger.broadcast(
               ActiveSupport::Logger.new($stdout)
