@@ -20,10 +20,7 @@ class Consumer < Karafka::BaseConsumer
       DataCollector.data[0] << message.raw_payload
 
       # When we encounter last message out of those that we expected, let's rewind
-      if message.raw_payload == '1'
-        seek(20)
-        return
-      end
+      seek(20) if message.raw_payload == '1'
     end
   end
 end
@@ -50,7 +47,7 @@ assert_equal true, DataCollector.data[0].count { |val| val == '1' } >= 5
 
 # First 20 messages should be consumed only once
 elements[0..19].each do |payload|
-  assert_equal 1, DataCollector.data[0].count { |val| val == payload }
+  assert_equal 1, (DataCollector.data[0].count { |val| val == payload })
 end
 
 # All other messages should be consumed at least 5 times
@@ -61,7 +58,7 @@ end
 # Order of messages needs to be maintained within a single loop
 previous = nil
 
-DataCollector.data[0].each_with_index do |payload, index|
+DataCollector.data[0].each do |payload|
   unless previous
     previous = payload
     next
