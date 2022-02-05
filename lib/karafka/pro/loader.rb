@@ -12,8 +12,7 @@ module Karafka
     class Loader
       class << self
         # Loads all the pro components
-        def run
-        end
+        def run; end
       end
     end
   end

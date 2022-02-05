@@ -23,7 +23,7 @@ module Karafka
       #   customization
       # @return [Hash] karafka options
       def karafka_options(args = {})
-        return self._karafka_options if args.empty?
+        return _karafka_options if args.empty?
 
         args.each do |name, value|
           _karafka_options[name] = value
