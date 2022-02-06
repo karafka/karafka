@@ -12,8 +12,10 @@ module Karafka
     class Loader
       class << self
         # Loads all the pro components and configures them wherever it is expected
+        # @param config [Dry::Configurable::Config] whole app config that we can alter with pro
+        #   components
         def setup(config)
-          raise
+          raise config
         end
       end
     end

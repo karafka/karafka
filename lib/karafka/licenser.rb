@@ -39,6 +39,7 @@ module Karafka
     private
 
     # Raises an error with info, that used token is invalid
+    # @param license_config [Dry::Configurable::Config]
     def raise_invalid_license_token(license_config)
       # We set it to false so `Karafka.pro?` method behaves as expected
       license_config.token = false

@@ -10,7 +10,7 @@ RSpec.describe_current do
   context 'when we define job options' do
     subject(:option_setup) { job_class.karafka_options(args) }
 
-    let(:args) { { rand => rand } }
+    let(:args) { { 1 => 2 } }
 
     before do
       allow(Karafka::App.config.internal.active_job.job_options_contract)
