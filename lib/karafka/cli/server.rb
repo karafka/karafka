@@ -5,11 +5,6 @@ module Karafka
   class Cli < Thor
     # Server Karafka Cli action
     class Server < Base
-      # Server config settings contract
-      CONTRACT = Contracts::ServerCliOptions.new.freeze
-
-      private_constant :CONTRACT
-
       desc 'Start the Karafka server (short-cut alias: "s")'
       option aliases: 's'
       option :consumer_groups, type: :array, default: nil, aliases: :g
@@ -19,7 +14,7 @@ module Karafka
         # Print our banner and info in the dev mode
         print_marketing_info if Karafka::App.env.development?
 
-        validate!
+        Contracts::ServerCliOptions.new.validate!(cli.options)
 
         # We assign active topics on a server level, as only server is expected to listen on
         # part of the topics
@@ -43,15 +38,6 @@ module Karafka
             "\033[0;31mYou like Karafka? Please consider getting a Pro subscription!\033[0m\n"
           )
         end
-      end
-
-      # Checks the server cli configuration
-      # options validations in terms of app setup (topics, pid existence, etc)
-      def validate!
-        result = CONTRACT.call(cli.options)
-        return if result.success?
-
-        raise Errors::InvalidConfigurationError, result.errors.to_h
       end
     end
   end

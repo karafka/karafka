@@ -8,9 +8,7 @@ module Karafka
     #   `Karafka::Setup::Config` model, but we don't validate them here as they are
     #   validated per each route (topic + consumer_group) because they can be overwritten,
     #   so we validate all of that once all the routes are defined and ready.
-    class Config < Dry::Validation::Contract
-      config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
-
+    class Config < Base
       params do
         # License validity happens in the licenser. Here we do only the simple consistency checks
         required(:license).schema do

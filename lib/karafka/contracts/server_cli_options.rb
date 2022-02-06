@@ -3,9 +3,7 @@
 module Karafka
   module Contracts
     # Contract for validating correctness of the server cli command options.
-    class ServerCliOptions < Dry::Validation::Contract
-      config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
-
+    class ServerCliOptions < Base
       params do
         optional(:consumer_groups).value(:array, :filled?)
       end
