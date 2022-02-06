@@ -3,9 +3,7 @@
 module Karafka
   module Contracts
     # Contract for single full route (consumer group + topics) validation.
-    class ConsumerGroup < Dry::Validation::Contract
-      config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
-
+    class ConsumerGroup < Base
       # Internal contract for sub-validating topics schema
       TOPIC_CONTRACT = ConsumerGroupTopic.new.freeze
 

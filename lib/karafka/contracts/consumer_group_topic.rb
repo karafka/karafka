@@ -3,9 +3,7 @@
 module Karafka
   module Contracts
     # Consumer group topic validation rules.
-    class ConsumerGroupTopic < Dry::Validation::Contract
-      config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
-
+    class ConsumerGroupTopic < Base
       params do
         required(:consumer).filled
         required(:deserializer).filled
