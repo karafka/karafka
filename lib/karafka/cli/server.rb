@@ -14,10 +14,7 @@ module Karafka
         # Print our banner and info in the dev mode
         print_marketing_info if Karafka::App.env.development?
 
-        Contracts::ServerCliOptions.new.validate!(
-          cli.options,
-          Errors::InvalidConfigurationError
-        )
+        Contracts::ServerCliOptions.new.validate!(cli.options)
 
         # We assign active topics on a server level, as only server is expected to listen on
         # part of the topics

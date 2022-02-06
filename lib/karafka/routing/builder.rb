@@ -33,10 +33,7 @@ module Karafka
         instance_eval(&block)
 
         each do |consumer_group|
-          validation_result = Contracts::ConsumerGroup.new.validate!(
-            consumer_group.to_h,
-            Errors::InvalidConfigurationError
-          )
+          Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
         end
       end
 

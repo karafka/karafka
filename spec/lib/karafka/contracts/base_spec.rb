@@ -10,7 +10,7 @@ RSpec.describe_current do
   end
 
   describe '#validate!' do
-    subject(:validation) { validator_class.new.validate!(data, ArgumentError) }
+    subject(:validation) { validator_class.new.validate!(data) }
 
     context 'when data is valid' do
       let(:data) { { id: '1' } }
@@ -21,7 +21,7 @@ RSpec.describe_current do
     context 'when data is not valid' do
       let(:data) { { id: 1 } }
 
-      it { expect { validation }.to raise_error(ArgumentError) }
+      it { expect { validation }.to raise_error(Karafka::Errors::InvalidConfigurationError) }
     end
   end
 end

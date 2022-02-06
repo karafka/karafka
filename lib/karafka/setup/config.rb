@@ -103,7 +103,7 @@ module Karafka
         def setup(&block)
           configure(&block)
           merge_kafka_defaults!(config)
-          validate!
+          Contracts::Config.new.validate!(config.to_h)
 
           # Check the license presence (if needed) and
           Licenser.new.verify(config.license)
@@ -123,17 +123,6 @@ module Karafka
 
             config.kafka[key] = value
           end
-        end
-
-        # Validate config based on the config contract
-        # @return [Boolean] true if configuration is valid
-        # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
-        #   doesn't match with the config contract
-        def validate!
-          Contracts::Config.new.validate!(
-            config.to_h,
-            Errors::InvalidConfigurationError
-          )
         end
 
         # Sets up all the components that are based on the user configuration

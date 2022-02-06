@@ -6,16 +6,14 @@ module Karafka
       config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
 
       # @param data [Hash] data for validation
-      # @param error_class [Class] error class that should be used when validation fails
-      # @return [Boolean] true
-      # @raise [StandardError] any error provided in the error_class that inherits from the
-      #   standard error
-      def validate!(data, error_class)
+      # @return [Boolean] true if all good
+      # @raise [Errors::InvalidConfigurationError] invalid configuration error
+      def validate!(data)
         result = call(data)
 
         return true if result.success?
 
-        raise error_class, result.errors.to_h
+        raise Errors::InvalidConfigurationError, result.errors.to_h
       end
     end
   end
