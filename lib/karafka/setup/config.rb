@@ -148,7 +148,7 @@ module Karafka
 
           # Runs the pro loader that includes all the pro components
           require 'karafka/pro/loader'
-          Pro::Loader.run
+          Pro::Loader.setup
         end
       end
     end

@@ -15,7 +15,7 @@ module Karafka
         # @param config [Dry::Configurable::Config] whole app config that we can alter with pro
         #   components
         def setup(config)
-          raise config
+          config
         end
       end
     end
