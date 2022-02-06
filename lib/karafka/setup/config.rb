@@ -14,15 +14,12 @@ module Karafka
     class Config
       extend Dry::Configurable
 
-      # Contract for checking the config provided by the user
-      CONTRACT = Karafka::Contracts::Config.new.freeze
-
       # Defaults for kafka settings, that will be overwritten only if not present already
       KAFKA_DEFAULTS = {
         'client.id' => 'karafka'
       }.freeze
 
-      private_constant :CONTRACT, :KAFKA_DEFAULTS
+      private_constant :KAFKA_DEFAULTS
 
       # Available settings
 
@@ -106,7 +103,7 @@ module Karafka
         def setup(&block)
           configure(&block)
           merge_kafka_defaults!(config)
-          validate!
+          Contracts::Config.new.validate!(config.to_h)
 
           # Check the license presence (if needed) and
           Licenser.new.verify(config.license)
@@ -126,18 +123,6 @@ module Karafka
 
             config.kafka[key] = value
           end
-        end
-
-        # Validate config based on the config contract
-        # @return [Boolean] true if configuration is valid
-        # @raise [Karafka::Errors::InvalidConfigurationError] raised when configuration
-        #   doesn't match with the config contract
-        def validate!
-          validation_result = CONTRACT.call(config.to_h)
-
-          return true if validation_result.success?
-
-          raise Errors::InvalidConfigurationError, validation_result.errors.to_h
         end
 
         # Sets up all the components that are based on the user configuration

@@ -10,11 +10,6 @@ module Karafka
     #     end
     #   end
     class Builder < Concurrent::Array
-      # Consumer group consistency checking contract
-      CONTRACT = Karafka::Contracts::ConsumerGroup.new.freeze
-
-      private_constant :CONTRACT
-
       def initialize
         @draws = Concurrent::Array.new
         super
@@ -38,12 +33,7 @@ module Karafka
         instance_eval(&block)
 
         each do |consumer_group|
-          hashed_group = consumer_group.to_h
-          validation_result = CONTRACT.call(hashed_group)
-
-          next if validation_result.success?
-
-          raise Errors::InvalidConfigurationError, validation_result.errors.to_h
+          Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
         end
       end
 
