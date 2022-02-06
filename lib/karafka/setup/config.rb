@@ -81,8 +81,6 @@ module Karafka
       setting :kafka, default: {}
 
       # Namespace for internal settings that should not be modified
-      # It's a temporary step to "declassify" several things internally before we move to a
-      # non global state
       setting :internal do
         # option routing_builder [Karafka::Routing::Builder] builder instance
         setting :routing_builder, default: Routing::Builder.new
@@ -95,6 +93,17 @@ module Karafka
         # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
         #   group builder
         setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
+
+        # Karafka components for ActiveJob
+        setting :active_job do
+          # option dispatcher [Karafka::ActiveJob::Dispatcher] default dispatcher for ActiveJob
+          setting :dispatcher, default: ActiveJob::Dispatcher.new
+          # option job_options_contract [Karafka::Contracts::JobOptionsContract] contract for
+          #   ensuring, that extra job options defined are valid
+          setting :job_options_contract, default: ActiveJob::JobOptionsContract.new
+          # option consumer [Class] consumer class that should be used to consume ActiveJob data
+          setting :consumer, default: ActiveJob::Consumer
+        end
       end
 
       class << self

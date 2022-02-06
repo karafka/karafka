@@ -10,7 +10,7 @@ module Karafka
       # @param name [String, Symbol] name of the topic where ActiveJobs jobs should go
       def active_job_topic(name)
         topic(name) do
-          consumer ::Karafka::ActiveJob::Consumer
+          consumer App.config.internal.active_job.consumer
         end
       end
     end

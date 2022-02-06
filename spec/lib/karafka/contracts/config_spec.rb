@@ -17,6 +17,12 @@ RSpec.describe_current do
         token: false,
         entity: '',
         expires_on: Date.parse('2100-01-01')
+      },
+      internal: {
+        routing_builder: Karafka::Routing::Builder.new,
+        status: Karafka::Status.new,
+        process: Karafka::Process.new,
+        subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new
       }
     }
   end
@@ -166,6 +172,38 @@ RSpec.describe_current do
 
     context 'when concurrency is less then 1' do
       before { config[:concurrency] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate internal components' do
+    context 'when internals are missing' do
+      before { config.delete(:internal) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when routing_builder is missing' do
+      before { config[:internal].delete(:routing_builder) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when status is missing' do
+      before { config[:internal].delete(:status) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when process is missing' do
+      before { config[:internal].delete(:process) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when subscription_groups_builder is missing' do
+      before { config[:internal].delete(:subscription_groups_builder) }
 
       it { expect(contract.call(config)).not_to be_success }
     end

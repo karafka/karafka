@@ -11,8 +11,10 @@ module Karafka
     # Loader requires and loads all the pro components only when they are needed
     class Loader
       class << self
-        # Loads all the pro components
-        def run; end
+        # Loads all the pro components and configures them wherever it is expected
+        def setup(config)
+          raise
+        end
       end
     end
   end

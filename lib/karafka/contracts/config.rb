@@ -25,6 +25,14 @@ module Karafka
         required(:pause_max_timeout) { int? & gt?(0) }
         required(:pause_with_exponential_backoff).filled(:bool?)
         required(:shutdown_timeout) { int? & gt?(0) }
+
+        # We validate internals just to be sure, that they are present and working
+        required(:internal).schema do
+          required(:routing_builder)
+          required(:status)
+          required(:process)
+          required(:subscription_groups_builder)
+        end
       end
 
       rule(:pause_timeout, :pause_max_timeout) do
