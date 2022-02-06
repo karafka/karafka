@@ -33,7 +33,7 @@ module Karafka
 
         postfix = Karafka.pro? ? ' + Pro' : ''
 
-        info = [
+        [
           "Karafka version: #{Karafka::VERSION}#{postfix}",
           "Ruby version: #{RUBY_VERSION}",
           "Rdkafka version: #{::Rdkafka::VERSION}",
