@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## master (Unreleased)
+- Drop support for ruby 2.6
+
 ## 1.4.12 (2022-01-13)
 - Ruby 3.1 support
 - `irb` dependency removal (vbyno)
