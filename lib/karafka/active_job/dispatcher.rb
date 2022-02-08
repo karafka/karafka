@@ -14,17 +14,24 @@ module Karafka
 
       # @param job [ActiveJob::Base] job
       def call(job)
-        # We can either dispatch sync (slower) or async (faster)
-        dispatch_method = job
-                          .class
-                          .karafka_options
-                          .fetch(:dispatch_method, DEFAULTS[:dispatch_method])
-
         ::Karafka.producer.public_send(
-          dispatch_method,
+          fetch_option(job, :dispatch_method, DEFAULTS),
           topic: job.queue_name,
           payload: ::ActiveSupport::JSON.encode(job.serialize)
         )
+      end
+
+      private
+
+      # @param job [ActiveJob::Base] job
+      # @param key [Symbol] key we want to fetch
+      # @param defaults [Hash]
+      # @return [Object] options we are interested in
+      def fetch_option(job, key, defaults)
+        job
+          .class
+          .karafka_options
+          .fetch(key, defaults.fetch(key))
       end
     end
   end

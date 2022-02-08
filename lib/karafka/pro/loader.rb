@@ -6,6 +6,8 @@
 #
 # Karafka has also commercial-friendly license, commercial support and commercial components.
 #
+# By sending a pull request to the pro components, you are agreeing to transfer the copyright of
+# your code to Maciej Mensfeld.
 module Karafka
   module Pro
     # Loader requires and loads all the pro components only when they are needed
@@ -15,7 +17,11 @@ module Karafka
         # @param config [Dry::Configurable::Config] whole app config that we can alter with pro
         #   components
         def setup(config)
-          config
+          require_relative 'active_job/dispatcher'
+          require_relative 'active_job/job_options_contract'
+
+          config.internal.active_job.dispatcher = ActiveJob::Dispatcher.new
+          config.internal.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
         end
       end
     end
