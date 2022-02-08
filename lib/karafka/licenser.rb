@@ -58,12 +58,18 @@ module Karafka
     #
     # @param expires_on [Date] when the license expires
     def notify_if_license_expired(expires_on)
-      Karafka.logger.error(
-        <<~MSG.tr("\n", ' ')
-          Your license expired on #{expires_on}.
-          Karafka no longer uses any Pro capabilities.
-          Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
-        MSG
+      message = <<~MSG.tr("\n", ' ')
+        Your license expired on #{expires_on}.
+        Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
+      MSG
+
+      Karafka.logger.error(message)
+
+      Karafka.monitor.instrument(
+        'error.occurred',
+        caller: self,
+        error: Errors::ExpiredLicenseTokenError.new(message),
+        type: 'licenser.expired'
       )
     end
   end

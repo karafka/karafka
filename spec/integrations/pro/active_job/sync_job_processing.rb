@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
-# Karafka should be able to dispatch jobs using sync adapter
+# Karafka should be able to dispatch jobs using sync pro adapter
 
-setup_karafka
+setup_karafka do |config|
+  config.license.token = pro_license_token
+end
+
 setup_active_job
 
 Karafka::App.routes.draw do
@@ -35,8 +38,8 @@ end
 
 aj_config = Karafka::App.config.internal.active_job
 
-assert_equal aj_config.dispatcher.class, Karafka::ActiveJob::Dispatcher
-assert_equal aj_config.job_options_contract.class, Karafka::ActiveJob::JobOptionsContract
+assert_equal aj_config.dispatcher.class, Karafka::Pro::ActiveJob::Dispatcher
+assert_equal aj_config.job_options_contract.class, Karafka::Pro::ActiveJob::JobOptionsContract
 assert_equal VALUE1, DataCollector.data[0][0]
 assert_equal VALUE2, DataCollector.data[0][1]
 assert_equal 1, DataCollector.data.size
