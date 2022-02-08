@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'karafka/pro/active_job/dispatcher'
+
 RSpec.describe_current do
   subject(:dispatcher) { described_class.new }
 

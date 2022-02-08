@@ -110,3 +110,13 @@ def assert_not_equal(not_expected, received)
 
   raise AssertionFailedError, "#{received} equals to #{not_expected}"
 end
+
+# Checks if a given constant can be accessed
+# @param const_name [String] string with potential class / module name
+# @return [Boolean] true if accessible
+def const_visible?(const_name)
+  Kernel.const_get(const_name)
+  true
+rescue NameError
+  false
+end

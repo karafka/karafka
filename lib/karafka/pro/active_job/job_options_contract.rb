@@ -15,6 +15,8 @@ module Karafka
       # Contract for validating the options that can be altered with `#karafka_options` per job
       # class that works with Pro features.
       class JobOptionsContract < ::Karafka::ActiveJob::JobOptionsContract
+        Types = include Dry.Types()
+
         params do
           optional(:partitioner).value(Types.Interface(:call))
         end

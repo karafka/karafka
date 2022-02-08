@@ -87,8 +87,8 @@ end
 
 loader = Zeitwerk::Loader.for_gem
 # Do not load Rails extensions by default, this will be handled by Railtie if they are needed
-loader.do_not_eager_load(Karafka.gem_root.join('lib/active_job'))
+loader.ignore(Karafka.gem_root.join('lib/active_job'))
 # Do not load pro components, this will be handled by license manager
-loader.do_not_eager_load(Karafka.gem_root.join('lib/karafka/pro'))
+loader.ignore(Karafka.gem_root.join('lib/karafka/pro'))
 loader.setup
 loader.eager_load

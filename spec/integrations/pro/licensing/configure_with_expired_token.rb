@@ -28,3 +28,7 @@ logs = LOGS.read
 assert_equal true, logs.include?('] ERROR -- : Your license expired on 2021-01-01')
 assert_equal true, logs.include?('Please reach us at contact@karafka.io')
 assert_equal true, Karafka.pro?
+
+# We do not want to break systems, so even with expired keys, pro components should be loaded
+assert_equal true, const_visible?('Karafka::Pro::ActiveJob::Dispatcher')
+assert_equal true, const_visible?('Karafka::Pro::ActiveJob::JobOptionsContract')
