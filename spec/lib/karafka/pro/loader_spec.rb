@@ -5,7 +5,7 @@ require 'karafka/pro/loader'
 RSpec.describe_current do
   subject(:loader) { described_class }
 
-  context 'active_job pro compoments' do
+  context 'when we are loading active_job pro compoments' do
     let(:aj_defaults) { Karafka::App.config.internal.active_job.dup }
     let(:aj_config) { Karafka::App.config.internal.active_job }
 
