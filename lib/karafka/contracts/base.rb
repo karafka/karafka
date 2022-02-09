@@ -2,7 +2,7 @@
 
 module Karafka
   module Contracts
-    # Base contract for all Karafka contrats
+    # Base contract for all Karafka contracts
     class Base < Dry::Validation::Contract
       config.messages.load_paths << File.join(Karafka.gem_root, 'config', 'errors.yml')
 

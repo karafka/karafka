@@ -41,7 +41,7 @@ module Karafka
       # We signal critical exceptions, notify and do not allow worker to fail
       # rubocop:disable Lint/RescueException
       rescue Exception => e
-      # rubocop:enable Lint/RescueException
+        # rubocop:enable Lint/RescueException
         Karafka.monitor.instrument(
           'error.occurred',
           caller: self,

@@ -35,11 +35,11 @@ end
 counts = 0
 
 # First loop kicks in before initialization of the connection and we want to publish after, that
-# is why we run it on the second run
+# is why we don't run it on the first run
 Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
   counts += 1
 
-  if counts == 2
+  if counts == 5
     # We dispatch in order per partition, in case it all would go to one without partitioner or
     # in case it would fail, the order will break
     2.downto(0) do |partition|

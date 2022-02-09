@@ -41,8 +41,10 @@ end
 
 elements = Array.new(5) { SecureRandom.uuid }
 
-elements.each { |data| produce(DataCollector.topics.first, data) }
-elements.each { |data| produce(DataCollector.topics.last, data) }
+elements.each do |data|
+  produce(DataCollector.topics.first, data)
+  produce(DataCollector.topics.last, data)
+end
 
 start_karafka_and_wait_until do
   DataCollector.data[0].size >= 1 &&

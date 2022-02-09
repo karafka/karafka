@@ -27,7 +27,6 @@ class Job2 < ActiveJob::Base
   end
 end
 
-
 Job1.perform_later
 Job2.perform_later
 
