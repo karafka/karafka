@@ -27,6 +27,7 @@ RSpec.describe_current do
     it { expect(group.kafka['auto.offset.reset']).to eq('earliest') }
     it { expect(group.kafka['enable.auto.offset.store']).to eq('false') }
     it { expect(group.kafka['bootstrap.servers']).to eq(topic.kafka[:'bootstrap.servers']) }
+    it { expect(group.kafka['bootstrap.servers']).not_to be_nil }
   end
 
   context "with string keys" do
@@ -38,6 +39,7 @@ RSpec.describe_current do
       it { expect(group.kafka['auto.offset.reset']).to eq('earliest') }
       it { expect(group.kafka['enable.auto.offset.store']).to eq('false') }
       it { expect(group.kafka['bootstrap.servers']).to eq(topic.kafka['bootstrap.servers']) }
+      it { expect(group.kafka['bootstrap.servers']).not_to be_nil }
     end
   end
 end
