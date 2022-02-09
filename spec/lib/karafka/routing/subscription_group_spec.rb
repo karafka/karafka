@@ -26,6 +26,18 @@ RSpec.describe_current do
     it { expect(group.kafka['group.id']).to eq(topic.consumer_group.id) }
     it { expect(group.kafka['auto.offset.reset']).to eq('earliest') }
     it { expect(group.kafka['enable.auto.offset.store']).to eq('false') }
-    it { expect(group.kafka['bootstrap.servers']).to eq(topic.kafka['bootstrap.servers']) }
+    it { expect(group.kafka['bootstrap.servers']).to eq(topic.kafka[:'bootstrap.servers']) }
+  end
+
+  context "with string keys" do
+    let(:topic) { build(:routing_topic, kafka: { 'bootstrap.servers' => 'kafka://kafka:9092' }) }
+
+    describe '#kafka' do
+      it { expect(group.kafka['client.id']).to eq(Karafka::App.config.client_id) }
+      it { expect(group.kafka['group.id']).to eq(topic.consumer_group.id) }
+      it { expect(group.kafka['auto.offset.reset']).to eq('earliest') }
+      it { expect(group.kafka['enable.auto.offset.store']).to eq('false') }
+      it { expect(group.kafka['bootstrap.servers']).to eq(topic.kafka['bootstrap.servers']) }
+    end
   end
 end
