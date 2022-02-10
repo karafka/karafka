@@ -23,12 +23,41 @@ RSpec.describe_current do
         status: Karafka::Status.new,
         process: Karafka::Process.new,
         subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new
+      },
+      kafka: {
+        'bootstrap.servers' => '127.0.0.1:9092'
       }
     }
   end
 
   context 'when config is valid' do
     it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when validating kafka details' do
+    context 'when kafka is missing' do
+      before { config.delete(:kafka) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when kafka scope is empty' do
+      before { config[:kafka] = {} }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when kafka scope is not a hash' do
+      before { config[:kafka] = [1, 2, 3] }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when kafka scope has non string keys' do
+      before { config[:kafka] = { test: 1 } }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
   end
 
   context 'when validating license related components' do
