@@ -40,7 +40,7 @@ module Karafka
       rule(:kafka) do
         next unless value.is_a?(Hash)
 
-        value.keys.each do |key|
+        value.each_key do |key|
           next if key.is_a?(String)
 
           key(:"kafka.#{key}").failure(:kafka_key_must_be_a_string)
