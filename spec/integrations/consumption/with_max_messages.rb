@@ -25,7 +25,7 @@ Karafka::App.routes.draw do
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data[:counts].size >= 4
+  DataCollector.data[:counts].size >= 8
 end
 
 assert_equal 5, DataCollector.data[:counts].max
