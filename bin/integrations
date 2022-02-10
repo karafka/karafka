@@ -13,7 +13,7 @@ IntegrationTestError = Class.new(StandardError)
 
 # How many child processes with integration specs do we want to run in parallel
 # When the value is high, there's a problem with thread allocation on Github
-CONCURRENCY = 5
+CONCURRENCY = 4
 
 # Abstraction around a single test scenario execution process
 class Scenario
