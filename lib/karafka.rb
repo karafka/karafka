@@ -65,6 +65,11 @@ module Karafka
       Pathname.new(File.expand_path('karafka', __dir__))
     end
 
+    # @return [Boolean] true if there is a valid pro token present
+    def pro?
+      App.config.license.token != false
+    end
+
     # @return [String] path to a default file that contains booting procedure etc
     # @note By default it is a file called 'karafka.rb' but it can be specified as you wish if you
     #   have Karafka that is merged into a Sinatra/Rails app and karafka.rb is taken.
@@ -82,8 +87,8 @@ end
 
 loader = Zeitwerk::Loader.for_gem
 # Do not load Rails extensions by default, this will be handled by Railtie if they are needed
-loader.do_not_eager_load(Karafka.gem_root.join('lib/active_job'))
+loader.ignore(Karafka.gem_root.join('lib/active_job'))
 # Do not load pro components, this will be handled by license manager
-loader.do_not_eager_load(Karafka.gem_root.join('lib/karafka/pro'))
+loader.ignore(Karafka.gem_root.join('lib/karafka/pro'))
 loader.setup
 loader.eager_load

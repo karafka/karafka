@@ -12,6 +12,7 @@ class Consumer < Karafka::BaseConsumer
   def initialize
     @backwards = false
     @ignore = false
+    super
   end
 
   def consume

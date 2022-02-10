@@ -88,6 +88,9 @@ module Karafka
         when 'connection.listener.fetch_loop.error'
           error "Listener fetch loop error: #{error}"
           error details
+        when 'licenser.expired'
+          error error
+          error details
         when 'runner.call.error'
           fatal "Runner crashed due to an error: #{error}"
           fatal details

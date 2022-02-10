@@ -54,6 +54,16 @@ def setup_karafka
   Karafka.producer.monitor.subscribe(listener)
 end
 
+# Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup
+def setup_active_job
+  require 'active_job'
+  require 'active_job/karafka'
+
+  # This is done in Railtie but here we use only ActiveJob, not Rails
+  ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
+  ActiveJob::Base.queue_adapter = :karafka
+end
+
 # Waits until block yields true
 def wait_until
   sleep(0.01) until yield
@@ -101,6 +111,11 @@ def assert_equal(expected, received)
   raise AssertionFailedError, "#{received} does not equal to #{expected}"
 end
 
+# @return [String] valid pro license token that we use in the integration tests
+def pro_license_token
+  ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+end
+
 # Checks that what we've received and what we do not expect is not equal
 #
 # @param not_expected [Object] what we do not expect
@@ -109,4 +124,14 @@ def assert_not_equal(not_expected, received)
   return if not_expected != received
 
   raise AssertionFailedError, "#{received} equals to #{not_expected}"
+end
+
+# Checks if a given constant can be accessed
+# @param const_name [String] string with potential class / module name
+# @return [Boolean] true if accessible
+def const_visible?(const_name)
+  Kernel.const_get(const_name)
+  true
+rescue NameError
+  false
 end

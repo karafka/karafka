@@ -31,9 +31,9 @@ module Karafka
       def core_info
         config = Karafka::App.config
 
-        postfix = config.license.token ? ' + Pro' : ''
+        postfix = Karafka.pro? ? ' + Pro' : ''
 
-        info = [
+        [
           "Karafka version: #{Karafka::VERSION}#{postfix}",
           "Ruby version: #{RUBY_VERSION}",
           "Rdkafka version: #{::Rdkafka::VERSION}",
@@ -49,7 +49,7 @@ module Karafka
       def license_info
         config = Karafka::App.config
 
-        if config.license.token
+        if Karafka.pro?
           [
             'License: Commercial',
             "License entity: #{config.license.entity}",

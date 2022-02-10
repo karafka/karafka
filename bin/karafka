@@ -2,6 +2,10 @@
 
 require 'karafka'
 
+# We set this to indicate, that the process in which we are (whatever it does) was started using
+# our bin/karafka cli
+ENV['KARAFKA_CLI'] = 'true'
+
 # If there is a boot file, we need to require it as we expect it to contain
 # Karafka app setup, routes, etc
 if File.exist?(Karafka.boot_file)

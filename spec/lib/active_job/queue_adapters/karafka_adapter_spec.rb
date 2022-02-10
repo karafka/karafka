@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:adapter) { described_class.new }
+  subject(:adapter) { ActiveJob::QueueAdapters::KarafkaAdapter.new }
 
   let(:job) { ActiveJob::Base.new }
 
@@ -12,19 +12,13 @@ RSpec.describe_current do
   end
 
   describe '#enqueue' do
-    let(:serialized_payload) { ActiveSupport::JSON.encode(job.serialize) }
-
     before do
-      allow(::Karafka.producer).to receive(:produce_async).with(
-        topic: job.queue_name,
-        payload: serialized_payload
-      )
+      allow(Karafka::App.config.internal.active_job.dispatcher).to receive(:call).with(job)
     end
 
-    it 'expect to use proper encoder and async producer to dispatch the job' do
+    it 'expect to delegate to a proper dispatcher based on the configuration' do
       adapter.enqueue(job)
-
-      expect(::Karafka.producer).to have_received(:produce_async)
+      expect(Karafka::App.config.internal.active_job.dispatcher).to have_received(:call).with(job)
     end
   end
 end

@@ -1,8 +1,17 @@
 # frozen_string_literal: true
 
 # Karafka should not crash with expired token but should print an error message
+# It also should work the way it works. We do not want to crash anyone processes running and
+# for example restarting.
+# It should aside from adding a message to logger also report an error into the monitor.
 
 LOGS = StringIO.new
+
+Karafka::App.monitor.subscribe('error.occurred') do |event|
+  assert_equal 'licenser.expired', event[:type]
+  assert_equal Karafka::Errors::ExpiredLicenseTokenError, event[:error].class
+  assert_equal true, event[:error].message.include?('Your license expired on')
+end
 
 setup_karafka do |config|
   config.logger = Logger.new(LOGS)
@@ -25,3 +34,8 @@ logs = LOGS.read
 
 assert_equal true, logs.include?('] ERROR -- : Your license expired on 2021-01-01')
 assert_equal true, logs.include?('Please reach us at contact@karafka.io')
+assert_equal true, Karafka.pro?
+
+# We do not want to break systems, so even with expired keys, pro components should be loaded
+assert_equal true, const_visible?('Karafka::Pro::ActiveJob::Dispatcher')
+assert_equal true, const_visible?('Karafka::Pro::ActiveJob::JobOptionsContract')

@@ -26,7 +26,7 @@ module Karafka
         data = nil
       end
 
-      details = data ? JSON.parse(data) : raise_invalid_license_token
+      details = data ? JSON.parse(data) : raise_invalid_license_token(license_config)
 
       license_config.entity = details.fetch('entity')
       license_config.expires_on = Date.parse(details.fetch('expires_on'))
@@ -39,7 +39,11 @@ module Karafka
     private
 
     # Raises an error with info, that used token is invalid
-    def raise_invalid_license_token
+    # @param license_config [Dry::Configurable::Config]
+    def raise_invalid_license_token(license_config)
+      # We set it to false so `Karafka.pro?` method behaves as expected
+      license_config.token = false
+
       raise(
         Errors::InvalidLicenseTokenError,
         <<~MSG.tr("\n", ' ')
@@ -50,15 +54,22 @@ module Karafka
     end
 
     # We do not raise an error here as we don't want to cause any problems to someone that runs
-    # Karafka on production. Error is enough.
+    # Karafka on production. Error message is enough.
+    #
     # @param expires_on [Date] when the license expires
     def notify_if_license_expired(expires_on)
-      Karafka.logger.error(
-        <<~MSG.tr("\n", ' ')
-          Your license expired on #{expires_on}.
-          Karafka no longer uses any Pro capabilities.
-          Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
-        MSG
+      message = <<~MSG.tr("\n", ' ')
+        Your license expired on #{expires_on}.
+        Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
+      MSG
+
+      Karafka.logger.error(message)
+
+      Karafka.monitor.instrument(
+        'error.occurred',
+        caller: self,
+        error: Errors::ExpiredLicenseTokenError.new(message),
+        type: 'licenser.expired'
       )
     end
   end

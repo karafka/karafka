@@ -23,7 +23,10 @@ RSpec.describe_current do
         ].join("\n")
       end
 
-      before { allow(Karafka.logger).to receive(:info) }
+      before do
+        Karafka::App.config.license.token = false
+        allow(Karafka.logger).to receive(:info)
+      end
 
       it 'expect to print details of this Karafka app instance' do
         info_cli.call

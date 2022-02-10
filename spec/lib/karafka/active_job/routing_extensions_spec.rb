@@ -24,8 +24,8 @@ RSpec.describe_current do
     it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_app_default" }
     it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_app_topic_name" }
     it { expect(builder.size).to eq 1 }
-    it { expect(topic1.consumer).to eq(ActiveJob::Consumer) }
-    it { expect(topic2.consumer).not_to eq(ActiveJob::Consumer) }
+    it { expect(topic1.consumer).to eq(Karafka::ActiveJob::Consumer) }
+    it { expect(topic2.consumer).not_to eq(Karafka::ActiveJob::Consumer) }
   end
 
   context 'when we define more than one active job topic on the root level without other topics' do
@@ -42,8 +42,8 @@ RSpec.describe_current do
     it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_app_default" }
     it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_app_urgent" }
     it { expect(builder.size).to eq 1 }
-    it { expect(topic1.consumer).to eq(ActiveJob::Consumer) }
-    it { expect(topic2.consumer).to eq(ActiveJob::Consumer) }
+    it { expect(topic1.consumer).to eq(Karafka::ActiveJob::Consumer) }
+    it { expect(topic2.consumer).to eq(Karafka::ActiveJob::Consumer) }
   end
 
   context 'when we define separate consumer groups for separate active job topics' do
@@ -65,7 +65,7 @@ RSpec.describe_current do
     it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_g1_default" }
     it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_g2_urgent" }
     it { expect(builder.size).to eq 2 }
-    it { expect(topic1.consumer).to eq(ActiveJob::Consumer) }
-    it { expect(topic2.consumer).to eq(ActiveJob::Consumer) }
+    it { expect(topic1.consumer).to eq(Karafka::ActiveJob::Consumer) }
+    it { expect(topic2.consumer).to eq(Karafka::ActiveJob::Consumer) }
   end
 end
