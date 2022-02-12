@@ -2,10 +2,10 @@
 
 RSpec.describe_current do
   let(:routing_topic) { build(:routing_topic) }
-  let(:message1) { build(:kafka_fetched_message) }
-  let(:message2) { build(:kafka_fetched_message) }
+  let(:message1) { build(:kafka_fetched_message, timestamp: 5.seconds.ago) }
+  let(:message2) { build(:kafka_fetched_message, timestamp: 3.seconds.ago) }
   let(:kafka_batch) { [message1, message2] }
-  let(:scheduled_at) { Time.now }
+  let(:scheduled_at) { Time.now - 1.second }
 
   describe '#call' do
     subject(:result) { described_class.call(kafka_batch, routing_topic, scheduled_at) }
@@ -18,6 +18,8 @@ RSpec.describe_current do
     it { expect(result.topic).to eq routing_topic.name }
     it { expect(result.deserializer).to eq routing_topic.deserializer }
     it { expect(result.scheduled_at).to eq(scheduled_at) }
+    it { expect(result.consumption_lag).to be_between(3000, 3100) }
+    it { expect(result.processing_lag).to be_between(1000, 1100) }
     it { expect(result).to be_frozen }
   end
 end

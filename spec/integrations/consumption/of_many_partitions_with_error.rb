@@ -29,7 +29,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     # Special topic with 10 partitions available
     topic 'integrations_0_10' do

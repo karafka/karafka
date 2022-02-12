@@ -14,6 +14,8 @@ module Karafka
       :partition,
       :topic,
       :scheduled_at,
+      :consumption_lag,
+      :processing_lag,
       keyword_init: true
     )
   end

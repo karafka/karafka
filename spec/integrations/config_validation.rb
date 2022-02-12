@@ -10,7 +10,7 @@ begin
     config.kafka = { 'message.max.bytes' => 0, 'message.copy.max.bytes' => -1 }
   end
 
-  Karafka::App.routes.draw do
+  draw_routes do
     consumer_group 'usual' do
       topic 'regular' do
         consumer Class.new

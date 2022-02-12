@@ -15,7 +15,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   topic DataCollector.topic do
     consumer Consumer
   end
