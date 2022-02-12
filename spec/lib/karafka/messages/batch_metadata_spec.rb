@@ -46,4 +46,16 @@ RSpec.describe_current do
 
     it { expect(metadata.scheduled_at).to eq rand_value }
   end
+
+  describe '#consumption_lag' do
+    before { metadata['consumption_lag'] = rand_value }
+
+    it { expect(metadata.consumption_lag).to eq rand_value }
+  end
+
+  describe '#processing_lag' do
+    before { metadata['processing_lag'] = rand_value }
+
+    it { expect(metadata.processing_lag).to eq rand_value }
+  end
 end

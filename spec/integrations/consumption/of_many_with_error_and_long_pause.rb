@@ -27,7 +27,7 @@ class Consumer2 < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topics.first do
       consumer Consumer1

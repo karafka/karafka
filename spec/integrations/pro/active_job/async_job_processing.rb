@@ -8,7 +8,7 @@ end
 
 setup_active_job
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     active_job_topic DataCollector.topic
   end

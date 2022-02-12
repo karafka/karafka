@@ -19,11 +19,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
-  topic DataCollector.topic do
-    consumer Consumer
-  end
-end
+draw_routes(Consumer)
 
 produce(DataCollector.topic, '1')
 

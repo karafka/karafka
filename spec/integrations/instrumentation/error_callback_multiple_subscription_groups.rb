@@ -9,7 +9,7 @@ setup_karafka do |config|
   config.kafka = { 'bootstrap.servers' => '127.0.0.1:9090' }
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_groups.first do
     topic DataCollector.topic do
       consumer Class.new

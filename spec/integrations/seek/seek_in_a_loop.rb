@@ -25,13 +25,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
-      consumer Consumer
-    end
-  end
-end
+draw_routes(Consumer)
 
 start_karafka_and_wait_until do
   # 100 initially and then a loop from 20th 4 times

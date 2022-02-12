@@ -20,13 +20,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
-      consumer Consumer
-    end
-  end
-end
+draw_routes(Consumer)
 
 # Start Karafka
 Thread.new { Karafka::Server.run }

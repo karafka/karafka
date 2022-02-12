@@ -13,7 +13,7 @@ setup_active_job
 # This is a special topic with 3 partitions
 TOPIC_NAME = 'integrations_2_03'
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group DataCollector.consumer_group do
     active_job_topic TOPIC_NAME
   end

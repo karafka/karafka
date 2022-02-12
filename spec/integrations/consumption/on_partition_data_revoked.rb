@@ -24,7 +24,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.routes.draw do
+draw_routes do
   consumer_group 'integrations_1_03' do
     topic 'integrations_1_03' do
       consumer Consumer

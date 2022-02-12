@@ -64,6 +64,24 @@ def setup_active_job
   ActiveJob::Base.queue_adapter = :karafka
 end
 
+# Sets up default routes (mostly used in integration specs) or allows to configure custom routes
+# by providing a block
+# @param consumer_class [Class, nil] consumer class we want to use if going with defaults
+# @param block [Proc] block with routes we want to draw if going with complex routes setup
+def draw_routes(consumer_class = nil, &block)
+  Karafka::App.routes.draw do
+    if block
+      instance_eval(&block)
+    else
+      consumer_group DataCollector.consumer_group do
+        topic DataCollector.topic do
+          consumer consumer_class
+        end
+      end
+    end
+  end
+end
+
 # Waits until block yields true
 def wait_until
   sleep(0.01) until yield
