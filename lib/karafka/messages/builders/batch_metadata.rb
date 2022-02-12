@@ -12,9 +12,9 @@ module Karafka
           # @param topic [Karafka::Routing::Topic] topic for which we've fetched the batch
           # @param scheduled_at [Time] moment when the batch was scheduled for processing
           # @return [Karafka::Messages::BatchMetadata] batch metadata object
-          # @note In regards to the time lags: we can use current time here, as creation of
-          #   batch metadata happens in worker. So whenever this is being built, it means that the
-          #   processing of this batch started.
+          # @note Regarding the time lags: we can use the current time here, as batch metadata is
+          #   created in the worker. So whenever this is being built, it means that the processing
+          #   of this batch has already started.
           def call(kafka_batch, topic, scheduled_at)
             now = Time.now
 

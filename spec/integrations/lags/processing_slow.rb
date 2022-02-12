@@ -2,7 +2,7 @@
 
 # When processing data slowly from a single partition of a single topic, we do not fetch more data
 # from Kafka, thus the processing lag should not be big as there is no more data enqueued
-# We keep the time numbers a big higher than they could be as when running on the CI, sometimes
+# We keep the time numbers a bit higher than they could be as when running on the CI, sometimes
 # there are small lags
 
 setup_karafka do |config|
