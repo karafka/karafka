@@ -2,6 +2,8 @@
 
 # When processing data slowly from a single partition of a single topic, we do not fetch more data
 # from Kafka, thus the processing lag should not be big as there is no more data enqueued
+# We keep the time numbers a big higher than they could be as when running on the CI, sometimes
+# there are small lags
 
 setup_karafka do |config|
   config.max_messages = 5
@@ -24,4 +26,4 @@ start_karafka_and_wait_until do
   DataCollector.data[:processing_lags].size >= 20
 end
 
-assert_equal true, DataCollector.data[:processing_lags].max <= 5
+assert_equal true, DataCollector.data[:processing_lags].max <= 50
