@@ -7,7 +7,7 @@ guarded = []
 
 begin
   setup_karafka do |config|
-    config.kafka = { 'message.max.bytes' => 0, 'message.copy.max.bytes' => -1 }
+    config.kafka = { 'message.max.bytes': 0, 'message.copy.max.bytes': -1 }
   end
 
   draw_routes do
@@ -23,7 +23,7 @@ end
 
 begin
   setup_karafka do |config|
-    config.kafka = { 'message.max.bytes': 0, 'message.copy.max.bytes': -1 }
+    config.kafka = { 'message.max.bytes' => 0, 'message.copy.max.bytes' => -1 }
   end
 rescue Karafka::Errors::InvalidConfigurationError
   guarded << true

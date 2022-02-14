@@ -16,7 +16,7 @@ module Karafka
 
       # Defaults for kafka settings, that will be overwritten only if not present already
       KAFKA_DEFAULTS = {
-        'client.id' => 'karafka'
+        'client.id': 'karafka'
       }.freeze
 
       private_constant :KAFKA_DEFAULTS

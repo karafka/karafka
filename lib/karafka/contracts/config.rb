@@ -41,9 +41,9 @@ module Karafka
         next unless value.is_a?(Hash)
 
         value.each_key do |key|
-          next if key.is_a?(String)
+          next if key.is_a?(Symbol)
 
-          key(:"kafka.#{key}").failure(:kafka_key_must_be_a_string)
+          key(:"kafka.#{key}").failure(:kafka_key_must_be_a_symbol)
         end
       end
 
