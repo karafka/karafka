@@ -25,7 +25,7 @@ RSpec.describe_current do
         subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new
       },
       kafka: {
-        'bootstrap.servers' => '127.0.0.1:9092'
+        'bootstrap.servers': '127.0.0.1:9092'
       }
     }
   end
@@ -53,8 +53,8 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when kafka scope has non string keys' do
-      before { config[:kafka] = { test: 1 } }
+    context 'when kafka scope has non symbolized keys' do
+      before { config[:kafka] = { 'test' => 1 } }
 
       it { expect(contract.call(config)).not_to be_success }
     end

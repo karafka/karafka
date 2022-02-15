@@ -4,7 +4,7 @@
 
 setup_karafka do |config|
   # Bad port on purpose to trigger the error
-  config.kafka = { 'bootstrap.servers' => '127.0.0.1:9090' }
+  config.kafka = { 'bootstrap.servers': '127.0.0.1:9090' }
 end
 
 draw_routes(Class.new)

@@ -3,7 +3,7 @@
 # Karafka should be able to start consuming from the latest offset
 
 setup_karafka do |config|
-  config.kafka['auto.offset.reset'] = 'latest'
+  config.kafka[:'auto.offset.reset'] = 'latest'
 end
 
 before = Array.new(10) { SecureRandom.uuid }

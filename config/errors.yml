@@ -5,4 +5,4 @@ en:
       topics_names_not_unique: all topic names within a single consumer group must be unique
       required_usage_count: Given topic must be used at least once
       consumer_groups_inclusion: Unknown consumer group
-      kafka_key_must_be_a_string: All keys under the kafka settings scope need to be strings
+      kafka_key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
