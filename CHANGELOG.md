@@ -2,6 +2,8 @@
 
 ## 2.0.0-alpha2 (2022-02-19)
 - Require `kafka` keys to be symbols
+- Added ActiveJob Pro adapter
+- Small updates to the license and docs
 
 ## 2.0.0-alpha1 (2022-01-30)
 - Change license to `LGPL-3.0`
