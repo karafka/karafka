@@ -1,7 +1,8 @@
 # Karafka framework changelog
 
-## master (Unreleased)
+## 1.4.13 (2022-02-19)
 - Drop support for ruby 2.6
+- Add mfa requirement
 
 ## 1.4.12 (2022-01-13)
 - Ruby 3.1 support
