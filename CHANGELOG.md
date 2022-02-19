@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.0-alpha2 (Unreleased)
+## 2.0.0-alpha2 (2022-02-19)
 - Require `kafka` keys to be symbols
 
 ## 2.0.0-alpha1 (2022-01-30)
