@@ -17,8 +17,8 @@ class SingleMessageBaseConsumer < Karafka::BaseConsumer
       consume_one
     end
 
-    # This could be moved into the loop but would slow down the processing, it's a tradeoff between
-    # retrying the batch and processing performance
+    # This could be moved into the loop but would slow down the processing, it's a trade-off
+    # between retrying the batch and processing performance
     mark_as_consumed(messages.last)
   end
 end
