@@ -2,6 +2,11 @@
 
 # Runner to run integration specs in parallel
 
+# Part of integration specs run pristine without bundler.
+# If we would run bundle exec when running this code, bundler would inject its own context
+# into them, messing things up heavily
+raise 'This code needs to be executed WITHOUT bundle exec' if Kernel.const_defined?(:Bundler)
+
 require 'open3'
 require 'fileutils'
 require 'pathname'
@@ -158,10 +163,13 @@ end
 # Load all the specs
 specs = Dir[ROOT_PATH.join('spec/integrations/**/*.rb')]
 
-# If filter is provided, apply
-specs.delete_if { |name| !name.include?(ARGV[0]) } if ARGV[0]
+# If filters is provided, apply
+# Allows to provide several filters one after another and applies all of them
+ARGV.each do |filter|
+  specs.delete_if { |name| !name.include?(filter) }
+end
 
-raise ArgumentError, "No integration specs with filter: #{ARGV[0]}" if specs.empty?
+raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
 
 # Randomize order
 seed = (ENV['SEED'] || rand(0..10_000)).to_i
