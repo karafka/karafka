@@ -47,16 +47,7 @@ class Scenario
     'shutdown/on_hanging_poll_and_shutdown.rb' => [2].freeze
   }.freeze
 
-  # There are specs where we do not want to inject helpers or bundler as we run inline bundler
-  # to check some specific gems combinations, etc.
-  # In cases like this we need to run in a pristine mode
-  PRISTINE_RUNES = %w[
-    rails/rails5_integration.rb
-    rails/rails6_integration.rb
-    rails/rails7_integration.rb
-  ]
-
-  private_constant :MAX_RUN_TIME, :EXIT_CODES, :PRISTINE_RUNES
+  private_constant :MAX_RUN_TIME, :EXIT_CODES
 
   # Creates scenario instance and runs in the background process
   #
@@ -64,14 +55,17 @@ class Scenario
   def initialize(path)
     FileUtils.mkdir_p('tmp')
 
-    if PRISTINE_RUNES.any? { |pristine_file| path.end_with?(pristine_file) }
+    # There are specs where we do not want to inject helpers or bundler as we run inline bundler
+    # to check some specific gems combinations, etc.
+    # In cases like this we need to run in a pristine mode
+    if path.include?('pristine')
       # We need to run it that way as we cannot pass bundler context to be able to run inline
       # bundler mode. We cannot wrap it around directly as it would not work in the popen3
       #
       # We enter the tmp directory because of a bug in bundler: when there is a plugin defined
       # for a bundler in the directory we're in, despite being in an inline mode it will still
       # be used and we do not want that
-      cmd = "cd tmp && PRISTINE_MODE=true BUNDLE_AUTO_CLEAN_WITHOUT_PATH=true BUNDLE_CLEAN=true BUNDLE_DISABLE_SHARED_GEMS=true ruby -r ../spec/integrations_helper.rb #{path}"
+      cmd = "cd tmp && BUNDLE_PATH=/tmp/test BUNDLE_PATH__SYSTEM=false BUNDLE_SYSTEM_BINDIR=/tmp/test2 BUNDLE_GLOBAL_GEM_CACHE=false PRISTINE_MODE=true BUNDLE_AUTO_CLEAN_WITHOUT_PATH=true BUNDLE_CLEAN=true BUNDLE_DISABLE_SHARED_GEMS=true ruby -r ../spec/integrations_helper.rb #{path}"
       @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
     else
       cmd = "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
