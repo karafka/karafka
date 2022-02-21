@@ -136,11 +136,6 @@ def pro_license_token
   ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
 end
 
-# @return [String] karafka gemified root path for pristine reference
-def gemified_karafka_root
-  '/tmp/karafka'
-end
-
 # Checks that what we've received and what we do not expect is not equal
 #
 # @param not_expected [Object] what we do not expect

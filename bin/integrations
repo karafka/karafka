@@ -10,19 +10,9 @@ raise 'This code needs to be executed WITHOUT bundle exec' if Kernel.const_defin
 require 'open3'
 require 'fileutils'
 require 'pathname'
+require 'tmpdir'
 
 ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
-
-# Path to a copy of the gem without Gemfile and Gemfile.lock
-# This will ensure that we can bundle all the Karafka but without Gemfile.lock affecting the
-# bundle. It is needed for running in the pristine mode
-GEMIFIED_ROOT = File.join('/tmp', 'karafka')
-
-FileUtils.rm_rf(GEMIFIED_ROOT)
-FileUtils.mkdir_p(GEMIFIED_ROOT)
-
-system("git clone #{ROOT_PATH} #{GEMIFIED_ROOT}")
-system("cd #{GEMIFIED_ROOT} && rm Gemfile*")
 
 # Raised from the parent process if any of the integration tests fails
 IntegrationTestError = Class.new(StandardError)
@@ -53,34 +43,8 @@ class Scenario
   #
   # @param path [String] path to the scenarios file
   def initialize(path)
-    FileUtils.mkdir_p('tmp')
-
-    # There are specs where we do not want to inject helpers or bundler as we run inline bundler
-    # to check some specific gems combinations, etc.
-    # In cases like this we need to run in a pristine mode
-    if path.include?('pristine')
-      # We need to run it that way as we cannot pass bundler context to be able to run inline
-      # bundler mode. We cannot wrap it around directly as it would not work in the popen3
-      #
-      # We enter the tmp directory because of a bug in bundler: when there is a plugin defined
-      # for a bundler in the directory we're in, despite being in an inline mode it will still
-      # be used and we do not want that
-      pristine_dir = File.dirname(path)
-      require 'securerandom'
-      temp = "/tmp/#{SecureRandom.uuid}"
-
-      FileUtils.mkdir_p(temp)
-
-      FileUtils.cp_r("#{pristine_dir}/.", temp)
-
-      cmd = "cd #{temp} && KARAFKA_ROOT_DIR=#{GEMIFIED_ROOT} BUNDLE_AUTO_INSTALL=true PRISTINE_MODE=true bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb check.rb"
-      @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
-    else
-      cmd = "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
-      @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
-    end
-
     @path = path
+    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(init_and_build_cmd)
     @started_at = current_time
     # Last 1024 characters from stdout
     @stdout_tail = ''
@@ -141,6 +105,32 @@ class Scenario
   end
 
   private
+
+  # Sets up a proper environment for a given spec to run and returns the run command
+  # @return [String] run command
+  def init_and_build_cmd
+    scenario_dir = File.dirname(@path)
+
+    # If there is a Gemfile in a scenario directory, it means it is a pristine spec and we need
+    # to run bundle install, etc in order to run it
+    if File.exist?(File.join(scenario_dir, 'Gemfile'))
+      # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
+      temp_dir = Dir.mktmpdir
+      file_name = File.basename(@path)
+
+      FileUtils.cp_r("#{scenario_dir}/.", temp_dir)
+
+      <<~CMD
+        cd #{temp_dir} &&
+        KARAFKA_ROOT_DIR=#{ROOT_PATH} \
+        BUNDLE_AUTO_INSTALL=true \
+        PRISTINE_MODE=true \
+        bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{file_name}
+      CMD
+    else
+      "bundle exec ruby -r ./spec/integrations_helper.rb #{@path}"
+    end
+  end
 
   # @return [Float] current machine time
   def current_time
