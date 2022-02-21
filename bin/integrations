@@ -50,7 +50,7 @@ class Scenario
       require 'securerandom'
       dir = SecureRandom.uuid
       FileUtils.mkdir_p("/tmp/#{dir}")
-      "BUNDLE_IGNORE_CONFIG=true BUNDLE_CACHE_PATH=/tmp/#{dir} PRISTINE_MODE=true ruby -r ./spec/integrations_helper.rb #{path}"
+      "BUNDLE_IGNORE_CONFIG=true BUNDLE_DISABLE_SHARED_GEMS=true BUNDLE_CACHE_PATH=/tmp/#{dir} PRISTINE_MODE=true ruby -r ./spec/integrations_helper.rb #{path}"
     else
       "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
     end
