@@ -22,7 +22,7 @@ FileUtils.rm_rf(GEMIFIED_ROOT)
 FileUtils.mkdir_p(GEMIFIED_ROOT)
 
 system("git clone #{ROOT_PATH} #{GEMIFIED_ROOT}")
-system("cd #{GEMIFIED_ROOT} && rm Gemfile.*")
+system("cd #{GEMIFIED_ROOT} && rm Gemfile*")
 
 # Raised from the parent process if any of the integration tests fails
 IntegrationTestError = Class.new(StandardError)
