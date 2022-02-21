@@ -51,13 +51,19 @@ class Scenario
     if PRISTINE_RUNES.any? { |pristine_file| path.end_with?(pristine_file) }
       # We need to run it that way as we cannot pass bundler context to be able to run inline
       # bundler mode
-      Bundler.with_unbundled_env do
-        # We enter the tmp directory because of a bug in bundler: when there is a plugin defined
-        # for a bundler in the directory we're in, despite being in an inline mode it will still
-        # be used and we do not want that
-        cmd = "cd tmp && PRISTINE_MODE=true ruby -r ../spec/integrations_helper.rb #{path}"
-        @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
-      end
+      # We enter the tmp directory because of a bug in bundler: when there is a plugin defined
+      # for a bundler in the directory we're in, despite being in an inline mode it will still
+      # be used and we do not want that
+      cmd = <<~CMD
+        cd tmp &&
+        ruby -e '
+          require "bundler"
+          Bundler.with_unbundled_env do
+            system "PRISTINE_MODE=true ruby -r ../spec/integrations_helper.rb #{path}"
+          end
+        '
+      CMD
+      @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
     else
       cmd = "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
       @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
