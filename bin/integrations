@@ -73,7 +73,7 @@ class Scenario
 
       FileUtils.cp_r("#{pristine_dir}/.", temp)
 
-      cmd = "cd #{temp} && KARAFKA_ROOT_DIR=#{GEMIFIED_ROOT} PRISTINE_MODE=true bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb check.rb"
+      cmd = "cd #{temp} && KARAFKA_ROOT_DIR=#{GEMIFIED_ROOT} BUNDLE_AUTO_INSTALL=true PRISTINE_MODE=true bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb check.rb"
       @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
     else
       cmd = "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
