@@ -13,6 +13,12 @@ require 'pathname'
 
 ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
 
+FileUtils.rm_rf(File.join(ROOT_PATH, 'tmp', 'karafka'))
+FileUtils.mkdir_p(File.join(ROOT_PATH, 'tmp', 'karafka'))
+
+`git clone #{ROOT_PATH} #{File.join(ROOT_PATH, 'tmp', 'karafka')}`
+`cd #{File.join(ROOT_PATH, 'tmp', 'karafka')} && rm Gemfile.*`
+
 # Raised from the parent process if any of the integration tests fails
 IntegrationTestError = Class.new(StandardError)
 

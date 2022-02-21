@@ -138,7 +138,7 @@ end
 
 # @return [String] karafka gem root path
 def karafka_gem_root
-  File.expand_path(File.join(__dir__, '../')).to_s
+  File.expand_path(File.join(__dir__, '../tmp/karafka')).to_s
 end
 
 # Checks that what we've received and what we do not expect is not equal
