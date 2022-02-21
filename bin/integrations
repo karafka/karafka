@@ -46,17 +46,19 @@ class Scenario
   #
   # @param path [String] path to the scenarios file
   def initialize(path)
-    run_cmd = if PRISTINE_RUNES.any? { |pristine_file| path.end_with?(pristine_file) }
-      require 'securerandom'
-      dir = SecureRandom.uuid
-      FileUtils.mkdir_p("/tmp/#{dir}")
-      "BUNDLE_IGNORE_CONFIG=true BUNDLE_DISABLE_SHARED_GEMS=true BUNDLE_CACHE_PATH=/tmp/#{dir} PRISTINE_MODE=true ruby -r ./spec/integrations_helper.rb #{path}"
+    if PRISTINE_RUNES.any? { |pristine_file| path.end_with?(pristine_file) }
+      # We need to run it that way as we cannot pass bundler context to be able to run inline
+      # bundler mode
+      Bundler.with_unbundled_env do
+        cmd = "PRISTINE_MODE=true ruby -r ./spec/integrations_helper.rb #{path}"
+        @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
+      end
     else
-      "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
+      cmd = "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
+      @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
     end
 
     @path = path
-    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(run_cmd)
     @started_at = current_time
     # Last 1024 characters from stdout
     @stdout_tail = ''
