@@ -2,14 +2,13 @@
 
 # Karafka should work with Rails 6 using the default setup
 
-require 'rails'
-require 'karafka'
+Bundler.require(:default)
+
+require 'tempfile'
 
 class ExampleApp < Rails::Application
   config.eager_load = 'test'
 end
-
-Rails.configuration.middleware.delete ActionDispatch::Static
 
 dummy_boot_file = "#{Tempfile.new.path}.rb"
 FileUtils.touch(dummy_boot_file)

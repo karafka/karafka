@@ -2,8 +2,9 @@
 
 # Karafka+Pro should work with Rails 5 using the default setup
 
-require 'rails'
-require 'karafka'
+Bundler.require(:default)
+
+require 'tempfile'
 
 class ExampleApp < Rails::Application
   config.eager_load = 'test'
