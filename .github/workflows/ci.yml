@@ -113,6 +113,7 @@ jobs:
       - name: Install latest Bundler
         run: |
           gem install bundler --no-document
+          gem update --system --no-document
           bundle config set without 'tools benchmarks docs'
 
       - name: Bundle install
