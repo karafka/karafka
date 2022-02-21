@@ -19,10 +19,9 @@ end
 
 Rails.configuration.middleware.delete ActionDispatch::Static
 
-DUMMY_BOOT_FILE = "#{Tempfile.new.path}.rb"
-FileUtils.touch(DUMMY_BOOT_FILE)
-
-ENV['KARAFKA_BOOT_FILE'] = DUMMY_BOOT_FILE
+dummy_boot_file = "#{Tempfile.new.path}.rb"
+FileUtils.touch(dummy_boot_file)
+ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
 
 ExampleApp.initialize!
 
