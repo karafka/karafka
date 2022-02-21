@@ -47,7 +47,10 @@ class Scenario
   # @param path [String] path to the scenarios file
   def initialize(path)
     run_cmd = if PRISTINE_RUNES.any? { |pristine_file| path.end_with?(pristine_file) }
-      "cd spec && PRISTINE_MODE=true ruby -r ./integrations_helper.rb #{path}"
+      require 'securerandom'
+      dir = SecureRandom.uuid
+      FileUtils.mkdir_p("/tmp/#{dir}")
+      "BUNDLE_IGNORE_CONFIG=true BUNDLE_CACHE_PATH=/tmp/#{dir} PRISTINE_MODE=true ruby -r ./spec/integrations_helper.rb #{path}"
     else
       "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
     end
