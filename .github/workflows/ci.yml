@@ -115,6 +115,11 @@ jobs:
           gem install bundler --no-document
           bundle config set without 'tools benchmarks docs'
 
+      - name: Bundle install
+        run: |
+          bundle config set without development
+          bundle install --jobs 4 --retry 3
+
       - name: Run integration tests
         env:
           KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
