@@ -46,6 +46,8 @@ class Scenario
   #
   # @param path [String] path to the scenarios file
   def initialize(path)
+    FileUtils.mkdir_p('tmp')
+
     if PRISTINE_RUNES.any? { |pristine_file| path.end_with?(pristine_file) }
       # We need to run it that way as we cannot pass bundler context to be able to run inline
       # bundler mode
