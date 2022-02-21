@@ -2,7 +2,7 @@
 
 # Karafka should work with Rails 5 using the default setup
 
-gem_root = File.expand_path(File.join(__dir__, '../../../'))
+gem_root = File.expand_path(File.join(__dir__, '../../../../'))
 
 require 'bundler/inline'
 
@@ -21,7 +21,7 @@ end
 
 Rails.configuration.middleware.delete ActionDispatch::Static
 
-DUMMY_BOOT_FILE = Rails.root.join('tmp', 'karafka.rb').to_s
+DUMMY_BOOT_FILE = Tempfile.new.path + '.rb'
 FileUtils.touch(DUMMY_BOOT_FILE)
 
 ENV['KARAFKA_BOOT_FILE'] = DUMMY_BOOT_FILE

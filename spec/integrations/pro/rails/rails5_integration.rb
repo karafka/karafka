@@ -21,7 +21,7 @@ end
 
 Rails.configuration.middleware.delete ActionDispatch::Static
 
-DUMMY_BOOT_FILE = Rails.root.join('tmp', 'karafka.rb').to_s
+DUMMY_BOOT_FILE = Tempfile.new.path + '.rb'
 FileUtils.touch(DUMMY_BOOT_FILE)
 
 ENV['KARAFKA_BOOT_FILE'] = DUMMY_BOOT_FILE
