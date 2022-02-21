@@ -71,14 +71,17 @@ if rails
           end
         end
 
+        karafka_boot_file = Rails.root.join(Karafka.boot_file.to_s).to_s
+
         if rails6plus
           app.reloader.to_prepare do
             # Load Karafka boot file, so it can be used in Rails server context
-            require Rails.root.join(Karafka.boot_file.to_s).to_s
+            require karafka_boot_file
           end
         else
-          app.after_initialize do
-            require Rails.root.join(Karafka.boot_file.to_s).to_s
+          # Load Karafka main setup for older Rails versions
+          app.config.after_initialize do
+            require karafka_boot_file
           end
         end
       end
