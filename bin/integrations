@@ -50,7 +50,8 @@ class Scenario
 
     if PRISTINE_RUNES.any? { |pristine_file| path.end_with?(pristine_file) }
       # We need to run it that way as we cannot pass bundler context to be able to run inline
-      # bundler mode
+      # bundler mode. We cannot wrap it around directly as it would not work in the popen3
+      #
       # We enter the tmp directory because of a bug in bundler: when there is a plugin defined
       # for a bundler in the directory we're in, despite being in an inline mode it will still
       # be used and we do not want that
@@ -59,7 +60,7 @@ class Scenario
         ruby -e '
           require "bundler"
           Bundler.with_unbundled_env do
-            system "PRISTINE_MODE=true ruby -r ../spec/integrations_helper.rb #{path}"
+            exec "PRISTINE_MODE=true ruby -r ../spec/integrations_helper.rb #{path}"
           end
         '
       CMD
