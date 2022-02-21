@@ -42,6 +42,10 @@ if rails
         # Consumers should autoload by default in the Rails app so they are visible
         app.config.autoload_paths += %w[app/consumers]
 
+        # There are components that won't work with older Rails version, so we check it and
+        # provide a failover
+        rails6plus = Rails.gem_version >= Gem::Version.new('6.0.0')
+
         # Make Karafka use Rails logger
         ::Karafka::App.config.logger = Rails.logger
 
@@ -55,19 +59,27 @@ if rails
             )
           )
 
-          # We can have many listeners, but it does not matter in which we will reload the code as
-          # long as all the consumers will be re-created as Rails reload is thread-safe
-          ::Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
-            # Reload code each time there is a change in the code
-            next unless Rails.application.reloaders.any?(&:updated?)
+          if rails6plus
+            # We can have many listeners, but it does not matter in which we will reload the code as
+            # long as all the consumers will be re-created as Rails reload is thread-safe
+            ::Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
+              # Reload code each time there is a change in the code
+              next unless Rails.application.reloaders.any?(&:updated?)
 
-            Rails.application.reloader.reload!
+              Rails.application.reloader.reload!
+            end
           end
         end
 
-        app.reloader.to_prepare do
-          # Load Karafka bot file, so it can be used in Rails server context
-          require Rails.root.join(Karafka.boot_file.to_s).to_s
+        if rails6plus
+          app.reloader.to_prepare do
+            # Load Karafka boot file, so it can be used in Rails server context
+            require Rails.root.join(Karafka.boot_file.to_s).to_s
+          end
+        else
+          app.after_initialize do
+            require Rails.root.join(Karafka.boot_file.to_s).to_s
+          end
         end
       end
     end
