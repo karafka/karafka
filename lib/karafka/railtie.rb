@@ -41,7 +41,7 @@ if rails
       # This lines will make Karafka print to stdout like puma or unicorn when we run karafka
       # server + will support code reloading with each fetched loop. We do it only for karafka
       # based commands as Rails processes and console will have it enabled already
-      initializer 'karafka.configure_rails_logger' do |app|
+      initializer 'karafka.configure_rails_logger' do
         # Make Karafka use Rails logger
         ::Karafka::App.config.logger = Rails.logger
 
@@ -60,7 +60,7 @@ if rails
         app.config.autoload_paths += %w[app/consumers]
       end
 
-      initializer 'karafka.configure_rails_code_reloader' do |app|
+      initializer 'karafka.configure_rails_code_reloader' do
         # There are components that won't work with older Rails version, so we check it and
         # provide a failover
         rails6plus = Rails.gem_version >= Gem::Version.new('6.0.0')
@@ -70,7 +70,7 @@ if rails
         next unless rails6plus
 
         # We can have many listeners, but it does not matter in which we will reload the code
-        # aslong as all the consumers will be re-created as Rails reload is thread-safe
+        # as long as all the consumers will be re-created as Rails reload is thread-safe
         ::Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
           # Reload code each time there is a change in the code
           next unless Rails.application.reloaders.any?(&:updated?)
