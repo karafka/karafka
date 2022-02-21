@@ -38,38 +38,49 @@ if rails
         end
       end
 
-      initializer 'karafka.configure_rails_initialization' do |app|
+      # This lines will make Karafka print to stdout like puma or unicorn when we run karafka
+      # server + will support code reloading with each fetched loop. We do it only for karafka
+      # based commands as Rails processes and console will have it enabled already
+      initializer 'karafka.configure_rails_logger' do |app|
+        # Make Karafka use Rails logger
+        ::Karafka::App.config.logger = Rails.logger
+
+        next unless Rails.env.development?
+        next unless ENV.key?('KARAFKA_CLI')
+
+        Rails.logger.extend(
+          ActiveSupport::Logger.broadcast(
+            ActiveSupport::Logger.new($stdout)
+          )
+        )
+      end
+
+      initializer 'karafka.configure_rails_auto_load_paths' do |app|
         # Consumers should autoload by default in the Rails app so they are visible
         app.config.autoload_paths += %w[app/consumers]
+      end
 
+      initializer 'karafka.configure_rails_code_reloader' do |app|
         # There are components that won't work with older Rails version, so we check it and
         # provide a failover
         rails6plus = Rails.gem_version >= Gem::Version.new('6.0.0')
 
-        # Make Karafka use Rails logger
-        ::Karafka::App.config.logger = Rails.logger
+        next unless Rails.env.development?
+        next unless ENV.key?('KARAFKA_CLI')
+        next unless rails6plus
 
-        # This lines will make Karafka print to stdout like puma or unicorn when we run karafka
-        # server + will support code reloading with each fetched loop. We do it only for karafka
-        # based commands as Rails processes and console will have it enabled already
-        if Rails.env.development? && ENV.key?('KARAFKA_CLI')
-          Rails.logger.extend(
-            ActiveSupport::Logger.broadcast(
-              ActiveSupport::Logger.new($stdout)
-            )
-          )
+        # We can have many listeners, but it does not matter in which we will reload the code
+        # aslong as all the consumers will be re-created as Rails reload is thread-safe
+        ::Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
+          # Reload code each time there is a change in the code
+          next unless Rails.application.reloaders.any?(&:updated?)
 
-          if rails6plus
-            # We can have many listeners, but it does not matter in which we will reload the code as
-            # long as all the consumers will be re-created as Rails reload is thread-safe
-            ::Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
-              # Reload code each time there is a change in the code
-              next unless Rails.application.reloaders.any?(&:updated?)
-
-              Rails.application.reloader.reload!
-            end
-          end
+          Rails.application.reloader.reload!
         end
+      end
+
+      initializer 'karafka.require_karafka_boot_file' do |app|
+        rails6plus = Rails.gem_version >= Gem::Version.new('6.0.0')
 
         karafka_boot_file = Rails.root.join(Karafka.boot_file.to_s).to_s
 

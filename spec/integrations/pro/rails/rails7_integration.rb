@@ -2,7 +2,7 @@
 
 # Karafka+Pro should work with Rails 7 using the default setup
 
-gem_root = File.expand_path(File.join(__dir__, '../../../'))
+gem_root = File.expand_path(File.join(__dir__, '../../../../'))
 
 require 'bundler/inline'
 
