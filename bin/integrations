@@ -16,7 +16,7 @@ ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../
 # Path to a copy of the gem without Gemfile and Gemfile.lock
 # This will ensure that we can bundle all the Karafka but without Gemfile.lock affecting the
 # bundle. It is needed for running in the pristine mode
-GEMIFIED_ROOT = File.join(ROOT_PATH, 'tmp', 'karafka')
+GEMIFIED_ROOT = File.join('/tmp', 'karafka')
 
 FileUtils.rm_rf(GEMIFIED_ROOT)
 FileUtils.mkdir_p(GEMIFIED_ROOT)
@@ -71,7 +71,7 @@ class Scenario
       # We enter the tmp directory because of a bug in bundler: when there is a plugin defined
       # for a bundler in the directory we're in, despite being in an inline mode it will still
       # be used and we do not want that
-      cmd = "cd tmp && PRISTINE_MODE=true ruby -r ../spec/integrations_helper.rb #{path}"
+      cmd = "cd tmp && PRISTINE_MODE=true BUNDLE_AUTO_CLEAN_WITHOUT_PATH=true BUNDLE_CLEAN=true BUNDLE_DISABLE_SHARED_GEMS=true ruby -r ../spec/integrations_helper.rb #{path}"
       @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
     else
       cmd = "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"

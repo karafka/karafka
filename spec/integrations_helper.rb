@@ -138,7 +138,7 @@ end
 
 # @return [String] karafka gemified root path for pristine reference
 def gemified_karafka_root
-  File.expand_path(File.join(__dir__, '../tmp/karafka')).to_s
+  '/tmp/karafka'
 end
 
 # Checks that what we've received and what we do not expect is not equal
