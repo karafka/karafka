@@ -136,6 +136,11 @@ def pro_license_token
   ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
 end
 
+# @return [String] karafka gem root path
+def karafka_gem_root
+  File.expand_path(File.join(__dir__, '../')).to_s
+end
+
 # Checks that what we've received and what we do not expect is not equal
 #
 # @param not_expected [Object] what we do not expect

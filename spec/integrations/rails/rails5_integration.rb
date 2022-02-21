@@ -2,14 +2,12 @@
 
 # Karafka should work with Rails 5 using the default setup
 
-gem_root = File.expand_path(File.join(__dir__, '../../../../'))
-
 require 'bundler/inline'
 
 gemfile(true) do
   source 'https://rubygems.org'
   gem 'rails', '5.2.6.2'
-  gem 'karafka', path: gem_root
+  gem 'karafka', path: karafka_gem_root
 end
 
 require 'rails'
