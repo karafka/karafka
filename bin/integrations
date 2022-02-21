@@ -55,16 +55,16 @@ class Scenario
       # We enter the tmp directory because of a bug in bundler: when there is a plugin defined
       # for a bundler in the directory we're in, despite being in an inline mode it will still
       # be used and we do not want that
-      cmd = <<~CMD
-        cd tmp &&
-        ruby -e '
-          require "bundler"
-          Bundler.with_unbundled_env do
+      Bundler.with_unbundled_env do
+        cmd = <<~CMD
+          cd tmp &&
+          ruby -e '
+            require "bundler"
             exec "PRISTINE_MODE=true ruby -r ../spec/integrations_helper.rb #{path}"
-          end
-        '
-      CMD
-      @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
+          '
+        CMD
+        @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
+      end
     else
       cmd = "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
       @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
