@@ -6,7 +6,7 @@ gem_root = File.expand_path(File.join(__dir__, '../../../../'))
 
 require 'bundler/inline'
 
-gemfile do
+gemfile(true) do
   source 'https://rubygems.org'
   gem 'rails', '7.0.2.2'
   gem 'karafka', path: gem_root
