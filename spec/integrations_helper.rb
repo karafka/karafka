@@ -136,8 +136,8 @@ def pro_license_token
   ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
 end
 
-# @return [String] karafka gem root path
-def karafka_gem_root
+# @return [String] karafka gemified root path for pristine reference
+def gemified_karafka_root
   File.expand_path(File.join(__dir__, '../tmp/karafka')).to_s
 end
 

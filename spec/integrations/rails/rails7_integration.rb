@@ -7,7 +7,7 @@ require 'bundler/inline'
 gemfile(true) do
   source 'https://rubygems.org'
   gem 'rails', '7.0.2.2'
-  gem 'karafka', path: karafka_gem_root
+  gem 'karafka', path: gemified_karafka_root
 end
 
 require 'rails'
