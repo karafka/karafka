@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 7 using the default setup
-
-require 'bundler/inline'
-
-gemfile(true) do
-  source 'https://rubygems.org'
-  gem 'rails', '7.0.2.2'
-  gem 'karafka', path: gemified_karafka_root
-end
+# Karafka+Pro should work with Rails 7 using the default setup
 
 require 'rails'
 require 'karafka'
@@ -25,7 +17,9 @@ ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
 
 ExampleApp.initialize!
 
-setup_karafka
+setup_karafka do |config|
+  config.license.token = pro_license_token
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume

@@ -8,11 +8,11 @@ unless ENV['PRISTINE_MODE']
   require 'bundler'
   Bundler.setup(:default, :test, :integrations)
   require_relative '../lib/karafka'
+  require 'byebug'
 end
 
 require 'singleton'
 require 'securerandom'
-require 'byebug'
 require_relative './support/data_collector'
 
 Thread.abort_on_exception = true

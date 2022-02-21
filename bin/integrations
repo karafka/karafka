@@ -65,17 +65,15 @@ class Scenario
       # We enter the tmp directory because of a bug in bundler: when there is a plugin defined
       # for a bundler in the directory we're in, despite being in an inline mode it will still
       # be used and we do not want that
-      cmd = "cd tmp &&
-        BUNDLE_PATH=/tmp/test \
-        BUNDLE_PATH__SYSTEM=false \
-        BUNDLE_SYSTEM_BINDIR=/tmp/test2 \
-        BUNDLE_GLOBAL_GEM_CACHE=false \
-        PRISTINE_MODE=true \
-        BUNDLE_AUTO_CLEAN_WITHOUT_PATH=true \
-        BUNDLE_CLEAN=true \
-        BUNDLE_DISABLE_SHARED_GEMS=true \
-        ruby -r ../spec/integrations_helper.rb #{path}
-      "
+      pristine_dir = File.dirname(path)
+      require 'securerandom'
+      temp = "/tmp/#{SecureRandom.uuid}"
+
+      FileUtils.mkdir_p(temp)
+
+      FileUtils.cp_r("#{pristine_dir}/.", temp)
+
+      cmd = "cd #{temp} && KARAFKA_ROOT_DIR=#{GEMIFIED_ROOT} PRISTINE_MODE=true bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb check.rb"
       @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(cmd)
     else
       cmd = "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
