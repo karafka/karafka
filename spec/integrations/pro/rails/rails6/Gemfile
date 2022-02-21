@@ -2,5 +2,5 @@
 
 source 'https://rubygems.org'
 
-  gem 'rails', '6.1.4.6'
-gem 'karafka', path: ENV['KARAFKA_ROOT_DIR']
+gem 'karafka', path: ENV.fetch('KARAFKA_ROOT_DIR')
+gem 'rails', '6.1.4.6'

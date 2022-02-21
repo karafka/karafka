@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka+Pro should work with Rails 7 using the default setup
+# Karafka should work with Rails 7 using the default setup
 
 require 'rails'
 require 'karafka'
