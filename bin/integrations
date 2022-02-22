@@ -2,9 +2,15 @@
 
 # Runner to run integration specs in parallel
 
+# Part of integration specs run pristine without bundler.
+# If we would run bundle exec when running this code, bundler would inject its own context
+# into them, messing things up heavily
+raise 'This code needs to be executed WITHOUT bundle exec' if Kernel.const_defined?(:Bundler)
+
 require 'open3'
 require 'fileutils'
 require 'pathname'
+require 'tmpdir'
 
 ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
 
@@ -38,9 +44,7 @@ class Scenario
   # @param path [String] path to the scenarios file
   def initialize(path)
     @path = path
-    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(
-      "bundle exec ruby -r ./spec/integrations_helper.rb #{path}"
-    )
+    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(init_and_build_cmd)
     @started_at = current_time
     # Last 1024 characters from stdout
     @stdout_tail = ''
@@ -102,6 +106,32 @@ class Scenario
 
   private
 
+  # Sets up a proper environment for a given spec to run and returns the run command
+  # @return [String] run command
+  def init_and_build_cmd
+    scenario_dir = File.dirname(@path)
+
+    # If there is a Gemfile in a scenario directory, it means it is a pristine spec and we need
+    # to run bundle install, etc in order to run it
+    if File.exist?(File.join(scenario_dir, 'Gemfile'))
+      # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
+      temp_dir = Dir.mktmpdir
+      file_name = File.basename(@path)
+
+      FileUtils.cp_r("#{scenario_dir}/.", temp_dir)
+
+      <<~CMD
+        cd #{temp_dir} &&
+        KARAFKA_ROOT_DIR=#{ROOT_PATH} \
+        BUNDLE_AUTO_INSTALL=true \
+        PRISTINE_MODE=true \
+        bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{file_name}
+      CMD
+    else
+      "bundle exec ruby -r ./spec/integrations_helper.rb #{@path}"
+    end
+  end
+
   # @return [Float] current machine time
   def current_time
     Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -136,10 +166,13 @@ end
 # Load all the specs
 specs = Dir[ROOT_PATH.join('spec/integrations/**/*.rb')]
 
-# If filter is provided, apply
-specs.delete_if { |name| !name.include?(ARGV[0]) } if ARGV[0]
+# If filters is provided, apply
+# Allows to provide several filters one after another and applies all of them
+ARGV.each do |filter|
+  specs.delete_if { |name| !name.include?(filter) }
+end
 
-raise ArgumentError, "No integration specs with filter: #{ARGV[0]}" if specs.empty?
+raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
 
 # Randomize order
 seed = (ENV['SEED'] || rand(0..10_000)).to_i
