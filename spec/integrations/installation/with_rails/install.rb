@@ -35,6 +35,7 @@ Dir.mktmpdir do |dir|
 
     assert_equal 0, cmd(dir, 'bundle install')
     assert_equal 0, cmd(dir, 'bundle exec karafka install')
-    assert_equal 0, cmd(dir, 'timeout --preserve-status 5 bundle exec karafka server')
+    # Give it enough time to start and stop
+    assert_equal 0, cmd(dir, 'timeout --preserve-status 10 bundle exec karafka server')
   end
 end
