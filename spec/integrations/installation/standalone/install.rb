@@ -6,7 +6,7 @@ require 'tmpdir'
 require 'fileutils'
 require 'open3'
 
-current_dir = File.expand_path(File.dirname(__FILE__))
+current_dir = File.expand_path(__dir__)
 
 # Runs a given command in a given dir and returns its exit code
 # @param dir [String]

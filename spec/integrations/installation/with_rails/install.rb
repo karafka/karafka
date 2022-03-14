@@ -6,7 +6,7 @@ require 'tmpdir'
 require 'fileutils'
 require 'open3'
 
-spec_dir = File.expand_path(File.dirname(__FILE__))
+spec_dir = File.expand_path(__dir__)
 
 # Runs a given command in a given dir and returns its exit code
 # @param dir [String]
@@ -28,6 +28,7 @@ Dir.mktmpdir do |dir|
     assert_equal 0, cmd(dir, 'rails new rapp --api')
     assert_equal 0, cmd(dir, 'mv ./rapp/** ./')
 
+    # rails new has its own Gemfile to which we need to add karafka once more
     File.open("#{dir}/Gemfile", 'a') do |f|
       f.puts 'gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR"), require: true'
     end
