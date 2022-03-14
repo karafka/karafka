@@ -14,6 +14,7 @@ module Karafka
         app/consumers
         config
         log
+        lib
       ].freeze
 
       # Where should we map proper files from templates
