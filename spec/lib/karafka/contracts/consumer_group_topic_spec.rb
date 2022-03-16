@@ -111,9 +111,15 @@ RSpec.describe_current do
     end
 
     context 'when latest' do
-      before { config[:initial_offset] = 'earliest' }
+      before { config[:initial_offset] = 'latest' }
 
       it { expect(check).to be_success }
+    end
+
+    context 'when not supported' do
+      before { config[:initial_offset] = rand.to_s }
+
+      it { expect(check).not_to be_success }
     end
   end
 end
