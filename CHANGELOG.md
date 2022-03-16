@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## 2.0.0-alpha3 (2022-03-16)
+- Restore 'app.initialized' state and add notification on it
+- Fix the installation flow for Rails and add integration tests for this scenario
+- Add more integration tests covering some edge cases
+
 ## 2.0.0-alpha2 (2022-02-19)
 - Require `kafka` keys to be symbols
 - Added ActiveJob Pro adapter
