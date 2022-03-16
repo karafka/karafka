@@ -118,6 +118,8 @@ module Karafka
           Licenser.new.verify(config.license)
 
           configure_components
+
+          Karafka::App.initialized!
         end
 
         private
