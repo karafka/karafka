@@ -41,7 +41,7 @@ module Karafka
 
         kafka[:'client.id'] ||= Karafka::App.config.client_id
         kafka[:'group.id'] ||= @topics.first.consumer_group.id
-        kafka[:'auto.offset.reset'] ||= 'earliest'
+        kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
         # rdkafka offset auto-storing
         kafka[:'enable.auto.offset.store'] = 'false'
