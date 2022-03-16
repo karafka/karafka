@@ -10,6 +10,7 @@ end
 class Consumer1 < Karafka::BaseConsumer
   def consume
     # We give it a bit of time just so we're sure that both consumer groups are up and working
+    sleep(2)
     DataCollector.data[0] << messages.first.raw_payload
     producer.produce_sync(topic: DataCollector.topics.last, payload: '1')
   end
