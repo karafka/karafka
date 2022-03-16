@@ -25,7 +25,7 @@ CONCURRENCY = 4
 class Scenario
   # How long a scenario can run before we kill it
   # This is a fail-safe just in case something would hang
-  MAX_RUN_TIME = 60 * 5
+  MAX_RUN_TIME = 60 * 2
 
   # There are rare cases where Karafka may force shutdown for some of the integration cases
   # This includes exactly those

@@ -86,18 +86,7 @@ end
 
 # Waits until block yields true
 def wait_until
-  started_at = Time.now
-  stop = false
-
-  until stop
-    stop = yield
-
-    # Stop if it was running for 2 minutes and nothing changed
-    # This prevent from hanging in case of specs instability
-    raise StandardError, 'Execution expired' if (Time.now - started_at) > 120
-
-    sleep(0.01)
-  end
+  sleep(0.01) until yield
 
   Karafka::Server.stop
 
