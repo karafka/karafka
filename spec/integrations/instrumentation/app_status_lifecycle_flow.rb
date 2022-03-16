@@ -11,7 +11,7 @@ PUBLISHED_STATES = %w[
 ].freeze
 
 PUBLISHED_STATES.each do |state|
-  Karafka::App.monitor.subscribe(state) do |event|
+  Karafka::App.monitor.subscribe(state) do
     DataCollector.data[:states] << state
   end
 end
