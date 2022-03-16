@@ -10,7 +10,7 @@ setup_karafka do |config|
   config.pause_timeout = 1_000
   config.pause_max_timeout = 1_000
   config.pause_with_exponential_backoff = false
-  config.kafka[:'auto.offset.reset'] = 'latest'
+  config.initial_offset = 'latest'
 end
 
 before = Array.new(2) { SecureRandom.uuid }
