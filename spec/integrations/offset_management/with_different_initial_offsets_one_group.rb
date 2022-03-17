@@ -37,7 +37,7 @@ produce(DataCollector.topics.first, '0')
 produce(DataCollector.topics.last, '0')
 
 Thread.new do
-  sleep(5)
+  sleep(10)
   produce(DataCollector.topics.last, '1')
 end
 
