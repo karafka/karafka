@@ -4,7 +4,7 @@
 
 setup_karafka do |config|
   config.concurrency = 10
-  config.kafka[:'auto.offset.reset'] = 'latest'
+  config.initial_offset = 'latest'
 end
 
 class Consumer < Karafka::BaseConsumer

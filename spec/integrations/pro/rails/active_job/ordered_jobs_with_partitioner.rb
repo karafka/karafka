@@ -5,7 +5,7 @@
 
 setup_karafka do |config|
   config.license.token = pro_license_token
-  config.kafka[:'auto.offset.reset'] = 'latest'
+  config.initial_offset = 'latest'
 end
 
 setup_active_job

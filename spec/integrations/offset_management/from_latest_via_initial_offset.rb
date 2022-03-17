@@ -1,19 +1,12 @@
 # frozen_string_literal: true
 
-# When we connect for the first time with cluster from a new consumer group and start consuming
-# from earliest and an error occurs on a first message, we should pause and retry consumption
-# until we can process this message. No messages should be skipped or ignored.
+# Karafka should be able to start consuming from the latest offset whe set via initial_offset
 
 setup_karafka do |config|
-  config.concurrency = 1
-  # We sleep more to check if when sleeping other topic messages are processed
-  config.pause_timeout = 1_000
-  config.pause_max_timeout = 1_000
-  config.pause_with_exponential_backoff = false
   config.initial_offset = 'latest'
 end
 
-before = Array.new(2) { SecureRandom.uuid }
+before = Array.new(10) { SecureRandom.uuid }
 after = Array.new(10) { SecureRandom.uuid }
 
 # Sends some messages before starting Karafka - those should not be received
@@ -21,13 +14,8 @@ before.each { |number| produce(DataCollector.topic, number) }
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    @retry ||= 0
-    @retry += 1
-
-    raise StandardError if @retry < 3
-
     messages.each do |message|
-      DataCollector.data[0] << message.raw_payload
+      DataCollector.data[message.metadata.partition] << message.raw_payload
     end
   end
 end

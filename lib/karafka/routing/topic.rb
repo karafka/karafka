@@ -16,6 +16,7 @@ module Karafka
         manual_offset_management
         max_messages
         max_wait_time
+        initial_offset
       ].freeze
 
       private_constant :INHERITABLE_ATTRIBUTES
