@@ -80,6 +80,8 @@ if rails
       end
 
       initializer 'karafka.require_karafka_boot_file' do |app|
+        next if Rails.env.test?
+
         rails6plus = Rails.gem_version >= Gem::Version.new('6.0.0')
 
         karafka_boot_file = Rails.root.join(Karafka.boot_file.to_s).to_s
