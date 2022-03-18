@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-aj = false
-
 begin
   require 'active_job'
   require_relative 'queue_adapters/karafka_adapter'
