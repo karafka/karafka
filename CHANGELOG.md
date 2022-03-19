@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.0-alpha4 (Unreleased)
+- Rails support without ActiveJob queue adapter usage (#805)
+
 ## 2.0.0-alpha3 (2022-03-16)
 - Restore 'app.initialized' state and add notification on it
 - Fix the installation flow for Rails and add integration tests for this scenario
