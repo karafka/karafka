@@ -20,14 +20,6 @@ ExampleApp.initialize!
 
 setup_karafka
 
-extended_routing = false
-
-begin
-  draw_routes Class.new do
-    active_job_topic 'test'
-  end
-
-  extended_routing = true
+draw_routes Class.new do
+  active_job_topic 'test'
 end
-
-assert_equal true, extended_routing
