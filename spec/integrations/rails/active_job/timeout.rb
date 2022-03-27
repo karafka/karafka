@@ -3,6 +3,7 @@
 # Karafka should never process the same job multiple times from one perform call
 
 setup_karafka do |config|
+  config.concurrency = 2
   # Set a 6 second maximum poll interval for the consumer
   config.kafka[:'session.timeout.ms'] = '6000'
   config.kafka[:'max.poll.interval.ms'] = '6000'
@@ -20,12 +21,13 @@ class Job < ActiveJob::Base
   queue_as DataCollector.topic
 
   karafka_options(
-    dispatch_method: :produce_sync
+    dispatch_method: :produce_sync,
+    timeout: 8000
   )
 
   def perform(value1)
-    DataCollector.data[0] << value1
     sleep(7) # Intentionally take longer than the maximum poll interval
+    DataCollector.data[0] << value1
   end
 end
 

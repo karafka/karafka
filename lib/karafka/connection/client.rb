@@ -81,6 +81,15 @@ module Karafka
         @buffer
       end
 
+      # Polls Kafka with a set timeout as a keep alive
+      #
+      # @param timeout in milliseconds to wait for poll
+      # @note This is intended only as a keep alive for the consumer - the partition|topic
+      #   should be paused before using this to not repeatedly read messages
+      def keep_alive_poll(timeout:)
+        poll(timeout)
+      end
+
       # Stores offset for a given partition of a given topic based on the provided message.
       #
       # @param message [Karafka::Messages::Message]
@@ -129,6 +138,16 @@ module Karafka
       # @param message [Messages::Message, Messages::Seek] message to which we want to seek to
       def seek(message)
         @kafka.seek(message)
+      end
+
+      # Pauses given partition and topic
+      #
+      # @param topic [String] topic name
+      # @param partition [Integer] partition
+      # @note This will pause indefinitely and requires manual `#resume`
+      def pause_without_reversal(topic, partition)
+        tpl = topic_partition_list(topic, partition)
+        @kafka.pause(tpl)
       end
 
       # Pauses given partition and moves back to last successful offset processed.
