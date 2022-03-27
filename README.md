@@ -55,7 +55,7 @@ Karafka based applications can be easily deployed to any type of infrastructure,
 
 Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment along with other useful details on how to run Karafka.
 
-If you have any questions about using Karafka, feel free to join our [Gitter](https://gitter.im/karafka/karafka) chat channel.
+If you have any questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) chat channel.
 
 ## Getting started
 
