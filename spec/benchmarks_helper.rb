@@ -26,7 +26,7 @@ def setup_karafka
     yield(config) if block_given?
   end
 
-  Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
+  Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
 end
 
 # Alias for drawing routes in the same way across benchmarks

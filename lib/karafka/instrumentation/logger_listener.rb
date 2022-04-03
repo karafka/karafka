@@ -4,7 +4,7 @@ module Karafka
   module Instrumentation
     # Default listener that hooks up to our instrumentation and uses its events for logging
     # It can be removed/replaced or anything without any harm to the Karafka app flow.
-    class StdoutListener
+    class LoggerListener
       # Log levels that we use in this particular listener
       USED_LOG_LEVELS = %i[
         debug
