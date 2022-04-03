@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.0-alpha5 (Unreleased)
+## 2.0.0-alpha5 (2022-04-03)
 - Rename StdoutListener to LoggerListener (#811)
 
 ## 2.0.0-alpha4 (2022-03-20)
