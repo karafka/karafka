@@ -1,6 +1,9 @@
 # Karafka framework changelog
 
-## 2.0.0-alpha4 (Unreleased)
+## 2.0.0-alpha5 (Unreleased)
+- Rename StdoutListener to LoggerListener (#811)
+
+## 2.0.0-alpha4 (2022-03-20)
 - Rails support without ActiveJob queue adapter usage (#805)
 
 ## 2.0.0-alpha3 (2022-03-16)

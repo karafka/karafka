@@ -71,5 +71,5 @@ RSpec.extend RSpecLocator.new(__FILE__)
 
 # We by default use the default listeners for specs to check how they work and that
 # they don't not break anything
-Karafka.monitor.subscribe(Karafka::Instrumentation::StdoutListener.new)
+Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
 Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
