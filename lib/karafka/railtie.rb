@@ -85,7 +85,9 @@ if rails
         karafka_boot_file = Rails.root.join(Karafka.boot_file.to_s).to_s
 
         # Provide more comprehensive error for when no boot file
-        raise Karafka::Errors::MissingBootFileError unless File.exist?(karafka_boot_file)
+        unless File.exist?(karafka_boot_file)
+          raise(Karafka::Errors::MissingBootFileError, karafka_boot_file)
+        end
 
         if rails6plus
           app.reloader.to_prepare do
