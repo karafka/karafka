@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.0-alpha6 (Unreleased)
+- Fix a bug, where upon missing boot file and Rails, railtie would fail with a generic exception (#818) 
+
 ## 2.0.0-alpha5 (2022-04-03)
 - Rename StdoutListener to LoggerListener (#811)
 
