@@ -21,18 +21,18 @@ module Karafka
     #   that may not yet kick in when error occurs. That way we pause always on the last processed
     #   message.
     def on_consume
-      Karafka.monitor.instrument('consumer.consume', caller: self) do
+      Karafka.monitor.instrument('consumer.consumed', caller: self) do
         consume
+
+        pause.reset
+
+        # Mark as consumed only if manual offset management is not on
+        return if topic.manual_offset_management
+
+        # We use the non-blocking one here. If someone needs the blocking one, can implement it with
+        # manual offset management
+        mark_as_consumed(messages.last)
       end
-
-      pause.reset
-
-      # Mark as consumed only if manual offset management is not on
-      return if topic.manual_offset_management
-
-      # We use the non-blocking one here. If someone needs the blocking one, can implement it with
-      # manual offset management
-      mark_as_consumed(messages.last)
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',

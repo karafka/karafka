@@ -78,7 +78,7 @@ RSpec.describe_current do
       it { expect { consumer.on_consume }.not_to raise_error }
 
       it 'expect to run proper instrumentation' do
-        Karafka.monitor.subscribe('consumer.consume') do |event|
+        Karafka.monitor.subscribe('consumer.consumed') do |event|
           expect(event.payload[:caller]).to eq(consumer)
         end
 
@@ -138,7 +138,7 @@ RSpec.describe_current do
       it { expect { consumer.on_consume }.not_to raise_error }
 
       it 'expect to run proper instrumentation' do
-        Karafka.monitor.subscribe('consumer.consume') do |event|
+        Karafka.monitor.subscribe('consumer.consumed') do |event|
           expect(event.payload[:caller]).to eq(consumer)
         end
 
