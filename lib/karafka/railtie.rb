@@ -82,6 +82,13 @@ if rails
       initializer 'karafka.require_karafka_boot_file' do |app|
         rails6plus = Rails.gem_version >= Gem::Version.new('6.0.0')
 
+        # If the bootfile location is set to "false", we should not raise an exception and we
+        # should just not load karafka stuff. Setting this explicitly to false indicates, that
+        # karafka is part of the supply chain but it is not a first class citizen of a given
+        # system (may be just a dependency of a dependency), thus railtie should not kick in to
+        # load the non-existing boot file
+        next if Karafka.boot_file.to_s == 'false'
+
         karafka_boot_file = Rails.root.join(Karafka.boot_file.to_s).to_s
 
         # Provide more comprehensive error for when no boot file

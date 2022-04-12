@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 6 that does not use ActiveJob using the default setup and should
+# Karafka should work with Rails 7 that does not use ActiveJob using the default setup and should
 # just ignore the ActiveJob components
 
 Bundler.require(:default)
