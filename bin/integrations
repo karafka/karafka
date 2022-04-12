@@ -44,15 +44,28 @@ class Scenario
   # @param path [String] path to the scenarios file
   def initialize(path)
     @path = path
-    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(init_and_build_cmd)
-    @started_at = current_time
     # Last 1024 characters from stdout
     @stdout_tail = ''
+  end
+
+  # Starts running given scenario in a separate process
+  def start
+    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(init_and_build_cmd)
+    @started_at = current_time
   end
 
   # @return [String] integration spec name
   def name
     @path.gsub("#{ROOT_PATH}/spec/integrations/", '')
+  end
+
+  # @return [Boolean] true if spec is pristine
+  def pristine?
+    scenario_dir = File.dirname(@path)
+
+    # If there is a Gemfile in a scenario directory, it means it is a pristine spec and we need
+    # to run bundle install, etc in order to run it
+    File.exist?(File.join(scenario_dir, 'Gemfile'))
   end
 
   # @return [Boolean] did this scenario finished or is it still running
@@ -73,6 +86,13 @@ class Scenario
     !@wait_thr.alive?
   end
 
+  # @return [Boolean] did this scenario finish successfully or not
+  def success?
+    expected_exit_codes = EXIT_CODES[name] || EXIT_CODES[:default]
+
+    expected_exit_codes.include?(exit_code)
+  end
+
   # @return [Integer] pid of the process of this scenario
   def pid
     @wait_thr.pid
@@ -82,13 +102,6 @@ class Scenario
   def exit_code
     # There may be no exit status if we killed the thread
     @wait_thr.value&.exitstatus || 123
-  end
-
-  # @return [Boolean] did this scenario finish successfully or not
-  def success?
-    expected_exit_codes = EXIT_CODES[name] || EXIT_CODES[:default]
-
-    expected_exit_codes.include?(exit_code)
   end
 
   # Prints a status report when scenario is finished and stdout if it failed
@@ -109,11 +122,10 @@ class Scenario
   # Sets up a proper environment for a given spec to run and returns the run command
   # @return [String] run command
   def init_and_build_cmd
-    scenario_dir = File.dirname(@path)
-
     # If there is a Gemfile in a scenario directory, it means it is a pristine spec and we need
     # to run bundle install, etc in order to run it
-    if File.exist?(File.join(scenario_dir, 'Gemfile'))
+    if pristine?
+      scenario_dir = File.dirname(@path)
       # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
       temp_dir = Dir.mktmpdir
       file_name = File.basename(@path)
@@ -145,24 +157,18 @@ end
 # test scenario is running
 active_scenarios = []
 
-# Finished runners
+# Finished scenarios
 finished_scenarios = []
 
-# Waits for any of the processes to be finished and tracks exit codes
+# Selects finished scenarios and tracks them and their exit codes
 #
-# @param active_scenarios [Array] active runners
+# @param active_scenarios [Array] active scenarios
 # @param finished_scenarios [Hash] finished forks exit codes
-def wait_and_track(active_scenarios, finished_scenarios)
-  exited = active_scenarios.find(&:finished?)
-
-  if exited
+def track_progress(active_scenarios, finished_scenarios)
+  active_scenarios.select(&:finished?).each do |exited|
     scenario = active_scenarios.delete(exited)
-
     scenario.report
-
     finished_scenarios << scenario
-  else
-    Thread.pass
   end
 end
 
@@ -182,15 +188,35 @@ seed = (ENV['SEED'] || rand(0..10_000)).to_i
 
 puts "Random seed: #{seed}"
 
-specs.shuffle(random: Random.new(seed)).each do |integration_test|
-  scenario = Scenario.new(integration_test)
+scenarios = specs
+            .shuffle(random: Random.new(seed))
+            .map { |integration_test| Scenario.new(integration_test) }
 
-  active_scenarios << scenario
+regulars = scenarios.reject(&:pristine?)
+pristine = scenarios.select(&:pristine?)
 
-  wait_and_track(active_scenarios, finished_scenarios) until active_scenarios.size < CONCURRENCY
+loop do
+  # If we have space to run another scenario, we add it
+  if active_scenarios.size < CONCURRENCY
+    scenario = nil
+    # We can run only one pristine at the same time due to concurrency issues within bundler
+    # Since they usually take longer than others, we try to run them as fast as possible when there
+    # is a slot
+    scenario = pristine.pop unless active_scenarios.any?(&:pristine?)
+    scenario ||= regulars.pop
+
+    if scenario
+      scenario.start
+      active_scenarios << scenario
+    end
+  end
+
+  track_progress(active_scenarios, finished_scenarios)
+
+  sleep(0.1)
+
+  break if regulars.empty? && pristine.empty? && active_scenarios.empty?
 end
-
-wait_and_track(active_scenarios, finished_scenarios) while !active_scenarios.empty?
 
 # Fail all if any of the tests does not have expected exit code
 raise IntegrationTestError unless finished_scenarios.all?(&:success?)
