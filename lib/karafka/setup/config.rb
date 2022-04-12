@@ -60,7 +60,7 @@ module Karafka
       # option [Boolean] should we leave offset management to the user
       setting :manual_offset_management, default: false
       # options max_messages [Integer] how many messages do we want to fetch from Kafka in one go
-      setting :max_messages, default: 100_000
+      setting :max_messages, default: 1_000
       # option [Integer] number of milliseconds we can wait while fetching data
       setting :max_wait_time, default: 10_000
       # option shutdown_timeout [Integer] the number of milliseconds after which Karafka no

@@ -10,34 +10,26 @@ module Karafka
     # @note Since this does not happen really often, we try to stick with same objects for the
     #   empty states most of the time, so we don't create many objects during the manager life
     class RebalanceManager
-      # @return [RebalanceManager]
-      def initialize
-        @assigned = {}
-        @revoked = {}
-      end
-
       # @return [Hash<String, Array<Integer>>] hash where the keys are the names of topics for
       #   which we've got new partitions assigned and array with ids of the partitions as the value
-      # @note Once assigned partitions are fetched, the state will be reset since the callbacks
-      #   for new assigned partitions are set only during a state change
-      def assigned_partitions
-        return @assigned if @assigned.empty?
-
-        result = @assigned.dup
-        @assigned.clear
-        result
-      end
+      attr_reader :assigned_partitions
 
       # @return [Hash<String, Array<Integer>>] hash where the keys are the names of topics for
       #   which we've lost partitions and array with ids of the partitions as the value
-      # @note Once revoked partitions are fetched, the state will be reset since the callbacks
-      #   for new revoked partitions are set only during a state change
-      def revoked_partitions
-        return @revoked if @revoked.empty?
+      attr_reader :revoked_partitions
 
-        result = @revoked.dup
-        @revoked.clear
-        result
+      # @return [RebalanceManager]
+      def initialize
+        @assigned_partitions = {}
+        @revoked_partitions = {}
+      end
+
+      # Resets the rebalance manager state
+      # This needs to be done before each polling loop as during the polling, the state may be
+      # changed
+      def clear
+        @assigned_partitions.clear
+        @revoked_partitions.clear
       end
 
       # Callback that kicks in inside of rdkafka, when new partitions are assigned.
@@ -46,7 +38,7 @@ module Karafka
       # @param _ [Rdkafka::Consumer]
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       def on_partitions_assigned(_, partitions)
-        @assigned = partitions.to_h.transform_values { |part| part.map(&:partition) }
+        @assigned_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
       end
 
       # Callback that kicks in inside of rdkafka, when partitions are revoked.
@@ -55,7 +47,7 @@ module Karafka
       # @param _ [Rdkafka::Consumer]
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       def on_partitions_revoked(_, partitions)
-        @revoked = partitions.to_h.transform_values { |part| part.map(&:partition) }
+        @revoked_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
       end
     end
   end
