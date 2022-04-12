@@ -5,6 +5,7 @@
 - Fix an issue with parallel pristine specs colliding with each other during `bundle install` (#820)
 - Replace `consumer.consume` with `consumer.consumed` event to match the behaviour
 - Make sure, that offset committing happens before the `consumer.consumed` event is propagated
+- Fix for failing when not installed (just a dependency) (#817)
 
 ## 2.0.0-alpha5 (2022-04-03)
 - Rename StdoutListener to LoggerListener (#811)
