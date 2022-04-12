@@ -48,6 +48,7 @@ module Karafka
         time_poll.start
 
         @buffer.clear
+        @rebalance_manager.clear
 
         loop do
           # Don't fetch more messages if we do not have any time left
@@ -212,6 +213,8 @@ module Karafka
           ::Karafka::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
           @kafka.close
+          @buffer.clear
+          @rebalance_manager.clear
         end
       end
 
