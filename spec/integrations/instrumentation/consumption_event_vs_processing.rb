@@ -4,8 +4,6 @@
 
 setup_karafka
 
-elements = Array.new(10) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DataCollector.data[0] << messages.count
