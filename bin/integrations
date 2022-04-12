@@ -153,25 +153,6 @@ class Scenario
   end
 end
 
-# Simple array to keep track of active integration processes thread running with info on which
-# test scenario is running
-active_scenarios = []
-
-# Finished scenarios
-finished_scenarios = []
-
-# Selects finished scenarios and tracks them and their exit codes
-#
-# @param active_scenarios [Array] active scenarios
-# @param finished_scenarios [Hash] finished forks exit codes
-def track_progress(active_scenarios, finished_scenarios)
-  active_scenarios.select(&:finished?).each do |exited|
-    scenario = active_scenarios.delete(exited)
-    scenario.report
-    finished_scenarios << scenario
-  end
-end
-
 # Load all the specs
 specs = Dir[ROOT_PATH.join('spec/integrations/**/*.rb')]
 
@@ -195,7 +176,10 @@ scenarios = specs
 regulars = scenarios.reject(&:pristine?)
 pristine = scenarios.select(&:pristine?)
 
-loop do
+active_scenarios = []
+finished_scenarios = []
+
+while finished_scenarios.size < scenarios.size
   # If we have space to run another scenario, we add it
   if active_scenarios.size < CONCURRENCY
     scenario = nil
@@ -211,11 +195,13 @@ loop do
     end
   end
 
-  track_progress(active_scenarios, finished_scenarios)
+  active_scenarios.select(&:finished?).each do |exited|
+    scenario = active_scenarios.delete(exited)
+    scenario.report
+    finished_scenarios << scenario
+  end
 
   sleep(0.1)
-
-  break if regulars.empty? && pristine.empty? && active_scenarios.empty?
 end
 
 # Fail all if any of the tests does not have expected exit code
