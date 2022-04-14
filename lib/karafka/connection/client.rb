@@ -67,10 +67,13 @@ module Karafka
           # Track time spent on all of the processing and polling
           time_poll.checkpoint
 
-          # We should not poll more messages if rebalance happened to finish early
-          # This will ensure that we remove revoked messages and that when next time we poll,
-          # in case there would be another revocation, it will be tracked by the rebalance manager
-          remove_revoked_and_duplicated_messages unless @rebalance_manager.revoked_partitions.empty?
+
+          next if @rebalance_manager.revoked_partitions.empty?
+
+          # If partition revocation happens, we need to remove messages from revoked partitions
+          # as well as ensure we do not have duplicated due to the offset reset for partitions
+          # that we got assigned
+          remove_revoked_and_duplicated_messages
         end
 
         @buffer
