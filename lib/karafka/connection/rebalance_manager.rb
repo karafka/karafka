@@ -9,19 +9,22 @@ module Karafka
     #
     # @note Since this does not happen really often, we try to stick with same objects for the
     #   empty states most of the time, so we don't create many objects during the manager life
+    #
+    # @note Internally in the rebalance manager we have a notion of lost partitions. Partitions
+    #   that are lost, are those that got revoked but did not get re-assigned back. We do not
+    #   expose this concept outside and we normalize to have them revoked, as it is irrelevant
+    #   from the rest of the code perspective as only those that are lost are truly revoked.
     class RebalanceManager
-      # @return [Hash<String, Array<Integer>>] hash where the keys are the names of topics for
-      #   which we've got new partitions assigned and array with ids of the partitions as the value
-      attr_reader :assigned_partitions
+      # Empty array for internal usage not to create new objects
+      EMPTY_ARRAY = [].freeze
 
-      # @return [Hash<String, Array<Integer>>] hash where the keys are the names of topics for
-      #   which we've lost partitions and array with ids of the partitions as the value
-      attr_reader :revoked_partitions
+      private_constant :EMPTY_ARRAY
 
       # @return [RebalanceManager]
       def initialize
         @assigned_partitions = {}
         @revoked_partitions = {}
+        @lost_partitions = {}
       end
 
       # Resets the rebalance manager state
@@ -30,6 +33,21 @@ module Karafka
       def clear
         @assigned_partitions.clear
         @revoked_partitions.clear
+        @lost_partitions.clear
+      end
+
+      # @return [Hash<String, Array<Integer>>] hash where the keys are the names of topics for
+      #   which we've lost partitions and array with ids of the partitions as the value
+      # @note We do not consider as lost topics and partitions that got revoked and assigned
+      def revoked_partitions
+        return @revoked_partitions if @revoked_partitions.empty?
+        return @lost_partitions unless @lost_partitions.empty?
+
+        @revoked_partitions.each do |topic, partitions|
+          @lost_partitions[topic] = partitions - @assigned_partitions.fetch(topic, EMPTY_ARRAY)
+        end
+
+        @lost_partitions
       end
 
       # Callback that kicks in inside of rdkafka, when new partitions are assigned.

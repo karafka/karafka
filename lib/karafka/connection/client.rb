@@ -66,7 +66,16 @@ module Karafka
 
           # Track time spent on all of the processing and polling
           time_poll.checkpoint
+
+          # We should not poll more messages if rebalance happened to finish early
+          # This will ensure that we remove revoked messages and that when next time we poll,
+          # in case there would be another revocation, it will be tracked by the rebalance manager
+          unless @rebalance_manager.revoked_partitions.empty?
+            remove_revoked_and_duplicated_messages
+            break
+          end
         end
+
 
         @buffer
       end
@@ -85,13 +94,16 @@ module Karafka
       # Ignoring a case where there would not be an offset (for example when rebalance occurs).
       #
       # @param async [Boolean] should the commit happen async or sync (async by default)
+      # @return [Boolean] did committing was successful. It may be not, when we no longer own
+      #   given partition.
+      #
       # @note This will commit all the offsets for the whole consumer. In order to achieve
       #   granular control over where the offset should be for particular topic partitions, the
       #   store_offset should be used to only store new offset when we want to to be flushed
       def commit_offsets(async: true)
         @mutex.lock
 
-        return unless @offsetting
+        return true unless @offsetting
 
         @kafka.commit(nil, async)
         @offsetting = false
@@ -178,6 +190,7 @@ module Karafka
       #   check-pointing trigger that happens with each batch processed
       def mark_as_consumed(message)
         store_offset(message)
+        true
       end
 
       # Marks a given message as consumed and commits the offsets in a blocking way.
@@ -235,7 +248,7 @@ module Karafka
       # Performs a single poll operation.
       #
       # @param timeout [Integer] timeout for a single poll
-      # @return [Array<Rdkafka::Consumer::Message>, nil] fetched messages or nil if nothing polled
+      # @return [Rdkafka::Consumer::Message, nil] fetched message or nil if nothing polled
       def poll(timeout)
         time_poll ||= TimeTrackers::Poll.new(timeout)
 
@@ -303,6 +316,20 @@ module Karafka
         )
 
         consumer
+      end
+
+      # We may have a case where in the middle of data polling, we've lost a partition.
+      # In a case like this we should remove all the pre-buffered messages from list partitions as
+      # we are no longer responsible in a given process for processing those messages and they
+      # should have been picked up by a different process.
+      def remove_revoked_and_duplicated_messages
+        @rebalance_manager.revoked_partitions.each do |topic, partitions|
+          partitions.each do |partition|
+            @buffer.delete(topic, partition)
+          end
+        end
+
+        @buffer.uniq!
       end
     end
   end
