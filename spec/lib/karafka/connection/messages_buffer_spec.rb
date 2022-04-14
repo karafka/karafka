@@ -170,14 +170,29 @@ RSpec.describe_current do
   end
 
   describe 'uniq!' do
+    let(:message1) { build(:messages_message) }
+    let(:message2) { build(:messages_message) }
+    let(:message3) { build(:messages_message) }
+    let(:message4) { build(:messages_message) }
+
     context 'when we have same message twice for the same topic partition' do
-      
+      before do
+        buffer << message1
+        buffer << message2
+        buffer << message1
+        buffer << message3
+        buffer << message4
+      end
 
-      it { expect { buffer.uniq! }.to change(buffer, :size).by(1) }
-    end
+      it { expect { buffer.uniq! }.to change(buffer, :size).by(-1) }
 
-    context 'when we have different messages for the same topic partition' do
-      it { expect { buffer.uniq! }.not_to change(buffer, :size) }
+      it 'expect to maintain messages order' do
+        buffer.uniq!
+
+        buffer.each do |_, _, messages|
+          expect(messages).to eq([message1, message2, message3, message4])
+        end
+      end
     end
   end
 end
