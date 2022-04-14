@@ -146,7 +146,7 @@ RSpec.describe_current do
       it 'expect not to mix the topics' do
         buffer.delete(message1.topic, 0)
 
-        buffer.each do |topic, partition, messages|
+        buffer.each do |topic, _, _|
           expect(topic).to eq(message2.topic)
         end
       end
@@ -154,7 +154,7 @@ RSpec.describe_current do
       it 'expect not to mix partitions' do
         buffer.delete(message1.topic, 0)
 
-        buffer.each do |topic, partition, messages|
+        buffer.each do |_, partition, _|
           expect(partition).to eq(message2.partition)
         end
       end
@@ -162,7 +162,7 @@ RSpec.describe_current do
       it 'expect not to mix messages in the buffer' do
         buffer.delete(message1.topic, 0)
 
-        buffer.each do |topic, partition, messages|
+        buffer.each do |_, _, messages|
           expect(messages).to eq([message2])
         end
       end
@@ -170,6 +170,14 @@ RSpec.describe_current do
   end
 
   describe 'uniq!' do
-    pending
+    context 'when we have same message twice for the same topic partition' do
+      
+
+      it { expect { buffer.uniq! }.to change(buffer, :size).by(1) }
+    end
+
+    context 'when we have different messages for the same topic partition' do
+      it { expect { buffer.uniq! }.not_to change(buffer, :size) }
+    end
   end
 end

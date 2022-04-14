@@ -76,7 +76,6 @@ module Karafka
           end
         end
 
-
         @buffer
       end
 
@@ -103,7 +102,7 @@ module Karafka
       def commit_offsets(async: true)
         @mutex.lock
 
-        return true unless @offsetting
+        return unless @offsetting
 
         @kafka.commit(nil, async)
         @offsetting = false
@@ -190,7 +189,6 @@ module Karafka
       #   check-pointing trigger that happens with each batch processed
       def mark_as_consumed(message)
         store_offset(message)
-        true
       end
 
       # Marks a given message as consumed and commits the offsets in a blocking way.

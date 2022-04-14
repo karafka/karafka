@@ -11,7 +11,7 @@ require 'securerandom'
 RUN = SecureRandom.uuid.split('-').first
 
 setup_karafka do |config|
-  config.max_wait_time = 10_000
+  config.max_wait_time = 5_000
   config.max_messages = 1_000
   config.initial_offset = 'earliest'
 end
@@ -39,26 +39,25 @@ end
 Karafka.producer.config.logger.level = Logger::FATAL
 
 Thread.new do
-  sleep(1)
-
   nr = 0
 
   loop do
     2.times do |i|
       # If revoked, we are stopping, so producer will be closed
       break if DataCollector.data.key?(:revoked)
+
       produce('integrations_0_02', "#{RUN}-#{nr}-#{i}", partition: i)
     end
 
     nr += 1
 
-    sleep(0.1)
+    sleep(0.2)
   end
 end
 
 Thread.new do
   # We give it a bit of time, so we make sure we have something in the buffer
-  sleep(5)
+  sleep(10)
 
   config = {
     'bootstrap.servers': 'localhost:9092',
@@ -92,26 +91,24 @@ end
 # There should be no duplicated data received
 process1.each do |_, messages|
   assert_equal messages.size, messages.uniq.size
-end
 
-# All the messages in both processes should be in order
-process1.each do |_, messages|
   previous = nil
 
+  # All the messages in both processes should be in order
   messages
     .select { |message| message.include?(RUN) }
     .each do |message|
       current = message.split('-')[1].to_i
 
-      if previous
-        assert_equal previous + 1, current
-      end
+      assert_equal previous + 1, current if previous
 
       previous = current
     end
 end
 
 process2.each do |_, messages|
+  assert_equal messages.size, messages.uniq.size
+
   previous = nil
 
   messages
@@ -119,9 +116,7 @@ process2.each do |_, messages|
     .each do |message|
       current = message.split('-')[1].to_i
 
-      if previous
-        assert_equal previous + 1, current
-      end
+      assert_equal previous + 1, current if previous
 
       previous = current
     end
