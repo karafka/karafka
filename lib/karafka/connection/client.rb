@@ -70,10 +70,7 @@ module Karafka
           # We should not poll more messages if rebalance happened to finish early
           # This will ensure that we remove revoked messages and that when next time we poll,
           # in case there would be another revocation, it will be tracked by the rebalance manager
-          unless @rebalance_manager.revoked_partitions.empty?
-            remove_revoked_and_duplicated_messages
-            break
-          end
+          remove_revoked_and_duplicated_messages unless @rebalance_manager.revoked_partitions.empty?
         end
 
         @buffer
