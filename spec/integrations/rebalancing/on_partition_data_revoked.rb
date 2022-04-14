@@ -55,13 +55,13 @@ end
 
 consumer.close
 
-# Rebalance revokes all that were assigned
-assert_equal 3, DataCollector.data[:revoked].size
-assert_equal [0, 1, 2], DataCollector.data[:revoked].flat_map(&:keys).sort
+# Rebalance should not revoke all the partitions
+assert_equal true, DataCollector.data[:revoked].size < 3
+assert_equal true, (DataCollector.data[:revoked].flat_map(&:keys) - [0, 1, 2]).empty?
+# Before revocation, we should have had all the partitions in our first process
 assert_equal [0, 1, 2], DataCollector.data[:pre].to_a.sort
 
 re_assigned = DataCollector.data[:post].to_a.sort
-
 # After rebalance we should not get all partitions back as now there are two consumers
 assert_not_equal [0, 1, 2], re_assigned
 # It may get either one or two partitions back

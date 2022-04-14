@@ -42,6 +42,37 @@ module Karafka
         @groups[message.topic][message.partition] << message
       end
 
+      # Removes given topic and partition data out of the buffer
+      # This is used when there's a partition revocation
+      # @param topic [String] topic we're interested in
+      # @param partition [Integer] partition of which data we want to remove
+      def delete(topic, partition)
+        return unless @groups.key?(topic)
+        return unless @groups.fetch(topic).key?(partition)
+
+        topic_data = @groups.fetch(topic)
+        topic_data.delete(partition)
+
+        recount!
+
+        # If there are no more partitions to handle in a given topic, remove it completely
+        @groups.delete(topic) if topic_data.empty?
+      end
+
+      # Removes duplicated messages from the same partitions
+      # This should be used only when rebalance occurs, as we may get data again we already have
+      # due to the processing from the last offset. In cases like this, we may get same data
+      # again and we do want to ensure as few duplications as possible
+      def uniq!
+        @groups.each_value do |partitions|
+          partitions.each_value do |messages|
+            messages.uniq!(&:offset)
+          end
+        end
+
+        recount!
+      end
+
       # Removes all the data from the buffer.
       #
       # @note We do not clear the whole groups hash but rather we clear the partition hashes, so
@@ -51,6 +82,15 @@ module Karafka
       def clear
         @size = 0
         @groups.each_value(&:clear)
+      end
+
+      private
+
+      # Updates the messages count if we performed any operations that could change the state
+      def recount!
+        @size = @groups.each_value.sum do |partitions|
+          partitions.each_value.map(&:count).sum
+        end
       end
     end
   end
