@@ -11,7 +11,7 @@ require 'securerandom'
 RUN = SecureRandom.uuid.split('-').first
 
 setup_karafka do |config|
-  config.max_wait_time = 5_000
+  config.max_wait_time = 50_000
   config.max_messages = 1_000
   config.initial_offset = 'earliest'
 end
