@@ -67,7 +67,6 @@ module Karafka
           # Track time spent on all of the processing and polling
           time_poll.checkpoint
 
-
           next if @rebalance_manager.revoked_partitions.empty?
 
           # If partition revocation happens, we need to remove messages from revoked partitions
