@@ -36,8 +36,6 @@ draw_routes do
   end
 end
 
-Karafka.producer.config.logger.level = Logger::FATAL
-
 Thread.new do
   nr = 0
 
