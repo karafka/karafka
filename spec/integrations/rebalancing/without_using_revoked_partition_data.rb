@@ -55,7 +55,7 @@ Thread.new do
   end
 end
 
-Thread.new do
+other = Thread.new do
   # We give it a bit of time, so we make sure we have something in the buffer
   sleep(10)
 
@@ -68,12 +68,20 @@ Thread.new do
   consumer.subscribe('integrations_0_02')
   consumer.each do |message|
     DataCollector.data[:process2] << message
+
+    # We wait for the main Karafka process to stop, so data is not skewed by second rebalance
+    sleep(0.1) until Karafka::App.stopped?
+
+    consumer.close
+    break
   end
 end
 
 start_karafka_and_wait_until do
   DataCollector.data.key?(:process2)
 end
+
+other.join
 
 process1 = DataCollector.data[:process1].group_by(&:partition)
 process2 = DataCollector.data[:process2].group_by(&:partition)

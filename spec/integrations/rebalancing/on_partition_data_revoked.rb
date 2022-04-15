@@ -42,17 +42,22 @@ config = {
 }
 consumer = Rdkafka::Config.new(config).consumer
 
-Thread.new do
+other =  Thread.new do
   sleep(2)
 
   consumer.subscribe('integrations_1_03')
-  consumer.each {}
+  # 1 message is enough
+  consumer.each do
+    consumer.close
+    break
+  end
 end
 
 start_karafka_and_wait_until do
   !DataCollector.data[:post].empty?
 end
 
+other.join
 consumer.close
 
 # Rebalance should not revoke all the partitions
