@@ -9,6 +9,8 @@
 - Evict messages from partitions that were lost upon rebalancing (#825)
 - Do **not** run `#revoked` on partitions that were lost and assigned back upon rebalancing (#825)
 - Remove potential duplicated that could occur upon rebalance with re-assigned partitions (#825)
+- Optimize integration test suite additional consumers shutdown process (#828)
+- Optimize messages eviction and duplicates removal on poll stopped due to lack of messages 
 
 ## 2.0.0-alpha5 (2022-04-03)
 - Rename StdoutListener to LoggerListener (#811)

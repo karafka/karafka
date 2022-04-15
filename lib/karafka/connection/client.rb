@@ -59,20 +59,23 @@ module Karafka
           # Fetch message within our time boundaries
           message = poll(time_poll.remaining)
 
-          # If there are no more messages, return what we have
-          break unless message
-
-          @buffer << message
+          # Put a message to the buffer if there is one
+          @buffer << message if message
 
           # Track time spent on all of the processing and polling
           time_poll.checkpoint
 
-          next if @rebalance_manager.revoked_partitions.empty?
-
+          # Upon polling rebalance manager might have been updated.
           # If partition revocation happens, we need to remove messages from revoked partitions
           # as well as ensure we do not have duplicated due to the offset reset for partitions
           # that we got assigned
-          remove_revoked_and_duplicated_messages
+          remove_revoked_and_duplicated_messages if @rebalance_manager.revoked_partitions?
+
+          # Finally once we've (potentially) removed revoked, etc, if no messages were returned
+          # we can break.
+          # Worth keeping in mind, that the rebalance manager might have been updated despite no
+          # messages being returned during a poll
+          break unless message
         end
 
         @buffer

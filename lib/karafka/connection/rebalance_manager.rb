@@ -50,6 +50,11 @@ module Karafka
         @lost_partitions
       end
 
+      # @return [Boolean] true if any partitions were revoked
+      def revoked_partitions?
+        !revoked_partitions.empty?
+      end
+
       # Callback that kicks in inside of rdkafka, when new partitions are assigned.
       #
       # @private
