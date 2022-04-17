@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.0-alpha6 (Unreleased)
+## 2.0.0-alpha6 (2022-04-17)
 - Fix a bug, where upon missing boot file and Rails, railtie would fail with a generic exception (#818) 
 - Fix an issue with parallel pristine specs colliding with each other during `bundle install` (#820)
 - Replace `consumer.consume` with `consumer.consumed` event to match the behaviour
