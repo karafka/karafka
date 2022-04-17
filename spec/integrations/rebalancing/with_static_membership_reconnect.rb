@@ -110,7 +110,8 @@ other.join
 assert_equal [0, 1], DataCollector.data[:process1].map(&:last).uniq.sort
 
 # Second process should have been stopped two times
-assert_equal 2, DataCollector.data[:process2].count { |message| message == :stop }
+stops_count = DataCollector.data[:process2].count { |message| message == :stop }
+assert_equal 2, stops_count
 
 process2_messages = DataCollector.data[:process2].select { |message| message.is_a?(Array) }
 
