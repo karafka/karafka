@@ -11,9 +11,9 @@ setup_karafka do |config|
   config.pause_max_timeout = 100
 end
 
-
 class Consumer < Karafka::BaseConsumer
   def initialize
+    super
     DataCollector.data[0] << Time.now.to_f
   end
 
@@ -26,20 +26,20 @@ end
 
 draw_routes(Consumer)
 
-1.times { |data| produce(DataCollector.topic, '0') }
+produce(DataCollector.topic, '0')
 
 start_karafka_and_wait_until do
   DataCollector.data[0].size >= 10
 end
 
 # Backoff time before next exception occurrence (not before resume).
-# We give it some tolerance as we need to unpause +  we need to compensate for running several
+# We give it some tolerance as we need to resume +  we need to compensate for running several
 # specs at the same time in parallel in the CI
 BACKOFF_RANGE = 0..1
 
 previous = nil
 
-DataCollector.data[0].each_with_index do |timestamp, index|
+DataCollector.data[0].each do |timestamp|
   unless previous
     previous = timestamp
     next

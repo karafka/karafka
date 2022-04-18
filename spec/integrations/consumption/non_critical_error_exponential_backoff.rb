@@ -11,9 +11,9 @@ setup_karafka do |config|
   config.pause_timeout = 200
 end
 
-
 class Consumer < Karafka::BaseConsumer
   def initialize
+    super
     DataCollector.data[0] << Time.now.to_f
   end
 
@@ -26,7 +26,7 @@ end
 
 draw_routes(Consumer)
 
-1.times { |data| produce(DataCollector.topic, '0') }
+produce(DataCollector.topic, '0')
 
 start_karafka_and_wait_until do
   DataCollector.data[0].size >= 10
