@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/metrics_tracker'
+require 'karafka/pro/performance_tracker'
 
 RSpec.describe_current do
   pending

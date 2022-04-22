@@ -43,7 +43,7 @@ start_karafka_and_wait_until do
 end
 
 TOPICS.each do |topic_name|
-  p95 = Karafka::Pro::MetricsTracker.instance.processing_time_p95(topic_name, 0)
+  p95 = Karafka::Pro::PerformanceTracker.instance.processing_time_p95(topic_name, 0)
 
   message_speed = MESSAGE_SPEED.fetch(topic_name)
 

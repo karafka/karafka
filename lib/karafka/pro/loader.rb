@@ -18,7 +18,7 @@ module Karafka
         # @param config [Dry::Configurable::Config] whole app config that we can alter with pro
         #   components
         def setup(config)
-          require_relative 'metrics_tracker'
+          require_relative 'performance_tracker'
           require_relative 'active_job/dispatcher'
           require_relative 'active_job/job_options_contract'
 
@@ -26,7 +26,7 @@ module Karafka
           config.internal.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 
           # Monitor time needed to process each message from a single partition
-          config.monitor.subscribe(MetricsTracker.instance)
+          config.monitor.subscribe(PerformanceTracker.instance)
         end
       end
     end

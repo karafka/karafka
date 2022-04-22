@@ -13,7 +13,7 @@ module Karafka
 
     # Tracker used to keep track of performance metrics
     # It provides insights that can be used to optimize processing flow
-    class MetricsTracker
+    class PerformanceTracker
       include Singleton
 
       # How many samples do we collect per topic partition
