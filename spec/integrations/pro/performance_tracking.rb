@@ -48,6 +48,6 @@ TOPICS.each do |topic_name|
   message_speed = MESSAGE_SPEED.fetch(topic_name)
 
   assert_equal true, p95 >= message_speed, "Expected #{p95} to be gteq: #{message_speed}"
-  # We add 4ms to compensate for slow ci
-  assert_equal true, p95 <= message_speed + 4, "Expected #{p95} to be lteq: #{message_speed + 4}"
+  # We add 10ms to compensate for slow ci
+  assert_equal true, p95 <= message_speed + 10, "Expected #{p95} to be lteq: #{message_speed + 10}"
 end
