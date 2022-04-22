@@ -1,7 +1,7 @@
 # Karafka framework changelog
 
 ## 2.0.0-beta1 (Unreleased)
-- [Pro] Introduce metrics traker for scheduling optimizer
+- [Pro] Introduce metrics tracker for scheduling optimizer
 
 ## 2.0.0-alpha6 (2022-04-17)
 - Fix a bug, where upon missing boot file and Rails, railtie would fail with a generic exception (#818) 

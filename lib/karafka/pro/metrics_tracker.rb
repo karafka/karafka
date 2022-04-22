@@ -47,11 +47,11 @@ module Karafka
       def on_consumer_consumed(event)
         consumer = event[:caller]
         topic = consumer.topic.name
-        partition = consumer.messages.metadata.partition
-        count = consumer.messages.count
+        messages = consumer.messages
+        partition = messages.metadata.partition
 
         samples = @processing_times[topic][partition]
-        samples << event[:time] / consumer.messages.count
+        samples << event[:time] / messages.count
 
         return unless samples.size > SAMPLES_COUNT
 
