@@ -5,6 +5,8 @@ module Karafka
   class Scheduler
     # Yields messages from partitions in the fifo order
     #
+    # @param messages_buffer [Karafka::Connection::MessagesBuffer] messages buffer with data from
+    #   multiple topics and partitions
     # @yieldparam [String] topic name
     # @yieldparam [Integer] partition number
     # @yieldparam [Array<Rdkafka::Consumer::Message>] topic partition aggregated results

@@ -10,22 +10,19 @@ RSpec.describe_current do
   end
 
   context 'when there are messages' do
-    [
-      [0,0],
-      [0,1],
-      [1,0],
-      [1,1]
-    ].each do |topic_nr, partition_nr|
-      2.times do |i|
-        let(:"t#{topic_nr}p#{partition_nr}m#{i}") do
-          build(
-            :messages_message,
-            metadata: build(
-              :messages_metadata,
-              topic: "topic#{topic_nr}",
-              partition: partition_nr
+    2.times do |topic_nr|
+      2.times do |partition_nr|
+        2.times do |message_nr|
+          let(:"t#{topic_nr}p#{partition_nr}m#{message_nr}") do
+            build(
+              :messages_message,
+              metadata: build(
+                :messages_metadata,
+                topic: "topic#{topic_nr}",
+                partition: partition_nr
+              )
             )
-          )
+          end
         end
       end
     end
@@ -40,6 +37,15 @@ RSpec.describe_current do
       data
     end
 
+    let(:expected) do
+      [
+        [t0p0m0.topic, t0p0m0.partition, [t0p0m0, t0p0m1]],
+        [t0p1m0.topic, t0p1m0.partition, [t0p1m0, t0p1m1]],
+        [t1p0m0.topic, t1p0m0.partition, [t1p0m0, t1p0m1]],
+        [t1p1m0.topic, t1p1m0.partition, [t1p1m0, t1p1m1]]
+      ]
+    end
+
     before do
       messages_buffer << t0p0m0
       messages_buffer << t0p0m1
@@ -52,10 +58,7 @@ RSpec.describe_current do
     end
 
     it 'expect to yield them in the fifo order' do
-      expect(yielded[0]).to eq([t0p0m0.topic, t0p0m0.partition, [t0p0m0, t0p0m1]])
-      expect(yielded[1]).to eq([t0p1m0.topic, t0p1m0.partition, [t0p1m0, t0p1m1]])
-      expect(yielded[2]).to eq([t1p0m0.topic, t1p0m0.partition, [t1p0m0, t1p0m1]])
-      expect(yielded[3]).to eq([t1p1m0.topic, t1p1m0.partition, [t1p1m0, t1p1m1]])
+      expect(yielded).to eq(expected)
     end
   end
 end
