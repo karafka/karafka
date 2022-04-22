@@ -3,5 +3,5 @@
 # Main module namespace
 module Karafka
   # Current Karafka version
-  VERSION = '2.0.0.alpha6'
+  VERSION = '2.0.0.beta1'
 end
