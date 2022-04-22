@@ -49,8 +49,8 @@ module Karafka
       # Tracks time taken to process a single message of a given topic partition
       def on_consumer_consumed(event)
         consumer = event[:caller]
-        topic = consumer.topic.name
         messages = consumer.messages
+        topic = messages.metadata.topic
         partition = messages.metadata.partition
 
         samples = @processing_times[topic][partition]
