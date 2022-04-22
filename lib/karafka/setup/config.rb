@@ -96,6 +96,8 @@ module Karafka
         # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
         #   group builder
         setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
+        # option scheduler [Class] scheduler we will be using
+        setting :scheduler, default: Scheduler.new
 
         # Karafka components for ActiveJob
         setting :active_job do

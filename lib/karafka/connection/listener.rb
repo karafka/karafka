@@ -15,6 +15,8 @@ module Karafka
         @pauses_manager = PausesManager.new
         @client = Client.new(@subscription_group)
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
+        # We reference scheduler here as it is much faster than fetching this each time
+        @scheduler = ::Karafka::App.config.internal.scheduler
       end
 
       # Runs the main listener fetch loop.
@@ -66,9 +68,9 @@ module Karafka
           # distributing consuming jobs as upon revoking, we might get assigned to the same
           # partitions, thus getting their jobs. The revoking jobs need to finish before
           # appropriate consumers are taken down and re-created
-          wait(@subscription_group) if distribute_revoke_lost_partitions_jobs
+          wait(@subscription_group) if schedule_revoke_lost_partitions_jobs
 
-          distribute_partitions_jobs(messages_buffer)
+          schedule_partitions_jobs(messages_buffer)
 
           # We wait only on jobs from our subscription group. Other groups are independent.
           wait(@subscription_group)
@@ -103,7 +105,9 @@ module Karafka
 
       # Enqueues revoking jobs for partitions that were taken away from the running process.
       # @return [Boolean] was there anything to revoke
-      def distribute_revoke_lost_partitions_jobs
+      # @note We do not use scheduler here as those jobs are not meant to be order optimized in
+      #   any way. Since they operate occasionally it is irrelevant.
+      def schedule_revoke_lost_partitions_jobs
         revoked_partitions = @client.rebalance_manager.revoked_partitions
 
         return false if revoked_partitions.empty?
@@ -122,8 +126,8 @@ module Karafka
       # Takes the messages per topic partition and enqueues processing jobs in threads.
       #
       # @param messages_buffer [Karafka::Connection::MessagesBuffer] buffer with messages
-      def distribute_partitions_jobs(messages_buffer)
-        messages_buffer.each do |topic, partition, messages|
+      def schedule_partitions_jobs(messages_buffer)
+        @scheduler.call(messages_buffer) do |topic, partition, messages|
           pause = @pauses_manager.fetch(topic, partition)
 
           next if pause.paused?

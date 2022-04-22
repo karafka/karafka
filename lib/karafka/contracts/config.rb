@@ -32,6 +32,7 @@ module Karafka
           required(:routing_builder)
           required(:status)
           required(:process)
+          required(:scheduler)
           required(:subscription_groups_builder)
         end
       end

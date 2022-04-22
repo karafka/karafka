@@ -36,9 +36,9 @@ end
 # that we run this in parallel, we add some extra time to compensate.
 BACKOFF_RANGES = [
   0..0.5,
-  0..1,
-  0..1,
-  0..1,
+  0..1.5,
+  0..1.5,
+  0..1.5,
   1..2,
   2..3,
   4..5,
@@ -54,8 +54,13 @@ DataCollector.data[0].each_with_index do |timestamp, index|
   end
 
   backoff = (timestamp - previous)
+  expected_range = (BACKOFF_RANGES[index] || BACKOFF_RANGES.last)
 
-  assert_equal true, (BACKOFF_RANGES[index] || BACKOFF_RANGES.last).include?(backoff)
+  assert_equal(
+    true,
+    expected_range.include?(backoff),
+    "Expected #{backoff} to be in range: #{expected_range}"
+  )
 
   previous = timestamp
 end
