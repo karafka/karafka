@@ -136,10 +136,12 @@ AssertionFailedError = Class.new(StandardError)
 #
 # @param expected [Object] what we expect
 # @param received [Object] what we've received
-def assert_equal(expected, received)
+# @param message [nil, String] message we want to pass upon failure or nil if default should be
+#   used
+def assert_equal(expected, received, message = nil)
   return if expected == received
 
-  raise AssertionFailedError, "#{received} does not equal to #{expected}"
+  raise AssertionFailedError, message || "#{received} does not equal to #{expected}"
 end
 
 # @return [String] valid pro license token that we use in the integration tests

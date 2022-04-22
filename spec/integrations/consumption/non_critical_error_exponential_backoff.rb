@@ -54,8 +54,13 @@ DataCollector.data[0].each_with_index do |timestamp, index|
   end
 
   backoff = (timestamp - previous)
+  expected_range = (BACKOFF_RANGES[index] || BACKOFF_RANGES.last)
 
-  assert_equal true, (BACKOFF_RANGES[index] || BACKOFF_RANGES.last).include?(backoff)
+  assert_equal(
+    true,
+    expected_range.include?(backoff),
+    "Expected #{backoff} to be in range: #{expected_range}"
+  )
 
   previous = timestamp
 end
