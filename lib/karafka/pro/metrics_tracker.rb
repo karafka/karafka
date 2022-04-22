@@ -32,6 +32,8 @@ module Karafka
         end
       end
 
+      # @param topic [String]
+      # @param partition [Integer]
       # @return [Float] p95 processing time of a single message from a single topic partition
       def processing_time_p95(topic, partition)
         values = @processing_times[topic][partition]
@@ -43,6 +45,7 @@ module Karafka
       end
 
       # @private
+      # @param event [Dry::Events::Event] event details
       # Tracks time taken to process a single message of a given topic partition
       def on_consumer_consumed(event)
         consumer = event[:caller]
