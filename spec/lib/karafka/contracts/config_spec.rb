@@ -22,7 +22,8 @@ RSpec.describe_current do
         routing_builder: Karafka::Routing::Builder.new,
         status: Karafka::Status.new,
         process: Karafka::Process.new,
-        subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new
+        subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new,
+        scheduler: Karafka::Scheduler.new
       },
       kafka: {
         'bootstrap.servers': '127.0.0.1:9092'
@@ -233,6 +234,12 @@ RSpec.describe_current do
 
     context 'when subscription_groups_builder is missing' do
       before { config[:internal].delete(:subscription_groups_builder) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when scheduler is missing' do
+      before { config[:internal].delete(:scheduler) }
 
       it { expect(contract.call(config)).not_to be_success }
     end

@@ -10,25 +10,16 @@ module Karafka
     class MessagesBuffer
       attr_reader :size
 
+      extend Forwardable
+
+      def_delegators :@groups, :each
+
       # @return [Karafka::Connection::MessagesBuffer] buffer instance
       def initialize
         @size = 0
         @groups = Hash.new do |topic_groups, topic|
           topic_groups[topic] = Hash.new do |partition_groups, partition|
             partition_groups[partition] = []
-          end
-        end
-      end
-
-      # Iterates over aggregated data providing messages per topic partition.
-      #
-      # @yieldparam [String] topic name
-      # @yieldparam [Integer] partition number
-      # @yieldparam [Array<Rdkafka::Consumer::Message>] topic partition aggregated results
-      def each
-        @groups.each do |topic, partitions|
-          partitions.each do |partition, messages|
-            yield(topic, partition, messages)
           end
         end
       end
