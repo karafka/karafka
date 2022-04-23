@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-# This Karafka component is a Pro component.
-# All of the commercial components are present in the lib/karafka/pro directory of this repository
-# and their usage requires commercial license agreement.
-#
-# Karafka has also commercial-friendly license, commercial support and commercial components.
-#
-# By sending a pull request to the pro components, you are agreeing to transfer the copyright of
-# your code to Maciej Mensfeld.
-
 module Karafka
   module Pro
     # Karafka Pro ActiveJob components
     module ActiveJob
+      # This Karafka component is a Pro component.
+      # All of the commercial components are present in the lib/karafka/pro directory of this
+      # repository and their usage requires commercial license agreement.
+      #
+      # Karafka has also commercial-friendly license, commercial support and commercial components.
+      #
+      # By sending a pull request to the pro components, you are agreeing to transfer the copyright
+      # of your code to Maciej Mensfeld.
+
       # Pro dispatcher that sends the ActiveJob job to a proper topic based on the queue name
       # and that allows to inject additional options into the producer, effectively allowing for a
       # much better and more granular control over the dispatch and consumption process.

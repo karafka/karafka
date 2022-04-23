@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.0-beta1 (Unreleased)
+- [Pro] Introduce performance tracker for scheduling optimizer
+
 ## 2.0.0-alpha6 (2022-04-17)
 - Fix a bug, where upon missing boot file and Rails, railtie would fail with a generic exception (#818) 
 - Fix an issue with parallel pristine specs colliding with each other during `bundle install` (#820)
@@ -26,12 +29,12 @@
 
 ## 2.0.0-alpha2 (2022-02-19)
 - Require `kafka` keys to be symbols
-- Added ActiveJob Pro adapter
+- [Pro] Added ActiveJob Pro adapter
 - Small updates to the license and docs
 
 ## 2.0.0-alpha1 (2022-01-30)
 - Change license to `LGPL-3.0`
-- Introduce a Pro subscription
+- [Pro] Introduce a Pro subscription
 - Switch from `ruby-kafka` to `librdkafka` as an underlying driver
 - Introduce fully automatic integration tests that go through the whole server lifecycle
 - Integrate WaterDrop tightly with autoconfiguration inheritance and an option to redefine it

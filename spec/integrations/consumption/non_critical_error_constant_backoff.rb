@@ -35,7 +35,7 @@ end
 # Backoff time before next exception occurrence (not before resume).
 # We give it some tolerance as we need to resume +  we need to compensate for running several
 # specs at the same time in parallel in the CI
-BACKOFF_RANGE = 0..1
+BACKOFF_RANGE = 0..1.5
 
 previous = nil
 
@@ -47,7 +47,11 @@ DataCollector.data[0].each do |timestamp|
 
   backoff = (timestamp - previous)
 
-  assert_equal true, BACKOFF_RANGE.include?(backoff)
+  assert_equal(
+    true,
+    BACKOFF_RANGE.include?(backoff),
+    "Expected #{backoff} to be in #{BACKOFF_RANGE}"
+  )
 
   previous = timestamp
 end

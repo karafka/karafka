@@ -18,3 +18,4 @@ assert_equal false, Karafka.pro?
 # Pro components should not be visible
 assert_equal false, const_visible?('Karafka::Pro::ActiveJob::Dispatcher')
 assert_equal false, const_visible?('Karafka::Pro::ActiveJob::JobOptionsContract')
+assert_equal false, const_visible?('Karafka::Pro::PerformanceTracker')
