@@ -43,7 +43,7 @@ config = {
 consumer = Rdkafka::Config.new(config).consumer
 
 other =  Thread.new do
-  sleep(5)
+  sleep(10)
 
   consumer.subscribe('integrations_1_03')
   # 1 message is enough
