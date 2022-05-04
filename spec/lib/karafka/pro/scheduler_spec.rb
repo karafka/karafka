@@ -25,12 +25,10 @@ RSpec.describe_current do
 
     # @note This is an edge case for first batch. After that we will get measurements, so we don't
     #   have to worry. "Ignoring" this non-optimal first case simplifies the codebase
-    it 'expect to run in reverse order' do
-      expect(scheduled_order[0]).to eq([message3.topic, message3.partition, [message3]])
-      expect(scheduled_order[1]).to eq([message2.topic, message2.partition, [message2]])
-      expect(scheduled_order[2]).to eq([message1.topic, message1.partition, [message1]])
-      expect(scheduled_order[3]).to eq([message0.topic, message0.partition, [message0]])
-    end
+    it { expect(scheduled_order[0]).to eq([message3.topic, message3.partition, [message3]]) }
+    it { expect(scheduled_order[1]).to eq([message2.topic, message2.partition, [message2]]) }
+    it { expect(scheduled_order[2]).to eq([message1.topic, message1.partition, [message1]]) }
+    it { expect(scheduled_order[3]).to eq([message0.topic, message0.partition, [message0]]) }
   end
 
   context 'when metrics on the computation cost for messages from topics are present' do
@@ -55,11 +53,9 @@ RSpec.describe_current do
       end
     end
 
-    it 'expect to use LJF for ordering' do
-      expect(scheduled_order[0]).to eq([message3.topic, message3.partition, [message3]])
-      expect(scheduled_order[1]).to eq([message2.topic, message2.partition, [message2]])
-      expect(scheduled_order[2]).to eq([message1.topic, message1.partition, [message1]])
-      expect(scheduled_order[3]).to eq([message0.topic, message0.partition, [message0]])
-    end
+    it { expect(scheduled_order[0]).to eq([message3.topic, message3.partition, [message3]]) }
+    it { expect(scheduled_order[1]).to eq([message2.topic, message2.partition, [message2]]) }
+    it { expect(scheduled_order[2]).to eq([message1.topic, message1.partition, [message1]]) }
+    it { expect(scheduled_order[3]).to eq([message0.topic, message0.partition, [message0]]) }
   end
 end
