@@ -32,6 +32,8 @@ RSpec.describe_current do
   end
 
   describe '#prepare' do
+    before { allow(consumer).to receive(:on_prepared) }
+
     it { expect { executor.prepare(messages, received_at) }.not_to raise_error }
 
     it 'expect to build appropriate messages batch' do
@@ -43,6 +45,11 @@ RSpec.describe_current do
       executor.prepare(messages, received_at)
       expect(consumer.messages.metadata.scheduled_at).to eq(received_at)
       expect(consumer.messages.metadata.topic).to eq(topic.name)
+    end
+
+    it 'expect to run consumer on_prepared' do
+      executor.prepare(messages, received_at)
+      expect(consumer).to have_received(:on_prepared).with(no_args)
     end
   end
 

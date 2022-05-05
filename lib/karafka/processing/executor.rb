@@ -48,6 +48,8 @@ module Karafka
           @topic,
           received_at
         )
+
+        consumer.on_prepared
       end
 
       # Runs consumer data processing against given batch and handles failures and errors.

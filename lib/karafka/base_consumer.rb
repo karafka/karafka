@@ -76,7 +76,30 @@ module Karafka
       )
     end
 
+    # Can be used to run preparation code
+    #
+    # @private
+    # @note This should not be used by the end users as it is part of the lifecycle of things but
+    #   not as part of the public api. This can act as a hook when creating non-blocking
+    #   consumers and doing other advanced stuff
+    def on_prepared
+      Karafka.monitor.instrument('consumer.prepared', caller: self) do
+        prepared
+      end
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.prepared.error'
+      )
+    end
+
     private
+
+    # Method that gets called in the blocking flow allowing to setup any type of resources or to
+    # send additional commands to Kafka before the proper execution starts.
+    def prepared; end
 
     # Method that will perform business logic and on data received from Kafka (it will consume
     #   the data)
