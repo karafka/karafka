@@ -21,7 +21,7 @@ module Karafka
         # We cannot use a single semaphore as it could potentially block in listeners that should
         # process with their data and also could unlock when a given group needs to remain locked
         @semaphores = Hash.new { |h, k| h[k] = Queue.new }
-        @in_processing = Hash.new { |h, k| h[k] = Array.new }
+        @in_processing = Hash.new { |h, k| h[k] = [] }
         @mutex = Mutex.new
       end
 
@@ -60,7 +60,7 @@ module Karafka
         @queue.pop
       end
 
-      # Causes the wait lock to re-check the lock conditions and potentiall unlock.
+      # Causes the wait lock to re-check the lock conditions and potential unlock.
       # @param group_id [String] id of the group we want to unlock for one tick
       # @note This does not release the wait lock. It just causes a conditions recheck
       def tick(group_id)
