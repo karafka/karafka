@@ -31,7 +31,7 @@ module Karafka
 
         messages_buffer.each do |topic, partitions|
           partitions.each do |partition, messages|
-            cost = pt.processing_time_p95(topic, partition)
+            cost = pt.processing_time_p95(topic, partition) * messages.size
 
             ordered << [topic, partition, messages, cost]
           end

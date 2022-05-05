@@ -27,7 +27,6 @@ module Karafka
           config.internal.active_job.dispatcher = ActiveJob::Dispatcher.new
           config.internal.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 
-          # Monitor time needed to process each message from a single partition
           config.monitor.subscribe(PerformanceTracker.instance)
         end
       end
