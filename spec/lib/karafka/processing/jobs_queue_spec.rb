@@ -117,6 +117,30 @@ RSpec.describe_current do
       end
     end
 
+    context 'when we have to wait and tick runs' do
+      before do
+        queue << job1
+
+        Thread.new do
+          # We need to close it in order to unlock
+          sleep(0.1)
+          10.times { queue.tick(job1.group_id) }
+        end
+
+        Thread.new do
+          sleep(1)
+          queue.close
+        end
+      end
+
+      # tick should not allow for wait skipping, it should just trigger a re-check
+      it 'expect not to pass until the queue is actually closed' do
+        before = Time.now.to_f
+        queue.wait(job1.group_id)
+        expect(Time.now.to_f - before).to be >= 1
+      end
+    end
+
     context 'when Karafka is stopping and the queue is empty' do
       before { allow(Karafka::App).to receive(:stopping?).and_return(true) }
 
