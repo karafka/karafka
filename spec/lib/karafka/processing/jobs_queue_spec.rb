@@ -3,8 +3,8 @@
 RSpec.describe_current do
   subject(:queue) { described_class.new }
 
-  let(:job1) { OpenStruct.new(group_id: 1, id: 1, call: true) }
-  let(:job2) { OpenStruct.new(group_id: 2, id: 1, call: true) }
+  let(:job1) { OpenStruct.new(group_id: 1, id: 1, call: true, non_blocking?: false) }
+  let(:job2) { OpenStruct.new(group_id: 2, id: 1, call: true, non_blocking?: false) }
   let(:internal_queue) { ::Queue.new }
 
   before { queue.instance_variable_set('@queue', internal_queue) }
@@ -103,7 +103,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when we have to wait' do
+    context 'when we have to wait for a job' do
       before { queue << job1 }
 
       it 'expect to pass until no longer needing to wait' do
@@ -138,6 +138,14 @@ RSpec.describe_current do
         before = Time.now.to_f
         queue.wait(job1.group_id)
         expect(Time.now.to_f - before).to be >= 1
+      end
+    end
+
+    context 'when we have non blocking jobs in the queue only' do
+      before { queue << OpenStruct.new(group_id: 1, id: 1, call: true, non_blocking?: true) }
+
+      it 'expect not to block' do
+        queue.wait(job1.group_id)
       end
     end
 

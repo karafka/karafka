@@ -115,13 +115,15 @@ module Karafka
       # @param group_id [String] id of the group in which jobs we're interested.
       # @return [Boolean] should we keep waiting or not
       def wait?(group_id)
+        group = @in_processing[group_id]
+
         # If it is stopping, all the previous messages that are processed at the moment need to
         # finish. Otherwise we may risk closing the client and committing offsets afterwards
-        return false if Karafka::App.stopping? && @in_processing[group_id].empty?
+        return false if Karafka::App.stopping? && group.empty?
         return false if @queue.closed?
-        return false if @in_processing[group_id].empty?
+        return false if group.empty?
 
-        true
+        !group.all?(&:non_blocking?)
       end
     end
   end

@@ -4,6 +4,18 @@ module Karafka
   module Processing
     # Workers are used to run jobs in separate threads.
     # Workers are the main processing units of the Karafka framework.
+    #
+    # Each job runs in three stages:
+    #   - prepare - here we can run any code that we would need to run blocking before we allow
+    #               the job to run fully async (non blocking). This will always run in a blocking
+    #               way and can be used to make sure all the resources and external dependencies
+    #               are satisfied before going async.
+    #
+    #   - call - actual processing logic that can run sync or async
+    #
+    #   - teardown - it should include any code that we want to run after we executed the user
+    #                code. This can be used to unlock certain resources or do other things that are
+    #                not user code but need to run after user code base is executed.
     class Worker
       extend Forwardable
 
@@ -33,7 +45,18 @@ module Karafka
         job = @jobs_queue.pop
 
         if job
+          job.prepare
+
+          # If a job is marked as non blocking, we can run a tick in the job queue and if there
+          # are no other blocking factors, the job queue will be unlocked.
+          # If this does not run, all the things will be blocking and job queue won't allow to
+          # pass it until done.
+          @jobs_queue.tick(job.group_id) if job.non_blocking?
+
           job.call
+
+          job.teardown
+
           true
         else
           false
