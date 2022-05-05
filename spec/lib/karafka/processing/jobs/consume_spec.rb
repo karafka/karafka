@@ -7,6 +7,8 @@ RSpec.describe_current do
   let(:messages) { [rand] }
   let(:time_now) { Time.now }
 
+  it { expect(job.non_blocking?).to eq(false) }
+
   describe '#prepare' do
     before do
       allow(Time).to receive(:now).and_return(time_now)
