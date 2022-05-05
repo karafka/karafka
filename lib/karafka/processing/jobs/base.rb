@@ -5,7 +5,7 @@ module Karafka
     # Namespace for all the jobs that are suppose to run in workers.
     module Jobs
       # Base class for all the jobs types that are suppose to run in workers threads.
-      # Each job can have 3 main entrypoints: `#prepare`, `#call` and `#teardown`
+      # Each job can have 3 main entry-points: `#prepare`, `#call` and `#teardown`
       # Only `#call` is required.
       class Base
         extend Forwardable
@@ -35,7 +35,7 @@ module Karafka
 
         # Marks this job as no longer blocking
         def unblock!
-          @nnon_blocking = true
+          @non_blocking = true
         end
       end
     end
