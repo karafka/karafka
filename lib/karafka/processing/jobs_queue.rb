@@ -21,7 +21,7 @@ module Karafka
         # We cannot use a single semaphore as it could potentially block in listeners that should
         # process with their data and also could unlock when a given group needs to remain locked
         @semaphores = Hash.new { |h, k| h[k] = Queue.new }
-        @in_processing = Hash.new { |h, k| h[k] = {} }
+        @in_processing = Hash.new { |h, k| h[k] = [] }
         @mutex = Mutex.new
       end
 
@@ -44,9 +44,9 @@ module Karafka
         @mutex.synchronize do
           group = @in_processing[job.group_id]
 
-          raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.key?(job.id)
+          raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.include?(job)
 
-          group[job.id] = true
+          group << job
         end
 
         @queue << job
@@ -60,14 +60,21 @@ module Karafka
         @queue.pop
       end
 
+      # Causes the wait lock to re-check the lock conditions and potential unlock.
+      # @param group_id [String] id of the group we want to unlock for one tick
+      # @note This does not release the wait lock. It just causes a conditions recheck
+      def tick(group_id)
+        @semaphores[group_id] << true
+      end
+
       # Marks a given job from a given group as completed. When there are no more jobs from a given
       # group to be executed, we won't wait.
       #
       # @param [Jobs::Base] job that was completed
       def complete(job)
         @mutex.synchronize do
-          @in_processing[job.group_id].delete(job.id)
-          @semaphores[job.group_id] << true
+          @in_processing[job.group_id].delete(job)
+          tick(job.group_id)
         end
       end
 
@@ -79,7 +86,7 @@ module Karafka
         @mutex.synchronize do
           @in_processing[group_id].clear
           # We unlock it just in case it was blocked when clearing started
-          @semaphores[group_id] << true
+          tick(group_id)
         end
       end
 
