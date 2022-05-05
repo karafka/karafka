@@ -1,6 +1,8 @@
 # Karafka framework changelog
 
 ## 2.0.0-beta1 (Unreleased)
+- Update the jobs queue blocking engine and allow for non-blocking jobs execution
+- Provide `#prepared` hook that always runs before the fetching loop is unblocked
 - [Pro] Introduce performance tracker for scheduling optimizer
 
 ## 2.0.0-alpha6 (2022-04-17)
