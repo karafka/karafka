@@ -40,6 +40,8 @@ RSpec.describe_current do
         allow(job).to receive(:prepare)
         allow(job).to receive(:call)
         allow(job).to receive(:teardown)
+        allow(queue).to receive(:tick)
+
         queue << job
         # Force the background job work, so we can validate the expectation as the thread will
         # execute correctly the given job
@@ -47,7 +49,7 @@ RSpec.describe_current do
         sleep(0.05)
       end
 
-      it { expect(queue).not_to receive(:tick) }
+      it { expect(queue).not_to have_received(:tick) }
       it { expect(job).to have_received(:prepare).with(no_args) }
       it { expect(job).to have_received(:call).with(no_args) }
       it { expect(job).to have_received(:teardown).with(no_args) }
