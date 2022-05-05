@@ -3,7 +3,7 @@
 # Karafka consumer can be used with `#prepared` method to run some preparations before running the
 # proper code
 # While it is not recommended to use it unless you are advanced user and want to elevate certain
-# karafka capabilities, we still add this spec to make sure things operate as expecteda and that
+# karafka capabilities, we still add this spec to make sure things operate as expected and that
 # this method is called
 
 setup_karafka
