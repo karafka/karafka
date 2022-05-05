@@ -31,25 +31,29 @@ RSpec.describe_current do
     it { expect(executor.group_id).to eq(group_id) }
   end
 
-  describe '#consume' do
-    before { allow(consumer).to receive(:on_consume) }
-
-    it { expect { executor.consume(messages, received_at) }.not_to raise_error }
-
-    it 'expect to run the consumer appropriate method' do
-      executor.consume(messages, received_at)
-      expect(consumer).to have_received(:on_consume).with(no_args)
-    end
+  describe '#prepare' do
+    it { expect { executor.prepare(messages, received_at) }.not_to raise_error }
 
     it 'expect to build appropriate messages batch' do
-      executor.consume(messages, received_at)
+      executor.prepare(messages, received_at)
       expect(consumer.messages.first.raw_payload).to eq(messages.first.payload)
     end
 
     it 'expect to build metadata with proper details' do
-      executor.consume(messages, received_at)
+      executor.prepare(messages, received_at)
       expect(consumer.messages.metadata.scheduled_at).to eq(received_at)
       expect(consumer.messages.metadata.topic).to eq(topic.name)
+    end
+  end
+
+  describe '#consume' do
+    before do
+      allow(consumer).to receive(:on_consume)
+      executor.consume
+    end
+
+    it 'expect to run consumer' do
+      expect(consumer).to have_received(:on_consume)
     end
   end
 
@@ -67,7 +71,7 @@ RSpec.describe_current do
     context 'when the consumer was in use and exists' do
       before do
         allow(consumer).to receive(:on_consume)
-        executor.consume(messages, received_at)
+        executor.consume
         executor.revoked
       end
 
@@ -91,7 +95,7 @@ RSpec.describe_current do
     context 'when the consumer was in use and exists' do
       before do
         allow(consumer).to receive(:on_consume)
-        executor.consume(messages, received_at)
+        executor.consume
         executor.shutdown
       end
 

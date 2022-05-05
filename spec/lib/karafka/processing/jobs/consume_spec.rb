@@ -7,16 +7,26 @@ RSpec.describe_current do
   let(:messages) { [rand] }
   let(:time_now) { Time.now }
 
-  before do
-    allow(Time).to receive(:now).and_return(time_now)
-    allow(executor).to receive(:consume)
-    job.call
+  describe '#prepare' do
+    before do
+      allow(Time).to receive(:now).and_return(time_now)
+      allow(executor).to receive(:prepare)
+      job.prepare
+    end
+
+    it 'expect to run prepare on the executor with time and messages' do
+      expect(executor).to have_received(:prepare).with(messages, time_now)
+    end
   end
 
-  it { expect(job.id).to eq(executor.id) }
-  it { expect(job.group_id).to eq(executor.group_id) }
+  describe '#call' do
+    before do
+      allow(executor).to receive(:consume)
+      job.call
+    end
 
-  it 'expect to run consumption on the executor with time and messages' do
-    expect(executor).to have_received(:consume).with(messages, time_now)
+    it 'expect to run consume' do
+      expect(executor).to have_received(:consume)
+    end
   end
 end
