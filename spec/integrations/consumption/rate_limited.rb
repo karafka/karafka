@@ -35,8 +35,8 @@ class Consumer < Karafka::BaseConsumer
       DataCollector.data[:pauses] << Time.now.to_f
 
       @seconds_available = 5
-      client.pause(topic.name, message.partition, message.offset + 1)
-      pause_tracker.pause
+      pause(message.offset + 1)
+
       break
     end
   end

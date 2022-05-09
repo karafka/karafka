@@ -21,9 +21,7 @@ class Consumer < Karafka::BaseConsumer
     end
 
     # Pause for 1 second
-    pause_tracker.pause(1_000)
-    # Pause and start frm the next message
-    client.pause(topic.name, messages.last.partition, messages.last.offset + 1)
+    pause(messages.last.offset + 1, 1_000)
   end
 end
 
