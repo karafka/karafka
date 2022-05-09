@@ -35,7 +35,7 @@ start_karafka_and_wait_until do
   DataCollector.data[:messages].size >= 10
 end
 
-# Pausing and getting back to consumption should not screw order or number of messages
+# Pausing and getting back to consumption should not mess order or number of messages
 assert_equal elements, DataCollector.data[:messages]
 
 previous = nil
