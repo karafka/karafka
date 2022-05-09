@@ -10,8 +10,8 @@ module Karafka
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
-    # @return [Karafka::TimeTrackers::Pause] current topic partition pause
-    attr_accessor :pause
+    # @return [Karafka::TimeTrackers::Pause] current topic partition pause tracker
+    attr_accessor :pause_tracker
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
 
@@ -24,7 +24,7 @@ module Karafka
       Karafka.monitor.instrument('consumer.consumed', caller: self) do
         consume
 
-        pause.reset
+        pause_tracker.reset
 
         # Mark as consumed only if manual offset management is not on
         return if topic.manual_offset_management
@@ -41,7 +41,7 @@ module Karafka
         type: 'consumer.consume.error'
       )
       client.pause(topic.name, messages.first.partition, @seek_offset || messages.first.offset)
-      pause.pause
+      pause_tracker.pause
     end
 
     # Trigger method for running on shutdown.
@@ -120,6 +120,10 @@ module Karafka
     # Marks message as consumed in an async way.
     #
     # @param message [Messages::Message] last successfully processed message.
+    # @note We keep track of this offset in case we would mark as consumed and got error when
+    #   processing another message. In case like this we do not pause on the message we've already
+    #   processed but rather at the next one. This applies to both sync and async versions of this
+    #   method.
     def mark_as_consumed(message)
       client.mark_as_consumed(message)
       @seek_offset = message.offset + 1

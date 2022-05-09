@@ -36,7 +36,7 @@ class Consumer < Karafka::BaseConsumer
 
       @seconds_available = 5
       client.pause(topic.name, message.partition, message.offset + 1)
-      pause.pause
+      pause_tracker.pause
       break
     end
   end

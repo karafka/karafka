@@ -20,6 +20,11 @@ class Consumer < Karafka::BaseConsumer
   end
 
   def revoked
+    # We are interested only in the first rebalance
+    return unless DataCollector.data[:done].empty?
+
+    DataCollector.data[:done] << true
+
     DataCollector.data[:revoked] << { messages.metadata.partition => Time.now }
   end
 end

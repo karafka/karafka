@@ -3,12 +3,12 @@
 RSpec.describe_current do
   subject(:consumer) do
     instance = working_class.new
-    instance.pause = pause
+    instance.pause_tracker = pause_tracker
     instance.topic = topic
     instance
   end
 
-  let(:pause) { build(:time_trackers_pause) }
+  let(:pause_tracker) { build(:time_trackers_pause) }
   let(:topic) { build(:routing_topic) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
@@ -66,10 +66,10 @@ RSpec.describe_current do
 
   describe '#on_consume' do
     before do
-      consumer.pause = pause
+      consumer.pause_tracker = pause_tracker
       consumer.client = client
       consumer.messages = messages
-      allow(pause).to receive(:pause)
+      allow(pause_tracker).to receive(:pause)
     end
 
     context 'when everything went ok on consume with manual offset management' do
@@ -117,7 +117,7 @@ RSpec.describe_current do
 
       it 'expect to pause with time tracker' do
         consumer.on_consume
-        expect(pause).to have_received(:pause)
+        expect(pause_tracker).to have_received(:pause)
       end
 
       it 'expect to track this with an instrumentation' do
@@ -178,7 +178,7 @@ RSpec.describe_current do
 
       it 'expect to pause with time tracker' do
         consumer.on_consume
-        expect(pause).to have_received(:pause)
+        expect(pause_tracker).to have_received(:pause)
       end
 
       it 'expect to track this with an instrumentation' do
