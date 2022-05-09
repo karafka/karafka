@@ -35,12 +35,12 @@ start_karafka_and_wait_until do
   DataCollector.data[:messages].size >= 10
 end
 
-# Pausing and getting back to consumption should not scew order or number of messages
+# Pausing and getting back to consumption should not screw order or number of messages
 assert_equal elements, DataCollector.data[:messages]
 
 previous = nil
 
-# Pausing should also be at least as much as we paused + time to get back after unpause
+# Pausing should also be at least as much as we paused + time to get back after un-pause
 DataCollector.data[:times].each do |timestamp|
   unless previous
     previous = timestamp
