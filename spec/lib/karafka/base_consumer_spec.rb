@@ -384,10 +384,30 @@ RSpec.describe_current do
   end
 
   describe '#pause' do
-    pending
+    context 'when we pause without providing the timeout' do
+      pending
+    end
+
+    context 'when we pause providing the timeout' do
+      pending
+    end
   end
 
   describe '#resume' do
-    pending
+    before do
+      consumer.client = client
+      consumer.messages = messages
+
+      allow(client).to receive(:resume)
+
+      consumer.send(:resume)
+    end
+
+    it 'expect to forward to client using current execution context data' do
+      expect(client).to have_received(:resume).with(
+        messages.metadata.topic,
+        messages.metadata.partition
+      )
+    end
   end
 end
