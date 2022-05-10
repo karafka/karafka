@@ -10,8 +10,8 @@ module Karafka
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
-    # @return [Karafka::TimeTrackers::Pause] current topic partition pause
-    attr_accessor :pause
+    # @return [Karafka::TimeTrackers::Pause] current topic partition pause tracker
+    attr_accessor :pause_tracker
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
 
@@ -24,7 +24,7 @@ module Karafka
       Karafka.monitor.instrument('consumer.consumed', caller: self) do
         consume
 
-        pause.reset
+        pause_tracker.reset
 
         # Mark as consumed only if manual offset management is not on
         return if topic.manual_offset_management
@@ -40,8 +40,8 @@ module Karafka
         caller: self,
         type: 'consumer.consume.error'
       )
-      client.pause(topic.name, messages.first.partition, @seek_offset || messages.first.offset)
-      pause.pause
+
+      pause(@seek_offset || messages.first.offset)
     end
 
     # Trigger method for running on shutdown.
@@ -120,6 +120,10 @@ module Karafka
     # Marks message as consumed in an async way.
     #
     # @param message [Messages::Message] last successfully processed message.
+    # @note We keep track of this offset in case we would mark as consumed and got error when
+    #   processing another message. In case like this we do not pause on the message we've already
+    #   processed but rather at the next one. This applies to both sync and async versions of this
+    #   method.
     def mark_as_consumed(message)
       client.mark_as_consumed(message)
       @seek_offset = message.offset + 1
@@ -131,6 +135,32 @@ module Karafka
     def mark_as_consumed!(message)
       client.mark_as_consumed!(message)
       @seek_offset = message.offset + 1
+    end
+
+    # Pauses processing on a given offset for the current topic partition
+    #
+    # After given partition is resumed, it will continue processing from the given offset
+    # @param offset [Integer] offset from which we want to restart the processing
+    # @param timeout [Integer, nil] how long in milliseconds do we want to pause or nil to use the
+    #   default exponential pausing strategy defined for retries
+    def pause(offset, timeout = nil)
+      client.pause(
+        messages.metadata.topic,
+        messages.metadata.partition,
+        offset
+      )
+
+      timeout ? pause_tracker.pause(timeout) : pause_tracker.pause
+    end
+
+    # Resumes processing of the current topic partition
+    def resume
+      client.resume(
+        messages.metadata.topic,
+        messages.metadata.partition
+      )
+
+      pause_tracker.expire
     end
 
     # Seeks in the context of current topic and partition

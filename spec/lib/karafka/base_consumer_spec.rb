@@ -3,12 +3,12 @@
 RSpec.describe_current do
   subject(:consumer) do
     instance = working_class.new
-    instance.pause = pause
+    instance.pause_tracker = pause_tracker
     instance.topic = topic
     instance
   end
 
-  let(:pause) { build(:time_trackers_pause) }
+  let(:pause_tracker) { build(:time_trackers_pause) }
   let(:topic) { build(:routing_topic) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
@@ -66,10 +66,10 @@ RSpec.describe_current do
 
   describe '#on_consume' do
     before do
-      consumer.pause = pause
+      consumer.pause_tracker = pause_tracker
       consumer.client = client
       consumer.messages = messages
-      allow(pause).to receive(:pause)
+      allow(pause_tracker).to receive(:pause)
     end
 
     context 'when everything went ok on consume with manual offset management' do
@@ -117,7 +117,7 @@ RSpec.describe_current do
 
       it 'expect to pause with time tracker' do
         consumer.on_consume
-        expect(pause).to have_received(:pause)
+        expect(pause_tracker).to have_received(:pause)
       end
 
       it 'expect to track this with an instrumentation' do
@@ -178,7 +178,7 @@ RSpec.describe_current do
 
       it 'expect to pause with time tracker' do
         consumer.on_consume
-        expect(pause).to have_received(:pause)
+        expect(pause_tracker).to have_received(:pause)
       end
 
       it 'expect to track this with an instrumentation' do
@@ -380,6 +380,68 @@ RSpec.describe_current do
 
     it 'expect to forward to client using current execution context data' do
       expect(client).to have_received(:seek).with(seek)
+    end
+  end
+
+  describe '#pause' do
+    before do
+      consumer.client = client
+      consumer.messages = messages
+
+      allow(pause_tracker).to receive(:pause)
+      allow(client).to receive(:pause)
+    end
+
+    context 'when we pause without providing the timeout' do
+      let(:expected_args) do
+        [
+          messages.metadata.topic,
+          messages.metadata.partition,
+          100
+        ]
+      end
+
+      before { consumer.send(:pause, 100) }
+
+      it 'expect to pause via client and use pause tracker without any arguments' do
+        expect(client).to have_received(:pause).with(*expected_args)
+        expect(pause_tracker).to have_received(:pause).with(no_args)
+      end
+    end
+
+    context 'when we pause providing the timeout' do
+      let(:expected_args) do
+        [
+          messages.metadata.topic,
+          messages.metadata.partition,
+          100
+        ]
+      end
+
+      before { consumer.send(:pause, 100, 2_000) }
+
+      it 'expect to pause via client and use pause tracker with provided timeout' do
+        expect(client).to have_received(:pause).with(*expected_args)
+        expect(pause_tracker).to have_received(:pause).with(2_000)
+      end
+    end
+  end
+
+  describe '#resume' do
+    before do
+      consumer.client = client
+      consumer.messages = messages
+
+      allow(client).to receive(:resume)
+
+      consumer.send(:resume)
+    end
+
+    it 'expect to forward to client using current execution context data' do
+      expect(client).to have_received(:resume).with(
+        messages.metadata.topic,
+        messages.metadata.partition
+      )
     end
   end
 end

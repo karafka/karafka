@@ -7,8 +7,6 @@ setup_karafka do |config|
   config.max_messages = 5
 end
 
-elements = Array.new(100) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DataCollector.data[:processing_lags] << messages.metadata.processing_lag
@@ -17,6 +15,7 @@ end
 
 draw_routes(Consumer)
 
+elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do

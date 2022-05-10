@@ -21,13 +21,13 @@ module Karafka
       # @param group_id [String] id of the subscription group to which the executor belongs
       # @param client [Karafka::Connection::Client] kafka client
       # @param topic [Karafka::Routing::Topic] topic for which this executor will run
-      # @param pause [Karafka::TimeTrackers::Pause] fetch pause object for crash pausing
-      def initialize(group_id, client, topic, pause)
+      # @param pause_tracker [Karafka::TimeTrackers::Pause] fetch pause tracker for pausing
+      def initialize(group_id, client, topic, pause_tracker)
         @id = SecureRandom.uuid
         @group_id = group_id
         @client = client
         @topic = topic
-        @pause = pause
+        @pause_tracker = pause_tracker
       end
 
       # Builds the consumer instance and sets all that is needed to run the user consumption logic
@@ -91,7 +91,7 @@ module Karafka
           consumer = @topic.consumer.new
           consumer.topic = @topic
           consumer.client = @client
-          consumer.pause = @pause
+          consumer.pause_tracker = @pause_tracker
           consumer.producer = ::Karafka::App.producer
           consumer
         end

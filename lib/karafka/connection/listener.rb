@@ -114,8 +114,8 @@ module Karafka
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
-            pause = @pauses_manager.fetch(topic, partition)
-            executor = @executors.fetch(topic, partition, pause)
+            pause_tracker = @pauses_manager.fetch(topic, partition)
+            executor = @executors.fetch(topic, partition, pause_tracker)
             @jobs_queue << Processing::Jobs::Revoked.new(executor)
           end
         end

@@ -14,8 +14,6 @@ setup_karafka do |config|
   config.concurrency = 1
 end
 
-elements = Array.new(50) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def initialize
     super
@@ -35,8 +33,8 @@ class Consumer < Karafka::BaseConsumer
       DataCollector.data[:pauses] << Time.now.to_f
 
       @seconds_available = 5
-      client.pause(topic.name, message.partition, message.offset + 1)
-      pause.pause
+      pause(message.offset + 1)
+
       break
     end
   end
@@ -44,6 +42,7 @@ end
 
 draw_routes(Consumer)
 
+elements = Array.new(50) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 started_at = Time.now.to_f

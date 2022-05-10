@@ -13,8 +13,6 @@ Karafka.monitor.subscribe(Listener.new)
 
 setup_karafka
 
-elements = Array.new(5) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     @count ||= 0
@@ -35,6 +33,7 @@ draw_routes do
   end
 end
 
+elements = Array.new(5) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do

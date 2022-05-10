@@ -4,6 +4,8 @@
 - Update the jobs queue blocking engine and allow for non-blocking jobs execution
 - Provide `#prepared` hook that always runs before the fetching loop is unblocked
 - [Pro] Introduce performance tracker for scheduling optimizer
+- Provide ability to pause (`#pause`) and resume (`#resume`) given partitions from the consumers
+- Small integration specs refactoring + specs for pausing scenarios
 
 ## 2.0.0-alpha6 (2022-04-17)
 - Fix a bug, where upon missing boot file and Rails, railtie would fail with a generic exception (#818) 
