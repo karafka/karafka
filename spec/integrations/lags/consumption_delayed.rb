@@ -5,8 +5,6 @@
 
 setup_karafka
 
-elements = Array.new(5) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DataCollector.data[:consumption_lag] = messages.metadata.consumption_lag
@@ -14,6 +12,8 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes(Consumer)
+
+elements = Array.new(5) { SecureRandom.uuid }
 
 elements.each do |data|
   # We sleep here to make sure, that the lag is not computed on any of the messages except last

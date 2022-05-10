@@ -18,9 +18,14 @@ module Karafka
           super()
         end
 
-        # Runs the given executor.
+        # Runs the preparations on the executor
+        def prepare
+          executor.prepare(@messages, @created_at)
+        end
+
+        # Runs the given executor
         def call
-          executor.consume(@messages, @created_at)
+          executor.consume
         end
       end
     end

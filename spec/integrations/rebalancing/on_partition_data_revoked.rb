@@ -4,8 +4,6 @@
 
 setup_karafka
 
-elements = Array.new(100) { SecureRandom.uuid }
-
 DataCollector.data[:revoked] = Concurrent::Array.new
 DataCollector.data[:pre] = Set.new
 DataCollector.data[:post] = Set.new
@@ -20,6 +18,11 @@ class Consumer < Karafka::BaseConsumer
   end
 
   def revoked
+    # We are interested only in the first rebalance
+    return unless DataCollector.data[:done].empty?
+
+    DataCollector.data[:done] << true
+
     DataCollector.data[:revoked] << { messages.metadata.partition => Time.now }
   end
 end
@@ -33,6 +36,7 @@ draw_routes do
   end
 end
 
+elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce('integrations_1_03', data, partition: rand(0..2)) }
 
 config = {

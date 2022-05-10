@@ -33,11 +33,15 @@ RSpec.describe_current do
       it { expect(queue).not_to have_received(:complete) }
     end
 
-    context 'when it is not a closing job' do
+    context 'when it is a non-closing, blocking job' do
       let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true) }
 
       before do
+        allow(job).to receive(:prepare)
         allow(job).to receive(:call)
+        allow(job).to receive(:teardown)
+        allow(queue).to receive(:tick)
+
         queue << job
         # Force the background job work, so we can validate the expectation as the thread will
         # execute correctly the given job
@@ -45,7 +49,33 @@ RSpec.describe_current do
         sleep(0.05)
       end
 
+      it { expect(queue).not_to have_received(:tick) }
+      it { expect(job).to have_received(:prepare).with(no_args) }
       it { expect(job).to have_received(:call).with(no_args) }
+      it { expect(job).to have_received(:teardown).with(no_args) }
+      it { expect(queue).to have_received(:complete).with(job) }
+    end
+
+    context 'when it is a non-closing, non-blocking job' do
+      let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true, non_blocking?: true) }
+
+      before do
+        allow(job).to receive(:prepare)
+        allow(job).to receive(:call)
+        allow(job).to receive(:teardown)
+        allow(queue).to receive(:tick)
+
+        queue << job
+        # Force the background job work, so we can validate the expectation as the thread will
+        # execute correctly the given job
+        Thread.pass
+        sleep(0.05)
+      end
+
+      it { expect(queue).to have_received(:tick).with(job.group_id) }
+      it { expect(job).to have_received(:prepare).with(no_args) }
+      it { expect(job).to have_received(:call).with(no_args) }
+      it { expect(job).to have_received(:teardown).with(no_args) }
       it { expect(queue).to have_received(:complete).with(job) }
     end
   end
