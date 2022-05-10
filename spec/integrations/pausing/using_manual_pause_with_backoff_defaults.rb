@@ -37,7 +37,7 @@ assert_equal 5, DataCollector.data[:pauses].count
 
 previous = nil
 
-DataCollector.data[:pauses].each_with_index do |time, iter|
+DataCollector.data[:pauses].each do |time|
   unless previous
     previous = time
     next

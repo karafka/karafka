@@ -384,12 +384,46 @@ RSpec.describe_current do
   end
 
   describe '#pause' do
+    before do
+      consumer.client = client
+      consumer.messages = messages
+
+      allow(pause_tracker).to receive(:pause)
+      allow(client).to receive(:pause)
+    end
+
     context 'when we pause without providing the timeout' do
-      pending
+      let(:expected_args) do
+        [
+          messages.metadata.topic,
+          messages.metadata.partition,
+          100
+        ]
+      end
+
+      before { consumer.send(:pause, 100) }
+
+      it 'expect to pause via client and use pause tracker without any arguments' do
+        expect(client).to have_received(:pause).with(*expected_args)
+        expect(pause_tracker).to have_received(:pause).with(no_args)
+      end
     end
 
     context 'when we pause providing the timeout' do
-      pending
+      let(:expected_args) do
+        [
+          messages.metadata.topic,
+          messages.metadata.partition,
+          100
+        ]
+      end
+
+      before { consumer.send(:pause, 100, 2_000) }
+
+      it 'expect to pause via client and use pause tracker with provided timeout' do
+        expect(client).to have_received(:pause).with(*expected_args)
+        expect(pause_tracker).to have_received(:pause).with(2_000)
+      end
     end
   end
 
