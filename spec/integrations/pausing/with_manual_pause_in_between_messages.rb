@@ -11,8 +11,6 @@ setup_karafka do |config|
   config.pause_max_timeout = 1_000_000
 end
 
-elements = Array.new(10) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -27,6 +25,7 @@ end
 
 draw_routes(Consumer)
 
+elements = Array.new(10) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do

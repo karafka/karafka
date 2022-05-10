@@ -5,8 +5,6 @@
 
 setup_karafka
 
-jsons = Array.new(10) { { SecureRandom.uuid => rand.to_s } }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -32,6 +30,8 @@ end
 
 # Listen only on one consumer group
 Karafka::Server.consumer_groups = [DataCollector.consumer_groups.first]
+
+jsons = Array.new(10) { { SecureRandom.uuid => rand.to_s } }
 
 # We send same messages to both topics, but except only one to run and consume
 jsons.each do |data|

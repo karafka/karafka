@@ -5,8 +5,6 @@
 
 setup_karafka
 
-elements = Array.new(20) { SecureRandom.uuid }
-
 # Abstraction layer on top of Karafka to build a "per message" consumers
 class SingleMessageBaseConsumer < Karafka::BaseConsumer
   attr_reader :message
@@ -31,6 +29,7 @@ end
 
 draw_routes(Consumer)
 
+elements = Array.new(20) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do

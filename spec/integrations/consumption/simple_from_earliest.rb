@@ -4,8 +4,6 @@
 
 setup_karafka
 
-elements = Array.new(100) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -21,6 +19,7 @@ Thread.new do
   Karafka::Server.stop
 end
 
+elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 Karafka::Server.run

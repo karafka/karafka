@@ -5,7 +5,6 @@
 setup_karafka
 
 elements = Array.new(40) { SecureRandom.uuid }
-
 elements.each { |data| produce(DataCollector.topic, data) }
 
 class Consumer < Karafka::BaseConsumer

@@ -382,4 +382,12 @@ RSpec.describe_current do
       expect(client).to have_received(:seek).with(seek)
     end
   end
+
+  describe '#pause' do
+    pending
+  end
+
+  describe '#resume' do
+    pending
+  end
 end
