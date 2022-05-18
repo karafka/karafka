@@ -13,10 +13,10 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (7.0.2.4)
-      activesupport (= 7.0.2.4)
+    activejob (7.0.3)
+      activesupport (= 7.0.3)
       globalid (>= 0.3.6)
-    activesupport (7.0.2.4)
+    activesupport (7.0.3)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
