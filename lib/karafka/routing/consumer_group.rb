@@ -17,7 +17,7 @@ module Karafka
       def initialize(name)
         @name = name
         @id = Karafka::App.config.consumer_mapper.call(name)
-        @topics = []
+        @topics = Topics.new([])
       end
 
       # @return [Boolean] true if this consumer group should be active in our current process
