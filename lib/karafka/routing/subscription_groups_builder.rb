@@ -32,7 +32,7 @@ module Karafka
           .group_by(&:first)
           .values
           .map { |value| value.map(&:last) }
-          .map { |topics| Routing::Topics.new(topics) }
+          .map { |topics_array| Routing::Topics.new(topics_array) }
           .map { |grouped_topics| SubscriptionGroup.new(grouped_topics) }
       end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:topics) { described_class.new }
+  subject(:topics) { described_class.new([]) }
 
   let(:topic) { build(:routing_topic) }
 

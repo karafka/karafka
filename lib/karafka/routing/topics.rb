@@ -8,8 +8,8 @@ module Karafka
     class Topics
       include Enumerable
 
-      # @param [Array<Karafka::Routing::Topic>] array with topics
-      def initialize(topics_array = [])
+      # @param topics_array [Array<Karafka::Routing::Topic>] array with topics
+      def initialize(topics_array)
         @accumulator = topics_array.dup
       end
 
@@ -23,9 +23,9 @@ module Karafka
 
       # Yields each topic
       #
-      # @yieldparam [Karafka::Routing::Topic]
-      def each
-        @accumulator.each { |topic| yield(topic) }
+      # @param [Proc] block we want to yield with on each topic
+      def each(&block)
+        @accumulator.each(&block)
       end
 
       # @return [Boolean] is the group empty or not
