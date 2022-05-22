@@ -23,7 +23,7 @@ module Karafka
         partition,
         pause
       )
-        topic = @subscription_group.topics.find { |ktopic| ktopic.name == topic }
+        topic = @subscription_group.topics.find(topic)
 
         topic || raise(Errors::TopicNotFoundError, topic)
 
