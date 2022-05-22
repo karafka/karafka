@@ -7,18 +7,13 @@ module Karafka
     # Abstraction layer on top of groups of topics
     class Topics
       include Enumerable
+      extend Forwardable
+
+      def_delegators :@accumulator, :[], :size, :empty?, :last, :<<
 
       # @param topics_array [Array<Karafka::Routing::Topic>] array with topics
       def initialize(topics_array)
         @accumulator = topics_array.dup
-      end
-
-      # Adds topic to the topics group
-      #
-      # @param topic [Karafka::Routing::Topic]
-      # @return [Karafka::Routing::Topic]
-      def <<(topic)
-        @accumulator << topic
       end
 
       # Yields each topic
@@ -26,21 +21,6 @@ module Karafka
       # @param [Proc] block we want to yield with on each topic
       def each(&block)
         @accumulator.each(&block)
-      end
-
-      # @return [Boolean] is the group empty or not
-      def empty?
-        @accumulator.empty?
-      end
-
-      # @return [Karafka::Routing::Topic] last available topic
-      def last
-        @accumulator.last
-      end
-
-      # @return [Integer] number of topics
-      def size
-        @accumulator.size
       end
 
       # Finds topic by its name
