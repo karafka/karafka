@@ -29,6 +29,18 @@ RSpec.describe_current do
     end
   end
 
+  describe '#size' do
+    context 'when there are no topics' do
+      it { expect(topics.size).to eq(0) }
+    end
+
+    context 'when there are some topics' do
+      before { topics << topic }
+
+      it { expect(topics.size).to eq(1) }
+    end
+  end
+
   describe '#each' do
     before { topics << topic }
 

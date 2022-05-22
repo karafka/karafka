@@ -38,6 +38,11 @@ module Karafka
         @accumulator.last
       end
 
+      # @return [Integer] number of topics
+      def size
+        @accumulator.size
+      end
+
       # Finds topic by its name
       #
       # @param topic_name [String] topic name
