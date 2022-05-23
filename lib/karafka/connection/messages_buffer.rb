@@ -7,12 +7,11 @@ module Karafka
     # the same topic and partition.
     #
     # @note This buffer is NOT threadsafe.
+    #
+    # @note We store data here in groups per topic partition to handle the revocation case, where
+    #    we may need to remove messages from a single topic partition
     class MessagesBuffer
       attr_reader :size
-
-      extend Forwardable
-
-      def_delegators :@groups, :each
 
       # @return [Karafka::Connection::MessagesBuffer] buffer instance
       def initialize
@@ -31,6 +30,19 @@ module Karafka
       def <<(message)
         @size += 1
         @groups[message.topic][message.partition] << message
+      end
+
+      # Allows to iterate over all the topics and partitions messages
+      #
+      # @yieldparam [String] topic name
+      # @yieldparam [Integer] partition number
+      # @yieldparam [Array<Rdkafka::Consumer::Message>] topic partition aggregated results
+      def each
+        @groups.each do |topic, partitions|
+          partitions.each do |partition, messages|
+            yield(topic, partition, messages)
+          end
+        end
       end
 
       # Removes given topic and partition data out of the buffer
