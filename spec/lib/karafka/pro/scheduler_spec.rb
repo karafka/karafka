@@ -22,7 +22,7 @@ RSpec.describe_current do
 
   context 'when there are no metrics on any of the topics data' do
     before do
-      4.times do|i|
+      4.times do |i|
         jobs_array << Karafka::Processing::Jobs::Consume.new(nil, [public_send("message#{i}")])
       end
     end

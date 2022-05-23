@@ -22,6 +22,7 @@ module Karafka
       # Yields messages from partitions in the LJF order
       #
       # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
+      # @param block [Proc] proc we want to run on each job
       # @yieldparam [Karafka::Processing::Jobs::Base] job we want to enqueue
       def call(jobs_array, &block)
         pt = PerformanceTracker.instance
