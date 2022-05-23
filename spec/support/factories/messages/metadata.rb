@@ -4,7 +4,7 @@ FactoryBot.define do
   factory :messages_metadata, class: 'Karafka::Messages::Metadata' do
     skip_create
 
-    sequence(:topic) { |nr| "topic#{nr}" }
+    sequence(:topic) { |nr| "topic-from-meta#{nr}" }
     partition { 0 }
     sequence(:offset) { |nr| nr }
 
