@@ -16,33 +16,32 @@ module Karafka
     #
     # This scheduler is designed to optimize execution times on jobs that perform IO operations as
     # when taking IO into consideration, the can achieve optimized parallel processing.
+    #
+    # This scheduler can also work with virtual partitions.
     class Scheduler < ::Karafka::Scheduler
       # Yields messages from partitions in the LJF order
       #
-      # @param messages_buffer [Karafka::Connection::MessagesBuffer] messages buffer with data from
-      #   multiple topics and partitions
-      # @yieldparam [String] topic name
-      # @yieldparam [Integer] partition number
-      # @yieldparam [Array<Rdkafka::Consumer::Message>] topic partition aggregated results
-      def call(messages_buffer)
+      # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
+      # @yieldparam [Karafka::Processing::Jobs::Base] job we want to enqueue
+      def call(jobs_array, &block)
         pt = PerformanceTracker.instance
 
         ordered = []
 
-        messages_buffer.each do |topic, partitions|
-          partitions.each do |partition, messages|
-            cost = pt.processing_time_p95(topic, partition) * messages.size
+        jobs_array.each do |job|
+          messages = job.messages
+          message = messages.first
 
-            ordered << [topic, partition, messages, cost]
-          end
+          cost = pt.processing_time_p95(message.topic, message.partition) * messages.size
+
+          ordered << [job, cost]
         end
 
         ordered.sort_by!(&:last)
         ordered.reverse!
+        ordered.map!(&:first)
 
-        ordered.each do |topic, partition, messages, _|
-          yield(topic, partition, messages)
-        end
+        ordered.each(&block)
       end
     end
   end

@@ -6,6 +6,8 @@ module Karafka
       # The main job type. It runs the executor that triggers given topic partition messages
       # processing in an underlying consumer instance.
       class Consume < Base
+        attr_reader :messages
+
         # @param executor [Karafka::Processing::Executor] executor that is suppose to run a given
         #   job
         # @param messages [Array<dkafka::Consumer::Message>] array with raw rdkafka messages with
