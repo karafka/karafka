@@ -53,6 +53,7 @@ module Karafka
           )
 
           resume_paused_partitions
+
           # We need to fetch data before we revoke lost partitions details as during the polling
           # the callbacks for tracking lost partitions are triggered. Otherwise we would be always
           # one batch behind.
@@ -127,15 +128,19 @@ module Karafka
       #
       # @param messages_buffer [Karafka::Connection::MessagesBuffer] buffer with messages
       def schedule_partitions_jobs(messages_buffer)
-        @scheduler.call(messages_buffer) do |topic, partition, messages|
+        jobs = []
+
+        messages_buffer.each do |topic, partition, messages|
           pause = @pauses_manager.fetch(topic, partition)
 
           next if pause.paused?
 
           executor = @executors.fetch(topic, partition, pause)
 
-          @jobs_queue << Processing::Jobs::Consume.new(executor, messages)
+          jobs << Processing::Jobs::Consume.new(executor, messages)
         end
+
+        @scheduler.call(jobs) { |job| @jobs_queue << job }
       end
 
       # Waits for all the jobs from a given subscription group to finish before moving forward
