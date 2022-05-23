@@ -8,8 +8,6 @@ setup_karafka
 # How long do we want to process stuff before shutting down Karafka process
 MAX_TIME = 10
 
-elements = Array.new(100) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -21,6 +19,7 @@ end
 draw_routes(Consumer)
 
 # Sends some data so we know all is good
+elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 # Stop after 10 seconds

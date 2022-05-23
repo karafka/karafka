@@ -10,7 +10,7 @@ module Karafka
     class SubscriptionGroup
       attr_reader :id, :topics
 
-      # @param topics [Array<Topic>] all the topics that share the same key settings
+      # @param topics [Karafka::Routing::Topics] all the topics that share the same key settings
       # @return [SubscriptionGroup] built subscription group
       def initialize(topics)
         @id = SecureRandom.uuid

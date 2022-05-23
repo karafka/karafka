@@ -41,15 +41,23 @@ module Karafka
 
       # Pauses the processing from now till the end of the interval (backoff or non-backoff)
       # and records the count.
-      def pause
+      # @param timeout [Integer] timeout value in milliseconds that overwrites the default timeout
+      # @note Providing this value can be useful when we explicitly want to pause for a certain
+      #   period of time, outside of any regular pausing logic
+      def pause(timeout = backoff_interval)
         @started_at = now
-        @ends_at = @started_at + backoff_interval
+        @ends_at = @started_at + timeout
         @count += 1
       end
 
       # Marks the pause as resumed.
       def resume
         @started_at = nil
+        @ends_at = nil
+      end
+
+      # Expires the pause, so it can be considered expired
+      def expire
         @ends_at = nil
       end
 

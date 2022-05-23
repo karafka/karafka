@@ -11,9 +11,6 @@ setup_karafka do |config|
   config.pause_with_exponential_backoff = false
 end
 
-elements1 = Array.new(10) { SecureRandom.uuid }
-elements2 = Array.new(10) { SecureRandom.uuid }
-
 class Listener
   def on_error_occurred(event)
     DataCollector.data[:errors] << event
@@ -60,6 +57,9 @@ draw_routes do
     end
   end
 end
+
+elements1 = Array.new(10) { SecureRandom.uuid }
+elements2 = Array.new(10) { SecureRandom.uuid }
 
 elements1.each { |data| produce(DataCollector.topics.first, data) }
 # We send one message so the topic gets created

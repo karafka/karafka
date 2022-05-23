@@ -23,8 +23,8 @@ module Karafka
 
       private_constant :DISTRIBUTION_KEYS
 
-      # @param topics [Array<Topic>] array with topics based on which we want to build subscription
-      #   groups
+      # @param topics [Karafka::Routing::Topics] all the topics based on which we want to build
+      #   subscription groups
       # @return [Array<SubscriptionGroup>] all subscription groups we need in separate threads
       def call(topics)
         topics
@@ -32,6 +32,7 @@ module Karafka
           .group_by(&:first)
           .values
           .map { |value| value.map(&:last) }
+          .map { |topics_array| Routing::Topics.new(topics_array) }
           .map { |grouped_topics| SubscriptionGroup.new(grouped_topics) }
       end
 

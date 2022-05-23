@@ -12,11 +12,11 @@ module Karafka
         end
       end
 
-      # Creates or fetches pause of a given topic partition.
+      # Creates or fetches pause tracker of a given topic partition.
       #
       # @param topic [String] topic name
       # @param partition [Integer] partition number
-      # @return [Karafka::TimeTrackers::Pause] pause instance
+      # @return [Karafka::TimeTrackers::Pause] pause tracker instance
       def fetch(topic, partition)
         @pauses[topic][partition] ||= TimeTrackers::Pause.new(
           timeout: Karafka::App.config.pause_timeout,

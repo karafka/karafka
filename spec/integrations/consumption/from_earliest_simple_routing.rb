@@ -5,8 +5,6 @@
 
 setup_karafka
 
-elements = Array.new(10) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -21,6 +19,7 @@ draw_routes do
   end
 end
 
+elements = Array.new(10) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do

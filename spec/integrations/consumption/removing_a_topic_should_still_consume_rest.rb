@@ -5,9 +5,6 @@
 
 setup_karafka
 
-elements1 = Array.new(10) { SecureRandom.uuid }
-elements2 = Array.new(10) { SecureRandom.uuid }
-
 class Consumer1 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -36,6 +33,8 @@ draw_routes do
   end
 end
 
+elements1 = Array.new(10) { SecureRandom.uuid }
+elements2 = Array.new(10) { SecureRandom.uuid }
 elements1.each { |data| produce(DataCollector.topics.first, data) }
 elements2.each { |data| produce(DataCollector.topics.last, data) }
 
