@@ -18,6 +18,8 @@ module Karafka
       # @return [String] subscription group id to which a given executor belongs
       attr_reader :group_id
 
+      attr_reader :messages
+
       # @param group_id [String] id of the subscription group to which the executor belongs
       # @param client [Karafka::Connection::Client] kafka client
       # @param topic [Karafka::Routing::Topic] topic for which this executor will run

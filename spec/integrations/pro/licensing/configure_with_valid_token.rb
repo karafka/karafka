@@ -19,3 +19,4 @@ assert_equal true, Karafka.pro?
 assert_equal true, const_visible?('Karafka::Pro::ActiveJob::Dispatcher')
 assert_equal true, const_visible?('Karafka::Pro::ActiveJob::JobOptionsContract')
 assert_equal true, const_visible?('Karafka::Pro::PerformanceTracker')
+assert_equal true, const_visible?('Karafka::Pro::Scheduler')

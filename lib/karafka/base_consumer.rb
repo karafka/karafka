@@ -27,7 +27,7 @@ module Karafka
         pause_tracker.reset
 
         # Mark as consumed only if manual offset management is not on
-        return if topic.manual_offset_management
+        next if topic.manual_offset_management
 
         # We use the non-blocking one here. If someone needs the blocking one, can implement it
         # with manual offset management

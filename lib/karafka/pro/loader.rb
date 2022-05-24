@@ -19,13 +19,14 @@ module Karafka
         #   components
         def setup(config)
           require_relative 'performance_tracker'
+          require_relative 'scheduler'
           require_relative 'active_job/dispatcher'
           require_relative 'active_job/job_options_contract'
 
+          config.internal.scheduler = Scheduler.new
           config.internal.active_job.dispatcher = ActiveJob::Dispatcher.new
           config.internal.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 
-          # Monitor time needed to process each message from a single partition
           config.monitor.subscribe(PerformanceTracker.instance)
         end
       end
