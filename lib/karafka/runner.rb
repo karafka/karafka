@@ -28,6 +28,11 @@ module Karafka
 
       # All the listener threads need to finish
       threads.each(&:join)
+
+      # We close the jobs queue only when no listener threads are working.
+      # This ensures, that everything was closed prior to us not accepting anymore jobs
+      jobs_queue.close
+
       # All the workers need to stop processing anything before we can stop the runner completely
       workers.each(&:join)
     # If anything crashes here, we need to raise the error and crush the runner because it means

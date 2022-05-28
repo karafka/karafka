@@ -2,6 +2,7 @@
 
 ## 2.0.0-beta2 (Unreleased)
 - Abstract away notion of topics groups (until now it was just an array)
+- Optimize how jobs queue is closed. This will ensure all sync and async jobs are finished prior to the queue being closed for cases with high load processing systems with multiple consumer groups
 
 ## 2.0.0-beta1 (2022-05-22)
 - Update the jobs queue blocking engine and allow for non-blocking jobs execution
