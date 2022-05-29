@@ -16,7 +16,11 @@ RSpec.describe_current do
   end
 
   describe '#run' do
-    after { server_class.run }
+    after do
+      server_class.run
+      # Since stopping happens in a separate thread, we need to wait
+      sleep(0.5)
+    end
 
     context 'when we want to run in supervision' do
       it 'runs in supervision, start consuming' do
