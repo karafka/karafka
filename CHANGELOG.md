@@ -6,6 +6,7 @@
 - `Shutdown` jobs are executed in workers to align all the jobs behaviours.
 - `Shutdown` jobs are always blocking.
 - Notion of `ListenersBatch` was introduced similar to `WorkersBatch` to abstract this concept.
+- Change default `shutdown_timeout` to be more than `max_wait_time` not to cause forced shutdown when no messages are being received from Kafka.
 
 ## 2.0.0-beta1 (2022-05-22)
 - Update the jobs queue blocking engine and allow for non-blocking jobs execution
