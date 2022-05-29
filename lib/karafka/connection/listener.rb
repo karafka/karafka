@@ -71,12 +71,12 @@ module Karafka
           # distributing consuming jobs as upon revoking, we might get assigned to the same
           # partitions, thus getting their jobs. The revoking jobs need to finish before
           # appropriate consumers are taken down and re-created
-          schedule_revoke_lost_partitions_jobs
+          build_and_schedule_revoke_lost_partitions_jobs
 
           # We wait only on jobs from our subscription group. Other groups are independent.
           wait(@subscription_group)
 
-          schedule_partitions_jobs(messages_buffer)
+          build_and_schedule_consumption_jobs(messages_buffer)
 
           wait(@subscription_group)
 
@@ -101,7 +101,7 @@ module Karafka
         # (including non-blocking) as there might be a long-running job with a shutdown and then
         # we would run two jobs in parallel for the same executor and consumer. We do not want that
         # as it could create a race-condition.
-        schedule_shutdown_jobs
+        build_and_schedule_shutdown_jobs
 
         wait(@subscription_group)
 
@@ -129,32 +129,41 @@ module Karafka
       end
 
       # Enqueues revoking jobs for partitions that were taken away from the running process.
-      # @return [Boolean] was there anything to revoke
-      # @note We do not use scheduler here as those jobs are not meant to be order optimized in
-      #   any way. Since they operate occasionally it is irrelevant.
-      def schedule_revoke_lost_partitions_jobs
+      def build_and_schedule_revoke_lost_partitions_jobs
         revoked_partitions = @client.rebalance_manager.revoked_partitions
+
+        # Stop early to save on some execution and array allocation
+        return if revoked_partitions.empty?
+
+        jobs = []
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
             pause_tracker = @pauses_manager.fetch(topic, partition)
             executor = @executors.fetch(topic, partition, pause_tracker)
-            @jobs_queue << Processing::Jobs::Revoked.new(executor)
+            jobs << Processing::Jobs::Revoked.new(executor)
           end
         end
+
+        @scheduler.schedule_revocation(@jobs_queue, jobs)
       end
 
-      # Runs the shutdown jobs for all the executors that exist in our subscription group
-      def schedule_shutdown_jobs
+      # Enqueues the shutdown jobs for all the executors that exist in our subscription group
+      def build_and_schedule_shutdown_jobs
+        jobs = []
+
         @executors.each do |_, _, executor|
-          @jobs_queue << Processing::Jobs::Shutdown.new(executor)
+          jobs << Processing::Jobs::Shutdown.new(executor)
         end
+
+        @scheduler.schedule_shutdown(@jobs_queue, jobs)
       end
 
-      # Takes the messages per topic partition and enqueues processing jobs in threads.
+      # Takes the messages per topic partition and enqueues processing jobs in threads using
+      # given scheduler.
       #
       # @param messages_buffer [Karafka::Connection::MessagesBuffer] buffer with messages
-      def schedule_partitions_jobs(messages_buffer)
+      def build_and_schedule_consumption_jobs(messages_buffer)
         jobs = []
 
         messages_buffer.each do |topic, partition, messages|
@@ -167,7 +176,7 @@ module Karafka
           jobs << Processing::Jobs::Consume.new(executor, messages)
         end
 
-        @scheduler.call(jobs) { |job| @jobs_queue << job }
+        @scheduler.schedule_consumption(@jobs_queue, jobs)
       end
 
       # Waits for all the jobs from a given subscription group to finish before moving forward
