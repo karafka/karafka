@@ -90,6 +90,10 @@ module Karafka
         end
       end
 
+      def empty?(group_id)
+        @in_processing[group_id].empty?
+      end
+
       # Stops the whole processing queue.
       def close
         @mutex.synchronize do
@@ -115,8 +119,6 @@ module Karafka
       # @param group_id [String] id of the group in which jobs we're interested.
       # @return [Boolean] should we keep waiting or not
       def wait?(group_id)
-        # Only wait if there are blocking jobs running for  a given subscription group
-        # Otherwise if empty or only non-blocking, it is safe to move forward
         !@in_processing[group_id].all?(&:non_blocking?)
       end
     end

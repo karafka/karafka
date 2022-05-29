@@ -38,6 +38,8 @@ module Karafka
 
         # We always need to wait for Karafka to stop here since we should wait for the stop running
         # in a separate thread (or trap context) to indicate everything is closed
+        # Since `#start` is blocking, we were get here only after the runner is done. This will
+        # not add any performance degradation because of that.
         Thread.pass until Karafka::App.stopped?
       # Try its best to shutdown underlying components before re-raising
       # rubocop:disable Lint/RescueException

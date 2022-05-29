@@ -35,9 +35,12 @@ module Karafka
         )
       end
 
-      # Runs the shutdown on all active executors.
-      def shutdown
-        @buffer.values.map(&:values).flatten.each(&:shutdown)
+      def each
+        @buffer.each do |topic, partitions|
+          partitions.each do |partition, executor|
+            yield(topic, partition, executor)
+          end
+        end
       end
 
       # Clears the executors buffer. Useful for critical errors recovery.

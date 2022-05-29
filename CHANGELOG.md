@@ -2,7 +2,10 @@
 
 ## 2.0.0-beta2 (Unreleased)
 - Abstract away notion of topics groups (until now it was just an array)
-- Optimize how jobs queue is closed. This will ensure all sync and async jobs are finished prior to the queue being closed for cases with high load processing systems with multiple consumer groups
+- Optimize how jobs queue is closed. Since we enqueue jobs only from the listeners, we can safely close jobs queue once listeners are done. By extracting this responsiblity from listeners, we remove corner cases and race conditions. Note here: for non-blocking jobs we do wait for them to finish while running the `poll`. This ensures, that for async jobs that are long-living, we do not reach `max.poll.interval`.
+- `Shutdown` jobs are executed in workers to align all the jobs behaviours.
+- `Shutdown` jobs are always blocking.
+- Notion of `ListenersBatch` was introduced similar to `WorkersBatch` to abstract this concept.
 
 ## 2.0.0-beta1 (2022-05-22)
 - Update the jobs queue blocking engine and allow for non-blocking jobs execution

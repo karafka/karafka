@@ -80,18 +80,39 @@ module Karafka
           # distributing consuming jobs as upon revoking, we might get assigned to the same
           # partitions, thus getting their jobs. The revoking jobs need to finish before
           # appropriate consumers are taken down and re-created
-          wait(@subscription_group) if schedule_revoke_lost_partitions_jobs
-
-          schedule_partitions_jobs(messages_buffer)
-
+          schedule_revoke_lost_partitions_jobs
 
           # We wait only on jobs from our subscription group. Other groups are independent.
           wait(@subscription_group)
 
+          schedule_partitions_jobs(messages_buffer)
+
+          wait(@subscription_group)
+
           # We don't use the `#commit_offsets!` here for performance reasons. This can be achieved
           # if needed by using manual offset management.
+
           @client.commit_offsets
         end
+
+        # If we are stopping we will no longer schedule any jobs despite polling.
+        # We need to keep polling not to exceed the `max.poll.interval` for long-running
+        # non-blocking jobs and we need to allow them to finish. We however do not want to
+        # enqueue any new jobs. It's worth keeping in mind that it is the end user responsibility
+        # to detect shutdown in their long-running logic or else Karafka will force shutdown
+        # after a while.
+        #
+        # We do not care about resuming any partitions or lost jobs as we do not plan to do
+        # anything with them as we're in the shutdown phase.
+        @client.batch_poll until @jobs_queue.empty?(@subscription_group.id)
+
+        # We do not want to schedule the shutdown jobs prior to finishing all the jobs
+        # (including non-blocking) as there might be a long-running job with a shutdown and then
+        # we would run two jobs in parallel for the same executor and consumer. We do not want that
+        # as it could create a race-condition.
+        schedule_shutdown_jobs
+
+        wait(@subscription_group)
 
         shutdown
 
@@ -123,7 +144,7 @@ module Karafka
       def schedule_revoke_lost_partitions_jobs
         revoked_partitions = @client.rebalance_manager.revoked_partitions
 
-        return false if revoked_partitions.empty?
+        return if revoked_partitions.empty?
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
@@ -132,8 +153,13 @@ module Karafka
             @jobs_queue << Processing::Jobs::Revoked.new(executor)
           end
         end
+      end
 
-        true
+      # Runs the shutdown jobs for all the executors that exist in our subscription group
+      def schedule_shutdown_jobs
+        @executors.each do |_, _, executor|
+          @jobs_queue << Processing::Jobs::Shutdown.new(executor)
+        end
       end
 
       # Takes the messages per topic partition and enqueues processing jobs in threads.
@@ -164,9 +190,6 @@ module Karafka
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
       # stops kafka client.
       def shutdown
-        # This runs synchronously, making sure we finish all the shutdowns before we stop the
-        # client.
-        @executors.shutdown
         @client.commit_offsets!
         @client.stop
       end
