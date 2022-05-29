@@ -90,10 +90,6 @@ module Karafka
         end
       end
 
-      def empty?(group_id)
-        @in_processing[group_id].empty?
-      end
-
       # Stops the whole processing queue.
       def close
         @mutex.synchronize do
@@ -102,6 +98,14 @@ module Karafka
           @queue.close
           @semaphores.values.each(&:close)
         end
+      end
+
+      # @param group_id [String]
+      #
+      # @return [Boolean] tell us if we have anything in the processing (or for processing) from
+      # a given gorup.
+      def empty?(group_id)
+        @in_processing[group_id].empty?
       end
 
       # Blocks when there are things in the queue in a given group and waits until all the jobs
@@ -118,6 +122,8 @@ module Karafka
 
       # @param group_id [String] id of the group in which jobs we're interested.
       # @return [Boolean] should we keep waiting or not
+      # @note We do not wait for non-blocking jobs. Their flow should allow for `poll` running
+      #   as they may exceed `max.poll.interval`
       def wait?(group_id)
         !@in_processing[group_id].all?(&:non_blocking?)
       end
