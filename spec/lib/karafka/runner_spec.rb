@@ -13,11 +13,11 @@ RSpec.describe_current do
     context 'when everything is ok' do
       let(:listeners) { [listener] }
       let(:async_scope) { listener }
-      let(:listener) { instance_double(Karafka::Connection::Listener, call: nil) }
+      let(:listener) { instance_double(Karafka::Connection::Listener, async_call: nil, join: nil) }
 
       before do
-        allow(runner)
-          .to receive(:listeners)
+        allow(Karafka::Connection::ListenersBatch)
+          .to receive(:new)
           .and_return(listeners)
       end
 
