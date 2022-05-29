@@ -2,7 +2,7 @@
 
 module Karafka
   module Connection
-    # Abstraction layer around listeners batch batch.
+    # Abstraction layer around listeners batch.
     class ListenersBatch
       include Enumerable
 

@@ -27,6 +27,8 @@ module Karafka
 
       private
 
+      # Runs processing of jobs in a loop
+      # Stops when queue is closed.
       def call
         loop { break unless process }
       end

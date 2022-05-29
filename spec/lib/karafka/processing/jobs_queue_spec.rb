@@ -214,4 +214,8 @@ RSpec.describe_current do
       it { expect(queue.size).to eq(2) }
     end
   end
+
+  describe '#empty?' do
+    pending
+  end
 end

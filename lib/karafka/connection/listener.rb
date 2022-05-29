@@ -135,8 +135,6 @@ module Karafka
       def schedule_revoke_lost_partitions_jobs
         revoked_partitions = @client.rebalance_manager.revoked_partitions
 
-        return if revoked_partitions.empty?
-
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
             pause_tracker = @pauses_manager.fetch(topic, partition)

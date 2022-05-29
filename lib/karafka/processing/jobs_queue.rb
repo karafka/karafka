@@ -103,7 +103,7 @@ module Karafka
       # @param group_id [String]
       #
       # @return [Boolean] tell us if we have anything in the processing (or for processing) from
-      # a given gorup.
+      # a given group.
       def empty?(group_id)
         @in_processing[group_id].empty?
       end
