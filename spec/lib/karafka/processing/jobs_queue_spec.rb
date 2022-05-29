@@ -216,6 +216,22 @@ RSpec.describe_current do
   end
 
   describe '#empty?' do
-    pending
+    let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true) }
+
+    context 'when there are no jobs at all' do
+      it { expect(queue.empty?(1)).to eq(true) }
+    end
+
+    context 'when there are jobs from a different subscription group' do
+      before { queue << job }
+
+      it { expect(queue.empty?(2)).to eq(true) }
+    end
+
+    context 'when there are jobs from our subscription group' do
+      before { queue << job }
+
+      it { expect(queue.empty?(job.group_id)).to eq(false) }
+    end
   end
 end
