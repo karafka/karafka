@@ -42,18 +42,20 @@ RSpec.describe_current do
     end
   end
 
-  describe '#shutdown' do
-    context 'when there is nothing in the buffer' do
-      it { expect { buffer.shutdown }.not_to raise_error }
+  describe '#each' do
+    context 'when there are no executors' do
+      it 'expect not to yield anything' do
+        expect { |block| buffer.each(&block) }.not_to yield_control
+      end
     end
 
-    context 'when there are executors in the buffer' do
-      before do
-        allow(fetched_executor).to receive(:shutdown)
-        buffer.shutdown
-      end
+    context 'when there are executors' do
+      before { fetched_executor }
 
-      it { expect(fetched_executor).to have_received(:shutdown) }
+      it 'expect to yield with executor from this topic partition' do
+        expect { |block| buffer.each(&block) }
+          .to yield_with_args(consumer_groups.first.topics.first, partition_id, fetched_executor)
+      end
     end
   end
 

@@ -7,7 +7,7 @@ RSpec.describe_current do
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:client) { Karafka::Connection::Client.new(subscription_group) }
   let(:routing_topic) { build(:routing_topic) }
-  let(:workers_batch) { Karafka::Processing::WorkersBatch.new(jobs_queue) }
+  let(:workers_batch) { Karafka::Processing::WorkersBatch.new(jobs_queue).each(&:async_call) }
 
   before do
     workers_batch
@@ -51,11 +51,12 @@ RSpec.describe_current do
         .and_return(revoked_partitions)
 
       allow(jobs_queue).to receive(:wait)
+      allow(jobs_queue).to receive(:empty?).and_return(true)
 
       listener.call
     end
 
-    it { expect(jobs_queue.size).to eq(1) }
+    it { expect(jobs_queue.size).to eq(2) }
     it { expect(jobs_queue.pop).to be_a(Karafka::Processing::Jobs::Revoked) }
     it { expect(client).to have_received(:commit_offsets).exactly(3).times }
   end
@@ -102,7 +103,7 @@ RSpec.describe_current do
     end
 
     it 'expect to wait on the jobs queue' do
-      expect(jobs_queue).to have_received(:wait).with(subscription_group.id)
+      expect(jobs_queue).to have_received(:wait).with(subscription_group.id).at_least(:once)
     end
 
     it 'expect to clear the jobs queue from any jobs from this subscription group' do

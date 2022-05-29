@@ -13,6 +13,9 @@ module Karafka
       workers = Processing::WorkersBatch.new(jobs_queue)
       listeners = Connection::ListenersBatch.new(jobs_queue)
 
+      workers.each(&:async_call)
+      listeners.each(&:async_call)
+
       # We aggregate threads here for a supervised shutdown process
       Karafka::Server.workers = workers
       Karafka::Server.listeners = listeners

@@ -5,8 +5,7 @@ RSpec.describe_current do
 
   context 'when creating workers batch' do
     let(:concurrency) { Karafka::App.config.concurrency }
-    let(:thread_count) { -> { Thread.list.size } }
 
-    it { expect { described_class.new(jobs_queue) }.to change(&thread_count).by(concurrency) }
+    it { expect(described_class.new(jobs_queue).size).to eq(concurrency) }
   end
 end

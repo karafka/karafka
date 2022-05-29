@@ -108,9 +108,8 @@ RSpec.describe_current do
 
       it 'expect to pass until no longer needing to wait' do
         Thread.new do
-          # We need to close it in order to unlock
           sleep(0.01)
-          queue.close
+          queue.complete(job1)
         end
 
         queue.wait(job1.group_id)
@@ -122,14 +121,13 @@ RSpec.describe_current do
         queue << job1
 
         Thread.new do
-          # We need to close it in order to unlock
           sleep(0.1)
           10.times { queue.tick(job1.group_id) }
         end
 
         Thread.new do
           sleep(1)
-          queue.close
+          queue.complete(job1)
         end
       end
 
@@ -165,9 +163,8 @@ RSpec.describe_current do
 
       it 'expect to wait' do
         Thread.new do
-          # We need to close it in order to unlock
           sleep(0.01)
-          queue.close
+          queue.complete(job1)
         end
 
         queue.wait(job1.group_id)

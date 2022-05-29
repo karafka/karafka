@@ -6,9 +6,7 @@ module Karafka
     # It polls the messages and then enqueues. It also takes care of potential recovery from
     # critical errors by restarting everything in a safe manner.
     class Listener
-      extend Forwardable
-
-      def_delegators :@thread, :join, :terminate, :alive?
+      include Helpers::Async
 
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
@@ -21,13 +19,6 @@ module Karafka
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         # We reference scheduler here as it is much faster than fetching this each time
         @scheduler = ::Karafka::App.config.internal.scheduler
-        @thread = Thread.new do
-          # If anything goes wrong in this listener thread, it means something went really wrong
-          # and we should terminate.
-          Thread.current.abort_on_exception = true
-
-          call
-        end
       end
 
       # Runs the main listener fetch loop.
