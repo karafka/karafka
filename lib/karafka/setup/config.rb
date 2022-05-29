@@ -66,7 +66,7 @@ module Karafka
       # option shutdown_timeout [Integer] the number of milliseconds after which Karafka no
       #   longer waits for the consumers to stop gracefully but instead we force terminate
       #   everything.
-      setting :shutdown_timeout, default: 30_000
+      setting :shutdown_timeout, default: 60_000
       # option [Integer] number of threads in which we want to do parallel processing
       setting :concurrency, default: 5
       # option [Integer] how long should we wait upon processing error
