@@ -15,7 +15,7 @@ module Karafka
 
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
-      attr_accessor :consumer_threads
+      attr_accessor :listeners
 
       # Set of workers
       attr_accessor :workers
@@ -25,9 +25,12 @@ module Karafka
 
       # Method which runs app
       def run
-        process.on_sigint { stop }
-        process.on_sigquit { stop }
-        process.on_sigterm { stop }
+        # Since we do a lot of threading and queuing, we don't want to stop from the trap context
+        # as some things may not work there as expected, that is why we spawn a separate thread to
+        # handle the stopping process
+        process.on_sigint { Thread.new { stop } }
+        process.on_sigquit { Thread.new { stop } }
+        process.on_sigterm { Thread.new { stop } }
 
         # Start is blocking until stop is called and when we stop, it will wait until
         # all of the things are ready to stop
@@ -35,6 +38,8 @@ module Karafka
 
         # We always need to wait for Karafka to stop here since we should wait for the stop running
         # in a separate thread (or trap context) to indicate everything is closed
+        # Since `#start` is blocking, we were get here only after the runner is done. This will
+        # not add any performance degradation because of that.
         Thread.pass until Karafka::App.stopped?
       # Try its best to shutdown underlying components before re-raising
       # rubocop:disable Lint/RescueException
@@ -70,16 +75,16 @@ module Karafka
       def stop
         Karafka::App.stop!
 
-        timeout = Thread.new { Karafka::App.config.shutdown_timeout }.join.value
+        timeout = Karafka::App.config.shutdown_timeout
 
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
         ((timeout / 1_000) * SUPERVISION_CHECK_FACTOR).to_i.times do
-          if consumer_threads.count(&:alive?).zero? &&
+          if listeners.count(&:alive?).zero? &&
              workers.count(&:alive?).zero?
 
-            Thread.new { Karafka::App.producer.close }.join
+            Karafka::App.producer.close
 
             return
           end
@@ -89,22 +94,18 @@ module Karafka
 
         raise Errors::ForcefulShutdownError
       rescue Errors::ForcefulShutdownError => e
-        thread = Thread.new do
-          Karafka.monitor.instrument(
-            'error.occurred',
-            caller: self,
-            error: e,
-            type: 'app.stopping.error'
-          )
+        Karafka.monitor.instrument(
+          'error.occurred',
+          caller: self,
+          error: e,
+          type: 'app.stopping.error'
+        )
 
-          # We're done waiting, lets kill them!
-          workers.each(&:terminate)
-          consumer_threads.each(&:terminate)
+        # We're done waiting, lets kill them!
+        workers.each(&:terminate)
+        listeners.each(&:terminate)
 
-          Karafka::App.producer.close
-        end
-
-        thread.join
+        Karafka::App.producer.close
 
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit! FORCEFUL_EXIT_CODE

@@ -23,21 +23,29 @@ module Karafka
         partition,
         pause
       )
-        topic = @subscription_group.topics.find(topic)
+        ktopic = @subscription_group.topics.find(topic)
 
-        topic || raise(Errors::TopicNotFoundError, topic)
+        ktopic || raise(Errors::TopicNotFoundError, topic)
 
-        @buffer[topic][partition] ||= Executor.new(
+        @buffer[ktopic][partition] ||= Executor.new(
           @subscription_group.id,
           @client,
-          topic,
+          ktopic,
           pause
         )
       end
 
-      # Runs the shutdown on all active executors.
-      def shutdown
-        @buffer.values.map(&:values).flatten.each(&:shutdown)
+      # Iterates over all available executors and yields them together with topic and partition
+      # info
+      # @yieldparam [Routing::Topic] karafka routing topic object
+      # @yieldparam [Integer] partition number
+      # @yieldparam [Executor] given executor
+      def each
+        @buffer.each do |ktopic, partitions|
+          partitions.each do |partition, executor|
+            yield(ktopic, partition, executor)
+          end
+        end
       end
 
       # Clears the executors buffer. Useful for critical errors recovery.

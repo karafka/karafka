@@ -17,6 +17,11 @@ module Karafka
       def each(&block)
         @batch.each(&block)
       end
+
+      # @return [Integer] number of workers in the batch
+      def size
+        @batch.size
+      end
     end
   end
 end

@@ -11,12 +11,16 @@ RSpec.describe_current do
     allow(Karafka::App).to receive(:stopped?).and_return(true)
     allow(Karafka::Runner).to receive(:new).and_return(runner)
     allow(runner).to receive(:call)
-    described_class.consumer_threads = []
+    described_class.listeners = []
     described_class.workers = []
   end
 
   describe '#run' do
-    after { server_class.run }
+    after do
+      server_class.run
+      # Since stopping happens in a separate thread, we need to wait
+      sleep(0.5)
+    end
 
     context 'when we want to run in supervision' do
       it 'runs in supervision, start consuming' do
@@ -87,7 +91,7 @@ RSpec.describe_current do
 
     after do
       server_class.stop
-      described_class.consumer_threads.clear
+      described_class.listeners.clear
       described_class.workers = []
       # After shutdown we need to reinitialize the app for other specs
       Karafka::App.initialize!
@@ -106,7 +110,7 @@ RSpec.describe_current do
       context 'when there are no active threads (all shutdown ok)' do
         before do
           server_class.stop
-          described_class.consumer_threads.clear
+          described_class.listeners.clear
         end
 
         it 'expect stop without exit or sleep' do
@@ -120,9 +124,9 @@ RSpec.describe_current do
         let(:active_thread) { instance_double(Thread, alive?: true, terminate: true, join: true) }
 
         before do
-          described_class.consumer_threads = [active_thread]
+          described_class.listeners = [active_thread]
           server_class.stop
-          described_class.consumer_threads.clear
+          described_class.listeners.clear
         end
 
         it 'expect stop and exit with sleep' do

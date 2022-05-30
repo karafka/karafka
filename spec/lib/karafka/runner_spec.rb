@@ -13,11 +13,11 @@ RSpec.describe_current do
     context 'when everything is ok' do
       let(:listeners) { [listener] }
       let(:async_scope) { listener }
-      let(:listener) { instance_double(Karafka::Connection::Listener, call: nil) }
+      let(:listener) { instance_double(Karafka::Connection::Listener, async_call: nil, join: nil) }
 
       before do
-        allow(runner)
-          .to receive(:listeners)
+        allow(Karafka::Connection::ListenersBatch)
+          .to receive(:new)
           .and_return(listeners)
       end
 
@@ -34,7 +34,7 @@ RSpec.describe_current do
       end
 
       before do
-        allow(runner).to receive(:listeners).and_raise(error)
+        allow(Karafka::Processing::JobsQueue).to receive(:new).and_raise(error)
         allow(Karafka::App).to receive(:stop!)
         allow(Karafka.monitor).to receive(:instrument)
       end
@@ -45,23 +45,5 @@ RSpec.describe_current do
         expect(Karafka::App).to have_received(:stop!).with(no_args)
       end
     end
-  end
-
-  describe '#listeners' do
-    let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
-    let(:subscription_group) { build(:routing_subscription_group) }
-    let(:subscription_groups) { [subscription_group] }
-
-    before do
-      allow(Karafka::App)
-        .to receive(:subscription_groups)
-        .and_return(subscription_groups)
-
-      allow(Karafka::Connection::Listener)
-        .to receive(:new)
-        .with(subscription_group, jobs_queue)
-    end
-
-    it { expect(runner.send(:listeners, jobs_queue)).to be_a(Array) }
   end
 end

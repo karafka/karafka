@@ -12,7 +12,7 @@ module Karafka
     class JobsQueue
       # @return [Karafka::Processing::JobsQueue]
       def initialize
-        @queue = ::Queue.new
+        @queue = Queue.new
         # Those queues will act as a semaphores internally. Since we need an indicator for waiting
         # we could use Thread.pass but this is expensive. Instead we can just lock until any
         # of the workers finishes their work and we can re-check. This means that in the worse
@@ -100,6 +100,14 @@ module Karafka
         end
       end
 
+      # @param group_id [String]
+      #
+      # @return [Boolean] tell us if we have anything in the processing (or for processing) from
+      # a given group.
+      def empty?(group_id)
+        @in_processing[group_id].empty?
+      end
+
       # Blocks when there are things in the queue in a given group and waits until all the jobs
       #   from a given group are completed
       # @param group_id [String] id of the group in which jobs we're interested.
@@ -114,16 +122,10 @@ module Karafka
 
       # @param group_id [String] id of the group in which jobs we're interested.
       # @return [Boolean] should we keep waiting or not
+      # @note We do not wait for non-blocking jobs. Their flow should allow for `poll` running
+      #   as they may exceed `max.poll.interval`
       def wait?(group_id)
-        group = @in_processing[group_id]
-
-        # If it is stopping, all the previous messages that are processed at the moment need to
-        # finish. Otherwise we may risk closing the client and committing offsets afterwards
-        return false if Karafka::App.stopping? && group.empty?
-        return false if @queue.closed?
-        return false if group.empty?
-
-        !group.all?(&:non_blocking?)
+        !@in_processing[group_id].all?(&:non_blocking?)
       end
     end
   end

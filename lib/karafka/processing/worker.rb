@@ -17,23 +17,21 @@ module Karafka
     #                code. This can be used to unlock certain resources or do other things that are
     #                not user code but need to run after user code base is executed.
     class Worker
-      extend Forwardable
-
-      def_delegators :@thread, :join, :terminate, :alive?
+      include Helpers::Async
 
       # @param jobs_queue [JobsQueue]
       # @return [Worker]
       def initialize(jobs_queue)
         @jobs_queue = jobs_queue
-        @thread = Thread.new do
-          # If anything goes wrong in this worker thread, it means something went really wrong and
-          # we should terminate.
-          Thread.current.abort_on_exception = true
-          loop { break unless process }
-        end
       end
 
       private
+
+      # Runs processing of jobs in a loop
+      # Stops when queue is closed.
+      def call
+        loop { break unless process }
+      end
 
       # Fetches a single job, processes it and marks as completed.
       #
