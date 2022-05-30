@@ -12,9 +12,7 @@ RSpec.describe_current do
     end
 
     it 'expect to yield each listener' do
-      batch.each do |listener|
-        expect(listener).to be_a(Karafka::Connection::Listener)
-      end
+      expect(batch).to all be_a(Karafka::Connection::Listener)
     end
   end
 end

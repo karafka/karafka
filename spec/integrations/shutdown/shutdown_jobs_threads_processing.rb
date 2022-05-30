@@ -9,7 +9,7 @@ end
 
 # This will allow us to establish the listener thread id. Shutdown jobs should run from the
 # worker threads
-Karafka::App.monitor.subscribe('connection.listener.before_fetch_loop') do |event|
+Karafka::App.monitor.subscribe('connection.listener.before_fetch_loop') do
   DataCollector.data[:listener_thread_id] = Thread.current.object_id
 end
 

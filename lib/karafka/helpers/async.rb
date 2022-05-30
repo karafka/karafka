@@ -6,7 +6,7 @@ module Karafka
     # want to use to control the underlying thread
     #
     # @note Thread running code needs to manage it's own exceptions. If they leak out, they will
-    #   aborth thread on exception.
+    #   abort thread on exception.
     module Async
       class << self
         # Adds forwardable to redirect thread-based control methods to the underlying thread that
