@@ -18,13 +18,16 @@ module Karafka
     # when taking IO into consideration, the can achieve optimized parallel processing.
     #
     # This scheduler can also work with virtual partitions.
+    #
+    # Aside from consumption jobs, other jobs do not run often, thus we can leave them with
+    # default FIFO scheduler from the default Karafka scheduler
     class Scheduler < ::Karafka::Scheduler
-      # Yields messages from partitions in the LJF order
+      # Schedules jobs in the LJF order for consumption
       #
+      # @param queue [Karafka::Processing::JobsQueue] queue where we want to put the jobs
       # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
-      # @param block [Proc] proc we want to run on each job
-      # @yieldparam [Karafka::Processing::Jobs::Base] job we want to enqueue
-      def call(jobs_array, &block)
+      #
+      def schedule_consumption(queue, jobs_array)
         pt = PerformanceTracker.instance
 
         ordered = []
@@ -42,7 +45,9 @@ module Karafka
         ordered.reverse!
         ordered.map!(&:first)
 
-        ordered.each(&block)
+        ordered.each do |job|
+          queue << job
+        end
       end
     end
   end
