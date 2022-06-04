@@ -18,8 +18,17 @@ RSpec.describe_current do
     it { expect(result.topic).to eq routing_topic.name }
     it { expect(result.deserializer).to eq routing_topic.deserializer }
     it { expect(result.scheduled_at).to eq(scheduled_at) }
-    it { expect(result.consumption_lag).to be_between(3000, 3100) }
-    it { expect(result.processing_lag).to be_between(1000, 1100) }
-    it { expect(result).to be_frozen }
+    it { expect(result).not_to be_frozen }
+
+    it 'expect to have processed_at set to nil, since not yet picked up' do
+      expect(result.processed_at).to eq(nil)
+    end
+
+    context 'when processed_at is assigned to the build metadata' do
+      before { result.processed_at = Time.now }
+
+      it { expect(result.consumption_lag).to be_between(3000, 3100) }
+      it { expect(result.processing_lag).to be_between(1000, 1100) }
+    end
   end
 end

@@ -34,17 +34,21 @@ module Karafka
 
       # Builds the consumer instance and sets all that is needed to run the user consumption logic
       #
-      # @param messages [Array<Rdkafka::Consumer::Message>] raw rdkafka messages
-      def prepare(messages)
+      # @param received_at [Time] the moment we've received the batch (actually the moment we've)
+      #   enqueued it, but good enough
+      def prepare(messages, received_at)
         # Recreate consumer with each batch if persistence is not enabled
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
         # middle state, where re-creation of a consumer instance would occur only sometimes
         @consumer = nil unless ::Karafka::App.config.consumer_persistence
 
-        messages.metadata.processed_at = Time.now
-        messages.metadata.freeze
-        consumer.messages = messages
+        # First we build messages batch...
+        consumer.messages = Messages::Builders::Messages.call(
+          messages,
+          @topic,
+          received_at
+        )
 
         consumer.on_prepared
       end

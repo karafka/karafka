@@ -31,6 +31,7 @@ module Karafka
       end
 
       # Remaps raw messages from the raw messages buffer to Karafka messages
+      # @param raw_messages_buffer [RawMessagesBuffer] buffer with raw messages
       def remap(raw_messages_buffer)
         clear unless @size.zero?
 
@@ -39,11 +40,15 @@ module Karafka
         raw_messages_buffer.each do |topic, partition, messages|
           @size += messages.count
 
-          @groups[topic][partition] = Messages::Builders::Messages.call(
-            messages,
-            @subscription_group.topics.find(topic),
-            received_at
-          )
+          ktopic = @subscription_group.topics.find(topic)
+
+          @groups[topic][partition] = messages.map do |message|
+            Messages::Builders::Message.call(
+              message,
+              ktopic,
+              received_at
+            )
+          end
         end
       end
 
@@ -56,7 +61,7 @@ module Karafka
       #
       # @yieldparam [String] topic name
       # @yieldparam [Integer] partition number
-      # @yieldparam [Array<Rdkafka::Consumer::Message>] topic partition aggregated results
+      # @yieldparam [Array<Karafka::Messages::Message>] messages from a given topic partition
       def each
         @groups.each do |topic, partitions|
           partitions.each do |partition, messages|
@@ -65,6 +70,9 @@ module Karafka
         end
       end
 
+      private
+
+      # Clears the buffer completely
       def clear
         @size = 0
         @groups.clear

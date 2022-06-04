@@ -11,18 +11,18 @@ module Karafka
 
         # @param executor [Karafka::Processing::Executor] executor that is suppose to run a given
         #   job
-        # @param messages [Array<dkafka::Consumer::Message>] array with raw rdkafka messages with
-        #   which we are suppose to work
+        # @param messages [Karafka::Messages::Messages] karafka messages batch
         # @return [Consume]
         def initialize(executor, messages)
           @executor = executor
           @messages = messages
+          @created_at = Time.now
           super()
         end
 
         # Runs the preparations on the executor
         def prepare
-          executor.prepare(@messages)
+          executor.prepare(@messages, @created_at)
         end
 
         # Runs the given executor

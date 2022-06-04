@@ -198,7 +198,6 @@ module Karafka
       end
 
       # Waits for all the jobs from a given subscription group to finish before moving forward
-      # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       def wait
         @jobs_queue.wait(@subscription_group.id)
       end

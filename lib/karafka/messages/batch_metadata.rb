@@ -16,8 +16,6 @@ module Karafka
       :created_at,
       :scheduled_at,
       :processed_at,
-      :consumption_lag,
-      :processing_lag,
       keyword_init: true
     ) do
       # This lag describes how long did it take for a message to be consumed from the moment it was
