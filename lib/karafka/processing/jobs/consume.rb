@@ -17,13 +17,12 @@ module Karafka
         def initialize(executor, messages)
           @executor = executor
           @messages = messages
-          @created_at = Time.now
           super()
         end
 
         # Runs the preparations on the executor
         def prepare
-          executor.prepare(@messages, @created_at)
+          executor.prepare(@messages)
         end
 
         # Runs the given executor

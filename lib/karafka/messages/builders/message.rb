@@ -26,6 +26,7 @@ module Karafka
               received_at: received_at
             ).freeze
 
+            # Karafka messages cannot be frozen because of the lazy deserialization feature
             Karafka::Messages::Message.new(
               kafka_message.payload,
               metadata

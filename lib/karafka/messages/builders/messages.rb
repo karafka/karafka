@@ -22,11 +22,15 @@ module Karafka
               )
             end
 
+            # We cannot freeze batch metadata because it contains fields that will be filled only
+            # when the batch is picked for processing. It is mutable until we pick it up.
+            # From the end user perspective, this is irrelevant, since he "receives" the whole
+            # batch with metadata already frozen.
             metadata = BatchMetadata.call(
               kafka_messages,
               topic,
               received_at
-            ).freeze
+            )
 
             Karafka::Messages::Messages.new(
               messages_array,
