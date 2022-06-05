@@ -35,6 +35,8 @@ module Karafka
       def remap(raw_messages_buffer)
         clear unless @size.zero?
 
+        # Since it happens "right after" we've received the messages, it is close enough it time
+        # to be used as the moment we received messages.
         received_at = Time.now
 
         raw_messages_buffer.each do |topic, partition, messages|

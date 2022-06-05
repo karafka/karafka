@@ -5,11 +5,12 @@ FactoryBot.define do
     skip_create
 
     sequence(:topic) { |nr| "topic-from-meta#{nr}" }
-    partition { 0 }
     sequence(:offset) { |nr| nr }
+    partition { 0 }
+    deserializer { ->(message) { JSON.parse(message.raw_payload) } }
 
     initialize_with do
-      new(partition: partition, topic: topic, offset: 0)
+      new(partition: partition, topic: topic, offset: 0, deserializer: deserializer)
     end
   end
 end

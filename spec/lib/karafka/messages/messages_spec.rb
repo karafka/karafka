@@ -2,15 +2,15 @@
 
 RSpec.describe_current do
   subject(:messages) do
-    Karafka::Messages::Builders::Messages.call(kafka_messages, topic, received_at)
+    Karafka::Messages::Builders::Messages.call(messages_array, topic, received_at)
   end
 
   let(:deserialized_payload) { { rand.to_s => rand.to_s } }
   let(:serialized_payload) { deserialized_payload.to_json }
   let(:topic) { build(:routing_topic) }
-  let(:kafka_message1) { build(:kafka_fetched_message, payload: serialized_payload) }
-  let(:kafka_message2) { build(:kafka_fetched_message, payload: serialized_payload) }
-  let(:kafka_messages) { [kafka_message1, kafka_message2] }
+  let(:message1) { build(:messages_message, raw_payload: serialized_payload) }
+  let(:message2) { build(:messages_message, raw_payload: serialized_payload) }
+  let(:messages_array) { [message1, message2] }
   let(:received_at) { Time.now }
 
   describe '#to_a' do
