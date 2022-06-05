@@ -15,6 +15,13 @@ module Karafka
 
         attr_reader :executor
 
+        # Creates a new job instance
+        def initialize
+          # All jobs are blocking by default and they can release the lock when blocking operations
+          # are done (if needed)
+          @non_blocking = false
+        end
+
         # When redefined can run any code that should run before executing the proper code
         def prepare; end
 
@@ -22,11 +29,16 @@ module Karafka
         def teardown; end
 
         # @return [Boolean] is this a non-blocking job
+        #
         # @note Blocking job is a job, that will cause the job queue to wait until it is finished
         #   before removing the lock on new jobs being added
+        #
         # @note All the jobs are blocking by default
+        #
+        # @note Job **needs** to mark itself as non-blocking only **after** it is done with all
+        #   the blocking things (pausing partition, etc).
         def non_blocking?
-          false
+          @non_blocking
         end
       end
     end
