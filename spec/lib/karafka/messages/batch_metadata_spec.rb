@@ -48,10 +48,30 @@ RSpec.describe_current do
   end
 
   describe '#consumption_lag' do
-    pending
+    let(:created_at) { 2.days.ago }
+    let(:processed_at) { 1.days.ago }
+
+    before do
+      metadata['created_at'] = created_at
+      metadata['processed_at'] = processed_at
+    end
+
+    it 'expect to calculate it as a distance in between message creation time and processing' do
+      expect(metadata.consumption_lag).to eq(((processed_at - created_at) * 1_000).round)
+    end
   end
 
   describe '#processing_lag' do
-    pending
+    let(:scheduled_at) { 2.days.ago }
+    let(:processed_at) { 1.days.ago }
+
+    before do
+      metadata['scheduled_at'] = scheduled_at
+      metadata['processed_at'] = processed_at
+    end
+
+    it 'expect to calculate it as a distance in between message schedule time and processing' do
+      expect(metadata.processing_lag).to eq(((processed_at - scheduled_at) * 1_000).round)
+    end
   end
 end
