@@ -98,7 +98,7 @@ RSpec.describe_current do
     end
 
     context 'when shutdown time is more then 1' do
-      let(:timeout_s) { rand(5..15) }
+      let(:timeout_s) { 15 }
       let(:timeout_ms) { timeout_s * 1_000 }
 
       before do
