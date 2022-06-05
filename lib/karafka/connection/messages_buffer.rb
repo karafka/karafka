@@ -54,11 +54,6 @@ module Karafka
         end
       end
 
-      # @return [Boolean] is the buffer empty or does it contain any messages
-      def empty?
-        @size.zero?
-      end
-
       # Allows to iterate over all the topics and partitions messages
       #
       # @yieldparam [String] topic name
@@ -70,6 +65,11 @@ module Karafka
             yield(topic, partition, messages)
           end
         end
+      end
+
+      # @return [Boolean] is the buffer empty or does it contain any messages
+      def empty?
+        @size.zero?
       end
 
       private
