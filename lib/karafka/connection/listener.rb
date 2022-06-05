@@ -100,7 +100,7 @@ module Karafka
         #
         # We do not care about resuming any partitions or lost jobs as we do not plan to do
         # anything with them as we're in the shutdown phase.
-        @client.batch_poll until @jobs_queue.empty?(@subscription_group.id)
+        wait_with_poll
 
         # We do not want to schedule the shutdown jobs prior to finishing all the jobs
         # (including non-blocking) as there might be a long-running job with a shutdown and then
@@ -108,7 +108,7 @@ module Karafka
         # as it could create a race-condition.
         build_and_schedule_shutdown_jobs
 
-        wait
+        wait_with_poll
 
         shutdown
 
@@ -200,6 +200,13 @@ module Karafka
       # Waits for all the jobs from a given subscription group to finish before moving forward
       def wait
         @jobs_queue.wait(@subscription_group.id)
+      end
+
+      # Waits without blocking the polling
+      # This should be used only when we no longer plan to use any incoming data and we can safely
+      # discard it
+      def wait_with_poll
+        @client.batch_poll until @jobs_queue.empty?(@subscription_group.id)
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and

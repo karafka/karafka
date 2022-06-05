@@ -10,6 +10,8 @@
 - Abstract away scheduling of revocation and shutdown jobs for both default and pro schedulers
 - Introduce a second (internal) messages buffer to distinguish between raw messages buffer and karafka messages buffer
 - Move messages and their metadata remap process to the listener thread to allow for their inline usage
+- Change how we wait in the shutdown phase, so shutdown jobs can still use Kafka connection even if they run for a longer period of time. This will prevent us from being kicked out from the group early.
+- Introduce validation that ensures, that `shutdown_timeout` is more than `max_wait_time`. This will prevent users from ending up with a config that could lead to frequent forceful shutdowns.
 
 ## 2.0.0-beta1 (2022-05-22)
 - Update the jobs queue blocking engine and allow for non-blocking jobs execution
