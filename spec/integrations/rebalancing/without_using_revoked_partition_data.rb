@@ -11,9 +11,15 @@ require 'securerandom'
 RUN = SecureRandom.uuid.split('-').first
 
 setup_karafka do |config|
-  config.max_wait_time = 50_000
+  config.max_wait_time = 40_000
+  config.shutdown_timeout = 50_000
   config.max_messages = 1_000
   config.initial_offset = 'earliest'
+  # Shutdown timeout should be bigger than the max wait as during shutdown we poll as well to be
+  # able to finalize all work and not to loose the assignment
+  # We need to set it that way in this particular spec so we do not force shutdown when we poll
+  # during the shutdown phase
+  config.shutdown_timeout = 60_000
 end
 
 class Consumer < Karafka::BaseConsumer

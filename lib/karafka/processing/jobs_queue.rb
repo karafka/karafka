@@ -108,8 +108,9 @@ module Karafka
         @in_processing[group_id].empty?
       end
 
-      # Blocks when there are things in the queue in a given group and waits until all the jobs
-      #   from a given group are completed
+      # Blocks when there are things in the queue in a given group and waits until all the blocking
+      #   jobs from a given group are completed
+      #
       # @param group_id [String] id of the group in which jobs we're interested.
       # @note This method is blocking.
       def wait(group_id)

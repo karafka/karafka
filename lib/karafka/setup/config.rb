@@ -117,6 +117,7 @@ module Karafka
         def setup(&block)
           configure(&block)
           merge_kafka_defaults!(config)
+
           Contracts::Config.new.validate!(config.to_h)
 
           # Check the license presence (if needed) and
