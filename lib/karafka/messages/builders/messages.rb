@@ -9,27 +9,19 @@ module Karafka
           # Creates messages batch with messages inside based on the incoming messages and the
           # topic from which it comes.
           #
-          # @param kafka_messages [Array<Rdkafka::Consumer::Message>] raw fetched messages
+          # @param messages [Array<Karafka::Messages::Message>] karafka messages array
           # @param topic [Karafka::Routing::Topic] topic for which we're received messages
           # @param received_at [Time] moment in time when the messages were received
           # @return [Karafka::Messages::Messages] messages batch object
-          def call(kafka_messages, topic, received_at)
-            messages_array = kafka_messages.map do |message|
-              Karafka::Messages::Builders::Message.call(
-                message,
-                topic,
-                received_at
-              )
-            end
-
+          def call(messages, topic, received_at)
             metadata = BatchMetadata.call(
-              kafka_messages,
+              messages,
               topic,
               received_at
             ).freeze
 
             Karafka::Messages::Messages.new(
-              messages_array,
+              messages,
               metadata
             ).freeze
           end

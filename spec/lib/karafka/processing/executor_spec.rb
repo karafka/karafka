@@ -7,7 +7,7 @@ RSpec.describe_current do
   let(:client) { instance_double(Karafka::Connection::Client) }
   let(:topic) { build(:routing_topic) }
   let(:pause) { build(:time_trackers_pause) }
-  let(:messages) { [build(:kafka_fetched_message)] }
+  let(:messages) { [build(:messages_message)] }
   let(:received_at) { Time.now }
   let(:consumer) do
     ClassBuilder.inherit(topic.consumer) do
@@ -38,7 +38,7 @@ RSpec.describe_current do
 
     it 'expect to build appropriate messages batch' do
       executor.prepare(messages, received_at)
-      expect(consumer.messages.first.raw_payload).to eq(messages.first.payload)
+      expect(consumer.messages.first.raw_payload).to eq(messages.first.raw_payload)
     end
 
     it 'expect to build metadata with proper details' do

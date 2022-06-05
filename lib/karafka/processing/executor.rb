@@ -32,9 +32,10 @@ module Karafka
         @pause_tracker = pause_tracker
       end
 
-      # Builds the consumer instance and sets all that is needed to run the user consumption logic
+      # Builds the consumer instance, builds messages batch and sets all that is needed to run the
+      # user consumption logic
       #
-      # @param messages [Array<Rdkafka::Consumer::Message>] raw rdkafka messages
+      # @param messages [Array<Karafka::Messages::Message>]
       # @param received_at [Time] the moment we've received the batch (actually the moment we've)
       #   enqueued it, but good enough
       def prepare(messages, received_at)

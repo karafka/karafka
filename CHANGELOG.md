@@ -8,6 +8,8 @@
 - Notion of `ListenersBatch` was introduced similar to `WorkersBatch` to abstract this concept.
 - Change default `shutdown_timeout` to be more than `max_wait_time` not to cause forced shutdown when no messages are being received from Kafka.
 - Abstract away scheduling of revocation and shutdown jobs for both default and pro schedulers
+- Introduce a second (internal) messages buffer to distinguish between raw messages buffer and karafka messages buffer
+- Move messages and their metadata remap process to the listener thread to allow for their inline usage
 
 ## 2.0.0-beta1 (2022-05-22)
 - Update the jobs queue blocking engine and allow for non-blocking jobs execution

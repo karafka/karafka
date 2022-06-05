@@ -23,8 +23,8 @@ RSpec.describe_current do
         schedule
       end
 
-      # @note This is an edge case for first batch. After that we will get measurements, so we don't
-      #   have to worry. "Ignoring" this non-optimal first case simplifies the codebase
+      # @note This is an edge case for first batch. After that we will get measurements, so we
+      #   don't have to worry. "Ignoring" this non-optimal first case simplifies the codebase
       it { expect(queue[0]).to eq(jobs_array[3]) }
       it { expect(queue[1]).to eq(jobs_array[2]) }
       it { expect(queue[2]).to eq(jobs_array[1]) }

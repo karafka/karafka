@@ -3,8 +3,10 @@
 module Karafka
   module Connection
     # A single listener that listens to incoming messages from a single subscription group.
-    # It polls the messages and then enqueues. It also takes care of potential recovery from
+    # It polls the messages and then enqueues jobs. It also takes care of potential recovery from
     # critical errors by restarting everything in a safe manner.
+    #
+    # This is the heart of the consumption process.
     class Listener
       include Helpers::Async
 
@@ -19,6 +21,10 @@ module Karafka
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         # We reference scheduler here as it is much faster than fetching this each time
         @scheduler = ::Karafka::App.config.internal.scheduler
+        # We keep one buffer for messages to preserve memory and not allocate extra objects
+        # We can do this that way because we always first schedule jobs using messages before we
+        # fetch another batch.
+        @messages_buffer = MessagesBuffer.new(subscription_group)
       end
 
       # Runs the main listener fetch loop.
@@ -59,12 +65,12 @@ module Karafka
           # We need to fetch data before we revoke lost partitions details as during the polling
           # the callbacks for tracking lost partitions are triggered. Otherwise we would be always
           # one batch behind.
-          messages_buffer = @client.batch_poll
+          poll_and_remap_messages
 
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop.received',
             caller: self,
-            messages_buffer: messages_buffer
+            messages_buffer: @messages_buffer
           )
 
           # If there were revoked partitions, we need to wait on their jobs to finish before
@@ -74,15 +80,14 @@ module Karafka
           build_and_schedule_revoke_lost_partitions_jobs
 
           # We wait only on jobs from our subscription group. Other groups are independent.
-          wait(@subscription_group)
+          wait
 
-          build_and_schedule_consumption_jobs(messages_buffer)
+          build_and_schedule_consumption_jobs
 
-          wait(@subscription_group)
+          wait
 
           # We don't use the `#commit_offsets!` here for performance reasons. This can be achieved
           # if needed by using manual offset management.
-
           @client.commit_offsets
         end
 
@@ -103,7 +108,7 @@ module Karafka
         # as it could create a race-condition.
         build_and_schedule_shutdown_jobs
 
-        wait(@subscription_group)
+        wait
 
         shutdown
 
@@ -125,7 +130,9 @@ module Karafka
 
       # Resumes processing of partitions that were paused due to an error.
       def resume_paused_partitions
-        @pauses_manager.resume { |topic, partition| @client.resume(topic, partition) }
+        @pauses_manager.resume do |topic, partition|
+          @client.resume(topic, partition)
+        end
       end
 
       # Enqueues revoking jobs for partitions that were taken away from the running process.
@@ -159,14 +166,25 @@ module Karafka
         @scheduler.schedule_shutdown(@jobs_queue, jobs)
       end
 
+      # Polls messages within the time and amount boundaries defined in the settings and then
+      # builds karafka messages based on the raw rdkafka messages buffer returned by the
+      # `#batch_poll` method.
+      #
+      # @note There are two buffers, one for raw messages and one for "built" karafka messages
+      def poll_and_remap_messages
+        @messages_buffer.remap(
+          @client.batch_poll
+        )
+      end
+
       # Takes the messages per topic partition and enqueues processing jobs in threads using
       # given scheduler.
-      #
-      # @param messages_buffer [Karafka::Connection::MessagesBuffer] buffer with messages
-      def build_and_schedule_consumption_jobs(messages_buffer)
+      def build_and_schedule_consumption_jobs
+        return if @messages_buffer.empty?
+
         jobs = []
 
-        messages_buffer.each do |topic, partition, messages|
+        @messages_buffer.each do |topic, partition, messages|
           pause = @pauses_manager.fetch(topic, partition)
 
           next if pause.paused?
@@ -180,9 +198,8 @@ module Karafka
       end
 
       # Waits for all the jobs from a given subscription group to finish before moving forward
-      # @param subscription_group [Karafka::Routing::SubscriptionGroup]
-      def wait(subscription_group)
-        @jobs_queue.wait(subscription_group.id)
+      def wait
+        @jobs_queue.wait(@subscription_group.id)
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and

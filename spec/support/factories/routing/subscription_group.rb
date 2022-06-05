@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :routing_subscription_group, class: 'Karafka::Routing::SubscriptionGroup' do
-    topics { [build(:routing_topic)] }
+    topics { Karafka::Routing::Topics.new([build(:routing_topic)]) }
 
     skip_create
 

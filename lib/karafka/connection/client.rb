@@ -30,7 +30,7 @@ module Karafka
         @mutex = Mutex.new
         @closed = false
         @subscription_group = subscription_group
-        @buffer = MessagesBuffer.new
+        @buffer = RawMessagesBuffer.new
         @rebalance_manager = RebalanceManager.new
         @kafka = build_consumer
         # Marks if we need to offset. If we did not store offsets, we should not commit the offset
