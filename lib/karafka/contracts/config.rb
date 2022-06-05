@@ -25,6 +25,7 @@ module Karafka
         required(:pause_max_timeout) { int? & gt?(0) }
         required(:pause_with_exponential_backoff).filled(:bool?)
         required(:shutdown_timeout) { int? & gt?(0) }
+        required(:max_wait_time) { int? & gt?(0) }
         required(:kafka).filled(:hash)
 
         # We validate internals just to be sure, that they are present and working
@@ -51,6 +52,12 @@ module Karafka
       rule(:pause_timeout, :pause_max_timeout) do
         if values[:pause_timeout].to_i > values[:pause_max_timeout].to_i
           key(:pause_timeout).failure(:max_timeout_vs_pause_max_timeout)
+        end
+      end
+
+      rule(:shutdown_timeout, :max_wait_time) do
+        if values[:max_wait_time].to_i >= values[:shutdown_timeout].to_i
+          key(:shutdown_timeout).failure(:shutdown_timeout_vs_max_wait_time)
         end
       end
     end

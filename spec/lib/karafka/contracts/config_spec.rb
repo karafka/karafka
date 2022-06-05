@@ -12,6 +12,7 @@ RSpec.describe_current do
       pause_max_timeout: 1_000,
       pause_timeout: 1_000,
       pause_with_exponential_backoff: false,
+      max_wait_time: 5,
       concurrency: 5,
       license: {
         token: false,
@@ -116,6 +117,44 @@ RSpec.describe_current do
 
     context 'when shutdown_timeout is less then 0' do
       before { config[:shutdown_timeout] = -2 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate max_wait_time' do
+    context 'when max_wait_time is nil' do
+      before { config[:max_wait_time] = nil }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_wait_time is not an int' do
+      before { config[:max_wait_time] = 2.1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_wait_time is less then 0' do
+      before { config[:max_wait_time] = -2 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_wait_time is equal to shutdown_timeout' do
+      before do
+        config[:max_wait_time] = 5
+        config[:shutdown_timeout] = 5
+      end
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_wait_time is more than shutdown_timeout' do
+      before do
+        config[:max_wait_time] = 15
+        config[:shutdown_timeout] = 5
+      end
 
       it { expect(contract.call(config)).not_to be_success }
     end

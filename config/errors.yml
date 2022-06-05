@@ -2,6 +2,7 @@ en:
   dry_validation:
     errors:
       max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
+      shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
       topics_names_not_unique: all topic names within a single consumer group must be unique
       required_usage_count: Given topic must be used at least once
       consumer_groups_inclusion: Unknown consumer group
