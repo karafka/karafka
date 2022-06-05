@@ -20,6 +20,7 @@ module Karafka
         def setup(config)
           require_relative 'performance_tracker'
           require_relative 'scheduler'
+          require_relative 'processing/jobs/consume_non_blocking'
           require_relative 'active_job/consumer'
           require_relative 'active_job/dispatcher'
           require_relative 'active_job/job_options_contract'
