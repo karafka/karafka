@@ -16,6 +16,8 @@ logs = LOGS.read
 assert_equal false, logs.include?('] ERROR -- : Your license expired')
 assert_equal false, logs.include?('Please reach us')
 assert_equal true, Karafka.pro?
+assert_equal true, const_visible?('Karafka::Pro::Processing::Jobs::ConsumeNonBlocking')
+assert_equal true, const_visible?('Karafka::Pro::ActiveJob::Consumer')
 assert_equal true, const_visible?('Karafka::Pro::ActiveJob::Dispatcher')
 assert_equal true, const_visible?('Karafka::Pro::ActiveJob::JobOptionsContract')
 assert_equal true, const_visible?('Karafka::Pro::PerformanceTracker')

@@ -42,7 +42,7 @@ end
 draw_routes(Consumer)
 
 Thread.new do
-  sleep(1)
+  sleep(5)
 
   sleep(0.1) while DataCollector.data[:running].empty?
 

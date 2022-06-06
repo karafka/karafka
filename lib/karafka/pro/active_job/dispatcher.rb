@@ -18,7 +18,7 @@ module Karafka
       # much better and more granular control over the dispatch and consumption process.
       class Dispatcher < ::Karafka::ActiveJob::Dispatcher
         # Defaults for dispatching
-        # The can be updated by using `#karafka_options` on the job
+        # They can be updated by using `#karafka_options` on the job
         DEFAULTS = {
           dispatch_method: :produce_async,
           # We don't create a dummy proc based partitioner as we would have to evaluate it with
