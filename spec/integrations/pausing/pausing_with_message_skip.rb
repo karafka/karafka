@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # We should be able to pause the partition in a way that would allow us to skip a message. This
-# is not something you want to do in production, nonetheless usecase like this should be supported.
+# is not something you want to do in production, nonetheless use-case like this should be
+# supported.
 
 setup_karafka do |config|
   config.max_messages = 5
