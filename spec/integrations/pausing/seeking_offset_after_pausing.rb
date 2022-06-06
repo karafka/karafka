@@ -34,7 +34,7 @@ draw_routes(Consumer)
 20.times { |i| produce(DataCollector.topic, i.to_s) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[:messages].size >= 19
+  DataCollector.data[:messages].size >= 25
 end
 
 assert_equal 25, DataCollector.data[:messages].size
