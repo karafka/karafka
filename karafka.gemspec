@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'https://karafka.io'
   spec.summary     = 'Ruby based framework for working with Apache Kafka'
   spec.description = 'Framework used to simplify Apache Kafka based Ruby applications development'
-  spec.license     = 'LGPL-3.0'
+  spec.licenses    = ['LGPL-3.0', 'Commercial']
 
   spec.add_dependency 'dry-configurable', '~> 0.13'
   spec.add_dependency 'dry-monitor', '~> 0.5'
