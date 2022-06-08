@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# We should be able to prolong a manual pause that we did
+# We should be able to prolong a manual pause that we did pause already and the times should add up
 
 setup_karafka do |config|
   config.max_messages = 5
