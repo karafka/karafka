@@ -16,6 +16,7 @@ module Karafka
       def initialize(subscription_group, jobs_queue)
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
+        @jobs_builder = ::Karafka::App.config.internal.jobs_builder
         @pauses_manager = PausesManager.new
         @client = Client.new(@subscription_group)
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
@@ -148,7 +149,7 @@ module Karafka
           partitions.each do |partition|
             pause_tracker = @pauses_manager.fetch(topic, partition)
             executor = @executors.fetch(topic, partition, pause_tracker)
-            jobs << Processing::Jobs::Revoked.new(executor)
+            jobs << @jobs_builder.revoked(executor)
           end
         end
 
@@ -160,7 +161,7 @@ module Karafka
         jobs = []
 
         @executors.each do |_, _, executor|
-          jobs << Processing::Jobs::Shutdown.new(executor)
+          jobs << @jobs_builder.shutdown(executor)
         end
 
         @scheduler.schedule_shutdown(@jobs_queue, jobs)
@@ -191,7 +192,7 @@ module Karafka
 
           executor = @executors.fetch(topic, partition, pause)
 
-          jobs << Processing::Jobs::Consume.new(executor, messages)
+          jobs << @jobs_builder.consume(executor, messages)
         end
 
         @scheduler.schedule_consumption(@jobs_queue, jobs)

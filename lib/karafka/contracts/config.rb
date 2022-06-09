@@ -31,10 +31,11 @@ module Karafka
         # We validate internals just to be sure, that they are present and working
         required(:internal).schema do
           required(:routing_builder)
+          required(:subscription_groups_builder)
+          required(:jobs_builder)
           required(:status)
           required(:process)
           required(:scheduler)
-          required(:subscription_groups_builder)
         end
       end
 
