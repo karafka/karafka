@@ -28,4 +28,6 @@ start_karafka_and_wait_until do
 end
 
 assert_equal 5, DataCollector.data[:counts].max
-assert_equal 8, DataCollector.data[:counts].size
+# We should get at least 8 batches 5 messages each but if there is a hickup, we may get more with
+# less in each
+assert_equal true, DataCollector.data[:counts].size >= 8
