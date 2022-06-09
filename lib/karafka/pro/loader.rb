@@ -21,6 +21,7 @@ module Karafka
           require_relative 'performance_tracker'
           require_relative 'scheduler'
           require_relative 'processing/jobs/consume_non_blocking'
+          require_relative 'routing/extensions'
           require_relative 'active_job/consumer'
           require_relative 'active_job/dispatcher'
           require_relative 'active_job/job_options_contract'
@@ -29,6 +30,8 @@ module Karafka
           config.internal.active_job.consumer = ActiveJob::Consumer
           config.internal.active_job.dispatcher = ActiveJob::Dispatcher.new
           config.internal.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
+
+          ::Karafka::Routing::Topic.include(Routing::Extensions)
 
           config.monitor.subscribe(PerformanceTracker.instance)
         end
