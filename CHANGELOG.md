@@ -3,6 +3,7 @@
 ## 2.0.0-beta2 (Unreleased)
 - Jobs building responsibility extracted out of the listener code base.
 - Fix a case where specs supervisor would try to kill no longer running process (#868)
+- Fix an instable integration spec that could misbehave under load
 
 ## 2.0.0-beta2 (2022-06-07)
 - Abstract away notion of topics groups (until now it was just an array)
