@@ -21,6 +21,9 @@ module Karafka
       # @return [Karafka::Messages::Messages] messages batch
       attr_reader :messages
 
+      # Topic accessibility may be needed for the jobs builder to be able to build a proper job
+      # based on the topic settings defined by the end user
+      #
       # @return [Karafka::Routing::Topic] topic of this executor
       attr_reader :topic
 

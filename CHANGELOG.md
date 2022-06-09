@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.0-beta2 (Unreleased)
+- Jobs building responsibility extracted out of the listener code base.
+
 ## 2.0.0-beta2 (2022-06-07)
 - Abstract away notion of topics groups (until now it was just an array)
 - Optimize how jobs queue is closed. Since we enqueue jobs only from the listeners, we can safely close jobs queue once listeners are done. By extracting this responsibility from listeners, we remove corner cases and race conditions. Note here: for non-blocking jobs we do wait for them to finish while running the `poll`. This ensures, that for async jobs that are long-living, we do not reach `max.poll.interval`.
