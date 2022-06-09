@@ -18,7 +18,14 @@ module Karafka
       # @return [String] subscription group id to which a given executor belongs
       attr_reader :group_id
 
+      # @return [Karafka::Messages::Messages] messages batch
       attr_reader :messages
+
+      # Topic accessibility may be needed for the jobs builder to be able to build a proper job
+      # based on the topic settings defined by the end user
+      #
+      # @return [Karafka::Routing::Topic] topic of this executor
+      attr_reader :topic
 
       # @param group_id [String] id of the subscription group to which the executor belongs
       # @param client [Karafka::Connection::Client] kafka client

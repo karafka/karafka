@@ -83,7 +83,7 @@ module Karafka
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
 
-      # Namespace for internal settings that should not be modified
+      # Namespace for internal settings that should not be modified directly
       setting :internal do
         # option routing_builder [Karafka::Routing::Builder] builder instance
         setting :routing_builder, default: Routing::Builder.new
@@ -98,6 +98,8 @@ module Karafka
         setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
         # option scheduler [Class] scheduler we will be using
         setting :scheduler, default: Scheduler.new
+        # option jobs_builder [Class] jobs builder we want to use
+        setting :jobs_builder, default: Processing::JobsBuilder.new
 
         # Karafka components for ActiveJob
         setting :active_job do

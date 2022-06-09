@@ -25,7 +25,7 @@ CONCURRENCY = 4
 class Scenario
   # How long a scenario can run before we kill it
   # This is a fail-safe just in case something would hang
-  MAX_RUN_TIME = 60 * 2
+  MAX_RUN_TIME = 3 * 60 # 3 minutes tops
 
   # There are rare cases where Karafka may force shutdown for some of the integration cases
   # This includes exactly those
@@ -73,7 +73,12 @@ class Scenario
     # If the thread is running too long, kill it
     if current_time - @started_at > MAX_RUN_TIME
       @wait_thr.kill
-      Process.kill('TERM', pid)
+
+      begin
+        Process.kill('TERM', pid)
+      # It may finish right after we want to kill it, that's why we ignore this
+      rescue Errno::ESRCH
+      end
     end
 
     # We read it so it won't grow as we use our default logger that prints to both test.log and
