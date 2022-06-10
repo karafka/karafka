@@ -21,12 +21,14 @@ module Karafka
           require_relative 'performance_tracker'
           require_relative 'scheduler'
           require_relative 'processing/jobs/consume_non_blocking'
+          require_relative 'processing/jobs_builder'
           require_relative 'routing/extensions'
           require_relative 'active_job/consumer'
           require_relative 'active_job/dispatcher'
           require_relative 'active_job/job_options_contract'
 
           config.internal.scheduler = Scheduler.new
+          config.internal.jobs_builder = Processing::JobsBuilder.new
           config.internal.active_job.consumer = ActiveJob::Consumer
           config.internal.active_job.dispatcher = ActiveJob::Dispatcher.new
           config.internal.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
