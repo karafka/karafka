@@ -73,6 +73,9 @@ module Karafka
         details = (error.backtrace || []).join("\n")
 
         case type
+        when 'consumer.prepared.error'
+          error "Consumer prepared error: #{error}"
+          error details
         when 'consumer.consume.error'
           error "Consumer consuming error: #{error}"
           error details

@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
+# This Karafka component is a Pro component.
+# All of the commercial components are present in the lib/karafka/pro directory of this
+# repository and their usage requires commercial license agreement.
+#
+# Karafka has also commercial-friendly license, commercial support and commercial components.
+#
+# By sending a pull request to the pro components, you are agreeing to transfer the copyright of
+# your code to Maciej Mensfeld.
+
 module Karafka
   module Pro
     module ActiveJob
-      # This Karafka component is a Pro component.
-      # All of the commercial components are present in the lib/karafka/pro directory of this
-      # repository and their usage requires commercial license agreement.
-      #
-      # Karafka has also commercial-friendly license, commercial support and commercial components.
-      #
-      # By sending a pull request to the pro components, you are agreeing to transfer the copyright
-      # of your code to Maciej Mensfeld.
-
       # Pro ActiveJob consumer that is suppose to handle long-running jobs as well as short
       # running jobs
       class Consumer < Karafka::ActiveJob::Consumer
@@ -20,16 +20,27 @@ module Karafka
 
         private_constant :MAX_PAUSE_TIME
 
+        # Before we switch to a non-blocking mode, we need to pause this partition
         def prepared
           return unless topic.long_running_job?
 
-          # Basically pause forever on the next message
+          # Basically pause forever on the next message (if exists)
           pause(messages.last.offset + 1, MAX_PAUSE_TIME)
         end
 
         # Runs ActiveJob jobs processing and handles lrj if needed
         def consume
-          super
+          messages.each do |message|
+            ::ActiveJob::Base.execute(
+              ::ActiveSupport::JSON.decode(message.raw_payload)
+            )
+
+            mark_as_consumed(message)
+
+            # If for any reason we've lost this partition, not worth iterating over new messages
+            # as they are no longer ours
+            return if topic.long_running_job? && revoked?
+          end
 
           return unless topic.long_running_job?
 

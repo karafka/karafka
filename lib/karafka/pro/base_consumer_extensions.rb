@@ -11,21 +11,19 @@
 
 module Karafka
   module Pro
-    # Pro routing components
-    module Routing
-      # Routing extensions that allow to configure some extra PRO routing options
-      module Extensions
-        class << self
-          # @param base [Class] class we extend
-          def included(base)
-            base.attr_accessor :long_running_job
-          end
-        end
+    # Extensions to the base consumer that make it more pro and fancy
+    module BaseConsumerExtensions
+      # Marks this consumer revoked state as true
+      # This allows us for things like lrj to finish early as this state may change during lrj
+      # execution
+      def on_revoked
+        @revoked = true
+        super
+      end
 
-        # @return [Boolean] is a given job on a topic a long running one
-        def long_running_job?
-          @long_running_job || false
-        end
+      # @return [Boolean] true if partition was revoked from the current consumer
+      def revoked?
+        @revoked || false
       end
     end
   end

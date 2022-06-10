@@ -144,13 +144,18 @@ module Karafka
         # Do not pause if the client got closed, would not change anything
         return if @closed
 
+        pause_msg = Messages::Seek.new(topic, partition, offset)
+
+        # Since we want to pause on a given offset, we commit it
+        # We cannot use our local method as we are inside our mutex already
+        @kafka.store_offset(pause_msg)
+        @kafka.commit(nil, false)
+
         tpl = topic_partition_list(topic, partition)
 
         return unless tpl
 
         @kafka.pause(tpl)
-
-        pause_msg = Messages::Seek.new(topic, partition, offset)
 
         seek(pause_msg)
       ensure
@@ -165,6 +170,11 @@ module Karafka
         @mutex.lock
 
         return if @closed
+
+        # Always commit synchronously offsets if any when we resume
+        # This prevents resuming without offset in case it would not be committed prior
+        # We can skip performance penalty since resuming should not happen too often
+        @kafka.commit(nil, false) if @offsetting
 
         tpl = topic_partition_list(topic, partition)
 

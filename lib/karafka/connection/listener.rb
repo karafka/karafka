@@ -186,11 +186,9 @@ module Karafka
         jobs = []
 
         @messages_buffer.each do |topic, partition, messages|
-          pause = @pauses_manager.fetch(topic, partition)
+          pause_tracker = @pauses_manager.fetch(topic, partition)
 
-          next if pause.paused?
-
-          executor = @executors.fetch(topic, partition, pause)
+          executor = @executors.fetch(topic, partition, pause_tracker)
 
           jobs << @jobs_builder.consume(executor, messages)
         end

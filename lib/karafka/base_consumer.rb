@@ -155,11 +155,8 @@ module Karafka
 
     # Resumes processing of the current topic partition
     def resume
-      client.resume(
-        messages.metadata.topic,
-        messages.metadata.partition
-      )
-
+      # This is sufficient to resumt a partition, as with expired timeout, it will be resumed
+      # by the listener thread before the next poll.
       pause_tracker.expire
     end
 
