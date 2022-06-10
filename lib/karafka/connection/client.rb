@@ -149,7 +149,7 @@ module Karafka
         # Since we want to pause on a given offset, we commit it
         # We cannot use our local method as we are inside our mutex already
         @kafka.store_offset(pause_msg)
-        @kafka.commit(nil, false)
+        @kafka.commit(nil, false) unless offset.zero?
 
         tpl = topic_partition_list(topic, partition)
 

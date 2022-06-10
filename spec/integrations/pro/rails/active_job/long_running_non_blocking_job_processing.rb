@@ -39,7 +39,7 @@ config = {
 }
 consumer = Rdkafka::Config.new(config).consumer
 
-other = Thread.new do
+Thread.new do
   sleep(10)
 
   consumer.subscribe(DataCollector.topic)
@@ -57,4 +57,4 @@ start_karafka_and_wait_until do
   DataCollector.data[0].size >= 1
 end
 
-assert_equal 1, DataCollector.data[0].size
+assert_equal 1, DataCollector.data[0].size, 'Given job should be executed only once'

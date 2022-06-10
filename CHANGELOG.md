@@ -7,8 +7,7 @@
 - Commit offsets prior to pausing partitions to ensure that the latest offset is always committed
 - Fix a case where consecutive CTRL+C (non-stop) would case an exception during forced shutdown
 - Add missing `consumer.prepared.error` into `LoggerListener`
-- Always unpause prior to resuming the partition.
-- Delegate partition resuming from the consumers to listener thread.
+- Delegate partition resuming from the consumers to listeners threads.
 
 ## 2.0.0-beta2 (2022-06-07)
 - Abstract away notion of topics groups (until now it was just an array)

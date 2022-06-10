@@ -155,8 +155,8 @@ module Karafka
 
     # Resumes processing of the current topic partition
     def resume
-      # This is sufficient to resumt a partition, as with expired timeout, it will be resumed
-      # by the listener thread before the next poll.
+      # This is sufficient to expire a partition pause, as with it will be resumed by the listener
+      # thread before the next poll.
       pause_tracker.expire
     end
 

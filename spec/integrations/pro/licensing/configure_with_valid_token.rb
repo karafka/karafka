@@ -11,7 +11,6 @@ end
 
 LOGS.rewind
 
-
 logs = LOGS.read
 config = Karafka::App.config.internal
 pro = Karafka::Pro
