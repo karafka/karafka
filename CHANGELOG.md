@@ -8,9 +8,10 @@
 - Fix a case where consecutive CTRL+C (non-stop) would case an exception during forced shutdown
 - Add missing `consumer.prepared.error` into `LoggerListener`
 - Delegate partition resuming from the consumers to listeners threads.
-- Add support for Long Running Jobs (LRJ) for ActiveJob
+- Add support for Long Running Jobs (LRJ) for ActiveJob [PRO]
 - Allow `active_job_topic` to accept a block for extra topic related settings
 - Remove no longer needed logger threads
+- Auto-adapt number of processes for integration specs based on the number of CPUs
 
 ## 2.0.0-beta2 (2022-06-07)
 - Abstract away notion of topics groups (until now it was just an array)
