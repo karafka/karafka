@@ -86,8 +86,7 @@ module Karafka
       # @param message [Karafka::Messages::Message]
       def store_offset(message)
         @mutex.synchronize do
-          @offsetting = true
-          @kafka.store_offset(message)
+          internal_store_offset(message)
         end
       end
 
@@ -104,14 +103,7 @@ module Karafka
       def commit_offsets(async: true)
         @mutex.lock
 
-        return unless @offsetting
-
-        @kafka.commit(nil, async)
-        @offsetting = false
-      rescue Rdkafka::RdkafkaError => e
-        return if e.code == :no_offset
-
-        raise e
+        internal_commit_offsets(async: async)
       ensure
         @mutex.unlock
       end
@@ -147,9 +139,8 @@ module Karafka
         pause_msg = Messages::Seek.new(topic, partition, offset)
 
         # Since we want to pause on a given offset, we commit it
-        # We cannot use our local method as we are inside our mutex already
-        @kafka.store_offset(pause_msg)
-        @kafka.commit(nil, false) unless offset.zero?
+        internal_store_offset(pause_msg)
+        internal_commit_offsets(async: false)
 
         tpl = topic_partition_list(topic, partition)
 
@@ -224,11 +215,31 @@ module Karafka
 
       private
 
+      # Non thread-safe offset storing method
+      # @param message [Karafka::Messages::Message]
+      def internal_store_offset(message)
+        @offsetting = true
+        @kafka.store_offset(message)
+      end
+
+      # Non thread-safe message committing method
+      # @param async [Boolean] should the commit happen async or sync (async by default)
+      def internal_commit_offsets(async: true)
+        return unless @offsetting
+
+        @kafka.commit(nil, async)
+        @offsetting = false
+      rescue Rdkafka::RdkafkaError => e
+        return if e.code == :no_offset
+
+        raise e
+      end
+
       # Commits the stored offsets in a sync way and closes the consumer.
       def close
-        commit_offsets!
-
         @mutex.synchronize do
+          internal_commit_offsets(async: false)
+
           @closed = true
 
           # Remove callbacks runners that were registered
