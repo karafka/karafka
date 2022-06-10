@@ -41,12 +41,16 @@ module Karafka
               ::ActiveSupport::JSON.decode(message.raw_payload)
             )
 
+            next unless topic.long_running_job?
+
+            # If partition was revoked, there won't be anything to mark as consumed
+            return if revoked?
+
             mark_as_consumed(message)
 
             # If for any reason we've lost this partition, not worth iterating over new messages
             # as they are no longer ours
-            return if topic.long_running_job? && revoked?
-            return if topic.long_running_job? && Karafka::App.stopping?
+            return if Karafka::App.stopping?
           end
 
           return unless topic.long_running_job?

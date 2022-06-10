@@ -8,8 +8,8 @@
 
 setup_karafka do |config|
   config.license.token = pro_license_token
-  config.max_wait_time = 5_000
-  config.concurrency = 5
+  config.max_wait_time = 2_500
+  config.concurrency = 10
   config.shutdown_timeout = 60_000
 end
 
@@ -19,6 +19,7 @@ draw_routes do
   consumer_group DataCollector.consumer_group do
     active_job_topic 'integrations_3_02' do
       long_running_job true
+      manual_offset_management true
     end
   end
 end
@@ -56,13 +57,20 @@ consumer = Rdkafka::Config.new(config).consumer
   Job.perform_later('4')
 end
 
+revoked = false
+
 # This will trigger a rebalance when the first job is being processed
 Thread.new do
-  sleep(15)
+  sleep(10)
 
   consumer.subscribe('integrations_3_02')
 
   consumer.each do
+    unless revoked
+      sleep(5)
+      revoked = true
+    end
+
     next
   end
 
@@ -70,7 +78,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data[:started].size >= 2
+  DataCollector.data[:started].size >= 2 && revoked
 end
 
 # We should finish only one job per each partition as the rest should be stopped from being

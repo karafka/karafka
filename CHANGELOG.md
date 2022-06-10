@@ -10,7 +10,7 @@
 - Delegate partition resuming from the consumers to listeners threads.
 - Add support for Long Running Jobs (LRJ) for ActiveJob
 - Allow `active_job_topic` to accept a block for extra topic related settings
-- Remove no longer needed loger threads
+- Remove no longer needed logger threads
 
 ## 2.0.0-beta2 (2022-06-07)
 - Abstract away notion of topics groups (until now it was just an array)
