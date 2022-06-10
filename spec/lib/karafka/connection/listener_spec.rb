@@ -32,7 +32,7 @@ RSpec.describe_current do
     end
 
     it 'expect client to commit offsets' do
-      expect(client).to have_received(:commit_offsets).exactly(3).times
+      expect(client).to have_received(:commit_offsets).exactly(2).times
     end
   end
 
@@ -58,7 +58,7 @@ RSpec.describe_current do
 
     it { expect(jobs_queue.size).to eq(2) }
     it { expect(jobs_queue.pop).to be_a(Karafka::Processing::Jobs::Revoked) }
-    it { expect(client).to have_received(:commit_offsets).exactly(3).times }
+    it { expect(client).to have_received(:commit_offsets).exactly(2).times }
   end
 
   context 'when we have lost partitions during rebalance and actions need to be taken' do

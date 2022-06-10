@@ -14,13 +14,19 @@ module Karafka
     module ActiveJob
       # Pro ActiveJob consumer that is suppose to handle long-running jobs as well as short
       # running jobs
+      #
+      # When in LRJ, it will pause a given partition forever and will resume its processing only
+      # when all the jobs are done processing.
+      #
+      # It contains slightly better revocation warranties than the regular blocking consumer as
+      # it can stop processing batch of jobs in the middle after the revocation.
       class Consumer < Karafka::ActiveJob::Consumer
         # Pause for tops 31 years
         MAX_PAUSE_TIME = 1_000_000_000_000
 
         private_constant :MAX_PAUSE_TIME
 
-        # Before we switch to a non-blocking mode, we need to pause this partition
+        # Before we switch to a non-blocking mode, we need to pause this partition forever
         def prepared
           return unless topic.long_running_job?
 
@@ -40,6 +46,7 @@ module Karafka
             # If for any reason we've lost this partition, not worth iterating over new messages
             # as they are no longer ours
             return if topic.long_running_job? && revoked?
+            return if topic.long_running_job? && Karafka::App.stopping?
           end
 
           return unless topic.long_running_job?
