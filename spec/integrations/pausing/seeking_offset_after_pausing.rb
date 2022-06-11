@@ -5,9 +5,9 @@
 
 setup_karafka do |config|
   config.max_messages = 5
-  config.pause_timeout = 10_000
-  config.pause_max_timeout = 10_000
-  config.pause_with_exponential_backoff = true
+  config.pause_timeout = 5_000
+  config.pause_max_timeout = 25_000
+  config.pause_with_exponential_backoff = false
   config.manual_offset_management = true
 end
 
@@ -18,8 +18,6 @@ class Consumer < Karafka::BaseConsumer
     unless @paused
       @paused = true
       pause(messages.last.offset + 5)
-      # Simulate consumption
-      sleep 5
       seek(@first_message.offset)
     end
 
@@ -34,8 +32,8 @@ draw_routes(Consumer)
 20.times { |i| produce(DataCollector.topic, i.to_s) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[:messages].size >= 25
+  DataCollector.data[:messages].size > 20
 end
 
-assert_equal 25, DataCollector.data[:messages].size
+assert_equal true, DataCollector.data[:messages].size > 20
 assert_equal 20, DataCollector.data[:messages].uniq.size

@@ -120,7 +120,11 @@ module Karafka
       #
       # @param message [Messages::Message, Messages::Seek] message to which we want to seek to
       def seek(message)
+        @mutex.lock
+
         @kafka.seek(message)
+      ensure
+        @mutex.unlock
       end
 
       # Pauses given partition and moves back to last successful offset processed.
@@ -148,7 +152,7 @@ module Karafka
 
         @kafka.pause(tpl)
 
-        seek(pause_msg)
+        @kafka.seek(pause_msg)
       ensure
         @mutex.unlock
       end

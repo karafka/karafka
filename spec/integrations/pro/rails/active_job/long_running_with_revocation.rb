@@ -70,7 +70,7 @@ Thread.new do
       revoked = true
     end
 
-    next
+    break
   end
 
   consumer.close
