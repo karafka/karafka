@@ -59,8 +59,8 @@ end
 
 start_karafka_and_wait_until do
   DataCollector[:revoked].size >= 1 && (
-    DataCollector[0].size >= 2 ||
-      DataCollector[1].size >= 2
+    DataCollector[0].size >= 10 ||
+      DataCollector[1].size >= 10
   )
 end
 
