@@ -12,6 +12,8 @@
 - Allow `active_job_topic` to accept a block for extra topic related settings
 - Remove no longer needed logger threads
 - Auto-adapt number of processes for integration specs based on the number of CPUs
+- Introduce an integration spec runner that prints everything to stdout (better for development)
+- Introduce extra integration specs for various ActiveJob usage scenarios
 
 ## 2.0.0-beta2 (2022-06-07)
 - Abstract away notion of topics groups (until now it was just an array)

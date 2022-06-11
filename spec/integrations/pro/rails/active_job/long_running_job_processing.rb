@@ -58,3 +58,5 @@ start_karafka_and_wait_until do
 end
 
 assert_equal 1, DataCollector.data[0].size, 'Given job should be executed only once'
+
+consumer.close
