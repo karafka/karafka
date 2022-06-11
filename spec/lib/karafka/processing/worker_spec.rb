@@ -78,5 +78,30 @@ RSpec.describe_current do
       it { expect(job).to have_received(:teardown).with(no_args) }
       it { expect(queue).to have_received(:complete).with(job) }
     end
+
+    context 'when an error occurs in the worker' do
+      let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true) }
+
+      let(:detected_errors) do
+        errors = []
+        Karafka.monitor.subscribe('error.occurred') { |occurred| errors << occurred }
+        errors
+      end
+
+      before do
+        allow(job).to receive(:prepare).and_raise(StandardError)
+
+        detected_errors
+
+        queue << job
+        Thread.pass
+        sleep(0.05)
+      end
+
+      it 'expect to instrument on it' do
+        expect(detected_errors[0].id).to eq('error.occurred')
+        expect(detected_errors[0].payload[:type]).to eq('worker.process.error')
+      end
+    end
   end
 end

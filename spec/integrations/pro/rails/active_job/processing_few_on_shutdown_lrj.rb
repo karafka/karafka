@@ -3,7 +3,7 @@
 # Karafka with PRO should finish processing AJ jobs as fast as possible even if more were received
 # in the batch. Since we are shutting down, those jobs will be picked up after Karafka is started
 # again, so not worth waiting.
-# The above should appy also to LRJ.
+# The above should apply also to LRJ.
 
 setup_karafka do |config|
   # This will ensure we get more jobs in one go

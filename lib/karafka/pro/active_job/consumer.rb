@@ -41,13 +41,13 @@ module Karafka
               ::ActiveSupport::JSON.decode(message.raw_payload)
             )
 
-            # If partition was revoked, there won't be anything to mark as consumed
+            # If for any reason we've lost this partition, not worth iterating over new messages
+            # as they are no longer ours
             return if revoked?
 
             mark_as_consumed(message)
 
-            # If for any reason we've lost this partition, not worth iterating over new messages
-            # as they are no longer ours
+            # If we are shutting down, not worth continuing processing
             return if Karafka::App.stopping?
           end
 
