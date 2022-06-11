@@ -63,12 +63,7 @@ other = Thread.new do
   # We give it a bit of time, so we make sure we have something in the buffer
   sleep(10)
 
-  config = {
-    'bootstrap.servers': 'localhost:9092',
-    'group.id': Karafka::App.consumer_groups.first.id,
-    'auto.offset.reset': 'earliest'
-  }
-  consumer = Rdkafka::Config.new(config).consumer
+  consumer = setup_rdkafka_consumer
   consumer.subscribe('integrations_0_02')
   consumer.each do |message|
     DataCollector[:process2] << message

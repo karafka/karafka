@@ -15,7 +15,6 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-
     messages.each do
       DataCollector[messages.metadata.partition] << true
 
@@ -46,12 +45,7 @@ end
 end
 
 # We need a second producer to trigger a rebalance
-config = {
-  'bootstrap.servers': 'localhost:9092',
-  'group.id': Karafka::App.consumer_groups.first.id,
-  'auto.offset.reset': 'earliest'
-}
-consumer = Rdkafka::Config.new(config).consumer
+consumer = setup_rdkafka_consumer
 
 Thread.new do
   sleep(10)

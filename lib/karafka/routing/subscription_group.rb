@@ -44,7 +44,7 @@ module Karafka
         kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
         # rdkafka offset auto-storing
-        kafka[:'enable.auto.offset.store'] = 'false'
+        kafka[:'enable.auto.offset.store'] = false
         kafka.freeze
         kafka
       end

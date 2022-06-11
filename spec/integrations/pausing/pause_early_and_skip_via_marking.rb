@@ -35,12 +35,7 @@ start_karafka_and_wait_until do
   DataCollector[:messages].size >= 1
 end
 
-config = {
-  'bootstrap.servers': 'localhost:9092',
-  'group.id': Karafka::App.consumer_groups.first.id,
-  'auto.offset.reset': 'earliest'
-}
-consumer = Rdkafka::Config.new(config).consumer
+consumer = setup_rdkafka_consumer
 
 Thread.new do
   consumer.subscribe(DataCollector.topic)

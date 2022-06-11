@@ -36,12 +36,7 @@ Thread.new do
 end
 
 # We need a second producer so we are sure that there was no revocation due to a timeout
-config = {
-  'bootstrap.servers': 'localhost:9092',
-  'group.id': Karafka::App.consumer_groups.first.id,
-  'auto.offset.reset': 'earliest'
-}
-consumer = Rdkafka::Config.new(config).consumer
+consumer = setup_rdkafka_consumer
 
 other = Thread.new do
   sleep(5)

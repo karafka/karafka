@@ -39,12 +39,7 @@ end
 elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce('integrations_1_03', data, partition: rand(0..2)) }
 
-config = {
-  'bootstrap.servers': 'localhost:9092',
-  'group.id': Karafka::App.consumer_groups.first.id,
-  'auto.offset.reset': 'earliest'
-}
-consumer = Rdkafka::Config.new(config).consumer
+consumer = setup_rdkafka_consumer
 
 other =  Thread.new do
   sleep(10)

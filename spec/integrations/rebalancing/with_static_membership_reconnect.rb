@@ -63,14 +63,13 @@ sleep(2)
 # First we start the first producer, so the one that we want to track activity of, gets only
 # one partition assigned, so we don't have to worry about figuring out which partition it got
 other = Thread.new do
-  config = {
-    'bootstrap.servers': 'localhost:9092',
-    'group.id': Karafka::App.consumer_groups.first.id,
+  consumer = setup_rdkafka_consumer(
     'group.instance.id': SecureRandom.uuid,
     'auto.offset.reset': 'latest'
-  }
-  consumer = Rdkafka::Config.new(config).consumer
+  )
+
   consumer.subscribe('integrations_1_02')
+
   consumer.each do |message|
     DataCollector[:process1] << [message.payload.to_i, message.partition]
 

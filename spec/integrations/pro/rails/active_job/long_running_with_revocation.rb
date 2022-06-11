@@ -41,13 +41,7 @@ class Job < ActiveJob::Base
   end
 end
 
-config = {
-  'bootstrap.servers': 'localhost:9092',
-  'group.id': Karafka::App.consumer_groups.first.id,
-  'auto.offset.reset': 'earliest'
-}
-
-consumer = Rdkafka::Config.new(config).consumer
+consumer = setup_rdkafka_consumer
 
 # 3 really slow jobs per partition
 # 1 and 4 are picked because they will dispatch messages to 0 and 1 partition

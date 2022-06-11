@@ -41,8 +41,11 @@ module Karafka
 
         return unless topic.long_running_job?
 
-        # Once processing is done, we move to the next batch and resume
-        seek(messages.last.offset + 1)
+        # Nothing to resume if it was revoked
+        return if revoked?
+
+        # Once processing is done, we move to the new offset based on commits
+        seek(@seek_offset || messages.first.offset)
         resume
       end
 

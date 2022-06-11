@@ -142,8 +142,6 @@ module Karafka
 
         pause_msg = Messages::Seek.new(topic, partition, offset)
 
-        # Since we want to pause on a given offset, we commit it
-        internal_store_offset(pause_msg)
         internal_commit_offsets(async: false)
 
         tpl = topic_partition_list(topic, partition)
