@@ -33,6 +33,9 @@ module Karafka
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
 
+        worker.process
+        worker.processed
+
         statistics.emitted
 
         error.occurred

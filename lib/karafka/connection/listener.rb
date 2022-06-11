@@ -10,10 +10,15 @@ module Karafka
     class Listener
       include Helpers::Async
 
+      # Can be useful for logging
+      # @return [String] id of this listener
+      attr_reader :id
+
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
       # @return [Karafka::Connection::Listener] listener instance
       def initialize(subscription_group, jobs_queue)
+        @id = SecureRandom.uuid
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
         @jobs_builder = ::Karafka::App.config.internal.jobs_builder
@@ -63,16 +68,16 @@ module Karafka
 
           resume_paused_partitions
 
-          # We need to fetch data before we revoke lost partitions details as during the polling
-          # the callbacks for tracking lost partitions are triggered. Otherwise we would be always
-          # one batch behind.
-          poll_and_remap_messages
-
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop.received',
             caller: self,
             messages_buffer: @messages_buffer
-          )
+          ) do
+            # We need to fetch data before we revoke lost partitions details as during the polling
+            # the callbacks for tracking lost partitions are triggered. Otherwise we would be
+            # always one batch behind.
+            poll_and_remap_messages
+          end
 
           # If there were revoked partitions, we need to wait on their jobs to finish before
           # distributing consuming jobs as upon revoking, we might get assigned to the same
