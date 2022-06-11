@@ -30,25 +30,30 @@ module Karafka
         def prepared
           return unless topic.long_running_job?
 
-          # Basically pause forever on the next message (if exists)
-          pause(messages.last.offset + 1, MAX_PAUSE_TIME)
+          # Basically pause forever on the first message
+          # In case of a crash, this will ensure we do not skip any jobs
+          pause(messages.first.offset, MAX_PAUSE_TIME)
         end
 
         # Runs ActiveJob jobs processing and handles lrj if needed
         def consume
           messages.each do |message|
+            # If for any reason we've lost this partition, not worth iterating over new messages
+            # as they are no longer ours
+            return if revoked?
+            break if Karafka::App.stopping?
+
             ::ActiveJob::Base.execute(
               ::ActiveSupport::JSON.decode(message.raw_payload)
             )
 
-            # If for any reason we've lost this partition, not worth iterating over new messages
-            # as they are no longer ours
+            # We check it twice as the job may be long running
             return if revoked?
 
             mark_as_consumed(message)
 
-            # If we are shutting down, not worth continuing processing
-            return if Karafka::App.stopping?
+            # Do not process more if we are shutting down
+            break if Karafka::App.stopping?
           end
 
           return unless topic.long_running_job?
@@ -56,6 +61,9 @@ module Karafka
           # Resume processing if it was an lrj
           # If it was lrj  it was paused during the preparation phase, so we need to resume to get
           # new jobs
+          # Since we have paused on our first message (not to skip any messages), we now ned to
+          # move the offset to the next one as all should be processed
+          seek(messages.last.offset + 1)
           resume
         end
       end
