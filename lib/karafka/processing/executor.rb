@@ -59,7 +59,7 @@ module Karafka
           received_at
         )
 
-        consumer.on_prepared
+        consumer.on_prepare
       end
 
       # Runs consumer data processing against given batch and handles failures and errors.

@@ -25,12 +25,12 @@ RSpec.describe_current do
 
   it { expect(described_class).to be < Karafka::ActiveJob::Consumer }
 
-  describe '#prepared' do
+  describe '#prepare' do
     before { allow(consumer).to receive(:pause) }
 
     context 'when it is not a lrj' do
       it 'expect not to pause' do
-        consumer.prepared
+        consumer.prepare
 
         expect(consumer).not_to have_received(:pause)
       end
@@ -43,7 +43,7 @@ RSpec.describe_current do
       end
 
       it 'expect to pause forever on our first message' do
-        consumer.prepared
+        consumer.prepare
 
         expect(consumer).to have_received(:pause).with(message1.offset, 1_000_000_000_000)
       end

@@ -27,7 +27,7 @@ module Karafka
         private_constant :MAX_PAUSE_TIME
 
         # Before we switch to a non-blocking mode, we need to pause this partition forever
-        def prepared
+        def prepare
           return unless topic.long_running_job?
 
           # Basically pause forever on the first message
