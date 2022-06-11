@@ -65,9 +65,7 @@ module Karafka
 
       return unless env.development? || env.test?
 
-      raise(
-        Errors::ExpiredLicenseTokenError.new(expired_message(expires_on))
-      )
+      raise Errors::ExpiredLicenseTokenError.new, expired_message(expires_on)
     end
 
     # We do not raise an error here as we don't want to cause any problems to someone that runs
