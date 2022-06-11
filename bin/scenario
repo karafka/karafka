@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+# Runner for non-parallel execution of a single scenario.
+# It prints all the info stdout, etc and basically replaces itself with the scenario execution.
+# It is useful when we work with a single spec and we need all the debug info
+
+raise 'This code needs to be executed WITHOUT bundle exec' if Kernel.const_defined?(:Bundler)
+
+require 'open3'
+require 'fileutils'
+require 'pathname'
+require 'tmpdir'
+require 'etc'
+
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
+
+# Load all the specs
+specs = Dir[ROOT_PATH.join('spec/integrations/**/*.rb')]
+
+# If filters is provided, apply
+# Allows to provide several filters one after another and applies all of them
+ARGV.each do |filter|
+  specs.delete_if { |name| !name.include?(filter) }
+end
+
+raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
+raise ArgumentError, "Many specs found with filters: #{ARGV.join(', ')}" if specs.size != 1
+
+exec("bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{specs[0]}")

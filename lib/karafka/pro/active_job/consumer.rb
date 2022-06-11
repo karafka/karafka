@@ -41,8 +41,6 @@ module Karafka
               ::ActiveSupport::JSON.decode(message.raw_payload)
             )
 
-            next unless topic.long_running_job?
-
             # If partition was revoked, there won't be anything to mark as consumed
             return if revoked?
 

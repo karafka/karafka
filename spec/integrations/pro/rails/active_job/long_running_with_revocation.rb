@@ -19,7 +19,6 @@ draw_routes do
   consumer_group DataCollector.consumer_group do
     active_job_topic 'integrations_3_02' do
       long_running_job true
-      manual_offset_management true
     end
   end
 end

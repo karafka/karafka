@@ -165,7 +165,7 @@ module Karafka
         # Always commit synchronously offsets if any when we resume
         # This prevents resuming without offset in case it would not be committed prior
         # We can skip performance penalty since resuming should not happen too often
-        @kafka.commit(nil, false) if @offsetting
+        internal_commit_offsets(async: false)
 
         tpl = topic_partition_list(topic, partition)
 
