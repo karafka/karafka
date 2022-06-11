@@ -20,7 +20,7 @@ module Karafka
             instance_eval(&block)
 
             # This is handled by our custom ActiveJob consumer
-            # Without this default behaviour would cause messages to skip upon shutdown as the
+            # Without this, default behaviour would cause messages to skip upon shutdown as the
             # offset would be committed for the last message
             manual_offset_management true
           end
