@@ -5,7 +5,7 @@
 
 setup_karafka do |config|
   config.max_messages = 5
-  config.pause_timeout = 5_000
+  config.pause_timeout = 6_000
   config.pause_max_timeout = 10_000
   config.pause_with_exponential_backoff = true
   config.manual_offset_management = true
@@ -17,9 +17,8 @@ class Consumer < Karafka::BaseConsumer
 
     unless @paused
       @paused = true
-      # Skip one from the next batch
       pause(messages.last.offset + 5)
-      sleep 2
+      sleep 3
       seek(@first_message.offset)
     end
 
