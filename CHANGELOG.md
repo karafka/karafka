@@ -15,6 +15,7 @@
 - Introduce an integration spec runner that prints everything to stdout (better for development)
 - Introduce extra integration specs for various ActiveJob usage scenarios
 - Rename consumer method `#prepared` to `#prepare` to reflect better its use-case
+- For test and dev raise an error when expired license key is used (never for non dev)
 
 ## 2.0.0-beta2 (2022-06-07)
 - Abstract away notion of topics groups (until now it was just an array)

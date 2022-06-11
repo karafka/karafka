@@ -62,15 +62,15 @@ DataCollector.data[:pauses].each do |pause_time|
   if previous_pause_time
     distance = pause_time - previous_pause_time
 
-    assert_equal true, distance >= 1
+    assert distance >= 1
     # We add 2 seconds of tolerance as under heavy load, it can take that much time
-    assert_equal true, distance <= 3
+    assert distance <= 3
   end
 
   previous_pause_time = pause_time
 end
 
-assert_equal true, (Time.now.to_f - started_at) >= 9
+assert (Time.now.to_f - started_at) >= 9
 assert_equal elements, DataCollector.data[0]
 # We should pause 10 times, once every 5 messages
 assert_equal 10, DataCollector.data[:pauses].count

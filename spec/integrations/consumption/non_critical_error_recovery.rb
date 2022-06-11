@@ -41,7 +41,7 @@ start_karafka_and_wait_until do
   DataCollector.data[0].size >= 6
 end
 
-assert_equal true, DataCollector.data[0].size >= 6
+assert DataCollector.data[0].size >= 6
 assert_equal 1, DataCollector.data[1].uniq.size
 assert_equal StandardError, DataCollector.data[:errors].first[:error].class
 assert_equal 'consumer.consume.error', DataCollector.data[:errors].first[:type]

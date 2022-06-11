@@ -25,4 +25,4 @@ start_karafka_and_wait_until do
   DataCollector.data[:processing_lags].size >= 20
 end
 
-assert_equal true, DataCollector.data[:processing_lags].max <= 50
+assert DataCollector.data[:processing_lags].max <= 50

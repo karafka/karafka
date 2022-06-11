@@ -35,4 +35,4 @@ end
 
 max_lag = DataCollector.data[:processing_lags].max
 
-assert_equal true, (200..300).cover?(max_lag)
+assert (200..300).cover?(max_lag)

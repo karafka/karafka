@@ -25,4 +25,4 @@ rescue Karafka::Errors::MissingBootFileError
   disabled = false
 end
 
-assert_equal true, disabled
+assert disabled

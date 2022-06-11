@@ -141,4 +141,4 @@ post_rebalance_messages = DataCollector
                           .with_index { |_, index| index > after }
                           .select { |message| message.is_a?(Array) }
 
-assert_equal true, (DataCollector.data[:process1] & post_rebalance_messages).empty?
+assert (DataCollector.data[:process1] & post_rebalance_messages).empty?

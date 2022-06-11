@@ -59,4 +59,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal [1], DataCollector.data[:partitions].uniq
-assert_equal true, DataCollector.data[:ticks].count > 1
+assert DataCollector.data[:ticks].count > 1

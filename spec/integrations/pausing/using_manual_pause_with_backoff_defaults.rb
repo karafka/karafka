@@ -43,8 +43,8 @@ DataCollector.data[:pauses].each do |time|
     next
   end
 
-  assert_equal true, (time - previous) * 1_000 >= 2_000
-  assert_equal true, (time - previous) * 1_000 <= 4_000
+  assert (time - previous) * 1_000 >= 2_000
+  assert (time - previous) * 1_000 <= 4_000
 
   previous = time
 end

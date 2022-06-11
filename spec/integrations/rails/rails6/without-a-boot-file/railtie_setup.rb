@@ -19,4 +19,4 @@ rescue Karafka::Errors::MissingBootFileError
   failure = true
 end
 
-assert_equal true, failure
+assert failure

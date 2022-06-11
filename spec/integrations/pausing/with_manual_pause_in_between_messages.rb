@@ -45,7 +45,7 @@ DataCollector.data[:times].each do |timestamp|
   end
 
   pause = (timestamp - previous)
-  assert_equal true, pause >= 1 && pause <= 5
+  assert pause >= 1 && pause <= 5
 
   previous = timestamp
 end

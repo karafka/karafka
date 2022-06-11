@@ -30,4 +30,4 @@ end
 assert_equal 5, DataCollector.data[:counts].max
 # We should get at least 8 batches 5 messages each but if there is a hickup, we may get more with
 # less in each
-assert_equal true, DataCollector.data[:counts].size >= 8
+assert DataCollector.data[:counts].size >= 8

@@ -18,6 +18,6 @@ handle { Job.karafka_options(dispatch_method: :na) }
 handle { Job.karafka_options(dispatch_method: :produce_async) }
 handle { Job.karafka_options(dispatch_method: rand) }
 
-assert_equal true, DataCollector.data[0][0]
+assert DataCollector.data[0][0]
 assert_equal false, DataCollector.data[0][1]
-assert_equal true, DataCollector.data[0][2]
+assert DataCollector.data[0][2]
