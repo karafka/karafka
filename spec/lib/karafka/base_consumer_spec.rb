@@ -205,9 +205,7 @@ RSpec.describe_current do
 
       it 'expect not to run error instrumentation' do
         Karafka.monitor.subscribe('error.occurred') do |event|
-          expect(event.payload[:caller]).not_to eq(consumer)
-          expect(event.payload[:error]).not_to be_a(StandardError)
-          expect(event.payload[:type]).to eq('consumer.prepared.error')
+          raise
         end
 
         consumer.on_prepare
