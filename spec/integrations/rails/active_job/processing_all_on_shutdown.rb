@@ -43,4 +43,4 @@ start_karafka_and_wait_until do
   !DataCollector.data[:stopping].size.zero?
 end
 
-assert_equal true, DataCollector.data[0].size > 1
+assert DataCollector.data[0].size > 1

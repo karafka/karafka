@@ -31,4 +31,4 @@ end
 
 lag = DataCollector.data[:consumption_lag]
 
-assert_equal true, (2_000...4_000).cover?(lag)
+assert (2_000...4_000).cover?(lag)

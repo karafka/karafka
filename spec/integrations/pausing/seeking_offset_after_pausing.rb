@@ -35,5 +35,5 @@ start_karafka_and_wait_until do
   DataCollector.data[:messages].size > 20
 end
 
-assert_equal true, DataCollector.data[:messages].size > 20
+assert DataCollector.data[:messages].size > 20
 assert_equal 20, DataCollector.data[:messages].uniq.size

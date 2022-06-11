@@ -33,6 +33,8 @@ module Karafka
 
       return if license_config.expires_on > Date.today
 
+      raise_expired_license_token_in_dev(license_config.expires_on)
+
       notify_if_license_expired(license_config.expires_on)
     end
 
@@ -53,24 +55,41 @@ module Karafka
       )
     end
 
+    # Raises an error for test and dev environments if running pro with expired license
+    # We never want to cause any non-dev problems and we should never crash anything else than
+    # tests and development envs.
+    #
+    # @param expires_on [Date] when the license expires
+    def raise_expired_license_token_in_dev(expires_on)
+      env = Karafka::App.env
+
+      return unless env.development? || env.test?
+
+      raise Errors::ExpiredLicenseTokenError.new, expired_message(expires_on)
+    end
+
     # We do not raise an error here as we don't want to cause any problems to someone that runs
     # Karafka on production. Error message is enough.
     #
     # @param expires_on [Date] when the license expires
     def notify_if_license_expired(expires_on)
-      message = <<~MSG.tr("\n", ' ')
-        Your license expired on #{expires_on}.
-        Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
-      MSG
-
-      Karafka.logger.error(message)
+      Karafka.logger.error(expired_message(expires_on))
 
       Karafka.monitor.instrument(
         'error.occurred',
         caller: self,
-        error: Errors::ExpiredLicenseTokenError.new(message),
+        error: Errors::ExpiredLicenseTokenError.new(expired_message(expires_on)),
         type: 'licenser.expired'
       )
+    end
+
+    # @param expires_on [Date] when the license expires
+    # @return [String] expired message
+    def expired_message(expires_on)
+      <<~MSG.tr("\n", ' ')
+        Your license expired on #{expires_on}.
+        Please reach us at contact@karafka.io or visit https://karafka.io to obtain a valid one.
+      MSG
     end
   end
 end

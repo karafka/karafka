@@ -19,4 +19,4 @@ rescue NoMethodError
   not_found = true
 end
 
-assert_equal true, not_found
+assert not_found

@@ -37,4 +37,4 @@ time_after = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 assert_equal elements, DataCollector.data[0]
 assert_equal 1, DataCollector.data.size
 # We will give Karafka 2 seconds to stop
-assert_equal true, time_after - time_before - MAX_TIME < 2
+assert time_after - time_before - MAX_TIME < 2

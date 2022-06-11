@@ -39,4 +39,4 @@ end
 
 assert_equal DataCollector.data['prep-0'], DataCollector.data[0]
 assert_equal 3, DataCollector.data.size
-assert_equal true, DataCollector.data[:prepared]
+assert DataCollector.data[:prepared]

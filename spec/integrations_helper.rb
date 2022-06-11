@@ -144,6 +144,13 @@ def assert_equal(expected, received, message = nil)
   raise AssertionFailedError, message || "#{received} does not equal to #{expected}"
 end
 
+# A shortcut to `assert_equal(true, value)` as often we check if something is true
+# @param received [Boolean] true or false
+# @param message [nil, String] message we want to pass upon failure
+def assert(received, message = nil)
+  assert_equal(true, received, message)
+end
+
 # @return [String] valid pro license token that we use in the integration tests
 def pro_license_token
   ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')

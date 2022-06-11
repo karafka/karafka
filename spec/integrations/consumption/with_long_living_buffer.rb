@@ -43,4 +43,4 @@ end
 
 assert_equal 50, DataCollector.data[:batches]
 assert_equal elements, DataCollector.data[:buffer].flatten
-assert_equal true, (DataCollector.data[:buffer].all? { |sub| sub.size < 3 })
+assert(DataCollector.data[:buffer].all? { |sub| sub.size < 3 })

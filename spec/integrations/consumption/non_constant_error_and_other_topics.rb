@@ -75,8 +75,8 @@ start_karafka_and_wait_until do
   DataCollector.data[:all].size >= 20
 end
 
-assert_equal true, DataCollector.data[0].size >= 10
-assert_equal true, DataCollector.data[:errors].size == 2
+assert DataCollector.data[0].size >= 10
+assert DataCollector.data[:errors].size == 2
 assert_equal 1, DataCollector.data[1].uniq.size
 assert_equal 1, DataCollector.data[3].uniq.size
 assert_equal StandardError, DataCollector.data[:errors].first[:error].class

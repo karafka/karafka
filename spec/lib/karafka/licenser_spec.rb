@@ -36,14 +36,37 @@ RSpec.describe_current do
 
     before { license_config.token = expired_token }
 
-    it { expect { verify }.not_to raise_error }
-    it { expect { verify }.to change(license_config, :entity).to('CI') }
-    it { expect { verify }.to change(license_config, :expires_on).to(Date.parse('2021-01-01')) }
+    context 'when env is not test or development' do
+      before do
+        allow(Karafka::App.env).to receive(:test?).and_return(false)
+        allow(Karafka::App.env).to receive(:development?).and_return(false)
+      end
 
-    it 'expect to print an error info' do
-      allow(Karafka::App.logger).to receive(:error)
-      verify
-      expect(Karafka::App.logger).to have_received(:error)
+      it { expect { verify }.not_to raise_error }
+      it { expect { verify }.to change(license_config, :entity).to('CI') }
+      it { expect { verify }.to change(license_config, :expires_on).to(Date.parse('2021-01-01')) }
+
+      it 'expect to print an error info and not to crash' do
+        allow(Karafka::App.logger).to receive(:error)
+        verify
+        expect(Karafka::App.logger).to have_received(:error)
+      end
+    end
+
+    context 'when env is development' do
+      before { allow(Karafka::App.env).to receive(:development?).and_return(true) }
+
+      it 'expect to crash with an error' do
+        expect { verify }.to raise_error(::Karafka::Errors::ExpiredLicenseTokenError)
+      end
+    end
+
+    context 'when env is test' do
+      before { allow(Karafka::App.env).to receive(:test?).and_return(true) }
+
+      it 'expect to crash with an error' do
+        expect { verify }.to raise_error(::Karafka::Errors::ExpiredLicenseTokenError)
+      end
     end
   end
 end

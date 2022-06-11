@@ -31,8 +31,8 @@ start_karafka_and_wait_until do
   DataCollector.data.key?(:worker_thread_id)
 end
 
-assert_equal true, DataCollector.data.key?(:listener_thread_id)
-assert_equal true, DataCollector.data.key?(:worker_thread_id)
-assert_equal true, DataCollector.data.key?(:shutdown_thread_id)
-assert_equal true, DataCollector.data[:listener_thread_id] != DataCollector.data[:worker_thread_id]
+assert DataCollector.data.key?(:listener_thread_id)
+assert DataCollector.data.key?(:worker_thread_id)
+assert DataCollector.data.key?(:shutdown_thread_id)
+assert DataCollector.data[:listener_thread_id] != DataCollector.data[:worker_thread_id]
 assert_equal DataCollector.data[:worker_thread_id], DataCollector.data[:shutdown_thread_id]

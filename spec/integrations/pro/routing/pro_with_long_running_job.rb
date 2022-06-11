@@ -26,6 +26,6 @@ draw_routes do
   end
 end
 
-assert_equal true, Karafka::App.routes.first.topics[0].long_running_job?
+assert Karafka::App.routes.first.topics[0].long_running_job?
 assert_equal false, Karafka::App.routes.first.topics[1].long_running_job?
 assert_equal false, Karafka::App.routes.first.topics[2].long_running_job?
