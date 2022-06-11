@@ -191,45 +191,43 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_prepared' do
+  describe '#on_prepare' do
     context 'when everything went ok on revoked' do
-      it { expect { consumer.on_prepared }.not_to raise_error }
+      it { expect { consumer.on_prepare }.not_to raise_error }
 
       it 'expect to run proper instrumentation' do
         Karafka.monitor.subscribe('consumer.revoked') do |event|
           expect(event.payload[:caller]).to eq(consumer)
         end
 
-        consumer.on_prepared
+        consumer.on_prepare
       end
 
       it 'expect not to run error instrumentation' do
         Karafka.monitor.subscribe('error.occurred') do |event|
-          expect(event.payload[:caller]).not_to eq(consumer)
-          expect(event.payload[:error]).not_to be_a(StandardError)
-          expect(event.payload[:type]).to eq('consumer.prepared.error')
+          raise
         end
 
-        consumer.on_prepared
+        consumer.on_prepare
       end
     end
 
-    context 'when something goes wrong on prepared' do
+    context 'when something goes wrong on prepare' do
       let(:working_class) do
         ClassBuilder.inherit(described_class) do
-          def prepared
+          def prepare
             raise StandardError
           end
         end
       end
 
-      it { expect { consumer.on_prepared }.not_to raise_error }
+      it { expect { consumer.on_prepare }.not_to raise_error }
 
       it 'expect to run the error instrumentation' do
         Karafka.monitor.subscribe('error.occurred') do |event|
           expect(event.payload[:caller]).to eq(consumer)
           expect(event.payload[:error]).to be_a(StandardError)
-          expect(event.payload[:type]).to eq('consumer.prepared.error')
+          expect(event.payload[:type]).to eq('consumer.prepare.error')
         end
 
         consumer.on_revoked

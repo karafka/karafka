@@ -82,16 +82,16 @@ module Karafka
     # @note This should not be used by the end users as it is part of the lifecycle of things but
     #   not as part of the public api. This can act as a hook when creating non-blocking
     #   consumers and doing other advanced stuff
-    def on_prepared
+    def on_prepare
       Karafka.monitor.instrument('consumer.prepared', caller: self) do
-        prepared
+        prepare
       end
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',
         error: e,
         caller: self,
-        type: 'consumer.prepared.error'
+        type: 'consumer.prepare.error'
       )
     end
 
@@ -99,7 +99,7 @@ module Karafka
 
     # Method that gets called in the blocking flow allowing to setup any type of resources or to
     # send additional commands to Kafka before the proper execution starts.
-    def prepared; end
+    def prepare; end
 
     # Method that will perform business logic and on data received from Kafka (it will consume
     #   the data)

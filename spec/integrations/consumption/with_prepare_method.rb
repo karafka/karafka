@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka consumer can be used with `#prepared` method to run some preparations before running the
+# Karafka consumer can be used with `#prepare` method to run some preparations before running the
 # proper code
 # While it is not recommended to use it unless you are advanced user and want to elevate certain
 # karafka capabilities, we still add this spec to make sure things operate as expected and that
@@ -11,7 +11,7 @@ setup_karafka
 class Consumer < Karafka::BaseConsumer
   # We should have access here to anything that we can get when consuming, so we duplicate
   # this and we can compare that later
-  def prepared
+  def prepare
     messages.each do |message|
       DataCollector.data["prep-#{message.metadata.partition}"] << message.raw_payload
     end
