@@ -13,20 +13,27 @@ module Karafka
   module Pro
     # Loader requires and loads all the pro components only when they are needed
     class Loader
+      # All the pro components that need to be loaded
+      COMPONENTS = %w[
+        performance_tracker
+        scheduler
+        base_consumer_extensions
+        processing/jobs/consume_non_blocking
+        processing/jobs_builder
+        routing/extensions
+        active_job/consumer
+        active_job/dispatcher
+        active_job/job_options_contract
+      ]
+
+      private_constant :COMPONENTS
+
       class << self
         # Loads all the pro components and configures them wherever it is expected
         # @param config [Dry::Configurable::Config] whole app config that we can alter with pro
         #   components
         def setup(config)
-          require_relative 'performance_tracker'
-          require_relative 'scheduler'
-          require_relative 'base_consumer_extensions'
-          require_relative 'processing/jobs/consume_non_blocking'
-          require_relative 'processing/jobs_builder'
-          require_relative 'routing/extensions'
-          require_relative 'active_job/consumer'
-          require_relative 'active_job/dispatcher'
-          require_relative 'active_job/job_options_contract'
+          COMPONENTS.each { |component| require_relative(component) }
 
           config.internal.scheduler = Scheduler.new
           config.internal.jobs_builder = Processing::JobsBuilder.new
