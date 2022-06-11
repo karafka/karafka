@@ -429,19 +429,13 @@ RSpec.describe_current do
 
   describe '#resume' do
     before do
-      consumer.client = client
-      consumer.messages = messages
-
-      allow(client).to receive(:resume)
+      allow(pause_tracker).to receive(:expire)
 
       consumer.send(:resume)
     end
 
-    it 'expect to forward to client using current execution context data' do
-      expect(client).to have_received(:resume).with(
-        messages.metadata.topic,
-        messages.metadata.partition
-      )
+    it 'expect to expire the pause tracker' do
+      expect(pause_tracker).to have_received(:expire)
     end
   end
 end

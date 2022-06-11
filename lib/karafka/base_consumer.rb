@@ -144,22 +144,19 @@ module Karafka
     # @param timeout [Integer, nil] how long in milliseconds do we want to pause or nil to use the
     #   default exponential pausing strategy defined for retries
     def pause(offset, timeout = nil)
+      timeout ? pause_tracker.pause(timeout) : pause_tracker.pause
+
       client.pause(
         messages.metadata.topic,
         messages.metadata.partition,
         offset
       )
-
-      timeout ? pause_tracker.pause(timeout) : pause_tracker.pause
     end
 
     # Resumes processing of the current topic partition
     def resume
-      client.resume(
-        messages.metadata.topic,
-        messages.metadata.partition
-      )
-
+      # This is sufficient to expire a partition pause, as with it will be resumed by the listener
+      # thread before the next poll.
       pause_tracker.expire
     end
 

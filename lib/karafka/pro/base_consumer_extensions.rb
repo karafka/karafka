@@ -11,16 +11,19 @@
 
 module Karafka
   module Pro
-    module ActiveJob
-      # Contract for validating the options that can be altered with `#karafka_options` per job
-      # class that works with Pro features.
-      class JobOptionsContract < ::Karafka::ActiveJob::JobOptionsContract
-        # Dry types
-        Types = include Dry.Types()
+    # Extensions to the base consumer that make it more pro and fancy
+    module BaseConsumerExtensions
+      # Marks this consumer revoked state as true
+      # This allows us for things like lrj to finish early as this state may change during lrj
+      # execution
+      def on_revoked
+        @revoked = true
+        super
+      end
 
-        params do
-          optional(:partitioner).value(Types.Interface(:call))
-        end
+      # @return [Boolean] true if partition was revoked from the current consumer
+      def revoked?
+        @revoked || false
       end
     end
   end

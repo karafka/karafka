@@ -68,4 +68,21 @@ RSpec.describe_current do
     it { expect(topic1.consumer).to eq(Karafka::ActiveJob::Consumer) }
     it { expect(topic2.consumer).to eq(Karafka::ActiveJob::Consumer) }
   end
+
+  context 'when we alter defaults inside an AJ defined topic' do
+    let(:topic) { builder.first.topics.first }
+
+    before do
+      builder.draw do
+        active_job_topic :default do
+          max_wait_time 1_000
+        end
+      end
+    end
+
+    it { expect(topic.id).to eq "#{Karafka::App.config.client_id}_app_default" }
+    it { expect(builder.size).to eq 1 }
+    it { expect(topic.consumer).to eq(Karafka::ActiveJob::Consumer) }
+    it { expect(topic.max_wait_time).to eq(1_000) }
+  end
 end

@@ -11,15 +11,20 @@
 
 module Karafka
   module Pro
-    module ActiveJob
-      # Contract for validating the options that can be altered with `#karafka_options` per job
-      # class that works with Pro features.
-      class JobOptionsContract < ::Karafka::ActiveJob::JobOptionsContract
-        # Dry types
-        Types = include Dry.Types()
+    # Pro routing components
+    module Routing
+      # Routing extensions that allow to configure some extra PRO routing options
+      module Extensions
+        class << self
+          # @param base [Class] class we extend
+          def included(base)
+            base.attr_accessor :long_running_job
+          end
+        end
 
-        params do
-          optional(:partitioner).value(Types.Interface(:call))
+        # @return [Boolean] is a given job on a topic a long running one
+        def long_running_job?
+          @long_running_job || false
         end
       end
     end

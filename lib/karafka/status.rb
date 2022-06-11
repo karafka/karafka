@@ -31,9 +31,7 @@ module Karafka
         # We skip as during this state we do not have yet a monitor
         return if initializing?
 
-        # Trap context disallows to run certain things that we instrument
-        # so the state changes are executed from a separate thread
-        Thread.new { Karafka.monitor.instrument("app.#{state}") }.join
+        Karafka.monitor.instrument("app.#{state}")
       end
     end
   end

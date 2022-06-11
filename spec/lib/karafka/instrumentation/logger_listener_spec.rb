@@ -115,6 +115,13 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context 'when it is a consumer.prepared.error' do
+      let(:type) { 'consumer.prepared.error' }
+      let(:message) { "Consumer prepared error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context 'when it is a consumer.consume.error' do
       let(:type) { 'consumer.consume.error' }
       let(:message) { "Consumer consuming error: #{error}" }
@@ -152,6 +159,14 @@ RSpec.describe_current do
         # This sleep ensures that the threaded logger is able to finish
         sleep 0.1
         expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
+      end
+
+      context 'when it is a licenser.expired error' do
+        let(:type) { 'licenser.expired' }
+        let(:error) { Karafka::Errors::ExpiredLicenseTokenError.new }
+        let(:message) { '' }
+
+        it { expect(Karafka.logger).to have_received(:error).with(message) }
       end
     end
 

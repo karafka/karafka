@@ -52,16 +52,14 @@ module Karafka
       #
       # @param _event [Dry::Events::Event] event details including payload
       def on_app_stopping(_event)
-        # We use a separate thread as logging can't be called from trap context
-        Thread.new { info 'Stopping Karafka server' }
+        info 'Stopping Karafka server'
       end
 
       # Logs info that we stopped the Karafka server.
       #
       # @param _event [Dry::Events::Event] event details including payload
       def on_app_stopped(_event)
-        # We use a separate thread as logging can't be called from trap context
-        Thread.new { info 'Stopped Karafka server' }
+        info 'Stopped Karafka server'
       end
 
       # There are many types of errors that can occur in many places, but we provide a single
@@ -73,6 +71,9 @@ module Karafka
         details = (error.backtrace || []).join("\n")
 
         case type
+        when 'consumer.prepared.error'
+          error "Consumer prepared error: #{error}"
+          error details
         when 'consumer.consume.error'
           error "Consumer consuming error: #{error}"
           error details
@@ -95,8 +96,7 @@ module Karafka
           fatal "Runner crashed due to an error: #{error}"
           fatal details
         when 'app.stopping.error'
-          # We use a separate thread as logging can't be called from trap context
-          Thread.new { error 'Forceful Karafka server stop' }
+          error 'Forceful Karafka server stop'
         when 'librdkafka.error'
           error "librdkafka internal error occurred: #{error}"
           error details

@@ -11,15 +11,15 @@ require 'open3'
 require 'fileutils'
 require 'pathname'
 require 'tmpdir'
+require 'etc'
 
 ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
 
-# Raised from the parent process if any of the integration tests fails
-IntegrationTestError = Class.new(StandardError)
-
 # How many child processes with integration specs do we want to run in parallel
-# When the value is high, there's a problem with thread allocation on Github
-CONCURRENCY = 4
+# When the value is high, there's a problem with thread allocation on Github CI, tht is why
+# we limit it. Locally we can run a lot of those, as many of them have sleeps and do not use a lot
+# of CPU
+CONCURRENCY = ENV.key?('CI') ? 5 : Etc.nprocessors * 2
 
 # Abstraction around a single test scenario execution process
 class Scenario
@@ -111,7 +111,7 @@ class Scenario
 
   # Prints a status report when scenario is finished and stdout if it failed
   def report
-    result = success? ? "\e[#{32}m#{'OK'}\e[0m" : "\e[#{31}m#{'FAILED'}\e[0m"
+    result = success? ? "\e[#{32}m#{'[OK]'}\e[0m" : "\e[#{31}m#{'[FAILED]'}\e[0m"
 
     puts "#{result} #{name}"
 
@@ -209,5 +209,19 @@ while finished_scenarios.size < scenarios.size
   sleep(0.1)
 end
 
-# Fail all if any of the tests does not have expected exit code
-raise IntegrationTestError unless finished_scenarios.all?(&:success?)
+failed_scenarios = finished_scenarios.reject(&:success?)
+
+# Report once more on the failed jobs
+# This will only list scenarios that failed without printing their stdout here.
+unless failed_scenarios.empty?
+  puts "\nFailed scenarios:\n\n"
+
+  failed_scenarios.each do |scenario|
+    puts "\e[#{31}m#{'[FAILED]'}\e[0m #{scenario.name}"
+  end
+
+  puts
+
+  # Exit with 1 if not all scenarios were successful
+  exit 1
+end
