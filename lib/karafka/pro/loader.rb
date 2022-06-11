@@ -24,7 +24,7 @@ module Karafka
         active_job/consumer
         active_job/dispatcher
         active_job/job_options_contract
-      ]
+      ].freeze
 
       private_constant :COMPONENTS
 
