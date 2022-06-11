@@ -34,6 +34,22 @@ class DataCollector
     def consumer_groups
       instance.consumer_groups
     end
+
+    # Alias to the data key (used frequently)
+    #
+    # @param key [Object] key for the data access
+    # @return [Object] anything under given key in the data
+    def [](key)
+      data[key]
+    end
+
+    # Alias to the data assignment
+    #
+    # @param key [Object] anything we want to have as a key
+    # @param value [Object] anything we want to store
+    def []=(key, value)
+      data[key] = value
+    end
   end
 
   # Creates a collector

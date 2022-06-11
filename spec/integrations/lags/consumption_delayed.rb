@@ -7,7 +7,7 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[:consumption_lag] = messages.metadata.consumption_lag
+    DataCollector[:consumption_lag] = messages.metadata.consumption_lag
   end
 end
 
@@ -29,6 +29,6 @@ start_karafka_and_wait_until do
   DataCollector.data.key?(:consumption_lag)
 end
 
-lag = DataCollector.data[:consumption_lag]
+lag = DataCollector[:consumption_lag]
 
 assert (2_000...4_000).cover?(lag)

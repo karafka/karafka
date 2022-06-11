@@ -14,8 +14,8 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[:times] << Time.now.to_f
-      DataCollector.data[:messages] << message.raw_payload
+      DataCollector[:times] << Time.now.to_f
+      DataCollector[:messages] << message.raw_payload
     end
 
     # Pause for 1 second
@@ -29,16 +29,16 @@ elements = Array.new(10) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[:messages].size >= 10
+  DataCollector[:messages].size >= 10
 end
 
 # Pausing and getting back to consumption should not mess order or number of messages
-assert_equal elements, DataCollector.data[:messages]
+assert_equal elements, DataCollector[:messages]
 
 previous = nil
 
 # Pausing should also be at least as much as we paused + time to get back after un-pause
-DataCollector.data[:times].each do |timestamp|
+DataCollector[:times].each do |timestamp|
   unless previous
     previous = timestamp
     next

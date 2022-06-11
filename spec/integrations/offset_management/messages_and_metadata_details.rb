@@ -7,7 +7,7 @@ setup_karafka
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[message.metadata.partition] << message
+      DataCollector[message.metadata.partition] << message
     end
   end
 end
@@ -18,10 +18,10 @@ elements = Array.new(10) { SecureRandom.uuid }
 elements.each { |number| produce(DataCollector.topic, number) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 10
+  DataCollector[0].size >= 10
 end
 
-DataCollector.data[0].each_with_index do |message, index|
+DataCollector[0].each_with_index do |message, index|
   assert_equal Karafka::Messages::Message, message.class
   assert_equal Karafka::Messages::Metadata, message.metadata.class
   assert_equal String, message.raw_payload.class

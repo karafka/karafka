@@ -5,7 +5,7 @@
 
 class Listener
   def on_error_occurred(event)
-    DataCollector.data[:errors] << event
+    DataCollector[:errors] << event
   end
 end
 
@@ -18,8 +18,8 @@ class Consumer < Karafka::BaseConsumer
     @count ||= 0
     @count += 1
 
-    messages.each { |message| DataCollector.data[0] << message.raw_payload }
-    DataCollector.data[1] << object_id
+    messages.each { |message| DataCollector[0] << message.raw_payload }
+    DataCollector[1] << object_id
 
     raise StandardError if @count == 1
   end
@@ -38,12 +38,12 @@ elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
   # We have 5 messages but we retry thus it needs to be minimum 6
-  DataCollector.data[0].size >= 6
+  DataCollector[0].size >= 6
 end
 
-assert DataCollector.data[0].size >= 6
-assert_equal 1, DataCollector.data[1].uniq.size
-assert_equal StandardError, DataCollector.data[:errors].first[:error].class
-assert_equal 'consumer.consume.error', DataCollector.data[:errors].first[:type]
-assert_equal 'error.occurred', DataCollector.data[:errors].first.id
-assert_equal 5, DataCollector.data[0].uniq.size
+assert DataCollector[0].size >= 6
+assert_equal 1, DataCollector[1].uniq.size
+assert_equal StandardError, DataCollector[:errors].first[:error].class
+assert_equal 'consumer.consume.error', DataCollector[:errors].first[:type]
+assert_equal 'error.occurred', DataCollector[:errors].first.id
+assert_equal 5, DataCollector[0].uniq.size

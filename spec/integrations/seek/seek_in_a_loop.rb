@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     # Process data only after the offset seek has been sent
     messages.each do |message|
-      DataCollector.data[0] << message.raw_payload
+      DataCollector[0] << message.raw_payload
 
       # When we encounter last message out of those that we expected, let's rewind
       seek(20) if message.raw_payload == '1'
@@ -29,30 +29,30 @@ draw_routes(Consumer)
 
 start_karafka_and_wait_until do
   # 100 initially and then a loop from 20th 4 times
-  DataCollector.data[0].size >= 420
+  DataCollector[0].size >= 420
 end
 
 # While we return there may be prefetched data that is still being processed before karafka stops
 # so we cannot have a strict limitation here (async)
-assert DataCollector.data[0].size >= 420
+assert DataCollector[0].size >= 420
 
 # The last message should be consumed at least 5 times (first + min 4 loops)
-assert DataCollector.data[0].count { |val| val == '1' } >= 5
+assert DataCollector[0].count { |val| val == '1' } >= 5
 
 # First 20 messages should be consumed only once
 elements[0..19].each do |payload|
-  assert_equal 1, (DataCollector.data[0].count { |val| val == payload })
+  assert_equal 1, (DataCollector[0].count { |val| val == payload })
 end
 
 # All other messages should be consumed at least 5 times
 elements[20..-1].each do |payload|
-  assert DataCollector.data[0].count { |val| val == payload } >= 5
+  assert DataCollector[0].count { |val| val == payload } >= 5
 end
 
 # Order of messages needs to be maintained within a single loop
 previous = nil
 
-DataCollector.data[0].each do |payload|
+DataCollector[0].each do |payload|
   unless previous
     previous = payload
     next

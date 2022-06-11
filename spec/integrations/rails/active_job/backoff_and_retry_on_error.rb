@@ -15,11 +15,11 @@ class Job < ActiveJob::Base
   queue_as DataCollector.topic
 
   def perform
-    if DataCollector.data[0].size.zero?
-      DataCollector.data[0] << '1'
+    if DataCollector[0].size.zero?
+      DataCollector[0] << '1'
       raise StandardError
     else
-      DataCollector.data[0] << '2'
+      DataCollector[0] << '2'
     end
   end
 end
@@ -27,8 +27,8 @@ end
 Job.perform_later
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 2
+  DataCollector[0].size >= 2
 end
 
-assert_equal '1', DataCollector.data[0][0]
-assert_equal '2', DataCollector.data[0][1]
+assert_equal '1', DataCollector[0][0]
+assert_equal '2', DataCollector[0][1]

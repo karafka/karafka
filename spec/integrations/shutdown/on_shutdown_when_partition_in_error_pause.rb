@@ -10,12 +10,12 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[0] << true
+    DataCollector[0] << true
     raise StandardError
   end
 
   def on_shutdown
-    DataCollector.data[:shutdown] << true
+    DataCollector[:shutdown] << true
   end
 end
 
@@ -24,7 +24,7 @@ draw_routes(Consumer)
 produce(DataCollector.topic, '1')
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 1
+  DataCollector[0].size >= 1
 end
 
-assert_equal [true], DataCollector.data[:shutdown]
+assert_equal [true], DataCollector[:shutdown]

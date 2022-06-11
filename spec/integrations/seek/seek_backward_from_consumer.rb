@@ -21,7 +21,7 @@ class Consumer < Karafka::BaseConsumer
     if @backwards
       message = messages.first
 
-      DataCollector.data[messages.metadata.partition] << message.offset
+      DataCollector[messages.metadata.partition] << message.offset
       seek(message.offset - 1)
 
       @ignore = true if message.offset.zero?
@@ -35,7 +35,7 @@ end
 draw_routes(Consumer)
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 10
+  DataCollector[0].size >= 10
 end
 
-assert_equal (0..9).to_a.reverse, DataCollector.data[0]
+assert_equal (0..9).to_a.reverse, DataCollector[0]

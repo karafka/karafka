@@ -16,7 +16,7 @@ class Consumer < Karafka::BaseConsumer
         payload: (message.payload + 1).to_json
       )
 
-      DataCollector.data[0] << message.payload
+      DataCollector[0] << message.payload
     end
   end
 end
@@ -24,7 +24,7 @@ end
 draw_routes(Consumer)
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size > 10
+  DataCollector[0].size > 10
 end
 
-assert_equal (0..10).to_a, DataCollector.data[0]
+assert_equal (0..10).to_a, DataCollector[0]

@@ -23,11 +23,11 @@ class Consumer < Karafka::BaseConsumer
       # And then skip via seek and resume
       seek(messages.last.offset + 2)
       resume
-      DataCollector.data[:skipped] = messages.last.offset + 1
+      DataCollector[:skipped] = messages.last.offset + 1
     end
 
     messages.each do |message|
-      DataCollector.data[:messages] << message.offset
+      DataCollector[:messages] << message.offset
     end
   end
 end
@@ -37,9 +37,9 @@ draw_routes(Consumer)
 20.times { |i| produce(DataCollector.topic, i.to_s) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[:messages].size >= 19
+  DataCollector[:messages].size >= 19
 end
 
-assert_equal 19, DataCollector.data[:messages].size
+assert_equal 19, DataCollector[:messages].size
 # This message should have been skipped when pausing and seeking
-assert_equal false, DataCollector.data[:messages].include?(DataCollector.data[:skipped])
+assert_equal false, DataCollector[:messages].include?(DataCollector[:skipped])

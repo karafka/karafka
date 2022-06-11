@@ -9,7 +9,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[:processing_lags] << messages.metadata.processing_lag
+    DataCollector[:processing_lags] << messages.metadata.processing_lag
   end
 end
 
@@ -19,7 +19,7 @@ elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[:processing_lags].size >= 20
+  DataCollector[:processing_lags].size >= 20
 end
 
-assert DataCollector.data[:processing_lags].max <= 50
+assert DataCollector[:processing_lags].max <= 50

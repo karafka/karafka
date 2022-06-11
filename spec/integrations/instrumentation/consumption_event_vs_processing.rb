@@ -6,12 +6,12 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[0] << messages.count
+    DataCollector[0] << messages.count
   end
 end
 
 Karafka::App.monitor.subscribe('consumer.consumed') do |event|
-  DataCollector.data[1] << event[:caller].messages.count
+  DataCollector[1] << event[:caller].messages.count
 end
 
 draw_routes do
@@ -22,7 +22,7 @@ end
 
 start_karafka_and_wait_until do
   produce(DataCollector.topic, rand.to_s)
-  DataCollector.data[0].sum >= 100
+  DataCollector[0].sum >= 100
 end
 
-assert_equal DataCollector.data[0], DataCollector.data[1]
+assert_equal DataCollector[0], DataCollector[1]

@@ -10,16 +10,16 @@ end
 # This will allow us to establish the listener thread id. Shutdown jobs should run from the
 # worker threads
 Karafka::App.monitor.subscribe('connection.listener.before_fetch_loop') do
-  DataCollector.data[:listener_thread_id] = Thread.current.object_id
+  DataCollector[:listener_thread_id] = Thread.current.object_id
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[:worker_thread_id] = Thread.current.object_id
+    DataCollector[:worker_thread_id] = Thread.current.object_id
   end
 
   def on_shutdown
-    DataCollector.data[:shutdown_thread_id] = Thread.current.object_id
+    DataCollector[:shutdown_thread_id] = Thread.current.object_id
   end
 end
 
@@ -34,5 +34,5 @@ end
 assert DataCollector.data.key?(:listener_thread_id)
 assert DataCollector.data.key?(:worker_thread_id)
 assert DataCollector.data.key?(:shutdown_thread_id)
-assert DataCollector.data[:listener_thread_id] != DataCollector.data[:worker_thread_id]
-assert_equal DataCollector.data[:worker_thread_id], DataCollector.data[:shutdown_thread_id]
+assert DataCollector[:listener_thread_id] != DataCollector[:worker_thread_id]
+assert_equal DataCollector[:worker_thread_id], DataCollector[:shutdown_thread_id]

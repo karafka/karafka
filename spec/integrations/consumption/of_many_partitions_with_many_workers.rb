@@ -14,7 +14,7 @@ class Consumer < Karafka::BaseConsumer
     sleep(1)
 
     messages.each do |message|
-      DataCollector.data[message.partition] << Thread.current.object_id
+      DataCollector[message.partition] << Thread.current.object_id
     end
   end
 

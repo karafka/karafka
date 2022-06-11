@@ -21,20 +21,6 @@ module Karafka
       # It contains slightly better revocation warranties than the regular blocking consumer as
       # it can stop processing batch of jobs in the middle after the revocation.
       class Consumer < Karafka::ActiveJob::Consumer
-        # Pause for tops 31 years
-        MAX_PAUSE_TIME = 1_000_000_000_000
-
-        private_constant :MAX_PAUSE_TIME
-
-        # Before we switch to a non-blocking mode, we need to pause this partition forever
-        def prepare
-          return unless topic.long_running_job?
-
-          # Basically pause forever on the first message
-          # In case of a crash, this will ensure we do not skip any jobs
-          pause(messages.first.offset, MAX_PAUSE_TIME)
-        end
-
         # Runs ActiveJob jobs processing and handles lrj if needed
         def consume
           messages.each do |message|
@@ -55,16 +41,6 @@ module Karafka
             # Do not process more if we are shutting down
             break if Karafka::App.stopping?
           end
-
-          return unless topic.long_running_job?
-
-          # Resume processing if it was an lrj
-          # If it was lrj  it was paused during the preparation phase, so we need to resume to get
-          # new jobs
-          # Since we have paused on our first message (not to skip any messages), we now ned to
-          # move the offset to the next one as all should be processed
-          seek(messages.last.offset + 1)
-          resume
         end
       end
     end

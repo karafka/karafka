@@ -24,13 +24,13 @@ class Consumer < Karafka::BaseConsumer
     # Lets say we want to process at most 5 messages per second and that processing one takes 0.2s
     # which means we can process at most 5 messages before pausing for a second
     messages.each do |message|
-      DataCollector.data[0] << message.raw_payload
+      DataCollector[0] << message.raw_payload
 
       @seconds_available -= 1
 
       next unless @seconds_available.zero?
 
-      DataCollector.data[:pauses] << Time.now.to_f
+      DataCollector[:pauses] << Time.now.to_f
 
       @seconds_available = 5
       pause(message.offset + 1)
@@ -48,7 +48,7 @@ elements.each { |data| produce(DataCollector.topic, data) }
 started_at = Time.now.to_f
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 50
+  DataCollector[0].size >= 50
 end
 
 # Distance in between pauses should be more or less 1 second
@@ -58,7 +58,7 @@ previous_pause_time = nil
 # assuming, that all the other things take 0 time (since the pause after last is irrelevant as
 # we shutdown)
 
-DataCollector.data[:pauses].each do |pause_time|
+DataCollector[:pauses].each do |pause_time|
   if previous_pause_time
     distance = pause_time - previous_pause_time
 
@@ -71,6 +71,6 @@ DataCollector.data[:pauses].each do |pause_time|
 end
 
 assert (Time.now.to_f - started_at) >= 9
-assert_equal elements, DataCollector.data[0]
+assert_equal elements, DataCollector[0]
 # We should pause 10 times, once every 5 messages
-assert_equal 10, DataCollector.data[:pauses].count
+assert_equal 10, DataCollector[:pauses].count

@@ -8,7 +8,7 @@ setup_karafka
 class Consumer1 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[0] << message.raw_payload
+      DataCollector[0] << message.raw_payload
     end
   end
 end
@@ -16,7 +16,7 @@ end
 class Consumer2 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[1] << message.raw_payload
+      DataCollector[1] << message.raw_payload
     end
   end
 end
@@ -39,8 +39,8 @@ elements1.each { |data| produce(DataCollector.topics.first, data) }
 elements2.each { |data| produce(DataCollector.topics.last, data) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 10 &&
-    DataCollector.data[1].size >= 10
+  DataCollector[0].size >= 10 &&
+    DataCollector[1].size >= 10
 end
 
 # Clear all the routes so later we can subscribe to only one topic
@@ -69,10 +69,10 @@ elements2.each do |data|
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data[1].size >= 20
+  DataCollector[1].size >= 20
 end
 
 # This topic should receive only data that was dispatched before we removed the topic from routes
-assert_equal 10, DataCollector.data[0].size
+assert_equal 10, DataCollector[0].size
 # This should receive also the rest, since this topic remained in the consumer group
-assert_equal 20, DataCollector.data[1].size
+assert_equal 20, DataCollector[1].size

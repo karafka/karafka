@@ -18,7 +18,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     pause(messages.last.offset + 1)
 
-    DataCollector.data[:pauses] << Time.now
+    DataCollector[:pauses] << Time.now
   end
 end
 
@@ -28,16 +28,16 @@ elements = Array.new(5) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[:pauses].size >= 5
+  DataCollector[:pauses].size >= 5
 end
 
 previous = nil
 
-assert_equal 5, DataCollector.data[:pauses].count
+assert_equal 5, DataCollector[:pauses].count
 
 previous = nil
 
-DataCollector.data[:pauses].each do |time|
+DataCollector[:pauses].each do |time|
   unless previous
     previous = time
     next

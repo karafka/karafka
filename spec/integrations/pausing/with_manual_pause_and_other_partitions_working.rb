@@ -16,7 +16,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     if messages.metadata.partition.zero?
-      DataCollector.data[:ticks] << true
+      DataCollector[:ticks] << true
       pause(messages.first.offset, 500)
 
       return
@@ -25,7 +25,7 @@ class Consumer < Karafka::BaseConsumer
     sleep(0.5)
 
     messages.each do |message|
-      DataCollector.data[:partitions] << message.partition
+      DataCollector[:partitions] << message.partition
     end
   end
 end
@@ -44,7 +44,7 @@ draw_routes(Consumer)
 Thread.new do
   sleep(5)
 
-  sleep(0.1) while DataCollector.data[:running].empty?
+  sleep(0.1) while DataCollector[:running].empty?
 
   100.times do
     2.times do |partition|
@@ -54,9 +54,9 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data[:running] << true
-  DataCollector.data[:partitions].size >= 100
+  DataCollector[:running] << true
+  DataCollector[:partitions].size >= 100
 end
 
-assert_equal [1], DataCollector.data[:partitions].uniq
-assert DataCollector.data[:ticks].count > 1
+assert_equal [1], DataCollector[:partitions].uniq
+assert DataCollector[:ticks].count > 1

@@ -12,7 +12,7 @@ topic2 = DataCollector.topics[1]
 class Consumer1 < Karafka::BaseConsumer
   def consume
     messages.each do
-      DataCollector.data[Thread.current.object_id] << true
+      DataCollector[Thread.current.object_id] << true
     end
   end
 end
@@ -20,7 +20,7 @@ end
 class Consumer2 < Karafka::BaseConsumer
   def consume
     messages.each do
-      DataCollector.data[Thread.current.object_id] << true
+      DataCollector[Thread.current.object_id] << true
     end
   end
 end

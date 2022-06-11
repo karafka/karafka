@@ -15,7 +15,7 @@ class Job1 < ActiveJob::Base
   queue_as DataCollector.topic
 
   def perform
-    DataCollector.data[0] << 'job1'
+    DataCollector[0] << 'job1'
   end
 end
 
@@ -23,7 +23,7 @@ class Job2 < ActiveJob::Base
   queue_as DataCollector.topic
 
   def perform
-    DataCollector.data[1] << 'job2'
+    DataCollector[1] << 'job2'
   end
 end
 
@@ -31,9 +31,9 @@ Job1.perform_later
 Job2.perform_later
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 1 &&
-    DataCollector.data[1].size >= 1
+  DataCollector[0].size >= 1 &&
+    DataCollector[1].size >= 1
 end
 
-assert_equal 'job1', DataCollector.data[0][0]
-assert_equal 'job2', DataCollector.data[1][0]
+assert_equal 'job1', DataCollector[0][0]
+assert_equal 'job2', DataCollector[1][0]

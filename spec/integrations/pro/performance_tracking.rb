@@ -18,7 +18,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     # We add 10ms per message to make sure that the metrics tracking track it as expected
     messages.each do
-      DataCollector.data[0] << true
+      DataCollector[0] << true
 
       # Sleep needs seconds not ms
       sleep MESSAGE_SPEED.fetch(messages.metadata.topic) / 1_000.0
@@ -39,7 +39,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 50
+  DataCollector[0].size >= 50
 end
 
 TOPICS.each do |topic_name|
