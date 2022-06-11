@@ -43,8 +43,8 @@ elements = Array.new(5) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  # We have 5 messages but we retry thus it needs to be minimum 6
-  DataCollector[0].size >= 6
+  DataCollector[0].uniq.size >= 5 &&
+    DataCollector[0].size >= 6
 end
 
 assert DataCollector[0].size >= 6
