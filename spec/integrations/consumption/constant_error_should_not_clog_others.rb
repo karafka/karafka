@@ -14,13 +14,13 @@ end
 # There can be more if we run this in development several times
 300.times do |i|
   result = produce('integrations_0_03', SecureRandom.uuid, partition: i % 3)
-  DataCollector.data[:last_offsets][result.partition] = result.offset
+  DataCollector[:last_offsets][result.partition] = result.offset
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
     unless @seeked
-      seek(DataCollector.data[:last_offsets][messages.metadata.partition] - 99)
+      seek(DataCollector[:last_offsets][messages.metadata.partition] - 99)
       @seeked = true
       return
     end
@@ -29,7 +29,7 @@ class Consumer < Karafka::BaseConsumer
     raise StandardError if messages.metadata.partition.zero?
 
     messages.each do |message|
-      DataCollector.data[message.metadata.partition] << message.metadata.partition
+      DataCollector[message.metadata.partition] << message.metadata.partition
     end
   end
 end
@@ -49,9 +49,9 @@ start_karafka_and_wait_until do
 end
 
 # No data for failing partition
-assert_equal 0, DataCollector.data[0].size
-assert_equal 100, DataCollector.data[1].size
-assert_equal 100, DataCollector.data[2].size
+assert_equal 0, DataCollector[0].size
+assert_equal 100, DataCollector[1].size
+assert_equal 100, DataCollector[2].size
 # Extra checks for in-partition data consistency
-assert_equal [1], DataCollector.data[1].uniq
-assert_equal [2], DataCollector.data[2].uniq
+assert_equal [1], DataCollector[1].uniq
+assert_equal [2], DataCollector[2].uniq

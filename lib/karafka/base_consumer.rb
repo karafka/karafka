@@ -15,7 +15,32 @@ module Karafka
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
 
+    # Can be used to run preparation code
+    #
+    # @private
+    # @note This should not be used by the end users as it is part of the lifecycle of things but
+    #   not as part of the public api. This can act as a hook when creating non-blocking
+    #   consumers and doing other advanced stuff
+    def on_prepare
+      Karafka.monitor.instrument('consumer.prepared', caller: self) do
+        prepare
+      end
+
+      true
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.prepare.error'
+      )
+
+      false
+    end
+
     # Executes the default consumer flow.
+    #
+    # @return [Boolean] true if there was no exception, otherwise false.
     #
     # @note We keep the seek offset tracking, and use it to compensate for async offset flushing
     #   that may not yet kick in when error occurs. That way we pause always on the last processed
@@ -33,6 +58,8 @@ module Karafka
         # with manual offset management
         mark_as_consumed(messages.last)
       end
+
+      true
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',
@@ -42,6 +69,8 @@ module Karafka
       )
 
       pause(@seek_offset || messages.first.offset)
+
+      false
     end
 
     # Trigger method for running on shutdown.
@@ -51,6 +80,8 @@ module Karafka
       Karafka.monitor.instrument('consumer.revoked', caller: self) do
         revoked
       end
+
+      true
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',
@@ -58,6 +89,8 @@ module Karafka
         caller: self,
         type: 'consumer.revoked.error'
       )
+
+      false
     end
 
     # Trigger method for running on shutdown.
@@ -67,6 +100,8 @@ module Karafka
       Karafka.monitor.instrument('consumer.shutdown', caller: self) do
         shutdown
       end
+
+      true
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',
@@ -74,25 +109,8 @@ module Karafka
         caller: self,
         type: 'consumer.shutdown.error'
       )
-    end
 
-    # Can be used to run preparation code
-    #
-    # @private
-    # @note This should not be used by the end users as it is part of the lifecycle of things but
-    #   not as part of the public api. This can act as a hook when creating non-blocking
-    #   consumers and doing other advanced stuff
-    def on_prepare
-      Karafka.monitor.instrument('consumer.prepared', caller: self) do
-        prepare
-      end
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        error: e,
-        caller: self,
-        type: 'consumer.prepare.error'
-      )
+      false
     end
 
     private

@@ -12,7 +12,7 @@ end
 
 class Listener
   def on_error_occurred(event)
-    DataCollector.data[:errors] << event
+    DataCollector[:errors] << event
   end
 end
 
@@ -37,13 +37,13 @@ raised = false
 begin
   start_karafka_and_wait_until do
     # This means, that listener received critical error
-    DataCollector.data[:errors].size >= 1
+    DataCollector[:errors].size >= 1
   end
 rescue SuperException
   raised = true
 end
 
 assert_equal false, raised
-assert_equal 1, DataCollector.data[:errors].size
-assert_equal 'error.occurred', DataCollector.data[:errors].first.id
-assert_equal 'worker.process.error', DataCollector.data[:errors].first.payload[:type]
+assert_equal 1, DataCollector[:errors].size
+assert_equal 'error.occurred', DataCollector[:errors].first.id
+assert_equal 'worker.process.error', DataCollector[:errors].first.payload[:type]

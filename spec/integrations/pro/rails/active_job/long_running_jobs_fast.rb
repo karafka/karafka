@@ -20,16 +20,16 @@ class Job < ActiveJob::Base
   queue_as DataCollector.topic
 
   def perform(value)
-    DataCollector.data[0] << value
+    DataCollector[0] << value
   end
 end
 
 100.times { |value| Job.perform_later(value) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 100
+  DataCollector[0].size >= 100
 end
 
 100.times do |value|
-  assert_equal value, DataCollector.data[0][value]
+  assert_equal value, DataCollector[0][value]
 end

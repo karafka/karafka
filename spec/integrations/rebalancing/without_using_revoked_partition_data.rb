@@ -25,12 +25,12 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[:process1] << message
+      DataCollector[:process1] << message
     end
   end
 
   def revoked
-    DataCollector.data[:revoked] = messages.metadata.partition
+    DataCollector[:revoked] = messages.metadata.partition
   end
 end
 
@@ -63,15 +63,10 @@ other = Thread.new do
   # We give it a bit of time, so we make sure we have something in the buffer
   sleep(10)
 
-  config = {
-    'bootstrap.servers': 'localhost:9092',
-    'group.id': Karafka::App.consumer_groups.first.id,
-    'auto.offset.reset': 'earliest'
-  }
-  consumer = Rdkafka::Config.new(config).consumer
+  consumer = setup_rdkafka_consumer
   consumer.subscribe('integrations_0_02')
   consumer.each do |message|
-    DataCollector.data[:process2] << message
+    DataCollector[:process2] << message
 
     # We wait for the main Karafka process to stop, so data is not skewed by second rebalance
     sleep(0.1) until Karafka::App.stopped?
@@ -87,8 +82,8 @@ end
 
 other.join
 
-process1 = DataCollector.data[:process1].group_by(&:partition)
-process2 = DataCollector.data[:process2].group_by(&:partition)
+process1 = DataCollector[:process1].group_by(&:partition)
+process2 = DataCollector[:process2].group_by(&:partition)
 
 process1.transform_values! { |messages| messages.map(&:raw_payload) }
 process2.transform_values! { |messages| messages.map(&:payload) }

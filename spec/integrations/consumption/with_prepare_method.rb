@@ -13,19 +13,19 @@ class Consumer < Karafka::BaseConsumer
   # this and we can compare that later
   def prepare
     messages.each do |message|
-      DataCollector.data["prep-#{message.metadata.partition}"] << message.raw_payload
+      DataCollector["prep-#{message.metadata.partition}"] << message.raw_payload
     end
   end
 
   def consume
     messages.each do |message|
-      DataCollector.data[message.metadata.partition] << message.raw_payload
+      DataCollector[message.metadata.partition] << message.raw_payload
     end
   end
 end
 
 Karafka::App.monitor.instrument('consumer.prepared') do
-  DataCollector.data[:prepared] = true
+  DataCollector[:prepared] = true
 end
 
 draw_routes(Consumer)
@@ -34,9 +34,9 @@ elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 100
+  DataCollector[0].size >= 100
 end
 
-assert_equal DataCollector.data['prep-0'], DataCollector.data[0]
+assert_equal DataCollector['prep-0'], DataCollector[0]
 assert_equal 3, DataCollector.data.size
-assert DataCollector.data[:prepared]
+assert DataCollector[:prepared]

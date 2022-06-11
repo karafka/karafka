@@ -9,7 +9,7 @@ produce(DataCollector.topic, '1')
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[0] << true
+    DataCollector[0] << true
   end
 end
 
@@ -25,7 +25,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  if DataCollector.data[0].empty?
+  if DataCollector[0].empty?
     false
   else
     sleep 1

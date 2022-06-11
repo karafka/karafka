@@ -13,7 +13,7 @@ class Consumer < Karafka::BaseConsumer
     pause(messages.last.offset + 1, 100_000)
 
     messages.each do |message|
-      DataCollector.data[:messages] << message.raw_payload
+      DataCollector[:messages] << message.raw_payload
     end
 
     resume
@@ -26,7 +26,7 @@ elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[:messages].size >= 100
+  DataCollector[:messages].size >= 100
 end
 
-assert_equal elements, DataCollector.data[:messages]
+assert_equal elements, DataCollector[:messages]

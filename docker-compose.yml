@@ -18,6 +18,7 @@ services:
          integrations_1_02:2:1,\
          integrations_2_02:2:1,\
          integrations_3_02:2:1,\
+         integrations_4_02:2:1,\
          integrations_0_03:3:1,\
          integrations_1_03:3:1,\
          integrations_2_03:3:1,\

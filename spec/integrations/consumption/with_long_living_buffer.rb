@@ -19,7 +19,7 @@ class Consumer < Karafka::BaseConsumer
     @batches += 1
 
     messages.each do
-      DataCollector.data[0] << true
+      DataCollector[0] << true
     end
 
     @buffer << messages.raw_payloads
@@ -27,8 +27,8 @@ class Consumer < Karafka::BaseConsumer
 
   # Transfer the buffer data outside of the consumer
   def on_shutdown
-    DataCollector.data[:batches] = @batches
-    DataCollector.data[:buffer] = @buffer
+    DataCollector[:batches] = @batches
+    DataCollector[:buffer] = @buffer
   end
 end
 
@@ -38,9 +38,9 @@ elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 100
+  DataCollector[0].size >= 100
 end
 
-assert_equal 50, DataCollector.data[:batches]
-assert_equal elements, DataCollector.data[:buffer].flatten
-assert(DataCollector.data[:buffer].all? { |sub| sub.size < 3 })
+assert_equal 50, DataCollector[:batches]
+assert_equal elements, DataCollector[:buffer].flatten
+assert(DataCollector[:buffer].all? { |sub| sub.size < 3 })

@@ -12,7 +12,7 @@ topic2_data = Array.new(10) { { SecureRandom.uuid => rand.to_s } }
 class Consumer1 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[topic.name] << message.payload
+      DataCollector[topic.name] << message.payload
     end
   end
 end
@@ -20,7 +20,7 @@ end
 class Consumer2 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[topic.name] << message.payload
+      DataCollector[topic.name] << message.payload
     end
   end
 end
@@ -44,6 +44,6 @@ start_karafka_and_wait_until do
   DataCollector.data.values.flatten.size >= 20
 end
 
-assert_equal topic1_data, DataCollector.data[topic1]
-assert_equal topic2_data, DataCollector.data[topic2]
+assert_equal topic1_data, DataCollector[topic1]
+assert_equal topic2_data, DataCollector[topic2]
 assert_equal 2, DataCollector.data.size

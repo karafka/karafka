@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Karafka with PRO should finish processing AJ jobs as fast as possible even if more were received
-# in the batch. Since we are shutting down, those jobs will be picked up after Karafka is started
-# again, so not worth waiting
+# Karafka with lrj ActiveJob when finishing in the middle of jobs on shutdown, should pick up
+# where it stopped when started again
+#
+# We test it by starting a new consumer just to get the first message offset
 
 setup_karafka do |config|
   # This will ensure we get more jobs in one go
@@ -14,7 +15,10 @@ setup_active_job
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic
+    active_job_topic DataCollector.topic do
+      long_running_job true
+      manual_offset_management true
+    end
   end
 end
 
@@ -42,4 +46,21 @@ start_karafka_and_wait_until do
   !DataCollector[:stopping].size.zero?
 end
 
-assert_equal 1, DataCollector[0].size
+# Give Karafka time to finalize everything
+sleep(2)
+
+# We need a second producer to check where fi started from
+consumer = setup_rdkafka_consumer
+
+consumer.subscribe(DataCollector.topic)
+
+consumer.each do |message|
+  DataCollector[1] << message.offset
+
+  # One is enough
+  break
+end
+
+consumer.close
+
+assert_equal DataCollector[0][0] + 1, DataCollector[1][0]

@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
       # This will trigger deserialization only for even numbers
       message.payload if (message.raw_payload.to_i % 2).zero?
 
-      DataCollector.data[0] << message
+      DataCollector[0] << message
     end
   end
 end
@@ -32,8 +32,8 @@ end
 100.times { |counter| produce(DataCollector.topic, counter.to_s) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 100
+  DataCollector[0].size >= 100
 end
 
-assert_equal 100, DataCollector.data[0].size
-assert_equal 50, DataCollector.data[0].count(&:deserialized?)
+assert_equal 100, DataCollector[0].size
+assert_equal 50, DataCollector[0].count(&:deserialized?)

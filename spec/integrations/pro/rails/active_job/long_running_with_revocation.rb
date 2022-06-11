@@ -35,19 +35,13 @@ class Job < ActiveJob::Base
   # one partition.
   # If this would not happen, we should not stop until all batches of jobs are processed
   def perform(value1)
-    DataCollector.data[:started] << value1
+    DataCollector[:started] << value1
     sleep(20)
-    DataCollector.data[:done] << value1
+    DataCollector[:done] << value1
   end
 end
 
-config = {
-  'bootstrap.servers': 'localhost:9092',
-  'group.id': Karafka::App.consumer_groups.first.id,
-  'auto.offset.reset': 'earliest'
-}
-
-consumer = Rdkafka::Config.new(config).consumer
+consumer = setup_rdkafka_consumer
 
 # 3 really slow jobs per partition
 # 1 and 4 are picked because they will dispatch messages to 0 and 1 partition
@@ -77,10 +71,10 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data[:started].size >= 2 && revoked
+  DataCollector[:started].size >= 2 && revoked
 end
 
 # We should finish only one job per each partition as the rest should be stopped from being
 # processed upon revocation
-assert_equal 2, DataCollector.data[:started].size
-assert_equal 2, DataCollector.data[:done].size
+assert_equal 2, DataCollector[:started].size
+assert_equal 2, DataCollector[:done].size

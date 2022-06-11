@@ -9,13 +9,13 @@ end
 
 class Consumer1 < Karafka::BaseConsumer
   def consume
-    DataCollector.data[0] << messages.first.raw_payload
+    DataCollector[0] << messages.first.raw_payload
   end
 end
 
 class Consumer2 < Karafka::BaseConsumer
   def consume
-    DataCollector.data[1] << messages.first.raw_payload
+    DataCollector[1] << messages.first.raw_payload
   end
 end
 
@@ -50,7 +50,7 @@ start_karafka_and_wait_until do
 end
 
 assert_equal 2, DataCollector.data.keys.size
-assert_equal '0', DataCollector.data[0].first
-assert_equal 1, DataCollector.data[0].size
-assert_equal '1', DataCollector.data[1].first
-assert_equal 1, DataCollector.data[1].size
+assert_equal '0', DataCollector[0].first
+assert_equal 1, DataCollector[0].size
+assert_equal '1', DataCollector[1].first
+assert_equal 1, DataCollector[1].size

@@ -28,7 +28,7 @@ class Job < ActiveJob::Base
   )
 
   def perform(value1)
-    DataCollector.data[0] << value1
+    DataCollector[0] << value1
   end
 end
 
@@ -51,10 +51,10 @@ Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 9
+  DataCollector[0].size >= 9
 end
 
-groups = DataCollector.data[0].group_by { |element| element[0] }
+groups = DataCollector[0].group_by { |element| element[0] }
 groups.transform_values! { |group| group.map(&:to_i) }
 
 groups.each do |_, values|

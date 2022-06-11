@@ -111,14 +111,15 @@ class Scenario
 
   # Prints a status report when scenario is finished and stdout if it failed
   def report
-    result = success? ? "\e[#{32}m#{'[OK]'}\e[0m" : "\e[#{31}m#{'[FAILED]'}\e[0m"
-
-    puts "#{result} #{name}"
-
-    unless success?
+    if success?
+      print "\e[#{32}m#{'.'}\e[0m"
+    else
+      puts
+      puts "\e[#{31}m#{'[FAILED]'}\e[0m #{name}"
       puts "Exit code: #{exit_code}"
       puts @stdout_tail
       puts @stderr.read
+      puts
     end
   end
 
@@ -213,7 +214,9 @@ failed_scenarios = finished_scenarios.reject(&:success?)
 
 # Report once more on the failed jobs
 # This will only list scenarios that failed without printing their stdout here.
-unless failed_scenarios.empty?
+if failed_scenarios.empty?
+  puts
+else
   puts "\nFailed scenarios:\n\n"
 
   failed_scenarios.each do |scenario|

@@ -9,7 +9,7 @@ messages = Array.new(100) { |i| "message#{i}" }
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[message.metadata.partition] << message.payload
+      DataCollector[message.metadata.partition] << message.payload
     end
   end
 end
@@ -32,8 +32,8 @@ end
 messages.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 100
+  DataCollector[0].size >= 100
 end
 
-assert_equal %w[message], DataCollector.data[0].uniq
-assert_equal 100, DataCollector.data[0].size
+assert_equal %w[message], DataCollector[0].uniq
+assert_equal 100, DataCollector[0].size

@@ -11,7 +11,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[:times] << Time.now.to_f
+    DataCollector[:times] << Time.now.to_f
 
     pause(messages.last.offset + 1)
 
@@ -26,12 +26,12 @@ draw_routes(Consumer)
 20.times { |i| produce(DataCollector.topic, i.to_s) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[:times].size >= 4
+  DataCollector[:times].size >= 4
 end
 
 # If second pausing would not work, it would be less than 3
-time1 = DataCollector.data[:times][1] - DataCollector.data[:times][0]
-time2 = DataCollector.data[:times][3] - DataCollector.data[:times][2]
+time1 = DataCollector[:times][1] - DataCollector[:times][0]
+time2 = DataCollector[:times][3] - DataCollector[:times][2]
 
 assert time1 >= 3, "#{time1} expected to be equal or more than 3 seconds"
 assert time2 >= 3, "#{time2} expected to be equal or more than 3 seconds"

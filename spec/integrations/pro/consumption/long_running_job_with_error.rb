@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Karafka should be able to recover from non-critical error with same consumer instance and it
-# also should emit an event with error details that can be logged
+# Karafka should be able to recover from non-critical error when using lrj the same way as any
+# normal consumer
 
 class Listener
   def on_error_occurred(event)
@@ -11,7 +11,9 @@ end
 
 Karafka.monitor.subscribe(Listener.new)
 
-setup_karafka
+setup_karafka do |config|
+  config.license.token = pro_license_token
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -21,7 +23,10 @@ class Consumer < Karafka::BaseConsumer
     messages.each { |message| DataCollector[0] << message.raw_payload }
     DataCollector[1] << object_id
 
-    raise StandardError if @count == 1
+    return unless @count == 1
+
+    sleep 15
+    raise StandardError
   end
 end
 
@@ -29,6 +34,7 @@ draw_routes do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topic do
       consumer Consumer
+      long_running_job true
     end
   end
 end
@@ -37,8 +43,8 @@ elements = Array.new(5) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  # We have 5 messages but we retry thus it needs to be minimum 6
-  DataCollector[0].size >= 6
+  DataCollector[0].uniq.size >= 5 &&
+    DataCollector[0].size >= 6
 end
 
 assert DataCollector[0].size >= 6

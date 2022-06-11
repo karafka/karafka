@@ -66,6 +66,19 @@ def setup_active_job
   ActiveJob::Base.queue_adapter = :karafka
 end
 
+# Sets up a raw rdkafka consumer
+# @param options [Hash] rdkafka consumer options if we need to overwrite defaults
+def setup_rdkafka_consumer(options = {})
+  config = {
+    'bootstrap.servers': 'localhost:9092',
+    'group.id': Karafka::App.consumer_groups.first.id,
+    'auto.offset.reset': 'earliest',
+    'enable.auto.offset.store': 'false'
+  }.merge!(options)
+
+  Rdkafka::Config.new(config).consumer
+end
+
 # Sets up default routes (mostly used in integration specs) or allows to configure custom routes
 # by providing a block
 # @param consumer_class [Class, nil] consumer class we want to use if going with defaults

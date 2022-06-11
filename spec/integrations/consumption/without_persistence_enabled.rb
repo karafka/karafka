@@ -10,7 +10,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[0] << object_id
+    DataCollector[0] << object_id
   end
 end
 
@@ -20,7 +20,7 @@ elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 100
+  DataCollector[0].size >= 100
 end
 
-assert_equal 100, DataCollector.data[0].uniq.size
+assert_equal 100, DataCollector[0].uniq.size

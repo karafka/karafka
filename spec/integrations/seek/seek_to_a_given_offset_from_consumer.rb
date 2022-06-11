@@ -18,7 +18,7 @@ class Consumer < Karafka::BaseConsumer
     if @after_seek
       # Process data only after the offset seek has been sent
       messages.each do |message|
-        DataCollector.data[message.metadata.partition] << message.raw_payload
+        DataCollector[message.metadata.partition] << message.raw_payload
       end
     else
       seek(10)
@@ -30,7 +30,7 @@ end
 draw_routes(Consumer)
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 10
+  DataCollector[0].size >= 10
 end
 
-assert_equal elements[10..-1], DataCollector.data[0]
+assert_equal elements[10..-1], DataCollector[0]

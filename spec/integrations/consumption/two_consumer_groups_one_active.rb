@@ -9,7 +9,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       group = topic.consumer_group.name
-      DataCollector.data[group] << message.payload
+      DataCollector[group] << message.payload
     end
   end
 end
@@ -45,5 +45,5 @@ end
 
 keys = DataCollector.data.keys
 
-assert_equal jsons, DataCollector.data[keys[0]]
+assert_equal jsons, DataCollector[keys[0]]
 assert_equal 1, DataCollector.data.size

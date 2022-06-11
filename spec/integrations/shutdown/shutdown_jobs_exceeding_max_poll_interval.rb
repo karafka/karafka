@@ -12,7 +12,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[:received] << true
+    DataCollector[:received] << true
   end
 
   def shutdown
@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
     # In case this would block polling, the other consumer will take over the job and raise an
     # exception
     sleep(15)
-    DataCollector.data[:done] << true
+    DataCollector[:done] << true
   end
 end
 
@@ -36,12 +36,7 @@ Thread.new do
 end
 
 # We need a second producer so we are sure that there was no revocation due to a timeout
-config = {
-  'bootstrap.servers': 'localhost:9092',
-  'group.id': Karafka::App.consumer_groups.first.id,
-  'auto.offset.reset': 'earliest'
-}
-consumer = Rdkafka::Config.new(config).consumer
+consumer = setup_rdkafka_consumer
 
 other = Thread.new do
   sleep(5)
@@ -56,13 +51,13 @@ other = Thread.new do
 end
 
 Thread.new do
-  sleep(0.1) while DataCollector.data[:done].empty?
+  sleep(0.1) while DataCollector[:done].empty?
 
   consumer.close
 end
 
 start_karafka_and_wait_until do
-  !DataCollector.data[:received].empty?
+  !DataCollector[:received].empty?
 end
 
 other.join

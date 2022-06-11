@@ -18,7 +18,7 @@ class Consumer < Karafka::BaseConsumer
     sleep(1)
 
     messages.each do |message|
-      DataCollector.data[message.partition] << message.raw_payload
+      DataCollector[message.partition] << message.raw_payload
     end
 
     raise StandardError if @count == 1 && messages.first.partition == 5

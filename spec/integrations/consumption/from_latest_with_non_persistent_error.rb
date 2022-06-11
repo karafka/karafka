@@ -27,7 +27,7 @@ class Consumer < Karafka::BaseConsumer
     raise StandardError if @retry < 3
 
     messages.each do |message|
-      DataCollector.data[0] << message.raw_payload
+      DataCollector[0] << message.raw_payload
     end
   end
 end
@@ -44,8 +44,8 @@ sleep(10)
 after.each { |number| produce(DataCollector.topic, number) }
 
 wait_until do
-  DataCollector.data[0].size >= 10
+  DataCollector[0].size >= 10
 end
 
-assert_equal after, DataCollector.data[0]
+assert_equal after, DataCollector[0]
 assert_equal 1, DataCollector.data.size

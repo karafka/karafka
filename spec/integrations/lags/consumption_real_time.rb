@@ -9,7 +9,7 @@ elements = Array.new(5) { SecureRandom.uuid }
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[:consumption_lags] << messages.metadata.consumption_lag
+    DataCollector[:consumption_lags] << messages.metadata.consumption_lag
   end
 end
 
@@ -21,7 +21,7 @@ start_karafka_and_wait_until do
     produce(DataCollector.topic, data)
   end
 
-  DataCollector.data[:consumption_lags].size >= 20
+  DataCollector[:consumption_lags].size >= 20
 end
 
-assert DataCollector.data[:consumption_lags].max < 500
+assert DataCollector[:consumption_lags].max < 500

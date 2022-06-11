@@ -9,6 +9,7 @@
 - Add missing `consumer.prepared.error` into `LoggerListener`
 - Delegate partition resuming from the consumers to listeners threads.
 - Add support for Long Running Jobs (LRJ) for ActiveJob [PRO]
+- Add support for Long Running Jobs for consumers [PRO]
 - Allow `active_job_topic` to accept a block for extra topic related settings
 - Remove no longer needed logger threads
 - Auto-adapt number of processes for integration specs based on the number of CPUs

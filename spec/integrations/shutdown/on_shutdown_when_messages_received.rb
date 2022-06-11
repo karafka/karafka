@@ -15,11 +15,11 @@ class Consumer < Karafka::BaseConsumer
   end
 
   def consume
-    DataCollector.data[0] << 1
+    DataCollector[0] << 1
   end
 
   def on_shutdown
-    DataCollector.data[topic.name] << @id
+    DataCollector[topic.name] << @id
   end
 end
 
@@ -44,10 +44,10 @@ produce(topic1, '1')
 produce(topic2, '1')
 
 start_karafka_and_wait_until do
-  DataCollector.data[0].size >= 2
+  DataCollector[0].size >= 2
 end
 
-assert_equal 1, DataCollector.data[topic1].size
-assert_equal 1, DataCollector.data[topic2].size
-assert_equal 0, DataCollector.data[topic3].size
-assert_not_equal DataCollector.data[topic1].first, DataCollector.data[topic2].first
+assert_equal 1, DataCollector[topic1].size
+assert_equal 1, DataCollector[topic2].size
+assert_equal 0, DataCollector[topic3].size
+assert_not_equal DataCollector[topic1].first, DataCollector[topic2].first

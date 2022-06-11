@@ -1,33 +1,32 @@
 # frozen_string_literal: true
 
 # When a job is marked as lrj, it should keep running longer than max poll interval and all
-# should be good
+# should be good. It should continue processing after resume and should pick up next messages
 
 setup_karafka do |config|
+  config.max_messages = 1
   # We set it here that way not too wait too long on stuff
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
   config.license.token = pro_license_token
 end
 
-setup_active_job
-
-draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic do
-      long_running_job true
-    end
-  end
-end
-
-class Job < ActiveJob::Base
-  queue_as DataCollector.topic
-
-  def perform
+class Consumer < Karafka::BaseConsumer
+  def consume
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group
     sleep(15)
-    DataCollector[0] << true
+
+    DataCollector[0] << messages.first.raw_payload
+  end
+end
+
+draw_routes do
+  consumer_group DataCollector.consumer_group do
+    topic DataCollector.topic do
+      consumer Consumer
+      long_running_job true
+    end
   end
 end
 
@@ -46,12 +45,14 @@ Thread.new do
   end
 end
 
-Job.perform_later
+payloads = Array.new(2) { SecureRandom.uuid }
+
+payloads.each { |payload| produce(DataCollector.topic, payload) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 1
+  DataCollector[0].size >= 2
 end
 
-assert_equal 1, DataCollector[0].size, 'Given job should be executed only once'
+assert_equal payloads, DataCollector[0]
 
 consumer.close

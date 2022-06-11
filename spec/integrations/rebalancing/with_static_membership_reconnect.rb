@@ -14,12 +14,12 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[:process2] << [message.raw_payload.to_i, message.partition]
+      DataCollector[:process2] << [message.raw_payload.to_i, message.partition]
     end
   end
 
   def shutdown
-    DataCollector.data[:process2] << :stop
+    DataCollector[:process2] << :stop
   end
 end
 
@@ -63,16 +63,15 @@ sleep(2)
 # First we start the first producer, so the one that we want to track activity of, gets only
 # one partition assigned, so we don't have to worry about figuring out which partition it got
 other = Thread.new do
-  config = {
-    'bootstrap.servers': 'localhost:9092',
-    'group.id': Karafka::App.consumer_groups.first.id,
+  consumer = setup_rdkafka_consumer(
     'group.instance.id': SecureRandom.uuid,
     'auto.offset.reset': 'latest'
-  }
-  consumer = Rdkafka::Config.new(config).consumer
+  )
+
   consumer.subscribe('integrations_1_02')
+
   consumer.each do |message|
-    DataCollector.data[:process1] << [message.payload.to_i, message.partition]
+    DataCollector[:process1] << [message.payload.to_i, message.partition]
 
     if DataCollector.data.key?(:terminate)
       consumer.close
@@ -85,7 +84,7 @@ end
 sleep 5
 
 start_karafka_and_wait_until do
-  DataCollector.data[:process2].size >= 20
+  DataCollector[:process2].size >= 20
 end
 
 # Wait to make sure, that the process 1 does not get the partitions back
@@ -94,26 +93,26 @@ sleep 5
 # After stopping start once again
 
 start_karafka_and_wait_until do
-  DataCollector.data[:process2].size >= 100
+  DataCollector[:process2].size >= 100
 end
 
 # Give it some time, so we allow (potentially) to assing all messages to process 1
 sleep 5
 
 # Close the first consumer instance
-DataCollector.data[:terminate] = true
+DataCollector[:terminate] = true
 
 other.join
 
 # Initially the first started producer should get some data from both partitions before the first
 # rebalance
-assert_equal [0, 1], DataCollector.data[:process1].map(&:last).uniq.sort
+assert_equal [0, 1], DataCollector[:process1].map(&:last).uniq.sort
 
 # Second process should have been stopped two times
-stops_count = DataCollector.data[:process2].count { |message| message == :stop }
+stops_count = DataCollector[:process2].count { |message| message == :stop }
 assert_equal 2, stops_count
 
-process2_messages = DataCollector.data[:process2].select { |message| message.is_a?(Array) }
+process2_messages = DataCollector[:process2].select { |message| message.is_a?(Array) }
 
 # Second process should have only one partition as joined later with static membership
 assert_equal 1, process2_messages.map(&:last).uniq.size
@@ -134,11 +133,11 @@ end
 
 # After the stop, none of the messages should be fetched by the process 1 when process 2 was not
 # consuming
-after = DataCollector.data[:process2].index(:stop)
+after = DataCollector[:process2].index(:stop)
 post_rebalance_messages = DataCollector
                           .data[:process2]
                           .select
                           .with_index { |_, index| index > after }
                           .select { |message| message.is_a?(Array) }
 
-assert (DataCollector.data[:process1] & post_rebalance_messages).empty?
+assert (DataCollector[:process1] & post_rebalance_messages).empty?

@@ -11,7 +11,7 @@ MAX_TIME = 10
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[message.metadata.partition] << message.raw_payload
+      DataCollector[message.metadata.partition] << message.raw_payload
     end
   end
 end
@@ -34,7 +34,7 @@ Karafka::Server.run
 
 time_after = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
-assert_equal elements, DataCollector.data[0]
+assert_equal elements, DataCollector[0]
 assert_equal 1, DataCollector.data.size
 # We will give Karafka 2 seconds to stop
 assert time_after - time_before - MAX_TIME < 2

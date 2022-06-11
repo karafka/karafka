@@ -15,7 +15,7 @@ before.each { |number| produce(DataCollector.topic, number) }
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector.data[message.metadata.partition] << message.raw_payload
+      DataCollector[message.metadata.partition] << message.raw_payload
     end
   end
 end
@@ -32,8 +32,8 @@ sleep(10)
 after.each { |number| produce(DataCollector.topic, number) }
 
 wait_until do
-  DataCollector.data[0].size >= 10
+  DataCollector[0].size >= 10
 end
 
-assert_equal after, DataCollector.data[0]
+assert_equal after, DataCollector[0]
 assert_equal 1, DataCollector.data.size

@@ -13,7 +13,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     sleep(0.1)
     messages.each do
-      DataCollector.data[topic.name] << Thread.current.object_id
+      DataCollector[topic.name] << Thread.current.object_id
     end
   end
 end
