@@ -40,6 +40,26 @@ RSpec.describe_current do
     end
   end
 
+  describe '#on_worker_process' do
+    subject(:trigger) { listener.on_worker_process(event) }
+
+    let(:job) { ::Karafka::Processing::Jobs::Shutdown.new(executor) }
+    let(:executor) { build(:processing_executor) }
+    let(:payload) { { job: job } }
+
+    it { expect(Karafka.logger).to have_received(:info) }
+  end
+
+  describe '#on_worker_processed' do
+    subject(:trigger) { listener.on_worker_processed(event) }
+
+    let(:job) { ::Karafka::Processing::Jobs::Shutdown.new(executor) }
+    let(:executor) { build(:processing_executor) }
+    let(:payload) { { job: job, time: 2 } }
+
+    it { expect(Karafka.logger).to have_received(:info) }
+  end
+
   describe '#on_process_notice_signal' do
     subject(:trigger) { listener.on_process_notice_signal(event) }
 
