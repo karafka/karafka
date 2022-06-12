@@ -19,8 +19,9 @@ RSpec.describe_current do
   describe '#on_connection_listener_fetch_loop' do
     subject(:trigger) { listener.on_connection_listener_fetch_loop(event) }
 
-    let(:payload) { { caller: caller } }
-    let(:message) { 'Receiving new messages from Kafka...' }
+    let(:connection_listener) { instance_double(Karafka::Connection::Listener, id: 'id') }
+    let(:payload) { { caller: connection_listener, time: 2 } }
+    let(:message) { '[id] Polling messages...' }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to have_received(:info).with(message)
@@ -30,12 +31,33 @@ RSpec.describe_current do
   describe '#on_connection_listener_fetch_loop_received' do
     subject(:trigger) { listener.on_connection_listener_fetch_loop_received(event) }
 
-    let(:payload) { { caller: caller, messages_buffer: Array.new(5) } }
-    let(:message) { 'Received 5 new messages from Kafka' }
+    let(:connection_listener) { instance_double(Karafka::Connection::Listener, id: 'id') }
+    let(:payload) { { caller: connection_listener, messages_buffer: Array.new(5), time: 2 } }
+    let(:message) { '[id] Polled 5 messages in 2ms' }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to have_received(:info).with(message)
     end
+  end
+
+  describe '#on_worker_process' do
+    subject(:trigger) { listener.on_worker_process(event) }
+
+    let(:job) { ::Karafka::Processing::Jobs::Shutdown.new(executor) }
+    let(:executor) { build(:processing_executor) }
+    let(:payload) { { job: job } }
+
+    it { expect(Karafka.logger).to have_received(:info) }
+  end
+
+  describe '#on_worker_processed' do
+    subject(:trigger) { listener.on_worker_processed(event) }
+
+    let(:job) { ::Karafka::Processing::Jobs::Shutdown.new(executor) }
+    let(:executor) { build(:processing_executor) }
+    let(:payload) { { job: job, time: 2 } }
+
+    it { expect(Karafka.logger).to have_received(:info) }
   end
 
   describe '#on_process_notice_signal' do

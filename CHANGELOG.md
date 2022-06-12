@@ -17,6 +17,8 @@
 - Introduce extra integration specs for various ActiveJob usage scenarios
 - Rename consumer method `#prepared` to `#prepare` to reflect better its use-case
 - For test and dev raise an error when expired license key is used (never for non dev)
+- Add worker related monitor events (`worker.process` and `worker.processed`)
+- Update `LoggerListener` to include more useful information about processing and polling messages
 
 ## 2.0.0-beta2 (2022-06-07)
 - Abstract away notion of topics groups (until now it was just an array)

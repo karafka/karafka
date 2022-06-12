@@ -19,9 +19,13 @@ module Karafka
     class Worker
       include Helpers::Async
 
+      # @return [String] id of this worker
+      attr_reader :id
+
       # @param jobs_queue [JobsQueue]
       # @return [Worker]
       def initialize(jobs_queue)
+        @id = SecureRandom.uuid
         @jobs_queue = jobs_queue
       end
 
@@ -43,19 +47,23 @@ module Karafka
         job = @jobs_queue.pop
 
         if job
-          job.prepare
+          Karafka.monitor.instrument('worker.process', caller: self, job: job)
 
-          # If a job is marked as non blocking, we can run a tick in the job queue and if there
-          # are no other blocking factors, the job queue will be unlocked.
-          # If this does not run, all the things will be blocking and job queue won't allow to
-          # pass it until done.
-          @jobs_queue.tick(job.group_id) if job.non_blocking?
+          Karafka.monitor.instrument('worker.processed', caller: self, job: job) do
+            job.prepare
 
-          job.call
+            # If a job is marked as non blocking, we can run a tick in the job queue and if there
+            # are no other blocking factors, the job queue will be unlocked.
+            # If this does not run, all the things will be blocking and job queue won't allow to
+            # pass it until done.
+            @jobs_queue.tick(job.group_id) if job.non_blocking?
 
-          job.teardown
+            job.call
 
-          true
+            job.teardown
+
+            true
+          end
         else
           false
         end

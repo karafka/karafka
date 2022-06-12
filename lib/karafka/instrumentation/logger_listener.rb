@@ -15,16 +15,43 @@ module Karafka
 
       # Logs each messages fetching attempt
       #
-      # @param _event [Dry::Events::Event] event details including payload
-      def on_connection_listener_fetch_loop(_event)
-        info 'Receiving new messages from Kafka...'
+      # @param event [Dry::Events::Event] event details including payload
+      def on_connection_listener_fetch_loop(event)
+        listener = event[:caller]
+        info "[#{listener.id}] Polling messages..."
       end
 
       # Logs about messages that we've received from Kafka
       #
       # @param event [Dry::Events::Event] event details including payload
       def on_connection_listener_fetch_loop_received(event)
-        info "Received #{event[:messages_buffer].size} new messages from Kafka"
+        listener = event[:caller]
+        time = event[:time]
+        messages_count = event[:messages_buffer].size
+        info "[#{listener.id}] Polled #{messages_count} messages in #{time}ms"
+      end
+
+      # Prints info about the fact that a given job has started
+      #
+      # @param event [Dry::Events::Event] event details including payload
+      def on_worker_process(event)
+        job = event[:job]
+        job_type = job.class.to_s.split('::').last
+        consumer = job.executor.topic.consumer
+        topic = job.executor.topic.name
+        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} started"
+      end
+
+      # Prints info about the fact that a given job has finished
+      #
+      # @param event [Dry::Events::Event] event details including payload
+      def on_worker_processed(event)
+        job = event[:job]
+        time = event[:time]
+        job_type = job.class.to_s.split('::').last
+        consumer = job.executor.topic.consumer
+        topic = job.executor.topic.name
+        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
       end
 
       # Logs info about system signals that Karafka received.
