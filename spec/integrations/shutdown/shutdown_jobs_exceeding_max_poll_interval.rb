@@ -50,7 +50,7 @@ other = Thread.new do
   end
 end
 
-Thread.new do
+other2 = Thread.new do
   sleep(0.1) while DataCollector[:done].empty?
 
   consumer.close
@@ -61,3 +61,4 @@ start_karafka_and_wait_until do
 end
 
 other.join
+other2.join
