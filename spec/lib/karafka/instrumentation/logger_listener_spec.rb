@@ -137,13 +137,6 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
-    context 'when it is a consumer.before_consume.error' do
-      let(:type) { 'consumer.before_consume.error' }
-      let(:message) { "Consumer before consume error: #{error}" }
-
-      it { expect(Karafka.logger).to have_received(:error).with(message) }
-    end
-
     context 'when it is a consumer.consume.error' do
       let(:type) { 'consumer.consume.error' }
       let(:message) { "Consumer consuming error: #{error}" }

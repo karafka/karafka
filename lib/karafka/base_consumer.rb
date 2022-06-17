@@ -21,22 +21,7 @@ module Karafka
     # @note This should not be used by the end users as it is part of the lifecycle of things but
     #   not as part of the public api. This can act as a hook when creating non-blocking
     #   consumers and doing other advanced stuff
-    def on_before_consume
-      Karafka.monitor.instrument('consumer.before_consumed', caller: self) do
-        before_consume
-      end
-
-      true
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        error: e,
-        caller: self,
-        type: 'consumer.before_consume.error'
-      )
-
-      false
-    end
+    def on_before_consume; end
 
     # Executes the default consumer flow.
     #
@@ -72,6 +57,11 @@ module Karafka
 
       false
     end
+
+    # @private
+    # @note This should not be used by the end users as it is part of the lifecycle of things but
+    #   not as part of the public api.
+    def on_after_consume; end
 
     # Trigger method for running on shutdown.
     #

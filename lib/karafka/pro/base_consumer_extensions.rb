@@ -29,8 +29,6 @@ module Karafka
         # Pause at the first message in a batch. That way in case of a crash, we will not loose
         # any messages
         pause(messages.first.offset, MAX_PAUSE_TIME) if topic.long_running_job?
-
-        super
       end
 
       # After user code, we seek and un-pause our partition
