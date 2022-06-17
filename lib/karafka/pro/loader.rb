@@ -15,9 +15,9 @@ module Karafka
     class Loader
       # All the pro components that need to be loaded
       COMPONENTS = %w[
+        base_consumer
         performance_tracker
         scheduler
-        base_consumer_extensions
         processing/jobs/consume_non_blocking
         processing/jobs_builder
         routing/extensions
@@ -42,7 +42,6 @@ module Karafka
           config.internal.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 
           ::Karafka::Routing::Topic.include(Routing::Extensions)
-          ::Karafka::BaseConsumer.prepend(BaseConsumerExtensions)
 
           config.monitor.subscribe(PerformanceTracker.instance)
         end

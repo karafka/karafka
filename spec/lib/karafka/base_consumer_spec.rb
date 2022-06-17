@@ -64,7 +64,14 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_consume' do
+  describe '#on_consume and #on_after_consume' do
+    let(:consume_with_after) do
+      lambda do
+        consumer.on_consume
+        consumer.on_after_consume
+      end
+    end
+
     before do
       consumer.pause_tracker = pause_tracker
       consumer.client = client
@@ -75,19 +82,19 @@ RSpec.describe_current do
     context 'when everything went ok on consume with manual offset management' do
       before { topic.manual_offset_management = true }
 
-      it { expect { consumer.on_consume }.not_to raise_error }
+      it { expect { consume_with_after.call }.not_to raise_error }
 
       it 'expect to run proper instrumentation' do
         Karafka.monitor.subscribe('consumer.consumed') do |event|
           expect(event.payload[:caller]).to eq(consumer)
         end
 
-        consumer.on_consume
+        consume_with_after.call
       end
 
       it 'expect to never run consumption marking' do
         allow(consumer).to receive(:mark_as_consumed)
-        consumer.on_consume
+        consume_with_after.call
         expect(consumer).not_to have_received(:mark_as_consumed)
       end
     end
@@ -108,15 +115,15 @@ RSpec.describe_current do
         end
       end
 
-      it { expect { consumer.on_consume }.not_to raise_error }
+      it { expect { consume_with_after.call }.not_to raise_error }
 
       it 'expect to pause based on the message offset' do
-        consumer.on_consume
+        consume_with_after.call
         expect(client).to have_received(:pause).with(topic.name, first_message.partition, offset)
       end
 
       it 'expect to pause with time tracker' do
-        consumer.on_consume
+        consume_with_after.call
         expect(pause_tracker).to have_received(:pause)
       end
 
@@ -146,7 +153,7 @@ RSpec.describe_current do
       end
 
       it 'expect to never run consumption marking' do
-        consumer.on_consume
+        consume_with_after.call
         expect(client).to have_received(:mark_as_consumed).with(last_message)
       end
     end
@@ -169,15 +176,15 @@ RSpec.describe_current do
         end
       end
 
-      it { expect { consumer.on_consume }.not_to raise_error }
+      it { expect { consume_with_after.call }.not_to raise_error }
 
       it 'expect to pause based on the message offset' do
-        consumer.on_consume
+        consume_with_after.call
         expect(client).to have_received(:pause).with(topic.name, first_message.partition, offset)
       end
 
       it 'expect to pause with time tracker' do
-        consumer.on_consume
+        consume_with_after.call
         expect(pause_tracker).to have_received(:pause)
       end
 
@@ -187,50 +194,6 @@ RSpec.describe_current do
           expect(event.payload[:error]).to eq(StandardError)
           expect(event.payload[:type]).to eq('consumer.consume.error')
         end
-      end
-    end
-  end
-
-  describe '#on_before_consume' do
-    context 'when everything went ok on revoked' do
-      it { expect { consumer.on_before_consume }.not_to raise_error }
-
-      it 'expect to run proper instrumentation' do
-        Karafka.monitor.subscribe('consumer.revoked') do |event|
-          expect(event.payload[:caller]).to eq(consumer)
-        end
-
-        consumer.on_before_consume
-      end
-
-      it 'expect not to run error instrumentation' do
-        Karafka.monitor.subscribe('error.occurred') do |event|
-          raise
-        end
-
-        consumer.on_before_consume
-      end
-    end
-
-    context 'when something goes wrong on prepare' do
-      let(:working_class) do
-        ClassBuilder.inherit(described_class) do
-          def prepare
-            raise StandardError
-          end
-        end
-      end
-
-      it { expect { consumer.on_before_consume }.not_to raise_error }
-
-      it 'expect to run the error instrumentation' do
-        Karafka.monitor.subscribe('error.occurred') do |event|
-          expect(event.payload[:caller]).to eq(consumer)
-          expect(event.payload[:error]).to be_a(StandardError)
-          expect(event.payload[:type]).to eq('consumer.prepare.error')
-        end
-
-        consumer.on_revoked
       end
     end
   end

@@ -15,6 +15,12 @@ module Karafka
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
 
+    def initialize
+      # We re-use one to save on object allocation
+      # It also allows us to transfer the consumption notion to another batch
+      @consumption = Processing::Result.new
+    end
+
     # Can be used to run preparation code
     #
     # @private
@@ -33,35 +39,37 @@ module Karafka
     def on_consume
       Karafka.monitor.instrument('consumer.consumed', caller: self) do
         consume
-
-        pause_tracker.reset
-
-        # Mark as consumed only if manual offset management is not on
-        next if topic.manual_offset_management
-
-        # We use the non-blocking one here. If someone needs the blocking one, can implement it
-        # with manual offset management
-        mark_as_consumed(messages.last)
       end
 
-      true
+      @consumption.success!
     rescue StandardError => e
+      @consumption.failure!
+
       Karafka.monitor.instrument(
         'error.occurred',
         error: e,
         caller: self,
         type: 'consumer.consume.error'
       )
-
-      pause(@seek_offset || messages.first.offset)
-
-      false
     end
 
     # @private
     # @note This should not be used by the end users as it is part of the lifecycle of things but
     #   not as part of the public api.
-    def on_after_consume; end
+    def on_after_consume
+      if @consumption.success?
+        pause_tracker.reset
+
+        # Mark as consumed only if manual offset management is not on
+        return if topic.manual_offset_management?
+
+        # We use the non-blocking one here. If someone needs the blocking one, can implement it
+        # with manual offset management
+        mark_as_consumed(messages.last)
+      else
+        pause(@seek_offset || messages.first.offset)
+      end
+    end
 
     # Trigger method for running on shutdown.
     #
@@ -70,8 +78,6 @@ module Karafka
       Karafka.monitor.instrument('consumer.revoked', caller: self) do
         revoked
       end
-
-      true
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',
@@ -79,8 +85,6 @@ module Karafka
         caller: self,
         type: 'consumer.revoked.error'
       )
-
-      false
     end
 
     # Trigger method for running on shutdown.
@@ -90,8 +94,6 @@ module Karafka
       Karafka.monitor.instrument('consumer.shutdown', caller: self) do
         shutdown
       end
-
-      true
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',
@@ -99,15 +101,9 @@ module Karafka
         caller: self,
         type: 'consumer.shutdown.error'
       )
-
-      false
     end
 
     private
-
-    # Method that gets called in the blocking flow allowing to setup any type of resources or to
-    # send additional commands to Kafka before the proper execution starts.
-    def before_consume; end
 
     # Method that will perform business logic and on data received from Kafka (it will consume
     #   the data)

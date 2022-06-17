@@ -3,6 +3,7 @@
 ## 2.0.0-beta4 (Unreleased)
 - Rename job internal api methods from `#prepare` to `#before_call` and from `#teardown` to `#after_call` to abstract away jobs execution from any type of executors and consumers logic
 - Remove ability of running `before_consume` and `after_consume` completely. Those should be for internal usage only.
+- Reorganize how Pro consumer and Pro AJ consumers inherit.
 - Require WaterDrop `2.3.1`.
 
 ## 2.0.0-beta3 (2022-06-14)

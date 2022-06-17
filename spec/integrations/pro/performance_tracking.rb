@@ -14,7 +14,7 @@ TOPICS = DataCollector.topics.first(5)
 # Simulated different performance for different topics
 MESSAGE_SPEED = TOPICS.map.with_index { |topic, index| [topic, index] }.to_h
 
-class Consumer < Karafka::BaseConsumer
+class Consumer < Karafka::Pro::BaseConsumer
   def consume
     # We add 10ms per message to make sure that the metrics tracking track it as expected
     messages.each do
