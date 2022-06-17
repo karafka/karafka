@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+require 'karafka/pro/base_consumer'
 require 'karafka/pro/active_job/consumer'
-require 'karafka/pro/base_consumer_extensions'
 require 'karafka/pro/routing/extensions'
 
 RSpec.describe_current do
@@ -11,7 +11,6 @@ RSpec.describe_current do
     described_class.new.tap do |instance|
       instance.client = client
       instance.topic = topic
-      instance.singleton_class.include ::Karafka::Pro::BaseConsumerExtensions
     end
   end
 
@@ -23,7 +22,7 @@ RSpec.describe_current do
   let(:payload1) { { '1' => '2' } }
   let(:payload2) { { '3' => '4' } }
 
-  it { expect(described_class).to be < Karafka::ActiveJob::Consumer }
+  it { expect(described_class).to be < Karafka::Pro::BaseConsumer }
 
   describe '#on_before_consume behaviour' do
     before { allow(consumer).to receive(:pause) }

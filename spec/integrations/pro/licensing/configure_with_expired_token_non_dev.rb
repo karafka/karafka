@@ -42,6 +42,7 @@ assert logs.include?('Please reach us at contact@karafka.io')
 assert Karafka.pro?
 
 # We do not want to break systems, so even with expired keys, pro components should be loaded
+assert const_visible?('Karafka::Pro::BaseConsumer')
 assert const_visible?('Karafka::Pro::Processing::JobsBuilder')
 assert const_visible?('Karafka::Pro::Routing::Extensions')
 assert const_visible?('Karafka::Pro::Processing::Jobs::ConsumeNonBlocking')
