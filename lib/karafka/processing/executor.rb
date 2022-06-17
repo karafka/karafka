@@ -68,6 +68,11 @@ module Karafka
         consumer.on_consume
       end
 
+      # Runs consumer after consumption code
+      def after_consume
+        consumer.on_after_consume
+      end
+
       # Runs the controller `#revoked` method that should be triggered when a given consumer is
       # no longer needed due to partitions reassignment.
       #
