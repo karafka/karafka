@@ -9,15 +9,15 @@ RSpec.describe_current do
 
   it { expect(job.non_blocking?).to eq(false) }
 
-  describe '#prepare' do
+  describe '#before_consume' do
     before do
       allow(Time).to receive(:now).and_return(time_now)
-      allow(executor).to receive(:prepare)
-      job.prepare
+      allow(executor).to receive(:before_consume)
+      job.before_call
     end
 
-    it 'expect to run prepare on the executor with time and messages' do
-      expect(executor).to have_received(:prepare).with(messages, time_now)
+    it 'expect to run before_consume on the executor with time and messages' do
+      expect(executor).to have_received(:before_consume).with(messages, time_now)
     end
   end
 

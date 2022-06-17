@@ -45,7 +45,7 @@ module Karafka
       # @param messages [Array<Karafka::Messages::Message>]
       # @param received_at [Time] the moment we've received the batch (actually the moment we've)
       #   enqueued it, but good enough
-      def prepare(messages, received_at)
+      def before_consume(messages, received_at)
         # Recreate consumer with each batch if persistence is not enabled
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
@@ -59,7 +59,7 @@ module Karafka
           received_at
         )
 
-        consumer.on_prepare
+        consumer.on_before_consume
       end
 
       # Runs consumer data processing against given batch and handles failures and errors.

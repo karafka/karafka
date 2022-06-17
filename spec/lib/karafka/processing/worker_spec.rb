@@ -37,9 +37,9 @@ RSpec.describe_current do
       let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true) }
 
       before do
-        allow(job).to receive(:prepare)
+        allow(job).to receive(:before_call)
         allow(job).to receive(:call)
-        allow(job).to receive(:teardown)
+        allow(job).to receive(:after_call)
         allow(queue).to receive(:tick)
 
         queue << job
@@ -50,9 +50,9 @@ RSpec.describe_current do
       end
 
       it { expect(queue).not_to have_received(:tick) }
-      it { expect(job).to have_received(:prepare).with(no_args) }
+      it { expect(job).to have_received(:before_call).with(no_args) }
       it { expect(job).to have_received(:call).with(no_args) }
-      it { expect(job).to have_received(:teardown).with(no_args) }
+      it { expect(job).to have_received(:after_call).with(no_args) }
       it { expect(queue).to have_received(:complete).with(job) }
     end
 
@@ -60,9 +60,9 @@ RSpec.describe_current do
       let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true, non_blocking?: true) }
 
       before do
-        allow(job).to receive(:prepare)
+        allow(job).to receive(:before_call)
         allow(job).to receive(:call)
-        allow(job).to receive(:teardown)
+        allow(job).to receive(:after_call)
         allow(queue).to receive(:tick)
 
         queue << job
@@ -73,9 +73,9 @@ RSpec.describe_current do
       end
 
       it { expect(queue).to have_received(:tick).with(job.group_id) }
-      it { expect(job).to have_received(:prepare).with(no_args) }
+      it { expect(job).to have_received(:before_call).with(no_args) }
       it { expect(job).to have_received(:call).with(no_args) }
-      it { expect(job).to have_received(:teardown).with(no_args) }
+      it { expect(job).to have_received(:after_call).with(no_args) }
       it { expect(queue).to have_received(:complete).with(job) }
     end
 
@@ -89,7 +89,7 @@ RSpec.describe_current do
       end
 
       before do
-        allow(job).to receive(:prepare).and_raise(StandardError)
+        allow(job).to receive(:before_call).and_raise(StandardError)
 
         detected_errors
 

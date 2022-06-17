@@ -31,25 +31,25 @@ RSpec.describe_current do
     it { expect(executor.group_id).to eq(group_id) }
   end
 
-  describe '#prepare' do
-    before { allow(consumer).to receive(:on_prepare) }
+  describe '#before_consume' do
+    before { allow(consumer).to receive(:on_before_consume) }
 
-    it { expect { executor.prepare(messages, received_at) }.not_to raise_error }
+    it { expect { executor.before_consume(messages, received_at) }.not_to raise_error }
 
     it 'expect to build appropriate messages batch' do
-      executor.prepare(messages, received_at)
+      executor.before_consume(messages, received_at)
       expect(consumer.messages.first.raw_payload).to eq(messages.first.raw_payload)
     end
 
     it 'expect to build metadata with proper details' do
-      executor.prepare(messages, received_at)
+      executor.before_consume(messages, received_at)
       expect(consumer.messages.metadata.scheduled_at).to eq(received_at)
       expect(consumer.messages.metadata.topic).to eq(topic.name)
     end
 
-    it 'expect to run consumer on_prepare' do
-      executor.prepare(messages, received_at)
-      expect(consumer).to have_received(:on_prepare).with(no_args)
+    it 'expect to run consumer on_before_consume' do
+      executor.before_consume(messages, received_at)
+      expect(consumer).to have_received(:on_before_consume).with(no_args)
     end
   end
 

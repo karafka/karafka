@@ -22,8 +22,9 @@ module Karafka
         app.stopping
         app.stopped
 
-        consumer.prepared
+        consumer.before_consumed
         consumer.consumed
+        consumer.after_consumed
         consumer.revoked
         consumer.shutdown
 

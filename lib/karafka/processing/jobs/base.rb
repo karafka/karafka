@@ -5,7 +5,7 @@ module Karafka
     # Namespace for all the jobs that are suppose to run in workers.
     module Jobs
       # Base class for all the jobs types that are suppose to run in workers threads.
-      # Each job can have 3 main entry-points: `#prepare`, `#call` and `#teardown`
+      # Each job can have 3 main entry-points: `#before_call`, `#call` and `#after_call`
       # Only `#call` is required.
       class Base
         extend Forwardable
@@ -23,10 +23,15 @@ module Karafka
         end
 
         # When redefined can run any code that should run before executing the proper code
-        def prepare; end
+        def before_call; end
+
+        # The main entry-point of a job
+        def call
+          raise NotImplementedError, 'Please implement in a subclass'
+        end
 
         # When redefined can run any code that should run after executing the proper code
-        def teardown; end
+        def after_call; end
 
         # @return [Boolean] is this a non-blocking job
         #

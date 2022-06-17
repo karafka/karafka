@@ -50,7 +50,7 @@ module Karafka
           Karafka.monitor.instrument('worker.process', caller: self, job: job)
 
           Karafka.monitor.instrument('worker.processed', caller: self, job: job) do
-            job.prepare
+            job.before_call
 
             # If a job is marked as non blocking, we can run a tick in the job queue and if there
             # are no other blocking factors, the job queue will be unlocked.
@@ -60,7 +60,7 @@ module Karafka
 
             job.call
 
-            job.teardown
+            job.after_call
 
             true
           end

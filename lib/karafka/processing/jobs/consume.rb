@@ -21,8 +21,8 @@ module Karafka
         end
 
         # Runs the preparations on the executor
-        def prepare
-          executor.prepare(@messages, @created_at)
+        def before_call
+          executor.before_consume(@messages, @created_at)
         end
 
         # Runs the given executor
