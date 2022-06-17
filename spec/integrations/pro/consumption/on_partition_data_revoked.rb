@@ -1,15 +1,20 @@
 # frozen_string_literal: true
 
-# Karafka should trigger a revoked action when a partition is being taken from us
+# Karafka should trigger a revoked action when a partition is being taken from us and we should
+# be able to use `#revoked?` even when not LRJ.
 
-setup_karafka
+setup_karafka do |config|
+  config.license.token = pro_license_token
+end
 
 DataCollector[:revoked] = Concurrent::Array.new
 DataCollector[:pre] = Set.new
 DataCollector[:post] = Set.new
 
-class Consumer < Karafka::BaseConsumer
+class Consumer < Karafka::Pro::BaseConsumer
   def consume
+    DataCollector[:revocations] << revoked?
+
     if DataCollector[:revoked].empty?
       DataCollector[:pre] << messages.metadata.partition
     else
@@ -18,6 +23,8 @@ class Consumer < Karafka::BaseConsumer
   end
 
   def revoked
+    DataCollector[:revocations] << revoked?
+
     # We are interested only in the first rebalance
     return unless DataCollector[:done].empty?
 
@@ -70,3 +77,5 @@ re_assigned = DataCollector[:post].to_a.sort
 assert_not_equal [0, 1, 2], re_assigned
 # It may get either one or two partitions back
 assert re_assigned.size == 1 || re_assigned.size == 2
+# We should have revocation later as last thing
+assert_equal [false, true], DataCollector[:revocations].uniq

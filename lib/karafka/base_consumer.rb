@@ -17,7 +17,7 @@ module Karafka
 
     def initialize
       # We re-use one to save on object allocation
-      # It also allows us to move transfer the consumption notion to another batch
+      # It also allows us to transfer the consumption notion to another batch
       @consumption = Processing::Result.new
     end
 

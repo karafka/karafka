@@ -11,8 +11,8 @@ module Karafka
       end
 
       # @return [Boolean]
-      def failed?
-        !success
+      def failure?
+        !success?
       end
 
       # @return [Boolean]
