@@ -25,7 +25,7 @@ module Karafka
         # When redefined can run any code that should run before executing the proper code
         def before_call; end
 
-        # The main entrypoint of a job
+        # The main entry-point of a job
         def call
           raise NotImplementedError, 'Please implement in a subclass'
         end
