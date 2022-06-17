@@ -45,7 +45,7 @@ module Karafka
           # We use the non-blocking one here. If someone needs the blocking one, can implement it
           # with manual offset management
           # Mark as consumed only if manual offset management is not on
-          mark_as_consumed(messages.last) unless topic.manual_offset_management
+          mark_as_consumed(messages.last) unless topic.manual_offset_management?
 
           # If this is not a long running job there is nothing for us to do here
           return unless topic.long_running_job?
