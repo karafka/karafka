@@ -11,12 +11,12 @@
 
 module Karafka
   module Pro
-    # Extensions to the base consumer that make it more pro and fancy
+    # Karafka PRO consumer.
+    #
+    # If you use PRO, all your consumers should inherit (indirectly) from it.
     #
     # @note In case of using lrj, manual pausing may not be the best idea as resume needs to happen
     #   after each batch is processed.
-    #
-    # They need to be added to the consumer via `#prepend`
     class BaseConsumer < Karafka::BaseConsumer
       # Pause for tops 31 years
       MAX_PAUSE_TIME = 1_000_000_000_000
