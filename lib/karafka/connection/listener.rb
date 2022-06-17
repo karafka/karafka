@@ -22,7 +22,7 @@ module Karafka
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
         @jobs_builder = ::Karafka::App.config.internal.jobs_builder
-        @coordinator = ::Karafka::App.config.internal.coordinator
+        @coordinators = ::Karafka::App.config.internal.coordinator
         @pauses_manager = PausesManager.new
         @client = Client.new(@subscription_group)
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
@@ -196,9 +196,9 @@ module Karafka
 
         @messages_buffer.each do |topic, partition, messages|
           pause_tracker = @pauses_manager.fetch(topic, partition)
-          coordinator = @coordinator.new(pause_tracker)
+          coordinator = @coordinators.new(pause_tracker)
 
-          executor = @executors.find_or_create(topic, partition, coordinator)
+          executor = @executors.find_or_create(topic, partition, 0, coordinator)
 
           jobs << @jobs_builder.consume(executor, messages)
         end

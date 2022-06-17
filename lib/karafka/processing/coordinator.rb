@@ -11,7 +11,6 @@ module Karafka
       # @param pause_tracker [Karafka::TimeTrackers::Pause] pause tracker for given topic partition
       def initialize(pause_tracker)
         @pause_tracker = pause_tracker
-        @mutex = Mutex.new
       end
     end
   end

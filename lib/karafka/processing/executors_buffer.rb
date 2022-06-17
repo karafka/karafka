@@ -20,11 +20,12 @@ module Karafka
       # @param topic [String] topic name
       # @param partition [Integer] partition number
       # @param coordinator [Object] processing coordinator
+      # @param parallel_key [String] parallel group key
       # @return [Executor] consumer executor
-      def find_or_create(topic, partition, coordinator)
+      def find_or_create(topic, partition, parallel_key, coordinator)
         ktopic = find_topic(topic)
 
-        @buffer[ktopic][partition][coordinator] ||= Executor.new(
+        @buffer[ktopic][partition][parallel_key] ||= Executor.new(
           @subscription_group.id,
           @client,
           ktopic,
@@ -51,7 +52,7 @@ module Karafka
       def each
         @buffer.each do |ktopic, partitions|
           partitions.each do |partition, executors|
-            executors.each do |_coordinator, executor|
+            executors.each do |_parallel_key, executor|
               # We skip the parallel key here as it does not serve any value when iterating
               yield(ktopic, partition, executor)
             end
