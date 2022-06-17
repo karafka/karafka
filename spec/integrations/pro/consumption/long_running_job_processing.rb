@@ -11,7 +11,7 @@ setup_karafka do |config|
   config.license.token = pro_license_token
 end
 
-class Consumer < Karafka::BaseConsumer
+class Consumer < Karafka::Pro::BaseConsumer
   def consume
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group

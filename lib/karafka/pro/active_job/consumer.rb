@@ -20,7 +20,7 @@ module Karafka
       #
       # It contains slightly better revocation warranties than the regular blocking consumer as
       # it can stop processing batch of jobs in the middle after the revocation.
-      class Consumer < Karafka::ActiveJob::Consumer
+      class Consumer < Karafka::Pro::BaseConsumer
         # Runs ActiveJob jobs processing and handles lrj if needed
         def consume
           messages.each do |message|

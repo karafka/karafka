@@ -26,7 +26,7 @@ module Karafka
         #   management. This layer of the framework knows nothing about Kafka messages consumption.
         class ConsumeNonBlocking < ::Karafka::Processing::Jobs::Consume
           # Releases the blocking lock after it is done with the preparation phase for this job
-          def prepare
+          def before_call
             super
             @non_blocking = true
           end

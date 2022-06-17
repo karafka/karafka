@@ -46,12 +46,20 @@ module Karafka
       # @param messages [Array<Karafka::Messages::Message>]
       # @param received_at [Time] the moment we've received the batch (actually the moment we've)
       #   enqueued it, but good enough
-      def prepare(messages, received_at)
+      def before_consume(messages, received_at)
         # Recreate consumer with each batch if persistence is not enabled
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
         # middle state, where re-creation of a consumer instance would occur only sometimes
-        @consumer = nil unless ::Karafka::App.config.consumer_persistence
+        @recreate = true unless ::Karafka::App.config.consumer_persistence
+
+        # If @recreate was set to true (aside from non persistent), it means, that revocation or
+        # a shutdown happened and we need to have a new instance for running another consume for
+        # this topic partition
+        if @recreate
+          @consumer = nil
+          @recreate = false
+        end
 
         # First we build messages batch...
         consumer.messages = Messages::Builders::Messages.call(
@@ -60,13 +68,18 @@ module Karafka
           received_at
         )
 
-        consumer.on_prepare
+        consumer.on_before_consume
       end
 
       # Runs consumer data processing against given batch and handles failures and errors.
       def consume
         # We run the consumer client logic...
         consumer.on_consume
+      end
+
+      # Runs consumer after consumption code
+      def after_consume
+        consumer.on_after_consume if @consumer
       end
 
       # Runs the controller `#revoked` method that should be triggered when a given consumer is
@@ -77,9 +90,13 @@ module Karafka
       #
       # @note We run it only when consumer was present, because presence indicates, that at least
       #   a single message has been consumed.
+      #
+      # @note We do not reset the consumer but we indicate need for recreation instead, because
+      #   after the revocation, there still may be `#after_consume` running that needs a given
+      #   consumer instance.
       def revoked
         consumer.on_revoked if @consumer
-        @consumer = nil
+        @recreate = true
       end
 
       # Runs the controller `#shutdown` method that should be triggered when a given consumer is
@@ -91,7 +108,7 @@ module Karafka
         # There is a case, where the consumer no longer exists because it was revoked, in case like
         # that we do not build a new instance and shutdown should not be triggered.
         consumer.on_shutdown if @consumer
-        @consumer = nil
+        @recreate = true
       end
 
       private

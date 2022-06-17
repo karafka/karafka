@@ -13,7 +13,7 @@ setup_karafka do |config|
   config.shutdown_timeout = 60_000
 end
 
-class Consumer < Karafka::BaseConsumer
+class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do
       DataCollector[messages.metadata.partition] << true

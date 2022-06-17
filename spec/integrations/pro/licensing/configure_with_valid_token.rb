@@ -18,6 +18,7 @@ pro = Karafka::Pro
 assert_equal false, logs.include?('] ERROR -- : Your license expired')
 assert_equal false, logs.include?('Please reach us')
 assert Karafka.pro?
+assert const_visible?('Karafka::Pro::BaseConsumer')
 assert const_visible?('Karafka::Pro::Processing::JobsBuilder')
 assert const_visible?('Karafka::Pro::Routing::Extensions')
 assert const_visible?('Karafka::Pro::Processing::Jobs::ConsumeNonBlocking')

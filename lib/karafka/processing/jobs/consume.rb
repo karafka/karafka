@@ -20,14 +20,19 @@ module Karafka
           super()
         end
 
-        # Runs the preparations on the executor
-        def prepare
-          executor.prepare(@messages, @created_at)
+        # Runs the before consumption preparations on the executor
+        def before_call
+          executor.before_consume(@messages, @created_at)
         end
 
         # Runs the given executor
         def call
           executor.consume
+        end
+
+        # Runs any error handling and other post-consumption stuff on the executor
+        def after_call
+          executor.after_consume
         end
       end
     end

@@ -66,6 +66,11 @@ module Karafka
         end
       end
 
+      # @return [Boolean] true if this topic offset is handled by the end user
+      def manual_offset_management?
+        manual_offset_management
+      end
+
       # @return [Hash] hash with all the topic attributes
       # @note This is being used when we validate the consumer_group and its topics
       def to_h
