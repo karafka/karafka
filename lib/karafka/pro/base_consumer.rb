@@ -51,6 +51,9 @@ module Karafka
           return unless topic.long_running_job?
 
           # Once processing is done, we move to the new offset based on commits
+          # Here, in case manual offset management is off, we have the new proper offset of a
+          # first message from another batch from `@seek_offset`. If manual offset management
+          # is on, we move to place where the user indicated it was finished.
           seek(@seek_offset || messages.first.offset)
           resume
         else
