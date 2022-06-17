@@ -152,9 +152,12 @@ module Karafka
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
-            pause_tracker = @pauses_manager.fetch(topic, partition)
-            executor = @executors.fetch(topic, partition, pause_tracker)
-            jobs << @jobs_builder.revoked(executor)
+            # There may be a case where we have lost partition of which data we have never
+            # processed (if it was assigned and revoked really fast), thus we may not have it
+            # here. In cases like this, we do not run a revocation job
+            @executors.find_all(topic, partition).each do |executor|
+              jobs << @jobs_builder.revoked(executor)
+            end
           end
         end
 
@@ -193,7 +196,7 @@ module Karafka
         @messages_buffer.each do |topic, partition, messages|
           pause_tracker = @pauses_manager.fetch(topic, partition)
 
-          executor = @executors.fetch(topic, partition, pause_tracker)
+          executor = @executors.find_or_create(topic, partition, false, pause_tracker)
 
           jobs << @jobs_builder.consume(executor, messages)
         end

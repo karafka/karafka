@@ -31,11 +31,12 @@ module Karafka
       # @param client [Karafka::Connection::Client] kafka client
       # @param topic [Karafka::Routing::Topic] topic for which this executor will run
       # @param pause_tracker [Karafka::TimeTrackers::Pause] fetch pause tracker for pausing
-      def initialize(group_id, client, topic, pause_tracker)
+      def initialize(group_id, client, topic, parallel_key, pause_tracker)
         @id = SecureRandom.uuid
         @group_id = group_id
         @client = client
         @topic = topic
+        @parallel_key = parallel_key
         @pause_tracker = pause_tracker
       end
 

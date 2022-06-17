@@ -11,28 +11,36 @@ module Karafka
       def initialize(client, subscription_group)
         @subscription_group = subscription_group
         @client = client
-        @buffer = Hash.new { |h, k| h[k] = {} }
+        # We need two layers here to keep track of topics, partitions and processing groups
+        @buffer = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = {} } }
+      end
+
+      # Finds or creates an executor based on the provided details
+      #
+      # @param topic [String] topic name
+      # @param partition [Integer] partition number
+      # @param parallel_key [Object] key used for parallel work distribution
+      # @param pause [TimeTrackers::Pause] pause corresponding with provided topic and partition
+      # @return [Executor] consumer executor
+      def find_or_create(topic, partition, parallel_key, pause)
+        ktopic = find_topic(topic)
+
+        @buffer[ktopic][partition][parallel_key] ||= Executor.new(
+          @subscription_group.id,
+          @client,
+          ktopic,
+          parallel_key,
+          pause
+        )
       end
 
       # @param topic [String] topic name
       # @param partition [Integer] partition number
-      # @param pause [TimeTrackers::Pause] pause corresponding with provided topic and partition
-      # @return [Executor] consumer executor
-      def fetch(
-        topic,
-        partition,
-        pause
-      )
-        ktopic = @subscription_group.topics.find(topic)
+      # @return [Array<Executor>] executors in use for this topic + partition
+      def find_all(topic, partition)
+        ktopic = find_topic(topic)
 
-        ktopic || raise(Errors::TopicNotFoundError, topic)
-
-        @buffer[ktopic][partition] ||= Executor.new(
-          @subscription_group.id,
-          @client,
-          ktopic,
-          pause
-        )
+        @buffer[ktopic][partition].values
       end
 
       # Iterates over all available executors and yields them together with topic and partition
@@ -42,8 +50,11 @@ module Karafka
       # @yieldparam [Executor] given executor
       def each
         @buffer.each do |ktopic, partitions|
-          partitions.each do |partition, executor|
-            yield(ktopic, partition, executor)
+          partitions.each do |partition, executors|
+            executors.each do |_parallel_key, executor|
+              # We skip the parallel key here as it does not serve any value when iterating
+              yield(ktopic, partition, executor)
+            end
           end
         end
       end
@@ -51,6 +62,16 @@ module Karafka
       # Clears the executors buffer. Useful for critical errors recovery.
       def clear
         @buffer.clear
+      end
+
+      private
+
+      # Finds topic based on its name
+      #
+      # @param topic [String] topic we're looking for
+      # @return [Karafka::Routing::Topic] topic we're interested in
+      def find_topic(topic)
+        @subscription_group.topics.find(topic) || raise(Errors::TopicNotFoundError, topic)
       end
     end
   end
