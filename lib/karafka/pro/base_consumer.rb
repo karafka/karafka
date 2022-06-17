@@ -40,7 +40,7 @@ module Karafka
         return if revoked?
 
         if @consumption.success?
-          pause_tracker.reset
+          coordinator.pause_tracker.reset
 
           # We use the non-blocking one here. If someone needs the blocking one, can implement it
           # with manual offset management

@@ -3,12 +3,12 @@
 RSpec.describe_current do
   subject(:consumer) do
     instance = working_class.new
-    instance.pause_tracker = pause_tracker
+    instance.coordinator = coordinator
     instance.topic = topic
     instance
   end
 
-  let(:pause_tracker) { build(:time_trackers_pause) }
+  let(:coordinator) { build(:processing_coordinator) }
   let(:topic) { build(:routing_topic) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
@@ -73,10 +73,10 @@ RSpec.describe_current do
     end
 
     before do
-      consumer.pause_tracker = pause_tracker
+      consumer.coordinator = coordinator
       consumer.client = client
       consumer.messages = messages
-      allow(pause_tracker).to receive(:pause)
+      allow(coordinator.pause_tracker).to receive(:pause)
     end
 
     context 'when everything went ok on consume with manual offset management' do
@@ -124,7 +124,7 @@ RSpec.describe_current do
 
       it 'expect to pause with time tracker' do
         consume_with_after.call
-        expect(pause_tracker).to have_received(:pause)
+        expect(coordinator.pause_tracker).to have_received(:pause)
       end
 
       it 'expect to track this with an instrumentation' do
@@ -185,7 +185,7 @@ RSpec.describe_current do
 
       it 'expect to pause with time tracker' do
         consume_with_after.call
-        expect(pause_tracker).to have_received(:pause)
+        expect(coordinator.pause_tracker).to have_received(:pause)
       end
 
       it 'expect to track this with an instrumentation' do
@@ -349,7 +349,7 @@ RSpec.describe_current do
       consumer.client = client
       consumer.messages = messages
 
-      allow(pause_tracker).to receive(:pause)
+      allow(coordinator.pause_tracker).to receive(:pause)
       allow(client).to receive(:pause)
     end
 
@@ -366,7 +366,7 @@ RSpec.describe_current do
 
       it 'expect to pause via client and use pause tracker without any arguments' do
         expect(client).to have_received(:pause).with(*expected_args)
-        expect(pause_tracker).to have_received(:pause).with(no_args)
+        expect(coordinator.pause_tracker).to have_received(:pause).with(no_args)
       end
     end
 
@@ -383,20 +383,20 @@ RSpec.describe_current do
 
       it 'expect to pause via client and use pause tracker with provided timeout' do
         expect(client).to have_received(:pause).with(*expected_args)
-        expect(pause_tracker).to have_received(:pause).with(2_000)
+        expect(coordinator.pause_tracker).to have_received(:pause).with(2_000)
       end
     end
   end
 
   describe '#resume' do
     before do
-      allow(pause_tracker).to receive(:expire)
+      allow(coordinator.pause_tracker).to receive(:expire)
 
       consumer.send(:resume)
     end
 
     it 'expect to expire the pause tracker' do
-      expect(pause_tracker).to have_received(:expire)
+      expect(coordinator.pause_tracker).to have_received(:expire)
     end
   end
 end

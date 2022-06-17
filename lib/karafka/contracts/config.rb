@@ -36,6 +36,7 @@ module Karafka
           required(:status)
           required(:process)
           required(:scheduler)
+          required(:coordinator)
         end
       end
 

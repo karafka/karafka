@@ -6,10 +6,10 @@ RSpec.describe_current do
   let(:client) { instance_double(Karafka::Connection::Client) }
   let(:group_id) { SecureRandom.uuid }
   let(:topic_name) { 'topic_name1' }
-  let(:parallel_key) { false }
+  let(:coordinator) { build(:processing_coordinator) }
   let(:partition_id) { 0 }
   let(:pause) { nil }
-  let(:fetched_executor) { buffer.find_or_create(topic_name, partition_id, parallel_key, pause) }
+  let(:fetched_executor) { buffer.find_or_create(topic_name, partition_id, coordinator) }
   let(:subscription_group) { consumer_groups.first.subscription_groups.first }
   let(:consumer_groups) do
     Karafka::Routing::Builder.new.draw do
@@ -32,7 +32,7 @@ RSpec.describe_current do
 
     context 'when executor is in a buffer' do
       let(:existing_executor) do
-        buffer.find_or_create(topic_name, partition_id, parallel_key, pause)
+        buffer.find_or_create(topic_name, partition_id, coordinator)
       end
 
       before { existing_executor }
@@ -64,7 +64,7 @@ RSpec.describe_current do
 
   describe '#clear' do
     let(:pre_cleaned_executor) do
-      buffer.find_or_create(topic_name, partition_id, parallel_key, pause)
+      buffer.find_or_create(topic_name, partition_id, coordinator)
     end
 
     before do

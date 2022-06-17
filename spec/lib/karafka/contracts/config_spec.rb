@@ -25,7 +25,8 @@ RSpec.describe_current do
         process: Karafka::Process.new,
         subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new,
         scheduler: Karafka::Scheduler.new,
-        jobs_builder: Karafka::Processing::JobsBuilder.new
+        jobs_builder: Karafka::Processing::JobsBuilder.new,
+        coordinator: Karafka::Processing::Coordinator
       },
       kafka: {
         'bootstrap.servers': '127.0.0.1:9092'

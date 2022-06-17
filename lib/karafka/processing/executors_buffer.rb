@@ -19,21 +19,21 @@ module Karafka
       #
       # @param topic [String] topic name
       # @param partition [Integer] partition number
-      # @param parallel_key [Object] key used for parallel work distribution
-      # @param pause [TimeTrackers::Pause] pause corresponding with provided topic and partition
+      # @param coordinator [Object] processing coordinator
       # @return [Executor] consumer executor
-      def find_or_create(topic, partition, parallel_key, pause)
+      def find_or_create(topic, partition, coordinator)
         ktopic = find_topic(topic)
 
-        @buffer[ktopic][partition][parallel_key] ||= Executor.new(
+        @buffer[ktopic][partition][coordinator] ||= Executor.new(
           @subscription_group.id,
           @client,
           ktopic,
-          parallel_key,
-          pause
+          coordinator
         )
       end
 
+      # Finds all the executors available for a given topic partition
+      #
       # @param topic [String] topic name
       # @param partition [Integer] partition number
       # @return [Array<Executor>] executors in use for this topic + partition
@@ -51,7 +51,7 @@ module Karafka
       def each
         @buffer.each do |ktopic, partitions|
           partitions.each do |partition, executors|
-            executors.each do |_parallel_key, executor|
+            executors.each do |_coordinator, executor|
               # We skip the parallel key here as it does not serve any value when iterating
               yield(ktopic, partition, executor)
             end

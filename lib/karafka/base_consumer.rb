@@ -10,8 +10,8 @@ module Karafka
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
-    # @return [Karafka::TimeTrackers::Pause] current topic partition pause tracker
-    attr_accessor :pause_tracker
+    # @return [Karafka::Processing::Coordinator] coordinator
+    attr_accessor :coordinator
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
 
@@ -58,7 +58,7 @@ module Karafka
     #   not as part of the public api.
     def on_after_consume
       if @consumption.success?
-        pause_tracker.reset
+        coordinator.pause_tracker.reset
 
         # Mark as consumed only if manual offset management is not on
         return if topic.manual_offset_management?
@@ -148,7 +148,7 @@ module Karafka
     # @param timeout [Integer, nil] how long in milliseconds do we want to pause or nil to use the
     #   default exponential pausing strategy defined for retries
     def pause(offset, timeout = nil)
-      timeout ? pause_tracker.pause(timeout) : pause_tracker.pause
+      timeout ? coordinator.pause_tracker.pause(timeout) : coordinator.pause_tracker.pause
 
       client.pause(
         messages.metadata.topic,
@@ -161,7 +161,7 @@ module Karafka
     def resume
       # This is sufficient to expire a partition pause, as with it will be resumed by the listener
       # thread before the next poll.
-      pause_tracker.expire
+      coordinator.pause_tracker.expire
     end
 
     # Seeks in the context of current topic and partition

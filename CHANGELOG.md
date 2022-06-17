@@ -5,6 +5,7 @@
 - Remove ability of running `before_consume` and `after_consume` completely. Those should be for internal usage only.
 - Reorganize how Pro consumer and Pro AJ consumers inherit.
 - Require WaterDrop `2.3.1`.
+- Fix a case where revocation job would be executed on partition for which we never did any work.
 
 ## 2.0.0-beta3 (2022-06-14)
 - Jobs building responsibility extracted out of the listener code base.
