@@ -1,17 +1,14 @@
 # frozen_string_literal: true
 
-# Karafka consumer can be used with `#prepare` method to run some preparations before running the
-# proper code
-# While it is not recommended to use it unless you are advanced user and want to elevate certain
-# karafka capabilities, we still add this spec to make sure things operate as expected and that
-# this method is called
+# Karafka has a `#before_consume` method. This method should not be used as part of the official
+# API but we add integration specs here just to make sure it runs as expected.
 
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   # We should have access here to anything that we can get when consuming, so we duplicate
   # this and we can compare that later
-  def prepare
+  def before_consume
     messages.each do |message|
       DataCollector["prep-#{message.metadata.partition}"] << message.raw_payload
     end
@@ -24,8 +21,8 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka::App.monitor.instrument('consumer.prepared') do
-  DataCollector[:prepared] = true
+Karafka::App.monitor.instrument('consumer.before_consumed') do
+  DataCollector[:before_consumed] = true
 end
 
 draw_routes(Consumer)
@@ -39,4 +36,4 @@ end
 
 assert_equal DataCollector['prep-0'], DataCollector[0]
 assert_equal 3, DataCollector.data.size
-assert DataCollector[:prepared]
+assert DataCollector[:before_consumed]

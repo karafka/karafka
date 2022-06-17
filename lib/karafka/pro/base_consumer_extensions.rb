@@ -25,7 +25,7 @@ module Karafka
 
       # Pauses processing of a given partition until we're done with the processing
       # This ensures, that we can easily poll not reaching the `max.poll.interval`
-      def on_prepare
+      def on_before_consume
         # Pause at the first message in a batch. That way in case of a crash, we will not loose
         # any messages
         pause(messages.first.offset, MAX_PAUSE_TIME) if topic.long_running_job?

@@ -12,19 +12,19 @@ RSpec.describe_current do
   it { expect(job.non_blocking?).to eq(false) }
   it { expect(described_class).to be < ::Karafka::Processing::Jobs::Consume }
 
-  describe '#prepare' do
+  describe '#before_call' do
     before do
       allow(Time).to receive(:now).and_return(time_now)
-      allow(executor).to receive(:prepare)
+      allow(executor).to receive(:before_consume)
     end
 
-    it 'expect to run prepare on the executor with time and messages' do
-      job.prepare
-      expect(executor).to have_received(:prepare).with(messages, time_now)
+    it 'expect to run before_consume on the executor with time and messages' do
+      job.before_call
+      expect(executor).to have_received(:before_consume).with(messages, time_now)
     end
 
     it 'expect to mark this job as non blocking after it is done with preparation' do
-      expect { job.prepare }.to change(job, :non_blocking?).from(false).to(true)
+      expect { job.before_call }.to change(job, :non_blocking?).from(false).to(true)
     end
   end
 end

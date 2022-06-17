@@ -191,16 +191,16 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_prepare' do
+  describe '#on_before_consume' do
     context 'when everything went ok on revoked' do
-      it { expect { consumer.on_prepare }.not_to raise_error }
+      it { expect { consumer.on_before_consume }.not_to raise_error }
 
       it 'expect to run proper instrumentation' do
         Karafka.monitor.subscribe('consumer.revoked') do |event|
           expect(event.payload[:caller]).to eq(consumer)
         end
 
-        consumer.on_prepare
+        consumer.on_before_consume
       end
 
       it 'expect not to run error instrumentation' do
@@ -208,7 +208,7 @@ RSpec.describe_current do
           raise
         end
 
-        consumer.on_prepare
+        consumer.on_before_consume
       end
     end
 
@@ -221,7 +221,7 @@ RSpec.describe_current do
         end
       end
 
-      it { expect { consumer.on_prepare }.not_to raise_error }
+      it { expect { consumer.on_before_consume }.not_to raise_error }
 
       it 'expect to run the error instrumentation' do
         Karafka.monitor.subscribe('error.occurred') do |event|

@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.0-beta4 (Unreleased)
+- Rename job internal api methods from `#prepare` to `#before_call` and from `#teardown` to `#after_call` to abstract away jobs execution from any type of executors and consumers logic
+
 ## 2.0.0-beta3 (2022-06-14)
 - Jobs building responsibility extracted out of the listener code base.
 - Fix a case where specs supervisor would try to kill no longer running process (#868)
