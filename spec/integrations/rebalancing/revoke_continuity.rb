@@ -91,9 +91,7 @@ DataCollector.data[revoked_partition].each do |offset|
     next
   end
 
-  if previous + 1 == jumped_offset
-    previous = jumped_offset
-  end
+  previous = jumped_offset if previous + 1 == jumped_offset
 
   assert_equal previous + 1, offset
 
