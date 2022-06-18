@@ -25,6 +25,14 @@ module Karafka
         )
       end
 
+      # Revokes pause tracker for a given topic partition
+      #
+      # @param topic [String] topic name
+      # @param partition [Integer] partition number
+      def revoke(topic, partition)
+        @pauses[topic].delete(partition)
+      end
+
       # Resumes processing of partitions for which pause time has ended.
       #
       # @yieldparam [String] topic name

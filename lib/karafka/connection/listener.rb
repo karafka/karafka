@@ -22,8 +22,7 @@ module Karafka
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
         @jobs_builder = ::Karafka::App.config.internal.jobs_builder
-        @coordinators = ::Karafka::App.config.internal.coordinator
-        @pauses_manager = PausesManager.new
+        @coordinators = Processing::CoordinatorsBuffer.new
         @client = Client.new(@subscription_group)
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         # We reference scheduler here as it is much faster than fetching this each time
@@ -137,7 +136,7 @@ module Karafka
 
       # Resumes processing of partitions that were paused due to an error.
       def resume_paused_partitions
-        @pauses_manager.resume do |topic, partition|
+        @coordinators.pauses.resume do |topic, partition|
           @client.resume(topic, partition)
         end
       end
@@ -153,6 +152,8 @@ module Karafka
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
+            @coordinators.revoke(topic, partition)
+
             # There may be a case where we have lost partition of which data we have never
             # processed (if it was assigned and revoked really fast), thus we may not have it
             # here. In cases like this, we do not run a revocation job
@@ -195,8 +196,7 @@ module Karafka
         jobs = []
 
         @messages_buffer.each do |topic, partition, messages|
-          pause_tracker = @pauses_manager.fetch(topic, partition)
-          coordinator = @coordinators.new(pause_tracker)
+          coordinator = @coordinators.find_or_create(topic, partition)
 
           executor = @executors.find_or_create(topic, partition, 0, coordinator)
 
@@ -236,7 +236,7 @@ module Karafka
         @jobs_queue.wait(@subscription_group.id)
         @jobs_queue.clear(@subscription_group.id)
         @client.reset
-        @pauses_manager = PausesManager.new
+        @coordinators.clear
         @executors = Processing::ExecutorsBuffer.new(@client, @subscription_group)
       end
     end
