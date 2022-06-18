@@ -66,13 +66,10 @@ module Karafka
       # This allows us for things like lrj to finish early as this state may change during lrj
       # execution
       def on_revoked
+        # @note This may already be set to true if we tried to commit offsets and failed. In case
+        # like this it will automatically be marked as revoked.
         @revoked = true
         super
-      end
-
-      # @return [Boolean] true if partition was revoked from the current consumer
-      def revoked?
-        @revoked || false
       end
     end
   end

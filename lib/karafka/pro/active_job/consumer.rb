@@ -33,10 +33,11 @@ module Karafka
               ::ActiveSupport::JSON.decode(message.raw_payload)
             )
 
-            # We check it twice as the job may be long running
-            return if revoked?
-
             mark_as_consumed(message)
+
+            # We check it twice as the job may be long running
+            # If marking fails, it also means it got revoked and we can stop consuming
+            return if revoked?
 
             # Do not process more if we are shutting down
             break if Karafka::App.stopping?

@@ -190,6 +190,7 @@ module Karafka
       # Marks given message as consumed.
       #
       # @param [Karafka::Messages::Message] message that we want to mark as processed
+      # @return [Boolean] true if successful. False if we no longer own given partition
       # @note This method won't trigger automatic offsets commits, rather relying on the offset
       #   check-pointing trigger that happens with each batch processed
       def mark_as_consumed(message)
@@ -199,9 +200,13 @@ module Karafka
       # Marks a given message as consumed and commits the offsets in a blocking way.
       #
       # @param [Karafka::Messages::Message] message that we want to mark as processed
+      # @return [Boolean] true if successful. False if we no longer own given partition
       def mark_as_consumed!(message)
-        mark_as_consumed(message)
+        return false unless mark_as_consumed(message)
+
         commit_offsets!
+
+        true
       end
 
       # Closes and resets the client completely.
@@ -217,11 +222,19 @@ module Karafka
 
       private
 
+      # When we cannot store an offset, it means we no longer own the partition
+      #
       # Non thread-safe offset storing method
       # @param message [Karafka::Messages::Message]
+      # @return [Boolean] true if we could store the offset (if we still own the partition)
       def internal_store_offset(message)
         @offsetting = true
         @kafka.store_offset(message)
+        true
+      rescue Rdkafka::RdkafkaError => e
+        return false if e.code == :state
+
+        raise e
       end
 
       # Non thread-safe message committing method
