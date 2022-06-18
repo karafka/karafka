@@ -21,17 +21,17 @@ class Consumer < Karafka::Pro::BaseConsumer
   def consume
     partition = messages.metadata.partition
 
-    unless @slept
-      @slept = true
-      sleep(15)
-      # Here we already should be revoked and we should know about it as long as we have enough
-      # threads to handle this
-      DataCollector["#{partition}-revoked"] << revoked?
-      # We should not own this partition anymore
-      DataCollector["#{partition}-marked"] << mark_as_consumed(messages.last)
-      # Here things should not change for us
-      DataCollector["#{partition}-revoked"] << revoked?
-    end
+    return if @slept
+
+    @slept = true
+    sleep(15)
+    # Here we already should be revoked and we should know about it as long as we have enough
+    # threads to handle this
+    DataCollector["#{partition}-revoked"] << revoked?
+    # We should not own this partition anymore
+    DataCollector["#{partition}-marked"] << mark_as_consumed(messages.last)
+    # Here things should not change for us
+    DataCollector["#{partition}-revoked"] << revoked?
   end
 end
 

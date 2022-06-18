@@ -19,14 +19,15 @@ class Consumer < Karafka::Pro::BaseConsumer
     messages.each do |message|
       # We store offsets only until revoked
       return unless mark_as_consumed!(message)
+
       DataCollector[partition] << message.offset
     end
 
+    return if @marked
+
     # For partition we have lost this will run twice
-    unless @marked
-      DataCollector[:partitions] << partition
-      @marked = true
-    end
+    DataCollector[:partitions] << partition
+    @marked = true
   end
 end
 
@@ -47,11 +48,10 @@ Thread.new do
     end
 
     sleep(0.5)
-  rescue
+  rescue StandardError
     nil
   end
 end
-
 
 # We need a second producer to trigger a rebalance
 consumer = setup_rdkafka_consumer
@@ -87,19 +87,19 @@ assert_equal 1, DataCollector[:jumped].size
 assert_equal false, DataCollector.data[revoked_partition].include?(jumped_offset)
 
 # We should have all the others in proper order and without any other missing
-
 previous = nil
 
 DataCollector.data[revoked_partition].each do |offset|
   unless previous
-    previous == offset
+    previous = offset
     next
   end
 
-  if offset == jumped_offset
+  if previous + 1 == jumped_offset
     previous = jumped_offset
-    next
   end
 
-  assert previous + 1 == offset
+  assert_equal previous + 1, offset
+
+  previous = offset
 end
