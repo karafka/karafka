@@ -5,6 +5,9 @@
 - Remove ability of running `before_consume` and `after_consume` completely. Those should be for internal usage only.
 - Reorganize how Pro consumer and Pro AJ consumers inherit.
 - Require WaterDrop `2.3.1`.
+- Add more integration specs for rebalancing.
+- Move `revoked?` state from PRO to regular Karafka.
+- Use return value of `mark_as_consumed!` and `mark_as_consumed` as indicator of partition ownership + use it to switch the ownership state.
 
 ## 2.0.0-beta3 (2022-06-14)
 - Jobs building responsibility extracted out of the listener code base.
