@@ -19,11 +19,14 @@ class Consumer < Karafka::Pro::BaseConsumer
 
     return if @slept
 
+    DataCollector["#{partition}-revoked"] << revoked?
+
     @slept = true
+
     sleep(15)
+
     # Here we already should be revoked and we should know about it as long as we have enough
     # threads to handle this
-    DataCollector["#{partition}-revoked"] << revoked?
     # We should not own this partition anymore
     DataCollector["#{partition}-marked"] << mark_as_consumed(messages.last)
     # Here things should not change for us
