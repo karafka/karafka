@@ -16,7 +16,7 @@ class Consumer < Karafka::Pro::BaseConsumer
   def consume
     # We should never try to consume new batch with a revoked consumer
     # This is just an extra test to make sure things work as expected
-    exit 5 if revoked?
+    exit! 5 if revoked?
 
     partition = messages.metadata.partition
 
@@ -66,6 +66,7 @@ other = Thread.new do
 
   consumer.each do |message|
     DataCollector[:jumped] << message
+
     consumer.store_offset(message)
     consumer.commit(nil, false)
 
