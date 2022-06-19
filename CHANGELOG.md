@@ -8,6 +8,8 @@
 - Add more integration specs for rebalancing.
 - Move `revoked?` state from PRO to regular Karafka.
 - Use return value of `mark_as_consumed!` and `mark_as_consumed` as indicator of partition ownership + use it to switch the ownership state.
+- Do not remove rebalance manager upon client reset and recovery. This allows us to keep the notion of lost partitions, so we can run revocation jobs for blocking jobs that exceeded the max poll interval.
+- Run revocation jobs upon reaching max poll interval for blocking jobs.
 
 ## 2.0.0-beta3 (2022-06-14)
 - Jobs building responsibility extracted out of the listener code base.

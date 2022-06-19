@@ -205,8 +205,6 @@ module Karafka
         return false unless mark_as_consumed(message)
 
         commit_offsets!
-
-        true
       end
 
       # Closes and resets the client completely.
@@ -232,6 +230,7 @@ module Karafka
         @kafka.store_offset(message)
         true
       rescue Rdkafka::RdkafkaError => e
+        return false if e.code == :assignment_lost
         return false if e.code == :state
 
         raise e
@@ -239,13 +238,17 @@ module Karafka
 
       # Non thread-safe message committing method
       # @param async [Boolean] should the commit happen async or sync (async by default)
+      # @return [Boolean] true if offset commit worked, false if we've lost the assignment
       def internal_commit_offsets(async: true)
-        return unless @offsetting
+        return true unless @offsetting
 
         @kafka.commit(nil, async)
         @offsetting = false
+
+        true
       rescue Rdkafka::RdkafkaError => e
-        return if e.code == :no_offset
+        return false if e.code == :assignment_lost
+        return false if e.code == :no_offset
 
         raise e
       end
@@ -263,7 +266,8 @@ module Karafka
 
           @kafka.close
           @buffer.clear
-          @rebalance_manager.clear
+          # @note We do not clear rebalance manager here as we may still have revocation info here
+          # that we want to consider valid prior to running another reconnection
         end
       end
 
@@ -316,7 +320,13 @@ module Karafka
 
         time_poll.backoff
 
-        retry
+        # We return nil, so we do not restart until running the whole loop
+        # This allows us to run revocation jobs and other things and we will pick up new work
+        # next time after dispatching all the things that are needed
+        #
+        # If we would retry here, the client reset would become transparent and we would not have
+        # a chance to take any actions
+        nil
       end
 
       # Builds a new rdkafka consumer instance based on the subscription group configuration
