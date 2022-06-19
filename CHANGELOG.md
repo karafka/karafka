@@ -11,6 +11,7 @@
 - Do not remove rebalance manager upon client reset and recovery. This will allow us to keep the notion of lost partitions, so we can run revocation jobs for blocking jobs that exceeded the max poll interval.
 - Run revocation jobs upon reaching max poll interval for blocking jobs.
 - Early exit `poll` operation upon partition lost or max poll exceeded event.
+- Always reset consumer instances on timeout exceeded.
 
 ## 2.0.0-beta3 (2022-06-14)
 - Jobs building responsibility extracted out of the listener code base.
