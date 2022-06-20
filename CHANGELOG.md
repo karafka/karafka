@@ -12,6 +12,7 @@
 - Run revocation jobs upon reaching max poll interval for blocking jobs.
 - Early exit `poll` operation upon partition lost or max poll exceeded event.
 - Always reset consumer instances on timeout exceeded.
+- Wait for Kafka to create all the needed topics before running specs in CI.
 
 ## 2.0.0-beta3 (2022-06-14)
 - Jobs building responsibility extracted out of the listener code base.
