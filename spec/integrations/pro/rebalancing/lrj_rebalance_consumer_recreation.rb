@@ -10,6 +10,7 @@ setup_karafka do |config|
   # We need 4: two partitions processing and non-blocking revokes
   config.concurrency = 4
   config.shutdown_timeout = 60_000
+  config.initial_offset = 'latest'
 end
 
 class Consumer < Karafka::Pro::BaseConsumer
@@ -26,7 +27,7 @@ class Consumer < Karafka::Pro::BaseConsumer
 
     DataCollector["#{partition}-object_ids"] << object_id
 
-    sleep 2
+    sleep 1
   end
 
   def revoked
@@ -60,7 +61,9 @@ end
 consumer = setup_rdkafka_consumer
 
 other = Thread.new do
-  sleep(10)
+  sleep(0.1) until got_both?
+
+  sleep(2)
 
   consumer.subscribe(TOPIC)
 
@@ -78,9 +81,17 @@ other = Thread.new do
   consumer.close
 end
 
+# This part makes sure we do not run rebalance until karafka got both partitions work to do
+def got_both?
+  DataCollector['0-object_ids'].uniq.size >= 1 &&
+    DataCollector['1-object_ids'].uniq.size >= 1
+end
+
 start_karafka_and_wait_until do
-  DataCollector['0-object_ids'].uniq.size >= 2 ||
-    DataCollector['1-object_ids'].uniq.size >= 2
+  got_both? && (
+    DataCollector['0-object_ids'].uniq.size >= 2 ||
+      DataCollector['1-object_ids'].uniq.size >= 2
+  )
 end
 
 other.join
