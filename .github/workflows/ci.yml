@@ -17,13 +17,16 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.1
           bundler-cache: true
+
       - name: Install Diffend plugin
         run: bundle plugin install diffend
+
       - name: Bundle Secure
         run: bundle secure
 
@@ -102,6 +105,12 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
+
+      - name: Install latest Bundler and RubyGems
+        run: |
+          gem install bundler --no-document
+          gem update --system --no-document
+          bundle config set without 'tools benchmarks docs'
 
       - name: Ensure all needed Kafka topics are created and wait if not
         run: |

@@ -55,11 +55,6 @@ Thread.new do
   end
 end
 
-# We sleep here to get some messages into kafka first
-# For any crazy reason, Kafka after topics are created still does something and before that is done
-# we may have some problems during rebalance. It happens only with freshly started docker setup
-sleep(5)
-
 # We need a second producer to trigger a rebalance
 consumer = setup_rdkafka_consumer
 
@@ -74,11 +69,11 @@ other = Thread.new do
     consumer.store_offset(message)
     consumer.commit(nil, false)
 
-    if DataCollector[:jumped].size >= 20
-      consumer.close
+    next unless DataCollector[:jumped].size >= 20
 
-      break
-    end
+    consumer.close
+
+    break
   end
 end
 
