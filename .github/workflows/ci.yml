@@ -8,7 +8,6 @@ on:
   schedule:
     - cron:  '0 1 * * *'
 
-
 env:
   BUNDLE_RETRY: 6
   BUNDLE_JOBS: 4
@@ -111,11 +110,16 @@ jobs:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
 
-      - name: Install latest Bundler and RubyGems
+      - name: Install latest Bundler
         run: |
           gem install bundler --no-document
           gem update --system --no-document
           bundle config set without 'tools benchmarks docs'
+
+      - name: Bundle install
+        run: |
+          bundle config set without development
+          bundle install
 
       - name: Ensure all needed Kafka topics are created and wait if not
         run: |
