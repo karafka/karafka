@@ -7,9 +7,7 @@ TOPIC = 'integrations_11_02'
 
 setup_karafka do |config|
   config.license.token = pro_license_token
-  # We need 4: two partitions processing and non-blocking revokes
   config.concurrency = 4
-  config.shutdown_timeout = 60_000
   config.initial_offset = 'latest'
 end
 
@@ -57,13 +55,16 @@ Thread.new do
   end
 end
 
+# We sleep here to get some messages into kafka first
+# For any crazy reason, Kafka after topics are created still does something and before that is done
+# we may have some problems during rebalance. It happens only with freshly started docker setup
+sleep(5)
+
 # We need a second producer to trigger a rebalance
 consumer = setup_rdkafka_consumer
 
 other = Thread.new do
   sleep(0.1) until got_both?
-
-  sleep(2)
 
   consumer.subscribe(TOPIC)
 
@@ -73,12 +74,12 @@ other = Thread.new do
     consumer.store_offset(message)
     consumer.commit(nil, false)
 
-    sleep 10
+    if DataCollector[:jumped].size >= 20
+      consumer.close
 
-    break if DataCollector[:jumped].size >= 2
+      break
+    end
   end
-
-  consumer.close
 end
 
 # This part makes sure we do not run rebalance until karafka got both partitions work to do
@@ -88,13 +89,12 @@ def got_both?
 end
 
 start_karafka_and_wait_until do
-  got_both? && (
-    DataCollector['0-object_ids'].uniq.size >= 2 ||
-      DataCollector['1-object_ids'].uniq.size >= 2
-  )
+  other.join &&
+    got_both? && (
+      DataCollector['0-object_ids'].uniq.size >= 2 ||
+        DataCollector['1-object_ids'].uniq.size >= 2
+    )
 end
-
-other.join
 
 revoked_partition = DataCollector[:jumped].last.partition
 
