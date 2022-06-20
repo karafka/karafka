@@ -57,10 +57,10 @@ jobs:
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
-      - name: Run Kafka with docker-compose and wait for it to start and create needed topics
+      - name: Run Kafka with docker-compose and wait for it to be ready
         run: |
           docker-compose up -d
-          sleep 15
+          bin/wait_for_kafka
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -100,10 +100,10 @@ jobs:
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
-      - name: Run Kafka with docker-compose
+      - name: Run Kafka with docker-compose and wait for it to be ready
         run: |
           docker-compose up -d
-          sleep 5
+          bin/wait_for_kafka
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1

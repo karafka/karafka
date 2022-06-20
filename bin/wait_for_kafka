@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# This script allows us to wait for Kafka docker to fully be ready
+# We consider it fully ready when all our topics that need to be created are created as expected
+
+KAFKA_NAME='karafka20_kafka_1'
+ZOOKEEPER='zookeeper:2181'
+
+until (((`docker exec $KAFKA_NAME kafka-topics.sh --list --zookeeper $ZOOKEEPER | wc -l`) > 20));
+do
+  echo "Waiting for Kafka to create all the needed topics..."
+  sleep 1
+done
+
+echo "All the needed topics created."
