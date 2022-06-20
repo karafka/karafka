@@ -1,10 +1,12 @@
 version: '2'
 services:
   zookeeper:
+    container_name: karafka_20_zookeeper
     image: wurstmeister/zookeeper
     ports:
       - '2181:2181'
   kafka:
+    container_name: karafka_20_kafka
     image: wurstmeister/kafka
     ports:
       - '9092:9092'
@@ -19,6 +21,14 @@ services:
          integrations_2_02:2:1,\
          integrations_3_02:2:1,\
          integrations_4_02:2:1,\
+         integrations_5_02:2:1,\
+         integrations_6_02:2:1,\
+         integrations_7_02:2:1,\
+         integrations_8_02:2:1,\
+         integrations_9_02:2:1,\
+         integrations_10_02:2:1,\
+         integrations_11_02:2:1,\
+         integrations_12_02:2:1,\
          integrations_0_03:3:1,\
          integrations_1_03:3:1,\
          integrations_2_03:3:1,\

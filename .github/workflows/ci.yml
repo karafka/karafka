@@ -21,8 +21,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.1
-      - name: Install latest bundler
-        run: gem install bundler --no-document
+          bundler-cache: true
       - name: Install Diffend plugin
         run: bundle plugin install diffend
       - name: Bundle Secure
@@ -57,25 +56,19 @@ jobs:
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
-      - name: Run Kafka with docker-compose
+      - name: Start Kafka with docker-compose
         run: |
           docker-compose up -d
-          sleep 10
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{matrix.ruby}}
+          bundler-cache: true
 
-      - name: Install latest Bundler
+      - name: Ensure all needed Kafka topics are created and wait if not
         run: |
-          gem install bundler --no-document
-          bundle config set without 'tools benchmarks docs'
-
-      - name: Bundle install
-        run: |
-          bundle config set without development
-          bundle install --jobs 4 --retry 3
+          bin/wait_for_kafka
 
       - name: Run all specs
         env:
@@ -100,26 +93,19 @@ jobs:
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
-      - name: Run Kafka with docker-compose
+      - name: Start Kafka with docker-compose
         run: |
           docker-compose up -d
-          sleep 5
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{matrix.ruby}}
+          bundler-cache: true
 
-      - name: Install latest Bundler
+      - name: Ensure all needed Kafka topics are created and wait if not
         run: |
-          gem install bundler --no-document
-          gem update --system --no-document
-          bundle config set without 'tools benchmarks docs'
-
-      - name: Bundle install
-        run: |
-          bundle config set without development
-          bundle install --jobs 4 --retry 3
+          bin/wait_for_kafka
 
       - name: Run integration tests
         env:

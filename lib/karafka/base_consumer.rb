@@ -124,21 +124,36 @@ module Karafka
     # Marks message as consumed in an async way.
     #
     # @param message [Messages::Message] last successfully processed message.
+    # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
+    #   that we were not able and that we have lost the partition.
+    #
     # @note We keep track of this offset in case we would mark as consumed and got error when
     #   processing another message. In case like this we do not pause on the message we've already
     #   processed but rather at the next one. This applies to both sync and async versions of this
     #   method.
     def mark_as_consumed(message)
-      client.mark_as_consumed(message)
+      @revoked = !client.mark_as_consumed(message)
+
+      return false if revoked?
+
       @seek_offset = message.offset + 1
+
+      true
     end
 
     # Marks message as consumed in a sync way.
     #
     # @param message [Messages::Message] last successfully processed message.
+    # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
+    #   that we were not able and that we have lost the partition.
     def mark_as_consumed!(message)
-      client.mark_as_consumed!(message)
+      @revoked = !client.mark_as_consumed!(message)
+
+      return false if revoked?
+
       @seek_offset = message.offset + 1
+
+      true
     end
 
     # Pauses processing on a given offset for the current topic partition
@@ -175,6 +190,13 @@ module Karafka
           offset
         )
       )
+    end
+
+    # @return [Boolean] true if partition was revoked from the current consumer
+    # @note We know that partition got revoked because when we try to mark message as consumed,
+    #   unless if is successful, it will return false
+    def revoked?
+      @revoked || false
     end
   end
 end
