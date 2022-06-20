@@ -8,6 +8,11 @@ on:
   schedule:
     - cron:  '0 1 * * *'
 
+
+env:
+  BUNDLE_RETRY: 6
+  BUNDLE_JOBS: 4
+
 jobs:
   diffend:
     runs-on: ubuntu-latest
