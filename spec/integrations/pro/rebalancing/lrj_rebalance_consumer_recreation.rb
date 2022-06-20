@@ -75,7 +75,7 @@ other = Thread.new do
 
     sleep 10
 
-    break
+    break if DataCollector[:jumped].size >= 2
   end
 
   consumer.close
@@ -96,7 +96,7 @@ end
 
 other.join
 
-revoked_partition = DataCollector[:jumped].first.partition
+revoked_partition = DataCollector[:jumped].last.partition
 
 # There should be two instances of the consumer in use. One before the revoke and one after we
 # lost the partition and when we got it back
