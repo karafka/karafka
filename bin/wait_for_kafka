@@ -5,8 +5,13 @@
 
 KAFKA_NAME='karafka_20_kafka'
 ZOOKEEPER='zookeeper:2181'
+LIST_CMD="kafka-topics.sh --list --zookeeper $ZOOKEEPER"
 
-until (((`docker exec $KAFKA_NAME kafka-topics.sh --list --zookeeper $ZOOKEEPER | wc -l`) > 20));
+# Take the number of topics that we need to create prior to running anything
+TOPICS_COUNT=`cat docker-compose.yml | grep -E -i 'integrations_|benchmarks_' | wc -l`
+
+# And wait until all of them are created
+until (((`docker exec $KAFKA_NAME $LIST_CMD | wc -l`) >= $TOPICS_COUNT));
 do
   echo "Waiting for Kafka to create all the needed topics..."
   sleep 1
