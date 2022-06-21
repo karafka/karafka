@@ -55,21 +55,12 @@ module Karafka
           # first message from another batch from `@seek_offset`. If manual offset management
           # is on, we move to place where the user indicated it was finished.
           seek(@seek_offset || messages.first.offset)
+
           resume
         else
           # If processing failed, we need to pause
           pause(@seek_offset || messages.first.offset)
         end
-      end
-
-      # Marks this consumer revoked state as true
-      # This allows us for things like lrj to finish early as this state may change during lrj
-      # execution
-      def on_revoked
-        # @note This may already be set to true if we tried to commit offsets and failed. In case
-        # like this it will automatically be marked as revoked.
-        @revoked = true
-        super
       end
     end
   end

@@ -36,6 +36,12 @@ module Karafka
         # Marks if we need to offset. If we did not store offsets, we should not commit the offset
         # position as it will crash rdkafka
         @offsetting = false
+        # We need to keep track of what we have paused for resuming
+        # In case we loose partition, we still need to resume it, otherwise it won't be fetched
+        # again if we get reassigned to it later on. We need to keep them as after revocation we
+        # no longer may be able to fetch them from Kafka. We could build them but it is easier
+        # to just keep them here and use if needed when cannot be obtained
+        @paused_tpls = Hash.new { |h, k| h[k] = {} }
       end
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -148,6 +154,8 @@ module Karafka
 
         return unless tpl
 
+        @paused_tpls[topic][partition] = tpl
+
         @kafka.pause(tpl)
 
         @kafka.seek(pause_msg)
@@ -170,6 +178,14 @@ module Karafka
         internal_commit_offsets(async: false)
 
         tpl = topic_partition_list(topic, partition)
+
+        # If we were able to get the tpc, we should cache if for future usage
+        if tpl
+          @paused_tpls[topic][partition] = tpl
+        else
+          # If we were not able, let's try to reuse the one we have (if we have)
+          tpl ||= @paused_tpls[topic][partition]
+        end
 
         return unless tpl
 
@@ -214,6 +230,7 @@ module Karafka
         @mutex.synchronize do
           @closed = false
           @offsetting = false
+          @paused_tpls.clear
           @kafka = build_consumer
         end
       end

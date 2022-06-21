@@ -11,6 +11,9 @@ end
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     DataCollector[0] << messages.last.offset
+    # We sleep here so we don't end up consuming so many messages, that the second consumer would
+    # hang as there would be no data for him
+    sleep(1)
   end
 end
 
