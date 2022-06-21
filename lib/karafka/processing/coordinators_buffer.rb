@@ -28,6 +28,15 @@ module Karafka
       # @param partition [Integer] partition number
       def revoke(topic, partition)
         @pauses_manager.revoke(topic, partition)
+
+        return unless @coordinators[topic]
+
+        @coordinators[topic].revoke
+
+        # The fact that we delete here does not change the fact that the executor still holds the
+        # reference to this coordinator. We delete it here, as we will no longer process any
+        # new stuff with it and we may need a new coordinator if we regain this partition, but the
+        # coordinator may still be in use
         @coordinators[topic].delete(partition)
       end
 

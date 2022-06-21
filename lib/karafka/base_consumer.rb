@@ -75,7 +75,7 @@ module Karafka
     #
     # @private
     def on_revoked
-      @revoked = true
+      coordinator.revoke
 
       # Revoked partition needs to be resumed. Otherwise there is a chance, that after a
       # re-assignment, it will not be fetched despite being assigned
@@ -138,7 +138,7 @@ module Karafka
     #   processed but rather at the next one. This applies to both sync and async versions of this
     #   method.
     def mark_as_consumed(message)
-      @revoked = !client.mark_as_consumed(message)
+      coordinator.revoke unless client.mark_as_consumed(message)
 
       return false if revoked?
 
@@ -153,7 +153,7 @@ module Karafka
     # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
     #   that we were not able and that we have lost the partition.
     def mark_as_consumed!(message)
-      @revoked = !client.mark_as_consumed!(message)
+      coordinator.revoke unless client.mark_as_consumed!(message)
 
       return false if revoked?
 
@@ -202,7 +202,7 @@ module Karafka
     # @note We know that partition got revoked because when we try to mark message as consumed,
     #   unless if is successful, it will return false
     def revoked?
-      @revoked || false
+      coordinator.revoked?
     end
   end
 end

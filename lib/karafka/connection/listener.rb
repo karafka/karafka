@@ -152,6 +152,8 @@ module Karafka
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
+            # We revoke the coordinator here, so we do not have to revoke it in the revoke job
+            # itself (this happens prior to scheduling those jobs)
             @coordinators.revoke(topic, partition)
 
             # There may be a case where we have lost partition of which data we have never
@@ -236,7 +238,7 @@ module Karafka
         @jobs_queue.wait(@subscription_group.id)
         @jobs_queue.clear(@subscription_group.id)
         @client.reset
-        @coordinators.clear
+        @coordinators.reset
         @executors = Processing::ExecutorsBuffer.new(@client, @subscription_group)
       end
     end
