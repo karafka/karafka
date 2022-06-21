@@ -52,7 +52,7 @@ module Karafka
         # middle state, where re-creation of a consumer instance would occur only sometimes
         @recreate = true unless ::Karafka::App.config.consumer_persistence
 
-        # If @recreate was set to true (aside from non persistent), it means, that revocation or
+        # If `@recreate` was set to true (aside from non persistent), it means, that revocation or
         # a shutdown happened and we need to have a new instance for running another consume for
         # this topic partition
         if @recreate
@@ -115,7 +115,7 @@ module Karafka
       # @return [Object] cached consumer instance
       def consumer
         @consumer ||= begin
-          consumer = @topic.consumer.new
+          consumer = @topic.consumer_class.new
           consumer.topic = @topic
           consumer.client = @client
           consumer.coordinator = @coordinator

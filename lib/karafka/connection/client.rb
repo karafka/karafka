@@ -150,6 +150,8 @@ module Karafka
 
         internal_commit_offsets(async: false)
 
+        # Here we do not use our cached tpls because we should not try to pause something we do
+        # not own anymore.
         tpl = topic_partition_list(topic, partition)
 
         return unless tpl

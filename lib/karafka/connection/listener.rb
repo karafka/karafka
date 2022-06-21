@@ -86,6 +86,9 @@ module Karafka
           build_and_schedule_revoke_lost_partitions_jobs
 
           # We wait only on jobs from our subscription group. Other groups are independent.
+          # This will block on revoked jobs until they are finished. Those are not meant to last
+          # long and should not have any bigger impact on the system. Doing this in a blocking way
+          # simplifies the overall design and prevents from race conditions
           wait
 
           build_and_schedule_consumption_jobs
@@ -136,7 +139,7 @@ module Karafka
 
       # Resumes processing of partitions that were paused due to an error.
       def resume_paused_partitions
-        @coordinators.pauses.resume do |topic, partition|
+        @coordinators.resume do |topic, partition|
           @client.resume(topic, partition)
         end
       end
@@ -199,6 +202,12 @@ module Karafka
 
         @messages_buffer.each do |topic, partition, messages|
           coordinator = @coordinators.find_or_create(topic, partition)
+
+          # Start work coordination for this topic partition
+          coordinator.start
+
+          # Count the job we're going to create here
+          coordinator.increment
 
           executor = @executors.find_or_create(topic, partition, 0, coordinator)
 

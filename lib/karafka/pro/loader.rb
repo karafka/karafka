@@ -37,7 +37,7 @@ module Karafka
 
           config.internal.scheduler = Scheduler.new
           config.internal.jobs_builder = Processing::JobsBuilder.new
-          config.internal.active_job.consumer = ActiveJob::Consumer
+          config.internal.active_job.consumer_class = ActiveJob::Consumer
           config.internal.active_job.dispatcher = ActiveJob::Dispatcher.new
           config.internal.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 

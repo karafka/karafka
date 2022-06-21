@@ -3,8 +3,12 @@
 module Karafka
   module Processing
     # Basic coordinator that allows us to provide coordination objects into consumers.
-    # This is a wrapping layer to simplify management of work to be handled.
-    # @note This coordinator needs to be thread safe
+    #
+    # This is a wrapping layer to simplify management of work to be handled around consumption.
+    #
+    # @note This coordinator needs to be thread safe. Some operations are performed only in the
+    #   listener thread, but we go with thread-safe by default for all not to worry about potential
+    #   future mistakes.
     class Coordinator
       # @return [Karafka::TimeTrackers::Pause]
       attr_reader :pause_tracker
@@ -13,16 +17,58 @@ module Karafka
       def initialize(pause_tracker)
         @pause_tracker = pause_tracker
         @revoked = false
+        @consumptions = {}
+        @jobs_count = 0
         @mutex = Mutex.new
       end
 
-      # Marks given coordinator for consumer as revoked
-      def revoke
+      # Starts the coordinator for given consumption jobs
+      def start
         @mutex.synchronize do
-          @revoke = true
+          @jobs_count = 0
+          # We need to clear the consumption results hash here, otherwise we could end up storing
+          # consumption results of consumer instances we no longer control
+          @consumptions.clear
         end
       end
 
+      # Increases number of jobs that we handle with this coordinator
+      def increment
+        @mutex.synchronize { @jobs_count += 1 }
+      end
+
+      # Decrements number of jobs we handle at the moment
+      def decrement
+        @mutex.synchronize { @jobs_count -= 1 }
+      end
+
+      # @return [Karafka::Processing::Result] result object which we can use to indicate
+      #   consumption processing state.
+      def consumption(consumer)
+        @mutex.synchronize do
+          @consumptions[consumer] ||= Processing::Result.new
+        end
+      end
+
+      # Is all the consumption done and finished successfully for this coordinator
+      def success?
+        @mutex.synchronize { @jobs_count.zero? && @consumptions.all?(&success?) }
+      end
+
+      # Marks given coordinator for processing group as revoked
+      #
+      # This is invoked in two places:
+      #   - from the main listener loop when we detect revoked partitions
+      #   - from the consumer in case checkpointing fails
+      #
+      # This means, we can end up having consumer being aware that it was revoked prior to the
+      # listener loop dispatching the revocation job. It is ok, as effectively nothing will be
+      # processed until revocation jobs are done.
+      def revoke
+        @mutex.synchronize { @revoke = true }
+      end
+
+      # @return [Boolean] is the partition we are processing revoked or not
       def revoked?
         @revoked
       end

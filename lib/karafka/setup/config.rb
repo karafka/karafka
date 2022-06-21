@@ -101,7 +101,7 @@ module Karafka
         # option jobs_builder [Object] jobs builder we want to use
         setting :jobs_builder, default: Processing::JobsBuilder.new
         # option coordinator [Class] work coordinator we want to user for processing coordination
-        setting :coordinator, default: Processing::Coordinator
+        setting :coordinator_class, default: Processing::Coordinator
 
         # Karafka components for ActiveJob
         setting :active_job do
@@ -111,7 +111,7 @@ module Karafka
           #   ensuring, that extra job options defined are valid
           setting :job_options_contract, default: ActiveJob::JobOptionsContract.new
           # option consumer [Class] consumer class that should be used to consume ActiveJob data
-          setting :consumer, default: ActiveJob::Consumer
+          setting :consumer_class, default: ActiveJob::Consumer
         end
       end
 

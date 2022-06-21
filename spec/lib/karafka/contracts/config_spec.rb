@@ -26,7 +26,12 @@ RSpec.describe_current do
         subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new,
         scheduler: Karafka::Scheduler.new,
         jobs_builder: Karafka::Processing::JobsBuilder.new,
-        coordinator: Karafka::Processing::Coordinator
+        coordinator: Karafka::Processing::Coordinator,
+        active_job: {
+          dispatcher: Karafka::ActiveJob::Dispatcher.new,
+          job_options_contract: Karafka::ActiveJob::JobOptionsContract.new,
+          consumer_class: Karafka::ActiveJob::Consumer
+        }
       },
       kafka: {
         'bootstrap.servers': '127.0.0.1:9092'
@@ -166,7 +171,7 @@ RSpec.describe_current do
     context 'when consumer_mapper is nil' do
       before { config[:consumer_mapper] = nil }
 
-      it { expect(contract.call(config)).not_to be_success }
+      it { expect(contract.call(concfig)).not_to be_success }
     end
   end
 
@@ -287,6 +292,32 @@ RSpec.describe_current do
 
     context 'when scheduler is missing' do
       before { config[:internal].delete(:scheduler) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate internal active job components' do
+    context 'when active_job settings are missing' do
+      before { config[:internal].delete(:active_job) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when active_job dispatcher is missing' do
+      before { config[:internal][:active_job].delete(:dispatcher) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when active_job job_options_contract is missing' do
+      before { config[:internal][:active_job].delete(:job_options_contract) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when active_job consmer class is missing' do
+      before { config[:internal][:active_job].delete(:consumer_class) }
 
       it { expect(contract.call(config)).not_to be_success }
     end

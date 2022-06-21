@@ -37,6 +37,12 @@ module Karafka
           required(:process)
           required(:scheduler)
           required(:coordinator)
+
+          required(:active_job) do
+            required(:dispatcher)
+            required(:job_options_contract)
+            required(:consumer_class)
+          end
         end
       end
 

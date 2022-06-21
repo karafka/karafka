@@ -15,12 +15,6 @@ module Karafka
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
 
-    def initialize
-      # We re-use one to save on object allocation
-      # It also allows us to transfer the consumption notion to another batch
-      @consumption = Processing::Result.new
-    end
-
     # Can be used to run preparation code
     #
     # @private
@@ -41,9 +35,9 @@ module Karafka
         consume
       end
 
-      @consumption.success!
+      @coordinator.consumption(self).success!
     rescue StandardError => e
-      @consumption.failure!
+      @coordinator.consumption(self).failure!
 
       Karafka.monitor.instrument(
         'error.occurred',
@@ -51,13 +45,16 @@ module Karafka
         caller: self,
         type: 'consumer.consume.error'
       )
+    ensure
+      # We need to decrease number of jobs that this coordinator coordinates as it has finished
+      @coordinator.decrement
     end
 
     # @private
     # @note This should not be used by the end users as it is part of the lifecycle of things but
     #   not as part of the public api.
     def on_after_consume
-      if @consumption.success?
+      if @coordinator.success?
         coordinator.pause_tracker.reset
 
         # Mark as consumed only if manual offset management is not on
@@ -138,9 +135,11 @@ module Karafka
     #   processed but rather at the next one. This applies to both sync and async versions of this
     #   method.
     def mark_as_consumed(message)
-      coordinator.revoke unless client.mark_as_consumed(message)
+      unless client.mark_as_consumed(message)
+        coordinator.revoke
 
-      return false if revoked?
+        return false
+      end
 
       @seek_offset = message.offset + 1
 
@@ -153,9 +152,11 @@ module Karafka
     # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
     #   that we were not able and that we have lost the partition.
     def mark_as_consumed!(message)
-      coordinator.revoke unless client.mark_as_consumed!(message)
+      unless client.mark_as_consumed!(message)
+        coordinator.revoke
 
-      return false if revoked?
+        return false
+      end
 
       @seek_offset = message.offset + 1
 

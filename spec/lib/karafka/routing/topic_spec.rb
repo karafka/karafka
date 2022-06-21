@@ -24,6 +24,10 @@ RSpec.describe_current do
     it { expect(topic.id).to eq "#{consumer_group.id}_#{name}" }
   end
 
+  describe '#consumer_class' do
+    pending
+  end
+
   describe '#deserializer=' do
     let(:deserializer) { double }
 

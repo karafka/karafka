@@ -2,26 +2,30 @@
 
 module Karafka
   module Processing
-    # Buffer used to build and store coordinators
+    # Buffer used to build and store coordinators per topic partition
+    #
     # It provides direct pauses access for revocation
+    #
+    # @note This buffer operates only from the listener loop, thus we do not have to make it
+    #   thread-safe.
     class CoordinatorsBuffer
       def initialize
         @pauses_manager = Connection::PausesManager.new
-
-        @coordinators = Hash.new do |h, k|
-          h[k] = {}
-        end
+        @coordinator_class = ::Karafka::App.config.internal.coordinator_class
+        @coordinators = Hash.new { |h, k| h[k] = {} }
       end
 
       # @param topic [String] topic name
       # @param partition [Integer] partition number
       def find_or_create(topic, partition)
-        pause_tracker = @pauses_manager.fetch(topic, partition)
-        @coordinators[topic][partition] ||= ::Karafka::App.config.internal.coordinator.new(pause_tracker)
+        @coordinators[topic][partition] ||= @coordinator_class.new(
+          @pauses_manager.fetch(topic, partition)
+        )
       end
 
-      def pauses
-        @pauses_manager
+      # Resumes processing of partitions for which pause time has ended.
+      def resume(&block)
+        @pauses_manager.resume(&block)
       end
 
       # @param topic [String] topic name
@@ -40,8 +44,10 @@ module Karafka
         @coordinators[topic].delete(partition)
       end
 
+      # Clears coordinators and re-created the pauses manager
+      # This should be used only for critical errors recovery
       def reset
-        @pauses_manager = PausesManager.new
+        @pauses_manager = Connection::PausesManager.new
         @coordinators.clear
       end
     end
