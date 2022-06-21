@@ -54,8 +54,8 @@ RSpec.describe_current do
       before do
         consumer.messages = messages
 
-        allow(client).to receive(:mark_as_consumed).with(messages.first)
-        allow(client).to receive(:mark_as_consumed).with(messages.last)
+        allow(client).to receive(:mark_as_consumed).with(messages.first).and_return(true)
+        allow(client).to receive(:mark_as_consumed).with(messages.last).and_return(true)
 
         allow(ActiveJob::Base).to receive(:execute).with(payload1)
         allow(ActiveJob::Base).to receive(:execute).with(payload2)
@@ -81,8 +81,8 @@ RSpec.describe_current do
         consumer.messages = messages
         consumer.on_revoked
 
-        allow(client).to receive(:mark_as_consumed).with(messages.first)
-        allow(client).to receive(:mark_as_consumed).with(messages.last)
+        allow(client).to receive(:mark_as_consumed).with(messages.first).and_return(true)
+        allow(client).to receive(:mark_as_consumed).with(messages.last).and_return(true)
 
         allow(ActiveJob::Base).to receive(:execute).with(payload1)
         allow(ActiveJob::Base).to receive(:execute).with(payload2)

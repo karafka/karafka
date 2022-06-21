@@ -213,7 +213,6 @@ RSpec.describe_current do
     end
   end
 
-
   describe '#on_consume and #on_after_consume for LRU' do
     let(:consume_with_after) do
       lambda do
@@ -359,7 +358,79 @@ RSpec.describe_current do
     it 'expect to run user code' do
       consumer.on_revoked
       expect(consumer.handled_revoked).to eq(true)
-      expect(consumer.revoked?).to eq(true)
+      expect(consumer.send(:revoked?)).to eq(true)
+    end
+  end
+
+  describe '#mark_as_consumed' do
+    before { consumer.client = client }
+
+    context 'when marking as consumed was successful' do
+      before do
+        allow(client).to receive(:mark_as_consumed).and_return(true)
+
+        consumer.send(:mark_as_consumed, last_message)
+      end
+
+      it 'expect to proxy pass to client' do
+        expect(client).to have_received(:mark_as_consumed).with(last_message)
+      end
+
+      it 'epxect to increase seek_offset' do
+        expect(consumer.instance_variable_get(:@seek_offset)).to eq(offset + 1)
+      end
+    end
+
+    context 'when marking as consumed failed' do
+      before do
+        allow(client).to receive(:mark_as_consumed).and_return(false)
+
+        consumer.send(:mark_as_consumed, last_message)
+      end
+
+      it 'expect to proxy pass to client' do
+        expect(client).to have_received(:mark_as_consumed).with(last_message)
+      end
+
+      it 'epxect to not increase seek_offset' do
+        expect(consumer.instance_variable_get(:@seek_offset)).to eq(nil)
+      end
+    end
+  end
+
+  describe '#mark_as_consumed!' do
+    before { consumer.client = client }
+
+    context 'when marking as consumed was successful' do
+      before do
+        allow(client).to receive(:mark_as_consumed!).and_return(true)
+
+        consumer.send(:mark_as_consumed!, last_message)
+      end
+
+      it 'expect to proxy pass to client' do
+        expect(client).to have_received(:mark_as_consumed!).with(last_message)
+      end
+
+      it 'epxect to increase seek_offset' do
+        expect(consumer.instance_variable_get(:@seek_offset)).to eq(offset + 1)
+      end
+    end
+
+    context 'when marking as consumed failed' do
+      before do
+        allow(client).to receive(:mark_as_consumed!).and_return(false)
+
+        consumer.send(:mark_as_consumed!, last_message)
+      end
+
+      it 'expect to proxy pass to client' do
+        expect(client).to have_received(:mark_as_consumed!).with(last_message)
+      end
+
+      it 'epxect to not increase seek_offset' do
+        expect(consumer.instance_variable_get(:@seek_offset)).to eq(nil)
+      end
     end
   end
 end

@@ -1,11 +1,23 @@
 # Karafka framework changelog
 
-## 2.0.0-beta4 (Unreleased)
+## 2.0.0-beta5 (Unreleased)
+- Always resume processing of a revoked partition just in case it gets re-assigned.
+- Improve specs stability
+- Fix a case where revocation job would be executed on partition for which we never did any work.
+
+## 2.0.0-beta4 (2022-06-20)
 - Rename job internal api methods from `#prepare` to `#before_call` and from `#teardown` to `#after_call` to abstract away jobs execution from any type of executors and consumers logic
 - Remove ability of running `before_consume` and `after_consume` completely. Those should be for internal usage only.
 - Reorganize how Pro consumer and Pro AJ consumers inherit.
 - Require WaterDrop `2.3.1`.
-- Fix a case where revocation job would be executed on partition for which we never did any work.
+- Add more integration specs for rebalancing and max poll exceeded.
+- Move `revoked?` state from PRO to regular Karafka.
+- Use return value of `mark_as_consumed!` and `mark_as_consumed` as indicator of partition ownership + use it to switch the ownership state.
+- Do not remove rebalance manager upon client reset and recovery. This will allow us to keep the notion of lost partitions, so we can run revocation jobs for blocking jobs that exceeded the max poll interval.
+- Run revocation jobs upon reaching max poll interval for blocking jobs.
+- Early exit `poll` operation upon partition lost or max poll exceeded event.
+- Always reset consumer instances on timeout exceeded.
+- Wait for Kafka to create all the needed topics before running specs in CI.
 
 ## 2.0.0-beta3 (2022-06-14)
 - Jobs building responsibility extracted out of the listener code base.

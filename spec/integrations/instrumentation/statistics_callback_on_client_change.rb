@@ -20,6 +20,11 @@ end
 
 SuperException = Class.new(Exception)
 
+Karafka::App.monitor.subscribe('connection.listener.before_fetch_loop') do
+  # We sleep to make sure events from clients have time to be published
+  sleep 0.5
+end
+
 # This will force listener to reload client (hacky, but works)
 Karafka::App.monitor.subscribe('connection.listener.fetch_loop.received') do
   raise SuperException

@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# When a job is marked as lrj, it should keep running longer than max poll interval and all
-# should be good. It should continue processing after resume and should pick up next messages
+# When a job is marked as lrj and there is a rebalance, we should be aware that our current
+# instance had the partition revoked even if it is assigned back. The assignment back should again
+# start from where it left
 
 setup_karafka do |config|
   config.max_messages = 1
@@ -30,6 +31,21 @@ draw_routes do
   end
 end
 
+# We need a second producer so we are sure that there was no revocation due to a timeout
+consumer = setup_rdkafka_consumer
+
+Thread.new do
+  sleep(10)
+
+  consumer.subscribe(DataCollector.topic)
+
+  consumer.each do
+    # This should never happen.
+    # We have one partition and it should be karafka that consumes it
+    exit! 5
+  end
+end
+
 payloads = Array.new(2) { SecureRandom.uuid }
 
 payloads.each { |payload| produce(DataCollector.topic, payload) }
@@ -39,3 +55,5 @@ start_karafka_and_wait_until do
 end
 
 assert_equal payloads, DataCollector[0]
+
+consumer.close
