@@ -38,7 +38,7 @@ module Karafka
           required(:scheduler)
           required(:coordinator)
 
-          required(:active_job) do
+          required(:active_job).schema do
             required(:dispatcher)
             required(:job_options_contract)
             required(:consumer_class)
