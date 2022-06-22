@@ -10,7 +10,7 @@ module Karafka
         end
 
         def finished?
-          @mutex { @jobs_count.zero?  }
+          @mutex.synchronize { @jobs_count.zero?  }
         end
       end
     end
