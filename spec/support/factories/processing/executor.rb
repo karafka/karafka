@@ -7,10 +7,9 @@ FactoryBot.define do
     group_id { SecureRandom.uuid }
     client { nil }
     topic { build(:routing_topic) }
-    pause { build(:time_trackers_pause) }
 
     initialize_with do
-      new(group_id, client, topic, pause)
+      new(group_id, client, topic)
     end
   end
 end

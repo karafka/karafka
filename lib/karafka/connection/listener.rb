@@ -21,12 +21,12 @@ module Karafka
         @id = SecureRandom.uuid
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
-        @jobs_builder = ::Karafka::App.config.internal.jobs_builder
+        @jobs_builder = ::Karafka::App.config.internal.processing.jobs_builder
         @coordinators = Processing::CoordinatorsBuffer.new
         @client = Client.new(@subscription_group)
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         # We reference scheduler here as it is much faster than fetching this each time
-        @scheduler = ::Karafka::App.config.internal.scheduler
+        @scheduler = ::Karafka::App.config.internal.processing.scheduler
         # We keep one buffer for messages to preserve memory and not allocate extra objects
         # We can do this that way because we always first schedule jobs using messages before we
         # fetch another batch.
@@ -209,9 +209,9 @@ module Karafka
           # Count the job we're going to create here
           coordinator.increment
 
-          executor = @executors.find_or_create(topic, partition, 0, coordinator)
+          executor = @executors.find_or_create(topic, partition, 0)
 
-          jobs << @jobs_builder.consume(executor, messages)
+          jobs << @jobs_builder.consume(executor, messages, coordinator)
         end
 
         @scheduler.schedule_consumption(@jobs_queue, jobs)

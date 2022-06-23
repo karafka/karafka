@@ -11,7 +11,7 @@ module Karafka
     class CoordinatorsBuffer
       def initialize
         @pauses_manager = Connection::PausesManager.new
-        @coordinator_class = ::Karafka::App.config.internal.coordinator_class
+        @coordinator_class = ::Karafka::App.config.internal.processing.coordinator_class
         @coordinators = Hash.new { |h, k| h[k] = {} }
       end
 
@@ -36,9 +36,9 @@ module Karafka
       def revoke(topic, partition)
         @pauses_manager.revoke(topic, partition)
 
-        return unless @coordinators[topic]
+        return unless @coordinators[topic][partition]
 
-        @coordinators[topic].revoke
+        @coordinators[topic][partition].revoke
 
         # The fact that we delete here does not change the fact that the executor still holds the
         # reference to this coordinator. We delete it here, as we will no longer process any

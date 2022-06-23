@@ -19,17 +19,15 @@ module Karafka
       #
       # @param topic [String] topic name
       # @param partition [Integer] partition number
-      # @param coordinator [Object] processing coordinator
       # @param parallel_key [String] parallel group key
       # @return [Executor] consumer executor
-      def find_or_create(topic, partition, parallel_key, coordinator)
+      def find_or_create(topic, partition, parallel_key)
         ktopic = find_topic(topic)
 
         @buffer[ktopic][partition][parallel_key] ||= Executor.new(
           @subscription_group.id,
           @client,
-          ktopic,
-          coordinator
+          ktopic
         )
       end
 

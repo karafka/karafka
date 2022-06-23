@@ -55,7 +55,7 @@ module Karafka
 
       # Is all the consumption done and finished successfully for this coordinator
       def success?
-        @mutex.synchronize { @jobs_count.zero? && @consumptions.all?(&success?) }
+        @mutex.synchronize { @jobs_count.zero? && @consumptions.values.all?(&:success?) }
       end
 
       # Marks given coordinator for processing group as revoked
@@ -68,7 +68,7 @@ module Karafka
       # listener loop dispatching the revocation job. It is ok, as effectively nothing will be
       # processed until revocation jobs are done.
       def revoke
-        @mutex.synchronize { @revoke = true }
+        @mutex.synchronize { @revoked = true }
       end
 
       # @return [Boolean] is the partition we are processing revoked or not

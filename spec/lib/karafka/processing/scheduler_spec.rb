@@ -19,10 +19,10 @@ RSpec.describe_current do
     context 'when there are jobs' do
       let(:jobs_array) do
         [
-          Karafka::Processing::Jobs::Consume.new(nil, []),
-          Karafka::Processing::Jobs::Consume.new(nil, []),
-          Karafka::Processing::Jobs::Consume.new(nil, []),
-          Karafka::Processing::Jobs::Consume.new(nil, [])
+          Karafka::Processing::Jobs::Consume.new(nil, [], nil),
+          Karafka::Processing::Jobs::Consume.new(nil, [], nil),
+          Karafka::Processing::Jobs::Consume.new(nil, [], nil),
+          Karafka::Processing::Jobs::Consume.new(nil, [], nil)
         ]
       end
 

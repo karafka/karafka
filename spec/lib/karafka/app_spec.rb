@@ -4,7 +4,7 @@ RSpec.describe_current do
   subject(:app_class) { described_class }
 
   describe '#consumer_groups' do
-    let(:builder) { described_class.config.internal.routing_builder }
+    let(:builder) { described_class.config.internal.routing.builder }
 
     it 'returns consumer_groups builder' do
       expect(app_class.consumer_groups).to eq builder

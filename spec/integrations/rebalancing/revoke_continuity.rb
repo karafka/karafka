@@ -13,6 +13,8 @@ class Consumer < Karafka::BaseConsumer
   def consume
     partition = messages.metadata.partition
 
+    p [partition, object_id]
+
     messages.each do |message|
       # We store offsets only until revoked
       return unless mark_as_consumed!(message)
@@ -69,10 +71,8 @@ other = Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:partitions].size >= 3
+  other.join && DataCollector[:partitions].size >= 3
 end
-
-other.join
 
 revoked_partition = DataCollector[:jumped].first.partition
 jumped_offset = DataCollector[:jumped].first.offset

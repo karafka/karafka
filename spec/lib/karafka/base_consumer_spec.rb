@@ -32,13 +32,7 @@ RSpec.describe_current do
     ClassBuilder.inherit(described_class) do
       attr_reader :consumed
 
-      def initialize
-        super
-        @consumed = false
-      end
-
       def consume
-        @consumed = true
         self
       end
     end
@@ -104,11 +98,6 @@ RSpec.describe_current do
         ClassBuilder.inherit(described_class) do
           attr_reader :consumed
 
-          def initialize
-            super
-            @consumed = false
-          end
-
           def consume
             raise StandardError
           end
@@ -164,11 +153,6 @@ RSpec.describe_current do
       let(:working_class) do
         ClassBuilder.inherit(described_class) do
           attr_reader :consumed
-
-          def initialize
-            super
-            @consumed = false
-          end
 
           def consume
             raise StandardError

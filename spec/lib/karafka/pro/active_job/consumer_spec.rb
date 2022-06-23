@@ -10,12 +10,14 @@ RSpec.describe_current do
 
     described_class.new.tap do |instance|
       instance.client = client
+      instance.coordinator = coordinator
       instance.topic = topic
     end
   end
 
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
   let(:topic) { build(:routing_topic) }
+  let(:coordinator) { build(:processing_coordinator) }
   let(:messages) { [message1, message2] }
   let(:message1) { build(:messages_message, raw_payload: payload1.to_json) }
   let(:message2) { build(:messages_message, raw_payload: payload2.to_json) }

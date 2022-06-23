@@ -7,7 +7,7 @@ FactoryBot.define do
     pause_tracker { build(:time_trackers_pause) }
 
     initialize_with do
-      new(pause_tracker)
+      new(pause_tracker).tap(&:increment)
     end
   end
 end

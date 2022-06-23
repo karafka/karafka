@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'karafka/pro/performance_tracker'
-require 'karafka/pro/scheduler'
+require 'karafka/pro/processing/scheduler'
 
 RSpec.describe_current do
   let(:queue) { [] }
@@ -17,7 +17,11 @@ RSpec.describe_current do
     context 'when there are no metrics on any of the topics data' do
       before do
         4.times do |i|
-          jobs_array << Karafka::Processing::Jobs::Consume.new(nil, [public_send("message#{i}")])
+          jobs_array << Karafka::Processing::Jobs::Consume.new(
+            nil,
+            [public_send("message#{i}")],
+            nil
+          )
         end
 
         schedule
@@ -50,7 +54,11 @@ RSpec.describe_current do
 
       before do
         4.times do |i|
-          jobs_array << Karafka::Processing::Jobs::Consume.new(nil, [public_send("message#{i}")])
+          jobs_array << Karafka::Processing::Jobs::Consume.new(
+            nil,
+            [public_send("message#{i}")],
+            nil
+          )
           tracker.on_consumer_consumed(public_send("event#{i}"))
         end
 
