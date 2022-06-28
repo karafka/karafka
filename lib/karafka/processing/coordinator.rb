@@ -42,11 +42,9 @@ module Karafka
         @mutex.synchronize { @jobs_count -= 1 }
       end
 
+      # @param consumer [Object] karafka consumer (normal or pro)
       # @return [Karafka::Processing::Result] result object which we can use to indicate
       #   consumption processing state.
-      #
-      # @param consumer [Object] karafka consumer (normal or pro)
-      # @return [::Karafka::Processing::Result] consumption result
       def consumption(consumer)
         @mutex.synchronize do
           @consumptions[consumer] ||= Processing::Result.new

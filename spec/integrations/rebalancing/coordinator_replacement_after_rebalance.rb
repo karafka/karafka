@@ -3,7 +3,6 @@
 # Karafka should replace coordinator for consumer of a given topic partition after partition was
 # taken away from us and assigned back
 
-
 TOPIC = 'integrations_13_02'
 
 setup_karafka do |config|
@@ -13,8 +12,6 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     partition = messages.metadata.partition
-
-    p [partition, object_id]
 
     DataCollector[partition] << coordinator.object_id
   end
@@ -68,8 +65,8 @@ start_karafka_and_wait_until do
     )
 end
 
-
 revoked_partition = DataCollector[:jumped].first.partition
+non_revoked = revoked_partition == 1 ? 0 : 1
 
-
-p DataCollector.data
+assert_equal 2, DataCollector.data[revoked_partition].uniq.size
+assert_equal 1, DataCollector.data[non_revoked].uniq.size
