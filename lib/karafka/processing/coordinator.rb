@@ -18,14 +18,14 @@ module Karafka
         @pause_tracker = pause_tracker
         @revoked = false
         @consumptions = {}
-        @jobs_count = 0
+        @running_jobs = 0
         @mutex = Mutex.new
       end
 
       # Starts the coordinator for given consumption jobs
       def start
         @mutex.synchronize do
-          @jobs_count = 0
+          @running_jobs = 0
           # We need to clear the consumption results hash here, otherwise we could end up storing
           # consumption results of consumer instances we no longer control
           @consumptions.clear
@@ -34,12 +34,18 @@ module Karafka
 
       # Increases number of jobs that we handle with this coordinator
       def increment
-        @mutex.synchronize { @jobs_count += 1 }
+        @mutex.synchronize { @running_jobs += 1 }
       end
 
       # Decrements number of jobs we handle at the moment
       def decrement
-        @mutex.synchronize { @jobs_count -= 1 }
+        @mutex.synchronize do
+          @running_jobs -= 1
+
+          raise Karafka::Errors::InvalidCoordinatorState, @running_jobs if @running_jobs < 0
+
+          @running_jobs
+        end
       end
 
       # @param consumer [Object] karafka consumer (normal or pro)
@@ -53,7 +59,7 @@ module Karafka
 
       # Is all the consumption done and finished successfully for this coordinator
       def success?
-        @mutex.synchronize { @jobs_count.zero? && @consumptions.values.all?(&:success?) }
+        @mutex.synchronize { @running_jobs.zero? && @consumptions.values.all?(&:success?) }
       end
 
       # Marks given coordinator for processing group as revoked

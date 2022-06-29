@@ -10,15 +10,46 @@ RSpec.describe_current do
   end
 
   describe '#start' do
-    pending
+    before { coordinator.start }
+
+    it { expect(coordinator.success?).to eq(true) }
+    it { expect(coordinator.revoked?).to eq(false) }
   end
 
   describe '#increment' do
-    pending
+    before { coordinator.increment }
+
+    it { expect(coordinator.success?).to eq(false) }
+    it { expect(coordinator.revoked?).to eq(false) }
   end
 
   describe '#decrement' do
-    pending
+    context 'when we would go below zero jobs' do
+      it 'expect to raise error' do
+        expect { coordinator.decrement }.to raise_error(Karafka::Errors::InvalidCoordinatorState)
+      end
+    end
+
+    context 'when decrementing from regular jobs count to zero' do
+      before do
+        coordinator.increment
+        coordinator.decrement
+      end
+
+      it { expect(coordinator.success?).to eq(true) }
+      it { expect(coordinator.revoked?).to eq(false) }
+    end
+
+    context 'when decrementing from regular jobs count not to zero' do
+      before do
+        coordinator.increment
+        coordinator.increment
+        coordinator.decrement
+      end
+
+      it { expect(coordinator.success?).to eq(false) }
+      it { expect(coordinator.revoked?).to eq(false) }
+    end
   end
 
   describe '#consumption' do
@@ -26,14 +57,44 @@ RSpec.describe_current do
   end
 
   describe '#success?' do
-    pending
+    context 'when there were no jobs' do
+      it { expect(coordinator.success?).to eq(true) }
+    end
+
+    context 'when there is a job running' do
+      before { coordinator.increment }
+
+      it { expect(coordinator.success?).to eq(false) }
+    end
+
+    context 'when there are no jobs running and all the finished are success' do
+      before { coordinator.consumption(0).success! }
+
+      it { expect(coordinator.success?).to eq(true) }
+    end
+
+    context 'when there are jobs running and all the finished are success' do
+      before do
+        coordinator.consumption(0).success!
+        coordinator.increment
+      end
+
+      it { expect(coordinator.success?).to eq(false) }
+    end
+
+    context 'when there are no jobs running and all the finished are success' do
+      before do
+        coordinator.consumption(0).success!
+        coordinator.consumption(1).failure!
+      end
+
+      it { expect(coordinator.success?).to eq(false) }
+    end
   end
 
-  describe '#revoke' do
-    pending
-  end
+  describe '#revoke and #revoked?' do
+    before { coordinator.revoke }
 
-  describe '#revoked?' do
-    pending
+    it { expect(coordinator.revoked?).to eq(true) }
   end
 end
