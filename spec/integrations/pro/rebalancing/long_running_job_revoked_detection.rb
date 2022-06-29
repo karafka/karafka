@@ -17,6 +17,7 @@ end
 
 class Consumer < Karafka::Pro::BaseConsumer
   def initialize
+    super
     @first = true
   end
 
