@@ -179,17 +179,13 @@ module Karafka
         # We can skip performance penalty since resuming should not happen too often
         internal_commit_offsets(async: false)
 
-        tpl = topic_partition_list(topic, partition)
-
-        # If we were able to get the tpc, we should cache if for future usage
-        if tpl
-          @paused_tpls[topic][partition] = tpl
-        else
-          # If we were not able, let's try to reuse the one we have (if we have)
-          tpl ||= @paused_tpls[topic][partition]
-        end
+        # If we were not able, let's try to reuse the one we have (if we have)
+        tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
 
         return unless tpl
+        # If we did not have it, it means we never paused this partition, thus no resume should
+        # happen in the first place
+        return unless @paused_tpls[topic].delete(partition)
 
         @kafka.resume(tpl)
       ensure

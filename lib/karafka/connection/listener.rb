@@ -79,6 +79,10 @@ module Karafka
             poll_and_remap_messages
           end
 
+          # This will ensure, that in the next poll, we continue processing (if we get them back)
+          # partitions that we have paused
+          resume_revoked_partitions
+
           # If there were revoked partitions, we need to wait on their jobs to finish before
           # distributing consuming jobs as upon revoking, we might get assigned to the same
           # partitions, thus getting their jobs. The revoking jobs need to finish before
@@ -90,11 +94,6 @@ module Karafka
           # long and should not have any bigger impact on the system. Doing this in a blocking way
           # simplifies the overall design and prevents from race conditions
           wait
-
-          # We resume paused partitions only after the lost partitions jobs are done. This provides
-          # higher chance, that post-revoke operations were done and we can (if needed) start with
-          # a clean slate
-          resume_revoked_partitions
 
           build_and_schedule_consumption_jobs
 

@@ -40,13 +40,6 @@ module Karafka
       #   which we've lost partitions and array with ids of the partitions as the value
       # @note We do not consider as lost topics and partitions that got revoked and assigned
       def revoked_partitions
-        return @revoked_partitions if @revoked_partitions.empty?
-        return @lost_partitions unless @lost_partitions.empty?
-
-        @revoked_partitions.each do |topic, partitions|
-          @lost_partitions[topic] = partitions - @assigned_partitions.fetch(topic, EMPTY_ARRAY)
-        end
-
         @lost_partitions
       end
 
@@ -62,6 +55,7 @@ module Karafka
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       def on_partitions_assigned(_, partitions)
         @assigned_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
+        refresh
       end
 
       # Callback that kicks in inside of rdkafka, when partitions are revoked.
@@ -71,6 +65,16 @@ module Karafka
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       def on_partitions_revoked(_, partitions)
         @revoked_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
+        refresh
+      end
+
+      private
+
+      # Recalculates the partitions we lost
+      def refresh
+        @revoked_partitions.each do |topic, partitions|
+          @lost_partitions[topic] = partitions - @assigned_partitions.fetch(topic, EMPTY_ARRAY)
+        end
       end
     end
   end

@@ -34,13 +34,6 @@ module Karafka
             )
 
             mark_as_consumed(message)
-
-            # We check it twice as the job may be long running
-            # If marking fails, it also means it got revoked and we can stop consuming
-            break if revoked?
-
-            # Do not process more if we are shutting down
-            break if Karafka::App.stopping?
           end
         end
       end

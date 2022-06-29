@@ -26,7 +26,7 @@ class Job < ActiveJob::Base
   def perform
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group
-    sleep(15)
+    sleep(11)
     DataCollector[0] << true
   end
 end
@@ -49,7 +49,10 @@ end
 Job.perform_later
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 1
+  if DataCollector[0].size >= 1
+    sleep(15)
+    true
+  end
 end
 
 assert_equal 1, DataCollector[0].size, 'Given job should be executed only once'
