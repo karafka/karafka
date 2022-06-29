@@ -7,10 +7,10 @@ RSpec.describe_current do
   let(:partition2) { Rdkafka::Consumer::Partition.new(4, 'topic_name') }
   let(:partitions) { { 'topic_name' => [partition1] } }
 
-  describe '#revoked_partitions, #on_partitions_revoked and #revoked_partitions?' do
+  describe '#revoked_partitions, #on_partitions_revoked and #changed?' do
     context 'when there are no revoked partitions' do
       it { expect(manager.revoked_partitions).to eq({}) }
-      it { expect(manager.revoked_partitions?).to eq(false) }
+      it { expect(manager.changed?).to eq(false) }
     end
 
     context 'when some partitions were revoked and not assigned' do
@@ -20,7 +20,7 @@ RSpec.describe_current do
         expect(manager.revoked_partitions).to eq({ 'topic_name' => [partition1.partition] })
       end
 
-      it { expect(manager.revoked_partitions?).to eq(true) }
+      it { expect(manager.changed?).to eq(true) }
     end
 
     context 'when we clear the manager' do
@@ -30,7 +30,7 @@ RSpec.describe_current do
       end
 
       it { expect(manager.revoked_partitions).to eq({}) }
-      it { expect(manager.revoked_partitions?).to eq(false) }
+      it { expect(manager.changed?).to eq(false) }
     end
 
     context 'when some of the revoked partitions were assigned back' do
@@ -43,7 +43,7 @@ RSpec.describe_current do
         expect(manager.revoked_partitions).to eq({ 'topic_name' => [partition2.partition] })
       end
 
-      it { expect(manager.revoked_partitions?).to eq(true) }
+      it { expect(manager.changed?).to eq(true) }
     end
   end
 end

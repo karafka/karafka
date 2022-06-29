@@ -16,6 +16,10 @@ setup_karafka do |config|
 end
 
 class Consumer < Karafka::Pro::BaseConsumer
+  def initialize
+    @first = true
+  end
+
   def consume
     messages.each do
       DataCollector[messages.metadata.partition] << true
@@ -25,9 +29,14 @@ class Consumer < Karafka::Pro::BaseConsumer
         return
       end
 
-      # Sleep only once here, it's to make sure we exceed max poll
-      sleep(@slept ? 1 : 15)
-      @slept = true
+      # First batch may be super small, so we skip it and wait for a bigger one
+      unless @first
+        # Sleep only once here, it's to make sure we exceed max poll
+        sleep(@slept ? 1 : 15)
+        @slept = true
+      end
+
+      @first = false
     end
   end
 end

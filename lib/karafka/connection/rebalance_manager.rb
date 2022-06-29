@@ -25,6 +25,7 @@ module Karafka
         @assigned_partitions = {}
         @revoked_partitions = {}
         @lost_partitions = {}
+        @changed = false
       end
 
       # Resets the rebalance manager state
@@ -34,6 +35,12 @@ module Karafka
         @assigned_partitions.clear
         @revoked_partitions.clear
         @lost_partitions.clear
+        @changed = false
+      end
+
+      # @return [Boolean] indicates a state change in the partitions assignment
+      def changed?
+        @changed
       end
 
       # @return [Hash<String, Array<Integer>>] hash where the keys are the names of topics for
@@ -43,11 +50,6 @@ module Karafka
         @lost_partitions
       end
 
-      # @return [Boolean] true if any partitions were revoked
-      def revoked_partitions?
-        !revoked_partitions.empty?
-      end
-
       # Callback that kicks in inside of rdkafka, when new partitions are assigned.
       #
       # @private
@@ -55,6 +57,7 @@ module Karafka
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       def on_partitions_assigned(_, partitions)
         @assigned_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
+        @changed = true
         refresh
       end
 
@@ -65,6 +68,7 @@ module Karafka
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       def on_partitions_revoked(_, partitions)
         @revoked_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
+        @changed = true
         refresh
       end
 

@@ -75,7 +75,11 @@ module Karafka
           # If partition revocation happens, we need to remove messages from revoked partitions
           # as well as ensure we do not have duplicated due to the offset reset for partitions
           # that we got assigned
-          remove_revoked_and_duplicated_messages if @rebalance_manager.revoked_partitions?
+          # We also do early break, so the information about rebalance is used as soon as possible
+          if @rebalance_manager.changed?
+            remove_revoked_and_duplicated_messages
+            break
+          end
 
           # Finally once we've (potentially) removed revoked, etc, if no messages were returned
           # we can break.

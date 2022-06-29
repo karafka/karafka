@@ -28,10 +28,8 @@ class Job < ActiveJob::Base
 
   def perform(value)
     # We add sleep to simulate work being done, so it ain't done too fast before we shutdown
-    if DataCollector[:stopping].size.zero?
-      DataCollector[:stopping] << true
-      sleep(5)
-    end
+    DataCollector[:stopping] << true
+    sleep(5)
 
     DataCollector[0] << value
   end
@@ -40,7 +38,7 @@ end
 5.times { |value| Job.perform_later(value) }
 
 start_karafka_and_wait_until do
-  !DataCollector[:stopping].size.zero?
+  DataCollector[:stopping].size >= 2
 end
 
 assert DataCollector[0].size > 1
