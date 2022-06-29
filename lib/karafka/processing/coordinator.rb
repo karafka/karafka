@@ -42,9 +42,9 @@ module Karafka
         @mutex.synchronize do
           @running_jobs -= 1
 
-          raise Karafka::Errors::InvalidCoordinatorState, @running_jobs if @running_jobs < 0
+          return @running_jobs unless @running_jobs.negative?
 
-          @running_jobs
+          raise Karafka::Errors::InvalidCoordinatorState, @running_jobs
         end
       end
 
