@@ -61,6 +61,8 @@ consumer = setup_rdkafka_consumer
 other = Thread.new do
   sleep(0.1) until got_both?
 
+  sleep 5
+
   consumer.subscribe(TOPIC)
 
   consumer.each do |message|
