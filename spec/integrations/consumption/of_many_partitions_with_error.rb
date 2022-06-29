@@ -3,6 +3,8 @@
 # When consuming on multiple workers, when one receives a non-critical exception, others should
 # continue processing and the one should be retried
 
+TOPIC = 'integrations_00_10'
+
 setup_karafka do |config|
   config.concurrency = 10
   config.initial_offset = 'latest'
@@ -32,7 +34,7 @@ end
 draw_routes do
   consumer_group DataCollector.consumer_group do
     # Special topic with 10 partitions available
-    topic 'integrations_0_10' do
+    topic TOPIC do
       consumer Consumer
     end
   end
@@ -44,7 +46,7 @@ Thread.new { Karafka::Server.run }
 # Give it some time to boot and connect before dispatching messages
 sleep(5)
 
-10.times { |i| produce('integrations_0_10', SecureRandom.uuid, partition: i) }
+10.times { |i| produce(TOPIC, SecureRandom.uuid, partition: i) }
 
 wait_until do
   DataCollector.data.values.flatten.size >= 11

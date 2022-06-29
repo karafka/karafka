@@ -2,6 +2,8 @@
 
 # Karafka should trigger a revoked action when a partition is being taken from us
 
+TOPIC = 'integrations_01_03'
+
 setup_karafka
 
 DataCollector[:revoked] = Concurrent::Array.new
@@ -28,8 +30,8 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group 'integrations_1_03' do
-    topic 'integrations_1_03' do
+  consumer_group TOPIC do
+    topic TOPIC do
       consumer Consumer
       manual_offset_management true
     end
@@ -37,14 +39,14 @@ draw_routes do
 end
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce('integrations_1_03', data, partition: rand(0..2)) }
+elements.each { |data| produce(TOPIC, data, partition: rand(0..2)) }
 
 consumer = setup_rdkafka_consumer
 
 other =  Thread.new do
   sleep(10)
 
-  consumer.subscribe('integrations_1_03')
+  consumer.subscribe(TOPIC)
   # 1 message is enough
   consumer.each do
     consumer.close

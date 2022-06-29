@@ -6,6 +6,8 @@
 # To simulate this we will run long jobs from two partitions in parallel and we will "loose" one
 # of them and detect this.
 
+TOPIC = 'integrations_03_02'
+
 setup_karafka do |config|
   config.license.token = pro_license_token
   config.max_wait_time = 2_500
@@ -17,14 +19,14 @@ setup_active_job
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
-    active_job_topic 'integrations_3_02' do
+    active_job_topic TOPIC do
       long_running_job true
     end
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as 'integrations_3_02'
+  queue_as TOPIC
 
   karafka_options(
     dispatch_method: :produce_sync,
@@ -56,7 +58,7 @@ revoked = false
 Thread.new do
   sleep(10)
 
-  consumer.subscribe('integrations_3_02')
+  consumer.subscribe(TOPIC)
 
   consumer.each do
     unless revoked

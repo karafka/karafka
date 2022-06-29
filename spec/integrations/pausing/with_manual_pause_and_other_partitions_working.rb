@@ -5,6 +5,8 @@
 # Here we check, that the paused partition data is consumed as last (since we pause long enough)
 # and that the other partition's data was consumed first.
 
+TOPIC = 'integrations_02_02'
+
 setup_karafka do |config|
   # We set it to 1 as in case of not pausing as expected with one worker the job would stop all
   # processing and we would fail.
@@ -33,7 +35,7 @@ end
 draw_routes do
   consumer_group DataCollector.consumer_group do
     # Special topic with 2 partitions available
-    topic 'integrations_2_02' do
+    topic TOPIC do
       consumer Consumer
     end
   end
@@ -48,7 +50,7 @@ Thread.new do
 
   100.times do
     2.times do |partition|
-      produce('integrations_2_02', SecureRandom.uuid, partition: partition)
+      produce(TOPIC, SecureRandom.uuid, partition: partition)
     end
   end
 end

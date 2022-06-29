@@ -4,6 +4,8 @@
 # Workers should not hang when a job within them fails but should be available for other jobs
 # Workers should not be clogged by a failing job
 
+TOPIC = 'integrations_00_03'
+
 setup_karafka do |config|
   config.concurrency = 1
 end
@@ -13,7 +15,7 @@ end
 # 300 messages to consume tops from all 3 partitions
 # There can be more if we run this in development several times
 300.times do |i|
-  result = produce('integrations_0_03', SecureRandom.uuid, partition: i % 3)
+  result = produce(TOPIC, SecureRandom.uuid, partition: i % 3)
   DataCollector[:last_offsets][result.partition] = result.offset
 end
 
@@ -37,7 +39,7 @@ end
 draw_routes do
   consumer_group DataCollector.consumer_group do
     # Special topic with 3 partitions available
-    topic 'integrations_0_03' do
+    topic TOPIC do
       consumer Consumer
     end
   end

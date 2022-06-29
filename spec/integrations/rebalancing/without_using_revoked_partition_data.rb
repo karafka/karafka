@@ -10,6 +10,8 @@ require 'securerandom'
 
 RUN = SecureRandom.uuid.split('-').first
 
+TOPIC = 'integrations_00_02'
+
 setup_karafka do |config|
   config.max_wait_time = 40_000
   config.shutdown_timeout = 50_000
@@ -35,8 +37,8 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group 'integrations_0_02' do
-    topic 'integrations_0_02' do
+  consumer_group TOPIC do
+    topic TOPIC do
       consumer Consumer
     end
   end
@@ -50,7 +52,7 @@ Thread.new do
       # If revoked, we are stopping, so producer will be closed
       break if DataCollector.data.key?(:revoked)
 
-      produce('integrations_0_02', "#{RUN}-#{nr}-#{i}", partition: i)
+      produce(TOPIC, "#{RUN}-#{nr}-#{i}", partition: i)
     end
 
     nr += 1
@@ -64,7 +66,7 @@ other = Thread.new do
   sleep(10)
 
   consumer = setup_rdkafka_consumer
-  consumer.subscribe('integrations_0_02')
+  consumer.subscribe(TOPIC)
   consumer.each do |message|
     DataCollector[:process2] << message
 

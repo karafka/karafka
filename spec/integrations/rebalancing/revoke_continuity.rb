@@ -13,8 +13,6 @@ class Consumer < Karafka::BaseConsumer
   def consume
     partition = messages.metadata.partition
 
-    p [partition, object_id]
-
     messages.each do |message|
       # We store offsets only until revoked
       return unless mark_as_consumed!(message)

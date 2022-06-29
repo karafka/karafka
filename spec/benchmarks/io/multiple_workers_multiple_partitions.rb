@@ -19,7 +19,7 @@ Process.fork_supervised do
   # Dispatch 1000 messages to each partition
   1_000.times do
     PARTITIONS_COUNT.times do |i|
-      Karafka.producer.buffer(topic: 'benchmarks_0_10', payload: 'a', partition: i)
+      Karafka.producer.buffer(topic: 'benchmarks_00_10', payload: 'a', partition: i)
     end
   end
 
@@ -53,7 +53,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes('benchmarks_0_10')
+draw_routes('benchmarks_00_10')
 
 Tracker.run(messages_count: MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT) do
   DataCollector.data[:completed] = Set.new

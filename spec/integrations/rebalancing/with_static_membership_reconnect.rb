@@ -6,6 +6,8 @@
 
 require 'securerandom'
 
+TOPIC = 'integrations_01_02'
+
 setup_karafka do |config|
   config.initial_offset = 'latest'
   config.kafka[:'group.instance.id'] = SecureRandom.uuid
@@ -24,8 +26,8 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group 'integrations_1_02' do
-    topic 'integrations_1_02' do
+  consumer_group TOPIC do
+    topic TOPIC do
       consumer Consumer
     end
   end
@@ -45,7 +47,7 @@ Thread.new do
   loop do
     2.times do |i|
       PRODUCER.produce_sync(
-        topic: 'integrations_1_02',
+        topic: TOPIC,
         payload: nr.to_s,
         partition: i
       )
@@ -68,7 +70,7 @@ other = Thread.new do
     'auto.offset.reset': 'latest'
   )
 
-  consumer.subscribe('integrations_1_02')
+  consumer.subscribe(TOPIC)
 
   consumer.each do |message|
     DataCollector[:process1] << [message.payload.to_i, message.partition]

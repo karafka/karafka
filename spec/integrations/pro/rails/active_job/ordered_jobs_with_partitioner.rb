@@ -11,16 +11,16 @@ end
 setup_active_job
 
 # This is a special topic with 3 partitions
-TOPIC_NAME = 'integrations_2_03'
+TOPIC = 'integrations_02_03'
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
-    active_job_topic TOPIC_NAME
+    active_job_topic TOPIC
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as TOPIC_NAME
+  queue_as TOPIC
 
   karafka_options(
     dispatch_method: :produce_sync,

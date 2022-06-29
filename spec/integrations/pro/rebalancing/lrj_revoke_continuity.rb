@@ -3,7 +3,7 @@
 # When Karafka looses a given partition but later gets it back, it should pick it up from the last
 # offset committed without any problems
 
-TOPIC = 'integrations_9_02'
+TOPIC = 'integrations_09_02'
 
 setup_karafka do |config|
   config.license.token = pro_license_token

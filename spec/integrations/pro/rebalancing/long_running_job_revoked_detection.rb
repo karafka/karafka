@@ -3,6 +3,8 @@
 # When a job is marked as lrj and a partition is lost, we should be able to get info about this
 # by calling the `#revoked?` method.
 
+TOPIC = 'integrations_04_02'
+
 setup_karafka do |config|
   config.max_messages = 5
   # We set it here that way not too wait too long on stuff
@@ -32,7 +34,7 @@ end
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
-    topic 'integrations_4_02' do
+    topic TOPIC do
       consumer Consumer
       long_running_job true
     end
@@ -40,8 +42,8 @@ draw_routes do
 end
 
 10.times do
-  produce('integrations_4_02', '1', partition: 0)
-  produce('integrations_4_02', '1', partition: 1)
+  produce(TOPIC, '1', partition: 0)
+  produce(TOPIC, '1', partition: 1)
 end
 
 # We need a second producer to trigger a rebalance
@@ -50,7 +52,7 @@ consumer = setup_rdkafka_consumer
 Thread.new do
   sleep(10)
 
-  consumer.subscribe('integrations_4_02')
+  consumer.subscribe(TOPIC)
 
   consumer.each do |message|
     DataCollector[:revoked_data] << message.partition

@@ -34,7 +34,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes('benchmarks_0_05')
+draw_routes('benchmarks_00_05')
 
 Tracker.run(messages_count: MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT) do
   DataCollector.data[:completed] = Set.new

@@ -8,7 +8,7 @@
 # This will work only when we have enough threads to be able to run the revocation jobs prior to
 # finishing the processing. Otherwise when enqueued, will run after (for this we have another spec)
 
-TOPIC = 'integrations_5_02'
+TOPIC = 'integrations_05_02'
 
 setup_karafka do |config|
   config.license.token = pro_license_token
