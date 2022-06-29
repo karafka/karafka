@@ -2,8 +2,9 @@
 
 ## 2.0.0-beta5 (Unreleased)
 - Always resume processing of a revoked partition just in case it gets re-assigned.
-- Improve specs stability
+- Improve specs stability.
 - Fix a case where revocation job would be executed on partition for which we never did any work.
+- Introduce a jobs group coordinator for easier jobs management.
 
 ## 2.0.0-beta4 (2022-06-20)
 - Rename job internal api methods from `#prepare` to `#before_call` and from `#teardown` to `#after_call` to abstract away jobs execution from any type of executors and consumers logic

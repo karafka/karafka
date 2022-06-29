@@ -25,7 +25,8 @@ RSpec.describe_current do
   end
 
   describe '#consumer_class' do
-    pending
+    # This is just an alias
+    it { expect(topic.consumer).to eq(topic.consumer_class) }
   end
 
   describe '#deserializer=' do

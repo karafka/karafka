@@ -3,5 +3,5 @@
 require 'karafka/pro/processing/coordinator'
 
 RSpec.describe_current do
-  pending
+  it { expect(described_class).to be < Karafka::Processing::Coordinator }
 end

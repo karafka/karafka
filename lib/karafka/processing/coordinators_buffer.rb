@@ -36,15 +36,15 @@ module Karafka
       def revoke(topic, partition)
         @pauses_manager.revoke(topic, partition)
 
-        return unless @coordinators[topic][partition]
-
-        @coordinators[topic][partition].revoke
-
         # The fact that we delete here does not change the fact that the executor still holds the
         # reference to this coordinator. We delete it here, as we will no longer process any
         # new stuff with it and we may need a new coordinator if we regain this partition, but the
         # coordinator may still be in use
-        @coordinators[topic].delete(partition)
+        coordinator = @coordinators[topic].delete(partition)
+
+        return unless coordinator
+
+        coordinator.revoke
       end
 
       # Clears coordinators and re-created the pauses manager
