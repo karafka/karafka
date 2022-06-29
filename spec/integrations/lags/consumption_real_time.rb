@@ -26,5 +26,5 @@ start_karafka_and_wait_until do
   DataCollector[:consumption_lags].size >= 20
 end
 
-# We reject first few lags as they often are bigger due to warmup and partitions assigments
+# We reject first few lags as they often are bigger due to warm-up and partitions assignments
 assert DataCollector[:consumption_lags][5...].max < 500
