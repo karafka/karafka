@@ -91,6 +91,11 @@ module Karafka
           # simplifies the overall design and prevents from race conditions
           wait
 
+          # We resume paused partitions only after the lost partitions jobs are done. This provides
+          # higher chance, that post-revoke operations were done and we can (if needed) start with
+          # a clean slate
+          resume_revoked_partitions
+
           build_and_schedule_consumption_jobs
 
           wait
@@ -191,6 +196,16 @@ module Karafka
         @messages_buffer.remap(
           @client.batch_poll
         )
+      end
+
+      # Revoked partition needs to be resumed. Otherwise there is a chance, that after a
+      # re-assignment, they will not be fetched despite being assigned by rdkafka.
+      def resume_revoked_partitions
+        @client.rebalance_manager.revoked_partitions.each do |topic, partitions|
+          partitions.each do |partition|
+            @client.resume(topic, partition)
+          end
+        end
       end
 
       # Takes the messages per topic partition and enqueues processing jobs in threads using

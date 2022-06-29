@@ -74,10 +74,6 @@ module Karafka
     def on_revoked
       coordinator.revoke
 
-      # Revoked partition needs to be resumed. Otherwise there is a chance, that after a
-      # re-assignment, it will not be fetched despite being assigned
-      resume
-
       Karafka.monitor.instrument('consumer.revoked', caller: self) do
         revoked
       end

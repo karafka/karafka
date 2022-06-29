@@ -19,11 +19,11 @@ class Consumer < Karafka::Pro::BaseConsumer
 
     partition = messages.metadata.partition
 
+    DataCollector["#{partition}-object_ids"] << object_id
+
     messages.each do |message|
       return unless mark_as_consumed!(message)
     end
-
-    DataCollector["#{partition}-object_ids"] << object_id
 
     sleep 1
   end
@@ -60,8 +60,6 @@ consumer = setup_rdkafka_consumer
 
 other = Thread.new do
   sleep(0.1) until got_both?
-
-  sleep 5
 
   consumer.subscribe(TOPIC)
 
