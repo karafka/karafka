@@ -74,6 +74,8 @@ module Karafka
     def on_revoked
       coordinator.revoke
 
+      resume
+
       Karafka.monitor.instrument('consumer.revoked', caller: self) do
         revoked
       end
