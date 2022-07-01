@@ -14,7 +14,8 @@ TOPIC = 'integrations_00_02'
 
 setup_karafka do |config|
   config.max_wait_time = 40_000
-  config.shutdown_timeout = 50_000
+  # We set it high, so a two long polls upon wait won't cause it to forcefully die
+  config.shutdown_timeout = 120_000
   config.max_messages = 1_000
   config.initial_offset = 'earliest'
   # Shutdown timeout should be bigger than the max wait as during shutdown we poll as well to be
@@ -99,6 +100,7 @@ end
 
 # There should be no duplicated data received
 process1.each do |_, messages|
+  byebug unless messages.size == messages.uniq.size
   assert_equal messages.size, messages.uniq.size
 
   previous = nil
