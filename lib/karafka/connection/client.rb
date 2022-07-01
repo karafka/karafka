@@ -51,12 +51,13 @@ module Karafka
       # @note This method should not be executed from many threads at the same time
       def batch_poll
         time_poll = TimeTrackers::Poll.new(@subscription_group.max_wait_time)
-        time_poll.start
 
         @buffer.clear
         @rebalance_manager.clear
 
         loop do
+          time_poll.start
+
           # Don't fetch more messages if we do not have any time left
           break if time_poll.exceeded?
           # Don't fetch more messages if we've fetched max as we've wanted

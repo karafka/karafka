@@ -7,6 +7,7 @@
 - Introduce a jobs group coordinator for easier jobs management.
 - Improve stability of resuming paused partitions that were revoked and re-assigned.
 - Optimize reaction time on partition ownership changes.
+- Fix a bug where despite setting long max wait time, we would return messages prior to it while not reaching the desired max messages count.
 
 ## 2.0.0-beta4 (2022-06-20)
 - Rename job internal api methods from `#prepare` to `#before_call` and from `#teardown` to `#after_call` to abstract away jobs execution from any type of executors and consumers logic
