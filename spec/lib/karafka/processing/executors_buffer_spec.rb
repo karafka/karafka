@@ -65,6 +65,10 @@ RSpec.describe_current do
     end
   end
 
+  describe '#revoke' do
+    pending
+  end
+
   describe '#clear' do
     let(:pre_cleaned_executor) do
       buffer.find_or_create(topic_name, partition_id, parallel_key)
