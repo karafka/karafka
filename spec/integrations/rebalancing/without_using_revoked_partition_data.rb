@@ -98,7 +98,6 @@ end
 
 # There should be no duplicated data received
 process1.each do |_, messages|
-  byebug unless messages.size == messages.uniq.size
   assert_equal messages.size, messages.uniq.size
 
   previous = nil
