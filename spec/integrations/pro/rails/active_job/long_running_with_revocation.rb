@@ -45,9 +45,11 @@ end
 
 consumer = setup_rdkafka_consumer
 
-# 3 really slow jobs per partition
+# really slow jobs per partition - we add a lot of them but we should not finish more than
+# 3 - one for each partition that were started prior to rebalance + one after the rebalance for
+# the partition we have regained (then shutdown)
 # 1 and 4 are picked because they will dispatch messages to 0 and 1 partition
-3.times do
+10.times do
   Job.perform_later('1')
   Job.perform_later('4')
 end
@@ -55,6 +57,7 @@ end
 revoked = false
 
 # This will trigger a rebalance when the first job is being processed
+# We keep it alive so we do not trigger a second rebalance
 Thread.new do
   sleep(10)
 
@@ -65,18 +68,16 @@ Thread.new do
       sleep(5)
       revoked = true
     end
-
-    break
   end
-
-  consumer.close
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:started].size >= 2 && revoked
+  DataCollector[:started].size >= 3 && revoked
 end
 
 # We should finish only one job per each partition as the rest should be stopped from being
 # processed upon revocation
-assert_equal 2, DataCollector[:started].size
-assert_equal 2, DataCollector[:done].size
+assert_equal 3, DataCollector[:started].size
+assert_equal 3, DataCollector[:done].size
+
+consumer.close

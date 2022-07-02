@@ -26,7 +26,7 @@ class Consumer < Karafka::Pro::BaseConsumer
       DataCollector[messages.metadata.partition] << true
 
       if revoked?
-        DataCollector[:revoked] << true
+        DataCollector[:revoked] << messages.metadata.partition
         return
       end
 
@@ -70,19 +70,13 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:revoked].size >= 1 && (
+  DataCollector[:revoked].size >= 2 && (
     DataCollector[0].size >= 10 ||
       DataCollector[1].size >= 10
   )
 end
 
+# Both partitions should be revoked
+assert_equal [0, 1], DataCollector[:revoked].sort.to_a
+
 consumer.close
-
-revoked_partition = DataCollector[:revoked_data].last
-non_revoked_partition = revoked_partition.zero? ? 1 : 0
-
-assert DataCollector[revoked_partition].size < DataCollector[non_revoked_partition].size
-
-# Only one partition should be revoked from our two. So this needs to be one as one of the
-# partitions should still be processed
-assert_equal 1, DataCollector[:revoked].size

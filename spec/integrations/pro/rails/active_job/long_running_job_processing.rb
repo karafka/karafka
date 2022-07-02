@@ -26,23 +26,8 @@ class Job < ActiveJob::Base
   def perform
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group
-    sleep(11)
+    sleep(15)
     DataCollector[0] << true
-  end
-end
-
-# We need a second producer so we are sure that there was no revocation due to a timeout
-consumer = setup_rdkafka_consumer
-
-Thread.new do
-  sleep(10)
-
-  consumer.subscribe(DataCollector.topic)
-
-  consumer.each do
-    # This should never happen.
-    # We have one partition and it should be karafka that consumes it
-    exit! 5
   end
 end
 
@@ -56,5 +41,3 @@ start_karafka_and_wait_until do
 end
 
 assert_equal 1, DataCollector[0].size, 'Given job should be executed only once'
-
-consumer.close

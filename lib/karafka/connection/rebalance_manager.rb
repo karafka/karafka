@@ -18,13 +18,14 @@ module Karafka
       # Empty array for internal usage not to create new objects
       EMPTY_ARRAY = [].freeze
 
+      attr_reader :assigned_partitions, :revoked_partitions
+
       private_constant :EMPTY_ARRAY
 
       # @return [RebalanceManager]
       def initialize
         @assigned_partitions = {}
         @revoked_partitions = {}
-        @lost_partitions = {}
         @changed = false
       end
 
@@ -34,20 +35,12 @@ module Karafka
       def clear
         @assigned_partitions.clear
         @revoked_partitions.clear
-        @lost_partitions.clear
         @changed = false
       end
 
       # @return [Boolean] indicates a state change in the partitions assignment
       def changed?
         @changed
-      end
-
-      # @return [Hash<String, Array<Integer>>] hash where the keys are the names of topics for
-      #   which we've lost partitions and array with ids of the partitions as the value
-      # @note We do not consider as lost topics and partitions that got revoked and assigned
-      def revoked_partitions
-        @lost_partitions
       end
 
       # Callback that kicks in inside of rdkafka, when new partitions are assigned.
@@ -58,7 +51,6 @@ module Karafka
       def on_partitions_assigned(_, partitions)
         @assigned_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
         @changed = true
-        refresh
       end
 
       # Callback that kicks in inside of rdkafka, when partitions are revoked.
@@ -69,16 +61,17 @@ module Karafka
       def on_partitions_revoked(_, partitions)
         @revoked_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
         @changed = true
-        refresh
       end
 
-      private
+      # We consider as lost only partitions that were taken away and not re-assigned back to us
+      def lost_partitions
+        lost_partitions = {}
 
-      # Recalculates the partitions we lost
-      def refresh
-        @revoked_partitions.each do |topic, partitions|
-          @lost_partitions[topic] = partitions - @assigned_partitions.fetch(topic, EMPTY_ARRAY)
+        revoked_partitions.each do |topic, partitions|
+          lost_partitions[topic] = partitions - assigned_partitions.fetch(topic, EMPTY_ARRAY)
         end
+
+        lost_partitions
       end
     end
   end

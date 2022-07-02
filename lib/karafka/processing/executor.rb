@@ -49,15 +49,7 @@ module Karafka
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
         # middle state, where re-creation of a consumer instance would occur only sometimes
-        @recreate = true unless ::Karafka::App.config.consumer_persistence
-
-        # If `@recreate` was set to true (aside from non persistent), it means, that revocation or
-        # a shutdown happened and we need to have a new instance for running another consume for
-        # this topic partition
-        if @recreate
-          @consumer = nil
-          @recreate = false
-        end
+        @consumer = nil unless ::Karafka::App.config.consumer_persistence
 
         consumer.coordinator = coordinator
 
@@ -96,7 +88,6 @@ module Karafka
       #   consumer instance.
       def revoked
         consumer.on_revoked if @consumer
-        @recreate = true
       end
 
       # Runs the controller `#shutdown` method that should be triggered when a given consumer is
@@ -108,7 +99,6 @@ module Karafka
         # There is a case, where the consumer no longer exists because it was revoked, in case like
         # that we do not build a new instance and shutdown should not be triggered.
         consumer.on_shutdown if @consumer
-        @recreate = true
       end
 
       private

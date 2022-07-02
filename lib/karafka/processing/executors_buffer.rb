@@ -31,6 +31,17 @@ module Karafka
         )
       end
 
+      # Revokes executors of a given topic partition, so they won't be used anymore for incoming
+      # messages
+      #
+      # @param topic [String] topic name
+      # @param partition [Integer] partition number
+      def revoke(topic, partition)
+        ktopic = find_topic(topic)
+
+        @buffer[ktopic][partition].clear
+      end
+
       # Finds all the executors available for a given topic partition
       #
       # @param topic [String] topic name

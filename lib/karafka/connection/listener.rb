@@ -81,7 +81,7 @@ module Karafka
 
           # This will ensure, that in the next poll, we continue processing (if we get them back)
           # partitions that we have paused
-          resume_revoked_partitions
+          resume_assigned_partitions
 
           # If there were revoked partitions, we need to wait on their jobs to finish before
           # distributing consuming jobs as upon revoking, we might get assigned to the same
@@ -169,6 +169,13 @@ module Karafka
             @executors.find_all(topic, partition).each do |executor|
               jobs << @jobs_builder.revoked(executor)
             end
+
+            # We need to remove all the executors of a given topic partition that we have lost, so
+            # next time we pick up it's work, new executors kick in. This may be needed especially
+            # for LRJ where we could end up with a race condition
+            # This revocation needs to happen after the jobs are scheduled, otherwise they would
+            # be scheduled with new executors instead of old
+            @executors.revoke(topic, partition)
           end
         end
 
@@ -197,10 +204,11 @@ module Karafka
         )
       end
 
-      # Revoked partition needs to be resumed. Otherwise there is a chance, that after a
-      # re-assignment, they will not be fetched despite being assigned by rdkafka.
-      def resume_revoked_partitions
-        @client.rebalance_manager.revoked_partitions.each do |topic, partitions|
+      # Revoked partition needs to be resumed if we were processing them earlier. This will do
+      # nothing to things that we are planning to process. Without this, things we get
+      # re-assigned would not be polled.
+      def resume_assigned_partitions
+        @client.rebalance_manager.assigned_partitions.each do |topic, partitions|
           partitions.each do |partition|
             @client.resume(topic, partition)
           end

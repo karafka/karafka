@@ -48,6 +48,7 @@ other = Thread.new do
 
   consumer.each do |message|
     DataCollector[:jumped] << message
+    sleep 10
     consumer.store_offset(message)
     break
   end
@@ -60,13 +61,13 @@ end
 start_karafka_and_wait_until do
   other.join &&
     (
-      DataCollector[0].uniq.size >= 2 ||
-        DataCollector[1].uniq.size >= 2
+      DataCollector[0].uniq.size >= 3 ||
+        DataCollector[1].uniq.size >= 3
     )
 end
 
-revoked_partition = DataCollector[:jumped].first.partition
-non_revoked = revoked_partition == 1 ? 0 : 1
+taken_partition = DataCollector[:jumped].first.partition
+non_taken = taken_partition == 1 ? 0 : 1
 
-assert_equal 2, DataCollector.data[revoked_partition].uniq.size
-assert_equal 1, DataCollector.data[non_revoked].uniq.size
+assert_equal 2, DataCollector.data[taken_partition].uniq.size
+assert_equal 3, DataCollector.data[non_taken].uniq.size
