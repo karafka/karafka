@@ -54,6 +54,8 @@ module Karafka
     # @note This should not be used by the end users as it is part of the lifecycle of things but
     #   not as part of the public api.
     def on_after_consume
+      return if revoked?
+
       if @coordinator.success?
         coordinator.pause_tracker.reset
 
