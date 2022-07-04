@@ -4,7 +4,7 @@
 # without waiting max wait time
 
 setup_karafka do |config|
-  config.max_messages = 5
+  config.max_messages = 1
   # It should never go that far
   config.max_wait_time = 5_000
   config.shutdown_timeout = 120_000
@@ -27,9 +27,10 @@ draw_routes(Consumer)
 started_at = Time.now.to_f
 
 start_karafka_and_wait_until do
-  DataCollector[:data].size >= 5
+  DataCollector[:data].size >= 20
 end
 
 time_taken = Time.now.to_f - started_at
 
-assert time_taken < 5
+# If it would reach max, we would wait for a really long time
+assert time_taken < 100
