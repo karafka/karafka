@@ -12,6 +12,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     sleep(0.1)
+
     messages.each do
       DataCollector[topic.name] << Thread.current.object_id
     end
@@ -42,4 +43,3 @@ assert_equal 10, Karafka::App.subscription_groups.size
 assert_equal 10, DataCollector.data.keys.size
 # All workers consumers should consume same number of messages
 assert_equal 2, DataCollector.data.values.flatten.uniq.size
-assert_equal 10, DataCollector.data.values.map(&:size).uniq.first

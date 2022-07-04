@@ -2,7 +2,18 @@
 
 ## 2.0.0-beta5 (Unreleased)
 - Always resume processing of a revoked partition just in case it gets re-assigned.
-- Improve specs stability
+- Improve specs stability.
+- Fix a case where revocation job would be executed on partition for which we never did any work.
+- Introduce a jobs group coordinator for easier jobs management.
+- Improve stability of resuming paused partitions that were revoked and re-assigned.
+- Optimize reaction time on partition ownership changes.
+- Fix a bug where despite setting long max wait time, we would return messages prior to it while not reaching the desired max messages count.
+- Add more integration specs related to polling limits.
+- Remove auto-detection of re-assigned partitions upon rebalance as for too fast rebalances it could not be accurate enough.
+- Optimize the removal of pre-buffered lost partitions data.
+- Always rune `#revoked` when rebalance with revocation happens.
+- Evict executors upon rebalance, to prevent race-conditions.
+- Align topics names for integration specs.
 
 ## 2.0.0-beta4 (2022-06-20)
 - Rename job internal api methods from `#prepare` to `#before_call` and from `#teardown` to `#after_call` to abstract away jobs execution from any type of executors and consumers logic

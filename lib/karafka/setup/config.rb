@@ -85,21 +85,29 @@ module Karafka
 
       # Namespace for internal settings that should not be modified directly
       setting :internal do
-        # option routing_builder [Karafka::Routing::Builder] builder instance
-        setting :routing_builder, default: Routing::Builder.new
         # option status [Karafka::Status] app status
         setting :status, default: Status.new
         # option process [Karafka::Process] process status
         # @note In the future, we need to have a single process representation for all the karafka
         #   instances
         setting :process, default: Process.new
-        # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
-        #   group builder
-        setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
-        # option scheduler [Class] scheduler we will be using
-        setting :scheduler, default: Scheduler.new
-        # option jobs_builder [Class] jobs builder we want to use
-        setting :jobs_builder, default: Processing::JobsBuilder.new
+
+        setting :routing do
+          # option builder [Karafka::Routing::Builder] builder instance
+          setting :builder, default: Routing::Builder.new
+          # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
+          #   group builder
+          setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
+        end
+
+        setting :processing do
+          # option scheduler [Object] scheduler we will be using
+          setting :scheduler, default: Processing::Scheduler.new
+          # option jobs_builder [Object] jobs builder we want to use
+          setting :jobs_builder, default: Processing::JobsBuilder.new
+          # option coordinator [Class] work coordinator we want to user for processing coordination
+          setting :coordinator_class, default: Processing::Coordinator
+        end
 
         # Karafka components for ActiveJob
         setting :active_job do
@@ -109,7 +117,7 @@ module Karafka
           #   ensuring, that extra job options defined are valid
           setting :job_options_contract, default: ActiveJob::JobOptionsContract.new
           # option consumer [Class] consumer class that should be used to consume ActiveJob data
-          setting :consumer, default: ActiveJob::Consumer
+          setting :consumer_class, default: ActiveJob::Consumer
         end
       end
 

@@ -38,7 +38,7 @@ module Karafka
       # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
       #   the consumer group topics
       def subscription_groups
-        App.config.internal.subscription_groups_builder.call(topics)
+        App.config.internal.routing.subscription_groups_builder.call(topics)
       end
 
       # Hashed version of consumer group that can be used for validation purposes

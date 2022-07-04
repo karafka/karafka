@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:job) { described_class.new(executor, messages) }
+  subject(:job) { described_class.new(executor, messages, coordinator) }
 
   let(:executor) { build(:processing_executor) }
   let(:messages) { [rand] }
+  let(:coordinator) { build(:processing_coordinator) }
   let(:time_now) { Time.now }
 
   it { expect(job.non_blocking?).to eq(false) }
@@ -17,7 +18,7 @@ RSpec.describe_current do
     end
 
     it 'expect to run before_consume on the executor with time and messages' do
-      expect(executor).to have_received(:before_consume).with(messages, time_now)
+      expect(executor).to have_received(:before_consume).with(messages, time_now, coordinator)
     end
   end
 

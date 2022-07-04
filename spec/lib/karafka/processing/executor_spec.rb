@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:executor) { described_class.new(group_id, client, topic, pause) }
+  subject(:executor) { described_class.new(group_id, client, topic) }
 
   let(:group_id) { rand.to_s }
   let(:client) { instance_double(Karafka::Connection::Client) }
   let(:topic) { build(:routing_topic) }
-  let(:pause) { build(:time_trackers_pause) }
   let(:messages) { [build(:messages_message)] }
+  let(:coordinator) { build(:processing_coordinator) }
   let(:received_at) { Time.now }
   let(:consumer) do
     ClassBuilder.inherit(topic.consumer) do
@@ -18,7 +18,7 @@ RSpec.describe_current do
   before { allow(topic.consumer).to receive(:new).and_return(consumer) }
 
   describe '#id' do
-    let(:executor2) { described_class.new(group_id, client, topic, pause) }
+    let(:executor2) { described_class.new(group_id, client, topic) }
 
     it { expect(executor.id).to be_a(String) }
 
@@ -34,21 +34,28 @@ RSpec.describe_current do
   describe '#before_consume' do
     before { allow(consumer).to receive(:on_before_consume) }
 
-    it { expect { executor.before_consume(messages, received_at) }.not_to raise_error }
+    it do
+      expect { executor.before_consume(messages, received_at, coordinator) }.not_to raise_error
+    end
 
     it 'expect to build appropriate messages batch' do
-      executor.before_consume(messages, received_at)
+      executor.before_consume(messages, received_at, coordinator)
       expect(consumer.messages.first.raw_payload).to eq(messages.first.raw_payload)
     end
 
+    it 'expect to assign appropriate coordinator' do
+      executor.before_consume(messages, received_at, coordinator)
+      expect(consumer.coordinator).to eq(coordinator)
+    end
+
     it 'expect to build metadata with proper details' do
-      executor.before_consume(messages, received_at)
+      executor.before_consume(messages, received_at, coordinator)
       expect(consumer.messages.metadata.scheduled_at).to eq(received_at)
       expect(consumer.messages.metadata.topic).to eq(topic.name)
     end
 
     it 'expect to run consumer on_before_consume' do
-      executor.before_consume(messages, received_at)
+      executor.before_consume(messages, received_at, coordinator)
       expect(consumer).to have_received(:on_before_consume).with(no_args)
     end
   end

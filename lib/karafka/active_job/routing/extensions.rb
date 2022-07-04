@@ -13,7 +13,7 @@ module Karafka
         # @param block [Proc] block that we can use for some extra configuration
         def active_job_topic(name, &block)
           topic(name) do
-            consumer App.config.internal.active_job.consumer
+            consumer App.config.internal.active_job.consumer_class
 
             next unless block
 

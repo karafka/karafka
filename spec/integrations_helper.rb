@@ -25,7 +25,10 @@ def setup_karafka
 
     config.kafka = {
       'bootstrap.servers': '127.0.0.1:9092',
-      'statistics.interval.ms': 100
+      'statistics.interval.ms': 100,
+      # We need to send this often as in specs we do time sensitive things and we may be kicked
+      # out of the consumer group if it is not delivered fast enough
+      'heartbeat.interval.ms': 1_000
     }
     config.client_id = caller_id
     config.pause_timeout = 1

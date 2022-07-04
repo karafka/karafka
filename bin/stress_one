@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Runs a single integration spec in an endless loop
+# This allows us to ensure (after long enough time) that the integration spec is stable and
+# that there are no anomalies when running it for a long period of time
+
+set -e
+
+while :
+do
+  reset
+  bin/scenario $1
+done

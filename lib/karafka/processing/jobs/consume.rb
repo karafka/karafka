@@ -12,17 +12,19 @@ module Karafka
         # @param executor [Karafka::Processing::Executor] executor that is suppose to run a given
         #   job
         # @param messages [Karafka::Messages::Messages] karafka messages batch
+        # @param coordinator [Karafka::Processing::Coordinator] processing coordinator
         # @return [Consume]
-        def initialize(executor, messages)
+        def initialize(executor, messages, coordinator)
           @executor = executor
           @messages = messages
+          @coordinator = coordinator
           @created_at = Time.now
           super()
         end
 
         # Runs the before consumption preparations on the executor
         def before_call
-          executor.before_consume(@messages, @created_at)
+          executor.before_consume(@messages, @created_at, @coordinator)
         end
 
         # Runs the given executor

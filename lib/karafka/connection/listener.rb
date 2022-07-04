@@ -21,12 +21,12 @@ module Karafka
         @id = SecureRandom.uuid
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
-        @jobs_builder = ::Karafka::App.config.internal.jobs_builder
-        @pauses_manager = PausesManager.new
+        @jobs_builder = ::Karafka::App.config.internal.processing.jobs_builder
+        @coordinators = Processing::CoordinatorsBuffer.new
         @client = Client.new(@subscription_group)
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         # We reference scheduler here as it is much faster than fetching this each time
-        @scheduler = ::Karafka::App.config.internal.scheduler
+        @scheduler = ::Karafka::App.config.internal.processing.scheduler
         # We keep one buffer for messages to preserve memory and not allocate extra objects
         # We can do this that way because we always first schedule jobs using messages before we
         # fetch another batch.
@@ -79,6 +79,10 @@ module Karafka
             poll_and_remap_messages
           end
 
+          # This will ensure, that in the next poll, we continue processing (if we get them back)
+          # partitions that we have paused
+          resume_assigned_partitions
+
           # If there were revoked partitions, we need to wait on their jobs to finish before
           # distributing consuming jobs as upon revoking, we might get assigned to the same
           # partitions, thus getting their jobs. The revoking jobs need to finish before
@@ -86,6 +90,9 @@ module Karafka
           build_and_schedule_revoke_lost_partitions_jobs
 
           # We wait only on jobs from our subscription group. Other groups are independent.
+          # This will block on revoked jobs until they are finished. Those are not meant to last
+          # long and should not have any bigger impact on the system. Doing this in a blocking way
+          # simplifies the overall design and prevents from race conditions
           wait
 
           build_and_schedule_consumption_jobs
@@ -136,7 +143,7 @@ module Karafka
 
       # Resumes processing of partitions that were paused due to an error.
       def resume_paused_partitions
-        @pauses_manager.resume do |topic, partition|
+        @coordinators.resume do |topic, partition|
           @client.resume(topic, partition)
         end
       end
@@ -152,9 +159,23 @@ module Karafka
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
-            pause_tracker = @pauses_manager.fetch(topic, partition)
-            executor = @executors.fetch(topic, partition, pause_tracker)
-            jobs << @jobs_builder.revoked(executor)
+            # We revoke the coordinator here, so we do not have to revoke it in the revoke job
+            # itself (this happens prior to scheduling those jobs)
+            @coordinators.revoke(topic, partition)
+
+            # There may be a case where we have lost partition of which data we have never
+            # processed (if it was assigned and revoked really fast), thus we may not have it
+            # here. In cases like this, we do not run a revocation job
+            @executors.find_all(topic, partition).each do |executor|
+              jobs << @jobs_builder.revoked(executor)
+            end
+
+            # We need to remove all the executors of a given topic partition that we have lost, so
+            # next time we pick up it's work, new executors kick in. This may be needed especially
+            # for LRJ where we could end up with a race condition
+            # This revocation needs to happen after the jobs are scheduled, otherwise they would
+            # be scheduled with new executors instead of old
+            @executors.revoke(topic, partition)
           end
         end
 
@@ -183,6 +204,17 @@ module Karafka
         )
       end
 
+      # Revoked partition needs to be resumed if we were processing them earlier. This will do
+      # nothing to things that we are planning to process. Without this, things we get
+      # re-assigned would not be polled.
+      def resume_assigned_partitions
+        @client.rebalance_manager.assigned_partitions.each do |topic, partitions|
+          partitions.each do |partition|
+            @client.resume(topic, partition)
+          end
+        end
+      end
+
       # Takes the messages per topic partition and enqueues processing jobs in threads using
       # given scheduler.
       def build_and_schedule_consumption_jobs
@@ -191,11 +223,17 @@ module Karafka
         jobs = []
 
         @messages_buffer.each do |topic, partition, messages|
-          pause_tracker = @pauses_manager.fetch(topic, partition)
+          coordinator = @coordinators.find_or_create(topic, partition)
 
-          executor = @executors.fetch(topic, partition, pause_tracker)
+          # Start work coordination for this topic partition
+          coordinator.start
 
-          jobs << @jobs_builder.consume(executor, messages)
+          # Count the job we're going to create here
+          coordinator.increment
+
+          executor = @executors.find_or_create(topic, partition, 0)
+
+          jobs << @jobs_builder.consume(executor, messages, coordinator)
         end
 
         @scheduler.schedule_consumption(@jobs_queue, jobs)
@@ -231,7 +269,7 @@ module Karafka
         @jobs_queue.wait(@subscription_group.id)
         @jobs_queue.clear(@subscription_group.id)
         @client.reset
-        @pauses_manager = PausesManager.new
+        @coordinators.reset
         @executors = Processing::ExecutorsBuffer.new(@client, @subscription_group)
       end
     end

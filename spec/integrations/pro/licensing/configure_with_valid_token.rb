@@ -18,17 +18,19 @@ pro = Karafka::Pro
 assert_equal false, logs.include?('] ERROR -- : Your license expired')
 assert_equal false, logs.include?('Please reach us')
 assert Karafka.pro?
+assert const_visible?('Karafka::Pro::Processing::Coordinator')
 assert const_visible?('Karafka::Pro::BaseConsumer')
 assert const_visible?('Karafka::Pro::Processing::JobsBuilder')
+assert const_visible?('Karafka::Pro::Processing::Scheduler')
 assert const_visible?('Karafka::Pro::Routing::Extensions')
 assert const_visible?('Karafka::Pro::Processing::Jobs::ConsumeNonBlocking')
 assert const_visible?('Karafka::Pro::ActiveJob::Consumer')
 assert const_visible?('Karafka::Pro::ActiveJob::Dispatcher')
 assert const_visible?('Karafka::Pro::ActiveJob::JobOptionsContract')
 assert const_visible?('Karafka::Pro::PerformanceTracker')
-assert const_visible?('Karafka::Pro::Scheduler')
-assert_equal pro::Scheduler, config.scheduler.class
-assert_equal pro::Processing::JobsBuilder, config.jobs_builder.class
+assert_equal pro::Processing::Coordinator, config.processing.coordinator_class
+assert_equal pro::Processing::Scheduler, config.processing.scheduler.class
+assert_equal pro::Processing::JobsBuilder, config.processing.jobs_builder.class
 assert_equal pro::ActiveJob::Dispatcher, config.active_job.dispatcher.class
-assert_equal pro::ActiveJob::Consumer, config.active_job.consumer
+assert_equal pro::ActiveJob::Consumer, config.active_job.consumer_class
 assert_equal pro::ActiveJob::JobOptionsContract, config.active_job.job_options_contract.class

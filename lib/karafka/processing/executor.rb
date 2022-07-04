@@ -30,13 +30,11 @@ module Karafka
       # @param group_id [String] id of the subscription group to which the executor belongs
       # @param client [Karafka::Connection::Client] kafka client
       # @param topic [Karafka::Routing::Topic] topic for which this executor will run
-      # @param pause_tracker [Karafka::TimeTrackers::Pause] fetch pause tracker for pausing
-      def initialize(group_id, client, topic, pause_tracker)
+      def initialize(group_id, client, topic)
         @id = SecureRandom.uuid
         @group_id = group_id
         @client = client
         @topic = topic
-        @pause_tracker = pause_tracker
       end
 
       # Builds the consumer instance, builds messages batch and sets all that is needed to run the
@@ -45,20 +43,15 @@ module Karafka
       # @param messages [Array<Karafka::Messages::Message>]
       # @param received_at [Time] the moment we've received the batch (actually the moment we've)
       #   enqueued it, but good enough
-      def before_consume(messages, received_at)
+      # @param coordinator [Karafka::Processing::Coordinator] coordinator for processing management
+      def before_consume(messages, received_at, coordinator)
         # Recreate consumer with each batch if persistence is not enabled
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
         # middle state, where re-creation of a consumer instance would occur only sometimes
-        @recreate = true unless ::Karafka::App.config.consumer_persistence
+        @consumer = nil unless ::Karafka::App.config.consumer_persistence
 
-        # If @recreate was set to true (aside from non persistent), it means, that revocation or
-        # a shutdown happened and we need to have a new instance for running another consume for
-        # this topic partition
-        if @recreate
-          @consumer = nil
-          @recreate = false
-        end
+        consumer.coordinator = coordinator
 
         # First we build messages batch...
         consumer.messages = Messages::Builders::Messages.call(
@@ -95,7 +88,6 @@ module Karafka
       #   consumer instance.
       def revoked
         consumer.on_revoked if @consumer
-        @recreate = true
       end
 
       # Runs the controller `#shutdown` method that should be triggered when a given consumer is
@@ -107,7 +99,6 @@ module Karafka
         # There is a case, where the consumer no longer exists because it was revoked, in case like
         # that we do not build a new instance and shutdown should not be triggered.
         consumer.on_shutdown if @consumer
-        @recreate = true
       end
 
       private
@@ -115,10 +106,9 @@ module Karafka
       # @return [Object] cached consumer instance
       def consumer
         @consumer ||= begin
-          consumer = @topic.consumer.new
+          consumer = @topic.consumer_class.new
           consumer.topic = @topic
           consumer.client = @client
-          consumer.pause_tracker = @pause_tracker
           consumer.producer = ::Karafka::App.producer
           consumer
         end

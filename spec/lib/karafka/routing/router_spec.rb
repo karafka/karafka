@@ -4,9 +4,9 @@ RSpec.describe_current do
   subject(:router) { described_class }
 
   before do
-    Karafka::App.config.internal.routing_builder.clear
+    Karafka::App.config.internal.routing.builder.clear
 
-    Karafka::App.config.internal.routing_builder.draw do
+    Karafka::App.config.internal.routing.builder.draw do
       topic :topic_name1 do
         consumer Class.new(Karafka::BaseConsumer)
       end
@@ -22,7 +22,7 @@ RSpec.describe_current do
     end
 
     context 'when we look for existing topic' do
-      let(:topic) { Karafka::App.config.internal.routing_builder.last.topics.last }
+      let(:topic) { Karafka::App.config.internal.routing.builder.last.topics.last }
       let(:topic_id) { topic.id }
 
       it { expect(router.find(topic_id)).to eq topic }

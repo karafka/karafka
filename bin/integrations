@@ -21,6 +21,9 @@ ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../
 # of CPU
 CONCURRENCY = ENV.key?('CI') ? 5 : Etc.nprocessors * 2
 
+# How may bytes do we want to keep from the stdout in the buffer for when we need to print it
+MAX_BUFFER_OUTPUT = 10_240
+
 # Abstraction around a single test scenario execution process
 class Scenario
   # How long a scenario can run before we kill it
@@ -84,9 +87,9 @@ class Scenario
     # We read it so it won't grow as we use our default logger that prints to both test.log and
     # to stdout. Otherwise after reaching the buffer size, it would hang
     buffer = ''
-    @stdout.read_nonblock(10_240, buffer, exception: false)
+    @stdout.read_nonblock(MAX_BUFFER_OUTPUT, buffer, exception: false)
     @stdout_tail << buffer
-    @stdout_tail = @stdout_tail[-10_024..-1] || @stdout_tail
+    @stdout_tail = @stdout_tail[-MAX_BUFFER_OUTPUT..-1] || @stdout_tail
 
     !@wait_thr.alive?
   end

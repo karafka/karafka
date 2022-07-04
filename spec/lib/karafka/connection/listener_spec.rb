@@ -36,31 +36,6 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we have lost partitions during rebalance' do
-    let(:revoked_partitions) { { routing_topic.name => [2] } }
-    # We do not create workers in this spec as we want to check the content of the queue afterwards
-    # and with the workers running, it could be consumed before we would have a chance to check it
-    let(:workers_batch) { [] }
-
-    before do
-      allow(client)
-        .to receive(:commit_offsets)
-
-      allow(client.rebalance_manager)
-        .to receive(:revoked_partitions)
-        .and_return(revoked_partitions)
-
-      allow(jobs_queue).to receive(:wait)
-      allow(jobs_queue).to receive(:empty?).and_return(true)
-
-      listener.call
-    end
-
-    it { expect(jobs_queue.size).to eq(2) }
-    it { expect(jobs_queue.pop).to be_a(Karafka::Processing::Jobs::Revoked) }
-    it { expect(client).to have_received(:commit_offsets).exactly(2).times }
-  end
-
   context 'when we have lost partitions during rebalance and actions need to be taken' do
     let(:revoked_partitions) { { routing_topic.name => [2] } }
 

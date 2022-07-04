@@ -41,6 +41,6 @@ start_karafka_and_wait_until do
   DataCollector[0].size >= 100
 end
 
-assert_equal 50, DataCollector[:batches]
+assert DataCollector[:batches] >= 50
 assert_equal elements, DataCollector[:buffer].flatten
 assert(DataCollector[:buffer].all? { |sub| sub.size < 3 })

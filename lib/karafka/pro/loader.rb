@@ -17,9 +17,10 @@ module Karafka
       COMPONENTS = %w[
         base_consumer
         performance_tracker
-        scheduler
+        processing/scheduler
         processing/jobs/consume_non_blocking
         processing/jobs_builder
+        processing/coordinator
         routing/extensions
         active_job/consumer
         active_job/dispatcher
@@ -35,11 +36,15 @@ module Karafka
         def setup(config)
           COMPONENTS.each { |component| require_relative(component) }
 
-          config.internal.scheduler = Scheduler.new
-          config.internal.jobs_builder = Processing::JobsBuilder.new
-          config.internal.active_job.consumer = ActiveJob::Consumer
-          config.internal.active_job.dispatcher = ActiveJob::Dispatcher.new
-          config.internal.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
+          icfg = config.internal
+
+          icfg.processing.coordinator_class = Processing::Coordinator
+          icfg.processing.scheduler = Processing::Scheduler.new
+          icfg.processing.jobs_builder = Processing::JobsBuilder.new
+
+          icfg.active_job.consumer_class = ActiveJob::Consumer
+          icfg.active_job.dispatcher = ActiveJob::Dispatcher.new
+          icfg.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 
           ::Karafka::Routing::Topic.include(Routing::Extensions)
 

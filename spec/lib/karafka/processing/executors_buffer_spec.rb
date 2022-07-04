@@ -7,9 +7,13 @@ RSpec.describe_current do
   let(:group_id) { SecureRandom.uuid }
   let(:topic_name) { 'topic_name1' }
   let(:partition_id) { 0 }
-  let(:pause) { nil }
-  let(:fetched_executor) { buffer.fetch(topic_name, partition_id, pause) }
+  let(:parallel_key) { 0 }
   let(:subscription_group) { consumer_groups.first.subscription_groups.first }
+
+  let(:fetched_executor) do
+    buffer.find_or_create(topic_name, partition_id, parallel_key)
+  end
+
   let(:consumer_groups) do
     Karafka::Routing::Builder.new.draw do
       consumer_group :group_name1 do
@@ -20,7 +24,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#fetch' do
+  describe '#find_or_create' do
     context 'when the executor is not in the buffer' do
       it { expect(fetched_executor.group_id).to eq(subscription_group.id) }
 
@@ -30,7 +34,9 @@ RSpec.describe_current do
     end
 
     context 'when executor is in a buffer' do
-      let(:existing_executor) { buffer.fetch(topic_name, partition_id, pause) }
+      let(:existing_executor) do
+        buffer.find_or_create(topic_name, partition_id, parallel_key)
+      end
 
       before { existing_executor }
 
@@ -59,8 +65,20 @@ RSpec.describe_current do
     end
   end
 
+  describe '#revoke' do
+    before { fetched_executor }
+
+    it 'expect to remove all executors from a given topic partition' do
+      buffer.revoke(topic_name, partition_id)
+      executor = buffer.find_or_create(topic_name, partition_id, parallel_key)
+      expect(executor).not_to eq(fetched_executor)
+    end
+  end
+
   describe '#clear' do
-    let(:pre_cleaned_executor) { buffer.fetch(topic_name, partition_id, pause) }
+    let(:pre_cleaned_executor) do
+      buffer.find_or_create(topic_name, partition_id, parallel_key)
+    end
 
     before do
       pre_cleaned_executor

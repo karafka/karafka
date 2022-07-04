@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
-# Karafka should not use data that was fetched partially for a partition that was lost.
+# Karafka should not use data that was fetched partially for a partition that was lost
+# in the same consumer instance that was revoked. There should be new instance created.
+#
+# New consumer instance should pick it up keeping continuity with the previous batch.
+#
 # When rebalance occurs and we're in the middle of data polling, data from a lost partition should
-# be rejected as it is going to be picked up by a different process
+# be rejected as it is going to be picked up by a different process / instance.
 
 # We simulate lost partition by starting a second consumer that will trigger a rebalance.
 
@@ -10,20 +14,23 @@ require 'securerandom'
 
 RUN = SecureRandom.uuid.split('-').first
 
+TOPIC = 'integrations_00_02'
+
 setup_karafka do |config|
-  config.max_wait_time = 40_000
-  config.shutdown_timeout = 50_000
-  config.max_messages = 1_000
-  config.initial_offset = 'earliest'
+  config.max_wait_time = 20_000
   # Shutdown timeout should be bigger than the max wait as during shutdown we poll as well to be
   # able to finalize all work and not to loose the assignment
   # We need to set it that way in this particular spec so we do not force shutdown when we poll
   # during the shutdown phase
-  config.shutdown_timeout = 60_000
+  config.shutdown_timeout = 80_000
+  config.max_messages = 1_000
+  config.initial_offset = 'latest'
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    return if DataCollector.data.key?(:revoked)
+
     messages.each do |message|
       DataCollector[:process1] << message
     end
@@ -35,8 +42,8 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group 'integrations_0_02' do
-    topic 'integrations_0_02' do
+  consumer_group TOPIC do
+    topic TOPIC do
       consumer Consumer
     end
   end
@@ -46,11 +53,11 @@ Thread.new do
   nr = 0
 
   loop do
-    2.times do |i|
-      # If revoked, we are stopping, so producer will be closed
-      break if DataCollector.data.key?(:revoked)
+    # If revoked, we are stopping, so producer will be closed
+    break if DataCollector.data.key?(:revoked)
 
-      produce('integrations_0_02', "#{RUN}-#{nr}-#{i}", partition: i)
+    2.times do |i|
+      produce(TOPIC, "#{RUN}-#{nr}-#{i}", partition: i)
     end
 
     nr += 1
@@ -61,19 +68,20 @@ end
 
 other = Thread.new do
   # We give it a bit of time, so we make sure we have something in the buffer
-  sleep(10)
+  sleep(30)
 
   consumer = setup_rdkafka_consumer
-  consumer.subscribe('integrations_0_02')
+  consumer.subscribe(TOPIC)
   consumer.each do |message|
     DataCollector[:process2] << message
 
     # We wait for the main Karafka process to stop, so data is not skewed by second rebalance
     sleep(0.1) until Karafka::App.stopped?
 
-    consumer.close
     break
   end
+
+  consumer.close
 end
 
 start_karafka_and_wait_until do
@@ -95,7 +103,7 @@ process2.each do |partition, messages|
   end
 end
 
-# There should be no duplicated data received
+# There should be no duplicated data received till rebalance
 process1.each do |_, messages|
   assert_equal messages.size, messages.uniq.size
 

@@ -39,8 +39,8 @@ if ENV['SEED']
 
   # We do not populate data of benchmarks_0_10 as we use it with life-stream data only
   %w[
-    benchmarks_0_01
-    benchmarks_0_05
+    benchmarks_00_01
+    benchmarks_00_05
   ].each do |topic_name|
     partitions_count = topic_name.split('_').last.to_i
 

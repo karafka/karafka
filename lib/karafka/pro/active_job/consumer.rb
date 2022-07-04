@@ -26,7 +26,7 @@ module Karafka
           messages.each do |message|
             # If for any reason we've lost this partition, not worth iterating over new messages
             # as they are no longer ours
-            return if revoked?
+            break if revoked?
             break if Karafka::App.stopping?
 
             ::ActiveJob::Base.execute(
@@ -34,13 +34,6 @@ module Karafka
             )
 
             mark_as_consumed(message)
-
-            # We check it twice as the job may be long running
-            # If marking fails, it also means it got revoked and we can stop consuming
-            return if revoked?
-
-            # Do not process more if we are shutting down
-            break if Karafka::App.stopping?
           end
         end
       end

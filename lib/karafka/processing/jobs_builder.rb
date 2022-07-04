@@ -7,9 +7,10 @@ module Karafka
     class JobsBuilder
       # @param executor [Karafka::Processing::Executor]
       # @param messages [Karafka::Messages::Messages] messages batch to be consumed
+      # @param coordinator [Karafka::Processing::Coordinator]
       # @return [Karafka::Processing::Jobs::Consume] consumption job
-      def consume(executor, messages)
-        Jobs::Consume.new(executor, messages)
+      def consume(executor, messages, coordinator)
+        Jobs::Consume.new(executor, messages, coordinator)
       end
 
       # @param executor [Karafka::Processing::Executor]

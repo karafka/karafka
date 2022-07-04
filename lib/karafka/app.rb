@@ -10,7 +10,8 @@ module Karafka
       def consumer_groups
         config
           .internal
-          .routing_builder
+          .routing
+          .builder
       end
 
       # @return [Array<Karafka::Routing::SubscriptionGroup>] active subscription groups

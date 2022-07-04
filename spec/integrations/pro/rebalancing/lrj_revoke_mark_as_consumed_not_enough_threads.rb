@@ -5,7 +5,7 @@
 # that the revocation took place. It should not indicate this before we mark as consumed as this
 # state could not be set on a consumer in the revocation job becuase it is pending in the queue.
 
-TOPIC = 'integrations_6_02'
+TOPIC = 'integrations_06_02'
 
 setup_karafka do |config|
   config.license.token = pro_license_token

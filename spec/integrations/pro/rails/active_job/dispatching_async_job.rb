@@ -38,7 +38,7 @@ end
 
 aj_config = Karafka::App.config.internal.active_job
 
-assert_equal aj_config.consumer, Karafka::Pro::ActiveJob::Consumer
+assert_equal aj_config.consumer_class, Karafka::Pro::ActiveJob::Consumer
 assert_equal aj_config.dispatcher.class, Karafka::Pro::ActiveJob::Dispatcher
 assert_equal aj_config.job_options_contract.class, Karafka::Pro::ActiveJob::JobOptionsContract
 assert_equal VALUE1, DataCollector[0][0]

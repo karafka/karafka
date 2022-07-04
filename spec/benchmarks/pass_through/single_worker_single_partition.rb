@@ -26,7 +26,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes('benchmarks_0_01')
+draw_routes('benchmarks_00_01')
 
 Tracker.run(messages_count: MAX_MESSAGES) do
   $start = false

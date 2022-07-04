@@ -31,27 +31,13 @@ class Job < ActiveJob::Base
   end
 end
 
-# We need a second producer so we are sure that there was no revocation due to a timeout
-consumer = setup_rdkafka_consumer
-
-Thread.new do
-  sleep(10)
-
-  consumer.subscribe(DataCollector.topic)
-
-  consumer.each do
-    # This should never happen.
-    # We have one partition and it should be karafka that consumes it
-    exit! 5
-  end
-end
-
 Job.perform_later
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 1
+  if DataCollector[0].size >= 1
+    sleep(15)
+    true
+  end
 end
 
 assert_equal 1, DataCollector[0].size, 'Given job should be executed only once'
-
-consumer.close

@@ -10,16 +10,10 @@ module Karafka
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
-    # @return [Karafka::TimeTrackers::Pause] current topic partition pause tracker
-    attr_accessor :pause_tracker
+    # @return [Karafka::Processing::Coordinator] coordinator
+    attr_accessor :coordinator
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
-
-    def initialize
-      # We re-use one to save on object allocation
-      # It also allows us to transfer the consumption notion to another batch
-      @consumption = Processing::Result.new
-    end
 
     # Can be used to run preparation code
     #
@@ -41,9 +35,9 @@ module Karafka
         consume
       end
 
-      @consumption.success!
+      @coordinator.consumption(self).success!
     rescue StandardError => e
-      @consumption.failure!
+      @coordinator.consumption(self).failure!
 
       Karafka.monitor.instrument(
         'error.occurred',
@@ -51,14 +45,19 @@ module Karafka
         caller: self,
         type: 'consumer.consume.error'
       )
+    ensure
+      # We need to decrease number of jobs that this coordinator coordinates as it has finished
+      @coordinator.decrement
     end
 
     # @private
     # @note This should not be used by the end users as it is part of the lifecycle of things but
     #   not as part of the public api.
     def on_after_consume
-      if @consumption.success?
-        pause_tracker.reset
+      return if revoked?
+
+      if @coordinator.success?
+        coordinator.pause_tracker.reset
 
         # Mark as consumed only if manual offset management is not on
         return if topic.manual_offset_management?
@@ -75,10 +74,8 @@ module Karafka
     #
     # @private
     def on_revoked
-      @revoked = true
+      coordinator.revoke
 
-      # Revoked partition needs to be resumed. Otherwise there is a chance, that after a
-      # re-assignment, it will not be fetched despite being assigned
       resume
 
       Karafka.monitor.instrument('consumer.revoked', caller: self) do
@@ -138,9 +135,11 @@ module Karafka
     #   processed but rather at the next one. This applies to both sync and async versions of this
     #   method.
     def mark_as_consumed(message)
-      @revoked = !client.mark_as_consumed(message)
+      unless client.mark_as_consumed(message)
+        coordinator.revoke
 
-      return false if revoked?
+        return false
+      end
 
       @seek_offset = message.offset + 1
 
@@ -153,9 +152,11 @@ module Karafka
     # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
     #   that we were not able and that we have lost the partition.
     def mark_as_consumed!(message)
-      @revoked = !client.mark_as_consumed!(message)
+      unless client.mark_as_consumed!(message)
+        coordinator.revoke
 
-      return false if revoked?
+        return false
+      end
 
       @seek_offset = message.offset + 1
 
@@ -169,7 +170,7 @@ module Karafka
     # @param timeout [Integer, nil] how long in milliseconds do we want to pause or nil to use the
     #   default exponential pausing strategy defined for retries
     def pause(offset, timeout = nil)
-      timeout ? pause_tracker.pause(timeout) : pause_tracker.pause
+      timeout ? coordinator.pause_tracker.pause(timeout) : coordinator.pause_tracker.pause
 
       client.pause(
         messages.metadata.topic,
@@ -182,7 +183,7 @@ module Karafka
     def resume
       # This is sufficient to expire a partition pause, as with it will be resumed by the listener
       # thread before the next poll.
-      pause_tracker.expire
+      coordinator.pause_tracker.expire
     end
 
     # Seeks in the context of current topic and partition
@@ -202,7 +203,7 @@ module Karafka
     # @note We know that partition got revoked because when we try to mark message as consumed,
     #   unless if is successful, it will return false
     def revoked?
-      @revoked || false
+      coordinator.revoked?
     end
   end
 end

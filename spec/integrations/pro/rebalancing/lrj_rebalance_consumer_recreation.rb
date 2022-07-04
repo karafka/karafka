@@ -19,11 +19,11 @@ class Consumer < Karafka::Pro::BaseConsumer
 
     partition = messages.metadata.partition
 
+    DataCollector["#{partition}-object_ids"] << object_id
+
     messages.each do |message|
       return unless mark_as_consumed!(message)
     end
-
-    DataCollector["#{partition}-object_ids"] << object_id
 
     sleep 1
   end
@@ -85,15 +85,13 @@ end
 
 start_karafka_and_wait_until do
   other.join &&
-    got_both? && (
-      DataCollector['0-object_ids'].uniq.size >= 2 ||
-        DataCollector['1-object_ids'].uniq.size >= 2
-    )
+    got_both? &&
+    DataCollector['0-object_ids'].uniq.size >= 2 &&
+    DataCollector['1-object_ids'].uniq.size >= 2
 end
 
-revoked_partition = DataCollector[:jumped].last.partition
-
-# There should be two instances of the consumer in use. One before the revoke and one after we
-# lost the partition and when we got it back
-assert_equal 2, DataCollector.data["#{revoked_partition}-object_ids"].uniq.size
-assert_equal [true], DataCollector[:revoked]
+# Since there are two rebalances here, one of those may actually have 3 ids, that's why we check
+# that it is two or more
+assert DataCollector.data['0-object_ids'].uniq.size >= 2
+assert DataCollector.data['1-object_ids'].uniq.size >= 2
+assert !DataCollector[:revoked].empty?

@@ -3,7 +3,7 @@
 # When Karafka looses a given partition but later gets it back, it should pick it up from the last
 # offset committed without any problems
 
-TOPIC = 'integrations_9_02'
+TOPIC = 'integrations_09_02'
 
 setup_karafka do |config|
   config.license.token = pro_license_token
@@ -73,10 +73,8 @@ other = Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:partitions].size >= 3
+  other.join && DataCollector[:partitions].size >= 3
 end
-
-other.join
 
 revoked_partition = DataCollector[:jumped].first.partition
 jumped_offset = DataCollector[:jumped].first.offset

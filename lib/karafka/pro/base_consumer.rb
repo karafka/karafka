@@ -39,13 +39,16 @@ module Karafka
         # Nothing to do if we lost the partition
         return if revoked?
 
-        if @consumption.success?
-          pause_tracker.reset
+        if @coordinator.success?
+          coordinator.pause_tracker.reset
 
           # We use the non-blocking one here. If someone needs the blocking one, can implement it
           # with manual offset management
           # Mark as consumed only if manual offset management is not on
           mark_as_consumed(messages.last) unless topic.manual_offset_management?
+
+          # We check it twice as marking could change this state
+          return if revoked?
 
           # If this is not a long running job there is nothing for us to do here
           return unless topic.long_running_job?
@@ -53,7 +56,10 @@ module Karafka
           # Once processing is done, we move to the new offset based on commits
           # Here, in case manual offset management is off, we have the new proper offset of a
           # first message from another batch from `@seek_offset`. If manual offset management
-          # is on, we move to place where the user indicated it was finished.
+          # is on, we move to place where the user indicated it was finished. This can create an
+          # interesting (yet valid) corner case, where with manual offset management on and no
+          # marking as consumed, we end up with an infinite loop processing same messages over and
+          # over again
           seek(@seek_offset || messages.first.offset)
 
           resume

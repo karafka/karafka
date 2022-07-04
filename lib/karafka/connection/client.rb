@@ -51,12 +51,13 @@ module Karafka
       # @note This method should not be executed from many threads at the same time
       def batch_poll
         time_poll = TimeTrackers::Poll.new(@subscription_group.max_wait_time)
-        time_poll.start
 
         @buffer.clear
         @rebalance_manager.clear
 
         loop do
+          time_poll.start
+
           # Don't fetch more messages if we do not have any time left
           break if time_poll.exceeded?
           # Don't fetch more messages if we've fetched max as we've wanted
@@ -75,7 +76,11 @@ module Karafka
           # If partition revocation happens, we need to remove messages from revoked partitions
           # as well as ensure we do not have duplicated due to the offset reset for partitions
           # that we got assigned
-          remove_revoked_and_duplicated_messages if @rebalance_manager.revoked_partitions?
+          # We also do early break, so the information about rebalance is used as soon as possible
+          if @rebalance_manager.changed?
+            remove_revoked_and_duplicated_messages
+            break
+          end
 
           # Finally once we've (potentially) removed revoked, etc, if no messages were returned
           # we can break.
@@ -150,6 +155,8 @@ module Karafka
 
         internal_commit_offsets(async: false)
 
+        # Here we do not use our cached tpls because we should not try to pause something we do
+        # not own anymore.
         tpl = topic_partition_list(topic, partition)
 
         return unless tpl
@@ -177,17 +184,13 @@ module Karafka
         # We can skip performance penalty since resuming should not happen too often
         internal_commit_offsets(async: false)
 
-        tpl = topic_partition_list(topic, partition)
-
-        # If we were able to get the tpc, we should cache if for future usage
-        if tpl
-          @paused_tpls[topic][partition] = tpl
-        else
-          # If we were not able, let's try to reuse the one we have (if we have)
-          tpl ||= @paused_tpls[topic][partition]
-        end
+        # If we were not able, let's try to reuse the one we have (if we have)
+        tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
 
         return unless tpl
+        # If we did not have it, it means we never paused this partition, thus no resume should
+        # happen in the first place
+        return unless @paused_tpls[topic].delete(partition)
 
         @kafka.resume(tpl)
       ensure
@@ -386,7 +389,7 @@ module Karafka
       # we are no longer responsible in a given process for processing those messages and they
       # should have been picked up by a different process.
       def remove_revoked_and_duplicated_messages
-        @rebalance_manager.revoked_partitions.each do |topic, partitions|
+        @rebalance_manager.lost_partitions.each do |topic, partitions|
           partitions.each do |partition|
             @buffer.delete(topic, partition)
           end

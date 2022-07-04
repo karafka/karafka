@@ -66,6 +66,15 @@ module Karafka
         end
       end
 
+      # @return [Class] consumer class that we should use
+      # @note This is just an alias to the `#consumer` method. We however want to use it internally
+      #   instead of referencing the `#consumer`. We use this to indicate that this method returns
+      #   class and not an instance. In the routing we want to keep the `#consumer Consumer`
+      #   routing syntax, but for references outside, we should use this one.
+      def consumer_class
+        consumer
+      end
+
       # @return [Boolean] true if this topic offset is handled by the end user
       def manual_offset_management?
         manual_offset_management

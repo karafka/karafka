@@ -16,26 +16,31 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_CREATE_TOPICS:
-        "integrations_0_02:2:1,\
-         integrations_1_02:2:1,\
-         integrations_2_02:2:1,\
-         integrations_3_02:2:1,\
-         integrations_4_02:2:1,\
-         integrations_5_02:2:1,\
-         integrations_6_02:2:1,\
-         integrations_7_02:2:1,\
-         integrations_8_02:2:1,\
-         integrations_9_02:2:1,\
+        "integrations_00_02:2:1,\
+         integrations_01_02:2:1,\
+         integrations_02_02:2:1,\
+         integrations_03_02:2:1,\
+         integrations_04_02:2:1,\
+         integrations_05_02:2:1,\
+         integrations_06_02:2:1,\
+         integrations_07_02:2:1,\
+         integrations_08_02:2:1,\
+         integrations_09_02:2:1,\
          integrations_10_02:2:1,\
          integrations_11_02:2:1,\
          integrations_12_02:2:1,\
-         integrations_0_03:3:1,\
-         integrations_1_03:3:1,\
-         integrations_2_03:3:1,\
-         integrations_0_10:10:1,\
-         integrations_1_10:10:1,\
-         benchmarks_0_01:1:1,\
-         benchmarks_0_05:5:1,\
-         benchmarks_0_10:10:1"
+         integrations_13_02:2:1,\
+         integrations_14_02:2:1,\
+         integrations_15_02:2:1,\
+         integrations_16_02:2:1,\
+         integrations_00_03:3:1,\
+         integrations_01_03:3:1,\
+         integrations_02_03:3:1,\
+         integrations_03_03:3:1,\
+         integrations_00_10:10:1,\
+         integrations_01_10:10:1,\
+         benchmarks_00_01:1:1,\
+         benchmarks_00_05:5:1,\
+         benchmarks_00_10:10:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
