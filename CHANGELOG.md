@@ -11,6 +11,8 @@
 - Add more integration specs related to polling limits.
 - Remove auto-detection of re-assigned partitions upon rebalance as for too fast rebalances it could not be accurate enough.
 - Optimize the removal of pre-buffered lost partitions data.
+- Always rune `#revoked` when rebalance with revocation happens.
+- Evict executors upon rebalance, to prevent race-conditions.
 
 ## 2.0.0-beta4 (2022-06-20)
 - Rename job internal api methods from `#prepare` to `#before_call` and from `#teardown` to `#after_call` to abstract away jobs execution from any type of executors and consumers logic

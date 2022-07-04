@@ -66,7 +66,13 @@ RSpec.describe_current do
   end
 
   describe '#revoke' do
-    pending
+    before { fetched_executor }
+
+    it 'expect to remove all executors from a given topic partition' do
+      buffer.revoke(topic_name, partition_id)
+      executor = buffer.find_or_create(topic_name, partition_id, parallel_key)
+      expect(executor).not_to eq(fetched_executor)
+    end
   end
 
   describe '#clear' do
