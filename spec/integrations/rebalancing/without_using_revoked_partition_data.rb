@@ -29,6 +29,8 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    return if DataCollector.data.key?(:revoked)
+
     messages.each do |message|
       DataCollector[:process1] << message
     end
@@ -101,7 +103,7 @@ process2.each do |partition, messages|
   end
 end
 
-# There should be no duplicated data received
+# There should be no duplicated data received till rebalance
 process1.each do |_, messages|
   assert_equal messages.size, messages.uniq.size
 
