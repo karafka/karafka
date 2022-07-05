@@ -107,6 +107,8 @@ module Karafka
           setting :jobs_builder, default: Processing::JobsBuilder.new
           # option coordinator [Class] work coordinator we want to user for processing coordination
           setting :coordinator_class, default: Processing::Coordinator
+          # option partitioner_class [Class] partitioner we use against a batch of data
+          setting :partitioner_class, default: Processing::Partitioner
         end
 
         # Karafka components for ActiveJob

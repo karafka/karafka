@@ -21,6 +21,7 @@ module Karafka
         processing/jobs/consume_non_blocking
         processing/jobs_builder
         processing/coordinator
+        processing/partitioner
         routing/extensions
         active_job/consumer
         active_job/dispatcher
@@ -39,6 +40,7 @@ module Karafka
           icfg = config.internal
 
           icfg.processing.coordinator_class = Processing::Coordinator
+          icfg.processing.partitioner_class = Processing::Partitioner
           icfg.processing.scheduler = Processing::Scheduler.new
           icfg.processing.jobs_builder = Processing::JobsBuilder.new
 

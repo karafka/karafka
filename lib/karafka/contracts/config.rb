@@ -42,6 +42,7 @@ module Karafka
             required(:jobs_builder)
             required(:scheduler)
             required(:coordinator_class)
+            required(:partitioner_class)
           end
 
           required(:active_job).schema do

@@ -44,6 +44,7 @@ assert Karafka.pro?
 # We do not want to break systems, so even with expired keys, pro components should be loaded
 assert const_visible?('Karafka::Pro::BaseConsumer')
 assert const_visible?('Karafka::Pro::Processing::Coordinator')
+assert const_visible?('Karafka::Pro::Processing::Partitioner')
 assert const_visible?('Karafka::Pro::Processing::JobsBuilder')
 assert const_visible?('Karafka::Pro::Routing::Extensions')
 assert const_visible?('Karafka::Pro::Processing::Jobs::ConsumeNonBlocking')
@@ -54,6 +55,7 @@ assert const_visible?('Karafka::Pro::PerformanceTracker')
 assert const_visible?('Karafka::Pro::Processing::Scheduler')
 assert_equal pro::Processing::Scheduler, config.processing.scheduler.class
 assert_equal pro::Processing::Coordinator, config.processing.coordinator_class
+assert_equal pro::Processing::Partitioner, config.processing.partitioner_class
 assert_equal pro::Processing::JobsBuilder, config.processing.jobs_builder.class
 assert_equal pro::ActiveJob::Dispatcher, config.active_job.dispatcher.class
 assert_equal pro::ActiveJob::Consumer, config.active_job.consumer_class
