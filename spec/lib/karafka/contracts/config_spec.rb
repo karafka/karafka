@@ -29,7 +29,8 @@ RSpec.describe_current do
         processing: {
           scheduler: Karafka::Processing::Scheduler.new,
           jobs_builder: Karafka::Processing::JobsBuilder.new,
-          coordinator_class: Karafka::Processing::Coordinator
+          coordinator_class: Karafka::Processing::Coordinator,
+          partitioner_class: Karafka::Processing::Partitioner
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,

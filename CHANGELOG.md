@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.0-beta6 (Unreleased)
+- Extract consumption partitioner out of listener inline code.
+
 ## 2.0.0-beta5 (2022-07-05)
 - Always resume processing of a revoked partition upon assignment.
 - Improve specs stability.

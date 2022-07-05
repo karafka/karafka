@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.0.0.beta5)
+    karafka (2.0.0.beta6)
       dry-configurable (~> 0.13)
       dry-monitor (~> 0.5)
       dry-validation (~> 1.7)
@@ -45,7 +45,7 @@ GEM
       dry-configurable (~> 0.13, >= 0.13.0)
       dry-core (~> 0.5, >= 0.5)
       dry-events (~> 0.2)
-    dry-schema (1.9.2)
+    dry-schema (1.9.3)
       concurrent-ruby (~> 1.0)
       dry-configurable (~> 0.13, >= 0.13.0)
       dry-core (~> 0.5, >= 0.5)
