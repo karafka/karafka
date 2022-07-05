@@ -117,11 +117,15 @@ class Scenario
     if success?
       print "\e[#{32}m#{'.'}\e[0m"
     else
+      buffer = ''
+
+      @stderr.read_nonblock(MAX_BUFFER_OUTPUT, buffer, exception: false)
+
       puts
       puts "\e[#{31}m#{'[FAILED]'}\e[0m #{name}"
       puts "Exit code: #{exit_code}"
       puts @stdout_tail
-      puts @stderr.read
+      puts buffer
       puts
     end
   end
