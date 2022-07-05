@@ -1,7 +1,7 @@
 # Karafka framework changelog
 
-## 2.0.0-beta5 (Unreleased)
-- Always resume processing of a revoked partition just in case it gets re-assigned.
+## 2.0.0-beta5 (2022-07-05)
+- Always resume processing of a revoked partition upon assignment.
 - Improve specs stability.
 - Fix a case where revocation job would be executed on partition for which we never did any work.
 - Introduce a jobs group coordinator for easier jobs management.
@@ -9,7 +9,7 @@
 - Optimize reaction time on partition ownership changes.
 - Fix a bug where despite setting long max wait time, we would return messages prior to it while not reaching the desired max messages count.
 - Add more integration specs related to polling limits.
-- Remove auto-detection of re-assigned partitions upon rebalance as for too fast rebalances it could not be accurate enough.
+- Remove auto-detection of re-assigned partitions upon rebalance as for too fast rebalances it could not be accurate enough. It would also mess up in case of rebalances that would happen right after a `#seek` was issued for a partition.
 - Optimize the removal of pre-buffered lost partitions data.
 - Always rune `#revoked` when rebalance with revocation happens.
 - Evict executors upon rebalance, to prevent race-conditions.
