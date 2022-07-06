@@ -35,9 +35,9 @@ module Karafka
         consume
       end
 
-      @coordinator.consumption(self).success!
+      coordinator.consumption(self).success!
     rescue StandardError => e
-      @coordinator.consumption(self).failure!
+      coordinator.consumption(self).failure!
 
       Karafka.monitor.instrument(
         'error.occurred',
@@ -47,7 +47,7 @@ module Karafka
       )
     ensure
       # We need to decrease number of jobs that this coordinator coordinates as it has finished
-      @coordinator.decrement
+      coordinator.decrement
     end
 
     # @private
@@ -56,7 +56,7 @@ module Karafka
     def on_after_consume
       return if revoked?
 
-      if @coordinator.success?
+      if coordinator.success?
         coordinator.pause_tracker.reset
 
         # Mark as consumed only if manual offset management is not on
