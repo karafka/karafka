@@ -2,6 +2,7 @@
 
 ## 2.0.0-beta6 (Unreleased)
 - Extract consumption partitioner out of listener inline code.
+- Introduce virtual partitioner concept for parallel processing of data from a single topic partition.
 
 ## 2.0.0-beta5 (2022-07-05)
 - Always resume processing of a revoked partition upon assignment.

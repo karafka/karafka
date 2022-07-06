@@ -229,7 +229,7 @@ module Karafka
           coordinator = @coordinators.find_or_create(topic, partition)
 
           # Start work coordination for this topic partition
-          coordinator.start
+          coordinator.start(messages)
 
           @partitioner.call(topic, messages) do |group_id, partition_messages|
             # Count the job we're going to create here

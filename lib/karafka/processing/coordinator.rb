@@ -23,7 +23,9 @@ module Karafka
       end
 
       # Starts the coordinator for given consumption jobs
-      def start
+      # @param _messages [Array<Karafka::Messages::Message>] batch of message for which we are
+      #   going to coordinate work. Not used with regular coordinator.
+      def start(_messages)
         @mutex.synchronize do
           @running_jobs = 0
           # We need to clear the consumption results hash here, otherwise we could end up storing

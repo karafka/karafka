@@ -11,7 +11,7 @@ class Consumer < Karafka::BaseConsumer
     DataCollector[0] << true
   end
 
-  def on_shutdown
+  def shutdown
     # This will "fake" a hanging job
     sleep(100)
   end

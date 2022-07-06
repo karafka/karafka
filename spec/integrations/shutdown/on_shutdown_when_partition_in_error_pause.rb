@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When partition was paused due to an error and this pause is still lasting, on shutdown the
-# `#on_shutdown` method still should be invoked
+# `#shutdown` method still should be invoked
 
 setup_karafka do |config|
   config.pause_timeout = 60 * 1_000
@@ -14,7 +14,7 @@ class Consumer < Karafka::BaseConsumer
     raise StandardError
   end
 
-  def on_shutdown
+  def shutdown
     DataCollector[:shutdown] << true
   end
 end

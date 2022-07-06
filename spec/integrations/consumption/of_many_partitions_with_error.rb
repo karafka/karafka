@@ -26,7 +26,7 @@ class Consumer < Karafka::BaseConsumer
     raise StandardError if @count == 1 && messages.first.partition == 5
   end
 
-  def on_shutdown
+  def shutdown
     mark_as_consumed!(messages.last)
   end
 end

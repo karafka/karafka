@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
     end
   end
 
-  def on_shutdown
+  def shutdown
     mark_as_consumed!(messages.last)
   end
 end

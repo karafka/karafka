@@ -13,7 +13,7 @@ setup_karafka do |config|
   config.kafka[:'session.timeout.ms'] = 10_000
   config.license.token = pro_license_token
   config.concurrency = 10
-  config.shutdown_timeout = 60_000
+  config.shutdown_timeout = 120_000
   config.initial_offset = 'latest'
 end
 

@@ -18,7 +18,7 @@ class Consumer < Karafka::BaseConsumer
     DataCollector[:worker_thread_id] = Thread.current.object_id
   end
 
-  def on_shutdown
+  def shutdown
     DataCollector[:shutdown_thread_id] = Thread.current.object_id
   end
 end
