@@ -8,6 +8,6 @@ set -e
 
 while :
 do
-  reset
+  clear
   bin/integrations $1
 done

@@ -14,11 +14,15 @@ module Karafka
           @flow_lock = Mutex.new
         end
 
-        # @param _messages [Array<Karafka::Messages::Message>]
+        # Starts the coordination process
+        # @param messages [Array<Karafka::Messages::Message>] messages for which processing we are
+        #   going to coordinate.
         def start(messages)
           super
 
           @mutex.synchronize do
+            @on_started_invoked = false
+            @on_finished_invoked = false
             @first_message = messages.first
             @last_message = messages.last
           end

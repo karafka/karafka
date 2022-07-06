@@ -143,6 +143,16 @@ def produce(topic, payload, details = {})
   )
 end
 
+# For integration specs where we do not expect any errors, we can set this and it will immediately
+# exit when any error occurs in the flow
+def ensure_no_errors!
+  Karafka::App.monitor.subscribe('error.occurred') do |event|
+    # This sleep buys us some time before exit so logs are flushed
+    sleep(0.5)
+    exit! 8
+  end
+end
+
 # Two basic helpers for assertion checking. Since we use only those, it was not worth adding
 # another gem
 

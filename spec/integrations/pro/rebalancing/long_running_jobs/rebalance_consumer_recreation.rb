@@ -11,6 +11,8 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
+ensure_no_errors!
+
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     # We should never try to consume new batch with a revoked consumer

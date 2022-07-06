@@ -2,6 +2,7 @@
 
 require 'karafka/pro/base_consumer'
 require 'karafka/pro/routing/extensions'
+require 'karafka/pro/processing/coordinator'
 
 RSpec.describe_current do
   subject(:consumer) do
@@ -12,7 +13,7 @@ RSpec.describe_current do
     instance
   end
 
-  let(:coordinator) { build(:processing_coordinator) }
+  let(:coordinator) { build(:processing_coordinator_pro) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true, seek: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:last_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
@@ -55,6 +56,11 @@ RSpec.describe_current do
         @handled_revoked = true
       end
     end
+  end
+
+  before do
+    coordinator.start(messages)
+    coordinator.increment
   end
 
   describe '#on_before_consume for non LRU' do

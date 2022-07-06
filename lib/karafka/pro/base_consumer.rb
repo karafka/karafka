@@ -39,18 +39,8 @@ module Karafka
       # Runs extra logic after consumption that is related to handling long running jobs
       # @note This overwrites the '#on_after_consume' from the base consumer
       def on_after_consume
-        # Nothing to do if we lost the partition
-        return if revoked?
-
-        # For virtual partitions we need to make sure we only run the post-consumption code once
-        if topic.virtual_partitioner?
-          # Here we get the first and last messages from all the virtual partitions so we can
-          # threat them conceptually as if they would have been executed not in parallel
-          coordinator.on_finished do |first_group_message, last_group_message|
-            on_after_consume_regular(first_group_message, last_group_message)
-          end
-        else
-          on_after_consume_regular(messages.first, messages.last)
+        coordinator.on_finished do |first_group_message, last_group_message|
+          on_after_consume_regular(first_group_message, last_group_message)
         end
       end
 
@@ -67,10 +57,9 @@ module Karafka
           # We use the non-blocking one here. If someone needs the blocking one, can implement it
           # with manual offset management
           # Mark as consumed only if manual offset management is not on
-          mark_as_consumed(last_message) unless topic.manual_offset_management?
-
-          # We check it twice as marking could change this state
-          return if revoked?
+          unless topic.manual_offset_management? || revoked?
+            mark_as_consumed(last_message)
+          end
 
           # If this is not a long running job there is nothing for us to do here
           return unless topic.long_running_job?
