@@ -4,7 +4,7 @@
 # and they should not collide with each other.
 # If they would, events would be published twice.
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   # Bad port on purpose to trigger the error
   config.kafka = { 'bootstrap.servers': '127.0.0.1:9090' }
 end

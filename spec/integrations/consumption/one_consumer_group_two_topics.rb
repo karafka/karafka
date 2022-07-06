@@ -4,8 +4,6 @@
 
 setup_karafka
 
-ensure_no_errors!
-
 topic1 = DataCollector.topics[0]
 topic2 = DataCollector.topics[1]
 topic1_data = Array.new(10) { { SecureRandom.uuid => rand.to_s } }

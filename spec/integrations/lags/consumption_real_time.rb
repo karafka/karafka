@@ -17,6 +17,8 @@ end
 
 draw_routes(Consumer)
 
+produce(DataCollector.topic, elements.first)
+
 start_karafka_and_wait_until do
   elements.each do |data|
     sleep(0.1)

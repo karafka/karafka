@@ -3,7 +3,7 @@
 # Karafka should not only recover from critical errors that happened but it also should reload
 # the underlying client and keep publishing statistics from the new librdkafka client
 
-setup_karafka
+setup_karafka(allow_errors: true)
 
 draw_routes(Class.new)
 

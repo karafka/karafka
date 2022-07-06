@@ -6,7 +6,7 @@
 
 TOPIC = 'integrations_00_03'
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
 end
 

@@ -5,8 +5,6 @@
 
 setup_karafka
 
-ensure_no_errors!
-
 class Deserializer
   def call(message)
     message.raw_payload.to_i

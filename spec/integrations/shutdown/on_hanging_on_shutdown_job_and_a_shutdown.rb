@@ -2,7 +2,7 @@
 
 # When Karafka is being shutdown and the consumer is hanging, it should force a shutdown
 
-setup_karafka { |config| config.shutdown_timeout = 1_000 }
+setup_karafka(allow_errors: true) { |config| config.shutdown_timeout = 1_000 }
 
 produce(DataCollector.topic, '1')
 

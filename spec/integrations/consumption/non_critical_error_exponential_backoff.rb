@@ -3,7 +3,7 @@
 # When we have non-critical error happening couple times and we use exponential backoff, Karafka
 # should increase the backoff time with each occurrence until max backoff.
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.max_wait_time = 100
   config.max_messages = 1
   config.pause_with_exponential_backoff = true

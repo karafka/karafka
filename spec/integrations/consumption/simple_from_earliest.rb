@@ -4,8 +4,6 @@
 
 setup_karafka
 
-ensure_no_errors!
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|

@@ -6,8 +6,6 @@ setup_karafka do |config|
   config.concurrency = 1
 end
 
-ensure_no_errors!
-
 topic1 = DataCollector.topics[0]
 topic2 = DataCollector.topics[1]
 

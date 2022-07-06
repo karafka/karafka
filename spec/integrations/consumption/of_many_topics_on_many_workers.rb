@@ -6,8 +6,6 @@ setup_karafka do |config|
   config.concurrency = 10
 end
 
-ensure_no_errors!
-
 class Consumer < Karafka::BaseConsumer
   def consume
     # This will simulate, that the thread is busy in a bit random way, so more worker threads can

@@ -3,7 +3,7 @@
 # When partition was paused due to an error and this pause is still lasting, on shutdown the
 # `#shutdown` method still should be invoked
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.pause_timeout = 60 * 1_000
   config.pause_max_timeout = 60 * 1_000
 end

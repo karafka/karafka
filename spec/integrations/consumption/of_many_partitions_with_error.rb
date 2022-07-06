@@ -5,7 +5,7 @@
 
 TOPIC = 'integrations_00_10'
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.concurrency = 10
   config.initial_offset = 'latest'
 end

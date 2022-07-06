@@ -14,8 +14,6 @@ setup_karafka do |config|
   config.concurrency = 1
 end
 
-ensure_no_errors!
-
 class Consumer < Karafka::BaseConsumer
   def initialize
     super

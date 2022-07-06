@@ -9,8 +9,6 @@ setup_karafka do |config|
   config.concurrency = 2
 end
 
-ensure_no_errors!
-
 class Consumer < Karafka::BaseConsumer
   def consume
     sleep(0.1)

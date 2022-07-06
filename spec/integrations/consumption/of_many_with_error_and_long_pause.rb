@@ -2,7 +2,7 @@
 
 # Karafka should pause and if pausing spans across batches, it should work and wait
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   # 60 seconds, long enough for it to not restart upon us finishing
   config.pause_timeout = 60 * 1_000
   config.pause_max_timeout = 60 * 1_000
