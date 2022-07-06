@@ -4,6 +4,8 @@
 
 setup_karafka
 
+ensure_no_errors!
+
 produce(DataCollector.topic, 0.to_json)
 
 class Consumer < Karafka::BaseConsumer

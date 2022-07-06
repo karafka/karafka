@@ -9,6 +9,8 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
+ensure_no_errors!
+
 class Consumer < Karafka::BaseConsumer
   def consume
     # This will simulate, that the thread is busy in a bit random way, so more worker threads can

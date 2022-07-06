@@ -6,6 +6,8 @@
 # This will force several batches, so we won't end up with 1 huge as this is not what we want here
 setup_karafka { |config| config.max_messages = 2 }
 
+ensure_no_errors!
+
 class Consumer < Karafka::BaseConsumer
   def initialize
     super

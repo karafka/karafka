@@ -8,6 +8,8 @@ setup_karafka do |config|
   config.max_messages = 1
 end
 
+ensure_no_errors!
+
 class Consumer < Karafka::BaseConsumer
   def consume
     DataCollector[0] << object_id

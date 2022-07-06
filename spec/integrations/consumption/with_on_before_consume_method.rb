@@ -5,6 +5,8 @@
 
 setup_karafka
 
+ensure_no_errors!
+
 class Consumer < Karafka::BaseConsumer
   # We should have access here to anything that we can get when consuming, so we duplicate
   # this and we can compare that later

@@ -10,6 +10,8 @@ setup_karafka do |config|
   config.shutdown_timeout = 60_000
 end
 
+ensure_no_errors!
+
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|

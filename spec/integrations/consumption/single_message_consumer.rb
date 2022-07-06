@@ -5,6 +5,8 @@
 
 setup_karafka
 
+ensure_no_errors!
+
 # Abstraction layer on top of Karafka to build a "per message" consumers
 class SingleMessageBaseConsumer < Karafka::BaseConsumer
   attr_reader :message

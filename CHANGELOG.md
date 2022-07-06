@@ -6,6 +6,7 @@
 - Improve stability when there kafka internal errors occur while polling.
 - Fix a case where we would resume a LRJ partition upon rebalance where we would reclaim the partition while job was still running.
 - Do not revoke pauses for lost partitions. This will allow to un-pause reclaimed partitions when LRJ jobs are done.
+- Introduce a `ensure_no_errors!` flag for integration suite that will ensure that specs that should not raise any exceptions operate that way.
 
 ## 2.0.0-beta5 (2022-07-05)
 - Always resume processing of a revoked partition upon assignment.

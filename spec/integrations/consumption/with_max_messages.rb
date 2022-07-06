@@ -4,6 +4,8 @@
 
 setup_karafka
 
+ensure_no_errors!
+
 elements = Array.new(40) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 

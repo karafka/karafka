@@ -5,6 +5,8 @@
 
 setup_karafka
 
+ensure_no_errors!
+
 # How long do we want to process stuff before shutting down Karafka process
 MAX_TIME = 10
 
