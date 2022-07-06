@@ -10,7 +10,7 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed!(message)
       DataCollector[0] << message
     end
-  rescue
+  rescue StandardError
     exit! 5
   end
 end
