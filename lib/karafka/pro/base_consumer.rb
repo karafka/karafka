@@ -39,7 +39,7 @@ module Karafka
         # Nothing to do if we lost the partition
         return if revoked?
 
-        if @coordinator.success?
+        if coordinator.success?
           coordinator.pause_tracker.reset
 
           # We use the non-blocking one here. If someone needs the blocking one, can implement it
