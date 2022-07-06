@@ -13,8 +13,6 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
-ensure_no_errors!
-
 before = Array.new(2) { SecureRandom.uuid }
 after = Array.new(10) { SecureRandom.uuid }
 
