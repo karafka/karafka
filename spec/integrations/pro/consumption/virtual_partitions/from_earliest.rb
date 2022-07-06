@@ -33,14 +33,14 @@ start_karafka_and_wait_until do
   DataCollector.data.values.map(&:size).sum >= 100
 end
 
-# Since Ruby hash function is slightly undeterministic, not all the threads may always be used
+# Since Ruby hash function is slightly nondeterministic, not all the threads may always be used
 # but in general more than 5 need to be always
 assert DataCollector.data.size >= 5
 
 # On average we should have similar number of messages
 sizes = DataCollector.data.values.map(&:size)
 average = sizes.sum / sizes.count
-# Small diviations may be expected
+# Small deviations may be expected
 assert average >= 8
 assert average <= 12
 

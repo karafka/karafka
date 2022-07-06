@@ -29,6 +29,7 @@ module Karafka
           @running_jobs.zero?
         end
 
+        # Runs given code only once per all the coordinated jobs upon starting first of them
         def on_started
           @flow_lock.synchronize do
             return if @on_started_invoked

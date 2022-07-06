@@ -2,7 +2,6 @@
 
 # Karafka should run the shutdown on all the consumers that processed virtual partitions.
 
-
 setup_karafka do |config|
   config.license.token = pro_license_token
   config.concurrency = 5

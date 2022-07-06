@@ -14,11 +14,11 @@ module Karafka
     module Processing
       # Pro partitioner that can distribute work based on the virtual partitioner settings
       class Partitioner < ::Karafka::Processing::Partitioner
-        # @param _opic [String] topic name
+        # @param topic [String] topic name
         # @param messages [Array<Karafka::Messages::Message>] karafka messages
         # @yieldparam [Integer] group id
         # @yieldparam [Array<Karafka::Messages::Message>] karafka messages
-        def call(topic, messages)
+        def call(topic, messages, &block)
           ktopic = @subscription_group.topics.find(topic)
 
           if ktopic.virtual_partitioner?
@@ -26,10 +26,10 @@ module Karafka
 
             messages
               .group_by { |msg| ktopic.virtual_partitioner.call(msg).hash.abs % concurrency }
-              .each { |group_id, messages_group| yield(group_id, messages_group) }
+              .each { |group_id, messages_group| block.call(group_id, messages_group) }
           else
-            # Whe no virtual partitioner, works as regular one
-            yield(0, messages)
+            # When no virtual partitioner, works as regular one
+            block.call(0, messages)
           end
         end
       end

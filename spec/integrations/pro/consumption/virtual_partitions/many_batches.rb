@@ -38,5 +38,5 @@ end
 
 # It should distribute work
 assert DataCollector.data.size >= 8
-# But overall number of consumer instances should be tops the concurreny
+# But overall number of consumer instances should be tops the concurrency
 assert DataCollector.data.size <= 10
