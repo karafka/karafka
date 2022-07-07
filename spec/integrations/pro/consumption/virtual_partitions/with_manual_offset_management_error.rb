@@ -8,7 +8,7 @@ MUTEX = Mutex.new
 
 setup_karafka(allow_errors: true) do |config|
   config.license.token = pro_license_token
-  config.concurrency = 10
+  config.concurrency = 5
 end
 
 class Consumer < Karafka::Pro::BaseConsumer
