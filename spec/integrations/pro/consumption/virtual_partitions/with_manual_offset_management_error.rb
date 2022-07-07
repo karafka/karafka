@@ -18,7 +18,7 @@ class Consumer < Karafka::Pro::BaseConsumer
     end
 
     MUTEX.synchronize do
-      return if DataCollector[:errors].size > 20
+      return if DataCollector[:errors].size > 30
 
       DataCollector[:errors] << true
 
@@ -41,7 +41,7 @@ elements = Array.new(100) { SecureRandom.uuid }
 elements.each { |data| produce(DataCollector.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[:errors].size >= 20
+  DataCollector[:errors].size >= 30
 end
 
 # We should restart over and over again so same messages should come

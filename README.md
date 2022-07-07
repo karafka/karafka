@@ -8,7 +8,7 @@
 
 ## About Karafka
 
-Karafka is a framework used to simplify Apache Kafka based Ruby and Ruby on Rails applications development.
+Karafka is a multi-threaded framework used to simplify Apache Kafka based Ruby and Ruby on Rails applications development.
 
 ```ruby
 # Define what topics you want to consume with which consumers in karafka.rb
@@ -45,7 +45,7 @@ We also maintain many [integration specs](https://github.com/karafka/karafka/tre
 
 ## Want to Upgrade? LGPL is not for you? Want to help?
 
-I also sell Karafka Pro subscription. It includes commercial-friendly license, priority support, architecture consultations and high throughput data processing-related features (under development).
+I also sell Karafka Pro subscription. It includes commercial-friendly license, priority support, architecture consultations and high throughput data processing-related features (virtual partitions, long running jobs and more).
 
 **20%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
 
@@ -56,11 +56,3 @@ Help me provide high-quality open-source software. Please see the Karafka [homep
 Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
 
 If you have any questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) channel.
-
-## Note on contributions
-
-First, thank you for considering contributing to the Karafka ecosystem! It's people like you that make the open source community such a great community!
-
-Each pull request must pass all the RSpec specs, integration tests and meet our quality requirements.
-
-Fork it, update and wait for the Github Actions results.
