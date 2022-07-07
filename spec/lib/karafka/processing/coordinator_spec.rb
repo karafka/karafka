@@ -53,7 +53,7 @@ RSpec.describe_current do
   end
 
   describe '#consumption' do
-    pending
+    it { expect(coordinator.consumption(self)).to be_a(Karafka::Processing::Result) }
   end
 
   describe '#success?' do

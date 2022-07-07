@@ -36,15 +36,7 @@ module Karafka
 
       # Increases number of jobs that we handle with this coordinator
       def increment
-        @mutex.synchronize do
-          @running_jobs += 1
-
-          return @running_jobs if @running_jobs.positive?
-
-          # This should never happen. If it does, something is heavily out of sync. Please reach
-          # out to us if you encounter this
-          raise Karafka::Errors::InvalidCoordinatorState, 'Was negative before incrementation'
-        end
+        @mutex.synchronize { @running_jobs += 1 }
       end
 
       # Decrements number of jobs we handle at the moment

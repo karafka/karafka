@@ -9,7 +9,7 @@ RSpec.describe_current do
     end
   end
 
-  it 'expect not to use lrj by defaulr' do
+  it 'expect not to use lrj by default' do
     expect(extended_topic.long_running_job?).to eq(false)
   end
 
@@ -17,5 +17,15 @@ RSpec.describe_current do
     before { extended_topic.long_running_job = true }
 
     it { expect(extended_topic.long_running_job?).to eq(true) }
+  end
+
+  it 'expect not to use virtual partitioner by default' do
+    expect(extended_topic.virtual_partitioner?).to eq(false)
+  end
+
+  context 'when virtual partitioner is set' do
+    before { extended_topic.virtual_partitioner = ->(msg) { msg.raw_payload } }
+
+    it { expect(extended_topic.virtual_partitioner?).to eq(true) }
   end
 end

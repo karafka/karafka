@@ -16,10 +16,9 @@ module Karafka
       class Partitioner < ::Karafka::Processing::Partitioner
         # @param topic [String] topic name
         # @param messages [Array<Karafka::Messages::Message>] karafka messages
-        # @param block [Proc] block we want to run on each group
         # @yieldparam [Integer] group id
         # @yieldparam [Array<Karafka::Messages::Message>] karafka messages
-        def call(topic, messages, &block)
+        def call(topic, messages)
           ktopic = @subscription_group.topics.find(topic)
 
           @concurrency ||= ::Karafka::App.config.concurrency
@@ -30,10 +29,10 @@ module Karafka
           if ktopic.virtual_partitioner? && @concurrency > 1
             messages
               .group_by { |msg| ktopic.virtual_partitioner.call(msg).hash.abs % @concurrency }
-              .each { |group_id, messages_group| block.call(group_id, messages_group) }
+              .each { |group_id, messages_group| yield(group_id, messages_group) }
           else
             # When no virtual partitioner, works as regular one
-            block.call(0, messages)
+            yield(0, messages)
           end
         end
       end
