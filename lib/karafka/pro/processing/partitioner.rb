@@ -16,6 +16,7 @@ module Karafka
       class Partitioner < ::Karafka::Processing::Partitioner
         # @param topic [String] topic name
         # @param messages [Array<Karafka::Messages::Message>] karafka messages
+        # @param block [Proc] block we want to run on each group
         # @yieldparam [Integer] group id
         # @yieldparam [Array<Karafka::Messages::Message>] karafka messages
         def call(topic, messages, &block)

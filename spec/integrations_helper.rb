@@ -60,9 +60,9 @@ def setup_karafka(allow_errors: false)
 
   return if allow_errors
 
-  # For integration specs where we do not expect any errors, we can set this and it will immediately
-  # exit when any error occurs in the flow
-  Karafka::App.monitor.subscribe('error.occurred') do |event|
+  # For integration specs where we do not expect any errors, we can set this and it will
+  # immediately exit when any error occurs in the flow
+  Karafka::App.monitor.subscribe('error.occurred') do
     # This sleep buys us some time before exit so logs are flushed
     sleep(0.5)
     exit! 8
