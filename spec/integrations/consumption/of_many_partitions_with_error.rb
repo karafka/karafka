@@ -5,7 +5,7 @@
 
 TOPIC = 'integrations_00_10'
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.concurrency = 10
   config.initial_offset = 'latest'
 end
@@ -26,7 +26,7 @@ class Consumer < Karafka::BaseConsumer
     raise StandardError if @count == 1 && messages.first.partition == 5
   end
 
-  def on_shutdown
+  def shutdown
     mark_as_consumed!(messages.last)
   end
 end

@@ -19,7 +19,13 @@ module Karafka
           # @param base [Class] class we extend
           def included(base)
             base.attr_accessor :long_running_job
+            base.attr_accessor :virtual_partitioner
           end
+        end
+
+        # @return [Boolean] true if virtual partitioner is defined, false otherwise
+        def virtual_partitioner?
+          virtual_partitioner != nil
         end
 
         # @return [Boolean] is a given job on a topic a long running one

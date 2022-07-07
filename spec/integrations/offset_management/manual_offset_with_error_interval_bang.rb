@@ -4,7 +4,7 @@
 # it had in the checkpoint, not from the beginning. We check here that this works well when we
 # commit "from time to time", not every message
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.manual_offset_management = true
 end
 

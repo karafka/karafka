@@ -2,7 +2,7 @@
 
 # Karafka should publish async errors from the client via a dedicated instrumentation hook
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   # Bad port on purpose to trigger the error
   config.kafka = { 'bootstrap.servers': '127.0.0.1:9090' }
 end

@@ -26,7 +26,7 @@ class Consumer < Karafka::BaseConsumer
   end
 
   # Transfer the buffer data outside of the consumer
-  def on_shutdown
+  def shutdown
     DataCollector[:batches] = @batches
     DataCollector[:buffer] = @buffer
   end

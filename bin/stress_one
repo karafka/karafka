@@ -8,6 +8,6 @@ set -e
 
 while :
 do
-  reset
+  clear
   bin/scenario $1
 done

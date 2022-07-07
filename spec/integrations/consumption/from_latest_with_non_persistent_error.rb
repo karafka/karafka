@@ -4,7 +4,7 @@
 # from earliest and an error occurs on a first message, we should pause and retry consumption
 # until we can process this message. No messages should be skipped or ignored.
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
   # We sleep more to check if when sleeping other topic messages are processed
   config.pause_timeout = 1_000

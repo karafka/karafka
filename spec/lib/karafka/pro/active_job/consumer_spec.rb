@@ -3,6 +3,7 @@
 require 'karafka/pro/base_consumer'
 require 'karafka/pro/active_job/consumer'
 require 'karafka/pro/routing/extensions'
+require 'karafka/pro/processing/coordinator'
 
 RSpec.describe_current do
   subject(:consumer) do
@@ -17,12 +18,17 @@ RSpec.describe_current do
 
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
   let(:topic) { build(:routing_topic) }
-  let(:coordinator) { build(:processing_coordinator) }
+  let(:coordinator) { build(:processing_coordinator_pro) }
   let(:messages) { [message1, message2] }
   let(:message1) { build(:messages_message, raw_payload: payload1.to_json) }
   let(:message2) { build(:messages_message, raw_payload: payload2.to_json) }
   let(:payload1) { { '1' => '2' } }
   let(:payload2) { { '3' => '4' } }
+
+  before do
+    coordinator.start(messages)
+    coordinator.increment
+  end
 
   it { expect(described_class).to be < Karafka::Pro::BaseConsumer }
 

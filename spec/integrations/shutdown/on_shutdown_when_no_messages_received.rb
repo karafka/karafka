@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# When we received no messages, on_shutdown should not happen
+# When we received no messages, shutdown should not happen
 
 setup_karafka
 
@@ -9,7 +9,7 @@ class Consumer < Karafka::BaseConsumer
     DataCollector[0] << 1
   end
 
-  def on_shutdown
+  def shutdown
     DataCollector[0] << 1
   end
 end

@@ -6,7 +6,7 @@
 # @note This test is a bit special as due to how Karafka operates, when unexpected issue happens
 #   in particular moments, it can bubble up and exit 2
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
 end
 

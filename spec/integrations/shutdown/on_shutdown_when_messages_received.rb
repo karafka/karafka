@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# When we received messages, on_shutdown should kick in for every consumer that did any work
+# When we received messages, shutdown should kick in for every consumer that did any work
 
 setup_karafka
 
@@ -18,7 +18,7 @@ class Consumer < Karafka::BaseConsumer
     DataCollector[0] << 1
   end
 
-  def on_shutdown
+  def shutdown
     DataCollector[topic.name] << @id
   end
 end

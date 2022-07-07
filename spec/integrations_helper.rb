@@ -18,7 +18,7 @@ require_relative './support/data_collector'
 Thread.abort_on_exception = true
 
 # Test setup for the framework
-def setup_karafka
+def setup_karafka(allow_errors: false)
   Karafka::App.setup do |config|
     # Use some decent defaults
     caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.uuid].join('-')
@@ -57,6 +57,16 @@ def setup_karafka
   # We turn on also WaterDrop instrumentation the same way and for the same reasons as above
   listener = ::WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
   Karafka.producer.monitor.subscribe(listener)
+
+  return if allow_errors
+
+  # For integration specs where we do not expect any errors, we can set this and it will
+  # immediately exit when any error occurs in the flow
+  Karafka::App.monitor.subscribe('error.occurred') do
+    # This sleep buys us some time before exit so logs are flushed
+    sleep(0.5)
+    exit! 8
+  end
 end
 
 # Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup

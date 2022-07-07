@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# A case where we have 5 workers consuming data from 10 partitions with simulated IO (sleep)
+# A case where we have 10 workers consuming data from 10 partitions with simulated IO (sleep)
 # Here we stream data in real-time (which works differently than catching up) and simulate IO
 # by sleeping 1ms per message to benchmark parallel processing.
 

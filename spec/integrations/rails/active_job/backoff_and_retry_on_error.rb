@@ -2,7 +2,7 @@
 
 # When there is ActiveJob processing error, Karafka should backoff and retry
 
-setup_karafka
+setup_karafka(allow_errors: true)
 setup_active_job
 
 draw_routes do

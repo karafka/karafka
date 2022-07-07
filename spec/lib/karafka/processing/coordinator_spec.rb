@@ -10,7 +10,7 @@ RSpec.describe_current do
   end
 
   describe '#start' do
-    before { coordinator.start }
+    before { coordinator.start([]) }
 
     it { expect(coordinator.success?).to eq(true) }
     it { expect(coordinator.revoked?).to eq(false) }
@@ -53,7 +53,7 @@ RSpec.describe_current do
   end
 
   describe '#consumption' do
-    pending
+    it { expect(coordinator.consumption(self)).to be_a(Karafka::Processing::Result) }
   end
 
   describe '#success?' do

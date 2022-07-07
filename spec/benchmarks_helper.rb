@@ -48,6 +48,11 @@ def draw_routes(topic, consumer_class = Consumer)
   end
 end
 
+# @return [String] valid pro license token that we use in the integration tests
+def pro_license_token
+  ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+end
+
 # Time extensions
 class Time
   class << self

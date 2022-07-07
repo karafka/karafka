@@ -33,6 +33,9 @@ services:
          integrations_14_02:2:1,\
          integrations_15_02:2:1,\
          integrations_16_02:2:1,\
+         integrations_17_02:2:1,\
+         integrations_18_02:2:1,\
+         integrations_19_02:2:1,\
          integrations_00_03:3:1,\
          integrations_01_03:3:1,\
          integrations_02_03:3:1,\
@@ -41,6 +44,7 @@ services:
          integrations_01_10:10:1,\
          benchmarks_00_01:1:1,\
          benchmarks_00_05:5:1,\
+         benchmarks_01_05:5:1,\
          benchmarks_00_10:10:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

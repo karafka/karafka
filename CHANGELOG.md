@@ -2,6 +2,11 @@
 
 ## 2.0.0-beta6 (Unreleased)
 - Extract consumption partitioner out of listener inline code.
+- Introduce virtual partitioner concept for parallel processing of data from a single topic partition.
+- Improve stability when there kafka internal errors occur while polling.
+- Fix a case where we would resume a LRJ partition upon rebalance where we would reclaim the partition while job was still running.
+- Do not revoke pauses for lost partitions. This will allow to un-pause reclaimed partitions when LRJ jobs are done.
+- Fail integrations by default (unless configured otherwise) if any errors occur during Karafka server execution.
 
 ## 2.0.0-beta5 (2022-07-05)
 - Always resume processing of a revoked partition upon assignment.

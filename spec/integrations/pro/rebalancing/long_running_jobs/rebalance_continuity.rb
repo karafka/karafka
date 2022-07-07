@@ -54,11 +54,11 @@ payloads = Array.new(2) { SecureRandom.uuid }
 payloads.each { |payload| produce(DataCollector.topic, payload) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 3
+  DataCollector[0].size >= 2
 end
 
-# We will get first message processed twice, as we finish one after revoke and then we pick it
-# up once again as we have one partition
-assert_equal [payloads.first, payloads].flatten, DataCollector[0]
+# There should be no duplication as our pause should be running for as long as it needs to and it
+# should be un-paused only when done
+assert_equal payloads, DataCollector[0]
 
 consumer.close

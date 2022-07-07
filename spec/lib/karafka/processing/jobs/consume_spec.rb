@@ -32,4 +32,15 @@ RSpec.describe_current do
       expect(executor).to have_received(:consume)
     end
   end
+
+  describe '#after_call' do
+    before do
+      allow(executor).to receive(:after_consume)
+      job.after_call
+    end
+
+    it 'expect to run after_consume on the executor' do
+      expect(executor).to have_received(:after_consume).with(no_args)
+    end
+  end
 end

@@ -3,7 +3,7 @@
 # When Karafka is being shutdown and the consumer thread is hanging for too long, it should force
 # a shutdown despite having active connections to Kafka
 
-setup_karafka { |config| config.shutdown_timeout = 1_000 }
+setup_karafka(allow_errors: true) { |config| config.shutdown_timeout = 1_000 }
 
 produce(DataCollector.topic, '1')
 

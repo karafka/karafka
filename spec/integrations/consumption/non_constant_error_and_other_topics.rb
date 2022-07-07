@@ -3,7 +3,7 @@
 # When on one partition topic an error occurs, other topics should be processed and given
 # partition should catch up on recovery after the pause timeout
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
   # We sleep more to check if when sleeping other topic messages are processed
   config.pause_timeout = 5_000

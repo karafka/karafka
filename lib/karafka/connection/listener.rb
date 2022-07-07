@@ -82,10 +82,6 @@ module Karafka
             poll_and_remap_messages
           end
 
-          # This will ensure, that in the next poll, we continue processing (if we get them back)
-          # partitions that we have paused
-          resume_assigned_partitions
-
           # If there were revoked partitions, we need to wait on their jobs to finish before
           # distributing consuming jobs as upon revoking, we might get assigned to the same
           # partitions, thus getting their jobs. The revoking jobs need to finish before
@@ -162,8 +158,6 @@ module Karafka
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
-            # We revoke the coordinator here, so we do not have to revoke it in the revoke job
-            # itself (this happens prior to scheduling those jobs)
             @coordinators.revoke(topic, partition)
 
             # There may be a case where we have lost partition of which data we have never
@@ -207,17 +201,6 @@ module Karafka
         )
       end
 
-      # Revoked partition needs to be resumed if we were processing them earlier. This will do
-      # nothing to things that we are planning to process. Without this, things we get
-      # re-assigned would not be polled.
-      def resume_assigned_partitions
-        @client.rebalance_manager.assigned_partitions.each do |topic, partitions|
-          partitions.each do |partition|
-            @client.resume(topic, partition)
-          end
-        end
-      end
-
       # Takes the messages per topic partition and enqueues processing jobs in threads using
       # given scheduler.
       def build_and_schedule_consumption_jobs
@@ -229,7 +212,7 @@ module Karafka
           coordinator = @coordinators.find_or_create(topic, partition)
 
           # Start work coordination for this topic partition
-          coordinator.start
+          coordinator.start(messages)
 
           @partitioner.call(topic, messages) do |group_id, partition_messages|
             # Count the job we're going to create here

@@ -316,37 +316,40 @@ module Karafka
 
         time_poll.start
 
-        @kafka.poll(time_poll.remaining)
+        @kafka.poll(timeout)
       rescue ::Rdkafka::RdkafkaError => e
-        raise if time_poll.attempts > MAX_POLL_RETRIES
-        raise unless time_poll.retryable?
-
-        case e.code
-        when :max_poll_exceeded # -147
-          reset
-        when :transport # -195
-          reset
-        when :rebalance_in_progress # -27
-          reset
-        when :not_coordinator # 16
-          reset
-        when :network_exception # 13
-          reset
-        end
-
-        time_poll.checkpoint
-
-        raise unless time_poll.retryable?
-
-        time_poll.backoff
-
         # We return nil, so we do not restart until running the whole loop
         # This allows us to run revocation jobs and other things and we will pick up new work
         # next time after dispatching all the things that are needed
         #
         # If we would retry here, the client reset would become transparent and we would not have
         # a chance to take any actions
-        nil
+        case e.code
+        when :max_poll_exceeded # -147
+          reset
+          return nil
+        when :transport # -195
+          reset
+          return nil
+        when :rebalance_in_progress # -27
+          reset
+          return nil
+        when :not_coordinator # 16
+          reset
+          return nil
+        when :network_exception # 13
+          reset
+          return nil
+        end
+
+        raise if time_poll.attempts > MAX_POLL_RETRIES
+        raise unless time_poll.retryable?
+
+        time_poll.checkpoint
+        time_poll.backoff
+
+        # On unknown errors we do our best to retry and handle them before raising
+        retry
       end
 
       # Builds a new rdkafka consumer instance based on the subscription group configuration
