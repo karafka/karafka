@@ -95,6 +95,19 @@ RSpec.describe_current do
     end
   end
 
+  describe '#after_consume' do
+    before do
+      allow(consumer).to receive(:on_consume)
+      allow(consumer).to receive(:on_after_consume)
+      executor.consume
+      executor.after_consume
+    end
+
+    it 'expect to run consumer' do
+      expect(consumer).to have_received(:on_after_consume).with(no_args)
+    end
+  end
+
   describe '#shutdown' do
     before { allow(consumer).to receive(:on_shutdown) }
 

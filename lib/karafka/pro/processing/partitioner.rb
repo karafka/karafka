@@ -21,11 +21,14 @@ module Karafka
         def call(topic, messages, &block)
           ktopic = @subscription_group.topics.find(topic)
 
-          if ktopic.virtual_partitioner?
-            concurrency = ::Karafka::App.config.concurrency
+          @concurrency ||= ::Karafka::App.config.concurrency
 
+          # We only partition work if we have a virtual partitioner and more than one thread to
+          # process the data. With one thread it is not worth partitioning the work as the work
+          # itself will be assigned to one thread (pointless work)
+          if ktopic.virtual_partitioner? && @concurrency > 1
             messages
-              .group_by { |msg| ktopic.virtual_partitioner.call(msg).hash.abs % concurrency }
+              .group_by { |msg| ktopic.virtual_partitioner.call(msg).hash.abs % @concurrency }
               .each { |group_id, messages_group| block.call(group_id, messages_group) }
           else
             # When no virtual partitioner, works as regular one
