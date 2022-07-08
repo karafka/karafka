@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.0.0.beta6)
+    karafka (2.0.0.rc1)
       dry-configurable (~> 0.13)
       dry-monitor (~> 0.5)
       dry-validation (~> 1.7)

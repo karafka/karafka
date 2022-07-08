@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.0-beta6 (Unreleased)
+## 2.0.0-rc1 (2022-07-08)
 - Extract consumption partitioner out of listener inline code.
 - Introduce virtual partitioner concept for parallel processing of data from a single topic partition.
 - Improve stability when there kafka internal errors occur while polling.
