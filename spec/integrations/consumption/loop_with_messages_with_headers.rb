@@ -8,7 +8,7 @@ setup_karafka
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[:headers] << messages.last.headers.fetch('iteration').to_i
+      DataCollector[:headers] << message.headers.fetch('iteration').to_i
     end
 
     producer.produce_sync(
@@ -30,7 +30,6 @@ Karafka.producer.produce_sync(
 start_karafka_and_wait_until do
   DataCollector[:headers].size >= 20
 end
-
 
 i = 0
 
