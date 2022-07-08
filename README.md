@@ -28,8 +28,6 @@ class EventsConsumer < ApplicationConsumer
 end
 ```
 
-Karafka allows you to capture everything that happens in your systems in large scale, providing you with a seamless and stable core for consuming, processing and producing data, without having to focus on things that are not your business domain.
-
 Karafka **uses** threads to handle many messages at the same time in the same process. It does not require Rails but will integrate tightly with any Ruby on Rails applications to make event processing dead simple.
 
 ## Getting started
