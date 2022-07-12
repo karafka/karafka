@@ -5,6 +5,8 @@ module Karafka
   class Cli < Thor
     # Server Karafka Cli action
     class Server < Base
+      include Helpers::Colorize
+
       desc 'Start the Karafka server (short-cut alias: "s")'
       option aliases: 's'
       option :consumer_groups, type: :array, default: nil, aliases: :g
@@ -31,11 +33,11 @@ module Karafka
 
         if Karafka.pro?
           Karafka.logger.info(
-            "\033[0;32mThank you for investing in the Karafka Pro subscription!\033[0m\n"
+            green('Thank you for investing in the Karafka Pro subscription!')
           )
         else
           Karafka.logger.info(
-            "\033[0;31mYou like Karafka? Please consider getting a Pro subscription!\033[0m\n"
+            red('You like Karafka? Please consider getting a Pro version!')
           )
         end
       end

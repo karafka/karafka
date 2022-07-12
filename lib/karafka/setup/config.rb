@@ -62,7 +62,7 @@ module Karafka
       # options max_messages [Integer] how many messages do we want to fetch from Kafka in one go
       setting :max_messages, default: 1_000
       # option [Integer] number of milliseconds we can wait while fetching data
-      setting :max_wait_time, default: 10_000
+      setting :max_wait_time, default: 5_000
       # option shutdown_timeout [Integer] the number of milliseconds after which Karafka no
       #   longer waits for the consumers to stop gracefully but instead we force terminate
       #   everything.

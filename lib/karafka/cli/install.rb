@@ -7,6 +7,8 @@ module Karafka
   class Cli < Thor
     # Install Karafka Cli action
     class Install < Base
+      include Helpers::Colorize
+
       desc 'Install all required things for Karafka application in current directory'
 
       # Directories created by default
@@ -42,14 +44,25 @@ module Karafka
           FileUtils.mkdir_p Karafka.root.join(dir)
         end
 
+        puts
+        puts 'Installing Karafka framework...'
+        puts 'Ruby on Rails detected...' if rails?
+        puts
+
         INSTALL_FILES_MAP.each do |source, target|
-          target = Karafka.root.join(target)
+          pathed_target = Karafka.root.join(target)
 
           template = File.read(Karafka.core_root.join("templates/#{source}"))
           render = ::ERB.new(template, trim_mode: '-').result(binding)
 
-          File.open(target, 'w') { |file| file.write(render) }
+          File.open(pathed_target, 'w') { |file| file.write(render) }
+
+          puts "#{green('Created')} #{target}"
         end
+
+        puts
+        puts("Installation #{green('completed')}. Have fun!")
+        puts
       end
 
       # @return [Boolean] true if we have Rails loaded
