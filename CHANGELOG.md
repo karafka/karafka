@@ -2,6 +2,8 @@
 
 ## 2.0.0.rc2 (Unreleased)
 - Fix `example_consumer.rb.erb` `#shutdown` and `#revoked` signatures to correct once.
+- Improve the install user experience (print status and created files).
+- Change default `max_wait_time` from 10s to 5s.
 
 ## 2.0.0-rc1 (2022-07-08)
 - Extract consumption partitioner out of listener inline code.
