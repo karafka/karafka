@@ -6,14 +6,14 @@ RSpec.describe_current do
   subject(:loader) { described_class }
 
   context 'when we are loading active_job pro compoments' do
-    let(:aj_defaults) { Karafka::App.config.internal.active_job.dup }
+    let(:aj_defaults) { Karafka::App.config.internal.active_job.deep_dup.tap(&:configure) }
     let(:aj_config) { Karafka::App.config.internal.active_job }
 
     before { aj_defaults }
 
     after do
       aj_defaults.to_h.each do |key, value|
-        Karafka::App.config.internal.active_job[key] = value
+        Karafka::App.config.internal.active_job.public_send("#{key}=", value)
       end
     end
 

@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:verify) { described_class.new.verify(license_config) }
 
-  let(:license_config) { Karafka::App.config.license.dup }
+  let(:license_config) { Karafka::App.config.license.deep_dup.tap(&:configure) }
 
   context 'when there is no license token' do
     before { license_config.token = false }
