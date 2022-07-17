@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-#plugin 'diffend'
+plugin 'diffend'
 
 gemspec
 
