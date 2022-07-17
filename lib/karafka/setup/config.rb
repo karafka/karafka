@@ -12,7 +12,7 @@ module Karafka
     #   enough and will still keep the code simple
     # @see Karafka::Setup::Configurators::Base for more details about configurators api
     class Config
-      extend Dry::Configurable
+      extend ::WaterDrop::Configurable
 
       # Defaults for kafka settings, that will be overwritten only if not present already
       KAFKA_DEFAULTS = {
@@ -122,6 +122,10 @@ module Karafka
           setting :consumer_class, default: ActiveJob::Consumer
         end
       end
+
+      # This will load all the defaults that can be later overwritten.
+      # Thanks to that we have an initial state out of the box.
+      configure
 
       class << self
         # Configuring method
