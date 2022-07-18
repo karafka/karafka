@@ -19,43 +19,43 @@ module Karafka
 
       # License validity happens in the licenser. Here we do only the simple consistency checks
       nested(:license) do
-        required(:token) { |token| [true, false].include?(token) || token.is_a?(String) }
-        required(:entity) { |entity| entity.is_a?(String) }
-        required(:expires_on) { |eo| eo.is_a?(Date) }
+        required(:token) { |val| [true, false].include?(val) || val.is_a?(String) }
+        required(:entity) { |val| val.is_a?(String) }
+        required(:expires_on) { |val| val.is_a?(Date) }
       end
 
-      required(:client_id) { |cid| cid.is_a?(String) && Contracts::TOPIC_REGEXP.match?(cid) }
-      required(:concurrency) { |con| con.is_a?(Integer) && con.positive? }
-      required(:consumer_mapper) { |consumer_mapper| !consumer_mapper.nil? }
-      required(:consumer_persistence) { |con_pre| [true, false].include?(con_pre) }
-      required(:pause_timeout) { |pt| pt.is_a?(Integer) && pt.positive? }
-      required(:pause_max_timeout) { |pmt| pmt.is_a?(Integer) && pmt.positive? }
-      required(:pause_with_exponential_backoff) { |pweb| [true, false].include?(pweb) }
-      required(:shutdown_timeout) { |st| st.is_a?(Integer) && st.positive? }
-      required(:max_wait_time) { |mwt| mwt.is_a?(Integer) && mwt.positive? }
-      required(:kafka) { |kafka| kafka.is_a?(Hash) && !kafka.empty? }
+      required(:client_id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
+      required(:concurrency) { |val| val.is_a?(Integer) && val.positive? }
+      required(:consumer_mapper) { |val| !val.nil? }
+      required(:consumer_persistence) { |val| [true, false].include?(val) }
+      required(:pause_timeout) { |val| val.is_a?(Integer) && val.positive? }
+      required(:pause_max_timeout) { |val| val.is_a?(Integer) && val.positive? }
+      required(:pause_with_exponential_backoff) { |val| [true, false].include?(val) }
+      required(:shutdown_timeout) { |val| val.is_a?(Integer) && val.positive? }
+      required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
+      required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
 
       # We validate internals just to be sure, that they are present and working
       nested(:internal) do
-        required(:status) { |status| !status.nil? }
-        required(:process) { |process| !process.nil? }
+        required(:status) { |val| !val.nil? }
+        required(:process) { |val| !val.nil? }
 
         nested(:routing) do
-          required(:builder) { |builder| !builder.nil? }
-          required(:subscription_groups_builder) { |sg| !sg.nil? }
+          required(:builder) { |val| !val.nil? }
+          required(:subscription_groups_builder) { |val| !val.nil? }
         end
 
         nested(:processing) do
-          required(:jobs_builder) { |jobs_builder| !jobs_builder.nil? }
-          required(:scheduler) { |scheduler| !scheduler.nil? }
-          required(:coordinator_class) { |coordinator_class| !coordinator_class.nil? }
-          required(:partitioner_class) { |partitioner_class| !partitioner_class.nil? }
+          required(:jobs_builder) { |val| !val.nil? }
+          required(:scheduler) { |val| !val.nil? }
+          required(:coordinator_class) { |val| !val.nil? }
+          required(:partitioner_class) { |val| !val.nil? }
         end
 
         nested(:active_job) do
-          required(:dispatcher) { |dispatcher| !dispatcher.nil? }
-          required(:job_options_contract) { |job_options_contract| !job_options_contract.nil? }
-          required(:consumer_class) { |consumer_class| !consumer_class.nil? }
+          required(:dispatcher) { |val| !val.nil? }
+          required(:job_options_contract) { |val| !val.nil? }
+          required(:consumer_class) { |val| !val.nil? }
         end
       end
 

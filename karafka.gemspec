@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.authors     = ['Maciej Mensfeld']
   spec.email       = %w[maciej@mensfeld.pl]
   spec.homepage    = 'https://karafka.io'
-  spec.summary     = 'Ruby based framework for working with Apache Kafka'
+  spec.summary     = 'Ruby framework for working with Apache Kafka'
   spec.description = 'Framework used to simplify Apache Kafka based Ruby applications development'
   spec.licenses    = ['LGPL-3.0', 'Commercial']
 
