@@ -28,11 +28,11 @@ module Karafka
       required(:concurrency) { |con| con.is_a?(Integer) && con.positive? }
       required(:consumer_mapper) { |consumer_mapper| !consumer_mapper.nil? }
       required(:consumer_persistence) { |con_pre| [true, false].include?(con_pre) }
-      required(:pause_timeout) { |pt| pt.is_a?(Integer) && pt > 0 }
-      required(:pause_max_timeout) { |pmt| pmt.is_a?(Integer) && pmt > 0 }
+      required(:pause_timeout) { |pt| pt.is_a?(Integer) && pt.positive? }
+      required(:pause_max_timeout) { |pmt| pmt.is_a?(Integer) && pmt.positive? }
       required(:pause_with_exponential_backoff) { |pweb| [true, false].include?(pweb) }
-      required(:shutdown_timeout) { |st| st.is_a?(Integer) && st > 0 }
-      required(:max_wait_time) { |mwt| mwt.is_a?(Integer) && mwt > 0 }
+      required(:shutdown_timeout) { |st| st.is_a?(Integer) && st.positive? }
+      required(:max_wait_time) { |mwt| mwt.is_a?(Integer) && mwt.positive? }
       required(:kafka) { |kafka| kafka.is_a?(Hash) && !kafka.empty? }
 
       # We validate internals just to be sure, that they are present and working
@@ -52,11 +52,11 @@ module Karafka
           required(:partitioner_class) { |partitioner_class| !partitioner_class.nil? }
         end
 
-         nested(:active_job) do
-           required(:dispatcher) { |dispatcher| !dispatcher.nil? }
-           required(:job_options_contract) { |job_options_contract| !job_options_contract.nil? }
-           required(:consumer_class) { |consumer_class| !consumer_class.nil? }
-         end
+        nested(:active_job) do
+          required(:dispatcher) { |dispatcher| !dispatcher.nil? }
+          required(:job_options_contract) { |job_options_contract| !job_options_contract.nil? }
+          required(:consumer_class) { |consumer_class| !consumer_class.nil? }
+        end
       end
 
       virtual do |data, errors|

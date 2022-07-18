@@ -30,7 +30,7 @@ module Karafka
 
         fetched_errors = []
 
-        data.fetch(:topics).each_with_index do |topic, index|
+        data.fetch(:topics).each do |topic|
           ConsumerGroupTopic.new.call(topic).errors.each do |key, value|
             fetched_errors << [[topic, key].flatten, value]
           end
