@@ -17,10 +17,9 @@ Gem::Specification.new do |spec|
   spec.licenses    = ['LGPL-3.0', 'Commercial']
 
   spec.add_dependency 'dry-monitor', '~> 0.5'
-  spec.add_dependency 'dry-validation', '~> 1.7'
   spec.add_dependency 'rdkafka', '>= 0.10'
   spec.add_dependency 'thor', '>= 0.20'
-  spec.add_dependency 'waterdrop', '>= 2.3.2', '< 3.0.0'
+  spec.add_dependency 'waterdrop', '>= 2.3.3', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   spec.required_ruby_version = '>= 2.6.0'

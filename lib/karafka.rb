@@ -12,7 +12,6 @@
   openssl
   base64
   date
-  dry-validation
   dry/events/publisher
   dry/monitor/notifications
   zeitwerk

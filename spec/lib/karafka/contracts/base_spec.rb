@@ -3,9 +3,15 @@
 RSpec.describe_current do
   subject(:validator_class) do
     Class.new(described_class) do
-      params do
-        required(:id).filled(:str?)
+      configure do |config|
+        config.error_messages = YAML.safe_load(
+          File.read(
+            File.join(Karafka.gem_root, 'config', 'errors.yml')
+          )
+        ).fetch('en').fetch('validations').fetch('test')
       end
+
+      required(:id) { |id| id.is_a?(String) }
     end
   end
 
