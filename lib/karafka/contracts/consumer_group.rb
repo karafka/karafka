@@ -4,32 +4,39 @@ module Karafka
   module Contracts
     # Contract for single full route (consumer group + topics) validation.
     class ConsumerGroup < Base
-      # Internal contract for sub-validating topics schema
-      TOPIC_CONTRACT = ConsumerGroupTopic.new.freeze
-
-      private_constant :TOPIC_CONTRACT
-
-      params do
-        required(:id).filled(:str?, format?: Karafka::Contracts::TOPIC_REGEXP)
-        required(:topics).value(:array, :filled?)
+      configure do |config|
+        config.error_messages = YAML.safe_load(
+          File.read(
+            File.join(Karafka.gem_root, 'config', 'errors.yml')
+          )
+        ).fetch('en').fetch('validations').fetch('consumer_group')
       end
 
-      rule(:topics) do
-        if value.is_a?(Array)
-          names = value.map { |topic| topic[:name] }
+      required(:id) { |id| id.is_a?(String) && Contracts::TOPIC_REGEXP.match?(id) }
+      required(:topics) { |topics| topics.is_a?(Array) && !topics.empty? }
 
-          key.failure(:topics_names_not_unique) if names.size != names.uniq.size
-        end
+      virtual do |data, errors|
+        next unless errors.empty?
+
+        names = data.fetch(:topics).map { |topic| topic[:name] }
+
+        next if names.size == names.uniq.size
+
+        [[%i[topics], :names_not_unique]]
       end
 
-      rule(:topics) do
-        if value.is_a?(Array)
-          value.each_with_index do |topic, index|
-            TOPIC_CONTRACT.call(topic).errors.each do |error|
-              key([:topics, index, error.path[0]]).failure(error.text)
-            end
+      virtual do |data, errors|
+        next unless errors.empty?
+
+        fetched_errors = []
+
+        data.fetch(:topics).each do |topic|
+          ConsumerGroupTopic.new.call(topic).errors.each do |key, value|
+            fetched_errors << [[topic, key].flatten, value]
           end
         end
+
+        fetched_errors
       end
     end
   end

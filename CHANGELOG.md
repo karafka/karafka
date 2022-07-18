@@ -5,6 +5,7 @@
 - Improve the install user experience (print status and created files).
 - Change default `max_wait_time` from 10s to 5s.
 - Remove direct dependency on `dry-configurable` in favour of a home-brew.
+- Remove direct dependency on `dry-validation` in favour of a home-brew.
 
 ## 2.0.0-rc1 (2022-07-08)
 - Extract consumption partitioner out of listener inline code.

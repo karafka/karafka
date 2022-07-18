@@ -14,13 +14,17 @@ module Karafka
     module ActiveJob
       # Contract for validating the options that can be altered with `#karafka_options` per job
       # class that works with Pro features.
-      class JobOptionsContract < ::Karafka::ActiveJob::JobOptionsContract
-        # Dry types
-        Types = include Dry.Types()
-
-        params do
-          optional(:partitioner).value(Types.Interface(:call))
+      class JobOptionsContract < Contracts::Base
+        configure do |config|
+          config.error_messages = YAML.safe_load(
+            File.read(
+              File.join(Karafka.gem_root, 'config', 'errors.yml')
+            )
+          ).fetch('en').fetch('validations').fetch('job_options')
         end
+
+        optional(:dispatch_method) { |val| %i[produce_async produce_sync].include?(val) }
+        optional(:partitioner) { |val| val.respond_to?(:call) }
       end
     end
   end

@@ -7,9 +7,15 @@ module Karafka
     #   we want to keep ActiveJob related Karafka components outside of the core Karafka code and
     #   all in the same place
     class JobOptionsContract < Contracts::Base
-      params do
-        optional(:dispatch_method).value(included_in?: %i[produce_async produce_sync])
+      configure do |config|
+        config.error_messages = YAML.safe_load(
+          File.read(
+            File.join(Karafka.gem_root, 'config', 'errors.yml')
+          )
+        ).fetch('en').fetch('validations').fetch('job_options')
       end
+
+      optional(:dispatch_method) { |val| %i[produce_async produce_sync].include?(val) }
     end
   end
 end

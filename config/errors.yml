@@ -1,9 +1,52 @@
 en:
-  dry_validation:
-    errors:
+  validations:
+    config:
+      missing: needs to be present
+      client_id_format: 'needs to be a string with a Kafka accepted format'
+      license.entity_format: needs to be a string
+      license.token_format: needs to be either false or a string
+      license.expires_on_format: needs to be a valid date
+      concurrency_format: needs to be an integer bigger than 0
+      consumer_mapper_format: needs to be present
+      consumer_persistence_format: needs to be either true or false
+      pause_timeout_format: needs to be an integer bigger than 0
+      pause_max_timeout_format: needs to be an integer bigger than 0
+      pause_with_exponential_backoff_format: needs to be either true or false
+      shutdown_timeout_format: needs to be an integer bigger than 0
+      max_wait_time_format: needs to be an integer bigger than 0
+      kafka_format: needs to be a filled hash
+      internal.status_format: needs to be present
+      internal.process_format: needs to be present
+      internal.routing.builder_format: needs to be present
+      internal.routing.subscription_groups_builder_format: needs to be present
+      key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
       max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
       shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
-      topics_names_not_unique: all topic names within a single consumer group must be unique
-      required_usage_count: Given topic must be used at least once
+
+    server_cli_options:
+      missing: needs to be present
       consumer_groups_inclusion: Unknown consumer group
-      kafka_key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+
+    consumer_group_topic:
+      missing: needs to be present
+      name_format: 'needs to be a string with a Kafka accepted format'
+      deserializer_format: needs to be present
+      manual_offset_management_format: needs to be either true or false
+      consumer_format: needs to be present
+      id_format: 'needs to be a string with a Kafka accepted format'
+      initial_offset_format: needs to be either earliest or latest
+
+    consumer_group:
+      missing: needs to be present
+      topics_names_not_unique: all topic names within a single consumer group must be unique
+      id_format: 'needs to be a string with a Kafka accepted format'
+      topics_format: needs to be a non-empty array
+
+    job_options:
+      missing: needs to be present
+      dispatch_method_format: needs to be either :produce_async or :produce_sync
+      partitioner_format: 'needs to respond to #call'
+
+    test:
+      missing: needs to be present
+      id_format: needs to be a String
