@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
-**Note**: All of the documentation here refers to Karafka `2.0.rc2`. If you are looking for the documentation to Karafka `1.4` please click here (TBA).
+**Note**: All of the documentation here refers to Karafka `2.0.rc2`. If you are looking for the documentation for Karafka `1.4`, please click [here](https://github.com/karafka/wiki/tree/1.4).
 
 ## About Karafka
 
@@ -43,7 +43,7 @@ We also maintain many [integration specs](https://github.com/karafka/karafka/tre
 
 ## Want to Upgrade? LGPL is not for you? Want to help?
 
-I also sell Karafka Pro subscription. It includes commercial-friendly license, priority support, architecture consultations and high throughput data processing-related features (virtual partitions, long running jobs and more).
+I also sell Karafka Pro subscriptions. It includes a commercial-friendly license, priority support, architecture consultations, and high throughput data processing-related features (virtual partitions, long-running jobs, and more).
 
 **20%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
 
@@ -51,6 +51,6 @@ Help me provide high-quality open-source software. Please see the Karafka [homep
 
 ## Support
 
-Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup and deployment along with other useful details on how to run Karafka.
+Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment, along with other useful details on how to run Karafka.
 
 If you have any questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) channel.
