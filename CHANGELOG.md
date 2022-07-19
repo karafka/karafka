@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.0.rc2 (Unreleased)
+## 2.0.0.rc2 (2022-07-19)
 - Fix `example_consumer.rb.erb` `#shutdown` and `#revoked` signatures to correct once.
 - Improve the install user experience (print status and created files).
 - Change default `max_wait_time` from 10s to 5s.
