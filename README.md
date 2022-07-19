@@ -51,6 +51,8 @@ Help me provide high-quality open-source software. Please see the Karafka [homep
 
 ## Support
 
-Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the whole installation, setup, and deployment, along with other useful details on how to run Karafka.
+Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost everything and a pretty decent [FAQ](https://github.com/karafka/karafka/wiki/FAQ). It covers the installation, setup, and deployment, along with other useful details on how to run Karafka.
 
-If you have any questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) channel.
+If you have questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) channel.
+
+Karafka has priority support for technical and architectural questions that is part of the Karafka Pro subscription.
