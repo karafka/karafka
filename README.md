@@ -8,7 +8,13 @@
 
 ## About Karafka
 
-Karafka is a multi-threaded framework used to simplify Apache Kafka based Ruby and Ruby on Rails applications development.
+Karafka is a multi-threaded framework used to simplify Apache Kafka based Ruby and Ruby on Rails applications development that:
+
+- Supports parallel processing in [multiple threads](Concurrency-and-multithreading) (also for a single topic partition work)
+- Has [ActiveJob backend](Active-Job) support (including ordered jobs)
+- [Automatically integrates](Integrating-with-Ruby-on-Rails-and-other-frameworks#integrating-with-ruby-on-rails=) with Ruby on Rails
+- Supports in-development [code reloading](Auto-reload-of-code-changes-in-development)
+- Is powered by [librdkafka](https://github.com/edenhill/librdkafka) (the Apache Kafka C/C++ client library)
 
 ```ruby
 # Define what topics you want to consume with which consumers in karafka.rb
