@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
-**Note**: All of the documentation here refers to Karafka `2.0`. If you are looking for the documentation to Karafka `1.4` please click here (TBA).
+**Note**: All of the documentation here refers to Karafka `2.0.rc2`. If you are looking for the documentation to Karafka `1.4` please click here (TBA).
 
 ## About Karafka
 
