@@ -175,7 +175,6 @@ module Karafka
           # max message batch size
           # p95 batch size
           # Message lag changes
-          # racecar.consumer.messages per client topic partition etc Processing throughput by topic
           # Messages consumed in timeframe
 
           private
