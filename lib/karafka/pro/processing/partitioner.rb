@@ -27,9 +27,28 @@ module Karafka
           # process the data. With one thread it is not worth partitioning the work as the work
           # itself will be assigned to one thread (pointless work)
           if ktopic.virtual_partitioner? && @concurrency > 1
-            messages
-              .group_by { |msg| ktopic.virtual_partitioner.call(msg).hash.abs % @concurrency }
-              .each { |group_id, messages_group| yield(group_id, messages_group) }
+            # We need to reduce it to number of threads, so the group_id is not a direct effect
+            # of the end user action. Otherwise the persistence layer for consumers would cache
+            # it forever and it would cause memory leaks
+            groupings = messages
+                        .group_by { |msg| ktopic.virtual_partitioner.call(msg) }
+                        .values
+
+            # Reduce the max concurrency to a size that matches the concurrency
+            # As mentioned above we cannot use the partitioning keys directly as it could cause
+            # memory leaks
+            #
+            # The algorithm here is simple, we assume that the most costly in terms of processing,
+            # will be processing of the biggest group and we reduce the smallest once to have
+            # max of groups equal to concurrency
+            while groupings.size > @concurrency
+              groupings.sort_by! { |grouping| -grouping.size }
+
+              # Offset order needs to be maintained for virtual partitions
+              groupings << (groupings.pop + groupings.pop).sort_by!(&:offset)
+            end
+
+            groupings.each_with_index { |messages_group, index| yield(index, messages_group) }
           else
             # When no virtual partitioner, works as regular one
             yield(0, messages)

@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 2.0.0.rc3 (Unreleased)
+- Fix Pro partitioner hash function may not utilize all the threads (#907)
+- Improve virtual partitions messages distribution
+
 ## 2.0.0.rc2 (2022-07-19)
 - Fix `example_consumer.rb.erb` `#shutdown` and `#revoked` signatures to correct once.
 - Improve the install user experience (print status and created files).
