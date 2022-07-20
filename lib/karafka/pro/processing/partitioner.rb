@@ -43,9 +43,9 @@ module Karafka
             # max of groups equal to concurrency
             while groupings.size > @concurrency
               groupings.sort_by! { |grouping| -grouping.size }
-              prev1 = groupings.pop
-              prev2 = groupings.pop
-              groupings << prev2 + prev1
+
+              # Offset order needs to be maintained for virtual partitions
+              groupings << (groupings.pop + groupings.pop).sort_by!(&:offset)
             end
 
             groupings.each_with_index { |messages_group, index| yield(index, messages_group) }
