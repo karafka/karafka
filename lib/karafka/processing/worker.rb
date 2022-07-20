@@ -47,9 +47,11 @@ module Karafka
         job = @jobs_queue.pop
 
         if job
-          Karafka.monitor.instrument('worker.process', caller: self, job: job)
+          instrument_details = { caller: self, job: job, jobs_queue: @jobs_queue }
 
-          Karafka.monitor.instrument('worker.processed', caller: self, job: job) do
+          Karafka.monitor.instrument('worker.process', instrument_details)
+
+          Karafka.monitor.instrument('worker.processed', instrument_details) do
             job.before_call
 
             # If a job is marked as non blocking, we can run a tick in the job queue and if there
