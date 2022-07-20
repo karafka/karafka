@@ -55,9 +55,7 @@ RSpec.describe_current do
     it 'expect to maintain the order based on the offsets' do
       yielded.each do |_, messages|
         messages.each_slice(2) do |m1, m2|
-          next unless m2
-
-          expect(m1.offset).to be < m2.offset
+          expect(m1.offset).to be < m2.offset if m2
         end
       end
     end
@@ -88,9 +86,7 @@ RSpec.describe_current do
     it 'expect to maintain the order based on the offsets' do
       yielded.each do |_, messages|
         messages.each_slice(2) do |m1, m2|
-          next unless m2
-
-          expect(m1.offset).to be < m2.offset
+          expect(m1.offset).to be < m2.offset if m2
         end
       end
     end
