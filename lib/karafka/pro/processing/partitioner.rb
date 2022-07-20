@@ -31,8 +31,8 @@ module Karafka
             # of the end user action. Otherwise the persistence layer for consumers would cache
             # it forever and it would cause memory leaks
             groupings = messages
-              .group_by { |msg| ktopic.virtual_partitioner.call(msg) }
-              .values
+                        .group_by { |msg| ktopic.virtual_partitioner.call(msg) }
+                        .values
 
             # Reduce the max concurrency to a size that matches the concurrency
             # As mentioned above we cannot use the partitioning keys directly as it could cause
