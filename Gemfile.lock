@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.0.0.rc2)
+    karafka (2.0.0.rc3)
       dry-monitor (~> 0.5)
       rdkafka (>= 0.10)
       thor (>= 0.20)

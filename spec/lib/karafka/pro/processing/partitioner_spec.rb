@@ -55,9 +55,38 @@ RSpec.describe_current do
     it 'expect to maintain the order based on the offsets' do
       yielded.each do |_, messages|
         messages.each_slice(2) do |m1, m2|
-          next unless m2
+          expect(m1.offset).to be < m2.offset if m2
+        end
+      end
+    end
 
-          expect(m1.offset).to be < m2.offset
+    it 'expect to have unique groups' do
+      expect(yielded.map(&:first)).to eq(yielded.map(&:first).uniq)
+    end
+  end
+
+  context 'when partitioner would create more partitions than threads' do
+    let(:concurrency) { 5 }
+    let(:yielded) do
+      yielded = []
+      partitioner.call(topic.name, messages) { |*args| yielded << args }
+      yielded
+    end
+
+    before { topic.virtual_partitioner = ->(_) { SecureRandom.uuid } }
+
+    it 'expect to use all the threads' do
+      expect(yielded.map(&:first).sort).to eq((0..4).to_a)
+    end
+
+    it 'expect to have unique messages in all the groups' do
+      expect(yielded.map(&:last).reduce(:&)).to eq([])
+    end
+
+    it 'expect to maintain the order based on the offsets' do
+      yielded.each do |_, messages|
+        messages.each_slice(2) do |m1, m2|
+          expect(m1.offset).to be < m2.offset if m2
         end
       end
     end
