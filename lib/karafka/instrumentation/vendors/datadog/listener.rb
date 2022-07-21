@@ -89,95 +89,64 @@ module Karafka
               ]
             end
 
-            client.count(
-              namespaced_metric('error_occurred'),
-              1,
-              tags: default_tags + extra_tags
-            )
+            count('error_occurred', 1, tags: default_tags + extra_tags)
           end
 
-          # Reports how many message we have consumed and how many batches
+          # Here we report majority of things related to processing as we have access to the
+          # consumer
           def on_consumer_consumed(event)
             messages = event.payload[:caller].messages
             metadata = messages.metadata
 
-            extra_tags = [
+            tags = default_tags + [
               "topic:#{metadata.topic}",
               "partition:#{metadata.partition}"
             ]
 
-            client.histogram(
-              namespaced_metric('consumer.time_taken'),
-              event[:time],
-              tags: default_tags + extra_tags
-            )
-
-            client.count(
-              namespaced_metric('consumer.messages'),
-              messages.count,
-              tags: default_tags + extra_tags
-            )
-
-            client.count(
-              namespaced_metric('consumer.batches'),
-              1,
-              tags: default_tags + extra_tags
-            )
-
-            client.histogram(
-              namespaced_metric('consumer.processing_lag'),
-              metadata.processing_lag,
-              tags: default_tags + extra_tags
-            )
-
-            client.histogram(
-              namespaced_metric('consumer.consumption_lag'),
-              metadata.consumption_lag,
-              tags: default_tags + extra_tags
-            )
-
-            client.gauge(
-              namespaced_metric('consumer.offset'),
-              metadata.last_offset,
-              tags: default_tags + extra_tags
-            )
+            count('consumer.messages', messages.count, tags: tags)
+            count('consumer.batches', 1, tags: tags)
+            gauge('consumer.offset', metadata.last_offset, tags: tags)
+            histogram('consumer.time_taken', event[:time], tags: tags)
+            histogram('consumer.batch_size', messages.count, tags: tags)
+            histogram('consumer.processing_lag', metadata.processing_lag, tags: tags)
+            histogram('consumer.consumption_lag', metadata.consumption_lag, tags: tags)
           end
 
+          # Worker related metrics
           def on_worker_process(event)
-            client.histogram(
-              namespaced_metric('worker.processing'),
-              event[:jobs_queue].statistics[:processing],
-              tags: default_tags
-            )
+            jq_stats = event[:jobs_queue].statistics
 
-            client.gauge(
-              namespaced_metric('worker.total_threads'),
-              Karafka::App.config.concurrency,
-              tags: default_tags
-            )
-
-            client.histogram(
-              namespaced_metric('worker.enqueued_jobs'),
-              event[:jobs_queue].statistics[:enqueued],
-              tags: default_tags
-            )
+            gauge('worker.total_threads', Karafka::App.config.concurrency, tags: default_tags)
+            histogram('worker.processing', jq_stats[:processing], tags: default_tags)
+            histogram('worker.enqueued_jobs', jq_stats[:enqueued], tags: default_tags)
           end
 
+          # We report this metric before and after processing for higher accuracy
+          # Without this, the utilization would not be fully reflected
           def on_worker_processed(event)
-            client.histogram(
-              namespaced_metric('worker.processing'),
-              event[:jobs_queue].statistics[:processing],
-              tags: default_tags
-            )
-          end
+            jq_stats = event[:jobs_queue].statistics
 
-          # delay miedzy przyjsciem wiadomosci a zaczeciem procesowania (lag)
-          # max message batch size
-          # p95 batch size
-          # Message lag changes
-          # Messages consumed in timeframe
+            histogram('worker.processing', jq_stats[:processing], tags: default_tags)
+          end
 
           private
+
+          %i[
+            count
+            gauge
+            histogram
+            increment
+            decrement
+          ].each do |metric_type|
+            class_eval <<~METHODS, __FILE__, __LINE__ + 1
+              def #{metric_type}(key, *args)
+                client.#{metric_type}(
+                  namespaced_metric(key),
+                  *args
+                )
+              end
+            METHODS
+          end
 
           # Wraps metric name in listener's namespace
           # @param metric_name [String] RdKafkaMetric name
@@ -192,9 +161,9 @@ module Karafka
           def report_metric(metric, statistics)
             case metric.scope
             when :root
-              client.public_send(
+              public_send(
                 metric.type,
-                namespaced_metric(metric.name),
+                metric.name,
                 statistics.fetch(*metric.key_location),
                 tags: default_tags
               )
@@ -205,9 +174,9 @@ module Karafka
                 # node ids
                 next if broker_statistics['nodeid'] == -1
 
-                client.public_send(
+                public_send(
                   metric.type,
-                  namespaced_metric(metric.name),
+                  metric.name,
                   broker_statistics.dig(*metric.key_location),
                   tags: default_tags + ["broker:#{broker_statistics['nodename']}"]
                 )

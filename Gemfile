@@ -2,9 +2,7 @@
 
 source 'https://rubygems.org'
 
-#plugin 'diffend'
-
-gem 'dogstatsd-ruby'
+plugin 'diffend'
 
 gemspec
 

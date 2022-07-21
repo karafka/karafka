@@ -15,6 +15,7 @@ Karafka is a multi-threaded framework used to simplify Apache Kafka based Ruby a
 - [Automatically integrates](Integrating-with-Ruby-on-Rails-and-other-frameworks#integrating-with-ruby-on-rails=) with Ruby on Rails
 - Supports in-development [code reloading](Auto-reload-of-code-changes-in-development)
 - Is powered by [librdkafka](https://github.com/edenhill/librdkafka) (the Apache Kafka C/C++ client library)
+- Has an out-of the box [StatsD/DataDog monitoring](Monitoring-and-logging) with a dashboard template.
 
 ```ruby
 # Define what topics you want to consume with which consumers in karafka.rb

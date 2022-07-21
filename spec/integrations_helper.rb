@@ -31,7 +31,7 @@ def setup_karafka(allow_errors: false)
       'heartbeat.interval.ms': 1_000,
       'queue.buffering.max.ms': 5
     }
-    config.client_id = 'ehah'
+    config.client_id = caller_id
     config.pause_timeout = 1
     config.pause_max_timeout = 1
     config.pause_with_exponential_backoff = false
@@ -121,7 +121,7 @@ def wait_until
 
     # Stop if it was running for 2 minutes and nothing changed
     # This prevent from hanging in case of specs instability
-    raise StandardError, 'Execution expired' if (Time.now - started_at) > 11111120
+    raise StandardError, 'Execution expired' if (Time.now - started_at) > 120
 
     sleep(0.01)
   end

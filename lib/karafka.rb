@@ -88,5 +88,7 @@ loader = Zeitwerk::Loader.for_gem
 loader.ignore(Karafka.gem_root.join('lib/active_job'))
 # Do not load pro components, this will be handled by license manager
 loader.ignore(Karafka.gem_root.join('lib/karafka/pro'))
+# Do not load vendors instrumentation components. Those need to be required manually if needed
+loader.ignore(Karafka.gem_root.join('lib/karafka/instrumentation/vendors'))
 loader.setup
 loader.eager_load
