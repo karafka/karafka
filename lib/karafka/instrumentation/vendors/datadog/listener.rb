@@ -107,10 +107,36 @@ module Karafka
             count('consumer.messages', messages.count, tags: tags)
             count('consumer.batches', 1, tags: tags)
             gauge('consumer.offset', metadata.last_offset, tags: tags)
-            histogram('consumer.time_taken', event[:time], tags: tags)
+            histogram('consumer.consumed.time_taken', event[:time], tags: tags)
             histogram('consumer.batch_size', messages.count, tags: tags)
             histogram('consumer.processing_lag', metadata.processing_lag, tags: tags)
             histogram('consumer.consumption_lag', metadata.consumption_lag, tags: tags)
+          end
+
+          # @param event [Dry::Events::Event]
+          def on_consumer_revoked(event)
+            messages = event.payload[:caller].messages
+            metadata = messages.metadata
+
+            tags = default_tags + [
+              "topic:#{metadata.topic}",
+              "partition:#{metadata.partition}"
+            ]
+
+            count('consumer.revoked', 1, tags: tags)
+          end
+
+          # @param event [Dry::Events::Event]
+          def on_consumer_shutdown(event)
+            messages = event.payload[:caller].messages
+            metadata = messages.metadata
+
+            tags = default_tags + [
+              "topic:#{metadata.topic}",
+              "partition:#{metadata.partition}"
+            ]
+
+            count('consumer.shutdown', 1, tags: tags)
           end
 
           # Worker related metrics

@@ -52,6 +52,7 @@ end
   karafka.error_occurred
   karafka.consumer.messages
   karafka.consumer.batches
+  karafka.consumer.shutdown
 ].each do |count_key|
   assert_equal true, statsd_dummy.buffer[:count].key?(count_key), "#{count_key} missing"
 end
@@ -76,7 +77,7 @@ end
 %w[
   karafka.worker.processing
   karafka.worker.enqueued_jobs
-  karafka.consumer.time_taken
+  karafka.consumer.consumed.time_taken
   karafka.consumer.batch_size
   karafka.consumer.processing_lag
   karafka.consumer.consumption_lag
