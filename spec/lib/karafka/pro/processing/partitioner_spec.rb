@@ -22,7 +22,8 @@ RSpec.describe_current do
 
   context 'when we do not use virtual partitions' do
     it 'expect to yield with 0 and input messages' do
-      expect { |block| partitioner.call(topic.name, messages, &block) }.to yield_with_args(0, messages)
+      expect { |block| partitioner.call(topic.name, messages, &block) }
+        .to yield_with_args(0, messages)
     end
   end
 
@@ -30,7 +31,8 @@ RSpec.describe_current do
     before { topic.virtual_partitioner = ->(_) { rand } }
 
     it 'expect to yield with 0 and input messages' do
-      expect { |block| partitioner.call(topic.name, messages, &block) }.to yield_with_args(0, messages)
+      expect { |block| partitioner.call(topic.name, messages, &block) }
+        .to yield_with_args(0, messages)
     end
   end
 
