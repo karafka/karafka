@@ -94,6 +94,7 @@ module Karafka
 
           # Here we report majority of things related to processing as we have access to the
           # consumer
+          # @param event [Dry::Events::Event]
           def on_consumer_consumed(event)
             messages = event.payload[:caller].messages
             metadata = messages.metadata
@@ -113,6 +114,7 @@ module Karafka
           end
 
           # Worker related metrics
+          # @param event [Dry::Events::Event]
           def on_worker_process(event)
             jq_stats = event[:jobs_queue].statistics
 
@@ -123,6 +125,7 @@ module Karafka
 
           # We report this metric before and after processing for higher accuracy
           # Without this, the utilization would not be fully reflected
+          # @param event [Dry::Events::Event]
           def on_worker_processed(event)
             jq_stats = event[:jobs_queue].statistics
 
