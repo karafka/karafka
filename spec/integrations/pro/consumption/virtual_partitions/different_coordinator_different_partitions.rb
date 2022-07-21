@@ -23,7 +23,7 @@ draw_routes do
   consumer_group DataCollector.consumer_group do
     topic TOPIC do
       consumer Consumer
-      virtual_partitioner ->(msg) { rand }
+      virtual_partitioner ->(_) { rand }
     end
   end
 end

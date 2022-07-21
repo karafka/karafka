@@ -16,6 +16,7 @@ module Karafka
       # Routing extensions for builder to be able to validate Pro components correct usage
       module BuilderExtensions
         # Validate consumer groups with pro contracts
+        # @param block [Proc] routing defining block
         def draw(&block)
           super
 
