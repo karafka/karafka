@@ -7,7 +7,7 @@ setup_karafka do |config|
   config.concurrency = 5
 end
 
-class Consumer < Karafka::BaseConsumer
+class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
       DataCollector[:messages] << message

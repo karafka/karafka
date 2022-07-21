@@ -8,6 +8,7 @@ setup_karafka do |config|
   config.license.token = pro_license_token
   config.concurrency = 10
   config.max_messages = 5
+  config.initial_offset = 'latest'
 end
 
 class Consumer < Karafka::Pro::BaseConsumer
@@ -22,19 +23,15 @@ draw_routes do
   consumer_group DataCollector.consumer_group do
     topic TOPIC do
       consumer Consumer
-      virtual_partitioner ->(msg) { msg.raw_payload }
+      virtual_partitioner ->(_) { rand }
     end
   end
 end
 
-elements = Array.new(50) { SecureRandom.uuid }
-
-elements.each do |data|
-  produce(TOPIC, data, partition: 0)
-  produce(TOPIC, data, partition: 1)
-end
-
 start_karafka_and_wait_until do
+  produce(TOPIC, '1', partition: 0)
+  produce(TOPIC, '1', partition: 1)
+
   DataCollector[:messages].count >= 100
 end
 

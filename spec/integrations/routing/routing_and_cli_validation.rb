@@ -19,6 +19,8 @@ rescue Karafka::Errors::InvalidConfigurationError
   guarded << true
 end
 
+Karafka::App.routes.clear
+
 begin
   draw_routes do
     consumer_group '#$%^&*(' do

@@ -2,12 +2,12 @@
 
 require 'karafka/pro/base_consumer'
 require 'karafka/pro/active_job/consumer'
-require 'karafka/pro/routing/extensions'
+require 'karafka/pro/routing/topic_extensions'
 require 'karafka/pro/processing/coordinator'
 
 RSpec.describe_current do
   subject(:consumer) do
-    topic.singleton_class.include Karafka::Pro::Routing::Extensions
+    topic.singleton_class.include Karafka::Pro::Routing::TopicExtensions
 
     described_class.new.tap do |instance|
       instance.client = client

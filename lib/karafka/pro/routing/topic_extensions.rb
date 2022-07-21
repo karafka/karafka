@@ -14,7 +14,7 @@ module Karafka
     # Pro routing components
     module Routing
       # Routing extensions that allow to configure some extra PRO routing options
-      module Extensions
+      module TopicExtensions
         class << self
           # @param base [Class] class we extend
           def included(base)

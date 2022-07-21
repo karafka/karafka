@@ -16,7 +16,7 @@ setup_karafka(allow_errors: true) do |config|
   config.concurrency = 10
 end
 
-class Consumer < Karafka::BaseConsumer
+class Consumer < Karafka::Pro::BaseConsumer
   def consume
     @count ||= 0
     @count += 1
