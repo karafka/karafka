@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/routing/extensions'
+require 'karafka/pro/routing/topic_extensions'
 
 RSpec.describe_current do
   subject(:extended_topic) do
     build(:routing_topic).tap do |topic|
-      topic.singleton_class.include Karafka::Pro::Routing::Extensions
+      topic.singleton_class.include Karafka::Pro::Routing::TopicExtensions
     end
   end
 

@@ -5,6 +5,11 @@ require 'karafka/pro/loader'
 RSpec.describe_current do
   subject(:loader) { described_class }
 
+  before do
+    # We do not want to load extensions as they would leak into other specs
+    allow(loader).to receive(:load_routing_extensions)
+  end
+
   context 'when we are loading active_job pro compoments' do
     let(:aj_defaults) { Karafka::App.config.internal.active_job.deep_dup.tap(&:configure) }
     let(:aj_config) { Karafka::App.config.internal.active_job }

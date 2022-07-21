@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'karafka/pro/base_consumer'
-require 'karafka/pro/routing/extensions'
+require 'karafka/pro/routing/topic_extensions'
 require 'karafka/pro/processing/coordinator'
 
 RSpec.describe_current do
@@ -20,7 +20,7 @@ RSpec.describe_current do
   let(:offset) { 123 }
   let(:topic) do
     build(:routing_topic).tap do |built|
-      built.singleton_class.include Karafka::Pro::Routing::Extensions
+      built.singleton_class.include Karafka::Pro::Routing::TopicExtensions
     end
   end
 

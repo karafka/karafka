@@ -50,3 +50,6 @@ en:
     test:
       missing: needs to be present
       id_format: needs to be a String
+
+    pro_consumer_group_topic:
+      consumer_format: needs to inherit from Karafka::Pro::BaseConsumer and not Karafka::Consumer

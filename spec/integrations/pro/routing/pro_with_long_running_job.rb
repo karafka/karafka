@@ -10,17 +10,17 @@ end
 draw_routes do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topics[0] do
-      consumer Class.new
+      consumer Class.new(Karafka::Pro::BaseConsumer)
       long_running_job true
     end
 
     topic DataCollector.topics[1] do
-      consumer Class.new
+      consumer Class.new(Karafka::Pro::BaseConsumer)
       long_running_job false
     end
 
     topic DataCollector.topics[2] do
-      consumer Class.new
+      consumer Class.new(Karafka::Pro::BaseConsumer)
       long_running_job false
     end
   end

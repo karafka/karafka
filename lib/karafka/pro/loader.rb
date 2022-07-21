@@ -22,7 +22,11 @@ module Karafka
         processing/jobs_builder
         processing/coordinator
         processing/partitioner
-        routing/extensions
+        contracts/base
+        contracts/consumer_group
+        contracts/consumer_group_topic
+        routing/topic_extensions
+        routing/builder_extensions
         active_job/consumer
         active_job/dispatcher
         active_job/job_options_contract
@@ -37,6 +41,16 @@ module Karafka
         def setup(config)
           COMPONENTS.each { |component| require_relative(component) }
 
+          reconfigure(config)
+
+          load_routing_extensions
+        end
+
+        private
+
+        # Sets proper config options to use pro components
+        # @param config [WaterDrop::Configurable::Node] root config node
+        def reconfigure(config)
           icfg = config.internal
 
           icfg.processing.coordinator_class = Processing::Coordinator
@@ -48,9 +62,13 @@ module Karafka
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new
           icfg.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 
-          ::Karafka::Routing::Topic.include(Routing::Extensions)
-
           config.monitor.subscribe(PerformanceTracker.instance)
+        end
+
+        # Loads routing extensions
+        def load_routing_extensions
+          ::Karafka::Routing::Topic.include(Routing::TopicExtensions)
+          ::Karafka::Routing::Builder.prepend(Routing::BuilderExtensions)
         end
       end
     end

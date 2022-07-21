@@ -10,7 +10,7 @@ setup_karafka do |config|
   config.license.token = pro_license_token
 end
 
-class Consumer < Karafka::BaseConsumer
+class Consumer < Karafka::Pro::BaseConsumer
   def consume
     partition = messages.metadata.partition
 

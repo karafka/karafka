@@ -4,6 +4,7 @@
 - Fix Pro partitioner hash function may not utilize all the threads (#907).
 - Improve virtual partitions messages distribution.
 - Add StatsD/DataDog optional monitoring listener + dashboard template.
+- Validate that Pro consumer is always used for Pro subscription
 
 ## 2.0.0.rc2 (2022-07-19)
 - Fix `example_consumer.rb.erb` `#shutdown` and `#revoked` signatures to correct once.

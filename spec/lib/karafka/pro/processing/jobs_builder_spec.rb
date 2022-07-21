@@ -2,7 +2,7 @@
 
 require 'karafka/pro/processing/jobs_builder'
 require 'karafka/pro/processing/jobs/consume_non_blocking'
-require 'karafka/pro/routing/extensions'
+require 'karafka/pro/routing/topic_extensions'
 
 RSpec.describe_current do
   subject(:builder) { described_class.new }
@@ -11,7 +11,7 @@ RSpec.describe_current do
   let(:coordinator) { build(:processing_coordinator) }
 
   before do
-    executor.topic.singleton_class.include(Karafka::Pro::Routing::Extensions)
+    executor.topic.singleton_class.include(Karafka::Pro::Routing::TopicExtensions)
   end
 
   describe '#consume' do
