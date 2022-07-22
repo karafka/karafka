@@ -66,7 +66,7 @@ bundle exec karafka install
 Karafka.producer.produce_sync(topic: 'example', payload: { 'ping' => 'pong' }.to_json)
 ```
 
-3. Run karafka and see the consumption magic happen:
+3. Run Karafka server and see the consumption magic happen:
 
 ```bash
 bundle exec karafka server
