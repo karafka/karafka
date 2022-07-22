@@ -60,14 +60,13 @@ bundle add karafka -v 2.0.0.rc2
 bundle exec karafka install
 ```
 
-2. Dispatch a message to the example topic using the Rails runner (or run it in a Ruby/Rails console):
+2. Dispatch a message to the example topic using the Rails or Ruby console:
 
 ```ruby
-bundle exec rails runner \
-  "Karafka.producer.produce_sync(topic: 'example', payload: { 'ping' => 'pong' }.to_json)"
+Karafka.producer.produce_sync(topic: 'example', payload: { 'ping' => 'pong' }.to_json)
 ```
 
-Run karafka and see the consumption magic happen:
+3. Run karafka and see the consumption magic happen:
 
 ```ruby
 bundle exec karafka server
