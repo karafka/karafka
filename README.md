@@ -35,11 +35,11 @@ class EventsConsumer < ApplicationConsumer
 end
 ```
 
-Karafka **uses** threads to handle many messages at the same time in the same process. It does not require Rails but will integrate tightly with any Ruby on Rails applications to make event processing dead simple.
+Karafka **uses** threads to handle many messages simultaneously in the same process. It does not require Rails but will integrate tightly with any Ruby on Rails applications to make event processing dead simple.
 
 ## Getting started
 
-If you're completely new to the subject, you can start with our "Kafka on Rails" articles series, that will get you up and running with the terminology and basic ideas behind using Kafka:
+If you're entirely new to the subject, you can start with our "Kafka on Rails" articles series, which will get you up and running with the terminology and basic ideas behind using Kafka:
 
 - [Kafka on Rails: Using Kafka with Ruby on Rails – Part 1 – Kafka basics and its advantages](https://mensfeld.pl/2017/11/kafka-on-rails-using-kafka-with-ruby-on-rails-part-1-kafka-basics-and-its-advantages/)
 - [Kafka on Rails: Using Kafka with Ruby on Rails – Part 2 – Getting started with Ruby and Kafka](https://mensfeld.pl/2018/01/kafka-on-rails-using-kafka-with-ruby-on-rails-part-2-getting-started-with-ruby-and-kafka/)
@@ -47,6 +47,30 @@ If you're completely new to the subject, you can start with our "Kafka on Rails"
 If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to visit our [Getting started](https://github.com/karafka/karafka/wiki/Getting-started) guides and the [example apps repository](https://github.com/karafka/example-apps).
 
 We also maintain many [integration specs](https://github.com/karafka/karafka/tree/master/spec/integrations) illustrating various use-cases and features of the framework.
+
+### TL;DR (1 minute from setup to publishing and consuming messages)
+
+**Prerequisites**: Kafka running. You can start it by following instructions from [here](https://github.com/karafka/karafka/wiki/Setting-up-Kafka).
+
+1. Add and install Karafka:
+
+```bash
+bundle add karafka -v 2.0.0.rc2
+
+bundle exec karafka install
+```
+
+2. Dispatch a message to the example topic using the Rails runner (or run it in the Ruby/Rails console):
+
+```ruby
+bundle exec rails runner "KarafkaApp.producer.produce_sync(topic: 'example', payload: { 'k' => 'v' }.to_json)"
+```
+
+Run karafka and see the consumption magic happen:
+
+```ruby
+bundle exec karafka server
+```
 
 ## Want to Upgrade? LGPL is not for you? Want to help?
 
