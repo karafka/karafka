@@ -60,7 +60,7 @@ bundle add karafka -v 2.0.0.rc2
 bundle exec karafka install
 ```
 
-2. Dispatch a message to the example topic using the Rails runner (or run it in the Ruby/Rails console):
+2. Dispatch a message to the example topic using the Rails runner (or run it in a Ruby/Rails console):
 
 ```ruby
 bundle exec rails r "Karafka.producer.produce_sync(topic: 'example', payload: { 'k' => 'v' }.to_json)"
