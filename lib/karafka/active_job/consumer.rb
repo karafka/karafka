@@ -9,6 +9,8 @@ module Karafka
       # @note ActiveJob does not support batches, so we just run one message after another
       def consume
         messages.each do |message|
+          break if Karafka::App.stopping?
+
           ::ActiveJob::Base.execute(
             # We technically speaking could set this as deserializer and reference it from the
             # message instead of using the `#raw_payload`. This is not done on purpose to simplify
