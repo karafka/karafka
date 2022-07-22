@@ -75,6 +75,7 @@ bundle exec karafka server
 [7616dc24-505a-417f-b87b-6bf8fc2d98c5] Polled 1 message in 5001ms
 [dcf3a8d8-0bd9-433a-8f63-b70a0cdb0732] Consume job for ExampleConsumer on example started
 {"ping"=>"pong"}
+[dcf3a8d8-0bd9-433a-8f63-b70a0cdb0732] Consume job for ExampleConsumer on example finished in 0ms
 ```
 
 ## Want to Upgrade? LGPL is not for you? Want to help?
