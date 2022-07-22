@@ -68,7 +68,7 @@ Karafka.producer.produce_sync(topic: 'example', payload: { 'ping' => 'pong' }.to
 
 3. Run karafka and see the consumption magic happen:
 
-```ruby
+```bash
 bundle exec karafka server
 
 [7616dc24-505a-417f-b87b-6bf8fc2d98c5] Polling messages...
