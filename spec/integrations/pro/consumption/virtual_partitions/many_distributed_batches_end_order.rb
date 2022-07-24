@@ -9,7 +9,7 @@ setup_karafka do |config|
 end
 
 Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
-  next unless event.payload[:messages_buffer].size > 0
+  next unless !event.payload[:messages_buffer].empty?
 
   DataCollector[:batches] << Concurrent::Array.new
 end

@@ -66,11 +66,10 @@ module Karafka
           # Fetch message within our time boundaries
           message = poll(time_poll.remaining)
 
+          p "client #{message.offset}" if message
+
           # Put a message to the buffer if there is one
           @buffer << message if message
-
-          # Track time spent on all of the processing and polling
-          time_poll.checkpoint
 
           # Upon polling rebalance manager might have been updated.
           # If partition revocation happens, we need to remove messages from revoked partitions
@@ -78,9 +77,12 @@ module Karafka
           # that we got assigned
           # We also do early break, so the information about rebalance is used as soon as possible
           if @rebalance_manager.changed?
-            remove_revoked_and_duplicated_messages
+            #remove_revoked_and_duplicated_messages
             break
           end
+
+          # Track time spent on all of the processing and polling
+          time_poll.checkpoint
 
           # Finally once we've (potentially) removed revoked, etc, if no messages were returned
           # we can break.
@@ -268,7 +270,7 @@ module Karafka
         true
       rescue Rdkafka::RdkafkaError => e
         return false if e.code == :assignment_lost
-        return false if e.code == :no_offset
+        return true if e.code == :no_offset
 
         raise e
       end
@@ -392,7 +394,7 @@ module Karafka
       # we are no longer responsible in a given process for processing those messages and they
       # should have been picked up by a different process.
       def remove_revoked_and_duplicated_messages
-        @rebalance_manager.lost_partitions.each do |topic, partitions|
+        @rebalance_manager.revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
             @buffer.delete(topic, partition)
           end
