@@ -69,9 +69,6 @@ module Karafka
           # Put a message to the buffer if there is one
           @buffer << message if message
 
-          # Track time spent on all of the processing and polling
-          time_poll.checkpoint
-
           # Upon polling rebalance manager might have been updated.
           # If partition revocation happens, we need to remove messages from revoked partitions
           # as well as ensure we do not have duplicated due to the offset reset for partitions
@@ -81,6 +78,9 @@ module Karafka
             remove_revoked_and_duplicated_messages
             break
           end
+
+          # Track time spent on all of the processing and polling
+          time_poll.checkpoint
 
           # Finally once we've (potentially) removed revoked, etc, if no messages were returned
           # we can break.
@@ -268,7 +268,7 @@ module Karafka
         true
       rescue Rdkafka::RdkafkaError => e
         return false if e.code == :assignment_lost
-        return false if e.code == :no_offset
+        return true if e.code == :no_offset
 
         raise e
       end
