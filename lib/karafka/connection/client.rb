@@ -66,8 +66,6 @@ module Karafka
           # Fetch message within our time boundaries
           message = poll(time_poll.remaining)
 
-          p "client #{message.offset}" if message
-
           # Put a message to the buffer if there is one
           @buffer << message if message
 
@@ -77,7 +75,7 @@ module Karafka
           # that we got assigned
           # We also do early break, so the information about rebalance is used as soon as possible
           if @rebalance_manager.changed?
-            #remove_revoked_and_duplicated_messages
+            remove_revoked_and_duplicated_messages
             break
           end
 
@@ -394,7 +392,7 @@ module Karafka
       # we are no longer responsible in a given process for processing those messages and they
       # should have been picked up by a different process.
       def remove_revoked_and_duplicated_messages
-        @rebalance_manager.revoked_partitions.each do |topic, partitions|
+        @rebalance_manager.lost_partitions.each do |topic, partitions|
           partitions.each do |partition|
             @buffer.delete(topic, partition)
           end

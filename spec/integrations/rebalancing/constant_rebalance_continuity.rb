@@ -25,7 +25,7 @@ draw_routes Consumer
 MESSAGES = Array.new(1_000) { SecureRandom.uuid }
 
 # We need a second producer to trigger the rebalances
-other = Thread.new do
+Thread.new do
   sleep(10)
 
   10.times do
@@ -53,8 +53,6 @@ start_karafka_and_wait_until do
 end
 
 previous = nil
-
-p DataCollector[:messages].map(&:offset)
 
 # They need to be in order one batch after another
 DataCollector[:messages].map(&:offset).uniq.each do |offset|
