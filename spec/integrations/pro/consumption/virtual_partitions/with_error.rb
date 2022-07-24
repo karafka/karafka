@@ -2,6 +2,7 @@
 
 # When Karafka consumes in the VP mode and error happens in any of the processing units we allow
 # the rest to finish the work and we restart the processing from the first offset on a batch.
+# This spec raises only one error once
 
 class Listener
   def on_error_occurred(event)
@@ -17,14 +18,19 @@ setup_karafka(allow_errors: true) do |config|
 end
 
 class Consumer < Karafka::Pro::BaseConsumer
-  def consume
-    @count ||= 0
-    @count += 1
+  MUTEX = Mutex.new
 
+  def consume
     messages.each { |message| DataCollector[0] << message.raw_payload }
     DataCollector[1] << object_id
 
-    raise StandardError if @count == 1
+    MUTEX.synchronize do
+      next unless DataCollector[2].empty?
+
+      DataCollector[2] << true
+
+      raise StandardError
+    end
   end
 end
 
@@ -48,6 +54,7 @@ end
 assert DataCollector[0].size >= 6
 # It should parallelize work
 assert DataCollector[1].uniq.size >= 2
+assert_equal 1, DataCollector[:errors].size
 assert_equal StandardError, DataCollector[:errors].first[:error].class
 assert_equal 'consumer.consume.error', DataCollector[:errors].first[:type]
 assert_equal 'error.occurred', DataCollector[:errors].first.id

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# When using virtual partitions, we should easily consume data with the same instances on may
+# When using virtual partitions, we should easily consume data with the same instances on many of
+# the batches even if error occurred.
 
 class Listener
   def on_error_occurred(event)
