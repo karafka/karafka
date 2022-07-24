@@ -9,6 +9,7 @@ RSpec.describe_current do
   let(:topic_name) { rand.to_s }
 
   before do
+    allow(Karafka.logger).to receive(:debug)
     allow(Karafka.logger).to receive(:info)
     allow(Karafka.logger).to receive(:error)
     allow(Karafka.logger).to receive(:fatal)
@@ -24,7 +25,7 @@ RSpec.describe_current do
     let(:message) { '[id] Polling messages...' }
 
     it 'expect logger to log proper message' do
-      expect(Karafka.logger).to have_received(:info).with(message)
+      expect(Karafka.logger).to have_received(:debug).with(message)
     end
   end
 
@@ -32,11 +33,23 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_connection_listener_fetch_loop_received(event) }
 
     let(:connection_listener) { instance_double(Karafka::Connection::Listener, id: 'id') }
-    let(:payload) { { caller: connection_listener, messages_buffer: Array.new(5), time: 2 } }
-    let(:message) { '[id] Polled 5 messages in 2ms' }
 
-    it 'expect logger to log proper message' do
-      expect(Karafka.logger).to have_received(:info).with(message)
+    context 'when there are no messages polled' do
+      let(:payload) { { caller: connection_listener, messages_buffer: [], time: 2 } }
+      let(:message) { '[id] Polled 0 messages in 2ms' }
+
+      it 'expect logger to log proper message via debug level' do
+        expect(Karafka.logger).to have_received(:debug).with(message)
+      end
+    end
+
+    context 'when there were messages polled' do
+      let(:payload) { { caller: connection_listener, messages_buffer: Array.new(5), time: 2 } }
+      let(:message) { '[id] Polled 5 messages in 2ms' }
+
+      it 'expect logger to log proper message via info level' do
+        expect(Karafka.logger).to have_received(:info).with(message)
+      end
     end
   end
 

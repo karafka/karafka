@@ -18,7 +18,7 @@ module Karafka
       # @param event [Dry::Events::Event] event details including payload
       def on_connection_listener_fetch_loop(event)
         listener = event[:caller]
-        info "[#{listener.id}] Polling messages..."
+        debug "[#{listener.id}] Polling messages..."
       end
 
       # Logs about messages that we've received from Kafka
@@ -28,7 +28,13 @@ module Karafka
         listener = event[:caller]
         time = event[:time]
         messages_count = event[:messages_buffer].size
-        info "[#{listener.id}] Polled #{messages_count} messages in #{time}ms"
+
+        message = "[#{listener.id}] Polled #{messages_count} messages in #{time}ms"
+
+        # We don't want the "polled 0" in dev as it would spam the log
+        # Instead we publish only info when there was anything we could poll and fail over to the
+        # zero notifications when in debug mode
+        messages_count.zero? ? debug(message) : info(message)
       end
 
       # Prints info about the fact that a given job has started
