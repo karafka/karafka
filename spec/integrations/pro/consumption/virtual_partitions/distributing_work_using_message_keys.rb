@@ -45,7 +45,7 @@ end
 assert_equal 4, DataCollector[:objects_ids].uniq.size
 
 # Messages must be order
-DataCollector[0].group_by(&:key).values.each do |messages|
+DataCollector[0].group_by(&:key).each_value do |messages|
   previous = nil
 
   messages.each do |message|
