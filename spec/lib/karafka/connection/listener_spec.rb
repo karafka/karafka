@@ -17,6 +17,8 @@ RSpec.describe_current do
     allow(client).to receive(:batch_poll).and_return([])
   end
 
+  after { client.stop }
+
   context 'when all goes well' do
     before do
       allow(client).to receive(:commit_offsets)
