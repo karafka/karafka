@@ -6,10 +6,11 @@
 - Add StatsD/DataDog optional monitoring listener + dashboard template.
 - Validate that Pro consumer is always used for Pro subscription.
 - Improve ActiveJob consumer shutdown behaviour.
-- Change default 'max_wait_time' to 1 second.
+- Change default `max_wait_time` to 1 second.
 - Change default `max_messages` to 100 (#915).
 - Move logger listener polling reporting level to debug when no messages (#916).
 - Improve stability on aggressive rebalancing (multiple rebalances in a short period).
+- Improve specs stability.
 
 ## 2.0.0.rc2 (2022-07-19)
 - Fix `example_consumer.rb.erb` `#shutdown` and `#revoked` signatures to correct once.
