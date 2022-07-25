@@ -92,6 +92,17 @@ module Karafka
             count('error_occurred', 1, tags: default_tags + extra_tags)
           end
 
+          # Reports how many messages we've polled and how much time did we spend on it
+          #
+          # @param event [Dry::Events::Event]
+          def on_connection_listener_fetch_loop_received(event)
+            time_taken = event[:time]
+            messages_count = event[:messages_buffer].size
+
+            histogram('listener.polling.time_taken', time_taken, tags: default_tags)
+            histogram('listener.polling.messages', messages_count, tags: default_tags)
+          end
+
           # Here we report majority of things related to processing as we have access to the
           # consumer
           # @param event [Dry::Events::Event]
