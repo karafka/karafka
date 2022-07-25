@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# Karafka should be able to work with messages that have headers
+# Karafka should be able to work with messages that have headers and all headers should have string
+# keys
 
 setup_karafka
 
@@ -26,4 +27,5 @@ assert_equal 10, DataCollector[0].size
 
 DataCollector[0].each do |element|
   assert_equal element[0], element[1].fetch('value')
+  assert(element[1].keys.all? { |key| key.is_a?(String) })
 end
