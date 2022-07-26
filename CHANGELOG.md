@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.0.rc3 (Unreleased)
+## 2.0.0.rc3 (2022-07-26)
 - Fix Pro partitioner hash function may not utilize all the threads (#907).
 - Improve virtual partitions messages distribution.
 - Add StatsD/DataDog optional monitoring listener + dashboard template.
