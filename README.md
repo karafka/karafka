@@ -10,7 +10,7 @@
 
 Karafka is a Ruby and Rails multi-threaded efficient Kafka processing framework that:
 
-- Supports parallel processing in [multiple threads](Concurrency-and-multithreading) (also for a single topic partition work)
+- Supports parallel processing in [multiple threads](Concurrency-and-multithreading) (also for a [single topic partition](Pro-Virtual-Partitions) work)
 - Has [ActiveJob backend](Active-Job) support (including ordered jobs)
 - [Automatically integrates](Integrating-with-Ruby-on-Rails-and-other-frameworks#integrating-with-ruby-on-rails=) with Ruby on Rails
 - Supports in-development [code reloading](Auto-reload-of-code-changes-in-development)
