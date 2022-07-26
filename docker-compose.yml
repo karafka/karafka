@@ -42,6 +42,7 @@ services:
          integrations_01_03:3:1,\
          integrations_02_03:3:1,\
          integrations_03_03:3:1,\
+         integrations_04_03:3:1,\
          integrations_00_10:10:1,\
          integrations_01_10:10:1,\
          benchmarks_00_01:1:1,\

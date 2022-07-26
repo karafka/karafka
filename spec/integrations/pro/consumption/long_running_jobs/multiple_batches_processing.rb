@@ -9,12 +9,23 @@ setup_karafka do |config|
   config.license.token = pro_license_token
 end
 
+# We want to sleep few times but not all the time not to exceed max execution time of specs
+DataCollector[:sleeps] = [
+  true,
+  false,
+  false,
+  false,
+  true,
+  false,
+  true
+]
+
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group
     # Sleep from time to time
-    sleep(11) if rand(10) <= 1
+    sleep(11) if DataCollector[:sleeps].pop
 
     messages.each do |message|
       DataCollector[0] << message

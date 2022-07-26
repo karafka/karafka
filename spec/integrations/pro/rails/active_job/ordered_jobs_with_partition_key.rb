@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # When using the pro adapter, we should be able to use partitioner that will allow us to process
-# ActiveJob jobs in their scheduled order using multiple partitions
+# ActiveJob jobs in their scheduled order using multiple partitions. We should be able to get
+# proper results when using `:partition_key`.
 
 setup_karafka do |config|
   config.license.token = pro_license_token
@@ -11,7 +12,7 @@ end
 setup_active_job
 
 # This is a special topic with 3 partitions
-TOPIC = 'integrations_02_03'
+TOPIC = 'integrations_04_03'
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
@@ -24,7 +25,8 @@ class Job < ActiveJob::Base
 
   karafka_options(
     dispatch_method: :produce_sync,
-    partitioner: ->(job) { job.arguments.first[0] }
+    partitioner: ->(job) { job.arguments.first[0] },
+    partition_key_type: :partition_key
   )
 
   def perform(value1)

@@ -7,7 +7,8 @@ RSpec.describe_current do
 
   let(:config) do
     {
-      dispatch_method: :produce_sync
+      dispatch_method: :produce_sync,
+      partition_key_type: :key
     }
   end
 
@@ -19,6 +20,18 @@ RSpec.describe_current do
     before { config.delete(:dispatch_method) }
 
     it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when there is no partition key type' do
+    before { config.delete(:partition_key_type) }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when partition key type is something unexpected' do
+    before { config[:partition_key_type] = rand.to_s }
+
+    it { expect(contract.call(config)).not_to be_success }
   end
 
   context 'when dispatch method is not valid' do
