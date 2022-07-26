@@ -10,12 +10,12 @@
 
 Karafka is a Ruby and Rails multi-threaded efficient Kafka processing framework that:
 
-- Supports parallel processing in [multiple threads](Concurrency-and-multithreading) (also for a [single topic partition](Pro-Virtual-Partitions) work)
-- Has [ActiveJob backend](Active-Job) support (including ordered jobs)
-- [Automatically integrates](Integrating-with-Ruby-on-Rails-and-other-frameworks#integrating-with-ruby-on-rails=) with Ruby on Rails
-- Supports in-development [code reloading](Auto-reload-of-code-changes-in-development)
+- Supports parallel processing in [multiple threads](https://github.com/karafka/karafka/wiki/Concurrency-and-multithreading) (also for a [single topic partition](https://github.com/karafka/karafka/wiki/Pro-Virtual-Partitions) work)
+- Has [ActiveJob backend](https://github.com/karafka/karafka/wiki/Active-Job) support (including ordered jobs)
+- [Automatically integrates](https://github.com/karafka/karafka/wiki/Integrating-with-Ruby-on-Rails-and-other-frameworks#integrating-with-ruby-on-rails=) with Ruby on Rails
+- Supports in-development [code reloading](https://github.com/karafka/karafka/wiki/Auto-reload-of-code-changes-in-development)
 - Is powered by [librdkafka](https://github.com/edenhill/librdkafka) (the Apache Kafka C/C++ client library)
-- Has an out-of the box [StatsD/DataDog monitoring](Monitoring-and-logging) with a dashboard template.
+- Has an out-of the box [StatsD/DataDog monitoring](https://github.com/karafka/karafka/wiki/Monitoring-and-logging) with a dashboard template.
 
 ```ruby
 # Define what topics you want to consume with which consumers in karafka.rb
