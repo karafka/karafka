@@ -43,7 +43,28 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we want to dispatch with partitioner' do
+  context 'when we want to dispatch with partitioner using key' do
+    let(:expected_args) do
+      {
+        topic: job.queue_name,
+        payload: serialized_payload,
+        key: job.job_id
+      }
+    end
+
+    before do
+      job_class.karafka_options(partitioner: ->(job) { job.job_id })
+      allow(::Karafka.producer).to receive(:produce_async)
+    end
+
+    it 'expect to use its result alongside other options' do
+      dispatcher.call(job)
+
+      expect(::Karafka.producer).to have_received(:produce_async).with(expected_args)
+    end
+  end
+
+  context 'when we want to dispatch with partitioner using partition_key' do
     let(:expected_args) do
       {
         topic: job.queue_name,
@@ -54,6 +75,7 @@ RSpec.describe_current do
 
     before do
       job_class.karafka_options(partitioner: ->(job) { job.job_id })
+      job_class.karafka_options(partition_key_type: :partition_key)
       allow(::Karafka.producer).to receive(:produce_async)
     end
 

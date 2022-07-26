@@ -11,6 +11,7 @@
 - Move logger listener polling reporting level to debug when no messages (#916).
 - Improve stability on aggressive rebalancing (multiple rebalances in a short period).
 - Improve specs stability.
+- Allow using `:key` and `:partition_key` for Enhanced Active Job partitioning.
 
 ## 2.0.0.rc2 (2022-07-19)
 - Fix `example_consumer.rb.erb` `#shutdown` and `#revoked` signatures to correct once.

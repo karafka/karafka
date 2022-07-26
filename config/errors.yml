@@ -46,6 +46,7 @@ en:
       missing: needs to be present
       dispatch_method_format: needs to be either :produce_async or :produce_sync
       partitioner_format: 'needs to respond to #call'
+      partition_key_type_format: 'needs to be either :key or :partition_key'
 
     test:
       missing: needs to be present

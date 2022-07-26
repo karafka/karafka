@@ -23,7 +23,9 @@ module Karafka
           dispatch_method: :produce_async,
           # We don't create a dummy proc based partitioner as we would have to evaluate it with
           # each job.
-          partitioner: nil
+          partitioner: nil,
+          # Allows for usage of `:key` or `:partition_key`
+          partition_key_type: :key
         }.freeze
 
         private_constant :DEFAULTS
@@ -45,11 +47,12 @@ module Karafka
         # @return [Hash] hash with dispatch details to which we merge topic and payload
         def dispatch_details(job)
           partitioner = fetch_option(job, :partitioner, DEFAULTS)
+          key_type = fetch_option(job, :partition_key_type, DEFAULTS)
 
           return {} unless partitioner
 
           {
-            partition_key: partitioner.call(job)
+            key_type => partitioner.call(job)
           }
         end
       end
