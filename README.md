@@ -42,7 +42,7 @@ Karafka **uses** threads to handle many messages simultaneously in the same proc
 If you're entirely new to the subject, you can start with our "Kafka on Rails" articles series, which will get you up and running with the terminology and basic ideas behind using Kafka:
 
 - [Kafka on Rails: Using Kafka with Ruby on Rails – Part 1 – Kafka basics and its advantages](https://mensfeld.pl/2017/11/kafka-on-rails-using-kafka-with-ruby-on-rails-part-1-kafka-basics-and-its-advantages/)
-- [Kafka on Rails: Using Kafka with Ruby on Rails – Part 2 – Getting started with Ruby and Kafka](https://mensfeld.pl/2018/01/kafka-on-rails-using-kafka-with-ruby-on-rails-part-2-getting-started-with-ruby-and-kafka/)
+- [Kafka on Rails: Using Kafka with Ruby on Rails – Part 2 – Getting started with Rails and Kafka](https://mensfeld.pl/2018/01/kafka-on-rails-using-kafka-with-ruby-on-rails-part-2-getting-started-with-ruby-and-kafka/)
 
 If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to visit our [Getting started](https://github.com/karafka/karafka/wiki/Getting-started) guides and the [example apps repository](https://github.com/karafka/example-apps).
 
