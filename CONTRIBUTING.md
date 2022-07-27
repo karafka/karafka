@@ -33,4 +33,4 @@ By sending a pull request to the pro components, you are agreeing to transfer th
 ## Questions
 
 If you have any questions, create an [issue](issue) (protip: do a quick search first to see if someone else didn't ask the same question before!).
-You can also reach us at hello@karafka.opencollective.com.
+You can also reach us at contact@karafka.io.
