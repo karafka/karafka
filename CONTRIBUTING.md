@@ -10,10 +10,6 @@ We welcome any type of contribution, not only code. You can help with:
 - **Community**: presenting the project at meetups, organizing a dedicated meetup for the local community, ...
 - **Code**: take a look at the [open issues](issues). Even if you can't write code, commenting on them, showing that you care about a given issue matters. It helps us triage them.
 
-## Your First Contribution
-
-Working on your first Pull Request? You can learn how from this *free* series, [How to Contribute to an Open Source Project on GitHub](https://egghead.io/series/how-to-contribute-to-an-open-source-project-on-github).
-
 ## Submitting code
 
 Any code change should be submitted as a pull request. The description should explain what the code does and give steps to execute it. The pull request should also contain tests.
