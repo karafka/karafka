@@ -11,7 +11,7 @@ module Karafka
         #
         # @note You need to setup the `dogstatsd-ruby` client and assign it
         class Listener
-          include WaterDrop::Configurable
+          include ::Karafka::Core::Configurable
           extend Forwardable
 
           def_delegators :config, :client, :rd_kafka_metrics, :namespace, :default_tags
