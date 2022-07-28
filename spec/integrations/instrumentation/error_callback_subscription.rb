@@ -22,7 +22,7 @@ end
 event = error_events.first
 
 assert_not_equal 0, error_events.size
-assert event.is_a?(Dry::Events::Event)
+assert event.is_a?(Karafka::Core::Monitoring::Event)
 assert_equal 'error.occurred', event.id
 assert_equal 'librdkafka.error', event[:type]
 assert event[:error].is_a?(Rdkafka::RdkafkaError)

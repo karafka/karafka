@@ -19,7 +19,7 @@ end
 event = statistics_events.first
 
 assert_not_equal 0, statistics_events.size
-assert event.is_a?(Dry::Events::Event)
+assert event.is_a?(::Karafka::Core::Monitoring::Event)
 assert_equal 'statistics.emitted', event.id
 assert_not_equal '', event[:subscription_group_id]
 assert event[:consumer_group_id].include?(DataCollector.consumer_groups.first)

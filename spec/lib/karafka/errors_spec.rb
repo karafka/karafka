@@ -25,12 +25,6 @@ RSpec.describe_current do
     specify { expect(error).to be < described_class::BaseError }
   end
 
-  describe 'UnregisteredMonitorEventError' do
-    subject(:error) { described_class::UnregisteredMonitorEventError }
-
-    specify { expect(error).to be < described_class::BaseError }
-  end
-
   describe 'ForcefulShutdownError' do
     subject(:error) { described_class::ForcefulShutdownError }
 

@@ -7,7 +7,7 @@ RSpec.describe_current do
 
   describe '#processing_time_p95 and #on_consumer_consumed' do
     let(:p95) { tracker.processing_time_p95(topic, partition) }
-    let(:event) { Dry::Events::Event.new(rand.to_s, payload) }
+    let(:event) { Karafka::Core::Monitoring::Event.new(rand.to_s, payload) }
 
     context 'when given topic does not exist' do
       let(:topic) { SecureRandom.uuid }

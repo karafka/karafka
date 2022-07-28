@@ -24,9 +24,6 @@ module Karafka
     # Raised when we try to use Karafka CLI commands (except install) without a boot file
     MissingBootFileError = Class.new(BaseError)
 
-    # Raised when want to hook up to an event that is not registered and supported
-    UnregisteredMonitorEventError = Class.new(BaseError)
-
     # Raised when we've waited enough for shutting down a non-responsive process
     ForcefulShutdownError = Class.new(BaseError)
 
