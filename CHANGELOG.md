@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.0.rc4 (Unreleased)
+## 2.0.0.rc4 (2022-07-28)
 - Remove `dry-monitor`
 - Use `karafka-core`
 
