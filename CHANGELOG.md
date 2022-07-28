@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 2.0.0.rc4 (Unreleased)
+- Remove `dry-monitor`
+- Use `karafka-core`
+
 ## 2.0.0.rc3 (2022-07-26)
 - Fix Pro partitioner hash function may not utilize all the threads (#907).
 - Improve virtual partitions messages distribution.

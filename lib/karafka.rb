@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 %w[
+  karafka-core
   delegate
   English
   rdkafka
@@ -12,8 +13,6 @@
   openssl
   base64
   date
-  dry/events/publisher
-  dry/monitor/notifications
   zeitwerk
 ].each(&method(:require))
 

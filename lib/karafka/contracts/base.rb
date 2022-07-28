@@ -3,7 +3,7 @@
 module Karafka
   module Contracts
     # Base contract for all Karafka contracts
-    class Base < ::WaterDrop::Contractable::Contract
+    class Base < ::Karafka::Core::Contractable::Contract
       # @param data [Hash] data for validation
       # @return [Boolean] true if all good
       # @raise [Errors::InvalidConfigurationError] invalid configuration error

@@ -48,7 +48,7 @@ RSpec.describe_current do
         end
 
         let("event#{i}") do
-          Dry::Events::Event.new(rand.to_s, public_send("payload#{i}"))
+          Karafka::Core::Monitoring::Event.new(rand.to_s, public_send("payload#{i}"))
         end
       end
 

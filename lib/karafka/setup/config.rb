@@ -12,7 +12,7 @@ module Karafka
     #   enough and will still keep the code simple
     # @see Karafka::Setup::Configurators::Base for more details about configurators api
     class Config
-      extend ::WaterDrop::Configurable
+      extend ::Karafka::Core::Configurable
 
       # Defaults for kafka settings, that will be overwritten only if not present already
       KAFKA_DEFAULTS = {

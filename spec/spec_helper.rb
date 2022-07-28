@@ -43,8 +43,8 @@ RSpec.configure do |config|
 
   # When we test things, we subscribe sometimes with one-off monitors, they need to always be
   # cleared not to spam and break test-suit
-  config.before { Karafka.monitor.__bus__.listeners.clear }
-  config.after { Karafka.monitor.__bus__.listeners.clear }
+  config.before { Karafka.monitor.notifications_bus.clear }
+  config.after { Karafka.monitor.notifications_bus.clear }
 end
 
 require 'karafka'

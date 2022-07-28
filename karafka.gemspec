@@ -16,10 +16,10 @@ Gem::Specification.new do |spec|
   spec.description = 'Framework used to simplify Apache Kafka based Ruby applications development'
   spec.licenses    = ['LGPL-3.0', 'Commercial']
 
-  spec.add_dependency 'dry-monitor', '~> 0.5'
+  spec.add_dependency 'karafka-core', '>= 2.0.0', '< 3.0.0'
   spec.add_dependency 'rdkafka', '>= 0.10'
   spec.add_dependency 'thor', '>= 0.20'
-  spec.add_dependency 'waterdrop', '>= 2.3.3', '< 3.0.0'
+  spec.add_dependency 'waterdrop', '>= 2.4.0', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   spec.required_ruby_version = '>= 2.7.0'
