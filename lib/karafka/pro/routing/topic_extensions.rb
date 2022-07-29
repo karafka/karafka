@@ -28,7 +28,7 @@ module Karafka
           virtual_partitioner != nil
         end
 
-        # @return [Boolean] is a given job on a topic a long running one
+        # @return [Boolean] is a given job on a topic a long-running one
         def long_running_job?
           @long_running_job || false
         end
