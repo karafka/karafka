@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Karafka should be able to consume messages for given amount of time (10 seconds) and then stop
-# While Karafka is designed as a long running process, it can be used as recurring job as well
+# While Karafka is designed as a long-running process, it can be used as recurring job as well
 
 setup_karafka
 

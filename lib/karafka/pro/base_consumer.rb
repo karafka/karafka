@@ -36,7 +36,7 @@ module Karafka
         end
       end
 
-      # Runs extra logic after consumption that is related to handling long running jobs
+      # Runs extra logic after consumption that is related to handling long-running jobs
       # @note This overwrites the '#on_after_consume' from the base consumer
       def on_after_consume
         coordinator.on_finished do |first_group_message, last_group_message|
@@ -59,7 +59,7 @@ module Karafka
           # Mark as consumed only if manual offset management is not on
           mark_as_consumed(last_message) unless topic.manual_offset_management? || revoked?
 
-          # If this is not a long running job there is nothing for us to do here
+          # If this is not a long-running job there is nothing for us to do here
           return unless topic.long_running_job?
 
           # Once processing is done, we move to the new offset based on commits
