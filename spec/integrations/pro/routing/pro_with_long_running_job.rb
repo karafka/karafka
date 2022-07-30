@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# I should be able to define a topic consumption with long running job indication
+# I should be able to define a topic consumption with long-running job indication
 # It should not impact other jobs and the default should not be lrj
 
 setup_karafka do |config|
