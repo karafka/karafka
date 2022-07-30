@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Virtual partitions and long running jobs should not have any problems working together
+# Virtual partitions and long-running jobs should not have any problems working together
 
 setup_karafka do |config|
   config.max_messages = 50
