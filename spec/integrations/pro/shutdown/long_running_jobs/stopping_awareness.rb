@@ -31,6 +31,7 @@ draw_routes do
     topic DataCollector.topic do
       consumer Consumer
       long_running_job true
+      manual_offset_management true
     end
   end
 end
