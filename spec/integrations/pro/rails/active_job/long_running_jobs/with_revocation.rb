@@ -67,6 +67,7 @@ Thread.new do
     unless revoked
       sleep(5)
       revoked = true
+      break
     end
   end
 end
