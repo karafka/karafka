@@ -16,7 +16,7 @@ class Consumer < Karafka::Pro::BaseConsumer
     sleep 5
 
     messages.each do |message|
-      DataCollector[:messages] << message
+      DataCollector[:offsets] << message.offset
 
       return unless mark_as_consumed!(message)
     end
@@ -65,7 +65,7 @@ end
 previous = nil
 
 # They need to be in order one batch after another
-DataCollector[:messages].map(&:offset).uniq.each do |offset|
+DataCollector[:offsets].uniq.each do |offset|
   unless previous
     previous = offset
     next

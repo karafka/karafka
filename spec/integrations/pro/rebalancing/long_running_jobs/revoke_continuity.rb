@@ -62,7 +62,7 @@ other = Thread.new do
   consumer.subscribe(TOPIC)
 
   consumer.each do |message|
-    DataCollector[:jumped] << message
+    DataCollector[:jumped] << [message.partition, message.offset]
     consumer.store_offset(message)
     break
   end
@@ -76,8 +76,8 @@ start_karafka_and_wait_until do
   other.join && DataCollector[:partitions].size >= 3
 end
 
-revoked_partition = DataCollector[:jumped].first.partition
-jumped_offset = DataCollector[:jumped].first.offset
+revoked_partition = DataCollector[:jumped].first.first
+jumped_offset = DataCollector[:jumped].first.last
 
 assert_equal 1, DataCollector[:jumped].size
 

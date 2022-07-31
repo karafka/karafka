@@ -16,7 +16,9 @@ end
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
-    DataCollector[:batches].last.push(*messages)
+    messages.each do |message|
+      DataCollector[:batches].last << [message.offset]
+    end
   end
 end
 
@@ -42,13 +44,13 @@ end
 
 # Sort messages from each of the batches
 DataCollector[:batches].map! do |batch|
-  batch.sort_by!(&:offset)
+  batch.sort_by!(&:first)
 end
 
 previous = nil
 
 # They need to be in order one batch after another
-DataCollector[:batches].flatten.map(&:offset).each do |offset|
+DataCollector[:batches].flatten.each do |offset|
   unless previous
     previous = offset
     next

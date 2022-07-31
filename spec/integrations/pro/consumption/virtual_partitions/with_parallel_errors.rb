@@ -24,7 +24,7 @@ class Consumer < Karafka::Pro::BaseConsumer
     end
 
     messages.each do |message|
-      DataCollector[0] << message
+      DataCollector[0] << message.offset
     end
   end
 end
@@ -50,7 +50,7 @@ assert_equal 10, DataCollector[:errors].size
 previous = nil
 
 # Check that no messages are skipped
-DataCollector[0].flatten.map(&:offset).sort.uniq.each do |offset|
+DataCollector[0].flatten.sort.uniq.each do |offset|
   unless previous
     previous = offset
     next

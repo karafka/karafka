@@ -37,3 +37,5 @@ end
 
 assert_equal 100, DataCollector[0].size
 assert_equal 50, DataCollector[0].count(&:deserialized?)
+
+DataCollector.clear

@@ -14,7 +14,7 @@ end
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[:messages] << message
+      DataCollector[:messages] << message.raw_payload
     end
 
     MUTEX.synchronize do
@@ -46,4 +46,4 @@ end
 
 # We should restart over and over again so same messages should come
 assert DataCollector.data[:messages].size >= 200
-assert_equal 100, DataCollector.data[:messages].map(&:raw_payload).uniq.size
+assert_equal 100, DataCollector.data[:messages].uniq.size

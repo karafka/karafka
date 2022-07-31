@@ -65,6 +65,8 @@ module Karafka
 
         @mutex.synchronize do
           @stopped = true
+          @executors.clear
+          @coordinators.reset
           @client.commit_offsets!
           @client.stop
         end

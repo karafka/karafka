@@ -8,7 +8,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       mark_as_consumed!(message)
-      DataCollector[0] << message
+      DataCollector[0] << message.offset
     end
   rescue StandardError
     exit! 5

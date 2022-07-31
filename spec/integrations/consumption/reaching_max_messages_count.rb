@@ -13,7 +13,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[:data] << message
+      DataCollector[:data] << message.offset
     end
 
     sleep(0.2)
