@@ -16,20 +16,29 @@ end
 draw_routes do
   consumer_group DataCollector.consumer_group do
     topic DataCollector.topic do
-      # This will force Karafka to be in a "permanent" poll
-      max_wait_time 100_000_000
       max_messages 1
       consumer Consumer
     end
   end
 end
 
-start_karafka_and_wait_until do
-  if DataCollector[0].empty?
-    false
-  else
-    sleep 1
-    true
+occurence = 0
+
+# This will force Karafka fetcher to hang
+Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do
+  sleep if occurence.positive?
+
+  occurence += 1
+end
+
+Thread.new do
+  start_karafka_and_wait_until do
+    if DataCollector[0].empty?
+      false
+    else
+      sleep 1
+      true
+    end
   end
 end
 
