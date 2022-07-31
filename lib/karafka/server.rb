@@ -103,6 +103,7 @@ module Karafka
 
         # We're done waiting, lets kill them!
         workers.each(&:terminate)
+        listeners.each(&:shutdown)
         listeners.each(&:terminate)
 
         Karafka::App.producer.close

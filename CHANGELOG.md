@@ -3,6 +3,8 @@
 ## 2.0.0.rc4 (2022-07-28)
 - Remove `dry-monitor`
 - Use `karafka-core`
+- Improve forceful shutdown resources finalization
+- Cache consumer client name
 
 ## 2.0.0.rc3 (2022-07-26)
 - Fix Pro partitioner hash function may not utilize all the threads (#907).
