@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## 2.0.0 (Unreleased)
+- Improve specs stability
+- Improve forceful shutdown
+- Add support for debig `TTIN` stacktrace printing
+
 ## 2.0.0.rc4 (2022-07-28)
 - Remove `dry-monitor`
 - Use `karafka-core`

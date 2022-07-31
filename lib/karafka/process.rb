@@ -9,6 +9,7 @@ module Karafka
       SIGINT
       SIGQUIT
       SIGTERM
+      SIGTTIN
     ].freeze
 
     HANDLED_SIGNALS.each do |signal|
