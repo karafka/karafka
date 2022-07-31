@@ -37,7 +37,7 @@ class Scenario
     'consumption/worker_critical_error_behaviour.rb' => [0, 2].freeze,
     'shutdown/on_hanging_jobs_and_a_shutdown.rb' => [2].freeze,
     'shutdown/on_hanging_on_shutdown_job_and_a_shutdown.rb' => [2].freeze,
-    'shutdown/on_hanging_poll_and_shutdown.rb' => [2].freeze
+    'shutdown/on_hanging_listener_and_shutdown.rb' => [2].freeze
   }.freeze
 
   private_constant :MAX_RUN_TIME, :EXIT_CODES
