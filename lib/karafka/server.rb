@@ -103,6 +103,8 @@ module Karafka
 
         # We're done waiting, lets kill them!
         workers.each(&:terminate)
+        # We always need to shutdown clients to make sure we do not force the GC to close ffi
+        # binded librdkafka. This can cause memory leaks and crashes
         listeners.each(&:shutdown)
         listeners.each(&:terminate)
 
