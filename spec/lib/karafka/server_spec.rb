@@ -121,7 +121,15 @@ RSpec.describe_current do
       end
 
       context 'when there are active consuming threads (consuming does not want to stop)' do
-        let(:active_thread) { instance_double(Thread, alive?: true, terminate: true, join: true) }
+        let(:active_thread) do
+          instance_double(
+            Karafka::Connection::Listener,
+            alive?: true,
+            terminate: true,
+            join: true,
+            shutdown: true
+          )
+        end
 
         before do
           described_class.listeners = [active_thread]
@@ -137,7 +145,15 @@ RSpec.describe_current do
       end
 
       context 'when there are active processing workers (processing does not want to stop)' do
-        let(:active_thread) { instance_double(Thread, alive?: true, terminate: true, join: true) }
+        let(:active_thread) do
+          instance_double(
+            Karafka::Connection::Listener,
+            alive?: true,
+            terminate: true,
+            join: true,
+            shutdown: true
+          )
+        end
 
         before do
           described_class.workers = [active_thread]

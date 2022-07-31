@@ -12,7 +12,7 @@ module Karafka
         # @note We need this to make sure that we allocate proper dispatched events only to
         #   callback listeners that should publish them
         def name
-          ::Rdkafka::Bindings.rd_kafka_name(@native_kafka)
+          @name ||= ::Rdkafka::Bindings.rd_kafka_name(@native_kafka)
         end
       end
     end

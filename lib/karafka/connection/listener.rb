@@ -34,6 +34,8 @@ module Karafka
         # We can do this that way because we always first schedule jobs using messages before we
         # fetch another batch.
         @messages_buffer = MessagesBuffer.new(subscription_group)
+        @mutex = Mutex.new
+        @stopped = false
       end
 
       # Runs the main listener fetch loop.
@@ -49,6 +51,23 @@ module Karafka
         )
 
         fetch_loop
+      end
+
+      # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
+      # stops kafka client.
+      #
+      # @note This method is not private despite being part of the fetch loop because in case of
+      #   a forceful shutdown, it may be invoked from a separate thread
+      #
+      # @note We wrap it with a mutex exactly because of the above case of forceful shutdown
+      def shutdown
+        return if @stopped
+
+        @mutex.synchronize do
+          @stopped = true
+          @client.commit_offsets!
+          @client.stop
+        end
       end
 
       private
@@ -237,13 +256,6 @@ module Karafka
       # discard it
       def wait_with_poll
         @client.batch_poll until @jobs_queue.empty?(@subscription_group.id)
-      end
-
-      # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
-      # stops kafka client.
-      def shutdown
-        @client.commit_offsets!
-        @client.stop
       end
 
       # We can stop client without a problem, as it will reinitialize itself when running the
