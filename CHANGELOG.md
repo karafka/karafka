@@ -3,7 +3,7 @@
 ## 2.0.0 (Unreleased)
 - Improve specs stability
 - Improve forceful shutdown
-- Add support for debug `TTIN` stacktrace printing
+- Add support for debug `TTIN` backtrace printing
 
 ## 2.0.0.rc4 (2022-07-28)
 - Remove `dry-monitor`
