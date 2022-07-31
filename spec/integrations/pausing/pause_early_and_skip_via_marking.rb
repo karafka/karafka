@@ -56,3 +56,5 @@ sleep(0.1) until sum >= 20
 end
 
 assert_equal 20, sum
+
+consumer.close
