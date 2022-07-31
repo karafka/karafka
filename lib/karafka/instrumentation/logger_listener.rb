@@ -9,6 +9,7 @@ module Karafka
       USED_LOG_LEVELS = %i[
         debug
         info
+        warn
         error
         fatal
       ].freeze
