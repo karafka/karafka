@@ -53,10 +53,10 @@ other =  Thread.new do
   consumer.each do
     next if DataCollector[:end].empty?
 
-    consumer.close
-
     break
   end
+
+  consumer.close
 end
 
 start_karafka_and_wait_until do

@@ -75,11 +75,10 @@ other = Thread.new do
   consumer.each do |message|
     DataCollector[:process1] << [message.payload.to_i, message.partition]
 
-    if DataCollector.data.key?(:terminate)
-      consumer.close
-      break
-    end
+    break if DataCollector.data.key?(:terminate)
   end
+
+  consumer.close
 end
 
 # Give it some time to start before starting Karafka main process

@@ -9,6 +9,7 @@ module Karafka
       USED_LOG_LEVELS = %i[
         debug
         info
+        warn
         error
         fatal
       ].freeze
@@ -60,11 +61,28 @@ module Karafka
         info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
       end
 
-      # Logs info about system signals that Karafka received.
+      # Logs info about system signals that Karafka received and prints backtrace for threads in
+      # case of ttin
       #
       # @param event [Dry::Events::Event] event details including payload
       def on_process_notice_signal(event)
         info "Received #{event[:signal]} system signal"
+
+        # We print backtrace only for ttin
+        return unless event[:signal] == :SIGTTIN
+
+        # Inspired by Sidekiq
+        Thread.list.each do |thread|
+          tid = (thread.object_id ^ ::Process.pid).to_s(36)
+
+          warn "Thread TID-#{tid} #{thread['label']}"
+
+          if thread.backtrace
+            warn thread.backtrace.join("\n")
+          else
+            warn '<no backtrace available>'
+          end
+        end
       end
 
       # Logs info that we're initializing Karafka app.
