@@ -15,7 +15,9 @@ end
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
-    DataCollector[object_id].push(*messages)
+    messages.each do |message|
+      DataCollector[object_id] << message.offset
+    end
   end
 end
 

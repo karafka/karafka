@@ -136,3 +136,5 @@ process2.each do |_, messages|
       previous = current
     end
 end
+
+DataCollector.clear

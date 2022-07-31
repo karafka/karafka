@@ -34,3 +34,5 @@ DataCollector[0].each_with_index do |message, index|
   assert_equal nil, message.key
   assert_equal false, message.deserialized?
 end
+
+DataCollector.clear

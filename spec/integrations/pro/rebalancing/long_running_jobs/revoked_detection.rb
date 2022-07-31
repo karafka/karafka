@@ -46,7 +46,7 @@ Thread.new do
   sleep(10)
 
   consumer.subscribe(TOPIC)
-  consumer.each {}
+  consumer.poll(1_000)
 end
 
 Thread.new do

@@ -12,7 +12,7 @@ end
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[object_id] << message
+      DataCollector[object_id] << message.offset
     end
   end
 end
@@ -45,15 +45,15 @@ assert average >= 8
 assert average <= 12
 
 # All data within partitions should be in order
-DataCollector.data.each do |_object_id, messages|
-  previous_message = nil
+DataCollector.data.each do |_object_id, offsets|
+  previous_offset = nil
 
-  messages.each do |message|
-    unless previous_message
-      previous_message = message
+  offsets.each do |offset|
+    unless previous_offset
+      previous_offset = offset
       next
     end
 
-    assert previous_message.offset < message.offset
+    assert previous_offset < offset
   end
 end

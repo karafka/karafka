@@ -28,7 +28,7 @@ class Consumer < Karafka::Pro::BaseConsumer
     sleep(11) if DataCollector[:sleeps].pop
 
     messages.each do |message|
-      DataCollector[0] << message
+      DataCollector[0] << message.offset
     end
 
     5.times { produce(DataCollector.topic, '1') }
@@ -52,7 +52,7 @@ end
 
 previous = nil
 
-DataCollector[0].map(&:offset).each do |offset|
+DataCollector[0].each do |offset|
   unless previous
     previous = offset
     next

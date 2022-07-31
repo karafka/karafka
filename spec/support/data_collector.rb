@@ -50,6 +50,11 @@ class DataCollector
     def []=(key, value)
       data[key] = value
     end
+
+    # Removes all the data from the collector
+    def clear
+      instance.clear
+    end
   end
 
   # Creates a collector
@@ -67,5 +72,13 @@ class DataCollector
   # @return [String] first consumer group
   def consumer_group
     topics.first
+  end
+
+  # Removes all the data from the collector
+  # This may be needed if be buffer rdkafka messages for GC to figure things out
+  def clear
+    @topics.clear
+    @consumer_groups.clear
+    @data.clear
   end
 end

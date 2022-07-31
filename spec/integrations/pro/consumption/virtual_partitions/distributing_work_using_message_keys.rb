@@ -21,7 +21,10 @@ end
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
-    DataCollector[0].push(*messages)
+    messages.each do |message|
+      DataCollector[0] << [message.key, message.offset]
+    end
+
     DataCollector[:objects_ids] << object_id
   end
 end
@@ -45,15 +48,15 @@ end
 assert_equal 4, DataCollector[:objects_ids].uniq.size
 
 # Messages must be order
-DataCollector[0].group_by(&:key).each_value do |messages|
+DataCollector[0].group_by(&:first).each_value do |messages|
   previous = nil
 
-  messages.each do |message|
+  messages.map(&:last).each do |offset|
     unless previous
-      previous = message
+      previous = offset
       next
     end
 
-    assert previous.offset < message.offset
+    assert previous < offset
   end
 end

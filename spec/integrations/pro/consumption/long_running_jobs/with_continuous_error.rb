@@ -20,7 +20,7 @@ class Consumer < Karafka::Pro::BaseConsumer
   def consume
     raise StandardError if rand(2).zero?
 
-    messages.each { |message| DataCollector[0] << message }
+    messages.each { |message| DataCollector[0] << message.offset }
 
     sleep 2
 
@@ -45,7 +45,7 @@ end
 
 previous = nil
 
-DataCollector[0].map(&:offset).each do |offset|
+DataCollector[0].each do |offset|
   unless previous
     previous = offset
     next
