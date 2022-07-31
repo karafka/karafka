@@ -71,10 +71,10 @@ other = Thread.new do
 
     next unless DataCollector[:jumped].size >= 20
 
-    consumer.close
-
     break
   end
+
+  consumer.close
 end
 
 # This part makes sure we do not run rebalance until karafka got both partitions work to do

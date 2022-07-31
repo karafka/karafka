@@ -38,12 +38,7 @@ Thread.new do
   sleep(10)
 
   consumer.subscribe(DataCollector.topic)
-
-  consumer.each do
-    # This should never happen.
-    # We have one partition and it should be karafka that consumes it
-    exit! 5
-  end
+  consumer.poll(1_000)
 end
 
 payloads = Array.new(2) { SecureRandom.uuid }
