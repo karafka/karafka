@@ -1,11 +1,12 @@
 # Karafka framework changelog
 
-## 2.0.0 (Unreleased)
+## 2.0.0.rc5 (2022-08-01)
 - Improve specs stability
 - Improve forceful shutdown
 - Add support for debug `TTIN` backtrace printing
 - Fix a case where logger listener would not intercept `warn` level
 - Require `rdkafka` >= `0.12`
+- Replace statistics decorator with the one from `karafka-core`
 
 ## 2.0.0.rc4 (2022-07-28)
 - Remove `dry-monitor`

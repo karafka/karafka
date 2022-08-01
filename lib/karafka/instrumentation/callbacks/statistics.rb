@@ -16,8 +16,7 @@ module Karafka
           @consumer_group_id = consumer_group_id
           @client_name = client_name
           @monitor = monitor
-          # We decorate both Karafka and WaterDrop statistics the same way
-          @statistics_decorator = ::WaterDrop::Instrumentation::Callbacks::StatisticsDecorator.new
+          @statistics_decorator = ::Karafka::Core::Monitoring::StatisticsDecorator.new
         end
 
         # Emits decorated statistics to the monitor
