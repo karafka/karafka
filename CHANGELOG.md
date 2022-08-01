@@ -5,6 +5,7 @@
 - Improve forceful shutdown
 - Add support for debug `TTIN` backtrace printing
 - Fix a case where logger listener would not intercept `warn` level
+- Require `rdkafka` >= `0.12`
 
 ## 2.0.0.rc4 (2022-07-28)
 - Remove `dry-monitor`
