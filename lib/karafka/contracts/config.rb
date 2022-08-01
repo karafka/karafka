@@ -21,7 +21,6 @@ module Karafka
       nested(:license) do
         required(:token) { |val| [true, false].include?(val) || val.is_a?(String) }
         required(:entity) { |val| val.is_a?(String) }
-        required(:expires_on) { |val| val.is_a?(Date) }
       end
 
       required(:client_id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }

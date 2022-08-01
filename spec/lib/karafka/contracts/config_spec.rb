@@ -16,8 +16,7 @@ RSpec.describe_current do
       concurrency: 5,
       license: {
         token: false,
-        entity: '',
-        expires_on: Date.parse('2100-01-01')
+        entity: ''
       },
       internal: {
         status: Karafka::Status.new,
@@ -89,12 +88,6 @@ RSpec.describe_current do
 
     context 'when entity token is nil' do
       before { config[:license][:entity] = nil }
-
-      it { expect(contract.call(config)).not_to be_success }
-    end
-
-    context 'when expires_on is nil' do
-      before { config[:license][:expires_on] = nil }
 
       it { expect(contract.call(config)).not_to be_success }
     end

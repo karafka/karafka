@@ -34,8 +34,6 @@ module Karafka
         setting :token, default: false
         # option entity [String] for whom we did issue the license
         setting :entity, default: ''
-        # option expires_on [Date] date when the license expires
-        setting :expires_on, default: Date.parse('2100-01-01')
       end
 
       # option client_id [String] kafka client_id - used to provide
@@ -136,8 +134,10 @@ module Karafka
 
           Contracts::Config.new.validate!(config.to_h)
 
-          # Check the license presence (if needed) and
-          Licenser.new.verify(config.license)
+          licenser = Licenser.new
+
+          # Tries to load our license gem and if present will try to load the correct license
+          licenser.prepare_and_verify(config.license)
 
           configure_components
 
@@ -149,7 +149,7 @@ module Karafka
         # Propagates the kafka setting defaults unless they are already present
         # This makes it easier to set some values that users usually don't change but still allows
         # them to overwrite the whole hash if they want to
-        # @param config [Dry::Configurable::Config] dry config of this producer
+        # @param config [Karafka::Core::Configurable::Node] config of this producer
         def merge_kafka_defaults!(config)
           KAFKA_DEFAULTS.each do |key, value|
             next if config.kafka.key?(key)

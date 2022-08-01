@@ -9,16 +9,10 @@ PRIVATE_KEY_LOCATION = File.join(Dir.home, '.ssh', 'karafka-pro', 'id_rsa')
 
 # Name of the entity that acquires the license
 ENTITY = ARGV[0]
-# Date till which license is valid
-EXPIRES_ON = Date.parse(ARGV[1])
 
 raise ArgumentError, 'Entity missing' if ENTITY.nil? || ENTITY.empty?
-raise ArgumentError, 'Expires on needs to be in the future' if EXPIRES_ON <= Date.today
 
-pro_token_data = {
-  entity: ENTITY,
-  expires_on: EXPIRES_ON
-}
+pro_token_data = { entity: ENTITY }
 
 # This code uses my private key to generate a new token for Karafka Pro capabilities
 private_key = OpenSSL::PKey::RSA.new(File.read(PRIVATE_KEY_LOCATION))

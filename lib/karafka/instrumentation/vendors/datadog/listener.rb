@@ -65,7 +65,7 @@ module Karafka
 
           # Hooks up to WaterDrop instrumentation for emitted statistics
           #
-          # @param event [Dry::Events::Event]
+          # @param event [Karafka::Core::Monitoring::Event]
           def on_statistics_emitted(event)
             statistics = event[:statistics]
 
@@ -76,7 +76,7 @@ module Karafka
 
           # Increases the errors count by 1
           #
-          # @param event [Dry::Events::Event]
+          # @param event [Karafka::Core::Monitoring::Event]
           def on_error_occurred(event)
             extra_tags = ["type:#{event[:type]}"]
 
@@ -94,7 +94,7 @@ module Karafka
 
           # Reports how many messages we've polled and how much time did we spend on it
           #
-          # @param event [Dry::Events::Event]
+          # @param event [Karafka::Core::Monitoring::Event]
           def on_connection_listener_fetch_loop_received(event)
             time_taken = event[:time]
             messages_count = event[:messages_buffer].size
@@ -105,7 +105,7 @@ module Karafka
 
           # Here we report majority of things related to processing as we have access to the
           # consumer
-          # @param event [Dry::Events::Event]
+          # @param event [Karafka::Core::Monitoring::Event]
           def on_consumer_consumed(event)
             messages = event.payload[:caller].messages
             metadata = messages.metadata
@@ -124,7 +124,7 @@ module Karafka
             histogram('consumer.consumption_lag', metadata.consumption_lag, tags: tags)
           end
 
-          # @param event [Dry::Events::Event]
+          # @param event [Karafka::Core::Monitoring::Event]
           def on_consumer_revoked(event)
             messages = event.payload[:caller].messages
             metadata = messages.metadata
@@ -137,7 +137,7 @@ module Karafka
             count('consumer.revoked', 1, tags: tags)
           end
 
-          # @param event [Dry::Events::Event]
+          # @param event [Karafka::Core::Monitoring::Event]
           def on_consumer_shutdown(event)
             messages = event.payload[:caller].messages
             metadata = messages.metadata
@@ -151,7 +151,7 @@ module Karafka
           end
 
           # Worker related metrics
-          # @param event [Dry::Events::Event]
+          # @param event [Karafka::Core::Monitoring::Event]
           def on_worker_process(event)
             jq_stats = event[:jobs_queue].statistics
 
@@ -162,7 +162,7 @@ module Karafka
 
           # We report this metric before and after processing for higher accuracy
           # Without this, the utilization would not be fully reflected
-          # @param event [Dry::Events::Event]
+          # @param event [Karafka::Core::Monitoring::Event]
           def on_worker_processed(event)
             jq_stats = event[:jobs_queue].statistics
 

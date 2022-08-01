@@ -45,7 +45,7 @@ module Karafka
       end
 
       # @private
-      # @param event [Dry::Events::Event] event details
+      # @param event [Karafka::Core::Monitoring::Event] event details
       # Tracks time taken to process a single message of a given topic partition
       def on_consumer_consumed(event)
         consumer = event[:caller]
