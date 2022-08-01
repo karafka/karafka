@@ -52,8 +52,7 @@ module Karafka
         if Karafka.pro?
           [
             'License: Commercial',
-            "License entity: #{config.license.entity}",
-            "License expires on: #{config.license.expires_on}"
+            "License entity: #{config.license.entity}"
           ]
         else
           [

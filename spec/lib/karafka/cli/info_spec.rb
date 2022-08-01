@@ -47,8 +47,7 @@ RSpec.describe_current do
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
           'License: Commercial',
-          "License entity: #{Karafka::App.config.license.entity}",
-          "License expires on: #{Karafka::App.config.license.expires_on}"
+          "License entity: #{Karafka::App.config.license.entity}"
         ].join("\n")
       end
 
