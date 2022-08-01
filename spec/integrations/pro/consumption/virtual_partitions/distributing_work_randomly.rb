@@ -13,6 +13,20 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
+class VirtualPartitioner
+  def initialize
+    @current = 0
+    @max = Karafka::App.config.concurrency - 1
+    @set = (0..@max).to_a
+  end
+
+  def call(_)
+    @current += 1
+    @current = 0 if @current > @max
+    @set[@current]
+  end
+end
+
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
@@ -25,7 +39,7 @@ draw_routes do
   consumer_group DataCollector.consumer_group do
     topic TOPIC do
       consumer Consumer
-      virtual_partitioner ->(_) { rand(Karafka::App.config.concurrency) }
+      virtual_partitioner VirtualPartitioner.new
     end
   end
 end
