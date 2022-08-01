@@ -51,5 +51,5 @@ start_karafka_and_wait_until do
   DataCollector.data.values.map(&:count).sum >= 1_000
 end
 
-# Two partitions, 3-5 jobs per each
-assert DataCollector.data.size >= 8
+# Two partitions, 5 jobs per each
+assert_equal 10, DataCollector.data.size
