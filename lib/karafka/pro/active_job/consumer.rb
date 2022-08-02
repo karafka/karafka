@@ -33,6 +33,10 @@ module Karafka
               ::ActiveSupport::JSON.decode(message.raw_payload)
             )
 
+            # We cannot mark jobs as done after each if there are virtual partitions. Otherwise
+            # this could create random markings
+            next if topic.virtual_partitioner?
+
             mark_as_consumed(message)
           end
         end

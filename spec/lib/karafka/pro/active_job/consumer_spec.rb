@@ -84,6 +84,32 @@ RSpec.describe_current do
       end
     end
 
+    context 'when messages are available to the consumer and it is virtual partition' do
+      before do
+        consumer.messages = messages
+
+        allow(client).to receive(:mark_as_consumed)
+
+        allow(ActiveJob::Base).to receive(:execute).with(payload1)
+        allow(ActiveJob::Base).to receive(:execute).with(payload2)
+
+        topic.virtual_partitioner = ->(_) {}
+      end
+
+      it 'expect to decode them and run active job executor' do
+        consumer.consume
+
+        expect(ActiveJob::Base).to have_received(:execute).with(payload1)
+        expect(ActiveJob::Base).to have_received(:execute).with(payload2)
+      end
+
+      it 'expect not to mark each message during consumption' do
+        consumer.consume
+
+        expect(client).not_to have_received(:mark_as_consumed)
+      end
+    end
+
     context 'when messages are available but partition got revoked prior to processing' do
       before do
         consumer.messages = messages

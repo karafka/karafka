@@ -2,6 +2,7 @@
 
 ## 2.0.0 (Unreleased)
 - Update licenser to use a gem based approach based on `karafka/pro/license`.
+- Do not mark intermediate jobs as consumed when Karafka runs Enhanced Active Job with Virtual Partitions.
 
 ## 2.0.0.rc5 (2022-08-01)
 - Improve specs stability
