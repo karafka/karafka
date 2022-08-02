@@ -42,5 +42,5 @@ start_karafka_and_wait_until do
 end
 
 # If we would mark as consumed
-assert_equal 2, DataCollector[0].count { |nr| nr == 94 }
+assert_equal 2, (DataCollector[0].count { |nr| nr == 94 })
 assert_equal DataCollector[0].uniq.sort, (0..99).to_a
