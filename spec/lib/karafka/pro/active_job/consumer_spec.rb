@@ -93,7 +93,7 @@ RSpec.describe_current do
         allow(ActiveJob::Base).to receive(:execute).with(payload1)
         allow(ActiveJob::Base).to receive(:execute).with(payload2)
 
-        topic.virtual_partitioner = ->(_) { }
+        topic.virtual_partitioner = ->(_) {}
       end
 
       it 'expect to decode them and run active job executor' do
