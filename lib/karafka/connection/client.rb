@@ -369,6 +369,8 @@ module Karafka
         config.consumer_rebalance_listener = @rebalance_manager
         consumer = config.consumer
 
+        @name = consumer.name
+
         # Register statistics runner for this particular type of callbacks
         ::Karafka::Instrumentation.statistics_callbacks.add(
           @subscription_group.id,
@@ -394,7 +396,6 @@ module Karafka
         # Subscription needs to happen after we assigned the rebalance callbacks just in case of
         # a race condition
         consumer.subscribe(*@subscription_group.topics.map(&:name))
-        @name = consumer.name
         consumer
       end
 
