@@ -347,7 +347,8 @@ module Karafka
           return nil
         # We should signal when we cannot subscribe to a topic due to any reasons
         when :unknown_topic_or_part
-          raise
+          # This is expected and temporary until rdkafka catches up with metadata
+          return nil
         end
 
         raise if time_poll.attempts > MAX_POLL_RETRIES
@@ -367,8 +368,6 @@ module Karafka
         config = ::Rdkafka::Config.new(@subscription_group.kafka)
         config.consumer_rebalance_listener = @rebalance_manager
         consumer = config.consumer
-        consumer.subscribe(*@subscription_group.topics.map(&:name))
-        @name = consumer.name
 
         # Register statistics runner for this particular type of callbacks
         ::Karafka::Instrumentation.statistics_callbacks.add(
@@ -392,6 +391,10 @@ module Karafka
           )
         )
 
+        # Subscription needs to happen after we assigned the rebalance callbacks just in case of
+        # a race condition
+        consumer.subscribe(*@subscription_group.topics.map(&:name))
+        @name = consumer.name
         consumer
       end
 
