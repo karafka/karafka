@@ -368,7 +368,6 @@ module Karafka
         config = ::Rdkafka::Config.new(@subscription_group.kafka)
         config.consumer_rebalance_listener = @rebalance_manager
         consumer = config.consumer
-
         @name = consumer.name
 
         # Register statistics runner for this particular type of callbacks
