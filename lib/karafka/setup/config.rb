@@ -19,7 +19,20 @@ module Karafka
         'client.id': 'karafka'
       }.freeze
 
-      private_constant :KAFKA_DEFAULTS
+      # Contains settings that should not be used in production but make life easier in dev
+      DEV_DEFAULTS = {
+        # Will create non-existing topics automatically.
+        # Note that the broker needs to be configured with `auto.create.topics.enable=true`
+        # While it is not recommended in prod, it simplifies work in dev
+        'allow.auto.create.topics': 'true',
+        # We refresh the cluster state often as newly created topics in dev may not be detected
+        # fast enough. Fast enough means within reasonable time to provide decent user experience
+        # While it's only a one time thing for new topics, it can still be irritating to have to
+        # restart the process.
+        'topic.metadata.refresh.interval.ms': 5_000
+      }.freeze
+
+      private_constant :KAFKA_DEFAULTS, :DEV_DEFAULTS
 
       # Available settings
 
@@ -152,6 +165,14 @@ module Karafka
         # @param config [Karafka::Core::Configurable::Node] config of this producer
         def merge_kafka_defaults!(config)
           KAFKA_DEFAULTS.each do |key, value|
+            next if config.kafka.key?(key)
+
+            config.kafka[key] = value
+          end
+
+          return if Karafka::App.env.production?
+
+          DEV_DEFAULTS.each do |key, value|
             next if config.kafka.key?(key)
 
             config.kafka[key] = value

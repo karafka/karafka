@@ -345,6 +345,9 @@ module Karafka
         when :network_exception # 13
           reset
           return nil
+        when :unknown_topic_or_part
+          # This is expected and temporary until rdkafka catches up with metadata
+          return nil
         end
 
         raise if time_poll.attempts > MAX_POLL_RETRIES
@@ -388,6 +391,8 @@ module Karafka
           )
         )
 
+        # Subscription needs to happen after we assigned the rebalance callbacks just in case of
+        # a race condition
         consumer.subscribe(*@subscription_group.topics.map(&:name))
         consumer
       end
