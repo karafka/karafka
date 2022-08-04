@@ -345,7 +345,6 @@ module Karafka
         when :network_exception # 13
           reset
           return nil
-        # We should signal when we cannot subscribe to a topic due to any reasons
         when :unknown_topic_or_part
           # This is expected and temporary until rdkafka catches up with metadata
           return nil
