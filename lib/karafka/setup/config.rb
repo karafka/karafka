@@ -24,7 +24,12 @@ module Karafka
         # Will create non-existing topics automatically.
         # Note that the broker needs to be configured with `auto.create.topics.enable=true`
         # While it is not recommended in prod, it simplifies work in dev
-        'allow.auto.create.topics': 'true'
+        'allow.auto.create.topics': 'true',
+        # We refresh the cluster state often as newly created topics in dev may not be detected
+        # fast enough. Fast enough means within reasonable time to provide decent user experience
+        # While it's only a one time thing for new topics, it can still be irritating to have to
+        # restart the process.
+        'topic.metadata.refresh.interval.ms': 5_000
       }.freeze
 
       private_constant :KAFKA_DEFAULTS, :DEV_DEFAULTS
