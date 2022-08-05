@@ -17,12 +17,14 @@ RSpec.describe_current do
       end
 
       it { expect(queue.size).to eq(0) }
+      it { expect(queue.statistics).to eq(enqueued: 0, processing: 0) }
     end
 
     context 'when the queue is not closed' do
       before { queue << job1 }
 
       it { expect(queue.size).to eq(1) }
+      it { expect(queue.statistics).to eq(enqueued: 1, processing: 0) }
     end
 
     context 'when we want to add a job from a group that is in processing' do
@@ -38,6 +40,7 @@ RSpec.describe_current do
 
       it { expect { queue << job2 }.not_to raise_error }
       it { expect { queue << job2 }.to change(queue, :size).from(1).to(2) }
+      it { expect(queue.statistics).to eq(enqueued: 1, processing: 0) }
     end
   end
 
@@ -46,6 +49,7 @@ RSpec.describe_current do
 
     it { expect(queue.pop).to eq(job1) }
     it { expect { queue.pop }.not_to change(queue, :size) }
+    it { expect(queue.statistics).to eq(enqueued: 1, processing: 0) }
   end
 
   describe '#complete' do
@@ -233,5 +237,9 @@ RSpec.describe_current do
 
       it { expect(queue.empty?(job.group_id)).to eq(false) }
     end
+  end
+
+  describe '#statistics' do
+    it { expect(queue.statistics).to eq(enqueued: 0, processing: 0) }
   end
 end

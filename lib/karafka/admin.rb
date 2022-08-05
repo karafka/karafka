@@ -3,7 +3,7 @@
 module Karafka
   # Simple admin actions that we can perform via Karafka on our Kafka cluster
   #
-  # @note It always initializes a new admin instace as we want to ensure it is always closed
+  # @note It always initializes a new admin instance as we want to ensure it is always closed
   #   Since admin actions are not performed that often, that should be ok.
   #
   # @note It always uses the primary defined cluster and does not support multi-cluster work.
@@ -31,7 +31,7 @@ module Karafka
       def delete_topic(name)
         with_admin do |admin|
           admin
-            .delete_topic(admin)
+            .delete_topic(name)
             .wait
         end
       end
@@ -45,6 +45,7 @@ module Karafka
 
       private
 
+      # Creates admin instance and yields it. After usage it closes the admin instance
       def with_admin
         admin = ::Rdkafka::Config.new(Karafka::App.config.kafka).admin
         result = yield(admin)
