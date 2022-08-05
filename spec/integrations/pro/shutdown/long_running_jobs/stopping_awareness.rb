@@ -17,18 +17,18 @@ class Consumer < Karafka::Pro::BaseConsumer
     loop do
       break if Karafka::App.stopping?
 
-      DataCollector[:done] << true
+      DT[:done] << true
 
       sleep(0.1)
     end
 
-    DataCollector[:aware] << true
+    DT[:aware] << true
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
       manual_offset_management true
@@ -37,10 +37,10 @@ draw_routes do
 end
 
 elements = Array.new(10) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[:done].size >= 1
+  DT[:done].size >= 1
 end
 
-assert_equal [true], DataCollector[:aware]
+assert_equal [true], DT[:aware]

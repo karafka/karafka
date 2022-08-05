@@ -9,27 +9,27 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic do
       long_running_job true
     end
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as DataCollector.topic
+  queue_as DT.topic
 
   def perform(value)
-    DataCollector[0] << value
+    DT[0] << value
   end
 end
 
 100.times { |value| Job.perform_later(value) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 100
+  DT[0].size >= 100
 end
 
 100.times do |value|
-  assert_equal value, DataCollector[0][value]
+  assert_equal value, DT[0][value]
 end

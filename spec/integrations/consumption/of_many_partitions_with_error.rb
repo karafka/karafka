@@ -3,12 +3,12 @@
 # When consuming on multiple workers, when one receives a non-critical exception, others should
 # continue processing and the one should be retried
 
-TOPIC = 'integrations_00_10'
-
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 10
   config.initial_offset = 'latest'
 end
+
+create_topic(partitions: 10)
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
     sleep(1)
 
     messages.each do |message|
-      DataCollector[message.partition] << message.raw_payload
+      DT[message.partition] << message.raw_payload
     end
 
     raise StandardError if @count == 1 && messages.first.partition == 5
@@ -32,9 +32,9 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
+  consumer_group DT.consumer_group do
     # Special topic with 10 partitions available
-    topic TOPIC do
+    topic DT.topic do
       consumer Consumer
     end
   end
@@ -46,15 +46,15 @@ Thread.new { Karafka::Server.run }
 # Give it some time to boot and connect before dispatching messages
 sleep(5)
 
-10.times { |i| produce(TOPIC, SecureRandom.uuid, partition: i) }
+10.times { |i| produce(DT.topic, SecureRandom.uuid, partition: i) }
 
 wait_until do
-  DataCollector.data.values.flatten.size >= 11
+  DT.data.values.flatten.size >= 11
 end
 
 # 10 partitions are expected
-assert_equal 10, DataCollector.data.size
+assert_equal 10, DT.data.size
 # In 11 messages are expected as insert in one will be retried due to error
-assert_equal 11, DataCollector.data.values.flatten.count
+assert_equal 11, DT.data.values.flatten.count
 # We sent 10, we expect 10
-assert_equal 10, DataCollector.data.values.flatten.uniq.count
+assert_equal 10, DT.data.values.flatten.uniq.count

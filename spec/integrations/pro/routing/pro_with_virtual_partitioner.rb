@@ -8,17 +8,17 @@ setup_karafka do |config|
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topics[0] do
+  consumer_group DT.consumer_group do
+    topic DT.topics[0] do
       consumer Class.new(Karafka::Pro::BaseConsumer)
       virtual_partitioner ->(msg) { msg.raw_payload }
     end
 
-    topic DataCollector.topics[1] do
+    topic DT.topics[1] do
       consumer Class.new(Karafka::Pro::BaseConsumer)
     end
 
-    topic DataCollector.topics[2] do
+    topic DT.topics[2] do
       consumer Class.new(Karafka::Pro::BaseConsumer)
     end
   end

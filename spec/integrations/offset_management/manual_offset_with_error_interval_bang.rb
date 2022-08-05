@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
       # After 25 we should mark as consumed
       mark_as_consumed!(message) if @consumed == 24
 
-      DataCollector[0] << message.raw_payload
+      DT[0] << message.raw_payload
     end
   end
 end
@@ -28,13 +28,13 @@ end
 draw_routes(Consumer)
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 125
+  DT[0].size >= 125
 end
 
 # We need unique as due to error and manual offset, some will be duplicated
-assert_equal elements, DataCollector[0].uniq
-assert_equal 125, DataCollector[0].size
-assert_equal 1, DataCollector.data.size
+assert_equal elements, DT[0].uniq
+assert_equal 125, DT[0].size
+assert_equal 1, DT.data.size

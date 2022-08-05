@@ -16,36 +16,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_CREATE_TOPICS:
-        "integrations_00_02:2:1,\
-         integrations_01_02:2:1,\
-         integrations_02_02:2:1,\
-         integrations_03_02:2:1,\
-         integrations_04_02:2:1,\
-         integrations_05_02:2:1,\
-         integrations_06_02:2:1,\
-         integrations_07_02:2:1,\
-         integrations_08_02:2:1,\
-         integrations_09_02:2:1,\
-         integrations_10_02:2:1,\
-         integrations_11_02:2:1,\
-         integrations_12_02:2:1,\
-         integrations_13_02:2:1,\
-         integrations_14_02:2:1,\
-         integrations_15_02:2:1,\
-         integrations_16_02:2:1,\
-         integrations_17_02:2:1,\
-         integrations_18_02:2:1,\
-         integrations_19_02:2:1,\
-         integrations_20_02:2:1,\
-         integrations_21_02:2:1,\
-         integrations_00_03:3:1,\
-         integrations_01_03:3:1,\
-         integrations_02_03:3:1,\
-         integrations_03_03:3:1,\
-         integrations_04_03:3:1,\
-         integrations_00_10:10:1,\
-         integrations_01_10:10:1,\
-         benchmarks_00_01:1:1,\
+        "benchmarks_00_01:1:1,\
          benchmarks_00_05:5:1,\
          benchmarks_01_05:5:1,\
          benchmarks_00_10:10:1"

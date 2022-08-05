@@ -3,11 +3,11 @@
 # When Karafka looses a given partition but later gets it back, it should pick it up from the last
 # offset committed without any problems
 
-TOPIC = 'integrations_10_02'
-
 setup_karafka do |config|
   config.concurrency = 4
 end
+
+create_topic(partitions: 2)
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -17,20 +17,20 @@ class Consumer < Karafka::BaseConsumer
       # We store offsets only until revoked
       return unless mark_as_consumed!(message)
 
-      DataCollector[partition] << message.offset
+      DT[partition] << message.offset
     end
 
     return if @marked
 
     # For partition we have lost this will run twice
-    DataCollector[:partitions] << partition
+    DT[:partitions] << partition
     @marked = true
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic TOPIC do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
     end
   end
@@ -39,8 +39,8 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(TOPIC, '1', partition: 0)
-      produce(TOPIC, '1', partition: 1)
+      produce(DT.topic, '1', partition: 0)
+      produce(DT.topic, '1', partition: 1)
     end
 
     sleep(0.5)
@@ -55,10 +55,10 @@ consumer = setup_rdkafka_consumer
 other = Thread.new do
   sleep(10)
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DT.topic)
 
   consumer.each do |message|
-    DataCollector[:jumped] << message
+    DT[:jumped] << message
     consumer.store_offset(message)
     break
   end
@@ -69,21 +69,21 @@ other = Thread.new do
 end
 
 start_karafka_and_wait_until do
-  other.join && DataCollector[:partitions].size >= 3
+  other.join && DT[:partitions].size >= 3
 end
 
-revoked_partition = DataCollector[:jumped].first.partition
-jumped_offset = DataCollector[:jumped].first.offset
+revoked_partition = DT[:jumped].first.partition
+jumped_offset = DT[:jumped].first.offset
 
-assert_equal 1, DataCollector[:jumped].size
+assert_equal 1, DT[:jumped].size
 
 # This single one should have been consumed by a different process
-assert_equal false, DataCollector.data[revoked_partition].include?(jumped_offset)
+assert_equal false, DT.data[revoked_partition].include?(jumped_offset)
 
 # We should have all the others in proper order and without any other missing
 previous = nil
 
-DataCollector.data[revoked_partition].each do |offset|
+DT.data[revoked_partition].each do |offset|
   unless previous
     previous = offset
     next

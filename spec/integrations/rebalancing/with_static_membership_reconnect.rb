@@ -6,32 +6,26 @@
 
 require 'securerandom'
 
-TOPIC = 'integrations_01_02'
-
 setup_karafka do |config|
   config.initial_offset = 'latest'
   config.kafka[:'group.instance.id'] = SecureRandom.uuid
 end
 
+create_topic(partitions: 2)
+
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[:process2] << [message.raw_payload.to_i, message.partition]
+      DT[:process2] << [message.raw_payload.to_i, message.partition]
     end
   end
 
   def shutdown
-    DataCollector[:process2] << :stop
+    DT[:process2] << :stop
   end
 end
 
-draw_routes do
-  consumer_group TOPIC do
-    topic TOPIC do
-      consumer Consumer
-    end
-  end
-end
+draw_routes(Consumer)
 
 # @note We use external messages producer here, as the one from Karafka will be closed upon first
 # process shutdown.
@@ -47,7 +41,7 @@ Thread.new do
   loop do
     2.times do |i|
       PRODUCER.produce_sync(
-        topic: TOPIC,
+        topic: DT.topic,
         payload: nr.to_s,
         partition: i
       )
@@ -70,12 +64,12 @@ other = Thread.new do
     'auto.offset.reset': 'latest'
   )
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DT.topic)
 
   consumer.each do |message|
-    DataCollector[:process1] << [message.payload.to_i, message.partition]
+    DT[:process1] << [message.payload.to_i, message.partition]
 
-    break if DataCollector.data.key?(:terminate)
+    break if DT.data.key?(:terminate)
   end
 
   consumer.close
@@ -85,7 +79,7 @@ end
 sleep 5
 
 start_karafka_and_wait_until do
-  DataCollector[:process2].size >= 20
+  DT[:process2].size >= 20
 end
 
 # Wait to make sure, that the process 1 does not get the partitions back
@@ -94,26 +88,26 @@ sleep 5
 # After stopping start once again
 
 start_karafka_and_wait_until do
-  DataCollector[:process2].size >= 100
+  DT[:process2].size >= 100
 end
 
 # Give it some time, so we allow (potentially) to assing all messages to process 1
 sleep 5
 
 # Close the first consumer instance
-DataCollector[:terminate] = true
+DT[:terminate] = true
 
 other.join
 
 # Initially the first started producer should get some data from both partitions before the first
 # rebalance
-assert_equal [0, 1], DataCollector[:process1].map(&:last).uniq.sort
+assert_equal [0, 1], DT[:process1].map(&:last).uniq.sort
 
 # Second process should have been stopped two times
-stops_count = DataCollector[:process2].count { |message| message == :stop }
+stops_count = DT[:process2].count { |message| message == :stop }
 assert_equal 2, stops_count
 
-process2_messages = DataCollector[:process2].select { |message| message.is_a?(Array) }
+process2_messages = DT[:process2].select { |message| message.is_a?(Array) }
 
 # Second process should have only one partition as joined later with static membership
 assert_equal 1, process2_messages.map(&:last).uniq.size
@@ -134,11 +128,11 @@ end
 
 # After the stop, none of the messages should be fetched by the process 1 when process 2 was not
 # consuming
-after = DataCollector[:process2].index(:stop)
-post_rebalance_messages = DataCollector
+after = DT[:process2].index(:stop)
+post_rebalance_messages = DT
                           .data[:process2]
                           .select
                           .with_index { |_, index| index > after }
                           .select { |message| message.is_a?(Array) }
 
-assert (DataCollector[:process1] & post_rebalance_messages).empty?
+assert (DT[:process1] & post_rebalance_messages).empty?

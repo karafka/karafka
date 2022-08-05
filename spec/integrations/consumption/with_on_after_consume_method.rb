@@ -8,7 +8,7 @@ setup_karafka
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[message.metadata.partition] << message.raw_payload
+      DT[message.metadata.partition] << message.raw_payload
     end
   end
 
@@ -16,7 +16,7 @@ class Consumer < Karafka::BaseConsumer
   # compare that later
   def on_after_consume
     messages.each do |message|
-      DataCollector["post-#{message.metadata.partition}"] << message.raw_payload
+      DT["post-#{message.metadata.partition}"] << message.raw_payload
     end
   end
 end
@@ -24,11 +24,11 @@ end
 draw_routes(Consumer)
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 100
+  DT[0].size >= 100
 end
 
-assert_equal DataCollector['post-0'], DataCollector[0]
-assert_equal 2, DataCollector.data.size
+assert_equal DT['post-0'], DT[0]
+assert_equal 2, DT.data.size

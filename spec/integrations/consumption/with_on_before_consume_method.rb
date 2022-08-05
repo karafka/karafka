@@ -10,13 +10,13 @@ class Consumer < Karafka::BaseConsumer
   # this and we can compare that later
   def on_before_consume
     messages.each do |message|
-      DataCollector["prep-#{message.metadata.partition}"] << message.raw_payload
+      DT["prep-#{message.metadata.partition}"] << message.raw_payload
     end
   end
 
   def consume
     messages.each do |message|
-      DataCollector[message.metadata.partition] << message.raw_payload
+      DT[message.metadata.partition] << message.raw_payload
     end
   end
 end
@@ -24,11 +24,11 @@ end
 draw_routes(Consumer)
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 100
+  DT[0].size >= 100
 end
 
-assert_equal DataCollector['prep-0'], DataCollector[0]
-assert_equal 2, DataCollector.data.size
+assert_equal DT['prep-0'], DT[0]
+assert_equal 2, DT.data.size

@@ -29,4 +29,4 @@ assert event[:error].is_a?(Rdkafka::RdkafkaError)
 assert_equal false, event[:subscription_group_id].empty?
 # We remap the consumer group id to a consumer group, thus the raw name is just a part of the
 # full name
-assert event[:consumer_group_id].include?(DataCollector.consumer_groups.first)
+assert event[:consumer_group_id].include?(DT.consumer_groups.first)

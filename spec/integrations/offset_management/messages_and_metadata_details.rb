@@ -7,7 +7,7 @@ setup_karafka
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[message.metadata.partition] << message
+      DT[message.metadata.partition] << message
     end
   end
 end
@@ -15,13 +15,13 @@ end
 draw_routes(Consumer)
 
 elements = Array.new(10) { SecureRandom.uuid }
-elements.each { |number| produce(DataCollector.topic, number) }
+elements.each { |number| produce(DT.topic, number) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 10
+  DT[0].size >= 10
 end
 
-DataCollector[0].each_with_index do |message, index|
+DT[0].each_with_index do |message, index|
   assert_equal Karafka::Messages::Message, message.class
   assert_equal Karafka::Messages::Metadata, message.metadata.class
   assert_equal String, message.raw_payload.class
@@ -30,9 +30,9 @@ DataCollector[0].each_with_index do |message, index|
   assert_equal 0, message.partition
   assert_equal Time, message.timestamp.class
   assert_equal index, message.offset
-  assert_equal DataCollector.topic, message.topic
+  assert_equal DT.topic, message.topic
   assert_equal nil, message.key
   assert_equal false, message.deserialized?
 end
 
-DataCollector.clear
+DT.clear

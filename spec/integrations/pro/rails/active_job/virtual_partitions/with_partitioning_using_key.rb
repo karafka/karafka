@@ -11,15 +11,15 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic do
       virtual_partitioner ->(job) { job.key }
     end
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as DataCollector.topic
+  queue_as DT.topic
 
   karafka_options(
     dispatch_method: :produce_sync,
@@ -28,7 +28,7 @@ class Job < ActiveJob::Base
   )
 
   def perform(value1)
-    DataCollector[0] << value1
+    DT[0] << value1
   end
 end
 
@@ -42,11 +42,11 @@ order_without_vp = []
 end
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 20
+  DT[0].size >= 20
 end
 
-assert_equal DataCollector[0].size, order_without_vp.size
+assert_equal DT[0].size, order_without_vp.size
 
 # Without virtual partitions we should get a consistent order, but with them and concurrent
 # processing, it should not be like that
-assert DataCollector[0] != order_without_vp
+assert DT[0] != order_without_vp

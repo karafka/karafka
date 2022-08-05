@@ -16,33 +16,33 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector.data[:consume_object_ids] << object_id
+    DT.data[:consume_object_ids] << object_id
 
     sleep(15)
 
-    DataCollector.data[:markings] << mark_as_consumed!(messages.last)
-    DataCollector.data[:revocations] << revoked?
+    DT.data[:markings] << mark_as_consumed!(messages.last)
+    DT.data[:revocations] << revoked?
 
-    DataCollector[:done] << true
+    DT[:done] << true
   end
 
   def revoked
-    DataCollector.data[:revoked_object_ids] << object_id
+    DT.data[:revoked_object_ids] << object_id
   end
 end
 
 draw_routes(Consumer)
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[:done].size >= 2
+  DT[:done].size >= 2
 end
 
-assert_equal 2, DataCollector.data[:consume_object_ids].size
-assert_equal 2, DataCollector.data[:consume_object_ids].uniq.size
-assert_equal 2, DataCollector.data[:revoked_object_ids].size
-assert_equal 2, DataCollector.data[:revoked_object_ids].uniq.size
-assert_equal [false, false], DataCollector.data[:markings]
-assert_equal [true, true], DataCollector.data[:revocations]
+assert_equal 2, DT.data[:consume_object_ids].size
+assert_equal 2, DT.data[:consume_object_ids].uniq.size
+assert_equal 2, DT.data[:revoked_object_ids].size
+assert_equal 2, DT.data[:revoked_object_ids].uniq.size
+assert_equal [false, false], DT.data[:markings]
+assert_equal [true, true], DT.data[:revocations]

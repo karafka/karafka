@@ -7,14 +7,14 @@
 setup_karafka
 
 draw_routes do
-  consumer_group DataCollector.consumer_groups.first do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_groups.first do
+    topic DT.topic do
       consumer Class.new
     end
   end
 
-  consumer_group DataCollector.consumer_groups.last do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_groups.last do
+    topic DT.topic do
       consumer Class.new
     end
   end

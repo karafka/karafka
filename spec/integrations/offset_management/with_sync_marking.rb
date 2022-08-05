@@ -8,7 +8,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       mark_as_consumed!(message)
-      DataCollector[0] << message.offset
+      DT[0] << message.offset
     end
   rescue StandardError
     exit! 5
@@ -17,8 +17,8 @@ end
 
 draw_routes(Consumer)
 
-Array.new(100) { SecureRandom.uuid }.each { |value| produce(DataCollector.topic, value) }
+Array.new(100) { SecureRandom.uuid }.each { |value| produce(DT.topic, value) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 100
+  DT[0].size >= 100
 end

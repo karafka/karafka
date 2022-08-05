@@ -3,13 +3,13 @@
 # When there is a rebalance and we get the partition back, we should start consuming with a new
 # consumer instance. We should use one before and one after we got the partition back.
 
-TOPIC = 'integrations_11_02'
-
 setup_karafka do |config|
   config.license.token = pro_license_token
   config.concurrency = 4
   config.initial_offset = 'latest'
 end
+
+create_topic(partitions: 2)
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
@@ -19,7 +19,7 @@ class Consumer < Karafka::Pro::BaseConsumer
 
     partition = messages.metadata.partition
 
-    DataCollector["#{partition}-object_ids"] << object_id
+    DT["#{partition}-object_ids"] << object_id
 
     messages.each do |message|
       return unless mark_as_consumed!(message)
@@ -29,13 +29,13 @@ class Consumer < Karafka::Pro::BaseConsumer
   end
 
   def revoked
-    DataCollector[:revoked] << true
+    DT[:revoked] << true
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic TOPIC do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
@@ -45,8 +45,8 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(TOPIC, '1', partition: 0)
-      produce(TOPIC, '1', partition: 1)
+      produce(DT.topic, '1', partition: 0)
+      produce(DT.topic, '1', partition: 1)
     end
 
     sleep(0.5)
@@ -61,15 +61,15 @@ consumer = setup_rdkafka_consumer
 other = Thread.new do
   sleep(0.1) until got_both?
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DT.topic)
 
   consumer.each do |message|
-    DataCollector[:jumped] << message
+    DT[:jumped] << message
 
     consumer.store_offset(message)
     consumer.commit(nil, false)
 
-    next unless DataCollector[:jumped].size >= 20
+    next unless DT[:jumped].size >= 20
 
     break
   end
@@ -79,19 +79,19 @@ end
 
 # This part makes sure we do not run rebalance until karafka got both partitions work to do
 def got_both?
-  DataCollector['0-object_ids'].uniq.size >= 1 &&
-    DataCollector['1-object_ids'].uniq.size >= 1
+  DT['0-object_ids'].uniq.size >= 1 &&
+    DT['1-object_ids'].uniq.size >= 1
 end
 
 start_karafka_and_wait_until do
   other.join &&
     got_both? &&
-    DataCollector['0-object_ids'].uniq.size >= 2 &&
-    DataCollector['1-object_ids'].uniq.size >= 2
+    DT['0-object_ids'].uniq.size >= 2 &&
+    DT['1-object_ids'].uniq.size >= 2
 end
 
 # Since there are two rebalances here, one of those may actually have 3 ids, that's why we check
 # that it is two or more
-assert DataCollector.data['0-object_ids'].uniq.size >= 2
-assert DataCollector.data['1-object_ids'].uniq.size >= 2
-assert !DataCollector[:revoked].empty?
+assert DT.data['0-object_ids'].uniq.size >= 2
+assert DT.data['1-object_ids'].uniq.size >= 2
+assert !DT[:revoked].empty?

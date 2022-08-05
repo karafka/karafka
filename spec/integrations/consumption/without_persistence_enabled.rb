@@ -10,17 +10,17 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector[0] << object_id
+    DT[0] << object_id
   end
 end
 
 draw_routes(Consumer)
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 100
+  DT[0].size >= 100
 end
 
-assert_equal 100, DataCollector[0].uniq.size
+assert_equal 100, DT[0].uniq.size

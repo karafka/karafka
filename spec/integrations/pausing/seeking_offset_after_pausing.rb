@@ -22,18 +22,18 @@ class Consumer < Karafka::BaseConsumer
     end
 
     messages.each do |message|
-      DataCollector[:messages] << message.offset
+      DT[:messages] << message.offset
     end
   end
 end
 
 draw_routes(Consumer)
 
-20.times { |i| produce(DataCollector.topic, i.to_s) }
+20.times { |i| produce(DT.topic, i.to_s) }
 
 start_karafka_and_wait_until do
-  DataCollector[:messages].size > 20
+  DT[:messages].size > 20
 end
 
-assert DataCollector[:messages].size > 20
-assert_equal 20, DataCollector[:messages].uniq.size
+assert DT[:messages].size > 20
+assert_equal 20, DT[:messages].uniq.size

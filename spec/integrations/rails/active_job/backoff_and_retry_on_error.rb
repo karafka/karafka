@@ -6,20 +6,20 @@ setup_karafka(allow_errors: true)
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as DataCollector.topic
+  queue_as DT.topic
 
   def perform
-    if DataCollector[0].size.zero?
-      DataCollector[0] << '1'
+    if DT[0].size.zero?
+      DT[0] << '1'
       raise StandardError
     else
-      DataCollector[0] << '2'
+      DT[0] << '2'
     end
   end
 end
@@ -27,8 +27,8 @@ end
 Job.perform_later
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 2
+  DT[0].size >= 2
 end
 
-assert_equal '1', DataCollector[0][0]
-assert_equal '2', DataCollector[0][1]
+assert_equal '1', DT[0][0]
+assert_equal '2', DT[0][1]

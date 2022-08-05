@@ -10,8 +10,6 @@
 # can be sure, is that if you have messages with key `c`, they will always go to one of the
 # virtual consumers. Virtual consumer instance is **not** warrantied.
 
-TOPIC = 'integrations_20_02'
-
 setup_karafka do |config|
   config.license.token = pro_license_token
   config.concurrency = 10
@@ -19,19 +17,21 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
+create_topic(partitions: 2)
+
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[0] << [message.key, message.offset]
+      DT[0] << [message.key, message.offset]
     end
 
-    DataCollector[:objects_ids] << object_id
+    DT[:objects_ids] << object_id
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic TOPIC do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner ->(message) { message.key }
     end
@@ -39,16 +39,16 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  produce(TOPIC, '1', key: %w[a b c d].sample)
-  produce(TOPIC, '1', key: %w[a b c d].sample)
+  produce(DT.topic, '1', key: %w[a b c d].sample)
+  produce(DT.topic, '1', key: %w[a b c d].sample)
 
-  DataCollector[0].size >= 200
+  DT[0].size >= 200
 end
 
-assert_equal 4, DataCollector[:objects_ids].uniq.size
+assert_equal 4, DT[:objects_ids].uniq.size
 
 # Messages must be order
-DataCollector[0].group_by(&:first).each_value do |messages|
+DT[0].group_by(&:first).each_value do |messages|
   previous = nil
 
   messages.map(&:last).each do |offset|

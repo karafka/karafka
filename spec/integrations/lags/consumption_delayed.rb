@@ -7,7 +7,7 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector[:consumption_lag] = messages.metadata.consumption_lag
+    DT[:consumption_lag] = messages.metadata.consumption_lag
   end
 end
 
@@ -19,16 +19,16 @@ elements.each do |data|
   # We sleep here to make sure, that the lag is not computed on any of the messages except last
   # from a single batch
   sleep(0.5)
-  produce(DataCollector.topic, data)
+  produce(DT.topic, data)
 end
 
 # Give it some time so we have bigger consumption lag
 sleep(2)
 
 start_karafka_and_wait_until do
-  DataCollector.data.key?(:consumption_lag)
+  DT.data.key?(:consumption_lag)
 end
 
-lag = DataCollector[:consumption_lag]
+lag = DT[:consumption_lag]
 
 assert (2_000...4_000).cover?(lag)

@@ -22,7 +22,7 @@ assert_not_equal 0, statistics_events.size
 assert event.is_a?(::Karafka::Core::Monitoring::Event)
 assert_equal 'statistics.emitted', event.id
 assert_not_equal '', event[:subscription_group_id]
-assert event[:consumer_group_id].include?(DataCollector.consumer_groups.first)
+assert event[:consumer_group_id].include?(DT.consumer_groups.first)
 assert event[:statistics].is_a?(Hash)
 assert_equal 0, event[:statistics]['txmsgs_d']
 assert event[:statistics]['name'].include?('karafka')

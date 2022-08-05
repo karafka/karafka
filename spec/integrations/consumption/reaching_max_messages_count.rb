@@ -13,7 +13,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[:data] << message.offset
+      DT[:data] << message.offset
     end
 
     sleep(0.2)
@@ -22,12 +22,12 @@ end
 
 draw_routes(Consumer)
 
-100.times { |data| produce(DataCollector.topic, data.to_s) }
+100.times { |data| produce(DT.topic, data.to_s) }
 
 started_at = Time.now.to_f
 
 start_karafka_and_wait_until do
-  DataCollector[:data].size >= 20
+  DT[:data].size >= 20
 end
 
 time_taken = Time.now.to_f - started_at

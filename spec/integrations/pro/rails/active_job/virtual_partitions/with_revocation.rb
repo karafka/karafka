@@ -8,8 +8,6 @@
 # in the middle. Since we internally mark as consumed on each job, we can be aware of revocation
 # early enough
 
-TOPIC = 'integrations_17_02'
-
 setup_karafka do |config|
   config.license.token = pro_license_token
   config.max_wait_time = 2_500
@@ -18,18 +16,20 @@ setup_karafka do |config|
   config.shutdown_timeout = 60_000
 end
 
+create_topic(partitions: 2)
+
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic TOPIC do
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic do
       virtual_partitioner ->(_) { rand }
     end
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as TOPIC
+  queue_as DT.topic
 
   karafka_options(
     dispatch_method: :produce_sync,
@@ -40,9 +40,9 @@ class Job < ActiveJob::Base
   # one partition.
   # If this would not happen, we should not stop until all batches of jobs are processed
   def perform(value1)
-    DataCollector[:started] << value1
+    DT[:started] << value1
     sleep(20)
-    DataCollector[:done] << value1
+    DT[:done] << value1
   end
 end
 
@@ -61,7 +61,7 @@ revoked = false
 Thread.new do
   sleep(10)
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DT.topic)
 
   consumer.each do
     unless revoked
@@ -72,10 +72,10 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:started].size >= 4 && revoked
+  DT[:started].size >= 4 && revoked
 end
 
-assert DataCollector[:started].size < 10
-assert DataCollector[:done].size < 10
+assert DT[:started].size < 10
+assert DT[:done].size < 10
 
 consumer.close

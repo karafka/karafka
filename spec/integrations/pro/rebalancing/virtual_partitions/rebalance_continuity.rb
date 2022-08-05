@@ -15,7 +15,7 @@ class Consumer < Karafka::Pro::BaseConsumer
     sleep(1)
 
     messages.each do |message|
-      DataCollector[0] << message.raw_payload
+      DT[0] << message.raw_payload
     end
 
 
@@ -25,8 +25,8 @@ class Consumer < Karafka::Pro::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner ->(_) { rand }
     end
@@ -39,7 +39,7 @@ consumer = setup_rdkafka_consumer
 Thread.new do
   sleep(10)
 
-  consumer.subscribe(DataCollector.topic)
+  consumer.subscribe(DT.topic)
 
   consumer.each do
     # This should never happen.
@@ -50,14 +50,14 @@ end
 
 payloads = Array.new(20) { SecureRandom.uuid }
 
-payloads.each { |payload| produce(DataCollector.topic, payload) }
+payloads.each { |payload| produce(DT.topic, payload) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 20
+  DT[0].size >= 20
 end
 
 # There should be no duplication as our pause should be running for as long as it needs to and it
 # should be un-paused only when done
-assert_equal payloads.sort, DataCollector[0].sort
+assert_equal payloads.sort, DT[0].sort
 
 consumer.close

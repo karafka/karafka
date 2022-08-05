@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## 2.0.1 (Unreleased)
+- Provide `Karafka::Admin` for creation and destruction of topics and fetching cluster info.
+- Update integration specs to always use one-time disposable topics.
+- Remove no longer needed `wait_for_kafka` script.
+
 ## 2.0.0 (2022-08-5)
 
 This changelog describes changes between `1.4` and `2.0`. Please refer to appropriate release notes for changes between particular `rc` releases.

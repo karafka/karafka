@@ -6,11 +6,11 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector[0] << 1
+    DT[0] << 1
   end
 
   def shutdown
-    DataCollector[0] << 1
+    DT[0] << 1
   end
 end
 
@@ -21,4 +21,4 @@ start_karafka_and_wait_until do
   true
 end
 
-assert_equal 0, DataCollector[0].size
+assert_equal 0, DT[0].size

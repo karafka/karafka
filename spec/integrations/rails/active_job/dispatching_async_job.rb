@@ -6,21 +6,21 @@ setup_karafka
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as DataCollector.topic
+  queue_as DT.topic
 
   karafka_options(
     dispatch_method: :produce_async
   )
 
   def perform(value1, value2)
-    DataCollector[0] << value1
-    DataCollector[0] << value2
+    DT[0] << value1
+    DT[0] << value2
   end
 end
 
@@ -30,13 +30,13 @@ VALUE2 = rand
 Job.perform_later(VALUE1, VALUE2)
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 1
+  DT[0].size >= 1
 end
 
 aj_config = Karafka::App.config.internal.active_job
 
 assert_equal aj_config.dispatcher.class, Karafka::ActiveJob::Dispatcher
 assert_equal aj_config.job_options_contract.class, Karafka::ActiveJob::JobOptionsContract
-assert_equal VALUE1, DataCollector[0][0]
-assert_equal VALUE2, DataCollector[0][1]
-assert_equal 1, DataCollector.data.size
+assert_equal VALUE1, DT[0][0]
+assert_equal VALUE2, DT[0][1]
+assert_equal 1, DT.data.size

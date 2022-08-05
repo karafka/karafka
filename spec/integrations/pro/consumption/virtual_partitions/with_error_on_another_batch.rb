@@ -5,7 +5,7 @@
 
 class Listener
   def on_error_occurred(event)
-    DataCollector[:errors] << event
+    DT[:errors] << event
   end
 end
 
@@ -21,16 +21,16 @@ class Consumer < Karafka::Pro::BaseConsumer
     @count ||= 0
     @count += 1
 
-    messages.each { |message| DataCollector[0] << message.raw_payload }
-    DataCollector[1] << object_id
+    messages.each { |message| DT[0] << message.raw_payload }
+    DT[1] << object_id
 
     raise StandardError if @count == 2
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner ->(msg) { msg.raw_payload }
     end
@@ -38,19 +38,19 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  if DataCollector[0].size >= 50
+  if DT[0].size >= 50
     true
   else
     elements = Array.new(5) { SecureRandom.uuid }
-    elements.each { |data| produce(DataCollector.topic, data) }
+    elements.each { |data| produce(DT.topic, data) }
     sleep(1)
     false
   end
 end
 
-assert DataCollector[0].size >= 6
+assert DT[0].size >= 6
 # It should parallelize work
-assert DataCollector[1].uniq.size >= 2
-assert_equal StandardError, DataCollector[:errors].first[:error].class
-assert_equal 'consumer.consume.error', DataCollector[:errors].first[:type]
-assert_equal 'error.occurred', DataCollector[:errors].first.id
+assert DT[1].uniq.size >= 2
+assert_equal StandardError, DT[:errors].first[:error].class
+assert_equal 'consumer.consume.error', DT[:errors].first[:type]
+assert_equal 'error.occurred', DT[:errors].first.id

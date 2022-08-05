@@ -10,7 +10,7 @@ end
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
-    DataCollector[0] << messages.last.offset
+    DT[0] << messages.last.offset
     # We sleep here so we don't end up consuming so many messages, that the second consumer would
     # hang as there would be no data for him
     sleep(1)
@@ -18,8 +18,8 @@ class Consumer < Karafka::Pro::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
@@ -28,23 +28,23 @@ end
 
 payloads = Array.new(20) { SecureRandom.uuid }
 
-payloads.each { |payload| produce(DataCollector.topic, payload) }
+payloads.each { |payload| produce(DT.topic, payload) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 1
+  DT[0].size >= 1
 end
 
 # Now when w pick up the work again, it should start from the first message
 consumer = setup_rdkafka_consumer
 
-consumer.subscribe(DataCollector.topic)
+consumer.subscribe(DT.topic)
 
 consumer.each do |message|
-  DataCollector[1] << message.offset
+  DT[1] << message.offset
 
   break
 end
 
-assert_equal DataCollector[0].last + 1, DataCollector[1].first
+assert_equal DT[0].last + 1, DT[1].first
 
 consumer.close

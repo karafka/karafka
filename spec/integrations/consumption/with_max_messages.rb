@@ -5,17 +5,17 @@
 setup_karafka
 
 elements = Array.new(40) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector[:counts] << messages.size
+    DT[:counts] << messages.size
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       max_messages 5
       max_wait_time 10_000
       consumer Consumer
@@ -24,10 +24,10 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:counts].size >= 8
+  DT[:counts].size >= 8
 end
 
-assert_equal 5, DataCollector[:counts].max
+assert_equal 5, DT[:counts].max
 # We should get at least 8 batches 5 messages each but if there is a hiccup, we may get more with
 # less in each
-assert DataCollector[:counts].size >= 8
+assert DT[:counts].size >= 8

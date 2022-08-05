@@ -6,8 +6,6 @@
 # To simulate this we will run long jobs from two partitions in parallel and we will "loose" one
 # of them and detect this.
 
-TOPIC = 'integrations_03_02'
-
 setup_karafka do |config|
   config.license.token = pro_license_token
   config.max_wait_time = 2_500
@@ -15,18 +13,20 @@ setup_karafka do |config|
   config.shutdown_timeout = 60_000
 end
 
+create_topic(partitions: 2)
+
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic TOPIC do
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic do
       long_running_job true
     end
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as TOPIC
+  queue_as DT.topic
 
   karafka_options(
     dispatch_method: :produce_sync,
@@ -37,9 +37,9 @@ class Job < ActiveJob::Base
   # one partition.
   # If this would not happen, we should not stop until all batches of jobs are processed
   def perform(value1)
-    DataCollector[:started] << value1
+    DT[:started] << value1
     sleep(20)
-    DataCollector[:done] << value1
+    DT[:done] << value1
   end
 end
 
@@ -61,7 +61,7 @@ revoked = false
 Thread.new do
   sleep(10)
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DT.topic)
 
   consumer.each do
     unless revoked
@@ -73,12 +73,12 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:started].size >= 3 && revoked
+  DT[:started].size >= 3 && revoked
 end
 
 # We should finish only one job per each partition as the rest should be stopped from being
 # processed upon revocation
-assert_equal 3, DataCollector[:started].size
-assert_equal 3, DataCollector[:done].size
+assert_equal 3, DT[:started].size
+assert_equal 3, DT[:done].size
 
 consumer.close

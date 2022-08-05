@@ -11,20 +11,20 @@ end
 Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
   next if event.payload[:messages_buffer].empty?
 
-  DataCollector[:batches] << Concurrent::Array.new
+  DT[:batches] << Concurrent::Array.new
 end
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[:batches].last << [message.offset]
+      DT[:batches].last << [message.offset]
     end
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner ->(msg) { msg.raw_payload }
     end
@@ -32,9 +32,9 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  if DataCollector[:batches].map(&:size).sum < 1000
+  if DT[:batches].map(&:size).sum < 1000
     elements = Array.new(100) { SecureRandom.uuid }
-    elements.each { |data| produce(DataCollector.topic, data) }
+    elements.each { |data| produce(DT.topic, data) }
     sleep(1)
     false
   else
@@ -43,14 +43,14 @@ start_karafka_and_wait_until do
 end
 
 # Sort messages from each of the batches
-DataCollector[:batches].map! do |batch|
+DT[:batches].map! do |batch|
   batch.sort_by!(&:first)
 end
 
 previous = nil
 
 # They need to be in order one batch after another
-DataCollector[:batches].flatten.each do |offset|
+DT[:batches].flatten.each do |offset|
   unless previous
     previous = offset
     next

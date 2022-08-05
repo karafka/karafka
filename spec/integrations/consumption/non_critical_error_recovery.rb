@@ -5,7 +5,7 @@
 
 class Listener
   def on_error_occurred(event)
-    DataCollector[:errors] << event
+    DT[:errors] << event
   end
 end
 
@@ -18,32 +18,32 @@ class Consumer < Karafka::BaseConsumer
     @count ||= 0
     @count += 1
 
-    messages.each { |message| DataCollector[0] << message.raw_payload }
-    DataCollector[1] << object_id
+    messages.each { |message| DT[0] << message.raw_payload }
+    DT[1] << object_id
 
     raise StandardError if @count == 1
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
     end
   end
 end
 
 elements = Array.new(5) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
   # We have 5 messages but we retry thus it needs to be minimum 6
-  DataCollector[0].size >= 6
+  DT[0].size >= 6
 end
 
-assert DataCollector[0].size >= 6
-assert_equal 1, DataCollector[1].uniq.size
-assert_equal StandardError, DataCollector[:errors].first[:error].class
-assert_equal 'consumer.consume.error', DataCollector[:errors].first[:type]
-assert_equal 'error.occurred', DataCollector[:errors].first.id
-assert_equal 5, DataCollector[0].uniq.size
+assert DT[0].size >= 6
+assert_equal 1, DT[1].uniq.size
+assert_equal StandardError, DT[:errors].first[:error].class
+assert_equal 'consumer.consume.error', DT[:errors].first[:type]
+assert_equal 'error.occurred', DT[:errors].first.id
+assert_equal 5, DT[0].uniq.size

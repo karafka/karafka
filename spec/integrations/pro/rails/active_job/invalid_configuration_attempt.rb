@@ -11,9 +11,9 @@ setup_active_job
 
 def handle
   yield
-  DataCollector[0] << false
+  DT[0] << false
 rescue Karafka::Errors::InvalidConfigurationError
-  DataCollector[0] << true
+  DT[0] << true
 end
 
 Job = Class.new(ActiveJob::Base)
@@ -34,10 +34,10 @@ handle { Job.karafka_options(partitioner: ->(job) { job.job_id }) }
 handle { Job.karafka_options(partitioner: Partitioner.new) }
 handle { Job.karafka_options(partitioner: NotPartitioner.new) }
 
-assert DataCollector[0][0]
-assert_equal false, DataCollector[0][1]
-assert DataCollector[0][2]
-assert DataCollector[0][3]
-assert_equal false, DataCollector[0][4]
-assert_equal false, DataCollector[0][5]
-assert DataCollector[0][6]
+assert DT[0][0]
+assert_equal false, DT[0][1]
+assert DT[0][2]
+assert DT[0][3]
+assert_equal false, DT[0][4]
+assert_equal false, DT[0][5]
+assert DT[0][6]

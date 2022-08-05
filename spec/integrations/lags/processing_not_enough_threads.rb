@@ -12,13 +12,13 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     sleep(0.2)
-    DataCollector[:processing_lags] << messages.metadata.processing_lag
+    DT[:processing_lags] << messages.metadata.processing_lag
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    DataCollector.topics.first(2).each do |topic_name|
+  consumer_group DT.consumer_group do
+    DT.topics.first(2).each do |topic_name|
       topic topic_name do
         consumer Consumer
       end
@@ -30,9 +30,9 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:processing_lags].size >= 2
+  DT[:processing_lags].size >= 2
 end
 
-max_lag = DataCollector[:processing_lags].max
+max_lag = DT[:processing_lags].max
 
 assert (200..300).cover?(max_lag)
