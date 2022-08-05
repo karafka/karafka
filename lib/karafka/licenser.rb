@@ -26,12 +26,12 @@ module Karafka
       return if license_config.token
 
       begin
-        license_config.token || require('karafka/pro/license')
+        license_config.token || require('karafka-license')
       rescue LoadError
         return
       end
 
-      license_config.token = Karafka::Pro::License.token
+      license_config.token = Karafka::License.token
     end
 
     # Check license and setup license details (if needed)
