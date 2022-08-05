@@ -3,8 +3,6 @@
 # When a job is marked as lrj and a partition is lost, we should be able to get info about this
 # by calling the `#revoked?` method.
 
-TOPIC = 'integrations_04_02'
-
 setup_karafka do |config|
   config.max_messages = 10
   config.max_wait_time = 5_000
@@ -16,6 +14,8 @@ setup_karafka do |config|
   config.shutdown_timeout = 120_000
   config.initial_offset = 'latest'
 end
+
+create_topic(partitions: 2)
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
@@ -31,7 +31,7 @@ end
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
-    topic TOPIC do
+    topic DataCollector.topic do
       consumer Consumer
       long_running_job true
     end
@@ -45,7 +45,7 @@ Thread.new do
   sleep(0.1) until Karafka::App.running?
   sleep(10)
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DataCollector.topic)
   consumer.poll(1_000)
 end
 
@@ -54,8 +54,8 @@ Thread.new do
 
   5.times do
     10.times do
-      produce(TOPIC, '1', partition: 0)
-      produce(TOPIC, '1', partition: 1)
+      produce(DataCollector.topic, '1', partition: 0)
+      produce(DataCollector.topic, '1', partition: 1)
     rescue StandardError
       nil
     end

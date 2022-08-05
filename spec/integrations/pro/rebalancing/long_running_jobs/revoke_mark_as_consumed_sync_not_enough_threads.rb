@@ -5,13 +5,13 @@
 # that the revocation took place. It should not indicate this before we mark as consumed as this
 # state could not be set on a consumer in the revocation job becuase it is pending in the queue.
 
-TOPIC = 'integrations_08_02'
-
 setup_karafka do |config|
   config.license.token = pro_license_token
   config.concurrency = 2
   config.shutdown_timeout = 60_000
 end
+
+create_topic(partitions: 2)
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
@@ -33,7 +33,7 @@ end
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
-    topic TOPIC do
+    topic DataCollector.topic do
       consumer Consumer
       long_running_job true
     end
@@ -41,8 +41,8 @@ draw_routes do
 end
 
 10.times do
-  produce(TOPIC, '1', partition: 0)
-  produce(TOPIC, '1', partition: 1)
+  produce(DataCollector.topic, '1', partition: 0)
+  produce(DataCollector.topic, '1', partition: 1)
 end
 
 # We need a second producer to trigger a rebalance
@@ -51,7 +51,7 @@ consumer = setup_rdkafka_consumer
 Thread.new do
   sleep(10)
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DataCollector.topic)
 
   consumer.each do |message|
     DataCollector[:revoked_data] << message.partition

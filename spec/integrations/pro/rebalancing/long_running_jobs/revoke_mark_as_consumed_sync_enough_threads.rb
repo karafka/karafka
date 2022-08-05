@@ -8,14 +8,14 @@
 # This will work only when we have enough threads to be able to run the revocation jobs prior to
 # finishing the processing. Otherwise when enqueued, will run after (for this we have another spec)
 
-TOPIC = 'integrations_07_02'
-
 setup_karafka do |config|
   config.license.token = pro_license_token
   # We need 4: two partitions processing and non-blocking revokes
   config.concurrency = 4
   config.shutdown_timeout = 60_000
 end
+
+create_topic(partitions: 2)
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
@@ -37,7 +37,7 @@ end
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
-    topic TOPIC do
+    topic DataCollector.topic do
       consumer Consumer
       long_running_job true
     end
@@ -45,8 +45,8 @@ draw_routes do
 end
 
 10.times do
-  produce(TOPIC, '1', partition: 0)
-  produce(TOPIC, '1', partition: 1)
+  produce(DataCollector.topic, '1', partition: 0)
+  produce(DataCollector.topic, '1', partition: 1)
 end
 
 # We need a second producer to trigger a rebalance
@@ -55,7 +55,7 @@ consumer = setup_rdkafka_consumer
 Thread.new do
   sleep(10)
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DataCollector.topic)
 
   consumer.each do |message|
     DataCollector[:revoked_data] << message.partition
