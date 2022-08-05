@@ -5,20 +5,20 @@ RSpec.describe_current do
   let(:topics) { Karafka::Admin.cluster_info.topics.map { |tp| tp[:topic_name] } }
 
   describe '#create_topic and #cluster_info' do
-    context 'create topic with one partition' do
+    context 'when creating topic with one partition' do
       before { described_class.create_topic(name, 1, 1) }
 
       it { expect(topics).to include(name) }
     end
 
-    context 'create topic with two partitions' do
+    context 'when creating topic with two partitions' do
       before { described_class.create_topic(name, 2, 1) }
 
       it { expect(topics).to include(name) }
     end
   end
 
-  context '#delete_topic and #cluster_info' do
+  describe '#delete_topic and #cluster_info' do
     before do
       described_class.create_topic(name, 2, 1)
       described_class.delete_topic(name)
