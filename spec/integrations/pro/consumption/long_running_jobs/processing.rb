@@ -17,13 +17,13 @@ class Consumer < Karafka::Pro::BaseConsumer
     # be kicked out of the group
     sleep(15)
 
-    DataCollector[0] << messages.first.raw_payload
+    DT[0] << messages.first.raw_payload
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
@@ -32,10 +32,10 @@ end
 
 payloads = Array.new(2) { SecureRandom.uuid }
 
-payloads.each { |payload| produce(DataCollector.topic, payload) }
+payloads.each { |payload| produce(DT.topic, payload) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 2
+  DT[0].size >= 2
 end
 
-assert_equal payloads, DataCollector[0]
+assert_equal payloads, DT[0]

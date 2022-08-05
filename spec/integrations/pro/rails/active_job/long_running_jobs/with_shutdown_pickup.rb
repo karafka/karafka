@@ -14,8 +14,8 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic do
       long_running_job true
       manual_offset_management true
     end
@@ -23,7 +23,7 @@ draw_routes do
 end
 
 class Job < ActiveJob::Base
-  queue_as DataCollector.topic
+  queue_as DT.topic
 
   karafka_options(
     dispatch_method: :produce_sync
@@ -31,19 +31,19 @@ class Job < ActiveJob::Base
 
   def perform(value)
     # We add sleep to simulate work being done, so it ain't done too fast before we shutdown
-    if DataCollector[:stopping].size.zero?
-      DataCollector[:stopping] << true
+    if DT[:stopping].size.zero?
+      DT[:stopping] << true
       sleep(5)
     end
 
-    DataCollector[0] << value
+    DT[0] << value
   end
 end
 
 5.times { |value| Job.perform_later(value) }
 
 start_karafka_and_wait_until do
-  !DataCollector[:stopping].size.zero?
+  !DT[:stopping].size.zero?
 end
 
 # Give Karafka time to finalize everything
@@ -52,10 +52,10 @@ sleep(2)
 # We need a second producer to check where fi started from
 consumer = setup_rdkafka_consumer
 
-consumer.subscribe(DataCollector.topic)
+consumer.subscribe(DT.topic)
 
 consumer.each do |message|
-  DataCollector[1] << message.offset
+  DT[1] << message.offset
 
   # One is enough
   break
@@ -63,4 +63,4 @@ end
 
 consumer.close
 
-assert_equal DataCollector[0][0] + 1, DataCollector[1][0]
+assert_equal DT[0][0] + 1, DT[1][0]

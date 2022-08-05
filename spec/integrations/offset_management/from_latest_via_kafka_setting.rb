@@ -10,12 +10,12 @@ before = Array.new(10) { SecureRandom.uuid }
 after = Array.new(10) { SecureRandom.uuid }
 
 # Sends some messages before starting Karafka - those should not be received
-before.each { |number| produce(DataCollector.topic, number) }
+before.each { |number| produce(DT.topic, number) }
 
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[message.metadata.partition] << message.raw_payload
+      DT[message.metadata.partition] << message.raw_payload
     end
   end
 end
@@ -29,11 +29,11 @@ Thread.new { Karafka::Server.run }
 sleep(10)
 
 # Dispatch the messages that should be consumed
-after.each { |number| produce(DataCollector.topic, number) }
+after.each { |number| produce(DT.topic, number) }
 
 wait_until do
-  DataCollector[0].size >= 10
+  DT[0].size >= 10
 end
 
-assert_equal after, DataCollector[0]
-assert_equal 1, DataCollector.data.size
+assert_equal after, DT[0]
+assert_equal 1, DT.data.size

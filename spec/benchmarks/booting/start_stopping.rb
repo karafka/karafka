@@ -11,7 +11,7 @@ TOPICS = 5
 
 100.times do
   TOPICS.times do |i|
-    Karafka.producer.buffer(topic: DataCollector.topics[i], payload: 'a')
+    Karafka.producer.buffer(topic: DT.topics[i], payload: 'a')
   end
 
   Karafka.producer.flush_sync
@@ -25,7 +25,7 @@ end
 
 Karafka::App.routes.draw do
   TOPICS.times do |i|
-    topic DataCollector.topics[i] do
+    topic DT.topics[i] do
       max_messages 1
       max_wait_time 1_000
       consumer Consumer

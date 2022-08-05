@@ -15,27 +15,27 @@ class Consumer < Karafka::Pro::BaseConsumer
   def consume
     sleep(15)
 
-    DataCollector[0] << Time.now
+    DT[0] << Time.now
   end
 
   def shutdown
-    DataCollector[1] << Time.now
+    DT[1] << Time.now
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
   end
 end
 
-5.times { produce(DataCollector.topic, '1') }
+5.times { produce(DT.topic, '1') }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 1
+  DT[0].size >= 1
 end
 
-assert DataCollector[0].last < DataCollector[1].last
+assert DT[0].last < DT[1].last

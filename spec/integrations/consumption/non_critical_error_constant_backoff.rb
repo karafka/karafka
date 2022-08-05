@@ -14,11 +14,11 @@ end
 class Consumer < Karafka::BaseConsumer
   def initialize
     super
-    DataCollector[0] << Time.now.to_f
+    DT[0] << Time.now.to_f
   end
 
   def consume
-    DataCollector[0] << Time.now.to_f
+    DT[0] << Time.now.to_f
 
     raise StandardError
   end
@@ -26,10 +26,10 @@ end
 
 draw_routes(Consumer)
 
-produce(DataCollector.topic, '0')
+produce(DT.topic, '0')
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 10
+  DT[0].size >= 10
 end
 
 # Backoff time before next exception occurrence (not before resume).
@@ -39,7 +39,7 @@ BACKOFF_RANGE = 0..1.5
 
 previous = nil
 
-DataCollector[0].each do |timestamp|
+DT[0].each do |timestamp|
   unless previous
     previous = timestamp
     next

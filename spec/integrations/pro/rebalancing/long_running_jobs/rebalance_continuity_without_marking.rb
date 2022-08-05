@@ -18,13 +18,13 @@ class Consumer < Karafka::Pro::BaseConsumer
     # be kicked out of the group
     sleep(15)
 
-    DataCollector[0] << messages.first.raw_payload
+    DT[0] << messages.first.raw_payload
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
@@ -37,20 +37,20 @@ consumer = setup_rdkafka_consumer
 Thread.new do
   sleep(10)
 
-  consumer.subscribe(DataCollector.topic)
+  consumer.subscribe(DT.topic)
   consumer.poll(1_000)
 end
 
 payloads = Array.new(2) { SecureRandom.uuid }
 
-payloads.each { |payload| produce(DataCollector.topic, payload) }
+payloads.each { |payload| produce(DT.topic, payload) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 3
+  DT[0].size >= 3
 end
 
 # First one will be consumed twice as first consumption happens with a rebalance. When this
 # happens, we start consuming from where we left, which is from the same
-assert_equal [payloads.first, payloads].flatten, DataCollector[0]
+assert_equal [payloads.first, payloads].flatten, DT[0]
 
 consumer.close

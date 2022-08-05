@@ -13,12 +13,12 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
-create_topic(partitions: 2, name: DataCollector.topics[1])
+create_topic(partitions: 2, name: DT.topics[1])
 
 class Consumer < Karafka::BaseConsumer
   def consume
     if messages.metadata.partition.zero?
-      DataCollector[:ticks] << true
+      DT[:ticks] << true
       pause(messages.first.offset, 500)
 
       return
@@ -27,15 +27,15 @@ class Consumer < Karafka::BaseConsumer
     sleep(0.5)
 
     messages.each do |message|
-      DataCollector[:partitions] << message.partition
+      DT[:partitions] << message.partition
     end
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
+  consumer_group DT.consumer_group do
     # Special topic with 2 partitions available
-    topic DataCollector.topics[1] do
+    topic DT.topics[1] do
       consumer Consumer
     end
   end
@@ -46,19 +46,19 @@ draw_routes(Consumer)
 Thread.new do
   sleep(5)
 
-  sleep(0.1) while DataCollector[:running].empty?
+  sleep(0.1) while DT[:running].empty?
 
   100.times do
     2.times do |partition|
-      produce(DataCollector.topics[1], SecureRandom.uuid, partition: partition)
+      produce(DT.topics[1], SecureRandom.uuid, partition: partition)
     end
   end
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:running] << true
-  DataCollector[:partitions].size >= 100
+  DT[:running] << true
+  DT[:partitions].size >= 100
 end
 
-assert_equal [1], DataCollector[:partitions].uniq
-assert DataCollector[:ticks].count > 1
+assert_equal [1], DT[:partitions].uniq
+assert DT[:ticks].count > 1

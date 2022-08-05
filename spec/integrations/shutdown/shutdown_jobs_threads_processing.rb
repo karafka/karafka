@@ -10,29 +10,29 @@ end
 # This will allow us to establish the listener thread id. Shutdown jobs should run from the
 # worker threads
 Karafka::App.monitor.subscribe('connection.listener.before_fetch_loop') do
-  DataCollector[:listener_thread_id] = Thread.current.object_id
+  DT[:listener_thread_id] = Thread.current.object_id
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector[:worker_thread_id] = Thread.current.object_id
+    DT[:worker_thread_id] = Thread.current.object_id
   end
 
   def shutdown
-    DataCollector[:shutdown_thread_id] = Thread.current.object_id
+    DT[:shutdown_thread_id] = Thread.current.object_id
   end
 end
 
 draw_routes(Consumer)
 
-produce(DataCollector.topic, '1')
+produce(DT.topic, '1')
 
 start_karafka_and_wait_until do
-  DataCollector.data.key?(:worker_thread_id)
+  DT.data.key?(:worker_thread_id)
 end
 
-assert DataCollector.data.key?(:listener_thread_id)
-assert DataCollector.data.key?(:worker_thread_id)
-assert DataCollector.data.key?(:shutdown_thread_id)
-assert DataCollector[:listener_thread_id] != DataCollector[:worker_thread_id]
-assert_equal DataCollector[:worker_thread_id], DataCollector[:shutdown_thread_id]
+assert DT.data.key?(:listener_thread_id)
+assert DT.data.key?(:worker_thread_id)
+assert DT.data.key?(:shutdown_thread_id)
+assert DT[:listener_thread_id] != DT[:worker_thread_id]
+assert_equal DT[:worker_thread_id], DT[:shutdown_thread_id]

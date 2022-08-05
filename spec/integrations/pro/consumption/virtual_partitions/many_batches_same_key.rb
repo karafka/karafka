@@ -11,14 +11,14 @@ end
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[object_id] << message.offset
+      DT[object_id] << message.offset
     end
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner ->(_msg) { '1' }
     end
@@ -26,9 +26,9 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  if DataCollector.data.values.map(&:size).sum < 1000
+  if DT.data.values.map(&:size).sum < 1000
     elements = Array.new(100) { SecureRandom.uuid }
-    elements.each { |data| produce(DataCollector.topic, data) }
+    elements.each { |data| produce(DT.topic, data) }
     sleep(1)
     false
   else
@@ -36,4 +36,4 @@ start_karafka_and_wait_until do
   end
 end
 
-assert_equal 1, DataCollector.data.size
+assert_equal 1, DT.data.size

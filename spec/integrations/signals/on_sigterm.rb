@@ -11,7 +11,7 @@ end
 
 draw_routes(Consumer)
 
-produce(DataCollector.topic, '1')
+produce(DT.topic, '1')
 
 Thread.new do
   sleep(5)

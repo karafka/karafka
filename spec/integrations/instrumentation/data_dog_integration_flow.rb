@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
     end
 
     messages.each do |message|
-      DataCollector[message.metadata.partition] << message.raw_payload
+      DT[message.metadata.partition] << message.raw_payload
     end
   end
 end
@@ -35,10 +35,10 @@ Karafka.monitor.subscribe(listener)
 draw_routes(Consumer)
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 100
+  DT[0].size >= 100
 end
 
 %w[

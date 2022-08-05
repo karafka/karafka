@@ -5,7 +5,7 @@
 
 class Listener
   def on_error_occurred(event)
-    DataCollector[:errors] << event
+    DT[:errors] << event
   end
 end
 
@@ -24,14 +24,14 @@ class Consumer < Karafka::Pro::BaseConsumer
     end
 
     messages.each do |message|
-      DataCollector[0] << message.offset
+      DT[0] << message.offset
     end
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner ->(msg) { msg.raw_payload }
     end
@@ -39,18 +39,18 @@ draw_routes do
 end
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 100
+  DT[0].size >= 100
 end
 
-assert_equal 10, DataCollector[:errors].size
+assert_equal 10, DT[:errors].size
 
 previous = nil
 
 # Check that no messages are skipped
-DataCollector[0].flatten.sort.uniq.each do |offset|
+DT[0].flatten.sort.uniq.each do |offset|
   unless previous
     previous = offset
     next

@@ -13,13 +13,13 @@ class Consumer < Karafka::BaseConsumer
   def consume
     partition = messages.metadata.partition
 
-    DataCollector[partition] << coordinator.object_id
+    DT[partition] << coordinator.object_id
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
     end
   end
@@ -28,8 +28,8 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(DataCollector.topic, '1', partition: 0)
-      produce(DataCollector.topic, '1', partition: 1)
+      produce(DT.topic, '1', partition: 0)
+      produce(DT.topic, '1', partition: 1)
     end
 
     sleep(0.5)
@@ -44,10 +44,10 @@ consumer = setup_rdkafka_consumer
 other = Thread.new do
   sleep(10)
 
-  consumer.subscribe(DataCollector.topic)
+  consumer.subscribe(DT.topic)
 
   consumer.each do |message|
-    DataCollector[:jumped] << message
+    DT[:jumped] << message
     sleep 10
     consumer.store_offset(message)
     break
@@ -61,13 +61,13 @@ end
 start_karafka_and_wait_until do
   other.join &&
     (
-      DataCollector[0].uniq.size >= 3 ||
-        DataCollector[1].uniq.size >= 3
+      DT[0].uniq.size >= 3 ||
+        DT[1].uniq.size >= 3
     )
 end
 
-taken_partition = DataCollector[:jumped].first.partition
+taken_partition = DT[:jumped].first.partition
 non_taken = taken_partition == 1 ? 0 : 1
 
-assert_equal 2, DataCollector.data[taken_partition].uniq.size
-assert_equal 3, DataCollector.data[non_taken].uniq.size
+assert_equal 2, DT.data[taken_partition].uniq.size
+assert_equal 3, DT.data[non_taken].uniq.size

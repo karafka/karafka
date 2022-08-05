@@ -35,7 +35,7 @@ end
 # @param consumer_class [Class] consumer class
 def draw_routes(topic, consumer_class = Consumer)
   Karafka::App.routes.draw do
-    consumer_group DataCollector.consumer_group do
+    consumer_group DT.consumer_group do
       topic topic do
         max_messages 1_000
         max_wait_time 1_000

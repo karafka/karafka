@@ -9,48 +9,48 @@ end
 
 class Consumer1 < Karafka::BaseConsumer
   def consume
-    DataCollector[0] << messages.first.raw_payload
+    DT[0] << messages.first.raw_payload
   end
 end
 
 class Consumer2 < Karafka::BaseConsumer
   def consume
-    DataCollector[1] << messages.first.raw_payload
+    DT[1] << messages.first.raw_payload
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_groups.first do
-    topic DataCollector.topics.first do
+  consumer_group DT.consumer_groups.first do
+    topic DT.topics.first do
       consumer Consumer1
       initial_offset 'earliest'
     end
   end
 
-  consumer_group DataCollector.consumer_groups.last do
-    topic DataCollector.topics.last do
+  consumer_group DT.consumer_groups.last do
+    topic DT.topics.last do
       consumer Consumer2
       initial_offset 'latest'
     end
   end
 end
 
-produce(DataCollector.topics.first, '0')
+produce(DT.topics.first, '0')
 # This one should not be picked at all because it is sent before we start listening for the
 # first time
-produce(DataCollector.topics.last, '0')
+produce(DT.topics.last, '0')
 
 Thread.new do
   sleep(10)
-  produce(DataCollector.topics.last, '1')
+  produce(DT.topics.last, '1')
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data.values.flatten.size >= 2
+  DT.data.values.flatten.size >= 2
 end
 
-assert_equal 2, DataCollector.data.keys.size
-assert_equal '0', DataCollector[0].first
-assert_equal 1, DataCollector[0].size
-assert_equal '1', DataCollector[1].first
-assert_equal 1, DataCollector[1].size
+assert_equal 2, DT.data.keys.size
+assert_equal '0', DT[0].first
+assert_equal 1, DT[0].size
+assert_equal '1', DT[1].first
+assert_equal 1, DT[1].size

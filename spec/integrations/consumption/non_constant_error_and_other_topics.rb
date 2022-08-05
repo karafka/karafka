@@ -13,7 +13,7 @@ end
 
 class Listener
   def on_error_occurred(event)
-    DataCollector[:errors] << event
+    DT[:errors] << event
   end
 end
 
@@ -27,32 +27,32 @@ class Consumer1 < Karafka::BaseConsumer
     raise StandardError if @count < 3
 
     messages.each do |message|
-      DataCollector[0] << message.raw_payload
-      DataCollector[:all] << message.raw_payload
+      DT[0] << message.raw_payload
+      DT[:all] << message.raw_payload
     end
 
-    DataCollector[1] << Thread.current.object_id
+    DT[1] << Thread.current.object_id
   end
 end
 
 class Consumer2 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[2] << message.raw_payload
-      DataCollector[:all] << message.raw_payload
+      DT[2] << message.raw_payload
+      DT[:all] << message.raw_payload
     end
 
-    DataCollector[3] << Thread.current.object_id
+    DT[3] << Thread.current.object_id
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topics.first do
+  consumer_group DT.consumer_group do
+    topic DT.topics.first do
       consumer Consumer1
     end
 
-    topic DataCollector.topics.last do
+    topic DT.topics.last do
       consumer Consumer2
     end
   end
@@ -61,30 +61,30 @@ end
 elements1 = Array.new(10) { SecureRandom.uuid }
 elements2 = Array.new(10) { SecureRandom.uuid }
 
-elements1.each { |data| produce(DataCollector.topics.first, data) }
+elements1.each { |data| produce(DT.topics.first, data) }
 # We send one message so the topic gets created
-elements2[0...1].each { |data| produce(DataCollector.topics.last, data) }
+elements2[0...1].each { |data| produce(DT.topics.last, data) }
 
 Thread.new do
   # Dispatching those after 2s will ensure we start sending when the first partition is paused
   sleep(2)
-  elements2[1..].each { |data| produce(DataCollector.topics.last, data) }
+  elements2[1..].each { |data| produce(DT.topics.last, data) }
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:all].size >= 20
+  DT[:all].size >= 20
 end
 
-assert DataCollector[0].size >= 10
-assert DataCollector[:errors].size == 2
-assert_equal 1, DataCollector[1].uniq.size
-assert_equal 1, DataCollector[3].uniq.size
-assert_equal StandardError, DataCollector[:errors].first[:error].class
-assert_equal 'consumer.consume.error', DataCollector[:errors].first[:type]
-assert_equal 'error.occurred', DataCollector[:errors].first.id
-assert_equal 10, DataCollector[0].uniq.size
-assert_equal 10, DataCollector[2].uniq.size
+assert DT[0].size >= 10
+assert DT[:errors].size == 2
+assert_equal 1, DT[1].uniq.size
+assert_equal 1, DT[3].uniq.size
+assert_equal StandardError, DT[:errors].first[:error].class
+assert_equal 'consumer.consume.error', DT[:errors].first[:type]
+assert_equal 'error.occurred', DT[:errors].first.id
+assert_equal 10, DT[0].uniq.size
+assert_equal 10, DT[2].uniq.size
 # Same worker from the same thread should process both
-assert_equal DataCollector[1].uniq, DataCollector[3].uniq
-assert_equal 20, DataCollector[:all].size
-assert_equal elements2, DataCollector[:all][0..9]
+assert_equal DT[1].uniq, DT[3].uniq
+assert_equal 20, DT[:all].size
+assert_equal elements2, DT[:all][0..9]

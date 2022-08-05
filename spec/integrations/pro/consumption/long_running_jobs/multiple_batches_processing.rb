@@ -10,7 +10,7 @@ setup_karafka do |config|
 end
 
 # We want to sleep few times but not all the time not to exceed max execution time of specs
-DataCollector[:sleeps] = [
+DT[:sleeps] = [
   true,
   false,
   false,
@@ -25,34 +25,34 @@ class Consumer < Karafka::Pro::BaseConsumer
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group
     # Sleep from time to time
-    sleep(11) if DataCollector[:sleeps].pop
+    sleep(11) if DT[:sleeps].pop
 
     messages.each do |message|
-      DataCollector[0] << message.offset
+      DT[0] << message.offset
     end
 
-    5.times { produce(DataCollector.topic, '1') }
+    5.times { produce(DT.topic, '1') }
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
   end
 end
 
-5.times { produce(DataCollector.topic, '1') }
+5.times { produce(DT.topic, '1') }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 100
+  DT[0].size >= 100
 end
 
 previous = nil
 
-DataCollector[0].each do |offset|
+DT[0].each do |offset|
   unless previous
     previous = offset
     next

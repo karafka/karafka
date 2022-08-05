@@ -4,14 +4,14 @@
 # Note that even when using random distribution, messages from different partitions will never
 # mix within a batch.
 
-TOPIC = 'integrations_21_02'
-
 setup_karafka do |config|
   config.license.token = pro_license_token
   config.concurrency = 5
   config.max_messages = 20
   config.initial_offset = 'latest'
 end
+
+create_topic(partitions: 2)
 
 class VirtualPartitioner
   def initialize
@@ -30,14 +30,14 @@ end
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[object_id] << message.offset
+      DT[object_id] << message.offset
     end
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic TOPIC do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner VirtualPartitioner.new
     end
@@ -45,11 +45,11 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  produce(TOPIC, '1', key: %w[a b c d].sample)
-  produce(TOPIC, '1', key: %w[a b c d].sample)
+  produce(DT.topic, '1', key: %w[a b c d].sample)
+  produce(DT.topic, '1', key: %w[a b c d].sample)
 
-  DataCollector.data.values.map(&:count).sum >= 1_000
+  DT.data.values.map(&:count).sum >= 1_000
 end
 
 # Two partitions, 5 jobs per each
-assert_equal 10, DataCollector.data.size
+assert_equal 10, DT.data.size

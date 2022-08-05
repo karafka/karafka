@@ -19,19 +19,19 @@ create_topic(partitions: 2)
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
-    DataCollector[:owned] << messages.metadata.partition
+    DT[:owned] << messages.metadata.partition
 
     messages.each do
-      sleep(0.1) while !revoked? && DataCollector[:revoked].size < 2
+      sleep(0.1) while !revoked? && DT[:revoked].size < 2
 
-      DataCollector[:revoked] << messages.metadata.partition
+      DT[:revoked] << messages.metadata.partition
     end
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
@@ -45,7 +45,7 @@ Thread.new do
   sleep(0.1) until Karafka::App.running?
   sleep(10)
 
-  consumer.subscribe(DataCollector.topic)
+  consumer.subscribe(DT.topic)
   consumer.poll(1_000)
 end
 
@@ -54,8 +54,8 @@ Thread.new do
 
   5.times do
     10.times do
-      produce(DataCollector.topic, '1', partition: 0)
-      produce(DataCollector.topic, '1', partition: 1)
+      produce(DT.topic, '1', partition: 0)
+      produce(DT.topic, '1', partition: 1)
     rescue StandardError
       nil
     end
@@ -65,10 +65,10 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[:revoked].uniq.size >= 2
+  DT[:revoked].uniq.size >= 2
 end
 
 # Both partitions should be revoked
-assert_equal [0, 1], DataCollector[:revoked].uniq.sort.to_a
+assert_equal [0, 1], DT[:revoked].uniq.sort.to_a
 
 consumer.close

@@ -11,16 +11,16 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as DataCollector.topic
+  queue_as DT.topic
 
   def perform
-    DataCollector[0] << true
+    DT[0] << true
 
     # Simulate some delay, otherwise jobs will be faster than shutdown
     sleep(0.5)
@@ -30,8 +30,8 @@ end
 100.times { Job.perform_later }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 3
+  DT[0].size >= 3
 end
 
 # We should not process all the messages but just few
-assert DataCollector[0].size <= 5
+assert DT[0].size <= 5

@@ -42,9 +42,9 @@ class Consumer < Karafka::BaseConsumer
     # Assume each message persistence takes 1ms
     messages.each { sleep(0.001) }
 
-    DataCollector.data[:completed] << messages.count
+    DT.data[:completed] << messages.count
 
-    return if DataCollector.data[:completed].sum < MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT
+    return if DT.data[:completed].sum < MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT
     return if $stop
 
     $stop = Time.monotonic
@@ -53,7 +53,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 Karafka::App.routes.draw do
-  consumer_group DataCollector.consumer_group do
+  consumer_group DT.consumer_group do
     topic 'benchmarks_01_05' do
       max_messages 1_000
       max_wait_time 1_000
@@ -65,7 +65,7 @@ Karafka::App.routes.draw do
 end
 
 Tracker.run(messages_count: MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT) do
-  DataCollector.data[:completed] = []
+  DT.data[:completed] = []
   $start = false
   $stop = false
 

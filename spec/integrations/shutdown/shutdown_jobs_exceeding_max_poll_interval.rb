@@ -12,7 +12,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector[:received] << true
+    DT[:received] << true
   end
 
   def shutdown
@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
     # In case this would block polling, the other consumer will take over the job and raise an
     # exception
     sleep(15)
-    DataCollector[:done] << true
+    DT[:done] << true
   end
 end
 
@@ -28,7 +28,7 @@ draw_routes(Consumer)
 
 Thread.new do
   loop do
-    produce(DataCollector.topic, '1')
+    produce(DT.topic, '1')
     sleep(0.5)
   rescue WaterDrop::Errors::ProducerClosedError
     break
@@ -41,17 +41,17 @@ consumer = setup_rdkafka_consumer
 other = Thread.new do
   sleep(5)
 
-  consumer.subscribe(DataCollector.topic)
+  consumer.subscribe(DT.topic)
 
   consumer.poll(1_000)
 
-  sleep(0.1) while DataCollector[:done].empty?
+  sleep(0.1) while DT[:done].empty?
 
   consumer.close
 end
 
 start_karafka_and_wait_until do
-  !DataCollector[:received].empty?
+  !DT[:received].empty?
 end
 
 other.join

@@ -8,7 +8,7 @@ setup_karafka
 class Consumer1 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[0] << message.raw_payload
+      DT[0] << message.raw_payload
     end
   end
 end
@@ -16,18 +16,18 @@ end
 class Consumer2 < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[1] << message.raw_payload
+      DT[1] << message.raw_payload
     end
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topics.first do
+  consumer_group DT.consumer_group do
+    topic DT.topics.first do
       consumer Consumer1
     end
 
-    topic DataCollector.topics.last do
+    topic DT.topics.last do
       consumer Consumer2
     end
   end
@@ -35,20 +35,20 @@ end
 
 elements1 = Array.new(10) { SecureRandom.uuid }
 elements2 = Array.new(10) { SecureRandom.uuid }
-elements1.each { |data| produce(DataCollector.topics.first, data) }
-elements2.each { |data| produce(DataCollector.topics.last, data) }
+elements1.each { |data| produce(DT.topics.first, data) }
+elements2.each { |data| produce(DT.topics.last, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 10 &&
-    DataCollector[1].size >= 10
+  DT[0].size >= 10 &&
+    DT[1].size >= 10
 end
 
 # Clear all the routes so later we can subscribe to only one topic
 Karafka::App.routes.clear
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topics.last do
+  consumer_group DT.consumer_group do
+    topic DT.topics.last do
       consumer Consumer2
     end
   end
@@ -61,18 +61,18 @@ end
 
 # We publish again and we will check that only one topic got consumed afterwards
 elements1.each do |data|
-  producer.produce_sync(topic: DataCollector.topics.first, payload: data)
+  producer.produce_sync(topic: DT.topics.first, payload: data)
 end
 
 elements2.each do |data|
-  producer.produce_sync(topic: DataCollector.topics.last, payload: data)
+  producer.produce_sync(topic: DT.topics.last, payload: data)
 end
 
 start_karafka_and_wait_until do
-  DataCollector[1].size >= 20
+  DT[1].size >= 20
 end
 
 # This topic should receive only data that was dispatched before we removed the topic from routes
-assert_equal 10, DataCollector[0].size
+assert_equal 10, DT[0].size
 # This should receive also the rest, since this topic remained in the consumer group
-assert_equal 20, DataCollector[1].size
+assert_equal 20, DT[1].size

@@ -11,14 +11,14 @@
 setup_karafka
 
 elements = Array.new(20) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 class Consumer < Karafka::BaseConsumer
   def consume
     if @after_seek
       # Process data only after the offset seek has been sent
       messages.each do |message|
-        DataCollector[message.metadata.partition] << message.raw_payload
+        DT[message.metadata.partition] << message.raw_payload
       end
     else
       seek(10)
@@ -30,7 +30,7 @@ end
 draw_routes(Consumer)
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 10
+  DT[0].size >= 10
 end
 
-assert_equal elements[10..-1], DataCollector[0]
+assert_equal elements[10..-1], DT[0]

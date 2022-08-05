@@ -10,15 +10,15 @@ end
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
-    messages.each { |message| DataCollector[:messages] << message.offset }
+    messages.each { |message| DT[:messages] << message.offset }
 
-    DataCollector[:coordinators_ids] << coordinator.object_id
+    DT[:coordinators_ids] << coordinator.object_id
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner ->(msg) { msg.raw_payload }
     end
@@ -26,10 +26,10 @@ draw_routes do
 end
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[:messages].count >= 100
+  DT[:messages].count >= 100
 end
 
-assert_equal 1, DataCollector[:coordinators_ids].uniq.size
+assert_equal 1, DT[:coordinators_ids].uniq.size

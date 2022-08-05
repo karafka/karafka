@@ -13,23 +13,23 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic do
       virtual_partitioner ->(_) { [true, false].sample }
     end
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as DataCollector.topic
+  queue_as DT.topic
 
   def perform(number)
-    if number == 95 && !DataCollector[0].include?(number)
-      DataCollector[0] << number
+    if number == 95 && !DT[0].include?(number)
+      DT[0] << number
       raise StandardError
     end
 
-    DataCollector[0] << number
+    DT[0] << number
 
     sleep 0.1
   end
@@ -38,9 +38,9 @@ end
 100.times { |i| Job.perform_later(i) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].uniq.sort.size >= 100
+  DT[0].uniq.sort.size >= 100
 end
 
 # If we would mark as consumed
-assert_equal 2, (DataCollector[0].count { |nr| nr == 94 })
-assert_equal DataCollector[0].uniq.sort, (0..99).to_a
+assert_equal 2, (DT[0].count { |nr| nr == 94 })
+assert_equal DT[0].uniq.sort, (0..99).to_a

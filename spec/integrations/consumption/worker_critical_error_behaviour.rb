@@ -12,7 +12,7 @@ end
 
 class Listener
   def on_error_occurred(event)
-    DataCollector[:errors] << event
+    DT[:errors] << event
   end
 end
 
@@ -30,20 +30,20 @@ end
 
 draw_routes(Consumer)
 
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 raised = false
 
 begin
   start_karafka_and_wait_until do
     # This means, that listener received critical error
-    DataCollector[:errors].size >= 1
+    DT[:errors].size >= 1
   end
 rescue SuperException
   raised = true
 end
 
 assert_equal false, raised
-assert_equal 1, DataCollector[:errors].size
-assert_equal 'error.occurred', DataCollector[:errors].first.id
-assert_equal 'worker.process.error', DataCollector[:errors].first.payload[:type]
+assert_equal 1, DT[:errors].size
+assert_equal 'error.occurred', DT[:errors].first.id
+assert_equal 'worker.process.error', DT[:errors].first.payload[:type]

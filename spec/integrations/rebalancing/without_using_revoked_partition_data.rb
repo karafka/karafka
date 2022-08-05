@@ -29,15 +29,15 @@ create_topic(partitions: 2)
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if DataCollector.data.key?(:revoked)
+    return if DT.data.key?(:revoked)
 
     messages.each do |message|
-      DataCollector[:process1] << message
+      DT[:process1] << message
     end
   end
 
   def revoked
-    DataCollector[:revoked] = messages.metadata.partition
+    DT[:revoked] = messages.metadata.partition
   end
 end
 
@@ -48,10 +48,10 @@ Thread.new do
 
   loop do
     # If revoked, we are stopping, so producer will be closed
-    break if DataCollector.data.key?(:revoked)
+    break if DT.data.key?(:revoked)
 
     2.times do |i|
-      produce(DataCollector.topic, "#{RUN}-#{nr}-#{i}", partition: i)
+      produce(DT.topic, "#{RUN}-#{nr}-#{i}", partition: i)
     end
 
     nr += 1
@@ -65,9 +65,9 @@ other = Thread.new do
   sleep(30)
 
   consumer = setup_rdkafka_consumer
-  consumer.subscribe(DataCollector.topic)
+  consumer.subscribe(DT.topic)
   consumer.each do |message|
-    DataCollector[:process2] << message
+    DT[:process2] << message
 
     # We wait for the main Karafka process to stop, so data is not skewed by second rebalance
     sleep(0.1) until Karafka::App.stopped?
@@ -79,13 +79,13 @@ other = Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data.key?(:process2)
+  DT.data.key?(:process2)
 end
 
 other.join
 
-process1 = DataCollector[:process1].group_by(&:partition)
-process2 = DataCollector[:process2].group_by(&:partition)
+process1 = DT[:process1].group_by(&:partition)
+process2 = DT[:process2].group_by(&:partition)
 
 process1.transform_values! { |messages| messages.map(&:raw_payload) }
 process2.transform_values! { |messages| messages.map(&:payload) }
@@ -131,4 +131,4 @@ process2.each do |_, messages|
     end
 end
 
-DataCollector.clear
+DT.clear

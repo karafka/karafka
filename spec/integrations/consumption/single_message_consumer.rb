@@ -23,18 +23,18 @@ end
 
 class Consumer < SingleMessageBaseConsumer
   def consume_one
-    DataCollector[message.metadata.partition] << message.raw_payload
+    DT[message.metadata.partition] << message.raw_payload
   end
 end
 
 draw_routes(Consumer)
 
 elements = Array.new(20) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 20
+  DT[0].size >= 20
 end
 
-assert_equal elements, DataCollector[0]
-assert_equal 1, DataCollector.data.size
+assert_equal elements, DT[0]
+assert_equal 1, DT.data.size

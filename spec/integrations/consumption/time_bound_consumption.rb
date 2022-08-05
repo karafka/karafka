@@ -11,7 +11,7 @@ MAX_TIME = 10
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[message.metadata.partition] << message.raw_payload
+      DT[message.metadata.partition] << message.raw_payload
     end
   end
 end
@@ -20,7 +20,7 @@ draw_routes(Consumer)
 
 # Sends some data so we know all is good
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 # Stop after 10 seconds
 Thread.new do
@@ -34,7 +34,7 @@ Karafka::Server.run
 
 time_after = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
-assert_equal elements, DataCollector[0]
-assert_equal 1, DataCollector.data.size
+assert_equal elements, DT[0]
+assert_equal 1, DT.data.size
 # We will give Karafka 2 seconds to stop
 assert time_after - time_before - MAX_TIME < 2

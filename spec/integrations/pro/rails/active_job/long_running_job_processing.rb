@@ -13,31 +13,31 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic do
       long_running_job true
     end
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as DataCollector.topic
+  queue_as DT.topic
 
   def perform
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group
     sleep(15)
-    DataCollector[0] << true
+    DT[0] << true
   end
 end
 
 Job.perform_later
 
 start_karafka_and_wait_until do
-  if DataCollector[0].size >= 1
+  if DT[0].size >= 1
     sleep(15)
     true
   end
 end
 
-assert_equal 1, DataCollector[0].size, 'Given job should be executed only once'
+assert_equal 1, DT[0].size, 'Given job should be executed only once'

@@ -6,7 +6,7 @@
 setup_karafka
 
 elements = Array.new(10) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 class Consumer < Karafka::BaseConsumer
   def initialize
@@ -21,7 +21,7 @@ class Consumer < Karafka::BaseConsumer
     if @backwards
       message = messages.first
 
-      DataCollector[messages.metadata.partition] << message.offset
+      DT[messages.metadata.partition] << message.offset
       seek(message.offset - 1)
 
       @ignore = true if message.offset.zero?
@@ -35,7 +35,7 @@ end
 draw_routes(Consumer)
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 10
+  DT[0].size >= 10
 end
 
-assert_equal (0..9).to_a.reverse, DataCollector[0]
+assert_equal (0..9).to_a.reverse, DT[0]

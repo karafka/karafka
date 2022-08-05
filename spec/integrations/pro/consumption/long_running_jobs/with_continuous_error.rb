@@ -6,7 +6,7 @@
 
 class Listener
   def on_error_occurred(event)
-    DataCollector[:errors] << event
+    DT[:errors] << event
   end
 end
 
@@ -20,32 +20,32 @@ class Consumer < Karafka::Pro::BaseConsumer
   def consume
     raise StandardError if rand(2).zero?
 
-    messages.each { |message| DataCollector[0] << message.offset }
+    messages.each { |message| DT[0] << message.offset }
 
     sleep 2
 
-    5.times { produce(DataCollector.topic, '1') }
+    5.times { produce(DT.topic, '1') }
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
   end
 end
 
-5.times { produce(DataCollector.topic, '1') }
+5.times { produce(DT.topic, '1') }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 50 && DataCollector[:errors].size >= 5
+  DT[0].size >= 50 && DT[:errors].size >= 5
 end
 
 previous = nil
 
-DataCollector[0].each do |offset|
+DT[0].each do |offset|
   unless previous
     previous = offset
     next

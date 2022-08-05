@@ -16,7 +16,7 @@ class Consumer < Karafka::Pro::BaseConsumer
     sleep 5
 
     messages.each do |message|
-      DataCollector[:offsets] << message.offset
+      DT[:offsets] << message.offset
 
       return unless mark_as_consumed!(message)
     end
@@ -24,8 +24,8 @@ class Consumer < Karafka::Pro::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
@@ -40,32 +40,32 @@ Thread.new do
 
   10.times do
     consumer = setup_rdkafka_consumer
-    consumer.subscribe(DataCollector.topic)
+    consumer.subscribe(DT.topic)
     sleep(2)
     consumer.close
     sleep(1)
   end
 
-  DataCollector[:rebalanced] << true
+  DT[:rebalanced] << true
 end
 
 i = 0
 
 start_karafka_and_wait_until do
   10.times do
-    produce(DataCollector.topic, MESSAGES[i])
+    produce(DT.topic, MESSAGES[i])
     i += 1
   end
 
   sleep(1)
 
-  DataCollector[:rebalanced].size >= 1
+  DT[:rebalanced].size >= 1
 end
 
 previous = nil
 
 # They need to be in order one batch after another
-DataCollector[:offsets].uniq.each do |offset|
+DT[:offsets].uniq.each do |offset|
   unless previous
     previous = offset
     next

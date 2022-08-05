@@ -18,7 +18,7 @@ class Consumer < Karafka::Pro::BaseConsumer
     # be kicked out of the group
     sleep(15)
 
-    DataCollector[0] << messages.first.raw_payload
+    DT[0] << messages.first.raw_payload
 
     # This will ensure we can move forward
     mark_as_consumed(messages.first)
@@ -26,8 +26,8 @@ class Consumer < Karafka::Pro::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       long_running_job true
     end
@@ -40,7 +40,7 @@ consumer = setup_rdkafka_consumer
 Thread.new do
   sleep(10)
 
-  consumer.subscribe(DataCollector.topic)
+  consumer.subscribe(DT.topic)
 
   consumer.each do
     # This should never happen.
@@ -51,14 +51,14 @@ end
 
 payloads = Array.new(2) { SecureRandom.uuid }
 
-payloads.each { |payload| produce(DataCollector.topic, payload) }
+payloads.each { |payload| produce(DT.topic, payload) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 2
+  DT[0].size >= 2
 end
 
 # There should be no duplication as our pause should be running for as long as it needs to and it
 # should be un-paused only when done
-assert_equal payloads, DataCollector[0]
+assert_equal payloads, DT[0]
 
 consumer.close

@@ -73,10 +73,6 @@ jobs:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
 
-      - name: Ensure all needed Kafka topics are created and wait if not
-        run: |
-          bin/wait_for_kafka
-
       - name: Run all specs
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}
@@ -119,10 +115,6 @@ jobs:
         run: |
           bundle config set without development
           bundle install
-
-      - name: Ensure all needed Kafka topics are created and wait if not
-        run: |
-          bin/wait_for_kafka
 
       - name: Run integration tests
         env:

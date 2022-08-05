@@ -9,19 +9,18 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
+create_topic(partitions: 3)
+
 setup_active_job
 
-# This is a special topic with 3 partitions
-TOPIC = 'integrations_02_03'
-
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    active_job_topic TOPIC
+  consumer_group DT.consumer_group do
+    active_job_topic DT.topic
   end
 end
 
 class Job < ActiveJob::Base
-  queue_as TOPIC
+  queue_as DT.topic
 
   karafka_options(
     dispatch_method: :produce_sync,
@@ -30,7 +29,7 @@ class Job < ActiveJob::Base
   )
 
   def perform(value1)
-    DataCollector[0] << value1
+    DT[0] << value1
   end
 end
 
@@ -53,10 +52,10 @@ Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 9
+  DT[0].size >= 9
 end
 
-groups = DataCollector[0].group_by { |element| element[0] }
+groups = DT[0].group_by { |element| element[0] }
 groups.transform_values! { |group| group.map(&:to_i) }
 
 groups.each do |_, values|

@@ -13,7 +13,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[:messages] << message.offset
+      DT[:messages] << message.offset
 
       return unless mark_as_consumed!(message)
     end
@@ -30,32 +30,32 @@ Thread.new do
 
   10.times do
     consumer = setup_rdkafka_consumer
-    consumer.subscribe(DataCollector.topic)
+    consumer.subscribe(DT.topic)
     sleep(2)
     consumer.close
     sleep(1)
   end
 
-  DataCollector[:rebalanced] << true
+  DT[:rebalanced] << true
 end
 
 i = 0
 
 start_karafka_and_wait_until do
   10.times do
-    produce(DataCollector.topic, MESSAGES[i])
+    produce(DT.topic, MESSAGES[i])
     i += 1
   end
 
   sleep(1)
 
-  DataCollector[:rebalanced].size >= 1
+  DT[:rebalanced].size >= 1
 end
 
 previous = nil
 
 # They need to be in order one batch after another
-DataCollector[:messages].uniq.each do |offset|
+DT[:messages].uniq.each do |offset|
   unless previous
     previous = offset
     next

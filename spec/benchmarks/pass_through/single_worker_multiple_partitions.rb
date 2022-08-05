@@ -19,10 +19,10 @@ class Consumer < Karafka::BaseConsumer
     @count += messages.size
 
     if @count >= MAX_MESSAGES_PER_PARTITION
-      DataCollector.data[:completed] << messages.metadata.partition
+      DT.data[:completed] << messages.metadata.partition
     end
 
-    return if DataCollector.data[:completed].size != PARTITIONS_COUNT
+    return if DT.data[:completed].size != PARTITIONS_COUNT
     return if $stop
 
     $stop = Time.monotonic
@@ -33,7 +33,7 @@ end
 draw_routes('benchmarks_00_05')
 
 Tracker.run(messages_count: MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT) do
-  DataCollector.data[:completed] = Set.new
+  DT.data[:completed] = Set.new
   $start = false
   $stop = false
 

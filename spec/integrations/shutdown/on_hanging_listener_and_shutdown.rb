@@ -5,17 +5,17 @@
 
 setup_karafka(allow_errors: true) { |config| config.shutdown_timeout = 1_000 }
 
-produce(DataCollector.topic, '1')
+produce(DT.topic, '1')
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector[0] << true
+    DT[0] << true
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       max_messages 1
       consumer Consumer
     end
@@ -33,7 +33,7 @@ end
 
 Thread.new do
   start_karafka_and_wait_until do
-    if DataCollector[0].empty?
+    if DT[0].empty?
       false
     else
       sleep 1

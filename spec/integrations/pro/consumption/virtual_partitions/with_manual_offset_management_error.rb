@@ -14,13 +14,13 @@ end
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[:messages] << message.raw_payload
+      DT[:messages] << message.raw_payload
     end
 
     MUTEX.synchronize do
-      return if DataCollector[:errors].size > 30
+      return if DT[:errors].size > 30
 
-      DataCollector[:errors] << true
+      DT[:errors] << true
 
       raise StandardError
     end
@@ -28,8 +28,8 @@ class Consumer < Karafka::Pro::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner ->(msg) { msg.raw_payload }
       manual_offset_management true
@@ -38,12 +38,12 @@ draw_routes do
 end
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[:errors].size >= 30
+  DT[:errors].size >= 30
 end
 
 # We should restart over and over again so same messages should come
-assert DataCollector.data[:messages].size >= 200
-assert_equal 100, DataCollector.data[:messages].uniq.size
+assert DT.data[:messages].size >= 200
+assert_equal 100, DT.data[:messages].uniq.size

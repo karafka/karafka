@@ -17,6 +17,9 @@ require_relative './support/data_collector'
 
 Thread.abort_on_exception = true
 
+# Alias data collector for shorter referencing
+DT = DataCollector
+
 # Test setup for the framework
 def setup_karafka(allow_errors: false)
   Karafka::App.setup do |config|
@@ -97,11 +100,11 @@ end
 # automatically created during our specs, but for some we need more than one. In those cases we
 # use this helper.
 #
-# The name is equal to the default spec topic, that is `DataCollector.topic`
+# The name is equal to the default spec topic, that is `DT.topic`
 #
 # @param name [String] topic name
 # @param partitions [Integer] number of partitions for this topic
-def create_topic(name: DataCollector.topic, partitions: 1)
+def create_topic(name: DT.topic, partitions: 1)
   Karafka::Admin.create_topic(
     name,
     partitions,
@@ -118,8 +121,8 @@ def draw_routes(consumer_class = nil, &block)
     if block
       instance_eval(&block)
     else
-      consumer_group DataCollector.consumer_group do
-        topic DataCollector.topic do
+      consumer_group DT.consumer_group do
+        topic DT.topic do
           consumer consumer_class
         end
       end

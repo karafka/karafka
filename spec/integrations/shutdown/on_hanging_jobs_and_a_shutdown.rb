@@ -4,11 +4,11 @@
 
 setup_karafka(allow_errors: true) { |config| config.shutdown_timeout = 1_000 }
 
-produce(DataCollector.topic, '1')
+produce(DT.topic, '1')
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector[0] << true
+    DT[0] << true
     # This will "fake" a hanging job
     sleep(100)
   end
@@ -17,7 +17,7 @@ end
 draw_routes(Consumer)
 
 start_karafka_and_wait_until do
-  if DataCollector[0].empty?
+  if DT[0].empty?
     false
   else
     sleep 1

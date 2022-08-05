@@ -12,17 +12,17 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     sleep(0.1)
-    DataCollector[:processing_lags] << messages.metadata.processing_lag
+    DT[:processing_lags] << messages.metadata.processing_lag
   end
 end
 
 draw_routes(Consumer)
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[:processing_lags].size >= 20
+  DT[:processing_lags].size >= 20
 end
 
-assert DataCollector[:processing_lags].max <= 50
+assert DT[:processing_lags].max <= 50

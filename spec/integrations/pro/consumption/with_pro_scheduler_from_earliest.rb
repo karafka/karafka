@@ -15,14 +15,14 @@ class Consumer < Karafka::Pro::BaseConsumer
     sleep(0.1)
 
     messages.each do
-      DataCollector[topic.name] << Thread.current.object_id
+      DT[topic.name] << Thread.current.object_id
     end
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    DataCollector.topics.first(10).each do |topic_name|
+  consumer_group DT.consumer_group do
+    DT.topics.first(10).each do |topic_name|
       topic topic_name do
         consumer Consumer
       end
@@ -33,11 +33,11 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DataCollector.data.values.flatten.size >= 100
+  DT.data.values.flatten.size >= 100
 end
 
 # All workers should be in use
-assert_equal 10, DataCollector.data.keys.size
+assert_equal 10, DT.data.keys.size
 # All workers consumers should consume same number of messages
-assert_equal 10, DataCollector.data.values.flatten.uniq.size
-assert_equal 10, DataCollector.data.values.map(&:size).uniq.first
+assert_equal 10, DT.data.values.flatten.uniq.size
+assert_equal 10, DT.data.values.map(&:size).uniq.first

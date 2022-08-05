@@ -4,36 +4,36 @@
 # Initially we should own all the partitions and then after they are taken away, we should get
 # back to two (as the last one will be owned by the second consumer).
 
-TOPIC = 'integrations_03_03'
-
 setup_karafka do |config|
   config.license.token = pro_license_token
 end
 
-DataCollector[:revoked] = Concurrent::Array.new
-DataCollector[:pre] = Set.new
-DataCollector[:post] = Set.new
+create_topic(partitions: 3)
+
+DT[:revoked] = Concurrent::Array.new
+DT[:pre] = Set.new
+DT[:post] = Set.new
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     # Pre rebalance
-    if DataCollector[:revoked].empty?
-      DataCollector[:pre] << messages.metadata.partition
+    if DT[:revoked].empty?
+      DT[:pre] << messages.metadata.partition
     # Post rebalance
     else
-      DataCollector[:post] << messages.metadata.partition
+      DT[:post] << messages.metadata.partition
     end
   end
 
   # Collect info on all the partitions we have lost
   def revoked
-    DataCollector[:revoked] << { messages.metadata.partition => Time.now }
+    DT[:revoked] << { messages.metadata.partition => Time.now }
   end
 end
 
 draw_routes do
-  consumer_group TOPIC do
-    topic TOPIC do
+  consumer_group DT.topic do
+    topic DT.topic do
       consumer Consumer
       manual_offset_management true
     end
@@ -41,17 +41,17 @@ draw_routes do
 end
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(TOPIC, data, partition: rand(0..2)) }
+elements.each { |data| produce(DT.topic, data, partition: rand(0..2)) }
 
 consumer = setup_rdkafka_consumer
 
 other =  Thread.new do
   sleep(10)
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DT.topic)
   # 1 message is enough
   consumer.each do
-    next if DataCollector[:end].empty?
+    next if DT[:end].empty?
 
     break
   end
@@ -60,7 +60,7 @@ other =  Thread.new do
 end
 
 start_karafka_and_wait_until do
-  if DataCollector[:post].empty?
+  if DT[:post].empty?
     false
   else
     sleep 2
@@ -68,18 +68,18 @@ start_karafka_and_wait_until do
   end
 end
 
-DataCollector[:end] << true
+DT[:end] << true
 
 # Rebalance should revoke all 3 partitions
-assert_equal 3, DataCollector[:revoked].size
+assert_equal 3, DT[:revoked].size
 
 # There should be no extra partitions or anything like that that was revoked
-assert (DataCollector[:revoked].flat_map(&:keys) - [0, 1, 2]).empty?
+assert (DT[:revoked].flat_map(&:keys) - [0, 1, 2]).empty?
 
 # Before revocation, we should have had all the partitions in our first process
-assert_equal [0, 1, 2], DataCollector[:pre].to_a.sort
+assert_equal [0, 1, 2], DT[:pre].to_a.sort
 
-re_assigned = DataCollector[:post].to_a.sort
+re_assigned = DT[:post].to_a.sort
 # After rebalance we should not get all partitions back as now there are two consumers
 assert_not_equal [0, 1, 2], re_assigned
 # It may get either one or two partitions back

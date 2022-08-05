@@ -12,14 +12,14 @@ end
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DataCollector[object_id] << message
+      DT[object_id] << message
     end
   end
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
-    topic DataCollector.topic do
+  consumer_group DT.consumer_group do
+    topic DT.topic do
       consumer Consumer
       virtual_partitioner ->(msg) { msg.raw_payload }
     end
@@ -27,9 +27,9 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  if DataCollector.data.values.map(&:size).sum < 1000
+  if DT.data.values.map(&:size).sum < 1000
     elements = Array.new(100) { SecureRandom.uuid }
-    elements.each { |data| produce(DataCollector.topic, data) }
+    elements.each { |data| produce(DT.topic, data) }
     sleep(1)
     false
   else
@@ -38,6 +38,6 @@ start_karafka_and_wait_until do
 end
 
 # It should distribute work
-assert DataCollector.data.size >= 8
+assert DT.data.size >= 8
 # But overall number of consumer instances should be tops the concurrency
-assert DataCollector.data.size <= 10
+assert DT.data.size <= 10

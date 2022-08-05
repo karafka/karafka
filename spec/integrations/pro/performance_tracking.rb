@@ -9,7 +9,7 @@ setup_karafka do |config|
   config.max_messages = 2
 end
 
-TOPICS = DataCollector.topics.first(5)
+TOPICS = DT.topics.first(5)
 
 # Simulated different performance for different topics
 MESSAGE_SPEED = TOPICS.map.with_index { |topic, index| [topic, index] }.to_h
@@ -18,7 +18,7 @@ class Consumer < Karafka::Pro::BaseConsumer
   def consume
     # We add 10ms per message to make sure that the metrics tracking track it as expected
     messages.each do
-      DataCollector[0] << true
+      DT[0] << true
 
       # Sleep needs seconds not ms
       sleep MESSAGE_SPEED.fetch(messages.metadata.topic) / 1_000.0
@@ -27,7 +27,7 @@ class Consumer < Karafka::Pro::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DataCollector.consumer_group do
+  consumer_group DT.consumer_group do
     TOPICS.each do |topic_name|
       topic topic_name do
         consumer Consumer
@@ -39,7 +39,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 50
+  DT[0].size >= 50
 end
 
 TOPICS.each do |topic_name|

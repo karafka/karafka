@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
 
       raise StandardError if @consumed == 50
 
-      DataCollector[0] << message.raw_payload
+      DT[0] << message.raw_payload
 
       mark_as_consumed(message)
     end
@@ -27,12 +27,12 @@ end
 draw_routes(Consumer)
 
 elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DataCollector.topic, data) }
+elements.each { |data| produce(DT.topic, data) }
 
 start_karafka_and_wait_until do
-  DataCollector[0].size >= 100
+  DT[0].size >= 100
 end
 
-assert_equal elements, DataCollector[0]
-assert_equal 100, DataCollector[0].size
-assert_equal 1, DataCollector.data.size
+assert_equal elements, DT[0]
+assert_equal 100, DT[0].size
+assert_equal 1, DT.data.size

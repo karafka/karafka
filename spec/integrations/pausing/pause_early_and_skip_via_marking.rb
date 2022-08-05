@@ -22,37 +22,37 @@ class Consumer < Karafka::BaseConsumer
     mark_as_consumed(messages.last)
 
     messages.each do |message|
-      DataCollector[:messages] << message.offset
+      DT[:messages] << message.offset
     end
   end
 end
 
 draw_routes(Consumer)
 
-20.times { |i| produce(DataCollector.topic, i.to_s) }
+20.times { |i| produce(DT.topic, i.to_s) }
 
 start_karafka_and_wait_until do
-  DataCollector[:messages].size >= 1
+  DT[:messages].size >= 1
 end
 
 consumer = setup_rdkafka_consumer
 
 Thread.new do
-  consumer.subscribe(DataCollector.topic)
+  consumer.subscribe(DT.topic)
 
   consumer.each do |message|
-    DataCollector[:other] << message.offset
+    DT[:other] << message.offset
   end
 end
 
 def sum
-  DataCollector[:messages].size + DataCollector[:other].size
+  DT[:messages].size + DT[:other].size
 end
 
 sleep(0.1) until sum >= 20
 
 20.times do |i|
-  assert_equal i, (DataCollector[:messages] + DataCollector[:other])[i]
+  assert_equal i, (DT[:messages] + DT[:other])[i]
 end
 
 assert_equal 20, sum

@@ -11,22 +11,22 @@ elements = Array.new(5) { SecureRandom.uuid }
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DataCollector[:consumption_lags] << messages.metadata.consumption_lag
+    DT[:consumption_lags] << messages.metadata.consumption_lag
   end
 end
 
 draw_routes(Consumer)
 
-produce(DataCollector.topic, elements.first)
+produce(DT.topic, elements.first)
 
 start_karafka_and_wait_until do
   elements.each do |data|
     sleep(0.1)
-    produce(DataCollector.topic, data)
+    produce(DT.topic, data)
   end
 
-  DataCollector[:consumption_lags].size >= 20
+  DT[:consumption_lags].size >= 20
 end
 
 # We reject first few lags as they often are bigger due to warm-up and partitions assignments
-assert DataCollector[:consumption_lags][5...].max < 500
+assert DT[:consumption_lags][5...].max < 500
