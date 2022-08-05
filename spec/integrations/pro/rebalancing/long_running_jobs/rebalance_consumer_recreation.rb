@@ -3,13 +3,13 @@
 # When there is a rebalance and we get the partition back, we should start consuming with a new
 # consumer instance. We should use one before and one after we got the partition back.
 
-TOPIC = 'integrations_11_02'
-
 setup_karafka do |config|
   config.license.token = pro_license_token
   config.concurrency = 4
   config.initial_offset = 'latest'
 end
+
+create_topic(partitions: 2)
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
@@ -35,7 +35,7 @@ end
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
-    topic TOPIC do
+    topic DataCollector.topic do
       consumer Consumer
       long_running_job true
     end
@@ -45,8 +45,8 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(TOPIC, '1', partition: 0)
-      produce(TOPIC, '1', partition: 1)
+      produce(DataCollector.topic, '1', partition: 0)
+      produce(DataCollector.topic, '1', partition: 1)
     end
 
     sleep(0.5)
@@ -61,7 +61,7 @@ consumer = setup_rdkafka_consumer
 other = Thread.new do
   sleep(0.1) until got_both?
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DataCollector.topic)
 
   consumer.each do |message|
     DataCollector[:jumped] << message

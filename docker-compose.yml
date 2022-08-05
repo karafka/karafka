@@ -16,11 +16,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_CREATE_TOPICS:
-        "integrations_11_02:2:1,\
-         integrations_12_02:2:1,\
-         integrations_13_02:2:1,\
-         integrations_14_02:2:1,\
-         integrations_15_02:2:1,\
+        "integrations_15_02:2:1,\
          integrations_16_02:2:1,\
          integrations_17_02:2:1,\
          integrations_18_02:2:1,\

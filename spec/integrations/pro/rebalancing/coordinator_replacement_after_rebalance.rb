@@ -3,12 +3,12 @@
 # Karafka should replace coordinator for consumer of a given topic partition after partition was
 # taken away from us and assigned back
 
-TOPIC = 'integrations_14_02'
-
 setup_karafka do |config|
   config.concurrency = 4
   config.license.token = pro_license_token
 end
+
+create_topic(partitions: 2)
 
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
@@ -20,7 +20,7 @@ end
 
 draw_routes do
   consumer_group DataCollector.consumer_group do
-    topic TOPIC do
+    topic DataCollector.topic do
       consumer Consumer
     end
   end
@@ -29,8 +29,8 @@ end
 Thread.new do
   loop do
     2.times do
-      produce(TOPIC, '1', partition: 0)
-      produce(TOPIC, '1', partition: 1)
+      produce(DataCollector.topic, '1', partition: 0)
+      produce(DataCollector.topic, '1', partition: 1)
     end
 
     sleep(0.5)
@@ -45,7 +45,7 @@ consumer = setup_rdkafka_consumer
 other = Thread.new do
   sleep(10)
 
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DataCollector.topic)
 
   consumer.each do |message|
     DataCollector[:jumped] << message
