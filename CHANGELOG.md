@@ -1,9 +1,10 @@
 # Karafka framework changelog
 
-## 2.0.0 (Unreleased)
+## 2.0.0.rc6 (Unreleased)
 - Update licenser to use a gem based approach based on `karafka/pro/license`.
 - Do not mark intermediate jobs as consumed when Karafka runs Enhanced Active Job with Virtual Partitions.
 - Improve development experience by adding fast cluster state changes refresh (#944)
+- Improve the license loading.
 
 ## 2.0.0.rc5 (2022-08-01)
 - Improve specs stability
