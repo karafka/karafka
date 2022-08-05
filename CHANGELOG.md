@@ -1,7 +1,91 @@
 # Karafka framework changelog
 
+## 2.0.0 (Unreleased)
+
+This changelog describes changes between `1.4` and `2.0`. Please refer to appropriate release notes for changes between particular `rc` releases.
+
+Karafka 2.0 is a **major** rewrite that brings many new things to the table but also removes specific concepts that happened not to be as good as I initially thought when I created them.
+
+Please consider getting a Pro version if you want to **support** my work on the Karafka ecosystem!
+
+For anyone worried that I will start converting regular features into Pro: This will **not** happen. Anything free and fully OSS in Karafka 1.4 will **forever** remain free. Most additions and improvements to the ecosystem are to its free parts. Any feature that is introduced as a free and open one will not become paid.
+
+### Additions
+
+This section describes **new** things and concepts introduced with Karafka 2.0.
+
+Karafka 2.0:
+
+- Introduces multi-threaded support for [concurrent work](https://github.com/karafka/karafka/wiki/Concurrency-and-multithreading) consumption for separate partitions as well as for single partition work via [Virtual Partitions](https://github.com/karafka/karafka/wiki/Pro-Virtual-Partitions).
+- Introduces [Active Job adapter](https://github.com/karafka/karafka/wiki/Active-Job) for using Karafka as a jobs backend with Ruby on Rails Active Job.
+- Introduces fully automatic integration end-to-end [test suite](https://github.com/karafka/karafka/tree/master/spec/integrations) that checks any case I could imagine.
+- Introduces [Virtual Partitions](https://github.com/karafka/karafka/wiki/Pro-Virtual-Partitions) for ability to parallelize work of a single partition.
+- Introduces [Long-Running Jobs](https://github.com/karafka/karafka/wiki/Pro-Long-Running-Jobs) to allow for work that would otherwise exceed the `max.poll.interval.ms`.
+- Introduces the [Enhanced Scheduler](https://github.com/karafka/karafka/wiki/Pro-Enhanced-Scheduler) that uses a non-preemptive LJF (Longest Job First) algorithm instead of a a FIFO (First-In, First-Out) one.
+- Introduces [Enhanced Active Job adapter](https://github.com/karafka/karafka/wiki/Pro-Enhanced-Active-Job) that is optimized and allows for strong ordering of jobs and more.
+- Introduces seamless [Ruby on Rails integration](https://github.com/karafka/karafka/wiki/Integrating-with-Ruby-on-Rails-and-other-frameworks) via `Rails::Railte` without need for any extra configuration.
+- Provides `#revoked` [method](https://github.com/karafka/karafka/wiki/Consuming-messages#shutdown-and-partition-revocation-handlers) for taking actions upon topic revocation.
+- Emits underlying async errors emitted from `librdkafka` via the standardized `error.occurred` [monitor channel](https://github.com/karafka/karafka/wiki/Error-handling-and-back-off-policy#error-tracking).
+- Replaces `ruby-kafka` with `librdkafka` as an underlying driver.
+- Introduces official [EOL policies](https://github.com/karafka/karafka/wiki/Versions-Lifecycle-and-EOL).
+- Introduces [benchmarks](https://github.com/karafka/karafka/tree/master/spec/benchmarks) that can be used to profile Karafka.
+- Introduces a requirement that the end user code **needs** to be [thread-safe](https://github.com/karafka/karafka/wiki/FAQ#does-karafka-require-gems-to-be-thread-safe).
+- Introduces a [Pro subscription](https://github.com/karafka/karafka/wiki/Build-vs.-Buy) with a [commercial license](https://github.com/karafka/karafka/blob/master/LICENSE-COMM) to fund further ecosystem development.
+
+### Deletions
+
+This section describes things that are **no longer** part of the Karafka ecosystem.
+
+Karafka 2.0:
+
+- Removes topics mappers concept completely.
+- Removes pidfiles support.
+- Removes daemonization support.
+- Removes support for using `sidekiq-backend` due to introduction of [multi-threading](https://github.com/karafka/karafka/wiki/Concurrency-and-multithreading).
+- Removes the `Responders` concept in favour of WaterDrop producer usage.
+- Removes completely all the callbacks in favour of finalizer method `#shutdown`.
+- Removes single message consumption mode in favour of [documentation](https://github.com/karafka/karafka/wiki/Consuming-messages#one-at-a-time) on how to do it easily by yourself.
+
+### Changes
+
+This section describes things that were **changed** in Karafka but are still present.
+
+Karafka 2.0:
+
+- Uses only instrumentation that comes from Karafka. This applies also to notifications coming natively from `librdkafka`. They are now piped through Karafka prior to being dispatched.
+- Integrates WaterDrop `2.x` tightly with autoconfiguration inheritance and an option to redefine it.
+- Integrates with the `karafka-testing` gem for RSpec that also has been updated.
+- Updates `cli info` to reflect the `2.0` details.
+- Stops validating `kafka` configuration beyond minimum as the rest is handled by `librdkafka`.
+- No longer uses `dry-validation`.
+- No longer uses `dry-monitor`.
+- No longer uses `dry-configurable`.
+- Lowers general external dependencies three **heavily**.
+- Renames `Karafka::Params::BatchMetadata` to `Karafka::Messages::BatchMetadata`.
+- Renames `Karafka::Params::Params` to `Karafka::Messages::Message`.
+- Renames `#params_batch` in consumers to `#messages`.
+- Renames `Karafka::Params::Metadata` to `Karafka::Messages::Metadata`.
+- Renames `Karafka::Fetcher` to `Karafka::Runner` and align notifications key names.
+- Renames `StdoutListener` to `LoggerListener`.
+- Reorganizes [monitoring and logging](https://github.com/karafka/karafka/wiki/Monitoring-and-logging) to match new concepts.
+- Notifies on fatal worker processing errors.
+- Contains updated install templates for Rails and no-non Rails.
+- Changes how the routing style (`0.5`) behaves. It now builds a single consumer group instead of one per topic.
+- Introduces changes that will allow me to build full web-UI in the upcoming `2.1`.
+- Contains updated example apps.
+- Standardizes error hooks for all error reporting (`error.occurred`).
+- Changes license to `LGPL-3.0`.
+- Introduces a `karafka-core` dependency that contains common code used across the ecosystem.
+- Contains updated [wiki](https://github.com/karafka/karafka/wiki) on everything I could think of.
+
+### What's ahead
+
+Karafka 2.0 is just the beginning.
+
+There are several things in the plan already for 2.1 and beyond, including a web dashboard, at-rest encryption, transactions support, and more.
+
 ## 2.0.0.rc6 (2022-08-05)
-- Update licenser to use a gem based approach based on `karafka/pro/license`.
+- Update licenser to use a gem based approach based on `karafka-license`.
 - Do not mark intermediate jobs as consumed when Karafka runs Enhanced Active Job with Virtual Partitions.
 - Improve development experience by adding fast cluster state changes refresh (#944)
 - Improve the license loading.
@@ -59,7 +143,7 @@
 - Add more integration specs related to polling limits.
 - Remove auto-detection of re-assigned partitions upon rebalance as for too fast rebalances it could not be accurate enough. It would also mess up in case of rebalances that would happen right after a `#seek` was issued for a partition.
 - Optimize the removal of pre-buffered lost partitions data.
-- Always rune `#revoked` when rebalance with revocation happens.
+- Always run `#revoked` when rebalance with revocation happens.
 - Evict executors upon rebalance, to prevent race-conditions.
 - Align topics names for integration specs.
 
