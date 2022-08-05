@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.0 (Unreleased)
+## 2.0.0 (2022-08-5)
 
 This changelog describes changes between `1.4` and `2.0`. Please refer to appropriate release notes for changes between particular `rc` releases.
 
