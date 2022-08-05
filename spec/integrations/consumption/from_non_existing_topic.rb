@@ -4,6 +4,8 @@
 
 setup_karafka
 
+create_topic(name: DataCollector.topics[1])
+
 class Consumer < Karafka::BaseConsumer
   def consume
     DataCollector[0] << 1
@@ -21,7 +23,7 @@ draw_routes do
 
   # We need a second existing topic to which we send nothing, but only then Karafka will not
   # notice immediately the lack of the first topic
-  topic 'integrations_00_02' do
+  topic DataCollector.topics[1] do
     consumer Consumer2
   end
 end

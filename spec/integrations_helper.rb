@@ -93,6 +93,22 @@ def setup_rdkafka_consumer(options = {})
   Rdkafka::Config.new(config).consumer
 end
 
+# A simple helper for creation of topics with given partitions count. Single partition topics are
+# automatically created during our specs, but for some we need more than one. In those cases we
+# use this helper.
+#
+# The name is equal to the default spec topic, that is `DataCollector.topic`
+#
+# @param name [String] topic name
+# @param partitions [Integer] number of partitions for this topic
+def create_topic(name: DataCollector.topic, partitions: 1)
+  Karafka::Admin.create_topic(
+    name,
+    partitions,
+    1
+  )
+end
+
 # Sets up default routes (mostly used in integration specs) or allows to configure custom routes
 # by providing a block
 # @param consumer_class [Class, nil] consumer class we want to use if going with defaults

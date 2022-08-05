@@ -14,8 +14,6 @@ require 'securerandom'
 
 RUN = SecureRandom.uuid.split('-').first
 
-TOPIC = 'integrations_00_02'
-
 setup_karafka do |config|
   config.max_wait_time = 20_000
   # Shutdown timeout should be bigger than the max wait as during shutdown we poll as well to be
@@ -26,6 +24,8 @@ setup_karafka do |config|
   config.max_messages = 1_000
   config.initial_offset = 'latest'
 end
+
+create_topic(partitions: 2)
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -41,13 +41,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
-  consumer_group TOPIC do
-    topic TOPIC do
-      consumer Consumer
-    end
-  end
-end
+draw_routes(Consumer)
 
 Thread.new do
   nr = 0
@@ -57,7 +51,7 @@ Thread.new do
     break if DataCollector.data.key?(:revoked)
 
     2.times do |i|
-      produce(TOPIC, "#{RUN}-#{nr}-#{i}", partition: i)
+      produce(DataCollector.topic, "#{RUN}-#{nr}-#{i}", partition: i)
     end
 
     nr += 1
@@ -71,7 +65,7 @@ other = Thread.new do
   sleep(30)
 
   consumer = setup_rdkafka_consumer
-  consumer.subscribe(TOPIC)
+  consumer.subscribe(DataCollector.topic)
   consumer.each do |message|
     DataCollector[:process2] << message
 
