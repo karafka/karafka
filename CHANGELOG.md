@@ -78,6 +78,12 @@ Karafka 2.0:
 - Introduces a `karafka-core` dependency that contains common code used across the ecosystem.
 - Contains updated [wiki](https://github.com/karafka/karafka/wiki) on everything I could think of.
 
+### What's ahead
+
+Karafka 2.0 is just the beginning.
+
+There are several things in the plan already for 2.1 and beyond, including a web dashboard, at-rest encryption, transactions support, and more.
+
 ## 2.0.0.rc6 (2022-08-05)
 - Update licenser to use a gem based approach based on `karafka-license`.
 - Do not mark intermediate jobs as consumed when Karafka runs Enhanced Active Job with Virtual Partitions.
