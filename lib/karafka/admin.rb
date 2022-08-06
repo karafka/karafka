@@ -8,7 +8,7 @@ module Karafka
   #
   # @note It always uses the primary defined cluster and does not support multi-cluster work.
   #   If you need this, just replace the cluster info for the time you use this
-  class Admin
+  module Admin
     class << self
       # Creates Kafka topic with given settings
       #
