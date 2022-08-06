@@ -20,21 +20,21 @@ class Consumer < Karafka::BaseConsumer
     @count ||= 0
     @count += 1
 
-    if @count == 1
-      DT[:last_good] = messages.to_a[-2].offset
-      # This and previous messages should not appear twice
-      mark_as_consumed messages.to_a[-2]
+    return unless @count == 1
 
-      DT[:repeated] = messages.to_a[-1].offset
+    DT[:last_good] = messages.to_a[-2].offset
+    # This and previous messages should not appear twice
+    mark_as_consumed messages.to_a[-2]
 
-      raise StandardError
-    end
+    DT[:repeated] = messages.to_a[-1].offset
+
+    raise StandardError
   end
 end
 
 draw_routes(Consumer)
 
-100.times { |data| produce(DT.topic, '1') }
+100.times { produce(DT.topic, '1') }
 
 start_karafka_and_wait_until do
   DT[:offsets].size >= 101

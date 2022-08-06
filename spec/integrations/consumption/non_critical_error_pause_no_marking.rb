@@ -19,18 +19,18 @@ class Consumer < Karafka::BaseConsumer
     @count ||= 0
     @count += 1
 
-    if @count == 1
-      DT[:first_in] = messages.first.offset
-      DT[:last_in] = messages.last.offset
+    return unless @count == 1
 
-      raise StandardError
-    end
+    DT[:first_in] = messages.first.offset
+    DT[:last_in] = messages.last.offset
+
+    raise StandardError
   end
 end
 
 draw_routes(Consumer)
 
-100.times { |data| produce(DT.topic, '1') }
+100.times { produce(DT.topic, '1') }
 
 start_karafka_and_wait_until do
   DT[:offsets].size >= 101
