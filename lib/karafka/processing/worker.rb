@@ -46,8 +46,9 @@ module Karafka
       def process
         job = @jobs_queue.pop
 
+        instrument_details = { caller: self, job: job, jobs_queue: @jobs_queue }
+
         if job
-          instrument_details = { caller: self, job: job, jobs_queue: @jobs_queue }
 
           Karafka.monitor.instrument('worker.process', instrument_details)
 
@@ -82,6 +83,9 @@ module Karafka
       ensure
         # job can be nil when the queue is being closed
         @jobs_queue.complete(job) if job
+
+        # Always publish info, that we completed all the work despite its result
+        Karafka.monitor.instrument('worker.completed', instrument_details)
       end
     end
   end
