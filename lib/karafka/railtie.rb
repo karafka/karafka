@@ -75,7 +75,6 @@ if rails
           # Reload code each time there is a change in the code
           next unless Rails.application.reloaders.any?(&:updated?)
 
-          # Rails.autoloaders.main.reload
           Rails.application.reloader.reload!
         end
 
