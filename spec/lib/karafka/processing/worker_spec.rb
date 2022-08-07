@@ -88,10 +88,17 @@ RSpec.describe_current do
         errors
       end
 
+      let(:completions) do
+        completions = []
+        Karafka.monitor.subscribe('worker.completed') { |event| completions << event }
+        completions
+      end
+
       before do
         allow(job).to receive(:before_call).and_raise(StandardError)
 
         detected_errors
+        completions
 
         queue << job
         Thread.pass
@@ -101,6 +108,10 @@ RSpec.describe_current do
       it 'expect to instrument on it' do
         expect(detected_errors[0].id).to eq('error.occurred')
         expect(detected_errors[0].payload[:type]).to eq('worker.process.error')
+      end
+
+      it 'expect to publish completion even despite error' do
+        expect(completions[0].id).to eq('worker.completed')
       end
     end
   end

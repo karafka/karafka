@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.2 (Unreleased)
+- Bypass issue with Rails reload in development by releasing the connection (https://github.com/rails/rails/issues/44183).
+
 ## 2.0.1 (2022-08-06)
 - Provide `Karafka::Admin` for creation and destruction of topics and fetching cluster info.
 - Update integration specs to always use one-time disposable topics.

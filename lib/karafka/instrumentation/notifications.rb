@@ -34,6 +34,7 @@ module Karafka
 
         worker.process
         worker.processed
+        worker.completed
 
         statistics.emitted
 
