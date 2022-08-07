@@ -12,7 +12,7 @@ RSpec.describe_current do
       let(:info) do
         [
           "Karafka version: #{Karafka::VERSION}",
-          "Ruby version: #{RUBY_VERSION}",
+          "Ruby version: #{RUBY_DESCRIPTION}",
           "Rdkafka version: #{::Rdkafka::VERSION}",
           "Subscription groups count: #{Karafka::App.subscription_groups.size}",
           "Workers count: #{Karafka::App.config.concurrency}",
@@ -39,7 +39,7 @@ RSpec.describe_current do
       let(:info) do
         [
           "Karafka version: #{Karafka::VERSION} + Pro",
-          "Ruby version: #{RUBY_VERSION}",
+          "Ruby version: #{RUBY_DESCRIPTION}",
           "Rdkafka version: #{::Rdkafka::VERSION}",
           "Subscription groups count: #{Karafka::App.subscription_groups.size}",
           "Workers count: #{Karafka::App.config.concurrency}",

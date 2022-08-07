@@ -101,7 +101,7 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_app_running(event) }
 
     let(:payload) { {} }
-    let(:message) { 'Running Karafka server' }
+    let(:message) { "Running Karafka #{Karafka::VERSION} server" }
 
     it 'expect logger to log server running' do
       # We had to add at least once as it runs in a separate thread and can interact

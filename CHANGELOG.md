@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 2.0.3 (Unreleased)
+- Update boot info on server startup.
+- Update `karafka info` with more descriptive Ruby version info.
+
 ## 2.0.2 (2022-08-07)
 - Bypass issue with Rails reload in development by releasing the connection (https://github.com/rails/rails/issues/44183).
 

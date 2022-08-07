@@ -33,11 +33,11 @@ module Karafka
 
         if Karafka.pro?
           Karafka.logger.info(
-            green('Thank you for investing in the Karafka Pro subscription!')
+            green('Thank you for using Karafka Pro!')
           )
         else
           Karafka.logger.info(
-            red('You like Karafka? Please consider getting a Pro version!')
+            red('Upgrade to Karafka Pro for more features and support: https://karafka.io')
           )
         end
       end
