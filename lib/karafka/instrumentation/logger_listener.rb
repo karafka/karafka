@@ -96,7 +96,12 @@ module Karafka
       #
       # @param _event [Dry::Events::Event] event details including payload
       def on_app_running(_event)
-        info 'Running Karafka server'
+        info "Running in #{RUBY_DESCRIPTION}"
+        info "Running Karafka #{Karafka::VERSION} server"
+
+        return if Karafka.pro?
+
+        info 'See LICENSE and the LGPL-3.0 for licensing details.'
       end
 
       # Logs info that we're going to stop the Karafka server.

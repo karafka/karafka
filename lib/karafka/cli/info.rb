@@ -35,7 +35,7 @@ module Karafka
 
         [
           "Karafka version: #{Karafka::VERSION}#{postfix}",
-          "Ruby version: #{RUBY_VERSION}",
+          "Ruby version: #{RUBY_DESCRIPTION}",
           "Rdkafka version: #{::Rdkafka::VERSION}",
           "Subscription groups count: #{Karafka::App.subscription_groups.size}",
           "Workers count: #{Karafka::App.config.concurrency}",
