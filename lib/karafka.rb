@@ -85,8 +85,16 @@ end
 loader = Zeitwerk::Loader.for_gem
 # Do not load Rails extensions by default, this will be handled by Railtie if they are needed
 loader.ignore(Karafka.gem_root.join('lib/active_job'))
-# Do not load pro components, this will be handled by license manager
-loader.ignore(Karafka.gem_root.join('lib/karafka/pro'))
+
+begin
+  require 'karafka-license'
+rescue LoadError
+  # Do not load pro components if we cannot load the license
+  # This is a preliminary check so autoload works as expected
+  # Later on the licenser will make sure to setup all the needed components anyhow
+  loader.ignore(Karafka.gem_root.join('lib/karafka/pro'))
+end
+
 # Do not load vendors instrumentation components. Those need to be required manually if needed
 loader.ignore(Karafka.gem_root.join('lib/karafka/instrumentation/vendors'))
 loader.setup

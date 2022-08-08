@@ -48,9 +48,13 @@ if rails
         next unless Rails.env.development?
         next unless ENV.key?('KARAFKA_CLI')
 
+        logger = ActiveSupport::Logger.new($stdout)
+        # Inherit the logger level from Rails, otherwise would always run with the debug level
+        logger.level = Rails.logger.level
+
         Rails.logger.extend(
           ActiveSupport::Logger.broadcast(
-            ActiveSupport::Logger.new($stdout)
+            logger
           )
         )
       end
