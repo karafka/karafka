@@ -76,7 +76,7 @@ RSpec.describe_current do
     before do
       tracker.start
 
-      sleep 0.199
+      sleep 0.1995
 
       tracker.checkpoint
     end
