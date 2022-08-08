@@ -13,11 +13,34 @@ module Karafka
   module Pro
     # Loader requires and loads all the pro components only when they are needed
     class Loader
+      # All the pro components that need to be loaded
+      COMPONENTS = %w[
+        base_consumer
+        performance_tracker
+        processing/scheduler
+        processing/jobs/consume_non_blocking
+        processing/jobs_builder
+        processing/coordinator
+        processing/partitioner
+        contracts/base
+        contracts/consumer_group
+        contracts/consumer_group_topic
+        routing/topic_extensions
+        routing/builder_extensions
+        active_job/consumer
+        active_job/dispatcher
+        active_job/job_options_contract
+      ].freeze
+
+      private_constant :COMPONENTS
+
       class << self
         # Loads all the pro components and configures them wherever it is expected
         # @param config [Karafka::Core::Configurable::Node] app config that we can alter with pro
         #   components
         def setup(config)
+          COMPONENTS.each { |component| require_relative(component) }
+
           reconfigure(config)
 
           load_routing_extensions
