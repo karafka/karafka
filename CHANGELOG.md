@@ -3,6 +3,8 @@
 ## 2.0.3 (Unreleased)
 - Update boot info on server startup.
 - Update `karafka info` with more descriptive Ruby version info.
+- Fix issue where when used with Rails in development, log would be too verbose.
+- Fix issue where Zeitwerk with Rails would not load Pro components despite license being present.
 
 ## 2.0.2 (2022-08-07)
 - Bypass issue with Rails reload in development by releasing the connection (https://github.com/rails/rails/issues/44183).
