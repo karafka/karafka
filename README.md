@@ -89,4 +89,4 @@ Karafka has [Wiki pages](https://github.com/karafka/karafka/wiki) for almost eve
 
 If you have questions about using Karafka, feel free to join our [Slack](https://slack.karafka.io) channel.
 
-Karafka has priority support for technical and architectural questions that is part of the Karafka Pro subscription.
+Karafka has [priority support](https://github.com/karafka/karafka/wiki/Pro-Support) for technical and architectural questions that is part of the Karafka Pro subscription.
