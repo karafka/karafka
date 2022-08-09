@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.3 (Unreleased)
+## 2.0.3 (2022-08-09)
 - Update boot info on server startup.
 - Update `karafka info` with more descriptive Ruby version info.
 - Fix issue where when used with Rails in development, log would be too verbose.
