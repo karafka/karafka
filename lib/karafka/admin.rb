@@ -19,9 +19,9 @@ module Karafka
       #   https://kafka.apache.org/documentation/#topicconfigs
       def create_topic(name, partitions, replication_factor, topic_config = {})
         with_admin do |admin|
-          admin
-            .create_topic(name, partitions, replication_factor, topic_config)
-            .wait
+          admin.create_topic(name, partitions, replication_factor, topic_config)
+
+          sleep(0.1) until topics_names.include?(name)
         end
       end
 
@@ -30,9 +30,9 @@ module Karafka
       # @param name [String] topic name
       def delete_topic(name)
         with_admin do |admin|
-          admin
-            .delete_topic(name)
-            .wait
+          admin.delete_topic(name)
+
+          sleep(0.1) while topics_names.include?(name)
         end
       end
 
@@ -44,6 +44,11 @@ module Karafka
       end
 
       private
+
+      # @return [Array<String>] topics names
+      def topics_names
+        cluster_info.topics.map { |topic| topic.fetch(:topic_name) }
+      end
 
       # Creates admin instance and yields it. After usage it closes the admin instance
       def with_admin
