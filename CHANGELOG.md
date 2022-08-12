@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- Fix hanging topic creation (#964)
+
 ## 2.0.3 (2022-08-09)
 - Update boot info on server startup.
 - Update `karafka info` with more descriptive Ruby version info.
