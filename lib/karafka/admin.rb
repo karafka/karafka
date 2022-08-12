@@ -9,6 +9,13 @@ module Karafka
   # @note It always uses the primary defined cluster and does not support multi-cluster work.
   #   If you need this, just replace the cluster info for the time you use this
   module Admin
+    # How long we should wait prior to failing a given operation
+    # Most of the time Kafka reacts real time, however in CI and other heavy loaded systems
+    # certain operations can take slightly more, thus the extended wait.
+    MAX_WAIT_TIMEOUT = 5 * 60
+
+    private_constant :MAX_WAIT_TIMEOUT
+
     class << self
       # Creates Kafka topic with given settings
       #
@@ -21,7 +28,7 @@ module Karafka
         with_admin do |admin|
           admin
             .create_topic(name, partitions, replication_factor, topic_config)
-            .wait
+            .wait(max_wait_timeout: MAX_WAIT_TIMEOUT)
         end
       end
 
@@ -32,7 +39,7 @@ module Karafka
         with_admin do |admin|
           admin
             .delete_topic(name)
-            .wait
+            .wait(max_wait_timeout: MAX_WAIT_TIMEOUT)
         end
       end
 
