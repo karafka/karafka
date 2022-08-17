@@ -5,6 +5,10 @@ require 'karafka/pro/active_job/dispatcher'
 RSpec.describe_current do
   subject(:dispatcher) { described_class.new }
 
+  before { allow(Time).to receive(:now).and_return(current_time) }
+
+  let(:current_time) { Time.now }
+
   let(:job_class) do
     Class.new(ActiveJob::Base) do
       extend ::Karafka::ActiveJob::JobExtensions
