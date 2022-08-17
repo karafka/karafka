@@ -9,7 +9,7 @@ class CustomDeserializer
 end
 
 setup_karafka do |config|
-  config.deserializer CustomDeserializer.new
+  config.deserializer = CustomDeserializer.new
 end
 
 messages = Array.new(100) { |i| "message#{i}" }
