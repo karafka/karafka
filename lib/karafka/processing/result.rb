@@ -6,8 +6,11 @@ module Karafka
     # It allows to indicate if given thing moved from success to a failure or the other way around
     # Useful for tracking consumption state
     class Result
+      attr_reader :cause
+
       def initialize
         @success = true
+        @cause = false
       end
 
       # @return [Boolean]
@@ -18,11 +21,16 @@ module Karafka
       # Marks state as successful
       def success!
         @success = true
+        # We set cause to false so the previous error that occurred does not leak when error is
+        # no longer present
+        @cause = false
       end
 
       # Marks state as failure
-      def failure!
+      # @param cause [StandardError] error that occurred and caused failure
+      def failure!(cause)
         @success = false
+        @cause = cause
       end
     end
   end

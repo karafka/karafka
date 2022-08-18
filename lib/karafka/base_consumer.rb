@@ -37,7 +37,7 @@ module Karafka
 
       coordinator.consumption(self).success!
     rescue StandardError => e
-      coordinator.consumption(self).failure!
+      coordinator.consumption(self).failure!(e)
 
       Karafka.monitor.instrument(
         'error.occurred',
