@@ -20,10 +20,10 @@ module Karafka
 
       # Marks state as successful
       def success!
-        @cause = false
+        @success = true
         # We set cause to false so the previous error that occurred does not leak when error is
         # no longer present
-        @success = true
+        @cause = false
       end
 
       # Marks state as failure
