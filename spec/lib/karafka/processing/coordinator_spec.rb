@@ -85,7 +85,7 @@ RSpec.describe_current do
     context 'when there are no jobs running and not all the jobs finished with success' do
       before do
         coordinator.consumption(0).success!
-        coordinator.consumption(1).failure!
+        coordinator.consumption(1).failure!(StandardError.new)
       end
 
       it { expect(coordinator.success?).to eq(false) }
