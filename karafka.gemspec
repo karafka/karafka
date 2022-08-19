@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.version     = ::Karafka::VERSION
   spec.platform    = Gem::Platform::RUBY
   spec.authors     = ['Maciej Mensfeld']
-  spec.email       = %w[maciej@mensfeld.pl]
+  spec.email       = %w[contact@karafka.io]
   spec.homepage    = 'https://karafka.io'
   spec.summary     = 'Efficient Kafka processing framework for Ruby and Rails'
   spec.description = 'Framework used to simplify Apache Kafka based Ruby applications development'
@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
     spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
   end
 
-  spec.cert_chain    = %w[certs/mensfeld.pem]
+  spec.cert_chain    = %w[certs/cert_chain.pem]
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = %w[karafka]
   spec.require_paths = %w[lib]
