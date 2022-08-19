@@ -1,7 +1,8 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.4 (Unreleased)
 - Fix hanging topic creation (#964)
+- Fix conflict with other Rails loading libraries like `gruf` (#974)
 
 ## 2.0.3 (2022-08-09)
 - Update boot info on server startup.
