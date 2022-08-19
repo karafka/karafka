@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Parallel consumer should also work with ActiveJob, though it will be a bit undeterministic unless
-# we use headers data to balance work.
+# Parallel consumer should also work with ActiveJob, though it will be a bit nondeterministic
+# unless we use headers data to balance work.
 
 setup_karafka do |config|
   config.license.token = pro_license_token
