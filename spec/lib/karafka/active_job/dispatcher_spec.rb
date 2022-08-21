@@ -11,6 +11,9 @@ RSpec.describe_current do
 
   let(:job) { job_class.new }
   let(:serialized_payload) { ActiveSupport::JSON.encode(job.serialize) }
+  let(:time_now) { Time.now }
+
+  before { allow(Time).to receive(:now).and_return(time_now) }
 
   context 'when we dispatch without any changes to the defaults' do
     before { allow(::Karafka.producer).to receive(:produce_async) }
