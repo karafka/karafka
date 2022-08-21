@@ -18,7 +18,6 @@ class Consumer < Karafka::Pro::BaseConsumer
       DT[0] << message.raw_payload
     end
 
-
     # This will ensure we can move forward
     mark_as_consumed(messages.first)
   end

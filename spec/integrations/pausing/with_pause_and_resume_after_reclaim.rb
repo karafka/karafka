@@ -34,13 +34,11 @@ end
 draw_routes(Consumer)
 
 Thread.new do
-  begin
-    loop do
-      produce(DT.topic, '1', partition: [0, 1].sample)
-      sleep(0.1)
-    end
+  loop do
+    produce(DT.topic, '1', partition: [0, 1].sample)
+    sleep(0.1)
   rescue WaterDrop::Errors::ProducerClosedError
-    nil
+    break
   end
 end
 
@@ -71,3 +69,5 @@ end
 lost_partition = DT[:jumped][0]
 
 assert !DT[lost_partition].include?(DT[:jumped][1])
+
+other.join
