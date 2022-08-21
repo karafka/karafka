@@ -70,10 +70,15 @@ module Karafka
       end
     end
 
-    # Trigger method for running on shutdown.
+    # Trigger method for running on partition revocation.
     #
     # @private
     def on_revoked
+      # We need to always un-pause the processing in case we have lost a given partition.
+      # Otherwise the underlying librdkafka would not know we may want to continue processing and
+      # the pause could in theory last forever
+      resume
+
       coordinator.revoke
 
       Karafka.monitor.instrument('consumer.revoked', caller: self) do
