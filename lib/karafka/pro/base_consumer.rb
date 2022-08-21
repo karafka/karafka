@@ -44,6 +44,29 @@ module Karafka
         end
       end
 
+      # Trigger method for running on partition revocation.
+      #
+      # @private
+      def on_revoked
+        # We do not want to resume on revocation in case of a LRJ.
+        # For LRJ we resume after the successful processing or do a backoff pause in case of a
+        # failure. Double non-blocking resume could cause problems in coordination.
+        resume unless topic.long_running_job?
+
+        coordinator.revoke
+
+        Karafka.monitor.instrument('consumer.revoked', caller: self) do
+          revoked
+        end
+      rescue StandardError => e
+        Karafka.monitor.instrument(
+          'error.occurred',
+          error: e,
+          caller: self,
+          type: 'consumer.revoked.error'
+        )
+      end
+
       private
 
       # Handles the post-consumption flow depending on topic settings
@@ -74,6 +97,8 @@ module Karafka
           resume
         else
           # If processing failed, we need to pause
+          # For long running job this will overwrite the default never-ending pause and will cause
+          # the processing th keep going after the error backoff
           pause(@seek_offset || first_message.offset)
         end
       end
