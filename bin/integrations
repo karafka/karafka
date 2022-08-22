@@ -19,7 +19,7 @@ ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../
 # When the value is high, there's a problem with thread allocation on Github CI, tht is why
 # we limit it. Locally we can run a lot of those, as many of them have sleeps and do not use a lot
 # of CPU
-CONCURRENCY = ENV.key?('CI') ? 5 : Etc.nprocessors * 2
+CONCURRENCY = ENV.key?('CI') ? 3 : Etc.nprocessors * 2
 
 # How may bytes do we want to keep from the stdout in the buffer for when we need to print it
 MAX_BUFFER_OUTPUT = 51_200

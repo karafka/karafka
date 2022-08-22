@@ -224,8 +224,8 @@ RSpec.describe_current do
   end
 
   context 'when we define a custom manual pause time' do
-    let(:timeout) { 100 }
-    let(:max_timeout) { 100 }
+    let(:timeout) { 5000 }
+    let(:max_timeout) { 5000 }
     let(:exponential_backoff) { false }
 
     context 'when pause tracker is created' do

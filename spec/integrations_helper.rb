@@ -140,7 +140,7 @@ def wait_until
 
     # Stop if it was running for 2 minutes and nothing changed
     # This prevent from hanging in case of specs instability
-    raise StandardError, 'Execution expired' if (Time.now - started_at) > 120
+    raise StandardError, 'Execution expired' if (Time.now - started_at) > 180
 
     sleep(0.01)
   end
