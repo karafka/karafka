@@ -38,7 +38,7 @@ other = Thread.new do
 
   consumer.each do |message|
     DT[:jumped] << [message.partition, message.offset]
-    sleep 5
+    sleep 15
     consumer.store_offset(message)
     break
   end
