@@ -40,9 +40,14 @@ draw_routes do
   end
 end
 
-10.times do
-  produce(DT.topic, '1', partition: 0)
-  produce(DT.topic, '1', partition: 1)
+dispatch = Thread.new do
+  10.times do
+    produce(DT.topic, '1', partition: 0)
+    sleep 2
+    produce(DT.topic, '1', partition: 1)
+  end
+rescue WaterDrop::Errors::ProducerClosedError
+  nil
 end
 
 # We need a second producer to trigger a rebalance
@@ -66,6 +71,7 @@ start_karafka_and_wait_until do
 end
 
 consumer.close
+dispatch.join
 
 revoked_partition = DT[:revoked_data].first
 
