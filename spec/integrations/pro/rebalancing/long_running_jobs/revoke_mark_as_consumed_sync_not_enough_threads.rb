@@ -40,7 +40,6 @@ draw_routes do
   end
 end
 
-
 dispatch = Thread.new do
   10.times do
     produce(DT.topic, '1', partition: 0)
