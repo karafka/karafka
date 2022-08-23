@@ -42,13 +42,13 @@ If you're entirely new to the subject, you can start with our "Kafka on Rails" a
 - [Kafka on Rails: Using Kafka with Ruby on Rails – Part 1 – Kafka basics and its advantages](https://mensfeld.pl/2017/11/kafka-on-rails-using-kafka-with-ruby-on-rails-part-1-kafka-basics-and-its-advantages/)
 - [Kafka on Rails: Using Kafka with Ruby on Rails – Part 2 – Getting started with Rails and Kafka](https://mensfeld.pl/2018/01/kafka-on-rails-using-kafka-with-ruby-on-rails-part-2-getting-started-with-ruby-and-kafka/)
 
-If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to visit our [Getting started](https://github.com/karafka/karafka/wiki/Getting-started) guides and the [example apps repository](https://github.com/karafka/example-apps).
+If you want to get started with Kafka and Karafka as fast as possible, then the best idea is to visit our [Getting started](https://karafka.io/docs/Getting-Started) guides and the [example apps repository](https://github.com/karafka/example-apps).
 
 We also maintain many [integration specs](https://github.com/karafka/karafka/tree/master/spec/integrations) illustrating various use-cases and features of the framework.
 
 ### TL;DR (1 minute from setup to publishing and consuming messages)
 
-**Prerequisites**: Kafka running. You can start it by following instructions from [here](https://github.com/karafka/karafka/wiki/Setting-up-Kafka).
+**Prerequisites**: Kafka running. You can start it by following instructions from [here](https://karafka.io/docs/Setting-up-Kafka).
 
 1. Add and install Karafka:
 
