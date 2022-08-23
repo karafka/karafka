@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.5 (Unreleased)
+## 2.0.5 (2022-08-23)
 - Fix unnecessary double new line in the `karafka.rb` template for Ruby on Rails
 - Fix a case where a manually paused partition would not be processed after rebalance (#988)
 - Increase specs stability.
