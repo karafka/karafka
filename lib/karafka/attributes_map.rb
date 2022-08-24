@@ -19,7 +19,7 @@ module Karafka
           consumer: %i[
             session_timeout offset_commit_interval offset_commit_threshold
             offset_retention_time heartbeat_interval fetcher_max_queue_size
-            assignment_strategy
+            assignment_strategy rebalance_timeout
           ],
           subscribe: %i[start_from_beginning max_bytes_per_partition],
           consumption: %i[min_bytes max_bytes max_wait_time],

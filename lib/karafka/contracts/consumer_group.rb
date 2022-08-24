@@ -32,6 +32,7 @@ module Karafka
         required(:offset_retention_time).maybe(:integer)
         required(:heartbeat_interval).filled { (int? | float?) & gteq?(0) }
         required(:fetcher_max_queue_size).filled(:int?, gt?: 0)
+        required(:rebalance_timeout).filled(:int?, gt?: 0)
         required(:assignment_strategy).value(:any)
         required(:connect_timeout).filled { (int? | float?) & gt?(0) }
         required(:reconnect_timeout).filled { (int? | float?) & gteq?(0) }

@@ -115,6 +115,9 @@ module Karafka
         #   seconds of latency, set `max_wait_time` to 5. You should make sure
         #   max_wait_time * num brokers + heartbeat_interval is less than session_timeout.
         setting :max_wait_time, default: 1
+        # option rebalance_timeout [Integer] sets number of seconds a broker will wait for a
+        #   consumer during a rebalance before considering it dead.
+        setting :rebalance_timeout, default: 10
         # option automatically_mark_as_consumed [Boolean] should we automatically mark received
         # messages as consumed (processed) after non-error consumption
         setting :automatically_mark_as_consumed, default: true

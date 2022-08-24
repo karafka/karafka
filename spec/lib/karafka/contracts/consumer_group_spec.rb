@@ -252,6 +252,32 @@ RSpec.describe Karafka::Contracts::ConsumerGroup do
     end
   end
 
+  context 'when we validate rebalance_timeout' do
+    context 'when rebalance_timeout is nil' do
+      before { config[:rebalance_timeout] = nil }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when rebalance_timeout is not integer' do
+      before { config[:rebalance_timeout] = 's' }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when rebalance_timeout is 0' do
+      before { config[:rebalance_timeout] = 0 }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when rebalance_timeout is less than 0' do
+      before { config[:rebalance_timeout] = -1 }
+
+      it { expect(check).not_to be_success }
+    end
+  end
+
   context 'when we validate assignment_strategy' do
     context 'when it is an object without call method' do
       before { config[:assignment_strategy] = Struct.new(:test).new }
