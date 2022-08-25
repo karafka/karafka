@@ -275,15 +275,15 @@ module Karafka
 
       # Commits the stored offsets in a sync way and closes the consumer.
       def close
-        # Once client is closed, we should not close it again
-        # This could only happen in case of a race-condition when forceful shutdown happens
-        # and triggers this from a different thread
-        return if @closed
-
         @mutex.synchronize do
-          internal_commit_offsets(async: false)
+          # Once client is closed, we should not close it again
+          # This could only happen in case of a race-condition when forceful shutdown happens
+          # and triggers this from a different thread
+          return if @closed
 
           @closed = true
+
+          internal_commit_offsets(async: false)
 
           # Remove callbacks runners that were registered
           ::Karafka::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
