@@ -56,7 +56,7 @@ module Karafka
         result = yield(admin)
         result
       ensure
-        admin.close if admin
+        admin&.close
       end
     end
   end
