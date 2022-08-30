@@ -30,8 +30,8 @@ RSpec.describe_current do
 
     context 'when not paused over timeout' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.764)
         tracker.pause
-        sleep(0.001)
       end
 
       it { expect(tracker.expired?).to eq(false) }
@@ -41,8 +41,8 @@ RSpec.describe_current do
 
     context 'when paused over timeout' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
-        sleep(0.01)
       end
 
       it { expect(tracker.expired?).to eq(true) }
@@ -65,8 +65,8 @@ RSpec.describe_current do
 
     context 'when paused over timeout and resumed' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
-        sleep(0.01)
         tracker.resume
       end
 
@@ -77,8 +77,8 @@ RSpec.describe_current do
 
     context 'when paused over timeout, resumed and reset' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
-        sleep(0.01)
         tracker.resume
         tracker.reset
       end
@@ -110,8 +110,9 @@ RSpec.describe_current do
 
     context 'when not paused over timeout nor max timeout' do
       before do
+        # 1 ms of a difference
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.764)
         tracker.pause
-        sleep(0.001)
       end
 
       it { expect(tracker.expired?).to eq(false) }
@@ -121,8 +122,8 @@ RSpec.describe_current do
 
     context 'when paused over max timeout' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.769)
         tracker.pause
-        sleep(0.006)
       end
 
       it { expect(tracker.expired?).to eq(true) }
@@ -132,8 +133,8 @@ RSpec.describe_current do
 
     context 'when paused over timeout and resumed' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.769)
         tracker.pause
-        sleep(0.01)
         tracker.resume
       end
 
@@ -144,8 +145,8 @@ RSpec.describe_current do
 
     context 'when paused over timeout, resumed and reset' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.769)
         tracker.pause
-        sleep(0.01)
         tracker.resume
         tracker.reset
       end
@@ -177,8 +178,8 @@ RSpec.describe_current do
 
     context 'when not paused over timeout nor max timeout' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.764)
         tracker.pause
-        sleep(0.001)
       end
 
       it { expect(tracker.expired?).to eq(false) }
@@ -188,8 +189,8 @@ RSpec.describe_current do
 
     context 'when paused over max timeout' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
-        sleep(0.1)
       end
 
       it { expect(tracker.expired?).to eq(true) }
@@ -199,8 +200,8 @@ RSpec.describe_current do
 
     context 'when paused over timeout and resumed' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
-        sleep(0.01)
         tracker.resume
       end
 
@@ -211,8 +212,8 @@ RSpec.describe_current do
 
     context 'when paused over timeout, resumed and reset' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
-        sleep(0.01)
         tracker.resume
         tracker.reset
       end
@@ -255,8 +256,8 @@ RSpec.describe_current do
 
     context 'when not paused over timeout nor max timeout' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.764)
         tracker.pause(2)
-        sleep(0.001)
       end
 
       it { expect(tracker.expired?).to eq(false) }
@@ -266,8 +267,8 @@ RSpec.describe_current do
 
     context 'when paused over max timeout' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause(1)
-        sleep(0.006)
       end
 
       it { expect(tracker.expired?).to eq(true) }
@@ -277,8 +278,8 @@ RSpec.describe_current do
 
     context 'when paused over timeout and resumed' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause(1)
-        sleep(0.01)
         tracker.resume
       end
 
@@ -289,8 +290,8 @@ RSpec.describe_current do
 
     context 'when paused over timeout, resumed and reset' do
       before do
+        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause(1)
-        sleep(0.01)
         tracker.resume
         tracker.reset
       end
