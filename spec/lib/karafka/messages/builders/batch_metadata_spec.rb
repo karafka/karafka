@@ -24,7 +24,7 @@ RSpec.describe_current do
     it { expect(result.scheduled_at).to eq(scheduled_at) }
 
     it 'expect to have processed_at set to nil, since not yet picked up' do
-      expect(result.processed_at).to eq(now)
+      expect(result.processed_at).to eq(nil)
     end
 
     context 'when processed_at is assigned to the build metadata' do

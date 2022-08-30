@@ -26,6 +26,7 @@ module Karafka
         #   management. This layer of the framework knows nothing about Kafka messages consumption.
         class ConsumeNonBlocking < ::Karafka::Processing::Jobs::Consume
           # Makes this job non-blocking from the start
+          # @param args [Array] any arguments accepted by `::Karafka::Processing::Jobs::Consume`
           def initialize(*args)
             super
             @non_blocking = true

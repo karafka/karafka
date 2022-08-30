@@ -33,7 +33,7 @@ module Karafka
         return unless topic.long_running_job?
 
         # This ensures, that when running LRJ with VP, things operate as expected
-        coordinator.on_started do |first_group_message|
+        coordinator.on_enqueued do |first_group_message|
           # Pause at the first message in a batch. That way in case of a crash, we will not loose
           # any messages
           pause(first_group_message.offset, MAX_PAUSE_TIME)

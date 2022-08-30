@@ -8,7 +8,6 @@ RSpec.describe_current do
   let(:topic) { build(:routing_topic) }
   let(:messages) { [build(:messages_message)] }
   let(:coordinator) { build(:processing_coordinator) }
-  let(:received_at) { Time.now }
   let(:consumer) do
     ClassBuilder.inherit(topic.consumer) do
       def consume; end
@@ -31,31 +30,41 @@ RSpec.describe_current do
     it { expect(executor.group_id).to eq(group_id) }
   end
 
-  describe '#before_consume' do
-    before { allow(consumer).to receive(:on_before_consume) }
+  describe '#before_enqueue' do
+    before { allow(consumer).to receive(:on_before_enqueue) }
 
     it do
-      expect { executor.before_consume(messages, received_at, coordinator) }.not_to raise_error
+      expect { executor.before_enqueue(messages, coordinator) }.not_to raise_error
     end
 
     it 'expect to build appropriate messages batch' do
-      executor.before_consume(messages, received_at, coordinator)
+      executor.before_enqueue(messages, coordinator)
       expect(consumer.messages.first.raw_payload).to eq(messages.first.raw_payload)
     end
 
     it 'expect to assign appropriate coordinator' do
-      executor.before_consume(messages, received_at, coordinator)
+      executor.before_enqueue(messages, coordinator)
       expect(consumer.coordinator).to eq(coordinator)
     end
 
     it 'expect to build metadata with proper details' do
-      executor.before_consume(messages, received_at, coordinator)
-      expect(consumer.messages.metadata.scheduled_at).to eq(received_at)
+      executor.before_enqueue(messages, coordinator)
       expect(consumer.messages.metadata.topic).to eq(topic.name)
     end
 
-    it 'expect to run consumer on_before_consume' do
-      executor.before_consume(messages, received_at, coordinator)
+    it 'expect to run consumer on_before_enqueue' do
+      executor.before_enqueue(messages, coordinator)
+      expect(consumer).to have_received(:on_before_enqueue).with(no_args)
+    end
+  end
+
+  describe '#before_consume' do
+    before do
+      allow(consumer).to receive(:on_before_consume)
+      executor.before_consume
+    end
+
+    it 'expect to run consumer#on_before_consume' do
       expect(consumer).to have_received(:on_before_consume).with(no_args)
     end
   end

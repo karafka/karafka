@@ -31,6 +31,7 @@ module Karafka
           super
 
           @mutex.synchronize do
+            @on_enqueued_invoked = false
             @on_started_invoked = false
             @on_finished_invoked = false
             @first_message = messages.first
@@ -43,6 +44,8 @@ module Karafka
           @running_jobs.zero?
         end
 
+        # Runs synchronized code once for a collective of virtual partitions prior to work being
+        # enqueued
         def on_enqueued
           @flow_lock.synchronize do
             return if @on_enqueued_invoked

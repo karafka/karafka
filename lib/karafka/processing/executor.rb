@@ -66,7 +66,7 @@ module Karafka
         consumer.on_before_enqueue
       end
 
-      # Runs setup and warmup code in the worker prior to running the consumption
+      # Runs setup and warm-up code in the worker prior to running the consumption
       def before_consume
         consumer.on_before_consume
       end
