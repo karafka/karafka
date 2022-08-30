@@ -9,6 +9,10 @@ RSpec.describe_current do
     )
   end
 
+  before { allow(::Process).to receive(:clock_gettime).and_return(*times) }
+
+  let(:times) { [0, 0] }
+
   context 'when max timeout not defined and no exponential backoff' do
     let(:timeout) { 10 }
     let(:max_timeout) { nil }
@@ -29,10 +33,9 @@ RSpec.describe_current do
     end
 
     context 'when not paused over timeout' do
-      before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.764)
-        tracker.pause
-      end
+      let(:times) { [0.763, 0.764] }
+
+      before { tracker.pause }
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
@@ -40,10 +43,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout' do
-      before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
-        tracker.pause
-      end
+      let(:times) { [0.763, 1.764] }
+
+      before { tracker.pause }
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
@@ -64,8 +66,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout and resumed' do
+      let(:times) { [0.763, 1.764] }
+
       before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
         tracker.resume
       end
@@ -76,8 +79,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout, resumed and reset' do
+      let(:times) { [0.763, 1.764] }
+
       before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
         tracker.resume
         tracker.reset
@@ -109,11 +113,10 @@ RSpec.describe_current do
     end
 
     context 'when not paused over timeout nor max timeout' do
-      before do
-        # 1 ms of a difference
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.764)
-        tracker.pause
-      end
+      # 1 ms of a difference
+      let(:times) { [0.763, 0.764] }
+
+      before { tracker.pause }
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
@@ -121,10 +124,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over max timeout' do
-      before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.769)
-        tracker.pause
-      end
+      let(:times) { [0.763, 0.769] }
+
+      before { tracker.pause }
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
@@ -132,8 +134,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout and resumed' do
+      let(:times) { [0.763, 0.769] }
+
       before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.769)
         tracker.pause
         tracker.resume
       end
@@ -144,8 +147,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout, resumed and reset' do
+      let(:times) { [0.763, 0.769] }
+
       before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.769)
         tracker.pause
         tracker.resume
         tracker.reset
@@ -177,10 +181,9 @@ RSpec.describe_current do
     end
 
     context 'when not paused over timeout nor max timeout' do
-      before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.764)
-        tracker.pause
-      end
+      let(:times) { [0.763, 0.764] }
+
+      before { tracker.pause }
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
@@ -188,10 +191,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over max timeout' do
-      before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
-        tracker.pause
-      end
+      let(:times) { [0.763, 1.764] }
+
+      before { tracker.pause }
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
@@ -199,8 +201,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout and resumed' do
+      let(:times) { [0.763, 1.764] }
+
       before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
         tracker.resume
       end
@@ -211,8 +214,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout, resumed and reset' do
+      let(:times) { [0.763, 1.764] }
+
       before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause
         tracker.resume
         tracker.reset
@@ -255,10 +259,9 @@ RSpec.describe_current do
     end
 
     context 'when not paused over timeout nor max timeout' do
-      before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 0.764)
-        tracker.pause(2)
-      end
+      let(:times) { [0.763, 0.764] }
+
+      before { tracker.pause(2) }
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
@@ -266,10 +269,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over max timeout' do
-      before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
-        tracker.pause(1)
-      end
+      let(:times) { [0.763, 1.764] }
+
+      before { tracker.pause(1) }
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
@@ -277,8 +279,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout and resumed' do
+      let(:times) { [0.763, 1.764] }
+
       before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause(1)
         tracker.resume
       end
@@ -289,8 +292,9 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout, resumed and reset' do
+      let(:times) { [0.763, 1.764] }
+
       before do
-        allow(::Process).to receive(:clock_gettime).and_return(0.763, 1.764)
         tracker.pause(1)
         tracker.resume
         tracker.reset
