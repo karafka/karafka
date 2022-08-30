@@ -185,7 +185,9 @@ module Karafka
             # processed (if it was assigned and revoked really fast), thus we may not have it
             # here. In cases like this, we do not run a revocation job
             @executors.find_all(topic, partition).each do |executor|
-              jobs << @jobs_builder.revoked(executor)
+              job = @jobs_builder.revoked(executor)
+              job.before_enqueue
+              jobs << job
             end
 
             # We need to remove all the executors of a given topic partition that we have lost, so
@@ -205,7 +207,9 @@ module Karafka
         jobs = []
 
         @executors.each do |_, _, executor|
-          jobs << @jobs_builder.shutdown(executor)
+          job = @jobs_builder.shutdown(executor)
+          job.before_enqueue
+          jobs << job
         end
 
         @scheduler.schedule_shutdown(@jobs_queue, jobs)
@@ -238,10 +242,10 @@ module Karafka
           @partitioner.call(topic, messages) do |group_id, partition_messages|
             # Count the job we're going to create here
             coordinator.increment
-
             executor = @executors.find_or_create(topic, partition, group_id)
-
-            jobs << @jobs_builder.consume(executor, partition_messages, coordinator)
+            job = @jobs_builder.consume(executor, partition_messages, coordinator)
+            job.before_enqueue
+            jobs << job
           end
         end
 

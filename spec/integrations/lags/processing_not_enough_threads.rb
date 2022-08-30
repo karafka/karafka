@@ -35,4 +35,6 @@ end
 
 max_lag = DT[:processing_lags].max
 
+p max_lag
+
 assert (200..300).cover?(max_lag)
