@@ -18,6 +18,7 @@ module Karafka
         # @param args [Object] anything the base coordinator accepts
         def initialize(*args)
           super
+          @on_enqueued_invoked = false
           @on_started_invoked = false
           @on_finished_invoked = false
           @flow_lock = Mutex.new
@@ -30,6 +31,7 @@ module Karafka
           super
 
           @mutex.synchronize do
+            @on_enqueued_invoked = false
             @on_started_invoked = false
             @on_finished_invoked = false
             @first_message = messages.first
@@ -40,6 +42,18 @@ module Karafka
         # @return [Boolean] is the coordinated work finished or not
         def finished?
           @running_jobs.zero?
+        end
+
+        # Runs synchronized code once for a collective of virtual partitions prior to work being
+        # enqueued
+        def on_enqueued
+          @flow_lock.synchronize do
+            return if @on_enqueued_invoked
+
+            @on_enqueued_invoked = true
+
+            yield(@first_message, @last_message)
+          end
         end
 
         # Runs given code only once per all the coordinated jobs upon starting first of them

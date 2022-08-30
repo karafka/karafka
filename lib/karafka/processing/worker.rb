@@ -49,7 +49,6 @@ module Karafka
         instrument_details = { caller: self, job: job, jobs_queue: @jobs_queue }
 
         if job
-
           Karafka.monitor.instrument('worker.process', instrument_details)
 
           Karafka.monitor.instrument('worker.processed', instrument_details) do

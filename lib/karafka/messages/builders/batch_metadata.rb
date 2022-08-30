@@ -28,9 +28,8 @@ module Karafka
               created_at: messages.last.timestamp,
               # When this batch was built and scheduled for execution
               scheduled_at: scheduled_at,
-              # We build the batch metadata when we pick up the job in the worker, thus we can use
-              # current time here
-              processed_at: Time.now
+              # This needs to be set to a correct value prior to processing starting
+              processed_at: nil
             )
           end
         end

@@ -37,14 +37,17 @@ module Karafka
         @topic = topic
       end
 
-      # Builds the consumer instance, builds messages batch and sets all that is needed to run the
-      # user consumption logic
+      # Allows us to prepare the consumer in the listener thread prior to the job being send to
+      # the queue. It also allows to run some code that is time sensitive and cannot wait in the
+      # queue as it could cause starvation.
       #
       # @param messages [Array<Karafka::Messages::Message>]
-      # @param received_at [Time] the moment we've received the batch (actually the moment we've)
-      #   enqueued it, but good enough
       # @param coordinator [Karafka::Processing::Coordinator] coordinator for processing management
-      def before_consume(messages, received_at, coordinator)
+      def before_enqueue(messages, coordinator)
+        # the moment we've received the batch or actually the moment we've enqueued it,
+        # but good enough
+        @enqueued_at = Time.now
+
         # Recreate consumer with each batch if persistence is not enabled
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
@@ -57,9 +60,14 @@ module Karafka
         consumer.messages = Messages::Builders::Messages.call(
           messages,
           @topic,
-          received_at
+          @enqueued_at
         )
 
+        consumer.on_before_enqueue
+      end
+
+      # Runs setup and warm-up code in the worker prior to running the consumption
+      def before_consume
         consumer.on_before_consume
       end
 

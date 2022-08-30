@@ -23,13 +23,17 @@ module Karafka
 
       private_constant :MAX_PAUSE_TIME
 
-      # Pauses processing of a given partition until we're done with the processing
+      # Pauses processing of a given partition until we're done with the processing.
       # This ensures, that we can easily poll not reaching the `max.poll.interval`
-      def on_before_consume
+      # @note This needs to happen in the listener thread, because we cannot wait on this being
+      #   executed in the workers. Workers may be already running some LRJ jobs that are blocking
+      #   all the threads until finished, yet unless we pause the incoming partitions information,
+      #   we may be kicked out of the consumer group due to not polling often enough
+      def on_before_enqueue
         return unless topic.long_running_job?
 
         # This ensures, that when running LRJ with VP, things operate as expected
-        coordinator.on_started do |first_group_message|
+        coordinator.on_enqueued do |first_group_message|
           # Pause at the first message in a batch. That way in case of a crash, we will not loose
           # any messages
           pause(first_group_message.offset, MAX_PAUSE_TIME)

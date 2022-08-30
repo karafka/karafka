@@ -15,13 +15,24 @@ module Karafka
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
 
-    # Can be used to run preparation code
+    # Can be used to run preparation code prior to the job being enqueued
     #
     # @private
-    # @note This should not be used by the end users as it is part of the lifecycle of things but
+    # @note This should not be used by the end users as it is part of the lifecycle of things and
+    #   not as a part of the public api. This should not perform any extensive operations as it is
+    #   blocking and running in the listener thread.
+    def on_before_enqueue; end
+
+    # Can be used to run preparation code in the worker
+    #
+    # @private
+    # @note This should not be used by the end users as it is part of the lifecycle of things and
     #   not as part of the public api. This can act as a hook when creating non-blocking
     #   consumers and doing other advanced stuff
-    def on_before_consume; end
+    def on_before_consume
+      messages.metadata.processed_at = Time.now
+      messages.metadata.freeze
+    end
 
     # Executes the default consumer flow.
     #

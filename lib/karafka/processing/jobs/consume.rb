@@ -18,13 +18,18 @@ module Karafka
           @executor = executor
           @messages = messages
           @coordinator = coordinator
-          @created_at = Time.now
           super()
+        end
+
+        # Runs all the preparation code on the executor that needs to happen before the job is
+        # enqueued.
+        def before_enqueue
+          executor.before_enqueue(@messages, @coordinator)
         end
 
         # Runs the before consumption preparations on the executor
         def before_call
-          executor.before_consume(@messages, @created_at, @coordinator)
+          executor.before_consume
         end
 
         # Runs the given executor

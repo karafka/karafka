@@ -29,10 +29,10 @@ RSpec.describe_current do
       Karafka::Messages::Messages,
       first: first_message,
       last: last_message,
-      metadata: instance_double(
-        Karafka::Messages::BatchMetadata,
+      metadata: Karafka::Messages::BatchMetadata.new(
         topic: topic.name,
-        partition: 0
+        partition: 0,
+        processed_at: nil
       )
     )
   end
@@ -63,12 +63,24 @@ RSpec.describe_current do
     coordinator.increment
   end
 
-  describe '#on_before_consume for non LRU' do
+  describe '#on_before_enqueue for non LRU' do
     before { allow(client).to receive(:pause) }
 
     it 'expect not to pause the partition' do
-      consumer.on_before_consume
+      consumer.on_before_enqueue
       expect(client).not_to have_received(:pause)
+    end
+  end
+
+  describe '#on_before_consume' do
+    before do
+      consumer.messages = messages
+    end
+
+    it 'expect to assign time to messages metadata and freeze it' do
+      consumer.on_before_consume
+      expect(consumer.messages.metadata).to be_frozen
+      expect(consumer.messages.metadata.processed_at).not_to be(nil)
     end
   end
 
@@ -206,7 +218,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_before_consume for LRU' do
+  describe '#on_before_enqueue for LRU' do
     before do
       topic.long_running_job = true
       allow(client).to receive(:pause)
@@ -214,7 +226,7 @@ RSpec.describe_current do
     end
 
     it 'expect not to pause the partition' do
-      consumer.on_before_consume
+      consumer.on_before_enqueue
       expect(client).to have_received(:pause).with(topic.name, 0, offset)
     end
   end
@@ -365,6 +377,28 @@ RSpec.describe_current do
       consumer.on_revoked
       expect(consumer.handled_revoked).to eq(true)
       expect(consumer.send(:revoked?)).to eq(true)
+    end
+
+    context 'when something goes wrong on revoked' do
+      let(:working_class) do
+        ClassBuilder.inherit(described_class) do
+          def revoked
+            raise StandardError
+          end
+        end
+      end
+
+      it { expect { consumer.on_revoked }.not_to raise_error }
+
+      it 'expect to run the error instrumentation' do
+        Karafka.monitor.subscribe('error.occurred') do |event|
+          expect(event.payload[:caller]).to eq(consumer)
+          expect(event.payload[:error]).to be_a(StandardError)
+          expect(event.payload[:type]).to eq('consumer.revoked.error')
+        end
+
+        consumer.on_revoked
+      end
     end
   end
 
