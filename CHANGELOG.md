@@ -4,6 +4,7 @@
 - Improve client closing.
 - Fix for: Multiple LRJ topics fetched concurrently block ability for LRJ to kick in (#1002)
 - Introduce a pre-enqueue sync execution layer to prevent starvation cases for LRJ
+- Close admin upon critical errors to prevent segmentation faults
 
 ## 2.0.5 (2022-08-23)
 - Fix unnecessary double new line in the `karafka.rb` template for Ruby on Rails
