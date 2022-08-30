@@ -14,11 +14,13 @@ module Karafka
           # @param received_at [Time] moment in time when the messages were received
           # @return [Karafka::Messages::Messages] messages batch object
           def call(messages, topic, received_at)
+            # We cannot freeze the batch metadata because it is altered with the processed_at time
+            # prior to the consumption. It is being frozen there
             metadata = BatchMetadata.call(
               messages,
               topic,
               received_at
-            ).freeze
+            )
 
             Karafka::Messages::Messages.new(
               messages,

@@ -29,7 +29,10 @@ module Karafka
     # @note This should not be used by the end users as it is part of the lifecycle of things and
     #   not as part of the public api. This can act as a hook when creating non-blocking
     #   consumers and doing other advanced stuff
-    def on_before_consume; end
+    def on_before_consume
+      messages.metadata.processed_at = Time.now
+      messages.metadata.freeze
+    end
 
     # Executes the default consumer flow.
     #
