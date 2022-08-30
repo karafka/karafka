@@ -40,7 +40,7 @@ counts = 0
 Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
   counts += 1
 
-  if counts == 5
+  if counts == 10
     # We dispatch in order per partition, in case it all would go to one without partitioner or
     # in case it would fail, the order will break
     2.downto(0) do |partition|

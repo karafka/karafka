@@ -54,8 +54,9 @@ module Karafka
       def with_admin
         admin = ::Rdkafka::Config.new(Karafka::App.config.kafka).admin
         result = yield(admin)
-        admin.close
         result
+      ensure
+        admin&.close
       end
     end
   end
