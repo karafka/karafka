@@ -61,8 +61,8 @@ start_karafka_and_wait_until do
   DT.data.size >= 3 && [bigger, smaller].all? { |values| values.include?(0) }
 end
 
-assert (18..20).include?(bigger[0])
-assert (8..10).include?(smaller[0])
+assert (18..20).cover?(bigger[0])
+assert (8..10).cover?(smaller[0])
 
 assert_equal 0, bigger.last
 assert_equal 0, smaller.last
