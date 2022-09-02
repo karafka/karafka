@@ -21,7 +21,7 @@ module Karafka
       required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
       required(:manual_offset_management) { |val| [true, false].include?(val) }
       required(:name) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
-      required(:subscription_group_id) { |val| val.nil? || (val.is_a?(String) && !val.empty?) }
+      required(:subscription_group) { |val| val.nil? || (val.is_a?(String) && !val.empty?) }
 
       virtual do |data, errors|
         next unless errors.empty?

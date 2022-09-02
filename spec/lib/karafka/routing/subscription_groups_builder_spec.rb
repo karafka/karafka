@@ -42,11 +42,11 @@ RSpec.describe_current do
     it { expect(groups.size).to eq(2) }
   end
 
-  context 'when there are topics but they have different subscription_group_id settings' do
+  context 'when there are topics but they have different subscription_group settings' do
     let(:topic1) { build(:routing_topic) }
     let(:topic2) { build(:routing_topic) }
 
-    before { topic1.subscription_group_id = '1' }
+    before { topic1.subscription_group = '1' }
 
     it { expect(groups.size).to eq(2) }
   end

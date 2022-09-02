@@ -44,12 +44,12 @@ end
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
-    subscription_group_id '1'
+    subscription_group '1'
   end
 
   topic DT.topics[1] do
     consumer Consumer
-    subscription_group_id '2'
+    subscription_group '2'
   end
 end
 

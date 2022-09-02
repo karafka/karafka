@@ -15,7 +15,7 @@ RSpec.describe_current do
         max_messages: 10,
         manual_offset_management: true,
         initial_offset: 'earliest',
-        subscription_group_id: nil
+        subscription_group: nil
       }
     ]
   end
