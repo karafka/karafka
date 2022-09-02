@@ -16,7 +16,7 @@ end
 
 draw_routes(Consumer)
 
-jsons.each { |data| produce(DT.topic, data.to_json) }
+produce_many(DT.topic, jsons.map(&:to_json))
 
 start_karafka_and_wait_until do
   DT[0].size >= 100

@@ -32,7 +32,7 @@ draw_routes do
   end
 end
 
-MESSAGES = Array.new(1_000) { SecureRandom.uuid }
+MESSAGES = DT.uuids(1_000)
 
 # We need a second producer to trigger the rebalances
 Thread.new do

@@ -20,8 +20,6 @@ SuperException = Class.new(Exception)
 
 Karafka.monitor.subscribe(Listener.new)
 
-elements = Array.new(5) { SecureRandom.uuid }
-
 class Consumer < Karafka::BaseConsumer
   def consume
     raise SuperException
@@ -30,7 +28,7 @@ end
 
 draw_routes(Consumer)
 
-elements.each { |data| produce(DT.topic, data) }
+produce_many(DT.topic, DT.uuids(5))
 
 raised = false
 

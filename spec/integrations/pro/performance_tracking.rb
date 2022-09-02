@@ -33,7 +33,7 @@ draw_routes do
         consumer Consumer
       end
 
-      10.times { produce(topic_name, SecureRandom.uuid) }
+      produce_many(topic_name, DT.uuids(10))
     end
   end
 end

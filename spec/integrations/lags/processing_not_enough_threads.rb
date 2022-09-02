@@ -24,7 +24,7 @@ draw_routes do
       end
 
       # Dispatching in a loop per topic will ensure the delivery order
-      20.times { produce(topic_name, SecureRandom.uuid) }
+      produce_many(topic_name, DT.uuids(20))
     end
   end
 end

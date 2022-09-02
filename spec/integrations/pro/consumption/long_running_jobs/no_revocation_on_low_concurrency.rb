@@ -40,8 +40,8 @@ draw_routes do
   end
 end
 
-5.times { produce(DT.topics[0], '1') }
-5.times { produce(DT.topics[1], '1') }
+produce_many(DT.topics[0], DT.uuids(5))
+produce_many(DT.topics[1], DT.uuids(5))
 
 start_karafka_and_wait_until do
   DT[:work].uniq.size >= 2

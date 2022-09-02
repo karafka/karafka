@@ -19,8 +19,8 @@ Thread.new do
   Karafka::Server.stop
 end
 
-elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DT.topic, data) }
+elements = DT.uuids(100)
+produce_many(DT.topic, elements)
 
 Karafka::Server.run
 

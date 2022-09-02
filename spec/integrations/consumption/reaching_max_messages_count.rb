@@ -22,7 +22,7 @@ end
 
 draw_routes(Consumer)
 
-100.times { |data| produce(DT.topic, data.to_s) }
+produce_many(DT.topic, DT.uuids(100))
 
 started_at = Time.now.to_f
 

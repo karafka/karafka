@@ -37,8 +37,8 @@ draw_routes do
   end
 end
 
-10.times { produce(topic1, SecureRandom.uuid) }
-10.times { produce(topic2, SecureRandom.uuid) }
+produce_many(topic1, DT.uuids(10))
+produce_many(topic2, DT.uuids(10))
 
 start_karafka_and_wait_until do
   DT.data.values.flatten.size >= 20

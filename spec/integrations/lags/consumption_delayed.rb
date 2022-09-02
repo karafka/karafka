@@ -13,7 +13,7 @@ end
 
 draw_routes(Consumer)
 
-elements = Array.new(5) { SecureRandom.uuid }
+elements = DT.uuids(5)
 
 elements.each do |data|
   # We sleep here to make sure, that the lag is not computed on any of the messages except last

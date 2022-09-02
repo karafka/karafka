@@ -42,8 +42,8 @@ end
 
 draw_routes(Consumer)
 
-elements = Array.new(50) { SecureRandom.uuid }
-elements.each { |data| produce(DT.topic, data) }
+elements = DT.uuids(50)
+produce_many(DT.topic, elements)
 
 started_at = Time.now.to_f
 

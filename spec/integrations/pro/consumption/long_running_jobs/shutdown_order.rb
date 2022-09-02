@@ -32,7 +32,7 @@ draw_routes do
   end
 end
 
-5.times { produce(DT.topic, '1') }
+produce_many(DT.topic, DT.uuids(5))
 
 start_karafka_and_wait_until do
   DT[0].size >= 1

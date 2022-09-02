@@ -49,8 +49,7 @@ Thread.new do
   end
 end
 
-payloads = Array.new(2) { SecureRandom.uuid }
-
+payloads = DT.uuids(2)
 payloads.each { |payload| produce(DT.topic, payload) }
 
 start_karafka_and_wait_until do

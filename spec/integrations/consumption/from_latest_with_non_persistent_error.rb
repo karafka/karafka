@@ -13,11 +13,11 @@ setup_karafka(allow_errors: true) do |config|
   config.initial_offset = 'latest'
 end
 
-before = Array.new(2) { SecureRandom.uuid }
-after = Array.new(10) { SecureRandom.uuid }
+before = DT.uuids(2)
+after = DT.uuids(10)
 
 # Sends some messages before starting Karafka - those should not be received
-before.each { |number| produce(DT.topic, number) }
+produce_many(DT.topic, before)
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -41,7 +41,7 @@ Thread.new { Karafka::Server.run }
 sleep(10)
 
 # Dispatch the messages that should be consumed
-after.each { |number| produce(DT.topic, number) }
+produce_many(DT.topic, after)
 
 wait_until do
   DT[0].size >= 10

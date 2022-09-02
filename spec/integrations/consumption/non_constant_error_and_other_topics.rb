@@ -58,8 +58,8 @@ draw_routes do
   end
 end
 
-elements1 = Array.new(10) { SecureRandom.uuid }
-elements2 = Array.new(10) { SecureRandom.uuid }
+elements1 = DT.uuids(10)
+elements2 = DT.uuids(10)
 
 elements1.each { |data| produce(DT.topics.first, data) }
 # We send one message so the topic gets created

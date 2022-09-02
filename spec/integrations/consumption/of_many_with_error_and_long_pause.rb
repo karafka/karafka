@@ -39,7 +39,7 @@ draw_routes do
   end
 end
 
-elements = Array.new(5) { SecureRandom.uuid }
+elements = DT.uuids(5)
 
 elements.each do |data|
   produce(DT.topics.first, data)

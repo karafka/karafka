@@ -173,6 +173,16 @@ def produce(topic, payload, details = {})
   )
 end
 
+# Sends multiple messages to kafka efficiently
+# @param topic [String] topic name
+# @param payloads [Array<String>] data we want to send
+# @param details [Hash] other details
+def produce_many(topic, payloads, details = {})
+  messages = payloads.map { |payload| details.merge(topic: topic, payload: payload) }
+
+  Karafka::App.producer.produce_many_sync(messages)
+end
+
 # Two basic helpers for assertion checking. Since we use only those, it was not worth adding
 # another gem
 

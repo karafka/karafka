@@ -29,7 +29,7 @@ draw_routes do
   end
 end
 
-messages.each { |data| produce(DT.topic, data) }
+produce_many(DT.topic, messages)
 
 start_karafka_and_wait_until do
   DT[0].size >= 100

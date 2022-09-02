@@ -29,10 +29,8 @@ end
 
 Thread.new do
   loop do
-    2.times do
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '1', partition: 1)
-    end
+    produce_many(DT.topic, DT.uuids(2), partition: 0)
+    produce_many(DT.topic, DT.uuids(2), partition: 1)
 
     sleep(0.5)
   rescue StandardError

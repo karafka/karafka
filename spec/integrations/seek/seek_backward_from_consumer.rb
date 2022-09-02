@@ -5,8 +5,7 @@
 
 setup_karafka
 
-elements = Array.new(10) { SecureRandom.uuid }
-elements.each { |data| produce(DT.topic, data) }
+produce_many(DT.topic, DT.uuids(10))
 
 class Consumer < Karafka::BaseConsumer
   def initialize

@@ -4,8 +4,7 @@
 
 setup_karafka
 
-elements = Array.new(40) { SecureRandom.uuid }
-elements.each { |data| produce(DT.topic, data) }
+produce_many(DT.topic, DT.uuids(40))
 
 class Consumer < Karafka::BaseConsumer
   def consume
