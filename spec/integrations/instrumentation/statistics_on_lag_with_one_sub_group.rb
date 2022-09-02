@@ -57,4 +57,11 @@ start_karafka_and_wait_until do
   DT.data.size >= 2 && DT.data.values.all? { |values| values.include?(0) }
 end
 
-p DT.data
+bigger = DT.data[DT.topics[0]]
+smaller = DT.data[DT.topics[1]]
+
+assert (98..100).include?(bigger[0])
+assert (48..50).include?(smaller[0])
+
+assert_equal 0, bigger.last
+assert_equal 0, smaller.last
