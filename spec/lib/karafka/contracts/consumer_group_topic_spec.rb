@@ -13,7 +13,8 @@ RSpec.describe_current do
       kafka: { 'bootstrap.servers' => 'localhost:9092' },
       max_messages: 10,
       max_wait_time: 10_000,
-      initial_offset: 'earliest'
+      initial_offset: 'earliest',
+      subscription_group: nil
     }
   end
 
@@ -56,6 +57,26 @@ RSpec.describe_current do
 
     context 'when it is an invalid string' do
       before { config[:name] = '%^&*(' }
+
+      it { expect(check).not_to be_success }
+    end
+  end
+
+  context 'when we subscription_group' do
+    context 'when it is nil' do
+      before { config[:subscription_group] = nil }
+
+      it { expect(check).to be_success }
+    end
+
+    context 'when it is not a string' do
+      before { config[:subscription_group] = 2 }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when it is an empty string' do
+      before { config[:subscription_group] = '' }
 
       it { expect(check).not_to be_success }
     end

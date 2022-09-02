@@ -28,8 +28,7 @@ end
 
 start_karafka_and_wait_until do
   if DT.data.values.map(&:size).sum < 1000
-    elements = Array.new(100) { SecureRandom.uuid }
-    elements.each { |data| produce(DT.topic, data) }
+    produce_many(DT.topic, DT.uuids(100))
     sleep(1)
     false
   else

@@ -35,6 +35,7 @@ en:
       consumer_format: needs to be present
       id_format: 'needs to be a string with a Kafka accepted format'
       initial_offset_format: needs to be either earliest or latest
+      subscription_group_format: must be nil or a non-empty string
 
     consumer_group:
       missing: needs to be present

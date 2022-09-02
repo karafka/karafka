@@ -43,10 +43,8 @@ draw_routes do
   end
 end
 
-10.times do
-  produce(DT.topic, '1', partition: 0)
-  produce(DT.topic, '1', partition: 1)
-end
+produce_many(DT.topic, DT.uuids(10), partition: 0)
+produce_many(DT.topic, DT.uuids(10), partition: 1)
 
 # We need a second producer to trigger a rebalance
 consumer = setup_rdkafka_consumer

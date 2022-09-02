@@ -36,8 +36,7 @@ draw_routes do
   end
 end
 
-elements = Array.new(10) { SecureRandom.uuid }
-elements.each { |data| produce(DT.topic, data) }
+produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
   DT[:done].size >= 1

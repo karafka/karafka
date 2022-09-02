@@ -12,15 +12,16 @@ module Karafka
         ).fetch('en').fetch('validations').fetch('consumer_group_topic')
       end
 
-      required(:consumer) { |consumer_group| !consumer_group.nil? }
-      required(:deserializer) { |deserializer| !deserializer.nil? }
-      required(:id) { |id| id.is_a?(String) && Contracts::TOPIC_REGEXP.match?(id) }
-      required(:kafka) { |kafka| kafka.is_a?(Hash) && !kafka.empty? }
-      required(:max_messages) { |mm| mm.is_a?(Integer) && mm >= 1 }
-      required(:initial_offset) { |io| %w[earliest latest].include?(io) }
-      required(:max_wait_time) { |mwt| mwt.is_a?(Integer) && mwt >= 10 }
-      required(:manual_offset_management) { |mmm| [true, false].include?(mmm) }
-      required(:name) { |name| name.is_a?(String) && Contracts::TOPIC_REGEXP.match?(name) }
+      required(:consumer) { |val| !val.nil? }
+      required(:deserializer) { |val| !val.nil? }
+      required(:id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
+      required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
+      required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }
+      required(:initial_offset) { |val| %w[earliest latest].include?(val) }
+      required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
+      required(:manual_offset_management) { |val| [true, false].include?(val) }
+      required(:name) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
+      required(:subscription_group) { |val| val.nil? || (val.is_a?(String) && !val.empty?) }
 
       virtual do |data, errors|
         next unless errors.empty?

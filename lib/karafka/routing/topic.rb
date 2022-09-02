@@ -8,6 +8,7 @@ module Karafka
     class Topic
       attr_reader :id, :name, :consumer_group
       attr_writer :consumer
+      attr_accessor :subscription_group
 
       # Attributes we can inherit from the root unless they were defined on this level
       INHERITABLE_ATTRIBUTES = %i[
@@ -91,7 +92,8 @@ module Karafka
           id: id,
           name: name,
           consumer: consumer,
-          consumer_group_id: consumer_group.id
+          consumer_group_id: consumer_group.id,
+          subscription_group: subscription_group
         ).freeze
       end
     end

@@ -60,6 +60,8 @@ Thread.new do
 
   consumer.each do |message|
     DT[:revoked_data] << message.partition
+
+    break if DT[:revoked_data].size >= 1
   end
 end
 

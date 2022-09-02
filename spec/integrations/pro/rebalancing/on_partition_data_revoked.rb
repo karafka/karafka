@@ -40,7 +40,7 @@ draw_routes do
   end
 end
 
-elements = Array.new(100) { SecureRandom.uuid }
+elements = DT.uuids(100)
 elements.each { |data| produce(DT.topic, data, partition: rand(0..2)) }
 
 consumer = setup_rdkafka_consumer

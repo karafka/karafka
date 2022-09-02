@@ -29,7 +29,7 @@ draw_routes do
   end
 end
 
-100.times { |counter| produce(DT.topic, counter.to_s) }
+produce_many(DT.topic, Array.new(100, &:to_s))
 
 start_karafka_and_wait_until do
   DT[0].size >= 100

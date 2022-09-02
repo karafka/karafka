@@ -37,8 +37,8 @@ draw_routes do
   end
 end
 
-topic1_data.each { |data| produce(topic1, data.to_json) }
-topic2_data.each { |data| produce(topic2, data.to_json) }
+produce_many(topic1, topic1_data.map(&:to_json))
+produce_many(topic2, topic2_data.map(&:to_json))
 
 start_karafka_and_wait_until do
   DT.data.values.flatten.size >= 20

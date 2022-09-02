@@ -30,7 +30,7 @@ end
 
 draw_routes(Consumer)
 
-100.times { produce(DT.topic, '1') }
+produce_many(DT.topic, DT.uuids(100))
 
 start_karafka_and_wait_until do
   DT[:offsets].size >= 101

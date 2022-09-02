@@ -7,7 +7,7 @@ setup_karafka do |config|
   config.max_wait_time = 100
 end
 
-elements = Array.new(5) { SecureRandom.uuid }
+elements = DT.uuids(5)
 
 class Consumer < Karafka::BaseConsumer
   def consume

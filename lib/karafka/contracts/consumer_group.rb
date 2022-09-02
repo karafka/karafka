@@ -12,8 +12,8 @@ module Karafka
         ).fetch('en').fetch('validations').fetch('consumer_group')
       end
 
-      required(:id) { |id| id.is_a?(String) && Contracts::TOPIC_REGEXP.match?(id) }
-      required(:topics) { |topics| topics.is_a?(Array) && !topics.empty? }
+      required(:id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
+      required(:topics) { |val| val.is_a?(Array) && !val.empty? }
 
       virtual do |data, errors|
         next unless errors.empty?

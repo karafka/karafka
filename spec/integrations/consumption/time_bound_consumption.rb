@@ -19,8 +19,8 @@ end
 draw_routes(Consumer)
 
 # Sends some data so we know all is good
-elements = Array.new(100) { SecureRandom.uuid }
-elements.each { |data| produce(DT.topic, data) }
+elements = DT.uuids(100)
+produce_many(DT.topic, elements)
 
 # Stop after 10 seconds
 Thread.new do

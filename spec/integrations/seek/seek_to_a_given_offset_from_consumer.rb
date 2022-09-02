@@ -10,8 +10,8 @@
 
 setup_karafka
 
-elements = Array.new(20) { SecureRandom.uuid }
-elements.each { |data| produce(DT.topic, data) }
+elements = DT.uuids(20)
+produce_many(DT.topic, elements)
 
 class Consumer < Karafka::BaseConsumer
   def consume

@@ -25,8 +25,8 @@ end
 
 draw_routes(Consumer)
 
-elements = Array.new(10) { SecureRandom.uuid }
-elements.each { |data| produce(DT.topic, data) }
+elements = DT.uuids(10)
+produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
   DT[:messages].size >= 10
