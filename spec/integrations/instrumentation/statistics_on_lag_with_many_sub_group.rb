@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 # Karafka when consuming messages, should report per topic partition consumer lag
-# Since librdkafka fetches data in batches onto the queue, this can cause the lagged partition to
-# run first without processing anything else despite good concurrency settings
-# This can be solved either via subscription group distribution or by tuning the per partition data
-# that goes into the buffer
+# By using two subscription groups, we can make sure we have separate connections and that we
+# fetch data in parallel and ship it as it goes, so one topic partition data is not causing
+# a wait on other things
 # ref https://github.com/edenhill/librdkafka/wiki/FAQ#how-are-partitions-fetched
 
 setup_karafka do |config|
@@ -50,7 +49,7 @@ draw_routes do
 
   topic DT.topics[1] do
     consumer Consumer
-    subscription_group_id '1'
+    subscription_group_id '2'
   end
 end
 
@@ -69,9 +68,10 @@ assert_equal 0, smaller.last
 
 previous = nil
 continuous = true
+at_least_one_non_order = false
 
-# We check here, that we actually consume only one topic data and the moment we encounter the
-# second one, the first one should be already done.
+# We check here, that we actually consume and publish metrics from both topics and that each of
+# them can put their data independently and in its own order (one does not block the other)
 DT[:overall].each do |point|
   topic, lag = point.split('/')
 
@@ -81,8 +81,9 @@ DT[:overall].each do |point|
     next
   end
 
-  assert_equal previous, topic if continuous
+  at_least_one_non_order = true if previous != topic
 
-  # Initially we should not be interrupted with other topics partitions
-  continuous = false if lag.to_i <= 10
+  continuous = false if lag.to_i == '0'
 end
+
+assert at_least_one_non_order
