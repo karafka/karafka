@@ -24,6 +24,7 @@ class Job < ActiveJob::Base
   queue_as DT.topic
 
   def perform(value)
+    sleep(0.001)
     DT[0] << value
     DT[:threads_ids] << Thread.current.object_id
   end

@@ -16,18 +16,18 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT.data[:consume_object_ids] << object_id
+    DT[:consume_object_ids] << object_id
 
     sleep(15)
 
-    DT.data[:markings] << mark_as_consumed!(messages.last)
-    DT.data[:revocations] << revoked?
+    DT[:markings] << mark_as_consumed!(messages.last)
+    DT[:revocations] << revoked?
 
     DT[:done] << true
   end
 
   def revoked
-    DT.data[:revoked_object_ids] << object_id
+    DT[:revoked_object_ids] << object_id
   end
 end
 
@@ -39,9 +39,9 @@ start_karafka_and_wait_until do
   DT[:done].size >= 2
 end
 
-assert_equal 2, DT.data[:consume_object_ids].size
-assert_equal 2, DT.data[:consume_object_ids].uniq.size
-assert_equal 2, DT.data[:revoked_object_ids].size
-assert_equal 2, DT.data[:revoked_object_ids].uniq.size
-assert_equal [false, false], DT.data[:markings]
-assert_equal [true, true], DT.data[:revocations]
+assert (2..3).cover?(DT[:consume_object_ids].size)
+assert (2..3).cover?(DT[:consume_object_ids].uniq.size)
+assert_equal 2, DT[:revoked_object_ids].size
+assert_equal 2, DT[:revoked_object_ids].uniq.size
+assert_equal [false], DT[:markings].uniq
+assert_equal [true], DT[:revocations].uniq
