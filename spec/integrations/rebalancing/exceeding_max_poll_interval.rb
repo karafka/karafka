@@ -39,10 +39,8 @@ start_karafka_and_wait_until do
   DT[:done].size >= 2
 end
 
-consume_object_ids = DT[:consume_object_ids]
-
-assert (2..3).cover?(consume_object_ids.size)
-assert (2..3).cover?(consume_object_ids.uniq.size)
+assert (2..3).cover?(DT[:consume_object_ids].size)
+assert (2..3).cover?(DT[:consume_object_ids].uniq.size)
 assert_equal 2, DT[:revoked_object_ids].size
 assert_equal 2, DT[:revoked_object_ids].uniq.size
 assert_equal [false], DT[:markings].uniq
