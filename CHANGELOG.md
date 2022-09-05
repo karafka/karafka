@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.7 (Unreleased)
+## 2.0.7 (2022-09-05)
 - [Breaking change] Redefine the Virtual Partitions routing DSL to accept concurrency
 - Allow for `concurrency` setting in Virtual Partitions to extend or limit number of jobs per regular partition. This allows to make sure, we do not use all the threads on virtual partitions jobs
 - Allow for creation of as many Virtual Partitions as needed, without taking global `concurrency` into consideration
