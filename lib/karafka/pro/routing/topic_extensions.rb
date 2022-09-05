@@ -17,12 +17,15 @@ module Karafka
       module TopicExtensions
         # Internal representation of the virtual partitions settings and configuration
         # This allows us to abstract away things in a nice manner
+        #
+        # For features with more options than just on/off we use this approach as it simplifies
+        # the code. We do not use it for all not to create unneeded complexity
         VirtualPartitions = Struct.new(
           :active,
           :partitioner,
           :concurrency,
           keyword_init: true
-        ) { alias active? active }
+        ) { alias_method :active?, :active }
 
         class << self
           # @param base [Class] class we extend
@@ -35,6 +38,7 @@ module Karafka
         #   single distribution flow. When set to more than the Karafka threading, will create
         #   more work than workers. When less, can ensure we have spare resources to process other
         #   things in parallel.
+        # @param partitioner [nil, #call] nil or callable partitioner
         # @return [VirtualPartitions] method that allows to set the virtual partitions details
         #   during the routing configuration and then allows to retrieve it
         def virtual_partitions(

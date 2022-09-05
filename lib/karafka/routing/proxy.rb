@@ -16,8 +16,6 @@ module Karafka
 
       # Translates the no "=" DSL of routing into elements assignments on target
       # @param method_name [Symbol] name of the missing method
-      # @param arguments [Array] array with it's arguments
-      # @param block [Proc] block provided to the method
       def method_missing(method_name, ...)
         return super unless respond_to_missing?(method_name)
 

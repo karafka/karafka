@@ -16,7 +16,6 @@ RSpec.describe_current do
         concurrency: 2
       }
     }
-
   end
 
   context 'when config is valid' do

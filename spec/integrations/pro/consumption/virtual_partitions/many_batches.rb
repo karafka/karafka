@@ -22,7 +22,7 @@ draw_routes do
     topic DT.topic do
       consumer Consumer
       virtual_partitions(
-        partitioner:->(msg) { msg.raw_payload }
+        partitioner: ->(msg) { msg.raw_payload }
       )
     end
   end
