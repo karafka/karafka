@@ -7,7 +7,7 @@ require 'karafka/pro/processing/coordinator'
 
 RSpec.describe_current do
   subject(:consumer) do
-    topic.singleton_class.include Karafka::Pro::Routing::TopicExtensions
+    topic.singleton_class.prepend Karafka::Pro::Routing::TopicExtensions
 
     described_class.new.tap do |instance|
       instance.client = client
@@ -93,7 +93,7 @@ RSpec.describe_current do
         allow(ActiveJob::Base).to receive(:execute).with(payload1)
         allow(ActiveJob::Base).to receive(:execute).with(payload2)
 
-        topic.virtual_partitioner = ->(_) {}
+        topic.virtual_partitions(partitioner: ->(_) {})
       end
 
       it 'expect to decode them and run active job executor' do

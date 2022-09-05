@@ -31,7 +31,9 @@ draw_routes do
     topic DT.topic do
       consumer Consumer
       long_running_job true
-      virtual_partitioner ->(msg) { msg.raw_payload }
+      virtual_partitions(
+        partitioner: ->(msg) { msg.raw_payload }
+      )
     end
   end
 end

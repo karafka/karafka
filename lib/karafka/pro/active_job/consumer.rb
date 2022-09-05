@@ -35,7 +35,7 @@ module Karafka
 
             # We cannot mark jobs as done after each if there are virtual partitions. Otherwise
             # this could create random markings
-            next if topic.virtual_partitioner?
+            next if topic.virtual_partitions?
 
             mark_as_consumed(message)
           end

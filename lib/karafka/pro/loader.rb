@@ -67,7 +67,7 @@ module Karafka
 
         # Loads routing extensions
         def load_routing_extensions
-          ::Karafka::Routing::Topic.include(Routing::TopicExtensions)
+          ::Karafka::Routing::Topic.prepend(Routing::TopicExtensions)
           ::Karafka::Routing::Builder.prepend(Routing::BuilderExtensions)
         end
       end

@@ -11,7 +11,7 @@ RSpec.describe_current do
   let(:coordinator) { build(:processing_coordinator) }
 
   before do
-    executor.topic.singleton_class.include(Karafka::Pro::Routing::TopicExtensions)
+    executor.topic.singleton_class.prepend Karafka::Pro::Routing::TopicExtensions
   end
 
   describe '#consume' do

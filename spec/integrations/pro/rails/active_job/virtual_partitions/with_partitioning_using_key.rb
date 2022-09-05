@@ -13,7 +13,9 @@ setup_active_job
 draw_routes do
   consumer_group DT.consumer_group do
     active_job_topic DT.topic do
-      virtual_partitioner ->(job) { job.key }
+      virtual_partitions(
+        partitioner: ->(job) { job.key }
+      )
     end
   end
 end

@@ -23,7 +23,9 @@ setup_active_job
 draw_routes do
   consumer_group DT.consumer_group do
     active_job_topic DT.topic do
-      virtual_partitioner ->(_) { rand }
+      virtual_partitions(
+        partitioner: ->(_) { rand }
+      )
     end
   end
 end
