@@ -39,7 +39,9 @@ draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
       consumer Consumer
-      virtual_partitioner VirtualPartitioner.new
+      virtual_partitions(
+        partitioner: VirtualPartitioner.new
+      )
     end
   end
 end

@@ -21,17 +21,15 @@ module Karafka
         def call(topic, messages)
           ktopic = @subscription_group.topics.find(topic)
 
-          @concurrency ||= ::Karafka::App.config.concurrency
-
           # We only partition work if we have a virtual partitioner and more than one thread to
           # process the data. With one thread it is not worth partitioning the work as the work
           # itself will be assigned to one thread (pointless work)
-          if ktopic.virtual_partitioner? && @concurrency > 1
+          if ktopic.virtual_partitions? && ktopic.virtual_partitions.concurrency > 1
             # We need to reduce it to number of threads, so the group_id is not a direct effect
             # of the end user action. Otherwise the persistence layer for consumers would cache
             # it forever and it would cause memory leaks
             groupings = messages
-                        .group_by { |msg| ktopic.virtual_partitioner.call(msg) }
+                        .group_by { |msg| ktopic.virtual_partitions.partitioner.call(msg) }
                         .values
 
             # Reduce the max concurrency to a size that matches the concurrency
@@ -41,7 +39,7 @@ module Karafka
             # The algorithm here is simple, we assume that the most costly in terms of processing,
             # will be processing of the biggest group and we reduce the smallest once to have
             # max of groups equal to concurrency
-            while groupings.size > @concurrency
+            while groupings.size > ktopic.virtual_partitions.concurrency
               groupings.sort_by! { |grouping| -grouping.size }
 
               # Offset order needs to be maintained for virtual partitions

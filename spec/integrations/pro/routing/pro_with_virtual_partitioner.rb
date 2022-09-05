@@ -11,7 +11,9 @@ draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topics[0] do
       consumer Class.new(Karafka::Pro::BaseConsumer)
-      virtual_partitioner ->(msg) { msg.raw_payload }
+      virtual_partitions(
+        partitioner: ->(msg) { msg.raw_payload }
+      )
     end
 
     topic DT.topics[1] do
@@ -24,6 +26,6 @@ draw_routes do
   end
 end
 
-assert Karafka::App.routes.first.topics[0].virtual_partitioner?
-assert_equal false, Karafka::App.routes.first.topics[1].virtual_partitioner?
-assert_equal false, Karafka::App.routes.first.topics[2].virtual_partitioner?
+assert Karafka::App.routes.first.topics[0].virtual_partitions?
+assert_equal false, Karafka::App.routes.first.topics[1].virtual_partitions?
+assert_equal false, Karafka::App.routes.first.topics[2].virtual_partitions?

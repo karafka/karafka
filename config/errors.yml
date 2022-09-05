@@ -55,3 +55,5 @@ en:
 
     pro_consumer_group_topic:
       consumer_format: needs to inherit from Karafka::Pro::BaseConsumer and not Karafka::Consumer
+      virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
+      virtual_partitions.concurrency_format: needs to be equl or more than 1

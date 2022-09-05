@@ -14,7 +14,7 @@ RSpec.describe_current do
   let(:messages) { Array.new(100) { build(:messages_message) } }
 
   before do
-    topic.singleton_class.include Karafka::Pro::Routing::TopicExtensions
+    topic.singleton_class.prepend Karafka::Pro::Routing::TopicExtensions
     ::Karafka::App.config.concurrency = concurrency
   end
 
@@ -28,7 +28,7 @@ RSpec.describe_current do
   end
 
   context 'when we use virtual partitions but we only use one thread' do
-    before { topic.virtual_partitioner = ->(_) { rand } }
+    before { topic.virtual_partitions(partitioner: ->(_) { rand }) }
 
     it 'expect to yield with 0 and input messages' do
       expect { |block| partitioner.call(topic.name, messages, &block) }
@@ -44,7 +44,7 @@ RSpec.describe_current do
       yielded
     end
 
-    before { topic.virtual_partitioner = ->(_) { rand } }
+    before { topic.virtual_partitions(partitioner: ->(_) { rand }) }
 
     it 'expect to use all the threads' do
       expect(yielded.map(&:first).sort).to eq((0..4).to_a)
@@ -75,7 +75,7 @@ RSpec.describe_current do
       yielded
     end
 
-    before { topic.virtual_partitioner = ->(_) { SecureRandom.uuid } }
+    before { topic.virtual_partitions(partitioner: ->(_) { SecureRandom.uuid }) }
 
     it 'expect to use all the threads' do
       expect(yielded.map(&:first).sort).to eq((0..4).to_a)

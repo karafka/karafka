@@ -11,7 +11,9 @@ begin
     consumer_group DT.consumer_group do
       topic DT.topics[0] do
         consumer Class.new
-        virtual_partitioner ->(msg) { msg.raw_payload }
+        virtual_partitions(
+          partitioner: ->(msg) { msg.raw_payload }
+        )
       end
     end
   end

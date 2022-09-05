@@ -33,7 +33,9 @@ draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
       consumer Consumer
-      virtual_partitioner ->(message) { message.key }
+      virtual_partitions(
+        partitioner: ->(message) { message.key }
+      )
     end
   end
 end

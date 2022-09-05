@@ -20,7 +20,7 @@ RSpec.describe_current do
   let(:offset) { 123 }
   let(:topic) do
     build(:routing_topic).tap do |built|
-      built.singleton_class.include Karafka::Pro::Routing::TopicExtensions
+      built.singleton_class.prepend Karafka::Pro::Routing::TopicExtensions
     end
   end
 

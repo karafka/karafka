@@ -9,7 +9,20 @@ RSpec.describe_current do
   subject(:check) { described_class.new.call(config) }
 
   let(:consumer) { Class.new(Karafka::Pro::BaseConsumer) }
-  let(:config) { { topics: [{ consumer: consumer }] } }
+  let(:config) do
+    {
+      topics: [
+        {
+          consumer: consumer,
+          virtual_partitions: {
+            concurrency: 1,
+            partitioner: nil,
+            active: false
+          }
+        }
+      ]
+    }
+  end
 
   context 'when config is valid' do
     it { expect(check).to be_success }

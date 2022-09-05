@@ -15,22 +15,32 @@ RSpec.describe_current do
   end
 
   context 'when defining a topic in a valid way' do
-    it 'expect not to raise errors' do
-      expect do
-        extended_builder.draw do
-          topic('test') { consumer Class.new(Karafka::Pro::BaseConsumer) }
+    let(:building) do
+      extended_builder.draw do
+        topic('test') do
+          consumer Class.new(Karafka::Pro::BaseConsumer)
+          target.singleton_class.prepend Karafka::Pro::Routing::TopicExtensions
         end
-      end.not_to raise_error
+      end
+    end
+
+    it 'expect not to raise errors' do
+      expect { building }.not_to raise_error
     end
   end
 
   context 'when defining a topic in an invalid way' do
-    it 'expect not to raise errors' do
-      expect do
-        extended_builder.draw do
-          topic('test') { consumer Class.new(Karafka::BaseConsumer) }
+    let(:building) do
+      extended_builder.draw do
+        topic('test') do
+          consumer Class.new(Karafka::BaseConsumer)
+          target.singleton_class.prepend Karafka::Pro::Routing::TopicExtensions
         end
-      end.to raise_error(Karafka::Errors::InvalidConfigurationError)
+      end
+    end
+
+    it 'expect not to raise errors' do
+      expect { building }.to raise_error(Karafka::Errors::InvalidConfigurationError)
     end
   end
 end
