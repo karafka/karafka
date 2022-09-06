@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Breaking change] Rename Virtual Partitions `concurrency` to `max_partitions` to avoid confusion  (#1023).
+
 ## 2.0.7 (2022-09-05)
 - [Breaking change] Redefine the Virtual Partitions routing DSL to accept concurrency
 - Allow for `concurrency` setting in Virtual Partitions to extend or limit number of jobs per regular partition. This allows to make sure, we do not use all the threads on virtual partitions jobs

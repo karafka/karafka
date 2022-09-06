@@ -28,7 +28,7 @@ draw_routes do
       # This combination will make a virtual partition per message. You probably don't want that
       # in a regular setup.
       virtual_partitions(
-        concurrency: 200,
+        max_partitions: 200,
         partitioner: ->(msg) { msg.raw_payload }
       )
     end
