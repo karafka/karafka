@@ -13,7 +13,7 @@ RSpec.describe_current do
       virtual_partitions: {
         active: true,
         partitioner: ->(_) { 1 },
-        concurrency: 2
+        max_partitions: 2
       }
     }
   end
@@ -22,8 +22,8 @@ RSpec.describe_current do
     it { expect(check).to be_success }
   end
 
-  context 'when virtual partitions concurrency is too low' do
-    before { config[:virtual_partitions][:concurrency] = 0 }
+  context 'when virtual partitions max_partitions is too low' do
+    before { config[:virtual_partitions][:max_partitions] = 0 }
 
     it { expect(check).not_to be_success }
   end

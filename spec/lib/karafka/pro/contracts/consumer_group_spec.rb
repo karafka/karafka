@@ -15,7 +15,7 @@ RSpec.describe_current do
         {
           consumer: consumer,
           virtual_partitions: {
-            concurrency: 1,
+            max_partitions: 1,
             partitioner: nil,
             active: false
           }

@@ -25,7 +25,7 @@ module Karafka
         nested(:virtual_partitions) do
           required(:active) { |val| [true, false].include?(val) }
           required(:partitioner) { |val| val.nil? || val.respond_to?(:call) }
-          required(:concurrency) { |val| val.is_a?(Integer) && val >= 1 }
+          required(:max_partitions) { |val| val.is_a?(Integer) && val >= 1 }
         end
 
         virtual do |data, errors|

@@ -23,7 +23,7 @@ module Karafka
         VirtualPartitions = Struct.new(
           :active,
           :partitioner,
-          :concurrency,
+          :max_partitions,
           keyword_init: true
         ) { alias_method :active?, :active }
 
@@ -34,7 +34,7 @@ module Karafka
           end
         end
 
-        # @param concurrency [Integer] max number of virtual partitions that can come out of the
+        # @param max_partitions [Integer] max number of virtual partitions that can come out of the
         #   single distribution flow. When set to more than the Karafka threading, will create
         #   more work than workers. When less, can ensure we have spare resources to process other
         #   things in parallel.
@@ -42,12 +42,12 @@ module Karafka
         # @return [VirtualPartitions] method that allows to set the virtual partitions details
         #   during the routing configuration and then allows to retrieve it
         def virtual_partitions(
-          concurrency: Karafka::App.config.concurrency,
+          max_partitions: Karafka::App.config.concurrency,
           partitioner: nil
         )
           @virtual_partitions ||= VirtualPartitions.new(
             active: !partitioner.nil?,
-            concurrency: concurrency,
+            max_partitions: max_partitions,
             partitioner: partitioner
           )
         end

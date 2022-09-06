@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# When using Virtual Partitions with limited concurrency, VP should not occupy all the threads but
-# it should use at most what was allowed. This allows for having some worker threads that are
+# When using Virtual Partitions with limited max partitions, VP should not occupy all the threads
+# but it should use at most what was allowed. This allows for having some worker threads that are
 # always available for other work.
 
 setup_karafka do |config|
@@ -33,7 +33,7 @@ draw_routes do
       consumer Consumer
 
       virtual_partitions(
-        concurrency: 2,
+        max_partitions: 2,
         partitioner: ->(msg) { msg.raw_payload }
       )
     end
