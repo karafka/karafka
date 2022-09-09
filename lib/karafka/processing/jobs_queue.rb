@@ -13,7 +13,7 @@ module Karafka
       # @return [Karafka::Processing::JobsQueue]
       def initialize
         @queue = Queue.new
-        # Those queues will act as a semaphores internally. Since we need an indicator for waiting
+        # Those queues will act as semaphores internally. Since we need an indicator for waiting
         # we could use Thread.pass but this is expensive. Instead we can just lock until any
         # of the workers finishes their work and we can re-check. This means that in the worse
         # scenario, we will context switch 10 times per poll instead of getting this thread
