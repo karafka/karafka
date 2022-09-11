@@ -38,9 +38,11 @@ module Karafka
       def topic=(name, &block)
         topic = Topic.new(name, self)
         @topics << Proxy.new(topic, &block).target
-        topic = @topics.last
-        topic.subscription_group = current_subscription_group_name
-        topic
+        built_topic = @topics.last
+        # We overwrite it conditionally in case it was not set by the user inline in the topic
+        # block definition
+        built_topic.subscription_group ||= current_subscription_group_name
+        built_topic
       end
 
       # Assigns the current subscription group id based on the defined one and allows for further

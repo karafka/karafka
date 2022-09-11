@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should allow for nice subscription groups management style with nestings DSL
+# Karafka should allow for nice subscription groups management style with nesting DSL
 
 setup_karafka
 

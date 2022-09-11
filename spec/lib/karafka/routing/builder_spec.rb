@@ -238,7 +238,7 @@ RSpec.describe_current do
       end
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
-      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2"}
+      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
       it { expect(builder.size).to eq 2 }
     end
 
