@@ -54,7 +54,7 @@ module Karafka
         # validated as a string
         self.current_subscription_group_name = name.to_s
 
-        Proxy.new(self, &block).target
+        Proxy.new(self, &block)
 
         # We need to reset the current subscription group after it is used, so it won't leak
         # outside to other topics that would be defined without a defined subscription group
