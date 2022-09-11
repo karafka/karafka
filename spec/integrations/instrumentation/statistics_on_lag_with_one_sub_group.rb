@@ -43,14 +43,14 @@ Karafka::App.monitor.subscribe('statistics.emitted') do |event|
 end
 
 draw_routes do
-  topic DT.topics[0] do
-    consumer Consumer
-    subscription_group '1'
-  end
+  subscription_group '1' do
+    topic DT.topics[0] do
+      consumer Consumer
+    end
 
-  topic DT.topics[1] do
-    consumer Consumer
-    subscription_group '1'
+    topic DT.topics[1] do
+      consumer Consumer
+    end
   end
 end
 

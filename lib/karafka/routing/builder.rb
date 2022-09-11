@@ -66,6 +66,16 @@ module Karafka
         end
       end
 
+      # Handles the simple routing case where we create one consumer group and allow for further
+      # subscription group customization
+      # @param subscription_group_name [String, Symbol] subscription group id
+      # @param block [Proc] further topics definitions
+      def subscription_group(subscription_group_name, &block)
+        consumer_group('app') do
+          target.public_send(:subscription_group=, subscription_group_name, &block)
+        end
+      end
+
       # In case we use simple style of routing, all topics will be assigned to the same consumer
       # group that will be based on the client_id
       #
