@@ -17,11 +17,11 @@ draw_routes do
   DT.topics.first(10).each_slice(2) do |topics|
     slice_uuid = SecureRandom.uuid
 
-    topics.each do |topic_name|
-      topic topic_name do
-        consumer Consumer
-
-        subscription_group slice_uuid
+    subscription_group slice_uuid do
+      topics.each do |topic_name|
+        topic topic_name do
+          consumer Consumer
+        end
       end
     end
   end

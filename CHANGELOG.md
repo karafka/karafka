@@ -2,6 +2,7 @@
 
 ## Unreleased
 - [Breaking change] Rename Virtual Partitions `concurrency` to `max_partitions` to avoid confusion  (#1023).
+-  Allow for block based subscription groups management (#1030).
 
 ## 2.0.7 (2022-09-05)
 - [Breaking change] Redefine the Virtual Partitions routing DSL to accept concurrency

@@ -15,10 +15,10 @@ end
 
 draw_routes do
   DT.topics.first(10).each do |topic_name|
-    topic topic_name do
-      consumer Consumer
-
-      subscription_group topic_name
+    subscription_group topic_name do
+      topic topic_name do
+        consumer Consumer
+      end
     end
   end
 end
