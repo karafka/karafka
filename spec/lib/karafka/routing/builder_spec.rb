@@ -42,9 +42,106 @@ RSpec.describe_current do
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_app_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_app_topic_name2" }
       it { expect(builder.size).to eq 1 }
+      it { expect(topic1.subscription_group).to eq nil }
       it { expect(topic1.name).to eq 'topic_name1' }
       it { expect(topic2.name).to eq 'topic_name2' }
+      it { expect(topic2.subscription_group).to eq nil }
       it { expect(builder.first.id).to eq "#{Karafka::App.config.client_id}_app" }
+    end
+
+    context 'when we use simple topic style with one subscription group and one topic' do
+      let(:topic) { builder.first.topics.first }
+      let(:draw) do
+        builder.draw do
+          subscription_group 'test' do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+              deserializer :deserializer1
+            end
+          end
+        end
+      end
+
+      before { draw }
+
+      it { expect(topic.subscription_group).to eq 'test' }
+    end
+
+    context 'when we use simple topic style with one subscription group and two topics' do
+      let(:topic1) { builder.first.topics.first }
+      let(:topic2) { builder.first.topics.last }
+      let(:draw) do
+        builder.draw do
+          subscription_group 'test' do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+              deserializer :deserializer1
+            end
+
+            topic :topic_name2 do
+              consumer Class.new(Karafka::BaseConsumer)
+              deserializer :deserializer1
+            end
+          end
+        end
+      end
+
+      before { draw }
+
+      it { expect(topic1.subscription_group).to eq 'test' }
+      it { expect(topic2.subscription_group).to eq 'test' }
+    end
+
+    context 'when we use simple topic style with many subscription groups' do
+      let(:topic1) { builder.first.topics.first }
+      let(:topic2) { builder.first.topics.last }
+      let(:draw) do
+        builder.draw do
+          subscription_group 'test1' do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+              deserializer :deserializer1
+            end
+          end
+
+          subscription_group 'test2' do
+            topic :topic_name2 do
+              consumer Class.new(Karafka::BaseConsumer)
+              deserializer :deserializer1
+            end
+          end
+        end
+      end
+
+      before { draw }
+
+      it { expect(topic1.subscription_group).to eq 'test1' }
+      it { expect(topic2.subscription_group).to eq 'test2' }
+    end
+
+    context 'when we mix subscription group definitions styles' do
+      let(:topic1) { builder.first.topics.first }
+      let(:topic2) { builder.first.topics.last }
+      let(:draw) do
+        builder.draw do
+          subscription_group 'test1' do
+            topic :topic_name1 do
+              consumer Class.new(Karafka::BaseConsumer)
+              deserializer :deserializer1
+            end
+          end
+
+          topic :topic_name2 do
+            consumer Class.new(Karafka::BaseConsumer)
+            deserializer :deserializer1
+          end
+        end
+      end
+
+      before { draw }
+
+      it { expect(topic1.subscription_group).to eq 'test1' }
+      it { expect(topic2.subscription_group).to eq nil }
     end
 
     context 'when we use 0.6 simple topic style single topic groups' do
@@ -79,7 +176,9 @@ RSpec.describe_current do
       end
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
+      it { expect(topic1.subscription_group).to eq nil }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
+      it { expect(topic2.subscription_group).to eq nil }
       it { expect(builder.size).to eq 2 }
     end
 
@@ -108,6 +207,39 @@ RSpec.describe_current do
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name2" }
       it { expect(builder.size).to eq 1 }
+    end
+
+    context 'when we define multiple consumer groups with multiple subscription groups' do
+      let(:topic1) { builder.first.topics.first }
+      let(:topic2) { builder.last.topics.last }
+
+      before do
+        builder.draw do
+          consumer_group :group_name1 do
+            subscription_group 'test1' do
+              topic :topic_name1 do
+                kafka('bootstrap.servers' => 'localhost:9092')
+                consumer Class.new(Karafka::BaseConsumer)
+                deserializer :deserializer1
+              end
+            end
+          end
+
+          consumer_group :group_name2 do
+            subscription_group 'test2' do
+              topic :topic_name2 do
+                kafka('bootstrap.servers' => 'localhost:9092')
+                consumer Class.new(Karafka::BaseConsumer)
+                deserializer :deserializer2
+              end
+            end
+          end
+        end
+      end
+
+      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
+      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
+      it { expect(builder.size).to eq 2 }
     end
 
     context 'when we define invalid route' do
