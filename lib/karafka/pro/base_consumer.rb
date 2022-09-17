@@ -102,7 +102,7 @@ module Karafka
         else
           # If processing failed, we need to pause
           # For long running job this will overwrite the default never-ending pause and will cause
-          # the processing th keep going after the error backoff
+          # the processing to keep going after the error backoff
           pause(@seek_offset || first_message.offset)
         end
       end

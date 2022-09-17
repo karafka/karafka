@@ -2,7 +2,7 @@
 
 module Karafka
   module Processing
-    # Namespace for all the jobs that are suppose to run in workers.
+    # Namespace for all the jobs that are supposed to run in workers.
     module Jobs
       # Base class for all the jobs types that are suppose to run in workers threads.
       # Each job can have 3 main entry-points: `#before_call`, `#call` and `#after_call`
@@ -10,7 +10,7 @@ module Karafka
       class Base
         extend Forwardable
 
-        # @note Since one job has always one executer, we use the jobs id and group id as reference
+        # @note Since one job has always one executor, we use the jobs id and group id as reference
         def_delegators :executor, :id, :group_id
 
         attr_reader :executor

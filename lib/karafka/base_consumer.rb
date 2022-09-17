@@ -124,7 +124,7 @@ module Karafka
 
     # Method that will perform business logic and on data received from Kafka (it will consume
     #   the data)
-    # @note This method needs bo be implemented in a subclass. We stub it here as a failover if
+    # @note This method needs to be implemented in a subclass. We stub it here as a failover if
     #   someone forgets about it or makes on with typo
     def consume
       raise NotImplementedError, 'Implement this in a subclass'
