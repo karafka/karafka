@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.8 (2022-09-19)
 - [Breaking change] Rename Virtual Partitions `concurrency` to `max_partitions` to avoid confusion  (#1023).
 -  Allow for block based subscription groups management (#1030).
 
