@@ -3,4 +3,4 @@
 source 'https://rubygems.org'
 
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR')
-gem 'rails', '7.0.3.1', require: true
+gem 'rails', '7.0.4', require: true
