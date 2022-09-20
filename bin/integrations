@@ -9,7 +9,7 @@
 # Types of specs:
 # - regular - can run in parallel, includes all the helpers
 # - pristine - cannot run in parallel, uses custom bundler but includes helpers
-# - poro - cannot run in paralle, uses custom bundler, does not include any helpers
+# - poro - cannot run in parallel, uses custom bundler, does not include any helpers
 raise 'This code needs to be executed WITHOUT bundle exec' if Kernel.const_defined?(:Bundler)
 
 require 'open3'
