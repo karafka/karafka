@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## Unreleased
+- Fix Singleton not visible when used in PORO (#1034)
+- Divide pristine specs into pristine and poro. Pristine will still have helpers loaded, poro will have nothing.
+
 ## 2.0.8 (2022-09-19)
 - [Breaking change] Rename Virtual Partitions `concurrency` to `max_partitions` to avoid confusion  (#1023).
 -  Allow for block based subscription groups management (#1030).

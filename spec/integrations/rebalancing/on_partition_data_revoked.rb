@@ -54,6 +54,8 @@ other =  Thread.new do
     break
   end
 
+  sleep(2)
+
   consumer.close
 end
 

@@ -13,6 +13,7 @@
   openssl
   base64
   date
+  singleton
   zeitwerk
 ].each(&method(:require))
 

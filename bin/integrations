@@ -2,9 +2,14 @@
 
 # Runner to run integration specs in parallel
 
-# Part of integration specs run pristine without bundler.
+# Part of integration specs run linear without bundler.
 # If we would run bundle exec when running this code, bundler would inject its own context
 # into them, messing things up heavily
+#
+# Types of specs:
+# - regular - can run in parallel, includes all the helpers
+# - pristine - cannot run in parallel, uses custom bundler but includes helpers
+# - poro - cannot run in parallel, uses custom bundler, does not include any helpers
 raise 'This code needs to be executed WITHOUT bundle exec' if Kernel.const_defined?(:Bundler)
 
 require 'open3'
@@ -64,13 +69,19 @@ class Scenario
     @path.gsub("#{ROOT_PATH}/spec/integrations/", '')
   end
 
-  # @return [Boolean] true if spec is pristine
-  def pristine?
+  # @return [Symbol] type of spec
+  def type
     scenario_dir = File.dirname(@path)
 
-    # If there is a Gemfile in a scenario directory, it means it is a pristine spec and we need
-    # to run bundle install, etc in order to run it
-    File.exist?(File.join(scenario_dir, 'Gemfile'))
+    return :poro if scenario_dir.end_with?('_poro')
+    return :pristine if scenario_dir.end_with?('_pristine')
+
+    :regular
+  end
+
+  # @return [Boolean] any spec that is not a regular one should not run in parallel with others
+  def linear?
+    !type == :regular
   end
 
   # @return [Boolean] did this scenario finished or is it still running
@@ -145,9 +156,23 @@ class Scenario
   # Sets up a proper environment for a given spec to run and returns the run command
   # @return [String] run command
   def init_and_build_cmd
-    # If there is a Gemfile in a scenario directory, it means it is a pristine spec and we need
-    # to run bundle install, etc in order to run it
-    if pristine?
+    case type
+    when :poro
+      scenario_dir = File.dirname(@path)
+      # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
+      temp_dir = Dir.mktmpdir
+      file_name = File.basename(@path)
+
+      FileUtils.cp_r("#{scenario_dir}/.", temp_dir)
+
+      <<~CMD
+        cd #{temp_dir} &&
+        KARAFKA_GEM_DIR=#{ROOT_PATH} \
+        BUNDLE_AUTO_INSTALL=true \
+        PRISTINE_MODE=true \
+        bundle exec ruby #{file_name}
+      CMD
+    when :pristine
       scenario_dir = File.dirname(@path)
       # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
       temp_dir = Dir.mktmpdir
@@ -196,8 +221,8 @@ scenarios = specs
             .shuffle(random: Random.new(seed))
             .map { |integration_test| Scenario.new(integration_test) }
 
-regulars = scenarios.reject(&:pristine?)
-pristine = scenarios.select(&:pristine?)
+regulars = scenarios.reject(&:linear?)
+linears = scenarios - regulars
 
 active_scenarios = []
 finished_scenarios = []
@@ -206,10 +231,10 @@ while finished_scenarios.size < scenarios.size
   # If we have space to run another scenario, we add it
   if active_scenarios.size < CONCURRENCY
     scenario = nil
-    # We can run only one pristine at the same time due to concurrency issues within bundler
+    # We can run only one linear at the same time due to concurrency issues within bundler
     # Since they usually take longer than others, we try to run them as fast as possible when there
     # is a slot
-    scenario = pristine.pop unless active_scenarios.any?(&:pristine?)
+    scenario = linears.pop unless active_scenarios.any?(&:linear?)
     scenario ||= regulars.pop
 
     if scenario
