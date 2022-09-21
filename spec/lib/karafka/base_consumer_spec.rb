@@ -20,10 +20,10 @@ RSpec.describe_current do
       Karafka::Messages::Messages,
       first: first_message,
       last: last_message,
-      metadata: instance_double(
-        Karafka::Messages::BatchMetadata,
+      metadata: Karafka::Messages::BatchMetadata.new(
         topic: topic.name,
-        partition: 0
+        partition: 0,
+        processed_at: Time.now
       )
     )
   end
@@ -61,6 +61,7 @@ RSpec.describe_current do
   describe '#on_consume and #on_after_consume' do
     let(:consume_with_after) do
       lambda do
+        consumer.on_before_consume
         consumer.on_consume
         consumer.on_after_consume
       end
@@ -106,7 +107,7 @@ RSpec.describe_current do
 
       it { expect { consume_with_after.call }.not_to raise_error }
 
-      it 'expect to pause based on the message offset' do
+      it 'expect to pause based on the first message ever received' do
         consume_with_after.call
         expect(client).to have_received(:pause).with(topic.name, first_message.partition, offset)
       end

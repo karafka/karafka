@@ -3,6 +3,8 @@
 ## Unreleased
 - Fix Singleton not visible when used in PORO (#1034)
 - Divide pristine specs into pristine and poro. Pristine will still have helpers loaded, poro will have nothing.
+- Fix a case where `manual_offset_management` offset upon error is not reverted to the first message in a case where there were no markings as consumed at all.
+- Implement small reliability improvements around marking as consumed.
 
 ## 2.0.8 (2022-09-19)
 - [Breaking change] Rename Virtual Partitions `concurrency` to `max_partitions` to avoid confusion  (#1023).
