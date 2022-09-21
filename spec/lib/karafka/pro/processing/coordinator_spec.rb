@@ -6,9 +6,8 @@ RSpec.describe_current do
   subject(:coordinator) { described_class.new(pause_tracker) }
 
   let(:pause_tracker) { build(:time_trackers_pause) }
-  let(:first_message) { build(:messages_message) }
   let(:last_message) { build(:messages_message) }
-  let(:messages) { [first_message, last_message] }
+  let(:messages) { [last_message] }
 
   it { expect(described_class).to be < Karafka::Processing::Coordinator }
 
@@ -29,7 +28,7 @@ RSpec.describe_current do
   describe '#on_enqueued' do
     context 'when executed for the first time' do
       it 'expect to run with first and last message info' do
-        args = [first_message, last_message]
+        args = [last_message]
         expect { |block| coordinator.on_enqueued(&block) }.to yield_with_args(*args)
       end
     end
@@ -46,7 +45,7 @@ RSpec.describe_current do
   describe '#on_started' do
     context 'when executed for the first time' do
       it 'expect to run with first and last message info' do
-        args = [first_message, last_message]
+        args = [last_message]
         expect { |block| coordinator.on_started(&block) }.to yield_with_args(*args)
       end
     end
@@ -63,7 +62,7 @@ RSpec.describe_current do
   describe '#on_finished' do
     context 'when executed for the first time' do
       it 'expect to run with first and last message info' do
-        args = [first_message, last_message]
+        args = [last_message]
         expect { |block| coordinator.on_finished(&block) }.to yield_with_args(*args)
       end
     end

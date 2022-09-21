@@ -6,7 +6,7 @@ module Karafka
     # It belongs to a consumer group as from 0.6 all the topics can work in the same consumer group
     # It is a part of Karafka's DSL.
     class Topic
-      attr_reader :id, :name, :consumer_group
+      attr_reader :id, :name, :consumer_group, :tags
       attr_writer :consumer
       attr_accessor :subscription_group
 
@@ -32,6 +32,7 @@ module Karafka
         #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can
         #   have same topic name across multiple consumer groups
         @id = "#{consumer_group.id}_#{@name}"
+        @tags = []
       end
 
       INHERITABLE_ATTRIBUTES.each do |attribute|
@@ -93,7 +94,8 @@ module Karafka
           name: name,
           consumer: consumer,
           consumer_group_id: consumer_group.id,
-          subscription_group: subscription_group
+          subscription_group: subscription_group,
+          tags: tags
         ).freeze
       end
     end

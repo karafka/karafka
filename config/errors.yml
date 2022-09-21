@@ -57,3 +57,4 @@ en:
       consumer_format: needs to inherit from Karafka::Pro::BaseConsumer and not Karafka::Consumer
       virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
       virtual_partitions.max_partitions_format: needs to be equl or more than 1
+      manual_offset_management_not_with_virtual_partitions: cannot be used together with Virtual Partitions

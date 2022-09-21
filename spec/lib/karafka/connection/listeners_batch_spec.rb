@@ -6,6 +6,8 @@ RSpec.describe_current do
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:subscription_group) { build(:routing_subscription_group) }
 
+  after { batch.each(&:shutdown) }
+
   describe '#each' do
     before do
       allow(Karafka::App).to receive(:subscription_groups).and_return([subscription_group])

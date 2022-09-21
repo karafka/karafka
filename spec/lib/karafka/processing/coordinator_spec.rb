@@ -4,13 +4,14 @@ RSpec.describe_current do
   subject(:coordinator) { described_class.new(pause_tracker) }
 
   let(:pause_tracker) { build(:time_trackers_pause) }
+  let(:message) { build(:messages_message) }
 
   describe '#pause_tracker' do
     it { expect(coordinator.pause_tracker).to eq(pause_tracker) }
   end
 
   describe '#start' do
-    before { coordinator.start([]) }
+    before { coordinator.start([message]) }
 
     it { expect(coordinator.success?).to eq(true) }
     it { expect(coordinator.revoked?).to eq(false) }

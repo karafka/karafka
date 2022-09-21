@@ -3,6 +3,13 @@
 ## Unreleased
 - Fix Singleton not visible when used in PORO (#1034)
 - Divide pristine specs into pristine and poro. Pristine will still have helpers loaded, poro will have nothing.
+- Fix a case where `manual_offset_management` offset upon error is not reverted to the first message in a case where there were no markings as consumed at all for multiple batches.
+- Implement small reliability improvements around marking as consumed.
+- Introduce a config sanity check to make sure Virtual Partitions are not used with manual offset management.
+- Fix a possibility of using `active_job_topic` with Virtual Partitions and manual offset management (ActiveJob still can use due to atomicity of jobs).
+- Move seek offset ownership to the coordinator to allow Virtual Partitions further development.
+- Improve client shutdown in specs.
+- Do not reset client on network issue and rely on `librdkafka` to do so.
 
 ## 2.0.8 (2022-09-19)
 - [Breaking change] Rename Virtual Partitions `concurrency` to `max_partitions` to avoid confusion  (#1023).

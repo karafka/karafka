@@ -47,6 +47,22 @@ module Karafka
 
           [[%i[virtual_partitions partitioner], :respond_to_call]]
         end
+
+        # Make sure that manual offset management is not used together with Virtual Partitions
+        # This would not make any sense as there would be edge cases related to skipping
+        # messages even if there were errors.
+        virtual do |data, errors|
+          next unless errors.empty?
+
+          virtual_partitions = data[:virtual_partitions]
+          manual_offset_management = data[:manual_offset_management]
+
+          next unless virtual_partitions[:active]
+          next unless manual_offset_management
+          next if data[:tags].include?(:active_job)
+
+          [[%i[manual_offset_management], :not_with_virtual_partitions]]
+        end
       end
     end
   end

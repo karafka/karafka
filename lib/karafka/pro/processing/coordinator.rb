@@ -34,7 +34,6 @@ module Karafka
             @on_enqueued_invoked = false
             @on_started_invoked = false
             @on_finished_invoked = false
-            @first_message = messages.first
             @last_message = messages.last
           end
         end
@@ -52,7 +51,7 @@ module Karafka
 
             @on_enqueued_invoked = true
 
-            yield(@first_message, @last_message)
+            yield(@last_message)
           end
         end
 
@@ -63,7 +62,7 @@ module Karafka
 
             @on_started_invoked = true
 
-            yield(@first_message, @last_message)
+            yield(@last_message)
           end
         end
 
@@ -77,7 +76,7 @@ module Karafka
 
             @on_finished_invoked = true
 
-            yield(@first_message, @last_message)
+            yield(@last_message)
           end
         end
       end

@@ -19,6 +19,8 @@ module Karafka
 
             instance_eval(&block)
 
+            target.tags << :active_job
+
             # This is handled by our custom ActiveJob consumer
             # Without this, default behaviour would cause messages to skip upon shutdown as the
             # offset would be committed for the last message

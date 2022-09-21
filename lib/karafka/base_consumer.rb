@@ -77,7 +77,7 @@ module Karafka
         # with manual offset management
         mark_as_consumed(messages.last)
       else
-        pause(@seek_offset || messages.first.offset)
+        pause(coordinator.seek_offset)
       end
     end
 
@@ -155,7 +155,7 @@ module Karafka
         return false
       end
 
-      @seek_offset = message.offset + 1
+      coordinator.seek_offset = message.offset + 1
 
       true
     end
@@ -172,7 +172,7 @@ module Karafka
         return false
       end
 
-      @seek_offset = message.offset + 1
+      coordinator.seek_offset = message.offset + 1
 
       true
     end

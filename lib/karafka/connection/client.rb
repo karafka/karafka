@@ -153,7 +153,7 @@ module Karafka
 
         pause_msg = Messages::Seek.new(topic, partition, offset)
 
-        internal_commit_offsets(async: false)
+        internal_commit_offsets(async: true)
 
         # Here we do not use our cached tpls because we should not try to pause something we do
         # not own anymore.
@@ -267,8 +267,15 @@ module Karafka
 
         true
       rescue Rdkafka::RdkafkaError => e
-        return false if e.code == :assignment_lost
-        return true if e.code == :no_offset
+        case e.code
+        when :assignment_lost
+          return false
+        when :no_offset
+          return true
+        when :coordinator_load_in_progress
+          sleep(1)
+          retry
+        end
 
         raise e
       end
@@ -329,25 +336,27 @@ module Karafka
         #
         # If we would retry here, the client reset would become transparent and we would not have
         # a chance to take any actions
+        early_return = false
+
         case e.code
         when :max_poll_exceeded # -147
           reset
-          return nil
+          early_return = true
         when :transport # -195
           reset
-          return nil
-        when :rebalance_in_progress # -27
-          reset
-          return nil
+          early_return = true
         when :not_coordinator # 16
           reset
-          return nil
+          early_return = true
         when :network_exception # 13
-          reset
-          return nil
+          early_return = true
+        when :rebalance_in_progress # -27
+          early_return = true
+        when :coordinator_load_in_progress # 14
+          early_return = true
         when :unknown_topic_or_part
           # This is expected and temporary until rdkafka catches up with metadata
-          return nil
+          early_return = true
         end
 
         raise if time_poll.attempts > MAX_POLL_RETRIES
@@ -356,8 +365,9 @@ module Karafka
         time_poll.checkpoint
         time_poll.backoff
 
-        # On unknown errors we do our best to retry and handle them before raising
-        retry
+        # On unknown errors we do our best to retry and handle them before raising unless we
+        # decide to early return
+        early_return ? nil : retry
       end
 
       # Builds a new rdkafka consumer instance based on the subscription group configuration
