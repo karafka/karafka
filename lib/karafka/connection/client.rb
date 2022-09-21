@@ -366,7 +366,7 @@ module Karafka
         time_poll.backoff
 
         # On unknown errors we do our best to retry and handle them before raising unless we
-        # decide to early exit
+        # decide to early return
         early_return ? nil : retry
       end
 
