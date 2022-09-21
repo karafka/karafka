@@ -76,9 +76,9 @@ module Karafka
 
       # Handles the post-consumption flow depending on topic settings
       #
-      # @param first_group_message [Karafka::Messages::Message]
+      # @param _first_group_message [Karafka::Messages::Message]
       # @param last_group_message [Karafka::Messages::Message]
-      def on_after_consume_regular(first_group_message, last_group_message)
+      def on_after_consume_regular(_first_group_message, last_group_message)
         if coordinator.success?
           coordinator.pause_tracker.reset
 

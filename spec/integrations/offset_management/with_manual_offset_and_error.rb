@@ -17,11 +17,11 @@ class Consumer < Karafka::BaseConsumer
 
     @runs += 1
 
-    if @runs == 4
-      # The -1 will act as a divider so it's easier to spec things
-      DT[:split] << DT[:offsets].size
-      raise StandardError
-    end
+    next unless @runs == 4
+
+    # The -1 will act as a divider so it's easier to spec things
+    DT[:split] << DT[:offsets].size
+    raise StandardError
   end
 end
 
