@@ -18,7 +18,7 @@ class Consumer < Karafka::Pro::BaseConsumer
 
     @runs += 1
 
-    next unless @runs == 4
+    return unless @runs == 4
 
     # The -1 will act as a divider so it's easier to spec things
     DT[:split] << DT[:offsets].size

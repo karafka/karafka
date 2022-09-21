@@ -8,6 +8,7 @@
 - Introduce a config sanity check to make sure Virtual Partitions are not used with manual offset management.
 - Fix a possibility of using `active_job_topic` with Virtual Partitions and manual offset management (ActiveJob still can use due to atomicity of jobs).
 - Move seek offset ownership to the coordinator to allow Virtual Partitions further development.
+- Improve client shutdown in specs.
 
 ## 2.0.8 (2022-09-19)
 - [Breaking change] Rename Virtual Partitions `concurrency` to `max_partitions` to avoid confusion  (#1023).
