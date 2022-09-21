@@ -32,7 +32,8 @@ module Karafka
       def on_before_enqueue
         return unless topic.long_running_job?
 
-        # This ensures, that when running LRJ with VP, things operate as expected and once
+        # This ensures that when running LRJ with VP, things operate as expected run only once
+        # for all the virtual partitions collectively
         coordinator.on_enqueued do
           # Pause at the first message in a batch. That way in case of a crash, we will not loose
           # any messages.
