@@ -11,6 +11,8 @@ RSpec.describe_current do
 
     before { Karafka::App.config.client_id = client_id }
 
+    after { client.stop }
+
     # Kafka counts all the consumers one after another, that is why we need to check it in one
     # spec
     it 'expect to give it proper names within the lifecycle' do

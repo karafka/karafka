@@ -59,9 +59,6 @@ module Karafka
 
           next unless virtual_partitions[:active]
           next unless manual_offset_management
-
-          consumer_class = data[:consumer]
-
           next if data[:tags].include?(:active_job)
 
           [[%i[manual_offset_management], :not_with_virtual_partitions]]
