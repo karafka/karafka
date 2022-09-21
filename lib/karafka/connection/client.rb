@@ -349,7 +349,6 @@ module Karafka
           reset
           early_return = true
         when :network_exception # 13
-          reset
           early_return = true
         when :rebalance_in_progress # -27
           early_return = true
