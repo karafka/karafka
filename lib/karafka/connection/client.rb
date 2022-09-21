@@ -353,6 +353,8 @@ module Karafka
           early_return = true
         when :rebalance_in_progress # -27
           early_return = true
+        when :coordinator_load_in_progress # 14
+          early_return = true
         when :unknown_topic_or_part
           # This is expected and temporary until rdkafka catches up with metadata
           early_return = true
