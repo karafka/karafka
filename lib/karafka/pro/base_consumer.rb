@@ -34,9 +34,10 @@ module Karafka
 
         # This ensures, that when running LRJ with VP, things operate as expected
         coordinator.on_enqueued do |first_group_message|
+          @seek_offset = first_group_message.offset
           # Pause at the first message in a batch. That way in case of a crash, we will not loose
           # any messages
-          pause(first_group_message.offset, MAX_PAUSE_TIME)
+          pause(@seek_offset, MAX_PAUSE_TIME)
         end
       end
 
@@ -75,16 +76,16 @@ module Karafka
 
       # Handles the post-consumption flow depending on topic settings
       #
-      # @param first_message [Karafka::Messages::Message]
-      # @param last_message [Karafka::Messages::Message]
-      def on_after_consume_regular(first_message, last_message)
+      # @param first_group_message [Karafka::Messages::Message]
+      # @param last_group_message [Karafka::Messages::Message]
+      def on_after_consume_regular(first_group_message, last_group_message)
         if coordinator.success?
           coordinator.pause_tracker.reset
 
           # We use the non-blocking one here. If someone needs the blocking one, can implement it
           # with manual offset management
           # Mark as consumed only if manual offset management is not on
-          mark_as_consumed(last_message) unless topic.manual_offset_management? || revoked?
+          mark_as_consumed(last_group_message) unless topic.manual_offset_management? || revoked?
 
           # If this is not a long-running job there is nothing for us to do here
           return unless topic.long_running_job?
@@ -96,14 +97,14 @@ module Karafka
           # interesting (yet valid) corner case, where with manual offset management on and no
           # marking as consumed, we end up with an infinite loop processing same messages over and
           # over again
-          seek(@seek_offset || first_message.offset)
+          seek(@seek_offset)
 
           resume
         else
           # If processing failed, we need to pause
           # For long running job this will overwrite the default never-ending pause and will cause
           # the processing to keep going after the error backoff
-          pause(@seek_offset || first_message.offset)
+          pause(@seek_offset)
         end
       end
     end

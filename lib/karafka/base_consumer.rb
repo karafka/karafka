@@ -30,6 +30,14 @@ module Karafka
     #   not as part of the public api. This can act as a hook when creating non-blocking
     #   consumers and doing other advanced stuff
     def on_before_consume
+      # Seek offset needs to be always initialized as for case where manual offset management is
+      # turned on, we need to have reference to the first offset even in case of running multiple
+      # batches without marking any messages as consumed. Rollback needs to happen to the last
+      # place we know of or the last message + 1 that was marked
+      #
+      # @note For pro this will be already set in the `#on_before_enqueue` hook.
+      @seek_offset ||= messages.first.offset
+
       messages.metadata.processed_at = Time.now
       messages.metadata.freeze
     end
@@ -77,7 +85,7 @@ module Karafka
         # with manual offset management
         mark_as_consumed(messages.last)
       else
-        pause(@seek_offset || messages.first.offset)
+        pause(@seek_offset)
       end
     end
 
