@@ -429,7 +429,7 @@ RSpec.describe_current do
       end
 
       it 'epxect to increase seek_offset' do
-        expect(consumer.instance_variable_get(:@seek_offset)).to eq(offset + 1)
+        expect(consumer.coordinator.seek_offset).to eq(offset + 1)
       end
     end
 
@@ -444,8 +444,8 @@ RSpec.describe_current do
         expect(client).to have_received(:mark_as_consumed).with(last_message)
       end
 
-      it 'epxect to not increase seek_offset' do
-        expect(consumer.instance_variable_get(:@seek_offset)).to eq(nil)
+      it 'expect to not increase seek_offset' do
+        expect(consumer.coordinator.seek_offset).to eq(first_message.offset)
       end
     end
   end
@@ -465,7 +465,7 @@ RSpec.describe_current do
       end
 
       it 'epxect to increase seek_offset' do
-        expect(consumer.instance_variable_get(:@seek_offset)).to eq(offset + 1)
+        expect(consumer.coordinator.seek_offset).to eq(offset + 1)
       end
     end
 
@@ -481,7 +481,7 @@ RSpec.describe_current do
       end
 
       it 'expect to not increase seek_offset' do
-        expect(consumer.instance_variable_get(:@seek_offset)).to eq(nil)
+        expect(consumer.coordinator.seek_offset).to eq(first_message.offset)
       end
     end
   end

@@ -68,6 +68,7 @@ RSpec.describe_current do
     end
 
     before do
+      coordinator.seek_offset = messages.first.offset
       consumer.coordinator = coordinator
       consumer.client = client
       consumer.messages = messages
@@ -290,7 +291,7 @@ RSpec.describe_current do
       end
 
       it 'epxect to increase seek_offset' do
-        expect(consumer.instance_variable_get(:@seek_offset)).to eq(offset + 1)
+        expect(consumer.coordinator.seek_offset).to eq(offset + 1)
       end
     end
 
@@ -306,7 +307,7 @@ RSpec.describe_current do
       end
 
       it 'epxect to not increase seek_offset' do
-        expect(consumer.instance_variable_get(:@seek_offset)).to eq(nil)
+        expect(consumer.coordinator.seek_offset).to eq(nil)
       end
     end
   end
@@ -326,7 +327,7 @@ RSpec.describe_current do
       end
 
       it 'epxect to increase seek_offset' do
-        expect(consumer.instance_variable_get(:@seek_offset)).to eq(offset + 1)
+        expect(consumer.coordinator.seek_offset).to eq(offset + 1)
       end
     end
 
@@ -342,7 +343,7 @@ RSpec.describe_current do
       end
 
       it 'epxect to not increase seek_offset' do
-        expect(consumer.instance_variable_get(:@seek_offset)).to eq(nil)
+        expect(consumer.coordinator.seek_offset).to eq(nil)
       end
     end
   end

@@ -13,6 +13,8 @@ module Karafka
       # @return [Karafka::TimeTrackers::Pause]
       attr_reader :pause_tracker
 
+      attr_reader :seek_offset
+
       # @param pause_tracker [Karafka::TimeTrackers::Pause] pause tracker for given topic partition
       def initialize(pause_tracker)
         @pause_tracker = pause_tracker
@@ -23,15 +25,28 @@ module Karafka
       end
 
       # Starts the coordinator for given consumption jobs
-      # @param _messages [Array<Karafka::Messages::Message>] batch of message for which we are
+      # @param messages [Array<Karafka::Messages::Message>] batch of message for which we are
       #   going to coordinate work. Not used with regular coordinator.
-      def start(_messages)
+      def start(messages)
         @mutex.synchronize do
           @running_jobs = 0
           # We need to clear the consumption results hash here, otherwise we could end up storing
           # consumption results of consumer instances we no longer control
           @consumptions.clear
+
+          # We set it on the first encounter and never again, because then the offset setting
+          # should be up to the consumers logic (our or the end user)
+          # Seek offset needs to be always initialized as for case where manual offset management
+          # is turned on, we need to have reference to the first offset even in case of running
+          # multiple batches without marking any messages as consumed. Rollback needs to happen to
+          # the last place we know of or the last message + 1 that was marked
+          @seek_offset ||= messages.first.offset
         end
+      end
+
+      # @param offset [Integer] message offset
+      def seek_offset=(offset)
+        @mutex.synchronize { @seek_offset = offset }
       end
 
       # Increases number of jobs that we handle with this coordinator

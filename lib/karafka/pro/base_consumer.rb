@@ -32,20 +32,22 @@ module Karafka
       def on_before_enqueue
         return unless topic.long_running_job?
 
-        # This ensures, that when running LRJ with VP, things operate as expected
-        coordinator.on_enqueued do |first_group_message|
-          @seek_offset = first_group_message.offset
+        # This ensures, that when running LRJ with VP, things operate as expected and once
+        coordinator.on_enqueued do
           # Pause at the first message in a batch. That way in case of a crash, we will not loose
-          # any messages
-          pause(@seek_offset, MAX_PAUSE_TIME)
+          # any messages.
+          #
+          # For VP it applies the same way and since VP cannot be used with MOM we should not have
+          # any edge cases here.
+          pause(coordinator.seek_offset, MAX_PAUSE_TIME)
         end
       end
 
       # Runs extra logic after consumption that is related to handling long-running jobs
       # @note This overwrites the '#on_after_consume' from the base consumer
       def on_after_consume
-        coordinator.on_finished do |first_group_message, last_group_message|
-          on_after_consume_regular(first_group_message, last_group_message)
+        coordinator.on_finished do |last_group_message|
+          on_after_consume_regular(last_group_message)
         end
       end
 
@@ -76,9 +78,8 @@ module Karafka
 
       # Handles the post-consumption flow depending on topic settings
       #
-      # @param _first_group_message [Karafka::Messages::Message]
       # @param last_group_message [Karafka::Messages::Message]
-      def on_after_consume_regular(_first_group_message, last_group_message)
+      def on_after_consume_regular(last_group_message)
         if coordinator.success?
           coordinator.pause_tracker.reset
 
@@ -90,21 +91,14 @@ module Karafka
           # If this is not a long-running job there is nothing for us to do here
           return unless topic.long_running_job?
 
-          # Once processing is done, we move to the new offset based on commits
-          # Here, in case manual offset management is off, we have the new proper offset of a
-          # first message from another batch from `@seek_offset`. If manual offset management
-          # is on, we move to place where the user indicated it was finished. This can create an
-          # interesting (yet valid) corner case, where with manual offset management on and no
-          # marking as consumed, we end up with an infinite loop processing same messages over and
-          # over again
-          seek(@seek_offset)
+          seek(coordinator.seek_offset)
 
           resume
         else
           # If processing failed, we need to pause
           # For long running job this will overwrite the default never-ending pause and will cause
           # the processing to keep going after the error backoff
-          pause(@seek_offset)
+          pause(coordinator.seek_offset)
         end
       end
     end
