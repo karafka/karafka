@@ -81,7 +81,7 @@ class Scenario
 
   # @return [Boolean] any spec that is not a regular one should not run in parallel with others
   def linear?
-    !type == :regular
+    type != :regular
   end
 
   # @return [Boolean] did this scenario finished or is it still running
