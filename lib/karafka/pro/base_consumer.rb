@@ -92,7 +92,7 @@ module Karafka
           # If this is not a long-running job there is nothing for us to do here
           return unless topic.long_running_job?
 
-          seek(coordinator.seek_offset)
+          seek(coordinator.seek_offset) unless revoked?
 
           resume
         else

@@ -53,11 +53,11 @@ payloads = DT.uuids(2)
 payloads.each { |payload| produce(DT.topic, payload) }
 
 start_karafka_and_wait_until do
-  DT[0].size >= 2
+  DT[0].uniq.size >= 2
 end
 
-# There should be no duplication as our pause should be running for as long as it needs to and it
-# should be un-paused only when done
-assert_equal payloads, DT[0]
+# There can be duplication of processing on LRJ if there is a revocation and another LRJ job is
+# pushed after partition is regained. We should however not loose any messages
+assert_equal payloads, DT[0].uniq
 
 consumer.close

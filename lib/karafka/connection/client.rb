@@ -338,15 +338,15 @@ module Karafka
         # a chance to take any actions
         early_return = false
 
+        # Most of the errors can be safely ignored as librdkafka will recover from them
+        # @see https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
         case e.code
         when :max_poll_exceeded # -147
-          reset
           early_return = true
         when :transport # -195
-          reset
           early_return = true
+        # https://github.com/edenhill/librdkafka/issues/2630#issuecomment-598193001
         when :not_coordinator # 16
-          reset
           early_return = true
         when :network_exception # 13
           early_return = true

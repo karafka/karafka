@@ -36,7 +36,7 @@ draw_routes(Consumer)
 produce_many(DT.topic, DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT[:done].size >= 2
+  DT[:done].size >= 3
 end
 
 assert (2..3).cover?(DT[:consume_object_ids].size)
