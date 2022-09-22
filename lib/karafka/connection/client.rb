@@ -15,7 +15,7 @@ module Karafka
       attr_reader :name
 
       # How many times should we retry polling in case of a failure
-      MAX_POLL_RETRIES = 10
+      MAX_POLL_RETRIES = 20
 
       private_constant :MAX_POLL_RETRIES
 
@@ -330,44 +330,26 @@ module Karafka
 
         @kafka.poll(timeout)
       rescue ::Rdkafka::RdkafkaError => e
-        # We return nil, so we do not restart until running the whole loop
-        # This allows us to run revocation jobs and other things and we will pick up new work
-        # next time after dispatching all the things that are needed
-        #
-        # If we would retry here, the client reset would become transparent and we would not have
-        # a chance to take any actions
-        early_return = false
+        # Most of the errors can be safely ignored as librdkafka will recover from them
+        # @see https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
+        # @see https://github.com/edenhill/librdkafka/wiki/Error-handling
+        if time_poll.attempts > MAX_POLL_RETRIES || !time_poll.retryable?
+          Karafka.monitor.instrument(
+            'error.occurred',
+            caller: self,
+            error: e,
+            type: 'connection.client.poll.error'
+          )
 
-        case e.code
-        when :max_poll_exceeded # -147
-          reset
-          early_return = true
-        when :transport # -195
-          reset
-          early_return = true
-        when :not_coordinator # 16
-          reset
-          early_return = true
-        when :network_exception # 13
-          early_return = true
-        when :rebalance_in_progress # -27
-          early_return = true
-        when :coordinator_load_in_progress # 14
-          early_return = true
-        when :unknown_topic_or_part
-          # This is expected and temporary until rdkafka catches up with metadata
-          early_return = true
+          raise
         end
-
-        raise if time_poll.attempts > MAX_POLL_RETRIES
-        raise unless time_poll.retryable?
 
         time_poll.checkpoint
         time_poll.backoff
 
-        # On unknown errors we do our best to retry and handle them before raising unless we
-        # decide to early return
-        early_return ? nil : retry
+        # poll may not only return message but also can run callbacks and if they changed,
+        # despite the errors we need to delegate to the other app parts
+        @rebalance_manager.changed? ? nil : retry
       end
 
       # Builds a new rdkafka consumer instance based on the subscription group configuration
