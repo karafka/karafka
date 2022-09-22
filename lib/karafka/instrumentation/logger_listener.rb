@@ -153,6 +153,11 @@ module Karafka
         when 'librdkafka.error'
           error "librdkafka internal error occurred: #{error}"
           error details
+        # Those will only occur when retries in the client fail and when they did not stop after
+        # backoffs
+        when 'connection.client.poll.error'
+          error "Data polling error occurred: #{error}"
+          error details
         else
           # This should never happen. Please contact the maintainers
           raise Errors::UnsupportedCaseError, event

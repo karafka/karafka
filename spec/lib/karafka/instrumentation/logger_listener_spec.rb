@@ -212,6 +212,13 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context 'when it is a connection.client.poll.error' do
+      let(:type) { 'connection.client.poll.error' }
+      let(:message) { "Data polling error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context 'when it is an unsupported error type' do
       subject(:error_trigger) { listener.on_error_occurred(event) }
 
