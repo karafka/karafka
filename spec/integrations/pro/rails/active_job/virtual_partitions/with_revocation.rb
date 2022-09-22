@@ -60,7 +60,7 @@ revoked = false
 
 # This will trigger a rebalance when the first job is being processed
 # We keep it alive so we do not trigger a second rebalance
-Thread.new do
+other = Thread.new do
   sleep(10)
 
   consumer.subscribe(DT.topic)
@@ -69,6 +69,8 @@ Thread.new do
     unless revoked
       sleep(5)
       revoked = true
+
+      break
     end
   end
 end
@@ -80,4 +82,5 @@ end
 assert DT[:started].size < 10
 assert DT[:done].size < 10
 
+other.join
 consumer.close

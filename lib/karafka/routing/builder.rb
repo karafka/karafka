@@ -68,9 +68,10 @@ module Karafka
 
       # Handles the simple routing case where we create one consumer group and allow for further
       # subscription group customization
-      # @param subscription_group_name [String, Symbol] subscription group id
+      # @param subscription_group_name [String, Symbol] subscription group id. When not provided,
+      #   a random uuid will be used
       # @param block [Proc] further topics definitions
-      def subscription_group(subscription_group_name, &block)
+      def subscription_group(subscription_group_name = SecureRandom.uuid, &block)
         consumer_group('app') do
           target.public_send(:subscription_group=, subscription_group_name, &block)
         end
