@@ -338,7 +338,6 @@ module Karafka
         # a chance to take any actions
         early_return = false
 
-<<<<<<< HEAD
         # Most of the errors can be safely ignored as librdkafka will recover from them
         # @see https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
         case e.code
