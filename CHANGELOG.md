@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- Improve error recovery by delegating the recovery to the existing `librdkafka` instance.
+
 ## 2.0.9 (2022-09-22)
 - Fix Singleton not visible when used in PORO (#1034)
 - Divide pristine specs into pristine and poro. Pristine will still have helpers loaded, poro will have nothing.
