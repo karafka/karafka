@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.9 (2022-09-22)
 - Fix Singleton not visible when used in PORO (#1034)
 - Divide pristine specs into pristine and poro. Pristine will still have helpers loaded, poro will have nothing.
 - Fix a case where `manual_offset_management` offset upon error is not reverted to the first message in a case where there were no markings as consumed at all for multiple batches.
