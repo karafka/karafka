@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.10 (2022-09-23)
 - Improve error recovery by delegating the recovery to the existing `librdkafka` instance.
 
 ## 2.0.9 (2022-09-22)
