@@ -5,7 +5,10 @@
 #
 # The revocation job should kick in with a proper revoked state.
 
-setup_karafka do |config|
+setup_karafka(
+  # Allow max poll interval error as it is expected to be reported in this spec
+  allow_errors: %w[connection.client.poll.error]
+) do |config|
   config.max_messages = 5
   # We set it here that way not too wait too long on stuff
   config.kafka[:'max.poll.interval.ms'] = 10_000

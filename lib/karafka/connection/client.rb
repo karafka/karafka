@@ -188,6 +188,7 @@ module Karafka
         tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
 
         return unless tpl
+
         # If we did not have it, it means we never paused this partition, thus no resume should
         # happen in the first place
         return unless @paused_tpls[topic].delete(partition)
@@ -317,7 +318,7 @@ module Karafka
         Rdkafka::Consumer::TopicPartitionList.new({ topic => [rdkafka_partition] })
       end
 
-      # Performs a single poll operation.
+      # Performs a single poll operation and handles retries and error
       #
       # @param timeout [Integer] timeout for a single poll
       # @return [Rdkafka::Consumer::Message, nil] fetched message or nil if nothing polled
@@ -330,19 +331,38 @@ module Karafka
 
         @kafka.poll(timeout)
       rescue ::Rdkafka::RdkafkaError => e
-        # Most of the errors can be safely ignored as librdkafka will recover from them
-        # @see https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
-        # @see https://github.com/edenhill/librdkafka/wiki/Error-handling
-        if time_poll.attempts > MAX_POLL_RETRIES || !time_poll.retryable?
+        early_report = false
+
+        # There are retryable issues on which we want to report fast as they are source of
+        # problems and can mean some bigger system instabilities
+        # Those are mainly network issues and exceeding the max poll interval
+        # We want to report early on max poll interval exceeding because it may mean that the
+        # underlying processing is taking too much time and it is not LRJ
+        case e.code
+        when :max_poll_exceeded # -147
+          early_report = true
+        when :network_exception # 13
+          early_report = true
+        when :transport # -195
+          early_report = true
+        end
+
+        retryable = time_poll.attempts <= MAX_POLL_RETRIES && time_poll.retryable?
+
+        if early_report || !retryable
           Karafka.monitor.instrument(
             'error.occurred',
             caller: self,
             error: e,
             type: 'connection.client.poll.error'
           )
-
-          raise
         end
+
+        raise unless retryable
+
+        # Most of the errors can be safely ignored as librdkafka will recover from them
+        # @see https://github.com/edenhill/librdkafka/issues/1987#issuecomment-422008750
+        # @see https://github.com/edenhill/librdkafka/wiki/Error-handling
 
         time_poll.checkpoint
         time_poll.backoff

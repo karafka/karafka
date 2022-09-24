@@ -62,13 +62,19 @@ def setup_karafka(allow_errors: false)
   listener = ::WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
   Karafka.producer.monitor.subscribe(listener)
 
-  return if allow_errors
+  return if allow_errors == true
 
   # For integration specs where we do not expect any errors, we can set this and it will
   # immediately exit when any error occurs in the flow
-  Karafka::App.monitor.subscribe('error.occurred') do
+  # There are some specs where we want to allow only a particular type of error, then we can set
+  # it explicitly
+  Karafka::App.monitor.subscribe('error.occurred') do |event|
+    # This allows us to specify errors we expect while not ignoring others
+    next if allow_errors.is_a?(Array) && allow_errors.include?(event[:type])
+
     # This sleep buys us some time before exit so logs are flushed
     sleep(0.5)
+
     exit! 8
   end
 end
