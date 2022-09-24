@@ -188,6 +188,7 @@ module Karafka
         tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
 
         return unless tpl
+
         # If we did not have it, it means we never paused this partition, thus no resume should
         # happen in the first place
         return unless @paused_tpls[topic].delete(partition)
