@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.11 (Unreleased)
+## 2.0.11 (2022-09-29)
 - Report early on errors related to network and on max poll interval being exceeded to indicate critical problems that will be retries but may mean some underlying problems in the system.
 - Fix support of Ruby 2.7.0 to 2.7.2 (#1045)
 
