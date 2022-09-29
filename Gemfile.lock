@@ -61,15 +61,13 @@ GEM
     thor (1.2.1)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
-    waterdrop (2.4.1)
+    waterdrop (2.4.2)
       karafka-core (>= 2.0.2, < 3.0.0)
       rdkafka (>= 0.10)
       zeitwerk (~> 2.3)
     zeitwerk (2.6.0)
 
 PLATFORMS
-  arm64-darwin
-  ruby
   x86_64-linux
 
 DEPENDENCIES

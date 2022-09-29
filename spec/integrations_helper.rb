@@ -110,11 +110,13 @@ end
 #
 # @param name [String] topic name
 # @param partitions [Integer] number of partitions for this topic
-def create_topic(name: DT.topic, partitions: 1)
+# @param config [Hash] optional topic configuration settings
+def create_topic(name: DT.topic, partitions: 1, config: {})
   Karafka::Admin.create_topic(
     name,
     partitions,
-    1
+    1,
+    config
   )
 end
 
@@ -168,7 +170,7 @@ end
 
 # Sends data to Kafka in a sync way
 # @param topic [String] topic name
-# @param payload [String] data we want to send
+# @param payload [String, nil] data we want to send
 # @param details [Hash] other details
 def produce(topic, payload, details = {})
   Karafka::App.producer.produce_sync(
@@ -181,7 +183,7 @@ end
 
 # Sends multiple messages to kafka efficiently
 # @param topic [String] topic name
-# @param payloads [Array<String>] data we want to send
+# @param payloads [Array<String, nil>] data we want to send
 # @param details [Hash] other details
 def produce_many(topic, payloads, details = {})
   messages = payloads.map { |payload| details.merge(topic: topic, payload: payload) }
