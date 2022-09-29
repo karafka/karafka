@@ -1,7 +1,8 @@
 # Karafka framework changelog
 
-## Unreleased
-- Report early on errors related to network and on max poll interval being exceeded to indicate critical problems that will be retries but may mean some underlying problems in the system. 
+## 2.0.11 (Unreleased)
+- Report early on errors related to network and on max poll interval being exceeded to indicate critical problems that will be retries but may mean some underlying problems in the system.
+- Fix support of Ruby 2.7.0 to 2.7.2 (#1045)
 
 ## 2.0.10 (2022-09-23)
 - Improve error recovery by delegating the recovery to the existing `librdkafka` instance.

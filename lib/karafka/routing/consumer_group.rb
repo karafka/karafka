@@ -21,7 +21,7 @@ module Karafka
       #   We add it to make a multi-system development easier for people that don't use
       #   kafka and don't understand the concept of consumer groups.
       def initialize(name)
-        @name = name
+        @name = name.to_s
         @id = Karafka::App.config.consumer_mapper.call(name)
         @topics = Topics.new([])
       end
@@ -52,7 +52,7 @@ module Karafka
       def subscription_group=(name, &block)
         # We cast it here, so the routing supports symbol based but that's anyhow later on
         # validated as a string
-        self.current_subscription_group_name = name.to_s
+        self.current_subscription_group_name = name
 
         Proxy.new(self, &block)
 

@@ -14,17 +14,22 @@ module Karafka
         instance_eval(&block)
       end
 
-      # Translates the no "=" DSL of routing into elements assignments on target
-      # @param method_name [Symbol] name of the missing method
-      def method_missing(method_name, ...)
-        return super unless respond_to_missing?(method_name)
+      # Ruby 2.7.0 to 2.7.2 do not have arg forwarding, so we fallback to the old way
+      arg_forwarding = RUBY_VERSION < '3.0' ? '*args, &block' : '...'
 
-        if @target.respond_to?(:"#{method_name}=")
-          @target.public_send(:"#{method_name}=", ...)
-        else
-          @target.public_send(method_name, ...)
+      class_eval <<~RUBY, __FILE__, __LINE__ + 1
+        # Translates the no "=" DSL of routing into elements assignments on target
+        # @param method_name [Symbol] name of the missing method
+        def method_missing(method_name, #{arg_forwarding})
+          return super unless respond_to_missing?(method_name)
+
+          if @target.respond_to?(:"\#{method_name}=")
+            @target.public_send(:"\#{method_name}=", #{arg_forwarding})
+          else
+            @target.public_send(method_name, #{arg_forwarding})
+          end
         end
-      end
+      RUBY
 
       # Tells whether or not a given element exists on the target
       # @param method_name [Symbol] name of the missing method
