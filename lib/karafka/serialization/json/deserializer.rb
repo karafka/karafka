@@ -10,6 +10,7 @@ module Karafka
         # @param message [Karafka::Messages::Message] Message object that we want to deserialize
         # @return [Hash] hash with deserialized JSON data
         def call(message)
+          # nil payload can be present for example for tombstone messages
           message.raw_payload.nil? ? nil : ::JSON.parse(message.raw_payload)
         end
       end
