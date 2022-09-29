@@ -16,13 +16,15 @@ module Karafka
 
       # Translates the no "=" DSL of routing into elements assignments on target
       # @param method_name [Symbol] name of the missing method
-      def method_missing(method_name, ...)
+      # @param args [Array] all the arguments of a method
+      # @param block [Proc] block of the method
+      def method_missing(method_name, *args, &block)
         return super unless respond_to_missing?(method_name)
 
         if @target.respond_to?(:"#{method_name}=")
-          @target.public_send(:"#{method_name}=", ...)
+          @target.public_send(:"#{method_name}=", *args, &block)
         else
-          @target.public_send(method_name, ...)
+          @target.public_send(method_name, *args, &block)
         end
       end
 
