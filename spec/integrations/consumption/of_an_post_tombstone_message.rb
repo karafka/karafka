@@ -40,7 +40,7 @@ produce(DT.topic, '2', key: '1')
 
 # We need to wait so Kafka does a compaction
 # If this spec fails randomly, this will have to be extended
-sleep(10)
+sleep(30)
 
 start_karafka_and_wait_until do
   DT[0].size >= 1
