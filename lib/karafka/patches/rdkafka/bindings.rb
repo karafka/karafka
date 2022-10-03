@@ -7,14 +7,16 @@ module Karafka
       module Bindings
         include ::Rdkafka::Bindings
 
-        # This patch changes two things:
+        # This patch changes few things:
         # - it commits offsets (if any) upon partition revocation, so less jobs need to be
         #   reprocessed if they are assigned to a different process
         # - reports callback errors into the errors instrumentation instead of the logger
+        # - catches only StandardError instead of Exception as we fully control the directly
+        #   executed callbacks
         #
         # @see https://docs.confluent.io/2.0.0/clients/librdkafka/classRdKafka_1_1RebalanceCb.html
         RebalanceCallback = FFI::Function.new(
-          :void, [:pointer, :int, :pointer, :pointer]
+          :void, %i[pointer int pointer pointer]
         ) do |client_ptr, code, partitions_ptr, opaque_ptr|
           case code
           when RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
@@ -39,7 +41,7 @@ module Karafka
             when RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
               opaque.call_on_partitions_revoked(consumer, tpl)
             end
-          rescue Exception => e
+          rescue StandardError => e
             Karafka.monitor.instrument(
               'error.occurred',
               caller: self,
