@@ -23,6 +23,7 @@ SimpleCov.start do
   add_filter '/spec/'
   add_filter '/config/'
   add_filter '/lib/karafka/railtie'
+  add_filter '/lib/karafka/patches'
   merge_timeout 600
 end
 
