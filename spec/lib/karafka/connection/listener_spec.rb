@@ -33,8 +33,8 @@ RSpec.describe_current do
       end
     end
 
-    it 'expect client to commit offsets' do
-      expect(client).to have_received(:commit_offsets).exactly(2).times
+    it 'expect client to commit offsets on shutdown' do
+      expect(client).to have_received(:commit_offsets).exactly(1).times
     end
   end
 

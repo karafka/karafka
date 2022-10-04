@@ -18,6 +18,8 @@ Thread.new do
     end
 
     sleep(1)
+  rescue WaterDrop::Errors::ProducerClosedError
+    break
   end
 end
 

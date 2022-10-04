@@ -118,10 +118,6 @@ module Karafka
           build_and_schedule_consumption_jobs
 
           wait
-
-          # We don't use the `#commit_offsets!` here for performance reasons. This can be achieved
-          # if needed by using manual offset management.
-          @client.commit_offsets
         end
 
         # If we are stopping we will no longer schedule any jobs despite polling.
