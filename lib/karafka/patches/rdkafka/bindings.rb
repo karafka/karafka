@@ -16,8 +16,7 @@ module Karafka
           # @param client_ptr [FFI::Pointer]
           # @param code [Integer]
           # @param partitions_ptr [FFI::Pointer]
-          # @param opaque_ptr [FFI::Pointer]
-          def on_cooperative_rebalance(client_ptr, code, partitions_ptr, opaque_ptr)
+          def on_cooperative_rebalance(client_ptr, code, partitions_ptr)
             case code
             when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
               RB.rd_kafka_incremental_assign(client_ptr, partitions_ptr)
@@ -34,8 +33,7 @@ module Karafka
           # @param client_ptr [FFI::Pointer]
           # @param code [Integer]
           # @param partitions_ptr [FFI::Pointer]
-          # @param opaque_ptr [FFI::Pointer]
-          def on_eager_rebalance(client_ptr, code, partitions_ptr, opaque_ptr)
+          def on_eager_rebalance(client_ptr, code, partitions_ptr)
             case code
             when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
               RB.rd_kafka_assign(client_ptr, partitions_ptr)
@@ -85,9 +83,9 @@ module Karafka
           pr = ::Karafka::Patches::Rdkafka::Bindings
 
           if RB.rd_kafka_rebalance_protocol(client_ptr) == 'COOPERATIVE'
-            pr.on_cooperative_rebalance(client_ptr, code, partitions_ptr, opaque_ptr)
+            pr.on_cooperative_rebalance(client_ptr, code, partitions_ptr)
           else
-            pr.on_eager_rebalance(client_ptr, code, partitions_ptr, opaque_ptr)
+            pr.on_eager_rebalance(client_ptr, code, partitions_ptr)
           end
 
           opaque = ::Rdkafka::Config.opaques[opaque_ptr.to_i]
