@@ -22,8 +22,7 @@ Thread.new do
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume
-  end
+  def consume; end
 
   def on_revoked
     DT[messages.metadata.topic] << messages.metadata.partition
@@ -50,9 +49,7 @@ other = Thread.new do
   sleep(10)
   consumer.subscribe(DT.topics[0])
 
-  consumer.each do |message|
-    break
-  end
+  consumer.each { break }
 
   consumer.close
 end
