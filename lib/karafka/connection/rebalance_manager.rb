@@ -14,6 +14,9 @@ module Karafka
     #   that are lost, are those that got revoked but did not get re-assigned back. We do not
     #   expose this concept outside and we normalize to have them revoked, as it is irrelevant
     #   from the rest of the code perspective as only those that are lost are truly revoked.
+    #
+    # @note For cooperative-sticky `#assigned_partitions` holds only the recently assigned
+    #   partitions, not all the partitions that are owned
     class RebalanceManager
       # Empty array for internal usage not to create new objects
       EMPTY_ARRAY = [].freeze

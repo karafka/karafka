@@ -7,63 +7,57 @@ module Karafka
       module Bindings
         include ::Rdkafka::Bindings
 
-        # This patch changes few things:
-        # - it commits offsets (if any) upon partition revocation, so less jobs need to be
-        #   reprocessed if they are assigned to a different process
-        # - reports callback errors into the errors instrumentation instead of the logger
-        # - catches only StandardError instead of Exception as we fully control the directly
-        #   executed callbacks
-        #
-        # @see https://docs.confluent.io/2.0.0/clients/librdkafka/classRdKafka_1_1RebalanceCb.html
-        RebalanceCallback = FFI::Function.new(
-          :void, %i[pointer int pointer pointer]
-        ) do |client_ptr, code, partitions_ptr, opaque_ptr|
-          p 'a'
+        # Alias internally
+        RB = ::Rdkafka::Bindings
 
-          if ::Rdkafka::Bindings.rd_kafka_rebalance_protocol(client_ptr) == 'COOPERATIVE'
-            p 'c'
-            p [code, RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS, RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS]
-            p ::Rdkafka::Consumer::TopicPartitionList.from_native_tpl(partitions_ptr).freeze
+        class << self
+          # Handle assignments on cooperative rebalance
+          #
+          # @param client_ptr [FFI::Pointer]
+          # @param code [Integer]
+          # @param partitions_ptr [FFI::Pointer]
+          # @param opaque_ptr [FFI::Pointer]
+          def on_cooperative_rebalance(client_ptr, code, partitions_ptr, opaque_ptr)
             case code
-            when RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
-              ::Rdkafka::Bindings.rd_kafka_incremental_assign(client_ptr, partitions_ptr)
-            when RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
-          #    ::Rdkafka::Bindings.rd_kafka_commit(client_ptr, nil, false)
-              ::Rdkafka::Bindings.rd_kafka_incremental_unassign(client_ptr, partitions_ptr)
+            when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
+              RB.rd_kafka_incremental_assign(client_ptr, partitions_ptr)
+            when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
+              RB.rd_kafka_commit(client_ptr, nil, false)
+              RB.rd_kafka_incremental_unassign(client_ptr, partitions_ptr)
             else
-              ::Rdkafka::Bindings.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
+              RB.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
             end
-
-            opaque = ::Rdkafka::Config.opaques[opaque_ptr.to_i]
-            return unless opaque
-
-            tpl = ::Rdkafka::Consumer::TopicPartitionList.from_native_tpl(partitions_ptr).freeze
-            consumer = ::Rdkafka::Consumer.new(client_ptr)
-          else
-            p 'x'
-            case code
-            when RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
-              ::Rdkafka::Bindings.rd_kafka_assign(client_ptr, partitions_ptr)
-            when RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
-              ::Rdkafka::Bindings.rd_kafka_commit(client_ptr, nil, false)
-              ::Rdkafka::Bindings.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
-            else
-              ::Rdkafka::Bindings.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
-            end
-
-            opaque = ::Rdkafka::Config.opaques[opaque_ptr.to_i]
-            return unless opaque
-
-            tpl = ::Rdkafka::Consumer::TopicPartitionList.from_native_tpl(partitions_ptr).freeze
-            consumer = ::Rdkafka::Consumer.new(client_ptr)
           end
 
-
-          begin
+          # Handle assignments on a eager rebalance
+          #
+          # @param client_ptr [FFI::Pointer]
+          # @param code [Integer]
+          # @param partitions_ptr [FFI::Pointer]
+          # @param opaque_ptr [FFI::Pointer]
+          def on_eager_rebalance(client_ptr, code, partitions_ptr, opaque_ptr)
             case code
-            when RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
+            when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
+              RB.rd_kafka_assign(client_ptr, partitions_ptr)
+            when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
+              RB.rd_kafka_commit(client_ptr, nil, false)
+              RB.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
+            else
+              RB.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
+            end
+          end
+
+          # Trigger Karafka callbacks
+          #
+          # @param code [Integer]
+          # @param opaque [Rdkafka::Opaque]
+          # @param consumer [Rdkafka::Consumer]
+          # @param tpl [Rdkafka::Consumer::TopicPartitionList]
+          def trigger_callbacks(code, opaque, consumer, tpl)
+            case code
+            when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
               opaque.call_on_partitions_assigned(consumer, tpl)
-            when RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
+            when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
               opaque.call_on_partitions_revoked(consumer, tpl)
             end
           rescue StandardError => e
@@ -75,11 +69,42 @@ module Karafka
             )
           end
         end
+
+        # This patch changes few things:
+        # - it commits offsets (if any) upon partition revocation, so less jobs need to be
+        #   reprocessed if they are assigned to a different process
+        # - reports callback errors into the errors instrumentation instead of the logger
+        # - catches only StandardError instead of Exception as we fully control the directly
+        #   executed callbacks
+        #
+        # @see https://docs.confluent.io/2.0.0/clients/librdkafka/classRdKafka_1_1RebalanceCb.html
+        RebalanceCallback = FFI::Function.new(
+          :void, %i[pointer int pointer pointer]
+        ) do |client_ptr, code, partitions_ptr, opaque_ptr|
+          # Patch reference
+          pr = ::Karafka::Patches::Rdkafka::Bindings
+
+          if RB.rd_kafka_rebalance_protocol(client_ptr) == 'COOPERATIVE'
+            pr.on_cooperative_rebalance(client_ptr, code, partitions_ptr, opaque_ptr)
+          else
+            pr.on_eager_rebalance(client_ptr, code, partitions_ptr, opaque_ptr)
+          end
+
+          opaque = ::Rdkafka::Config.opaques[opaque_ptr.to_i]
+          return unless opaque
+
+          tpl = ::Rdkafka::Consumer::TopicPartitionList.from_native_tpl(partitions_ptr).freeze
+          consumer = ::Rdkafka::Consumer.new(client_ptr)
+
+          pr.trigger_callbacks(code, opaque, consumer, tpl)
+        end
       end
     end
   end
 end
 
+# We need to replace the original callback with ours.
+# At the moment there is no API in rdkafka-ruby to do so
 ::Rdkafka::Bindings.send(
   :remove_const,
   'RebalanceCallback'
@@ -90,6 +115,20 @@ end
   Karafka::Patches::Rdkafka::Bindings::RebalanceCallback
 )
 
-::Rdkafka::Bindings.attach_function :rd_kafka_rebalance_protocol, [:pointer], :string
-::Rdkafka::Bindings.attach_function :rd_kafka_incremental_assign, [:pointer, :pointer], :string
-::Rdkafka::Bindings.attach_function :rd_kafka_incremental_unassign, [:pointer, :pointer], :string
+::Rdkafka::Bindings.attach_function(
+  :rd_kafka_rebalance_protocol,
+  %i[pointer],
+  :string
+)
+
+::Rdkafka::Bindings.attach_function(
+  :rd_kafka_incremental_assign,
+  %i[pointer pointer],
+  :string
+)
+
+::Rdkafka::Bindings.attach_function(
+  :rd_kafka_incremental_unassign,
+  %i[pointer pointer],
+  :string
+)
