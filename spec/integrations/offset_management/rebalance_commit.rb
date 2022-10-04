@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Karafka flushes the offsets once in a while. When auto offset committing is disabled, we anyhow
-# should comit the offset in rebalance
+# should commit the offset in rebalance
 
 setup_karafka do |config|
   config.kafka[:'enable.auto.commit'] = false
@@ -42,7 +42,7 @@ other = Thread.new do
   consumer.subscribe(DT.topic)
 
   consumer.each do |message|
-    DT[:picked] <<  [message.partition, message.offset]
+    DT[:picked] << [message.partition, message.offset]
 
     break
   end
