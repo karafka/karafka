@@ -72,6 +72,9 @@ def setup_karafka(allow_errors: false)
     # This allows us to specify errors we expect while not ignoring others
     next if allow_errors.is_a?(Array) && allow_errors.include?(event[:type])
 
+    # Print error event details in case we are going to exit
+    puts event
+
     # This sleep buys us some time before exit so logs are flushed
     sleep(0.5)
 
