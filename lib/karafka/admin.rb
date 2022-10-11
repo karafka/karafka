@@ -39,7 +39,12 @@ module Karafka
       # @return [Rdkafka::Metadata] cluster metadata info
       def cluster_info
         with_admin do |admin|
-          Rdkafka::Metadata.new(admin.instance_variable_get('@native_kafka'))
+          native = admin.instance_variable_get('@native_kafka')
+
+          Rdkafka::Metadata.new(
+            # rdkafka supports things differently in between versions (0.13 vs older)
+            native.respond_to?(:inner) ? native.inner : native
+          )
         end
       end
 

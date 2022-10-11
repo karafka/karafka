@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- Support for rdkafka 0.13.0.beta1 and higher.
+
 ## 2.0.12 (2022-10-06)
 - Commit stored offsets upon rebalance revocation event to reduce number of messages that are re-processed.
 - Support cooperative-sticky rebalance strategy.
