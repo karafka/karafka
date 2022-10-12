@@ -8,7 +8,7 @@ RSpec.describe_current do
     instance
   end
 
-  let(:coordinator) { build(:processing_coordinator) }
+  let(:coordinator) { build(:processing_coordinator, seek_offset: -1) }
   let(:topic) { build(:routing_topic) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
@@ -290,7 +290,7 @@ RSpec.describe_current do
         expect(client).to have_received(:mark_as_consumed).with(last_message)
       end
 
-      it 'epxect to increase seek_offset' do
+      it 'expect to increase seek_offset' do
         expect(consumer.coordinator.seek_offset).to eq(offset + 1)
       end
     end
@@ -306,8 +306,36 @@ RSpec.describe_current do
         expect(client).to have_received(:mark_as_consumed).with(last_message)
       end
 
-      it 'epxect to not increase seek_offset' do
-        expect(consumer.coordinator.seek_offset).to eq(nil)
+      it 'expect to not increase seek_offset' do
+        expect(consumer.coordinator.seek_offset).to eq(-1)
+      end
+    end
+
+    context 'when we try to mark previous message' do
+      before do
+        allow(client).to receive(:mark_as_consumed).and_return(true)
+
+        consumer.send(:mark_as_consumed, last_message)
+      end
+
+      it 'expect not to mark as consumed' do
+        consumer.send(:mark_as_consumed, first_message)
+
+        expect(client).to have_received(:mark_as_consumed).with(last_message).once
+      end
+    end
+
+    context 'when we try to mark same message twice' do
+      before do
+        allow(client).to receive(:mark_as_consumed).and_return(true)
+
+        consumer.send(:mark_as_consumed, last_message)
+      end
+
+      it 'expect not to mark as consumed again' do
+        consumer.send(:mark_as_consumed, last_message)
+
+        expect(client).to have_received(:mark_as_consumed).with(last_message).once
       end
     end
   end
@@ -326,7 +354,7 @@ RSpec.describe_current do
         expect(client).to have_received(:mark_as_consumed!).with(last_message)
       end
 
-      it 'epxect to increase seek_offset' do
+      it 'expect to increase seek_offset' do
         expect(consumer.coordinator.seek_offset).to eq(offset + 1)
       end
     end
@@ -342,8 +370,36 @@ RSpec.describe_current do
         expect(client).to have_received(:mark_as_consumed!).with(last_message)
       end
 
-      it 'epxect to not increase seek_offset' do
-        expect(consumer.coordinator.seek_offset).to eq(nil)
+      it 'expect to not increase seek_offset' do
+        expect(consumer.coordinator.seek_offset).to eq(-1)
+      end
+    end
+
+    context 'when we try to mark previous message' do
+      before do
+        allow(client).to receive(:mark_as_consumed!).and_return(true)
+
+        consumer.send(:mark_as_consumed!, last_message)
+      end
+
+      it 'expect not to mark as consumed' do
+        consumer.send(:mark_as_consumed!, first_message)
+
+        expect(client).to have_received(:mark_as_consumed!).with(last_message).once
+      end
+    end
+
+    context 'when we try to mark same message twice' do
+      before do
+        allow(client).to receive(:mark_as_consumed!).and_return(true)
+
+        consumer.send(:mark_as_consumed!, last_message)
+      end
+
+      it 'expect not to mark as consumed again' do
+        consumer.send(:mark_as_consumed!, last_message)
+
+        expect(client).to have_received(:mark_as_consumed!).with(last_message).once
       end
     end
   end
