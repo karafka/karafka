@@ -13,7 +13,7 @@ RSpec.describe_current do
     instance
   end
 
-  let(:coordinator) { build(:processing_coordinator_pro) }
+  let(:coordinator) { build(:processing_coordinator_pro, seek_offset: nil) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true, seek: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:last_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
@@ -428,7 +428,7 @@ RSpec.describe_current do
         expect(client).to have_received(:mark_as_consumed).with(last_message)
       end
 
-      it 'epxect to increase seek_offset' do
+      it 'expect to increase seek_offset' do
         expect(consumer.coordinator.seek_offset).to eq(offset + 1)
       end
     end
@@ -464,7 +464,7 @@ RSpec.describe_current do
         expect(client).to have_received(:mark_as_consumed!).with(last_message)
       end
 
-      it 'epxect to increase seek_offset' do
+      it 'expect to increase seek_offset' do
         expect(consumer.coordinator.seek_offset).to eq(offset + 1)
       end
     end

@@ -5,9 +5,13 @@ FactoryBot.define do
     skip_create
 
     pause_tracker { build(:time_trackers_pause) }
+    seek_offset { nil }
 
     initialize_with do
-      new(pause_tracker).tap(&:increment)
+      coordinator = new(pause_tracker)
+      coordinator.increment
+      coordinator.seek_offset = seek_offset
+      coordinator
     end
   end
 
@@ -15,9 +19,13 @@ FactoryBot.define do
     skip_create
 
     pause_tracker { build(:time_trackers_pause) }
+    seek_offset { nil }
 
     initialize_with do
-      new(pause_tracker).tap(&:increment)
+      coordinator = new(pause_tracker)
+      coordinator.increment
+      coordinator.seek_offset = seek_offset
+      coordinator
     end
   end
 end
