@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## Unreleased
+- Early exit upon attempts to commit current or earlier offset twice.
+- Add more integration specs covering edge cases.
+
 ## 2.0.12 (2022-10-06)
 - Commit stored offsets upon rebalance revocation event to reduce number of messages that are re-processed.
 - Support cooperative-sticky rebalance strategy.
