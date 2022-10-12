@@ -20,22 +20,33 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    messages.each do |message|
-      DT[:offsets] << message.offset
-    end
+    track
 
     return if messages.size < 2
 
+    mark
+
+    return unless DT[:first_one].empty?
+
+    # We force a rebalance by reaching the max poll interval
+    DT[:first_one] << true
+    DT[:expected_next] << messages.last.offset + 1
+
+    sleep(15)
+  end
+
+  private
+
+  def track
+    messages.each do |message|
+      DT[:offsets] << message.offset
+    end
+  end
+
+  def mark
     mark_as_consumed! messages.last
     sleep(0.1)
     mark_as_consumed! messages.first
-
-    # We force a rebalance by reaching the max poll interval
-    if DT[:first_one].empty?
-      DT[:first_one] << true
-      DT[:expected_next] << messages.last.offset + 1
-      sleep(15)
-    end
   end
 end
 
