@@ -29,12 +29,19 @@ module Karafka
     # Creates an instance of process and creates empty hash for callbacks
     def initialize
       @callbacks = Hash.new { |hsh, key| hsh[key] = [] }
+      @supervised = false
     end
 
     # Method catches all HANDLED_SIGNALS and performs appropriate callbacks (if defined)
     # @note If there are no callbacks, this method will just ignore a given signal that was sent
     def supervise
       HANDLED_SIGNALS.each { |signal| trap_signal(signal) }
+      @supervised = true
+    end
+
+    # Is the current process supervised and are trap signals installed
+    def supervised?
+      @supervised
     end
 
     private
