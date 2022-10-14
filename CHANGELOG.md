@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.13 (2022-10-14)
 - Early exit upon attempts to commit current or earlier offset twice.
 - Add more integration specs covering edge cases.
 - Strip non producer related config when default producer is initialized (#776)
