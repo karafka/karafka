@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  pending
+  describe '#start' do
+    pending
+  end
+
+  describe '#stop' do
+    pending
+  end
 end
