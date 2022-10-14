@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 1.4.14 (2022-10-14)
+- Fix `concurrent-ruby` missing as a dependency (Azdaroth)
+- Warn about upcoming end of 1.4 support.
+
 ## 1.4.13 (2022-02-19)
 - Drop support for ruby 2.6
 - Add mfa requirement
