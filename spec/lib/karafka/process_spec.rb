@@ -28,6 +28,21 @@ RSpec.describe_current do
     end
   end
 
+  describe '#supervised?' do
+    context 'when we did not install the trap hooks yet' do
+      it { expect(process.supervised?).to eq(false) }
+    end
+
+    context 'when we did install trap hooks' do
+      before do
+        allow(process).to receive(:trap_signal)
+        process.supervise
+      end
+
+      it { expect(process.supervised?).to eq(true) }
+    end
+  end
+
   describe '#trap_signal' do
     let(:signal) { rand.to_s }
     let(:callback) { double }
