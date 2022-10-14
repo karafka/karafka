@@ -38,6 +38,11 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = %w[lib]
+  spec.post_install_message = <<~MSG
+    WARN: Karafka 1.4 will reach the end of life soon.
+    We highly recommend updating to Karafka 2.0.
+    Visit this page for more details: https://karafka.io/docs/Versions-Lifecycle-and-EOL
+  MSG
 
   spec.metadata = {
     'source_code_uri' => 'https://github.com/karafka/karafka',
