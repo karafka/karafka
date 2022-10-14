@@ -114,7 +114,7 @@ module Karafka
         Karafka::App.producer.close
 
         # We also do not forcefully terminate everything when running in the embedded mode,
-        # otherwise we would overwrite the shutdown process of the process that starated Karafka
+        # otherwise we would overwrite the shutdown process of the process that started Karafka
         return unless process.supervised?
 
         # exit! is not within the instrumentation as it would not trigger due to exit

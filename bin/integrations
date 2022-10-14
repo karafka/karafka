@@ -202,13 +202,14 @@ class Scenario
 end
 
 # Load all the specs
-specs = Dir[ROOT_PATH.join('spec/integrations/**/*.rb')]
+specs = Dir[ROOT_PATH.join('spec/integrations/**/*_spec.rb')]
 
 # If filters is provided, apply
 # Allows to provide several filters one after another and applies all of them
 ARGV.each do |filter|
   specs.delete_if { |name| !name.include?(filter) }
 end
+
 
 raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
 
