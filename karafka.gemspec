@@ -17,7 +17,8 @@ Gem::Specification.new do |spec|
   spec.description = 'Framework used to simplify Apache Kafka based Ruby applications development'
   spec.license     = 'MIT'
 
-  spec.add_dependency 'dry-configurable', '~> 0.13'
+  spec.add_dependency 'concurrent-ruby'
+  spec.add_dependency 'dry-configurable', '~> 0.16'
   spec.add_dependency 'dry-inflector', '~> 0.2'
   spec.add_dependency 'dry-monitor', '~> 0.5'
   spec.add_dependency 'dry-validation', '~> 1.7'
@@ -25,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'ruby-kafka', '>= 1.3.0'
   spec.add_dependency 'thor', '>= 1.1'
   spec.add_dependency 'waterdrop', '~> 1.4'
-  spec.add_dependency 'zeitwerk', '~> 2.4'
+  spec.add_dependency 'zeitwerk', '~> 2.6'
 
   spec.required_ruby_version = '>= 2.7'
 

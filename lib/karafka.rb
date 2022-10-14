@@ -10,6 +10,7 @@
   thor
   forwardable
   fileutils
+  concurrent
   dry-configurable
   dry-validation
   dry/events/publisher
