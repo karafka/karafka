@@ -40,16 +40,18 @@ def setup_karafka(allow_errors: false)
     config.pause_with_exponential_backoff = false
     config.max_wait_time = 500
     config.shutdown_timeout = 30_000
+
+    # Allows to overwrite any option we're interested in
+    yield(config) if block_given?
+
+    # Configure producer once everything else has been configured
     config.producer = ::WaterDrop::Producer.new do |producer_config|
-      producer_config.kafka = config.kafka.dup
+      producer_config.kafka = Karafka::Setup::AttributesMap.producer(config.kafka.dup)
       producer_config.logger = config.logger
       # We need to wait a lot sometimes because we create a lot of new topics and this can take
       # time
       producer_config.max_wait_timeout = 120 # 2 minutes
     end
-
-    # Allows to overwrite any option we're interested in
-    yield(config) if block_given?
   end
 
   Karafka.logger.level = 'debug'

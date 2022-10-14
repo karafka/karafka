@@ -20,7 +20,7 @@ module Karafka
       }.freeze
 
       # Contains settings that should not be used in production but make life easier in dev
-      DEV_DEFAULTS = {
+      KAFKA_DEV_DEFAULTS = {
         # Will create non-existing topics automatically.
         # Note that the broker needs to be configured with `auto.create.topics.enable=true`
         # While it is not recommended in prod, it simplifies work in dev
@@ -32,7 +32,7 @@ module Karafka
         'topic.metadata.refresh.interval.ms': 5_000
       }.freeze
 
-      private_constant :KAFKA_DEFAULTS, :DEV_DEFAULTS
+      private_constant :KAFKA_DEFAULTS, :KAFKA_DEV_DEFAULTS
 
       # Available settings
 
@@ -172,7 +172,7 @@ module Karafka
 
           return if Karafka::App.env.production?
 
-          DEV_DEFAULTS.each do |key, value|
+          KAFKA_DEV_DEFAULTS.each do |key, value|
             next if config.kafka.key?(key)
 
             config.kafka[key] = value
@@ -185,7 +185,7 @@ module Karafka
           config.producer ||= ::WaterDrop::Producer.new do |producer_config|
             # In some cases WaterDrop updates the config and we don't want our consumer config to
             # be polluted by those updates, that's why we copy
-            producer_config.kafka = config.kafka.dup
+            producer_config.kafka = AttributesMap.producer(config.kafka.dup)
             producer_config.logger = config.logger
           end
 

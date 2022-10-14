@@ -20,6 +20,8 @@ draw_routes do
         consumer Consumer
       end
     end
+
+    create_topic(name: topic_name)
   end
 end
 

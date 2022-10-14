@@ -3,6 +3,7 @@
 ## Unreleased
 - Early exit upon attempts to commit current or earlier offset twice.
 - Add more integration specs covering edge cases.
+- Strip non producer related config when default producer is initialized (#776)
 
 ## 2.0.12 (2022-10-06)
 - Commit stored offsets upon rebalance revocation event to reduce number of messages that are re-processed.
