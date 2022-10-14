@@ -25,7 +25,8 @@ RSpec.describe_current do
     end
 
     it 'expect to start supervision' do
-      expect(process).to receive(:supervise)
+      server_class.run
+      expect(process).to have_received(:supervise)
     end
 
     context 'when we want to run in supervision' do

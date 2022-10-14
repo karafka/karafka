@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   describe '#start' do
     # The fact that it runs in a separate thread (non-blocking) is checked in the integrations
-    before { allow(Karafka::Server). to receive(:start) }
+    before { allow(Karafka::Server).to receive(:start) }
 
     it 'expect to invoke server start' do
       embedded.start
@@ -15,7 +15,7 @@ RSpec.describe_current do
   end
 
   describe '#stop' do
-    before { allow(Karafka::Server). to receive(:stop) }
+    before { allow(Karafka::Server).to receive(:stop) }
 
     it 'expect to invoke server stop' do
       embedded.stop
