@@ -37,11 +37,13 @@ end
 
 consumer = setup_rdkafka_consumer
 
-Thread.new do
+thread = Thread.new do
   consumer.subscribe(DT.topic)
 
   consumer.each do |message|
     DT[:other] << message.offset
+
+    break if DT[:other].size >= 19
   end
 end
 
@@ -57,4 +59,5 @@ end
 
 assert_equal 20, sum
 
+thread.join
 consumer.close
