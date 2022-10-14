@@ -37,7 +37,7 @@ module Karafka
       #   topics but they lack the group.id (unless explicitly) provided. To make it compatible
       #   with our routing engine, we inject it before it will go to the consumer
       def kafka
-        kafka = @topics.first.kafka.dup
+        kafka = Setup::AttributesMap.consumer(@topics.first.kafka.dup)
 
         kafka[:'client.id'] ||= Karafka::App.config.client_id
         kafka[:'group.id'] ||= @topics.first.consumer_group.id
