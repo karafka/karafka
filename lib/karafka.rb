@@ -10,7 +10,7 @@
   thor
   forwardable
   fileutils
-  concurrent/array
+  concurrent
   dry-configurable
   dry-validation
   dry/events/publisher
