@@ -278,6 +278,7 @@ module Karafka
         transactional.id
       ].freeze
 
+      # Location of the file with rdkafka settings list
       SOURCE = 'https://raw.githubusercontent.com/edenhill/librdkafka/master/CONFIGURATION.md'
 
       private_constant :SOURCE
@@ -298,19 +299,20 @@ module Karafka
         end
 
         # @private
-        # @return [Hash<Symbo,Array<Symbol>>] hash with consumer and producer attributes list that
-        #   is sorted.
+        # @return [Hash<Symbol, Array<Symbol>>] hash with consumer and producer attributes list
+        #   that is sorted.
         # @note This method should not be used directly. It is only used to generate appropriate
         #   options list in case it would change
         def generate
+          # Not used anywhere else, hence required here
           require 'open-uri'
 
           attributes = { consumer: Set.new, producer: Set.new }
 
-          ::URI.open(SOURCE).readlines.each do |line|
+          ::URI.parse(SOURCE).open.readlines.each do |line|
             next unless line.include?('|')
 
-            attribute, attribute_type, _ = line.split('|').map(&:strip)
+            attribute, attribute_type = line.split('|').map(&:strip)
 
             case attribute_type
             when 'C'
@@ -326,7 +328,7 @@ module Karafka
           end
 
           attributes.transform_values!(&:sort)
-          attributes.values.each { |vals| vals.map!(&:to_sym) }
+          attributes.each_value { |vals| vals.map!(&:to_sym) }
           attributes
         end
       end
