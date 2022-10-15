@@ -1,1 +1,3 @@
 --require spec_helper
+# Integration specs run with their one framework, not via RSpec
+--exclude-pattern "spec/integrations/**/*_spec.rb"

@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## Unreleased
+- Prevent consecutive stop signals from starting multiple supervision shutdowns.
+- Provide `Karafka::Embedded` to simplify the start/stop process when running Karafka from within other process (Puma, Sidekiq, etc).
+
 ## 2.0.13 (2022-10-14)
 - Early exit upon attempts to commit current or earlier offset twice.
 - Add more integration specs covering edge cases.
