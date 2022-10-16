@@ -3,6 +3,7 @@
 ## Unreleased
 - Prevent consecutive stop signals from starting multiple supervision shutdowns.
 - Provide `Karafka::Embedded` to simplify the start/stop process when running Karafka from within other process (Puma, Sidekiq, etc).
+- Fix a race condition when un-pausing a long-running-job exactly upon listener resuming would crash the listener loop (#1072).
 
 ## 2.0.13 (2022-10-14)
 - Early exit upon attempts to commit current or earlier offset twice.
