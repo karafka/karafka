@@ -37,8 +37,12 @@ produce(DT.topics.first, '0')
 produce(DT.topics.last, '0')
 
 Thread.new do
-  sleep(10)
-  produce(DT.topics.last, '1')
+  loop do
+    sleep(10)
+    produce(DT.topics.last, '1')
+  rescue WaterDrop::Errors::ProducerClosedError
+    break
+  end
 end
 
 start_karafka_and_wait_until do
