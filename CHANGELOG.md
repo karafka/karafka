@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.14 (2022-10-16)
 - Prevent consecutive stop signals from starting multiple supervision shutdowns.
 - Provide `Karafka::Embedded` to simplify the start/stop process when running Karafka from within other process (Puma, Sidekiq, etc).
 - Fix a race condition when un-pausing a long-running-job exactly upon listener resuming would crash the listener loop (#1072).
