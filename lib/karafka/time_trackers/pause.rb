@@ -3,6 +3,12 @@
 module Karafka
   module TimeTrackers
     # Handles Kafka topic partition pausing and resuming with exponential back-offs.
+    # Since expiring and pausing can happen from both consumer and listener, this needs to be
+    # thread-safe.
+    #
+    # @note We do not have to worry about performance implications of a mutex wrapping most of the
+    #   code here, as this is not a frequently used tracker. It is active only once per batch in
+    #   case of long-running-jobs and upon errors.
     class Pause < Base
       attr_reader :count
 
@@ -36,6 +42,7 @@ module Karafka
         @timeout = timeout
         @max_timeout = max_timeout
         @exponential_backoff = exponential_backoff
+        @mutex = Mutex.new
         super()
       end
 
@@ -45,35 +52,47 @@ module Karafka
       # @note Providing this value can be useful when we explicitly want to pause for a certain
       #   period of time, outside of any regular pausing logic
       def pause(timeout = backoff_interval)
-        @started_at = now
-        @ends_at = @started_at + timeout
-        @count += 1
+        @mutex.synchronize do
+          @started_at = now
+          @ends_at = @started_at + timeout
+          @count += 1
+        end
       end
 
       # Marks the pause as resumed.
       def resume
-        @started_at = nil
-        @ends_at = nil
+        @mutex.synchronize do
+          @started_at = nil
+          @ends_at = nil
+        end
       end
 
       # Expires the pause, so it can be considered expired
       def expire
-        @ends_at = nil
+        @mutex.synchronize do
+          @ends_at = nil
+        end
       end
 
       # @return [Boolean] are we paused from processing
       def paused?
-        !@started_at.nil?
+        @mutex.synchronize do
+          !@started_at.nil?
+        end
       end
 
       # @return [Boolean] did the pause expire
       def expired?
-        @ends_at ? now >= @ends_at : true
+        @mutex.synchronize do
+          @ends_at ? now >= @ends_at : true
+        end
       end
 
       # Resets the pause counter.
       def reset
-        @count = 0
+        @mutex.synchronize do
+          @count = 0
+        end
       end
 
       private

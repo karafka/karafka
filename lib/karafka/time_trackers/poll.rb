@@ -2,7 +2,8 @@
 
 module Karafka
   module TimeTrackers
-    # Object used to keep track of time we've used running certain operations.
+    # Object used to keep track of time we've used running certain operations. Polling is
+    # running in a single thread, thus we do not have to worry about this being thread-safe.
     #
     # @example Keep track of sleeping and stop after 3 seconds of 0.1 sleep intervals
     #   time_poll = Poll.new(3000)
