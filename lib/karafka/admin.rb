@@ -52,7 +52,10 @@ module Karafka
 
       # Creates admin instance and yields it. After usage it closes the admin instance
       def with_admin
-        admin = ::Rdkafka::Config.new(Karafka::App.config.kafka).admin
+        # Admin needs a producer config
+        config = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+
+        admin = ::Rdkafka::Config.new(config).admin
         result = yield(admin)
         result
       ensure

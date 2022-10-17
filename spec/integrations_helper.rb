@@ -104,7 +104,9 @@ def setup_rdkafka_consumer(options = {})
     'enable.auto.offset.store': 'false'
   }.merge!(options)
 
-  Rdkafka::Config.new(config).consumer
+  Rdkafka::Config.new(
+    Karafka::Setup::AttributesMap.consumer(config)
+  ).consumer
 end
 
 # A simple helper for creation of topics with given partitions count. Single partition topics are
