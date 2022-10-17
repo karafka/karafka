@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- Sanitize admin config prior to any admin action.
+
 ## 2.0.14 (2022-10-16)
 - Prevent consecutive stop signals from starting multiple supervision shutdowns.
 - Provide `Karafka::Embedded` to simplify the start/stop process when running Karafka from within other process (Puma, Sidekiq, etc).
