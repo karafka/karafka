@@ -37,23 +37,28 @@ end
 
 draw_routes(Consumer)
 
-consumer = setup_rdkafka_consumer(
-  'partition.assignment.strategy': 'cooperative-sticky'
-)
 
+# We do it twice as it's an edge case that can but does not have to happen
+# It should not happen if sync marking is not used though
 other = Thread.new do
-  sleep(10)
-  consumer.subscribe(DT.topic)
+  2.times do
+    consumer = setup_rdkafka_consumer(
+      'partition.assignment.strategy': 'cooperative-sticky'
+    )
 
-  consumer.each do |message|
-    DT[:picked] << message.partition
+    sleep(10)
+    consumer.subscribe(DT.topic)
 
-    break if DT[:picked].uniq.size >= 2
+    consumer.each do |message|
+      DT[:picked] << message.partition
+
+      break if DT[:picked].uniq.size >= 2
+    end
+
+    sleep(5)
+
+    consumer.close
   end
-
-  sleep(5)
-
-  consumer.close
 end
 
 start_karafka_and_wait_until do
@@ -62,4 +67,4 @@ start_karafka_and_wait_until do
   true
 end
 
-assert_equal [0, 1, 2, 3, 4], DT.data[:revoked].sort
+assert_equal [0, 1, 2, 3, 4], DT.data[:revoked].sort.uniq
