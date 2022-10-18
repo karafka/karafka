@@ -46,7 +46,11 @@ module Karafka
             RdKafkaMetric.new(:count, :brokers, 'connection.disconnects', 'disconnects_d'),
             RdKafkaMetric.new(:gauge, :brokers, 'network.latency.avg', %w[rtt avg]),
             RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p95', %w[rtt p95]),
-            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p99', %w[rtt p99])
+            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p99', %w[rtt p99]),
+
+            # Topics metrics
+            RdKafkaMetric.new(:gauge, :topics, 'consumer.lags', 'consumer_lag_stored'),
+            RdKafkaMetric.new(:gauge, :topics, 'consumer.lags_delta', 'consumer_lag_stored_d')
           ].freeze
 
           configure
@@ -220,6 +224,24 @@ module Karafka
                   broker_statistics.dig(*metric.key_location),
                   tags: default_tags + ["broker:#{broker_statistics['nodename']}"]
                 )
+              end
+            when :topics
+              statistics.fetch('topics').each do |topic_name, topic_values|
+                topic_values['partitions'].each do |partition_name, partition_statistics|
+                  next if partition_name == '-1'
+                  # Skip until lag info is available
+                  next if partition_statistics['consumer_lag'] == -1
+
+                  public_send(
+                    metric.type,
+                    metric.name,
+                    partition_statistics.dig(*metric.key_location),
+                    tags: default_tags + [
+                      "topic:#{topic_name}",
+                      "partition:#{partition_name}"
+                    ]
+                  )
+                end
               end
             else
               raise ArgumentError, metric.scope

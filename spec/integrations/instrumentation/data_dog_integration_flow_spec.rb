@@ -37,7 +37,8 @@ draw_routes(Consumer)
 produce_many(DT.topic, DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT[0].size >= 100
+  # This sleeps make karafka run a bit longer for more metrics to kick in
+  DT[0].size >= 100 && sleep(5)
 end
 
 %w[
@@ -69,6 +70,8 @@ assert_equal true, error_tracks[0][1][:tags].include?('type:consumer.consume.err
   karafka.network.latency.p99
   karafka.worker.total_threads
   karafka.consumer.offset
+  karafka.consumer.lags
+  karafka.consumer.lags_delta
 ].each do |gauge_key|
   assert_equal true, statsd_dummy.buffer[:gauge].key?(gauge_key), "#{gauge_key} missing"
 end
