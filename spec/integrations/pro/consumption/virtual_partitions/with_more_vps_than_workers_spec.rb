@@ -35,12 +35,12 @@ draw_routes do
   end
 end
 
-produce_many(DT.topics[0], DT.uuids(200))
+produce_many(DT.topics[0], DT.uuids(1_000))
 
 start_karafka_and_wait_until do
   DT[:messages].sum >= 200
 end
 
 # The distribution is per batch and the first one is super small, so it won't be always 200, it
-# may be slightly less
-assert DT[:objects_ids].uniq.count > 150
+# may be less due to how we reduce it and the data sample
+assert DT[:objects_ids].uniq.count > 100
