@@ -18,7 +18,7 @@ require_relative './support/data_collector'
 Thread.abort_on_exception = true
 
 # Make sure all logs are always flushed
-STDOUT.sync = true
+$stdout.sync = true
 
 # Alias data collector for shorter referencing
 DT = DataCollector
