@@ -4,6 +4,7 @@
 - Sanitize admin config prior to any admin action.
 - Make messages partitioner outcome for virtual partitions consistently distributed in regards to concurrency.
 - Improve DataDog/StatsD metrics reporting by reporting per topic partition lags and trends.
+- Replace synchronous offset commit with async on resuming paused partition (#1087).
 
 ## 2.0.14 (2022-10-16)
 - Prevent consecutive stop signals from starting multiple supervision shutdowns.
