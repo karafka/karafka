@@ -46,8 +46,6 @@ other = Thread.new do
   consumer.poll(1_000)
 
   sleep(0.1) while DT[:done].empty?
-
-  consumer.close
 end
 
 start_karafka_and_wait_until do
@@ -55,3 +53,4 @@ start_karafka_and_wait_until do
 end
 
 other.join
+consumer.close
