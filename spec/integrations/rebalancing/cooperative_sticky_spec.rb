@@ -7,16 +7,14 @@ setup_karafka do |config|
 end
 
 # We use a lot of partitions to make sure we never revoke part of them on rebalances
-create_topic(partitions: 5)
+create_topic(partitions: 10)
 
 Thread.new do
   loop do
     begin
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '2', partition: 1)
-      produce(DT.topic, '3', partition: 2)
-      produce(DT.topic, '4', partition: 3)
-      produce(DT.topic, '5', partition: 4)
+      10.times do |i|
+        produce(DT.topic, (i + 1).to_s, partition: i)
+      end
     rescue WaterDrop::Errors::ProducerClosedError
       break
     end
@@ -46,12 +44,10 @@ other = Thread.new do
   consumer.each do |message|
     DT[:picked] << message.partition
 
-    break if DT[:picked].uniq.size >= 2
+    break if DT[:picked].size >= 200
   end
 
   sleep(5)
-
-  consumer.close
 end
 
 start_karafka_and_wait_until do
@@ -61,4 +57,6 @@ start_karafka_and_wait_until do
 end
 
 assert_equal DT[:revoked].uniq.sort, DT[:picked].uniq.sort
-assert DT[:revoked].uniq.size < 5
+assert DT[:revoked].uniq.size < 10
+
+consumer.close

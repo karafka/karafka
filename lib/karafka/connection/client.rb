@@ -179,10 +179,8 @@ module Karafka
 
         return if @closed
 
-        # Always commit synchronously offsets if any when we resume
-        # This prevents resuming without offset in case it would not be committed prior
-        # We can skip performance penalty since resuming should not happen too often
-        internal_commit_offsets(async: false)
+        # We now commit offsets on rebalances, thus we can do it async just to make sure
+        internal_commit_offsets(async: true)
 
         # If we were not able, let's try to reuse the one we have (if we have)
         tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
