@@ -46,8 +46,6 @@ other = Thread.new do
 
     break
   end
-
-  consumer.close
 end
 
 start_karafka_and_wait_until do
@@ -56,3 +54,5 @@ end
 
 # Should not start from beginning as the offset should be stored on rebalance
 assert DT[:picked].first.last > 0
+
+consumer.close
