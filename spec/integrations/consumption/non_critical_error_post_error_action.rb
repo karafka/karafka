@@ -50,7 +50,6 @@ end
 # Cleanup from instance
 Karafka.monitor.subscribe(Cleaner.new)
 
-
 produce(DT.topic, '0')
 
 start_karafka_and_wait_until do
