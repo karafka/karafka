@@ -26,6 +26,6 @@ Dir.mktmpdir do |dir|
   Bundler.with_unbundled_env do
     assert_equal 0, cmd(dir, 'bundle install')
     assert_equal 0, cmd(dir, 'bundle exec karafka install')
-    assert_equal 0, cmd(dir, 'timeout --preserve-status 3 bundle exec karafka server')
+    assert_equal 0, cmd(dir, 'timeout --preserve-status 10 bundle exec karafka server')
   end
 end
