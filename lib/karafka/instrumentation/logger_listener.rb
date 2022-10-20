@@ -85,13 +85,6 @@ module Karafka
         end
       end
 
-      # Logs info that we're initializing Karafka app.
-      #
-      # @param _event [Dry::Events::Event] event details including payload
-      def on_app_initializing(_event)
-        info 'Initializing Karafka framework'
-      end
-
       # Logs info that we're running Karafka app.
       #
       # @param _event [Dry::Events::Event] event details including payload

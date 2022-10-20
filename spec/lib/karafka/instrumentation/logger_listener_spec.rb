@@ -84,19 +84,6 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_app_initializing' do
-    subject(:trigger) { listener.on_app_initializing(event) }
-
-    let(:payload) { {} }
-    let(:message) { 'Initializing Karafka framework' }
-
-    it 'expect logger to log framework initializing' do
-      # We had to add at least once as it runs in a separate thread and can interact
-      # with other specs - this is a cheap workaround
-      expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
-    end
-  end
-
   describe '#on_app_running' do
     subject(:trigger) { listener.on_app_running(event) }
 
