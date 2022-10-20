@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.15 (2022-10-20)
 - Sanitize admin config prior to any admin action.
 - Make messages partitioner outcome for virtual partitions consistently distributed in regards to concurrency.
 - Improve DataDog/StatsD metrics reporting by reporting per topic partition lags and trends.
