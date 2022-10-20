@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## Unreleased
+- Align attributes available in the instrumentation bus for listener related events.
+- Include consumer group id in consumption related events (#1093)
+- Remove unused logger listener event handler.
+
 ## 2.0.15 (2022-10-20)
 - Sanitize admin config prior to any admin action.
 - Make messages partitioner outcome for virtual partitions consistently distributed in regards to concurrency.
