@@ -31,6 +31,7 @@ module Karafka
         process.on_sigint { Thread.new { stop } }
         process.on_sigquit { Thread.new { stop } }
         process.on_sigterm { Thread.new { stop } }
+        process.supervise
 
         # Start is blocking until stop is called and when we stop, it will wait until
         # all of the things are ready to stop
@@ -61,7 +62,6 @@ module Karafka
       # @note We don't need to sleep because Karafka::Fetcher is locking and waiting to
       # finish loop (and it won't happen until we explicitly want to stop)
       def start
-        process.supervise
         Karafka::App.run!
         Karafka::Runner.new.call
       end
@@ -73,6 +73,9 @@ module Karafka
       #   lock them forever. If you need to run Karafka shutdown from within workers threads,
       #   please start a separate thread to do so.
       def stop
+        # Initialize the stopping process only if Karafka was running
+        return unless Karafka::App.running?
+
         Karafka::App.stop!
 
         timeout = Karafka::App.config.shutdown_timeout
@@ -110,8 +113,12 @@ module Karafka
 
         Karafka::App.producer.close
 
+        # We also do not forcefully terminate everything when running in the embedded mode,
+        # otherwise we would overwrite the shutdown process of the process that started Karafka
+        return unless process.supervised?
+
         # exit! is not within the instrumentation as it would not trigger due to exit
-        Kernel.exit! FORCEFUL_EXIT_CODE
+        Kernel.exit!(FORCEFUL_EXIT_CODE)
       ensure
         Karafka::App.stopped!
       end

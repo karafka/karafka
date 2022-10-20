@@ -36,7 +36,7 @@ end
 
 order_without_vp = []
 
-10.times do
+100.times do
   2.times do |iteration|
     order_without_vp << iteration.to_s
     Job.perform_later(iteration.to_s)
@@ -44,7 +44,7 @@ order_without_vp = []
 end
 
 start_karafka_and_wait_until do
-  DT[0].size >= 20
+  DT[0].size >= 200
 end
 
 assert_equal DT[0].size, order_without_vp.size

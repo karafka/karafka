@@ -2,6 +2,22 @@
 
 ## Unreleased
 - Require rdkafka 0.13.0 or higher.
+- Align attributes available in the instrumentation bus for listener related events.
+- Include consumer group id in consumption related events (#1093)
+- Remove unused logger listener event handler.
+
+## 2.0.15 (2022-10-20)
+- Sanitize admin config prior to any admin action.
+- Make messages partitioner outcome for virtual partitions consistently distributed in regards to concurrency.
+- Improve DataDog/StatsD metrics reporting by reporting per topic partition lags and trends.
+- Replace synchronous offset commit with async on resuming paused partition (#1087).
+
+## 2.0.14 (2022-10-16)
+- Prevent consecutive stop signals from starting multiple supervision shutdowns.
+- Provide `Karafka::Embedded` to simplify the start/stop process when running Karafka from within other process (Puma, Sidekiq, etc).
+- Fix a race condition when un-pausing a long-running-job exactly upon listener resuming would crash the listener loop (#1072).
+
+## 2.0.13 (2022-10-14)
 - Early exit upon attempts to commit current or earlier offset twice.
 - Add more integration specs covering edge cases.
 - Strip non producer related config when default producer is initialized (#776)

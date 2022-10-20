@@ -7,13 +7,14 @@
 require 'securerandom'
 
 setup_karafka do |config|
+  config.license.token = pro_license_token
   config.initial_offset = 'latest'
   config.kafka[:'group.instance.id'] = SecureRandom.uuid
 end
 
 create_topic(partitions: 2)
 
-class Consumer < Karafka::BaseConsumer
+class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
       DT[:process2] << [message.raw_payload.to_i, message.partition]
@@ -30,7 +31,7 @@ draw_routes(Consumer)
 # @note We use external messages producer here, as the one from Karafka will be closed upon first
 # process shutdown.
 PRODUCER = ::WaterDrop::Producer.new do |producer_config|
-  producer_config.kafka = Karafka::App.config.kafka.dup
+  producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
   producer_config.logger = Karafka::App.config.logger
   producer_config.max_wait_timeout = 120
 end

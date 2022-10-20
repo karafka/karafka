@@ -25,6 +25,9 @@ module Karafka
       end
 
       define_method transition do
+        # Do nothing if the state change would change nothing (same state)
+        return if @status == state
+
         @status = state
 
         # Skip on creation (initializing)

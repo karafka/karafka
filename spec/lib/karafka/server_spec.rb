@@ -16,10 +16,17 @@ RSpec.describe_current do
   end
 
   describe '#run' do
+    before { allow(process).to receive(:supervise) }
+
     after do
       server_class.run
       # Since stopping happens in a separate thread, we need to wait
       sleep(0.5)
+    end
+
+    it 'expect to start supervision' do
+      server_class.run
+      expect(process).to have_received(:supervise)
     end
 
     context 'when we want to run in supervision' do
@@ -72,24 +79,27 @@ RSpec.describe_current do
 
   describe '#start' do
     before do
-      allow(process).to receive(:supervise)
       allow(Karafka::App).to receive(:run!)
       allow(runner).to receive(:call)
 
       server_class.start
     end
 
-    it 'expect to supervise and run' do
-      expect(process).to have_received(:supervise)
+    it 'expect to run' do
       expect(Karafka::App).to have_received(:run!)
       expect(runner).to have_received(:call)
     end
   end
 
   describe '#stop' do
-    before { Karafka::App.config.shutdown_timeout = timeout_ms }
+    before do
+      Karafka::App.config.internal.status.run!
+      Karafka::App.config.shutdown_timeout = timeout_ms
+      allow(process).to receive(:supervised?).and_return(true)
+    end
 
     after do
+      Karafka::App.config.internal.status.run!
       server_class.stop
       described_class.listeners.clear
       described_class.workers = []
@@ -141,6 +151,31 @@ RSpec.describe_current do
           expect(Karafka::App).to have_received(:stop!)
           expect(described_class).to have_received(:sleep).with(0.1).exactly(timeout_s * 10).times
           expect(Kernel).to have_received(:exit!).with(2)
+        end
+      end
+
+      context 'when there are active consuming threads but not supervised' do
+        let(:active_thread) do
+          instance_double(
+            Karafka::Connection::Listener,
+            alive?: true,
+            terminate: true,
+            join: true,
+            shutdown: true
+          )
+        end
+
+        before do
+          allow(process).to receive(:supervised?).and_return(false)
+          described_class.listeners = [active_thread]
+          server_class.stop
+          described_class.listeners.clear
+        end
+
+        it 'expect stop and exit with sleep' do
+          expect(Karafka::App).to have_received(:stop!)
+          expect(described_class).to have_received(:sleep).with(0.1).exactly(timeout_s * 10).times
+          expect(Kernel).not_to have_received(:exit!)
         end
       end
 

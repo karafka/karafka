@@ -17,6 +17,9 @@ require_relative './support/data_collector'
 
 Thread.abort_on_exception = true
 
+# Make sure all logs are always flushed
+$stdout.sync = true
+
 # Alias data collector for shorter referencing
 DT = DataCollector
 
@@ -75,7 +78,7 @@ def setup_karafka(allow_errors: false)
     next if allow_errors.is_a?(Array) && allow_errors.include?(event[:type])
 
     # Print error event details in case we are going to exit
-    puts event
+    Karafka.logger.fatal event
 
     # This sleep buys us some time before exit so logs are flushed
     sleep(0.5)
@@ -104,7 +107,9 @@ def setup_rdkafka_consumer(options = {})
     'enable.auto.offset.store': 'false'
   }.merge!(options)
 
-  Rdkafka::Config.new(config).consumer
+  Rdkafka::Config.new(
+    Karafka::Setup::AttributesMap.consumer(config)
+  ).consumer
 end
 
 # A simple helper for creation of topics with given partitions count. Single partition topics are

@@ -46,8 +46,8 @@ module Karafka
         Karafka.monitor.instrument(
           'connection.listener.before_fetch_loop',
           caller: self,
-          subscription_group: @subscription_group,
-          client: @client
+          client: @client,
+          subscription_group: @subscription_group
         )
 
         fetch_loop
@@ -87,7 +87,8 @@ module Karafka
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop',
             caller: self,
-            client: @client
+            client: @client,
+            subscription_group: @subscription_group
           )
 
           resume_paused_partitions
@@ -95,6 +96,8 @@ module Karafka
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop.received',
             caller: self,
+            client: @client,
+            subscription_group: @subscription_group,
             messages_buffer: @messages_buffer
           ) do
             # We need to fetch data before we revoke lost partitions details as during the polling

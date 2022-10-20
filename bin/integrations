@@ -24,7 +24,7 @@ ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../
 # When the value is high, there's a problem with thread allocation on Github CI, tht is why
 # we limit it. Locally we can run a lot of those, as many of them have sleeps and do not use a lot
 # of CPU
-CONCURRENCY = ENV.key?('CI') ? 3 : Etc.nprocessors * 2
+CONCURRENCY = ENV.key?('CI') ? 4 : Etc.nprocessors * 2
 
 # How may bytes do we want to keep from the stdout in the buffer for when we need to print it
 MAX_BUFFER_OUTPUT = 51_200
@@ -39,10 +39,10 @@ class Scenario
   # This includes exactly those
   EXIT_CODES = {
     default: [0],
-    'consumption/worker_critical_error_behaviour.rb' => [0, 2].freeze,
-    'shutdown/on_hanging_jobs_and_a_shutdown.rb' => [2].freeze,
-    'shutdown/on_hanging_on_shutdown_job_and_a_shutdown.rb' => [2].freeze,
-    'shutdown/on_hanging_listener_and_shutdown.rb' => [2].freeze
+    'consumption/worker_critical_error_behaviour_spec.rb' => [0, 2].freeze,
+    'shutdown/on_hanging_jobs_and_a_shutdown_spec.rb' => [2].freeze,
+    'shutdown/on_hanging_on_shutdown_job_and_a_shutdown_spec.rb' => [2].freeze,
+    'shutdown/on_hanging_listener_and_shutdown_spec.rb' => [2].freeze
   }.freeze
 
   private_constant :MAX_RUN_TIME, :EXIT_CODES
@@ -202,13 +202,14 @@ class Scenario
 end
 
 # Load all the specs
-specs = Dir[ROOT_PATH.join('spec/integrations/**/*.rb')]
+specs = Dir[ROOT_PATH.join('spec/integrations/**/*_spec.rb')]
 
 # If filters is provided, apply
 # Allows to provide several filters one after another and applies all of them
 ARGV.each do |filter|
   specs.delete_if { |name| !name.include?(filter) }
 end
+
 
 raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
 

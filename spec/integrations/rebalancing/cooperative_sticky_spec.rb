@@ -1,22 +1,20 @@
 # frozen_string_literal: true
 
-# Karafka will run a full rebalance in case we use cooperative-sticky but force commit when
-# rebalance happens. This is how `librdkafka` works
+# Karafka should support a cooperative-sticky rebalance strategy without any problems
 
-setup_karafka(allow_errors: true) do |config|
+setup_karafka do |config|
   config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
 end
 
-create_topic(partitions: 5)
+# We use a lot of partitions to make sure we never revoke part of them on rebalances
+create_topic(partitions: 10)
 
 Thread.new do
   loop do
     begin
-      produce(DT.topic, '1', partition: 0)
-      produce(DT.topic, '2', partition: 1)
-      produce(DT.topic, '3', partition: 2)
-      produce(DT.topic, '4', partition: 3)
-      produce(DT.topic, '5', partition: 4)
+      10.times do |i|
+        produce(DT.topic, (i + 1).to_s, partition: i)
+      end
     rescue WaterDrop::Errors::ProducerClosedError
       break
     end
@@ -26,9 +24,7 @@ Thread.new do
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume
-    mark_as_consumed! messages.last
-  end
+  def consume; end
 
   def on_revoked
     DT[:revoked] << messages.metadata.partition
@@ -48,12 +44,10 @@ other = Thread.new do
   consumer.each do |message|
     DT[:picked] << message.partition
 
-    break if DT[:picked].uniq.size >= 2
+    break if DT[:picked].size >= 200
   end
 
   sleep(5)
-
-  consumer.close
 end
 
 start_karafka_and_wait_until do
@@ -62,4 +56,7 @@ start_karafka_and_wait_until do
   true
 end
 
-assert_equal [0, 1, 2, 3, 4], DT.data[:revoked].sort
+assert_equal DT[:revoked].uniq.sort, DT[:picked].uniq.sort
+assert DT[:revoked].uniq.size < 10
+
+consumer.close
