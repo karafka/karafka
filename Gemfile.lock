@@ -68,6 +68,7 @@ GEM
     zeitwerk (2.6.1)
 
 PLATFORMS
+  arm64-darwin
   x86_64-linux
 
 DEPENDENCIES
@@ -79,4 +80,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   2.3.22
+   2.3.24
