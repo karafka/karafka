@@ -4,6 +4,7 @@
 - Align attributes available in the instrumentation bus for listener related events.
 - Include consumer group id in consumption related events (#1093)
 - Remove unused logger listener event handler.
+- Internal refactoring of routing validations flow.
 
 ## 2.0.15 (2022-10-20)
 - Sanitize admin config prior to any admin action.

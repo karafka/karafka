@@ -3,8 +3,7 @@
 require 'karafka/pro/routing/builder_extensions'
 require 'karafka/pro/routing/topic_extensions'
 require 'karafka/pro/contracts/base'
-require 'karafka/pro/contracts/consumer_group'
-require 'karafka/pro/contracts/consumer_group_topic'
+require 'karafka/pro/contracts/topic'
 require 'karafka/pro/base_consumer'
 
 RSpec.describe_current do

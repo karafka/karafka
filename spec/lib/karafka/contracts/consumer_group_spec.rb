@@ -59,15 +59,6 @@ RSpec.describe_current do
 
       it { expect(check).to be_success }
     end
-
-    context 'when topics do not comply with the internal contract' do
-      before do
-        config[:topics][1] = config[:topics][0].dup
-        config[:topics][1][:name] = nil
-      end
-
-      it { expect(check).not_to be_success }
-    end
   end
 
   context 'when we validate id' do

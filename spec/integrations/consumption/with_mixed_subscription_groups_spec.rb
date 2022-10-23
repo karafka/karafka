@@ -34,7 +34,7 @@ end
 Karafka.producer.produce_many_sync(messages)
 
 start_karafka_and_wait_until do
-  DT[:clients].uniq.count >= 5
+  DT[:clients].uniq.count >= 5 && sleep(5)
 end
 
 assert_equal 5, DT[:clients].uniq.size

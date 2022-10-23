@@ -23,8 +23,7 @@ module Karafka
         processing/coordinator
         processing/partitioner
         contracts/base
-        contracts/consumer_group
-        contracts/consumer_group_topic
+        contracts/topic
         routing/topic_extensions
         routing/builder_extensions
         active_job/consumer
