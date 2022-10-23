@@ -21,7 +21,9 @@ module Karafka
           super
 
           each do |consumer_group|
-            ::Karafka::Pro::Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
+            consumer_group.topics.each do |topic|
+              ::Karafka::Pro::Contracts::Topic.new.validate!(topic.to_h)
+            end
           end
         end
       end

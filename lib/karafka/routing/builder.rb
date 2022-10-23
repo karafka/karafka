@@ -33,7 +33,13 @@ module Karafka
         instance_eval(&block)
 
         each do |consumer_group|
+          # Validate consumer group settings
           Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
+
+          # and then its topics settings
+          consumer_group.topics.each do |topic|
+            Contracts::Topic.new.validate!(topic.to_h)
+          end
         end
       end
 

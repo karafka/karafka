@@ -13,13 +13,13 @@ module Karafka
   module Pro
     module Contracts
       # Contract for validating correct Pro components setup on a topic levels
-      class ConsumerGroupTopic < Base
+      class Topic < Base
         configure do |config|
           config.error_messages = YAML.safe_load(
             File.read(
               File.join(Karafka.gem_root, 'config', 'errors.yml')
             )
-          ).fetch('en').fetch('validations').fetch('pro_consumer_group_topic')
+          ).fetch('en').fetch('validations').fetch('pro_topic')
         end
 
         nested(:virtual_partitions) do

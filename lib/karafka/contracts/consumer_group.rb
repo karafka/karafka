@@ -24,20 +24,6 @@ module Karafka
 
         [[%i[topics], :names_not_unique]]
       end
-
-      virtual do |data, errors|
-        next unless errors.empty?
-
-        fetched_errors = []
-
-        data.fetch(:topics).each do |topic|
-          ConsumerGroupTopic.new.call(topic).errors.each do |key, value|
-            fetched_errors << [[topic, key].flatten, value]
-          end
-        end
-
-        fetched_errors
-      end
     end
   end
 end

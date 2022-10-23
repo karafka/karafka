@@ -3,13 +3,13 @@
 module Karafka
   module Contracts
     # Consumer group topic validation rules.
-    class ConsumerGroupTopic < Base
+    class Topic < Base
       configure do |config|
         config.error_messages = YAML.safe_load(
           File.read(
             File.join(Karafka.gem_root, 'config', 'errors.yml')
           )
-        ).fetch('en').fetch('validations').fetch('consumer_group_topic')
+        ).fetch('en').fetch('validations').fetch('topic')
       end
 
       required(:consumer) { |val| !val.nil? }

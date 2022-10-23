@@ -27,7 +27,7 @@ en:
       missing: needs to be present
       consumer_groups_inclusion: Unknown consumer group
 
-    consumer_group_topic:
+    topic:
       missing: needs to be present
       name_format: 'needs to be a string with a Kafka accepted format'
       deserializer_format: needs to be present
@@ -53,7 +53,7 @@ en:
       missing: needs to be present
       id_format: needs to be a String
 
-    pro_consumer_group_topic:
+    pro_topic:
       consumer_format: needs to inherit from Karafka::Pro::BaseConsumer and not Karafka::Consumer
       virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
       virtual_partitions.max_partitions_format: needs to be equl or more than 1

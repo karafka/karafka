@@ -2,7 +2,7 @@
 
 require 'karafka/pro/base_consumer'
 require 'karafka/pro/contracts/base'
-require 'karafka/pro/contracts/consumer_group_topic'
+require 'karafka/pro/contracts/topic'
 
 RSpec.describe_current do
   subject(:check) { described_class.new.call(config) }
