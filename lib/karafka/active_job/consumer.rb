@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
+  # Namespace for all the ActiveJob related things from within Karafka
   module ActiveJob
     # This is the consumer for ActiveJob that eats the messages enqueued with it one after another.
     # It marks the offset after each message, so we make sure, none of the jobs is executed twice
