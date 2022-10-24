@@ -8,6 +8,7 @@
 - **[Breaking]** Disable the root `manual_offset_management` setting and require it to be configured per topic. This is part of "topic features" configuration extraction for better code organization.
 - Reorganize how routing related features are represented internally to simplify features management.
 - Fix a case where routing tags would not be injected when given routing definition would not be used with a block
+- Fix a case where using `#active_job_topic` without extra block options would cause `manual_offset_management` to stay false.
 
 ## 2.0.15 (2022-10-20)
 - Sanitize admin config prior to any admin action.

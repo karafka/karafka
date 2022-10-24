@@ -17,7 +17,7 @@ module Karafka
 
           virtual do |data, errors|
             next unless errors.empty?
-            next unless data[:tags].include?(:active_job)
+            next unless data[:active_job][:active]
             # One should not define active job jobs without ActiveJob being available for usage
             next if Object.const_defined?('ActiveJob::Base')
 

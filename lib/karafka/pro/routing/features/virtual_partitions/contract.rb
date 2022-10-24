@@ -51,10 +51,11 @@ module Karafka
 
               virtual_partitions = data[:virtual_partitions]
               manual_offset_management = data[:manual_offset_management]
+              active_job = data[:active_job]
 
               next unless virtual_partitions[:active]
               next unless manual_offset_management[:active]
-              next if data[:tags].include?(:active_job)
+              next if active_job[:active]
 
               [[%i[manual_offset_management], :not_with_virtual_partitions]]
             end

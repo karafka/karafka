@@ -89,6 +89,17 @@ module Karafka
           # Mark as consumed only if manual offset management is not on
           mark_as_consumed(last_group_message) unless topic.manual_offset_management? || revoked?
 
+          # When this is an ActiveJob running via Pro with virtual partitions, we cannot mark
+          # intermediate jobs as processed not to mess up with the ordering.
+          # Only when all the jobs are processed and we did not loose the partition assignment and
+          # we are not stopping (Pro ActiveJob has an early break) we can commit offsets on
+          # this as only then we can be sure, that all the jobs were processed.
+          # For a non virtual partitions case, the flow is regular and state is marked after each
+          # successfully processed job
+          if topic.active_job? && topic.virtual_partitions? && !revoked? && !Karafka::App.stopping?
+            mark_as_consumed(last_group_message)
+          end
+
           # If this is not a long-running job there is nothing for us to do here
           return unless topic.long_running_job?
 

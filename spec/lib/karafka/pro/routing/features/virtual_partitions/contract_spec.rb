@@ -13,11 +13,14 @@ RSpec.describe_current do
       manual_offset_management: {
         active: mom_active
       },
-      tags: tags
+      active_job: {
+        active: aj_active
+      }
     }
   end
 
   let(:mom_active) { false }
+  let(:aj_active) { false }
   let(:tags) { [] }
 
   context 'when config is valid' do
@@ -44,7 +47,7 @@ RSpec.describe_current do
 
   context 'when manual offset management is on with virtual partitions for active job' do
     let(:mom_active) { true }
-    let(:tags) { %i[active_job] }
+    let(:aj_active) { true }
 
     it { expect(check).to be_success }
   end
