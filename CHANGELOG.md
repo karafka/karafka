@@ -11,6 +11,41 @@
 - Fix a case where using `#active_job_topic` without extra block options would cause `manual_offset_management` to stay false.
 - Fix a case when upon Pro ActiveJob usage with Virtual Partitions, correct offset would not be stored
 
+### Upgrade notes
+
+1. Remove the `manual_offset_management` setting from the main config if you use it:
+
+```ruby
+class KarafkaApp < Karafka::App
+  setup do |config|
+    # ...
+
+    # This line needs to be removed:
+    config.manual_offset_management = true
+  end
+end
+```
+
+2. Set the `manual_offset_management` feature flag per each topic where you want to use it in the routing. Don't set it for topics where you want the default offset management strategy to be used.
+
+```ruby
+class KarafkaApp < Karafka::App
+  routes.draw do
+    consumer_group :group_name do
+      topic :example do
+        consumer ExampleConsumer
+        manual_offset_management true
+      end
+
+      topic :example2 do
+        consumer ExampleConsumer2
+        manual_offset_management true
+      end
+    end
+  end
+end
+```
+
 ## 2.0.15 (2022-10-20)
 - Sanitize admin config prior to any admin action.
 - Make messages partitioner outcome for virtual partitions consistently distributed in regards to concurrency.
