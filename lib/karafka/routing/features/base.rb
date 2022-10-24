@@ -13,8 +13,10 @@ module Karafka
         class << self
           # Extends topic and builder with given feature API
           def activate
-            ::Karafka::Routing::Topic.prepend(self::Topic)
-            ::Karafka::Routing::Builder.prepend(Base::Builder.new(self))
+            Topic.prepend(self::Topic) if const_defined?('Topic')
+            Proxy.prepend(self::Builder) if const_defined?('Builder')
+            Builder.prepend(self::Builder) if const_defined?('Builder')
+            Builder.prepend(Base::Expander.new(self)) if const_defined?('Contract')
           end
 
           # Loads all the features and activates them

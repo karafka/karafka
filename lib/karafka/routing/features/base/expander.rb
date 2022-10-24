@@ -5,9 +5,9 @@ module Karafka
     module Features
       class Base
         # Routing builder expander that injects feature related drawing operations into it
-        class Builder < Module
+        class Expander < Module
           # @param scope [Module] feature scope in which contract and other things should be
-          # @return [Builder] builder expander instance
+          # @return [Expander] builder expander instance
           def initialize(scope)
             super()
             @scope = scope
@@ -34,13 +34,15 @@ module Karafka
               #
               # @param block [Proc] routing defining block
               define_method :draw do |&block|
-                super(&block)
+                result = super(&block)
 
                 each do |consumer_group|
                   consumer_group.topics.each do |topic|
                     scope::Contract.new.validate!(topic.to_h)
                   end
                 end
+
+                result
               end
             end
           end

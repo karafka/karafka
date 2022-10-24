@@ -36,6 +36,7 @@ en:
       initial_offset_format: needs to be either earliest or latest
       subscription_group_format: must be nil or a non-empty string
       manual_offset_management.active_format: needs to be either true or false
+      consumer_active_job_missing: ActiveJob needs to be available
 
     consumer_group:
       missing: needs to be present
