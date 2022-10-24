@@ -18,7 +18,15 @@ RSpec.describe_current do
     end
 
     context 'when defining AJ with extra settings' do
-      pending
+      before do
+        builder.active_job_topic(:test) do
+          max_messages 5
+        end
+      end
+
+      it { expect(topic.consumer).to eq(Karafka::ActiveJob::Consumer) }
+      it { expect(topic.active_job?).to eq(true) }
+      it { expect(topic.max_messages).to eq(5) }
     end
   end
 end
