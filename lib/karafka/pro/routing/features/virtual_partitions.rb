@@ -17,7 +17,7 @@ module Karafka
         #
         # Virtual Partitions allow you to parallelize the processing of data from a single
         # partition. This can drastically increase throughput when IO operations are involved.
-        class VirtualPartitions < ::Karafka::Routing::Features::Base
+        class VirtualPartitions < Base
         end
       end
     end

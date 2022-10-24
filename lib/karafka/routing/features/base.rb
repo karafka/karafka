@@ -16,6 +16,14 @@ module Karafka
             ::Karafka::Routing::Topic.prepend(self::Topic)
             ::Karafka::Routing::Builder.prepend(Base::Builder.new(self))
           end
+
+          # Loads all the features and activates them
+          def load_all
+            ObjectSpace
+              .each_object(Class)
+              .select { |klass| klass < self }
+              .each(&:activate)
+          end
         end
       end
     end

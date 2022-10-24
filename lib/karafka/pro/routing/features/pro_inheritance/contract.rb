@@ -13,7 +13,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class ProInheritance < Karafka::Routing::Features::Base
+        class ProInheritance < Base
           # Rules around manual offset management settings
           class Contract < Contracts::Base
             # Contract for validating correct Pro components setup on a topic levels

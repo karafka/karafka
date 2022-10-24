@@ -15,7 +15,7 @@ module Karafka
       module Features
         # This is a "virtual" feature that allows us to inject validations to make sure, that
         # upon usage of Pro, all the consumers are inheriting from Pro
-        class ProInheritance < Karafka::Routing::Features::Base
+        class ProInheritance < Base
         end
       end
     end

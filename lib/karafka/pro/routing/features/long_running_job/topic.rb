@@ -13,7 +13,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class LongRunningJob < Karafka::Routing::Features::Base
+        class LongRunningJob < Base
           # Long-Running Jobs topic API extensions
           module Topic
             # @param active [Boolean] do we want to enable long-running job feature for this topic

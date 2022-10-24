@@ -13,8 +13,8 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class VirtualPartitions < ::Karafka::Routing::Features::Base
-          # Topic extensions to be able to manage virtual parttions feature
+        class VirtualPartitions < Base
+          # Topic extensions to be able to manage virtual partitions feature
           module Topic
             # @param max_partitions [Integer] max number of virtual partitions that can come out of
             #   the single distribution flow. When set to more than the Karafka threading, will

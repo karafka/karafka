@@ -13,7 +13,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class VirtualPartitions < ::Karafka::Routing::Features::Base
+        class VirtualPartitions < Base
           # Config for virtual partitions
           Config = Struct.new(
             :active,

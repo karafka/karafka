@@ -23,6 +23,8 @@ module Karafka
         processing/coordinator
         processing/partitioner
 
+        routing/features/base
+
         routing/features/virtual_partitions
         routing/features/virtual_partitions/config
         routing/features/virtual_partitions/topic
@@ -80,10 +82,10 @@ module Karafka
           config.monitor.subscribe(PerformanceTracker.instance)
         end
 
+        # Loads the Pro features of Karafka
+        # @note Object space lookup is not the fastest but we do it once during boot, so it's ok
         def load_topic_features
-          ::Karafka::Pro::Routing::Features::VirtualPartitions.activate
-          ::Karafka::Pro::Routing::Features::LongRunningJob.activate
-          ::Karafka::Pro::Routing::Features::ProInheritance.activate
+          ::Karafka::Pro::Routing::Features::Base.load_all
         end
       end
     end

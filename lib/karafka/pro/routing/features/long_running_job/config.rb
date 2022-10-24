@@ -13,7 +13,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class LongRunningJob < Karafka::Routing::Features::Base
+        class LongRunningJob < Base
           # Long-Running Jobs configuration
           Config = Struct.new(
             :active,

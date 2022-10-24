@@ -13,11 +13,8 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class ProInheritance < Base
-          # Extensions to the topic. This feature is virtual (has only contract) but to follow
-          # the API for features, empty module is added
-          module Topic
-          end
+        # Base class for all the Pro features
+        class Base < Karafka::Routing::Features::Base
         end
       end
     end

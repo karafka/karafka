@@ -13,7 +13,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class LongRunningJob < Karafka::Routing::Features::Base
+        class LongRunningJob < Base
           # Rules around manual offset management settings
           class Contract < Contracts::Base
             configure do |config|
