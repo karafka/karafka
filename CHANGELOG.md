@@ -10,6 +10,7 @@
 - Fix a case where routing tags would not be injected when given routing definition would not be used with a block
 - Fix a case where using `#active_job_topic` without extra block options would cause `manual_offset_management` to stay false.
 - Fix a case when upon Pro ActiveJob usage with Virtual Partitions, correct offset would not be stored
+- Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
 
 ### Upgrade notes
 

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-# This Karafka component is a Pro component.
+# This Karafka component is a Pro component under a commercial license.
+# This Karafka component is NOT licensed under LGPL.
+#
 # All of the commercial components are present in the lib/karafka/pro directory of this
 # repository and their usage requires commercial license agreement.
 #
