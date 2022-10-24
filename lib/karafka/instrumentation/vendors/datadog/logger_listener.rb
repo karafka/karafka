@@ -16,7 +16,7 @@ module Karafka
           # @param event [Dry::Events::Event] event details including payload
           def on_worker_process(event)
             current_span = Datadog::Tracing.trace('karafka.consumer')
-            Karafka.logger.push_tags(Datadog::Tracing.log_correlation) if Karafka.logger.respond_to?(:push_tags)
+            push_tags
 
             job = event[:job]
             job_type = job.class.to_s.split('::').last
@@ -26,14 +26,14 @@ module Karafka
             current_span.resource = "#{consumer}#consume"
             info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} started"
 
-            Karafka.logger.pop_tags if Karafka.logger.respond_to?(:pop_tags)
+            pop_tags
           end
 
           # Prints info about the fact that a given job has finished
           #
           # @param event [Dry::Events::Event] event details including payload
           def on_worker_processed(event)
-            Karafka.logger.push_tags(Datadog::Tracing.log_correlation) if Karafka.logger.respond_to?(:push_tags)
+            push_tags
 
             job = event[:job]
             time = event[:time]
@@ -46,14 +46,14 @@ module Karafka
             current_span = Datadog::Tracing.active_span
             current_span.finish if current_span.present?
 
-            Karafka.logger.pop_tags if Karafka.logger.respond_to?(:pop_tags)
+            pop_tags
           end
 
           # There are many types of errors that can occur in many places, but we provide a single
           # handler for all of them to simplify error instrumentation.
           # @param event [Dry::Events::Event] event details including payload
           def on_error_occurred(event)
-            Karafka.logger.push_tags(Datadog::Tracing.log_correlation) if Karafka.logger.respond_to?(:push_tags)
+            push_tags
 
             error = event[:error]
             Datadog::Tracing.active_span&.set_error(error)
@@ -82,18 +82,28 @@ module Karafka
             when 'connection.client.poll.error'
               error "Data polling error occurred: #{error}"
             else
-              Karafka.logger.pop_tags if Karafka.logger.respond_to?(:pop_tags)
+              pop_tags
               # This should never happen. Please contact the maintainers
               raise Errors::UnsupportedCaseError, event
             end
 
-            Karafka.logger.pop_tags if Karafka.logger.respond_to?(:pop_tags)
+            pop_tags
           end
 
           LOG_LEVELS.each do |log_level|
             define_method log_level do |*args|
               Karafka.logger.send(log_level, *args)
             end
+          end
+
+          def push_tags
+            return unless Karafka.logger.respond_to?(:push_tags)
+
+            Karafka.logger.push_tags(Datadog::Tracing.log_correlation)
+          end
+
+          def pop_tags
+            Karafka.logger.pop_tags if Karafka.logger.respond_to?(:pop_tags)
           end
         end
       end
