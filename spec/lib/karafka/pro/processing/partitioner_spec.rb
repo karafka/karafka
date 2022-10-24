@@ -11,8 +11,11 @@ RSpec.describe_current do
   let(:messages) { Array.new(100) { build(:messages_message) } }
 
   before do
-    topic.singleton_class.prepend Karafka::Pro::Routing::Features::VirtualPartitions::Topic
-    topic.singleton_class.prepend Karafka::Pro::Routing::Features::LongRunningJob::Topic
+    [
+      Karafka::Pro::Routing::Features::VirtualPartitions::Topic,
+      Karafka::Pro::Routing::Features::LongRunningJob::Topic
+    ].each { |feature| topic.singleton_class.prepend(feature) }
+
     ::Karafka::App.config.concurrency = concurrency
   end
 

@@ -2,8 +2,10 @@
 
 RSpec.describe_current do
   subject(:consumer) do
-    topic.singleton_class.prepend Karafka::Pro::Routing::Features::VirtualPartitions::Topic
-    topic.singleton_class.prepend Karafka::Pro::Routing::Features::LongRunningJob::Topic
+    [
+      Karafka::Pro::Routing::Features::VirtualPartitions::Topic,
+      Karafka::Pro::Routing::Features::LongRunningJob::Topic
+    ].each { |feature| topic.singleton_class.prepend(feature) }
 
     described_class.new.tap do |instance|
       instance.client = client

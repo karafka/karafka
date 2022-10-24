@@ -7,8 +7,10 @@ RSpec.describe_current do
   let(:coordinator) { build(:processing_coordinator) }
 
   before do
-    executor.topic.singleton_class.prepend Karafka::Pro::Routing::Features::VirtualPartitions::Topic
-    executor.topic.singleton_class.prepend Karafka::Pro::Routing::Features::LongRunningJob::Topic
+    [
+      Karafka::Pro::Routing::Features::VirtualPartitions::Topic,
+      Karafka::Pro::Routing::Features::LongRunningJob::Topic
+    ].each { |feature| executor.topic.singleton_class.prepend(feature) }
   end
 
   describe '#consume' do

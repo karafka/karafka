@@ -16,8 +16,10 @@ RSpec.describe_current do
   let(:offset) { 123 }
   let(:topic) do
     build(:routing_topic).tap do |built|
-      built.singleton_class.prepend Karafka::Pro::Routing::Features::VirtualPartitions::Topic
-      built.singleton_class.prepend Karafka::Pro::Routing::Features::LongRunningJob::Topic
+      [
+        Karafka::Pro::Routing::Features::VirtualPartitions::Topic,
+        Karafka::Pro::Routing::Features::LongRunningJob::Topic
+      ].each { |feature| built.singleton_class.prepend(feature) }
     end
   end
 
