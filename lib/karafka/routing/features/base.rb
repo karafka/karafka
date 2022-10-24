@@ -24,6 +24,7 @@ module Karafka
             ObjectSpace
               .each_object(Class)
               .select { |klass| klass < self }
+              .sort_by(&:to_s)
               .each(&:activate)
           end
         end
