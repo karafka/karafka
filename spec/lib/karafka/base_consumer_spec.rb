@@ -76,7 +76,7 @@ RSpec.describe_current do
     end
 
     context 'when everything went ok on consume with manual offset management' do
-      before { topic.manual_offset_management = true }
+      before { topic.manual_offset_management true }
 
       it { expect { consume_with_after.call }.not_to raise_error }
 
@@ -129,7 +129,7 @@ RSpec.describe_current do
 
     context 'when everything went ok on consume with automatic offset management' do
       before do
-        topic.manual_offset_management = false
+        topic.manual_offset_management false
         allow(client).to receive(:mark_as_consumed)
       end
 
@@ -150,7 +150,7 @@ RSpec.describe_current do
     end
 
     context 'when there was an error on consume with automatic offset management' do
-      before { topic.manual_offset_management = false }
+      before { topic.manual_offset_management false }
 
       let(:working_class) do
         ClassBuilder.inherit(described_class) do

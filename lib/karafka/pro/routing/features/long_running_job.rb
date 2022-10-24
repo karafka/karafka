@@ -11,20 +11,12 @@
 
 module Karafka
   module Pro
-    # Pro routing components
     module Routing
-      # Routing extensions for builder to be able to validate Pro components correct usage
-      module BuilderExtensions
-        # Validate consumer groups with pro contracts
-        # @param block [Proc] routing defining block
-        def draw(&block)
-          super
-
-          each do |consumer_group|
-            consumer_group.topics.each do |topic|
-              ::Karafka::Pro::Contracts::Topic.new.validate!(topic.to_h)
-            end
-          end
+      module Features
+        # Long-Running Jobs feature config and DSL namespace.
+        #
+        # Long-Running Jobs allow you to run Karafka jobs beyond `max.poll.interval.ms`
+        class LongRunningJob < Karafka::Routing::Features::Base
         end
       end
     end

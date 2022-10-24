@@ -14,7 +14,6 @@ module Karafka
       INHERITABLE_ATTRIBUTES = %i[
         kafka
         deserializer
-        manual_offset_management
         max_messages
         max_wait_time
         initial_offset
@@ -75,11 +74,6 @@ module Karafka
       #   routing syntax, but for references outside, we should use this one.
       def consumer_class
         consumer
-      end
-
-      # @return [Boolean] true if this topic offset is handled by the end user
-      def manual_offset_management?
-        manual_offset_management
       end
 
       # @return [Hash] hash with all the topic attributes

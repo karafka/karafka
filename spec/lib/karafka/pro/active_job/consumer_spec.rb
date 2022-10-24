@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/base_consumer'
-require 'karafka/pro/active_job/consumer'
-require 'karafka/pro/routing/topic_extensions'
-require 'karafka/pro/processing/coordinator'
-
 RSpec.describe_current do
   subject(:consumer) do
-    topic.singleton_class.prepend Karafka::Pro::Routing::TopicExtensions
+    topic.singleton_class.prepend Karafka::Pro::Routing::Features::VirtualPartitions::Topic
+    topic.singleton_class.prepend Karafka::Pro::Routing::Features::LongRunningJob::Topic
 
     described_class.new.tap do |instance|
       instance.client = client
@@ -46,7 +42,7 @@ RSpec.describe_current do
     context 'when it is a lrj' do
       before do
         consumer.messages = messages
-        topic.long_running_job = true
+        topic.long_running_job true
       end
 
       it 'expect to pause forever on our first message' do

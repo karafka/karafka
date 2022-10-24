@@ -4,10 +4,7 @@
 # This can be useful when doing development with a fixed data-set in kafka over which we don't
 # have control (that is, cannot be changed)
 
-setup_karafka do |config|
-  # Not really needed as we seek back, but still just in case of a crash
-  config.manual_offset_management = true
-end
+setup_karafka
 
 # The last one will act as an indicator that we're done
 elements = DT.uuids(99) << '1'
@@ -25,7 +22,13 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    # Not really needed as we seek back, but still just in case of a crash
+    manual_offset_management true
+  end
+end
 
 start_karafka_and_wait_until do
   # 100 initially and then a loop from 20th 4 times

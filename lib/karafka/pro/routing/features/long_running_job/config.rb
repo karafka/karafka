@@ -11,10 +11,15 @@
 
 module Karafka
   module Pro
-    # Namespace for Karafka Pro related contracts
-    module Contracts
-      # Base contract for Pro components contracts
-      class Base < ::Karafka::Contracts::Base
+    module Routing
+      module Features
+        class LongRunningJob < Karafka::Routing::Features::Base
+          # Long-Running Jobs configuration
+          Config = Struct.new(
+            :active,
+            keyword_init: true
+          ) { alias_method :active?, :active }
+        end
       end
     end
   end

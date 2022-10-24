@@ -5,6 +5,8 @@
 - Include consumer group id in consumption related events (#1093)
 - Remove unused logger listener event handler.
 - Internal refactoring of routing validations flow.
+- **[Breaking]** Disable the root `manual_offset_management` setting and require it to be configured per topic. This is part of "topic features" configuration extraction for better code organization.
+- Reorganize how routing related features are represented internally to simplify features management.
 
 ## 2.0.15 (2022-10-20)
 - Sanitize admin config prior to any admin action.

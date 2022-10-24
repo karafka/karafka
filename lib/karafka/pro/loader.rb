@@ -22,10 +22,21 @@ module Karafka
         processing/jobs_builder
         processing/coordinator
         processing/partitioner
-        contracts/base
-        contracts/topic
-        routing/topic_extensions
-        routing/builder_extensions
+
+        routing/features/virtual_partitions
+        routing/features/virtual_partitions/config
+        routing/features/virtual_partitions/topic
+        routing/features/virtual_partitions/contract
+
+        routing/features/long_running_job
+        routing/features/long_running_job/config
+        routing/features/long_running_job/topic
+        routing/features/long_running_job/contract
+
+        routing/features/pro_inheritance
+        routing/features/pro_inheritance/topic
+        routing/features/pro_inheritance/contract
+
         active_job/consumer
         active_job/dispatcher
         active_job/job_options_contract
@@ -34,15 +45,20 @@ module Karafka
       private_constant :COMPONENTS
 
       class << self
+        # Requires all the components without using them anywhere
+        def require_all
+          COMPONENTS.each { |component| require_relative(component) }
+        end
+
         # Loads all the pro components and configures them wherever it is expected
         # @param config [Karafka::Core::Configurable::Node] app config that we can alter with pro
         #   components
         def setup(config)
-          COMPONENTS.each { |component| require_relative(component) }
+          require_all
 
           reconfigure(config)
 
-          load_routing_extensions
+          load_topic_features
         end
 
         private
@@ -64,10 +80,10 @@ module Karafka
           config.monitor.subscribe(PerformanceTracker.instance)
         end
 
-        # Loads routing extensions
-        def load_routing_extensions
-          ::Karafka::Routing::Topic.prepend(Routing::TopicExtensions)
-          ::Karafka::Routing::Builder.prepend(Routing::BuilderExtensions)
+        def load_topic_features
+          ::Karafka::Pro::Routing::Features::VirtualPartitions.activate
+          ::Karafka::Pro::Routing::Features::LongRunningJob.activate
+          ::Karafka::Pro::Routing::Features::ProInheritance.activate
         end
       end
     end

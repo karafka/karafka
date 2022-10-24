@@ -100,3 +100,5 @@ end
 loader.ignore(Karafka.gem_root.join('lib/karafka/instrumentation/vendors'))
 loader.setup
 loader.eager_load
+
+Karafka::Routing::Features::ManualOffsetManagement.activate

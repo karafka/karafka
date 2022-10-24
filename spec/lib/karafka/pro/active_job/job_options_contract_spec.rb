@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/active_job/job_options_contract'
-
 RSpec.describe_current do
   subject(:contract) { described_class.new }
 

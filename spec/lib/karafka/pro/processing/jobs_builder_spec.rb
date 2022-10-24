@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/processing/jobs_builder'
-require 'karafka/pro/processing/jobs/consume_non_blocking'
-require 'karafka/pro/routing/topic_extensions'
-
 RSpec.describe_current do
   subject(:builder) { described_class.new }
 
@@ -11,12 +7,13 @@ RSpec.describe_current do
   let(:coordinator) { build(:processing_coordinator) }
 
   before do
-    executor.topic.singleton_class.prepend Karafka::Pro::Routing::TopicExtensions
+    executor.topic.singleton_class.prepend Karafka::Pro::Routing::Features::VirtualPartitions::Topic
+    executor.topic.singleton_class.prepend Karafka::Pro::Routing::Features::LongRunningJob::Topic
   end
 
   describe '#consume' do
     context 'when it is a lrj topic' do
-      before { executor.topic.long_running_job = true }
+      before { executor.topic.long_running_job true }
 
       it 'expect to use the non blocking pro consumption job' do
         job = builder.consume(executor, [], coordinator)

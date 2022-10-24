@@ -7,7 +7,6 @@
 
 setup_karafka do |config|
   config.concurrency = 1
-  config.manual_offset_management = true
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -20,7 +19,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes Consumer
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    manual_offset_management true
+  end
+end
 
 MESSAGES = DT.uuids(1_000)
 

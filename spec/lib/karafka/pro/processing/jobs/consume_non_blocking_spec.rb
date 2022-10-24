@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/processing/jobs/consume_non_blocking'
-
 RSpec.describe_current do
   subject(:job) { described_class.new(executor, messages, coordinator) }
 
