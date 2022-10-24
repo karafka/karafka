@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# Datadog logger listener for karafka
+# A karafka's logger listener for Datadog
 # It depends on the 'ddtrace' gem
-class DatadogLoggerListener
+class LoggerListener
   LOG_LEVELS = %i[info error fatal].freeze
 
   # Prints info about the fact that a given job has started
