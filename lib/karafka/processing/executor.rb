@@ -117,7 +117,7 @@ module Karafka
           strategy = ::Karafka::App.config.internal.processing.strategy_selector.find(@topic)
 
           consumer = @topic.consumer_class.new
-          # We use singleton class as the same consumer class may be used to procecss different
+          # We use singleton class as the same consumer class may be used to process different
           # topics with different settings
           consumer.singleton_class.include(strategy)
           consumer.topic = @topic

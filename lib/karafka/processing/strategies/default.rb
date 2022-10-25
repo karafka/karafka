@@ -10,6 +10,7 @@ module Karafka
       module Default
         include Base
 
+        # Apply strategy for a non-feature based flow
         FEATURES = %i[].freeze
 
         # No actions needed for the standard flow here

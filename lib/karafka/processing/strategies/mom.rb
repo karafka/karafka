@@ -7,6 +7,7 @@ module Karafka
       module Mom
         include Base
 
+        # Apply strategy when ony manual offset management is turned on
         FEATURES = %i[
           manual_offset_management
         ].freeze
