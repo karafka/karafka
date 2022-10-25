@@ -5,9 +5,10 @@ module Karafka
     module Features
       class ActiveJob < Base
         # Config for ActiveJob usage
-        Config = Struct.new(:active, keyword_init: true) do
-          alias_method :active?, :active
-        end
+        Config = Struct.new(
+          :active,
+          keyword_init: true
+        ) { alias_method :active?, :active }
       end
     end
   end
