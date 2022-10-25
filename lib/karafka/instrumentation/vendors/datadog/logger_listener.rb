@@ -9,7 +9,8 @@ module Karafka
         # A karafka's logger listener for Datadog
         # It depends on the 'ddtrace' gem
         class LoggerListener
-          LOG_LEVELS = %i[info error fatal].freeze
+          # Log levels that we use in this particular listener
+          USED_LOG_LEVELS = %i[info error fatal].freeze
 
           # Prints info about the fact that a given job has started
           #
@@ -77,8 +78,8 @@ module Karafka
               error 'Forceful Karafka server stop'
             when 'librdkafka.error'
               error "librdkafka internal error occurred: #{error}"
-              # Those will only occur when retries in the client fail and when they did not stop after
-              # backoffs
+              # Those will only occur when retries in the client fail and when they did not stop
+              # after backoffs
             when 'connection.client.poll.error'
               error "Data polling error occurred: #{error}"
             else
@@ -90,21 +91,27 @@ module Karafka
             pop_tags
           end
 
-          LOG_LEVELS.each do |log_level|
+          USED_LOG_LEVELS.each do |log_level|
             define_method log_level do |*args|
               Karafka.logger.send(log_level, *args)
             end
           end
 
+          # Pushes datadog's tags to the logger
+          # This is required when tracing log lines asynchronously to correlate logs of the same
+          # process together
           def push_tags
             return unless Karafka.logger.respond_to?(:push_tags)
 
             Karafka.logger.push_tags(Datadog::Tracing.log_correlation)
           end
 
+          # Pops datadog's tags from the logger
+          # This is required when tracing log lines asynchronously to avoid the logs of the
+          # different processes to be correlated
           def pop_tags
             return unless Karafka.logger.respond_to?(:pop_tags)
-            
+
             Karafka.logger.pop_tags
           end
         end
