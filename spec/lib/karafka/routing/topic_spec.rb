@@ -55,13 +55,12 @@ RSpec.describe_current do
 
   %w[kafka manual_offset_management deserializer max_messages max_wait_time].each do |attribute|
     it { expect(topic).to respond_to(attribute) }
-    it { expect(topic).to respond_to(:"#{attribute}=") }
   end
 
   describe '#to_h' do
     let(:expected_keys) do
-      %i[kafka deserializer manual_offset_management max_messages max_wait_time initial_offset] +
-        %i[id name consumer consumer_group_id subscription_group tags]
+      %i[kafka deserializer max_messages max_wait_time initial_offset id name consumer] +
+        %i[consumer_group_id subscription_group active_job manual_offset_management]
     end
 
     it 'expect to contain all the topic attrs plus some inherited' do

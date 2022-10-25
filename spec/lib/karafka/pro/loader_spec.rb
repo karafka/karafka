@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/loader'
-
 RSpec.describe_current do
   subject(:loader) { described_class }
 
@@ -30,11 +28,23 @@ RSpec.describe_current do
     end
 
     context 'when we run loader' do
-      before { loader.setup(Karafka::App.config) }
+      before do
+        allow(::Karafka::Pro::Routing::Features::VirtualPartitions).to receive(:activate)
+        allow(::Karafka::Pro::Routing::Features::LongRunningJob).to receive(:activate)
+        allow(::Karafka::Pro::Routing::Features::ProInheritance).to receive(:activate)
+
+        loader.setup(Karafka::App.config)
+      end
 
       it 'expect to change active job components into pro' do
         expect(aj_config.dispatcher).to be_a(Karafka::Pro::ActiveJob::Dispatcher)
         expect(aj_config.job_options_contract).to be_a(Karafka::Pro::ActiveJob::JobOptionsContract)
+      end
+
+      it 'expect to load pro routing features' do
+        expect(::Karafka::Pro::Routing::Features::VirtualPartitions).to have_received(:activate)
+        expect(::Karafka::Pro::Routing::Features::LongRunningJob).to have_received(:activate)
+        expect(::Karafka::Pro::Routing::Features::ProInheritance).to have_received(:activate)
       end
     end
   end

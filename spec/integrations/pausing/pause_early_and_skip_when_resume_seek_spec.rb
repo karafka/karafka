@@ -8,7 +8,6 @@ setup_karafka do |config|
   config.pause_timeout = 20_000
   config.pause_max_timeout = 20_000
   config.pause_with_exponential_backoff = false
-  config.manual_offset_management = true
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -32,7 +31,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    manual_offset_management true
+  end
+end
 
 produce_many(DT.topic, DT.uuids(20))
 

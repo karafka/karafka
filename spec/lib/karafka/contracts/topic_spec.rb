@@ -9,7 +9,6 @@ RSpec.describe_current do
       name: 'name',
       consumer: Class.new,
       deserializer: Class.new,
-      manual_offset_management: false,
       kafka: { 'bootstrap.servers' => 'localhost:9092' },
       max_messages: 10,
       max_wait_time: 10_000,
@@ -93,20 +92,6 @@ RSpec.describe_current do
   context 'when we validate deserializer' do
     context 'when it is not present' do
       before { config[:deserializer] = nil }
-
-      it { expect(check).not_to be_success }
-    end
-  end
-
-  context 'when we validate manual_offset_management' do
-    context 'when it is not present' do
-      before { config.delete(:manual_offset_management) }
-
-      it { expect(check).not_to be_success }
-    end
-
-    context 'when it is not boolean' do
-      before { config[:manual_offset_management] = nil }
 
       it { expect(check).not_to be_success }
     end

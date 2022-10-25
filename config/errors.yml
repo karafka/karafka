@@ -31,11 +31,12 @@ en:
       missing: needs to be present
       name_format: 'needs to be a string with a Kafka accepted format'
       deserializer_format: needs to be present
-      manual_offset_management_format: needs to be either true or false
       consumer_format: needs to be present
       id_format: 'needs to be a string with a Kafka accepted format'
       initial_offset_format: needs to be either earliest or latest
       subscription_group_format: must be nil or a non-empty string
+      manual_offset_management.active_format: needs to be either true or false
+      consumer_active_job_missing: ActiveJob needs to be available
 
     consumer_group:
       missing: needs to be present
@@ -58,3 +59,4 @@ en:
       virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
       virtual_partitions.max_partitions_format: needs to be equl or more than 1
       manual_offset_management_not_with_virtual_partitions: cannot be used together with Virtual Partitions
+      long_running_job.active_format: needs to be either true or false

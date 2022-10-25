@@ -1,22 +1,27 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/base_consumer'
-require 'karafka/pro/contracts/base'
-require 'karafka/pro/contracts/topic'
-
 RSpec.describe_current do
   subject(:check) { described_class.new.call(config) }
 
   let(:config) do
     {
-      consumer: Class.new(Karafka::Pro::BaseConsumer),
       virtual_partitions: {
         active: true,
         partitioner: ->(_) { 1 },
         max_partitions: 2
+      },
+      manual_offset_management: {
+        active: mom_active
+      },
+      active_job: {
+        active: aj_active
       }
     }
   end
+
+  let(:mom_active) { false }
+  let(:aj_active) { false }
+  let(:tags) { [] }
 
   context 'when config is valid' do
     it { expect(check).to be_success }
@@ -34,9 +39,16 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
-  context 'when consumer inherits from the base consumer' do
-    before { config[:consumer] = Class.new(Karafka::BaseConsumer) }
+  context 'when manual offset management is on with virtual partitions' do
+    let(:mom_active) { true }
 
     it { expect(check).not_to be_success }
+  end
+
+  context 'when manual offset management is on with virtual partitions for active job' do
+    let(:mom_active) { true }
+    let(:aj_active) { true }
+
+    it { expect(check).to be_success }
   end
 end

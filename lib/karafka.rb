@@ -100,3 +100,7 @@ end
 loader.ignore(Karafka.gem_root.join('lib/karafka/instrumentation/vendors'))
 loader.setup
 loader.eager_load
+
+# This will load features but since Pro are not loaded automatically, they will not be visible
+# nor included here
+::Karafka::Routing::Features::Base.load_all

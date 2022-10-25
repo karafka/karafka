@@ -6,7 +6,7 @@ module Karafka
     # It belongs to a consumer group as from 0.6 all the topics can work in the same consumer group
     # It is a part of Karafka's DSL.
     class Topic
-      attr_reader :id, :name, :consumer_group, :tags
+      attr_reader :id, :name, :consumer_group
       attr_writer :consumer
       attr_accessor :subscription_group
 
@@ -14,7 +14,6 @@ module Karafka
       INHERITABLE_ATTRIBUTES = %i[
         kafka
         deserializer
-        manual_offset_management
         max_messages
         max_wait_time
         initial_offset
@@ -32,7 +31,6 @@ module Karafka
         #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can
         #   have same topic name across multiple consumer groups
         @id = "#{consumer_group.id}_#{@name}"
-        @tags = []
       end
 
       INHERITABLE_ATTRIBUTES.each do |attribute|
@@ -77,11 +75,6 @@ module Karafka
         consumer
       end
 
-      # @return [Boolean] true if this topic offset is handled by the end user
-      def manual_offset_management?
-        manual_offset_management
-      end
-
       # @return [Hash] hash with all the topic attributes
       # @note This is being used when we validate the consumer_group and its topics
       def to_h
@@ -94,8 +87,7 @@ module Karafka
           name: name,
           consumer: consumer,
           consumer_group_id: consumer_group.id,
-          subscription_group: subscription_group,
-          tags: tags
+          subscription_group: subscription_group
         ).freeze
       end
     end
