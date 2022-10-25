@@ -118,6 +118,8 @@ module Karafka
           setting :coordinator_class, default: Processing::Coordinator
           # option partitioner_class [Class] partitioner we use against a batch of data
           setting :partitioner_class, default: Processing::Partitioner
+          # option strategy_selector [Object] processing strategy selector to be used
+          setting :strategy_selector, default: Processing::StrategySelector.new
         end
 
         # Karafka components for ActiveJob

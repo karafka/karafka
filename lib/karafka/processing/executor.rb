@@ -114,10 +114,16 @@ module Karafka
       # @return [Object] cached consumer instance
       def consumer
         @consumer ||= begin
+          strategy = ::Karafka::App.config.internal.processing.strategy_selector.find(@topic)
+
           consumer = @topic.consumer_class.new
+          # We use singleton class as the same consumer class may be used to process different
+          # topics with different settings
+          consumer.singleton_class.include(strategy)
           consumer.topic = @topic
           consumer.client = @client
           consumer.producer = ::Karafka::App.producer
+
           consumer
         end
       end

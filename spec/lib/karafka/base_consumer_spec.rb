@@ -72,6 +72,7 @@ RSpec.describe_current do
       consumer.coordinator = coordinator
       consumer.client = client
       consumer.messages = messages
+      consumer.singleton_class.include(Karafka::Processing::Strategies::Mom)
       allow(coordinator.pause_tracker).to receive(:pause)
     end
 
@@ -131,6 +132,7 @@ RSpec.describe_current do
       before do
         topic.manual_offset_management false
         allow(client).to receive(:mark_as_consumed)
+        consumer.singleton_class.include(Karafka::Processing::Strategies::Default)
       end
 
       it { expect { consumer.on_consume }.not_to raise_error }
@@ -186,6 +188,8 @@ RSpec.describe_current do
 
   describe '#on_revoked' do
     context 'when everything went ok on revoked' do
+      before { consumer.singleton_class.include(Karafka::Processing::Strategies::Default) }
+
       it { expect { consumer.on_revoked }.not_to raise_error }
 
       it 'expect to run proper instrumentation' do

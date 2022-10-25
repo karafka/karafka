@@ -21,7 +21,16 @@ module Karafka
     # @note This should not be used by the end users as it is part of the lifecycle of things and
     #   not as a part of the public api. This should not perform any extensive operations as it is
     #   blocking and running in the listener thread.
-    def on_before_enqueue; end
+    def on_before_enqueue
+      handle_before_enqueue
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.before_enqueue.error'
+      )
+    end
 
     # Can be used to run preparation code in the worker
     #
@@ -32,6 +41,13 @@ module Karafka
     def on_before_consume
       messages.metadata.processed_at = Time.now
       messages.metadata.freeze
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.before_consume.error'
+      )
     end
 
     # Executes the default consumer flow.
@@ -65,32 +81,21 @@ module Karafka
     # @note This should not be used by the end users as it is part of the lifecycle of things but
     #   not as part of the public api.
     def on_after_consume
-      return if revoked?
-
-      if coordinator.success?
-        coordinator.pause_tracker.reset
-
-        # Mark as consumed only if manual offset management is not on
-        return if topic.manual_offset_management?
-
-        # We use the non-blocking one here. If someone needs the blocking one, can implement it
-        # with manual offset management
-        mark_as_consumed(messages.last)
-      else
-        pause(coordinator.seek_offset)
-      end
+      handle_after_consume
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.after_consume.error'
+      )
     end
 
     # Trigger method for running on partition revocation.
     #
     # @private
     def on_revoked
-      # We need to always un-pause the processing in case we have lost a given partition.
-      # Otherwise the underlying librdkafka would not know we may want to continue processing and
-      # the pause could in theory last forever
-      resume
-
-      coordinator.revoke
+      handle_revoked
 
       Karafka.monitor.instrument('consumer.revoked', caller: self) do
         revoked
