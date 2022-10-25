@@ -8,7 +8,7 @@ ENV['KARAFKA_RAILTIE_LOAD'] = 'false'
 require 'karafka'
 require 'tempfile'
 
-Karafka
+assert_equal true, Object.const_defined?(:Karafka)
 
 # No Rails here expected
 assert_equal false, Object.const_defined?(:Rails)
