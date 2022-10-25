@@ -103,7 +103,9 @@ module Karafka
           end
 
           def pop_tags
-            Karafka.logger.pop_tags if Karafka.logger.respond_to?(:pop_tags)
+            return unless Karafka.logger.respond_to?(:pop_tags)
+            
+            Karafka.logger.pop_tags
           end
         end
       end
