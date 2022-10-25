@@ -24,6 +24,9 @@ SimpleCov.start do
   add_filter '/config/'
   add_filter '/lib/karafka/railtie'
   add_filter '/lib/karafka/patches'
+  # We do not spec strategies here. We do it via integration test suite
+  add_filter '/processing/strategies'
+
   merge_timeout 600
 end
 

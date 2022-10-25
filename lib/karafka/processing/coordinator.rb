@@ -63,7 +63,7 @@ module Karafka
 
           # This should never happen. If it does, something is heavily out of sync. Please reach
           # out to us if you encounter this
-          raise Karafka::Errors::InvalidCoordinatorState, 'Was zero before decrementation'
+          raise Karafka::Errors::InvalidCoordinatorStateError, 'Was zero before decrementation'
         end
       end
 
