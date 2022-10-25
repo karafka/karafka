@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/processing/partitioner'
-require 'karafka/pro/routing/topic_extensions'
-
 RSpec.describe_current do
   it { expect(described_class).to be < Karafka::Processing::Partitioner }
 
@@ -14,7 +11,11 @@ RSpec.describe_current do
   let(:messages) { Array.new(100) { build(:messages_message) } }
 
   before do
-    topic.singleton_class.prepend Karafka::Pro::Routing::TopicExtensions
+    [
+      Karafka::Pro::Routing::Features::VirtualPartitions::Topic,
+      Karafka::Pro::Routing::Features::LongRunningJob::Topic
+    ].each { |feature| topic.singleton_class.prepend(feature) }
+
     ::Karafka::App.config.concurrency = concurrency
   end
 

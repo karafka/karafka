@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/processing/coordinator'
-
 RSpec.describe_current do
   subject(:coordinator) { described_class.new(pause_tracker) }
 

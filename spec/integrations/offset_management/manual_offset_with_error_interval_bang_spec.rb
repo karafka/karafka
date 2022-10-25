@@ -4,9 +4,7 @@
 # it had in the checkpoint, not from the beginning. We check here that this works well when we
 # commit "from time to time", not every message
 
-setup_karafka(allow_errors: true) do |config|
-  config.manual_offset_management = true
-end
+setup_karafka(allow_errors: true)
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -25,7 +23,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    manual_offset_management true
+  end
+end
 
 elements = DT.uuids(100)
 produce_many(DT.topic, elements)
