@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-# This Karafka component is a Pro component.
+# This Karafka component is a Pro component under a commercial license.
+# This Karafka component is NOT licensed under LGPL.
+#
 # All of the commercial components are present in the lib/karafka/pro directory of this
 # repository and their usage requires commercial license agreement.
 #
@@ -11,10 +13,14 @@
 
 module Karafka
   module Pro
-    # Namespace for Karafka Pro related contracts
-    module Contracts
-      # Base contract for Pro components contracts
-      class Base < ::Karafka::Contracts::Base
+    module Routing
+      module Features
+        class ProInheritance < Base
+          # Extensions to the topic. This feature is virtual (has only contract) but to follow
+          # the API for features, empty module is added
+          module Topic
+          end
+        end
       end
     end
   end

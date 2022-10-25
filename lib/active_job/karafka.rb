@@ -10,12 +10,6 @@ begin
     module Karafka
     end
   end
-
-  # We extend routing builder by adding a simple wrapper for easier jobs topics defining
-  # This needs to be extended here as it is going to be used in karafka routes, hence doing that in
-  # the railtie initializer would be too late
-  ::Karafka::Routing::Builder.include ::Karafka::ActiveJob::Routing::Extensions
-  ::Karafka::Routing::Proxy.include ::Karafka::ActiveJob::Routing::Extensions
 rescue LoadError
   # We extend ActiveJob stuff in the railtie
 end

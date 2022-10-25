@@ -68,8 +68,6 @@ module Karafka
       # option [String] should we start with the earliest possible offset or latest
       # This will set the `auto.offset.reset` value unless present in the kafka scope
       setting :initial_offset, default: 'earliest'
-      # option [Boolean] should we leave offset management to the user
-      setting :manual_offset_management, default: false
       # options max_messages [Integer] how many messages do we want to fetch from Kafka in one go
       setting :max_messages, default: 100
       # option [Integer] number of milliseconds we can wait while fetching data

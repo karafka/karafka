@@ -50,6 +50,10 @@ end
 
 require 'karafka'
 require 'active_job/karafka'
+require 'karafka/pro/loader'
+
+# This will make all the pro components visible but will not use them anywhere
+Karafka::Pro::Loader.require_all
 
 # We extend this manually since it's done by a Railtie that we do not run here
 ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions

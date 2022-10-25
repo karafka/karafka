@@ -24,7 +24,7 @@ begin
   draw_routes Class.new do
     active_job_topic 'test'
   end
-rescue NoMethodError
+rescue Karafka::Errors::InvalidConfigurationError
   extended_routing = false
 end
 

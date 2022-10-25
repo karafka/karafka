@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'karafka/pro/performance_tracker'
-require 'karafka/pro/processing/scheduler'
-
 RSpec.describe_current do
   let(:queue) { [] }
 
