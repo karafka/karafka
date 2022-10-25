@@ -98,6 +98,18 @@ end
 
 # Do not load vendors instrumentation components. Those need to be required manually if needed
 loader.ignore(Karafka.gem_root.join('lib/karafka/instrumentation/vendors'))
+
+# We may not want to load the railtie automatically in scenarios, where Karafka is being bundled
+# within a different gem that holds some common app logic. In scenarios like this, Railtie
+# should be required prior to Rails app initialization but after this common gem was included with
+# all its internal components.
+#
+# This also allows not to include/configure Karafka in Rails apps in contexts where it is may not
+# be needed. For example within web servers that neither publish nor consume from Kafka.
+if ENV.fetch('KARAFKA_RAILTIE_LOAD', true).to_s == 'false'
+  loader.ignore(Karafka.gem_root.join('lib/karafka/railtie.rb'))
+end
+
 loader.setup
 loader.eager_load
 
