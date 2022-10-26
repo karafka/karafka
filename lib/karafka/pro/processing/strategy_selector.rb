@@ -26,13 +26,14 @@ module Karafka
                                   .map { |k| Strategies.const_get(k) }
         end
 
-        # @param topic [Karafka::Routing::Topic] topic with settings based on which we find strategy
+        # @param topic [Karafka::Routing::Topic] topic with settings based on which we find
+        #   the strategy
         # @return [Module] module with proper strategy
         def find(topic)
           feature_set = features_map(topic)
 
           @available_strategies.find do |strategy|
-            strategy::FEATURES == feature_set
+            strategy::FEATURES.sort == feature_set
           end || raise(Errors::StrategyNotFoundError, topic.name)
         end
 
@@ -40,14 +41,15 @@ module Karafka
 
         # Builds features map used to find matching processing strategy
         #
+        # @param topic [Karafka::Routing::Topic]
         # @return [Array<Symbol>]
         def features_map(topic)
-          feature_set = [
+          [
             topic.active_job? ? :active_job : nil,
             topic.long_running_job? ? :long_running_job : nil,
             topic.manual_offset_management? ? :manual_offset_management : nil,
             topic.virtual_partitions? ? :virtual_partitions : nil
-          ].compact
+          ].compact.sort
         end
       end
     end

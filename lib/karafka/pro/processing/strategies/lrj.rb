@@ -64,8 +64,8 @@ module Karafka
           def handle_revoked
             coordinator.on_revoked do
               # We do not want to resume on revocation in case of a LRJ.
-              # For LRJ we resume after the successful processing or do a backoff pause in case of a
-              # failure. Double non-blocking resume could cause problems in coordination.
+              # For LRJ we resume after the successful processing or do a backoff pause in case of
+              # a failure. Double non-blocking resume could cause problems in coordination.
               coordinator.revoke
             end
           end

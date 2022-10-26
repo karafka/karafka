@@ -42,7 +42,7 @@ module Karafka
 
           # No offset management, aside from that typical LRJ
           def handle_after_consume
-            coordinator.on_finished do |last_group_message|
+            coordinator.on_finished do
               if coordinator.success?
                 coordinator.pause_tracker.reset
 

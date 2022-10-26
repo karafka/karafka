@@ -22,7 +22,7 @@ module Karafka
         ].compact
 
         @available_strategies.find do |strategy|
-          strategy::FEATURES == feature_set
+          strategy::FEATURES.sort == feature_set.sort
         end || raise(Errors::StrategyNotFoundError, topic.name)
       end
     end
