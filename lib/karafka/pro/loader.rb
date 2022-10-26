@@ -13,45 +13,40 @@
 
 module Karafka
   module Pro
+    module ActiveJob
+    end
+
+    module Processing
+      module Jobs
+      end
+
+      module Strategies
+      end
+    end
+
+    module Routing
+      module Features
+      end
+    end
+  end
+end
+
+module Karafka
+  module Pro
     # Loader requires and loads all the pro components only when they are needed
     class Loader
-      # All the pro components that need to be loaded
-      COMPONENTS = %w[
-        base_consumer
-        performance_tracker
-        processing/scheduler
-        processing/jobs/consume_non_blocking
-        processing/jobs_builder
-        processing/coordinator
-        processing/partitioner
+      # Zeitwerk pro loader
+      # We need to have one per process, that's why it's set as a constant
+      PRO_LOADER = Zeitwerk::Loader.new
 
-        routing/features/base
-
-        routing/features/virtual_partitions
-        routing/features/virtual_partitions/config
-        routing/features/virtual_partitions/topic
-        routing/features/virtual_partitions/contract
-
-        routing/features/long_running_job
-        routing/features/long_running_job/config
-        routing/features/long_running_job/topic
-        routing/features/long_running_job/contract
-
-        routing/features/pro_inheritance
-        routing/features/pro_inheritance/topic
-        routing/features/pro_inheritance/contract
-
-        active_job/consumer
-        active_job/dispatcher
-        active_job/job_options_contract
-      ].freeze
-
-      private_constant :COMPONENTS
+      private_constant :PRO_LOADER
 
       class << self
         # Requires all the components without using them anywhere
         def require_all
-          COMPONENTS.each { |component| require_relative(component) }
+          PRO_LOADER.push_dir(Karafka.core_root.join('pro'), namespace: Karafka::Pro)
+          PRO_LOADER.setup
+          PRO_LOADER.eager_load
         end
 
         # Loads all the pro components and configures them wherever it is expected
@@ -76,6 +71,7 @@ module Karafka
           icfg.processing.partitioner_class = Processing::Partitioner
           icfg.processing.scheduler = Processing::Scheduler.new
           icfg.processing.jobs_builder = Processing::JobsBuilder.new
+          icfg.processing.strategy_selector = Processing::StrategySelector.new
 
           icfg.active_job.consumer_class = ActiveJob::Consumer
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new
