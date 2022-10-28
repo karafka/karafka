@@ -7,6 +7,9 @@ RSpec.describe_current do
     {
       active_job: {
         active: false
+      },
+      manual_offset_management: {
+        active: true
       }
     }
   end
@@ -20,5 +23,14 @@ RSpec.describe_current do
     before { config[:active_job][:active] = true }
 
     it { expect(check).to be_success }
+  end
+
+  context 'when someone tries to use ActiveJob without manual offset management' do
+    before do
+      config[:active_job][:active] = true
+      config[:manual_offset_management][:active] = false
+    end
+
+    it { expect(check).not_to be_success }
   end
 end

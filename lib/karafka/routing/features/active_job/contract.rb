@@ -23,6 +23,17 @@ module Karafka
 
             [[%i[consumer], :active_job_missing]]
           end
+
+          # ActiveJob needs to always run with manual offset management
+          # Automatic offset management cannot work with ActiveJob. Otherwise we could mark as
+          # consumed jobs that did not run because of shutdown.
+          virtual do |data, errors|
+            next unless errors.empty?
+            next unless data[:active_job][:active]
+            next if data[:manual_offset_management][:active]
+
+            [[%i[manual_offset_management], :not_supported_with_active_job]]
+          end
         end
       end
     end
