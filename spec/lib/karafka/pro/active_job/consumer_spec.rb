@@ -2,15 +2,11 @@
 
 RSpec.describe_current do
   subject(:consumer) do
-    [
-      Karafka::Pro::Routing::Features::VirtualPartitions::Topic,
-      Karafka::Pro::Routing::Features::LongRunningJob::Topic
-    ].each { |feature| topic.singleton_class.prepend(feature) }
-
     described_class.new.tap do |instance|
       instance.client = client
       instance.coordinator = coordinator
       instance.topic = topic
+      instance.singleton_class.include(strategy)
     end
   end
 
@@ -22,6 +18,7 @@ RSpec.describe_current do
   let(:message2) { build(:messages_message, raw_payload: payload2.to_json) }
   let(:payload1) { { '1' => '2' } }
   let(:payload2) { { '3' => '4' } }
+  let(:strategy) { Karafka::Pro::Processing::Strategies::AjMom }
 
   before do
     coordinator.start(messages)
@@ -42,6 +39,8 @@ RSpec.describe_current do
     end
 
     context 'when it is a lrj' do
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+
       before do
         consumer.messages = messages
         topic.long_running_job true
@@ -111,6 +110,7 @@ RSpec.describe_current do
     context 'when messages are available but partition got revoked prior to processing' do
       before do
         consumer.messages = messages
+        consumer.coordinator.decrement
         consumer.on_revoked
 
         allow(client).to receive(:mark_as_consumed).with(messages.first).and_return(true)

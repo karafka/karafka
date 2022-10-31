@@ -6,28 +6,24 @@ RSpec.describe_current do
     instance.coordinator = coordinator
     instance.topic = topic
     instance.client = client
+    instance.singleton_class.include(strategy)
     instance
   end
 
+  let(:strategy) { Karafka::Pro::Processing::Strategies::Default }
   let(:coordinator) { build(:processing_coordinator_pro, seek_offset: nil) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true, seek: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:last_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:offset) { 123 }
-  let(:topic) do
-    build(:routing_topic).tap do |built|
-      [
-        Karafka::Pro::Routing::Features::VirtualPartitions::Topic,
-        Karafka::Pro::Routing::Features::LongRunningJob::Topic
-      ].each { |feature| built.singleton_class.prepend(feature) }
-    end
-  end
+  let(:topic) { build(:routing_topic) }
 
   let(:messages) do
     instance_double(
       Karafka::Messages::Messages,
       first: first_message,
       last: last_message,
+      count: 2,
       metadata: Karafka::Messages::BatchMetadata.new(
         topic: topic.name,
         partition: 0,
@@ -63,6 +59,8 @@ RSpec.describe_current do
   end
 
   describe '#on_before_enqueue for non LRU' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+
     before { allow(client).to receive(:pause) }
 
     it 'expect not to pause the partition' do
@@ -84,6 +82,8 @@ RSpec.describe_current do
   end
 
   describe '#on_consume and #on_after_consume for non LRU' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Mom }
+
     let(:consume_with_after) do
       lambda do
         consumer.on_before_enqueue
@@ -158,6 +158,8 @@ RSpec.describe_current do
     end
 
     context 'when everything went ok on consume with automatic offset management' do
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+
       before do
         topic.manual_offset_management false
         allow(client).to receive(:mark_as_consumed)
@@ -220,6 +222,8 @@ RSpec.describe_current do
   end
 
   describe '#on_before_enqueue for LRU' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+
     before do
       topic.long_running_job true
       allow(client).to receive(:pause)
@@ -233,6 +237,8 @@ RSpec.describe_current do
   end
 
   describe '#on_consume and #on_after_consume for LRU' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+
     let(:consume_with_after) do
       lambda do
         consumer.on_consume
@@ -251,6 +257,8 @@ RSpec.describe_current do
     end
 
     context 'when everything went ok on consume with manual offset management' do
+      let(:strategy) { Karafka::Pro::Processing::Strategies::LrjMom }
+
       before { topic.manual_offset_management true }
 
       it { expect { consume_with_after.call }.not_to raise_error }
@@ -277,6 +285,8 @@ RSpec.describe_current do
     end
 
     context 'when there was an error on consume with manual offset management' do
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Mom }
+
       let(:working_class) do
         ClassBuilder.inherit(described_class) do
           attr_reader :consumed
@@ -300,7 +310,6 @@ RSpec.describe_current do
         expect(client)
           .to have_received(:pause)
           .with(topic.name, first_message.partition, offset)
-          .twice
       end
 
       it 'expect to pause with time tracker' do
@@ -384,6 +393,8 @@ RSpec.describe_current do
   end
 
   context 'when revocation happens' do
+    before { consumer.coordinator.decrement }
+
     it 'expect to run user code' do
       consumer.on_revoked
       expect(consumer.handled_revoked).to eq(true)
