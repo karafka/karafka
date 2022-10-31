@@ -128,6 +128,7 @@ module Karafka
         ssl.key.pem
         ssl.keystore.location
         ssl.keystore.password
+        ssl.providers
         ssl.sigalgs.list
         ssl_ca
         ssl_certificate
@@ -259,6 +260,7 @@ module Karafka
         ssl.key.pem
         ssl.keystore.location
         ssl.keystore.password
+        ssl.providers
         ssl.sigalgs.list
         ssl_ca
         ssl_certificate
