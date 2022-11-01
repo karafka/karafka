@@ -4,11 +4,15 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
-create_topic(name: DT.topics[0])
+create_topic(name: DT.topics[0], partitions: 10)
 create_topic(name: DT.topics[1], partitions: 10)
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    messages.each do |message|
+      DT[:partitions] << message.partition
+    end
+
     raise StandardError
   end
 end
@@ -34,10 +38,13 @@ draw_routes do
   end
 end
 
-elements = DT.uuids(100)
-produce_many(DT.topic, elements)
+10.times do |i|
+  elements = DT.uuids(100)
+  produce_many(DT.topic, elements, partition: i)
+end
 
 start_karafka_and_wait_until do
+  DT[:partitions].uniq.count >= 2 &&
   DT[:broken].uniq.count >= 5
 end
 
