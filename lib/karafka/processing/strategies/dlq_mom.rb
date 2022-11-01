@@ -3,21 +3,15 @@
 module Karafka
   module Processing
     module Strategies
-      # When using dead letter queue, processing won't stop after defined number of retries
-      # upon encountering non-critical errors but the messages that error will be moved to a
-      # separate topic with their payload and metadata, so they can be handled differently.
-      module Dlq
-        include Base
+      # Same as pure dead letter queue but we do not marked failed message as consumed
+      module DlqMom
+        include Dlq
 
-        # Apply strategy when only dead letter queue is turned on
+        # Apply strategy when dlq is on with manual offset management
         FEATURES = %i[
           dead_letter_queue
+          manual_offset_management
         ].freeze
-
-        # No actions needed for the standard flow here
-        def handle_before_enqueue
-          nil
-        end
 
         # When manual offset management is on, we do not mark anything as consumed automatically
         # and we rely on the user to figure things out
@@ -26,8 +20,6 @@ module Karafka
 
           if coordinator.success?
             coordinator.pause_tracker.reset
-
-            mark_as_consumed(messages.last)
           else
             # If we can still retry, just pause and try again
             if coordinator.pause_tracker.count < topic.dead_letter_queue.max_retries
@@ -52,26 +44,10 @@ module Karafka
                 headers: broken.headers
               )
 
-              # We mark the broken message as consumed and move on
-              mark_as_consumed(
-                Messages::Seek.new(
-                  topic.name,
-                  messages.metadata.partition,
-                  coordinator.seek_offset
-                )
-              )
-
               # We pause to backoff once just in case.
               pause(coordinator.seek_offset)
             end
           end
-        end
-
-        # Same as default
-        def handle_revoked
-          resume
-
-          coordinator.revoke
         end
       end
     end
