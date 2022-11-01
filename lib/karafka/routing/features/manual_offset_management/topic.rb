@@ -17,7 +17,7 @@ module Karafka
 
           # @return [Boolean] is manual offset management enabled for a given topic
           def manual_offset_management?
-            @manual_offset_management.active?
+            manual_offset_management.active?
           end
 
           # @return [Hash] topic with all its native configuration options plus manual offset

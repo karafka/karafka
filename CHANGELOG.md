@@ -12,6 +12,7 @@
 - Fix a case when upon Pro ActiveJob usage with Virtual Partitions, correct offset would not be stored
 - Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
 - Introduce `KARAFKA_RAILTIE_LOAD` to skip Rails Railtie autoload for granular loading process control.
+- Extract supported features combinations processing flow into separate strategies.
 
 ### Upgrade notes
 
