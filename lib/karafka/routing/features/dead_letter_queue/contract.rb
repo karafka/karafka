@@ -11,7 +11,7 @@ module Karafka
               File.read(
                 File.join(Karafka.gem_root, 'config', 'errors.yml')
               )
-            ).fetch('en').fetch('validations').fetch('topic')
+            ).fetch('en').fetch('validations').fetch('pro_topic')
           end
 
           nested :dead_letter_queue do
