@@ -20,13 +20,6 @@ RSpec.describe_current do
       end
     end
 
-    context 'when we do not load pro' do
-      it 'expect to use non-pro defaults' do
-        expect(aj_config.dispatcher).to be_a(Karafka::ActiveJob::Dispatcher)
-        expect(aj_config.job_options_contract).to be_a(Karafka::ActiveJob::JobOptionsContract)
-      end
-    end
-
     context 'when we run loader' do
       before do
         allow(::Karafka::Pro::Routing::Features::VirtualPartitions).to receive(:activate)

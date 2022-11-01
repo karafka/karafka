@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:topic) do
-    build(:routing_topic).tap do |topic|
-      topic.singleton_class.prepend described_class
-    end
-  end
+  subject(:topic) { build(:routing_topic) }
 
   describe '#virtual_partitions' do
     context 'when we use virtual_partitions without any arguments' do

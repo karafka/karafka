@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+SPECS_TYPE=regular bundle exec rspec --tag ~type:pro
+SPECS_TYPE=pro bundle exec rspec --tag type:pro
