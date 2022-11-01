@@ -65,10 +65,9 @@ GEM
       karafka-core (>= 2.0.2, < 3.0.0)
       rdkafka (>= 0.10)
       zeitwerk (~> 2.3)
-    zeitwerk (2.6.1)
+    zeitwerk (2.6.3)
 
 PLATFORMS
-  arm64-darwin
   x86_64-linux
 
 DEPENDENCIES

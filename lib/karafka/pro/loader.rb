@@ -11,30 +11,21 @@
 # By sending a pull request to the pro components, you are agreeing to transfer the copyright of
 # your code to Maciej Mensfeld.
 
-module Karafka
-  module Pro
-    module ActiveJob
-    end
-
-    module Processing
-      module Jobs
-      end
-
-      module Strategies
-      end
-    end
-
-    module Routing
-      module Features
-      end
-    end
-  end
-end
 
 module Karafka
   module Pro
     # Loader requires and loads all the pro components only when they are needed
     class Loader
+      # There seems to be a conflict in between using two Zeitwerk instances and it makes lookups
+      # for nested namespaces instead of creating them.
+      # We require those not to deal with this and then all works as expected
+      FORCE_LOADED = %w[
+        active_job/dispatcher
+        processing/jobs/consume_non_blocking
+        processing/strategies/base
+        routing/features/base
+      ].freeze
+
       # Zeitwerk pro loader
       # We need to have one per process, that's why it's set as a constant
       PRO_LOADER = Zeitwerk::Loader.new
@@ -44,6 +35,8 @@ module Karafka
       class << self
         # Requires all the components without using them anywhere
         def require_all
+          FORCE_LOADED.each { |file| require_relative(file) }
+
           PRO_LOADER.push_dir(Karafka.core_root.join('pro'), namespace: Karafka::Pro)
           PRO_LOADER.setup
           PRO_LOADER.eager_load

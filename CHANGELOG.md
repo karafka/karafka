@@ -14,6 +14,7 @@
 - Extract supported features combinations processing flow into separate strategies.
 - Delegate pro components loading to Zeitwerk
 - Fix a case where upon Virtual Partitions usage, same underlying real partition would be resumed several times.
+- Split specs into regular and pro to simplify how resources are loaded
 
 ### Upgrade notes
 
