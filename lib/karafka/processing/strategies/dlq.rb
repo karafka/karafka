@@ -7,17 +7,12 @@ module Karafka
       # upon encountering non-critical errors but the messages that error will be moved to a
       # separate topic with their payload and metadata, so they can be handled differently.
       module Dlq
-        include Base
+        include Default
 
         # Apply strategy when only dead letter queue is turned on
         FEATURES = %i[
           dead_letter_queue
         ].freeze
-
-        # No actions needed for the standard flow here
-        def handle_before_enqueue
-          nil
-        end
 
         # When manual offset management is on, we do not mark anything as consumed automatically
         # and we rely on the user to figure things out
@@ -39,17 +34,7 @@ module Karafka
               # We reset the pause to indicate we will now consider it as "ok".
               coordinator.pause_tracker.reset
 
-              # Find the first message that was not marked as consumed
-              broken = messages.find { |message| message.offset == coordinator.seek_offset }
-
-              # Failsafe, should never happen
-              broken || raise(Errors::SkipMessageNotFoundError, topic.name)
-
-              # Move broken message into the dead letter topic
-              producer.produce_async(
-                topic: topic.dead_letter_queue.topic,
-                payload: broken.raw_payload
-              )
+              copy_broken_message_to_dlq
 
               # We mark the broken message as consumed and move on
               mark_as_consumed(
@@ -60,17 +45,26 @@ module Karafka
                 )
               )
 
+              return if revoked?
+
               # We pause to backoff once just in case.
               pause(coordinator.seek_offset)
             end
           end
         end
 
-        # Same as default
-        def handle_revoked
-          resume
+        def copy_broken_message_to_dlq
+          # Find the first message that was not marked as consumed
+          broken = messages.find { |message| message.offset == coordinator.seek_offset }
 
-          coordinator.revoke
+          # Failsafe, should never happen
+          broken || raise(Errors::SkipMessageNotFoundError, topic.name)
+
+          # Move broken message into the dead letter topic
+          producer.produce_async(
+            topic: topic.dead_letter_queue.topic,
+            payload: broken.raw_payload
+          )
         end
       end
     end

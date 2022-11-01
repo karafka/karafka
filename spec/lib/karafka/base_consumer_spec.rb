@@ -72,12 +72,14 @@ RSpec.describe_current do
       consumer.coordinator = coordinator
       consumer.client = client
       consumer.messages = messages
-      consumer.singleton_class.include(Karafka::Processing::Strategies::Mom)
       allow(coordinator.pause_tracker).to receive(:pause)
     end
 
     context 'when everything went ok on consume with manual offset management' do
-      before { topic.manual_offset_management true }
+      before do
+        consumer.singleton_class.include(Karafka::Processing::Strategies::Mom)
+        topic.manual_offset_management true
+      end
 
       it { expect { consume_with_after.call }.not_to raise_error }
 
@@ -97,6 +99,8 @@ RSpec.describe_current do
     end
 
     context 'when there was an error on consume with manual offset management' do
+      before { consumer.singleton_class.include(Karafka::Processing::Strategies::Mom) }
+
       let(:working_class) do
         ClassBuilder.inherit(described_class) do
           attr_reader :consumed
@@ -151,8 +155,8 @@ RSpec.describe_current do
       end
     end
 
-    context 'when there was an error on consume with automatic offset management' do
-      before { topic.manual_offset_management false }
+    context 'when there was an error on consume with manual offset management' do
+      before { consumer.singleton_class.include(Karafka::Processing::Strategies::Mom) }
 
       let(:working_class) do
         ClassBuilder.inherit(described_class) do
