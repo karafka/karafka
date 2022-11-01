@@ -15,6 +15,7 @@
 - Delegate pro components loading to Zeitwerk
 - Fix a case where upon Virtual Partitions usage, same underlying real partition would be resumed several times.
 - Split specs into regular and pro to simplify how resources are loaded
+- Introduce dead letter queue feature (regular version only)
 
 ### Upgrade notes
 

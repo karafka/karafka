@@ -8,6 +8,7 @@ module Karafka
         module Topic
           # @param active [Boolean] should we stop managing the offset in Karafka and make the user
           #   responsible for marking messages as consumed.
+          # @return [Config] defined config
           #
           # @note Since this feature supports only one setting (active), we can use the old API
           # where the boolean would be an argument

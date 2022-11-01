@@ -38,6 +38,9 @@ en:
       manual_offset_management.active_format: needs to be either true or false
       consumer_active_job_missing: ActiveJob needs to be available
       manual_offset_management_not_supported_with_active_job: cannot be disabled for ActiveJob topics
+      dead_letter_queue.max_retries_format: needs to be equal or bigger than 0
+      dead_letter_queue.topic_format: 'needs to be a string with a Kafka accepted format'
+      dead_letter_queue.active_format: needs to be either true or false
 
     consumer_group:
       missing: needs to be present
