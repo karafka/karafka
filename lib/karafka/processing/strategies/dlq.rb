@@ -34,16 +34,13 @@ module Karafka
               # We reset the pause to indicate we will now consider it as "ok".
               coordinator.pause_tracker.reset
 
-              copy_broken_message_to_dlq
+              skippable_message = find_skippable_message
+
+              # Send skippable message to the dql topic
+              copy_skippable_message_to_dlq(skippable_message)
 
               # We mark the broken message as consumed and move on
-              mark_as_consumed(
-                Messages::Seek.new(
-                  topic.name,
-                  messages.metadata.partition,
-                  coordinator.seek_offset
-                )
-              )
+              mark_as_consumed(skippable_message)
 
               return if revoked?
 
@@ -53,17 +50,19 @@ module Karafka
           end
         end
 
-        def copy_broken_message_to_dlq
-          # Find the first message that was not marked as consumed
-          broken = messages.find { |message| message.offset == coordinator.seek_offset }
+        # Finds the message we want to skip
+        # @private
+        def find_skippable_message
+          skippable_message = messages.find { |message| message.offset == coordinator.seek_offset }
+          skippable_message || raise(Errors::SkipMessageNotFoundError, topic.name)
+        end
 
-          # Failsafe, should never happen
-          broken || raise(Errors::SkipMessageNotFoundError, topic.name)
-
-          # Move broken message into the dead letter topic
+        # Finds and moves the broken message into a separate queue defined via the settings
+        # @private
+        def copy_skippable_message_to_dlq(skippable_message)
           producer.produce_async(
             topic: topic.dead_letter_queue.topic,
-            payload: broken.raw_payload
+            payload: skippable_message.raw_payload
           )
         end
       end

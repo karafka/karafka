@@ -31,17 +31,8 @@ module Karafka
               # We reset the pause to indicate we will now consider it as "ok".
               coordinator.pause_tracker.reset
 
-              # Find the first message that was not marked as consumed
-              broken = messages.find { |message| message.offset == coordinator.seek_offset }
-
-              # Failsafe, should never happen
-              broken || raise(Errors::SkipMessageNotFoundError, topic.name)
-
-              # Move broken message into the dead letter topic
-              producer.produce_async(
-                topic: topic.dead_letter_queue.topic,
-                payload: broken.raw_payload
-              )
+              skippable_message = find_skippable_message
+              copy_skippable_message_to_dlq(skippable_message)
 
               # We pause to backoff once just in case.
               pause(coordinator.seek_offset)
