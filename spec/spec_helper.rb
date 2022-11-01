@@ -28,7 +28,7 @@ SimpleCov.start do
   add_filter '/processing/strategies'
 
   # enable_coverage :branch
-  command_name "#{ENV['TYPE']}"
+  command_name ENV.fetch('SPECS_TYPE', 'default')
   merge_timeout 3600
 end
 
