@@ -18,7 +18,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[:broken] << [message.offset, message.raw_payload, message.headers]
+      DT[:broken] << [message.offset, message.raw_payload]
     end
   end
 end
@@ -43,8 +43,7 @@ Karafka.monitor.subscribe('error.occurred') do |event|
 end
 
 elements = DT.uuids(100)
-details = { headers: { 'ping' => 'pong' } }
-produce_many(DT.topic, elements, details)
+produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
   DT[:offsets].uniq.count >= 100

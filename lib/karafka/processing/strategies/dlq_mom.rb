@@ -40,8 +40,7 @@ module Karafka
               # Move broken message into the dead letter topic
               producer.produce_async(
                 topic: topic.dead_letter_queue.topic,
-                payload: broken.raw_payload,
-                headers: broken.headers
+                payload: broken.raw_payload
               )
 
               # We pause to backoff once just in case.

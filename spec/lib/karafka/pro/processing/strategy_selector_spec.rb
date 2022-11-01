@@ -102,4 +102,10 @@ RSpec.describe_current do
 
     it { expect { selected_strategy }.to raise_error(Karafka::Errors::StrategyNotFoundError) }
   end
+
+  context 'when dlq is enabled' do
+    before { topic.dead_letter_queue(topic: 'test') }
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq) }
+  end
 end

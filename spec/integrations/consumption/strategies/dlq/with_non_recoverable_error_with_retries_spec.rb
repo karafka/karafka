@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When dead letter queue is used and we encounter non-recoverable message, we should skip it after
-# retries and move the broken message to a separate topic with its headers and payload
+# retries and move the broken message to a separate topic
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
@@ -23,7 +23,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[:broken] << [message.offset, message.raw_payload, message.headers]
+      DT[:broken] << [message.offset, message.raw_payload]
     end
   end
 end
@@ -46,8 +46,7 @@ Karafka.monitor.subscribe('error.occurred') do |event|
 end
 
 elements = DT.uuids(100)
-details = { headers: { 'ping' => 'pong' } }
-produce_many(DT.topic, elements, details)
+produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
   DT[:offsets].uniq.count >= 99 &&
@@ -64,5 +63,3 @@ assert_equal 1, DT[:broken].size
 # This message will get new offset (first)
 assert_equal DT[:broken][0][0], 0
 assert_equal DT[:broken][0][1], elements[10]
-# Make sure headers are the same
-assert_equal DT[:broken][0][2], { 'ping' => 'pong' }

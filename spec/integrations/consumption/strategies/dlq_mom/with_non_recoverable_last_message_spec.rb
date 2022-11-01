@@ -22,7 +22,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[:broken] << [message.offset, message.raw_payload, message.headers]
+      DT[:broken] << [message.offset, message.raw_payload]
     end
   end
 end
@@ -47,8 +47,7 @@ Karafka.monitor.subscribe('error.occurred') do |event|
 end
 
 elements = DT.uuids(100)
-details = { headers: { 'ping' => 'pong' } }
-produce_many(DT.topic, elements, details)
+produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
   # Send one more when we reached all
@@ -72,5 +71,3 @@ assert_equal 1, DT[:broken].size
 # This message will get new offset (first)
 assert_equal DT[:broken][0][0], 0
 assert_equal DT[:broken][0][1], elements[99]
-# Make sure headers are the same
-assert_equal DT[:broken][0][2], { 'ping' => 'pong' }

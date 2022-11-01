@@ -76,7 +76,7 @@ RSpec.describe_current do
   describe '#on_process_notice_signal' do
     subject(:trigger) { listener.on_process_notice_signal(event) }
 
-    let(:payload) { { signal: -1 } }
+    let(:payload) { { signal: :SIGTTIN } }
     let(:message) { "Received #{event[:signal]} system signal" }
 
     it 'expect logger to log proper message' do
