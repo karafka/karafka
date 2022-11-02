@@ -56,7 +56,7 @@ start_karafka_and_wait_until do
     DT[:broken].last[1] == elements[10]
 end
 
-# first error, retry and same for more messages from batch previos to failing
+# first error, retry and same for more messages from batch previous to failing
 assert DT[:errors].count > 3
 
 # we should not have the message that was failing

@@ -47,7 +47,7 @@ module Karafka
                 # Find the first message that was not marked as consumed
                 broken = messages.find { |message| message.offset == coordinator.seek_offset }
 
-                # Failsafe, should never happen
+                # Fail-safe, should never happen
                 broken || raise(Errors::SkipMessageNotFoundError, topic.name)
 
                 case topic.dead_letter_queue.skip

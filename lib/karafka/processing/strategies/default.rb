@@ -27,7 +27,6 @@ module Karafka
           if coordinator.success?
             coordinator.pause_tracker.reset
 
-
             mark_as_consumed(messages.last)
           else
             pause(coordinator.seek_offset)

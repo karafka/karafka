@@ -45,7 +45,7 @@ RSpec.describe_current do
       it { expect(topic.dead_letter_queue?).to eq(false) }
     end
 
-    context 'when not active' do
+    context 'when active' do
       before { topic.dead_letter_queue(topic: 'test') }
 
       it { expect(topic.dead_letter_queue?).to eq(true) }

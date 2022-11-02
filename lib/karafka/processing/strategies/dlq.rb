@@ -23,30 +23,27 @@ module Karafka
             coordinator.pause_tracker.reset
 
             mark_as_consumed(messages.last)
+          elsif coordinator.pause_tracker.count < topic.dead_letter_queue.max_retries
+            pause(coordinator.seek_offset)
+          # If we've reached number of retries that we could, we need to skip the first message
+          # that was not marked as consumed, pause and continue, while also moving this message
+          # to the dead topic
           else
-            # If we can still retry, just pause and try again
-            if coordinator.pause_tracker.count < topic.dead_letter_queue.max_retries
-              pause(coordinator.seek_offset)
-            # If we've reached number of retries that we could, we need to skip the first message
-            # that was not marked as consumed, pause and continue, while also moving this message
-            # to the dead topic
-            else
-              # We reset the pause to indicate we will now consider it as "ok".
-              coordinator.pause_tracker.reset
+            # We reset the pause to indicate we will now consider it as "ok".
+            coordinator.pause_tracker.reset
 
-              skippable_message = find_skippable_message
+            skippable_message = find_skippable_message
 
-              # Send skippable message to the dql topic
-              copy_skippable_message_to_dlq(skippable_message)
+            # Send skippable message to the dql topic
+            copy_skippable_message_to_dlq(skippable_message)
 
-              # We mark the broken message as consumed and move on
-              mark_as_consumed(skippable_message)
+            # We mark the broken message as consumed and move on
+            mark_as_consumed(skippable_message)
 
-              return if revoked?
+            return if revoked?
 
-              # We pause to backoff once just in case.
-              pause(coordinator.seek_offset)
-            end
+            # We pause to backoff once just in case.
+            pause(coordinator.seek_offset)
           end
         end
 
@@ -58,6 +55,8 @@ module Karafka
         end
 
         # Finds and moves the broken message into a separate queue defined via the settings
+        # @param skippable_message [Karafka::Messages::Message] message we are skipping that also
+        #   should go to the dlq topic
         # @private
         def copy_skippable_message_to_dlq(skippable_message)
           producer.produce_async(

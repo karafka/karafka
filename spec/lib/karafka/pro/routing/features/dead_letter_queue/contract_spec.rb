@@ -23,8 +23,8 @@ RSpec.describe_current do
     it { expect(check).to be_success }
   end
 
-  context 'when we want to skip batch' do
-    before { config[:dead_letter_queue][:skip] = :batch }
+  context 'when we want to skip one' do
+    before { config[:dead_letter_queue][:skip] = :one }
 
     it { expect(check).to be_success }
   end

@@ -56,7 +56,6 @@ start_karafka_and_wait_until do
     produce(DT.topic, SecureRandom.uuid)
   end
 
-
   DT[:offsets].uniq.count >= 100 &&
     DT[:broken].size >= 1
 end
