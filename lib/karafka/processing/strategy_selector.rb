@@ -17,12 +17,12 @@ module Karafka
       def find(topic)
         # ActiveJob usage is not a feature that would impact the strategy. ActiveJob always goes
         # with manual offset management.
-        combo = [
+        feature_set = [
           topic.manual_offset_management? ? :manual_offset_management : nil
         ].compact
 
         @available_strategies.find do |strategy|
-          strategy::FEATURES == combo
+          strategy::FEATURES.sort == feature_set.sort
         end || raise(Errors::StrategyNotFoundError, topic.name)
       end
     end

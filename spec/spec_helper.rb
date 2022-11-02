@@ -27,7 +27,9 @@ SimpleCov.start do
   # We do not spec strategies here. We do it via integration test suite
   add_filter '/processing/strategies'
 
-  merge_timeout 600
+  # enable_coverage :branch
+  command_name ENV.fetch('SPECS_TYPE', 'default')
+  merge_timeout 3600
 end
 
 SimpleCov.minimum_coverage(94)
@@ -49,6 +51,12 @@ RSpec.configure do |config|
   # cleared not to spam and break test-suit
   config.before { Karafka.monitor.notifications_bus.clear }
   config.after { Karafka.monitor.notifications_bus.clear }
+
+  config.before do |example|
+    next unless example.metadata[:type] == :pro
+
+    Karafka::Pro::Loader.setup(Karafka::App.config)
+  end
 end
 
 require 'karafka'

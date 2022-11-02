@@ -10,14 +10,7 @@ RSpec.describe_current do
   let(:topic) { subscription_group.topics.first }
   let(:messages) { Array.new(100) { build(:messages_message) } }
 
-  before do
-    [
-      Karafka::Pro::Routing::Features::VirtualPartitions::Topic,
-      Karafka::Pro::Routing::Features::LongRunningJob::Topic
-    ].each { |feature| topic.singleton_class.prepend(feature) }
-
-    ::Karafka::App.config.concurrency = concurrency
-  end
+  before { ::Karafka::App.config.concurrency = concurrency }
 
   after { ::Karafka::App.config.concurrency = 1 }
 

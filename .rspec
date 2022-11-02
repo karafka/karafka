@@ -1,3 +1,5 @@
 --require spec_helper
 # Integration specs run with their one framework, not via RSpec
 --exclude-pattern "spec/integrations/**/*_spec.rb"
+# Do not run pro at the same time as default specs as it would cause state conflicts
+--tag ~type:pro

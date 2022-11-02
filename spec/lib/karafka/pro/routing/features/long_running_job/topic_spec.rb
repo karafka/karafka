@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:topic) do
-    build(:routing_topic).tap do |topic|
-      topic.singleton_class.prepend described_class
-    end
-  end
+  subject(:topic) { build(:routing_topic) }
 
   describe '#long_running_job' do
     context 'when we use long_running_job without any arguments' do

@@ -20,50 +20,42 @@ module Karafka
     # @note In case of using lrj, manual pausing may not be the best idea as resume needs to happen
     #   after each batch is processed.
     class BaseConsumer < Karafka::BaseConsumer
-      # Pause for tops 31 years
-      MAX_PAUSE_TIME = 1_000_000_000_000
-
-      private_constant :MAX_PAUSE_TIME
-
-      # Pauses processing of a given partition until we're done with the processing.
-      # This ensures, that we can easily poll not reaching the `max.poll.interval`
-      # @note This needs to happen in the listener thread, because we cannot wait on this being
-      #   executed in the workers. Workers may be already running some LRJ jobs that are blocking
-      #   all the threads until finished, yet unless we pause the incoming partitions information,
-      #   we may be kicked out of the consumer group due to not polling often enough
+      # Can be used to run preparation code prior to the job being enqueued
+      #
+      # @private
+      # @note This should not be used by the end users as it is part of the lifecycle of things and
+      #   not as a part of the public api. This should not perform any extensive operations as it
+      #   is blocking and running in the listener thread.
       def on_before_enqueue
-        return unless topic.long_running_job?
-
-        # This ensures that when running LRJ with VP, things operate as expected run only once
-        # for all the virtual partitions collectively
-        coordinator.on_enqueued do
-          # Pause at the first message in a batch. That way in case of a crash, we will not loose
-          # any messages.
-          #
-          # For VP it applies the same way and since VP cannot be used with MOM we should not have
-          # any edge cases here.
-          pause(coordinator.seek_offset, MAX_PAUSE_TIME)
-        end
+        handle_before_enqueue
+      rescue StandardError => e
+        Karafka.monitor.instrument(
+          'error.occurred',
+          error: e,
+          caller: self,
+          type: 'consumer.before_enqueue.error'
+        )
       end
 
-      # Runs extra logic after consumption that is related to handling long-running jobs
-      # @note This overwrites the '#on_after_consume' from the base consumer
+      # @private
+      # @note This should not be used by the end users as it is part of the lifecycle of things but
+      #   not as part of the public api.
       def on_after_consume
-        coordinator.on_finished do |last_group_message|
-          on_after_consume_regular(last_group_message)
-        end
+        handle_after_consume
+      rescue StandardError => e
+        Karafka.monitor.instrument(
+          'error.occurred',
+          error: e,
+          caller: self,
+          type: 'consumer.after_consume.error'
+        )
       end
 
       # Trigger method for running on partition revocation.
       #
       # @private
       def on_revoked
-        # We do not want to resume on revocation in case of a LRJ.
-        # For LRJ we resume after the successful processing or do a backoff pause in case of a
-        # failure. Double non-blocking resume could cause problems in coordination.
-        resume unless topic.long_running_job?
-
-        coordinator.revoke
+        handle_revoked
 
         Karafka.monitor.instrument('consumer.revoked', caller: self) do
           revoked
@@ -75,45 +67,6 @@ module Karafka
           caller: self,
           type: 'consumer.revoked.error'
         )
-      end
-
-      private
-
-      # Handles the post-consumption flow depending on topic settings
-      #
-      # @param last_group_message [Karafka::Messages::Message]
-      def on_after_consume_regular(last_group_message)
-        if coordinator.success?
-          coordinator.pause_tracker.reset
-
-          # We use the non-blocking one here. If someone needs the blocking one, can implement it
-          # with manual offset management
-          # Mark as consumed only if manual offset management is not on
-          mark_as_consumed(last_group_message) unless topic.manual_offset_management? || revoked?
-
-          # When this is an ActiveJob running via Pro with virtual partitions, we cannot mark
-          # intermediate jobs as processed not to mess up with the ordering.
-          # Only when all the jobs are processed and we did not loose the partition assignment and
-          # we are not stopping (Pro ActiveJob has an early break) we can commit offsets on
-          # this as only then we can be sure, that all the jobs were processed.
-          # For a non virtual partitions case, the flow is regular and state is marked after each
-          # successfully processed job
-          if topic.active_job? && topic.virtual_partitions? && !revoked? && !Karafka::App.stopping?
-            mark_as_consumed(last_group_message)
-          end
-
-          # If this is not a long-running job there is nothing for us to do here
-          return unless topic.long_running_job?
-
-          seek(coordinator.seek_offset) unless revoked?
-
-          resume
-        else
-          # If processing failed, we need to pause
-          # For long running job this will overwrite the default never-ending pause and will cause
-          # the processing to keep going after the error backoff
-          pause(coordinator.seek_offset)
-        end
       end
     end
   end

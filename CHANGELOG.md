@@ -13,6 +13,9 @@
 - Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
 - Introduce `KARAFKA_RAILTIE_LOAD` to skip Rails Railtie autoload for granular loading process control.
 - Extract supported features combinations processing flow into separate strategies.
+- Delegate pro components loading to Zeitwerk
+- Fix a case where upon Virtual Partitions usage, same underlying real partition would be resumed several times.
+- Split specs into regular and pro to simplify how resources are loaded
 
 ### Upgrade notes
 
