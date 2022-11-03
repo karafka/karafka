@@ -44,55 +44,50 @@ module Karafka
                 # We reset the pause to indicate we will now consider it as "ok".
                 coordinator.pause_tracker.reset
 
-                # Find the first message that was not marked as consumed
-                broken = messages.find { |message| message.offset == coordinator.seek_offset }
-
-                # Fail-safe, should never happen
-                broken || raise(Errors::SkipMessageNotFoundError, topic.name)
+                first_skippable = find_first_skippable_message
 
                 case topic.dead_letter_queue.skip
                 when :one
-                  # Move broken message into the dead letter topic
-                  producer.produce_async(
-                    topic: topic.dead_letter_queue.topic,
-                    payload: broken.raw_payload,
-                    # Include original metadata
-                    metadata: broken.metadata,
-                    # Support strong ordering
-                    key: broken.partition
-                  )
-
-                  # We mark the broken message as consumed and move on
-                  mark_as_consumed(
-                    Messages::Seek.new(
-                      topic.name,
-                      messages.metadata.partition,
-                      coordinator.seek_offset
-                    )
-                  )
+                  skippables = [first_skippable]
                 when :many
-                  messages
-                    .select { |message| message.offset >= broken.offset }
-                    .each do |message|
-                      producer.produce_async(
-                        topic: topic.dead_letter_queue.topic,
-                        payload: broken.raw_payload,
-                        # Include original metadata
-                        metadata: broken.metadata,
-                        # Support strong ordering
-                        key: broken.partition
-                      )
+                  skippables = messages.select do |message|
+                    message.offset >= first_skippable.offset
                   end
-
-                  mark_as_consumed(messages.last)
                 else
                   raise Errors::UnsupportedCaseError, topic.dead_letter_queue.skip
                 end
 
-                # We pause to backoff once just in case.
+                copy_skippable_messages_to_dlq(skippables)
+                mark_as_consumed(skippables.last)
                 pause(coordinator.seek_offset)
               end
             end
+          end
+
+          # Finds the message we want to skip
+          # @private
+          def find_first_skippable_message
+            skippable_message = messages.find { |message| message.offset == coordinator.seek_offset }
+            skippable_message || raise(Errors::SkipMessageNotFoundError, topic.name)
+          end
+
+          # Finds and moves the broken message into a separate queue defined via the settings
+          # @private
+          # @param skippable_message [Karafka::Messages::Message] message we are skipping that also
+          #   should go to the dlq topic
+          def copy_skippable_messages_to_dlq(skippable_messages)
+            dispatch = skippable_messages.map do |skippable_message|
+              {
+                topic: topic.dead_letter_queue.topic,
+                payload: skippable_message.raw_payload,
+                headers: skippable_message.headers.merge(
+                  'original-partition' => skippable_message.partition.to_s
+                ),
+                key: skippable_message.partition.to_s
+              }
+            end
+
+            producer.produce_many_async(dispatch)
           end
         end
       end

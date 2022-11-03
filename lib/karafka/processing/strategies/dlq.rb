@@ -55,9 +55,9 @@ module Karafka
         end
 
         # Finds and moves the broken message into a separate queue defined via the settings
+        # @private
         # @param skippable_message [Karafka::Messages::Message] message we are skipping that also
         #   should go to the dlq topic
-        # @private
         def copy_skippable_message_to_dlq(skippable_message)
           producer.produce_async(
             topic: topic.dead_letter_queue.topic,
