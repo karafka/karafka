@@ -1,5 +1,6 @@
 require 'bundler'
-Bundler.setup(:default, :test, :integrations)
+
+Bundler.require(:default, :test, :integrations)
 
 require 'karafka'
 require_relative './integrations_helper'
