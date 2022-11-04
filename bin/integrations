@@ -187,9 +187,9 @@ class Scenario
 
       FileUtils.cp_r("#{path.dirname}/.", temp_dir)
 
-      [envvars, 'bundle', 'exec', 'ruby', '-r', ROOT_PATH.join('spec/integrations_helper.rb').to_s, path.to_s, {chdir: temp_dir}]
+      [envvars, 'bundle', 'exec', 'ruby', ROOT_PATH.join('spec/runner.rb').to_s, path.to_s, {chdir: temp_dir}]
     else
-      [envvars, 'bundle', 'exec', 'ruby', '-r', ROOT_PATH.join('spec/integrations_helper.rb').to_s, path.to_s]
+      [envvars, 'bundle', 'exec', 'ruby', ROOT_PATH.join('spec/runner.rb').to_s, path.to_s]
     end
   end
 
