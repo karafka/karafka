@@ -15,26 +15,25 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # DLQ enabled
-        # Long-Running Job enabled
-        module DlqLrj
-          # Order here matters, lrj needs to be second
-          include Dlq
-          include Lrj
+        # Strategy for supporting DLQ with Mom and LRJ enabled
+        module DlqLrjMom
+          # This strategy needs to pause and revoke same way as DlqLrj but without the offset
+          # management
+          include DlqLrj
 
           # Features for this strategy
           FEATURES = %i[
             dead_letter_queue
             long_running_job
+            manual_offset_management
           ].freeze
 
-          # LRJ standard flow after consumption with DLQ dispatch
+          # LRJ standard flow after consumption with DLQ dispatch and no offset management
           def handle_after_consume
             coordinator.on_finished do |last_group_message|
               if coordinator.success?
                 coordinator.pause_tracker.reset
 
-                mark_as_consumed(last_group_message) unless revoked?
                 seek(coordinator.seek_offset) unless revoked?
 
                 resume
@@ -47,11 +46,8 @@ module Karafka
 
                 unless revoked?
                   copy_skippable_message_to_dlq(skippable_message)
-                  mark_as_consumed(skippable_message)
+                  seek(coordinator.seek_offset)
                 end
-
-                # This revoke might have changed state due to marking, hence checked again
-                seek(coordinator.seek_offset) unless revoked?
 
                 resume
               end
