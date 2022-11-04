@@ -12,6 +12,9 @@
 - Fix a case when upon Pro ActiveJob usage with Virtual Partitions, correct offset would not be stored
 - Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
 - Extract supported features combinations processing flow into separate strategies.
+- Delegate pro components loading to Zeitwerk
+- Fix a case where upon Virtual Partitions usage, same underlying real partition would be resumed several times.
+- Split specs into regular and pro to simplify how resources are loaded
 
 ### Upgrade notes
 

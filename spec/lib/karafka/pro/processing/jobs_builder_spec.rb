@@ -6,13 +6,6 @@ RSpec.describe_current do
   let(:executor) { build(:processing_executor) }
   let(:coordinator) { build(:processing_coordinator) }
 
-  before do
-    [
-      Karafka::Pro::Routing::Features::VirtualPartitions::Topic,
-      Karafka::Pro::Routing::Features::LongRunningJob::Topic
-    ].each { |feature| executor.topic.singleton_class.prepend(feature) }
-  end
-
   describe '#consume' do
     context 'when it is a lrj topic' do
       before { executor.topic.long_running_job true }
