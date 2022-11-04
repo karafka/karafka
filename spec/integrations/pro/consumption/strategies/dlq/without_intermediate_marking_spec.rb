@@ -58,7 +58,7 @@ start_karafka_and_wait_until do
 end
 
 # first error, retry and same for more messages from batch previous to failing
-assert DT[:errors].count > 3
+assert DT[:errors].count >= 3, DT[:errors]
 
 # we should not have the message that was failing
 assert_equal (0..99).to_a - [10], DT[:offsets].uniq
