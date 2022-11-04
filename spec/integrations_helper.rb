@@ -18,8 +18,6 @@ DT = DataCollector
 
 # Test setup for the framework
 def setup_karafka(allow_errors: false)
-  require 'karafka'
-
   Karafka::App.setup do |config|
     # Use some decent defaults
     caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.uuid].join('-')
