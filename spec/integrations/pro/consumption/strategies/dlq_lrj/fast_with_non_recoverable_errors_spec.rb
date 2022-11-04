@@ -23,7 +23,7 @@ end
 class DlqConsumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DT[1] << message.headers['original-offset'].to_i
+      DT[1] << [message.headers['original-offset'].to_i, message.offset]
     end
   end
 end
@@ -50,7 +50,7 @@ start_karafka_and_wait_until do
 end
 
 # All messages moved to DLQ should have been present in the regular one
-assert (DT[1] - DT[0]).empty?
+assert (DT[1].map(&:first) - DT[0]).empty?
 # Each message should be present only once in the DLQ
 assert_equal DT[1].uniq, DT[1]
 # There should be many of them as we fail always
