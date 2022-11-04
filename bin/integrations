@@ -181,7 +181,7 @@ class Scenario
 
       FileUtils.cp_r("#{path.dirname}/.", temp_dir)
 
-      [envvars, 'bundle', 'exec', 'ruby', path.to_s, {chdir: temp_dir}]
+      [envvars, 'bundle', 'exec', 'ruby', ROOT_PATH.join('spec/integrations_runner.rb').to_s, path.to_s, {chdir: temp_dir}]
     when :pristine
       # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
       temp_dir = Dir.mktmpdir

@@ -4,13 +4,6 @@
 
 ENV['KARAFKA_ENV'] = 'test'
 
-unless ENV['PRISTINE_MODE']
-  require 'bundler'
-  Bundler.setup(:default, :test, :integrations)
-  require 'karafka'
-  require 'byebug'
-end
-
 require 'singleton'
 require 'securerandom'
 require_relative './support/data_collector'
