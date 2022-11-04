@@ -60,23 +60,34 @@ class Scenario
 
   # Starts running given scenario in a separate process
   def start
+    p "Starting!"
     @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(*init_and_build_cmd)
+    p "Started!"
     @started_at = current_time
+  rescue => e
+    # debugger
+    raise
   end
 
   # @return [String] integration spec name
   def name
-    @path.gsub("#{ROOT_PATH}/spec/integrations/", '')
+    path.relative_path_from(ROOT_PATH.join('spec/integrations/'))
+  rescue => e
+    # debugger
+    raise
   end
 
   # @return [Symbol] type of spec
   def type
-    scenario_dir = File.dirname(@path)
-
-    return :poro if scenario_dir.end_with?('_poro')
-    return :pristine if scenario_dir.end_with?('_pristine')
-
-    :regular
+    case path.dirname.basename.to_path.split('_').last
+    when 'poro' then :poro
+    when 'prisine' then :pristine
+    else
+      :regular
+    end
+  rescue => e
+    # debugger
+    raise
   end
 
   # @return [Boolean] any spec that is not a regular one should not run in parallel with others
@@ -103,6 +114,7 @@ class Scenario
     @stdout_tail << buffer
     @stdout_tail = @stdout_tail[-MAX_BUFFER_OUTPUT..-1] || @stdout_tail
 
+    puts buffer unless buffer.empty?
     !@wait_thr.alive?
   end
 
@@ -158,8 +170,8 @@ class Scenario
   # Sets up a proper environment for a given spec to run and returns the run command
   # @return [String] run command
   def init_and_build_cmd
-    envvars = {'KARAFKA_GEM_DIR' => ROOT_PATH, 'BUNDLE_AUTO_INSTALL' => 'true', 'PRISTINE_MODE' => 'true'}
-    envvars['BUNDLE_GEMFILE'] = path.dirname.join('Gemfile') if path.dirname.join('Gemfile').exist?
+    envvars = {'KARAFKA_GEM_DIR' => ROOT_PATH.to_s, 'BUNDLE_AUTO_INSTALL' => 'true', 'PRISTINE_MODE' => 'true'}
+    envvars['BUNDLE_GEMFILE'] = path.dirname.join('Gemfile').to_s if path.dirname.join('Gemfile').exist?
 
     case type
     when :poro
@@ -168,16 +180,16 @@ class Scenario
 
       FileUtils.cp_r("#{path.dirname}/.", temp_dir)
 
-      [envvars, 'bundle', 'exec', 'ruby', path, {chdir: temp_dir}]
+      [envvars, 'bundle', 'exec', 'ruby', path.to_s, {chdir: temp_dir}]
     when :pristine
       # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
       temp_dir = Dir.mktmpdir
 
       FileUtils.cp_r("#{path.dirname}/.", temp_dir)
 
-      [envvars, 'bundle', 'exec', 'ruby', '-r', "#{ROOT_PATH}/spec/integrations_helper.rb", path, {chdir: temp_dir}]
+      [envvars, 'bundle', 'exec', 'ruby', '-r', ROOT_PATH.join('spec/integrations_helper.rb').to_s, path.to_s, {chdir: temp_dir}]
     else
-      [envvars, 'bundle', 'exec', 'ruby', '-r', "spec/integrations_helper.rb", path]
+      [envvars, 'bundle', 'exec', 'ruby', '-r', ROOT_PATH.join('spec/integrations_helper.rb').to_s, path.to_s]
     end
   end
 
