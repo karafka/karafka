@@ -1,8 +1,7 @@
 require 'bundler'
 
-Bundler.require(:default, :test, :integrations)
+require 'rails' if Bundler.require(:default, :test, :integrations).any? { |gem| gem.name == 'railties' }
 
-require 'karafka'
 require_relative './integrations_helper'
 
 require ARGV.fetch(0)
