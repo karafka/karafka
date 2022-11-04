@@ -21,15 +21,6 @@ RSpec.describe_current do
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Vp) }
   end
 
-  context 'when we enable vp with mom' do
-    before do
-      topic.virtual_partitions(partitioner: true)
-      topic.manual_offset_management(true)
-    end
-
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::MomVp) }
-  end
-
   context 'when lrj is enabled with vp' do
     before do
       topic.long_running_job(true)
