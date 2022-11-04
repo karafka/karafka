@@ -120,7 +120,7 @@ class Scenario
 
   # @return [Boolean] did this scenario finish successfully or not
   def success?
-    expected_exit_codes = EXIT_CODES[name] || EXIT_CODES[:default]
+    expected_exit_codes = EXIT_CODES[name.to_s] || EXIT_CODES[:default]
 
     expected_exit_codes.include?(exit_code)
   end
