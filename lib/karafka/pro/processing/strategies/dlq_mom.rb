@@ -15,6 +15,7 @@ module Karafka
   module Pro
     module Processing
       module Strategies
+        # Strategy for supporting DLQ with Mom enabled
         module DlqMom
           # The broken message lookup is the same in this scenario
           include Dlq

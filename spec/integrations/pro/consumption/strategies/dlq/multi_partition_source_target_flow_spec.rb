@@ -62,6 +62,6 @@ DT.data.each do |k, v|
 end
 
 # Each original partition data should always go to one and the same target partition
-samples.each do |target_partition, sources|
+samples.each do |_, sources|
   assert_equal 1, sources.uniq.count, sources
 end
