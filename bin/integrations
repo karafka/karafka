@@ -172,6 +172,7 @@ class Scenario
   def init_and_build_cmd
     envvars = {'KARAFKA_GEM_DIR' => ROOT_PATH.to_s, 'BUNDLE_AUTO_INSTALL' => 'true', 'PRISTINE_MODE' => 'true'}
     envvars['BUNDLE_GEMFILE'] = path.dirname.join('Gemfile').to_s if path.dirname.join('Gemfile').exist?
+    envvars['RAILS'] = 'true' if name.descend.first.to_s == 'rails'
 
     case type
     when :poro
@@ -187,9 +188,9 @@ class Scenario
 
       FileUtils.cp_r("#{path.dirname}/.", temp_dir)
 
-      [envvars, 'bundle', 'exec', 'ruby', ROOT_PATH.join('spec/runner.rb').to_s, path.to_s, {chdir: temp_dir}]
+      [envvars, 'bundle', 'exec', 'ruby', ROOT_PATH.join('spec/integrations_runner.rb').to_s, path.to_s, {chdir: temp_dir}]
     else
-      [envvars, 'bundle', 'exec', 'ruby', ROOT_PATH.join('spec/runner.rb').to_s, path.to_s]
+      [envvars, 'bundle', 'exec', 'ruby', ROOT_PATH.join('spec/integrations_runner.rb').to_s, path.to_s]
     end
   end
 
