@@ -35,8 +35,6 @@ class Consumer < Karafka::Pro::BaseConsumer
 
       DT[0] << message.offset
     end
-
-
   end
 end
 
