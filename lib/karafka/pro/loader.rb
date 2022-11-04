@@ -11,7 +11,6 @@
 # By sending a pull request to the pro components, you are agreeing to transfer the copyright of
 # your code to Maciej Mensfeld.
 
-
 module Karafka
   module Pro
     # Loader requires and loads all the pro components only when they are needed
