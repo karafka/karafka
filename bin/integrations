@@ -51,7 +51,7 @@ class Scenario
   #
   # @param path [String] path to the scenarios file
   def initialize(path)
-    @path = path
+    @path = Pathname.new(path)
     # First 1024 characters from stdout
     @stdout_head = ''
     # Last 1024 characters from stdout
@@ -60,7 +60,7 @@ class Scenario
 
   # Starts running given scenario in a separate process
   def start
-    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(init_and_build_cmd)
+    @stdin, @stdout, @stderr, @wait_thr = Open3.popen3(*init_and_build_cmd)
     @started_at = current_time
   end
 
@@ -153,47 +153,31 @@ class Scenario
 
   private
 
+  attr_reader :path
+
   # Sets up a proper environment for a given spec to run and returns the run command
   # @return [String] run command
   def init_and_build_cmd
+    envvars = {'KARAFKA_GEM_DIR' => ROOT_PATH, 'BUNDLE_AUTO_INSTALL' => 'true', 'PRISTINE_MODE' => 'true'}
+    envvars['BUNDLE_GEMFILE'] = path.dirname.join('Gemfile') if path.dirname.join('Gemfile').exist?
+
     case type
     when :poro
-      scenario_dir = File.dirname(@path)
       # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
       temp_dir = Dir.mktmpdir
-      file_name = File.basename(@path)
 
-      FileUtils.cp_r("#{scenario_dir}/.", temp_dir)
+      FileUtils.cp_r("#{path.dirname}/.", temp_dir)
 
-      <<~CMD
-        cd #{temp_dir} &&
-        BUNDLE_GEMFILE=#{scenario_dir}/Gemfile \
-        KARAFKA_GEM_DIR=#{ROOT_PATH} \
-        BUNDLE_AUTO_INSTALL=true \
-        PRISTINE_MODE=true \
-        bundle exec ruby #{file_name}
-      CMD
+      [envvars, 'bundle', 'exec', 'ruby', path, {chdir: temp_dir}]
     when :pristine
-      scenario_dir = File.dirname(@path)
       # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
       temp_dir = Dir.mktmpdir
-      file_name = File.basename(@path)
 
-      FileUtils.cp_r("#{scenario_dir}/.", temp_dir)
+      FileUtils.cp_r("#{path.dirname}/.", temp_dir)
 
-      <<~CMD
-        cd #{temp_dir} &&
-        BUNDLE_GEMFILE=#{scenario_dir}/Gemfile \
-        KARAFKA_GEM_DIR=#{ROOT_PATH} \
-        BUNDLE_AUTO_INSTALL=true \
-        PRISTINE_MODE=true \
-        bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{file_name}
-      CMD
+      [envvars, 'bundle', 'exec', 'ruby', '-r', "#{ROOT_PATH}/spec/integrations_helper.rb", path, {chdir: temp_dir}]
     else
-      <<~CMD
-        KARAFKA_GEM_DIR=#{ROOT_PATH} \
-        bundle exec ruby -r ./spec/integrations_helper.rb #{@path}
-      CMD
+      [envvars, 'bundle', 'exec', 'ruby', '-r', "spec/integrations_helper.rb", path]
     end
   end
 
