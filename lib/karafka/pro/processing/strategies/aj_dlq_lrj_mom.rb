@@ -16,17 +16,19 @@ module Karafka
     module Processing
       module Strategies
         # ActiveJob enabled
+        # DLQ enabled
         # Long-Running Job enabled
         # Manual offset management enabled
-        module AjLrjMom
-          # Same behaviour as LrjMom
-          include LrjMom
+        module AjDlqLrjMom
+          # Same behaviour as DlqLrjMom
+          include DlqLrjMom
 
           # Features for this strategy
           FEATURES = %i[
             active_job
             long_running_job
             manual_offset_management
+            dead_letter_queue
           ].freeze
         end
       end
