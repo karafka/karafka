@@ -167,6 +167,7 @@ class Scenario
 
       <<~CMD
         cd #{temp_dir} &&
+        BUNDLE_GEMFILE=#{scenario_dir}/Gemfile \
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
         BUNDLE_AUTO_INSTALL=true \
         PRISTINE_MODE=true \
@@ -182,6 +183,7 @@ class Scenario
 
       <<~CMD
         cd #{temp_dir} &&
+        BUNDLE_GEMFILE=#{scenario_dir}/Gemfile \
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
         BUNDLE_AUTO_INSTALL=true \
         PRISTINE_MODE=true \
