@@ -8,8 +8,6 @@ module Karafka
         Config = Struct.new(
           :active,
           # We add skip variants but in regular we support only `:one`
-          :skip,
-          # How many times should we retry before skipping
           :max_retries,
           # To what topic the skipped messages should be moved
           :topic,

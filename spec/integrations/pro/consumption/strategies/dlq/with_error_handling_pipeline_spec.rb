@@ -26,7 +26,7 @@ draw_routes do
   4.times do |i|
     topic DT.topics[i] do
       consumer Consumer
-      dead_letter_queue(topic: DT.topics[i + 1], max_retries: 1, skip: :one)
+      dead_letter_queue(topic: DT.topics[i + 1], max_retries: 1)
     end
   end
 

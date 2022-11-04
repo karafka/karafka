@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# When dead letter queue is used and we last message out of all is broken, things should behave
-# like for any other broken message and we should pick up when more messages are present
+# When dead letter queue is used and we encounter non-recoverable message, we should skip it after
+# retries and move the broken message to a separate topic
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.license.token = pro_license_token
@@ -13,7 +13,7 @@ create_topic(name: DT.topics[1])
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      raise StandardError if message.offset == 99
+      raise StandardError if message.offset == 10
 
       DT[:offsets] << message.offset
 
@@ -33,7 +33,7 @@ end
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
-    dead_letter_queue(topic: DT.topics[1], max_retries: 2, skip: :one)
+    dead_letter_queue(topic: DT.topics[1], max_retries: 2)
   end
 
   topic DT.topics[1] do
@@ -51,13 +51,7 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  # Send one more when we reached all
-  if DT[:offsets].uniq.count == 99 && DT[:extra].empty?
-    DT[:extra] << true
-    produce(DT.topic, SecureRandom.uuid)
-  end
-
-  DT[:offsets].uniq.count >= 100 &&
+  DT[:offsets].uniq.count >= 99 &&
     DT[:broken].size >= 1
 end
 
@@ -65,9 +59,9 @@ end
 assert_equal 3, DT[:errors].count
 
 # we should not have the message that was failing
-assert_equal (0..100).to_a - [99], DT[:offsets]
+assert_equal (0..99).to_a - [10], DT[:offsets]
 
 assert_equal 1, DT[:broken].size
 # This message will get new offset (first)
 assert_equal DT[:broken][0][0], 0
-assert_equal DT[:broken][0][1], elements[99]
+assert_equal DT[:broken][0][1], elements[10]

@@ -33,7 +33,7 @@ end
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
-    dead_letter_queue(topic: DT.topics[1], max_retries: 2, skip: :one)
+    dead_letter_queue(topic: DT.topics[1], max_retries: 2)
   end
 
   topic DT.topics[1] do

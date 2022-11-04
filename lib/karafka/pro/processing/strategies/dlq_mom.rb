@@ -15,61 +15,38 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # Only dead letter queue enabled
-        module Dlq
-          include Default
+        module DlqMom
+          # The broken message lookup is the same in this scenario
+          include Dlq
 
           # Features for this strategy
           FEATURES = %i[
             dead_letter_queue
+            manual_offset_management
           ].freeze
 
-          # When we encounter non-recoverable message, we skip it and go on with our lives
+          # When manual offset management is on, we do not mark anything as consumed automatically
+          # and we rely on the user to figure things out
           def handle_after_consume
             return if revoked?
 
             if coordinator.success?
               coordinator.pause_tracker.reset
-
-              mark_as_consumed(messages.last)
             elsif coordinator.pause_tracker.count < topic.dead_letter_queue.max_retries
               pause(coordinator.seek_offset)
             # If we've reached number of retries that we could, we need to skip the first message
             # that was not marked as consumed, pause and continue, while also moving this message
-            # to the dead topic
+            # to the dead topic.
+            #
+            # For a Mom setup, this means, that user has to manage the checkpointing by himself.
+            # If no checkpointing is ever done, we end up with an endless loop.
             else
               # We reset the pause to indicate we will now consider it as "ok".
               coordinator.pause_tracker.reset
               skippable_message = find_skippable_message
               copy_skippable_message_to_dlq(skippable_message)
-              mark_as_consumed(skippable_message)
               pause(coordinator.seek_offset)
             end
-          end
-
-          # Finds the message may want to skip (all, starting from first)
-          # @private
-          # @return [Karafka::Messages::Message] message we may want to skip
-          def find_skippable_message
-            skippable_message = messages.find { |msg| msg.offset == coordinator.seek_offset }
-            skippable_message || raise(Errors::SkipMessageNotFoundError, topic.name)
-          end
-
-          # Moves the broken message into a separate queue defined via the settings
-          #
-          # @private
-          # @param skippable_message [Array<Karafka::Messages::Message>] message we want to
-          #   dispatch to DLQ
-          def copy_skippable_message_to_dlq(skippable_message)
-            producer.produce_async(
-              topic: topic.dead_letter_queue.topic,
-              payload: skippable_message.raw_payload,
-              key: skippable_message.partition.to_s,
-              headers: skippable_message.headers.merge(
-                'original-partition' => skippable_message.partition.to_s,
-                'original-offset' => skippable_message.offset.to_s
-              )
-            )
           end
         end
       end

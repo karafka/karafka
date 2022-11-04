@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# When dead letter queue is used and we don't encounter any errors, all should be regular.
+# When we move messages to the DLQ, their offset should be preserved in headers
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.license.token = pro_license_token
@@ -12,6 +12,8 @@ create_topic(name: DT.topics[1])
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
+      raise StandardError if message.offset == 10
+
       DT[:offsets] << message.offset
 
       mark_as_consumed message
@@ -22,7 +24,7 @@ end
 class DlqConsumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      DT[:broken] << [message.offset, message.raw_payload]
+      DT[:broken] << message.headers['original-offset']
     end
   end
 end
@@ -30,7 +32,7 @@ end
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
-    dead_letter_queue(topic: DT.topics[1], max_retries: 2, skip: :one)
+    dead_letter_queue(topic: DT.topics[1], max_retries: 2)
   end
 
   topic DT.topics[1] do
@@ -48,14 +50,12 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:offsets].uniq.count >= 100
+  DT[:offsets].uniq.count >= 99 &&
+    DT[:broken].size >= 1
 end
 
-# No errors
-assert_equal 0, DT[:errors].count
+# The skipped should not be in the processed
+assert !DT[:offsets].include?(DT[:broken].first.to_i)
 
-# All messages consumed
-assert_equal (0..99).to_a, DT[:offsets]
-
-# No broken messages
-assert_equal 0, DT[:broken].size
+# Skips should be what failed
+assert_equal 10, DT[:broken].first.to_i

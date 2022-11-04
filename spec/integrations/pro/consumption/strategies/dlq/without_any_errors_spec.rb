@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
-# When we do not perform any markings as consumed we should nonetheless skip one after another
-# starting from the beginning of the batch on failed batches.
-#
-# This should allow us to move one by one slowly and should mark on successful batches.
+# When dead letter queue is used and we don't encounter any errors, all should be regular.
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.license.token = pro_license_token
-  config.max_messages = 6
 end
 
 create_topic(name: DT.topics[0])
@@ -16,9 +12,9 @@ create_topic(name: DT.topics[1])
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|
-      raise StandardError if message.offset == 10
-
       DT[:offsets] << message.offset
+
+      mark_as_consumed message
     end
   end
 end
@@ -34,7 +30,7 @@ end
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
-    dead_letter_queue(topic: DT.topics[1], max_retries: 1, skip: :one)
+    dead_letter_queue(topic: DT.topics[1], max_retries: 2)
   end
 
   topic DT.topics[1] do
@@ -52,18 +48,14 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:offsets].uniq.count >= 99 &&
-    !DT[:broken].empty? &&
-    DT[:broken].last[1] == elements[10]
+  DT[:offsets].uniq.count >= 100
 end
 
-# first error, retry and same for more messages from batch previous to failing
-assert DT[:errors].count > 3
+# No errors
+assert_equal 0, DT[:errors].count
 
-# we should not have the message that was failing
-assert_equal (0..99).to_a - [10], DT[:offsets].uniq
+# All messages consumed
+assert_equal (0..99).to_a, DT[:offsets]
 
-# Previous to broken should be present
-assert DT[:broken].map(&:first)[-2] < 10
-
-assert DT[:broken].size >= 2
+# No broken messages
+assert_equal 0, DT[:broken].size

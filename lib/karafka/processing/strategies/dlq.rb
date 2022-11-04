@@ -54,7 +54,7 @@ module Karafka
           skippable_message || raise(Errors::SkipMessageNotFoundError, topic.name)
         end
 
-        # Finds and moves the broken message into a separate queue defined via the settings
+        # Moves the broken message into a separate queue defined via the settings
         # @private
         # @param skippable_message [Karafka::Messages::Message] message we are skipping that also
         #   should go to the dlq topic
