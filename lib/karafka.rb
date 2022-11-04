@@ -17,6 +17,8 @@
   zeitwerk
 ].each(&method(:require))
 
+require_relative './karafka/railtie' if defined?(Rails::Railtie)
+
 # Karafka framework main namespace
 module Karafka
   class << self
@@ -84,6 +86,8 @@ module Karafka
 end
 
 loader = Zeitwerk::Loader.for_gem
+# Do not load Railtie, it's loaded manually `if defined?(Rails)` to prevent circular require
+loader.ignore(Karafka.gem_root.join('lib/karafka/railtie.rb'))
 # Do not load Rails extensions by default, this will be handled by Railtie if they are needed
 loader.ignore(Karafka.gem_root.join('lib/active_job'))
 # Do not load pro components as they will be loaded if needed and allowed
