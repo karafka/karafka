@@ -15,39 +15,45 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # Strategy for supporting DLQ with Mom enabled
-        module DlqMom
-          # The broken message lookup is the same in this scenario
+        # DLQ enabled
+        # Long-Running Job enabled
+        module DlqLrj
+          # Order here matters, lrj needs to be second
           include Dlq
+          include Lrj
 
           # Features for this strategy
           FEATURES = %i[
             dead_letter_queue
-            manual_offset_management
+            long_running_job
           ].freeze
 
-          # When manual offset management is on, we do not mark anything as consumed automatically
-          # and we rely on the user to figure things out
+          # LRJ standard flow after consumption
           def handle_after_consume
-            coordinator.on_finished do
-              return if revoked?
-
+            coordinator.on_finished do |last_group_message|
               if coordinator.success?
                 coordinator.pause_tracker.reset
+
+                mark_as_consumed(last_group_message) unless revoked?
+                seek(coordinator.seek_offset) unless revoked?
+
+                resume
               elsif coordinator.pause_tracker.count < topic.dead_letter_queue.max_retries
                 pause(coordinator.seek_offset)
-              # If we've reached number of retries that we could, we need to skip the first message
-              # that was not marked as consumed, pause and continue, while also moving this message
-              # to the dead topic.
-              #
-              # For a Mom setup, this means, that user has to manage the checkpointing by himself.
-              # If no checkpointing is ever done, we end up with an endless loop.
               else
-                # We reset the pause to indicate we will now consider it as "ok".
                 coordinator.pause_tracker.reset
+
                 skippable_message = find_skippable_message
-                copy_skippable_message_to_dlq(skippable_message)
-                pause(coordinator.seek_offset)
+
+                unless revoked?
+                  copy_skippable_message_to_dlq(skippable_message)
+                  mark_as_consumed(skippable_message)
+                end
+
+                # This revoke might have changed state due to marking, hence checked again
+                seek(coordinator.seek_offset) unless revoked?
+
+                resume
               end
             end
           end

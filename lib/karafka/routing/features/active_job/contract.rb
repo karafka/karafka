@@ -32,7 +32,7 @@ module Karafka
             next unless data[:active_job][:active]
             next if data[:manual_offset_management][:active]
 
-            [[%i[manual_offset_management], :not_supported_with_active_job]]
+            [[%i[manual_offset_management], :must_be_enabled]]
           end
         end
       end
