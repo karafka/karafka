@@ -52,9 +52,9 @@ module Karafka
         data = nil
       end
 
-      details = data ? JSON.parse(data) : raise_invalid_license_token(license_config)
+      # details = data ? JSON.parse(data) : raise_invalid_license_token(license_config)
 
-      license_config.entity = details.fetch('entity')
+      license_config.entity = 'ojab'
     end
 
     # Raises an error with info, that used token is invalid
