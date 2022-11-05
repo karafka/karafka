@@ -21,7 +21,7 @@ RSpec.describe_current do
     context 'when pause tracker is created' do
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
 
     context 'when immediately after paused and incremented' do
@@ -32,7 +32,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when not paused over timeout' do
@@ -45,7 +45,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout' do
@@ -58,7 +58,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout several times' do
@@ -72,7 +72,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(5) }
+      it { expect(tracker.attempt).to eq(5) }
     end
 
     context 'when paused over timeout and resumed' do
@@ -86,7 +86,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout, resumed and reset' do
@@ -101,7 +101,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
   end
 
@@ -113,7 +113,7 @@ RSpec.describe_current do
     context 'when pause tracker is created' do
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
 
     context 'when immediately after paused' do
@@ -124,7 +124,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when not paused over timeout nor max timeout' do
@@ -138,7 +138,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over max timeout' do
@@ -151,7 +151,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout and resumed' do
@@ -165,7 +165,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout, resumed and reset' do
@@ -180,7 +180,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
   end
 
@@ -192,7 +192,7 @@ RSpec.describe_current do
     context 'when pause tracker is created' do
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
 
     context 'when immediately after paused' do
@@ -203,7 +203,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when not paused over timeout nor max timeout' do
@@ -216,7 +216,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over max timeout' do
@@ -229,7 +229,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout and resumed' do
@@ -243,7 +243,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout, resumed and reset' do
@@ -258,7 +258,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
   end
 
@@ -270,7 +270,7 @@ RSpec.describe_current do
     context 'when pause tracker is created' do
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
 
     context 'when immediately after paused' do
@@ -281,7 +281,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused and manually expired' do
@@ -293,7 +293,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when not paused over timeout nor max timeout' do
@@ -306,7 +306,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over max timeout' do
@@ -319,7 +319,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout and resumed' do
@@ -333,7 +333,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout, resumed and reset' do
@@ -348,7 +348,7 @@ RSpec.describe_current do
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.attempts).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
   end
 end

@@ -61,6 +61,6 @@ start_karafka_and_wait_until do
   !DT[1].empty?
 end
 
-assert_equal 2, DT[:errors].size
+assert_equal 4, DT[:errors].size
 assert_equal 0, DT[1].first
 assert_equal 1, DT[1].size

@@ -10,7 +10,7 @@ module Karafka
     #   code here, as this is not a frequently used tracker. It is active only once per batch in
     #   case of long-running-jobs and upon errors.
     class Pause < Base
-      attr_reader :attempts
+      attr_reader :attempt
 
       # @param timeout [Integer] how long should we wait when anything went wrong (in ms)
       # @param max_timeout [Integer, nil] if exponential is on, what is the max value we can reach
@@ -28,20 +28,20 @@ module Karafka
       #   sleep(1.1)
       #   pause.paused? #=> true
       #   pause.expired? #=> true
-      #   pause.attempts #=> 1
+      #   pause.attempt #=> 1
       #   pause.pause
       #   pause.increment
-      #   pause.attempts #=> 2
+      #   pause.attempt #=> 2
       #   pause.paused? #=> true
       #   pause.expired? #=> false
       #   pause.resume
-      #   pause.attempts #=> 2
+      #   pause.attempt #=> 2
       #   pause.paused? #=> false
       #   pause.reset
-      #   pause.attempts #=> 0
+      #   pause.attempt #=> 0
       def initialize(timeout:, max_timeout:, exponential_backoff:)
         @started_at = nil
-        @attempts = 0
+        @attempt = 0
         @timeout = timeout
         @max_timeout = max_timeout
         @exponential_backoff = exponential_backoff
@@ -50,7 +50,7 @@ module Karafka
       end
 
       # Pauses the processing from now till the end of the interval (backoff or non-backoff)
-      # and records the attempts.
+      # and records the attempt.
       # @param timeout [Integer] timeout value in milliseconds that overwrites the default timeout
       # @note Providing this value can be useful when we explicitly want to pause for a certain
       #   period of time, outside of any regular pausing logic
@@ -61,10 +61,10 @@ module Karafka
         end
       end
 
-      # Increments the number of attempts by 1
+      # Increments the number of attempt by 1
       def increment
         @mutex.synchronize do
-          @attempts += 1
+          @attempt += 1
         end
       end
 
@@ -97,10 +97,10 @@ module Karafka
         end
       end
 
-      # Resets the pause attemptser.
+      # Resets the pause attempt count.
       def reset
         @mutex.synchronize do
-          @attempts = 0
+          @attempt = 0
         end
       end
 
@@ -109,7 +109,7 @@ module Karafka
       # Computers the exponential backoff
       # @return [Integer] backoff in milliseconds
       def backoff_interval
-        backoff_factor = @exponential_backoff ? 2**@attempts : 1
+        backoff_factor = @exponential_backoff ? 2**@attempt : 1
 
         timeout = backoff_factor * @timeout
 
