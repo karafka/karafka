@@ -20,54 +20,6 @@ module Karafka
     # @note In case of using lrj, manual pausing may not be the best idea as resume needs to happen
     #   after each batch is processed.
     class BaseConsumer < Karafka::BaseConsumer
-      # Can be used to run preparation code prior to the job being enqueued
-      #
-      # @private
-      # @note This should not be used by the end users as it is part of the lifecycle of things and
-      #   not as a part of the public api. This should not perform any extensive operations as it
-      #   is blocking and running in the listener thread.
-      def on_before_enqueue
-        handle_before_enqueue
-      rescue StandardError => e
-        Karafka.monitor.instrument(
-          'error.occurred',
-          error: e,
-          caller: self,
-          type: 'consumer.before_enqueue.error'
-        )
-      end
-
-      # @private
-      # @note This should not be used by the end users as it is part of the lifecycle of things but
-      #   not as part of the public api.
-      def on_after_consume
-        handle_after_consume
-      rescue StandardError => e
-        Karafka.monitor.instrument(
-          'error.occurred',
-          error: e,
-          caller: self,
-          type: 'consumer.after_consume.error'
-        )
-      end
-
-      # Trigger method for running on partition revocation.
-      #
-      # @private
-      def on_revoked
-        handle_revoked
-
-        Karafka.monitor.instrument('consumer.revoked', caller: self) do
-          revoked
-        end
-      rescue StandardError => e
-        Karafka.monitor.instrument(
-          'error.occurred',
-          error: e,
-          caller: self,
-          type: 'consumer.revoked.error'
-        )
-      end
     end
   end
 end

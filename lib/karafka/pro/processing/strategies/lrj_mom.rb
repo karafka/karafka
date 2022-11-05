@@ -18,7 +18,7 @@ module Karafka
         # Long-Running Job enabled
         # Manual offset management enabled
         module LrjMom
-          include Base
+          include Default
 
           # Features for this strategy
           FEATURES = %i[

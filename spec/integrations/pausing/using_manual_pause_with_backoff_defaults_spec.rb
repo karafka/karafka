@@ -42,8 +42,8 @@ DT[:pauses].each do |time|
     next
   end
 
-  assert (time - previous) * 1_000 >= 2_000
-  assert (time - previous) * 1_000 <= 4_000
+  assert (time - previous) * 1_000 >= 3_000
+  assert (time - previous) * 1_000 <= 6_000
 
   previous = time
 end

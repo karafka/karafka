@@ -17,6 +17,11 @@ module Karafka
           raise NotImplementedError, 'Implement in a subclass'
         end
 
+        # What should happen before we kick in the processing
+        def handle_before_consume
+          raise NotImplementedError, 'Implement in a subclass'
+        end
+
         # Post-consumption handling
         def handle_after_consume
           raise NotImplementedError, 'Implement in a subclass'

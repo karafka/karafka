@@ -46,7 +46,7 @@ payloads = DT.uuids(20)
 produce_many(DT.topic, payloads)
 
 start_karafka_and_wait_until do
-  DT[0].size >= 20 && !DT[1].empty?
+  DT[0].size >= 20 && DT[1].size >= 10
 end
 
 # All messages moved to DLQ should have been present in the regular one
@@ -54,4 +54,4 @@ assert (DT[1].map(&:first) - DT[0]).empty?
 # Each message should be present only once in the DLQ
 assert_equal DT[1].uniq, DT[1]
 # There should be many of them as we fail always
-assert DT[1].size >= 10
+assert DT[1].size >= 10, DT[1]

@@ -38,7 +38,7 @@ module Karafka
                 seek(coordinator.seek_offset) unless revoked?
 
                 resume
-              elsif coordinator.pause_tracker.count < topic.dead_letter_queue.max_retries
+              elsif coordinator.pause_tracker.attempts <= topic.dead_letter_queue.max_retries
                 pause(coordinator.seek_offset)
               else
                 coordinator.pause_tracker.reset

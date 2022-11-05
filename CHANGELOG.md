@@ -16,6 +16,7 @@
 - Fix a case where upon Virtual Partitions usage, same underlying real partition would be resumed several times.
 - Split specs into regular and pro to simplify how resources are loaded
 - Introduce Dead Letter Queue feature and Pro Enhanced Dead Letter Queue feature
+- Fix LRJ enqueuing pause increases the coordinator counter (#115)
 
 ### Upgrade notes
 
