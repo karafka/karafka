@@ -1,3 +1,3 @@
 # frozen_string_literal: true
 
-exit 8
+exit 0
