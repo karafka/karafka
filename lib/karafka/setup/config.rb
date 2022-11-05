@@ -78,9 +78,9 @@ module Karafka
       setting :shutdown_timeout, default: 60_000
       # option [Integer] number of threads in which we want to do parallel processing
       setting :concurrency, default: 5
-      # option [Integer] how long should we wait upon processing error
+      # option [Integer] how long should we wait upon processing error (milliseconds)
       setting :pause_timeout, default: 1_000
-      # option [Integer] what is the max timeout in case of an exponential backoff
+      # option [Integer] what is the max timeout in case of an exponential backoff (milliseconds)
       setting :pause_max_timeout, default: 30_000
       # option [Boolean] should we use exponential backoff
       setting :pause_with_exponential_backoff, default: true
