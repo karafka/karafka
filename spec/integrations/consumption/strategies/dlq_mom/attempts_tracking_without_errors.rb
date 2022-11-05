@@ -6,8 +6,6 @@ setup_karafka do |config|
   config.max_messages = 5
 end
 
-REF = self
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[:attempts] << coordinator.pause_tracker.attempt
