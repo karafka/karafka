@@ -119,6 +119,17 @@ RSpec.describe_current do
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::DlqLrjMom) }
   end
 
+
+  context 'when aj, dlq and mom is enabled' do
+    before do
+      topic.dead_letter_queue(topic: 'test')
+      topic.manual_offset_management(true)
+      topic.active_job(true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::AjDlqMom) }
+  end
+
   context 'when aj, dlq, mom and lrj is enabled' do
     before do
       topic.dead_letter_queue(topic: 'test')
