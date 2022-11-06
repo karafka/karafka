@@ -68,6 +68,7 @@ module Karafka
               payload: skippable_message.raw_payload,
               key: skippable_message.partition.to_s,
               headers: skippable_message.headers.merge(
+                'original-topic' => topic.name,
                 'original-partition' => skippable_message.partition.to_s,
                 'original-offset' => skippable_message.offset.to_s
               )
