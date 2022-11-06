@@ -19,11 +19,12 @@ module Karafka
         # DLQ enabled
         # Long-Running Job enabled
         # Manual offset management enabled
+        #
+        # This case is a bit of special. Please see the `AjDlqMom` for explanation on how the
+        # offset management works in this case.
         module AjDlqLrjMom
-          # Same behaviour as DlqLrj. Since the AJ consumer marks jobs as consumed after each
-          # successful one, the "manual offset" management is kinda virtual/abstract. This means
-          # that we actually want to use here a non-MOM strategy that will move the offset forward
-          include DlqLrjMom
+          include AjLrjMom
+          include AjDlqMom
 
           # Features for this strategy
           FEATURES = %i[
