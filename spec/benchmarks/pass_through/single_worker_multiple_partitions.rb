@@ -18,9 +18,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     @count += messages.size
 
-    if @count >= MAX_MESSAGES_PER_PARTITION
-      DT.data[:completed] << messages.metadata.partition
-    end
+    DT.data[:completed] << messages.metadata.partition if @count >= MAX_MESSAGES_PER_PARTITION
 
     return if DT.data[:completed].size != PARTITIONS_COUNT
     return if $stop

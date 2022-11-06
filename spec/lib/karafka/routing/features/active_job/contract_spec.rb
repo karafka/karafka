@@ -33,4 +33,13 @@ RSpec.describe_current do
 
     it { expect(check).not_to be_success }
   end
+
+  context 'when ActiveJob::Base is missing and ActiveJob active' do
+    before do
+      config[:active_job][:active] = true
+      allow(Object).to receive(:const_defined?).with('ActiveJob::Base').and_return(false)
+    end
+
+    it { expect(check).not_to be_success }
+  end
 end

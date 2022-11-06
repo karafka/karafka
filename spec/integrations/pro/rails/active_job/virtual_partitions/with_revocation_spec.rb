@@ -66,12 +66,12 @@ other = Thread.new do
   consumer.subscribe(DT.topic)
 
   consumer.each do
-    unless revoked
-      sleep(5)
-      revoked = true
+    break if revoked
 
-      break
-    end
+    sleep(5)
+    revoked = true
+
+    break
   end
 end
 

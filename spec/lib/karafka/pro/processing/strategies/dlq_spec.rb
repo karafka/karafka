@@ -3,8 +3,7 @@
 RSpec.describe_current do
   let(:combination) do
     %i[
-      manual_offset_management
-      virtual_partitions
+      dead_letter_queue
     ]
   end
 

@@ -15,16 +15,23 @@ module Karafka
   module Pro
     module Processing
       module Strategies
+        # ActiveJob enabled
+        # DLQ enabled
+        # Long-Running Job enabled
         # Manual offset management enabled
-        # Virtual Partitions enabled
-        module MomVp
-          # Virtual Partitions work with standard Mom flow without any changes
-          include Mom
+        #
+        # This case is a bit of special. Please see the `AjDlqMom` for explanation on how the
+        # offset management works in this case.
+        module AjDlqLrjMom
+          include AjLrjMom
+          include AjDlqMom
 
           # Features for this strategy
           FEATURES = %i[
+            active_job
+            long_running_job
             manual_offset_management
-            virtual_partitions
+            dead_letter_queue
           ].freeze
         end
       end

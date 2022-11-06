@@ -19,7 +19,7 @@ module Karafka
         # Manual offset management enabled
         # Virtual Partitions enabled
         module AjMomVp
-          include Base
+          include Default
 
           # Features for this strategy
           FEATURES = %i[
@@ -27,11 +27,6 @@ module Karafka
             manual_offset_management
             virtual_partitions
           ].freeze
-
-          # No actions needed for the standard flow here
-          def handle_before_enqueue
-            nil
-          end
 
           # Standard flow without any features
           def handle_after_consume
@@ -54,15 +49,6 @@ module Karafka
               else
                 pause(coordinator.seek_offset)
               end
-            end
-          end
-
-          # Standard
-          def handle_revoked
-            coordinator.on_revoked do
-              resume
-
-              coordinator.revoke
             end
           end
         end

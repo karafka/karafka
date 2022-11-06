@@ -21,4 +21,5 @@ start_karafka_and_wait_until do
   DT[:processing_lags].size >= 20
 end
 
-assert DT[:processing_lags].max <= 50
+# We give it a bit of time, because on heavily loaded systems running multiple things it can lag
+assert DT[:processing_lags].max <= 100
