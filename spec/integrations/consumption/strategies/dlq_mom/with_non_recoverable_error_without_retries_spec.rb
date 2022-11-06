@@ -4,9 +4,6 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
-create_topic(name: DT.topics[0])
-create_topic(name: DT.topics[1])
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|

@@ -111,6 +111,19 @@ module Karafka
         info 'Stopped Karafka server'
       end
 
+      # Logs info when we have dispatched a message the the DLQ
+      #
+      # @param event [Dry::Events::Event] event details including payload
+      def on_dead_letter_queue_dispatched(event)
+        message = event[:message]
+        offset = message.offset
+        topic = event[:caller].topic.name
+        dlq_topic = event[:caller].topic.dead_letter_queue.topic
+        partition = message.partition
+
+        info "Dispatched message #{offset} from #{topic}/#{partition} to DQL topic: #{dlq_topic}"
+      end
+
       # There are many types of errors that can occur in many places, but we provide a single
       # handler for all of them to simplify error instrumentation.
       # @param event [Dry::Events::Event] event details including payload

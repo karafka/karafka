@@ -11,9 +11,6 @@ setup_karafka do |config|
   config.kafka[:'session.timeout.ms'] = 10_000
 end
 
-create_topic(name: DT.topics[0])
-create_topic(name: DT.topics[1])
-
 class LrjConsumer < Karafka::Pro::BaseConsumer
   def consume
     producer.produce_sync(topic: DT.topics[1], payload: '1')

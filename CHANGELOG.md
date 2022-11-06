@@ -17,6 +17,7 @@
 - Split specs into regular and pro to simplify how resources are loaded
 - Introduce Dead Letter Queue feature and Pro Enhanced Dead Letter Queue feature
 - Fix LRJ enqueuing pause increases the coordinator counter (#115)
+- Auto-create topics in the integration specs based on the defined routing
 
 ### Upgrade notes
 

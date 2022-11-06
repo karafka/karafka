@@ -30,7 +30,7 @@ module Karafka
             coordinator.pause_tracker.reset
 
             skippable_message = find_skippable_message
-            copy_skippable_message_to_dlq(skippable_message)
+            dispatch_skippable_message_to_dlq(skippable_message)
 
             # We pause to backoff once just in case.
             pause(coordinator.seek_offset)

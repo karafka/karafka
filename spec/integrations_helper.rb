@@ -133,8 +133,9 @@ end
 # Sets up default routes (mostly used in integration specs) or allows to configure custom routes
 # by providing a block
 # @param consumer_class [Class, nil] consumer class we want to use if going with defaults
+# @param create_topics [Boolean] should we create the defined topics (true by default)
 # @param block [Proc] block with routes we want to draw if going with complex routes setup
-def draw_routes(consumer_class = nil, &block)
+def draw_routes(consumer_class = nil, create_topics: true, &block)
   Karafka::App.routes.draw do
     if block
       instance_eval(&block)
@@ -146,6 +147,23 @@ def draw_routes(consumer_class = nil, &block)
       end
     end
   end
+
+  return unless create_topics
+
+  create_routes_topics
+end
+
+# Creates topics defined in the routes so they are available for the specs
+# Code below will auto-create all the routing based topics so we don't have to do it per spec
+# If a topic is already created for example with more partitions, this will do nothing
+def create_routes_topics
+  topics_names = Set.new
+
+  Karafka::App.routes.map(&:topics).flatten.each do |topics|
+    topics.each { |topic| topics_names << topic.name }
+  end
+
+  topics_names.each { |topic_name| create_topic(name: topic_name) }
 end
 
 # Waits until block yields true

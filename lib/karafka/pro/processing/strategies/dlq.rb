@@ -42,7 +42,7 @@ module Karafka
                 # We reset the pause to indicate we will now consider it as "ok".
                 coordinator.pause_tracker.reset
                 skippable_message = find_skippable_message
-                copy_skippable_message_to_dlq(skippable_message)
+                dispatch_skippable_message_to_dlq(skippable_message)
                 mark_as_consumed(skippable_message)
                 pause(coordinator.seek_offset)
               end
@@ -62,7 +62,7 @@ module Karafka
           # @private
           # @param skippable_message [Array<Karafka::Messages::Message>] message we want to
           #   dispatch to DLQ
-          def copy_skippable_message_to_dlq(skippable_message)
+          def dispatch_skippable_message_to_dlq(skippable_message)
             producer.produce_async(
               topic: topic.dead_letter_queue.topic,
               payload: skippable_message.raw_payload,
@@ -71,6 +71,13 @@ module Karafka
                 'original-partition' => skippable_message.partition.to_s,
                 'original-offset' => skippable_message.offset.to_s
               )
+            )
+
+            # Notify about dispatch on the events bus
+            Karafka.monitor.instrument(
+              'dead_letter_queue.dispatched',
+              caller: self,
+              message: skippable_message
             )
           end
         end

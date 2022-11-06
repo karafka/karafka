@@ -21,7 +21,7 @@ module Karafka
         with_admin do |admin|
           admin.create_topic(name, partitions, replication_factor, topic_config)
 
-          sleep(0.1) until topics_names.include?(name)
+          sleep(0.2) until topics_names.include?(name)
         end
       end
 
@@ -32,7 +32,7 @@ module Karafka
         with_admin do |admin|
           admin.delete_topic(name)
 
-          sleep(0.1) while topics_names.include?(name)
+          sleep(0.2) while topics_names.include?(name)
         end
       end
 
