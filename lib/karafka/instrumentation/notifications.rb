@@ -32,6 +32,8 @@ module Karafka
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
 
+        dead_letter_queue.dispatched
+
         worker.process
         worker.processed
         worker.completed
