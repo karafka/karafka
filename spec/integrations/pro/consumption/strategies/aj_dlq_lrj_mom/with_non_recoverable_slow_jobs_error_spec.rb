@@ -24,9 +24,6 @@ setup_karafka(allow_errors: true) do |config|
   config.kafka[:'session.timeout.ms'] = 10_000
 end
 
-create_topic(name: DT.topics[0])
-create_topic(name: DT.topics[1])
-
 class DlqConsumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|

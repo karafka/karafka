@@ -11,8 +11,6 @@ setup_karafka do |config|
   config.initial_offset = 'earliest'
 end
 
-create_topic
-
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     group = Set.new

@@ -6,8 +6,6 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.license.token = pro_license_token
 end
 
-5.times { |i| create_topic(name: DT.topics[i]) }
-
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     raise StandardError

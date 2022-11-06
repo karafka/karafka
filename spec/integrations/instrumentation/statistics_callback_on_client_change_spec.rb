@@ -5,7 +5,7 @@
 
 setup_karafka(allow_errors: true)
 
-draw_routes(Class.new)
+draw_routes(Class.new, false)
 
 stats_events = []
 
