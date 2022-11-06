@@ -5,17 +5,12 @@ module Karafka
     module Strategies
       # When using manual offset management, we do not mark as consumed after successful processing
       module Mom
-        include Base
+        include Default
 
-        # Apply strategy when ony manual offset management is turned on
+        # Apply strategy when only manual offset management is turned on
         FEATURES = %i[
           manual_offset_management
         ].freeze
-
-        # No actions needed for the standard flow here
-        def handle_before_enqueue
-          nil
-        end
 
         # When manual offset management is on, we do not mark anything as consumed automatically
         # and we rely on the user to figure things out
@@ -27,13 +22,6 @@ module Karafka
           else
             pause(coordinator.seek_offset)
           end
-        end
-
-        # Same as default
-        def handle_revoked
-          resume
-
-          coordinator.revoke
         end
       end
     end

@@ -20,7 +20,7 @@ module Karafka
         # Manual offset management enabled
         # Virtual Partitions enabled
         module AjLrjMomVp
-          include Base
+          include Default
 
           # Features for this strategy
           FEATURES = %i[

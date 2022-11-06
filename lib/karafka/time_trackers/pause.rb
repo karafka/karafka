@@ -10,7 +10,7 @@ module Karafka
     #   code here, as this is not a frequently used tracker. It is active only once per batch in
     #   case of long-running-jobs and upon errors.
     class Pause < Base
-      attr_reader :count
+      attr_reader :attempt
 
       # @param timeout [Integer] how long should we wait when anything went wrong (in ms)
       # @param max_timeout [Integer, nil] if exponential is on, what is the max value we can reach
@@ -19,26 +19,29 @@ module Karafka
       #   timeout value
       # @return [Karafka::TimeTrackers::Pause]
       # @example
-      #   pause = Karafka::TimeTrackers::Pause.new(timeout: 1000)
+      #   options = { timeout: 1000, max_timeout: 1000, exponential_backoff: false }
+      #   pause = Karafka::TimeTrackers::Pause.new(**options)
       #   pause.expired? #=> true
       #   pause.paused? #=> false
       #   pause.pause
+      #   pause.increment
       #   sleep(1.1)
       #   pause.paused? #=> true
       #   pause.expired? #=> true
-      #   pause.count #=> 1
+      #   pause.attempt #=> 1
       #   pause.pause
-      #   pause.count #=> 1
+      #   pause.increment
+      #   pause.attempt #=> 2
       #   pause.paused? #=> true
       #   pause.expired? #=> false
       #   pause.resume
-      #   pause.count #=> 2
+      #   pause.attempt #=> 2
       #   pause.paused? #=> false
       #   pause.reset
-      #   pause.count #=> 0
+      #   pause.attempt #=> 0
       def initialize(timeout:, max_timeout:, exponential_backoff:)
         @started_at = nil
-        @count = 0
+        @attempt = 0
         @timeout = timeout
         @max_timeout = max_timeout
         @exponential_backoff = exponential_backoff
@@ -47,7 +50,7 @@ module Karafka
       end
 
       # Pauses the processing from now till the end of the interval (backoff or non-backoff)
-      # and records the count.
+      # and records the attempt.
       # @param timeout [Integer] timeout value in milliseconds that overwrites the default timeout
       # @note Providing this value can be useful when we explicitly want to pause for a certain
       #   period of time, outside of any regular pausing logic
@@ -55,7 +58,13 @@ module Karafka
         @mutex.synchronize do
           @started_at = now
           @ends_at = @started_at + timeout
-          @count += 1
+        end
+      end
+
+      # Increments the number of attempt by 1
+      def increment
+        @mutex.synchronize do
+          @attempt += 1
         end
       end
 
@@ -88,10 +97,10 @@ module Karafka
         end
       end
 
-      # Resets the pause counter.
+      # Resets the pause attempt count.
       def reset
         @mutex.synchronize do
-          @count = 0
+          @attempt = 0
         end
       end
 
@@ -100,7 +109,7 @@ module Karafka
       # Computers the exponential backoff
       # @return [Integer] backoff in milliseconds
       def backoff_interval
-        backoff_factor = @exponential_backoff ? 2**@count : 1
+        backoff_factor = @exponential_backoff ? 2**@attempt : 1
 
         timeout = backoff_factor * @timeout
 

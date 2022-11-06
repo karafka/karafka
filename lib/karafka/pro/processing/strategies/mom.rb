@@ -17,17 +17,12 @@ module Karafka
       module Strategies
         # Manual offset management enabled
         module Mom
-          include Base
+          include Default
 
           # Features for this strategy
           FEATURES = %i[
             manual_offset_management
           ].freeze
-
-          # No actions needed for the standard flow here
-          def handle_before_enqueue
-            nil
-          end
 
           # When mom is enabled, we do not mark messages as consumed after processing
           def handle_after_consume
@@ -39,15 +34,6 @@ module Karafka
               else
                 pause(coordinator.seek_offset)
               end
-            end
-          end
-
-          # Standard flow
-          def handle_revoked
-            coordinator.on_revoked do
-              resume
-
-              coordinator.revoke
             end
           end
         end
