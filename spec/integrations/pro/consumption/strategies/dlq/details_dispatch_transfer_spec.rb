@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# When DLQ transfer occurs, payload and many other things should be transfered to the DLQ topic.
+# When DLQ transfer occurs, payload and many other things should be transferred to the DLQ topic.
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 1
@@ -35,7 +35,7 @@ end
 elements = DT.uuids(2)
 
 2.times do |i|
-  produce(DT.topic, elements[i], headers: { "test#{i}" => (i + 1).to_s } )
+  produce(DT.topic, elements[i], headers: { "test#{i}" => (i + 1).to_s })
 end
 
 start_karafka_and_wait_until do
