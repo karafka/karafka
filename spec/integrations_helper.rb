@@ -135,7 +135,7 @@ end
 # @param consumer_class [Class, nil] consumer class we want to use if going with defaults
 # @param create_topics [Boolean] should we create the defined topics (true by default)
 # @param block [Proc] block with routes we want to draw if going with complex routes setup
-def draw_routes(consumer_class = nil, create_topics = true, &block)
+def draw_routes(consumer_class = nil, create_topics: true, &block)
   Karafka::App.routes.draw do
     if block
       instance_eval(&block)
@@ -150,8 +150,13 @@ def draw_routes(consumer_class = nil, create_topics = true, &block)
 
   return unless create_topics
 
-  # Code below will auto-create all the routing based topics so we don't have to do it per spec
-  # If a topic is already created for example with more partitions, this will do nothing
+  create_routes_topics
+end
+
+# Creates topics defined in the routes so they are available for the specs
+# Code below will auto-create all the routing based topics so we don't have to do it per spec
+# If a topic is already created for example with more partitions, this will do nothing
+def create_routes_topics
   topics_names = Set.new
 
   Karafka::App.routes.map(&:topics).flatten.each do |topics|
