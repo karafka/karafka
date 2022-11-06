@@ -113,7 +113,7 @@ module Karafka
 
       # Logs info when we have dispatched a message the the DLQ
       #
-      # @param _event [Dry::Events::Event] event details including payload
+      # @param event [Dry::Events::Event] event details including payload
       def on_dead_letter_queue_dispatched(event)
         message = event[:message]
         offset = message.offset
