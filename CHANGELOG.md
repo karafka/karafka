@@ -1,25 +1,26 @@
 # Karafka framework changelog
 
 ## Unreleased
-- Align attributes available in the instrumentation bus for listener related events.
-- Include consumer group id in consumption related events (#1093)
-- Remove unused logger listener event handler.
-- Internal refactoring of routing validations flow.
 - **[Breaking]** Disable the root `manual_offset_management` setting and require it to be configured per topic. This is part of "topic features" configuration extraction for better code organization.
-- Reorganize how routing related features are represented internally to simplify features management.
-- Fix a case where routing tags would not be injected when given routing definition would not be used with a block
-- Fix a case where using `#active_job_topic` without extra block options would cause `manual_offset_management` to stay false.
-- Fix a case when upon Pro ActiveJob usage with Virtual Partitions, correct offset would not be stored
-- Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
-- Extract supported features combinations processing flow into separate strategies.
-- Delegate pro components loading to Zeitwerk
-- Fix a case where upon Virtual Partitions usage, same underlying real partition would be resumed several times.
-- Split specs into regular and pro to simplify how resources are loaded
-- Introduce Dead Letter Queue feature and Pro Enhanced Dead Letter Queue feature
-- Fix LRJ enqueuing pause increases the coordinator counter (#115)
-- Auto-create topics in the integration specs based on the defined routing
-- Include `Datadog::LoggerListener` for tracking logger data with DataDog (@bruno-b-martins)
-- Auto-inject Pro components via composition instead of requiring to use `Karafka::Pro::BaseConsumer` (#1116)
+- [Feature] Introduce Dead Letter Queue feature and Pro Enhanced Dead Letter Queue feature
+- [Improvement] Align attributes available in the instrumentation bus for listener related events.
+- [Improvement] Include consumer group id in consumption related events (#1093)
+- [Improvement] Delegate pro components loading to Zeitwerk
+- [Improvement] Include `Datadog::LoggerListener` for tracking logger data with DataDog (@bruno-b-martins)
+- [Refactor] Remove unused logger listener event handler.
+- [Refactor] Internal refactoring of routing validations flow.
+- [Refactor] Reorganize how routing related features are represented internally to simplify features management.
+- [Refactor] Extract supported features combinations processing flow into separate strategies.
+- [Refactor] Auto-create topics in the integration specs based on the defined routing
+- [Refactor] Auto-inject Pro components via composition instead of requiring to use `Karafka::Pro::BaseConsumer` (#1116)
+- [Fix] Fix a case where routing tags would not be injected when given routing definition would not be used with a block
+- [Fix] Fix a case where using `#active_job_topic` without extra block options would cause `manual_offset_management` to stay false.
+- [Fix] Fix a case when upon Pro ActiveJob usage with Virtual Partitions, correct offset would not be stored
+- [Fix] Fix a case where upon Virtual Partitions usage, same underlying real partition would be resumed several times.
+- [Fix] Fix LRJ enqueuing pause increases the coordinator counter (#115)
+- [Fix] Release `ActiveRecord` connection to the pool after the work in non-dev envs (#1130)
+- [Specs] Split specs into regular and pro to simplify how resources are loaded
+- [Specs] Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
 
 ### Upgrade notes
 
@@ -55,6 +56,22 @@ class KarafkaApp < Karafka::App
   end
 end
 ```
+
+3. If you were using code to restart dead connections similar to this:
+
+```ruby
+class ActiveRecordConnectionsCleaner
+  def on_error_occurred(event)
+    return unless event[:error].is_a?(ActiveRecord::StatementInvalid)
+
+    ::ActiveRecord::Base.clear_active_connections!
+  end
+end
+
+Karafka.monitor.subscribe(ActiveRecordConnectionsCleaner.new)
+```
+
+It **should** be removed. This code is **no longer needed**.
 
 ## 2.0.15 (2022-10-20)
 - Sanitize admin config prior to any admin action.
