@@ -160,7 +160,13 @@ def create_routes_topics
   topics_names = Set.new
 
   Karafka::App.routes.map(&:topics).flatten.each do |topics|
-    topics.each { |topic| topics_names << topic.name }
+    topics.each do |topic|
+      topics_names << topic.name
+
+      next unless topic.dead_letter_queue?
+
+      topics_names << topic.dead_letter_queue.topic
+    end
   end
 
   topics_names.each { |topic_name| create_topic(name: topic_name) }
