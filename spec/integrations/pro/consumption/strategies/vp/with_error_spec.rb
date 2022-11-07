@@ -17,7 +17,7 @@ setup_karafka(allow_errors: true) do |config|
   config.concurrency = 10
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   MUTEX = Mutex.new
 
   def consume

@@ -18,6 +18,7 @@
 - Introduce Dead Letter Queue feature and Pro Enhanced Dead Letter Queue feature
 - Fix LRJ enqueuing pause increases the coordinator counter (#115)
 - Auto-create topics in the integration specs based on the defined routing
+- Auto-inject Pro components via composition instead of requiring to use `Karafka::Pro::BaseConsumer` (#1116)
 
 ### Upgrade notes
 

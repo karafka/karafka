@@ -25,7 +25,7 @@ RSpec.describe_current do
     coordinator.increment
   end
 
-  it { expect(described_class).to be < Karafka::Pro::BaseConsumer }
+  it { expect(described_class).to be < Karafka::BaseConsumer }
 
   describe '#on_before_enqueue behaviour' do
     before { allow(consumer).to receive(:pause) }

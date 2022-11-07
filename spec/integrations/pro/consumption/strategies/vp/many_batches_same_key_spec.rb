@@ -8,7 +8,7 @@ setup_karafka do |config|
   config.concurrency = 10
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[object_id] << message.offset

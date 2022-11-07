@@ -16,7 +16,7 @@ setup_karafka(allow_errors: true) do |config|
   config.license.token = pro_license_token
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     raise StandardError if rand(2).zero?
 

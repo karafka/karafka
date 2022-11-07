@@ -27,7 +27,7 @@ class VirtualPartitioner
   end
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[object_id] << message.offset

@@ -19,7 +19,7 @@ end
 
 create_topic(partitions: 2)
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[0] << [message.key, message.offset]

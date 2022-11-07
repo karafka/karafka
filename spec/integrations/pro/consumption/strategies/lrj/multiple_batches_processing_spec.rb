@@ -20,7 +20,7 @@ DT[:sleeps] = [
   true
 ]
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group
