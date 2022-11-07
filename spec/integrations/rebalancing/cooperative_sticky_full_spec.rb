@@ -37,7 +37,6 @@ end
 
 draw_routes(Consumer)
 
-
 # We do it twice as it's an edge case that can but does not have to happen
 # It should not happen if sync marking is not used though
 other = Thread.new do
