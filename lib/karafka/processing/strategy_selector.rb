@@ -15,9 +15,8 @@ module Karafka
       # @param topic [Karafka::Routing::Topic] topic with settings based on which we find strategy
       # @return [Module] module with proper strategy
       def find(topic)
-        # ActiveJob usage is not a feature that would impact the strategy. ActiveJob always goes
-        # with manual offset management.
         feature_set = [
+          topic.active_job? ? :active_job : nil,
           topic.manual_offset_management? ? :manual_offset_management : nil,
           topic.dead_letter_queue? ? :dead_letter_queue : nil
         ].compact

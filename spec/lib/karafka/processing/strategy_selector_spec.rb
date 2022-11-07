@@ -29,4 +29,23 @@ RSpec.describe_current do
 
     it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::DlqMom) }
   end
+
+  context 'when dead letter queue is on with mom and aj' do
+    before do
+      topic.active_job(true)
+      topic.dead_letter_queue(topic: 'dead')
+      topic.manual_offset_management(true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::AjDlqMom) }
+  end
+
+  context 'when mom is on with aj' do
+    before do
+      topic.active_job(true)
+      topic.manual_offset_management(true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::AjMom) }
+  end
 end
