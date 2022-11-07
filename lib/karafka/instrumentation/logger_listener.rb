@@ -14,6 +14,8 @@ module Karafka
         fatal
       ].freeze
 
+      private_constant :USED_LOG_LEVELS
+
       # Logs each messages fetching attempt
       #
       # @param event [Dry::Events::Event] event details including payload
@@ -156,9 +158,6 @@ module Karafka
           fatal details
         when 'connection.listener.fetch_loop.error'
           error "Listener fetch loop error: #{error}"
-          error details
-        when 'licenser.expired'
-          error error
           error details
         when 'runner.call.error'
           fatal "Runner crashed due to an error: #{error}"
