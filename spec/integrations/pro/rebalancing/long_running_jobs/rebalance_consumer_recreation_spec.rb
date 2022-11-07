@@ -11,7 +11,7 @@ end
 
 create_topic(partitions: 2)
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     # We should never try to consume new batch with a revoked consumer
     # This is just an extra test to make sure things work as expected

@@ -7,7 +7,7 @@ setup_karafka(allow_errors: true) do |config|
   config.kafka = { 'bootstrap.servers': '127.0.0.1:9090' }
 end
 
-draw_routes(Class.new)
+draw_routes(Class.new, create_topics: false)
 
 error_events = []
 

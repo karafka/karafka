@@ -18,9 +18,10 @@ pro = Karafka::Pro
 assert_equal false, logs.include?('] ERROR -- : Your license expired')
 assert_equal false, logs.include?('Please reach us')
 assert Karafka.pro?
+assert const_visible?('Karafka::Pro::Processing::StrategySelector')
 assert const_visible?('Karafka::Pro::Processing::Coordinator')
 assert const_visible?('Karafka::Pro::Processing::Partitioner')
-assert const_visible?('Karafka::Pro::BaseConsumer')
+assert const_visible?('Karafka::BaseConsumer')
 assert const_visible?('Karafka::Pro::Processing::JobsBuilder')
 assert const_visible?('Karafka::Pro::Processing::Scheduler')
 assert const_visible?('Karafka::Pro::Routing::Features::LongRunningJob::Topic')
@@ -34,6 +35,7 @@ assert const_visible?('Karafka::Pro::ActiveJob::Consumer')
 assert const_visible?('Karafka::Pro::ActiveJob::Dispatcher')
 assert const_visible?('Karafka::Pro::ActiveJob::JobOptionsContract')
 assert const_visible?('Karafka::Pro::PerformanceTracker')
+assert_equal pro::Processing::StrategySelector, config.processing.strategy_selector.class
 assert_equal pro::Processing::Partitioner, config.processing.partitioner_class
 assert_equal pro::Processing::Coordinator, config.processing.coordinator_class
 assert_equal pro::Processing::Scheduler, config.processing.scheduler.class

@@ -88,8 +88,6 @@ module Karafka
             extra_tags = ["type:#{event[:type]}"]
 
             if event.payload[:caller].respond_to?(:messages)
-              metadata = event.payload[:caller].messages.metadata
-
               extra_tags += consumer_tags(event.payload[:caller])
             end
 

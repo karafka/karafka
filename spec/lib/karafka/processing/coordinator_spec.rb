@@ -27,7 +27,8 @@ RSpec.describe_current do
   describe '#decrement' do
     context 'when we would go below zero jobs' do
       it 'expect to raise error' do
-        expect { coordinator.decrement }.to raise_error(Karafka::Errors::InvalidCoordinatorState)
+        expected_error = Karafka::Errors::InvalidCoordinatorStateError
+        expect { coordinator.decrement }.to raise_error(expected_error)
       end
     end
 

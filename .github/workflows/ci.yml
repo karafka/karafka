@@ -81,7 +81,7 @@ jobs:
       - name: Run all specs
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}
-        run: bundle exec rspec
+        run: bin/rspecs
 
   integrations:
     runs-on: ubuntu-latest

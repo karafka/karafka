@@ -12,6 +12,14 @@
 - Fix a case where using `#active_job_topic` without extra block options would cause `manual_offset_management` to stay false.
 - Fix a case when upon Pro ActiveJob usage with Virtual Partitions, correct offset would not be stored
 - Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
+- Extract supported features combinations processing flow into separate strategies.
+- Delegate pro components loading to Zeitwerk
+- Fix a case where upon Virtual Partitions usage, same underlying real partition would be resumed several times.
+- Split specs into regular and pro to simplify how resources are loaded
+- Introduce Dead Letter Queue feature and Pro Enhanced Dead Letter Queue feature
+- Fix LRJ enqueuing pause increases the coordinator counter (#115)
+- Auto-create topics in the integration specs based on the defined routing
+- Auto-inject Pro components via composition instead of requiring to use `Karafka::Pro::BaseConsumer` (#1116)
 
 ### Upgrade notes
 

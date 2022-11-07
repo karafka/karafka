@@ -16,9 +16,9 @@ assert failed_as_expected
 assert_equal false, Karafka.pro?
 
 # Pro components should not be visible
+assert_equal false, const_visible?('Karafka::Pro::Processing::StrategySelector')
 assert_equal false, const_visible?('Karafka::Pro::Processing::Partitioner')
 assert_equal false, const_visible?('Karafka::Pro::Processing::Coordinator')
-assert_equal false, const_visible?('Karafka::Pro::BaseConsumer')
 assert_equal false, const_visible?('Karafka::Pro::Processing::JobsBuilder')
 assert_equal false, const_visible?('Karafka::Pro::Routing::Features::LongRunningJob::Topic')
 assert_equal false, const_visible?('Karafka::Pro::Routing::Features::LongRunningJob::Contract')

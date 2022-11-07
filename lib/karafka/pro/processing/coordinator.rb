@@ -23,6 +23,7 @@ module Karafka
           @on_enqueued_invoked = false
           @on_started_invoked = false
           @on_finished_invoked = false
+          @on_revoked_invoked = false
           @flow_lock = Mutex.new
         end
 
@@ -77,6 +78,18 @@ module Karafka
             return if @on_finished_invoked
 
             @on_finished_invoked = true
+
+            yield(@last_message)
+          end
+        end
+
+        # Runs once when a partition is revoked
+        def on_revoked
+          @flow_lock.synchronize do
+            return unless finished?
+            return if @on_revoked_invoked
+
+            @on_revoked_invoked = true
 
             yield(@last_message)
           end

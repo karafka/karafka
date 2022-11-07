@@ -9,7 +9,7 @@ setup_karafka(allow_errors: true) do |config|
   config.kafka = { 'bootstrap.servers': '127.0.0.1:9090' }
 end
 
-draw_routes do
+draw_routes(nil, create_topics: false) do
   consumer_group DT.consumer_groups.first do
     topic DT.topic do
       consumer Class.new

@@ -41,9 +41,7 @@ class Consumer < Karafka::BaseConsumer
     # Assume each message persistence takes 1ms
     sleep(messages.count / 1_000.to_f)
 
-    if @count >= MAX_MESSAGES_PER_PARTITION
-      DT.data[:completed] << messages.metadata.partition
-    end
+    DT.data[:completed] << messages.metadata.partition if @count >= MAX_MESSAGES_PER_PARTITION
 
     return if DT.data[:completed].size != PARTITIONS_COUNT
     return if $stop

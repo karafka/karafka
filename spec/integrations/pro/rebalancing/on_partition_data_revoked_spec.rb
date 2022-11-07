@@ -14,7 +14,7 @@ DT[:revoked] = Concurrent::Array.new
 DT[:pre] = Set.new
 DT[:post] = Set.new
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     # Pre rebalance
     if DT[:revoked].empty?

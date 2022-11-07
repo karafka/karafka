@@ -24,7 +24,9 @@ Thread.new do
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+    DT[:working] << [topic.name, messages.partition]
+  end
 
   def on_revoked
     DT[messages.metadata.topic] << messages.metadata.partition
@@ -48,7 +50,10 @@ end
 consumer = setup_rdkafka_consumer
 
 other = Thread.new do
-  sleep(10)
+  sleep(1) while DT[:working].uniq.count < 2
+
+  sleep(1)
+
   consumer.subscribe(DT.topics[0])
 
   consumer.each { break }

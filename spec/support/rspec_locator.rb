@@ -28,7 +28,10 @@ class RSpecLocator < Module
     # out the proper class that we want to describe
     # @param block [Proc] block with specs
     rspec.define_singleton_method :describe_current do |&block|
-      describe(this.inherited, &block)
+      # Mark specs from pro namespace as pro
+      type = this.inherited.to_s.include?('::Pro::') ? :pro : :regular
+
+      describe(this.inherited, type: type, &block)
     end
   end
 

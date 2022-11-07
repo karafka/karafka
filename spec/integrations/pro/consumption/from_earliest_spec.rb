@@ -7,7 +7,7 @@ setup_karafka do |config|
   config.license.token = pro_license_token
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[message.metadata.partition] << message.raw_payload

@@ -76,7 +76,10 @@ RSpec.describe_current do
     end
 
     context 'when everything went ok on consume with manual offset management' do
-      before { topic.manual_offset_management true }
+      before do
+        consumer.singleton_class.include(Karafka::Processing::Strategies::Mom)
+        topic.manual_offset_management true
+      end
 
       it { expect { consume_with_after.call }.not_to raise_error }
 
@@ -96,6 +99,8 @@ RSpec.describe_current do
     end
 
     context 'when there was an error on consume with manual offset management' do
+      before { consumer.singleton_class.include(Karafka::Processing::Strategies::Mom) }
+
       let(:working_class) do
         ClassBuilder.inherit(described_class) do
           attr_reader :consumed
@@ -131,6 +136,7 @@ RSpec.describe_current do
       before do
         topic.manual_offset_management false
         allow(client).to receive(:mark_as_consumed)
+        consumer.singleton_class.include(Karafka::Processing::Strategies::Default)
       end
 
       it { expect { consumer.on_consume }.not_to raise_error }
@@ -148,44 +154,12 @@ RSpec.describe_current do
         expect(client).to have_received(:mark_as_consumed).with(last_message)
       end
     end
-
-    context 'when there was an error on consume with automatic offset management' do
-      before { topic.manual_offset_management false }
-
-      let(:working_class) do
-        ClassBuilder.inherit(described_class) do
-          attr_reader :consumed
-
-          def consume
-            raise StandardError
-          end
-        end
-      end
-
-      it { expect { consume_with_after.call }.not_to raise_error }
-
-      it 'expect to pause based on the message offset' do
-        consume_with_after.call
-        expect(client).to have_received(:pause).with(topic.name, first_message.partition, offset)
-      end
-
-      it 'expect to pause with time tracker' do
-        consume_with_after.call
-        expect(coordinator.pause_tracker).to have_received(:pause)
-      end
-
-      it 'expect to track this with an instrumentation' do
-        Karafka.monitor.subscribe('error.occurred') do |event|
-          expect(event.payload[:caller]).to eq(consumer)
-          expect(event.payload[:error]).to eq(StandardError)
-          expect(event.payload[:type]).to eq('consumer.consume.error')
-        end
-      end
-    end
   end
 
   describe '#on_revoked' do
     context 'when everything went ok on revoked' do
+      before { consumer.singleton_class.include(Karafka::Processing::Strategies::Default) }
+
       it { expect { consumer.on_revoked }.not_to raise_error }
 
       it 'expect to run proper instrumentation' do
