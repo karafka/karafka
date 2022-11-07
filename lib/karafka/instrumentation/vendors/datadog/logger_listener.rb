@@ -26,6 +26,8 @@ module Karafka
             fatal
           ].freeze
 
+          private_constant :USED_LOG_LEVELS
+
           # @param block [Proc] configuration block
           def initialize(&block)
             configure
