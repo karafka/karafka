@@ -9,14 +9,40 @@ module Karafka
         # A karafka's logger listener for Datadog
         # It depends on the 'ddtrace' gem
         class LoggerListener
+          include ::Karafka::Core::Configurable
+          extend Forwardable
+
+          def_delegators :config, :client
+
+          # `Datadog::Tracing` client that we should use to trace stuff
+          setting :client
+
+          configure
+
           # Log levels that we use in this particular listener
-          USED_LOG_LEVELS = %i[info error fatal].freeze
+          USED_LOG_LEVELS = %i[
+            info
+            error
+            fatal
+          ].freeze
+
+          # @param block [Proc] configuration block
+          def initialize(&block)
+            configure
+            setup(&block) if block
+          end
+
+          # @param block [Proc] configuration block
+          # @note We define this alias to be consistent with `WaterDrop#setup`
+          def setup(&block)
+            configure(&block)
+          end
 
           # Prints info about the fact that a given job has started
           #
           # @param event [Dry::Events::Event] event details including payload
           def on_worker_process(event)
-            current_span = Datadog::Tracing.trace('karafka.consumer')
+            current_span = client.trace('karafka.consumer')
             push_tags
 
             job = event[:job]
@@ -44,7 +70,7 @@ module Karafka
 
             info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
 
-            current_span = Datadog::Tracing.active_span
+            current_span = client.active_span
             current_span.finish if current_span.present?
 
             pop_tags
@@ -57,21 +83,25 @@ module Karafka
             push_tags
 
             error = event[:error]
-            Datadog::Tracing.active_span&.set_error(error)
+            client.active_span&.set_error(error)
 
             case event[:type]
             when 'consumer.consume.error'
               error "Consumer consuming error: #{error}"
             when 'consumer.revoked.error'
               error "Consumer on revoked failed due to an error: #{error}"
+            when 'consumer.before_enqueue.error'
+              error "Consumer before enqueue failed due to an error: #{error}"
+            when 'consumer.before_consume.error'
+              error "Consumer before consume failed due to an error: #{error}"
+            when 'consumer.after_consume.error'
+              error "Consumer after consume failed due to an error: #{error}"
             when 'consumer.shutdown.error'
               error "Consumer on shutdown failed due to an error: #{error}"
             when 'worker.process.error'
               fatal "Worker processing failed due to an error: #{error}"
             when 'connection.listener.fetch_loop.error'
               error "Listener fetch loop error: #{error}"
-            when 'licenser.expired'
-              error error
             when 'runner.call.error'
               fatal "Runner crashed due to an error: #{error}"
             when 'app.stopping.error'
@@ -103,7 +133,7 @@ module Karafka
           def push_tags
             return unless Karafka.logger.respond_to?(:push_tags)
 
-            Karafka.logger.push_tags(Datadog::Tracing.log_correlation)
+            Karafka.logger.push_tags(client.log_correlation)
           end
 
           # Pops datadog's tags from the logger
