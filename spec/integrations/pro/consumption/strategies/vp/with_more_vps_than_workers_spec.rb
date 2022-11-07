@@ -11,7 +11,7 @@ setup_karafka do |config|
   config.max_wait_time = 2_000
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     DT[:objects_ids] << object_id
     DT[:messages] << messages.count

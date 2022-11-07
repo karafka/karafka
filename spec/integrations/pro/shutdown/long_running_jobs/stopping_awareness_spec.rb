@@ -11,7 +11,7 @@ setup_karafka do |config|
   config.concurrency = 5
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     # We use loop so in case this would not work, it will timeout and raise an error
     loop do

@@ -6,7 +6,7 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.license.token = pro_license_token
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[:offsets] << message.offset
@@ -14,7 +14,7 @@ class Consumer < Karafka::Pro::BaseConsumer
   end
 end
 
-class DlqConsumer < Karafka::Pro::BaseConsumer
+class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[:broken] << [message.offset, message.raw_payload]

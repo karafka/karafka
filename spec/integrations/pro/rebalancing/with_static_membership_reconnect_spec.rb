@@ -14,7 +14,7 @@ end
 
 create_topic(partitions: 2)
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[:process2] << [message.raw_payload.to_i, message.partition]

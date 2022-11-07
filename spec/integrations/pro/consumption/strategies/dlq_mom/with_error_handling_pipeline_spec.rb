@@ -6,13 +6,13 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.license.token = pro_license_token
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     raise StandardError
   end
 end
 
-class LastConsumer < Karafka::Pro::BaseConsumer
+class LastConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[:broken] << [message.offset, message.raw_payload]
