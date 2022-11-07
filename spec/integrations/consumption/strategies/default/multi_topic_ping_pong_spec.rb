@@ -6,9 +6,6 @@ setup_karafka do |config|
   config.max_wait_time = 100
 end
 
-create_topic(name: DT.topics[0])
-create_topic(name: DT.topics[1])
-
 produce(DT.topic, 0.to_json)
 
 class Consumer1 < Karafka::BaseConsumer

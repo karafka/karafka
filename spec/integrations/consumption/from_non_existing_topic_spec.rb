@@ -4,8 +4,6 @@
 
 setup_karafka
 
-create_topic(name: DT.topics[1])
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[0] << 1

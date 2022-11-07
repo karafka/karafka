@@ -8,9 +8,6 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.license.token = pro_license_token
 end
 
-create_topic(name: DT.topics[0])
-create_topic(name: DT.topics[1])
-
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     messages.each do |message|

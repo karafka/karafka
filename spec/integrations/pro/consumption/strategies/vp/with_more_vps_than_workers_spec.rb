@@ -11,8 +11,6 @@ setup_karafka do |config|
   config.max_wait_time = 2_000
 end
 
-create_topic(name: DT.topics[0])
-
 class Consumer < Karafka::Pro::BaseConsumer
   def consume
     DT[:objects_ids] << object_id
