@@ -15,6 +15,10 @@ RSpec.describe_current do
     it { expect { runner.handle_before_enqueue }.to raise_error(NotImplementedError) }
   end
 
+  describe '#handle_before_consume' do
+    it { expect { runner.handle_before_consume }.to raise_error(NotImplementedError) }
+  end
+
   describe '#handle_after_consume' do
     it { expect { runner.handle_after_consume }.to raise_error(NotImplementedError) }
   end

@@ -18,6 +18,11 @@ module Karafka
           nil
         end
 
+        # Increment number of attempts
+        def handle_before_consume
+          coordinator.pause_tracker.increment
+        end
+
         # Standard flow marks work as consumed and moves on if everything went ok.
         # If there was a processing error, we will pause and continue from the next message
         # (next that is +1 from the last one that was successfully marked as consumed)

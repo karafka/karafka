@@ -59,8 +59,10 @@ RSpec.describe_current do
 
   describe '#to_h' do
     let(:expected_keys) do
-      %i[kafka deserializer max_messages max_wait_time initial_offset id name consumer] +
-        %i[consumer_group_id subscription_group active_job manual_offset_management]
+      %i[
+        kafka deserializer max_messages max_wait_time initial_offset id name consumer
+        consumer_group_id subscription_group active_job dead_letter_queue manual_offset_management
+      ]
     end
 
     it 'expect to contain all the topic attrs plus some inherited' do

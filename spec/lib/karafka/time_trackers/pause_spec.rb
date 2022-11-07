@@ -21,48 +21,58 @@ RSpec.describe_current do
     context 'when pause tracker is created' do
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
 
-    context 'when immediately after paused' do
-      before { tracker.pause }
+    context 'when immediately after paused and incremented' do
+      before do
+        tracker.pause
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when not paused over timeout' do
       let(:times) { [0.763, 0.764] }
 
-      before { tracker.pause }
+      before do
+        tracker.pause
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout' do
       let(:times) { [0.763, 1.764] }
 
-      before { tracker.pause }
+      before do
+        tracker.pause
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout several times' do
       before do
         5.times do
           tracker.pause
+          tracker.increment
           tracker.resume
         end
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(5) }
+      it { expect(tracker.attempt).to eq(5) }
     end
 
     context 'when paused over timeout and resumed' do
@@ -70,12 +80,13 @@ RSpec.describe_current do
 
       before do
         tracker.pause
+        tracker.increment
         tracker.resume
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout, resumed and reset' do
@@ -83,13 +94,14 @@ RSpec.describe_current do
 
       before do
         tracker.pause
+        tracker.increment
         tracker.resume
         tracker.reset
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
   end
 
@@ -101,36 +113,45 @@ RSpec.describe_current do
     context 'when pause tracker is created' do
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
 
     context 'when immediately after paused' do
-      before { tracker.pause }
+      before do
+        tracker.pause
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when not paused over timeout nor max timeout' do
       # 1 ms of a difference
       let(:times) { [0.763, 0.764] }
 
-      before { tracker.pause }
+      before do
+        tracker.pause
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over max timeout' do
       let(:times) { [0.763, 0.769] }
 
-      before { tracker.pause }
+      before do
+        tracker.pause
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout and resumed' do
@@ -138,12 +159,13 @@ RSpec.describe_current do
 
       before do
         tracker.pause
+        tracker.increment
         tracker.resume
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout, resumed and reset' do
@@ -151,13 +173,14 @@ RSpec.describe_current do
 
       before do
         tracker.pause
+        tracker.increment
         tracker.resume
         tracker.reset
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
   end
 
@@ -169,35 +192,44 @@ RSpec.describe_current do
     context 'when pause tracker is created' do
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
 
     context 'when immediately after paused' do
-      before { tracker.pause }
+      before do
+        tracker.pause
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when not paused over timeout nor max timeout' do
       let(:times) { [0.763, 0.764] }
 
-      before { tracker.pause }
+      before do
+        tracker.pause
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over max timeout' do
       let(:times) { [0.763, 1.764] }
 
-      before { tracker.pause }
+      before do
+        tracker.pause
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout and resumed' do
@@ -205,12 +237,13 @@ RSpec.describe_current do
 
       before do
         tracker.pause
+        tracker.increment
         tracker.resume
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout, resumed and reset' do
@@ -218,13 +251,14 @@ RSpec.describe_current do
 
       before do
         tracker.pause
+        tracker.increment
         tracker.resume
         tracker.reset
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
   end
 
@@ -236,46 +270,56 @@ RSpec.describe_current do
     context 'when pause tracker is created' do
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
 
     context 'when immediately after paused' do
-      before { tracker.pause(1) }
+      before do
+        tracker.pause(1)
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused and manually expired' do
       before do
         tracker.pause(1_000)
+        tracker.increment
         tracker.expire
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when not paused over timeout nor max timeout' do
       let(:times) { [0.763, 0.764] }
 
-      before { tracker.pause(2) }
+      before do
+        tracker.pause(2)
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(false) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over max timeout' do
       let(:times) { [0.763, 1.764] }
 
-      before { tracker.pause(1) }
+      before do
+        tracker.pause(1)
+        tracker.increment
+      end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(true) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout and resumed' do
@@ -283,12 +327,13 @@ RSpec.describe_current do
 
       before do
         tracker.pause(1)
+        tracker.increment
         tracker.resume
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(1) }
+      it { expect(tracker.attempt).to eq(1) }
     end
 
     context 'when paused over timeout, resumed and reset' do
@@ -296,13 +341,14 @@ RSpec.describe_current do
 
       before do
         tracker.pause(1)
+        tracker.increment
         tracker.resume
         tracker.reset
       end
 
       it { expect(tracker.expired?).to eq(true) }
       it { expect(tracker.paused?).to eq(false) }
-      it { expect(tracker.count).to eq(0) }
+      it { expect(tracker.attempt).to eq(0) }
     end
   end
 end

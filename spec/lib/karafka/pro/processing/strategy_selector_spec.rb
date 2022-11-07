@@ -21,15 +21,6 @@ RSpec.describe_current do
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Vp) }
   end
 
-  context 'when we enable vp with mom' do
-    before do
-      topic.virtual_partitions(partitioner: true)
-      topic.manual_offset_management(true)
-    end
-
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::MomVp) }
-  end
-
   context 'when lrj is enabled with vp' do
     before do
       topic.long_running_job(true)
@@ -101,5 +92,51 @@ RSpec.describe_current do
     end
 
     it { expect { selected_strategy }.to raise_error(Karafka::Errors::StrategyNotFoundError) }
+  end
+
+  context 'when dlq is enabled' do
+    before { topic.dead_letter_queue(topic: 'test') }
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq) }
+  end
+
+  context 'when dlq with mom is enabled' do
+    before do
+      topic.dead_letter_queue(topic: 'test')
+      topic.manual_offset_management(true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::DlqMom) }
+  end
+
+  context 'when dlq, mom and lrj is enabled' do
+    before do
+      topic.dead_letter_queue(topic: 'test')
+      topic.manual_offset_management(true)
+      topic.long_running_job(true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::DlqLrjMom) }
+  end
+
+  context 'when aj, dlq and mom is enabled' do
+    before do
+      topic.dead_letter_queue(topic: 'test')
+      topic.manual_offset_management(true)
+      topic.active_job(true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::AjDlqMom) }
+  end
+
+  context 'when aj, dlq, mom and lrj is enabled' do
+    before do
+      topic.dead_letter_queue(topic: 'test')
+      topic.manual_offset_management(true)
+      topic.long_running_job(true)
+      topic.active_job(true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::AjDlqLrjMom) }
   end
 end

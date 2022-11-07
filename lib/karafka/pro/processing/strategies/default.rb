@@ -31,6 +31,14 @@ module Karafka
             nil
           end
 
+          # Increment number of attempts per one "full" job. For all VP on a single topic partition
+          # this also should run once.
+          def handle_before_consume
+            coordinator.on_started do
+              coordinator.pause_tracker.increment
+            end
+          end
+
           # Standard flow without any features
           def handle_after_consume
             coordinator.on_finished do |last_group_message|

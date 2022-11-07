@@ -17,7 +17,7 @@ module Karafka
       module Strategies
         # Long-Running Job enabled
         module Lrj
-          include Base
+          include Default
 
           # Pause for tops 31 years
           MAX_PAUSE_TIME = 1_000_000_000_000

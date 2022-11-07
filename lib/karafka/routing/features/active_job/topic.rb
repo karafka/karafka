@@ -19,8 +19,8 @@ module Karafka
             active_job.active?
           end
 
-          # @return [Hash] topic with all its native configuration options plus manual offset
-          #   management namespace settings
+          # @return [Hash] topic with all its native configuration options plus active job
+          #   namespace settings
           def to_h
             super.merge(
               active_job: active_job.to_h

@@ -41,6 +41,10 @@ module Karafka
     def on_before_consume
       messages.metadata.processed_at = Time.now
       messages.metadata.freeze
+
+      # We run this after the full metadata setup, so we can use all the messages information
+      # if needed
+      handle_before_consume
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',

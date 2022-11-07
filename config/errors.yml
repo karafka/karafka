@@ -37,7 +37,10 @@ en:
       subscription_group_format: must be nil or a non-empty string
       manual_offset_management.active_format: needs to be either true or false
       consumer_active_job_missing: ActiveJob needs to be available
-      manual_offset_management_not_supported_with_active_job: cannot be disabled for ActiveJob topics
+      manual_offset_management_must_be_enabled: cannot be disabled for ActiveJob topics
+      dead_letter_queue.max_retries_format: needs to be equal or bigger than 0
+      dead_letter_queue.topic_format: 'needs to be a string with a Kafka accepted format'
+      dead_letter_queue.active_format: needs to be either true or false
 
     consumer_group:
       missing: needs to be present
@@ -61,3 +64,4 @@ en:
       virtual_partitions.max_partitions_format: needs to be equl or more than 1
       manual_offset_management_not_with_virtual_partitions: cannot be used together with Virtual Partitions
       long_running_job.active_format: needs to be either true or false
+      dead_letter_queue_not_with_virtual_partitions: cannot be used together with Virtual Partitions
