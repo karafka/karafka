@@ -4,7 +4,7 @@
 # We use a dummy client that will intercept calls that should go to DataDog and check basic
 # metrics presence
 require 'karafka/instrumentation/vendors/datadog/listener'
-require Karafka.gem_root.join('spec/support/statsd_dummy_client')
+require Karafka.gem_root.join('spec/support/vendors/datadog/statsd_dummy_client')
 
 # We allow errors to raise one to make sure things are published as expected
 setup_karafka(allow_errors: true)
@@ -22,7 +22,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-statsd_dummy = StatsdDummyClient.new
+statsd_dummy = Vendors::Datadog::StatsdDummyClient.new
 
 listener = ::Karafka::Instrumentation::Vendors::Datadog::Listener.new do |config|
   config.client = statsd_dummy
