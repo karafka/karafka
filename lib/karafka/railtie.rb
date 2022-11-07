@@ -81,15 +81,16 @@ if rails
 
           Rails.application.reloader.reload!
         end
+      end
 
-        ::Karafka::App.monitor.subscribe('worker.completed') do
-          # Skip in case someone is using Rails without ActiveRecord
-          next unless Object.const_defined?('ActiveRecord::Base')
-
-          # Always release the connection after processing is done. Otherwise thread may hang
-          # blocking the reload and further processing
-          # @see https://github.com/rails/rails/issues/44183
-          ActiveRecord::Base.connection_pool.release_connection
+      initializer 'karafka.release_active_record_connections' do
+        ActiveSupport.on_load(:active_record) do
+          ::Karafka::App.monitor.subscribe('worker.completed') do
+            # Always release the connection after processing is done. Otherwise thread may hang
+            # blocking the reload and further processing
+            # @see https://github.com/rails/rails/issues/44183
+            ActiveRecord::Base.clear_active_connections!
+          end
         end
       end
 
