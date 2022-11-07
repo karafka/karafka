@@ -56,6 +56,22 @@ class KarafkaApp < Karafka::App
 end
 ```
 
+3. If you were using code to restart dead connections similar to this:
+
+```ruby
+class ActiveRecordConnectionsCleaner
+  def on_error_occurred(event)
+    return unless event[:error].is_a?(ActiveRecord::StatementInvalid)
+
+    ::ActiveRecord::Base.clear_active_connections!
+  end
+end
+
+Karafka.monitor.subscribe(ActiveRecordConnectionsCleaner.new)
+```
+
+It **should** be removed. This code is **no longer needed**.
+
 ## 2.0.15 (2022-10-20)
 - Sanitize admin config prior to any admin action.
 - Make messages partitioner outcome for virtual partitions consistently distributed in regards to concurrency.
