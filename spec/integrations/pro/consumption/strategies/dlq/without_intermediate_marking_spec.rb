@@ -51,7 +51,7 @@ produce_many(DT.topic, elements)
 start_karafka_and_wait_until do
   DT[:offsets].uniq.count >= 99 &&
     !DT[:broken].empty? &&
-    DT[:broken].last[1] == elements[10] &&
+    DT[:broken].any? { |broken| broken.last == elements[10] } &&
     DT[:broken].size >= 2
 end
 
