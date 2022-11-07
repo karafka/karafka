@@ -180,9 +180,12 @@ def wait_until
   until stop
     stop = yield
 
-    # Stop if it was running for 2 minutes and nothing changed
+    # Stop if it was running for 3 minutes and nothing changed
     # This prevent from hanging in case of specs instability
-    raise StandardError, 'Execution expired' if (Time.now - started_at) > 180
+    if (Time.now - started_at) > 180
+      puts DT.data
+      raise StandardError, 'Execution expired'
+    end
 
     sleep(0.01)
   end
