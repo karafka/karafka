@@ -18,6 +18,7 @@ module Karafka
           manual_offset_management
         ].freeze
 
+        # How should we post-finalize consumption.
         def handle_after_consume
           return if revoked?
 
