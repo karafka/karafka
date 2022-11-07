@@ -4,8 +4,7 @@ module Vendors
   module Datadog
     # Logger client that matches the basic `Datadog::Tracing` API.
     class LoggerDummyClient
-      attr_reader :buffer
-      attr_reader :errors
+      attr_reader :buffer, :errors
 
       def initialize
         @buffer = Concurrent::Array.new
@@ -24,11 +23,10 @@ module Vendors
         self
       end
 
-      # @key [Object] assigned key
+      # @param key [Object] assigned key
       # @return [Object] traced resource
       def resource=(key)
         @buffer << key
-        self
       end
 
       # @return [Object] traced resource

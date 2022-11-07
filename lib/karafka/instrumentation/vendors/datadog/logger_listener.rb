@@ -111,7 +111,7 @@ module Karafka
             when 'librdkafka.error'
               error "librdkafka internal error occurred: #{error}"
               # Those will only occur when retries in the client fail and when they did not stop
-              # after backoffs
+              # after back-offs
             when 'connection.client.poll.error'
               error "Data polling error occurred: #{error}"
             else
