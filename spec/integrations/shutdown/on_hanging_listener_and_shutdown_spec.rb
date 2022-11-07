@@ -26,9 +26,7 @@ occurence = 0
 
 # This will force Karafka fetcher to hang
 Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do
-  sleep if occurence >= 2
-
-  occurence += 1
+  sleep unless DT[0].empty?
 end
 
 Thread.new do
