@@ -7,6 +7,7 @@
 - [Improvement] Include consumer group id in consumption related events (#1093)
 - [Improvement] Delegate pro components loading to Zeitwerk
 - [Improvement] Include `Datadog::LoggerListener` for tracking logger data with DataDog (@bruno-b-martins)
+- [Improvement] Include `seek_offset` in the `consumer.consume.error` event payload (#1113)
 - [Refactor] Remove unused logger listener event handler.
 - [Refactor] Internal refactoring of routing validations flow.
 - [Refactor] Reorganize how routing related features are represented internally to simplify features management.
