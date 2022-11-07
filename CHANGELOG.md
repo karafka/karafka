@@ -18,6 +18,7 @@
 - Introduce Dead Letter Queue feature and Pro Enhanced Dead Letter Queue feature
 - Fix LRJ enqueuing pause increases the coordinator counter (#115)
 - Auto-create topics in the integration specs based on the defined routing
+- Include `Datadog::LoggerListener` for tracking logger data with DataDog (@bruno-b-martins)
 
 ### Upgrade notes
 
