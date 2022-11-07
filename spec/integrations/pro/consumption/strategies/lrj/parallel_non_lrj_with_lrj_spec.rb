@@ -11,7 +11,7 @@ setup_karafka do |config|
   config.kafka[:'session.timeout.ms'] = 10_000
 end
 
-class LrjConsumer < Karafka::Pro::BaseConsumer
+class LrjConsumer < Karafka::BaseConsumer
   def consume
     producer.produce_sync(topic: DT.topics[1], payload: '1')
     sleep(15)
@@ -19,7 +19,7 @@ class LrjConsumer < Karafka::Pro::BaseConsumer
   end
 end
 
-class RegularConsumer < Karafka::Pro::BaseConsumer
+class RegularConsumer < Karafka::BaseConsumer
   def consume
     DT[:regular_time] << Time.now
   end

@@ -13,7 +13,7 @@ begin
   draw_routes do
     consumer_group DT.consumer_group do
       topic DT.topic do
-        consumer Class.new(Karafka::Pro::BaseConsumer)
+        consumer Class.new(Karafka::BaseConsumer)
         virtual_partitions(
           partitioner: ->(msg) { msg.raw_payload }
         )

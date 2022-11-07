@@ -8,7 +8,7 @@ setup_karafka do |config|
   config.max_messages = 5
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each { |message| DT[:messages] << message.offset }
 

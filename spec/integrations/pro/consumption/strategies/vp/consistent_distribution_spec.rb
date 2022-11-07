@@ -11,7 +11,7 @@ setup_karafka do |config|
   config.initial_offset = 'earliest'
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     group = Set.new
     messages.each { |message| group << message.raw_payload }

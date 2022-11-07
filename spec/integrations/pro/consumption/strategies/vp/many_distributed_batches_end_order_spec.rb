@@ -14,7 +14,7 @@ Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
   DT[:batches] << Concurrent::Array.new
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[:batches].last << [message.offset]

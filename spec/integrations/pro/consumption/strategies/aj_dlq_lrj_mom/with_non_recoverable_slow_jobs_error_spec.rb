@@ -24,7 +24,7 @@ setup_karafka(allow_errors: true) do |config|
   config.kafka[:'session.timeout.ms'] = 10_000
 end
 
-class DlqConsumer < Karafka::Pro::BaseConsumer
+class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[1] << message.headers['original-offset'].to_i

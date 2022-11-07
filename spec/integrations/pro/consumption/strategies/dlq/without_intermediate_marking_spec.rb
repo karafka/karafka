@@ -10,7 +10,7 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 6
 end
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       raise StandardError if message.offset == 10
@@ -20,7 +20,7 @@ class Consumer < Karafka::Pro::BaseConsumer
   end
 end
 
-class DlqConsumer < Karafka::Pro::BaseConsumer
+class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[:broken] << [message.offset, message.raw_payload]

@@ -11,7 +11,7 @@ class KarafkaApp < Karafka::App
 
   routes.draw do
     topic :visits do
-      consumer Class.new(Karafka::Pro::BaseConsumer)
+      consumer Class.new(Karafka::BaseConsumer)
     end
   end
 end

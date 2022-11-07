@@ -24,7 +24,6 @@ RSpec.describe_current do
       before do
         allow(::Karafka::Pro::Routing::Features::VirtualPartitions).to receive(:activate)
         allow(::Karafka::Pro::Routing::Features::LongRunningJob).to receive(:activate)
-        allow(::Karafka::Pro::Routing::Features::ProInheritance).to receive(:activate)
 
         loader.setup(Karafka::App.config)
       end
@@ -37,7 +36,6 @@ RSpec.describe_current do
       it 'expect to load pro routing features' do
         expect(::Karafka::Pro::Routing::Features::VirtualPartitions).to have_received(:activate)
         expect(::Karafka::Pro::Routing::Features::LongRunningJob).to have_received(:activate)
-        expect(::Karafka::Pro::Routing::Features::ProInheritance).to have_received(:activate)
       end
     end
   end

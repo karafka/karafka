@@ -10,7 +10,7 @@ end
 create_topic(name: DT.topics[0], partitions: 10)
 create_topic(name: DT.topics[1], partitions: 10)
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT[:partitions] << message.partition
@@ -20,7 +20,7 @@ class Consumer < Karafka::Pro::BaseConsumer
   end
 end
 
-class DlqConsumer < Karafka::Pro::BaseConsumer
+class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       DT["broken-#{message.partition}"] << message.headers['original-partition']

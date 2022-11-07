@@ -12,7 +12,7 @@ end
 
 create_topic(partitions: 2)
 
-class Consumer < Karafka::Pro::BaseConsumer
+class Consumer < Karafka::BaseConsumer
   def consume
     partition = messages.metadata.partition
 

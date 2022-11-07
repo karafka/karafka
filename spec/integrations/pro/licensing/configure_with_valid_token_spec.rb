@@ -21,7 +21,7 @@ assert Karafka.pro?
 assert const_visible?('Karafka::Pro::Processing::StrategySelector')
 assert const_visible?('Karafka::Pro::Processing::Coordinator')
 assert const_visible?('Karafka::Pro::Processing::Partitioner')
-assert const_visible?('Karafka::Pro::BaseConsumer')
+assert const_visible?('Karafka::BaseConsumer')
 assert const_visible?('Karafka::Pro::Processing::JobsBuilder')
 assert const_visible?('Karafka::Pro::Processing::Scheduler')
 assert const_visible?('Karafka::Pro::Routing::Features::LongRunningJob::Topic')
