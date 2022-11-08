@@ -67,7 +67,6 @@ module Karafka
           @stopped = true
           @executors.clear
           @coordinators.reset
-          @client.commit_offsets!
           @client.stop
         end
       end
