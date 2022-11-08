@@ -33,7 +33,7 @@ draw_routes do
   end
 end
 
-produce_many(DT.topic, DT.uuids(20))
+produce_many(DT.topic, DT.uuids(100))
 
 start_karafka_and_wait_until do
   DT[:messages].size >= 1

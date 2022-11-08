@@ -35,7 +35,7 @@ module Karafka
             skippable_message = find_skippable_message
 
             # Send skippable message to the dql topic
-            dispatch_skippable_message_to_dlq(skippable_message)
+            dispatch_to_dlq(skippable_message)
 
             # We mark the broken message as consumed and move on
             mark_as_consumed(skippable_message)
@@ -58,7 +58,7 @@ module Karafka
         # @private
         # @param skippable_message [Karafka::Messages::Message] message we are skipping that also
         #   should go to the dlq topic
-        def dispatch_skippable_message_to_dlq(skippable_message)
+        def dispatch_to_dlq(skippable_message)
           producer.produce_async(
             topic: topic.dead_letter_queue.topic,
             payload: skippable_message.raw_payload
