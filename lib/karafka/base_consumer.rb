@@ -74,6 +74,7 @@ module Karafka
         'error.occurred',
         error: e,
         caller: self,
+        seek_offset: coordinator.seek_offset,
         type: 'consumer.consume.error'
       )
     ensure

@@ -7,6 +7,7 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 6
+  config.max_wait_time = 2_000
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -28,13 +29,18 @@ class DlqConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  topic DT.topics[0] do
-    consumer Consumer
-    dead_letter_queue(topic: DT.topics[1], max_retries: 1)
+  subscription_group do
+    topic DT.topics[0] do
+      consumer Consumer
+      dead_letter_queue(topic: DT.topics[1], max_retries: 1)
+    end
   end
 
-  topic DT.topics[1] do
-    consumer DlqConsumer
+  # We put those in separate subscription groups so their results aren't polled together
+  subscription_group do
+    topic DT.topics[1] do
+      consumer DlqConsumer
+    end
   end
 end
 
