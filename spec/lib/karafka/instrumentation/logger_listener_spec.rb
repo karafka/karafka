@@ -175,14 +175,6 @@ RSpec.describe_current do
         sleep 0.1
         expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
       end
-
-      context 'when it is a licenser.expired error' do
-        let(:type) { 'licenser.expired' }
-        let(:error) { Karafka::Errors::ExpiredLicenseTokenError.new }
-        let(:message) { '' }
-
-        it { expect(Karafka.logger).to have_received(:error).with(message) }
-      end
     end
 
     context 'when it is a worker.process.error' do

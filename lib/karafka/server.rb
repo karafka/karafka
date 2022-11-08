@@ -74,7 +74,7 @@ module Karafka
       #   please start a separate thread to do so.
       def stop
         # Initialize the stopping process only if Karafka was running
-        return unless Karafka::App.running?
+        return if Karafka::App.stopping? || Karafka::App.stopped?
 
         Karafka::App.stop!
 

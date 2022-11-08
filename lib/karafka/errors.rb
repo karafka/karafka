@@ -41,10 +41,6 @@ module Karafka
     # Raised when the license token is not valid
     InvalidLicenseTokenError = Class.new(BaseError)
 
-    # Used to instrument this error into the error notifications
-    # We do not raise it so we won't crash deployed systems
-    ExpiredLicenseTokenError = Class.new(BaseError)
-
     # This should never happen. Please open an issue if it does.
     InvalidCoordinatorStateError = Class.new(BaseError)
 
