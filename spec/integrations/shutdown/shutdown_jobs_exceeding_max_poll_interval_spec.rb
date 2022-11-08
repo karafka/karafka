@@ -3,7 +3,7 @@
 # When Karafka is configured with short 'max.poll.interval.ms', shorter than a shutdown job, it
 # should not matter. Shutdown jobs should not be terminated unless they exceed `shutdown_timeout`
 
-setup_karafka do |config|
+setup_karafka(allow_errors: %w[app.stopping.error]) do |config|
   # We set it here that way not too wait too long on stuff
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
