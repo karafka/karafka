@@ -46,7 +46,7 @@ module Karafka
                 skippable_message = find_skippable_message
 
                 unless revoked?
-                  dispatch_skippable_message_to_dlq(skippable_message)
+                  dispatch_to_dlq(skippable_message)
                   mark_as_consumed(skippable_message)
                 end
 
