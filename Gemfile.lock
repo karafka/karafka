@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.0.15)
+    karafka (2.0.16)
       karafka-core (>= 2.0.2, < 3.0.0)
       rdkafka (>= 0.12)
       thor (>= 0.20)
@@ -65,7 +65,7 @@ GEM
       karafka-core (>= 2.0.2, < 3.0.0)
       rdkafka (>= 0.10)
       zeitwerk (~> 2.3)
-    zeitwerk (2.6.3)
+    zeitwerk (2.6.6)
 
 PLATFORMS
   x86_64-linux
