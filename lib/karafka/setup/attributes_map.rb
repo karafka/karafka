@@ -148,6 +148,7 @@ module Karafka
       # List of rdkafka producer accepted attributes
       PRODUCER = %i[
         acks
+        allow.auto.create.topics
         api.version.fallback.ms
         api.version.request
         api.version.request.timeout.ms
