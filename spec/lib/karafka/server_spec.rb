@@ -112,6 +112,7 @@ RSpec.describe_current do
       let(:timeout_ms) { timeout_s * 1_000 }
 
       before do
+        allow(Karafka::App).to receive(:stopped?).and_return(false)
         allow(Karafka::App).to receive(:stop!)
         allow(described_class).to receive(:sleep)
         allow(Kernel).to receive(:exit!)

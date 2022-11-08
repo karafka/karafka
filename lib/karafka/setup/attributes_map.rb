@@ -329,6 +329,9 @@ module Karafka
             end
           end
 
+          # This can be removed when 0.13 librdkafka is released
+          attributes[:producer].delete_if { |val| val == 'allow.auto.create.topics' }
+
           attributes.transform_values!(&:sort)
           attributes.each_value { |vals| vals.map!(&:to_sym) }
           attributes
