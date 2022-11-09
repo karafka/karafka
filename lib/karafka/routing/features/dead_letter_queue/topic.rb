@@ -4,7 +4,7 @@ module Karafka
   module Routing
     module Features
       class DeadLetterQueue < Base
-        # DQL topic extensions
+        # DLQ topic extensions
         module Topic
           # After how many retries should be move data to DLQ
           DEFAULT_MAX_RETRIES = 3

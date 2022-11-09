@@ -123,7 +123,7 @@ module Karafka
         dlq_topic = event[:caller].topic.dead_letter_queue.topic
         partition = message.partition
 
-        info "Dispatched message #{offset} from #{topic}/#{partition} to DQL topic: #{dlq_topic}"
+        info "Dispatched message #{offset} from #{topic}/#{partition} to DLQ topic: #{dlq_topic}"
       end
 
       # There are many types of errors that can occur in many places, but we provide a single
