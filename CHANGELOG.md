@@ -22,6 +22,7 @@
 - [Fix] Release `ActiveRecord` connection to the pool after the work in non-dev envs (#1130)
 - [Fix] Fix a case where post-initialization shutdown would not initiate shutdown procedures.
 - [Fix] Prevent Karafka from committing offsets twice upon shutdown.
+- [Fix] Fix for a case where fast consecutive stop signaling could hang the stopping listeners.
 - [Specs] Split specs into regular and pro to simplify how resources are loaded
 - [Specs] Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
 
