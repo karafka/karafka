@@ -120,7 +120,9 @@ module Karafka
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(FORCEFUL_EXIT_CODE)
       ensure
-        Karafka::App.stopped!
+        # We need to check if it wasn't an early exit to make sure that only on stop invocation
+        # can change the status after everything is closed
+        Karafka::App.stopped! if timeout
       end
 
       private
