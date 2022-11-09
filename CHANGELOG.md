@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.16 (2022-11-09)
 - **[Breaking]** Disable the root `manual_offset_management` setting and require it to be configured per topic. This is part of "topic features" configuration extraction for better code organization.
 - **[Feature]** Introduce **Dead Letter Queue** feature and Pro **Enhanced Dead Letter Queue** feature
 - [Improvement] Align attributes available in the instrumentation bus for listener related events.
