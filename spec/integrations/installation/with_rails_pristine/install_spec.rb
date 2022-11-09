@@ -11,7 +11,7 @@ spec_dir = File.expand_path(__dir__)
 # Runs a given command in a given dir and returns its exit code
 # @param dir [String]
 # @param cmd [String]
-# @return [Integer]
+# @return [Array<String, Integer>]
 def cmd(dir, cmd)
   stdout, stderr, status = Open3.capture3(
     "cd #{dir} && KARAFKA_GEM_DIR=#{ENV['KARAFKA_GEM_DIR']} #{cmd}"
