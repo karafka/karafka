@@ -49,6 +49,6 @@ assert_equal DT[:broken].size, 1, DT.data
 broken = DT[:broken].first
 
 assert_equal elements[0], broken.raw_payload, DT.data
-assert_equal broken.headers['original-topic'], DT.topic
-assert_equal broken.headers['original-partition'].to_i, 0
-assert_equal broken.headers['original-offset'].to_i, 0
+assert_equal broken.headers['original_topic'], DT.topic
+assert_equal broken.headers['original_partition'].to_i, 0
+assert_equal broken.headers['original_offset'].to_i, 0

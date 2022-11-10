@@ -47,7 +47,7 @@ end
 
   assert_equal dlq_message.raw_payload, elements[i]
   assert_equal dlq_message.headers["test#{i}"], (i + 1).to_s
-  assert_equal dlq_message.headers['original-topic'], DT.topic
-  assert_equal dlq_message.headers['original-partition'], 0.to_s
-  assert_equal dlq_message.headers['original-offset'], i.to_s
+  assert_equal dlq_message.headers['original_topic'], DT.topic
+  assert_equal dlq_message.headers['original_partition'], 0.to_s
+  assert_equal dlq_message.headers['original_offset'], i.to_s
 end
