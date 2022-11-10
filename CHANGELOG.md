@@ -2,6 +2,7 @@
 
 ## Unreleased
 - [Fix] Few typos around DLQ and Pro DLQ Dispatch original metadata naming.
+- [Fix] Narrow the components lookup to the appropriate scope (#1114)
 
 ### Upgrade notes
 
