@@ -23,7 +23,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT["broken-#{message.partition}"] << message.headers['original-partition']
+      DT["broken-#{message.partition}"] << message.headers['original_partition']
     end
   end
 end
