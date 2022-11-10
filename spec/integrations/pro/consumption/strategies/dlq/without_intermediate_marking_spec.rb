@@ -7,13 +7,14 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.license.token = pro_license_token
-  config.max_messages = 6
+  config.max_messages = 9
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
       raise StandardError if message.offset == 10
+      raise StandardError if message.offset == 99
 
       DT[:offsets] << message.offset
     end
@@ -49,7 +50,7 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:offsets].uniq.count >= 99 &&
+  DT[:offsets].uniq.count >= 98 &&
     !DT[:broken].empty? &&
     DT[:broken].any? { |broken| broken.last == elements[10] } &&
     DT[:broken].size >= 2
@@ -59,7 +60,7 @@ end
 assert DT[:errors].count >= 3, DT[:errors]
 
 # we should not have the message that was failing
-assert_equal (0..99).to_a - [10], DT[:offsets].uniq
+assert_equal (0..99).to_a - [10, 99], DT[:offsets].uniq
 
 # Previous to broken should be present
 assert DT[:broken].map(&:first)[-2] < 10

@@ -32,10 +32,6 @@ RSpec.describe_current do
         expect(event.payload[:caller]).to eq(listener)
       end
     end
-
-    it 'expect client to commit offsets on shutdown' do
-      expect(client).to have_received(:commit_offsets).exactly(1).times
-    end
   end
 
   context 'when we have lost partitions during rebalance and actions need to be taken' do
