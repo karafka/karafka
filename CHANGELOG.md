@@ -1,5 +1,25 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Fix] Few typos around DLQ and Pro DLQ Dispatch original metadata naming.
+
+### Upgrade notes
+
+1. Replace `original-*` references from DLQ dispatched metadata with `original_*`
+
+```ruby
+# DLQ topic consumption
+def consume
+  messages.each do |broken_message|
+    topic = broken_message.metadata['original_topic'] # was original-topic
+    partition = broken_message.metadata['original_partition'] # was original-partition
+    offset = broken_message.metadata['original_offset'] # was original-offset
+
+    Rails.logger.error "This message is broken: #{topic}/#{partition}/#{offset}"
+  end
+end
+```
+
 ## 2.0.16 (2022-11-09)
 - **[Breaking]** Disable the root `manual_offset_management` setting and require it to be configured per topic. This is part of "topic features" configuration extraction for better code organization.
 - **[Feature]** Introduce **Dead Letter Queue** feature and Pro **Enhanced Dead Letter Queue** feature
@@ -25,7 +45,6 @@
 - [Fix] Fix for a case where fast consecutive stop signaling could hang the stopping listeners.
 - [Specs] Split specs into regular and pro to simplify how resources are loaded
 - [Specs] Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
-
 
 ### Upgrade notes
 
