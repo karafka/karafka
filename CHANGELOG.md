@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.17 (2022-11-10)
 - [Fix] Few typos around DLQ and Pro DLQ Dispatch original metadata naming.
 - [Fix] Narrow the components lookup to the appropriate scope (#1114)
 
