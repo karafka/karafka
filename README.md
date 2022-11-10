@@ -4,6 +4,8 @@
 [![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
+**Note**: Upgrade notes for migration from Karafka `1.4` to Karafka `2.0` can be found [here](https://karafka.io/docs/Upgrades-2.0/).
+
 ## About Karafka
 
 Karafka is a Ruby and Rails multi-threaded efficient Kafka processing framework that:
