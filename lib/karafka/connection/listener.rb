@@ -122,7 +122,7 @@ module Karafka
           wait
         end
 
-        # If we are stopping we will no longer schedule any jobs despite polling.
+        # If we are stopping we will no longer schedule any regular jobs despite polling.
         # We need to keep polling not to exceed the `max.poll.interval` for long-running
         # non-blocking jobs and we need to allow them to finish. We however do not want to
         # enqueue any new jobs. It's worth keeping in mind that it is the end user responsibility
@@ -131,7 +131,11 @@ module Karafka
         #
         # We do not care about resuming any partitions or lost jobs as we do not plan to do
         # anything with them as we're in the shutdown phase.
-        wait_with_poll
+        #
+        # What we do care however is the ability to still run revocation jobs in case anything
+        # would change in the cluster. We still want to notify the long-running jobs about changes
+        # that occurred in the cluster.
+        wait_with_poll { build_and_schedule_revoke_lost_partitions_jobs }
 
         # We do not want to schedule the shutdown jobs prior to finishing all the jobs
         # (including non-blocking) as there might be a long-running job with a shutdown and then
@@ -256,10 +260,16 @@ module Karafka
       end
 
       # Waits without blocking the polling
-      # This should be used only when we no longer plan to use any incoming data and we can safely
-      # discard it
+      # This should be used only when we no longer plan to use any incoming messages data and we
+      # can safely discard it.
+      #
+      # @yield Evaluates a block after each batch poll
       def wait_with_poll
-        @client.batch_poll until @jobs_queue.empty?(@subscription_group.id)
+        until @jobs_queue.empty?(@subscription_group.id)
+          @client.batch_poll
+
+          yield if block_given?
+        end
       end
 
       # We can stop client without a problem, as it will reinitialize itself when running the

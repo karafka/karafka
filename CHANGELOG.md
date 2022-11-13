@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Improvement] Trigger `#revoked` for jobs in case revocation would happen during shutdown when jobs are still running. This should ensure, we get a notion of revocation for Pro LRJ jobs even when revocation happening upon shutdown (#1150).
+
 ## 2.0.17 (2022-11-10)
 - [Fix] Few typos around DLQ and Pro DLQ Dispatch original metadata naming.
 - [Fix] Narrow the components lookup to the appropriate scope (#1114)
