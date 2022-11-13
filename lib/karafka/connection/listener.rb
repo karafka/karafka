@@ -263,7 +263,7 @@ module Karafka
       # This should be used only when we no longer plan to use any incoming messages data and we
       # can safely discard it.
       #
-      # @yield Evalues a block after each batch poll
+      # @yield Evaluates a block after each batch poll
       def wait_with_poll
         until @jobs_queue.empty?(@subscription_group.id)
           @client.batch_poll
