@@ -56,6 +56,7 @@ RSpec.describe_current do
       expect(process).to receive(:notice_signal).with(signal)
       expect(callback).to receive(:call)
       process.send(:trap_signal, signal)
+      sleep(1)
     end
   end
 
@@ -64,9 +65,9 @@ RSpec.describe_current do
     let(:instrument_args) { ['process.notice_signal', { caller: process, signal: signal }] }
 
     it 'logs info with signal code into Karafka logger' do
-      expect(Thread).to receive(:new).and_yield
       expect(Karafka.monitor).to receive(:instrument).with(*instrument_args)
       process.send(:notice_signal, signal)
+      sleep(1)
     end
   end
 end

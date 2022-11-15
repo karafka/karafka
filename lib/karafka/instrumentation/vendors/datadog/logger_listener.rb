@@ -42,7 +42,7 @@ module Karafka
 
           # Prints info about the fact that a given job has started
           #
-          # @param event [Dry::Events::Event] event details including payload
+          # @param event [Karafka::Core::Monitoring::Event] event details including payload
           def on_worker_process(event)
             current_span = client.trace('karafka.consumer')
             push_tags
@@ -60,7 +60,7 @@ module Karafka
 
           # Prints info about the fact that a given job has finished
           #
-          # @param event [Dry::Events::Event] event details including payload
+          # @param event [Karafka::Core::Monitoring::Event] event details including payload
           def on_worker_processed(event)
             push_tags
 
@@ -80,7 +80,7 @@ module Karafka
 
           # There are many types of errors that can occur in many places, but we provide a single
           # handler for all of them to simplify error instrumentation.
-          # @param event [Dry::Events::Event] event details including payload
+          # @param event [Karafka::Core::Monitoring::Event] event details including payload
           def on_error_occurred(event)
             push_tags
 

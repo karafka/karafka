@@ -82,7 +82,8 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far.
       def fetch_loop
-        until Karafka::App.stopping?
+        # Run the main loop as long as we are not stopping or moving into quiet mode
+        until Karafka::App.stopping? || Karafka::App.quieting?
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop',
             caller: self,
@@ -135,7 +136,10 @@ module Karafka
         # What we do care however is the ability to still run revocation jobs in case anything
         # would change in the cluster. We still want to notify the long-running jobs about changes
         # that occurred in the cluster.
-        wait_with_poll { build_and_schedule_revoke_lost_partitions_jobs }
+        wait_polling(
+          wait_until: -> { @jobs_queue.empty?(@subscription_group.id) },
+          after_poll: -> { build_and_schedule_revoke_lost_partitions_jobs }
+        )
 
         # We do not want to schedule the shutdown jobs prior to finishing all the jobs
         # (including non-blocking) as there might be a long-running job with a shutdown and then
@@ -143,7 +147,8 @@ module Karafka
         # as it could create a race-condition.
         build_and_schedule_shutdown_jobs
 
-        wait_with_poll
+        wait_polling(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
+        wait_polling(wait_until: -> { !Karafka::App.quieting? })
 
         shutdown
 
@@ -260,15 +265,20 @@ module Karafka
       end
 
       # Waits without blocking the polling
-      # This should be used only when we no longer plan to use any incoming messages data and we
-      # can safely discard it.
       #
-      # @yield Evaluates a block after each batch poll
-      def wait_with_poll
-        until @jobs_queue.empty?(@subscription_group.id)
+      # This should be used only when we no longer plan to use any incoming messages data and we
+      # can safely discard it. We can however use the rebalance information if needed.
+      #
+      # @param wait_until [Proc] until this evaluates to true, we will poll data
+      # @param after_poll [Proc] code that we want to run after each batch poll (if any)
+      #
+      # @note Performance of this is not relevant (in regards to blocks) because it is used only
+      #   on shutdown and quiet, hence not in the running mode
+      def wait_polling(wait_until:, after_poll: -> {})
+        until wait_until.call
           @client.batch_poll
 
-          yield if block_given?
+          after_poll.call
         end
       end
 

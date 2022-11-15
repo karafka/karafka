@@ -19,6 +19,7 @@ module Karafka
       EVENTS = %w[
         app.initialized
         app.running
+        app.quieting
         app.stopping
         app.stopped
 

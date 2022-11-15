@@ -124,6 +124,22 @@ RSpec.describe_current do
     end
   end
 
+  describe '#on_dead_letter_queue_dispatched' do
+    subject(:trigger) { listener.on_dead_letter_queue_dispatched(event) }
+
+    let(:payload) { { caller: consumer, message: kafka_message } }
+    let(:kafka_message) { create(:messages_message) }
+    let(:message) { 'Dispatched message 1 from test/0 to DLQ topic: dlq' }
+    let(:consumer) do
+      instance = Class.new(Karafka::BaseConsumer).new
+      instance.topic = build(:routing_topic, name: 'test')
+      instance.topic.dead_letter_queue(topic: 'dlq')
+      instance
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
   describe '#on_error_occurred' do
     subject(:trigger) { listener.on_error_occurred(event) }
 

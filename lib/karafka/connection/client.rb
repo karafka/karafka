@@ -17,7 +17,11 @@ module Karafka
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
-      private_constant :MAX_POLL_RETRIES
+      # We want to make sure we never close several clients in the same moment to prevent
+      # potential race conditions and other issues
+      SHUTDOWN_MUTEX = Mutex.new
+
+      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX
 
       # Creates a new consumer instance.
       #
@@ -281,24 +285,26 @@ module Karafka
 
       # Commits the stored offsets in a sync way and closes the consumer.
       def close
-        @mutex.synchronize do
-          # Once client is closed, we should not close it again
-          # This could only happen in case of a race-condition when forceful shutdown happens
-          # and triggers this from a different thread
-          return if @closed
+        # Allow only one client to be closed at the same time
+        SHUTDOWN_MUTEX.synchronize do
+          # Make sure that no other operations are happening on this client when we close it
+          @mutex.synchronize do
+            # Once client is closed, we should not close it again
+            # This could only happen in case of a race-condition when forceful shutdown happens
+            # and triggers this from a different thread
+            return if @closed
 
-          @closed = true
+            @closed = true
 
-          internal_commit_offsets(async: false)
+            # Remove callbacks runners that were registered
+            ::Karafka::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
+            ::Karafka::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
-          # Remove callbacks runners that were registered
-          ::Karafka::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
-          ::Karafka::Instrumentation.error_callbacks.delete(@subscription_group.id)
-
-          @kafka.close
-          @buffer.clear
-          # @note We do not clear rebalance manager here as we may still have revocation info here
-          # that we want to consider valid prior to running another reconnection
+            @kafka.close
+            @buffer.clear
+            # @note We do not clear rebalance manager here as we may still have revocation info here
+            # that we want to consider valid prior to running another reconnection
+          end
         end
       end
 

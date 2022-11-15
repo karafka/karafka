@@ -25,12 +25,10 @@ module Karafka
 
       # Method which runs app
       def run
-        # Since we do a lot of threading and queuing, we don't want to stop from the trap context
-        # as some things may not work there as expected, that is why we spawn a separate thread to
-        # handle the stopping process
-        process.on_sigint { Thread.new { stop } }
-        process.on_sigquit { Thread.new { stop } }
-        process.on_sigterm { Thread.new { stop } }
+        process.on_sigint { stop }
+        process.on_sigquit { stop }
+        process.on_sigterm { stop }
+        process.on_sigtstp { quiet }
         process.supervise
 
         # Start is blocking until stop is called and when we stop, it will wait until
@@ -74,7 +72,8 @@ module Karafka
       #   please start a separate thread to do so.
       def stop
         # Initialize the stopping process only if Karafka was running
-        return if Karafka::App.stopping? || Karafka::App.stopped?
+        return if Karafka::App.stopping?
+        return if Karafka::App.stopped?
 
         Karafka::App.stop!
 
@@ -123,6 +122,18 @@ module Karafka
         # We need to check if it wasn't an early exit to make sure that only on stop invocation
         # can change the status after everything is closed
         Karafka::App.stopped! if timeout
+      end
+
+      # Quiets the Karafka server.
+      # Karafka will stop processing but won't quiet to consumer group, so no rebalance will be
+      # triggered until final shutdown.
+      def quiet
+        # If we are already quieting or in the stop procedures, we should not do it again.
+        return if Karafka::App.quieting?
+        return if Karafka::App.stopping?
+        return if Karafka::App.stopped?
+
+        Karafka::App.quiet!
       end
 
       private
