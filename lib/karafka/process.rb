@@ -10,6 +10,7 @@ module Karafka
       SIGQUIT
       SIGTERM
       SIGTTIN
+      SIGTSTP
     ].freeze
 
     HANDLED_SIGNALS.each do |signal|
@@ -48,21 +49,23 @@ module Karafka
 
     # Traps a single signal and performs callbacks (if any) or just ignores this signal
     # @param [Symbol] signal type that we want to catch
+    # @note Since we do a lot of threading and queuing, we don't want to handle signals from the
+    # trap context s some things may not work there as expected, that is why we spawn a separate
+    # thread to handle the signals process
     def trap_signal(signal)
       trap(signal) do
-        notice_signal(signal)
-        (@callbacks[signal] || []).each(&:call)
+        Thread.new do
+          notice_signal(signal)
+
+          (@callbacks[signal] || []).each(&:call)
+        end
       end
     end
 
     # Informs monitoring about trapped signal
     # @param [Symbol] signal type that we received
-    # @note We cannot perform logging from trap context, that's why
-    #   we have to spin up a new thread to do this
     def notice_signal(signal)
-      Thread.new do
-        Karafka.monitor.instrument('process.notice_signal', caller: self, signal: signal)
-      end
+      Karafka.monitor.instrument('process.notice_signal', caller: self, signal: signal)
     end
   end
 end

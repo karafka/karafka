@@ -18,7 +18,7 @@ module Karafka
 
       # Logs each messages fetching attempt
       #
-      # @param event [Dry::Events::Event] event details including payload
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_connection_listener_fetch_loop(event)
         listener = event[:caller]
         debug "[#{listener.id}] Polling messages..."
@@ -26,7 +26,7 @@ module Karafka
 
       # Logs about messages that we've received from Kafka
       #
-      # @param event [Dry::Events::Event] event details including payload
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_connection_listener_fetch_loop_received(event)
         listener = event[:caller]
         time = event[:time]
@@ -42,7 +42,7 @@ module Karafka
 
       # Prints info about the fact that a given job has started
       #
-      # @param event [Dry::Events::Event] event details including payload
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_worker_process(event)
         job = event[:job]
         job_type = job.class.to_s.split('::').last
@@ -53,7 +53,7 @@ module Karafka
 
       # Prints info about the fact that a given job has finished
       #
-      # @param event [Dry::Events::Event] event details including payload
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_worker_processed(event)
         job = event[:job]
         time = event[:time]
@@ -66,7 +66,7 @@ module Karafka
       # Logs info about system signals that Karafka received and prints backtrace for threads in
       # case of ttin
       #
-      # @param event [Dry::Events::Event] event details including payload
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_process_notice_signal(event)
         info "Received #{event[:signal]} system signal"
 
@@ -89,7 +89,7 @@ module Karafka
 
       # Logs info that we're running Karafka app.
       #
-      # @param _event [Dry::Events::Event] event details including payload
+      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
       def on_app_running(_event)
         info "Running in #{RUBY_DESCRIPTION}"
         info "Running Karafka #{Karafka::VERSION} server"
@@ -99,23 +99,28 @@ module Karafka
         info 'See LICENSE and the LGPL-3.0 for licensing details.'
       end
 
+      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_app_quieting(_event)
+        info 'Switching to quiet mode. New messages will not be processed.'
+      end
+
       # Logs info that we're going to stop the Karafka server.
       #
-      # @param _event [Dry::Events::Event] event details including payload
+      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
       def on_app_stopping(_event)
         info 'Stopping Karafka server'
       end
 
       # Logs info that we stopped the Karafka server.
       #
-      # @param _event [Dry::Events::Event] event details including payload
+      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
       def on_app_stopped(_event)
         info 'Stopped Karafka server'
       end
 
       # Logs info when we have dispatched a message the the DLQ
       #
-      # @param event [Dry::Events::Event] event details including payload
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_dead_letter_queue_dispatched(event)
         message = event[:message]
         offset = message.offset
@@ -128,7 +133,7 @@ module Karafka
 
       # There are many types of errors that can occur in many places, but we provide a single
       # handler for all of them to simplify error instrumentation.
-      # @param event [Dry::Events::Event] event details including payload
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_error_occurred(event)
         type = event[:type]
         error = event[:error]

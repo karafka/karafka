@@ -8,6 +8,7 @@ module Karafka
       initializing: :initialize!,
       initialized: :initialized!,
       running: :run!,
+      quieting: :quiet!,
       stopping: :stop!,
       stopped: :stopped!
     }.freeze

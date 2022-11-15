@@ -18,6 +18,16 @@ module Karafka
         # Stop needs to be blocking to wait for all the things to finalize
         Karafka::Server.stop
       end
+
+      # Quiets Karafka upon any event
+      #
+      # @note This method is not blocking and will not wait for Karafka to fully quiet.
+      # It will trigger the quiet procedure but won't wait.
+      #
+      # @note Please keep in mind you need to `#stop` to actually stop the server anyhow.
+      def quiet
+        Karafka::Server.quiet
+      end
     end
   end
 end
