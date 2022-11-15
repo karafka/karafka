@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When Karafka receives sigstp it should finish all the work and keep polling not to trigger
-# rebalanes, however the shutdown hooks should happen and new work should not be picked up
+# rebalances, however the shutdown hooks should happen and new work should not be picked up
 
 setup_karafka
 

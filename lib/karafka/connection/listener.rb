@@ -274,7 +274,7 @@ module Karafka
       #
       # @note Performance of this is not relevant (in regards to blocks) because it is used only
       #   on shutdown and quiet, hence not in the running mode
-      def wait_polling(wait_until:, after_poll: -> { })
+      def wait_polling(wait_until:, after_poll: -> {})
         until wait_until.call
           @client.batch_poll
 
