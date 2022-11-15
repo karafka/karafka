@@ -296,8 +296,6 @@ module Karafka
 
             @closed = true
 
-            internal_commit_offsets(async: false)
-
             # Remove callbacks runners that were registered
             ::Karafka::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
             ::Karafka::Instrumentation.error_callbacks.delete(@subscription_group.id)
