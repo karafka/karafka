@@ -86,6 +86,9 @@ end
 loader = Zeitwerk::Loader.for_gem
 # Do not load Rails extensions by default, this will be handled by Railtie if they are needed
 loader.ignore(Karafka.gem_root.join('lib/active_job'))
+# Do not load Railtie. It will load if after everything is ready, so we don't have to load any
+# Karafka components when we require this railtie. Railtie needs to be loaded last.
+loader.ignore(Karafka.gem_root.join('lib/karafka/railtie'))
 # Do not load pro components as they will be loaded if needed and allowed
 loader.ignore(Karafka.core_root.join('pro/'))
 # Do not load vendors instrumentation components. Those need to be required manually if needed
@@ -96,3 +99,6 @@ loader.eager_load
 # This will load features but since Pro are not loaded automatically, they will not be visible
 # nor included here
 ::Karafka::Routing::Features::Base.load_all
+
+# Load railtie after everything else is ready so we know we can rely on it.
+require 'karafka/railtie'
