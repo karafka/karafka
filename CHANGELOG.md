@@ -7,6 +7,7 @@
 - [Improvement] Remove double loading of Karafka via Rails railtie.
 - [Fix] Fix invalid class references in YARD docs.
 - [Fix] prevent parallel closing of many clients.
+- [Fix] fix a case where information about revocation for a combination of LRJ + VP would not be dispatched until all VP work is done.
 
 ## 2.0.17 (2022-11-10)
 - [Fix] Few typos around DLQ and Pro DLQ Dispatch original metadata naming.

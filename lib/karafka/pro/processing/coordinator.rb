@@ -86,7 +86,6 @@ module Karafka
         # Runs once when a partition is revoked
         def on_revoked
           @flow_lock.synchronize do
-            return unless finished?
             return if @on_revoked_invoked
 
             @on_revoked_invoked = true
