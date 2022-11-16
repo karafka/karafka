@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:listener) { described_class.new(subscription_group, jobs_queue) }
+  subject(:listener) { described_class.new(consumer_group_status, subscription_group, jobs_queue) }
 
+  let(:consumer_group_status) { Karafka::Connection::ConsumerGroupStatus.new(1) }
   let(:subscription_group) { build(:routing_subscription_group, topics: [routing_topic]) }
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:client) { Karafka::Connection::Client.new(subscription_group) }
