@@ -19,12 +19,12 @@ setup_karafka do |config|
   config.concurrency = 10
 end
 
-POLL = Concurrent::Array.new(10) { |i| i }.reverse
+POLL = Concurrent::Array.new(8) { |i| i }.reverse
 
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[:clients] << client.object_id
-    sleep POLL.pop || 10
+    sleep POLL.pop || 8
   end
 end
 

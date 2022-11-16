@@ -129,7 +129,7 @@ RSpec.describe_current do
 
     let(:payload) { { caller: consumer, message: kafka_message } }
     let(:kafka_message) { create(:messages_message) }
-    let(:message) { 'Dispatched message 1 from test/0 to DLQ topic: dlq' }
+    let(:message) { "Dispatched message #{kafka_message.offset} from test/0 to DLQ topic: dlq" }
     let(:consumer) do
       instance = Class.new(Karafka::BaseConsumer).new
       instance.topic = build(:routing_topic, name: 'test')

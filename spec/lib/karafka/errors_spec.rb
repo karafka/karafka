@@ -42,4 +42,10 @@ RSpec.describe_current do
 
     specify { expect(error).to be < described_class::BaseError }
   end
+
+  describe 'InvalidConsumerGroupStatusError' do
+    subject(:error) { described_class::InvalidConsumerGroupStatusError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
 end

@@ -38,7 +38,7 @@ start_karafka_and_wait_until do
 end
 
 # Ensure we have 10 subscription groups as expected when non-homogeneous settings are used
-assert_equal 10, Karafka::App.subscription_groups.size
+assert_equal 10, Karafka::App.subscription_groups.values.flatten.size
 # All workers should be in use
 assert_equal 10, DT.data.keys.size
 # All workers consumers should consume same number of messages

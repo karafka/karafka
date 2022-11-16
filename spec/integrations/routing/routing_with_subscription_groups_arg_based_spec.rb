@@ -20,13 +20,15 @@ draw_routes do
   end
 end
 
+subscription_groups = Karafka::App.subscription_groups.values.flatten
+
 assert_equal 1, Karafka::App.routes.size
 assert_equal 1, Karafka::App.consumer_groups.size
-assert_equal 3, Karafka::App.subscription_groups.size
+assert_equal 3, subscription_groups.size
 assert_equal 3, Karafka::App.consumer_groups.first.topics.size
 assert_equal 'topic1', Karafka::App.consumer_groups.first.topics.first.name
 assert_equal 'topic2', Karafka::App.consumer_groups.first.topics[1].name
 assert_equal 'topic3', Karafka::App.consumer_groups.first.topics[2].name
-assert_equal 'group1', Karafka::App.subscription_groups.first.topics.first.subscription_group
-assert_equal nil, Karafka::App.subscription_groups[1].topics.first.subscription_group
-assert_equal 'group2', Karafka::App.subscription_groups[2].topics.first.subscription_group
+assert_equal 'group1', subscription_groups.first.topics.first.subscription_group
+assert_equal nil, subscription_groups[1].topics.first.subscription_group
+assert_equal 'group2', subscription_groups[2].topics.first.subscription_group

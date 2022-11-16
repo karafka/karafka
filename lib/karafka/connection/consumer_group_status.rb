@@ -23,9 +23,15 @@ module Karafka
         @active_size.positive?
       end
 
-      # Decrements number of working listeners in the gorup by one until there's none
+      # Decrements number of working listeners in the group by one until there's none
       def finish
-        @mutex.synchronize { @active_size -= 1 }
+        @mutex.synchronize do
+          @active_size -= 1
+
+          return if @active_size >= 0
+
+          raise Errors::InvalidConsumerGroupStatusError, @active_size
+        end
       end
     end
   end
