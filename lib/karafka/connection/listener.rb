@@ -14,13 +14,15 @@ module Karafka
       # @return [String] id of this listener
       attr_reader :id
 
+      # @param consumer_group_status [Karafka::Connection::ConsumerGroupStatus]
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
       # @return [Karafka::Connection::Listener] listener instance
-      def initialize(subscription_group, jobs_queue)
+      def initialize(consumer_group_status, subscription_group, jobs_queue)
         proc_config = ::Karafka::App.config.internal.processing
 
         @id = SecureRandom.uuid
+        @consumer_group_status = consumer_group_status
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
         @coordinators = Processing::CoordinatorsBuffer.new
@@ -147,8 +149,20 @@ module Karafka
         # as it could create a race-condition.
         build_and_schedule_shutdown_jobs
 
+        # Wait until all the shutdown jobs are done
         wait_polling(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
+
+        # Once all the work is done, we need to decrement counter of active subscription groups
+        # within this consumer group
+        @consumer_group_status.finish
+
+        # Wait if we're in the quiet mode
         wait_polling(wait_until: -> { !Karafka::App.quieting? })
+
+        # We need to wait until all the work in the whole consumer group (local to the process)
+        # is done. Otherwise we may end up with locks and `Timed out LeaveGroupRequest in flight`
+        # warning notifications.
+        wait_polling(wait_until: -> { !@consumer_group_status.working? })
 
         shutdown
 

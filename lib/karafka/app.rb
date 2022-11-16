@@ -14,11 +14,12 @@ module Karafka
           .builder
       end
 
-      # @return [Array<Karafka::Routing::SubscriptionGroup>] active subscription groups
+      # @return [Hash] active subscription groups grouped based on consumer group in a hash
       def subscription_groups
         consumer_groups
           .active
-          .flat_map(&:subscription_groups)
+          .map { |consumer_group| [consumer_group, consumer_group.subscription_groups] }
+          .to_h
       end
 
       # Just a nicer name for the consumer groups
