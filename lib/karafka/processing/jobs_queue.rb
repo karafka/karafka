@@ -20,7 +20,7 @@ module Karafka
         # scheduled by Ruby hundreds of thousands of times per group.
         # We cannot use a single semaphore as it could potentially block in listeners that should
         # process with their data and also could unlock when a given group needs to remain locked
-        @semaphores = Hash.new { |h, k| h[k] = Queue.new }
+        @semaphores = Concurrent::Map.new { |h, k| h[k] = Queue.new }
         @in_processing = Hash.new { |h, k| h[k] = [] }
         @mutex = Mutex.new
       end
@@ -47,9 +47,9 @@ module Karafka
           raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.include?(job)
 
           group << job
-        end
 
-        @queue << job
+          @queue << job
+        end
       end
 
       # @return [Jobs::Base, nil] waits for a job from the main queue and returns it once available
@@ -105,7 +105,9 @@ module Karafka
       # @return [Boolean] tell us if we have anything in the processing (or for processing) from
       # a given group.
       def empty?(group_id)
-        @in_processing[group_id].empty?
+        @mutex.synchronize do
+          @in_processing[group_id].empty?
+        end
       end
 
       # Blocks when there are things in the queue in a given group and waits until all the blocking
