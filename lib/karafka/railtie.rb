@@ -17,9 +17,6 @@ rescue LoadError
 end
 
 if rails
-  # Load Karafka
-  require 'karafka'
-
   # Load ActiveJob adapter
   require 'active_job/karafka'
 
