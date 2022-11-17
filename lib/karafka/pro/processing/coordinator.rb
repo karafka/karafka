@@ -20,10 +20,8 @@ module Karafka
         # @param args [Object] anything the base coordinator accepts
         def initialize(*args)
           super
-          @on_enqueued_invoked = false
-          @on_started_invoked = false
-          @on_finished_invoked = false
-          @on_revoked_invoked = false
+
+          @executed = []
           @flow_lock = Mutex.new
         end
 
@@ -34,9 +32,7 @@ module Karafka
           super
 
           @mutex.synchronize do
-            @on_enqueued_invoked = false
-            @on_started_invoked = false
-            @on_finished_invoked = false
+            @executed.clear
             @last_message = messages.last
           end
         end
@@ -50,9 +46,7 @@ module Karafka
         # enqueued
         def on_enqueued
           @flow_lock.synchronize do
-            return if @on_enqueued_invoked
-
-            @on_enqueued_invoked = true
+            return unless executable?(:on_enqueued)
 
             yield(@last_message)
           end
@@ -61,9 +55,7 @@ module Karafka
         # Runs given code only once per all the coordinated jobs upon starting first of them
         def on_started
           @flow_lock.synchronize do
-            return if @on_started_invoked
-
-            @on_started_invoked = true
+            return unless executable?(:on_started)
 
             yield(@last_message)
           end
@@ -75,24 +67,35 @@ module Karafka
         def on_finished
           @flow_lock.synchronize do
             return unless finished?
-            return if @on_finished_invoked
-
-            @on_finished_invoked = true
+            return unless executable?(:on_finished)
 
             yield(@last_message)
           end
         end
 
-        # Runs once when a partition is revoked
+        # Runs once after a partition is revoked
         def on_revoked
           @flow_lock.synchronize do
-            return unless finished?
-            return if @on_revoked_invoked
-
-            @on_revoked_invoked = true
+            return unless executable?(:on_revoked)
 
             yield(@last_message)
           end
+        end
+
+        private
+
+        # Checks if given action is executable once. If it is and true is returned, this method
+        # will return false next time it is used.
+        #
+        # @param action [Symbol] what action we want to perform
+        # @return [Boolean] true if we can
+        # @note This method needs to run behind a mutex.
+        def executable?(action)
+          return false if @executed.include?(action)
+
+          @executed << action
+
+          true
         end
       end
     end

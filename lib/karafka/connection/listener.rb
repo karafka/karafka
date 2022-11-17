@@ -14,6 +14,11 @@ module Karafka
       # @return [String] id of this listener
       attr_reader :id
 
+      # Mutex for things we do not want to do in parallel even in different consumer groups
+      MUTEX = Mutex.new
+
+      private_constant :MUTEX
+
       # @param consumer_group_status [Karafka::Connection::ConsumerGroupStatus]
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
@@ -65,11 +70,15 @@ module Karafka
       def shutdown
         return if @stopped
 
-        @mutex.synchronize do
-          @stopped = true
-          @executors.clear
-          @coordinators.reset
-          @client.stop
+        # We want to make sure that we never close two librdkafka clients at the same time. I'm not
+        # particularly fond of it's shutdown API being fully thread-safe
+        MUTEX.synchronize do
+          @mutex.synchronize do
+            @stopped = true
+            @executors.clear
+            @coordinators.reset
+            @client.stop
+          end
         end
       end
 
