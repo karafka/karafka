@@ -71,7 +71,7 @@ module Karafka
         return if @stopped
 
         # We want to make sure that we never close two librdkafka clients at the same time. I'm not
-        # particulary fond of it's shutdown API being fully thread-safe
+        # particularly fond of it's shutdown API being fully thread-safe
         MUTEX.synchronize do
           @mutex.synchronize do
             @stopped = true
