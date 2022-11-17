@@ -20,7 +20,7 @@ setup_karafka do |config|
 end
 
 POLL = Concurrent::Array.new(6) { |i| i }
-POLL << 9
+POLL << 8
 POLL.reverse!
 
 class Consumer < Karafka::BaseConsumer
