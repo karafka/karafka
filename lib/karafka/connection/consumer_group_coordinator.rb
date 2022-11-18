@@ -16,7 +16,7 @@ module Karafka
     class ConsumerGroupCoordinator
       # @param group_size [Integer] number of separate subscription groups in a consumer group
       def initialize(group_size)
-        # We need two mutexes here:
+        # We need two locks here:
         # - first one is to decrement the number of listeners doing work
         # - second to ensure only one client is being closed the same time and that others can
         #   wait actively (not locked)
@@ -37,7 +37,8 @@ module Karafka
         @shutdown_lock.unlock if @shutdown_lock.owned?
       end
 
-      # Decrements number of working listeners in the group by one until there's none
+      # Marks given listener as finished
+      # @param listener_id [String]
       def finish_work(listener_id)
         @finished << listener_id
       end

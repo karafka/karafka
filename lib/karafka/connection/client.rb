@@ -253,7 +253,7 @@ module Karafka
       # This is used only to trigger rebalance callbacks
       def ping
         poll(100)
-      rescue Rdkafka::RdkafkaError => e
+      rescue Rdkafka::RdkafkaError
         nil
       end
 
