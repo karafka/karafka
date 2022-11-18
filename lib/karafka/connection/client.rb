@@ -241,6 +241,17 @@ module Karafka
         end
       end
 
+      # Runs a single poll ignoring all the potential errors
+      # This is used as a keep-alive in the shutdown stage and any errors that happen here are
+      # irrelevant from the shutdown process perspective
+      #
+      # This is used only to trigger rebalance callbacks
+      def ping
+        poll(100)
+      rescue Rdkafka::RdkafkaError
+        nil
+      end
+
       private
 
       # When we cannot store an offset, it means we no longer own the partition

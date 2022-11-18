@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Improvement] Improve the integration with Ruby on Rails by preventing double-require of components.
+- [Improvement] Improve stability of the shutdown process upon critical errors.
+
 ## 2.0.18 (2022-11-18)
 - **[Feature]** Support quiet mode via `TSTP` signal. When used, Karafka will finish processing current messages, run `shutdown` jobs, and switch to a quiet mode where no new work is being accepted. At the same time, it will keep the consumer group quiet, and thus no rebalance will be triggered. This can be particularly useful during deployments.
 - [Improvement] Trigger `#revoked` for jobs in case revocation would happen during shutdown when jobs are still running. This should ensure, we get a notion of revocation for Pro LRJ jobs even when revocation happening upon shutdown (#1150).

@@ -14,20 +14,15 @@ module Karafka
       # @return [String] id of this listener
       attr_reader :id
 
-      # Mutex for things we do not want to do in parallel even in different consumer groups
-      MUTEX = Mutex.new
-
-      private_constant :MUTEX
-
-      # @param consumer_group_status [Karafka::Connection::ConsumerGroupStatus]
+      # @param consumer_group_coordinator [Karafka::Connection::ConsumerGroupCoordinator]
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
       # @return [Karafka::Connection::Listener] listener instance
-      def initialize(consumer_group_status, subscription_group, jobs_queue)
+      def initialize(consumer_group_coordinator, subscription_group, jobs_queue)
         proc_config = ::Karafka::App.config.internal.processing
 
         @id = SecureRandom.uuid
-        @consumer_group_status = consumer_group_status
+        @consumer_group_coordinator = consumer_group_coordinator
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
         @coordinators = Processing::CoordinatorsBuffer.new
@@ -68,17 +63,13 @@ module Karafka
       #
       # @note We wrap it with a mutex exactly because of the above case of forceful shutdown
       def shutdown
-        # We want to make sure that we never close two librdkafka clients at the same time. I'm not
-        # particularly fond of it's shutdown API being fully thread-safe
-        MUTEX.synchronize do
-          return if @stopped
+        return if @stopped
 
-          @mutex.synchronize do
-            @stopped = true
-            @executors.clear
-            @coordinators.reset
-            @client.stop
-          end
+        @mutex.synchronize do
+          @stopped = true
+          @executors.clear
+          @coordinators.reset
+          @client.stop
         end
       end
 
@@ -147,9 +138,9 @@ module Karafka
         # What we do care however is the ability to still run revocation jobs in case anything
         # would change in the cluster. We still want to notify the long-running jobs about changes
         # that occurred in the cluster.
-        wait_polling(
+        wait_pinging(
           wait_until: -> { @jobs_queue.empty?(@subscription_group.id) },
-          after_poll: -> { build_and_schedule_revoke_lost_partitions_jobs }
+          after_ping: -> { build_and_schedule_revoke_lost_partitions_jobs }
         )
 
         # We do not want to schedule the shutdown jobs prior to finishing all the jobs
@@ -159,19 +150,23 @@ module Karafka
         build_and_schedule_shutdown_jobs
 
         # Wait until all the shutdown jobs are done
-        wait_polling(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
+        wait_pinging(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
 
         # Once all the work is done, we need to decrement counter of active subscription groups
         # within this consumer group
-        @consumer_group_status.finish
+        @consumer_group_coordinator.finish_work(id)
 
         # Wait if we're in the quiet mode
-        wait_polling(wait_until: -> { !Karafka::App.quieting? })
+        wait_pinging(wait_until: -> { !Karafka::App.quieting? })
 
         # We need to wait until all the work in the whole consumer group (local to the process)
         # is done. Otherwise we may end up with locks and `Timed out LeaveGroupRequest in flight`
         # warning notifications.
-        wait_polling(wait_until: -> { !@consumer_group_status.working? })
+        wait_pinging(wait_until: -> { @consumer_group_coordinator.shutdown? })
+
+        # This extra ping will make sure we've refreshed the rebalance state after other instances
+        # potentially shutdown. This will prevent us from closing with a dangling callback
+        @client.ping
 
         shutdown
 
@@ -189,6 +184,8 @@ module Karafka
         restart
 
         sleep(1) && retry
+      ensure
+        @consumer_group_coordinator.unlock
       end
 
       # Resumes processing of partitions that were paused due to an error.
@@ -293,15 +290,15 @@ module Karafka
       # can safely discard it. We can however use the rebalance information if needed.
       #
       # @param wait_until [Proc] until this evaluates to true, we will poll data
-      # @param after_poll [Proc] code that we want to run after each batch poll (if any)
+      # @param after_ping [Proc] code that we want to run after each ping (if any)
       #
       # @note Performance of this is not relevant (in regards to blocks) because it is used only
       #   on shutdown and quiet, hence not in the running mode
-      def wait_polling(wait_until:, after_poll: -> {})
+      def wait_pinging(wait_until:, after_ping: -> {})
         until wait_until.call
-          @client.batch_poll
-
-          after_poll.call
+          @client.ping
+          after_ping.call
+          sleep(0.2)
         end
       end
 

@@ -38,4 +38,4 @@ start_karafka_and_wait_until do
   names(stats_events).size >= 2
 end
 
-assert_equal %w[karafka#consumer-1 karafka#consumer-2], names(stats_events)
+assert_equal %w[karafka#consumer-1 karafka#consumer-2 karafka#consumer-3], names(stats_events)
