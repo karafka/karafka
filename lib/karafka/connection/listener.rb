@@ -161,12 +161,12 @@ module Karafka
         # Wait until all the shutdown jobs are done
         wait_polling(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
 
+        # Wait if we're in the quiet mode
+        wait_polling(wait_until: -> { !Karafka::App.quieting? })
+
         # Once all the work is done, we need to decrement counter of active subscription groups
         # within this consumer group
         @consumer_group_status.finish
-
-        # Wait if we're in the quiet mode
-        wait_polling(wait_until: -> { !Karafka::App.quieting? })
 
         # We need to wait until all the work in the whole consumer group (local to the process)
         # is done. Otherwise we may end up with locks and `Timed out LeaveGroupRequest in flight`
@@ -299,6 +299,7 @@ module Karafka
       #   on shutdown and quiet, hence not in the running mode
       def wait_polling(wait_until:, after_poll: -> {})
         until wait_until.call
+          p @consumer_group_status
           @client.batch_poll
 
           after_poll.call
