@@ -1,7 +1,7 @@
 # Karafka framework changelog
 
 ## Unreleased
-- Improve the integration with Ruby on Rails
+- Improve the integration with Ruby on Rails by preventing double-require of components.
 
 ## 2.0.18 (2022-11-18)
 - **[Feature]** Support quiet mode via `TSTP` signal. When used, Karafka will finish processing current messages, run `shutdown` jobs, and switch to a quiet mode where no new work is being accepted. At the same time, it will keep the consumer group quiet, and thus no rebalance will be triggered. This can be particularly useful during deployments.

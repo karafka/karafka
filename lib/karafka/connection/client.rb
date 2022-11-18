@@ -50,11 +50,16 @@ module Karafka
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
       #
+      # @param max_messages [Integer] max messages we want to poll in batch
+      # @param max_wait_time [Integer] max wait time or nothing to use the default
       # @return [Karafka::Connection::MessagesBuffer] messages buffer that holds messages per topic
       #   partition
       # @note This method should not be executed from many threads at the same time
-      def batch_poll
-        time_poll = TimeTrackers::Poll.new(@subscription_group.max_wait_time)
+      def batch_poll(
+        max_messages = @subscription_group.max_messages,
+        max_wait_time = @subscription_group.max_wait_time
+      )
+        time_poll = TimeTrackers::Poll.new(max_wait_time)
 
         @buffer.clear
         @rebalance_manager.clear
@@ -65,7 +70,7 @@ module Karafka
           # Don't fetch more messages if we do not have any time left
           break if time_poll.exceeded?
           # Don't fetch more messages if we've fetched max as we've wanted
-          break if @buffer.size >= @subscription_group.max_messages
+          break if @buffer.size >= max_messages
 
           # Fetch message within our time boundaries
           message = poll(time_poll.remaining)
@@ -239,6 +244,17 @@ module Karafka
           @paused_tpls.clear
           @kafka = build_consumer
         end
+      end
+
+      # Runs a single poll ignoring all the potential errors
+      # This is used as a keep-alive in the shutdown stage and any errors that happen here are
+      # irrelevant from the shutdown process perspective
+      #
+      # This is used only to trigger rebalance callbacks
+      def ping
+        poll(100)
+      rescue Rdkafka::RdkafkaError => e
+        nil
       end
 
       private

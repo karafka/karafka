@@ -10,13 +10,13 @@ module Karafka
       # @return [ListenersBatch]
       def initialize(jobs_queue)
         @batch = App.subscription_groups.flat_map do |_consumer_group, subscription_groups|
-          consumer_group_status = Connection::ConsumerGroupStatus.new(
+          consumer_group_coordinator = Connection::ConsumerGroupCoordinator.new(
             subscription_groups.size
           )
 
           subscription_groups.map do |subscription_group|
             Connection::Listener.new(
-              consumer_group_status,
+              consumer_group_coordinator,
               subscription_group,
               jobs_queue
             )

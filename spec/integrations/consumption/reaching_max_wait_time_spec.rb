@@ -22,14 +22,14 @@ end
 
 draw_routes(Consumer)
 
-produce(DT.topic, 'data')
+3.times { produce(DT.topic, 'data') }
 
 started_at = Time.now.to_f
 
 start_karafka_and_wait_until do
-  DT[:data].size >= 1
+  DT[:data].size >= 3
 end
 
 time_taken = Time.now.to_f - started_at
 
-assert time_taken > 5
+assert time_taken > 5, time_taken

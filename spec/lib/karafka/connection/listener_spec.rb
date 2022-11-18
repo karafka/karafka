@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:listener) { described_class.new(consumer_group_status, subscription_group, jobs_queue) }
+  subject(:listener) do
+    described_class.new(
+      consumer_group_coordinator,
+      subscription_group,
+      jobs_queue
+    )
+  end
 
-  let(:consumer_group_status) { Karafka::Connection::ConsumerGroupStatus.new(1) }
+  let(:consumer_group_coordinator) { Karafka::Connection::ConsumerGroupCoordinator.new(0) }
   let(:subscription_group) { build(:routing_subscription_group, topics: [routing_topic]) }
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:client) { Karafka::Connection::Client.new(subscription_group) }
@@ -16,6 +22,10 @@ RSpec.describe_current do
     allow(client.class).to receive(:new).and_return(client)
     allow(Karafka::App).to receive(:stopping?).and_return(false, true)
     allow(client).to receive(:batch_poll).and_return([])
+    allow(client).to receive(:ping)
+    allow(consumer_group_coordinator).to receive(:shutdown?).and_return(true)
+
+    consumer_group_coordinator.finish_work(listener.id)
   end
 
   after { client.stop }
