@@ -5,7 +5,8 @@
 rails = false
 
 begin
-  require 'rails'
+  # Do not load Rails again if already loaded
+  Object.const_defined?('Rails::Railtie') || require('rails')
 
   rails = true
 rescue LoadError
