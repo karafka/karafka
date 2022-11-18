@@ -68,11 +68,11 @@ module Karafka
       #
       # @note We wrap it with a mutex exactly because of the above case of forceful shutdown
       def shutdown
-        return if @stopped
-
         # We want to make sure that we never close two librdkafka clients at the same time. I'm not
         # particularly fond of it's shutdown API being fully thread-safe
         MUTEX.synchronize do
+          return if @stopped
+
           @mutex.synchronize do
             @stopped = true
             @executors.clear
