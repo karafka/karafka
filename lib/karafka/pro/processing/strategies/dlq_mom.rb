@@ -45,8 +45,12 @@ module Karafka
               else
                 # We reset the pause to indicate we will now consider it as "ok".
                 coordinator.pause_tracker.reset
-                skippable_message = find_skippable_message
-                dispatch_to_dlq(skippable_message)
+
+                if dispatch_to_dlq?
+                  skippable_message = find_skippable_message
+                  dispatch_to_dlq(skippable_message)
+                end
+
                 pause(coordinator.seek_offset)
               end
             end

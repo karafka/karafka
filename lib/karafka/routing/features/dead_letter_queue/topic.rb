@@ -12,7 +12,8 @@ module Karafka
           private_constant :DEFAULT_MAX_RETRIES
 
           # @param max_retries [Integer] after how many retries should we move data to dlq
-          # @param topic [String] where the messages should be moved if failing
+          # @param topic [String, false] where the messages should be moved if failing or false
+          #   if we do not want to move it anywhere and just skip
           # @return [Config] defined config
           def dead_letter_queue(max_retries: DEFAULT_MAX_RETRIES, topic: nil)
             @dead_letter_queue ||= Config.new(
