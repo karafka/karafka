@@ -7,6 +7,8 @@
 class DataCollector
   include Singleton
 
+  MUTEX = Mutex.new
+
   attr_reader :topics, :consumer_groups, :data
 
   class << self
@@ -40,7 +42,9 @@ class DataCollector
     # @param key [Object] key for the data access
     # @return [Object] anything under given key in the data
     def [](key)
-      data[key]
+      MUTEX.synchronize do
+        data[key]
+      end
     end
 
     # Alias to the data assignment
@@ -48,7 +52,9 @@ class DataCollector
     # @param key [Object] anything we want to have as a key
     # @param value [Object] anything we want to store
     def []=(key, value)
-      data[key] = value
+      MUTEX.synchronize do
+        data[key] = value
+      end
     end
 
     # @param amount [Integer] number of uuids we want to get
@@ -59,15 +65,23 @@ class DataCollector
 
     # Removes all the data from the collector
     def clear
-      instance.clear
+      MUTEX.synchronize do
+        instance.clear
+      end
     end
   end
 
   # Creates a collector
   def initialize
+    @mutex = Mutex.new
     @topics = Concurrent::Array.new(100) { SecureRandom.uuid }
     @consumer_groups = @topics
-    @data = Concurrent::Hash.new { |hash, key| hash[key] = Concurrent::Array.new }
+    @data = Concurrent::Hash.new do |hash, key|
+      @mutex.synchronize do
+        return hash[key] if hash.key?(key)
+        hash[key] = Concurrent::Array.new
+      end
+    end
   end
 
   # @return [String] first topic name
