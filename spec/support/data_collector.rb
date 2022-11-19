@@ -7,7 +7,7 @@
 class DataCollector
   include Singleton
 
-  # Mutext we use to ensure we don't have multi-threaded issues when collecting data
+  # Mutex we use to ensure we don't have multi-threaded issues when collecting data
   MUTEX = Mutex.new
 
   private_constant :MUTEX
