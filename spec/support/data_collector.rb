@@ -7,7 +7,10 @@
 class DataCollector
   include Singleton
 
+  # Mutext we use to ensure we don't have multi-threaded issues when collecting data
   MUTEX = Mutex.new
+
+  private_constant :MUTEX
 
   attr_reader :topics, :consumer_groups, :data
 
@@ -79,6 +82,7 @@ class DataCollector
     @data = Concurrent::Hash.new do |hash, key|
       @mutex.synchronize do
         return hash[key] if hash.key?(key)
+
         hash[key] = Concurrent::Array.new
       end
     end
