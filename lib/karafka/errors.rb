@@ -45,9 +45,6 @@ module Karafka
     InvalidCoordinatorStateError = Class.new(BaseError)
 
     # This should never happen. Please open an issue if it does.
-    InvalidConsumerGroupStatusError = Class.new(BaseError)
-
-    # This should never happen. Please open an issue if it does.
     StrategyNotFoundError = Class.new(BaseError)
 
     # This should never happen. Please open an issue if it does.
