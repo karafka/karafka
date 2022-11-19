@@ -10,12 +10,6 @@ module Karafka
     #
     # We work with the assumption, that partitions data is evenly distributed.
     class JobsQueue
-      # We need a mutex because concurrent map is not fully thread-safe
-      # https://github.com/ruby-concurrency/concurrent-ruby/issues/970
-      MUTEX = Mutex.new
-
-      private_constant :MUTEX
-
       # @return [Karafka::Processing::JobsQueue]
       def initialize
         @queue = Queue.new
@@ -27,11 +21,7 @@ module Karafka
         # We cannot use a single semaphore as it could potentially block in listeners that should
         # process with their data and also could unlock when a given group needs to remain locked
         @semaphores = Concurrent::Map.new do |h, k|
-          MUTEX.synchronize do
-            break h[k] if h.key?(k)
-
-            h[k] = Queue.new
-          end
+          h.compute_if_absent(k) { Queue.new }
         end
 
         @in_processing = Hash.new { |h, k| h[k] = [] }
