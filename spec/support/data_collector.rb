@@ -101,8 +101,10 @@ class DataCollector
   # Removes all the data from the collector
   # This may be needed if be buffer rdkafka messages for GC to figure things out
   def clear
-    @topics.clear
-    @consumer_groups.clear
-    @data.clear
+    @mutex.synchronize do
+      @topics.clear
+      @consumer_groups.clear
+      @data.clear
+    end
   end
 end
