@@ -42,10 +42,12 @@ module Karafka
               else
                 coordinator.pause_tracker.reset
 
-                skippable_message = find_skippable_message
-
                 unless revoked?
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                  if dispatch_to_dlq?
+                    skippable_message = find_skippable_message
+                    dispatch_to_dlq(skippable_message)
+                  end
+
                   seek(coordinator.seek_offset)
                 end
 
