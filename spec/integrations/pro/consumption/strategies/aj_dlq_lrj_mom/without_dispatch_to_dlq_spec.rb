@@ -15,7 +15,7 @@ end
 
 class DlqConsumer < Karafka::BaseConsumer
   def consume
-    messages.each do |message|
+    messages.each do
       DT[1] << true
     end
   end
