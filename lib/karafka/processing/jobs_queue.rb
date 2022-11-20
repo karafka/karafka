@@ -20,8 +20,12 @@ module Karafka
         # scheduled by Ruby hundreds of thousands of times per group.
         # We cannot use a single semaphore as it could potentially block in listeners that should
         # process with their data and also could unlock when a given group needs to remain locked
-        @semaphores = Concurrent::Map.new { |h, k| h[k] = Queue.new }
+        @semaphores = Concurrent::Map.new do |h, k|
+          h.compute_if_absent(k) { Queue.new }
+        end
+
         @in_processing = Hash.new { |h, k| h[k] = [] }
+
         @mutex = Mutex.new
       end
 

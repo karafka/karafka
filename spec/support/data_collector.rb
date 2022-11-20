@@ -25,7 +25,7 @@ class DataCollector
       instance.topics
     end
 
-    # @return [ConcurrentHash] structure for aggregating data
+    # @return [Concurrent::Hash] structure for aggregating data
     def data
       instance.data
     end
@@ -72,6 +72,17 @@ class DataCollector
         instance.clear
       end
     end
+
+    # @return [String] Alias for printing and debug so when doing `p DT` we get the instance data
+    #   details automatically.
+    def inspect
+      instance.data.inspect
+    end
+
+    # @return [String] `#inspect` result
+    def to_s
+      inspect
+    end
   end
 
   # Creates a collector
@@ -79,11 +90,13 @@ class DataCollector
     @mutex = Mutex.new
     @topics = Concurrent::Array.new(100) { SecureRandom.uuid }
     @consumer_groups = @topics
+    # We need to use a concurrent hash and not a map because we want to print this data upon
+    # failures and debugging
     @data = Concurrent::Hash.new do |hash, key|
       @mutex.synchronize do
-        return hash[key] if hash.key?(key)
+        break hash[key] if hash.key?(key)
 
-        hash[key] = Concurrent::Array.new
+        hash[key] = ::Concurrent::Array.new
       end
     end
   end

@@ -1,9 +1,11 @@
 # Karafka framework changelog
 
 ## Unreleased
+- **[Feature]** Provide ability to skip failing messages without dispatching them to an alternative topic (DLQ).
 - [Improvement] Improve the integration with Ruby on Rails by preventing double-require of components.
 - [Improvement] Improve stability of the shutdown process upon critical errors.
 - [Improvement] Improve stability of the integrations spec suite.
+- [Fix] Fix an issue where upon fast startup of multiple subscription groups from the same consumer group, a ghost queue would be created due to problems in `Concurrent::Hash`.
 
 ## 2.0.18 (2022-11-18)
 - **[Feature]** Support quiet mode via `TSTP` signal. When used, Karafka will finish processing current messages, run `shutdown` jobs, and switch to a quiet mode where no new work is being accepted. At the same time, it will keep the consumer group quiet, and thus no rebalance will be triggered. This can be particularly useful during deployments.

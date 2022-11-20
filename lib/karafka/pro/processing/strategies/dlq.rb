@@ -42,7 +42,7 @@ module Karafka
                 # We reset the pause to indicate we will now consider it as "ok".
                 coordinator.pause_tracker.reset
                 skippable_message = find_skippable_message
-                dispatch_to_dlq(skippable_message)
+                dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
                 mark_as_consumed(skippable_message)
                 pause(coordinator.seek_offset)
               end
@@ -59,7 +59,6 @@ module Karafka
 
           # Moves the broken message into a separate queue defined via the settings
           #
-          # @private
           # @param skippable_message [Array<Karafka::Messages::Message>] message we want to
           #   dispatch to DLQ
           def dispatch_to_dlq(skippable_message)
@@ -80,6 +79,13 @@ module Karafka
               caller: self,
               message: skippable_message
             )
+          end
+
+          # @return [Boolean] should we dispatch the message to DLQ or not. When the dispatch topic
+          #   is set to false, we will skip the dispatch, effectively ignoring the broken message
+          #   without taking any action.
+          def dispatch_to_dlq?
+            topic.dead_letter_queue.topic
           end
         end
       end

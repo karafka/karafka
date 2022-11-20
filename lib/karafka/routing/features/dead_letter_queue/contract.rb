@@ -29,6 +29,8 @@ module Karafka
 
             topic = dead_letter_queue[:topic]
 
+            # When topic is set to false, it means we just want to skip dispatch on DLQ
+            next if topic == false
             next if topic.is_a?(String) && Contracts::TOPIC_REGEXP.match?(topic)
 
             [[%i[dead_letter_queue topic], :format]]

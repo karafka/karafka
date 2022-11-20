@@ -164,6 +164,7 @@ def create_routes_topics
       topics_names << topic.name
 
       next unless topic.dead_letter_queue?
+      next unless topic.dead_letter_queue.topic
 
       topics_names << topic.dead_letter_queue.topic
     end
@@ -237,9 +238,9 @@ AssertionFailedError = Class.new(StandardError)
 #
 # @param expected [Object] what we expect
 # @param received [Object] what we've received
-# @param message [nil, String] message we want to pass upon failure or nil if default should be
-#   used
-def assert_equal(expected, received, message = nil)
+# @param message [String] message we want to pass upon failure. If not present, the data
+#   collector data will be printed
+def assert_equal(expected, received, message = DT)
   return if expected == received
 
   raise AssertionFailedError, message || "#{received} does not equal to #{expected}"
@@ -247,8 +248,9 @@ end
 
 # A shortcut to `assert_equal(true, value)` as often we check if something is true
 # @param received [Boolean] true or false
-# @param message [nil, String] message we want to pass upon failure
-def assert(received, message = nil)
+# @param message [String] message we want to pass upon failure. If not present, the data
+#   collector data will be printed
+def assert(received, message = DT)
   assert_equal(true, received, message)
 end
 

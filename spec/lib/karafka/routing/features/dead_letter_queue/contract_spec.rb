@@ -35,6 +35,12 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
+  context 'when topic is a false' do
+    before { config[:dead_letter_queue][:topic] = false }
+
+    it { expect(check).to be_success }
+  end
+
   context 'when max_retries is not an integer' do
     before { config[:dead_letter_queue][:max_retries] = 'invalid' }
 

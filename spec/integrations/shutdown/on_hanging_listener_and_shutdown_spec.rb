@@ -22,8 +22,6 @@ draw_routes do
   end
 end
 
-occurence = 0
-
 # This will force Karafka fetcher to hang
 Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do
   sleep unless DT[0].empty?

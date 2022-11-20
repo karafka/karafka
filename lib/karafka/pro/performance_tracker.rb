@@ -25,11 +25,13 @@ module Karafka
 
       # Builds up nested concurrent hash for data tracking
       def initialize
-        @processing_times = Concurrent::Hash.new do |topics_hash, topic|
-          topics_hash[topic] = Concurrent::Hash.new do |partitions_hash, partition|
-            # This array does not have to be concurrent because we always access single partition
-            # data via instrumentation that operates in a single thread via consumer
-            partitions_hash[partition] = []
+        @processing_times = Concurrent::Map.new do |topics_hash, topic|
+          topics_hash.compute_if_absent(topic) do
+            Concurrent::Map.new do |partitions_hash, partition|
+              # This array does not have to be concurrent because we always access single
+              # partition data via instrumentation that operates in a single thread via consumer
+              partitions_hash.compute_if_absent(partition) { [] }
+            end
           end
         end
       end
