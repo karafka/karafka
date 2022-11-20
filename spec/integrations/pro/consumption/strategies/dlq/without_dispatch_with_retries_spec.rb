@@ -10,12 +10,10 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    if messages.first.offset.zero?
-      raise StandardError
-    else
-      messages.each do |message|
-        DT[:valid] << message.offset
-      end
+    raise StandardError if messages.first.offset.zero?
+
+    messages.each do |message|
+      DT[:valid] << message.offset
     end
   end
 end
