@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.19 (2022-11-20)
 - **[Feature]** Provide ability to skip failing messages without dispatching them to an alternative topic (DLQ).
 - [Improvement] Improve the integration with Ruby on Rails by preventing double-require of components.
 - [Improvement] Improve stability of the shutdown process upon critical errors.
