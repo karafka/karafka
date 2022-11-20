@@ -56,6 +56,8 @@ Thread.new do
 
   consumer.each do |message|
     DT[:revoked_data] << message.partition
+
+    break
   end
 end
 
