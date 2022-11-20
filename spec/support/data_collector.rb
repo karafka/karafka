@@ -25,7 +25,7 @@ class DataCollector
       instance.topics
     end
 
-    # @return [ConcurrentHash] structure for aggregating data
+    # @return [Concurrent::Hash] structure for aggregating data
     def data
       instance.data
     end
@@ -79,12 +79,8 @@ class DataCollector
     @mutex = Mutex.new
     @topics = Concurrent::Array.new(100) { SecureRandom.uuid }
     @consumer_groups = @topics
-    @data = Concurrent::Hash.new do |hash, key|
-      @mutex.synchronize do
-        return hash[key] if hash.key?(key)
-
-        hash[key] = Concurrent::Array.new
-      end
+    @data = Concurrent::Map.new do |hash, key|
+      hash.compute_if_absent(key) { ::Concurrent::Array.new }
     end
   end
 
