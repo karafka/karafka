@@ -313,8 +313,8 @@ module Karafka
 
             @kafka.close
             @buffer.clear
-            # @note We do not clear rebalance manager here as we may still have revocation info here
-            # that we want to consider valid prior to running another reconnection
+            # @note We do not clear rebalance manager here as we may still have revocation info
+            # here that we want to consider valid prior to running another reconnection
           end
         end
       end
