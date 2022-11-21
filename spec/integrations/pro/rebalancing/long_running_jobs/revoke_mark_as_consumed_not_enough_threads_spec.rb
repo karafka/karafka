@@ -49,13 +49,15 @@ produce_many(DT.topic, DT.uuids(10), partition: 1)
 # We need a second producer to trigger a rebalance
 consumer = setup_rdkafka_consumer
 
-Thread.new do
+thread = Thread.new do
   sleep(10)
 
   consumer.subscribe(DT.topic)
 
   consumer.each do |message|
     DT[:revoked_data] << message.partition
+
+    break
   end
 end
 
@@ -66,6 +68,7 @@ start_karafka_and_wait_until do
   ) && DT[:revoked_data].size >= 1
 end
 
+thread.join
 consumer.close
 
 revoked_partition = DT[:revoked_data].first
