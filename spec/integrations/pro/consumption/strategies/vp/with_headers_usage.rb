@@ -9,18 +9,17 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    messages.select do |message|
-      message.headers.key?('iteration')
-    end.select do |message|
-      message.headers['iteration'].to_i > 5
-    end.each do |message|
-      1_000.times do
-        message.headers.transform_keys!(&:to_s)
-        message.headers.transform_keys!(&:to_sym)
-      end
+    messages
+      .select { |message| message.headers.key?('iteration') }
+      .select { |message| message.headers['iteration'].to_i > 5 }
+      .each do |message|
+        1_000.times do
+          message.headers.transform_keys!(&:to_s)
+          message.headers.transform_keys!(&:to_sym)
+        end
 
-      DT[:selected] << message.offset
-    end
+        DT[:selected] << message.offset
+      end
   end
 end
 
