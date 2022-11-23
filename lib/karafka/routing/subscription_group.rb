@@ -10,6 +10,12 @@ module Karafka
     class SubscriptionGroup
       attr_reader :id, :topics
 
+      # This does not have to be thread-safe
+      # Routing definition happens in a single file
+      INSTANCES_IDS = (0..10_000).each
+
+      private_constant :INSTANCES_IDS
+
       # @param topics [Karafka::Routing::Topics] all the topics that share the same key settings
       # @return [SubscriptionGroup] built subscription group
       def initialize(topics)
@@ -38,6 +44,17 @@ module Karafka
       #   with our routing engine, we inject it before it will go to the consumer
       def kafka
         kafka = Setup::AttributesMap.consumer(@topics.first.kafka.dup)
+
+        # If we use static group memberships, there can be a case, where same instance id would
+        # be set on many subscription groups as the group instance id from Karafka perspective is
+        # set per config. Each instance even if they are subscribed to different topics needs to
+        # have if fully unique. To make sure of that, we just add extra postfix at the end that
+        # increments.
+        group_instance_id = kafka.fetch(:'group.instance.id', false)
+
+        if group_instance_id
+          kafka[:'group.instance.id'] = "#{group_instance_id}_#{INSTANCES_IDS.next}"
+        end
 
         kafka[:'client.id'] ||= Karafka::App.config.client_id
         kafka[:'group.id'] ||= @topics.first.consumer_group.id
