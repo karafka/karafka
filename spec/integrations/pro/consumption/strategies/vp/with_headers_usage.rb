@@ -28,7 +28,7 @@ draw_routes do
     topic DT.topic do
       consumer Consumer
       virtual_partitions(
-        partitioner: ->(msg) { rand }
+        partitioner: ->(_) { rand }
       )
     end
   end
