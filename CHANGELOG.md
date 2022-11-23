@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Improvement] Support `group.instance.id` assignment (static group membership) for a case where a single consumer group has multiple subscription groups (#1173).
+
 ## 2.0.19 (2022-11-20)
 - **[Feature]** Provide ability to skip failing messages without dispatching them to an alternative topic (DLQ).
 - [Improvement] Improve the integration with Ruby on Rails by preventing double-require of components.
