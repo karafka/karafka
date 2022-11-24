@@ -53,10 +53,7 @@ module Karafka
         # increments.
         group_instance_id = kafka.fetch(:'group.instance.id', false)
 
-        if group_instance_id
-          kafka[:'group.instance.id'] = "#{group_instance_id}_#{@position}"
-        end
-
+        kafka[:'group.instance.id'] = "#{group_instance_id}_#{@position}" if group_instance_id
         kafka[:'client.id'] ||= Karafka::App.config.client_id
         kafka[:'group.id'] ||= @topics.first.consumer_group.id
         kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
