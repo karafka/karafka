@@ -40,6 +40,9 @@ module Karafka
           consumer_group.topics.each do |topic|
             Contracts::Topic.new.validate!(topic.to_h)
           end
+
+          # Initialize subscription groups after all the routing is done
+          consumer_group.subscription_groups
         end
       end
 

@@ -11,8 +11,8 @@ RSpec.describe_current do
     it { expect(groups.size).to eq(1) }
   end
 
-  context 'when there are more topics with the same setings' do
-    let(:consumer_group_topics) { Array.new(3) { build(:routing_topic) } }
+  context 'when there are more topics with the same settings' do
+    let(:consumer_group_topics) { Array.new(3) { build(:routing_topic, subscription_group: '1') } }
 
     it { expect(groups.size).to eq(1) }
   end

@@ -24,6 +24,10 @@ module Karafka
 
       private_constant :DISTRIBUTION_KEYS
 
+      def initialize
+        @position = -1
+      end
+
       # @param topics [Karafka::Routing::Topics] all the topics based on which we want to build
       #   subscription groups
       # @return [Array<SubscriptionGroup>] all subscription groups we need in separate threads
@@ -34,7 +38,7 @@ module Karafka
           .values
           .map { |value| value.map(&:last) }
           .map { |topics_array| Routing::Topics.new(topics_array) }
-          .map { |grouped_topics| SubscriptionGroup.new(grouped_topics) }
+          .map { |grouped_topics| SubscriptionGroup.new(@position += 1, grouped_topics) }
       end
 
       private

@@ -8,19 +8,18 @@ module Karafka
     # @note One subscription group will always belong to one consumer group, but one consumer
     #   group can have multiple subscription groups.
     class SubscriptionGroup
-      attr_reader :id, :topics
+      attr_reader :id, :topics, :kafka
 
-      # This does not have to be thread-safe
-      # Routing definition happens in a single file
-      INSTANCES_IDS = (0..10_000).each
-
-      private_constant :INSTANCES_IDS
-
+      # @param position [Integer] position of this subscription group in all the subscriptions
+      #   groups array. We need to have this value for sake of static group memberships, where
+      #   we need a "in-between" restarts unique identifier
       # @param topics [Karafka::Routing::Topics] all the topics that share the same key settings
       # @return [SubscriptionGroup] built subscription group
-      def initialize(topics)
-        @id = SecureRandom.uuid
+      def initialize(position, topics)
+        @id = "#{topics.first.subscription_group}_#{position}"
+        @position = position
         @topics = topics
+        @kafka = build_kafka
         freeze
       end
 
@@ -39,10 +38,12 @@ module Karafka
         @topics.first.max_wait_time
       end
 
+      private
+
       # @return [Hash] kafka settings are a bit special. They are exactly the same for all of the
       #   topics but they lack the group.id (unless explicitly) provided. To make it compatible
       #   with our routing engine, we inject it before it will go to the consumer
-      def kafka
+      def build_kafka
         kafka = Setup::AttributesMap.consumer(@topics.first.kafka.dup)
 
         # If we use static group memberships, there can be a case, where same instance id would
@@ -53,7 +54,7 @@ module Karafka
         group_instance_id = kafka.fetch(:'group.instance.id', false)
 
         if group_instance_id
-          kafka[:'group.instance.id'] = "#{group_instance_id}_#{INSTANCES_IDS.next}"
+          kafka[:'group.instance.id'] = "#{group_instance_id}_#{@position}"
         end
 
         kafka[:'client.id'] ||= Karafka::App.config.client_id
