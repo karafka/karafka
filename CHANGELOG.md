@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.20 (2022-11-24)
 - [Improvement] Support `group.instance.id` assignment (static group membership) for a case where a single consumer group has multiple subscription groups (#1173).
 
 ## 2.0.19 (2022-11-20)
