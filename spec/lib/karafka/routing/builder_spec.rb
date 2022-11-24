@@ -42,10 +42,10 @@ RSpec.describe_current do
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_app_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_app_topic_name2" }
       it { expect(builder.size).to eq 1 }
-      it { expect(topic1.subscription_group).to eq nil }
+      it { expect(topic1.subscription_group).not_to eq(nil) }
       it { expect(topic1.name).to eq 'topic_name1' }
       it { expect(topic2.name).to eq 'topic_name2' }
-      it { expect(topic2.subscription_group).to eq nil }
+      it { expect(topic2.subscription_group).not_to eq(nil) }
       it { expect(builder.first.id).to eq "#{Karafka::App.config.client_id}_app" }
     end
 
@@ -141,7 +141,7 @@ RSpec.describe_current do
       before { draw }
 
       it { expect(topic1.subscription_group).to eq 'test1' }
-      it { expect(topic2.subscription_group).to eq nil }
+      it { expect(topic2.subscription_group).not_to eq(nil) }
     end
 
     context 'when we use 0.6 simple topic style single topic groups' do
@@ -176,9 +176,9 @@ RSpec.describe_current do
       end
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
-      it { expect(topic1.subscription_group).to eq nil }
+      it { expect(topic1.subscription_group).not_to eq(nil) }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
-      it { expect(topic2.subscription_group).to eq nil }
+      it { expect(topic2.subscription_group).not_to eq(nil) }
       it { expect(builder.size).to eq 2 }
     end
 

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:group) { described_class.new([topic]) }
+  subject(:group) { described_class.new(0, [topic]) }
 
   let(:topic) { build(:routing_topic, kafka: { 'bootstrap.servers': 'kafka://kafka:9092' }) }
 
   describe '#id' do
-    it { expect(group.id).not_to eq(nil) }
+    it { expect(group.id).to eq(topic.subscription_group) }
   end
 
   describe '#max_messages' do

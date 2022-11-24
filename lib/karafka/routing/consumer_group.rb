@@ -14,7 +14,7 @@ module Karafka
       # It allows us to store the "current" subscription group defined in the routing
       # This subscription group id is then injected into topics, so we can compute the subscription
       # groups
-      attr_accessor :current_subscription_group_name
+      attr_accessor :current_subscription_group_id
 
       # @param name [String, Symbol] raw name of this consumer group. Raw means, that it does not
       #   yet have an application client_id namespace, this will be added here by default.
@@ -24,6 +24,9 @@ module Karafka
         @name = name.to_s
         @id = Karafka::App.config.consumer_mapper.call(name)
         @topics = Topics.new([])
+        # Initialize the subscription group so there's always a value for it, since even if not
+        # defined directly, a subscription group will be created
+        @current_subscription_group_id = SecureRandom.uuid
       end
 
       # @return [Boolean] true if this consumer group should be active in our current process
@@ -41,7 +44,7 @@ module Karafka
         built_topic = @topics.last
         # We overwrite it conditionally in case it was not set by the user inline in the topic
         # block definition
-        built_topic.subscription_group ||= current_subscription_group_name
+        built_topic.subscription_group ||= current_subscription_group_id
         built_topic
       end
 
@@ -52,19 +55,24 @@ module Karafka
       def subscription_group=(name, &block)
         # We cast it here, so the routing supports symbol based but that's anyhow later on
         # validated as a string
-        self.current_subscription_group_name = name
+        @current_subscription_group_id = name
 
         Proxy.new(self, &block)
 
         # We need to reset the current subscription group after it is used, so it won't leak
         # outside to other topics that would be defined without a defined subscription group
-        self.current_subscription_group_name = nil
+        @current_subscription_group_id = SecureRandom.uuid
       end
 
       # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
       #   the consumer group topics
       def subscription_groups
-        App.config.internal.routing.subscription_groups_builder.call(topics)
+        @subscription_groups ||= App
+                                 .config
+                                 .internal
+                                 .routing
+                                 .subscription_groups_builder
+                                 .call(topics)
       end
 
       # Hashed version of consumer group that can be used for validation purposes

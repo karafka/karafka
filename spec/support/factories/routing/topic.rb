@@ -8,6 +8,7 @@ FactoryBot.define do
     kafka { {} }
     max_messages { 1000 }
     max_wait_time { 10_000 }
+    subscription_group { SecureRandom.uuid }
 
     skip_create
 
@@ -16,6 +17,7 @@ FactoryBot.define do
 
       instance.tap do |topic|
         topic.consumer = consumer
+        topic.subscription_group = subscription_group
       end
     end
   end
