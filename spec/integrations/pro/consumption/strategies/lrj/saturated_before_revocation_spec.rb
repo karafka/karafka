@@ -27,7 +27,7 @@ class Consumer < Karafka::BaseConsumer
 
     sleep(1) while DT[:done].empty?
 
-    sleep(10)
+    sleep(15)
   end
 end
 
