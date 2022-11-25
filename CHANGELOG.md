@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Improvement] Make revocation jobs for LRJ topics non-blocking to prevent blocking polling when someone uses non-revocation aware LRJ jobs and revocation happens.
+
 ## 2.0.20 (2022-11-24)
 - [Improvement] Support `group.instance.id` assignment (static group membership) for a case where a single consumer group has multiple subscription groups (#1173).
 
