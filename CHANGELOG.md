@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 20.0.21 (2022-11-25)
 - [Improvement] Make revocation jobs for LRJ topics non-blocking to prevent blocking polling when someone uses non-revocation aware LRJ jobs and revocation happens.
 
 ## 2.0.20 (2022-11-24)
