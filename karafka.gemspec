@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'https://karafka.io'
   spec.licenses    = ['LGPL-3.0', 'Commercial']
   spec.summary     = 'Karafka is Ruby and Rails efficient Kafka processing framework.'
-  spec.description = = <<-EOF
+  spec.description = <<-EOF
     Karafka is Ruby and Rails efficient Kafka processing framework.
 
     Karafka allows you to capture everything that happens in your systems in large scale,
