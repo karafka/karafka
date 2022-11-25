@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# When we have a LRJ job and revocation happens, non revocation aware LRJ may cause time poll
-# interval exceeding because revocation jobs are blocking.
+# When we have a LRJ job and revocation happens, non revocation aware LRJ should not cause a
+# timeout because the revocation job is also non-blocking.
 
 setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
   config.concurrency = 2
@@ -59,4 +59,4 @@ start_karafka_and_wait_until do
   true
 end
 
-assert events.first[:error].message.include?('Maximum application poll interval'), events
+assert events.empty?, events

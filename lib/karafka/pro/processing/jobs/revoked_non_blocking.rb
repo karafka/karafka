@@ -17,17 +17,15 @@ module Karafka
     module Processing
       # Pro jobs
       module Jobs
-        # The main job type in a non-blocking variant.
-        # This variant works "like" the regular consumption but does not block the queue.
+        # The revoked job type in a non-blocking variant.
+        # This variant works "like" the regular revoked but does not block the queue.
         #
         # It can be useful when having long lasting jobs that would exceed `max.poll.interval`
-        # if would block.
-        #
-        # @note It needs to be working with a proper consumer that will handle the partition
-        #   management. This layer of the framework knows nothing about Kafka messages consumption.
-        class ConsumeNonBlocking < ::Karafka::Processing::Jobs::Consume
+        # in scenarios where there are more jobs than threads, without this being async we
+        # would potentially stop polling
+        class RevokedNonBlocking < ::Karafka::Processing::Jobs::Revoked
           # Makes this job non-blocking from the start
-          # @param args [Array] any arguments accepted by `::Karafka::Processing::Jobs::Consume`
+          # @param args [Array] any arguments accepted by `::Karafka::Processing::Jobs::Revoked`
           def initialize(*args)
             super
             @non_blocking = true

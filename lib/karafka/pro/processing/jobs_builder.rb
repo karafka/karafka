@@ -28,6 +28,18 @@ module Karafka
             super
           end
         end
+
+        # @param executor [Karafka::Processing::Executor]
+        # @return [Karafka::Processing::Jobs::Revoked] revocation job for non LRJ
+        # @return [Karafka::Processing::Jobs::RevokedNonBlocking] revocation job that is
+        #   non-blocking, so when revocation job is scheduled for LRJ it also will not block
+        def revoked(executor)
+          if executor.topic.long_running_job?
+            Jobs::RevokedNonBlocking.new(executor)
+          else
+            super
+          end
+        end
       end
     end
   end
