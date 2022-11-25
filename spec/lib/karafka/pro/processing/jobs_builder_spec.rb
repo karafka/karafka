@@ -25,9 +25,20 @@ RSpec.describe_current do
   end
 
   describe '#revoked' do
-    it do
-      job = builder.revoked(executor)
-      expect(job).to be_a(Karafka::Processing::Jobs::Revoked)
+    context 'when it is a lrj topic' do
+      before { executor.topic.long_running_job true }
+
+      it 'expect to use the non blocking pro revocation job' do
+        job = builder.revoked(executor)
+        expect(job).to be_a(Karafka::Pro::Processing::Jobs::RevokedNonBlocking)
+      end
+    end
+
+    context 'when it is not a lrj topic' do
+      it do
+        job = builder.revoked(executor)
+        expect(job).to be_a(Karafka::Processing::Jobs::Revoked)
+      end
     end
   end
 
