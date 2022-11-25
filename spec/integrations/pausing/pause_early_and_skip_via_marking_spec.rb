@@ -61,7 +61,7 @@ sleep(0.1) until sum >= 20
   assert_equal i, (DT[:messages] + DT[:other])[i]
 end
 
-assert_equal 20, sum
+assert sum >= 20
 
 thread.join
 consumer.close
