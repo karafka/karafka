@@ -37,16 +37,19 @@ end
 # We need a second producer so we are sure that there was no revocation due to a timeout
 consumer = setup_rdkafka_consumer
 
-Thread.new do
+thread = Thread.new do
   sleep(10)
 
   consumer.subscribe(DT.topic)
 
-  consumer.each do
+  while DT[:done].empty?
+    data = consumer.poll(500)
     # This should never happen.
     # We have one partition and it should be karafka that consumes it
-    exit! 5
+    exit!(5) if data
   end
+
+  consumer.close
 end
 
 payloads = DT.uuids(2)
@@ -60,4 +63,6 @@ end
 # pushed after partition is regained. We should however not loose any messages
 assert_equal payloads, DT[0].uniq
 
-consumer.close
+DT[:done] << true
+
+thread.join
