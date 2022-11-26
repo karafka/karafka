@@ -1,8 +1,17 @@
 # frozen_string_literal: true
 
-SPECIAL_TOPIC = DT.topics[0]
+# When using Pro, we should be able to redefine and change the whole partitioner and use our own
+# custom one without any problems.
 
-setup_karafka
+# This spec illustrated, that you can overwrite the core partitioner and use your own that
+# distributes work differently for different topics with awareness of the received batch size.
+
+SPECIAL_TOPIC = DT.topics[0]
+REGULAR_TOPIC = DT.topics[1]
+
+# Load pro components without the setup as we want to do the setup later
+# This simulates normal flow where karafka loads pro when license is detected
+become_pro!
 
 class CustomPartitioner < Karafka::Pro::Processing::Partitioner
   def call(topic_name, messages, &block)
@@ -30,6 +39,8 @@ setup_karafka do |config|
   config.internal.processing.partitioner_class = CustomPartitioner
 end
 
+assert_equal Karafka::App.config.internal.processing.partitioner_class, CustomPartitioner
+
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[topic.name] << messages.count
@@ -37,26 +48,33 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  topic DT.topics[0] do
+  topic SPECIAL_TOPIC do
     consumer Consumer
     # Irrelevant because we use custom partitioner
     virtual_partitions
   end
 
-  topic DT.topics[1] do
+  topic REGULAR_TOPIC do
     consumer Consumer
   end
 end
 
 10.times do
-  produce_many(DT.topics[0], DT.uuids(1_000))
+  produce_many(SPECIAL_TOPIC, DT.uuids(1_000))
 end
 
-produce_many(DT.topics[1], DT.uuids(1_000))
+produce_many(REGULAR_TOPIC, DT.uuids(1_000))
 
 start_karafka_and_wait_until do
-  DT[DT.topics[0]].sum >= 5_000 &&
-    DT[DT.topics[1]].sum >= 100
+  DT[SPECIAL_TOPIC].sum >= 5_000 &&
+    DT[REGULAR_TOPIC].sum >= 100
 end
 
-p DT
+def median(array)
+  sorted = array.sort
+  len = sorted.length
+  (sorted[(len - 1) / 2] + sorted[len / 2]) / 2.0
+end
+
+assert_equal 20, median(DT[SPECIAL_TOPIC])
+assert (400..500).include?(median(DT[REGULAR_TOPIC]))
