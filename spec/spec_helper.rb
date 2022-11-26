@@ -14,6 +14,8 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   require lib
 end
 
+SPECS_TYPE = ENV.fetch('SPECS_TYPE', 'default')
+
 # Don't include unnecessary stuff into rcov
 SimpleCov.start do
   add_filter '/vendor/'
@@ -28,12 +30,12 @@ SimpleCov.start do
   add_filter '/processing/strategies'
 
   # enable_coverage :branch
-  command_name ENV.fetch('SPECS_TYPE', 'default')
+  command_name SPECS_TYPE
   merge_timeout 3600
 end
 
 # Require total coverage after running both regular and pro
-SimpleCov.minimum_coverage(94) if ENV.fetch('SPECS_TYPE', 'pro')
+SimpleCov.minimum_coverage(94) if SPECS_TYPE == 'pro'
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
   .sort
