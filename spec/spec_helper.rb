@@ -32,7 +32,8 @@ SimpleCov.start do
   merge_timeout 3600
 end
 
-SimpleCov.minimum_coverage(94)
+# Require total coverage after running both regular and pro
+SimpleCov.minimum_coverage(94) if ENV.fetch('SPECS_TYPE', 'pro')
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
   .sort
