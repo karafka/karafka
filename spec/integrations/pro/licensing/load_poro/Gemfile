@@ -2,4 +2,12 @@
 
 source 'https://rubygems.org'
 
+KARAFKA_PRO_USERNAME = ENV.fetch('KARAFKA_PRO_USERNAME')
+KARAFKA_PRO_PASSWORD = ENV.fetch('KARAFKA_PRO_PASSWORD')
+KARAFKA_PRO_VERSION = ENV.fetch('KARAFKA_PRO_VERSION')
+
+source "https://#{KARAFKA_PRO_USERNAME}:#{KARAFKA_PRO_PASSWORD}@gems.karafka.io" do
+  gem 'karafka-license', KARAFKA_PRO_VERSION
+end
+
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true

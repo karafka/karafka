@@ -7,7 +7,6 @@
 # be turned on.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 5
 end
 

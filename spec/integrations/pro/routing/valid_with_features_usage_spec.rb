@@ -2,9 +2,7 @@
 
 # Karafka should auto-load all the routing features
 
-setup_karafka do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka
 
 draw_routes do
   subscription_group do

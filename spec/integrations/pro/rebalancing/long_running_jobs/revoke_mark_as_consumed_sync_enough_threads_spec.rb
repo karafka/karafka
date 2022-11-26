@@ -9,7 +9,6 @@
 # finishing the processing. Otherwise when enqueued, will run after (for this we have another spec)
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   # We need 4: two partitions processing and non-blocking revokes
   config.concurrency = 4
   config.shutdown_timeout = 60_000

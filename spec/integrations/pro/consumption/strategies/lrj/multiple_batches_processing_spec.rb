@@ -6,7 +6,6 @@ setup_karafka do |config|
   config.max_messages = 10
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
-  config.license.token = pro_license_token
 end
 
 # We want to sleep few times but not all the time not to exceed max execution time of specs

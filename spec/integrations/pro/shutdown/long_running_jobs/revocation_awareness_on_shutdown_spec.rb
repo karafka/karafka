@@ -5,7 +5,6 @@
 # to make decisions also based on the revocation status.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 20
 end
 

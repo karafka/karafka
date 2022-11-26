@@ -22,4 +22,13 @@ RSpec.describe_current do
       expect(Karafka::Server).to have_received(:stop)
     end
   end
+
+  describe '#quiet' do
+    before { allow(Karafka::Server).to receive(:quiet) }
+
+    it 'expect to invoke server quiet' do
+      embedded.quiet
+      expect(Karafka::Server).to have_received(:quiet)
+    end
+  end
 end

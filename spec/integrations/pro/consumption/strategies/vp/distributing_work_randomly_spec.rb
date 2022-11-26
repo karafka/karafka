@@ -5,7 +5,6 @@
 # mix within a batch.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 5
   config.max_messages = 20
   config.initial_offset = 'latest'

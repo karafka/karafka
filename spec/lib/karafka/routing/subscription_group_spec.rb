@@ -6,7 +6,7 @@ RSpec.describe_current do
   let(:topic) { build(:routing_topic, kafka: { 'bootstrap.servers': 'kafka://kafka:9092' }) }
 
   describe '#id' do
-    it { expect(group.id).to eq(topic.subscription_group) }
+    it { expect(group.id).to eq("#{topic.subscription_group}_0") }
   end
 
   describe '#max_messages' do

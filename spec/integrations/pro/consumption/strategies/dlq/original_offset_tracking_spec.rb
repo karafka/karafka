@@ -2,9 +2,7 @@
 
 # When we move messages to the DLQ, their offset should be preserved in headers
 
-setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka(allow_errors: %w[consumer.consume.error])
 
 class Consumer < Karafka::BaseConsumer
   def consume

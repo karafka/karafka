@@ -100,5 +100,14 @@ loader.eager_load
 # nor included here
 ::Karafka::Routing::Features::Base.load_all
 
+# We need to detect and require (not setup) Pro components during the gem load, because we need
+# to make pro components available in case anyone wants to use them as a base to their own
+# custom components. Otherwise inheritance would not work.
+Karafka::Licenser.detect do
+  require 'karafka/pro/loader'
+
+  Karafka::Pro::Loader.require_all
+end
+
 # Load railtie after everything else is ready so we know we can rely on it.
 require 'karafka/railtie'

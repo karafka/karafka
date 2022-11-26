@@ -6,7 +6,6 @@
 # state could not be set on a consumer in the revocation job becuase it is pending in the queue.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 2
   config.shutdown_timeout = 60_000
 end

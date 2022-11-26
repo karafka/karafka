@@ -24,7 +24,16 @@ $stdout.sync = true
 DT = DataCollector
 
 # Test setup for the framework
-def setup_karafka(allow_errors: false)
+# @param allow_errors [true, false, Array<String>] Should we allow any errors (true), none (false)
+#   or a given types (array with types)
+def setup_karafka(
+  allow_errors: false,
+  # automatically load pro for all the pro specs unless stated otherwise
+  pro: caller_locations(1..1).first.path.include?('integrations/pro/')
+)
+  # If the spec  is in pro, run in pro mode
+  become_pro! if pro
+
   Karafka::App.setup do |config|
     # Use some decent defaults
     caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.uuid].join('-')
@@ -85,6 +94,20 @@ def setup_karafka(allow_errors: false)
 
     exit! 8
   end
+end
+
+# Switches specs into a Pro mode
+def become_pro!
+  mod = Module.new do
+    def self.token
+      ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+    end
+  end
+
+  Karafka.const_set('License', mod)
+  require 'karafka/pro/loader'
+
+  Karafka::Pro::Loader.require_all
 end
 
 # Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup
@@ -252,11 +275,6 @@ end
 #   collector data will be printed
 def assert(received, message = DT)
   assert_equal(true, received, message)
-end
-
-# @return [String] valid pro license token that we use in the integration tests
-def pro_license_token
-  ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
 end
 
 # Checks that what we've received and what we do not expect is not equal

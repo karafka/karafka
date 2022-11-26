@@ -11,9 +11,7 @@ end
 
 Karafka.monitor.subscribe(Listener.new)
 
-setup_karafka(allow_errors: true) do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka(allow_errors: true)
 
 class Consumer < Karafka::BaseConsumer
   def consume

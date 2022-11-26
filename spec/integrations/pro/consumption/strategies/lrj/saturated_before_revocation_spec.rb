@@ -8,7 +8,6 @@ setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
   config.max_messages = 1
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
-  config.license.token = pro_license_token
 end
 
 events = []

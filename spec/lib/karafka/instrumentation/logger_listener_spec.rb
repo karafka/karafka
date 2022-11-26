@@ -97,6 +97,17 @@ RSpec.describe_current do
     end
   end
 
+  describe '#on_app_quieting' do
+    subject(:trigger) { listener.on_app_quieting(event) }
+
+    let(:payload) { {} }
+    let(:message) { 'Switching to quiet mode. New messages will not be processed.' }
+
+    it 'expect logger to log server quiet' do
+      expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
+    end
+  end
+
   describe '#on_app_stopping' do
     subject(:trigger) { listener.on_app_stopping(event) }
 
@@ -104,10 +115,6 @@ RSpec.describe_current do
     let(:message) { 'Stopping Karafka server' }
 
     it 'expect logger to log server stop' do
-      # This sleep ensures that the threaded logger is able to finish
-      sleep 0.1
-      # We had to add at least once as it runs in a separate thread and can interact
-      # with other specs - this is a cheap workaround
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
     end
   end
@@ -119,7 +126,6 @@ RSpec.describe_current do
     let(:message) { 'Stopped Karafka server' }
 
     it 'expect logger to log server stopped' do
-      sleep 0.1
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
     end
   end
@@ -167,6 +173,27 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context 'when it is a consumer.before_enqueue.error' do
+      let(:type) { 'consumer.before_enqueue.error' }
+      let(:message) { "Consumer before enqueue failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a consumer.before_consume.error' do
+      let(:type) { 'consumer.before_consume.error' }
+      let(:message) { "Consumer before consume failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a consumer.after_consume.error' do
+      let(:type) { 'consumer.after_consume.error' }
+      let(:message) { "Consumer after consume failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context 'when it is a consumer.shutdown.error' do
       let(:type) { 'consumer.shutdown.error' }
       let(:message) { "Consumer on shutdown failed due to an error: #{error}" }
@@ -187,8 +214,6 @@ RSpec.describe_current do
       let(:message) { 'Forceful Karafka server stop' }
 
       it 'expect logger to log server stop' do
-        # This sleep ensures that the threaded logger is able to finish
-        sleep 0.1
         expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
       end
     end

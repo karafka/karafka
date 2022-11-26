@@ -8,7 +8,6 @@
 
 setup_karafka do |config|
   config.concurrency = 1
-  config.license.token = pro_license_token
 end
 
 class Consumer < Karafka::BaseConsumer

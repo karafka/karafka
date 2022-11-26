@@ -142,15 +142,17 @@ module Karafka
         # Configuring method
         # @param block [Proc] block we want to execute with the config instance
         def setup(&block)
+          # Will prepare and verify license if present
+          Licenser.prepare_and_verify(config.license)
+          # Will configure all the pro components
+          # This needs to happen before end user configuration as the end user may overwrite some
+          # of the pro defaults with custom components
+          Pro::Loader.setup(config) if Karafka.pro?
+
           configure(&block)
           merge_kafka_defaults!(config)
 
           Contracts::Config.new.validate!(config.to_h)
-
-          licenser = Licenser.new
-
-          # Tries to load our license gem and if present will try to load the correct license
-          licenser.prepare_and_verify(config.license)
 
           configure_components
 
@@ -188,12 +190,6 @@ module Karafka
             producer_config.kafka = AttributesMap.producer(config.kafka.dup)
             producer_config.logger = config.logger
           end
-
-          return unless Karafka.pro?
-
-          # Runs the pro loader that includes all the pro components
-          require 'karafka/pro/loader'
-          Pro::Loader.setup(config)
         end
       end
     end

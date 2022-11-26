@@ -4,9 +4,7 @@
 # Initially we should own all the partitions and then after they are taken away, we should get
 # back to two (as the last one will be owned by the second consumer).
 
-setup_karafka do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka
 
 create_topic(partitions: 3)
 

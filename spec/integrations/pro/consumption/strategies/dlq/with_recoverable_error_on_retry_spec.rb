@@ -3,9 +3,7 @@
 # When dead letter queue is used and we encounter recoverable message, we should not skip and not
 # move it to the dead letter topic. Just retry.
 
-setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka(allow_errors: %w[consumer.consume.error])
 
 class Consumer < Karafka::BaseConsumer
   def consume

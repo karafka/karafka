@@ -2,9 +2,7 @@
 
 # We should be able to use DLQ in a pipeline where we handle each stage separately.
 
-setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka(allow_errors: %w[consumer.consume.error])
 
 class Consumer < Karafka::BaseConsumer
   def consume

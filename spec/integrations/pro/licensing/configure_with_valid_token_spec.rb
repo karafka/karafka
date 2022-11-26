@@ -6,7 +6,6 @@ LOGS = StringIO.new
 
 setup_karafka do |config|
   config.logger = Logger.new(LOGS)
-  config.license.token = pro_license_token
 end
 
 LOGS.rewind

@@ -205,4 +205,61 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#quiet' do
+    before do
+      Karafka::App.public_send(new_status)
+      allow(Karafka::App).to receive(:quiet!)
+    end
+
+    context 'when already in quiet mode' do
+      let(:new_status) { :quiet! }
+
+      before { allow(Karafka::App).to receive(:stopped?).and_return(false) }
+
+      it do
+        described_class.quiet
+
+        expect(Karafka::App).not_to have_received(:quiet!)
+      end
+    end
+
+    context 'when stopping' do
+      let(:new_status) { :stop! }
+
+      before { allow(Karafka::App).to receive(:stopped?).and_return(false) }
+
+      it do
+        described_class.quiet
+
+        expect(Karafka::App).not_to have_received(:quiet!)
+      end
+    end
+
+    context 'when running' do
+      let(:new_status) { :run! }
+
+      before do
+        allow(Karafka::App).to receive(:quieting?).and_return(false)
+        allow(Karafka::App).to receive(:stopped?).and_return(false)
+        allow(Karafka::App).to receive(:stopping?).and_return(false)
+      end
+
+      it do
+        described_class.quiet
+
+        expect(Karafka::App).to have_received(:quiet!)
+      end
+    end
+
+    context 'when stopped' do
+      let(:new_status) { :stopped! }
+
+      it do
+        described_class.quiet
+
+        expect(Karafka::App).not_to have_received(:quiet!)
+      end
+    end
+  end
 end

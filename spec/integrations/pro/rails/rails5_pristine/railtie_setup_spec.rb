@@ -18,9 +18,7 @@ ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
 
 ExampleApp.initialize!
 
-setup_karafka do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume

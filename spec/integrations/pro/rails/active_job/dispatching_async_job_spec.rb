@@ -2,9 +2,7 @@
 
 # Karafka should be able to dispatch jobs using async pro adapter
 
-setup_karafka do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka
 
 setup_active_job
 

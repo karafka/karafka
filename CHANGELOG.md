@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Improvement] Load Pro components upon Karafka require so they can be altered prior to setup.
+
 ## 20.0.21 (2022-11-25)
 - [Improvement] Make revocation jobs for LRJ topics non-blocking to prevent blocking polling when someone uses non-revocation aware LRJ jobs and revocation happens.
 

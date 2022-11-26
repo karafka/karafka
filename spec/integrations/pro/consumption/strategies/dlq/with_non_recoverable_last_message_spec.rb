@@ -3,9 +3,7 @@
 # When dead letter queue is used and we last message out of all is broken, things should behave
 # like for any other broken message and we should pick up when more messages are present
 
-setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka(allow_errors: %w[consumer.consume.error])
 
 class Consumer < Karafka::BaseConsumer
   def consume

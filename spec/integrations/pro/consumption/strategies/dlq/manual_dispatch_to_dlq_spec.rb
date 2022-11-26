@@ -6,9 +6,7 @@
 # We can use this API to manually move stuff to DLQ without raising any errors upon detecting a
 # corrupted message.
 
-setup_karafka do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume

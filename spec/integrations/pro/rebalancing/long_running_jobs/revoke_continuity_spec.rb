@@ -4,7 +4,6 @@
 # offset committed without any problems
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   # We need 4: two partitions processing and non-blocking revokes
   config.concurrency = 4
   config.shutdown_timeout = 60_000

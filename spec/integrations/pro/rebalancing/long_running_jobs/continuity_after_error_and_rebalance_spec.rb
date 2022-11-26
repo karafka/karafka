@@ -6,7 +6,6 @@
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 1
-  config.license.token = pro_license_token
 end
 
 create_topic(partitions: 2)

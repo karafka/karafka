@@ -4,7 +4,6 @@
 # for parallel jobs. In general it should not mark intermediate jobs as consumed.
 
 setup_karafka(allow_errors: true) do |config|
-  config.license.token = pro_license_token
   config.concurrency = 1
   config.max_messages = 60
   config.max_wait_time = 2_000

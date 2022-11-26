@@ -7,7 +7,6 @@
 # of them and detect this.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.max_wait_time = 2_500
   config.concurrency = 10
   config.shutdown_timeout = 60_000
