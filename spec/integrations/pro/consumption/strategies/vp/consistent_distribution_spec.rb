@@ -5,7 +5,6 @@
 # stay the same (consistent).
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 2
   config.max_messages = 100
   config.initial_offset = 'earliest'

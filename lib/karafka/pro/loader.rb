@@ -45,8 +45,6 @@ module Karafka
         # @param config [Karafka::Core::Configurable::Node] app config that we can alter with pro
         #   components
         def setup(config)
-          require_all
-
           reconfigure(config)
 
           load_topic_features

@@ -12,7 +12,6 @@ end
 Karafka.monitor.subscribe(Listener.new)
 
 setup_karafka(allow_errors: true) do |config|
-  config.license.token = pro_license_token
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
 end

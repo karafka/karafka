@@ -2,9 +2,7 @@
 
 # Fast jobs should also not have any problems (though not recommended) when running as lrj
 
-setup_karafka do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka
 
 setup_active_job
 

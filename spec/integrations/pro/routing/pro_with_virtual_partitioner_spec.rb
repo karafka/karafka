@@ -3,9 +3,7 @@
 # I should be able to define a topic consumption with virtual partitioner.
 # It should not impact other jobs and the default should not have it.
 
-setup_karafka do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka
 
 draw_routes do
   consumer_group DT.consumer_group do

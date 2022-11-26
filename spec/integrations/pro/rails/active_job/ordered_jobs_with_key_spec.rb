@@ -5,7 +5,6 @@
 # proper results when using `:key`.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.initial_offset = 'latest'
 end
 

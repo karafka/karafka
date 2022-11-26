@@ -2,9 +2,7 @@
 
 # Same as pure DLQ version until rebalance
 
-setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka(allow_errors: %w[consumer.consume.error])
 
 create_topic(name: DT.topics[0], partitions: 10)
 create_topic(name: DT.topics[1], partitions: 10)

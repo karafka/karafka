@@ -2,7 +2,7 @@
 
 # When running non-pro, VP should not be available
 
-setup_karafka
+setup_karafka(pro: false)
 
 not_found = false
 

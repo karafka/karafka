@@ -7,7 +7,6 @@
 setup_karafka do |config|
   # This will ensure we get more jobs in one go
   config.max_wait_time = 5_000
-  config.license.token = pro_license_token
 end
 
 setup_active_job

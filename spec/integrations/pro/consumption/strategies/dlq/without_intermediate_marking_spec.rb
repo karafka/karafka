@@ -6,7 +6,6 @@
 # This should allow us to move one by one slowly and should mark on successful batches.
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.license.token = pro_license_token
   config.max_messages = 9
 end
 

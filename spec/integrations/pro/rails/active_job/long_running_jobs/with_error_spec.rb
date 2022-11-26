@@ -2,9 +2,7 @@
 
 # When we have an lrj job and it fails, it should use regular Karafka retry policies
 
-setup_karafka(allow_errors: true) do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka(allow_errors: true)
 
 setup_active_job
 

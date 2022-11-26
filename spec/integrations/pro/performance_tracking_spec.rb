@@ -4,7 +4,6 @@
 # This metrics tracker is then used internally for optimization purposes
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 5
   config.max_messages = 2
 end

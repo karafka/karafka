@@ -4,7 +4,6 @@
 # concurrent Active Job work execution.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 10
 end
 

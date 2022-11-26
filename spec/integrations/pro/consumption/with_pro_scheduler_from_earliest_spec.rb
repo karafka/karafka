@@ -4,7 +4,6 @@
 # Here we just aim to ensure, that we schedule all the jobs and that things operate as expected
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 10
 end
 

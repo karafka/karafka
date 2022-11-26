@@ -11,7 +11,6 @@
 # virtual consumers. Virtual consumer instance is **not** warrantied.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 10
   config.max_messages = 5
   config.initial_offset = 'latest'

@@ -3,9 +3,7 @@
 # When there is a misconfiguration of karafka options on ActiveJob job class, it should raise an
 # error
 
-setup_karafka do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka
 
 setup_active_job
 

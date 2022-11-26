@@ -7,7 +7,6 @@
 require 'securerandom'
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.initial_offset = 'latest'
   config.kafka[:'group.instance.id'] = SecureRandom.uuid
 end

@@ -7,7 +7,6 @@
 setup_karafka do |config|
   config.max_messages = 5
   config.concurrency = 5
-  config.license.token = pro_license_token
 end
 
 class Consumer < Karafka::BaseConsumer

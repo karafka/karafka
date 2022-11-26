@@ -5,7 +5,6 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 1
-  config.license.token = pro_license_token
 end
 
 class Consumer < Karafka::BaseConsumer

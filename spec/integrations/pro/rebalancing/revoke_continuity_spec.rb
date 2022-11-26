@@ -4,7 +4,6 @@
 # last offset committed without any problems
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 4
 end
 

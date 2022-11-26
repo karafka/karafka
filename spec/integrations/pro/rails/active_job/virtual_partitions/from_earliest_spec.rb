@@ -4,7 +4,6 @@
 # unless we use headers data to balance work.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 5
   config.max_messages = 50
 end

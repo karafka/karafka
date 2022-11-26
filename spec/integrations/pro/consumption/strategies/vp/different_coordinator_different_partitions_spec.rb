@@ -3,7 +3,6 @@
 # Karafka should not use the same coordinator for jobs from different partitions
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 10
   config.max_messages = 5
   config.initial_offset = 'latest'

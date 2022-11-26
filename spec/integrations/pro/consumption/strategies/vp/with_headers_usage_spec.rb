@@ -3,7 +3,6 @@
 # Ruby had some header related bugs in 3.0.2. This PR checks that all works as expected
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 10
 end
 

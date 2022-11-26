@@ -2,9 +2,7 @@
 
 # When dead letter queue is used and we don't encounter any errors, all should be regular.
 
-setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.license.token = pro_license_token
-end
+setup_karafka(allow_errors: %w[consumer.consume.error])
 
 class Consumer < Karafka::BaseConsumer
   def consume

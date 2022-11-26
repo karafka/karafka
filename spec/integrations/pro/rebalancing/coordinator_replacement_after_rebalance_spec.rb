@@ -5,7 +5,6 @@
 
 setup_karafka do |config|
   config.concurrency = 4
-  config.license.token = pro_license_token
 end
 
 create_topic(partitions: 2)

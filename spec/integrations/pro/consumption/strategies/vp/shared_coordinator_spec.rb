@@ -3,7 +3,6 @@
 # Karafka should use the same coordinator for all the jobs in a group
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 10
   config.max_messages = 5
 end

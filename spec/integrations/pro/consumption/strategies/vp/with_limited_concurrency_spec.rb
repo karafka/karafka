@@ -5,7 +5,6 @@
 # always available for other work.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 3
   config.max_messages = 1_000
   config.max_wait_time = 1_000

@@ -4,7 +4,6 @@
 # consumer instance. We should use one before and one after we got the partition back.
 
 setup_karafka do |config|
-  config.license.token = pro_license_token
   config.concurrency = 4
   config.initial_offset = 'latest'
 end
