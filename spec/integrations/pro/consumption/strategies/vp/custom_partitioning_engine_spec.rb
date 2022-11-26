@@ -77,4 +77,4 @@ def median(array)
 end
 
 assert_equal 20, median(DT[SPECIAL_TOPIC])
-assert (400..500).include?(median(DT[REGULAR_TOPIC]))
+assert (400..500).cover?(median(DT[REGULAR_TOPIC]))

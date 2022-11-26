@@ -240,6 +240,7 @@ RSpec.describe_current do
       let(:new_status) { :run! }
 
       before do
+        allow(Karafka::App).to receive(:quieting?).and_return(false)
         allow(Karafka::App).to receive(:stopped?).and_return(false)
         allow(Karafka::App).to receive(:stopping?).and_return(false)
       end
