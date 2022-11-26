@@ -28,7 +28,8 @@ DT = DataCollector
 #   or a given types (array with types)
 def setup_karafka(
   allow_errors: false,
-  pro: caller_locations.first.path.include?('integrations/pro/')
+  # automatically load pro for all the pro specs unless stated otherwise
+  pro: caller_locations(1..1).first.path.include?('integrations/pro/')
 )
   # If the spec  is in pro, run in pro mode
   become_pro! if pro
