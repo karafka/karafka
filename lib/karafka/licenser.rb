@@ -11,7 +11,8 @@ module Karafka
     class << self
       # Tries to load the license and yields if successful
       def detect
-        require('karafka-license')
+        # If required, do not require again
+        require('karafka-license') unless const_defined?('::Karafka::License')
 
         yield
 
