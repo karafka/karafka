@@ -50,7 +50,9 @@ end
 draw_routes do
   topic SPECIAL_TOPIC do
     consumer Consumer
-    # Irrelevant because we use custom partitioner
+
+    # Can be set up without any arguments as the virtualization is delegated to the
+    # CustomPartitioner
     virtual_partitions
   end
 
