@@ -50,9 +50,9 @@ module Karafka
 
       # Assigns the current subscription group id based on the defined one and allows for further
       # topic definition
-      # @param name [String, Symbol]
+      # @param name [String, Symbol] name of the current subscription group
       # @param block [Proc] block that may include topics definitions
-      def subscription_group=(name, &block)
+      def subscription_group=(name = SecureRandom.uuid, &block)
         # We cast it here, so the routing supports symbol based but that's anyhow later on
         # validated as a string
         @current_subscription_group_id = name

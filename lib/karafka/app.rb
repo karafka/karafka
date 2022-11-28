@@ -16,9 +16,12 @@ module Karafka
 
       # @return [Hash] active subscription groups grouped based on consumer group in a hash
       def subscription_groups
+        # We first build all the subscription groups, so they all get the same position, despite
+        # later narrowing that. It allows us to maintain same position number for static members
+        # even then we want to run subset of consumer groups or subscription groups
         consumer_groups
-          .active
           .map { |consumer_group| [consumer_group, consumer_group.subscription_groups] }
+          .select { |consumer_group, _| consumer_group.active? }
           .to_h
       end
 
