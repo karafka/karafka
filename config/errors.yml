@@ -34,7 +34,7 @@ en:
       consumer_format: needs to be present
       id_format: 'needs to be a string with a Kafka accepted format'
       initial_offset_format: needs to be either earliest or latest
-      subscription_group_format: must be nil or a non-empty string
+      subscription_group_format: must be a non-empty string
       manual_offset_management.active_format: needs to be either true or false
       consumer_active_job_missing: ActiveJob needs to be available
       manual_offset_management_must_be_enabled: cannot be disabled for ActiveJob topics
