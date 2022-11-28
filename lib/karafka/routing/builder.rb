@@ -82,7 +82,7 @@ module Karafka
       # @param block [Proc] further topics definitions
       def subscription_group(subscription_group_name = SecureRandom.uuid, &block)
         consumer_group('app') do
-          target.public_send(:subscription_group=, subscription_group_name, &block)
+          target.public_send(:subscription_group=, subscription_group_name.to_s, &block)
         end
       end
 

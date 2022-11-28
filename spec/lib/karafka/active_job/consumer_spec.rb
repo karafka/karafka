@@ -16,6 +16,8 @@ RSpec.describe_current do
   let(:payload1) { { '1' => '2' } }
   let(:payload2) { { '3' => '4' } }
 
+  before { allow(Karafka::App).to receive(:stopping?).and_return(false) }
+
   context 'when messages are available to the consumer' do
     before do
       consumer.messages = messages
