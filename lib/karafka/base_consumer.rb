@@ -62,14 +62,8 @@ module Karafka
     #   that may not yet kick in when error occurs. That way we pause always on the last processed
     #   message.
     def on_consume
-      Karafka.monitor.instrument('consumer.consumed', caller: self) do
-        consume
-      end
-
-      coordinator.consumption(self).success!
+      handle_consume
     rescue StandardError => e
-      coordinator.consumption(self).failure!(e)
-
       Karafka.monitor.instrument(
         'error.occurred',
         error: e,
@@ -77,9 +71,6 @@ module Karafka
         seek_offset: coordinator.seek_offset,
         type: 'consumer.consume.error'
       )
-    ensure
-      # We need to decrease number of jobs that this coordinator coordinates as it has finished
-      coordinator.decrement
     end
 
     # @private
