@@ -40,6 +40,31 @@ module Karafka
             end
           end
 
+          # Run the user consumption code
+          def handle_consume
+            # We should not run the work at all on a partition that was revoked
+            # This can happen primarily when an LRJ job gets to the internal worker queue and
+            # this partition is revoked prior processing.
+            unless revoked?
+              Karafka.monitor.instrument('consumer.consumed', caller: self) do
+                consume
+              end
+            end
+
+            # Mark job as successful
+            coordinator.consumption(self).success!
+          rescue StandardError => e
+            # If failed, mark as failed
+            coordinator.consumption(self).failure!(e)
+
+            # Re-raise so reported in the consumer
+            raise e
+          ensure
+            # We need to decrease number of jobs that this coordinator coordinates as it has
+            # finished
+            coordinator.decrement
+          end
+
           # Standard flow without any features
           def handle_after_consume
             coordinator.on_finished do |last_group_message|
