@@ -212,6 +212,8 @@ RSpec.describe_current do
       allow(Karafka::App).to receive(:quiet!)
     end
 
+    after { Karafka::App.initialized! }
+
     context 'when already in quiet mode' do
       let(:new_status) { :quiet! }
 
