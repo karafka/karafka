@@ -2,6 +2,7 @@
 
 ## Unreleased
 - [Improvement] Load Pro components upon Karafka require so they can be altered prior to setup.
+- [Improvement] Do not run LRJ jobs that were added to the jobs queue but were revoked meanwhile.
 - [Fix] Fix `karafka info` subscription groups count reporting as it was misleading.
 - [Fix] Allow for defining subscription groups with symbols similar to consumer groups and topics to align the API.
 - [Fix] Do not allow for an explicit `nil` as a `subscription_group` block argument.
