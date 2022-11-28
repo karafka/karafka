@@ -22,6 +22,7 @@ module Karafka
         # Nothing. Just standard, automatic flow
         module Default
           include Base
+          include ::Karafka::Processing::Strategies::Default
 
           # Apply strategy for a non-feature based flow
           FEATURES = %i[].freeze
