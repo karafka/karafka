@@ -33,7 +33,7 @@ draw_routes do
       consumer Consumer
       long_running_job true
       virtual_partitions(
-        partitioner: ->(msg) { ITERATOR.next % 50 },
+        partitioner: ->(_) { ITERATOR.next % 50 },
         max_partitions: 100
       )
     end
