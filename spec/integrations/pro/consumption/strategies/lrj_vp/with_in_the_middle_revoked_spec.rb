@@ -59,4 +59,4 @@ start_karafka_and_wait_until do
   end
 end
 
-assert 1, DT[0].size
+assert_equal 1, DT[0].size
