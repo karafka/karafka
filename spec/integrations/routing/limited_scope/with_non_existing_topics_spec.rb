@@ -4,8 +4,6 @@
 
 setup_karafka
 
-guarded = []
-
 draw_routes(create_topics: false) do
   consumer_group 'a' do
     subscription_group 'b' do

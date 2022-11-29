@@ -18,12 +18,6 @@ RSpec.describe_current do
     it { expect(contract.call(config)).not_to be_success }
   end
 
-  context 'when we want to use consumer groups that are not defined' do
-    before { config[:consumer_groups] = [rand.to_s] }
-
-    it { expect(contract.call(config)).not_to be_success }
-  end
-
   context 'when we want to use topics that are not defined' do
     before { config[:topics] = [rand.to_s] }
 
@@ -32,12 +26,6 @@ RSpec.describe_current do
 
   context 'when we want to use subscription groups that are not defined' do
     before { config[:subscription_groups] = [rand.to_s] }
-
-    it { expect(contract.call(config)).not_to be_success }
-  end
-
-  context 'when we want to use topics that are not defined' do
-    before { config[:topics] = [rand.to_s] }
 
     it { expect(contract.call(config)).not_to be_success }
   end

@@ -27,7 +27,7 @@ en:
       missing: needs to be present
       consumer_groups_inclusion: Unknown consumer group name
       subscription_groups_inclusion: Unknown subscription group name
-      topics_inclusion: Unknown topic names
+      topics_inclusion: Unknown topic name
       topics_missing: No topics to subscribe to
 
     topic:

@@ -68,7 +68,7 @@ module Karafka
                  .map(&:subscription_groups)
                  .flatten
                  .map(&:topics)
-                 .map { |topics| topics.map(&:name) }
+                 .map { |gtopics| gtopics.map(&:name) }
                  .flatten
 
         next if (value - topics).empty?

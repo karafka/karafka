@@ -26,6 +26,7 @@ module Karafka
       # Allows us to remove elements from the topics
       #
       # Block to decide what to delete
+      # @param block [Proc]
       def delete_if(&block)
         @accumulator.delete_if(&block)
       end
