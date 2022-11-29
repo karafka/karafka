@@ -20,6 +20,13 @@ setup_karafka do |config|
   config.kafka[:'retry.backoff.ms'] = 1_000
   # Consumer specific
   config.kafka[:'max.poll.interval.ms'] = 1_000
+  config.kafka[:'session.timeout.ms'] = 1_000
+end
+
+draw_routes do
+  topic DT.topic do
+    consumer Class.new(Karafka::BaseConsumer)
+  end
 end
 
 Karafka.producer.config.logger.level = :debug
