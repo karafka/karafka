@@ -4,7 +4,7 @@ RSpec.describe_current do
   subject(:topic) { described_class.new(name, consumer_group) }
 
   let(:consumer_group) { instance_double(Karafka::Routing::ConsumerGroup, id: group_id) }
-  let(:name) { :test }
+  let(:name) { 'test' }
   let(:group_id) { rand.to_s }
   let(:consumer) { Class.new(Karafka::BaseConsumer) }
 
@@ -55,6 +55,26 @@ RSpec.describe_current do
 
   %w[kafka manual_offset_management deserializer max_messages max_wait_time].each do |attribute|
     it { expect(topic).to respond_to(attribute) }
+  end
+
+  describe '#active?' do
+    context 'when there are no topics in the topics' do
+      before { Karafka::App.config.internal.routing.active.topics = [] }
+
+      it { expect(topic.active?).to eq true }
+    end
+
+    context 'when our topic name is in server topics' do
+      before { Karafka::App.config.internal.routing.active.topics = [name] }
+
+      it { expect(topic.active?).to eq true }
+    end
+
+    context 'when our topic name is not in server topics' do
+      before { Karafka::App.config.internal.routing.active.topics = ['na'] }
+
+      it { expect(topic.active?).to eq false }
+    end
   end
 
   describe '#to_h' do

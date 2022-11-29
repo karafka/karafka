@@ -23,6 +23,13 @@ module Karafka
         @accumulator.each(&block)
       end
 
+      # Allows us to remove elements from the topics
+      #
+      # Block to decide what to delete
+      def delete_if(&block)
+        @accumulator.delete_if(&block)
+      end
+
       # Finds topic by its name
       #
       # @param topic_name [String] topic name

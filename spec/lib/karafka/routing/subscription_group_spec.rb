@@ -23,9 +23,32 @@ RSpec.describe_current do
 
   describe '#kafka' do
     it { expect(group.kafka[:'client.id']).to eq(Karafka::App.config.client_id) }
-    it { expect(group.kafka[:'group.id']).to eq(topic.consumer_group.id) }
     it { expect(group.kafka[:'auto.offset.reset']).to eq('earliest') }
     it { expect(group.kafka[:'enable.auto.offset.store']).to eq(false) }
     it { expect(group.kafka[:'bootstrap.servers']).to eq(topic.kafka[:'bootstrap.servers']) }
+  end
+
+  describe '#active?' do
+    context 'when there are no topics in the subscription group' do
+      before { Karafka::App.config.internal.routing.active.subscription_groups = [] }
+
+      it { expect(group.active?).to eq true }
+    end
+
+    context 'when our subscription group name is in server subscription groups' do
+      before do
+        Karafka::App.config.internal.routing.active.subscription_groups = [
+          topic.subscription_group
+        ]
+      end
+
+      it { expect(group.active?).to eq true }
+    end
+
+    context 'when our subscription group name is not in server subscription groups' do
+      before { Karafka::App.config.internal.routing.active.subscription_groups = ['na'] }
+
+      it { expect(group.active?).to eq false }
+    end
   end
 end

@@ -18,10 +18,17 @@ module Karafka
       def subscription_groups
         # We first build all the subscription groups, so they all get the same position, despite
         # later narrowing that. It allows us to maintain same position number for static members
-        # even then we want to run subset of consumer groups or subscription groups
+        # even when we want to run subset of consumer groups or subscription groups
+        #
+        # We then narrow this to active consumer groups from which we select active subscription
+        # groups.
         consumer_groups
-          .map { |consumer_group| [consumer_group, consumer_group.subscription_groups] }
-          .select { |consumer_group, _| consumer_group.active? }
+          .map { |cg| [cg, cg.subscription_groups] }
+          .select { |cg, _| cg.active? }
+          .select { |_, sgs| sgs.delete_if { |sg| !sg.active? } }
+          .delete_if { |_, sgs| sgs.empty? }
+          .each { |_, sgs| sgs.each { |sg| sg.topics.delete_if { |top| !top.active? } } }
+          .each { |_, sgs| sgs.delete_if { |sg| sg.topics.empty? } }
           .to_h
       end
 

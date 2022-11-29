@@ -31,7 +31,10 @@ module Karafka
 
       # @return [Boolean] true if this consumer group should be active in our current process
       def active?
-        Karafka::Server.consumer_groups.include?(name)
+        cgs = Karafka::App.config.internal.routing.active.consumer_groups
+
+        # When empty it means no groups were specified, hence all should be used
+        cgs.empty? || cgs.include?(name)
       end
 
       # Builds a topic representation inside of a current consumer group route

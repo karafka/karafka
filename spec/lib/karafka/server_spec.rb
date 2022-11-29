@@ -9,6 +9,7 @@ RSpec.describe_current do
   before do
     allow(Karafka::App).to receive(:run!)
     allow(Karafka::App).to receive(:stopped?).and_return(true)
+    allow(Karafka::App).to receive(:subscription_groups).and_return({ 1 => 1 })
     allow(Karafka::Runner).to receive(:new).and_return(runner)
     allow(runner).to receive(:call)
     described_class.listeners = []
@@ -73,6 +74,18 @@ RSpec.describe_current do
       it 'defines a proper action for sigterm' do
         expect(described_class).to receive(:stop)
         expect(process).to receive(:on_sigterm).and_yield
+      end
+    end
+
+    context 'when server cli options are not valid' do
+      let(:expected_error) { Karafka::Errors::InvalidConfigurationError }
+
+      before { Karafka::App.config.internal.routing.active.topics = %w[na] }
+
+      after { Karafka::App.config.internal.routing.active.topics = [] }
+
+      it 'expect to raise proper exception' do
+        expect { server_class.run }.to raise_error(expected_error)
       end
     end
   end
