@@ -5,7 +5,7 @@ RSpec.describe_current do
   subject(:app_class) { Karafka::App }
 
   describe '#config' do
-    let(:config) { double }
+    let(:config) { Karafka::App.config }
 
     before do
       allow(Karafka::Setup::Config)

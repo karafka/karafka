@@ -100,7 +100,7 @@ module Karafka
           return if @queue.closed?
 
           @queue.close
-          @semaphores.values.each(&:close)
+          @semaphores.each_value(&:close)
         end
       end
 

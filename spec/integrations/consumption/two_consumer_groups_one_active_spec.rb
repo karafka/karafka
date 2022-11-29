@@ -29,7 +29,7 @@ draw_routes do
 end
 
 # Listen only on one consumer group
-Karafka::Server.consumer_groups = [DT.consumer_groups.first]
+Karafka::App.config.internal.routing.active.consumer_groups = [DT.consumer_groups.first]
 
 jsons = Array.new(10) { { SecureRandom.uuid => rand.to_s } }
 

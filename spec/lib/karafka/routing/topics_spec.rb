@@ -41,6 +41,12 @@ RSpec.describe_current do
     end
   end
 
+  describe '#delete_if?' do
+    before { topics << topic }
+
+    it { expect { topics.delete_if { true } }.to change(topics, :count) }
+  end
+
   describe '#each' do
     before { topics << topic }
 

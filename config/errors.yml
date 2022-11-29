@@ -25,7 +25,10 @@ en:
 
     server_cli_options:
       missing: needs to be present
-      consumer_groups_inclusion: Unknown consumer group
+      consumer_groups_inclusion: Unknown consumer group name
+      subscription_groups_inclusion: Unknown subscription group name
+      topics_inclusion: Unknown topic name
+      topics_missing: No topics to subscribe to
 
     topic:
       missing: needs to be present

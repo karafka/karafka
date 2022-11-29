@@ -8,7 +8,7 @@ module Karafka
     # @note One subscription group will always belong to one consumer group, but one consumer
     #   group can have multiple subscription groups.
     class SubscriptionGroup
-      attr_reader :id, :topics, :kafka
+      attr_reader :id, :name, :topics, :kafka
 
       # @param position [Integer] position of this subscription group in all the subscriptions
       #   groups array. We need to have this value for sake of static group memberships, where
@@ -16,7 +16,8 @@ module Karafka
       # @param topics [Karafka::Routing::Topics] all the topics that share the same key settings
       # @return [SubscriptionGroup] built subscription group
       def initialize(position, topics)
-        @id = "#{topics.first.subscription_group}_#{position}"
+        @name = topics.first.subscription_group
+        @id = "#{@name}_#{position}"
         @position = position
         @topics = topics
         @kafka = build_kafka
@@ -36,6 +37,14 @@ module Karafka
       # @return [Integer] max milliseconds we can wait for incoming messages
       def max_wait_time
         @topics.first.max_wait_time
+      end
+
+      # @return [Boolean] is this subscription group one of active once
+      def active?
+        sgs = Karafka::App.config.internal.routing.active.subscription_groups
+
+        # When empty it means no groups were specified, hence all should be used
+        sgs.empty? || sgs.include?(name)
       end
 
       private
