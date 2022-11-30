@@ -52,4 +52,10 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#subscription_groups' do
+    context 'when no routes are drawn' do
+      it { expect(app_class.subscription_groups).to eq({}) }
+    end
+  end
 end

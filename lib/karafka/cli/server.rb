@@ -9,18 +9,19 @@ module Karafka
 
       desc 'Start the Karafka server (short-cut alias: "s")'
       option aliases: 's'
-      option :consumer_groups, type: :array, default: nil, aliases: :g
+      option :consumer_groups, type: :array, default: [], aliases: :g
+      option :subscription_groups, type: :array, default: []
+      option :topics, type: :array, default: []
 
       # Start the Karafka server
       def call
         # Print our banner and info in the dev mode
         print_marketing_info if Karafka::App.env.development?
 
-        Contracts::ServerCliOptions.new.validate!(cli.options)
-
-        # We assign active topics on a server level, as only server is expected to listen on
-        # part of the topics
-        Karafka::Server.consumer_groups = cli.options[:consumer_groups]
+        active_routing_config = Karafka::App.config.internal.routing.active
+        active_routing_config.consumer_groups = cli.options[:consumer_groups]
+        active_routing_config.subscription_groups = cli.options[:subscription_groups]
+        active_routing_config.topics = cli.options[:topics]
 
         Karafka::Server.run
       end

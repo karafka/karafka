@@ -20,11 +20,19 @@ module Karafka
       # Set of workers
       attr_accessor :workers
 
-      # Writer for list of consumer groups that we want to consume in our current process context
-      attr_writer :consumer_groups
-
       # Method which runs app
       def run
+        self.listeners = []
+        self.workers = []
+
+        # We need to validate this prior to running because it may be executed also from the
+        # embedded
+        # We cannot validate this during the start because config needs to be populated and routes
+        # need to be defined.
+        Contracts::ServerCliOptions.new.validate!(
+          Karafka::App.config.internal.routing.active.to_h
+        )
+
         process.on_sigint { stop }
         process.on_sigquit { stop }
         process.on_sigterm { stop }
@@ -47,13 +55,6 @@ module Karafka
         stop
 
         raise e
-      end
-
-      # @return [Array<String>] array with names of consumer groups that should be consumed in a
-      #   current server context
-      def consumer_groups
-        # If not specified, a server will listen on all the topics
-        @consumer_groups ||= Karafka::App.consumer_groups.map(&:name).freeze
       end
 
       # Starts Karafka with a supervision

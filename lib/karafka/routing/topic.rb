@@ -75,6 +75,14 @@ module Karafka
         consumer
       end
 
+      # @return [Boolean] should this topic be in use
+      def active?
+        topics = Karafka::App.config.internal.routing.active.topics
+
+        # When empty it means no topics were specified, hence all should be used
+        topics.empty? || topics.include?(name)
+      end
+
       # @return [Hash] hash with all the topic attributes
       # @note This is being used when we validate the consumer_group and its topics
       def to_h

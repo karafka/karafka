@@ -19,16 +19,6 @@ RSpec.describe_current do
         server_cli.call
       end
     end
-
-    context 'when server cli options are not valid' do
-      let(:expected_error) { Karafka::Errors::InvalidConfigurationError }
-
-      before { cli.options = { consumer_groups: %w[na] } }
-
-      it 'expect to raise proper exception' do
-        expect { server_cli.call }.to raise_error(expected_error)
-      end
-    end
   end
 
   describe '#print_marketing_info' do

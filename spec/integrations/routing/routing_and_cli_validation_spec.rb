@@ -41,10 +41,48 @@ Karafka::Cli.prepare
 
 begin
   Karafka::Cli.start
-rescue Karafka::Errors::InvalidConfigurationError
+rescue Karafka::Errors::InvalidConfigurationError => e
+  assert e.message.include?('Unknown consumer group name')
+
   guarded << true
 end
 
 ARGV.clear
 
 assert_equal 3, guarded.size
+
+ARGV[0] = 'server'
+ARGV[1] = '--subscription-groups'
+ARGV[2] = 'non-existing'
+
+Karafka::Cli.prepare
+
+begin
+  Karafka::Cli.start
+rescue Karafka::Errors::InvalidConfigurationError => e
+  assert e.message.include?('Unknown subscription group name')
+
+  guarded << true
+end
+
+ARGV.clear
+
+assert_equal 4, guarded.size
+
+ARGV[0] = 'server'
+ARGV[1] = '--topics'
+ARGV[2] = 'non-existing'
+
+Karafka::Cli.prepare
+
+begin
+  Karafka::Cli.start
+rescue Karafka::Errors::InvalidConfigurationError => e
+  assert e.message.include?('Unknown topic name')
+
+  guarded << true
+end
+
+ARGV.clear
+
+assert_equal 5, guarded.size

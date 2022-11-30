@@ -107,6 +107,14 @@ module Karafka
           # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
           #   group builder
           setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
+
+          # Internally assigned list of limits on routings active for the current process
+          # This should be overwritten by the CLI command
+          setting :active do
+            setting :consumer_groups, default: [].freeze
+            setting :subscription_groups, default: [].freeze
+            setting :topics, default: [].freeze
+          end
         end
 
         setting :processing do

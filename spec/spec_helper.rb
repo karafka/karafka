@@ -54,7 +54,14 @@ RSpec.configure do |config|
   # When we test things, we subscribe sometimes with one-off monitors, they need to always be
   # cleared not to spam and break test-suit
   config.before { Karafka.monitor.notifications_bus.clear }
-  config.after { Karafka.monitor.notifications_bus.clear }
+
+  config.after do
+    Karafka::App.routes.clear
+    Karafka.monitor.notifications_bus.clear
+    Karafka::App.config.internal.routing.active.consumer_groups = []
+    Karafka::App.config.internal.routing.active.subscription_groups = []
+    Karafka::App.config.internal.routing.active.topics = []
+  end
 
   config.before do |example|
     next unless example.metadata[:type] == :pro
