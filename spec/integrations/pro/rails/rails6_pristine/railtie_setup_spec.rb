@@ -2,6 +2,9 @@
 
 # Karafka+Pro should work with Rails 6 using the default setup
 
+# Load all the Railtie stuff like when `rails server`
+ENV['KARAFKA_CLI'] = 'true'
+
 Bundler.require(:default)
 
 require 'tempfile'

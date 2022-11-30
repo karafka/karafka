@@ -5,6 +5,9 @@
 #
 # @see https://github.com/karafka/karafka/issues/813
 
+# Load all the Railtie stuff like when `rails server`
+ENV['KARAFKA_CLI'] = 'true'
+
 Bundler.require(:default)
 
 ENV['RAILS_ENV'] = 'test'

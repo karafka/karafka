@@ -1,9 +1,20 @@
 # frozen_string_literal: true
 
-# Karafka should work fine with Rails 7 even when it is just a transitive dependency and is not
-# in active use. In case like this KARAFKA_BOOT_FILE needs to be set to "false"
+# Karafka should work fine when someone has root level components named based on the features
 #
-# @see https://github.com/karafka/karafka/issues/813
+# @see https://github.com/karafka/karafka/issues/1144
+
+# Load all the Railtie stuff like when `rails server`
+ENV['KARAFKA_CLI'] = 'true'
+
+class Builder
+end
+
+class Topic
+end
+
+class Contract
+end
 
 Bundler.require(:default)
 
