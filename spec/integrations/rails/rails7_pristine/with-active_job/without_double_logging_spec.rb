@@ -19,8 +19,8 @@ $stderr = strio
 require 'active_support/core_ext/integer/time'
 
 class CustomFormatter < ::Logger::Formatter
-  def call(severity, timestamp, progname, input)
-    msg = String === input ? input : input.inspect
+  def call(severity, timestamp, _, input)
+    msg = input.is_a?(String) ? input : input.inspect
 
     "[CustomFormatter] [#{format_datetime(timestamp)}] #{severity} -- #{msg}\n"
   end
@@ -64,4 +64,3 @@ $stdout = proper_stdout
 $stderr = proper_stderr
 
 assert_equal 2, strio.string.split('Running Karafka').size, strio.string
-
