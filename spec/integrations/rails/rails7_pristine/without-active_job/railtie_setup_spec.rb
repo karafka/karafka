@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 6 using the default setup
+# Karafka should work with Rails 7 that does not use ActiveJob using the default setup and should
+# just ignore the ActiveJob components
+
+# Load all the Railtie stuff like when `rails server`
+ENV['KARAFKA_CLI'] = 'true'
 
 Bundler.require(:default)
 
@@ -32,4 +36,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal 1, DT.data.size
-assert_equal '6.1.7', Rails.version
+assert_equal '7.0.4', Rails.version

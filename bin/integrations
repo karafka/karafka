@@ -74,8 +74,8 @@ class Scenario
   def type
     scenario_dir = File.dirname(@path)
 
-    return :poro if scenario_dir.end_with?('_poro')
-    return :pristine if scenario_dir.end_with?('_pristine')
+    return :poro if scenario_dir.include?('_poro')
+    return :pristine if scenario_dir.include?('_pristine')
 
     :regular
   end

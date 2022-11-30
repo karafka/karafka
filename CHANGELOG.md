@@ -12,6 +12,7 @@
 - [Fix] Fix instability in subscription groups static members ids when using `--consumer_groups` CLI flag.
 - [Fix] Fix a case in routing, where anonymous subscription group could not be used inside of a consumer group.
 - [Fix] Fix a case where shutdown prior to listeners build would crash the server initialization.
+- [Fix] Duplicated logs in development environment for Rails when logger set to `$stdout`.
 
 ## 20.0.21 (2022-11-25)
 - [Improvement] Make revocation jobs for LRJ topics non-blocking to prevent blocking polling when someone uses non-revocation aware LRJ jobs and revocation happens.

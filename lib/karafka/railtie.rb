@@ -45,6 +45,9 @@ if rails
 
         next unless Rails.env.development?
         next unless ENV.key?('KARAFKA_CLI')
+        # If we are already publishing to STDOUT, no need to add it again.
+        # If added again, would print stuff twice
+        next if ActiveSupport::Logger.logger_outputs_to?(Rails.logger, $stdout)
 
         logger = ActiveSupport::Logger.new($stdout)
         # Inherit the logger level from Rails, otherwise would always run with the debug level

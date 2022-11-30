@@ -2,6 +2,9 @@
 
 # Karafka should injected extended ActiveJob routing when ActiveJob is available
 
+# Load all the Railtie stuff like when `rails server`
+ENV['KARAFKA_CLI'] = 'true'
+
 Bundler.require(:default)
 
 require 'tempfile'

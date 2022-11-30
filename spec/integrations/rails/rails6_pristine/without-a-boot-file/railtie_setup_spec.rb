@@ -2,6 +2,9 @@
 
 # Karafka should fail with a missing boot file error when used within railtie
 
+# Load all the Railtie stuff like when `rails server`
+ENV['KARAFKA_CLI'] = 'true'
+
 Bundler.require(:default)
 
 require 'tempfile'
