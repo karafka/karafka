@@ -102,7 +102,7 @@ jobs:
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
       - name: Remove libzstd-dev to check no supported compressions
-        run: apt-get -y remove libzstd-dev
+        run: sudo apt-get -y remove libzstd-dev
 
       - name: Start Kafka with docker-compose
         run: |
