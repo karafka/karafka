@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## Unreleased
+## 2.0.22 (2022-12-02)
 - [Improvement] Load Pro components upon Karafka require so they can be altered prior to setup.
 - [Improvement] Do not run LRJ jobs that were added to the jobs queue but were revoked meanwhile.
 - [Improvement] Allow running particular named subscription groups similar to consumer groups.
