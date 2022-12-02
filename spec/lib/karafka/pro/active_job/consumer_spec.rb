@@ -49,7 +49,7 @@ RSpec.describe_current do
       it 'expect to pause forever on our first message' do
         consumer.on_before_enqueue
 
-        expect(consumer).to have_received(:pause).with(message1.offset, 1_000_000_000_000)
+        expect(consumer).to have_received(:pause).with(message1.offset, 1_000_000_000_000, false)
       end
     end
   end

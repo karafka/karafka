@@ -26,7 +26,7 @@ module Karafka
             # Do NOT commit offsets, they are comitted after each job in the AJ consumer.
             coordinator.pause_tracker.reset
           elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-            pause(coordinator.seek_offset)
+            pause(coordinator.seek_offset, nil, false)
           else
             coordinator.pause_tracker.reset
             skippable_message = find_skippable_message
@@ -35,7 +35,7 @@ module Karafka
             # since AJ consumer commits the offset after each job, we also know that the
             # previous job was successful
             mark_as_consumed(skippable_message)
-            pause(coordinator.seek_offset)
+            pause(coordinator.seek_offset, nil, false)
           end
         end
       end

@@ -21,6 +21,7 @@ module Karafka
         @revoked = false
         @consumptions = {}
         @running_jobs = 0
+        @manual_pause = false
         @mutex = Mutex.new
       end
 
@@ -33,6 +34,9 @@ module Karafka
           # We need to clear the consumption results hash here, otherwise we could end up storing
           # consumption results of consumer instances we no longer control
           @consumptions.clear
+
+          # When starting to run, no pause is expected and no manual pause as well
+          @manual_pause = false
 
           # We set it on the first encounter and never again, because then the offset setting
           # should be up to the consumers logic (our or the end user)
@@ -97,6 +101,17 @@ module Karafka
       # @return [Boolean] is the partition we are processing revoked or not
       def revoked?
         @revoked
+      end
+
+      # Store in the coordinator info, that this pause was done manually by the end user and not
+      # by the system itself
+      def manual_pause
+        @mutex.synchronize { @manual_pause = true }
+      end
+
+      # @return [Boolean] are we in a pause that was initiated by the user
+      def manual_pause?
+        @pause_tracker.paused? && @manual_pause
       end
     end
   end

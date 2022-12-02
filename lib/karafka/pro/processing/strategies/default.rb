@@ -73,9 +73,13 @@ module Karafka
               if coordinator.success?
                 coordinator.pause_tracker.reset
 
+                # Do not mark last message if pause happened. This prevents a scenario where pause
+                # is overridden upon rebalance by marking
+                return if coordinator.manual_pause?
+
                 mark_as_consumed(last_group_message)
               else
-                pause(coordinator.seek_offset)
+                pause(coordinator.seek_offset, nil, false)
               end
             end
           end
