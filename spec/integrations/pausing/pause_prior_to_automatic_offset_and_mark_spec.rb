@@ -11,8 +11,6 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if messages.count < 2
-
     DT[:paused] << messages.first.offset
     DT[:last] << messages.last.offset
 
@@ -44,5 +42,4 @@ end
 
 consumer.close
 
-assert_equal 1, DT[:paused].uniq.count
 assert_equal DT[:jumped].last, DT[:last].last + 1
