@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Karafka should not resume when manual pause is in use for LRJ
+
 setup_karafka do |config|
   config.max_messages = 50
   config.pause_timeout = 2_000
