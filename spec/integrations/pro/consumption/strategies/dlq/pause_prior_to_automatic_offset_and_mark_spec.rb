@@ -43,4 +43,4 @@ end
 
 consumer.close
 
-assert_equal DT[:jumped].last, DT[:last].last + 1
+assert_equal DT[:jumped].last, DT[:last].max + 1
