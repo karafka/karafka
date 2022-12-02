@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Improvement] Upon an end user `#pause`, do not commit the offset in automatic offset management mode. This will prevent from a scenario where pause is needed but during it a rebalance occurs and a different assigned process starts not from the pause location but from the automatic offset that may be different. This still allows for using the `#mark_as_consumed`.
+- [Fix] Fix a scenario where manual `#pause` would be overwritten by a resume initiated by the strategy.
+- [Fix] Fix a scenario where manual `#pause` in LRJ would cause infinite pause.
+
 ## 2.0.22 (2022-12-02)
 - [Improvement] Load Pro components upon Karafka require so they can be altered prior to setup.
 - [Improvement] Do not run LRJ jobs that were added to the jobs queue but were revoked meanwhile.

@@ -37,7 +37,7 @@ module Karafka
               #
               # For VP it applies the same way and since VP cannot be used with MOM we should not
               # have any edge cases here.
-              pause(coordinator.seek_offset, MAX_PAUSE_TIME)
+              pause(coordinator.seek_offset, MAX_PAUSE_TIME, false)
             end
           end
 
@@ -47,6 +47,8 @@ module Karafka
               if coordinator.success?
                 coordinator.pause_tracker.reset
 
+                return if coordinator.manual_pause?
+
                 mark_as_consumed(last_group_message) unless revoked?
                 seek(coordinator.seek_offset) unless revoked?
 
@@ -55,7 +57,7 @@ module Karafka
                 # If processing failed, we need to pause
                 # For long running job this will overwrite the default never-ending pause and will
                 # cause the processing to keep going after the error backoff
-                pause(coordinator.seek_offset)
+                pause(coordinator.seek_offset, nil, false)
               end
             end
           end

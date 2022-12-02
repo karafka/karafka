@@ -190,7 +190,10 @@ module Karafka
     # @param offset [Integer] offset from which we want to restart the processing
     # @param timeout [Integer, nil] how long in milliseconds do we want to pause or nil to use the
     #   default exponential pausing strategy defined for retries
-    def pause(offset, timeout = nil)
+    # @param manual_pause [Boolean] Flag to differentiate between user pause and system/strategy
+    #   based pause. While they both pause in exactly the same way, the strategy application
+    #   may need to differentiate between them.
+    def pause(offset, timeout = nil, manual_pause = true)
       timeout ? coordinator.pause_tracker.pause(timeout) : coordinator.pause_tracker.pause
 
       client.pause(
@@ -198,6 +201,9 @@ module Karafka
         messages.metadata.partition,
         offset
       )
+
+      # Indicate, that user took a manual action of pausing
+      coordinator.manual_pause if manual_pause
     end
 
     # Resumes processing of the current topic partition

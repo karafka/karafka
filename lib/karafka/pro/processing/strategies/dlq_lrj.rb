@@ -34,12 +34,14 @@ module Karafka
               if coordinator.success?
                 coordinator.pause_tracker.reset
 
+                return if coordinator.manual_pause?
+
                 mark_as_consumed(last_group_message) unless revoked?
                 seek(coordinator.seek_offset) unless revoked?
 
                 resume
               elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-                pause(coordinator.seek_offset)
+                pause(coordinator.seek_offset, nil, false)
               else
                 coordinator.pause_tracker.reset
 

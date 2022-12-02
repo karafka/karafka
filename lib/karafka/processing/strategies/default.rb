@@ -51,9 +51,15 @@ module Karafka
           if coordinator.success?
             coordinator.pause_tracker.reset
 
+            # We should not move the offset automatically when the partition was paused
+            # If we would not do this upon a revocation during the pause time, a different process
+            # would pick not from the place where we paused but from the offset that would be
+            # automatically committed here
+            return if coordinator.manual_pause?
+
             mark_as_consumed(messages.last)
           else
-            pause(coordinator.seek_offset)
+            pause(coordinator.seek_offset, nil, false)
           end
         end
 

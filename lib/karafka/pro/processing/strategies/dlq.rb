@@ -32,9 +32,11 @@ module Karafka
               if coordinator.success?
                 coordinator.pause_tracker.reset
 
+                return if coordinator.manual_pause?
+
                 mark_as_consumed(messages.last)
               elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-                pause(coordinator.seek_offset)
+                pause(coordinator.seek_offset, nil, false)
               # If we've reached number of retries that we could, we need to skip the first message
               # that was not marked as consumed, pause and continue, while also moving this message
               # to the dead topic
@@ -44,7 +46,7 @@ module Karafka
                 skippable_message = find_skippable_message
                 dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
                 mark_as_consumed(skippable_message)
-                pause(coordinator.seek_offset)
+                pause(coordinator.seek_offset, nil, false)
               end
             end
           end
