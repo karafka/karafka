@@ -15,6 +15,19 @@ RSpec.describe_current do
 
     it { expect(coordinator.success?).to eq(true) }
     it { expect(coordinator.revoked?).to eq(false) }
+    it { expect(coordinator.manual_pause?).to eq(false) }
+
+    context 'when previous coordinator usage had a manual pause' do
+      before do
+        pause_tracker.pause
+        coordinator.manual_pause
+        coordinator.start([message])
+      end
+
+      it { expect(coordinator.success?).to eq(true) }
+      it { expect(coordinator.revoked?).to eq(false) }
+      it { expect(coordinator.manual_pause?).to eq(false) }
+    end
   end
 
   describe '#increment' do
@@ -98,5 +111,26 @@ RSpec.describe_current do
     before { coordinator.revoke }
 
     it { expect(coordinator.revoked?).to eq(true) }
+  end
+
+  describe '#manual_pause and manual_pause?' do
+    context 'when there is no pause' do
+      it { expect(coordinator.manual_pause?).to eq(false) }
+    end
+
+    context 'when there is a system pause' do
+      before { pause_tracker.pause }
+
+      it { expect(coordinator.manual_pause?).to eq(false) }
+    end
+
+    context 'when there is a manual pause' do
+      before do
+        pause_tracker.pause
+        coordinator.manual_pause
+      end
+
+      it { expect(coordinator.manual_pause?).to eq(true) }
+    end
   end
 end

@@ -34,7 +34,6 @@ start_karafka_and_wait_until do
   DT[:paused].size >= 3
 end
 
-
 consumer = setup_rdkafka_consumer
 consumer.subscribe(DT.topic)
 

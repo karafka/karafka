@@ -109,6 +109,7 @@ module Karafka
         @mutex.synchronize { @manual_pause = true }
       end
 
+      # @return [Boolean] are we in a pause that was initiated by the user
       def manual_pause?
         @pause_tracker.paused? && @manual_pause
       end
