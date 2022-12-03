@@ -43,5 +43,4 @@ end
 
 consumer.close
 
-assert_equal 1, DT[:paused].uniq.count
 assert_equal DT[:jumped].last, DT[:paused].last
