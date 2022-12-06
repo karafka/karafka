@@ -111,6 +111,7 @@ module Karafka
         admin&.close
       end
 
+      # Creates consumer instance and yields it. After usage it closes the consumer instance
       def with_consumer
         config = Karafka::Setup::AttributesMap.consumer(
           Karafka::App.config.kafka.dup
