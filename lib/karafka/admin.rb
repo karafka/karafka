@@ -9,7 +9,56 @@ module Karafka
   # @note It always uses the primary defined cluster and does not support multi-cluster work.
   #   If you need this, just replace the cluster info for the time you use this
   module Admin
+    # A fake admin topic representation that we use for messages fetched using this API
+    # We cannot use the topics directly because we may want to request data from topics that we
+    # do not have in the routing
+    Topic = Struct.new(:name, :deserializer)
+
+    private_constant :Topic
+
     class << self
+      # Allows us to read messages from the topic
+      #
+      # @param name [String, Symbol] topic name
+      # @param partition [Integer] partition
+      # @param count [Integer] how many messages we want to get at most
+      #
+      # @return [Array<Karafka::Messages::Message>] array with messages
+      def read_topic(name, partition, count = 1)
+        messages = []
+
+        with_consumer do |consumer|
+          offsets = consumer.query_watermark_offsets(name, partition)
+          tpl = Rdkafka::Consumer::TopicPartitionList.new
+
+          offset = offsets.last - count
+          offset = offset.negative? ? 0 : offset
+
+          tpl.add_topic_and_partitions_with_offsets(name, partition => offset)
+          consumer.assign(tpl)
+
+          # We should poll as long as we don't have all the messages that we need or as long as
+          # we do not read all the messages from the topic
+          while messages.size < count && messages.size < offsets.last
+            message = consumer.poll(200)
+            messages << message if message
+          end
+        end
+
+        topic = Topic.new(
+          name,
+          Karafka::App.config.deserializer
+        )
+
+        messages.map do |message|
+          Messages::Builders::Message.call(
+            message,
+            topic,
+            Time.now
+          )
+        end
+      end
+
       # Creates Kafka topic with given settings
       #
       # @param name [String] topic name
@@ -60,6 +109,18 @@ module Karafka
         result
       ensure
         admin&.close
+      end
+
+      def with_consumer
+        config = Karafka::Setup::AttributesMap.consumer(
+          Karafka::App.config.kafka.dup
+        ).merge('group.id': 'karafka_admin')
+
+        consumer = ::Rdkafka::Config.new(config).consumer
+        result = yield(consumer)
+        result
+      ensure
+        consumer&.close
       end
     end
   end
