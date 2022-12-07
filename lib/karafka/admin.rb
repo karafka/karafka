@@ -56,15 +56,10 @@ module Karafka
           end
         end
 
-        topic = Topic.new(
-          name,
-          Karafka::App.config.deserializer
-        )
-
         messages.map do |message|
           Messages::Builders::Message.call(
             message,
-            topic,
+            Topic.new(name, Karafka::App.config.deserializer),
             Time.now
           )
         end
