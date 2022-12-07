@@ -14,7 +14,15 @@ module Karafka
     # do not have in the routing
     Topic = Struct.new(:name, :deserializer)
 
-    private_constant :Topic
+    # Defaults for config
+    CONFIG_DEFAULTS = {
+      'group.id': 'karafka_admin',
+      # We want to know when there is no more data not to end up with an endless loop
+      'enable.partition.eof': true,
+      'statistics.interval.ms': 0
+    }.freeze
+
+    private_constant :Topic, :CONFIG_DEFAULTS
 
     class << self
       # Allows us to read messages from the topic
@@ -107,10 +115,7 @@ module Karafka
 
       # Creates admin instance and yields it. After usage it closes the admin instance
       def with_admin
-        # Admin needs a producer config
-        config = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
-
-        admin = ::Rdkafka::Config.new(config).admin
+        admin = config(:producer).admin
         result = yield(admin)
         result
       ensure
@@ -119,19 +124,22 @@ module Karafka
 
       # Creates consumer instance and yields it. After usage it closes the consumer instance
       def with_consumer
-        config = Karafka::Setup::AttributesMap.consumer(
-          Karafka::App.config.kafka.dup
-        ).merge(
-          'group.id': 'karafka_admin',
-          # We want to know when there is no more data not to end up with an endless loop
-          'enable.partition.eof': true
-        )
-
-        consumer = ::Rdkafka::Config.new(config).consumer
+        consumer = config(:consumer).consumer
         result = yield(consumer)
         result
       ensure
         consumer&.close
+      end
+
+      # @param type [Symbol] type of config we want
+      # @return [::Rdkafka::Config] rdkafka config
+      def config(type)
+        config_hash = Karafka::Setup::AttributesMap.public_send(
+          type,
+          Karafka::App.config.kafka.dup.merge(CONFIG_DEFAULTS)
+        )
+
+        ::Rdkafka::Config.new(config_hash)
       end
     end
   end
