@@ -9,7 +9,62 @@ module Karafka
   # @note It always uses the primary defined cluster and does not support multi-cluster work.
   #   If you need this, just replace the cluster info for the time you use this
   module Admin
+    # A fake admin topic representation that we use for messages fetched using this API
+    # We cannot use the topics directly because we may want to request data from topics that we
+    # do not have in the routing
+    Topic = Struct.new(:name, :deserializer)
+
+    private_constant :Topic
+
     class << self
+      # Allows us to read messages from the topic
+      #
+      # @param name [String, Symbol] topic name
+      # @param partition [Integer] partition
+      # @param count [Integer] how many messages we want to get at most
+      # @param offset [Integer] offset from which we should start. If -1 is provided (default) we
+      #   will start from the latest offset
+      #
+      # @return [Array<Karafka::Messages::Message>] array with messages
+      def read_topic(name, partition, count, offset = -1)
+        messages = []
+        tpl = Rdkafka::Consumer::TopicPartitionList.new
+
+        with_consumer do |consumer|
+          if offset.negative?
+            offsets = consumer.query_watermark_offsets(name, partition)
+            offset = offsets.last - count
+          end
+
+          offset = offset.negative? ? 0 : offset
+
+          tpl.add_topic_and_partitions_with_offsets(name, partition => offset)
+          consumer.assign(tpl)
+
+          # We should poll as long as we don't have all the messages that we need or as long as
+          # we do not read all the messages from the topic
+          loop do
+            break if messages.size >= count
+
+            message = consumer.poll(200)
+            messages << message if message
+          rescue Rdkafka::RdkafkaError => e
+            # End of partition
+            break if e.code == :partition_eof
+
+            raise e
+          end
+        end
+
+        messages.map do |message|
+          Messages::Builders::Message.call(
+            message,
+            Topic.new(name, Karafka::App.config.deserializer),
+            Time.now
+          )
+        end
+      end
+
       # Creates Kafka topic with given settings
       #
       # @param name [String] topic name
@@ -60,6 +115,23 @@ module Karafka
         result
       ensure
         admin&.close
+      end
+
+      # Creates consumer instance and yields it. After usage it closes the consumer instance
+      def with_consumer
+        config = Karafka::Setup::AttributesMap.consumer(
+          Karafka::App.config.kafka.dup
+        ).merge(
+          'group.id': 'karafka_admin',
+          # We want to know when there is no more data not to end up with an endless loop
+          'enable.partition.eof': true
+        )
+
+        consumer = ::Rdkafka::Config.new(config).consumer
+        result = yield(consumer)
+        result
+      ensure
+        consumer&.close
       end
     end
   end

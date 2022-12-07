@@ -51,9 +51,15 @@ RSpec.configure do |config|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
 
-  # When we test things, we subscribe sometimes with one-off monitors, they need to always be
-  # cleared not to spam and break test-suit
-  config.before { Karafka.monitor.notifications_bus.clear }
+  config.before do |example|
+    # When we test things, we subscribe sometimes with one-off monitors, they need to always be
+    # cleared not to spam and break test-suit
+    Karafka.monitor.notifications_bus.clear
+
+    next unless example.metadata[:type] == :pro
+
+    Karafka::Pro::Loader.setup(Karafka::App.config)
+  end
 
   config.after do
     Karafka::App.routes.clear
@@ -61,12 +67,6 @@ RSpec.configure do |config|
     Karafka::App.config.internal.routing.active.consumer_groups = []
     Karafka::App.config.internal.routing.active.subscription_groups = []
     Karafka::App.config.internal.routing.active.topics = []
-  end
-
-  config.before do |example|
-    next unless example.metadata[:type] == :pro
-
-    Karafka::Pro::Loader.setup(Karafka::App.config)
   end
 end
 

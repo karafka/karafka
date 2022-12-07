@@ -10,6 +10,8 @@ RSpec.describe_current do
     allow(Karafka::App).to receive(:run!)
     allow(Karafka::App).to receive(:stopped?).and_return(true)
     allow(Karafka::App).to receive(:subscription_groups).and_return({ 1 => 1 })
+    # Do not close the real producer as we use it in specs
+    allow(Karafka::App.producer).to receive(:close)
     allow(Karafka::Runner).to receive(:new).and_return(runner)
     allow(runner).to receive(:call)
     described_class.listeners = []
