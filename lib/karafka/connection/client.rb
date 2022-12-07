@@ -308,8 +308,8 @@ module Karafka
             @closed = true
 
             # Remove callbacks runners that were registered
-            ::Karafka::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
-            ::Karafka::Instrumentation.error_callbacks.delete(@subscription_group.id)
+            ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
+            ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
             @kafka.close
             @buffer.clear
@@ -397,7 +397,7 @@ module Karafka
         @name = consumer.name
 
         # Register statistics runner for this particular type of callbacks
-        ::Karafka::Instrumentation.statistics_callbacks.add(
+        ::Karafka::Core::Instrumentation.statistics_callbacks.add(
           @subscription_group.id,
           Instrumentation::Callbacks::Statistics.new(
             @subscription_group.id,
@@ -408,7 +408,7 @@ module Karafka
         )
 
         # Register error tracking callback
-        ::Karafka::Instrumentation.error_callbacks.add(
+        ::Karafka::Core::Instrumentation.error_callbacks.add(
           @subscription_group.id,
           Instrumentation::Callbacks::Error.new(
             @subscription_group.id,

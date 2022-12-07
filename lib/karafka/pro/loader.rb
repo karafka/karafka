@@ -53,7 +53,7 @@ module Karafka
         private
 
         # Sets proper config options to use pro components
-        # @param config [WaterDrop::Configurable::Node] root config node
+        # @param config [::Karafka::Core::Configurable::Node] root config node
         def reconfigure(config)
           icfg = config.internal
 

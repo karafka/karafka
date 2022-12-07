@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## Unreleased
+- [Maintenance] Align with `waterdrop` and `karafka-core`
 - [Improvement] Provide `Admin#read_topic` API to get topic data without subscribing.
 - [Improvement] Upon an end user `#pause`, do not commit the offset in automatic offset management mode. This will prevent from a scenario where pause is needed but during it a rebalance occurs and a different assigned process starts not from the pause location but from the automatic offset that may be different. This still allows for using the `#mark_as_consumed`.
 - [Fix] Fix a scenario where manual `#pause` would be overwritten by a resume initiated by the strategy.
