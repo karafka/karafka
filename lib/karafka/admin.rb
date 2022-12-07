@@ -136,8 +136,8 @@ module Karafka
       def config(type)
         config_hash = Karafka::Setup::AttributesMap.public_send(
           type,
-          Karafka::App.config.kafka.dup
-        ).merge(CONFIG_DEFAULTS)
+          Karafka::App.config.kafka.dup.merge(CONFIG_DEFAULTS)
+        )
 
         ::Rdkafka::Config.new(config_hash)
       end
