@@ -28,11 +28,12 @@ RSpec.describe_current do
   end
 
   describe '#read_topic' do
-    subject(:reading) { described_class.read_topic(name, partition, count) }
+    subject(:reading) { described_class.read_topic(name, partition, count, offset) }
 
     let(:name) { SecureRandom.hex(6) }
     let(:partition) { 0 }
     let(:count) { 1 }
+    let(:offset) { -1 }
 
     context 'when trying to read non-existing topic' do
       it { expect { reading }.to raise_error(Rdkafka::RdkafkaError) }
@@ -57,6 +58,7 @@ RSpec.describe_current do
 
       before do
         described_class.create_topic(name, 1, 1)
+
         ::Karafka.producer.produce_sync(topic: name, payload: '1')
       end
 
@@ -71,6 +73,7 @@ RSpec.describe_current do
       before do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
+
         ::Karafka.producer.produce_many_sync(messages)
       end
 
@@ -79,6 +82,52 @@ RSpec.describe_current do
       it { expect(reading.last.offset).to eq(9) }
       it { expect(reading.first.raw_payload).to eq('5') }
       it { expect(reading.last.raw_payload).to eq('9') }
+    end
+
+    context 'when trying to read from a non-existing offset' do
+      let(:count) { 5 }
+      let(:offset) { 100 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(reading.size).to eq(0) }
+    end
+
+    context 'when trying to get too much data from a custom offset' do
+      let(:count) { 1_000 }
+      let(:offset) { 3 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(reading.size).to eq(7) }
+      it { expect(reading.last.offset).to eq(9) }
+      it { expect(reading.first.offset).to eq(3) }
+    end
+
+    context 'when trying to get some data with a custom offset' do
+      let(:count) { 3 }
+      let(:offset) { 3 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(reading.size).to eq(3) }
+      it { expect(reading.last.offset).to eq(5) }
+      it { expect(reading.first.offset).to eq(3) }
     end
   end
 end

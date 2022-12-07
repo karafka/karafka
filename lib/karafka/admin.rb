@@ -22,16 +22,20 @@ module Karafka
       # @param name [String, Symbol] topic name
       # @param partition [Integer] partition
       # @param count [Integer] how many messages we want to get at most
+      # @param offset [Integer] offset from which we should start. If -1 is provided (default) we
+      #   will start from the latest offset
       #
       # @return [Array<Karafka::Messages::Message>] array with messages
-      def read_topic(name, partition, count = 1)
+      def read_topic(name, partition, count, offset = -1)
         messages = []
+        tpl = Rdkafka::Consumer::TopicPartitionList.new
 
         with_consumer do |consumer|
-          offsets = consumer.query_watermark_offsets(name, partition)
-          tpl = Rdkafka::Consumer::TopicPartitionList.new
+          if offset.negative?
+            offsets = consumer.query_watermark_offsets(name, partition)
+            offset = offsets.last - count
+          end
 
-          offset = offsets.last - count
           offset = offset.negative? ? 0 : offset
 
           tpl.add_topic_and_partitions_with_offsets(name, partition => offset)
@@ -39,9 +43,16 @@ module Karafka
 
           # We should poll as long as we don't have all the messages that we need or as long as
           # we do not read all the messages from the topic
-          while messages.size < count && messages.size < offsets.last
+          loop do
+            break if messages.size >= count
+
             message = consumer.poll(200)
             messages << message if message
+          rescue Rdkafka::RdkafkaError => e
+            # End of partition
+            break if e.code == :partition_eof
+
+            raise e
           end
         end
 
@@ -115,7 +126,11 @@ module Karafka
       def with_consumer
         config = Karafka::Setup::AttributesMap.consumer(
           Karafka::App.config.kafka.dup
-        ).merge('group.id': 'karafka_admin')
+        ).merge(
+          'group.id': 'karafka_admin',
+          # We want to know when there is no more data not to end up with an endless loop
+          'enable.partition.eof': true
+        )
 
         consumer = ::Rdkafka::Config.new(config).consumer
         result = yield(consumer)
