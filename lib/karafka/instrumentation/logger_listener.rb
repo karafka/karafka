@@ -73,7 +73,7 @@ module Karafka
         consumer = event[:caller]
         timeout = event[:timeout]
 
-        info <<~MSG.tr!("\n", ' ').strip
+        info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Pausing partition #{partition} of topic #{topic}
           on offset #{offset} for #{timeout} ms.
         MSG
@@ -89,7 +89,7 @@ module Karafka
         consumer = event[:caller]
         timeout = event[:timeout]
 
-        info <<~MSG.tr!("\n", ' ').strip
+        info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Retrying of #{consumer.class} after #{timeout} ms
           on partition #{partition} of topic #{topic} from offset #{offset}
         MSG

@@ -98,7 +98,7 @@ RSpec.describe_current do
 
     let(:consumer) { Class.new(Karafka::BaseConsumer).new }
     let(:message) do
-      <<~MSG.tr!("\n", ' ').strip
+      <<~MSG.tr("\n", ' ').strip
         [#{consumer.id}] Retrying of #{consumer.class} after 100 ms on partition 0
         of topic Topic from offset 12
       MSG
