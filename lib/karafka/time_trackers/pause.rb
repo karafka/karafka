@@ -10,7 +10,7 @@ module Karafka
     #   code here, as this is not a frequently used tracker. It is active only once per batch in
     #   case of long-running-jobs and upon errors.
     class Pause < Base
-      attr_reader :attempt
+      attr_reader :attempt, :current_timeout
 
       # @param timeout [Integer] how long should we wait when anything went wrong (in ms)
       # @param max_timeout [Integer, nil] if exponential is on, what is the max value we can reach
@@ -43,6 +43,7 @@ module Karafka
         @started_at = nil
         @attempt = 0
         @timeout = timeout
+        @current_timeout = timeout
         @max_timeout = max_timeout
         @exponential_backoff = exponential_backoff
         @mutex = Mutex.new
@@ -56,6 +57,7 @@ module Karafka
       #   period of time, outside of any regular pausing logic
       def pause(timeout = backoff_interval)
         @mutex.synchronize do
+          @current_timeout = timeout
           @started_at = now
           @ends_at = @started_at + timeout
         end

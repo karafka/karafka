@@ -24,6 +24,7 @@ module Karafka
         app.stopped
 
         consumer.consumed
+        consumer.consuming.pause
         consumer.revoked
         consumer.shutdown
 

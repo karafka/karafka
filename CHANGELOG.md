@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Improvement] Add instrumentation upon `#pause`.
+
 ## 2.0.23 (2022-12-07)
 - [Maintenance] Align with `waterdrop` and `karafka-core`
 - [Improvement] Provide `Admin#read_topic` API to get topic data without subscribing.
