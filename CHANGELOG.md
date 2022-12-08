@@ -2,6 +2,7 @@
 
 ## Unreleased
 - [Improvement] Add instrumentation upon `#pause`.
+- [Improvement] Add instrumentation upon retries.
 
 ## 2.0.23 (2022-12-07)
 - [Maintenance] Align with `waterdrop` and `karafka-core`

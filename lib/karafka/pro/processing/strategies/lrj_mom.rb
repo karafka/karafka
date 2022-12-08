@@ -50,7 +50,7 @@ module Karafka
 
                 resume
               else
-                pause(coordinator.seek_offset, false)
+                retry_after_pause
               end
             end
           end

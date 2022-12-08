@@ -243,5 +243,23 @@ module Karafka
     def revoked?
       coordinator.revoked?
     end
+
+    # Pauses the processing from the last offset to retry on given message
+    # @private
+    def retry_after_pause
+      pause(coordinator.seek_offset, nil, false)
+
+      # Instrumentation needs to run **after** `#pause` invocation because we rely on the states
+      # set by `#pause`
+      Karafka.monitor.instrument(
+        'consumer.consuming.retry',
+        caller: self,
+        topic: messages.metadata.topic,
+        partition: messages.metadata.partition,
+        offset: coordinator.seek_offset,
+        timeout: coordinator.pause_tracker.current_timeout,
+        attempt: coordinator.pause_tracker.attempt
+      )
+    end
   end
 end

@@ -25,6 +25,7 @@ module Karafka
 
         consumer.consumed
         consumer.consuming.pause
+        consumer.consuming.retry
         consumer.revoked
         consumer.shutdown
 
