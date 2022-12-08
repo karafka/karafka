@@ -204,6 +204,17 @@ module Karafka
 
       # Indicate, that user took a manual action of pausing
       coordinator.manual_pause if manual_pause
+
+      Karafka.monitor.instrument(
+        'consumer.consuming.pause',
+        caller: self,
+        manual: manual_pause,
+        topic: messages.metadata.topic,
+        partition: messages.metadata.partition,
+        offset: offset,
+        timeout: coordinator.pause_tracker.current_timeout,
+        attempt: coordinator.pause_tracker.attempt
+      )
     end
 
     # Resumes processing of the current topic partition
