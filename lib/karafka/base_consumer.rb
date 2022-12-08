@@ -4,6 +4,8 @@
 module Karafka
   # Base consumer from which all Karafka consumers should inherit
   class BaseConsumer
+    # @return [String] id of the current consumer
+    attr_reader :id
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
     attr_accessor :topic
     # @return [Karafka::Messages::Messages] current messages batch
@@ -14,6 +16,11 @@ module Karafka
     attr_accessor :coordinator
     # @return [Waterdrop::Producer] producer instance
     attr_accessor :producer
+
+    # Creates new consumer and assigns it an id
+    def initialize
+      @id = SecureRandom.hex(6)
+    end
 
     # Can be used to run preparation code prior to the job being enqueued
     #

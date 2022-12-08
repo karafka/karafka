@@ -3,6 +3,8 @@
 ## Unreleased
 - [Improvement] Add instrumentation upon `#pause`.
 - [Improvement] Add instrumentation upon retries.
+- [Improvement] Assign `#id` to consumers similar to other entities for ease of debugging.
+- [Improvement] Add retries and pausing to the default `LoggerListener`.
 
 ## 2.0.23 (2022-12-07)
 - [Maintenance] Align with `waterdrop` and `karafka-core`
