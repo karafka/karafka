@@ -63,6 +63,38 @@ module Karafka
         info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
       end
 
+      # Prints info about a pause occurrence. Irrelevant if user or system initiated.
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_consumer_consuming_pause(event)
+        topic = event[:topic]
+        partition = event[:partition]
+        offset = event[:offset]
+        consumer = event[:caller]
+        timeout = event[:timeout]
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Pausing partition #{partition} of topic #{topic}
+          on offset #{offset} for #{timeout} ms.
+        MSG
+      end
+
+      # Prints info about retry of processing after an error
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_consumer_consuming_retry(event)
+        topic = event[:topic]
+        partition = event[:partition]
+        offset = event[:offset]
+        consumer = event[:caller]
+        timeout = event[:timeout]
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Retrying of #{consumer.class} after #{timeout} ms
+          on partition #{partition} of topic #{topic} from offset #{offset}
+        MSG
+      end
+
       # Logs info about system signals that Karafka received and prints backtrace for threads in
       # case of ttin
       #

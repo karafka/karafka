@@ -73,6 +73,49 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info) }
   end
 
+  describe '#on_consumer_consuming_pause' do
+    subject(:trigger) { listener.on_consumer_consuming_pause(event) }
+
+    let(:consumer) { Class.new(Karafka::BaseConsumer).new }
+    let(:message) do
+      "[#{consumer.id}] Pausing partition 0 of topic Topic on offset 12 for 100 ms."
+    end
+    let(:payload) do
+      {
+        caller: consumer,
+        topic: 'Topic',
+        partition: 0,
+        offset: 12,
+        timeout: 100
+      }
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
+  describe '#on_consumer_consuming_retry' do
+    subject(:trigger) { listener.on_consumer_consuming_retry(event) }
+
+    let(:consumer) { Class.new(Karafka::BaseConsumer).new }
+    let(:message) do
+      <<~MSG.tr("\n", ' ').strip
+        [#{consumer.id}] Retrying of #{consumer.class} after 100 ms on partition 0
+        of topic Topic from offset 12
+      MSG
+    end
+    let(:payload) do
+      {
+        caller: consumer,
+        topic: 'Topic',
+        partition: 0,
+        offset: 12,
+        timeout: 100
+      }
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
   describe '#on_process_notice_signal' do
     subject(:trigger) { listener.on_process_notice_signal(event) }
 
