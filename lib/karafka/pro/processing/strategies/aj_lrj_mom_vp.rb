@@ -51,7 +51,7 @@ module Karafka
                 # If processing failed, we need to pause
                 # For long running job this will overwrite the default never-ending pause and will
                 # cause the processing to keep going after the error backoff
-                pause(coordinator.seek_offset, nil, false)
+                retry_after_pause
               end
             end
           end

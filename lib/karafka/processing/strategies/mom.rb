@@ -20,7 +20,7 @@ module Karafka
           if coordinator.success?
             coordinator.pause_tracker.reset
           else
-            pause(coordinator.seek_offset, nil, false)
+            retry_after_pause
           end
         end
       end

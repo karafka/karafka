@@ -26,7 +26,7 @@ module Karafka
 
             mark_as_consumed(messages.last)
           elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-            pause(coordinator.seek_offset, nil, false)
+            retry_after_pause
           # If we've reached number of retries that we could, we need to skip the first message
           # that was not marked as consumed, pause and continue, while also moving this message
           # to the dead topic

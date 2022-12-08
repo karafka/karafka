@@ -38,7 +38,7 @@ module Karafka
 
                 resume
               elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-                pause(coordinator.seek_offset, nil, false)
+                retry_after_pause
               else
                 coordinator.pause_tracker.reset
 

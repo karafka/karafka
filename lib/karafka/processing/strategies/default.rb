@@ -59,7 +59,7 @@ module Karafka
 
             mark_as_consumed(messages.last)
           else
-            pause(coordinator.seek_offset, nil, false)
+            retry_after_pause
           end
         end
 
