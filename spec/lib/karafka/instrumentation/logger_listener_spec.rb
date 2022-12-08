@@ -76,8 +76,10 @@ RSpec.describe_current do
   describe '#on_consumer_consuming_pause' do
     subject(:trigger) { listener.on_consumer_consuming_pause(event) }
 
-    let(:message) { "[#{consumer.id}] Pausing partition 0 of topic Topic on offset 12 for 100 ms." }
     let(:consumer) { Class.new(Karafka::BaseConsumer).new }
+    let(:message) do
+      "[#{consumer.id}] Pausing partition 0 of topic Topic on offset 12 for 100 ms."
+    end
     let(:payload) do
       {
         caller: consumer,
@@ -96,7 +98,10 @@ RSpec.describe_current do
 
     let(:consumer) { Class.new(Karafka::BaseConsumer).new }
     let(:message) do
-      "[#{consumer.id}] Retrying of #{consumer.class} after 100 ms on topic Topic from offset 12"
+      <<~MSG.tr!("\n", ' ').strip
+        [#{consumer.id}] Retrying of #{consumer.class} after 100 ms on partition 0
+        of topic Topic from offset 12
+      MSG
     end
     let(:payload) do
       {

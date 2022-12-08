@@ -63,7 +63,9 @@ module Karafka
         info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
       end
 
-      # Prints info about a pause occurrence. Irrelevant if user or system initiatied.
+      # Prints info about a pause occurrence. Irrelevant if user or system initiated.
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_consumer_consuming_pause(event)
         topic = event[:topic]
         partition = event[:partition]
@@ -71,7 +73,7 @@ module Karafka
         consumer = event[:caller]
         timeout = event[:timeout]
 
-        info <<~MSG.gsub!("\n", ' ').strip
+        info <<~MSG.tr!("\n", ' ').strip
           [#{consumer.id}] Pausing partition #{partition} of topic #{topic}
           on offset #{offset} for #{timeout} ms.
         MSG
@@ -87,9 +89,9 @@ module Karafka
         consumer = event[:caller]
         timeout = event[:timeout]
 
-        info <<~MSG.gsub!("\n", ' ').strip
+        info <<~MSG.tr!("\n", ' ').strip
           [#{consumer.id}] Retrying of #{consumer.class} after #{timeout} ms
-          on topic #{topic} from offset #{offset}
+          on partition #{partition} of topic #{topic} from offset #{offset}
         MSG
       end
 
