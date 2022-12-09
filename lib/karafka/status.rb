@@ -17,11 +17,16 @@ module Karafka
     # Mutex to ensure that state transitions are thread-safe
     MUTEX = Mutex.new
 
-    private_constant :STATES, :MUTEX
+    private_constant :MUTEX
 
     # By default we are in the initializing state
     def initialize
       initialize!
+    end
+
+    # @return [String] stringified current app status
+    def to_s
+      @status.to_s
     end
 
     # Resets the status state
