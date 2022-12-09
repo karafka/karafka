@@ -35,10 +35,21 @@ module Karafka
       # Just a nicer name for the consumer groups
       alias routes consumer_groups
 
-      Status.instance_methods(false).each do |delegated|
-        define_method(delegated) do
-          App.config.internal.status.send(delegated)
-        end
+      # Allow for easier status management via `Karafka::App` by aliasing status methods here
+      Status::STATES.each do |state, transition|
+        class_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def #{state}
+            App.config.internal.status.#{state}
+          end
+
+          def #{state}?
+            App.config.internal.status.#{state}?
+          end
+
+          def #{transition}
+            App.config.internal.status.#{transition}
+          end
+        RUBY
       end
 
       # Methods that should be delegated to Karafka module
