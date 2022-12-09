@@ -14,11 +14,10 @@ module Karafka
       terminated: :terminate!
     }.freeze
 
-    private_constant :STATES
-
+    # Mutex to ensure that state transitions are thread-safe
     MUTEX = Mutex.new
 
-    private_constant :MUTEX
+    private_constant :STATES, :MUTEX
 
     # By default we are in the initializing state
     def initialize

@@ -117,15 +117,15 @@ module Karafka
       ensure
         # We need to check if it wasn't an early exit to make sure that only on stop invocation
         # can change the status after everything is closed
-        return unless timeout
+        if timeout
+          Karafka::App.stopped!
 
-        Karafka::App.stopped!
+          # We close producer as the last thing as it can be used in the notification pipeline
+          # to dispatch state changes, etc
+          Karafka::App.producer.close
 
-        # We close producer as the last thing as it can be used in the notification pipeline
-        # to dispatch state changes, etc
-        Karafka::App.producer.close
-
-        Karafka::App.terminate!
+          Karafka::App.terminate!
+        end
       end
 
       # Quiets the Karafka server.
