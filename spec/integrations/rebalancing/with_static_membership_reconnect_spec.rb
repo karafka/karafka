@@ -78,7 +78,7 @@ end
 # Give it some time to start before starting Karafka main process
 sleep 5
 
-start_karafka_and_wait_until do
+start_karafka_and_wait_until(reset_status: true) do
   DT[:process2].size >= 20
 end
 
@@ -87,7 +87,7 @@ sleep 5
 
 # After stopping start once again
 
-start_karafka_and_wait_until do
+start_karafka_and_wait_until(reset_status: true) do
   DT[:process2].size >= 100
 end
 

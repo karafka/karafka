@@ -9,6 +9,7 @@ RSpec.describe_current do
   before do
     allow(Karafka::App).to receive(:run!)
     allow(Karafka::App).to receive(:stopped?).and_return(true)
+    allow(Karafka::App).to receive(:terminated?).and_return(true)
     allow(Karafka::App).to receive(:subscription_groups).and_return({ 1 => 1 })
     # Do not close the real producer as we use it in specs
     allow(Karafka::App.producer).to receive(:close)
@@ -128,6 +129,7 @@ RSpec.describe_current do
 
       before do
         allow(Karafka::App).to receive(:stopped?).and_return(false)
+        allow(Karafka::App).to receive(:terminated?).and_return(false)
         allow(Karafka::App).to receive(:stop!)
         allow(described_class).to receive(:sleep)
         allow(Kernel).to receive(:exit!)
@@ -229,18 +231,6 @@ RSpec.describe_current do
 
     after { Karafka::App.initialized! }
 
-    context 'when already in quiet mode' do
-      let(:new_status) { :quiet! }
-
-      before { allow(Karafka::App).to receive(:stopped?).and_return(false) }
-
-      it do
-        described_class.quiet
-
-        expect(Karafka::App).not_to have_received(:quiet!)
-      end
-    end
-
     context 'when stopping' do
       let(:new_status) { :stop! }
 
@@ -249,7 +239,7 @@ RSpec.describe_current do
       it do
         described_class.quiet
 
-        expect(Karafka::App).not_to have_received(:quiet!)
+        expect(Karafka::App).to have_received(:quiet!)
       end
     end
 
@@ -275,7 +265,7 @@ RSpec.describe_current do
       it do
         described_class.quiet
 
-        expect(Karafka::App).not_to have_received(:quiet!)
+        expect(Karafka::App).to have_received(:quiet!)
       end
     end
   end

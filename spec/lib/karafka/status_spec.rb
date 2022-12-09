@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:status_manager) { described_class.new }
 
-  let(:status) { rand }
+  let(:status) { :initializing }
 
   before { status_manager.instance_variable_set(:'@status', status) }
 
@@ -12,7 +12,8 @@ RSpec.describe_current do
     it { expect(status_manager.running?).to eq false }
     it { expect(status_manager.stopping?).to eq false }
     it { expect(status_manager.stopped?).to eq false }
-    it { expect(status_manager.initializing?).to eq false }
+    it { expect(status_manager.initializing?).to eq true }
+    it { expect(status_manager.terminated?).to eq false }
   end
 
   describe 'running?' do
@@ -25,6 +26,7 @@ RSpec.describe_current do
 
       it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.running?).to eq true }
+      it { expect(status_manager.terminated?).to eq false }
     end
   end
 
@@ -37,6 +39,7 @@ RSpec.describe_current do
       it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq false }
       it { expect(status_manager.stopped?).to eq false }
+      it { expect(status_manager.terminated?).to eq false }
     end
   end
 
@@ -49,6 +52,7 @@ RSpec.describe_current do
       it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq false }
       it { expect(status_manager.stopped?).to eq false }
+      it { expect(status_manager.terminated?).to eq false }
     end
 
     context 'when status is set to stopping' do
@@ -59,6 +63,7 @@ RSpec.describe_current do
       it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq true }
       it { expect(status_manager.stopped?).to eq false }
+      it { expect(status_manager.terminated?).to eq false }
     end
   end
 
@@ -74,6 +79,7 @@ RSpec.describe_current do
       it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq true }
       it { expect(status_manager.stopped?).to eq false }
+      it { expect(status_manager.terminated?).to eq false }
     end
   end
 
@@ -90,12 +96,14 @@ RSpec.describe_current do
       it { expect(status_manager.initialized?).to eq false }
       it { expect(status_manager.stopping?).to eq false }
       it { expect(status_manager.stopped?).to eq true }
+      it { expect(status_manager.terminated?).to eq false }
     end
   end
 
   describe 'initializing?' do
     context 'when status is not set to initializing' do
-      it { expect(status_manager.initializing?).to eq false }
+      it { expect(status_manager.initializing?).to eq true }
+      it { expect(status_manager.terminated?).to eq false }
     end
 
     context 'when status is set to initializing' do
@@ -103,6 +111,7 @@ RSpec.describe_current do
 
       it { expect(status_manager.initializing?).to eq true }
       it { expect(status_manager.initialized?).to eq false }
+      it { expect(status_manager.terminated?).to eq false }
     end
   end
 
@@ -115,6 +124,7 @@ RSpec.describe_current do
       it { expect(status_manager.running?).to eq false }
       it { expect(status_manager.initializing?).to eq true }
       it { expect(status_manager.stopping?).to eq false }
+      it { expect(status_manager.terminated?).to eq false }
     end
   end
 
@@ -128,6 +138,22 @@ RSpec.describe_current do
       it { expect(status_manager.running?).to eq false }
       it { expect(status_manager.initializing?).to eq false }
       it { expect(status_manager.stopping?).to eq false }
+      it { expect(status_manager.terminated?).to eq false }
+    end
+  end
+
+  describe '#reset!' do
+    context 'when we reset!' do
+      before do
+        status_manager.initialized!
+        status_manager.reset!
+      end
+
+      it { expect(status_manager.initialized?).to eq false }
+      it { expect(status_manager.running?).to eq false }
+      it { expect(status_manager.initializing?).to eq true }
+      it { expect(status_manager.stopping?).to eq false }
+      it { expect(status_manager.terminated?).to eq false }
     end
   end
 end

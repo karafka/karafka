@@ -22,6 +22,7 @@ module Karafka
         app.quieting
         app.stopping
         app.stopped
+        app.terminated
 
         consumer.consumed
         consumer.consuming.pause
