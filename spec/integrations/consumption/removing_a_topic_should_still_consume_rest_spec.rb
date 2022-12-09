@@ -39,7 +39,7 @@ elements2 = DT.uuids(10)
 produce_many(DT.topics.first, elements1)
 produce_many(DT.topics.last, elements2)
 
-start_karafka_and_wait_until do
+start_karafka_and_wait_until(reset_status: true) do
   DT[0].size >= 10 &&
     DT[1].size >= 10
 end
@@ -69,7 +69,7 @@ elements2.each do |data|
   producer.produce_sync(topic: DT.topics.last, payload: data)
 end
 
-start_karafka_and_wait_until do
+start_karafka_and_wait_until(reset_status: true) do
   DT[1].size >= 20
 end
 

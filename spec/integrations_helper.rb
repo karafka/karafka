@@ -223,10 +223,17 @@ def wait_until
 end
 
 # Starts Karafka and waits until the block evaluates to true. Then it stops Karafka.
-def start_karafka_and_wait_until(&block)
+# @param reset_status [Boolean] should we reset the server status to initializing after the
+#   shutdown. This allows us to run server multiple times in the same process, making some
+#   integration specs much easier to run
+def start_karafka_and_wait_until(reset_status: false, &block)
   Thread.new { wait_until(&block) }
 
   Karafka::Server.run
+
+  return unless reset_status
+
+  Karafka::App.config.internal.status.reset!
 end
 
 # Sends data to Kafka in a sync way

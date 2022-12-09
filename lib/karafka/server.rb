@@ -47,7 +47,7 @@ module Karafka
         # in a separate thread (or trap context) to indicate everything is closed
         # Since `#start` is blocking, we were get here only after the runner is done. This will
         # not add any performance degradation because of that.
-        Thread.pass until Karafka::App.stopped?
+        Thread.pass until Karafka::App.terminated?
       # Try its best to shutdown underlying components before re-raising
       # rubocop:disable Lint/RescueException
       rescue Exception => e
@@ -75,6 +75,7 @@ module Karafka
         # Initialize the stopping process only if Karafka was running
         return if Karafka::App.stopping?
         return if Karafka::App.stopped?
+        return if Karafka::App.terminated?
 
         Karafka::App.stop!
 
@@ -84,13 +85,7 @@ module Karafka
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
         ((timeout / 1_000) * SUPERVISION_CHECK_FACTOR).to_i.times do
-          if listeners.count(&:alive?).zero? &&
-             workers.count(&:alive?).zero?
-
-            Karafka::App.producer.close
-
-            return
-          end
+          return if listeners.count(&:alive?).zero? && workers.count(&:alive?).zero?
 
           sleep SUPERVISION_SLEEP
         end
@@ -122,18 +117,23 @@ module Karafka
       ensure
         # We need to check if it wasn't an early exit to make sure that only on stop invocation
         # can change the status after everything is closed
-        Karafka::App.stopped! if timeout
+        if timeout
+          Karafka::App.stopped!
+
+          # We close producer as the last thing as it can be used in the notification pipeline
+          # to dispatch state changes, etc
+          Karafka::App.producer.close
+
+          Karafka::App.terminate!
+        end
       end
 
       # Quiets the Karafka server.
       # Karafka will stop processing but won't quiet to consumer group, so no rebalance will be
       # triggered until final shutdown.
       def quiet
-        # If we are already quieting or in the stop procedures, we should not do it again.
-        return if Karafka::App.quieting?
-        return if Karafka::App.stopping?
-        return if Karafka::App.stopped?
-
+        # We don't have to safe-guard it with check states as the state transitions work only
+        # in one direction
         Karafka::App.quiet!
       end
 

@@ -70,7 +70,7 @@ other = Thread.new do
     DT[:process2] << message
 
     # We wait for the main Karafka process to stop, so data is not skewed by second rebalance
-    sleep(0.1) until Karafka::App.stopped?
+    sleep(0.1) until Karafka::App.terminated?
 
     break
   end

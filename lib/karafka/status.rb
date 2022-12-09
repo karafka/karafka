@@ -10,14 +10,24 @@ module Karafka
       running: :run!,
       quieting: :quiet!,
       stopping: :stop!,
-      stopped: :stopped!
+      stopped: :stopped!,
+      terminated: :terminate!
     }.freeze
 
-    private_constant :STATES
+    # Mutex to ensure that state transitions are thread-safe
+    MUTEX = Mutex.new
+
+    private_constant :STATES, :MUTEX
 
     # By default we are in the initializing state
     def initialize
       initialize!
+    end
+
+    # Resets the status state
+    # This is used mostly in the integration suite
+    def reset!
+      @status = :initializing
     end
 
     STATES.each do |state, transition|
@@ -26,16 +36,19 @@ module Karafka
       end
 
       define_method transition do
-        # Do nothing if the state change would change nothing (same state)
-        return if @status == state
+        MUTEX.synchronize do
+          # Do not allow reverse state transitions (we always go one way) or transition to the same
+          # state as currently
+          return if @status && STATES.keys.index(state) <= STATES.keys.index(@status)
 
-        @status = state
+          @status = state
 
-        # Skip on creation (initializing)
-        # We skip as during this state we do not have yet a monitor
-        return if initializing?
+          # Skip on creation (initializing)
+          # We skip as during this state we do not have yet a monitor
+          return if initializing?
 
-        Karafka.monitor.instrument("app.#{state}")
+          Karafka.monitor.instrument("app.#{state}")
+        end
       end
     end
   end
