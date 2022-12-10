@@ -11,6 +11,22 @@
 - [Improvement] Allow for easier state usage by introducing explicit `#to_s` for reporting.
 - [Improvement] Change auto-generated id from `SecureRandom#uuid` to `SecureRandom#hex(6)`
 - [Fix] Shutdown producer after all the consumer components are down and the status is stopped. This will ensure, that any instrumentation related Kafka messaging can still operate.
+- [Improvement] Emit statistic every 5 seconds by default.
+
+### Upgrade notes
+
+If you want to disable `librdkafka` statistics because you do not use them at all, update the `kafka` `statistics.interval.ms` setting and set it to `0`:
+
+```ruby
+class KarafkaApp < Karafka::App
+  setup do |config|
+    # Other settings...
+    config.kafka = {
+      'statistics.interval.ms': 0
+    }
+  end
+end
+```
 
 ## 2.0.23 (2022-12-07)
 - [Maintenance] Align with `waterdrop` and `karafka-core`
@@ -437,7 +453,7 @@ There are several things in the plan already for 2.1 and beyond, including a web
 - Small integration specs refactoring + specs for pausing scenarios
 
 ## 2.0.0-alpha6 (2022-04-17)
-- Fix a bug, where upon missing boot file and Rails, railtie would fail with a generic exception (#818) 
+- Fix a bug, where upon missing boot file and Rails, railtie would fail with a generic exception (#818)
 - Fix an issue with parallel pristine specs colliding with each other during `bundle install` (#820)
 - Replace `consumer.consume` with `consumer.consumed` event to match the behaviour
 - Make sure, that offset committing happens before the `consumer.consumed` event is propagated
