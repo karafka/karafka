@@ -46,7 +46,7 @@ Thread.new { Karafka::Server.run }
 # Give it some time to boot and connect before dispatching messages
 sleep(5)
 
-10.times { |i| produce(DT.topic, SecureRandom.uuid, partition: i) }
+10.times { |i| produce(DT.topic, SecureRandom.hex(6), partition: i) }
 
 wait_until do
   DT.data.values.flatten.size >= 11

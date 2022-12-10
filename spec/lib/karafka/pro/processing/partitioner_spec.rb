@@ -69,7 +69,7 @@ RSpec.describe_current do
       yielded
     end
 
-    before { topic.virtual_partitions(partitioner: ->(_) { SecureRandom.uuid }) }
+    before { topic.virtual_partitions(partitioner: ->(_) { SecureRandom.hex(6) }) }
 
     it 'expect to use all the threads' do
       expect(yielded.map(&:first).sort).to eq((0..4).to_a)

@@ -6,8 +6,8 @@ setup_karafka
 
 topic1 = DT.topics[0]
 topic2 = DT.topics[1]
-topic1_data = Array.new(10) { { SecureRandom.uuid => rand.to_s } }
-topic2_data = Array.new(10) { { SecureRandom.uuid => rand.to_s } }
+topic1_data = Array.new(10) { { SecureRandom.hex(6) => rand.to_s } }
+topic2_data = Array.new(10) { { SecureRandom.hex(6) => rand.to_s } }
 
 class Consumer1 < Karafka::BaseConsumer
   def consume

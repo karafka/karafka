@@ -8,7 +8,7 @@ FactoryBot.define do
     kafka { {} }
     max_messages { 1000 }
     max_wait_time { 10_000 }
-    subscription_group { SecureRandom.uuid }
+    subscription_group { SecureRandom.hex(6) }
 
     skip_create
 

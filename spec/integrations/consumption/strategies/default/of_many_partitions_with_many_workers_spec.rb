@@ -42,7 +42,7 @@ sleep(5)
 
 # We send only one message to each topic partition, so when messages are consumed, it forces them
 # to be in separate worker threads
-10.times { |i| produce(DT.topic, SecureRandom.uuid, partition: i) }
+10.times { |i| produce(DT.topic, SecureRandom.hex(6), partition: i) }
 
 wait_until do
   DT.data.values.flatten.size >= 10

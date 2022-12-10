@@ -8,7 +8,8 @@
 - [Improvement] Introduce a new final `terminated` state that will kick in prior to exit but after all the instrumentation and other things are done.
 - [Improvement] Ensure that state transitions are thread-safe and ensure state transitions can occur in one direction.
 - [Improvement] Optimize status methods proxying to `Karafka::App`.
-- [Improvement] Allow for easier state usage by introducing explicit `#to_s` for reporting. 
+- [Improvement] Allow for easier state usage by introducing explicit `#to_s` for reporting.
+- [Improvement] Change auto-generated id from `SecureRandom#uuid` to `SecureRandom#hex(6)`
 - [Fix] Shutdown producer after all the consumer components are down and the status is stopped. This will ensure, that any instrumentation related Kafka messaging can still operate.
 
 ## 2.0.23 (2022-12-07)

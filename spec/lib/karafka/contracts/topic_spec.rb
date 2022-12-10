@@ -13,7 +13,7 @@ RSpec.describe_current do
       max_messages: 10,
       max_wait_time: 10_000,
       initial_offset: 'earliest',
-      subscription_group: SecureRandom.uuid
+      subscription_group: SecureRandom.hex(6)
     }
   end
 

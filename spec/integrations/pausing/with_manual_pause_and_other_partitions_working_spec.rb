@@ -50,7 +50,7 @@ Thread.new do
 
   100.times do
     2.times do |partition|
-      produce(DT.topics[1], SecureRandom.uuid, partition: partition)
+      produce(DT.topics[1], SecureRandom.hex(6), partition: partition)
     end
   end
 end

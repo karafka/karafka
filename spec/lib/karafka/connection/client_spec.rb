@@ -6,7 +6,7 @@ RSpec.describe_current do
   let(:subscription_group) { build(:routing_subscription_group) }
 
   describe '#name' do
-    let(:client_id) { SecureRandom.uuid }
+    let(:client_id) { SecureRandom.hex(6) }
     let(:start_nr) { client.name.split('-').last.to_i }
 
     before { Karafka::App.config.client_id = client_id }

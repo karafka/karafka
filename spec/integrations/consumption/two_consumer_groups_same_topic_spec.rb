@@ -27,7 +27,7 @@ draw_routes do
   end
 end
 
-jsons = Array.new(100) { { SecureRandom.uuid => rand.to_s } }
+jsons = Array.new(100) { { SecureRandom.hex(6) => rand.to_s } }
 jsons.each { |data| produce(DT.topic, data.to_json) }
 
 start_karafka_and_wait_until do

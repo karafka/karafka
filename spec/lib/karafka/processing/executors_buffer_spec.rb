@@ -4,7 +4,7 @@ RSpec.describe_current do
   subject(:buffer) { described_class.new(client, subscription_group) }
 
   let(:client) { instance_double(Karafka::Connection::Client) }
-  let(:group_id) { SecureRandom.uuid }
+  let(:group_id) { SecureRandom.hex(6) }
   let(:topic_name) { 'topic_name1' }
   let(:partition_id) { 0 }
   let(:parallel_key) { 0 }

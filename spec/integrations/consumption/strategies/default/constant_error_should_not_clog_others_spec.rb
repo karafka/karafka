@@ -15,7 +15,7 @@ create_topic(partitions: 3)
 # 300 messages to consume tops from all 3 partitions
 # There can be more if we run this in development several times
 300.times do |i|
-  result = produce(DT.topic, SecureRandom.uuid, partition: i % 3)
+  result = produce(DT.topic, SecureRandom.hex(6), partition: i % 3)
   DT[:last_offsets][result.partition] = result.offset
 end
 

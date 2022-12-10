@@ -8,7 +8,7 @@ require 'securerandom'
 
 setup_karafka do |config|
   config.initial_offset = 'latest'
-  config.kafka[:'group.instance.id'] = SecureRandom.uuid
+  config.kafka[:'group.instance.id'] = SecureRandom.hex(6)
 end
 
 create_topic(partitions: 2)
@@ -60,7 +60,7 @@ sleep(2)
 # one partition assigned, so we don't have to worry about figuring out which partition it got
 other = Thread.new do
   consumer = setup_rdkafka_consumer(
-    'group.instance.id': SecureRandom.uuid,
+    'group.instance.id': SecureRandom.hex(6),
     'auto.offset.reset': 'latest'
   )
 

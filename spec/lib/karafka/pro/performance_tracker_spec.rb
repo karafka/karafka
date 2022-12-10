@@ -8,7 +8,7 @@ RSpec.describe_current do
     let(:event) { Karafka::Core::Monitoring::Event.new(rand.to_s, payload) }
 
     context 'when given topic does not exist' do
-      let(:topic) { SecureRandom.uuid }
+      let(:topic) { SecureRandom.hex(6) }
       let(:partition) { 0 }
 
       it { expect(p95).to eq(0) }

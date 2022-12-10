@@ -3,7 +3,7 @@
 require 'karafka'
 require 'securerandom'
 
-TOPIC = SecureRandom.uuid
+TOPIC = SecureRandom.hex(6)
 PID = Process.pid
 
 workers 1
@@ -26,7 +26,7 @@ end
 on_worker_boot do
   ::Karafka::App.setup do |config|
     config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
-    config.client_id = SecureRandom.uuid
+    config.client_id = SecureRandom.hex(6)
   end
 
   ::Karafka.producer.produce_sync(topic: TOPIC, payload: 'bye bye')
