@@ -16,7 +16,8 @@ module Karafka
 
       # Defaults for kafka settings, that will be overwritten only if not present already
       KAFKA_DEFAULTS = {
-        'client.id': 'karafka'
+        'client.id': 'karafka',
+        'statistics.interval.ms': 5_000
       }.freeze
 
       # Contains settings that should not be used in production but make life easier in dev
