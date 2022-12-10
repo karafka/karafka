@@ -55,8 +55,8 @@ RSpec.describe_current do
         "allow.auto.create.topics": "true",
         "bootstrap.servers": "127.0.0.1:9092",
         "client.id": "karafka",
-        "statistics.interval.ms": 5000,
-        "topic.metadata.refresh.interval.ms": 5000
+        "statistics.interval.ms": 5_000,
+        "topic.metadata.refresh.interval.ms": 5_000
       }
     end
 

@@ -13,6 +13,21 @@
 - [Fix] Shutdown producer after all the consumer components are down and the status is stopped. This will ensure, that any instrumentation related Kafka messaging can still operate.
 - [Improvement] Emit statistic every 5 seconds by default.
 
+### Upgrade notes
+
+If you want to disable `librdkafka` statistics because you do not use them at all, update the `kafka` `statistics.interval.ms` setting and set it to `0`:
+
+```ruby
+class KarafkaApp < Karafka::App
+  setup do |config|
+    # Other settings...
+    config.kafka = {
+      'statistics.interval.ms': 0
+    }
+  end
+end
+```
+
 ## 2.0.23 (2022-12-07)
 - [Maintenance] Align with `waterdrop` and `karafka-core`
 - [Improvement] Provide `Admin#read_topic` API to get topic data without subscribing.
