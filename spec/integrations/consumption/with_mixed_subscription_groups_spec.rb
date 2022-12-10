@@ -15,7 +15,7 @@ end
 
 draw_routes do
   DT.topics.first(10).each_slice(2) do |topics|
-    slice_uuid = SecureRandom.uuid
+    slice_uuid = SecureRandom.hex(6)
 
     subscription_group slice_uuid do
       topics.each do |topic_name|

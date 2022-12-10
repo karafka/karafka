@@ -26,7 +26,7 @@ module Karafka
         @topics = Topics.new([])
         # Initialize the subscription group so there's always a value for it, since even if not
         # defined directly, a subscription group will be created
-        @current_subscription_group_id = SecureRandom.uuid
+        @current_subscription_group_id = SecureRandom.hex(6)
       end
 
       # @return [Boolean] true if this consumer group should be active in our current process
@@ -55,7 +55,7 @@ module Karafka
       # topic definition
       # @param name [String, Symbol] name of the current subscription group
       # @param block [Proc] block that may include topics definitions
-      def subscription_group=(name = SecureRandom.uuid, &block)
+      def subscription_group=(name = SecureRandom.hex(6), &block)
         # We cast it here, so the routing supports symbol based but that's anyhow later on
         # validated as a string
         @current_subscription_group_id = name
@@ -64,7 +64,7 @@ module Karafka
 
         # We need to reset the current subscription group after it is used, so it won't leak
         # outside to other topics that would be defined without a defined subscription group
-        @current_subscription_group_id = SecureRandom.uuid
+        @current_subscription_group_id = SecureRandom.hex(6)
       end
 
       # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on

@@ -31,7 +31,7 @@ end
 # Listen only on one consumer group
 Karafka::App.config.internal.routing.active.consumer_groups = [DT.consumer_groups.first]
 
-jsons = Array.new(10) { { SecureRandom.uuid => rand.to_s } }
+jsons = Array.new(10) { { SecureRandom.hex(6) => rand.to_s } }
 
 # We send same messages to both topics, but except only one to run and consume
 jsons.each do |data|

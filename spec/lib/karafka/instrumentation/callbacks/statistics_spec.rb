@@ -5,9 +5,9 @@ RSpec.describe_current do
     described_class.new(subscription_group_id, consumer_group_id, client_name, monitor)
   end
 
-  let(:subscription_group_id) { SecureRandom.uuid }
-  let(:consumer_group_id) { SecureRandom.uuid }
-  let(:client_name) { SecureRandom.uuid }
+  let(:subscription_group_id) { SecureRandom.hex(6) }
+  let(:consumer_group_id) { SecureRandom.hex(6) }
+  let(:client_name) { SecureRandom.hex(6) }
   let(:monitor) { ::Karafka::Instrumentation::Monitor.new }
 
   describe '#call' do

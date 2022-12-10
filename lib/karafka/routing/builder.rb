@@ -80,7 +80,7 @@ module Karafka
       # @param subscription_group_name [String, Symbol] subscription group id. When not provided,
       #   a random uuid will be used
       # @param block [Proc] further topics definitions
-      def subscription_group(subscription_group_name = SecureRandom.uuid, &block)
+      def subscription_group(subscription_group_name = SecureRandom.hex(6), &block)
         consumer_group('app') do
           target.public_send(:subscription_group=, subscription_group_name.to_s, &block)
         end

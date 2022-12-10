@@ -25,7 +25,7 @@ module Karafka
       # @param jobs_queue [JobsQueue]
       # @return [Worker]
       def initialize(jobs_queue)
-        @id = SecureRandom.uuid
+        @id = SecureRandom.hex(6)
         @jobs_queue = jobs_queue
       end
 

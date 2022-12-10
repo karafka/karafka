@@ -10,9 +10,9 @@ RSpec.describe_current do
     )
   end
 
-  let(:subscription_group_id) { SecureRandom.uuid }
-  let(:consumer_group_id) { SecureRandom.uuid }
-  let(:client_name) { SecureRandom.uuid }
+  let(:subscription_group_id) { SecureRandom.hex(6) }
+  let(:consumer_group_id) { SecureRandom.hex(6) }
+  let(:client_name) { SecureRandom.hex(6) }
   let(:monitor) { ::Karafka::Instrumentation::Monitor.new }
   let(:error) { ::Rdkafka::RdkafkaError.new(1, []) }
 

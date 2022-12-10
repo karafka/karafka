@@ -184,7 +184,7 @@ RSpec.describe_current do
     end
 
     context 'when there are no jobs of a given group' do
-      let(:group_id) { SecureRandom.uuid }
+      let(:group_id) { SecureRandom.hex(6) }
 
       it 'expect not to wait' do
         queue.wait(group_id)

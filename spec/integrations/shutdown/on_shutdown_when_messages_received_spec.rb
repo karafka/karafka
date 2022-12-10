@@ -11,7 +11,7 @@ topic3 = DT.topics[2]
 class Consumer < Karafka::BaseConsumer
   def initialize
     super
-    @id = SecureRandom.uuid
+    @id = SecureRandom.hex(6)
   end
 
   def consume

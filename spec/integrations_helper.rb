@@ -36,7 +36,7 @@ def setup_karafka(
 
   Karafka::App.setup do |config|
     # Use some decent defaults
-    caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.uuid].join('-')
+    caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.hex(6)].join('-')
 
     config.kafka = {
       'bootstrap.servers': '127.0.0.1:9092',

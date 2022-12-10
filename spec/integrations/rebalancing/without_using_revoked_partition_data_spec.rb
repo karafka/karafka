@@ -12,7 +12,7 @@
 
 require 'securerandom'
 
-RUN = SecureRandom.uuid.split('-').first
+RUN = SecureRandom.hex(6).split('-').first
 
 setup_karafka do |config|
   config.max_wait_time = 20_000

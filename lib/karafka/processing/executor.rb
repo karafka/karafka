@@ -31,7 +31,7 @@ module Karafka
       # @param client [Karafka::Connection::Client] kafka client
       # @param topic [Karafka::Routing::Topic] topic for which this executor will run
       def initialize(group_id, client, topic)
-        @id = SecureRandom.uuid
+        @id = SecureRandom.hex(6)
         @group_id = group_id
         @client = client
         @topic = topic

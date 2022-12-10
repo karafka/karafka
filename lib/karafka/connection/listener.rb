@@ -21,7 +21,7 @@ module Karafka
       def initialize(consumer_group_coordinator, subscription_group, jobs_queue)
         proc_config = ::Karafka::App.config.internal.processing
 
-        @id = SecureRandom.uuid
+        @id = SecureRandom.hex(6)
         @consumer_group_coordinator = consumer_group_coordinator
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue

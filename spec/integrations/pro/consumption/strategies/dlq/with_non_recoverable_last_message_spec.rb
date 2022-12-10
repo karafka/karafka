@@ -49,7 +49,7 @@ start_karafka_and_wait_until do
   # Send one more when we reached all
   if DT[:offsets].uniq.count == 99 && DT[:extra].empty?
     DT[:extra] << true
-    produce(DT.topic, SecureRandom.uuid)
+    produce(DT.topic, SecureRandom.hex(6))
   end
 
   DT[:offsets].uniq.count >= 100 &&

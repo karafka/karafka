@@ -4,7 +4,7 @@
 # This requires us to inject extra postfix to group id per client and should happen automatically.
 
 setup_karafka do |config|
-  config.kafka[:'group.instance.id'] = SecureRandom.uuid
+  config.kafka[:'group.instance.id'] = SecureRandom.hex(6)
 end
 
 class Consumer < Karafka::BaseConsumer

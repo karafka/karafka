@@ -4,7 +4,7 @@
 
 setup_karafka
 
-jsons = Array.new(100) { { SecureRandom.uuid => rand.to_s } }
+jsons = Array.new(100) { { SecureRandom.hex(6) => rand.to_s } }
 
 class Consumer < Karafka::BaseConsumer
   def consume

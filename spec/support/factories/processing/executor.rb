@@ -4,7 +4,7 @@ FactoryBot.define do
   factory :processing_executor, class: 'Karafka::Processing::Executor' do
     skip_create
 
-    group_id { SecureRandom.uuid }
+    group_id { SecureRandom.hex(6) }
     client { nil }
     topic { build(:routing_topic) }
 
