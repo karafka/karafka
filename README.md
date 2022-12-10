@@ -72,10 +72,10 @@ Karafka.producer.produce_sync(topic: 'example', payload: { 'ping' => 'pong' }.to
 ```bash
 bundle exec karafka server
 
-[7616dc24-505a-417f-b87b-6bf8fc2d98c5] Polled 1 message in 1000ms
-[dcf3a8d8-0bd9-433a-8f63-b70a0cdb0732] Consume job for ExampleConsumer on example started
+[86d47f0b92f7] Polled 1 message in 1000ms
+[3732873c8a74] Consume job for ExampleConsumer on example started
 {"ping"=>"pong"}
-[dcf3a8d8-0bd9-433a-8f63-b70a0cdb0732] Consume job for ExampleConsumer on example finished in 0ms
+[3732873c8a74] Consume job for ExampleConsumer on example finished in 0ms
 ```
 
 ## Want to Upgrade? LGPL is not for you? Want to help?
