@@ -116,8 +116,7 @@ module Karafka
       # Creates admin instance and yields it. After usage it closes the admin instance
       def with_admin
         admin = config(:producer).admin
-        result = yield(admin)
-        result
+        yield(admin)
       ensure
         admin&.close
       end
@@ -125,8 +124,7 @@ module Karafka
       # Creates consumer instance and yields it. After usage it closes the consumer instance
       def with_consumer
         consumer = config(:consumer).consumer
-        result = yield(consumer)
-        result
+        yield(consumer)
       ensure
         consumer&.close
       end
