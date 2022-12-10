@@ -47,16 +47,16 @@ RSpec.describe_current do
     end
   end
 
-  describe "kafka config defaults" do
+  describe 'kafka config defaults' do
     subject(:defaults) { Karafka::App.config.kafka }
 
     let(:expected_defaults) do
       {
-        "allow.auto.create.topics": "true",
-        "bootstrap.servers": "127.0.0.1:9092",
-        "client.id": "karafka",
-        "statistics.interval.ms": 5_000,
-        "topic.metadata.refresh.interval.ms": 5_000
+        'allow.auto.create.topics': 'true',
+        'bootstrap.servers': '127.0.0.1:9092',
+        'client.id': 'karafka',
+        'statistics.interval.ms': 5_000,
+        'topic.metadata.refresh.interval.ms': 5_000
       }
     end
 
