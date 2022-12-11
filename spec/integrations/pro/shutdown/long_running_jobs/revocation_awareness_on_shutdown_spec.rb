@@ -44,19 +44,21 @@ draw_routes do
   end
 end
 
+consumer = setup_rdkafka_consumer
+
 start_karafka_and_wait_until do
   if DT[:started].size >= 10
     # Trigger a rebalance here, it should revoke all partitions
-    consumer = setup_rdkafka_consumer
     consumer.subscribe(DT.topic)
     consumer.each { break }
-    consumer.close
 
     true
   else
     false
   end
 end
+
+consumer.close
 
 assert_equal [], DT[:shutdown], DT[:shutdown]
 assert_equal 10, DT[:revoked].size, DT.data
