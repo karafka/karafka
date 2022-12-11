@@ -5,8 +5,7 @@
 # If by any chance you've wanted a setup for Rails app, either run the `karafka:install`
 # command again or refer to the install templates available in the source codes
 
-ENV['RACK_ENV'] ||= 'development'
-ENV['KARAFKA_ENV'] ||= ENV['RACK_ENV']
+ENV['KARAFKA_ENV'] ||= 'development'
 Bundler.require(:default, ENV['KARAFKA_ENV'])
 
 # Zeitwerk custom loader for loading the app components before the whole
