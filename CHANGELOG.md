@@ -10,8 +10,9 @@
 - [Improvement] Optimize status methods proxying to `Karafka::App`.
 - [Improvement] Allow for easier state usage by introducing explicit `#to_s` for reporting.
 - [Improvement] Change auto-generated id from `SecureRandom#uuid` to `SecureRandom#hex(6)`
-- [Fix] Shutdown producer after all the consumer components are down and the status is stopped. This will ensure, that any instrumentation related Kafka messaging can still operate.
 - [Improvement] Emit statistic every 5 seconds by default.
+- [Fix] Do not trigger code reloading when `consumer_persistence` is enabled.
+- [Fix] Shutdown producer after all the consumer components are down and the status is stopped. This will ensure, that any instrumentation related Kafka messaging can still operate.
 
 ### Upgrade notes
 
