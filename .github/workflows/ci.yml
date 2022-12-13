@@ -46,6 +46,7 @@ jobs:
         run: \curl -sSL https://api.coditsu.io/run/ci | bash
 
   specs:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     needs: diffend
     strategy:
@@ -84,6 +85,7 @@ jobs:
         run: bin/rspecs
 
   integrations:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     needs: diffend
     strategy:

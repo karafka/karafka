@@ -3,8 +3,10 @@ services:
   zookeeper:
     container_name: karafka_20_zookeeper
     image: wurstmeister/zookeeper
+    restart: on-failure
     ports:
       - '2181:2181'
+
   kafka:
     container_name: karafka_20_kafka
     image: wurstmeister/kafka
@@ -22,3 +24,4 @@ services:
          benchmarks_00_10:10:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    restart: on-failure
