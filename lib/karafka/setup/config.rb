@@ -133,6 +133,12 @@ module Karafka
           setting :strategy_selector, default: Processing::StrategySelector.new
         end
 
+        # Things related to operating on messages
+        setting :messages do
+          # Parser is used to convert raw payload prior to deserialization
+          setting :parser, default: Messages::Parser.new
+        end
+
         # Karafka components for ActiveJob
         setting :active_job do
           # option dispatcher [Karafka::ActiveJob::Dispatcher] default dispatcher for ActiveJob

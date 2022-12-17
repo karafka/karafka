@@ -9,7 +9,19 @@ module Karafka
     class Message
       extend Forwardable
 
-      attr_reader :raw_payload, :metadata
+      class << self
+        # @return [Object] general parser
+        # @note We cache it here for performance reasons. It is 2.5x times faster than getting it
+        #   via the config chain.
+        def parser
+          @parser ||= App.config.internal.messages.parser
+        end
+      end
+
+      attr_reader :metadata
+      # raw payload needs to be mutable as we want to have option to change it in the parser
+      # prior to the final deserialization
+      attr_accessor :raw_payload
 
       def_delegators :metadata, *Metadata.members
 
@@ -42,7 +54,7 @@ module Karafka
 
       # @return [Object] deserialized data
       def deserialize
-        metadata.deserializer.call(self)
+        self.class.parser.call(self)
       end
     end
   end
