@@ -16,7 +16,8 @@ module Karafka
     module Encryption
       # Encryption related messages components
       module Messages
-        # Middleware for WaterDrop. It automatically encrypts messages payload
+        # Middleware for WaterDrop. It automatically encrypts messages payload.
+        # It is injected only if encryption is enabled.
         class Middleware
           # @param message [Hash] WaterDrop message hash
           # @return [Hash] hash with encrypted payload and encryption version indicator

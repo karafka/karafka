@@ -12,4 +12,7 @@ en:
       encryption.public_key_invalid: 'is not a valid public RSA key'
       encryption.public_key_needs_to_be_public: 'is a private RSA key not a public'
       encryption.private_keys_format: 'needs to be a hash of version and private key value'
-      encryption.private_keys_needs_to_be_private: 'all keys need to be private'
+      encryption.private_keys_need_to_be_private: 'all keys need to be private'
+      encryption.version_format: must be a non-empty string
+      encryption.public_key_format: 'is not a valid public RSA key'
+      encryption.private_keys_invalid: 'contains an invalid private RSA key string'
