@@ -58,7 +58,7 @@ RSpec.configure do |config|
 
     next unless example.metadata[:type] == :pro
 
-    Karafka::Pro::Loader.setup(Karafka::App.config)
+    Karafka::Pro::Loader.pre_setup(Karafka::App.config)
   end
 
   config.after do
@@ -100,3 +100,17 @@ RSpec.extend RSpecLocator.new(__FILE__)
 # they don't not break anything
 Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
 Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
+
+# @param file_path [String] path within fixtures dir to the expected file
+# @return [String] fixture file content
+def fixture_file(file_path)
+  File.read(
+    File.join(
+      Karafka.gem_root,
+      'spec',
+      'support',
+      'fixtures',
+      file_path
+    )
+  )
+end

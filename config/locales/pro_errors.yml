@@ -1,0 +1,18 @@
+en:
+  validations:
+    topic:
+      virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
+      virtual_partitions.max_partitions_format: needs to be equal or more than 1
+      manual_offset_management_not_with_virtual_partitions: cannot be used together with Virtual Partitions
+      long_running_job.active_format: needs to be either true or false
+      dead_letter_queue_not_with_virtual_partitions: cannot be used together with Virtual Partitions
+
+    config:
+      encryption.active_format: 'needs to be either true or false'
+      encryption.public_key_invalid: 'is not a valid public RSA key'
+      encryption.public_key_needs_to_be_public: 'is a private RSA key not a public one'
+      encryption.private_keys_format: 'needs to be a hash of version and private key value'
+      encryption.private_keys_need_to_be_private: 'all keys need to be private'
+      encryption.version_format: must be a non-empty string
+      encryption.public_key_format: 'is not a valid public RSA key'
+      encryption.private_keys_invalid: 'contains an invalid private RSA key string'

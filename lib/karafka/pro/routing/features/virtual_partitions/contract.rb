@@ -21,9 +21,9 @@ module Karafka
             configure do |config|
               config.error_messages = YAML.safe_load(
                 File.read(
-                  File.join(Karafka.gem_root, 'config', 'errors.yml')
+                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
                 )
-              ).fetch('en').fetch('validations').fetch('pro_topic')
+              ).fetch('en').fetch('validations').fetch('topic')
             end
 
             nested(:virtual_partitions) do

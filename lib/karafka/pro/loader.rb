@@ -23,6 +23,11 @@ module Karafka
         processing/jobs/consume_non_blocking
         processing/strategies/base
         routing/features/base
+        encryption
+        encryption/cipher
+        encryption/setup/config
+        encryption/contracts/config
+        encryption/messages/parser
       ].freeze
 
       # Zeitwerk pro loader
@@ -44,13 +49,29 @@ module Karafka
         # Loads all the pro components and configures them wherever it is expected
         # @param config [Karafka::Core::Configurable::Node] app config that we can alter with pro
         #   components
-        def setup(config)
+        def pre_setup(config)
+          features.each { |feature| feature.pre_setup(config) }
+
           reconfigure(config)
 
           load_topic_features
         end
 
+        # Runs post setup features configuration operations
+        #
+        # @param config [Karafka::Core::Configurable::Node]
+        def post_setup(config)
+          features.each { |feature| feature.post_setup(config) }
+        end
+
         private
+
+        # @return [Array<Module>] extra non-routing related pro features
+        def features
+          [
+            Encryption
+          ]
+        end
 
         # Sets proper config options to use pro components
         # @param config [::Karafka::Core::Configurable::Node] root config node

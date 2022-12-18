@@ -294,6 +294,20 @@ def assert_not_equal(not_expected, received)
   raise AssertionFailedError, "#{received} equals to #{not_expected}"
 end
 
+# @param file_path [String] path within fixtures dir to the expected file
+# @return [String] fixture file content
+def fixture_file(file_path)
+  File.read(
+    File.join(
+      Karafka.gem_root,
+      'spec',
+      'support',
+      'fixtures',
+      file_path
+    )
+  )
+end
+
 # Checks if a given constant can be accessed
 # @param const_name [String] string with potential class / module name
 # @return [Boolean] true if accessible

@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## Unreleased
+- **[Feature]** Provide out of the box encryption support for Pro.
 - [Improvement] Add instrumentation upon `#pause`.
 - [Improvement] Add instrumentation upon retries.
 - [Improvement] Assign `#id` to consumers similar to other entities for ease of debugging.
