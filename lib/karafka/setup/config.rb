@@ -164,7 +164,7 @@ module Karafka
           # Will configure all the pro components
           # This needs to happen before end user configuration as the end user may overwrite some
           # of the pro defaults with custom components
-          Pro::Loader.setup(config) if Karafka.pro?
+          Pro::Loader.pre_setup(config) if Karafka.pro?
 
           configure(&block)
           merge_kafka_defaults!(config)
@@ -172,6 +172,10 @@ module Karafka
           Contracts::Config.new.validate!(config.to_h)
 
           configure_components
+
+          # Runs things that need to be executed after config is defined and all the components
+          # are also configured
+          Pro::Loader.post_setup(config) if Karafka.pro?
 
           Karafka::App.initialized!
         end

@@ -20,12 +20,12 @@ RSpec.describe_current do
       end
     end
 
-    context 'when we run loader' do
+    context 'when we run pre_setup loader' do
       before do
         allow(::Karafka::Pro::Routing::Features::VirtualPartitions).to receive(:activate)
         allow(::Karafka::Pro::Routing::Features::LongRunningJob).to receive(:activate)
 
-        loader.setup(Karafka::App.config)
+        loader.pre_setup(Karafka::App.config)
       end
 
       it 'expect to change active job components into pro' do
