@@ -16,6 +16,10 @@ module Karafka
     module Encryption
       # Cipher for encrypting and decrypting data
       class Cipher
+        def initialize
+          @private_pems = {}
+        end
+
         # Encrypts given string content with the public key
         # @param content [String]
         # @return [String]

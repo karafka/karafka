@@ -37,6 +37,9 @@ module Karafka
           # This allows us to support key rotation
           setting(:private_keys, default: {})
 
+          # Cipher used to encrypt and decrypt data
+          setting(:cipher, default: Encryption::Cipher.new)
+
           configure
         end
       end

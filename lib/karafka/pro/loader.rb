@@ -24,6 +24,7 @@ module Karafka
         processing/strategies/base
         routing/features/base
         encryption
+        encryption/cipher
         encryption/setup/config
         encryption/contracts/config
         encryption/messages/parser

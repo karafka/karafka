@@ -22,7 +22,7 @@ module Karafka
           # @return [Hash] hash with encrypted payload and encryption version indicator
           def call(message)
             message[:headers] ||= {}
-            message[:headers]['encrypted'] = version
+            message[:headers]['encryption'] = version
             message[:payload] = cipher.encrypt(message[:payload])
             message
           end
