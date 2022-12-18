@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Karafka should work correctly when encryption is enabled
+
 PUBLIC_KEY = fixture_file('rsa/public_key_1.pem')
 PRIVATE_KEYS = { '1' => fixture_file('rsa/private_key_1.pem') }.freeze
 
@@ -24,11 +26,11 @@ draw_routes do
   end
 end
 
-elements = DT.uuids(100)
+elements = DT.uuids(10)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[0].size >= 100
+  DT[0].size >= 10
 end
 
 assert_equal elements, DT[0]
