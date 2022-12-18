@@ -39,7 +39,7 @@ module Karafka
           config.internal.messages.parser = Messages::Parser.new
 
           # Encryption for WaterDrop
-          config.producer.middleware.append Messages::Middleware.new
+          config.producer.middleware.append(Messages::Middleware.new)
         end
       end
     end
