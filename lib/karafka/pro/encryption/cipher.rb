@@ -24,7 +24,7 @@ module Karafka
         # @param content [String]
         # @return [String]
         def encrypt(content)
-          public_pem.encrypt(content)
+          public_pem.public_encrypt(content)
         end
 
         # Decrypts provided content using `version` key
@@ -32,7 +32,7 @@ module Karafka
         # @param content [String] encrypted content
         # @return [String] decrypted content
         def decrypt(version, content)
-          private_pem(version).decrypt(content)
+          private_pem(version).private_decrypt(content)
         end
 
         private
