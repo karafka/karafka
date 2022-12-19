@@ -34,7 +34,7 @@ end
 
 # There should be no raw info available
 chunk = elements.first.split('-').first
-assert DT[0].none? { |payload| payload.include?(chunk) }
+assert(DT[0].none? { |payload| payload.include?(chunk) })
 
 # Correct encryption version headers should be present
 assert_equal %w[1], DT[:encryption].uniq
