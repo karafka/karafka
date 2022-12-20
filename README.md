@@ -4,7 +4,7 @@
 [![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
-**Note**: Upgrade notes for migration from Karafka `1.4` to Karafka `2.0` can be found [here](https://karafka.io/docs/Upgrades-2.0/).
+**Note**: Upgrade instructions for migration from Karafka `1.4` to Karafka `2.0` can be found [here](https://karafka.io/docs/Upgrades-2.0/).
 
 ## About Karafka
 
@@ -39,6 +39,8 @@ end
 Karafka **uses** threads to handle many messages simultaneously in the same process. It does not require Rails but will integrate tightly with any Ruby on Rails applications to make event processing dead simple.
 
 ## Getting started
+
+![karafka web ui](https://raw.githubusercontent.com/karafka/misc/master/printscreens/web-ui.png)
 
 If you're entirely new to the subject, you can start with our "Kafka on Rails" articles series, which will get you up and running with the terminology and basic ideas behind using Kafka:
 
