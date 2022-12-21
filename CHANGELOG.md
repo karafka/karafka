@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## Unreleased
+- [Improvement] Early terminate on `read_topic` when reaching the last offset available on the request time.
+
 ## 2.0.24 (2022-12-19)
 - **[Feature]** Provide out of the box encryption support for Pro.
 - [Improvement] Add instrumentation upon `#pause`.
