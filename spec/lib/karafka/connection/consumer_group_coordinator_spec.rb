@@ -9,6 +9,7 @@ RSpec.describe_current do
     before { coordinator.finish_work(1) }
 
     it { expect(coordinator.shutdown?).to eq(false) }
+    it { expect(coordinator.finished?).to eq(false) }
   end
 
   context 'when we finish enough work and can get the lock' do
@@ -17,5 +18,6 @@ RSpec.describe_current do
     after { coordinator.unlock }
 
     it { expect(coordinator.shutdown?).to eq(true) }
+    it { expect(coordinator.finished?).to eq(true) }
   end
 end

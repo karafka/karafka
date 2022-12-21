@@ -21,10 +21,16 @@ module Karafka
         @finished = Set.new
       end
 
+      # @return [Boolean] true if all the subscription groups from a given consumer group are
+      #   finished
+      def finished?
+        @finished.size == @group_size
+      end
+
       # @return [Boolean] can we start shutdown on a given listener
       # @note If true, will also obtain a lock so no-one else will be closing the same time we do
       def shutdown?
-        @finished.size == @group_size && @shutdown_lock.try_lock
+        finished? && @shutdown_lock.try_lock
       end
 
       # Unlocks the shutdown lock

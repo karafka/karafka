@@ -85,7 +85,7 @@ module Karafka
       #   propagate this far.
       def fetch_loop
         # Run the main loop as long as we are not stopping or moving into quiet mode
-        until Karafka::App.stopping? || Karafka::App.quieting?
+        until Karafka::App.stopping? || Karafka::App.quieting? || Karafka::App.quiet?
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop',
             caller: self,
@@ -156,8 +156,9 @@ module Karafka
         # within this consumer group
         @consumer_group_coordinator.finish_work(id)
 
-        # Wait if we're in the quiet mode
-        wait_pinging(wait_until: -> { !Karafka::App.quieting? })
+        # Wait if we're in the process of finishing started work or finished all the work and
+        # just sitting and being quiet
+        wait_pinging(wait_until: -> { !(Karafka::App.quieting? || Karafka::App.quiet?) })
 
         # We need to wait until all the work in the whole consumer group (local to the process)
         # is done. Otherwise we may end up with locks and `Timed out LeaveGroupRequest in flight`

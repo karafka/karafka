@@ -45,9 +45,9 @@ module Karafka
 
         # We always need to wait for Karafka to stop here since we should wait for the stop running
         # in a separate thread (or trap context) to indicate everything is closed
-        # Since `#start` is blocking, we were get here only after the runner is done. This will
+        # Since `#start` is blocking, we will get here only after the runner is done. This will
         # not add any performance degradation because of that.
-        Thread.pass until Karafka::App.terminated?
+        sleep(0.1) until Karafka::App.terminated?
       # Try its best to shutdown underlying components before re-raising
       # rubocop:disable Lint/RescueException
       rescue Exception => e
@@ -129,12 +129,20 @@ module Karafka
       end
 
       # Quiets the Karafka server.
-      # Karafka will stop processing but won't quiet to consumer group, so no rebalance will be
+      #
+      # Karafka will stop processing but won't quit the consumer group, so no rebalance will be
       # triggered until final shutdown.
       def quiet
         # We don't have to safe-guard it with check states as the state transitions work only
         # in one direction
         Karafka::App.quiet!
+
+        # We need one more thread to monitor the process and move to quieted once everything
+        # is quiet and no processing is happening anymore
+        Thread.new do
+          sleep(0.1) until listeners.coordinators.all?(&:finished?)
+          Karafka::App.quieted!
+        end
       end
 
       private

@@ -8,9 +8,15 @@ module Karafka
       initializing: :initialize!,
       initialized: :initialized!,
       running: :run!,
+      # will no longer pickup any work, but current work will be finished
       quieting: :quiet!,
+      # no work is happening but we keep process with the assignments running
+      quiet: :quieted!,
+      # shutdown started
       stopping: :stop!,
+      # all things are done and most of the things except critical are closed
       stopped: :stopped!,
+      # immediately after this process exists
       terminated: :terminate!
     }.freeze
 
