@@ -136,6 +136,11 @@ module Karafka
         info 'Switching to quiet mode. New messages will not be processed.'
       end
 
+      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_app_quiet(_event)
+        info 'Reached quiet mode. No messages will be processed anymore.'
+      end
+
       # Logs info that we're going to stop the Karafka server.
       #
       # @param _event [Karafka::Core::Monitoring::Event] event details including payload

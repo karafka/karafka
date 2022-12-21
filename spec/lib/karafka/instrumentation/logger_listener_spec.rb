@@ -151,6 +151,17 @@ RSpec.describe_current do
     end
   end
 
+  describe '#on_app_quiet' do
+    subject(:trigger) { listener.on_app_quiet(event) }
+
+    let(:payload) { {} }
+    let(:message) { 'Reached quiet mode. No messages will be processed anymore.' }
+
+    it 'expect logger to log server quiet' do
+      expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
+    end
+  end
+
   describe '#on_app_stopping' do
     subject(:trigger) { listener.on_app_stopping(event) }
 

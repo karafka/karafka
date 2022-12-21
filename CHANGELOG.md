@@ -2,6 +2,8 @@
 
 ## Unreleased
 - [Improvement] Early terminate on `read_topic` when reaching the last offset available on the request time.
+- [Improvement] Introduce a `quiet` state that indicates that Karafka is not only moving to quiet mode but actually that it reached it and no work will happen anymore in any of the consumer groups.
+- [Fix] Make sure all files descriptors are closed in the integration specs.
 
 ## 2.0.24 (2022-12-19)
 - **[Feature]** Provide out of the box encryption support for Pro.

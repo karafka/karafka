@@ -20,6 +20,7 @@ module Karafka
         app.initialized
         app.running
         app.quieting
+        app.quiet
         app.stopping
         app.stopped
         app.terminated

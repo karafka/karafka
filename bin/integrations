@@ -152,6 +152,13 @@ class Scenario
     end
   end
 
+  # Close all the files that are open, so they do not pile up
+  def close
+    @stdin.close
+    @stdout.close
+    @stderr.close
+  end
+
   private
 
   # Sets up a proper environment for a given spec to run and returns the run command
@@ -248,6 +255,7 @@ while finished_scenarios.size < scenarios.size
   active_scenarios.select(&:finished?).each do |exited|
     scenario = active_scenarios.delete(exited)
     scenario.report
+    scenario.close
     finished_scenarios << scenario
   end
 

@@ -10,12 +10,15 @@ RSpec.describe_current do
     allow(Karafka::App).to receive(:run!)
     allow(Karafka::App).to receive(:stopped?).and_return(true)
     allow(Karafka::App).to receive(:terminated?).and_return(true)
-    allow(Karafka::App).to receive(:subscription_groups).and_return({ 1 => 1 })
+    allow(Karafka::App).to receive(:subscription_groups).and_return({ 1 => [] })
     # Do not close the real producer as we use it in specs
     allow(Karafka::App.producer).to receive(:close)
     allow(Karafka::Runner).to receive(:new).and_return(runner)
     allow(runner).to receive(:call)
-    described_class.listeners = []
+
+    jobs_queue = Karafka::Processing::JobsQueue.new
+
+    described_class.listeners = ::Karafka::Connection::ListenersBatch.new(jobs_queue)
     described_class.workers = []
   end
 
@@ -117,7 +120,6 @@ RSpec.describe_current do
     after do
       Karafka::App.config.internal.status.run!
       server_class.stop
-      described_class.listeners.clear
       described_class.workers = []
       # After shutdown we need to reinitialize the app for other specs
       Karafka::App.initialize!
@@ -136,10 +138,7 @@ RSpec.describe_current do
       end
 
       context 'when there are no active threads (all shutdown ok)' do
-        before do
-          server_class.stop
-          described_class.listeners.clear
-        end
+        before { server_class.stop }
 
         it 'expect stop without exit or sleep' do
           expect(Karafka::App).to have_received(:stop!)
@@ -162,7 +161,6 @@ RSpec.describe_current do
         before do
           described_class.listeners = [active_thread]
           server_class.stop
-          described_class.listeners.clear
         end
 
         it 'expect stop and exit with sleep' do
@@ -187,7 +185,6 @@ RSpec.describe_current do
           allow(process).to receive(:supervised?).and_return(false)
           described_class.listeners = [active_thread]
           server_class.stop
-          described_class.listeners.clear
         end
 
         it 'expect stop and exit with sleep' do
