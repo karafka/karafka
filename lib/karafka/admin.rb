@@ -30,29 +30,30 @@ module Karafka
       # @param name [String, Symbol] topic name
       # @param partition [Integer] partition
       # @param count [Integer] how many messages we want to get at most
-      # @param offset [Integer] offset from which we should start. If -1 is provided (default) we
-      #   will start from the latest offset
+      # @param start_offset [Integer] offset from which we should start. If -1 is provided
+      #   (default) we will start from the latest offset
       #
       # @return [Array<Karafka::Messages::Message>] array with messages
-      def read_topic(name, partition, count, offset = -1)
+      def read_topic(name, partition, count, start_offset = -1)
         messages = []
         tpl = Rdkafka::Consumer::TopicPartitionList.new
 
         with_consumer do |consumer|
-          if offset.negative?
-            offsets = consumer.query_watermark_offsets(name, partition)
-            offset = offsets.last - count
-          end
+          offsets = consumer.query_watermark_offsets(name, partition)
+          end_offset = offsets.last
 
-          offset = offset.negative? ? 0 : offset
+          start_offset = [0, offsets.last - count].max if start_offset.negative?
 
-          tpl.add_topic_and_partitions_with_offsets(name, partition => offset)
+          tpl.add_topic_and_partitions_with_offsets(name, partition => start_offset)
           consumer.assign(tpl)
 
           # We should poll as long as we don't have all the messages that we need or as long as
           # we do not read all the messages from the topic
           loop do
+            # If we've got as many messages as we've wanted stop
             break if messages.size >= count
+            # If we've reached end of the topic messages, don't process more
+            break if !messages.empty? && end_offset <= messages.last.offset
 
             message = consumer.poll(200)
             messages << message if message
