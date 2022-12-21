@@ -30,8 +30,8 @@ module Karafka
       # @param name [String, Symbol] topic name
       # @param partition [Integer] partition
       # @param count [Integer] how many messages we want to get at most
-      # @param offset [Integer] offset from which we should start. If -1 is provided (default) we
-      #   will start from the latest offset
+      # @param start_offset [Integer] offset from which we should start. If -1 is provided
+      #   (default) we will start from the latest offset
       #
       # @return [Array<Karafka::Messages::Message>] array with messages
       def read_topic(name, partition, count, start_offset = -1)
