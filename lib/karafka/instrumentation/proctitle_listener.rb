@@ -4,7 +4,7 @@ module Karafka
   module Instrumentation
     # Listener that sets a proc title with a nice descriptive value
     class ProctitleListener
-      Status::STATES.keys.each do |state|
+      Status::STATES.each_key do |state|
         class_eval <<~RUBY, __FILE__, __LINE__ + 1
           # Updates proc title to an appropriate state
           def on_app_#{state}(_event)

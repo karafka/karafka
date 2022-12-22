@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   before { allow(::Process).to receive(:setproctitle) }
 
-  ::Karafka::Status::STATES.keys.each do |state|
+  ::Karafka::Status::STATES.each_key do |state|
     describe "#on_app_#{state}" do
       let(:expected_title) { "karafka #{Karafka::App.config.client_id} (#{state})" }
 
