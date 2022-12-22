@@ -5,27 +5,13 @@ RSpec.describe_current do
 
   before { allow(::Process).to receive(:setproctitle) }
 
-  describe '#on_app_initializing' do
-    let(:expected_title) { "karafka #{Karafka::App.config.client_id} (initializing)" }
+  ::Karafka::Status::STATES.each_key do |state|
+    describe "#on_app_#{state}" do
+      let(:expected_title) { "karafka #{Karafka::App.config.client_id} (#{state})" }
 
-    before { listener.on_app_initializing({}) }
+      before { listener.public_send("on_app_#{state}", {}) }
 
-    it { expect(::Process).to have_received(:setproctitle).with(expected_title) }
-  end
-
-  describe '#on_app_running' do
-    let(:expected_title) { "karafka #{Karafka::App.config.client_id} (running)" }
-
-    before { listener.on_app_running({}) }
-
-    it { expect(::Process).to have_received(:setproctitle).with(expected_title) }
-  end
-
-  describe '#on_app_stopping' do
-    let(:expected_title) { "karafka #{Karafka::App.config.client_id} (stopping)" }
-
-    before { listener.on_app_stopping({}) }
-
-    it { expect(::Process).to have_received(:setproctitle).with(expected_title) }
+      it { expect(::Process).to have_received(:setproctitle).with(expected_title) }
+    end
   end
 end

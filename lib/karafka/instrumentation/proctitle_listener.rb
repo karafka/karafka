@@ -4,22 +4,13 @@ module Karafka
   module Instrumentation
     # Listener that sets a proc title with a nice descriptive value
     class ProctitleListener
-      # Updates proc title to an initializing one
-      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_app_initializing(_event)
-        setproctitle('initializing')
-      end
-
-      # Updates proc title to a running one
-      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_app_running(_event)
-        setproctitle('running')
-      end
-
-      # Updates proc title to a stopping one
-      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_app_stopping(_event)
-        setproctitle('stopping')
+      Status::STATES.each_key do |state|
+        class_eval <<~RUBY, __FILE__, __LINE__ + 1
+          # Updates proc title to an appropriate state
+          def on_app_#{state}(_event)
+            setproctitle('#{state}')
+          end
+        RUBY
       end
 
       private
