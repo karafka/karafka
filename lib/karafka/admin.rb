@@ -68,7 +68,10 @@ module Karafka
         messages.map do |message|
           Messages::Builders::Message.call(
             message,
-            Topic.new(name, Karafka::App.config.deserializer),
+            # Use topic from routes if we can match it or create a dummy one
+            # Dummy one is used in case we cannot match the topic with routes. This can happen
+            # when admin API is used to read topics that are not part of the routing
+            Routing::Router.find_by(name: name) || Topic.new(name, App.config.deserializer),
             Time.now
           )
         end

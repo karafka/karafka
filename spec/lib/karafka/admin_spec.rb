@@ -129,5 +129,37 @@ RSpec.describe_current do
       it { expect(reading.last.offset).to eq(5) }
       it { expect(reading.first.offset).to eq(3) }
     end
+
+    context 'when trying to read from topic that is part of the routing' do
+      let(:created_custom_deserializer) { rand }
+      let(:count) { 1 }
+
+      before do
+        custom_deserializer = created_custom_deserializer
+        defined_topic_name = name
+
+        Karafka::App.config.internal.routing.builder.clear
+
+        Karafka::App.config.internal.routing.builder.draw do
+          topic defined_topic_name do
+            consumer Class.new(Karafka::BaseConsumer)
+            deserializer custom_deserializer
+          end
+        end
+
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(1) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it 'expect to assign proper deserializer to messages' do
+        expect(reading.first.deserializer).to eq(created_custom_deserializer)
+      end
+
+      it 'expect to user proper routes topic assigned to messages' do
+        expect(reading.first.topic).to eq(name)
+      end
+    end
   end
 end
