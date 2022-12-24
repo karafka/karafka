@@ -80,6 +80,7 @@ module Karafka
       # Makes sure we have anything to subscribe to when we start the server
       virtual do |_, errors|
         next unless errors.empty?
+
         next unless Karafka::App.subscription_groups.empty?
 
         [[%i[topics], :topics_missing]]

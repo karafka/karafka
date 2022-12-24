@@ -29,6 +29,7 @@ module Karafka
           .delete_if { |_, sgs| sgs.empty? }
           .each { |_, sgs| sgs.each { |sg| sg.topics.delete_if { |top| !top.active? } } }
           .each { |_, sgs| sgs.delete_if { |sg| sg.topics.empty? } }
+          .reject { |cg, _| cg.subscription_groups.empty? }
           .to_h
       end
 

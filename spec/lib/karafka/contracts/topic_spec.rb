@@ -7,6 +7,7 @@ RSpec.describe_current do
     {
       id: 'id',
       name: 'name',
+      active: true,
       consumer: Class.new,
       deserializer: Class.new,
       kafka: { 'bootstrap.servers' => 'localhost:9092' },
@@ -84,6 +85,31 @@ RSpec.describe_current do
   context 'when we validate consumer' do
     context 'when it is not present' do
       before { config[:consumer] = nil }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when topic is not active' do
+      before do
+        config[:consumer] = nil
+        config[:active] = false
+      end
+
+      it 'expect not to require consumer' do
+        expect(check).to be_success
+      end
+    end
+  end
+
+  context 'when we validate active' do
+    context 'when it is nil' do
+      before { config[:active] = nil }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when it is not a boolean' do
+      before { config[:active] = 2 }
 
       it { expect(check).not_to be_success }
     end
