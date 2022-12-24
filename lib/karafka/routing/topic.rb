@@ -27,6 +27,7 @@ module Karafka
         @name = name.to_s
         @consumer_group = consumer_group
         @attributes = {}
+        @active = true
         # @note We use identifier related to the consumer group that owns a topic, because from
         #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can
         #   have same topic name across multiple consumer groups
@@ -66,6 +67,12 @@ module Karafka
         end
       end
 
+      # Allows to disable topic by invoking this method and setting it to `false`.
+      # @param active [Boolean] should this topic be consumed or not
+      def active(active)
+        @active = active
+      end
+
       # @return [Class] consumer class that we should use
       # @note This is just an alias to the `#consumer` method. We however want to use it internally
       #   instead of referencing the `#consumer`. We use this to indicate that this method returns
@@ -77,6 +84,9 @@ module Karafka
 
       # @return [Boolean] should this topic be in use
       def active?
+        # Never active if disabled via routing
+        return false unless @active
+
         topics = Karafka::App.config.internal.routing.active.topics
 
         # When empty it means no topics were specified, hence all should be used
@@ -93,6 +103,7 @@ module Karafka
         Hash[map].merge!(
           id: id,
           name: name,
+          active: active?,
           consumer: consumer,
           consumer_group_id: consumer_group.id,
           subscription_group: subscription_group

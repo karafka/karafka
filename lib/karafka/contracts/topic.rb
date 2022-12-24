@@ -12,7 +12,6 @@ module Karafka
         ).fetch('en').fetch('validations').fetch('topic')
       end
 
-      required(:consumer) { |val| !val.nil? }
       required(:deserializer) { |val| !val.nil? }
       required(:id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
@@ -20,7 +19,19 @@ module Karafka
       required(:initial_offset) { |val| %w[earliest latest].include?(val) }
       required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
       required(:name) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
+      required(:active) { |val| [true, false].include?(val) }
       required(:subscription_group) { |val| val.is_a?(String) && !val.empty? }
+
+      # Consumer needs to be present only if topic is active
+      # We allow not to define consumer for non-active because they may be only used via admin
+      # api or other ways and not consumed with consumer
+      virtual do |data, errors|
+        next unless errors.empty?
+        next if data.fetch(:consumer)
+        next unless data.fetch(:active)
+
+        [[%w[consumer], :missing]]
+      end
 
       virtual do |data, errors|
         next unless errors.empty?
