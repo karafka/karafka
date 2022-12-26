@@ -53,6 +53,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.2'
           # We run it against the oldest and the newest of a given major to make sure, that there
           # are no syntax-sugars that we would use that were introduced down the road
           - '3.1'
