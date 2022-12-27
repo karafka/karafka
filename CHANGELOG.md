@@ -1,10 +1,10 @@
 # Karafka framework changelog
 
 ## Unreleased
+- **[Feature]** Allow for disabling given topics by setting `active` to false. It will exclude them from consumption but will allow to have their definitions for using admin APIs, etc.
 - [Improvement] Early terminate on `read_topic` when reaching the last offset available on the request time.
 - [Improvement] Introduce a `quiet` state that indicates that Karafka is not only moving to quiet mode but actually that it reached it and no work will happen anymore in any of the consumer groups.
 - [Improvement] Use Karafka defined routes topics when possible for `read_topic` admin API.
-- [Improvement] Allow for disabling given topics by setting `active` to false. It will exclude them from consumption but will allow to have their definitions for using admin APIs, etc.
 - [Fix] Fix proctitle listener state changes reporting on new states.
 - [Fix] Make sure all files descriptors are closed in the integration specs.
 - [Fix] Fix a case where empty subscription groups could leak into the execution flow.
