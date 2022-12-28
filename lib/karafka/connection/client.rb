@@ -14,6 +14,9 @@ module Karafka
       # @note Consumer name may change in case we regenerate it
       attr_reader :name
 
+      # @return [String] id of the client
+      attr_reader :id
+
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
@@ -29,6 +32,7 @@ module Karafka
       #   with all the configuration details needed for us to create a client
       # @return [Karafka::Connection::Rdk::Consumer]
       def initialize(subscription_group)
+        @id = SecureRandom.hex(6)
         # Name is set when we build consumer
         @name = ''
         @mutex = Mutex.new
@@ -165,6 +169,15 @@ module Karafka
 
         return unless tpl
 
+        Karafka.monitor.instrument(
+          'client.pause',
+          caller: self,
+          subscription_group: @subscription_group,
+          topic: topic,
+          partition: partition,
+          offset: offset
+        )
+
         @paused_tpls[topic][partition] = tpl
 
         @kafka.pause(tpl)
@@ -194,6 +207,14 @@ module Karafka
         # If we did not have it, it means we never paused this partition, thus no resume should
         # happen in the first place
         return unless @paused_tpls[topic].delete(partition)
+
+        Karafka.monitor.instrument(
+          'client.resume',
+          caller: self,
+          subscription_group: @subscription_group,
+          topic: topic,
+          partition: partition
+        )
 
         @kafka.resume(tpl)
       ensure

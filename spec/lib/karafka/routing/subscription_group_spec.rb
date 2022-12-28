@@ -21,6 +21,10 @@ RSpec.describe_current do
     it { expect(group.topics).to eq([topic]) }
   end
 
+  describe '#consumer_group' do
+    it { expect(group.consumer_group).to eq(topic.consumer_group) }
+  end
+
   describe '#kafka' do
     it { expect(group.kafka[:'client.id']).to eq(Karafka::App.config.client_id) }
     it { expect(group.kafka[:'auto.offset.reset']).to eq('earliest') }

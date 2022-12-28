@@ -25,25 +25,28 @@ module Karafka
         app.stopped
         app.terminated
 
-        consumer.consumed
-        consumer.consuming.pause
-        consumer.consuming.retry
-        consumer.revoked
-        consumer.shutdown
-
-        process.notice_signal
+        client.pause
+        client.resume
 
         connection.listener.before_fetch_loop
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
 
+        consumer.consuming.pause
+        consumer.consumed
+        consumer.consuming.retry
+        consumer.revoked
+        consumer.shutdown
+
         dead_letter_queue.dispatched
+
+        process.notice_signal
+
+        statistics.emitted
 
         worker.process
         worker.processed
         worker.completed
-
-        statistics.emitted
 
         error.occurred
       ].freeze

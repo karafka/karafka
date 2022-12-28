@@ -8,7 +8,7 @@ module Karafka
     # @note One subscription group will always belong to one consumer group, but one consumer
     #   group can have multiple subscription groups.
     class SubscriptionGroup
-      attr_reader :id, :name, :topics, :kafka
+      attr_reader :id, :name, :topics, :kafka, :consumer_group
 
       # @param position [Integer] position of this subscription group in all the subscriptions
       #   groups array. We need to have this value for sake of static group memberships, where
@@ -17,6 +17,7 @@ module Karafka
       # @return [SubscriptionGroup] built subscription group
       def initialize(position, topics)
         @name = topics.first.subscription_group
+        @consumer_group = topics.first.consumer_group
         @id = "#{@name}_#{position}"
         @position = position
         @topics = topics
