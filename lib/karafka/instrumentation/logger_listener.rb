@@ -63,19 +63,30 @@ module Karafka
         info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
       end
 
-      # Prints info about a pause occurrence. Irrelevant if user or system initiated.
+      # Prints info about a consumer pause occurrence. Irrelevant if user or system initiated.
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_consumer_consuming_pause(event)
+      def on_client_pause(event)
         topic = event[:topic]
         partition = event[:partition]
         offset = event[:offset]
-        consumer = event[:caller]
-        timeout = event[:timeout]
+        client = event[:caller]
 
         info <<~MSG.tr("\n", ' ').strip!
-          [#{consumer.id}] Pausing partition #{partition} of topic #{topic}
-          on offset #{offset} for #{timeout} ms.
+          [#{client.id}] Pausing partition #{partition} of topic #{topic} on offset #{offset}
+        MSG
+      end
+
+      # Prints information about resuming of processing of a given topic partition
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_client_resume(event)
+        topic = event[:topic]
+        partition = event[:partition]
+        client = event[:caller]
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{client.id}] Resuming partition #{partition} of topic #{topic}
         MSG
       end
 
@@ -128,17 +139,17 @@ module Karafka
 
         return if Karafka.pro?
 
-        info 'See LICENSE and the LGPL-3.0 for licensing details.'
+        info 'See LICENSE and the LGPL-3.0 for licensing details'
       end
 
       # @param _event [Karafka::Core::Monitoring::Event] event details including payload
       def on_app_quieting(_event)
-        info 'Switching to quiet mode. New messages will not be processed.'
+        info 'Switching to quiet mode. New messages will not be processed'
       end
 
       # @param _event [Karafka::Core::Monitoring::Event] event details including payload
       def on_app_quiet(_event)
-        info 'Reached quiet mode. No messages will be processed anymore.'
+        info 'Reached quiet mode. No messages will be processed anymore'
       end
 
       # Logs info that we're going to stop the Karafka server.

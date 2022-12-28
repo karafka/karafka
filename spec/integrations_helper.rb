@@ -184,6 +184,8 @@ def create_routes_topics
 
   Karafka::App.routes.map(&:topics).flatten.each do |topics|
     topics.each do |topic|
+      next unless topic.active?
+
       topics_names << topic.name
 
       next unless topic.dead_letter_queue?

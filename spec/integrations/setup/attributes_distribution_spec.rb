@@ -40,5 +40,7 @@ end
 $stdout = proper_stdout
 $stderr = proper_stderr
 
-assert_equal false, strio.string.include?('Configuration property heartbeat.interval.ms')
-assert_equal false, strio.string.include?('Configuration property max.poll.interval.ms')
+content = strio.string
+
+assert_equal false, content.include?('Configuration property heartbeat.interval.ms'), content
+assert_equal false, content.include?('Configuration property max.poll.interval.ms'), content
