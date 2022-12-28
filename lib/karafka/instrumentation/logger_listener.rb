@@ -63,19 +63,30 @@ module Karafka
         info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
       end
 
-      # Prints info about a pause occurrence. Irrelevant if user or system initiated.
+      # Prints info about a consumer pause occurrence. Irrelevant if user or system initiated.
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_consumer_consuming_pause(event)
+      def on_client_pause(event)
         topic = event[:topic]
         partition = event[:partition]
         offset = event[:offset]
-        consumer = event[:caller]
-        timeout = event[:timeout]
+        client = event[:caller]
 
         info <<~MSG.tr("\n", ' ').strip!
-          [#{consumer.id}] Pausing partition #{partition} of topic #{topic}
-          on offset #{offset} for #{timeout} ms.
+          [#{client.id}] Pausing partition #{partition} of topic #{topic} on offset #{offset}.
+        MSG
+      end
+
+      # Prints information about resuming of processing of a given topic partition
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_client_resume(event)
+        topic = event[:topic]
+        partition = event[:partition]
+        client = event[:caller]
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{client.id}] Resuming partition #{partition} of topic #{topic}.
         MSG
       end
 

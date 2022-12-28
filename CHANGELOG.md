@@ -5,6 +5,9 @@
 - [Improvement] Early terminate on `read_topic` when reaching the last offset available on the request time.
 - [Improvement] Introduce a `quiet` state that indicates that Karafka is not only moving to quiet mode but actually that it reached it and no work will happen anymore in any of the consumer groups.
 - [Improvement] Use Karafka defined routes topics when possible for `read_topic` admin API.
+- [Improvement] Introduce `client.pause` and `client.resume` instrumentation hooks for tracking client topic partition pausing and resuming. This is alongside of `consumer.consuming.pause` that can be used to track both manual and automatic pausing with more granular consumer related details. The `client.*` should be used for low level tracking.
+- [Improvement] Replace `LoggerListener` pause notification with one based on `client.pause` instead of `consumer.consuming.pause`.
+- [Improvement] Expand `LoggerListener` with `client.resume` notification.
 - [Fix] Fix proctitle listener state changes reporting on new states.
 - [Fix] Make sure all files descriptors are closed in the integration specs.
 - [Fix] Fix a case where empty subscription groups could leak into the execution flow.

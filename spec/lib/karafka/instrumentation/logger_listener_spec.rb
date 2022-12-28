@@ -73,20 +73,37 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info) }
   end
 
-  describe '#on_consumer_consuming_pause' do
-    subject(:trigger) { listener.on_consumer_consuming_pause(event) }
+  describe '#on_client_pause' do
+    subject(:trigger) { listener.on_client_pause(event) }
 
-    let(:consumer) { Class.new(Karafka::BaseConsumer).new }
+    let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
     let(:message) do
-      "[#{consumer.id}] Pausing partition 0 of topic Topic on offset 12 for 100 ms."
+      "[#{client.id}] Pausing partition 0 of topic Topic on offset 12."
     end
     let(:payload) do
       {
-        caller: consumer,
+        caller: client,
         topic: 'Topic',
         partition: 0,
-        offset: 12,
-        timeout: 100
+        offset: 12
+      }
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
+  describe '#on_client_resume' do
+    subject(:trigger) { listener.on_client_resume(event) }
+
+    let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
+    let(:message) do
+      "[#{client.id}] Resuming partition 0 of topic Topic."
+    end
+    let(:payload) do
+      {
+        caller: client,
+        topic: 'Topic',
+        partition: 0
       }
     end
 
