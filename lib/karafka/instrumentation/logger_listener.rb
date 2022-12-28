@@ -73,7 +73,7 @@ module Karafka
         client = event[:caller]
 
         info <<~MSG.tr("\n", ' ').strip!
-          [#{client.id}] Pausing partition #{partition} of topic #{topic} on offset #{offset}.
+          [#{client.id}] Pausing partition #{partition} of topic #{topic} on offset #{offset}
         MSG
       end
 
@@ -86,7 +86,7 @@ module Karafka
         client = event[:caller]
 
         info <<~MSG.tr("\n", ' ').strip!
-          [#{client.id}] Resuming partition #{partition} of topic #{topic}.
+          [#{client.id}] Resuming partition #{partition} of topic #{topic}
         MSG
       end
 
@@ -139,17 +139,17 @@ module Karafka
 
         return if Karafka.pro?
 
-        info 'See LICENSE and the LGPL-3.0 for licensing details.'
+        info 'See LICENSE and the LGPL-3.0 for licensing details'
       end
 
       # @param _event [Karafka::Core::Monitoring::Event] event details including payload
       def on_app_quieting(_event)
-        info 'Switching to quiet mode. New messages will not be processed.'
+        info 'Switching to quiet mode. New messages will not be processed'
       end
 
       # @param _event [Karafka::Core::Monitoring::Event] event details including payload
       def on_app_quiet(_event)
-        info 'Reached quiet mode. No messages will be processed anymore.'
+        info 'Reached quiet mode. No messages will be processed anymore'
       end
 
       # Logs info that we're going to stop the Karafka server.

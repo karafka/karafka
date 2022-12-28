@@ -78,7 +78,7 @@ RSpec.describe_current do
 
     let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
     let(:message) do
-      "[#{client.id}] Pausing partition 0 of topic Topic on offset 12."
+      "[#{client.id}] Pausing partition 0 of topic Topic on offset 12"
     end
     let(:payload) do
       {
@@ -97,7 +97,7 @@ RSpec.describe_current do
 
     let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
     let(:message) do
-      "[#{client.id}] Resuming partition 0 of topic Topic."
+      "[#{client.id}] Resuming partition 0 of topic Topic"
     end
     let(:payload) do
       {
@@ -161,7 +161,7 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_app_quieting(event) }
 
     let(:payload) { {} }
-    let(:message) { 'Switching to quiet mode. New messages will not be processed.' }
+    let(:message) { 'Switching to quiet mode. New messages will not be processed' }
 
     it 'expect logger to log server quiet' do
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
@@ -172,7 +172,7 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_app_quiet(event) }
 
     let(:payload) { {} }
-    let(:message) { 'Reached quiet mode. No messages will be processed anymore.' }
+    let(:message) { 'Reached quiet mode. No messages will be processed anymore' }
 
     it 'expect logger to log server quiet' do
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)

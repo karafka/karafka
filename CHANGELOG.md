@@ -11,6 +11,7 @@
 - [Fix] Fix proctitle listener state changes reporting on new states.
 - [Fix] Make sure all files descriptors are closed in the integration specs.
 - [Fix] Fix a case where empty subscription groups could leak into the execution flow.
+- [Fix] Fix `LoggerListener` reporting so it does not end with `.`.
 
 ## 2.0.24 (2022-12-19)
 - **[Feature]** Provide out of the box encryption support for Pro.
