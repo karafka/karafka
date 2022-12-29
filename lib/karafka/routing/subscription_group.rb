@@ -10,6 +10,7 @@ module Karafka
     class SubscriptionGroup
       attr_reader :id, :name, :topics, :kafka, :consumer_group
 
+      # Numeric for counting groups
       GROUP_COUNT = Concurrent::AtomicFixnum.new
 
       private_constant :GROUP_COUNT
@@ -17,7 +18,7 @@ module Karafka
       class << self
         # Generates new subscription group id that will be used in case of anonymous subscription
         #   groups
-        # @return [String] hex(6) compatible reproducable id
+        # @return [String] hex(6) compatible reproducible id
         def id
           ::Digest::MD5.hexdigest(
             GROUP_COUNT.increment.to_s
