@@ -39,6 +39,10 @@ consumer = setup_rdkafka_consumer
 other = Thread.new do
   sleep(1) until DT.data.size >= 2
 
+  # Give it enough time to actually finish the work and mark offset before triggering rebalance
+  # This is useful on the CI because the CI sometimes lags
+  sleep(1)
+
   consumer.subscribe(DT.topic)
 
   consumer.each do |message|

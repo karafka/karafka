@@ -10,6 +10,22 @@ module Karafka
     class SubscriptionGroup
       attr_reader :id, :name, :topics, :kafka, :consumer_group
 
+      # Numeric for counting groups
+      GROUP_COUNT = Concurrent::AtomicFixnum.new
+
+      private_constant :GROUP_COUNT
+
+      class << self
+        # Generates new subscription group id that will be used in case of anonymous subscription
+        #   groups
+        # @return [String] hex(6) compatible reproducible id
+        def id
+          ::Digest::MD5.hexdigest(
+            GROUP_COUNT.increment.to_s
+          )[0..11]
+        end
+      end
+
       # @param position [Integer] position of this subscription group in all the subscriptions
       #   groups array. We need to have this value for sake of static group memberships, where
       #   we need a "in-between" restarts unique identifier

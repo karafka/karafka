@@ -8,6 +8,7 @@
 - [Improvement] Introduce `client.pause` and `client.resume` instrumentation hooks for tracking client topic partition pausing and resuming. This is alongside of `consumer.consuming.pause` that can be used to track both manual and automatic pausing with more granular consumer related details. The `client.*` should be used for low level tracking.
 - [Improvement] Replace `LoggerListener` pause notification with one based on `client.pause` instead of `consumer.consuming.pause`.
 - [Improvement] Expand `LoggerListener` with `client.resume` notification.
+- [Improvement] Replace random anonymous subscription groups ids with stable once.
 - [Fix] Fix proctitle listener state changes reporting on new states.
 - [Fix] Make sure all files descriptors are closed in the integration specs.
 - [Fix] Fix a case where empty subscription groups could leak into the execution flow.
