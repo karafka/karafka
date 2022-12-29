@@ -14,7 +14,9 @@
   base64
   date
   singleton
+  digest
   zeitwerk
+  concurrent/atomic/atomic_fixnum
 ].each(&method(:require))
 
 # Karafka framework main namespace
