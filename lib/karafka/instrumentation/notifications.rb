@@ -38,6 +38,7 @@ module Karafka
         consumer.consuming.retry
         consumer.revoke
         consumer.revoked
+        consumer.shutting_down
         consumer.shutdown
 
         dead_letter_queue.dispatched

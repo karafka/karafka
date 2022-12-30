@@ -80,6 +80,7 @@ module Karafka
 
         # Runs the shutdown code
         def handle_shutdown
+          Karafka.monitor.instrument('consumer.shutting_down', caller: self) do
           Karafka.monitor.instrument('consumer.shutdown', caller: self) do
             shutdown
           end
