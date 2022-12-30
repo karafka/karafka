@@ -12,16 +12,6 @@ module Karafka
     #       raw_consumer_group_name
     #     end
     #   end
-    #
-    # @example Mapper for replacing "_" with "." in topic names
-    #   class MyMapper
-    #     def call(raw_consumer_group_name)
-    #       [
-    #         Karafka::Helpers::Inflector.map(Karafka::App.config.client_id.to_s),
-    #         raw_consumer_group_name
-    #       ].join('_').gsub('_', '.')
-    #     end
-    #   end
     class ConsumerMapper
       # @param raw_consumer_group_name [String, Symbol] string or symbolized consumer group name
       # @return [String] remapped final consumer group name

@@ -25,6 +25,7 @@ module Karafka
 
         # Run the user consumption code
         def handle_consume
+          Karafka.monitor.instrument('consumer.consume', caller: self)
           Karafka.monitor.instrument('consumer.consumed', caller: self) do
             consume
           end
@@ -70,6 +71,19 @@ module Karafka
           resume
 
           coordinator.revoke
+
+          Karafka.monitor.instrument('consumer.revoke', caller: self)
+          Karafka.monitor.instrument('consumer.revoked', caller: self) do
+            revoked
+          end
+        end
+
+        # Runs the shutdown code
+        def handle_shutdown
+          Karafka.monitor.instrument('consumer.shutting_down', caller: self)
+          Karafka.monitor.instrument('consumer.shutdown', caller: self) do
+            shutdown
+          end
         end
       end
     end

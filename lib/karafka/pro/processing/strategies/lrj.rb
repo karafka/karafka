@@ -70,6 +70,11 @@ module Karafka
               # a failure. Double non-blocking resume could cause problems in coordination.
               coordinator.revoke
             end
+
+            Karafka.monitor.instrument('consumer.revoke', caller: self)
+            Karafka.monitor.instrument('consumer.revoked', caller: self) do
+              revoked
+            end
           end
         end
       end

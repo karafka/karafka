@@ -46,6 +46,7 @@ module Karafka
             # This can happen primarily when an LRJ job gets to the internal worker queue and
             # this partition is revoked prior processing.
             unless revoked?
+              Karafka.monitor.instrument('consumer.consume', caller: self)
               Karafka.monitor.instrument('consumer.consumed', caller: self) do
                 consume
               end
@@ -90,6 +91,11 @@ module Karafka
               resume
 
               coordinator.revoke
+            end
+
+            Karafka.monitor.instrument('consumer.revoke', caller: self)
+            Karafka.monitor.instrument('consumer.revoked', caller: self) do
+              revoked
             end
           end
         end

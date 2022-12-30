@@ -99,10 +99,6 @@ module Karafka
     # @private
     def on_revoked
       handle_revoked
-
-      Karafka.monitor.instrument('consumer.revoked', caller: self) do
-        revoked
-      end
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',
@@ -116,9 +112,7 @@ module Karafka
     #
     # @private
     def on_shutdown
-      Karafka.monitor.instrument('consumer.shutdown', caller: self) do
-        shutdown
-      end
+      handle_shutdown
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',

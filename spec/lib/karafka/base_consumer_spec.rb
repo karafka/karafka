@@ -205,6 +205,8 @@ RSpec.describe_current do
   end
 
   describe '#on_shutdown' do
+    before { consumer.singleton_class.include(Karafka::Processing::Strategies::Default) }
+
     context 'when everything went ok on shutdown' do
       it { expect { consumer.on_shutdown }.not_to raise_error }
 
@@ -218,7 +220,7 @@ RSpec.describe_current do
 
       it 'expect not to run error instrumentation' do
         Karafka.monitor.subscribe('error.occurred') do |event|
-          expect(event.payload[:caller]).not_to eq(consumer)
+          expect(event.payload[:caller].object_id).not_to eq(consumer.object_id)
           expect(event.payload[:error]).not_to be_a(StandardError)
           expect(event.payload[:type]).to eq('consumer.shutdown.error')
         end

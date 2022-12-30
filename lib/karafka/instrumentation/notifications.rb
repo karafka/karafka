@@ -32,10 +32,13 @@ module Karafka
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
 
-        consumer.consuming.pause
+        consumer.consume
         consumer.consumed
+        consumer.consuming.pause
         consumer.consuming.retry
+        consumer.revoke
         consumer.revoked
+        consumer.shutting_down
         consumer.shutdown
 
         dead_letter_queue.dispatched
