@@ -36,6 +36,11 @@ module Karafka
         def handle_revoked
           raise NotImplementedError, 'Implement in a subclass'
         end
+
+        # Shutdown handling
+        def handle_shutdown
+          raise NotImplementedError, 'Implement in a subclass'
+        end
       end
     end
   end

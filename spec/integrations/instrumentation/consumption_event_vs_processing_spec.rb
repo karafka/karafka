@@ -10,6 +10,10 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+Karafka::App.monitor.subscribe('consumer.consume') do |event|
+  DT[2] << event[:caller].messages.count
+end
+
 Karafka::App.monitor.subscribe('consumer.consumed') do |event|
   DT[1] << event[:caller].messages.count
 end
@@ -26,3 +30,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal DT[0], DT[1]
+assert_equal DT[1], DT[2]

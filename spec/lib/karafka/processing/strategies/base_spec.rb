@@ -26,4 +26,8 @@ RSpec.describe_current do
   describe '#handle_revoked' do
     it { expect { runner.handle_revoked }.to raise_error(NotImplementedError) }
   end
+
+  describe '#handle_shutdown' do
+    it { expect { runner.handle_shutdown }.to raise_error(NotImplementedError) }
+  end
 end
