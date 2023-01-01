@@ -33,7 +33,7 @@ GEM
       concurrent-ruby (>= 1.1)
       rdkafka (>= 0.12)
     mini_portile2 (2.8.1)
-    minitest (5.16.3)
+    minitest (5.17.0)
     rake (13.0.6)
     rdkafka (0.12.0)
       ffi (~> 1.15)
