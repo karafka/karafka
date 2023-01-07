@@ -53,12 +53,14 @@ module Karafka
     # trap context s some things may not work there as expected, that is why we spawn a separate
     # thread to handle the signals process
     def trap_signal(signal)
-      trap(signal) do
+      previous_handler = ::Signal.trap(signal) do
         Thread.new do
           notice_signal(signal)
 
           (@callbacks[signal] || []).each(&:call)
         end
+
+        previous_handler.call if previous_handler.respond_to?(:call)
       end
     end
 
