@@ -14,6 +14,7 @@
 - [Fix] Make sure all files descriptors are closed in the integration specs.
 - [Fix] Fix a case where empty subscription groups could leak into the execution flow.
 - [Fix] Fix `LoggerListener` reporting so it does not end with `.`.
+- [Fix] Run previously defined (if any) signal traps created prior to Karafka signals traps.
 
 ## 2.0.24 (2022-12-19)
 - **[Feature]** Provide out of the box encryption support for Pro.
