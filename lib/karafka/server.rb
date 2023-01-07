@@ -20,6 +20,9 @@ module Karafka
       # Set of workers
       attr_accessor :workers
 
+      # Jobs queue
+      attr_accessor :jobs_queue
+
       # Method which runs app
       def run
         self.listeners = []
@@ -105,8 +108,6 @@ module Karafka
         # We always need to shutdown clients to make sure we do not force the GC to close consumer.
         # This can cause memory leaks and crashes.
         listeners.each(&:shutdown)
-
-        Karafka::App.producer.close
 
         # We also do not forcefully terminate everything when running in the embedded mode,
         # otherwise we would overwrite the shutdown process of the process that started Karafka

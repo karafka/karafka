@@ -58,7 +58,7 @@ module Karafka
       def pause(timeout = backoff_interval)
         @mutex.synchronize do
           @current_timeout = timeout
-          @started_at = now
+          @started_at = monotonic_now
           @ends_at = @started_at + timeout
         end
       end
@@ -95,7 +95,7 @@ module Karafka
       # @return [Boolean] did the pause expire
       def expired?
         @mutex.synchronize do
-          @ends_at ? now >= @ends_at : true
+          @ends_at ? monotonic_now >= @ends_at : true
         end
       end
 

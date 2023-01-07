@@ -76,6 +76,8 @@ module Karafka
         Karafka.monitor.instrument(
           'error.occurred',
           caller: self,
+          job: job,
+          jobs_queue: @jobs_queue,
           error: e,
           type: 'worker.process.error'
         )
