@@ -10,6 +10,7 @@
 - [Improvement] Expand `LoggerListener` with `client.resume` notification.
 - [Improvement] Replace random anonymous subscription groups ids with stable once.
 - [Improvement] Add `consumer.consume`, `consumer.revoke` and `consumer.shutting_down` notification events and move the revocation logic calling to strategies.
+- [Change] Rename job queue statistics `processing` key to `busy`. No changes needed because naming in the DataDog listener stays the same. 
 - [Fix] Fix proctitle listener state changes reporting on new states.
 - [Fix] Make sure all files descriptors are closed in the integration specs.
 - [Fix] Fix a case where empty subscription groups could leak into the execution flow.

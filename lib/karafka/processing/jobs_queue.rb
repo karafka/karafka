@@ -125,13 +125,13 @@ module Karafka
         @semaphores[group_id].pop while wait?(group_id)
       end
 
-      # - `processing` - number of jobs that are currently being processed (active work)
+      # - `busy` - number of jobs that are currently being processed (active work)
       # - `enqueued` - number of jobs in the queue that are waiting to be picked up by a worker
       #
       # @return [Hash] hash with basic usage statistics of this queue.
       def statistics
         {
-          processing: size - @queue.size,
+          busy: size - @queue.size,
           enqueued: @queue.size
         }.freeze
       end

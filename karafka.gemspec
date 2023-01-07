@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.authors     = ['Maciej Mensfeld']
   spec.email       = %w[contact@karafka.io]
   spec.homepage    = 'https://karafka.io'
-  spec.licenses    = ['LGPL-3.0', 'Commercial']
+  spec.licenses    = %w[LGPL-3.0 Commercial]
   spec.summary     = 'Karafka is Ruby and Rails efficient Kafka processing framework.'
   spec.description = <<-DESC
     Karafka is Ruby and Rails efficient Kafka processing framework.
@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
     without having to focus on things that are not your business domain.
   DESC
 
-  spec.add_dependency 'karafka-core', '>= 2.0.7', '< 3.0.0'
+  spec.add_dependency 'karafka-core', '>= 2.0.8', '< 3.0.0'
   spec.add_dependency 'thor', '>= 0.20'
   spec.add_dependency 'waterdrop', '>= 2.4.7', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'

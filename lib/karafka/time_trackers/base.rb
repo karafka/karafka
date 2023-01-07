@@ -8,12 +8,7 @@ module Karafka
   module TimeTrackers
     # Base class for all the time-trackers.
     class Base
-      private
-
-      # @return [Float] current time in milliseconds
-      def now
-        ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) * 1000
-      end
+      include ::Karafka::Core::Helpers::Time
     end
   end
 end

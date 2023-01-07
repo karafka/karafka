@@ -19,6 +19,7 @@ module Karafka
       # We aggregate threads here for a supervised shutdown process
       Karafka::Server.workers = workers
       Karafka::Server.listeners = listeners
+      Karafka::Server.jobs_queue = jobs_queue
 
       # All the listener threads need to finish
       listeners.each(&:join)

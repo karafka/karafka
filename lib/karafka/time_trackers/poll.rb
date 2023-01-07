@@ -34,12 +34,12 @@ module Karafka
       # Starts time tracking.
       def start
         @attempts += 1
-        @started_at = now
+        @started_at = monotonic_now
       end
 
       # Stops time tracking of a given piece of code and updates the remaining time.
       def checkpoint
-        @remaining -= (now - @started_at)
+        @remaining -= (monotonic_now - @started_at)
       end
 
       # @return [Boolean] If anything went wrong, can we retry after a backoff period or not
