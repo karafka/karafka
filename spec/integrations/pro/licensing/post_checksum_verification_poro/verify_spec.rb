@@ -11,4 +11,6 @@ cmd = <<~CMD
   #{ENV['KARAFKA_GEM_DIR']}/bin/verify_license_integrity
 CMD
 
-exit 1 unless cmd.include?('verification result: Success')
+result = `#{cmd}`
+
+exit 1 unless result.include?('verification result: Success')
