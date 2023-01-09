@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# This script verifies integrity of the Pro license
+# Run it before bundle install to ensure, that what you are fetching is what you expect
+
+set -e
+
+curl \
+  --fail \
+  -u $KARAFKA_PRO_USERNAME:$KARAFKA_PRO_PASSWORD \
+  https://gems.karafka.io/gems/karafka-license-1.7ed320eaf1e.gem \
+  -o ./karafka-license.gem
+
+detected=`sha256sum ./karafka-license.gem | awk '{ print $1 }'`
+
+echo -n "Karafka Pro license artifact checksum verification result: "
+
+if [ "$detected" = "$KARAFKA_PRO_LICENSE_CHECKSUM" ]; then
+  echo "Success"
+else
+  echo -e "\033[0;31mFailure!\033[0m"
+  exit 1
+fi

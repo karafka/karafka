@@ -34,6 +34,18 @@ jobs:
       - name: Bundle Secure
         run: bundle secure
 
+  karafka-checksum:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Run Karafka license checksum verification
+        run: bin/verify_karafka
+
   coditsu:
     runs-on: ubuntu-latest
     strategy:
