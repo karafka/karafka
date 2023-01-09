@@ -8,7 +8,7 @@
 
 set -e
 
-if [ "$MODE" = "before" ]; then
+if [ "$MODE" != "after" ]; then
   # Check the remote license prior to bundle installing
   curl \
     --fail \
