@@ -13,6 +13,8 @@ curl \
 
 detected=`sha256sum ./karafka-license.gem | awk '{ print $1 }'`
 
+rm ./karafka-license.gem
+
 echo -n "Karafka Pro license artifact checksum verification result: "
 
 if [ "$detected" = "$KARAFKA_PRO_LICENSE_CHECKSUM" ]; then
