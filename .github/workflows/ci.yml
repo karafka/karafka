@@ -44,7 +44,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Karafka license checksum verification
-        run: bin/verify_karafka
+        run: bin/verify_license_integrity
 
   coditsu:
     runs-on: ubuntu-latest

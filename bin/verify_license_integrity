@@ -8,7 +8,7 @@ set -e
 curl \
   --fail \
   -u $KARAFKA_PRO_USERNAME:$KARAFKA_PRO_PASSWORD \
-  https://gems.karafka.io/gems/karafka-license-1.7ed320eaf1e.gem \
+  https://gems.karafka.io/gems/karafka-license-$KARAFKA_PRO_VERSION.gem \
   -o ./karafka-license.gem
 
 detected=`sha256sum ./karafka-license.gem | awk '{ print $1 }'`
