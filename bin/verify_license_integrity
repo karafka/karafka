@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# This script verifies integrity of the Pro license
+# Run it before bundle install to ensure, that what you are fetching is what you expect
+# Run it after bundle install to ensure that the local artefact was not compromised
+
+#!/usr/bin/env bash
+
+set -e
+
+if [ "$MODE" != "after" ]; then
+  # Check the remote license prior to bundle installing
+  curl \
+    --fail \
+    -u $KARAFKA_PRO_USERNAME:$KARAFKA_PRO_PASSWORD \
+    https://gems.karafka.io/gems/karafka-license-$KARAFKA_PRO_VERSION.gem \
+    -o ./karafka-license.gem
+else
+  # Check the local cached one after bundle install
+  cache_path=`ruby -e 'puts "#{Gem.dir}/cache/"'`
+  cp "$cache_path/karafka-license-$KARAFKA_PRO_VERSION.gem" ./karafka-license.gem
+fi
+
+detected=`sha256sum ./karafka-license.gem | awk '{ print $1 }'`
+
+rm ./karafka-license.gem
+
+echo -n "Karafka Pro license artifact checksum verification result: "
+
+if [ "$detected" = "$KARAFKA_PRO_LICENSE_CHECKSUM" ]; then
+  echo "Success"
+else
+  echo -e "\033[0;31mFailure!\033[0m"
+  exit 1
+fi
