@@ -150,5 +150,6 @@ jobs:
           KARAFKA_PRO_USERNAME: ${{ secrets.KARAFKA_PRO_USERNAME }}
           KARAFKA_PRO_PASSWORD: ${{ secrets.KARAFKA_PRO_PASSWORD }}
           KARAFKA_PRO_VERSION: ${{ secrets.KARAFKA_PRO_VERSION }}
+          KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
           GITHUB_COVERAGE: ${{matrix.coverage}}
         run: bin/integrations
