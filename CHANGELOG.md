@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.25 (2023-01-10)
+## 2.0.26 (2023-01-10)
 - **[Feature]** Allow for disabling given topics by setting `active` to false. It will exclude them from consumption but will allow to have their definitions for using admin APIs, etc.
 - [Improvement] Early terminate on `read_topic` when reaching the last offset available on the request time.
 - [Improvement] Introduce a `quiet` state that indicates that Karafka is not only moving to quiet mode but actually that it reached it and no work will happen anymore in any of the consumer groups.
@@ -16,6 +16,9 @@
 - [Fix] Fix a case where empty subscription groups could leak into the execution flow.
 - [Fix] Fix `LoggerListener` reporting so it does not end with `.`.
 - [Fix] Run previously defined (if any) signal traps created prior to Karafka signals traps.
+
+## 2.0.25 (2023-01-10)
+- Release yanked due to accidental release with local changes.
 
 ## 2.0.24 (2022-12-19)
 - **[Feature]** Provide out of the box encryption support for Pro.
