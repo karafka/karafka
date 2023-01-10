@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.27 (Unreleased)
+- Do not lock Ruby version in Karafka in favour of `karafka-core`.
+
 ## 2.0.26 (2023-01-10)
 - **[Feature]** Allow for disabling given topics by setting `active` to false. It will exclude them from consumption but will allow to have their definitions for using admin APIs, etc.
 - [Improvement] Early terminate on `read_topic` when reaching the last offset available on the request time.
