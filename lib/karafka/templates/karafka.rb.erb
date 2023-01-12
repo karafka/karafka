@@ -43,7 +43,7 @@ class KarafkaApp < Karafka::App
   routes.draw do
 <% if rails? -%>
     # Uncomment this if you use Karafka with ActiveJob
-    # You ned to define the topic per each queue name you use
+    # You need to define the topic per each queue name you use
     # active_job_topic :default
 <% end -%>
     topic :example do
