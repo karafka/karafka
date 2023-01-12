@@ -64,16 +64,33 @@ module Karafka
           # @param skippable_message [Array<Karafka::Messages::Message>] message we want to
           #   dispatch to DLQ
           def dispatch_to_dlq(skippable_message)
-            producer.produce_async(
-              topic: topic.dead_letter_queue.topic,
+            message = {
               payload: skippable_message.raw_payload,
-              key: skippable_message.partition.to_s,
-              headers: skippable_message.headers.merge(
-                'original_topic' => topic.name,
-                'original_partition' => skippable_message.partition.to_s,
-                'original_offset' => skippable_message.offset.to_s
-              )
+              headers: skippable_message.headers.dup
+            }
+
+            # Message headers and payload can be altered by enhancements via optional custom method
+            if respond_to?(:enhance_skippable_message, true)
+              enhancements = enhance_skippable_message(skippable_message)
+              message.merge!(enhancements)
+            end
+
+            # We force inject this after (optional) enhancements to make sure, that neither topic
+            # nor key are altered. Those need to be set that way for ordering warranties and
+            # correct dispatch
+            message[:topic] = topic.dead_letter_queue.topic,
+            message[:key] = skippable_message.partition.to_s
+
+            # We force merge this here because we always want to ensure `original_` headers
+            # presence
+            message[:headers].merge!(
+              'original_topic' => topic.name,
+              'original_partition' => skippable_message.partition.to_s,
+              'original_offset' => skippable_message.offset.to_s,
+              'original_consumer_group' => topic.consumer_group.id
             )
+
+            producer.produce_async(message)
 
             # Notify about dispatch on the events bus
             Karafka.monitor.instrument(

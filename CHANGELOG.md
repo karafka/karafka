@@ -1,6 +1,10 @@
 # Karafka framework changelog
 
-## 2.0.27 (2022-01-11)
+## 2.0.28 (Unreleased)
+- Allow for customization of DLQ dispatched message details in Pro (#1266)
+- Include `original_consumer_group` in the DLQ dispatched messages in Pro.
+
+## 2.0.27 (2023-01-11)
 - Do not lock Ruby version in Karafka in favour of `karafka-core`.
 - Make sure `karafka-core` version is at least `2.0.9` to make sure we run `karafka-rdkafka`.
 

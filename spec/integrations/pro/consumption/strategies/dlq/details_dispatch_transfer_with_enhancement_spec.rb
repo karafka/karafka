@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# When DLQ transfer occurs, payload and many other things should be transferred to the DLQ topic.
+# When DLQ transfer occurs, we should be able to build our own payload and headers via
+# `#enhance_skippable_message`
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 1
@@ -9,6 +10,15 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     raise StandardError
+  end
+
+  private
+
+  def enhance_skippable_message(skippable_message)
+    {
+      payload: { orig: skippable_message.raw_payload, extra: 1 }.to_json,
+      headers: { 'total-remap' => 'yes' }
+    }
   end
 end
 
@@ -45,10 +55,15 @@ end
   dlq_message = DT[:broken][i]
   cg = Karafka::App.consumer_groups.first.id
 
-  assert_equal dlq_message.raw_payload, elements[i]
-  assert_equal dlq_message.headers["test#{i}"], (i + 1).to_s
+  expected_payload = { orig: elements[i], extra: 1 }.to_json
+
+  assert_equal dlq_message.raw_payload, expected_payload
+  # Original headers were replaced with custom via enhancement
+  assert_equal false, dlq_message.headers.key?("test#{i}")
+  # Those headers need to be always injected
   assert_equal dlq_message.headers.fetch('original_topic'), DT.topic
   assert_equal dlq_message.headers.fetch('original_partition'), 0.to_s
   assert_equal dlq_message.headers.fetch('original_offset'), i.to_s
   assert_equal dlq_message.headers.fetch('original_consumer_group'), cg
+  assert_equal dlq_message.headers.fetch('total-remap'), 'yes'
 end
