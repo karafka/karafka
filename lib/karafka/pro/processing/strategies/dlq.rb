@@ -78,7 +78,7 @@ module Karafka
             # We force inject this after (optional) enhancements to make sure, that neither topic
             # nor key are altered. Those need to be set that way for ordering warranties and
             # correct dispatch
-            message[:topic] = topic.dead_letter_queue.topic,
+            message[:topic] = topic.dead_letter_queue.topic
             message[:key] = skippable_message.partition.to_s
 
             # We force merge this here because we always want to ensure `original_` headers
