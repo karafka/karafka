@@ -65,13 +65,8 @@ module Karafka
           #   dispatch to DLQ
           def dispatch_to_dlq(skippable_message)
             producer.produce_async(
-              topic: topic.dead_letter_queue.topic,
-              payload: skippable_message.raw_payload,
-              key: skippable_message.partition.to_s,
-              headers: skippable_message.headers.merge(
-                'original_topic' => topic.name,
-                'original_partition' => skippable_message.partition.to_s,
-                'original_offset' => skippable_message.offset.to_s
+              build_dlq_message(
+                skippable_message
               )
             )
 
@@ -81,6 +76,33 @@ module Karafka
               caller: self,
               message: skippable_message
             )
+          end
+
+          # @param skippable_message [Array<Karafka::Messages::Message>]
+          # @return [Hash] dispatch DLQ message
+          def build_dlq_message(skippable_message)
+            dlq_message = {
+              topic: topic.dead_letter_queue.topic,
+              key: skippable_message.partition.to_s,
+              payload: skippable_message.raw_payload,
+              headers: skippable_message.headers.merge(
+                'original_topic' => topic.name,
+                'original_partition' => skippable_message.partition.to_s,
+                'original_offset' => skippable_message.offset.to_s,
+                'original_consumer_group' => topic.consumer_group.id
+              )
+            }
+
+            # Optional method user can define in consumer to enhance the dlq message hash with
+            # some extra details if needed or to replace payload, etc
+            if respond_to?(:enhance_dlq_message, true)
+              enhance_dlq_message(
+                dlq_message,
+                skippable_message
+              )
+            end
+
+            dlq_message
           end
 
           # @return [Boolean] should we dispatch the message to DLQ or not. When the dispatch topic
