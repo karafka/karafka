@@ -25,4 +25,4 @@ assert_not_equal '', event[:subscription_group_id]
 assert event[:consumer_group_id].include?(DT.consumer_groups.first)
 assert event[:statistics].is_a?(Hash)
 assert_equal 0, event[:statistics]['txmsgs_d']
-assert event[:statistics]['name'].include?('karafka')
+assert event[:statistics]['name'].include?(Karafka::App.config.client_id)
