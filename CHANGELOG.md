@@ -3,6 +3,22 @@
 ## 2.0.28 (Unreleased)
 - Allow for customization of DLQ dispatched message details in Pro (#1266)
 - Include `original_consumer_group` in the DLQ dispatched messages in Pro.
+- Use Karafka `client_id` as kafka `client.id` value by default
+
+### Upgrade notes
+
+If you want to continue to use `karafka` as default for kafka `client.id`, assign it manually:
+
+```ruby
+class KarafkaApp < Karafka::App
+  setup do |config|
+    # Other settings...
+    config.kafka = {
+      'client.id': 'karafka'
+    }
+  end
+end
+```
 
 ## 2.0.27 (2023-01-11)
 - Do not lock Ruby version in Karafka in favour of `karafka-core`.

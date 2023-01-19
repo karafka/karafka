@@ -38,4 +38,12 @@ start_karafka_and_wait_until do
   names(stats_events).size >= 2
 end
 
-assert_equal %w[karafka#consumer-1 karafka#consumer-2 karafka#consumer-3], names(stats_events)
+client_id = Karafka::App.config.client_id
+
+names = [
+  "#{client_id}#consumer-1",
+  "#{client_id}#consumer-2",
+  "#{client_id}#consumer-3"
+]
+
+assert_equal names, names(stats_events)
