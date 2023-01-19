@@ -81,13 +81,24 @@ module Karafka
           # @param skippable_message [Array<Karafka::Messages::Message>]
           # @return [Hash] dispatch DLQ message
           def build_dlq_message(skippable_message)
+            original_topic = topic.name
+            original_partition = skippable_message.partition.to_s
+
             dlq_message = {
               topic: topic.dead_letter_queue.topic,
-              key: skippable_message.partition.to_s,
+              # We use topic and partition to always dispatch data to the same partition in the DLQ
+              # We do not use only partition in case many DLQ dispatches would happen from many
+              # topics to the same DLQ topic partition.
+              #
+              # This handles a case where there is one DLQ topic for many topics and a lot of data
+              # goes there.
+              #
+              # We use the key in a format similar to one we use in the web-UI for consistency
+              key: "#{original_topic}: #{original_partition}",
               payload: skippable_message.raw_payload,
               headers: skippable_message.headers.merge(
-                'original_topic' => topic.name,
-                'original_partition' => skippable_message.partition.to_s,
+                'original_topic' => original_topic,
+                'original_partition' => original_partition,
                 'original_offset' => skippable_message.offset.to_s,
                 'original_consumer_group' => topic.consumer_group.id
               )

@@ -1,9 +1,10 @@
 # Karafka framework changelog
 
 ## 2.0.28 (Unreleased)
-- Allow for customization of DLQ dispatched message details in Pro (#1266)
+- [Improvement] Allow for customization of DLQ dispatched message details in Pro (#1266) via the `#enhance_dlq_message` consumer method.
 - Include `original_consumer_group` in the DLQ dispatched messages in Pro.
 - Use Karafka `client_id` as kafka `client.id` value by default
+- Change Pro DLQ dispatch `key` default value to mitigate a scenario where one DLQ topic is used to pipe all the dead messages from multiple topics and all the data goes to one partition.
 
 ### Upgrade notes
 
@@ -16,6 +17,19 @@ class KarafkaApp < Karafka::App
     config.kafka = {
       'client.id': 'karafka'
     }
+```
+
+
+You can use the pro `#enhance_dlq_message` to remap the key back to how it was before this release:
+
+```ruby
+class DataConsumer < Karafka::BaseConsumer
+  # Rest of the code
+
+  private
+
+  def enhance_dlq_message(dlq_message_hash, skippable_message)
+    dlq_message_hash[:key] = skippable_message.partition.to_s
   end
 end
 ```
