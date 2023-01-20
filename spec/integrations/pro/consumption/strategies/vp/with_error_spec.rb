@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # When Karafka consumes in the VP mode and error happens in any of the processing units we allow
-# the rest to finish the work and we restart the processing from the first offset on a batch.
+# the rest to finish the work and we restart the processing from the first offset on a batch
+# in a collapsed mode.
+#
 # This spec raises only one error once
 
 class Listener
@@ -51,9 +53,8 @@ start_karafka_and_wait_until do
   DT[0].size >= 6
 end
 
-assert DT[0].size >= 6
+assert DT[0].size >= 6, DT[0]
 # It should parallelize work
-assert DT[1].uniq.size >= 2
 assert_equal 1, DT[:errors].size
 assert_equal StandardError, DT[:errors].first[:error].class
 assert_equal 'consumer.consume.error', DT[:errors].first[:type]
