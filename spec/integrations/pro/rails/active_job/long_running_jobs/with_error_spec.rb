@@ -20,7 +20,7 @@ class Job < ActiveJob::Base
   def perform
     sleep 5
 
-    if DT[0].size.zero?
+    if DT[0].empty?
       DT[0] << '1'
       raise StandardError
     else

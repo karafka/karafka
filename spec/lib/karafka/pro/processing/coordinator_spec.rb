@@ -6,10 +6,38 @@ RSpec.describe_current do
   let(:pause_tracker) { build(:time_trackers_pause) }
   let(:last_message) { build(:messages_message) }
   let(:messages) { [last_message] }
+  let(:consumer) { instance_double(Karafka::BaseConsumer, messages: messages) }
 
   it { expect(described_class).to be < Karafka::Processing::Coordinator }
+  it { expect(coordinator.collapsed?).to eq(false) }
 
   before { coordinator.start(messages) }
+
+  describe '#start' do
+    context 'when we start in a non-collapsed state' do
+      before { coordinator.start(messages) }
+
+      it { expect(coordinator.collapsed?).to eq(false) }
+    end
+
+    context 'when we start in a collapsed state that lapses' do
+      before do
+        coordinator.failure!(consumer, StandardError.new)
+        coordinator.start(messages)
+      end
+
+      it { expect(coordinator.collapsed?).to eq(true) }
+    end
+
+    context 'when we start in a collapsed state that does not lapse' do
+      before do
+        coordinator.failure!(consumer, StandardError.new)
+        coordinator.start([build(:messages_message)])
+      end
+
+      it { expect(coordinator.collapsed?).to eq(false) }
+    end
+  end
 
   describe '#finished?' do
     context 'when no jobs are running' do
@@ -71,6 +99,14 @@ RSpec.describe_current do
       it 'expect not to run again' do
         expect { |block| coordinator.on_finished(&block) }.not_to yield_control
       end
+    end
+  end
+
+  describe '#failure!' do
+    before { coordinator.failure!(consumer, StandardError.new) }
+
+    it 'expect to collapse' do
+      expect(coordinator.collapsed?).to eq(true)
     end
   end
 end

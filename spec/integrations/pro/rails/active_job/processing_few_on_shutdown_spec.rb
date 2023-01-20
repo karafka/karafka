@@ -26,7 +26,7 @@ class Job < ActiveJob::Base
 
   def perform(value)
     # We add sleep to simulate work being done, so it ain't done too fast before we shutdown
-    if DT[:stopping].size.zero?
+    if DT[:stopping].empty?
       DT[:stopping] << true
       sleep(5)
     end
@@ -38,7 +38,7 @@ end
 5.times { |value| Job.perform_later(value) }
 
 start_karafka_and_wait_until do
-  !DT[:stopping].size.zero?
+  !DT[:stopping].empty?
 end
 
 assert_equal 1, DT[0].size

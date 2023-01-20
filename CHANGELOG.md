@@ -1,10 +1,14 @@
 # Karafka framework changelog
 
 ## 2.0.28 (Unreleased)
+- **[Feature]** Provide the ability to use Dead Letter Queue with Virtual Partitions.
+- [Improvement] Collapse Virtual Partitions upon retryable error to a single partition. This allows dead letter queue to operate and mitigate issues arising from work virtualization. This removes uncertainties upon errors that can be retried and processed. Affects given topic partition virtualization only for multi-topic and mulit-partition parallelization. It also minimizes potential "flickering" where given data set has potentially many corrupted messages. The collapse will last until all the messages from the collective corrupted batch are processed. After that, virtualization will resume.
+- [Improvement] Introduce `#collapsed?` consumer method available for consumers using Virtual Partitions.
 - [Improvement] Allow for customization of DLQ dispatched message details in Pro (#1266) via the `#enhance_dlq_message` consumer method.
-- Include `original_consumer_group` in the DLQ dispatched messages in Pro.
-- Use Karafka `client_id` as kafka `client.id` value by default
-- Change Pro DLQ dispatch `key` default value to mitigate a scenario where one DLQ topic is used to pipe all the dead messages from multiple topics and all the data goes to one partition.
+- [Improvement] Include `original_consumer_group` in the DLQ dispatched messages in Pro.
+- [Improvement] Use Karafka `client_id` as kafka `client.id` value by default
+- [Improvement] Change Pro DLQ dispatch `key` default value to mitigate a scenario where one DLQ topic is used to pipe all the dead messages from multiple topics and all the data goes to one partition.
+- [Improvement]
 
 ### Upgrade notes
 

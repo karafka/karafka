@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should not allow for using VP with DLQ
+# Karafka should not allow for using VP with DLQ without retries
 
 setup_karafka do |config|
   config.concurrency = 10
@@ -16,7 +16,10 @@ begin
         virtual_partitions(
           partitioner: ->(msg) { msg.raw_payload }
         )
-        dead_letter_queue topic: 'test'
+        dead_letter_queue(
+          topic: 'test',
+          max_retries: 0
+        )
       end
     end
   end

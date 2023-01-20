@@ -18,15 +18,29 @@ module Karafka
       class Partitioner < ::Karafka::Processing::Partitioner
         # @param topic [String] topic name
         # @param messages [Array<Karafka::Messages::Message>] karafka messages
+        # @param coordinator [Karafka::Pro::Processing::Coordinator] processing coordinator that
+        #   will be used with those messages
         # @yieldparam [Integer] group id
         # @yieldparam [Array<Karafka::Messages::Message>] karafka messages
-        def call(topic, messages)
+        def call(topic, messages, coordinator)
           ktopic = @subscription_group.topics.find(topic)
 
-          # We only partition work if we have a virtual partitioner and more than one thread to
-          # process the data. With one thread it is not worth partitioning the work as the work
-          # itself will be assigned to one thread (pointless work)
-          if ktopic.virtual_partitions? && ktopic.virtual_partitions.max_partitions > 1
+          # We only partition work if we have:
+          # - a virtual partitioner
+          # - more than one thread to process the data
+          # - collective is not collapsed via coordinator
+          #
+          # With one thread it is not worth partitioning the work as the work itself will be
+          # assigned to one thread (pointless work)
+          #
+          # We collapse the partitioning on errors because we "regain" full ordering on a batch
+          # that potentially contains the data that caused the error.
+          #
+          # This is great because it allows us to run things without the parallelization that adds
+          # a bit of uncertainty and allows us to use DLQ and safely skip messages if needed.
+          if ktopic.virtual_partitions? &&
+             ktopic.virtual_partitions.max_partitions > 1 &&
+             !coordinator.collapsed?
             # We need to reduce it to the max concurrency, so the group_id is not a direct effect
             # of the end user action. Otherwise the persistence layer for consumers would cache
             # it forever and it would cause memory leaks

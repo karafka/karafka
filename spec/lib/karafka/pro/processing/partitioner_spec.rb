@@ -7,6 +7,7 @@ RSpec.describe_current do
 
   let(:subscription_group) { build(:routing_subscription_group) }
   let(:concurrency) { 1 }
+  let(:coordinator) { build(:processing_coordinator_pro) }
   let(:topic) { subscription_group.topics.first }
   let(:messages) { Array.new(100) { build(:messages_message) } }
 
@@ -16,7 +17,7 @@ RSpec.describe_current do
 
   context 'when we do not use virtual partitions' do
     it 'expect to yield with 0 and input messages' do
-      expect { |block| partitioner.call(topic.name, messages, &block) }
+      expect { |block| partitioner.call(topic.name, messages, coordinator, &block) }
         .to yield_with_args(0, messages)
     end
   end
@@ -25,7 +26,7 @@ RSpec.describe_current do
     before { topic.virtual_partitions(partitioner: ->(_) { rand }) }
 
     it 'expect to yield with 0 and input messages' do
-      expect { |block| partitioner.call(topic.name, messages, &block) }
+      expect { |block| partitioner.call(topic.name, messages, coordinator, &block) }
         .to yield_with_args(0, messages)
     end
   end
@@ -34,7 +35,7 @@ RSpec.describe_current do
     let(:concurrency) { 5 }
     let(:yielded) do
       yielded = []
-      partitioner.call(topic.name, messages) { |*args| yielded << args }
+      partitioner.call(topic.name, messages, coordinator) { |*args| yielded << args }
       yielded
     end
 
@@ -65,7 +66,7 @@ RSpec.describe_current do
     let(:concurrency) { 5 }
     let(:yielded) do
       yielded = []
-      partitioner.call(topic.name, messages) { |*args| yielded << args }
+      partitioner.call(topic.name, messages, coordinator) { |*args| yielded << args }
       yielded
     end
 

@@ -67,10 +67,6 @@ RSpec.describe_current do
     end
   end
 
-  describe '#consumption' do
-    it { expect(coordinator.consumption(self)).to be_a(Karafka::Processing::Result) }
-  end
-
   describe '#success?' do
     context 'when there were no jobs' do
       it { expect(coordinator.success?).to eq(true) }
@@ -83,14 +79,14 @@ RSpec.describe_current do
     end
 
     context 'when there are no jobs running and all the finished are success' do
-      before { coordinator.consumption(0).success! }
+      before { coordinator.success!(0) }
 
       it { expect(coordinator.success?).to eq(true) }
     end
 
     context 'when there are jobs running and all the finished are success' do
       before do
-        coordinator.consumption(0).success!
+        coordinator.success!(0)
         coordinator.increment
       end
 
@@ -99,8 +95,8 @@ RSpec.describe_current do
 
     context 'when there are no jobs running and not all the jobs finished with success' do
       before do
-        coordinator.consumption(0).success!
-        coordinator.consumption(1).failure!(StandardError.new)
+        coordinator.success!(0)
+        coordinator.failure!(1, StandardError.new)
       end
 
       it { expect(coordinator.success?).to eq(false) }

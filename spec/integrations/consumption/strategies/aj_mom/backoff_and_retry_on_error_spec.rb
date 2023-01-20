@@ -15,7 +15,7 @@ class Job < ActiveJob::Base
   queue_as DT.topic
 
   def perform
-    if DT[0].size.zero?
+    if DT[0].empty?
       DT[0] << '1'
       raise StandardError
     else

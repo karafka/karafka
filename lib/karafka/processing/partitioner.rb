@@ -12,9 +12,11 @@ module Karafka
 
       # @param _topic [String] topic name
       # @param messages [Array<Karafka::Messages::Message>] karafka messages
+      # @param _coordinator [Karafka::Processing::Coordinator] processing coordinator that will
+      #   be used with those messages
       # @yieldparam [Integer] group id
       # @yieldparam [Array<Karafka::Messages::Message>] karafka messages
-      def call(_topic, messages)
+      def call(_topic, messages, _coordinator)
         yield(0, messages)
       end
     end

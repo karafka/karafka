@@ -71,18 +71,28 @@ module Karafka
         end
       end
 
-      # @param consumer [Object] karafka consumer (normal or pro)
-      # @return [Karafka::Processing::Result] result object which we can use to indicate
-      #   consumption processing state.
-      def consumption(consumer)
+      # Is all the consumption done and finished successfully for this coordinator
+      def success?
         @mutex.synchronize do
-          @consumptions[consumer] ||= Processing::Result.new
+          @running_jobs.zero? && @consumptions.values.all?(&:success?)
         end
       end
 
-      # Is all the consumption done and finished successfully for this coordinator
-      def success?
-        @mutex.synchronize { @running_jobs.zero? && @consumptions.values.all?(&:success?) }
+      # Mark given consumption on consumer as successful
+      # @param consumer [Karafka::BaseConsumer] consumer that finished successfully
+      def success!(consumer)
+        @mutex.synchronize do
+          consumption(consumer).success!
+        end
+      end
+
+      # Mark given consumption on consumer as failed
+      # @param consumer [Karafka::BaseConsumer] consumer that failed
+      # @param error [StandardError] error that occurred
+      def failure!(consumer, error)
+        @mutex.synchronize do
+          consumption(consumer).failure!(error)
+        end
       end
 
       # Marks given coordinator for processing group as revoked
@@ -112,6 +122,15 @@ module Karafka
       # @return [Boolean] are we in a pause that was initiated by the user
       def manual_pause?
         @pause_tracker.paused? && @manual_pause
+      end
+
+      private
+
+      # @param consumer [Object] karafka consumer (normal or pro)
+      # @return [Karafka::Processing::Result] result object which we can use to indicate
+      #   consumption processing state.
+      def consumption(consumer)
+        @consumptions[consumer] ||= Processing::Result.new
       end
     end
   end
