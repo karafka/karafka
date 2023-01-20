@@ -27,10 +27,8 @@ module Karafka
           ].freeze
 
           # @return [Boolean] is the virtual processing collapsed in the context of given consumer.
-          # @note Collapsed means, that we do not run virtual parallelization for a given batch
-          #   because of previous processing errors and a retry (hence attempt > 1)
           def collapsed?
-            coordinator.pause_tracker.attempt > 1
+            coordinator.collapsed?
           end
         end
       end
