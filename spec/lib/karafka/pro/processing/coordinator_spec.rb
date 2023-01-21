@@ -103,10 +103,18 @@ RSpec.describe_current do
   end
 
   describe '#failure!' do
-    before { coordinator.failure!(consumer, StandardError.new) }
+    context 'when there is a failure' do
+      before { coordinator.failure!(consumer, StandardError.new) }
 
-    it 'expect to collapse' do
-      expect(coordinator.collapsed?).to eq(true)
+      it 'expect not to collapse immediately after it' do
+        expect(coordinator.collapsed?).to eq(false)
+      end
+
+      context 'when we start again after it' do
+        before { coordinator.start(messages) }
+
+        it { expect(coordinator.collapsed?).to eq(true) }
+      end
     end
   end
 end
