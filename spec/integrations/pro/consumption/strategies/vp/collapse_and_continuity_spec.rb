@@ -7,10 +7,11 @@
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 5
   config.max_messages = 100
+  config.max_wait_time = 10_000
 end
 
 MUTEX = Mutex.new
-SLEEP = 10
+SLEEP = 30
 
 class Consumer < Karafka::BaseConsumer
   def consume
