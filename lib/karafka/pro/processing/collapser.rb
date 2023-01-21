@@ -41,7 +41,6 @@ module Karafka
         # @param offset [Integer] offset until which we keep the collapse
         def collapse_until!(offset)
           @mutex.synchronize do
-            @collapsed = true
             # We check it here in case after a pause and re-fetch we would get less messages and
             # one of them would cause an error. We do not want to overwrite the offset here unless
             # it is bigger.
