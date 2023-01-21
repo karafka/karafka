@@ -19,6 +19,7 @@ module Karafka
         # Virtual Partitions enabled
         module LrjVp
           # Same flow as the standard Lrj
+          include Vp
           include Lrj
 
           # Features for this strategy
