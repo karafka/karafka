@@ -16,14 +16,14 @@ MUTEX = Mutex.new
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    messages.each do |message|
-      DT[:flow] << [message.offset, object_id, collapsed?]
-    end
-
     entered = false
 
     MUTEX.synchronize do
-      if DT[:raised].empty? && DT[:flow].count >= 9
+      messages.each do |message|
+        DT[:flow] << [message.offset, object_id, collapsed?]
+      end
+
+      if DT[:raised].empty? && DT[:flow].count >= 11
         DT[:raised] << true
         entered = true
       end
