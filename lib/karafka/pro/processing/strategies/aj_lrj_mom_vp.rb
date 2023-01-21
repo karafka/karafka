@@ -21,6 +21,7 @@ module Karafka
         # Virtual Partitions enabled
         module AjLrjMomVp
           include Default
+          include Vp
 
           # Features for this strategy
           FEATURES = %i[

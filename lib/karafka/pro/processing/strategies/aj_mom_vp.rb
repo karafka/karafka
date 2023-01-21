@@ -19,6 +19,7 @@ module Karafka
         # Manual offset management enabled
         # Virtual Partitions enabled
         module AjMomVp
+          include Vp
           include Default
 
           # Features for this strategy
