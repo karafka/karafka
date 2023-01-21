@@ -23,7 +23,7 @@ class Consumer < Karafka::BaseConsumer
         DT[:flow] << [message.offset, object_id, collapsed?]
       end
 
-      if DT[:raised].empty? && DT[:flow].count >= 11
+      if DT[:raised].empty? && DT[:flow].count >= 9
         DT[:raised] << true
         entered = true
       end
