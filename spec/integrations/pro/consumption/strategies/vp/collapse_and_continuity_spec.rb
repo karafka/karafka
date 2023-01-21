@@ -7,17 +7,12 @@
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 5
   config.max_messages = 100
-  config.max_wait_time = 10_000
 end
 
 MUTEX = Mutex.new
-SLEEP = 30
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if messages.count == 1
-    return unless DT[:flow].include?([:post_warmup])
-
     messages.each do |message|
       DT[:flow] << [message.offset, object_id, collapsed?]
     end
@@ -25,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
     entered = false
 
     MUTEX.synchronize do
-      if DT[:raised].empty?
+      if DT[:raised].empty? && DT[:flow].count >= 9
         DT[:raised] << true
         entered = true
       end
@@ -51,44 +46,91 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  produce_many(DT.topic, %w[0])
+  produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
 
-  sleep(SLEEP)
-  DT[:flow] << [:post_warmup]
+  sleep(0.1) until DT[:raised].empty?
+  sleep(2)
+
+  sleep(0.1) until DT[:flow].count >= 20
 
   produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
 
-  sleep(SLEEP)
-  DT[:flow] << [:restored_vp]
-
-  produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
-
-  sleep(SLEEP)
+  sleep(0.1) until DT[:flow].count >= 20
 
   true
 end
 
-steps = {}
-step_key = nil
+pre_collapse_index = DT[:flow].index { |row| row.first == :post_collapsed }
+pre_collapse = DT[:flow][0..(pre_collapse_index - 1)]
+pre_collapse_offsets = pre_collapse.map(&:first)
 
-DT[:flow].each do |step|
-  if step.first.is_a?(Symbol)
-    step_key = step.first
-    steps[step_key] ||= []
-  else
-    steps[step_key] << step
+# Pre collapse should process all from start till crash
+# We sort because order is not deterministic
+previous = nil
+pre_collapse_offsets.sort.each do |offset|
+  unless previous
+    previous = offset
+    next
+  end
+
+  assert_equal previous + 1, offset
+  previous = offset
+end
+
+# Pre collapse should run in multiple threads
+assert pre_collapse.map { |row| row[1] }.uniq.count >= 2
+
+# None of pre-collapse should be marked as collapsed
+assert pre_collapse.none? { |row| row.last }
+
+collapsed = []
+flipped = false
+flipped_index = nil
+last_collapsed_index = nil
+
+DT[:flow].each_with_index do |row, index|
+  next unless row.last
+  next if row.first.is_a?(Symbol)
+
+  collapsed << row
+  last_collapsed_index = index
+
+  if row.last == false
+    flipped = true
+    flipped_index = index
   end
 end
 
-# First batch should run in many VPs
-assert_equal (1..10).to_a, steps[:post_warmup].map(&:first).sort
-assert steps[:post_warmup].map { |row| row[1] }.uniq.count >= 2
+# Once we stop getting collapsed data, it should not appear again
+assert !flipped
+assert_equal nil, flipped_index
 
-# Then we should have a second round that is collapsed with the same data but running in the same
-# partition and in order
-assert_equal (1..10).to_a, steps[:post_collapsed].select(&:last).map(&:first)
-assert_equal 1, steps[:post_collapsed].select(&:last).map { |row| row[1] }.uniq.count
+# Collapsed should run in a single thread
+assert_equal 1, collapsed.map { |row| row[1] }.uniq.count
 
-# After the recovery we should have regular VP flow again
-assert_equal (11..20).to_a, steps[:restored_vp].map(&:first).sort
-assert steps[:restored_vp].map { |row| row[1] }.uniq.count >= 2
+# All collapsed need to be in the pre collapsed because of retry
+assert (collapsed.map(&:first) - pre_collapse_offsets).empty?
+
+# All collapsed must be in order
+previous = nil
+collapsed.map(&:first).each do |offset|
+  unless previous
+    previous = offset
+    next
+  end
+
+  assert_equal previous + 1, offset
+  previous = offset
+end
+
+uncollapsed = DT[:flow][(last_collapsed_index + 1)..]
+
+# All post-collapse should not be collapsed
+assert uncollapsed.none?(&:last)
+
+# Post collapse should run in multiple threads
+assert uncollapsed.map { |row| row[1] }.uniq.count >= 2
+
+# None of those processed later in parallel should be in the previous sets
+assert (uncollapsed.map(&:first) & collapsed.map(&:first)).empty?
+assert (uncollapsed.map(&:first) & pre_collapse.map(&:first)).empty?
