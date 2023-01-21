@@ -9,32 +9,31 @@ setup_karafka(allow_errors: true) do |config|
   config.max_messages = 100
 end
 
+MUTEX = Mutex.new
+SLEEP = 10
+
 class Consumer < Karafka::BaseConsumer
   def consume
     return if messages.count == 1
-    return if DT[:post_warmup].empty?
+    return unless DT[:flow].include?([:post_warmup])
 
-    unless DT[:post_collapse_run].empty?
-      messages.each do |message|
-        DT[:post_collapse] << [message.offset, object_id, collapsed?]
-      end
-
-      return
+    messages.each do |message|
+      DT[:flow] << [message.offset, object_id, collapsed?]
     end
 
-    if collapsed?
-      messages.each do |message|
-        DT[:collapsed] << [message.offset, object_id]
-      end
-    else
-      messages.each do |message|
-        DT[:not_collapsed] << [message.offset, object_id]
-      end
+    entered = false
 
+    MUTEX.synchronize do
       if DT[:raised].empty?
         DT[:raised] << true
-        raise StandardError
+        entered = true
       end
+    end
+
+    if entered
+      sleep(2)
+      DT[:flow] << [:post_collapsed]
+      raise StandardError
     end
   end
 end
@@ -50,32 +49,45 @@ draw_routes do
   end
 end
 
-warmup = false
-
 start_karafka_and_wait_until do
-  unless warmup
-    warmup = true
-    produce_many(DT.topic, %w[0])
-    DT[:post_warmup] << true
-  end
+  produce_many(DT.topic, %w[0])
+
+  sleep(SLEEP)
+  DT[:flow] << [:post_warmup]
 
   produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
 
-  sleep(10)
+  sleep(SLEEP)
+  DT[:flow] << [:restored_vp]
 
   produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
 
-  sleep(10)
-
-  DT[:post_collapse_run] << true
-
-  produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
-
-  sleep(0.1) until DT[:post_collapse].size >= 10
+  sleep(SLEEP)
 
   true
 end
 
-assert_equal 20, DT[:not_collapsed].size
-assert_equal 10, DT[:collapsed].size
-assert_equal 10, DT[:post_collapse].size
+steps = {}
+step_key = nil
+
+DT[:flow].each do |step|
+  if step.first.is_a?(Symbol)
+    step_key = step.first
+    steps[step_key] ||= []
+  else
+    steps[step_key] << step
+  end
+end
+
+# First batch should run in many VPs
+assert_equal (1..10).to_a, steps[:post_warmup].map(&:first).sort
+assert steps[:post_warmup].map { |row| row[1] }.uniq.count >= 2
+
+# Then we should have a second round that is collapsed with the same data but running in the same
+# partition and in order
+assert_equal (1..10).to_a, steps[:post_collapsed].select(&:last).map(&:first)
+assert_equal 1, steps[:post_collapsed].select(&:last).map { |row| row[1] }.uniq.count
+
+# After the recovery we should have regular VP flow again
+assert_equal (11..20).to_a, steps[:restored_vp].map(&:first).sort
+assert steps[:restored_vp].map { |row| row[1] }.uniq.count >= 2
