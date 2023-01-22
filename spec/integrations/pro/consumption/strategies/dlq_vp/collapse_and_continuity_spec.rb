@@ -23,7 +23,7 @@ class Consumer < Karafka::BaseConsumer
         DT[:flow] << [message.offset, object_id, collapsed?]
       end
 
-      if DT[:raised].empty? && DT[:flow].count >= 9
+      if DT[:raised].empty? && DT[:flow].count >= 10
         DT[:raised] << true
         entered = true
       end
@@ -68,7 +68,9 @@ start_karafka_and_wait_until do
   sleep(0.1) until DT[:raised].empty?
   sleep(2)
 
-  sleep(0.1) until DT[:flow].count >= 20
+  # 10 from original + at least one from restart with collapse (which indicates all) + one
+  # tat indicates the moment (symbol one)
+  sleep(0.1) until DT[:flow].count >= 12
 
   produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
 
