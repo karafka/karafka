@@ -20,16 +20,13 @@ class Consumer < Karafka::BaseConsumer
         DT[:flow] << [message.offset, object_id, collapsed?]
       end
 
-      if DT[:raised].empty? && DT[:flow].count >= 9
+      if DT[:raised].empty? && DT[:flow].count >= 10
         DT[:raised] << true
         entered = true
+        sleep(2)
+        DT[:flow] << [:post_collapsed]
+        raise StandardError
       end
-    end
-
-    if entered
-      sleep(2)
-      DT[:flow] << [:post_collapsed]
-      raise StandardError
     end
   end
 end
