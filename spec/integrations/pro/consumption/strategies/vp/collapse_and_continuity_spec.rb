@@ -49,13 +49,17 @@ start_karafka_and_wait_until do
   produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
 
   sleep(0.1) until DT[:raised].empty?
-  sleep(2)
+  sleep(5)
 
-  sleep(0.1) until DT[:flow].count >= 20
+  # 10 from original + at least one from restart with collapse (which indicates all) + one
+  # tat indicates the moment (symbol one)
+  sleep(0.1) until DT[:flow].count >= 12
+  sleep(5)
 
   produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
 
   sleep(0.1) until DT[:flow].count >= 20
+  sleep(5)
 
   true
 end
