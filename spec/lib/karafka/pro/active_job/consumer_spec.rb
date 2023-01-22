@@ -82,6 +82,8 @@ RSpec.describe_current do
     end
 
     context 'when messages are available to the consumer and it is virtual partition' do
+      let(:strategy) { Karafka::Pro::Processing::Strategies::AjMomVp }
+
       before do
         consumer.messages = messages
 
