@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# DLQ in the VP mode should collapse and allow to skip when error occurs again in a collapsed mode
+# DLQ in the VP mode should collapse and skip when error occurs again in a collapsed mode
 
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 5
@@ -12,6 +12,7 @@ MUTEX = Mutex.new
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
+      # Simulates a broken message that for example cannot be deserialized
       raise StandardError if message.raw_payload == '5'
 
       # Mark only in a collapsed mode
