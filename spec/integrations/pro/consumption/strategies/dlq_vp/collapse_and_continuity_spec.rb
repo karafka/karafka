@@ -12,27 +12,31 @@ setup_karafka(allow_errors: true) do |config|
   config.max_messages = 100
 end
 
-MUTEX = Mutex.new
-
 class Consumer < Karafka::BaseConsumer
   def consume
-    entered = false
-
-    MUTEX.synchronize do
-      messages.each do |message|
-        DT[:flow] << [message.offset, object_id, collapsed?]
-      end
-
-      if DT[:raised].empty? && DT[:flow].count >= 10
-        DT[:raised] << true
-        entered = true
-      end
+    messages.each do |message|
+      DT[:flow] << [message.offset, object_id, collapsed?]
     end
 
-    if entered
-      sleep(2)
-      DT[:flow] << [:post_collapsed]
-      raise StandardError
+    messages.each do |message|
+      next unless message.raw_payload.to_i == 9
+
+      if DT[:raised].empty?
+        # Sleep needed to make sure all other VPs are done
+        sleep(2)
+        DT[:flow] << [:collapsed]
+        DT[:raised] << true
+
+        raise StandardError
+      else
+        DT[:flow] << [:post_collapsed]
+
+        Thread.new do
+          sleep(2)
+
+          produce_many(DT.topic, (10..19).to_a.map(&:to_s))
+        end
+      end
     end
   end
 end
@@ -62,27 +66,17 @@ draw_routes do
   end
 end
 
+produce_many(DT.topic, (0..9).to_a.map(&:to_s))
+
 start_karafka_and_wait_until do
-  produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
+  step = (DT[:flow].last || []).first
 
-  sleep(0.1) until DT[:raised].empty?
-  sleep(5)
-
-  # 10 from original + at least one from restart with collapse (which indicates all) + one
-  # tat indicates the moment (symbol one)
-  sleep(0.1) until DT[:flow].count >= 12
-  sleep(5)
-
-  produce_many(DT.topic, (0..9).to_a.map(&:to_s).shuffle)
-
-  sleep(0.1) until DT[:flow].count >= 20
-  sleep(5)
-
-  true
+  # 20 messages + 2 control records
+  DT[:flow].any? { |row| row.first == 19 && row.last == false } && DT[:flow].count >= 22
 end
 
-pre_collapse_index = DT[:flow].index { |row| row.first == :post_collapsed }
-pre_collapse = DT[:flow][0..(pre_collapse_index - 1)]
+pre_collapse_index = DT[:flow].index { |row| row.last } - 1
+pre_collapse = DT[:flow][0..pre_collapse_index]
 pre_collapse_offsets = pre_collapse.map(&:first)
 
 # Pre collapse should process all from start till crash
@@ -144,7 +138,8 @@ collapsed.map(&:first).each do |offset|
   previous = offset
 end
 
-uncollapsed = DT[:flow][(last_collapsed_index + 1)..]
+uncollapsed_index = DT[:flow].index { |row| row == [:post_collapsed] }
+uncollapsed = DT[:flow][(uncollapsed_index + 1)..100]
 
 # All post-collapse should not be collapsed
 assert uncollapsed.none?(&:last)
