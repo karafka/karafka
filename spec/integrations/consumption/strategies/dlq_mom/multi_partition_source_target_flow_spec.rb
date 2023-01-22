@@ -4,8 +4,8 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
-create_topic(name: DT.topics[0], partitions: 10)
-create_topic(name: DT.topics[1], partitions: 10)
+create_topic(name: DT.topics[0], partitions: 100)
+create_topic(name: DT.topics[1], partitions: 100)
 
 class Consumer < Karafka::BaseConsumer
   def consume
@@ -38,7 +38,7 @@ draw_routes do
   end
 end
 
-10.times do |i|
+100.times do |i|
   elements = DT.uuids(100)
   produce_many(DT.topic, elements, partition: i)
 end
