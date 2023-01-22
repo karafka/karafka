@@ -100,6 +100,15 @@ RSpec.describe_current do
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq) }
   end
 
+  context 'when dlq with vp is enabled' do
+    before do
+      topic.dead_letter_queue(topic: 'test')
+      topic.virtual_partitions(partitioner: true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::DlqVp) }
+  end
+
   context 'when dlq with mom is enabled' do
     before do
       topic.dead_letter_queue(topic: 'test')
