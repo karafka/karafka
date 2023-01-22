@@ -24,7 +24,7 @@ RSpec.describe_current do
 
   context 'when collapsed until future offset' do
     before do
-      collapser.collapse_until!(10000)
+      collapser.collapse_until!(10_000)
       collapser.refresh!(100)
     end
 

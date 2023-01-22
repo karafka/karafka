@@ -11,10 +11,20 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    track
+
+    trigger
+  end
+
+  private
+
+  def track
     messages.each do |message|
       DT[:flow] << [message.offset, object_id, collapsed?]
     end
+  end
 
+  def trigger
     messages.each do |message|
       next unless message.raw_payload.to_i == 9
 
@@ -52,13 +62,11 @@ end
 produce_many(DT.topic, (0..9).to_a.map(&:to_s))
 
 start_karafka_and_wait_until do
-  step = (DT[:flow].last || []).first
-
   # 20 messages + 2 control records
   DT[:flow].any? { |row| row.first == 19 && row.last == false } && DT[:flow].count >= 22
 end
 
-pre_collapse_index = DT[:flow].index { |row| row.last } - 1
+pre_collapse_index = DT[:flow].index(&:last) - 1
 pre_collapse = DT[:flow][0..pre_collapse_index]
 pre_collapse_offsets = pre_collapse.map(&:first)
 
@@ -79,7 +87,7 @@ end
 assert pre_collapse.map { |row| row[1] }.uniq.count >= 2
 
 # None of pre-collapse should be marked as collapsed
-assert pre_collapse.none? { |row| row.last }
+assert pre_collapse.none?(&:last)
 
 collapsed = []
 flipped = false

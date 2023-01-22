@@ -64,7 +64,7 @@ start_karafka_and_wait_until do
 end
 
 # We should not have in our data message with offset 5 as it failed
-assert DT[:flow].none? { |row| row.first == 5 }
+assert(DT[:flow].none? { |row| row.first == 5 })
 
 # It should be moved to DLQ
 assert_equal 5, DT[:dlq].first.headers['original_offset'].to_i
