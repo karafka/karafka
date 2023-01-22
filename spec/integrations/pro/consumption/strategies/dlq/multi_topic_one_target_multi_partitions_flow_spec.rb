@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When using single DLQ to handle errors from multiple topics, the dispatched message key should
-# combine topic and partition to allow for good data distribution.
+# match the partition of origin
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
@@ -17,7 +17,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[0] << message.key
+      DT[0] << [message.key, message.headers['original_partition']]
     end
   end
 end
@@ -50,11 +50,7 @@ set = Set.new
 topics = [DT.topics[0], DT.topics[1]]
 
 DT[0].each do |key|
-  assert topics.any? do |topic|
-    key.start_with?("#{topic}: ")
-  end
-
-  set << key.split(': ').first
+  assert_equal key[0], key[1]
 end
 
-assert_equal 2, set.size
+assert DT[0].map(&:first).uniq.count > 1
