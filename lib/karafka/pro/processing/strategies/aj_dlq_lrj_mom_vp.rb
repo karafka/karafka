@@ -16,43 +16,44 @@ module Karafka
     module Processing
       module Strategies
         # ActiveJob enabled
+        # DLQ enabled
+        # Long-Running Job enabled
         # Manual offset management enabled
         # Virtual Partitions enabled
-        module AjDlqMomVp
-          include Dlq
-          include Vp
-          include Default
+        #
+        # This case is a bit of special. Please see the `AjDlqMom` for explanation on how the
+        # offset management works in this case.
+        module AjDlqLrjMomVp
+          include AjDlqMomVp
+          include AjLrjMom
 
           # Features for this strategy
           FEATURES = %i[
             active_job
-            dead_letter_queue
+            long_running_job
             manual_offset_management
+            dead_letter_queue
             virtual_partitions
           ].freeze
 
-          # Flow including moving to DLQ in the collapsed mode
           def handle_after_consume
             coordinator.on_finished do |last_group_message|
               if coordinator.success?
                 coordinator.pause_tracker.reset
 
-                # When this is an ActiveJob running via Pro with virtual partitions, we cannot mark
-                # intermediate jobs as processed not to mess up with the ordering.
-                # Only when all the jobs are processed and we did not loose the partition
-                # assignment and we are not stopping (Pro ActiveJob has an early break) we can
-                # commit offsets on this as only then we can be sure, that all the jobs were
-                # processed.
-                # For a non virtual partitions case, the flow is regular and state is marked after
-                # each successfully processed job
                 return if revoked?
                 return if Karafka::App.stopping?
 
+                # Since we have VP here we do not commit intermediate offsets and need to commit
+                # them here. We do commit in collapsed mode but this is generalized.
                 mark_as_consumed(last_group_message)
+
+                seek(coordinator.seek_offset) unless revoked?
+
+                resume
               elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
                 retry_after_pause
               else
-                # Here we are in a collapsed state, hence we can apply the same logic as AjDlqMom
                 coordinator.pause_tracker.reset
                 skippable_message = find_skippable_message
                 dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
