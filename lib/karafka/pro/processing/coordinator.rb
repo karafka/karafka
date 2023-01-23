@@ -23,6 +23,7 @@ module Karafka
 
           @executed = []
           @flow_lock = Mutex.new
+          @collapser = Collapser.new
         end
 
         # Starts the coordination process
@@ -31,10 +32,26 @@ module Karafka
         def start(messages)
           super
 
+          @collapser.refresh!(messages.first.offset)
+
           @mutex.synchronize do
             @executed.clear
             @last_message = messages.last
           end
+        end
+
+        # Sets the consumer failure status and additionally starts the collapse until
+        #
+        # @param consumer [Karafka::BaseConsumer] consumer that failed
+        # @param error [StandardError] error from the failure
+        def failure!(consumer, error)
+          super
+          @collapser.collapse_until!(@last_message.offset + 1)
+        end
+
+        # @return [Boolean] are we in a collapsed state at the moment
+        def collapsed?
+          @collapser.collapsed?
         end
 
         # @return [Boolean] is the coordinated work finished or not

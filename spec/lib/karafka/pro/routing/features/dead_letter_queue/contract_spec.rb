@@ -6,7 +6,8 @@ RSpec.describe_current do
   let(:config) do
     {
       dead_letter_queue: {
-        active: true
+        active: true,
+        max_retries: 1
       },
       virtual_partitions: {
         active: false
@@ -18,8 +19,11 @@ RSpec.describe_current do
     it { expect(check).to be_success }
   end
 
-  context 'when trying to use DLQ with VP' do
-    before { config[:virtual_partitions][:active] = true }
+  context 'when trying to use DLQ with VP without any retries' do
+    before do
+      config[:virtual_partitions][:active] = true
+      config[:dead_letter_queue][:max_retries] = 0
+    end
 
     it { expect(check).not_to be_success }
   end

@@ -16,56 +16,51 @@ module Karafka
     module Processing
       module Strategies
         # ActiveJob enabled
+        # DLQ enabled
         # Long-Running Job enabled
         # Manual offset management enabled
         # Virtual Partitions enabled
-        module AjLrjMomVp
-          include Default
-          include Vp
+        #
+        # This case is a bit of special. Please see the `AjDlqMom` for explanation on how the
+        # offset management works in this case.
+        module AjDlqLrjMomVp
+          include AjDlqMomVp
+          include AjLrjMom
 
           # Features for this strategy
           FEATURES = %i[
             active_job
             long_running_job
             manual_offset_management
+            dead_letter_queue
             virtual_partitions
           ].freeze
 
-          # No actions needed for the standard flow here
-          def handle_before_enqueue
-            coordinator.on_enqueued do
-              pause(coordinator.seek_offset, Lrj::MAX_PAUSE_TIME, false)
-            end
-          end
-
-          # Standard flow without any features
+          # This strategy is pretty much as non VP one because of the collapse
           def handle_after_consume
             coordinator.on_finished do |last_group_message|
               if coordinator.success?
                 coordinator.pause_tracker.reset
 
-                mark_as_consumed(last_group_message) unless revoked? || Karafka::App.stopping?
+                return if revoked?
+                return if Karafka::App.stopping?
+
+                # Since we have VP here we do not commit intermediate offsets and need to commit
+                # them here. We do commit in collapsed mode but this is generalized.
+                mark_as_consumed(last_group_message)
+
                 seek(coordinator.seek_offset) unless revoked?
 
                 resume
-              else
-                # If processing failed, we need to pause
-                # For long running job this will overwrite the default never-ending pause and will
-                # cause the processing to keep going after the error backoff
+              elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
                 retry_after_pause
+              else
+                coordinator.pause_tracker.reset
+                skippable_message = find_skippable_message
+                dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                mark_as_consumed(skippable_message)
+                pause(coordinator.seek_offset, nil, false)
               end
-            end
-          end
-
-          # LRJ cannot resume here. Only in handling the after consumption
-          def handle_revoked
-            coordinator.on_revoked do
-              coordinator.revoke
-            end
-
-            Karafka.monitor.instrument('consumer.revoke', caller: self)
-            Karafka.monitor.instrument('consumer.revoked', caller: self) do
-              revoked
             end
           end
         end

@@ -15,21 +15,20 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # Just Virtual Partitions enabled
-        module Vp
-          # This flow is exactly the same as the default one because the default one is wrapper
-          # with `coordinator#on_finished`
-          include Default
+        # Dead-Letter Queue enabled
+        # Long-Running Job enabled
+        # Virtual Partitions enabled
+        module DlqLrjVp
+          # Same flow as the Dlq Lrj because VP collapses on errors, so DlqLrj can kick in
+          include Vp
+          include DlqLrj
 
           # Features for this strategy
           FEATURES = %i[
+            dead_letter_queue
+            long_running_job
             virtual_partitions
           ].freeze
-
-          # @return [Boolean] is the virtual processing collapsed in the context of given consumer.
-          def collapsed?
-            coordinator.collapsed?
-          end
         end
       end
     end

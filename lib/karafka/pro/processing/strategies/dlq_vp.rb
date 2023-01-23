@@ -15,21 +15,21 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # Just Virtual Partitions enabled
-        module Vp
-          # This flow is exactly the same as the default one because the default one is wrapper
-          # with `coordinator#on_finished`
-          include Default
-
+        # Dead Letter Queue enabled
+        # Virtual Partitions enabled
+        #
+        # In general because we collapse processing in virtual partitions to one on errors, there
+        # is no special action that needs to be taken because we warranty that even with VPs
+        # on errors a retry collapses into a single state.
+        module DlqVp
           # Features for this strategy
           FEATURES = %i[
+            dead_letter_queue
             virtual_partitions
           ].freeze
 
-          # @return [Boolean] is the virtual processing collapsed in the context of given consumer.
-          def collapsed?
-            coordinator.collapsed?
-          end
+          include Dlq
+          include Vp
         end
       end
     end

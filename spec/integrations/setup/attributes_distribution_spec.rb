@@ -17,15 +17,21 @@ setup_karafka do |config|
   config.logger = Logger.new(strio)
   config.logger.level = :debug
   # Producer specific
-  config.kafka[:'retry.backoff.ms'] = 1_000
+  config.kafka[:'retry.backoff.ms'] = 10_000
   # Consumer specific
-  config.kafka[:'max.poll.interval.ms'] = 1_000
-  config.kafka[:'session.timeout.ms'] = 1_000
+  config.kafka[:'max.poll.interval.ms'] = 15_000
+  config.kafka[:'session.timeout.ms'] = 10_000
+end
+
+class Consumer < Karafka::BaseConsumer
+  def consume
+    DT[:done] << true
+  end
 end
 
 draw_routes do
   topic DT.topic do
-    consumer Class.new(Karafka::BaseConsumer)
+    consumer Consumer
   end
 end
 
@@ -34,7 +40,7 @@ Karafka.producer.config.logger.level = :debug
 Karafka.producer.produce_sync(topic: DT.topic, payload: 'test')
 
 start_karafka_and_wait_until do
-  true
+  !DT[:done].empty?
 end
 
 $stdout = proper_stdout

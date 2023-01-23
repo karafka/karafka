@@ -31,10 +31,9 @@ module Karafka
           end
 
           # Mark job as successful
-          coordinator.consumption(self).success!
+          coordinator.success!(self)
         rescue StandardError => e
-          # If failed, mark as failed
-          coordinator.consumption(self).failure!(e)
+          coordinator.failure!(self, e)
 
           # Re-raise so reported in the consumer
           raise e

@@ -5,7 +5,7 @@ en:
       virtual_partitions.max_partitions_format: needs to be equal or more than 1
       manual_offset_management_not_with_virtual_partitions: cannot be used together with Virtual Partitions
       long_running_job.active_format: needs to be either true or false
-      dead_letter_queue_not_with_virtual_partitions: cannot be used together with Virtual Partitions
+      dead_letter_queue_with_virtual_partitions: when using Dead Letter Queue with Virtual Partitions, at least one retry is required.
 
     config:
       encryption.active_format: 'needs to be either true or false'

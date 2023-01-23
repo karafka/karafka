@@ -26,10 +26,10 @@ module Karafka
               ).fetch('en').fetch('validations').fetch('topic')
             end
 
-            # Make sure that we don't use DLQ with VP
-            # Using those two would cause many issues because the offset within VP is not
-            # manageable so in scenarios where we would fail on the last message, we would move by
-            # one and try again and fail, and move by one and try again and fail and so on...
+            # Make sure that when we use virtual partitions with DLQ, at least one retry is set
+            # We cannot use VP with DLQ without retries as we in order to provide ordering
+            # warranties on errors with VP, we need to collapse the VPs concurrency and retry
+            # without any indeterministic work
             virtual do |data, errors|
               next unless errors.empty?
 
@@ -38,8 +38,9 @@ module Karafka
 
               next unless dead_letter_queue[:active]
               next unless virtual_partitions[:active]
+              next if dead_letter_queue[:max_retries].positive?
 
-              [[%i[dead_letter_queue], :not_with_virtual_partitions]]
+              [[%i[dead_letter_queue], :with_virtual_partitions]]
             end
           end
         end

@@ -18,18 +18,20 @@ module Karafka
         # ActiveJob enabled
         # Manual offset management enabled
         # Virtual Partitions enabled
-        module AjMomVp
+        module AjDlqMomVp
+          include Dlq
           include Vp
           include Default
 
           # Features for this strategy
           FEATURES = %i[
             active_job
+            dead_letter_queue
             manual_offset_management
             virtual_partitions
           ].freeze
 
-          # Standard flow without any features
+          # Flow including moving to DLQ in the collapsed mode
           def handle_after_consume
             coordinator.on_finished do |last_group_message|
               if coordinator.success?
@@ -43,15 +45,19 @@ module Karafka
                 # processed.
                 # For a non virtual partitions case, the flow is regular and state is marked after
                 # each successfully processed job
-                #
-                # We can mark and we do mark intermediate jobs in the collapsed mode when running
-                # VPs
                 return if revoked?
                 return if Karafka::App.stopping?
 
                 mark_as_consumed(last_group_message)
-              else
+              elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
                 retry_after_pause
+              else
+                # Here we are in a collapsed state, hence we can apply the same logic as AjDlqMom
+                coordinator.pause_tracker.reset
+                skippable_message = find_skippable_message
+                dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                mark_as_consumed(skippable_message)
+                pause(coordinator.seek_offset, nil, false)
               end
             end
           end
