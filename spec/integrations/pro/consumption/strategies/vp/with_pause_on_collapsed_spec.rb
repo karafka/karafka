@@ -12,7 +12,7 @@ class Consumer < Karafka::BaseConsumer
     messages.each { |message| DT[0] << [message.offset, collapsed?, Time.now.to_f] }
 
     if collapsed?
-      pause(3, 10_000)
+      pause(0, 10_000)
     elsif DT[:raised].empty?
       DT[:raised] << true
       raise StandardError
