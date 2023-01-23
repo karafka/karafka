@@ -36,6 +36,7 @@ module Karafka
             virtual_partitions
           ].freeze
 
+          # This strategy is pretty much as non VP one because of the collapse
           def handle_after_consume
             coordinator.on_finished do |last_group_message|
               if coordinator.success?
