@@ -70,6 +70,19 @@ module Karafka
       App.config.license.token != false
     end
 
+    # @return [Boolean] Do we run within/with Rails. We use this to initialize Railtie and proxy
+    #   the console invocation to Rails
+    def rails?
+      return @rails if instance_variable_defined?('@rails')
+
+      # Do not load Rails again if already loaded
+      Object.const_defined?('Rails::Railtie') || require('rails')
+
+      @rails = true
+    rescue LoadError
+      @rails = false
+    end
+
     # @return [String] path to a default file that contains booting procedure etc
     # @note By default it is a file called 'karafka.rb' but it can be specified as you wish if you
     #   have Karafka that is merged into a Sinatra/Rails app and karafka.rb is taken.

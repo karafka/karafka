@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.29 (Unreleased)
+- [Fix] Fix for: running karafka console results in NameError with Rails (#1280)
+
 ## 2.0.28 (2023-01-25)
 - **[Feature]** Provide the ability to use Dead Letter Queue with Virtual Partitions.
 - [Improvement] Collapse Virtual Partitions upon retryable error to a single partition. This allows dead letter queue to operate and mitigate issues arising from work virtualization. This removes uncertainties upon errors that can be retried and processed. Affects given topic partition virtualization only for multi-topic and mulit-partition parallelization. It also minimizes potential "flickering" where given data set has potentially many corrupted messages. The collapse will last until all the messages from the collective corrupted batch are processed. After that, virtualization will resume.
