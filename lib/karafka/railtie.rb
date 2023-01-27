@@ -2,14 +2,7 @@
 
 # This file contains Railtie for auto-configuration
 
-rails = false
-
-begin
-  # Do not load Rails again if already loaded
-  Object.const_defined?('Rails::Railtie') || require('rails')
-
-  rails = true
-rescue LoadError
+unless Karafka.rails?
   # Without defining this in any way, Zeitwerk ain't happy so we do it that way
   module Karafka
     class Railtie
@@ -17,7 +10,7 @@ rescue LoadError
   end
 end
 
-if rails
+if Karafka.rails?
   # Load ActiveJob adapter
   require 'active_job/karafka'
 
