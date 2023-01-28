@@ -28,6 +28,7 @@ module Karafka
 
           @monitor.instrument(
             'error.occurred',
+            caller: self,
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
             type: 'librdkafka.error',

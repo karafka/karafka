@@ -2,6 +2,7 @@
 
 ## 2.0.29 (Unreleased)
 - [Fix] Fix for: running karafka console results in NameError with Rails (#1280)
+- [Fix] Make sure, that the `caller` for async errors is being published.
 
 ## 2.0.28 (2023-01-25)
 - **[Feature]** Provide the ability to use Dead Letter Queue with Virtual Partitions.
