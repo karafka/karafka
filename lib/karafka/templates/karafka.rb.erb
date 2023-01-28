@@ -40,6 +40,12 @@ class KarafkaApp < Karafka::App
   Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
   # Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
 
+  # This logger prints the producer development info using the Karafka logger.
+  # It is similar to the consumer logger listener but producer oriented.
+  Karafka.producer.monitor.subscribe(
+    WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
+  )
+
   routes.draw do
 <% if rails? -%>
     # Uncomment this if you use Karafka with ActiveJob
