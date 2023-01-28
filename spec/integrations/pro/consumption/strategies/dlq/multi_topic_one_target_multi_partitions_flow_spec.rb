@@ -46,9 +46,6 @@ start_karafka_and_wait_until do
   DT[0].count >= 20
 end
 
-set = Set.new
-topics = [DT.topics[0], DT.topics[1]]
-
 DT[0].each do |key|
   assert_equal key[0], key[1]
 end

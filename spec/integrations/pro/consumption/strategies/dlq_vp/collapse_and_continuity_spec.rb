@@ -83,7 +83,7 @@ start_karafka_and_wait_until do
   DT[:flow].any? { |row| row.first == 19 && row.last == false } && DT[:flow].count >= 22
 end
 
-pre_collapse_index = DT[:flow].index { |row| row.last } - 1
+pre_collapse_index = DT[:flow].index(&:last) - 1
 pre_collapse = DT[:flow][0..pre_collapse_index]
 pre_collapse_offsets = pre_collapse.map(&:first)
 
