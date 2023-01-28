@@ -38,9 +38,12 @@ draw_routes do
   end
 end
 
-elements = DT.uuids(100)
-produce_many(DT.topics[0], elements)
-produce_many(DT.topics[1], elements)
+100.times do |i|
+  elements = DT.uuids(10)
+  produce_many(DT.topics[0], elements, partition: i)
+  produce_many(DT.topics[1], elements, partition: i)
+end
+
 
 start_karafka_and_wait_until do
   DT[0].count >= 20
