@@ -87,7 +87,7 @@ I also sell Karafka Pro subscriptions. It includes a commercial-friendly license
 
 **20%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
 
-Help me provide high-quality open-source software. Please see the Karafka [homepage](https://karafka.io) for more details.
+Help me provide high-quality open-source software. Please see the Karafka [homepage](https://karafka.io/#become-pro) for more details.
 
 ## Support
 
