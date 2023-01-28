@@ -70,10 +70,10 @@ end
 
 # In the DLQ we should have all the skipped in the correct order because of the collapse-skip
 assert_equal 10, DT[:dlq].size
-assert_equal (0..9).to_a, DT[:dlq].map { |message| message.raw_payload.to_i }
+assert_equal (0..9).to_a, (DT[:dlq].map { |message| message.raw_payload.to_i })
 
 # Skipped should not be in the flow at all
-assert DT[:flow].none? { |row| row.first <= 9 }
+assert(DT[:flow].none? { |row| row.first <= 9 })
 
 # A batch dispatched after the recovery should use VP back
 assert DT[:flow2].none?(&:last)
