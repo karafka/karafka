@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.0.29 (Unreleased)
+- [Improvement] Make sure, that the `Karafka#producer` instance has the `LoggerListener` enabled in the install template, so Karafka by default prints both consumer and producer info.
 - [Fix] Fix for: running karafka console results in NameError with Rails (#1280)
 - [Fix] Make sure, that the `caller` for async errors is being published.
 
