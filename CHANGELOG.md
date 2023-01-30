@@ -1,10 +1,11 @@
 # Karafka framework changelog
 
-## 2.0.29 (Unreleased)
+## 2.0.29 (2023-01-30)
 - [Improvement] Make sure, that the `Karafka#producer` instance has the `LoggerListener` enabled in the install template, so Karafka by default prints both consumer and producer info.
 - [Improvement] Extract the code loading capabilities of Karafka console from the executable, so web can use it to provide CLI commands.
 - [Fix] Fix for: running karafka console results in NameError with Rails (#1280)
 - [Fix] Make sure, that the `caller` for async errors is being published.
+- [Change] Make sure that WaterDrop `2.4.10` or higher is used with this release to support Web-UI.
 
 ## 2.0.28 (2023-01-25)
 - **[Feature]** Provide the ability to use Dead Letter Queue with Virtual Partitions.
