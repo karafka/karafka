@@ -6,24 +6,6 @@ require 'karafka'
 # our bin/karafka cli
 ENV['KARAFKA_CLI'] = 'true'
 
-# If there is a boot file, we need to require it as we expect it to contain
-# Karafka app setup, routes, etc
-if File.exist?(Karafka.boot_file)
-  rails_env_rb = File.join(Dir.pwd, 'config/environment.rb')
-
-  # Load Rails environment file that starts Rails, so we can reference consumers and other things
-  # from `karafka.rb` file. This will work only for Rails, for non-rails a manual setup is needed
-  require rails_env_rb if Kernel.const_defined?(:Rails) && File.exist?(rails_env_rb)
-
-  require Karafka.boot_file.to_s
-else
-  # However when it is unavailable, we still want to be able to run help command
-  # and install command as they don't require configured app itself to run
-  raise(
-    Karafka::Errors::MissingBootFileError,
-    Karafka.boot_file
-  ) unless %w[-h install].include?(ARGV[0])
-end
-
+Karafka::Cli::Base.load
 Karafka::Cli.prepare
 Karafka::Cli.start
