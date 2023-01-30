@@ -34,7 +34,7 @@ module Karafka
       end
 
       class << self
-        # Loads prope environment with what is needed to run the CLI
+        # Loads proper environment with what is needed to run the CLI
         def load
           # If there is a boot file, we need to require it as we expect it to contain
           # Karafka app setup, routes, etc
@@ -47,13 +47,10 @@ module Karafka
             require rails_env_rb if Kernel.const_defined?(:Rails) && File.exist?(rails_env_rb)
 
             require Karafka.boot_file.to_s
-          else
-            # However when it is unavailable, we still want to be able to run help command
-            # and install command as they don't require configured app itself to run
-            raise(
-              ::Karafka::Errors::MissingBootFileError,
-              ::Karafka.boot_file
-            ) unless %w[-h install].include?(ARGV[0])
+          # However when it is unavailable, we still want to be able to run help command
+          # and install command as they don't require configured app itself to run
+          elsif %w[-h install].none? { |cmd| cmd == ARGV[0] }
+            raise ::Karafka::Errors::MissingBootFileError, ::Karafka.boot_file
           end
         end
 
