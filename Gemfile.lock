@@ -4,7 +4,7 @@ PATH
     karafka (2.0.29)
       karafka-core (>= 2.0.9, < 3.0.0)
       thor (>= 0.20)
-      waterdrop (>= 2.4.9, < 3.0.0)
+      waterdrop (>= 2.4.10, < 3.0.0)
       zeitwerk (~> 2.3)
 
 GEM
@@ -61,7 +61,7 @@ GEM
     thor (1.2.1)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
-    waterdrop (2.4.9)
+    waterdrop (2.4.10)
       karafka-core (>= 2.0.9, < 3.0.0)
       zeitwerk (~> 2.3)
     zeitwerk (2.6.6)
