@@ -83,7 +83,7 @@ bundle exec karafka server
 
 ## Want to Upgrade? LGPL is not for you? Want to help?
 
-I also sell Karafka Pro subscriptions. It includes a commercial-friendly license, priority support, architecture consultations, and high throughput data processing-related features (virtual partitions, long-running jobs, and more).
+I also sell Karafka Pro subscriptions. It includes a commercial-friendly license, priority support, architecture consultations, enhanced Web UI and high throughput data processing-related features (virtual partitions, long-running jobs, and more).
 
 **20%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
 
