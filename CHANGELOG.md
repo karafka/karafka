@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.30 (Unreleased)
+## 2.0.30 (2022-01-31)
 - [Improvement] Alias `--consumer-groups` with `--include-consumer-groups`
 - [Improvement] Alias `--subscription-groups` with `--include-subscription-groups`
 - [Improvement] Alias `--topics` with `--include-topics`
