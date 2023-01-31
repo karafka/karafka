@@ -59,19 +59,31 @@ RSpec.describe_current do
 
   describe '#active?' do
     context 'when there are no topics in the topics' do
-      before { Karafka::App.config.internal.routing.active.topics = [] }
-
       it { expect(topic.active?).to eq true }
     end
 
     context 'when our topic name is in server topics' do
-      before { Karafka::App.config.internal.routing.active.topics = [name] }
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:topics, name)
+      end
 
       it { expect(topic.active?).to eq true }
     end
 
     context 'when our topic name is not in server topics' do
-      before { Karafka::App.config.internal.routing.active.topics = ['na'] }
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:topics, 'na')
+      end
 
       it { expect(topic.active?).to eq false }
     end

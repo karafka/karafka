@@ -1,5 +1,13 @@
 # Karafka framework changelog
 
+## 2.0.30 (Unreleased)
+- [Improvement] Alias `--consumer-groups` with `--include-consumer-groups`
+- [Improvement] Alias `--subscription-groups` with `--include-subscription-groups`
+- [Improvement] Alias `--topics` with `--include-topics`
+- [Improvement] Introduce `--exclude-consumer-groups` for ability to exclude certain consumer groups from running
+- [Improvement] Introduce `--exclude-subscription-groups` for ability to exclude certain subscription groups from running
+- [Improvement] Introduce `--exclude-topics` for ability to exclude certain topics from running
+
 ## 2.0.29 (2023-01-30)
 - [Improvement] Make sure, that the `Karafka#producer` instance has the `LoggerListener` enabled in the install template, so Karafka by default prints both consumer and producer info.
 - [Improvement] Extract the code loading capabilities of Karafka console from the executable, so web can use it to provide CLI commands.

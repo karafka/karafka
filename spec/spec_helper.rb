@@ -64,9 +64,7 @@ RSpec.configure do |config|
   config.after do
     Karafka::App.routes.clear
     Karafka.monitor.notifications_bus.clear
-    Karafka::App.config.internal.routing.active.consumer_groups = []
-    Karafka::App.config.internal.routing.active.subscription_groups = []
-    Karafka::App.config.internal.routing.active.topics = []
+    Karafka::App.config.internal.routing.activity_manager.clear
   end
 end
 

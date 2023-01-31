@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# When trying to run non existing topics, we should fail.
+# When trying to exclude non existing consumer group, we should fail.
 
 setup_karafka
 
@@ -19,7 +19,7 @@ Karafka::App
   .internal
   .routing
   .activity_manager
-  .include(:topics, 'x')
+  .exclude(:consumer_groups, 'x')
 
 spotted = false
 

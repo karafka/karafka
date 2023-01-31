@@ -34,23 +34,31 @@ RSpec.describe_current do
 
   describe '#active?' do
     context 'when there are no topics in the subscription group' do
-      before { Karafka::App.config.internal.routing.active.subscription_groups = [] }
-
       it { expect(group.active?).to eq true }
     end
 
     context 'when our subscription group name is in server subscription groups' do
       before do
-        Karafka::App.config.internal.routing.active.subscription_groups = [
-          topic.subscription_group
-        ]
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:subscription_groups, topic.subscription_group)
       end
 
       it { expect(group.active?).to eq true }
     end
 
     context 'when our subscription group name is not in server subscription groups' do
-      before { Karafka::App.config.internal.routing.active.subscription_groups = ['na'] }
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:subscription_groups, 'na')
+      end
 
       it { expect(group.active?).to eq false }
     end

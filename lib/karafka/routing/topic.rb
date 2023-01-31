@@ -87,10 +87,7 @@ module Karafka
         # Never active if disabled via routing
         return false unless @active
 
-        topics = Karafka::App.config.internal.routing.active.topics
-
-        # When empty it means no topics were specified, hence all should be used
-        topics.empty? || topics.include?(name)
+        Karafka::App.config.internal.routing.activity_manager.active?(:topics, name)
       end
 
       # @return [Hash] hash with all the topic attributes

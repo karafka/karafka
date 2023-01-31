@@ -33,7 +33,7 @@ module Karafka
         # We cannot validate this during the start because config needs to be populated and routes
         # need to be defined.
         Contracts::ServerCliOptions.new.validate!(
-          Karafka::App.config.internal.routing.active.to_h
+          Karafka::App.config.internal.routing.activity_manager.to_h
         )
 
         process.on_sigint { stop }

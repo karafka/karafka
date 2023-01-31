@@ -82,13 +82,20 @@ RSpec.describe_current do
         expect(process).to receive(:on_sigterm).and_yield
       end
     end
+  end
 
+  describe '#run without after' do
     context 'when server cli options are not valid' do
       let(:expected_error) { Karafka::Errors::InvalidConfigurationError }
 
-      before { Karafka::App.config.internal.routing.active.topics = %w[na] }
-
-      after { Karafka::App.config.internal.routing.active.topics = [] }
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:topics, 'na')
+      end
 
       it 'expect to raise proper exception' do
         expect { server_class.run }.to raise_error(expected_error)
