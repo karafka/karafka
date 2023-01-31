@@ -58,10 +58,7 @@ module Karafka
 
       # @return [Boolean] is this subscription group one of active once
       def active?
-        sgs = Karafka::App.config.internal.routing.active.subscription_groups
-
-        # When empty it means no groups were specified, hence all should be used
-        sgs.empty? || sgs.include?(name)
+        Karafka::App.config.internal.routing.activity_manager.active?(:subscription_groups, name)
       end
 
       private

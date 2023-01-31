@@ -48,6 +48,7 @@ rescue Karafka::Errors::InvalidConfigurationError => e
 end
 
 ARGV.clear
+Karafka::App.config.internal.routing.activity_manager.clear
 
 assert_equal 3, guarded.size
 
@@ -66,6 +67,7 @@ rescue Karafka::Errors::InvalidConfigurationError => e
 end
 
 ARGV.clear
+Karafka::App.config.internal.routing.activity_manager.clear
 
 assert_equal 4, guarded.size
 
@@ -84,5 +86,6 @@ rescue Karafka::Errors::InvalidConfigurationError => e
 end
 
 ARGV.clear
+Karafka::App.config.internal.routing.activity_manager.clear
 
 assert_equal 5, guarded.size

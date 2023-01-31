@@ -14,7 +14,12 @@ draw_routes(create_topics: false) do
   end
 end
 
-Karafka::App.config.internal.routing.active.consumer_groups = %w[x]
+Karafka::App
+  .config
+  .internal
+  .routing
+  .activity_manager
+  .include(:consumer_groups, 'x')
 
 spotted = false
 

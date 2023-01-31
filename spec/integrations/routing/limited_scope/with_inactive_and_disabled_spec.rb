@@ -23,7 +23,7 @@ draw_routes(create_topics: false) do
   end
 end
 
-Karafka::App.config.internal.routing.active.topics = %w[c]
+Karafka::App.config.internal.routing.activity_manager.include(:topics, 'c')
 
 spotted = false
 
