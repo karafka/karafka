@@ -39,6 +39,8 @@ module Karafka
       # @param name [String] name of the element
       # @return [Boolean] is the given resource active or not
       def active?(type, name)
+        validate!(type)
+
         included = @included[type]
         excluded = @excluded[type]
 
@@ -46,10 +48,11 @@ module Karafka
         return true if included.empty? && excluded.empty?
         # Inclusion supersedes exclusion in case someone wrote both
         return true if !included.empty? && included.include?(name)
-        # If there are exclusions but our is not excluded it means it's ok
-        return true if !excluded.empty? && !excluded.include?(name)
 
-        false
+        # If there are exclusions but our is not excluded and no inclusions or included, it's ok
+        !excluded.empty? &&
+          !excluded.include?(name) &&
+          (included.empty? || included.include?(name))
       end
 
       # @return [Hash] accumulated data in a hash for validations
