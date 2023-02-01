@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.31 (Unreleased)
+- [Maintenance] Require `karafka-core` >= `2.0.10` and switch to shared RSpec locator.
+
 ## 2.0.30 (2022-01-31)
 - [Improvement] Alias `--consumer-groups` with `--include-consumer-groups`
 - [Improvement] Alias `--subscription-groups` with `--include-subscription-groups`
