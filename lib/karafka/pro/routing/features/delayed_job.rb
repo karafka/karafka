@@ -13,23 +13,15 @@
 
 module Karafka
   module Pro
+    # Namespace for Pro routing enhancements
     module Routing
+      # Namespace for additional Pro features
       module Features
-        class LongRunningJob < Base
-          # Rules around LRJ settings
-          class Contract < Contracts::Base
-            configure do |config|
-              config.error_messages = YAML.safe_load(
-                File.read(
-                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                )
-              ).fetch('en').fetch('validations').fetch('topic')
-            end
-
-            nested(:long_running_job) do
-              required(:active) { |val| [true, false].include?(val) }
-            end
-          end
+        # Delayed Jobs feature config and DSL namespace.
+        #
+        # Delayed Jobs allow you to run Karafka jobs with a delay against what is being published
+        # to Kafka.
+        class DelayedJob < Base
         end
       end
     end

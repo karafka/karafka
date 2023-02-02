@@ -27,6 +27,9 @@ module Karafka
       # @return [Karafka::Routing::Topic] topic of this executor
       attr_reader :topic
 
+      # @return [Karafka::Connection::Client] client for performing direct kafka operations
+      attr_reader :client
+
       # @param group_id [String] id of the subscription group to which the executor belongs
       # @param client [Karafka::Connection::Client] kafka client
       # @param topic [Karafka::Routing::Topic] topic for which this executor will run

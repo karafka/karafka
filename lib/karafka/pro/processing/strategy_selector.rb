@@ -49,7 +49,8 @@ module Karafka
             topic.long_running_job? ? :long_running_job : nil,
             topic.manual_offset_management? ? :manual_offset_management : nil,
             topic.virtual_partitions? ? :virtual_partitions : nil,
-            topic.dead_letter_queue? ? :dead_letter_queue : nil
+            topic.dead_letter_queue? ? :dead_letter_queue : nil,
+            topic.delayed_job? ? :delayed_job : nil
           ].compact.sort
         end
       end

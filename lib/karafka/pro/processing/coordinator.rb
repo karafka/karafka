@@ -17,6 +17,8 @@ module Karafka
       # Pro coordinator that provides extra orchestration methods useful for parallel processing
       # within the same partition
       class Coordinator < ::Karafka::Processing::Coordinator
+        attr_reader :delayer
+
         # @param args [Object] anything the base coordinator accepts
         def initialize(*args)
           super
@@ -24,6 +26,7 @@ module Karafka
           @executed = []
           @flow_lock = Mutex.new
           @collapser = Collapser.new
+          @delayer = Delayer.new
         end
 
         # Starts the coordination process
@@ -32,6 +35,7 @@ module Karafka
         def start(messages)
           super
 
+          @delayer.start
           @collapser.refresh!(messages.first.offset)
 
           @mutex.synchronize do

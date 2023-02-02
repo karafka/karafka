@@ -15,21 +15,13 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class LongRunningJob < Base
-          # Rules around LRJ settings
-          class Contract < Contracts::Base
-            configure do |config|
-              config.error_messages = YAML.safe_load(
-                File.read(
-                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                )
-              ).fetch('en').fetch('validations').fetch('topic')
-            end
-
-            nested(:long_running_job) do
-              required(:active) { |val| [true, false].include?(val) }
-            end
-          end
+        class DelayedJob < Base
+          # Config for delayed jobs
+          Config = Struct.new(
+            :active,
+            :delay_for,
+            keyword_init: true
+          ) { alias_method :active?, :active }
         end
       end
     end

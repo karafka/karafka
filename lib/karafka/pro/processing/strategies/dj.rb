@@ -15,28 +15,30 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # No features enabled.
-        # No manual offset management
-        # No long running jobs
-        # No virtual partitions
-        # Nothing. Just standard, automatic flow
-        module Default
-          include Base
-          include ::Karafka::Processing::Strategies::Default
+        # Delayed Jobs enabled and nothing else
+        module Dj
+          include Default
 
-          # Apply strategy for a non-feature based flow
-          FEATURES = %i[].freeze
+          # Active features of this strategy
+          FEATURES = %i[
+            delayed_job
+          ].freeze
 
-          # No actions needed for the standard flow here
-          def handle_before_enqueue
-            nil
-          end
-
-          # Increment number of attempts per one "full" job. For all VP on a single topic partition
-          # this also should run once.
+          # Run the default strategy stuff and then filter out messages that would be too young
+          # to be procesed
           def handle_before_consume
-            coordinator.on_started do
-              coordinator.pause_tracker.increment
+            super
+
+            delayer = coordinator.delayer
+            delayer.configure(
+              topic.delayed_job.delay_for,
+              topic.max_wait_time
+            )
+
+            # Limit messages to those that are old enough to be processed
+            # @note We may end up with not having messages at all for consumption after that
+            messages.delete_if do |message|
+              delayer.filter?(message)
             end
           end
 
@@ -68,7 +70,7 @@ module Karafka
 
           # Standard flow without any features
           def handle_after_consume
-            coordinator.on_finished do |last_group_message|
+            coordinator.on_finished do
               return if revoked?
 
               if coordinator.success?
@@ -78,25 +80,42 @@ module Karafka
                 # is overridden upon rebalance by marking
                 return if coordinator.manual_pause?
 
-                mark_as_consumed(last_group_message)
+                # If we limited the scope of what we are processing, we need to only mark
+                # as processed in place where we actually finished and not for the whole batch
+                # from which too young messages might have been removed
+                last_processed = coordinator.delayer.last_processed
+                mark_as_consumed(last_processed) if last_processed
+
+                return unless coordinator.delayer.limited?
+
+                continue_after_delay
               else
                 retry_after_pause
               end
             end
           end
 
-          # Standard
-          def handle_revoked
-            coordinator.on_revoked do
-              resume
+          private
 
-              coordinator.revoke
-            end
+          # Delay for the expected time and pick up after the last processed message
+          def continue_after_delay
+            # Start from the last one we agreed on
+            seek_offset = coordinator.delayer.seek_offset
+            delay = coordinator.delayer.backoff
 
-            Karafka.monitor.instrument('consumer.revoke', caller: self)
-            Karafka.monitor.instrument('consumer.revoked', caller: self) do
-              revoked
-            end
+            pause(seek_offset, delay, false)
+
+            # Instrumentation needs to run **after** `#pause` invocation because we rely on the
+            # states set by `#pause`
+            Karafka.monitor.instrument(
+              'consumer.consuming.delay',
+              caller: self,
+              topic: messages.metadata.topic,
+              partition: messages.metadata.partition,
+              offset: seek_offset,
+              timeout: delay,
+              attempt: coordinator.pause_tracker.attempt
+            )
           end
         end
       end

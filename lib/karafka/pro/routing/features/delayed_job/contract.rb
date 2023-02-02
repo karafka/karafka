@@ -15,8 +15,8 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class LongRunningJob < Base
-          # Rules around LRJ settings
+        class DelayedJob < Base
+          # Rules around delayed job settings
           class Contract < Contracts::Base
             configure do |config|
               config.error_messages = YAML.safe_load(
@@ -26,8 +26,22 @@ module Karafka
               ).fetch('en').fetch('validations').fetch('topic')
             end
 
-            nested(:long_running_job) do
+            nested(:delayed_job) do
               required(:active) { |val| [true, false].include?(val) }
+              required(:delay_for) { |val| val.is_a?(Integer) && val >= 0 }
+            end
+
+            # Delay should not be less than max wait time because it will anyhow not work well
+            virtual do |data, errors|
+              next unless errors.empty?
+
+              delayed_job = data[:delayed_job]
+              max_wait_time = data[:max_wait_time]
+
+              next unless delayed_job[:active]
+              next if delayed_job[:delay_for] >= max_wait_time
+
+              [[%i[delayed_job], :more_than_max_wait_time]]
             end
           end
         end

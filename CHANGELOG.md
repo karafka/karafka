@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.0.31 (Unreleased)
+- **[Feature]** Introduce Delayed Jobs
 - [Maintenance] Require `karafka-core` >= `2.0.10` and switch to shared RSpec locator.
 
 ## 2.0.30 (2022-01-31)

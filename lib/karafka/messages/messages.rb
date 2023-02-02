@@ -35,6 +35,18 @@ module Karafka
         map(&:payload)
       end
 
+      # @return [Boolean] true if no elements (first nil), otherwise false
+      def empty?
+        first.nil?
+      end
+
+      # Same as Ruby `Array#delete_if`
+      # @param block [Proc] block we want to execute per each message
+      # @yieldparam message [Karafka::Messages::Message] message we want to either delete or keep
+      def delete_if(&block)
+        @messages_array.delete_if(&block)
+      end
+
       # @return [Array<String>] array with raw, not deserialized payloads
       def raw_payloads
         map(&:raw_payload)
