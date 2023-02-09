@@ -60,6 +60,12 @@ RSpec.describe_current do
 
       it { expect(check).not_to be_success }
     end
+
+    context 'with complex string' do
+      before { config[:name] = 'ус.auth.cmd.shopper-registrations.1' }
+
+      it { expect(check).to be_success }
+    end
   end
 
   context 'when we subscription_group' do
