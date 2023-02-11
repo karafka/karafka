@@ -61,10 +61,26 @@ RSpec.describe_current do
       it { expect(check).not_to be_success }
     end
 
-    context 'with complex string' do
-      before { config[:name] = 'ус.auth.cmd.shopper-registrations.1' }
+    context 'considering namespaces' do
+      context 'with consistent namespacing style' do
+        context 'with dot style' do
+          before { config[:name] = 'yc.auth.cmd.shopper-registrations.1' }
 
-      it { expect(check).to be_success }
+          it { expect(check).to be_success }
+        end
+
+        context 'with underscore style' do
+          before { config[:name] = 'yc_auth_cmd_shopper-registrations_1' }
+
+          it { expect(check).to be_success }
+        end
+      end
+
+      context 'with inconsistent namespacing style' do
+        before { config[:name] = 'yc.auth.cmd.shopper-registrations_1' }
+
+        it { expect(check).not_to be_success }
+      end
     end
   end
 
