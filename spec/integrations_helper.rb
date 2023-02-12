@@ -151,6 +151,9 @@ def create_topic(name: DT.topic, partitions: 1, config: {})
     1,
     config
   )
+# Ignore if exists, some specs may try to create few times
+rescue Rdkafka::RdkafkaError => e
+  e.code == :topic_already_exists ? return : raise
 end
 
 # Sets up default routes (mostly used in integration specs) or allows to configure custom routes

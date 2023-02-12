@@ -11,6 +11,13 @@ RSpec.describe_current do
       it { expect(topics).to include(name) }
     end
 
+    context 'when creating topic with invalid setup' do
+      it do
+        expect { described_class.create_topic('%^&*', 1, 1) }
+          .to raise_error(Rdkafka::RdkafkaError)
+      end
+    end
+
     context 'when creating topic with two partitions' do
       before { described_class.create_topic(name, 2, 1) }
 
@@ -159,6 +166,46 @@ RSpec.describe_current do
 
       it 'expect to user proper routes topic assigned to messages' do
         expect(reading.first.topic).to eq(name)
+      end
+    end
+  end
+
+  describe '#create_partitions and #cluster_info' do
+    context 'when scaling a topic that does not exist' do
+      it do
+        expect { described_class.create_partitions(SecureRandom.uuid, 2) }
+          .to raise_error(Rdkafka::RdkafkaError)
+      end
+    end
+
+    context 'when trying to downscale partitions' do
+      before { described_class.create_topic(name, 2, 1) }
+
+      it do
+        expect { described_class.create_partitions(name, 1) }
+          .to raise_error(Rdkafka::RdkafkaError)
+      end
+    end
+
+    context 'when trying to match existing partitions' do
+      before { described_class.create_topic(name, 2, 1) }
+
+      it do
+        expect { described_class.create_partitions(name, 2) }
+          .to raise_error(Rdkafka::RdkafkaError)
+      end
+    end
+
+    context 'when trying to upscale partitions' do
+      let(:details) { Karafka::Admin.cluster_info.topics.find { |tp| tp[:topic_name] == name } }
+
+      before do
+        described_class.create_topic(name, 2, 1)
+        described_class.create_partitions(name, 7)
+      end
+
+      it 'expect to create them' do
+        expect(details[:partition_count]).to eq(7)
       end
     end
   end

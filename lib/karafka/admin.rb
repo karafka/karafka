@@ -86,9 +86,7 @@ module Karafka
       #   https://kafka.apache.org/documentation/#topicconfigs
       def create_topic(name, partitions, replication_factor, topic_config = {})
         with_admin do |admin|
-          admin.create_topic(name, partitions, replication_factor, topic_config)
-
-          sleep(0.2) until topics_names.include?(name)
+          admin.create_topic(name, partitions, replication_factor, topic_config).wait
         end
       end
 
@@ -97,9 +95,17 @@ module Karafka
       # @param name [String] topic name
       def delete_topic(name)
         with_admin do |admin|
-          admin.delete_topic(name)
+          admin.delete_topic(name).wait
+        end
+      end
 
-          sleep(0.2) while topics_names.include?(name)
+      # Creates more partitions for a given topic
+      #
+      # @param name [String] topic name
+      # @param partitions [Integer] total number of partitions we expect to end up with
+      def create_partitions(name, partitions)
+        with_admin do |admin|
+          admin.create_partitions(name, partitions).wait
         end
       end
 
