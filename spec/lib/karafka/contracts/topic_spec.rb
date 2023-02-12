@@ -61,7 +61,7 @@ RSpec.describe_current do
       it { expect(check).not_to be_success }
     end
 
-    context 'considering namespaces' do
+    context 'when considering namespaces' do
       context 'with consistent namespacing style' do
         context 'with dot style' do
           before { config[:name] = 'yc.auth.cmd.shopper-registrations.1' }

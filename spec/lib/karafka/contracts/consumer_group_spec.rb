@@ -60,7 +60,7 @@ RSpec.describe_current do
       it { expect(check).to be_success }
     end
 
-    context 'considering namespacing' do
+    context 'when considering namespacing' do
       before { config[:topics][0][:name] = 'some.namespaced.topic-name' }
 
       context 'when topics names are unique' do
