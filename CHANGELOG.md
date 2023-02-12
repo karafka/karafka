@@ -1,7 +1,10 @@
 # Karafka framework changelog
 
 ## 2.0.31 (Unreleased)
-- [Maintenance] Require `karafka-core` >= `2.0.10` and switch to shared RSpec locator.
+- [Feature] Allow for adding partitions via `Admin#create_partitions` API.
+- [Fix] Do not ignore admin errors upon invalid configuration (#1254)
+- [Maintenance] Require `karafka-core` >= `2.0.11` and switch to shared RSpec locator.
+- [Maintenance] Require `karafka-rdkafka` >= `0.12.1`
 
 ## 2.0.30 (2022-01-31)
 - [Improvement] Alias `--consumer-groups` with `--include-consumer-groups`
