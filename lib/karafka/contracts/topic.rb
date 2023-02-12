@@ -48,6 +48,17 @@ module Karafka
           [[%w[kafka], e.message]]
         end
       end
+
+      virtual do |data, errors|
+        next unless errors.empty?
+
+        value = data.fetch(:name)
+        namespacing_chars_count = value.chars.find_all { |c| ['.', '_'].include?(c) }.uniq.count
+
+        next if namespacing_chars_count <= 1
+
+        [[%w[name], :inconsistent_namespacing]]
+      end
     end
   end
 end
