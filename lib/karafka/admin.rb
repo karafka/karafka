@@ -17,7 +17,7 @@ module Karafka
     # Max wait time on the admin operations before timeout
     # We set it higher then the librdkafka defaults as sometimes they would timeout when running
     # on heavily loaded clusters
-    MAX_WAIT_TIMEOUT = 60 * 5
+    MAX_WAIT_TIMEOUT = 60 * 10
 
     # Defaults for config
     CONFIG_DEFAULTS = {
