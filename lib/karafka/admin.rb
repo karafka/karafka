@@ -14,6 +14,11 @@ module Karafka
     # do not have in the routing
     Topic = Struct.new(:name, :deserializer)
 
+    # Max wait time on the admin operations before timeout
+    # We set it higher then the librdkafka defaults as sometimes they would timeout when running
+    # on heavily loaded clusters
+    MAX_WAIT_TIMEOUT = 60 * 5
+
     # Defaults for config
     CONFIG_DEFAULTS = {
       'group.id': 'karafka_admin',
@@ -22,7 +27,7 @@ module Karafka
       'statistics.interval.ms': 0
     }.freeze
 
-    private_constant :Topic, :CONFIG_DEFAULTS
+    private_constant :Topic, :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT
 
     class << self
       # Allows us to read messages from the topic
@@ -86,7 +91,9 @@ module Karafka
       #   https://kafka.apache.org/documentation/#topicconfigs
       def create_topic(name, partitions, replication_factor, topic_config = {})
         with_admin do |admin|
-          admin.create_topic(name, partitions, replication_factor, topic_config).wait
+          admin
+            .create_topic(name, partitions, replication_factor, topic_config)
+            .wait(max_wait_timeout: MAX_WAIT_TIMEOUT)
         end
       end
 
@@ -95,7 +102,9 @@ module Karafka
       # @param name [String] topic name
       def delete_topic(name)
         with_admin do |admin|
-          admin.delete_topic(name).wait
+          admin
+            .delete_topic(name)
+            .wait(max_wait_timeout: MAX_WAIT_TIMEOUT)
         end
       end
 
@@ -105,7 +114,9 @@ module Karafka
       # @param partitions [Integer] total number of partitions we expect to end up with
       def create_partitions(name, partitions)
         with_admin do |admin|
-          admin.create_partitions(name, partitions).wait
+          admin
+            .create_partitions(name, partitions)
+            .wait(max_wait_timeout: MAX_WAIT_TIMEOUT)
         end
       end
 
