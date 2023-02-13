@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.31 (Unreleased)
+## 2.0.31 (2022-02-12)
 - [Feature] Allow for adding partitions via `Admin#create_partitions` API.
 - [Fix] Do not ignore admin errors upon invalid configuration (#1254)
 - [Fix] Topic name validation (#1300) - CandyFet
