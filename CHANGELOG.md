@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.32 (Unreleased)
+- [Improvement] Make sure, that `Karafka::Admin` operations actually finish before returning. 
+
 ## 2.0.31 (2022-02-12)
 - [Feature] Allow for adding partitions via `Admin#create_partitions` API.
 - [Fix] Do not ignore admin errors upon invalid configuration (#1254)

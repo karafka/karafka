@@ -182,6 +182,10 @@ module Karafka
         attempt += 1
 
         handler.call
+
+        # Kafka can make certain operations in the background even after the promise is
+        # materialized. This ensures, that even if all went well, the end goal is satisfied
+        sleep(0.2) until breaker.call
       rescue Rdkafka::AbstractHandle::WaitTimeoutError
         return if breaker.call
 
