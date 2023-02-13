@@ -3,6 +3,8 @@
 ## 2.0.31 (Unreleased)
 - [Feature] Allow for adding partitions via `Admin#create_partitions` API.
 - [Fix] Do not ignore admin errors upon invalid configuration (#1254)
+- [Fix] Topic name validation (#1300) - CandyFet
+- [Improvement] Increase the `max_wait_timeout` on admin operations to five minutes to make sure no timeout on heavily loaded clusters.
 - [Maintenance] Require `karafka-core` >= `2.0.11` and switch to shared RSpec locator.
 - [Maintenance] Require `karafka-rdkafka` >= `0.12.1`
 

@@ -59,6 +59,28 @@ RSpec.describe_current do
 
       it { expect(check).to be_success }
     end
+
+    context 'when considering namespacing' do
+      before { config[:topics][0][:name] = 'some.namespaced.topic-name' }
+
+      context 'when topics names are unique' do
+        before do
+          config[:topics][1] = config[:topics][0].dup
+          config[:topics][1][:name] = 'another_namespaced_topic-name'
+        end
+
+        it { expect(check).to be_success }
+      end
+
+      context 'when topics names are not unique' do
+        before do
+          config[:topics][1] = config[:topics][0].dup
+          config[:topics][1][:name] = 'some_namespaced_topic-name'
+        end
+
+        it { expect(check).not_to be_success }
+      end
+    end
   end
 
   context 'when we validate id' do

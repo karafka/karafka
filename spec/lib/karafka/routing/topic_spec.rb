@@ -87,6 +87,18 @@ RSpec.describe_current do
 
       it { expect(topic.active?).to eq false }
     end
+
+    context 'when we set the topic to active via #active' do
+      before { topic.active(true) }
+
+      it { expect(topic.active?).to eq true }
+    end
+
+    context 'when we set the topic to inactive via #active' do
+      before { topic.active(false) }
+
+      it { expect(topic.active?).to eq false }
+    end
   end
 
   describe '#to_h' do

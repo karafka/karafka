@@ -14,6 +14,13 @@ module Karafka
     # do not have in the routing
     Topic = Struct.new(:name, :deserializer)
 
+    # We wait only for this amount of time before raising error as we intercept this error and
+    # retry after checking that the operation was finished or failed using external factor.
+    MAX_WAIT_TIMEOUT = 1
+
+    # How many times should be try. 1 x 60 => 60 seconds wait in total
+    MAX_ATTEMPTS = 60
+
     # Defaults for config
     CONFIG_DEFAULTS = {
       'group.id': 'karafka_admin',
@@ -22,7 +29,7 @@ module Karafka
       'statistics.interval.ms': 0
     }.freeze
 
-    private_constant :Topic, :CONFIG_DEFAULTS
+    private_constant :Topic, :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :MAX_ATTEMPTS
 
     class << self
       # Allows us to read messages from the topic
@@ -86,7 +93,12 @@ module Karafka
       #   https://kafka.apache.org/documentation/#topicconfigs
       def create_topic(name, partitions, replication_factor, topic_config = {})
         with_admin do |admin|
-          admin.create_topic(name, partitions, replication_factor, topic_config).wait
+          handler = admin.create_topic(name, partitions, replication_factor, topic_config)
+
+          with_re_wait(
+            -> { handler.wait(max_wait_timeout: MAX_WAIT_TIMEOUT) },
+            -> { topics_names.include?(name) }
+          )
         end
       end
 
@@ -95,7 +107,12 @@ module Karafka
       # @param name [String] topic name
       def delete_topic(name)
         with_admin do |admin|
-          admin.delete_topic(name).wait
+          handler = admin.delete_topic(name)
+
+          with_re_wait(
+            -> { handler.wait(max_wait_timeout: MAX_WAIT_TIMEOUT) },
+            -> { !topics_names.include?(name) }
+          )
         end
       end
 
@@ -105,7 +122,12 @@ module Karafka
       # @param partitions [Integer] total number of partitions we expect to end up with
       def create_partitions(name, partitions)
         with_admin do |admin|
-          admin.create_partitions(name, partitions).wait
+          handler = admin.create_partitions(name, partitions)
+
+          with_re_wait(
+            -> { handler.wait(max_wait_timeout: MAX_WAIT_TIMEOUT) },
+            -> { topic(name).fetch(:partition_count) >= partitions }
+          )
         end
       end
 
@@ -123,6 +145,13 @@ module Karafka
         cluster_info.topics.map { |topic| topic.fetch(:topic_name) }
       end
 
+      # Finds details about given topic
+      # @param name [String] topic name
+      # @return [Hash] topic details
+      def topic(name)
+        cluster_info.topics.find { |topic| topic[:topic_name] == name }
+      end
+
       # Creates admin instance and yields it. After usage it closes the admin instance
       def with_admin
         admin = config(:producer).admin
@@ -137,6 +166,28 @@ module Karafka
         yield(consumer)
       ensure
         consumer&.close
+      end
+
+      # There are some cases where rdkafka admin operations finish successfully but without the
+      # callback being triggered to materialize the post-promise object. Until this is fixed we
+      # can figure out, that operation we wanted to do finished successfully by checking that the
+      # effect of the command (new topic, more partitions, etc) is handled. Exactly for that we
+      # use the breaker. It we get a timeout, we can check that what we wanted to achieve has
+      # happened via the breaker check, hence we do not need to wait any longer.
+      #
+      # @param handler [Proc] the wait handler operation
+      # @param breaker [Proc] extra condition upon timeout that indicates things were finished ok
+      def with_re_wait(handler, breaker)
+        attempt ||= 0
+        attempt += 1
+
+        handler.call
+      rescue Rdkafka::AbstractHandle::WaitTimeoutError
+        return if breaker.call
+
+        retry if attempt <= MAX_ATTEMPTS
+
+        raise
       end
 
       # @param type [Symbol] type of config we want
