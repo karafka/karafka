@@ -36,4 +36,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal 1, DT.data.size
-assert_equal '6.1.7', Rails.version
+assert_equal '6.1.7.2', Rails.version
