@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## 2.0.32 (Unreleased)
+- [Fix] Many non-existing topic subscriptions propagate poll errors beyond client
+- [Improvement] Ignore `unknown_topic_or_part` errors in dev when `allow.auto.create.topics` is on.
+- [Improvement] Optimize temporary errors handling in polling for a better backoff policy
+
 ## 2.0.31 (2022-02-12)
 - [Feature] Allow for adding partitions via `Admin#create_partitions` API.
 - [Fix] Do not ignore admin errors upon invalid configuration (#1254)

@@ -51,6 +51,9 @@ module Karafka
       # Sleeps for amount of time matching attempt, so we sleep more with each attempt in case of
       #   a retry.
       def backoff
+        # backoff should not be included in the remaining time computation, otherwise it runs
+        # shortly, never back-offing beyond a small number because of the sleep
+        @remaining += backoff_interval
         # Sleep requires seconds not ms
         sleep(backoff_interval / 1_000.0)
       end
