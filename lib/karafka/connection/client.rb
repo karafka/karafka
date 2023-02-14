@@ -381,6 +381,14 @@ module Karafka
           early_report = true
         when :transport # -195
           early_report = true
+        # @see
+        # https://github.com/confluentinc/confluent-kafka-dotnet/issues/1366#issuecomment-821842990
+        # This will be raised each time poll detects a non-existing topic. When auto creation is
+        # on, we can safely ignore it
+        when :unknown_topic_or_part # 3
+          return nil if @subscription_group.kafka[:'allow.auto.create.topics']
+
+          early_report = true
         end
 
         retryable = time_poll.attempts <= MAX_POLL_RETRIES && time_poll.retryable?
