@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.32 (Unreleased)
+## 2.0.32 (2022-02-13)
 - [Fix] Many non-existing topic subscriptions propagate poll errors beyond client
 - [Improvement] Ignore `unknown_topic_or_part` errors in dev when `allow.auto.create.topics` is on.
 - [Improvement] Optimize temporary errors handling in polling for a better backoff policy
