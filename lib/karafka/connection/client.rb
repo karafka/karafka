@@ -432,7 +432,7 @@ module Karafka
             @subscription_group.id,
             @subscription_group.consumer_group_id,
             @name,
-            ::Karafka::App.config.monitor
+            ::Karafka.monitor
           )
         )
 
@@ -443,7 +443,7 @@ module Karafka
             @subscription_group.id,
             @subscription_group.consumer_group_id,
             @name,
-            ::Karafka::App.config.monitor
+            ::Karafka.monitor
           )
         )
 

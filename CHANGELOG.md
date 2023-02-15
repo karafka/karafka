@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 2.0.33 (Unreleased)
+- [Fix] Karafka monitor is prematurely cached (#1314)
+- [Improvement] Make `::Karafka::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.
+
 ## 2.0.32 (2022-02-13)
 - [Fix] Many non-existing topic subscriptions propagate poll errors beyond client
 - [Improvement] Ignore `unknown_topic_or_part` errors in dev when `allow.auto.create.topics` is on.

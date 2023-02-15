@@ -95,6 +95,19 @@ module Karafka
     def boot_file
       Pathname.new(ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'karafka.rb'))
     end
+
+    # We need to be able to overwrite both monitor and logger after the configuration in case they
+    # would be changed because those two (with defaults) can be used prior to the setup and their
+    # state change should be reflected in the updated setup
+    #
+    # This method refreshes the things that might have been altered by the configuration
+    def refresh!
+      config = ::Karafka::App.config
+
+      @logger = config.logger
+      @producer = config.producer
+      @monitor = config.monitor
+    end
   end
 end
 

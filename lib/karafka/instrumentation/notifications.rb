@@ -54,8 +54,6 @@ module Karafka
         error.occurred
       ].freeze
 
-      private_constant :EVENTS
-
       # @return [Karafka::Instrumentation::Monitor] monitor instance for system instrumentation
       def initialize
         super
