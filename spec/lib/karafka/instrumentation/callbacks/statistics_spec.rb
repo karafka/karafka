@@ -2,13 +2,13 @@
 
 RSpec.describe_current do
   subject(:callback) do
-    described_class.new(subscription_group_id, consumer_group_id, client_name, monitor)
+    described_class.new(subscription_group_id, consumer_group_id, client_name)
   end
 
   let(:subscription_group_id) { SecureRandom.hex(6) }
   let(:consumer_group_id) { SecureRandom.hex(6) }
   let(:client_name) { SecureRandom.hex(6) }
-  let(:monitor) { ::Karafka::Instrumentation::Monitor.new }
+  let(:monitor) { ::Karafka.monitor }
 
   describe '#call' do
     let(:changed) { [] }

@@ -168,6 +168,9 @@ module Karafka
 
           configure_components
 
+          # Refreshes the references that are cached that might have been changed by the config
+          ::Karafka.refresh!
+
           # Runs things that need to be executed after config is defined and all the components
           # are also configured
           Pro::Loader.post_setup(config) if Karafka.pro?

@@ -431,8 +431,7 @@ module Karafka
           Instrumentation::Callbacks::Statistics.new(
             @subscription_group.id,
             @subscription_group.consumer_group_id,
-            @name,
-            ::Karafka::App.config.monitor
+            @name
           )
         )
 
@@ -442,8 +441,7 @@ module Karafka
           Instrumentation::Callbacks::Error.new(
             @subscription_group.id,
             @subscription_group.consumer_group_id,
-            @name,
-            ::Karafka::App.config.monitor
+            @name
           )
         )
 
