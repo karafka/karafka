@@ -10,12 +10,10 @@ module Karafka
         # @param subscription_group_id [String] id of the current subscription group
         # @param consumer_group_id [String] id of the current consumer group
         # @param client_name [String] rdkafka client name
-        # @param monitor [WaterDrop::Instrumentation::Monitor] monitor we are using
-        def initialize(subscription_group_id, consumer_group_id, client_name, monitor)
+        def initialize(subscription_group_id, consumer_group_id, client_name)
           @subscription_group_id = subscription_group_id
           @consumer_group_id = consumer_group_id
           @client_name = client_name
-          @monitor = monitor
           @statistics_decorator = ::Karafka::Core::Monitoring::StatisticsDecorator.new
         end
 
@@ -28,7 +26,7 @@ module Karafka
           # all the time.
           return unless @client_name == statistics['name']
 
-          @monitor.instrument(
+          ::Karafka.monitor.instrument(
             'statistics.emitted',
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
