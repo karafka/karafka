@@ -3,13 +3,13 @@
 # Karafka should update the cached references to the monitor, logger and producer once those are
 # altered during the configuration
 
-pre_logger = ::Karafka.logger
+::Karafka.logger
 post_logger = ::Karafka::Instrumentation::Logger.new
 
-pre_monitor = ::Karafka.monitor
+::Karafka.monitor
 post_monitor = ::Karafka::Instrumentation::Monitor.new
 
-pre_producer = ::Karafka.producer
+::Karafka.producer
 post_producer = Object.new
 
 Karafka::App.setup do |config|
