@@ -26,7 +26,9 @@ module Karafka
       'group.id': 'karafka_admin',
       # We want to know when there is no more data not to end up with an endless loop
       'enable.partition.eof': true,
-      'statistics.interval.ms': 0
+      'statistics.interval.ms': 0,
+      # Fetch at most 5 MBs when using admin
+      'fetch.message.max.bytes': 5 * 1_048_576
     }.freeze
 
     private_constant :Topic, :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :MAX_ATTEMPTS

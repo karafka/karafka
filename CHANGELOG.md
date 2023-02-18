@@ -3,6 +3,7 @@
 ## 2.0.33 (Unreleased)
 - [Fix] Karafka monitor is prematurely cached (#1314)
 - [Improvement] Make `::Karafka::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.
+- [Improvement] Set `fetch.message.max.bytes` for `Karafka::Admin` to `5MB` to make sure that all data is fetched correctly for Web UI under heavy load (many consumers).
 
 ## 2.0.32 (2022-02-13)
 - [Fix] Many non-existing topic subscriptions propagate poll errors beyond client
