@@ -33,7 +33,6 @@ end
 
 assert_equal elements, DT[:messages].map(&:first)
 
-
 previous = nil
 DT[:messages].map(&:last).each do |time|
   unless previous
