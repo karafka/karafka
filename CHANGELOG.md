@@ -4,6 +4,7 @@
 - [Fix] Karafka monitor is prematurely cached (#1314)
 - [Improvement] Make `::Karafka::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.
 - [Improvement] Set `fetch.message.max.bytes` for `Karafka::Admin` to `5MB` to make sure that all data is fetched correctly for Web UI under heavy load (many consumers).
+- [Improvement] Introduce a `strict_topics_namespacing` config option to enable/disable the strict topics naming validations. This can be useful when working with pre-existing topics which we cannot or do not want to rename.
 
 ## 2.0.32 (2022-02-13)
 - [Fix] Many non-existing topic subscriptions propagate poll errors beyond client
