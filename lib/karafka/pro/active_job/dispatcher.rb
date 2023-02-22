@@ -23,6 +23,7 @@ module Karafka
         # They can be updated by using `#karafka_options` on the job
         DEFAULTS = {
           dispatch_method: :produce_async,
+          dispatch_many_method: :produce_many_async,
           # We don't create a dummy proc based partitioner as we would have to evaluate it with
           # each job.
           partitioner: nil,
@@ -33,7 +34,7 @@ module Karafka
         private_constant :DEFAULTS
 
         # @param job [ActiveJob::Base] job
-        def call(job)
+        def dispatch(job)
           ::Karafka.producer.public_send(
             fetch_option(job, :dispatch_method, DEFAULTS),
             dispatch_details(job).merge!(
@@ -41,6 +42,28 @@ module Karafka
               payload: ::ActiveSupport::JSON.encode(job.serialize)
             )
           )
+        end
+
+        # Bulk dispatches multiple jobs using the Rails 7.1+ API
+        # @param jobs [Array<ActiveJob::Base>] jobs we want to dispatch
+        def dispatch_many(jobs)
+          dispatches = Hash.new { |hash, key| hash[key] = [] }
+
+          jobs.each do |job|
+            d_method = fetch_option(job, :dispatch_many_method, DEFAULTS)
+
+            dispatches[d_method] << dispatch_details(job).merge!(
+              topic: job.queue_name,
+              payload: ::ActiveSupport::JSON.encode(job.serialize)
+            )
+          end
+
+          dispatches.each do |type, messages|
+            ::Karafka.producer.public_send(
+              type,
+              messages
+            )
+          end
         end
 
         private

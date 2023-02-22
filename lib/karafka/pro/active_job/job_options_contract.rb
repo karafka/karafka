@@ -25,9 +25,20 @@ module Karafka
           ).fetch('en').fetch('validations').fetch('job_options')
         end
 
-        optional(:dispatch_method) { |val| %i[produce_async produce_sync].include?(val) }
         optional(:partitioner) { |val| val.respond_to?(:call) }
         optional(:partition_key_type) { |val| %i[key partition_key].include?(val) }
+        optional(:dispatch_method) do |val|
+          %i[
+            produce_async
+            produce_sync
+          ].include?(val)
+        end
+        optional(:dispatch_many_method) do |val|
+          %i[
+            produce_many_async
+            produce_many_sync
+          ].include?(val)
+        end
       end
     end
   end

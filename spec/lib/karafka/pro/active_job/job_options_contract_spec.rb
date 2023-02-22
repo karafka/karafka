@@ -38,6 +38,18 @@ RSpec.describe_current do
     it { expect(contract.call(config)).not_to be_success }
   end
 
+  context 'when there is no dispath many method' do
+    before { config.delete(:dispatch_many_method) }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when dispatch many method is not valid' do
+    before { config[:dispatch_many_method] = rand.to_s }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
   context 'when partitioner is not callable' do
     before { config[:partitioner] = 1 }
 

@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.0.33 (Unreleased)
+- [Feature] Support `perform_all_later` in ActiveJob adapter for Rails `7.1+`
 - [Fix] Karafka monitor is prematurely cached (#1314)
 - [Improvement] Make `::Karafka::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.
 - [Improvement] Set `fetch.message.max.bytes` for `Karafka::Admin` to `5MB` to make sure that all data is fetched correctly for Web UI under heavy load (many consumers).
