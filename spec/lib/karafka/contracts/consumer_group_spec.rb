@@ -80,6 +80,18 @@ RSpec.describe_current do
 
         it { expect(check).not_to be_success }
       end
+
+      context 'when strict_topics_namespacing is set to false' do
+        before do
+          config[:topics][1] = config[:topics][0].dup
+          config[:topics][1][:name] = 'some_namespaced_topic-name'
+          ::Karafka::App.config.strict_topics_namespacing = false
+        end
+
+        after { ::Karafka::App.config.strict_topics_namespacing = true }
+
+        it { expect(check).to be_success }
+      end
     end
   end
 

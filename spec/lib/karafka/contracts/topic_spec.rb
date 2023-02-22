@@ -81,6 +81,17 @@ RSpec.describe_current do
 
         it { expect(check).not_to be_success }
       end
+
+      context 'when strict_topics_namespacing is set to false' do
+        before do
+          config[:name] = 'yc.auth.cmd.shopper-registrations_1'
+          ::Karafka::App.config.strict_topics_namespacing = false
+        end
+
+        after { ::Karafka::App.config.strict_topics_namespacing = true }
+
+        it { expect(check).to be_success }
+      end
     end
   end
 
