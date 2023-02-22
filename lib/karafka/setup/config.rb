@@ -89,6 +89,11 @@ module Karafka
       # option [::WaterDrop::Producer, nil]
       # Unless configured, will be created once Karafka is configured based on user Karafka setup
       setting :producer, default: nil
+      # option [Boolean] when set to true, Karafka will ensure that the routing topic naming
+      # convention is strict
+      # Disabling this may be needed in scenarios where we do not have control over topics names
+      # and/or we work with existing systems where we cannot change topics names.
+      setting :strict_topics_namespacing, default: true
 
       # rdkafka default options
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md

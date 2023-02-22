@@ -45,14 +45,18 @@ en:
       dead_letter_queue.topic_format: 'needs to be a string with a Kafka accepted format'
       dead_letter_queue.active_format: needs to be either true or false
       active_format: needs to be either true or false
-      inconsistent_namespacing: needs to be consistent namespacing style
+      inconsistent_namespacing: |
+        needs to be consistent namespacing style
+        disable this validation by setting config.strict_topics_namespacing to false
 
     consumer_group:
       missing: needs to be present
       topics_names_not_unique: all topic names within a single consumer group must be unique
-      topics_namespaced_names_not_unique: all topic names within a single consumer group must be unique considering namespacing styles
       id_format: 'needs to be a string with a Kafka accepted format'
       topics_format: needs to be a non-empty array
+      topics_namespaced_names_not_unique: |
+        all topic names within a single consumer group must be unique considering namespacing styles
+        disable this validation by setting config.strict_topics_namespacing to false
 
     job_options:
       missing: needs to be present

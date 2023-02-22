@@ -27,6 +27,7 @@ module Karafka
 
       virtual do |data, errors|
         next unless errors.empty?
+        next unless ::Karafka::App.config.strict_topics_namespacing
 
         names = data.fetch(:topics).map { |topic| topic[:name] }
         names_hash = names.each_with_object({}) { |n, h| h[n] = true }
