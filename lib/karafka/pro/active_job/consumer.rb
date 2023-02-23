@@ -31,9 +31,11 @@ module Karafka
             break if revoked?
             break if Karafka::App.stopping?
 
-            ::ActiveJob::Base.execute(
-              ::ActiveSupport::JSON.decode(message.raw_payload)
-            )
+            job = ::ActiveSupport::JSON.decode(message.raw_payload)
+
+            tags.add(:job_class, job['job_class'])
+
+            ::ActiveJob::Base.execute(job)
 
             # We cannot mark jobs as done after each if there are virtual partitions. Otherwise
             # this could create random markings.

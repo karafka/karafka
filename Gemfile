@@ -6,6 +6,9 @@ plugin 'diffend'
 
 gemspec
 
+gem 'karafka-core', path: '/home/mencio/Software/Karafka/karafka-core'
+
+
 # Karafka gem does not require this but we add it here so we can test the integration with
 # ActiveJob much easier
 group :integrations do

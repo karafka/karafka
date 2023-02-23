@@ -12,12 +12,14 @@ module Karafka
         messages.each do |message|
           break if Karafka::App.stopping?
 
-          ::ActiveJob::Base.execute(
-            # We technically speaking could set this as deserializer and reference it from the
-            # message instead of using the `#raw_payload`. This is not done on purpose to simplify
-            # the ActiveJob setup here
-            ::ActiveSupport::JSON.decode(message.raw_payload)
-          )
+          # We technically speaking could set this as deserializer and reference it from the
+          # message instead of using the `#raw_payload`. This is not done on purpose to simplify
+          # the ActiveJob setup here
+          job = ::ActiveSupport::JSON.decode(message.raw_payload)
+
+          tags.add(:job_class, job['job_class'])
+
+          ::ActiveJob::Base.execute(job)
 
           mark_as_consumed(message)
         end

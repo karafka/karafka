@@ -4,6 +4,9 @@ module Karafka
   # Class used to catch signals from ruby Signal class in order to manage Karafka stop
   # @note There might be only one process - this class is a singleton
   class Process
+    # Allow for process tagging for instrumentation
+    extend ::Karafka::Core::Taggable
+
     # Signal types that we handle
     HANDLED_SIGNALS = %i[
       SIGINT
