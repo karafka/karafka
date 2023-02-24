@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.33 (Unreleased)
+## 2.0.33 (2023-02-24)
 - **[Feature]** Support `perform_all_later` in ActiveJob adapter for Rails `7.1+`
 - **[Feature]** Introduce ability to assign and re-assign tags in consumer instances. This can be used for extra instrumentation that is context aware.
 - **[Feature]** Introduce ability to assign and reassign tags to the `Karafka::Process`.
@@ -36,12 +36,12 @@ class EventsConsumer < ApplicationConsumer
 end
 ```
 
-## 2.0.32 (2022-02-13)
+## 2.0.32 (2023-02-13)
 - [Fix] Many non-existing topic subscriptions propagate poll errors beyond client
 - [Improvement] Ignore `unknown_topic_or_part` errors in dev when `allow.auto.create.topics` is on.
 - [Improvement] Optimize temporary errors handling in polling for a better backoff policy
 
-## 2.0.31 (2022-02-12)
+## 2.0.31 (2023-02-12)
 - [Feature] Allow for adding partitions via `Admin#create_partitions` API.
 - [Fix] Do not ignore admin errors upon invalid configuration (#1254)
 - [Fix] Topic name validation (#1300) - CandyFet
@@ -49,7 +49,7 @@ end
 - [Maintenance] Require `karafka-core` >= `2.0.11` and switch to shared RSpec locator.
 - [Maintenance] Require `karafka-rdkafka` >= `0.12.1`
 
-## 2.0.30 (2022-01-31)
+## 2.0.30 (2023-01-31)
 - [Improvement] Alias `--consumer-groups` with `--include-consumer-groups`
 - [Improvement] Alias `--subscription-groups` with `--include-subscription-groups`
 - [Improvement] Alias `--topics` with `--include-topics`
