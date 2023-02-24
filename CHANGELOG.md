@@ -14,6 +14,28 @@
 
 Since `#tags` were introduced on consumers, the `#tags` method is now part of the consumers API.
 
+This means, that in case you were using a method called `#tags` in your consumers, you will have to rename it:
+
+```ruby
+class EventsConsumer < ApplicationConsumer
+  def consume
+    messages.each do |message|
+      tags << message.payload.tag
+    end
+
+    tags.each { |tags| puts tag }
+  end
+
+  private
+
+  # This will collide with the tagging API
+  # This NEEDS to be renamed not to collide with `#tags` method provided by the consumers API.
+  def tags
+    @tags ||= Set.new
+  end
+end
+```
+
 ## 2.0.32 (2022-02-13)
 - [Fix] Many non-existing topic subscriptions propagate poll errors beyond client
 - [Improvement] Ignore `unknown_topic_or_part` errors in dev when `allow.auto.create.topics` is on.
