@@ -1,14 +1,18 @@
 # Karafka framework changelog
 
 ## 2.0.33 (Unreleased)
-- [Feature] Support `perform_all_later` in ActiveJob adapter for Rails `7.1+`
-- [Improvement] Introduce ability to assign and re-assign tags in consumer instances. This can be used for extra instrumentation that is context aware.
-- [Improvement] Introduce ability to assign and -reassing tags to the `Karafka::Process`.
+- **[Feature]** Support `perform_all_later` in ActiveJob adapter for Rails `7.1+`
+- **[Feature]** Introduce ability to assign and re-assign tags in consumer instances. This can be used for extra instrumentation that is context aware.
+- **[Feature]** Introduce ability to assign and reassign tags to the `Karafka::Process`.
+- [Improvement] When using `ActiveJob` adapter, automatically tag jobs with the name of the `ActiveJob` class that is running inside of the `ActiveJob` consumer.
 - [Improvement] Make `::Karafka::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.
 - [Improvement] Set `fetch.message.max.bytes` for `Karafka::Admin` to `5MB` to make sure that all data is fetched correctly for Web UI under heavy load (many consumers).
 - [Improvement] Introduce a `strict_topics_namespacing` config option to enable/disable the strict topics naming validations. This can be useful when working with pre-existing topics which we cannot or do not want to rename.
-- [Improvement] Tag `ActiveJob` consumers with the currently executed job
 - [Fix] Karafka monitor is prematurely cached (#1314)
+
+### Upgrade notes
+
+Since `#tags` were introduced on consumers, the `#tags` method is now part of the consumers API.
 
 ## 2.0.32 (2022-02-13)
 - [Fix] Many non-existing topic subscriptions propagate poll errors beyond client
