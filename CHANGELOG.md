@@ -1,11 +1,40 @@
 # Karafka framework changelog
 
 ## 2.0.33 (Unreleased)
-- [Feature] Support `perform_all_later` in ActiveJob adapter for Rails `7.1+`
-- [Fix] Karafka monitor is prematurely cached (#1314)
+- **[Feature]** Support `perform_all_later` in ActiveJob adapter for Rails `7.1+`
+- **[Feature]** Introduce ability to assign and re-assign tags in consumer instances. This can be used for extra instrumentation that is context aware.
+- **[Feature]** Introduce ability to assign and reassign tags to the `Karafka::Process`.
+- [Improvement] When using `ActiveJob` adapter, automatically tag jobs with the name of the `ActiveJob` class that is running inside of the `ActiveJob` consumer.
 - [Improvement] Make `::Karafka::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.
 - [Improvement] Set `fetch.message.max.bytes` for `Karafka::Admin` to `5MB` to make sure that all data is fetched correctly for Web UI under heavy load (many consumers).
 - [Improvement] Introduce a `strict_topics_namespacing` config option to enable/disable the strict topics naming validations. This can be useful when working with pre-existing topics which we cannot or do not want to rename.
+- [Fix] Karafka monitor is prematurely cached (#1314)
+
+### Upgrade notes
+
+Since `#tags` were introduced on consumers, the `#tags` method is now part of the consumers API.
+
+This means, that in case you were using a method called `#tags` in your consumers, you will have to rename it:
+
+```ruby
+class EventsConsumer < ApplicationConsumer
+  def consume
+    messages.each do |message|
+      tags << message.payload.tag
+    end
+
+    tags.each { |tags| puts tag }
+  end
+
+  private
+
+  # This will collide with the tagging API
+  # This NEEDS to be renamed not to collide with `#tags` method provided by the consumers API.
+  def tags
+    @tags ||= Set.new
+  end
+end
+```
 
 ## 2.0.32 (2022-02-13)
 - [Fix] Many non-existing topic subscriptions propagate poll errors beyond client

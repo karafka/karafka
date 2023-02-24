@@ -4,6 +4,9 @@
 module Karafka
   # Base consumer from which all Karafka consumers should inherit
   class BaseConsumer
+    # Allow for consumer instance tagging for instrumentation
+    include ::Karafka::Core::Taggable
+
     # @return [String] id of the current consumer
     attr_reader :id
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
