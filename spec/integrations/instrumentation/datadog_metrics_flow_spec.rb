@@ -3,7 +3,7 @@
 # Here we subscribe to our listener and make sure nothing breaks during the notifications
 # We use a dummy client that will intercept calls that should go to DataDog and check basic
 # metrics presence
-require 'karafka/instrumentation/vendors/datadog/listener'
+require 'karafka/instrumentation/vendors/datadog/metrics_listener'
 require Karafka.gem_root.join('spec/support/vendors/datadog/statsd_dummy_client')
 
 # We allow errors to raise one to make sure things are published as expected
@@ -24,7 +24,7 @@ end
 
 statsd_dummy = Vendors::Datadog::StatsdDummyClient.new
 
-listener = ::Karafka::Instrumentation::Vendors::Datadog::Listener.new do |config|
+listener = ::Karafka::Instrumentation::Vendors::Datadog::MetricsListener.new do |config|
   config.client = statsd_dummy
   # Publish host as a tag alongside the rest of tags
   config.default_tags = ["host:#{Socket.gethostname}"]

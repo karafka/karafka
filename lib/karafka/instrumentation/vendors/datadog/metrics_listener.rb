@@ -10,7 +10,7 @@ module Karafka
         # and/or Datadog
         #
         # @note You need to setup the `dogstatsd-ruby` client and assign it
-        class Listener
+        class MetricsListener
           include ::Karafka::Core::Configurable
           extend Forwardable
 
