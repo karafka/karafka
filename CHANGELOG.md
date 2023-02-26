@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.34 (Unreleased)
+- [Improvement] Attach an `embedded` tag to Karafka processes started using the embedded API.
+
 ## 2.0.33 (2023-02-24)
 - **[Feature]** Support `perform_all_later` in ActiveJob adapter for Rails `7.1+`
 - **[Feature]** Introduce ability to assign and re-assign tags in consumer instances. This can be used for extra instrumentation that is context aware.
