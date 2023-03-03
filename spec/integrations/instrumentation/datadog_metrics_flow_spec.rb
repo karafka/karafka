@@ -33,7 +33,7 @@ end
 
 Karafka.monitor.subscribe(listener)
 
-# Note: this sets up the old Listener class to make sure we keep backwards compatibility
+# @note this sets up the old Listener class to make sure we keep backwards compatibility
 statsd_dummy_for_backwards_compatibility = Vendors::Datadog::StatsdDummyClient.new
 deprecated_listener = ::Karafka::Instrumentation::Vendors::Datadog::Listener.new do |config|
   config.client = statsd_dummy_for_backwards_compatibility
@@ -52,7 +52,7 @@ start_karafka_and_wait_until do
 end
 
 # TODO: remove this loop when Listener is finally deprecated
-[ statsd_dummy, statsd_dummy_for_backwards_compatibility ].each do |statsd_client|
+[statsd_dummy, statsd_dummy_for_backwards_compatibility].each do |statsd_client|
   %w[
     karafka.messages.consumed
     karafka.messages.consumed.bytes
