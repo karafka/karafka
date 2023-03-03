@@ -29,12 +29,22 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+class Iterator
+  def step
+    @step ||= -1
+
+    (@step += 1) % 10
+  end
+end
+
+ITER = Iterator.new
+
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
       consumer Consumer
       virtual_partitions(
-        partitioner: ->(msg) { msg.raw_payload }
+        partitioner: ->(_) { ITER.step }
       )
     end
   end
