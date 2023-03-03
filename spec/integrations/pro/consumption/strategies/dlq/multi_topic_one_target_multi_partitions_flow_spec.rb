@@ -44,7 +44,6 @@ end
   produce_many(DT.topics[1], elements, partition: i)
 end
 
-
 start_karafka_and_wait_until do
   DT[0].count >= 20
 end
