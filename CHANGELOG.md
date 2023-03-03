@@ -2,6 +2,11 @@
 
 ## 2.0.34 (Unreleased)
 - [Improvement] Attach an `embedded` tag to Karafka processes started using the embedded API.
+- [Change] Renamed `Datadog::Listener` to `Datadog::MetricsListener` for consistency. (#1124)
+
+### Upgrade notes
+
+1. Replace `Datadog::Listener` references to `Datadog::MetricsListener`.
 
 ## 2.0.33 (2023-02-24)
 - **[Feature]** Support `perform_all_later` in ActiveJob adapter for Rails `7.1+`
@@ -102,7 +107,7 @@ class KarafkaApp < Karafka::App
 - [Improvement] Expand `LoggerListener` with `client.resume` notification.
 - [Improvement] Replace random anonymous subscription groups ids with stable once.
 - [Improvement] Add `consumer.consume`, `consumer.revoke` and `consumer.shutting_down` notification events and move the revocation logic calling to strategies.
-- [Change] Rename job queue statistics `processing` key to `busy`. No changes needed because naming in the DataDog listener stays the same. 
+- [Change] Rename job queue statistics `processing` key to `busy`. No changes needed because naming in the DataDog listener stays the same.
 - [Fix] Fix proctitle listener state changes reporting on new states.
 - [Fix] Make sure all files descriptors are closed in the integration specs.
 - [Fix] Fix a case where empty subscription groups could leak into the execution flow.
