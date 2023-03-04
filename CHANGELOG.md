@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.34 (Unreleased)
+## 2.0.34 (2023-03-04)
 - [Improvement] Attach an `embedded` tag to Karafka processes started using the embedded API.
 - [Change] Renamed `Datadog::Listener` to `Datadog::MetricsListener` for consistency. (#1124)
 
