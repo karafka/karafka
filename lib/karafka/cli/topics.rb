@@ -38,7 +38,7 @@ module Karafka
             puts "Creating topic #{name}..."
             Admin.create_topic(
               name,
-              topic.structurable.partition_count,
+              topic.structurable.partitions,
               topic.structurable.replication_factor,
               topic.structurable.details
             )
@@ -84,7 +84,7 @@ module Karafka
         routing_topics.each do |topic|
           name = topic.name
 
-          desired_count = topic.config.partition_count
+          desired_count = topic.config.partitions
           existing_count = existing_partitions.fetch(name, false)
 
           if existing_count && existing_count < desired_count

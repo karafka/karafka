@@ -34,7 +34,7 @@ draw_routes do
   consumer_group DT.consumer_group do
     # Special topic with 2 partitions available
     topic DT.topics[1] do
-      config(partition_count: 2)
+      config(partitions: 2)
       consumer Consumer
     end
   end

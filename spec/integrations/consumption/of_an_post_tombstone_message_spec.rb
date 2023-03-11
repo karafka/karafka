@@ -16,7 +16,7 @@ draw_routes do
   topic DT.topic do
     # Those are really aggressive settings to force Kafka into compaction
     config(
-      partition_count: 1,
+      partitions: 1,
       'max.compaction.lag.ms': 50_000,
       'retention.ms': 50_000,
       'delete.retention.ms': 100,

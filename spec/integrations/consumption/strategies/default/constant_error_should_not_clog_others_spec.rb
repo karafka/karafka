@@ -27,7 +27,7 @@ end
 
 draw_routes do
   topic DT.topic do
-    config(partition_count: 3)
+    config(partitions: 3)
     consumer Consumer
   end
 end

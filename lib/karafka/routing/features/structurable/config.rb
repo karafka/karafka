@@ -7,7 +7,7 @@ module Karafka
         # Config for structurable feature
         Config = Struct.new(
           :active,
-          :partition_count,
+          :partitions,
           :replication_factor,
           :details,
           keyword_init: true

@@ -19,7 +19,7 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
-      config(partition_count: 2)
+      config(partitions: 2)
       consumer Consumer
       virtual_partitions(
         partitioner: ->(_) { rand }

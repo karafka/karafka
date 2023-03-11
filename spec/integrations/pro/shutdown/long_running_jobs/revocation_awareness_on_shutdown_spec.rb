@@ -32,7 +32,7 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
-      config(partition_count: 10)
+      config(partitions: 10)
       consumer Consumer
       long_running_job true
     end

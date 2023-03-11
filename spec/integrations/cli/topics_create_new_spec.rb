@@ -17,7 +17,7 @@ draw_routes(create_topics: false) do
 
   topic DT.topics[1] do
     config(
-      partition_count: 2,
+      partitions: 2,
       'cleanup.policy': 'compact'
     )
 

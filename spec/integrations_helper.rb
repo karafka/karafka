@@ -182,7 +182,7 @@ end
 def create_routes_topics
   fetch_routes_topics_configs.each do |name, config|
     args = if config
-             [config.partition_count, config.replication_factor, config.details]
+             [config.partitions, config.replication_factor, config.details]
            else
              [1, 1, {}]
            end

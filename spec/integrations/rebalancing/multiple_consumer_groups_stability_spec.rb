@@ -20,14 +20,14 @@ end
 draw_routes do
   consumer_group DT.consumer_groups[0] do
     topic DT.topics[0] do
-      config(partition_count: 2)
+      config(partitions: 2)
       consumer Consumer
     end
   end
 
   consumer_group DT.consumer_groups[1] do
     topic DT.topics[1] do
-      config(partition_count: 2)
+      config(partitions: 2)
       consumer Consumer
     end
   end

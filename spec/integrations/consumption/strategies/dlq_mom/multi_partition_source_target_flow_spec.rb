@@ -24,14 +24,14 @@ end
 
 draw_routes do
   topic DT.topics[0] do
-    config(partition_count: 100)
+    config(partitions: 100)
     consumer Consumer
     dead_letter_queue(topic: DT.topics[1], max_retries: 0)
     manual_offset_management true
   end
 
   topic DT.topics[1] do
-    config(partition_count: 100)
+    config(partitions: 100)
     consumer DlqConsumer
     manual_offset_management true
   end

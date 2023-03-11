@@ -27,7 +27,7 @@ draw_routes do
   end
 
   topic DT.topics[1] do
-    config(partition_count: 10)
+    config(partitions: 10)
     consumer DlqConsumer
     manual_offset_management true
   end

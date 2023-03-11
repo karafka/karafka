@@ -17,7 +17,7 @@ end
 draw_routes do
   topic DT.topic do
     # We use a lot of partitions to make sure we never revoke part of them on rebalances
-    config(partition_count: 10)
+    config(partitions: 10)
     consumer Consumer
   end
 end

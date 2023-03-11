@@ -6,14 +6,14 @@ module Karafka
       class Structurable < Base
         # Extension for managing Kafka topic configuration
         module Topic
-          # @param partition_count [Integer]
+          # @param partitions [Integer]
           # @param replication_factor [Integer]
           # @param details [Hash] extra configuration for the topic
           # @return [Config] defined structure
-          def config(partition_count: 1, replication_factor: 1, **details)
+          def config(partitions: 1, replication_factor: 1, **details)
             @structurable ||= Config.new(
               active: true,
-              partition_count: partition_count,
+              partitions: partitions,
               replication_factor: replication_factor,
               details: details
             )

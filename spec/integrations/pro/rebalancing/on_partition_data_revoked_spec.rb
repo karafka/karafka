@@ -30,7 +30,7 @@ end
 draw_routes do
   consumer_group DT.topic do
     topic DT.topic do
-      config(partition_count: 3)
+      config(partitions: 3)
       consumer Consumer
       manual_offset_management true
     end

@@ -16,7 +16,7 @@ module Karafka
 
           nested :structurable do
             required(:active) { |val| val == true }
-            required(:partition_count) { |val| val.is_a?(Integer) && val.positive? }
+            required(:partitions) { |val| val.is_a?(Integer) && val.positive? }
             required(:replication_factor) { |val| val.is_a?(Integer) && val.positive? }
             required(:details) do |val|
               val.is_a?(Hash) &&
