@@ -161,11 +161,9 @@ end
 # @return [Hash] hash with names of topics and configs as values or false for topics for which
 #   we should use the defaults
 def fetch_routes_topics_configs
-  topics_configs = {}
-
-  Karafka::App.routes.map(&:topics).flatten.each do |topics|
+  Karafka::App.routes.map(&:topics).flatten.each_with_object({}) do |topics, accu|
     topics.each do |topic|
-      topics_configs[topic.name] ||= topic.structurable
+      accu[topic.name] ||= topic.structurable
 
       next unless topic.dead_letter_queue?
       next unless topic.dead_letter_queue.topic
@@ -173,11 +171,9 @@ def fetch_routes_topics_configs
       # Setting to false will force defaults, useful when we do not want to declare DLQ topics
       # manually. This will ensure we always create DLQ topics if their details are not defined
       # in the routing
-      topics_configs[topic.name] ||= false
+      accu[topic.name] ||= false
     end
   end
-
-  topics_configs
 end
 
 # Creates topics defined in the routes so they are available for the specs

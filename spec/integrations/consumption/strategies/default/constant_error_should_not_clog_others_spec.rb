@@ -8,8 +8,6 @@ setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
 end
 
-create_topic(partitions: 3)
-
 # Send data to all 3 partitions
 # We need to remember last offset per partition as we need to seek back to always have
 # 300 messages to consume tops from all 3 partitions
@@ -36,7 +34,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    config(partition_count: 3)
+    consumer Consumer
+  end
+end
 
 start_karafka_and_wait_until do
   # We subtract 3 as 3 values are from the offsets
