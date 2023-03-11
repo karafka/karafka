@@ -15,6 +15,12 @@ module Karafka
       def red(string)
         "\033[0;31m#{string}\033[0m"
       end
+
+      # @param string [String] string we want to have in yellow
+      # @return [String] yellow string
+      def yellow(string)
+        "\033[1;33m#{string}\033[0m"
+      end
     end
   end
 end
