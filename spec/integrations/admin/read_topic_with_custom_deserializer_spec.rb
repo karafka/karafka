@@ -18,8 +18,6 @@ draw_routes do
   end
 end
 
-create_topic(name: DT.topic)
-
 produce(DT.topic, '10')
 
 messages = Karafka::Admin.read_topic(DT.topic, 0, 1)

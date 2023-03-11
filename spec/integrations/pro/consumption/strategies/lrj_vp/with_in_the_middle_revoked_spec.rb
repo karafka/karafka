@@ -9,8 +9,6 @@ setup_karafka do |config|
   config.concurrency = 1
 end
 
-create_topic(name: DT.topic)
-
 MUTEX = Mutex.new
 
 class Consumer < Karafka::BaseConsumer

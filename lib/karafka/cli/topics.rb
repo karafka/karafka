@@ -18,6 +18,8 @@ module Karafka
           reset
         when 'repartition'
           repartition
+        when 'migrate'
+          migrate
         else
           raise ::ArgumentError, "Invalid topics action: #{action}"
         end
@@ -64,6 +66,12 @@ module Karafka
       def reset
         delete
         create
+      end
+
+      # Creates missing topics and aligns the partitions count
+      def migrate
+        create
+        repartition
       end
 
       # Increases number of partitions on topics that have less partitions than defined
