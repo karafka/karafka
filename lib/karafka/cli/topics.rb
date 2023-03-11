@@ -65,12 +65,20 @@ module Karafka
       # Deletes routing based topics and re-creates them
       def reset
         delete
+
+        # We need to invalidate the metadata cache, otherwise we will think, that the topic
+        # already exists
+        @existing_topics = nil
+
         create
       end
 
       # Creates missing topics and aligns the partitions count
       def migrate
         create
+
+        @existing_topics = nil
+
         repartition
       end
 
