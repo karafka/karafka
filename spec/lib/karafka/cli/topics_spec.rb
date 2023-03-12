@@ -1,5 +1,3 @@
 # frozen_string_literal: true
 
-RSpec.describe_current do
-  pending
-end
+# Placeholder. All topics CLI commands are checked in the integration suite.
