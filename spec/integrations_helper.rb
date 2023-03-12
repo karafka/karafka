@@ -158,21 +158,26 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
   create_routes_topics
 end
 
+# @return [Array<Karafka::Routing::Topic>] all topics (structurable and non-structurable)
+def fetch_routes_topics
+  Karafka::App.routes.map(&:topics).map(&:to_a).flatten
+end
+
 # @return [Hash] hash with names of topics and configs as values or false for topics for which
 #   we should use the defaults
-def fetch_routes_topics_configs
-  Karafka::App.routes.map(&:topics).flatten.each_with_object({}) do |topics, accu|
-    topics.each do |topic|
-      accu[topic.name] ||= topic.structurable
+def fetch_structurable_routes_topics_configs
+  fetch_routes_topics.each_with_object({}) do |topic, accu|
+    next unless topic.structurable.active?
 
-      next unless topic.dead_letter_queue?
-      next unless topic.dead_letter_queue.topic
+    accu[topic.name] ||= topic.structurable
 
-      # Setting to false will force defaults, useful when we do not want to declare DLQ topics
-      # manually. This will ensure we always create DLQ topics if their details are not defined
-      # in the routing
-      accu[topic.name] ||= false
-    end
+    next unless topic.dead_letter_queue?
+    next unless topic.dead_letter_queue.topic
+
+    # Setting to false will force defaults, useful when we do not want to declare DLQ topics
+    # manually. This will ensure we always create DLQ topics if their details are not defined
+    # in the routing
+    accu[topic.name] ||= false
   end
 end
 
@@ -180,7 +185,7 @@ end
 # Code below will auto-create all the routing based topics so we don't have to do it per spec
 # If a topic is already created for example with more partitions, this will do nothing
 def create_routes_topics
-  fetch_routes_topics_configs.each do |name, config|
+  fetch_structurable_routes_topics_configs.each do |name, config|
     args = if config
              [config.partitions, config.replication_factor, config.details]
            else

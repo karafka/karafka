@@ -29,7 +29,7 @@ module Karafka
 
       # Creates topics based on the routing setup and configuration
       def create
-        routing_topics.each do |topic|
+        structurable_routing_topics.each do |topic|
           name = topic.name
 
           if existing_topics_names.include?(name)
@@ -49,7 +49,7 @@ module Karafka
 
       # Deletes routing based topics
       def delete
-        routing_topics.each do |topic|
+        structurable_routing_topics.each do |topic|
           name = topic.name
 
           if existing_topics_names.include?(name)
@@ -89,7 +89,7 @@ module Karafka
           [topic.fetch(:topic_name), topic.fetch(:partition_count)]
         end.to_h
 
-        routing_topics.each do |topic|
+        structurable_routing_topics.each do |topic|
           name = topic.name
 
           desired_count = topic.config.partitions
@@ -108,22 +108,25 @@ module Karafka
         end
       end
 
-      # @return [Array<Karafka::Routing::Topic>] all available topics
+      # @return [Array<Karafka::Routing::Topic>] all available topics that can be managed
       # @note If topic is defined in multiple consumer groups, first config will be used. This
       #   means, that this CLI will not work for simultaneous management of multiple clusters from
       #   a single CLI command execution flow.
-      def routing_topics
-        return @routing_topics if @routing_topics
+      def structurable_routing_topics
+        return @structurable_routing_topics if @structurable_routing_topics
 
         collected_topics = {}
 
         App.consumer_groups.each do |consumer_group|
           consumer_group.topics.each do |topic|
+            # Skip topics that were explicitly disabled from management
+            next unless topic.structurable.active?
+
             collected_topics[topic.name] ||= topic
           end
         end
 
-        @routing_topics = collected_topics.values
+        @structurable_routing_topics = collected_topics.values
       end
 
       # @return [Array<Hash>] existing topics details

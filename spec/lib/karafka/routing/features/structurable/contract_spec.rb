@@ -21,7 +21,7 @@ RSpec.describe_current do
   context 'when active flag is not true' do
     before { config[:structurable][:active] = false }
 
-    it { expect(check).not_to be_success }
+    it { expect(check).to be_success }
   end
 
   context 'when there are not enough partitions' do
