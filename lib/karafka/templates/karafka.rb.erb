@@ -53,6 +53,11 @@ class KarafkaApp < Karafka::App
     # active_job_topic :default
 <% end -%>
     topic :example do
+      # Uncomment this if you want Karafka to manage your topics configuration
+      # Managing topics configuration via routing will allow you to ensure config consistency
+      # across multiple environments
+      #
+      # config(partitions: 2, 'cleanup.policy': 'compact')
       consumer ExampleConsumer
     end
   end

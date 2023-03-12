@@ -135,27 +135,6 @@ def setup_rdkafka_consumer(options = {})
   ).consumer
 end
 
-# A simple helper for creation of topics with given partitions count. Single partition topics are
-# automatically created during our specs, but for some we need more than one. In those cases we
-# use this helper.
-#
-# The name is equal to the default spec topic, that is `DT.topic`
-#
-# @param name [String] topic name
-# @param partitions [Integer] number of partitions for this topic
-# @param config [Hash] optional topic configuration settings
-def create_topic(name: DT.topic, partitions: 1, config: {})
-  Karafka::Admin.create_topic(
-    name,
-    partitions,
-    1,
-    config
-  )
-# Ignore if exists, some specs may try to create few times
-rescue Rdkafka::RdkafkaError => e
-  e.code == :topic_already_exists ? return : raise
-end
-
 # Sets up default routes (mostly used in integration specs) or allows to configure custom routes
 # by providing a block
 # @param consumer_class [Class, nil] consumer class we want to use if going with defaults
@@ -179,26 +158,50 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
   create_routes_topics
 end
 
+# @return [Array<Karafka::Routing::Topic>] all topics (structurable and non-structurable)
+def fetch_routes_topics
+  Karafka::App.routes.map(&:topics).map(&:to_a).flatten
+end
+
+# @return [Hash] hash with names of topics and configs as values or false for topics for which
+#   we should use the defaults
+def fetch_structurable_routes_topics_configs
+  fetch_routes_topics.each_with_object({}) do |topic, accu|
+    next unless topic.structurable.active?
+
+    accu[topic.name] ||= topic.structurable
+
+    next unless topic.dead_letter_queue?
+    next unless topic.dead_letter_queue.topic
+
+    # Setting to false will force defaults, useful when we do not want to declare DLQ topics
+    # manually. This will ensure we always create DLQ topics if their details are not defined
+    # in the routing
+    accu[topic.name] ||= false
+  end
+end
+
 # Creates topics defined in the routes so they are available for the specs
 # Code below will auto-create all the routing based topics so we don't have to do it per spec
 # If a topic is already created for example with more partitions, this will do nothing
 def create_routes_topics
-  topics_names = Set.new
+  fetch_structurable_routes_topics_configs.each do |name, config|
+    args = if config
+             [config.partitions, config.replication_factor, config.details]
+           else
+             [1, 1, {}]
+           end
 
-  Karafka::App.routes.map(&:topics).flatten.each do |topics|
-    topics.each do |topic|
-      next unless topic.active?
-
-      topics_names << topic.name
-
-      next unless topic.dead_letter_queue?
-      next unless topic.dead_letter_queue.topic
-
-      topics_names << topic.dead_letter_queue.topic
+    begin
+      Karafka::Admin.create_topic(
+        name,
+        *args
+      )
+    # Ignore if exists, some specs may try to create few times
+    rescue Rdkafka::RdkafkaError => e
+      e.code == :topic_already_exists ? return : raise
     end
   end
-
-  topics_names.each { |topic_name| create_topic(name: topic_name) }
 end
 
 # Waits until block yields true

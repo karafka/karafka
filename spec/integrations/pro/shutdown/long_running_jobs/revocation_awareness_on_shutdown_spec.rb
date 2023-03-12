@@ -8,12 +8,6 @@ setup_karafka do |config|
   config.concurrency = 20
 end
 
-create_topic(partitions: 10)
-
-10.times do |i|
-  produce(DT.topic, (i + 1).to_s, partition: i)
-end
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[:started] << true
@@ -38,10 +32,15 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
+      config(partitions: 10)
       consumer Consumer
       long_running_job true
     end
   end
+end
+
+10.times do |i|
+  produce(DT.topic, (i + 1).to_s, partition: i)
 end
 
 consumer = setup_rdkafka_consumer

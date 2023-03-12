@@ -5,9 +5,6 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
-create_topic(name: DT.topics[0], partitions: 100)
-create_topic(name: DT.topics[1], partitions: 100)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     raise StandardError
@@ -24,11 +21,13 @@ end
 
 draw_routes do
   topic DT.topics[0] do
+    config(partitions: 100)
     consumer Consumer
     dead_letter_queue(topic: DT.topics[2], max_retries: 0)
   end
 
   topic DT.topics[1] do
+    config(partitions: 100)
     consumer Consumer
     dead_letter_queue(topic: DT.topics[2], max_retries: 0)
   end

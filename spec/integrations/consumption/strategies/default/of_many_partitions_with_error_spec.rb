@@ -8,8 +8,6 @@ setup_karafka(allow_errors: true) do |config|
   config.initial_offset = 'latest'
 end
 
-create_topic(partitions: 10)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     @count ||= 0
@@ -35,6 +33,7 @@ draw_routes do
   consumer_group DT.consumer_group do
     # Special topic with 10 partitions available
     topic DT.topic do
+      config(partitions: 10)
       consumer Consumer
     end
   end

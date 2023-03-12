@@ -4,6 +4,4 @@
 
 Karafka::Cli.prepare
 
-Karafka::Cli.start
-
 Karafka::Cli.start ['info']

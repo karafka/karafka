@@ -45,6 +45,10 @@ en:
       dead_letter_queue.topic_format: 'needs to be a string with a Kafka accepted format'
       dead_letter_queue.active_format: needs to be either true or false
       active_format: needs to be either true or false
+      structurable.partitions_format: needs to be more or equal to 1
+      structurable.active_format: needs to be true
+      structurable.replication_factor_format: needs to be more or equal to 1
+      structurable.details_format: needs to be a hash with only symbol keys
       inconsistent_namespacing: |
         needs to be consistent namespacing style
         disable this validation by setting config.strict_topics_namespacing to false

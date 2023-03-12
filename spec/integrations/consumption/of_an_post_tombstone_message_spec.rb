@@ -4,21 +4,6 @@
 
 setup_karafka
 
-# Those are really aggressive settings to force Kafka into compaction
-create_topic(
-  partitions: 1,
-  config: {
-    'max.compaction.lag.ms': 50_000,
-    'retention.ms': 50_000,
-    'delete.retention.ms': 100,
-    'cleanup.policy': 'compact',
-    'min.cleanable.dirty.ratio': 0.001,
-    'segment.ms': 100,
-    'segment.bytes': 100,
-    'min.compaction.lag.ms': 10
-  }
-)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -27,7 +12,23 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    # Those are really aggressive settings to force Kafka into compaction
+    config(
+      partitions: 1,
+      'max.compaction.lag.ms': 50_000,
+      'retention.ms': 50_000,
+      'delete.retention.ms': 100,
+      'cleanup.policy': 'compact',
+      'min.cleanable.dirty.ratio': 0.001,
+      'segment.ms': 100,
+      'segment.bytes': 100,
+      'min.compaction.lag.ms': 10
+    )
+    consumer Consumer
+  end
+end
 
 data = Array.new(2) { '1' }
 

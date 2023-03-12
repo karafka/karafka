@@ -7,8 +7,6 @@ setup_karafka do |config|
   config.concurrency = 1
 end
 
-create_topic(name: DT.topic, partitions: 2)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[0] << messages.last.partition
@@ -19,6 +17,7 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
+      config(partitions: 2)
       consumer Consumer
       long_running_job true
     end

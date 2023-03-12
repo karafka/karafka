@@ -18,8 +18,6 @@ Karafka::App.monitor.subscribe('error.occurred') do |event|
   events << event
 end
 
-create_topic(partitions: 2)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[:any] << object_id
@@ -33,6 +31,7 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
+      config(partitions: 2)
       consumer Consumer
       long_running_job true
       manual_offset_management true

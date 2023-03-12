@@ -4,9 +4,6 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
-create_topic(name: DT.topics[0], partitions: 10)
-create_topic(name: DT.topics[1], partitions: 10)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -27,12 +24,14 @@ end
 
 draw_routes do
   topic DT.topics[0] do
+    config(partitions: 10)
     consumer Consumer
     dead_letter_queue(topic: DT.topics[1], max_retries: 0)
     manual_offset_management true
   end
 
   topic DT.topics[1] do
+    config(partitions: 10)
     consumer DlqConsumer
     manual_offset_management true
   end

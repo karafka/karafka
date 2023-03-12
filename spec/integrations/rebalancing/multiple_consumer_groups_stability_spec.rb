@@ -7,22 +7,6 @@ setup_karafka do |config|
   config.concurrency = 5
 end
 
-create_topic(name: DT.topics[0], partitions: 2)
-create_topic(name: DT.topics[1], partitions: 2)
-
-Thread.new do
-  loop do
-    2.times do |i|
-      produce(DT.topics[i], '1', partition: 0)
-      produce(DT.topics[i], '2', partition: 1)
-    end
-
-    sleep(1)
-  rescue WaterDrop::Errors::ProducerClosedError
-    break
-  end
-end
-
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[:working] << [topic.name, messages.partition]
@@ -36,14 +20,29 @@ end
 draw_routes do
   consumer_group DT.consumer_groups[0] do
     topic DT.topics[0] do
+      config(partitions: 2)
       consumer Consumer
     end
   end
 
   consumer_group DT.consumer_groups[1] do
     topic DT.topics[1] do
+      config(partitions: 2)
       consumer Consumer
     end
+  end
+end
+
+Thread.new do
+  loop do
+    2.times do |i|
+      produce(DT.topics[i], '1', partition: 0)
+      produce(DT.topics[i], '2', partition: 1)
+    end
+
+    sleep(1)
+  rescue WaterDrop::Errors::ProducerClosedError
+    break
   end
 end
 

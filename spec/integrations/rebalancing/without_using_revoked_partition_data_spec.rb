@@ -25,8 +25,6 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
-create_topic(partitions: 2)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     return if DT.data.key?(:revoked)
@@ -41,7 +39,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    config(partitions: 2)
+    consumer Consumer
+  end
+end
 
 Thread.new do
   nr = 0

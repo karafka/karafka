@@ -10,8 +10,6 @@ setup_karafka do |config|
   config.shutdown_timeout = 60_000
 end
 
-create_topic(partitions: 2)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     partition = messages.metadata.partition
@@ -33,6 +31,7 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
+      config(partitions: 2)
       consumer Consumer
       long_running_job true
     end

@@ -7,8 +7,6 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
-create_topic(partitions: 10)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     # This will simulate, that the thread is busy in a bit random way, so more worker threads can
@@ -29,6 +27,7 @@ draw_routes do
   consumer_group DT.consumer_group do
     # Special topic with 10 partitions available
     topic DT.topic do
+      config(partitions: 10)
       consumer Consumer
     end
   end

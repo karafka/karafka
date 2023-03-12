@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 2.0.35 (Unreleased)
+- **[Feature]** Allow for defining topics config via the DSL and its automatic creation via CLI command.
+- **[Feature]** Allow for full topics reset and topics repartitioning via the CLI. 
+
 ## 2.0.34 (2023-03-04)
 - [Improvement] Attach an `embedded` tag to Karafka processes started using the embedded API.
 - [Change] Renamed `Datadog::Listener` to `Datadog::MetricsListener` for consistency. (#1124)

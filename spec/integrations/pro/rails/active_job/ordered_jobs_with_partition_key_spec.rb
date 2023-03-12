@@ -8,13 +8,13 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
-create_topic(partitions: 3)
-
 setup_active_job
 
 draw_routes do
   consumer_group DT.consumer_group do
-    active_job_topic DT.topic
+    active_job_topic DT.topic do
+      config(partitions: 3)
+    end
   end
 end
 

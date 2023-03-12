@@ -22,7 +22,8 @@ RSpec.describe_current do
         Karafka::Cli::Console,
         Karafka::Cli::Info,
         Karafka::Cli::Install,
-        Karafka::Cli::Server
+        Karafka::Cli::Server,
+        Karafka::Cli::Topics
       ].map(&:to_s).sort
     end
 
