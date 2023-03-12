@@ -37,7 +37,7 @@ RSpec.describe_current do
   end
 
   context 'when details are a hash with non-symbol keys' do
-    before { config[:structurable][:details] =  { 'test' => 1 } }
+    before { config[:structurable][:details] = { 'test' => 1 } }
 
     it { expect(check).not_to be_success }
   end
