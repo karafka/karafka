@@ -29,6 +29,8 @@ SimpleCov.start do
   add_filter '/lib/karafka/patches'
   # We do not spec strategies here. We do it via integration test suite
   add_filter '/processing/strategies'
+  # CLI commands are also checked via integrations
+  add_filter '/cli/topics.rb'
 
   # enable_coverage :branch
   command_name SPECS_TYPE
