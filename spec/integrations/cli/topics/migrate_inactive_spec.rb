@@ -5,8 +5,6 @@
 
 Karafka::Cli.prepare
 
-Consumer = Class.new(Karafka::BaseConsumer)
-
 setup_karafka
 
 draw_routes(create_topics: false) do
