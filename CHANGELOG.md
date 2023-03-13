@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.35 (Unreleased)
+## 2.0.35 (2023-03-13)
 - **[Feature]** Allow for defining topics config via the DSL and its automatic creation via CLI command.
 - **[Feature]** Allow for full topics reset and topics repartitioning via the CLI. 
 
