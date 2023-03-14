@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   let(:config) do
     {
-      structurable: {
+      declaratives: {
         active: true,
         partitions: 1,
         replication_factor: 2,
@@ -19,25 +19,25 @@ RSpec.describe_current do
   end
 
   context 'when active flag is not true' do
-    before { config[:structurable][:active] = false }
+    before { config[:declaratives][:active] = false }
 
     it { expect(check).to be_success }
   end
 
   context 'when there are not enough partitions' do
-    before { config[:structurable][:partitions] = 0 }
+    before { config[:declaratives][:partitions] = 0 }
 
     it { expect(check).not_to be_success }
   end
 
   context 'when details are not a hash' do
-    before { config[:structurable][:details] = 0 }
+    before { config[:declaratives][:details] = 0 }
 
     it { expect(check).not_to be_success }
   end
 
   context 'when details are a hash with non-symbol keys' do
-    before { config[:structurable][:details] = { 'test' => 1 } }
+    before { config[:declaratives][:details] = { 'test' => 1 } }
 
     it { expect(check).not_to be_success }
   end

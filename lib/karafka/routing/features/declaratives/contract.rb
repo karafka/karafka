@@ -3,7 +3,7 @@
 module Karafka
   module Routing
     module Features
-      class Structurable < Base
+      class Declaratives < Base
         # Basic validation of the Kafka expected config details
         class Contract < Contracts::Base
           configure do |config|
@@ -14,7 +14,7 @@ module Karafka
             ).fetch('en').fetch('validations').fetch('topic')
           end
 
-          nested :structurable do
+          nested :declaratives do
             required(:active) { |val| [true, false].include?(val) }
             required(:partitions) { |val| val.is_a?(Integer) && val.positive? }
             required(:replication_factor) { |val| val.is_a?(Integer) && val.positive? }

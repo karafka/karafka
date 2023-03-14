@@ -105,8 +105,8 @@ RSpec.describe_current do
     let(:expected_keys) do
       %i[
         kafka deserializer max_messages max_wait_time initial_offset id name active consumer
-        consumer_group_id subscription_group active_job dead_letter_queue manual_offset_management
-        structurable
+        consumer_group_id subscription_group active_job dead_letter_queue declaratives
+        manual_offset_management
       ]
     end
 

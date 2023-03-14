@@ -3,7 +3,7 @@
 module Karafka
   module Routing
     module Features
-      class Structurable < Base
+      class Declaratives < Base
         # Extension for managing Kafka topic configuration
         module Topic
           # @param active [Boolean] is the topic structure management feature active
@@ -12,7 +12,7 @@ module Karafka
           # @param details [Hash] extra configuration for the topic
           # @return [Config] defined structure
           def config(active: true, partitions: 1, replication_factor: 1, **details)
-            @structurable ||= Config.new(
+            @declaratives ||= Config.new(
               active: active,
               partitions: partitions,
               replication_factor: replication_factor,
@@ -21,20 +21,20 @@ module Karafka
           end
 
           # @return [Config] config details
-          def structurable
+          def declaratives
             config
           end
 
-          # @return [true] structurable is always active
-          def structurable?
-            structurable.active?
+          # @return [true] declaratives is always active
+          def declaratives?
+            declaratives.active?
           end
 
-          # @return [Hash] topic with all its native configuration options plus structurable
+          # @return [Hash] topic with all its native configuration options plus declaratives
           #   settings
           def to_h
             super.merge(
-              structurable: structurable.to_h
+              declaratives: declaratives.to_h
             ).freeze
           end
         end

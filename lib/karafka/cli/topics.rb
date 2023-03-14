@@ -29,7 +29,7 @@ module Karafka
 
       # Creates topics based on the routing setup and configuration
       def create
-        structurable_routing_topics.each do |topic|
+        declaratives_routing_topics.each do |topic|
           name = topic.name
 
           if existing_topics_names.include?(name)
@@ -38,9 +38,9 @@ module Karafka
             puts "Creating topic #{name}..."
             Admin.create_topic(
               name,
-              topic.structurable.partitions,
-              topic.structurable.replication_factor,
-              topic.structurable.details
+              topic.declaratives.partitions,
+              topic.declaratives.replication_factor,
+              topic.declaratives.details
             )
             puts "#{green('Created')} topic #{name}."
           end
@@ -49,7 +49,7 @@ module Karafka
 
       # Deletes routing based topics
       def delete
-        structurable_routing_topics.each do |topic|
+        declaratives_routing_topics.each do |topic|
           name = topic.name
 
           if existing_topics_names.include?(name)
@@ -89,7 +89,7 @@ module Karafka
           [topic.fetch(:topic_name), topic.fetch(:partition_count)]
         end.to_h
 
-        structurable_routing_topics.each do |topic|
+        declaratives_routing_topics.each do |topic|
           name = topic.name
 
           desired_count = topic.config.partitions
@@ -112,21 +112,21 @@ module Karafka
       # @note If topic is defined in multiple consumer groups, first config will be used. This
       #   means, that this CLI will not work for simultaneous management of multiple clusters from
       #   a single CLI command execution flow.
-      def structurable_routing_topics
-        return @structurable_routing_topics if @structurable_routing_topics
+      def declaratives_routing_topics
+        return @declaratives_routing_topics if @declaratives_routing_topics
 
         collected_topics = {}
 
         App.consumer_groups.each do |consumer_group|
           consumer_group.topics.each do |topic|
             # Skip topics that were explicitly disabled from management
-            next unless topic.structurable.active?
+            next unless topic.declaratives.active?
 
             collected_topics[topic.name] ||= topic
           end
         end
 
-        @structurable_routing_topics = collected_topics.values
+        @declaratives_routing_topics = collected_topics.values
       end
 
       # @return [Array<Hash>] existing topics details

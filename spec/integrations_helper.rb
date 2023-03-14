@@ -158,18 +158,18 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
   create_routes_topics
 end
 
-# @return [Array<Karafka::Routing::Topic>] all topics (structurable and non-structurable)
+# @return [Array<Karafka::Routing::Topic>] all topics (declaratives and non-declaratives)
 def fetch_routes_topics
   Karafka::App.routes.map(&:topics).map(&:to_a).flatten
 end
 
 # @return [Hash] hash with names of topics and configs as values or false for topics for which
 #   we should use the defaults
-def fetch_structurable_routes_topics_configs
+def fetch_declarative_routes_topics_configs
   fetch_routes_topics.each_with_object({}) do |topic, accu|
-    next unless topic.structurable.active?
+    next unless topic.declaratives.active?
 
-    accu[topic.name] ||= topic.structurable
+    accu[topic.name] ||= topic.declaratives
 
     next unless topic.dead_letter_queue?
     next unless topic.dead_letter_queue.topic
@@ -185,7 +185,7 @@ end
 # Code below will auto-create all the routing based topics so we don't have to do it per spec
 # If a topic is already created for example with more partitions, this will do nothing
 def create_routes_topics
-  fetch_structurable_routes_topics_configs.each do |name, config|
+  fetch_declarative_routes_topics_configs.each do |name, config|
     args = if config
              [config.partitions, config.replication_factor, config.details]
            else

@@ -3,8 +3,8 @@
 module Karafka
   module Routing
     module Features
-      class Structurable < Base
-        # Config for structurable feature
+      class Declaratives < Base
+        # Config for declarative topics feature
         Config = Struct.new(
           :active,
           :partitions,
