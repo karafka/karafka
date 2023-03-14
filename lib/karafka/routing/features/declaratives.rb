@@ -7,7 +7,7 @@ module Karafka
       # topics structure for test/development, etc. This allows to share the same set of settings
       # for topics despite the environment. Pretty much similar to how the `structure.sql` or
       # `schema.rb` operate for SQL dbs.
-      class Structurable < Base
+      class Declaratives < Base
       end
     end
   end
