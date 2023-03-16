@@ -2,6 +2,7 @@
 
 ## 2.0.36 (Unreleased)
 - [Refactor] Rename internal naming of `Structurable` to `Declaratives` for declarative topics feature.
+- [Fix] AJ + DLQ + MOM + LRJ is pausing indefinitely after the first job (#1362)
 
 ## 2.0.35 (2023-03-13)
 - **[Feature]** Allow for defining topics config via the DSL and its automatic creation via CLI command.
