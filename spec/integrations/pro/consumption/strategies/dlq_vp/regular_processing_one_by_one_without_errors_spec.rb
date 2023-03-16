@@ -18,7 +18,7 @@ draw_routes do
     max_messages 1
     dead_letter_queue topic: DT.topics[1], max_retries: 4
     virtual_partitions(
-      partitioner: ->(message) { rand(10) }
+      partitioner: ->(_) { rand(10) }
     )
   end
 end

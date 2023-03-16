@@ -19,7 +19,7 @@ draw_routes do
     dead_letter_queue topic: DT.topics[1], max_retries: 4
     long_running_job true
     virtual_partitions(
-      partitioner: ->(message) { rand(10) }
+      partitioner: ->(_) { rand(10) }
     )
   end
 end
