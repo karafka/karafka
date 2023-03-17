@@ -23,8 +23,10 @@ module Karafka
         # This case is a bit of special. Please see the `AjDlqMom` for explanation on how the
         # offset management works in this case.
         module AjDlqLrjMom
-          include AjLrjMom
-          include AjDlqMom
+          # We can use the same code as for VP because non VP behaves like:
+          # - with one virtual partition
+          # - with "never ending" collapse
+          include AjDlqLrjMomVp
 
           # Features for this strategy
           FEATURES = %i[
