@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.37 (Unreleased)
+- [Fix] Declarative topics execution on a secondary cluster run topics creation on the primary one (#1365)
+
 ## 2.0.36 (2023-03-17)
 - [Refactor] Rename internal naming of `Structurable` to `Declaratives` for declarative topics feature.
 - [Fix] AJ + DLQ + MOM + LRJ is pausing indefinitely after the first job (#1362)
