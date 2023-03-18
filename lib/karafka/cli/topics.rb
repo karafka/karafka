@@ -116,11 +116,14 @@ module Karafka
         return @declaratives_routing_topics if @declaratives_routing_topics
 
         collected_topics = {}
+        default_servers = Karafka::App.config.kafka[:'bootstrap.servers']
 
         App.consumer_groups.each do |consumer_group|
           consumer_group.topics.each do |topic|
             # Skip topics that were explicitly disabled from management
             next unless topic.declaratives.active?
+            # If bootstrap servers are different, consider this a different cluster
+            next unless default_servers == topic.kafka[:'bootstrap.servers']
 
             collected_topics[topic.name] ||= topic
           end
