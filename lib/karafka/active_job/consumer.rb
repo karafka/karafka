@@ -19,7 +19,13 @@ module Karafka
 
           tags.add(:job_class, job['job_class'])
 
-          ::ActiveJob::Base.execute(job)
+          payload = { caller: self, job: job, message: message }
+
+          # We publish both to make it consistent with `consumer.x` events
+          Karafka.monitor.instrument('active_job.consume', payload)
+          Karafka.monitor.instrument('active_job.consumed', payload) do
+            ::ActiveJob::Base.execute(job)
+          end
 
           mark_as_consumed(message)
         end
