@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.37 (Unreleased)
+## 2.0.37 (2023-03-20)
 - [Fix] Declarative topics execution on a secondary cluster run topics creation on the primary one (#1365)
 - [Fix]  Admin read operations commit offset when not needed (#1369)
 
