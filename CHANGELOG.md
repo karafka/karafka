@@ -2,6 +2,7 @@
 
 ## 2.0.37 (Unreleased)
 - [Fix] Declarative topics execution on a secondary cluster run topics creation on the primary one (#1365)
+- [Fix]  Admin read operations commit offset when not needed (#1369)
 
 ## 2.0.36 (2023-03-17)
 - [Refactor] Rename internal naming of `Structurable` to `Declaratives` for declarative topics feature.
