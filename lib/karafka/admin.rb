@@ -28,7 +28,10 @@ module Karafka
       'enable.partition.eof': true,
       'statistics.interval.ms': 0,
       # Fetch at most 5 MBs when using admin
-      'fetch.message.max.bytes': 5 * 1_048_576
+      'fetch.message.max.bytes': 5 * 1_048_576,
+      # Do not commit offset automatically, this prevents offset tracking for operations involving
+      # a consumer instance
+      'enable.auto.commit': false
     }.freeze
 
     private_constant :Topic, :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :MAX_ATTEMPTS
