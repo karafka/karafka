@@ -22,7 +22,7 @@ module Karafka
       #
       # It contains slightly better revocation warranties than the regular blocking consumer as
       # it can stop processing batch of jobs in the middle after the revocation.
-      class Consumer < Karafka::Pro::BaseConsumer
+      class Consumer < ::Karafka::ActiveJob::Consumer
         # Runs ActiveJob jobs processing and handles lrj if needed
         def consume
           messages.each do |message|
@@ -31,11 +31,7 @@ module Karafka
             break if revoked?
             break if Karafka::App.stopping?
 
-            job = ::ActiveSupport::JSON.decode(message.raw_payload)
-
-            tags.add(:job_class, job['job_class'])
-
-            ::ActiveJob::Base.execute(job)
+            consume_job(message)
 
             # We cannot mark jobs as done after each if there are virtual partitions. Otherwise
             # this could create random markings.

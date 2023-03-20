@@ -17,6 +17,9 @@ module Karafka
       #   complete list of all the events. Please use the #available_events on fully loaded
       #   Karafka system to determine all of the events you can use.
       EVENTS = %w[
+        active_job.consume
+        active_job.consumed
+
         app.initialized
         app.running
         app.quieting

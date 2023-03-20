@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.0.38 (Unreleased)
+- [Improvement] Track active_job_id in instrumentation (#1372)
+
 ## 2.0.37 (2023-03-20)
 - [Fix] Declarative topics execution on a secondary cluster run topics creation on the primary one (#1365)
 - [Fix]  Admin read operations commit offset when not needed (#1369)
