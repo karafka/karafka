@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:coordinator) { described_class.new(pause_tracker) }
+  subject(:coordinator) { described_class.new(topic, partition, pause_tracker) }
 
+  let(:topic) { build(:routing_topic) }
+  let(:partition) { 0 }
   let(:pause_tracker) { build(:time_trackers_pause) }
   let(:message) { build(:messages_message) }
 

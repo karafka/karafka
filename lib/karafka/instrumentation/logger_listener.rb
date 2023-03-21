@@ -170,13 +170,36 @@ module Karafka
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_dead_letter_queue_dispatched(event)
+        consumer = event[:caller]
+        topic = consumer.topic.name
         message = event[:message]
         offset = message.offset
-        topic = event[:caller].topic.name
-        dlq_topic = event[:caller].topic.dead_letter_queue.topic
+        dlq_topic = consumer.topic.dead_letter_queue.topic
         partition = message.partition
 
-        info "Dispatched message #{offset} from #{topic}/#{partition} to DLQ topic: #{dlq_topic}"
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Dispatched message #{offset}
+          from #{topic}/#{partition}
+          to DLQ topic: #{dlq_topic}
+        MSG
+      end
+
+      # Logs info about throttling event
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_throttling_throttled(event)
+        consumer = event[:caller]
+        topic = consumer.topic.name
+        # Here we get last message before throttle
+        message = event[:message]
+        partition = message.partition
+        offset = message.offset
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Throttled and will resume
+          from message #{offset}
+          on #{topic}/#{partition}
+        MSG
       end
 
       # There are many types of errors that can occur in many places, but we provide a single
@@ -202,6 +225,9 @@ module Karafka
           error details
         when 'consumer.after_consume.error'
           error "Consumer after consume failed due to an error: #{error}"
+          error details
+        when 'consumer.idle.error'
+          error "Consumer idle failed due to an error: #{error}"
           error details
         when 'consumer.shutdown.error'
           error "Consumer on shutdown failed due to an error: #{error}"

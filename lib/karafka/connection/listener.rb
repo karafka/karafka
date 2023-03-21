@@ -25,7 +25,7 @@ module Karafka
         @consumer_group_coordinator = consumer_group_coordinator
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
-        @coordinators = Processing::CoordinatorsBuffer.new
+        @coordinators = Processing::CoordinatorsBuffer.new(subscription_group.topics)
         @client = Client.new(@subscription_group)
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         @jobs_builder = proc_config.jobs_builder
@@ -234,7 +234,7 @@ module Karafka
       def build_and_schedule_shutdown_jobs
         jobs = []
 
-        @executors.each do |_, _, executor|
+        @executors.each do |executor|
           job = @jobs_builder.shutdown(executor)
           job.before_enqueue
           jobs << job
@@ -263,19 +263,24 @@ module Karafka
 
         @messages_buffer.each do |topic, partition, messages|
           coordinator = @coordinators.find_or_create(topic, partition)
-
           # Start work coordination for this topic partition
           coordinator.start(messages)
 
-          @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
-            # Count the job we're going to create here
-            coordinator.increment
-            executor = @executors.find_or_create(topic, partition, group_id)
-            job = @jobs_builder.consume(executor, partition_messages, coordinator)
-            job.before_enqueue
-            jobs << job
+          # We do not increment coordinator for idle job because it's not a user related one
+          # and it will not go through a standard lifecycle. Same applies to revoked and shutdown
+          if messages.empty?
+            executor = @executors.find_or_create(topic, partition, 0, coordinator)
+            jobs << @jobs_builder.idle(executor)
+          else
+            @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
+              executor = @executors.find_or_create(topic, partition, group_id, coordinator)
+              coordinator.increment
+              jobs << @jobs_builder.consume(executor, partition_messages)
+            end
           end
         end
+
+        jobs.each(&:before_enqueue)
 
         @scheduler.schedule_consumption(@jobs_queue, jobs)
       end

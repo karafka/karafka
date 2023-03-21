@@ -6,10 +6,10 @@ FactoryBot.define do
 
     group_id { SecureRandom.hex(6) }
     client { nil }
-    topic { build(:routing_topic) }
+    coordinator { build(:processing_coordinator) }
 
     initialize_with do
-      new(group_id, client, topic)
+      new(group_id, client, coordinator)
     end
   end
 end

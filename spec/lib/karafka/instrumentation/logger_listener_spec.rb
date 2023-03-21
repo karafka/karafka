@@ -206,11 +206,36 @@ RSpec.describe_current do
 
     let(:payload) { { caller: consumer, message: kafka_message } }
     let(:kafka_message) { create(:messages_message) }
-    let(:message) { "Dispatched message #{kafka_message.offset} from test/0 to DLQ topic: dlq" }
+    let(:coordinator) { create(:processing_coordinator, topic: topic) }
+    let(:topic) { build(:routing_topic, name: 'test') }
+    let(:message) do
+      "[#{consumer.id}] Dispatched message #{kafka_message.offset} from test/0 to DLQ topic: dlq"
+    end
     let(:consumer) do
       instance = Class.new(Karafka::BaseConsumer).new
-      instance.topic = build(:routing_topic, name: 'test')
-      instance.topic.dead_letter_queue(topic: 'dlq')
+      instance.coordinator = coordinator
+      topic.dead_letter_queue(topic: 'dlq')
+      instance
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
+  describe '#on_throttling_throttled' do
+    subject(:trigger) { listener.on_throttling_throttled(event) }
+
+    let(:payload) { { caller: consumer, message: kafka_message } }
+    let(:kafka_message) { create(:messages_message) }
+    let(:coordinator) { create(:processing_coordinator, topic: topic) }
+    let(:topic) { build(:routing_topic, name: 'test') }
+    let(:message) do
+      resume_offset = kafka_message.offset
+      "[#{consumer.id}] Throttled and will resume from message #{resume_offset} on test/0"
+    end
+    let(:consumer) do
+      instance = Class.new(Karafka::BaseConsumer).new
+      instance.coordinator = coordinator
+      topic.dead_letter_queue(topic: 'dlq')
       instance
     end
 
@@ -261,6 +286,13 @@ RSpec.describe_current do
     context 'when it is a consumer.after_consume.error' do
       let(:type) { 'consumer.after_consume.error' }
       let(:message) { "Consumer after consume failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a consumer.idle.error' do
+      let(:type) { 'consumer.idle.error' }
+      let(:message) { "Consumer idle failed due to an error: #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end

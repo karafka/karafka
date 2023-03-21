@@ -10,13 +10,14 @@ module Karafka
     #   listener thread, but we go with thread-safe by default for all not to worry about potential
     #   future mistakes.
     class Coordinator
-      # @return [Karafka::TimeTrackers::Pause]
-      attr_reader :pause_tracker
+      attr_reader :pause_tracker, :seek_offset, :topic, :partition
 
-      attr_reader :seek_offset
-
+      # @param topic [Karafka::Routing::Topic]
+      # @param partition [Integer]
       # @param pause_tracker [Karafka::TimeTrackers::Pause] pause tracker for given topic partition
-      def initialize(pause_tracker)
+      def initialize(topic, partition, pause_tracker)
+        @topic = topic
+        @partition = partition
         @pause_tracker = pause_tracker
         @revoked = false
         @consumptions = {}

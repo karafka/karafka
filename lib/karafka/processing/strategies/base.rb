@@ -32,6 +32,11 @@ module Karafka
           raise NotImplementedError, 'Implement in a subclass'
         end
 
+        # Idle run handling
+        def handle_idle
+          raise NotImplementedError, 'Implement in a subclass'
+        end
+
         # Revocation handling
         def handle_revoked
           raise NotImplementedError, 'Implement in a subclass'

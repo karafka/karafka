@@ -4,7 +4,6 @@ RSpec.describe_current do
   subject(:consumer) do
     instance = working_class.new
     instance.coordinator = coordinator
-    instance.topic = topic
     instance.client = client
     instance.singleton_class.include(strategy)
     instance
@@ -58,8 +57,8 @@ RSpec.describe_current do
     coordinator.increment
   end
 
-  describe '#on_before_enqueue for non LRU' do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+  describe '#on_before_enqueue for non LRJ' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Default }
 
     before { allow(client).to receive(:pause) }
 
@@ -81,8 +80,8 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_consume and #on_after_consume for non LRU' do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Mom }
+  describe '#on_consume and #on_after_consume for non LRJ' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Mom::Default }
 
     let(:consume_with_after) do
       lambda do
@@ -158,7 +157,7 @@ RSpec.describe_current do
     end
 
     context 'when everything went ok on consume with automatic offset management' do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
 
       before do
         topic.manual_offset_management false
@@ -221,8 +220,8 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_before_enqueue for LRU' do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+  describe '#on_before_enqueue for LRJ' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
 
     before do
       topic.long_running_job true
@@ -236,8 +235,8 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_consume and #on_after_consume for LRU' do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+  describe '#on_consume and #on_after_consume for LRJ' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
 
     let(:consume_with_after) do
       lambda do
@@ -257,7 +256,7 @@ RSpec.describe_current do
     end
 
     context 'when everything went ok on consume with manual offset management' do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::LrjMom }
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Mom }
 
       before { topic.manual_offset_management true }
 
@@ -285,7 +284,7 @@ RSpec.describe_current do
     end
 
     context 'when there was an error on consume with manual offset management' do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Mom }
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Mom::Default }
 
       let(:working_class) do
         ClassBuilder.inherit(described_class) do

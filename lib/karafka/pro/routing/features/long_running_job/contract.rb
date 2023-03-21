@@ -16,7 +16,7 @@ module Karafka
     module Routing
       module Features
         class LongRunningJob < Base
-          # Rules around manual offset management settings
+          # Rules around long-running job settings
           class Contract < Contracts::Base
             configure do |config|
               config.error_messages = YAML.safe_load(

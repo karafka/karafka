@@ -36,6 +36,7 @@ end
 Tracker.run do
   start = Time.monotonic
 
+  Karafka::App.config.internal.status.reset!
   Karafka::Server.run
 
   Time.monotonic - start

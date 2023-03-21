@@ -39,12 +39,15 @@ module Karafka
         consumer.consumed
         consumer.consuming.pause
         consumer.consuming.retry
+        consumer.idle
         consumer.revoke
         consumer.revoked
         consumer.shutting_down
         consumer.shutdown
 
         dead_letter_queue.dispatched
+
+        throttling.throttled
 
         process.notice_signal
 

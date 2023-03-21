@@ -4,12 +4,11 @@ RSpec.describe_current do
   subject(:consumer) do
     instance = working_class.new
     instance.coordinator = coordinator
-    instance.topic = topic
     instance
   end
 
   let(:coordinator) { build(:processing_coordinator, seek_offset: -1) }
-  let(:topic) { build(:routing_topic) }
+  let(:topic) { coordinator.topic }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:last_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }

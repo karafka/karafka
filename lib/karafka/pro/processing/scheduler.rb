@@ -36,10 +36,17 @@ module Karafka
           ordered = []
 
           jobs_array.each do |job|
-            messages = job.messages
-            message = messages.first
+            cost = if job.is_a?(::Karafka::Processing::Jobs::Consume)
+                     messages = job.messages
+                     message = messages.first
 
-            cost = pt.processing_time_p95(message.topic, message.partition) * messages.size
+                     pt.processing_time_p95(message.topic, message.partition) * messages.size
+                   else
+                     # LJF will set first the most expensive, but we want to run the zero cost jobs
+                     # related to the lifecycle always first. That is why we "emulate" that they
+                     # the longest possible jobs that anyone can run
+                     Float::INFINITY
+                   end
 
             ordered << [job, cost]
           end

@@ -63,6 +63,11 @@ module Karafka
           end
         end
 
+        # Code that should run on idle runs without messages available
+        def handle_idle
+          nil
+        end
+
         # We need to always un-pause the processing in case we have lost a given partition.
         # Otherwise the underlying librdkafka would not know we may want to continue processing and
         # the pause could in theory last forever
