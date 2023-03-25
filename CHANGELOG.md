@@ -1,7 +1,10 @@
 # Karafka framework changelog
 
 ## 2.0.38 (Unreleased)
+- [Improvement] Introduce `Karafka::Admin#watermark_offsets` to get low and high watermark offsets values.
 - [Improvement] Track active_job_id in instrumentation (#1372)
+- [Improvement] Improve `#read_topic` reading in case of a compacted partition, there the offset is beyond the low watermark offset. This should optimize reading and should not go beyond the low watermark offset.
+- [Improvement] Allow `#read_topic` to accept instance settings to overwrite any settings needed to customize reading behaviours.
 
 ## 2.0.37 (2023-03-20)
 - [Fix] Declarative topics execution on a secondary cluster run topics creation on the primary one (#1365)
