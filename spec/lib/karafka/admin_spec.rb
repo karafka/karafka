@@ -209,4 +209,42 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#watermark_offsets' do
+    subject(:offsets) { described_class.watermark_offsets(name, partition) }
+
+    let(:name) { SecureRandom.hex(6) }
+    let(:partition) { 0 }
+
+    context 'when trying to read non-existing topic' do
+      it { expect { offsets }.to raise_error(Rdkafka::RdkafkaError) }
+    end
+
+    context 'when trying to read non-existing partition' do
+      let(:partition) { 1 }
+
+      before { described_class.create_topic(name, 1, 1) }
+
+      it { expect { offsets }.to raise_error(Rdkafka::RdkafkaError) }
+    end
+
+    context 'when getting watermarks from an empty partition' do
+      before { described_class.create_topic(name, 1, 1) }
+
+      it { expect(offsets.first).to eq(0) }
+      it { expect(offsets.last).to eq(0) }
+    end
+
+    context 'when getting watermarks from partition with data (not compacted)' do
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(offsets.first).to eq(0) }
+      it { expect(offsets.last).to eq(10) }
+    end
+  end
 end

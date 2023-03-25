@@ -44,17 +44,32 @@ module Karafka
       # @param count [Integer] how many messages we want to get at most
       # @param start_offset [Integer] offset from which we should start. If -1 is provided
       #   (default) we will start from the latest offset
+      # @param settings [Hash] kafka extra settings (optional)
       #
       # @return [Array<Karafka::Messages::Message>] array with messages
-      def read_topic(name, partition, count, start_offset = -1)
+      def read_topic(name, partition, count, start_offset = -1, settings = {})
         messages = []
         tpl = Rdkafka::Consumer::TopicPartitionList.new
+        low_offset, high_offset = nil
 
-        with_consumer do |consumer|
-          offsets = consumer.query_watermark_offsets(name, partition)
-          end_offset = offsets.last
+        with_consumer(settings) do |consumer|
+          low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
 
-          start_offset = [0, offsets.last - count].max if start_offset.negative?
+          # Select offset dynamically if -1 or less
+          start_offset = high_offset - count if start_offset.negative?
+
+          # Build the requested range - since first element is on the start offset we need to
+          # subtract one from requested count to end up with expected number of elements
+          requested_range = (start_offset..start_offset + (count - 1))
+          # Establish theoretical available range. Note, that this does not handle cases related to
+          # log retention or compaction
+          available_range = (low_offset..high_offset)
+          # Select only offset that we can select. This will remove all the potential offsets that
+          # are below the low watermark offset
+          possible_range = requested_range.select { |offset| available_range.include?(offset) }
+
+          start_offset = possible_range.first
+          count = possible_range.count
 
           tpl.add_topic_and_partitions_with_offsets(name, partition => start_offset)
           consumer.assign(tpl)
@@ -65,7 +80,7 @@ module Karafka
             # If we've got as many messages as we've wanted stop
             break if messages.size >= count
             # If we've reached end of the topic messages, don't process more
-            break if !messages.empty? && end_offset <= messages.last.offset
+            break if !messages.empty? && high_offset <= messages.last.offset
 
             message = consumer.poll(200)
             messages << message if message
@@ -77,7 +92,7 @@ module Karafka
           end
         end
 
-        messages.map do |message|
+        messages.map! do |message|
           Messages::Builders::Message.call(
             message,
             # Use topic from routes if we can match it or create a dummy one
@@ -136,6 +151,17 @@ module Karafka
         end
       end
 
+      # Fetches the watermark offsets for a given topic partition
+      #
+      # @param name [String, Symbol] topic name
+      # @param partition [Integer] partition
+      # @return [Array<Integer, Integer>] low watermark offset and high watermark offset
+      def watermark_offsets(name, partition)
+        with_consumer do |consumer|
+          consumer.query_watermark_offsets(name, partition)
+        end
+      end
+
       # @return [Rdkafka::Metadata] cluster metadata info
       def cluster_info
         with_admin do |admin|
@@ -159,15 +185,16 @@ module Karafka
 
       # Creates admin instance and yields it. After usage it closes the admin instance
       def with_admin
-        admin = config(:producer).admin
+        admin = config(:producer, {}).admin
         yield(admin)
       ensure
         admin&.close
       end
 
       # Creates consumer instance and yields it. After usage it closes the consumer instance
-      def with_consumer
-        consumer = config(:consumer).consumer
+      # @param settings [Hash] extra settings to customize consumer
+      def with_consumer(settings = {})
+        consumer = config(:consumer, settings).consumer
         yield(consumer)
       ensure
         consumer&.close
@@ -196,11 +223,12 @@ module Karafka
       end
 
       # @param type [Symbol] type of config we want
+      # @param settings [Hash] extra settings for config (if needed)
       # @return [::Rdkafka::Config] rdkafka config
-      def config(type)
+      def config(type, settings)
         config_hash = Karafka::Setup::AttributesMap.public_send(
           type,
-          Karafka::App.config.kafka.dup.merge(CONFIG_DEFAULTS)
+          Karafka::App.config.kafka.dup.merge(CONFIG_DEFAULTS).merge!(settings)
         )
 
         ::Rdkafka::Config.new(config_hash)
