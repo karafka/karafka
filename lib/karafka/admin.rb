@@ -77,14 +77,15 @@ module Karafka
           # We should poll as long as we don't have all the messages that we need or as long as
           # we do not read all the messages from the topic
           loop do
+            # If we've got as many messages as we've wanted stop
+            break if messages.size >= count
+
             message = consumer.poll(200)
 
             next unless message
 
             # If the message we've got is beyond the requested range, stop
             break unless possible_range.include?(message.offset)
-            # If we've got as many messages as we've wanted stop
-            break if messages.size > count
 
             messages << message
           rescue Rdkafka::RdkafkaError => e
