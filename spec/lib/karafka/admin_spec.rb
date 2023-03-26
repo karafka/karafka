@@ -210,8 +210,8 @@ RSpec.describe_current do
     end
   end
 
-  describe '#watermark_offsets' do
-    subject(:offsets) { described_class.watermark_offsets(name, partition) }
+  describe '#read_watermark_offsets' do
+    subject(:offsets) { described_class.read_watermark_offsets(name, partition) }
 
     let(:name) { SecureRandom.hex(6) }
     let(:partition) { 0 }

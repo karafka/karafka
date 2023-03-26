@@ -156,7 +156,7 @@ module Karafka
       # @param name [String, Symbol] topic name
       # @param partition [Integer] partition
       # @return [Array<Integer, Integer>] low watermark offset and high watermark offset
-      def watermark_offsets(name, partition)
+      def read_watermark_offsets(name, partition)
         with_consumer do |consumer|
           consumer.query_watermark_offsets(name, partition)
         end
