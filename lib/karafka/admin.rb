@@ -79,11 +79,15 @@ module Karafka
           loop do
             # If we've got as many messages as we've wanted stop
             break if messages.size >= count
-            # If we've reached end of the topic messages, don't process more
-            break if !messages.empty? && high_offset <= messages.last.offset
 
             message = consumer.poll(200)
-            messages << message if message
+
+            next unless message
+
+            # If the message we've got is beyond the requested range, stop
+            break unless possible_range.include?(message.offset)
+
+            messages << message
           rescue Rdkafka::RdkafkaError => e
             # End of partition
             break if e.code == :partition_eof
