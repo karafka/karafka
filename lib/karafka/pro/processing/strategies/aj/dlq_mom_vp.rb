@@ -42,12 +42,10 @@ module Karafka
                   # mark intermediate jobs as processed not to mess up with the ordering.
                   # Only when all the jobs are processed and we did not loose the partition
                   # assignment and we are not stopping (Pro ActiveJob has an early break) we can
-                  # commit offsets on this as only then we can be sure, that all the jobs were
-                  # processed.
+                  # commit offsets .
                   # For a non virtual partitions case, the flow is regular and state is marked
                   # after each successfully processed job
                   return if revoked?
-                  return if Karafka::App.stopping?
 
                   mark_as_consumed(last_group_message)
                 elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries

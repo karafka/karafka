@@ -39,7 +39,7 @@ RSpec.describe_current do
       before do
         max_messages.times { throttler.throttle!(['msg']) }
         throttler.throttle!(messages)
-        sleep(0.002)
+        sleep(0.1)
       end
 
       it { expect(throttler.throttled?).to be(true) }

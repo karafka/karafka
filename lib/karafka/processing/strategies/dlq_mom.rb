@@ -35,7 +35,7 @@ module Karafka
 
             # Backoff and move forward
             if marked
-              pause(coordinator.seek_offset + 1, nil, false)
+              pause(coordinator.seek_offset, nil, false)
             else
               pause(skippable_message.offset + 1, nil, false)
             end

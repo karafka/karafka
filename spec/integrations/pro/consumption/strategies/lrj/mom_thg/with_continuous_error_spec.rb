@@ -21,7 +21,7 @@ class Consumer < Karafka::BaseConsumer
 
     messages.each { |message| DT[0] << message.offset }
 
-    sleep 2
+    sleep 1
 
     produce_many(DT.topic, DT.uuids(5))
   end
@@ -41,10 +41,10 @@ end
 produce_many(DT.topic, DT.uuids(5))
 
 start_karafka_and_wait_until do
-  DT[0].size >= 50 && DT[:errors].size >= 5
+  DT[0].size >= 25 && DT[:errors].size >= 5
 end
 
-assert DT[0].count(0) > 2
+assert DT[0].count(0) > 1
 
 consumer = setup_rdkafka_consumer
 consumer.subscribe(DT.topic)

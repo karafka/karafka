@@ -13,6 +13,9 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    # just a check that we have this api method included in the strategy
+    collapsed?
+
     # Ensure we exceed max poll interval, if that happens and this would not work async we would
     # be kicked out of the group
     sleep(15)

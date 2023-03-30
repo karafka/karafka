@@ -31,25 +31,21 @@ module Karafka
             # Features for this strategy
             FEATURES = %i[
               active_job
+              dead_letter_queue
               long_running_job
               manual_offset_management
-              dead_letter_queue
               virtual_partitions
             ].freeze
 
-            # This strategy is pretty much as non VP one because of the collapse
+            # This strategy assumes we do not early break on shutdown as it has VP
             def handle_after_consume
               coordinator.on_finished do |last_group_message|
                 if coordinator.success?
                   coordinator.pause_tracker.reset
 
-                  return if revoked?
-                  return if Karafka::App.stopping?
-
                   # Since we have VP here we do not commit intermediate offsets and need to commit
                   # them here. We do commit in collapsed mode but this is generalized.
-                  mark_as_consumed(last_group_message)
-
+                  mark_as_consumed(last_group_message) unless revoked?
                   seek(coordinator.seek_offset) unless revoked?
 
                   resume

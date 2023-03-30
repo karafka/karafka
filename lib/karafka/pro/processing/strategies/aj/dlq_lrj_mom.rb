@@ -24,18 +24,36 @@ module Karafka
           # This case is a bit of special. Please see the `AjDlqMom` for explanation on how the
           # offset management works in this case.
           module DlqLrjMom
-            # We can use the same code as for VP because non VP behaves like:
-            # - with one virtual partition
-            # - with "never ending" collapse
             include Strategies::Aj::DlqLrjMomVp
 
             # Features for this strategy
             FEATURES = %i[
               active_job
+              dead_letter_queue
               long_running_job
               manual_offset_management
-              dead_letter_queue
             ].freeze
+
+            # We cannot use a VP version of this, because non-VP can early stop on shutdown
+            def handle_after_consume
+              coordinator.on_finished do
+                if coordinator.success?
+                  coordinator.pause_tracker.reset
+
+                  seek(coordinator.seek_offset) unless revoked?
+
+                  resume
+                elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
+                  retry_after_pause
+                else
+                  coordinator.pause_tracker.reset
+                  skippable_message, = find_skippable_message
+                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                  mark_as_consumed(skippable_message)
+                  pause(coordinator.seek_offset, nil, false)
+                end
+              end
+            end
           end
         end
       end

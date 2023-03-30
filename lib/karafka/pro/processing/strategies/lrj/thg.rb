@@ -68,6 +68,8 @@ module Karafka
                     # resume
                     seek(coordinator.seek_offset)
                     resume
+                  else
+                    resume
                   end
                 else
                   # If processing failed, we need to pause

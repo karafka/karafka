@@ -24,6 +24,7 @@ module Karafka
         @running_jobs = 0
         @manual_pause = false
         @mutex = Mutex.new
+        @marked = false
       end
 
       # Starts the coordinator for given consumption jobs
@@ -51,7 +52,10 @@ module Karafka
 
       # @param offset [Integer] message offset
       def seek_offset=(offset)
-        @mutex.synchronize { @seek_offset = offset }
+        @mutex.synchronize do
+          @marked = true
+          @seek_offset = offset
+        end
       end
 
       # Increases number of jobs that we handle with this coordinator
@@ -112,6 +116,14 @@ module Karafka
       # @return [Boolean] is the partition we are processing revoked or not
       def revoked?
         @revoked
+      end
+
+      # @return [Boolean] was the new seek offset assigned at least once. This is needed because
+      #   by default we assign seek offset of a first message ever, however this is insufficient
+      #   for DLQ in a scenario where the first message would be broken. We would never move
+      #   out of it and would end up in an endless loop.
+      def marked?
+        @marked
       end
 
       # Store in the coordinator info, that this pause was done manually by the end user and not

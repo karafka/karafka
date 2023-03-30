@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # Karafka should be able to just process all the jobs one after another
+
 setup_active_job
 
 setup_karafka(allow_errors: true) do |config|

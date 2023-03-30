@@ -29,7 +29,11 @@ module Karafka
             # If for any reason we've lost this partition, not worth iterating over new messages
             # as they are no longer ours
             break if revoked?
-            break if Karafka::App.stopping?
+
+            # We cannot early stop when running virtual partitions because the intermediate state
+            # would force us not to commit the offsets. This would cause extensive
+            # double-processing
+            break if Karafka::App.stopping? && !topic.virtual_partitions?
 
             consume_job(message)
 

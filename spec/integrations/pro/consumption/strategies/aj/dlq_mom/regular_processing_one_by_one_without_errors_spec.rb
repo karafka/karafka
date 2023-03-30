@@ -20,6 +20,7 @@ draw_routes do
     active_job_topic DT.topic do
       max_messages 1
       long_running_job true
+      dead_letter_queue topic: DT.topics[1], max_retries: 4
     end
   end
 end

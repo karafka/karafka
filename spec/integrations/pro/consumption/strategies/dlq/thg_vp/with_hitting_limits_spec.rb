@@ -6,6 +6,9 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    # just a check that we have this api method included in the strategy
+    collapsed?
+
     messages.each do |message|
       DT[message.metadata.partition] << message.raw_payload
       DT[:messages_times] << Time.now.to_f

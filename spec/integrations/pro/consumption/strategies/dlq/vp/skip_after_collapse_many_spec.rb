@@ -13,6 +13,9 @@ MUTEX = Mutex.new
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    # just a check that we have this api method included in the strategy
+    collapsed?
+
     messages.each do |message|
       # Simulates a broken message that for example one that cannot be deserialized
       raise StandardError if message.raw_payload.to_i <= 9

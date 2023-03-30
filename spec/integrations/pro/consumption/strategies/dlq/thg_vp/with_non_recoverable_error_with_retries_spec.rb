@@ -8,6 +8,9 @@ setup_karafka(allow_errors: %w[consumer.consume.error])
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    # just a check that we have this api method included in the strategy
+    collapsed?
+
     messages.each do |message|
       raise StandardError if message.offset == 3
 

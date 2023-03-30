@@ -6,7 +6,8 @@
 # To simulate this we will jobs on two partitions in parallel and we will "loose" one
 # of them and detect this. We need to make consumption jobs long enough to jump with a rebalance
 # in the middle. Since we internally mark as consumed on each job, we can be aware of revocation
-# early enough
+# early enough. We need to run in an LRJ mode to make this happen, so rebalance does not block
+# revocation.
 
 setup_karafka do |config|
   config.max_wait_time = 2_500
@@ -20,6 +21,7 @@ setup_active_job
 draw_routes do
   consumer_group DT.consumer_group do
     active_job_topic DT.topic do
+      long_running_job true
       config(partitions: 2)
       virtual_partitions(
         partitioner: ->(_) { rand }

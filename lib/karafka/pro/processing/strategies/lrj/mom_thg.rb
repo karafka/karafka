@@ -66,6 +66,8 @@ module Karafka
                     # resume
                     seek(last_group_message.offset + 1)
                     resume
+                  else
+                    resume
                   end
                 else
                   # If processing failed, we need to pause

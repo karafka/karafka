@@ -65,6 +65,27 @@ RSpec.describe_current do
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::MomVp) }
   end
 
+  context 'when aj is enabled with mom and thg' do
+    before do
+      topic.active_job(true)
+      topic.manual_offset_management(true)
+      topic.throttling(limit: 5, interval: 100)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::MomThg) }
+  end
+
+  context 'when aj is enabled with mom, thg and vp' do
+    before do
+      topic.active_job(true)
+      topic.manual_offset_management(true)
+      topic.throttling(limit: 5, interval: 100)
+      topic.virtual_partitions(partitioner: true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::MomThgVp) }
+  end
+
   context 'when aj is enabled with mom' do
     before do
       topic.active_job(true)
@@ -93,6 +114,17 @@ RSpec.describe_current do
     end
 
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::LrjMom) }
+  end
+
+  context 'when aj is enabled with lrj, mom and thg' do
+    before do
+      topic.active_job(true)
+      topic.long_running_job(true)
+      topic.manual_offset_management(true)
+      topic.throttling(limit: 5, interval: 100)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::LrjMomThg) }
   end
 
   context 'when we enable not supported combination' do
@@ -138,6 +170,38 @@ RSpec.describe_current do
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::LrjMom) }
   end
 
+  context 'when dlq, mom, lrj thg is enabled' do
+    before do
+      topic.dead_letter_queue(topic: 'test')
+      topic.manual_offset_management(true)
+      topic.long_running_job(true)
+      topic.throttling(limit: 100, interval: 100)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::LrjMomThg) }
+  end
+
+  context 'when dlq, lrj and thg is enabled' do
+    before do
+      topic.dead_letter_queue(topic: 'test')
+      topic.long_running_job(true)
+      topic.throttling(limit: 100, interval: 100)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::LrjThg) }
+  end
+
+  context 'when dlq, lrj, vp and thg is enabled' do
+    before do
+      topic.dead_letter_queue(topic: 'test')
+      topic.long_running_job(true)
+      topic.throttling(limit: 100, interval: 100)
+      topic.virtual_partitions(partitioner: true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::LrjThgVp) }
+  end
+
   context 'when dlq and thg' do
     before do
       topic.dead_letter_queue(topic: 'test')
@@ -165,6 +229,29 @@ RSpec.describe_current do
     end
 
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqMom) }
+  end
+
+  context 'when aj, dlq, mom and thg is enabled' do
+    before do
+      topic.active_job(true)
+      topic.dead_letter_queue(topic: 'test')
+      topic.manual_offset_management(true)
+      topic.throttling(limit: 100, interval: 100)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqMomThg) }
+  end
+
+  context 'when aj, dlq, mom, thg and vp is enabled' do
+    before do
+      topic.active_job(true)
+      topic.dead_letter_queue(topic: 'test')
+      topic.manual_offset_management(true)
+      topic.throttling(limit: 100, interval: 100)
+      topic.virtual_partitions(partitioner: true)
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqMomThgVp) }
   end
 
   context 'when aj, dlq, mom and vp is enabled' do
@@ -239,6 +326,7 @@ RSpec.describe_current do
         %i[active_job dead_letter_queue throttling],
         %i[active_job dead_letter_queue virtual_partitions],
         %i[active_job dead_letter_queue long_running_job],
+        %i[active_job dead_letter_queue throttling virtual_partitions],
         %i[active_job dead_letter_queue long_running_job throttling],
         %i[active_job dead_letter_queue long_running_job virtual_partitions],
         %i[active_job dead_letter_queue long_running_job virtual_partitions throttling],
@@ -258,11 +346,7 @@ RSpec.describe_current do
         mom_with_vp + %i[dead_letter_queue],
         mom_with_vp + %i[dead_letter_queue long_running_job],
         mom_with_vp + %i[dead_letter_queue throttling],
-        mom_with_vp + %i[dead_letter_queue long_running_job throttling],
-        mom_with_vp + %i[active_job throttling],
-        mom_with_vp + %i[active_job long_running_job throttling],
-        mom_with_vp + %i[active_job dead_letter_queue throttling],
-        mom_with_vp + %i[active_job dead_letter_queue long_running_job throttling]
+        mom_with_vp + %i[dead_letter_queue long_running_job throttling]
       ]
     end
 

@@ -35,7 +35,7 @@ module Karafka
             # No actions needed for the standard flow here
             def handle_before_enqueue
               coordinator.on_enqueued do
-                pause(coordinator.seek_offset, Lrj::MAX_PAUSE_TIME, false)
+                pause(coordinator.seek_offset, Strategies::Lrj::Default::MAX_PAUSE_TIME, false)
               end
             end
 
@@ -45,7 +45,7 @@ module Karafka
                 if coordinator.success?
                   coordinator.pause_tracker.reset
 
-                  mark_as_consumed(last_group_message) unless revoked? || Karafka::App.stopping?
+                  mark_as_consumed(last_group_message) unless revoked?
                   seek(coordinator.seek_offset) unless revoked?
 
                   resume

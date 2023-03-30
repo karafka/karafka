@@ -8,6 +8,9 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    # just a check that we have this api method included in the strategy
+    collapsed?
+
     DT[0] << true
   end
 end

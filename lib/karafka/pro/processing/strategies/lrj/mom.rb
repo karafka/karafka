@@ -38,7 +38,7 @@ module Karafka
                 #
                 # For VP it applies the same way and since VP cannot be used with MOM we should not
                 # have any edge cases here.
-                pause(coordinator.seek_offset, Lrj::Default::MAX_PAUSE_TIME, false)
+                pause(coordinator.seek_offset, Strategies::Lrj::Default::MAX_PAUSE_TIME, false)
               end
             end
 

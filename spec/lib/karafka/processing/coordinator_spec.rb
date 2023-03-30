@@ -111,6 +111,18 @@ RSpec.describe_current do
     it { expect(coordinator.revoked?).to eq(true) }
   end
 
+  describe '#marked?' do
+    context 'when having newly created coordinator' do
+      it { expect(coordinator.marked?).to eq(false) }
+    end
+
+    context 'when any new seek offset was assigned' do
+      before { coordinator.seek_offset = 0 }
+
+      it { expect(coordinator.marked?).to eq(true) }
+    end
+  end
+
   describe '#manual_pause and manual_pause?' do
     context 'when there is no pause' do
       it { expect(coordinator.manual_pause?).to eq(false) }

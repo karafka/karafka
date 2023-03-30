@@ -10,6 +10,9 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    # just a check that we have this api method included in the strategy
+    collapsed?
+
     messages.each do |message|
       DT[object_id] << message.offset
     end

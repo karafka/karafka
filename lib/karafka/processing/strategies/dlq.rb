@@ -54,7 +54,10 @@ module Karafka
         # @return [Array<Karafka::Messages::Message, Boolean>] message we may want to skip and
         #   information if this message was from marked offset or figured out via mom flow
         def find_skippable_message
-          skippable_message = messages.find { |msg| msg.offset == coordinator.seek_offset }
+          skippable_message = messages.find do |msg|
+            coordinator.marked? && msg.offset == coordinator.seek_offset
+          end
+
           # If we don't have the message matching the last comitted offset, it means that
           # user operates with manual offsets and we're beyond the batch in which things
           # broke for the first time. Then we skip the first (as no markings) and we

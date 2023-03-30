@@ -36,19 +36,7 @@ module Karafka
                 if coordinator.success?
                   coordinator.pause_tracker.reset
 
-                  # When this is an ActiveJob running via Pro with virtual partitions, we cannot
-                  # mark intermediate jobs as processed not to mess up with the ordering.
-                  # Only when all the jobs are processed and we did not loose the partition
-                  # assignment and we are not stopping (Pro ActiveJob has an early break) we can
-                  # commit offsets on this as only then we can be sure, that all the jobs were
-                  # processed.
-                  # For a non virtual partitions case, the flow is regular and state is marked
-                  # after each successfully processed job
-                  #
-                  # We can mark and we do mark intermediate jobs in the collapsed mode when running
-                  # VPs
                   return if revoked?
-                  return if Karafka::App.stopping?
 
                   mark_as_consumed(last_group_message)
                 else
