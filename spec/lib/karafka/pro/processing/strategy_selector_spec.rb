@@ -395,9 +395,7 @@ RSpec.describe_current do
         # expect(matching_strategies.size).to eq(1), combination.to_s
       end
 
-      aggro.sort.reverse.each do |a|
-        p a
-      end
+      expect(aggro).to eq([])
     end
   end
 end
