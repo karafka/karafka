@@ -3,15 +3,7 @@
 # Karafka should recover from this error and move on. Throttling should not impact order or
 # anything else.
 
-class Listener
-  def on_error_occurred(event)
-    DT[:errors] << event
-  end
-end
-
 setup_active_job
-
-Karafka.monitor.subscribe(Listener.new)
 
 setup_karafka(allow_errors: true)
 

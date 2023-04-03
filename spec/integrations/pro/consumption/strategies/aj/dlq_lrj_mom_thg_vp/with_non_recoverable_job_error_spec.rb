@@ -36,6 +36,7 @@ draw_routes do
     active_job_topic DT.topic do
       dead_letter_queue topic: DT.topics[1], max_retries: 4
       # mom is enabled automatically
+      throttling(limit: 3, interval: 1_000)
       virtual_partitions(
         partitioner: ->(_) { SAMPLES.pop }
       )

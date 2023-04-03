@@ -5,16 +5,6 @@
 
 setup_karafka(allow_errors: true)
 
-class Listener
-  def on_error_occurred(event)
-    DT[:errors] << event
-  end
-end
-
-SuperException = Class.new(Exception)
-
-Karafka.monitor.subscribe(Listener.new)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|

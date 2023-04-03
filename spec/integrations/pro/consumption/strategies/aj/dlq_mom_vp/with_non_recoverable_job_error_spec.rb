@@ -3,17 +3,9 @@
 # Karafka should run the same strategy for AJ DLQ MOM VP as for AJ DLQ MOM as we collapse the
 # state and can move in a linear manner.
 
-class Listener
-  def on_error_occurred(event)
-    DT[:errors] << event
-  end
-end
-
 SAMPLES = (0..1_000).to_a.map(&:to_s)
 
 setup_active_job
-
-Karafka.monitor.subscribe(Listener.new)
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10

@@ -4,14 +4,6 @@
 # of no marking, we should move forward, however upon picking up work, we should start from zero
 # This can be risky upon rebalance but we leave it to the advanced users to manage.
 
-class Listener
-  def on_error_occurred(event)
-    DT[:errors] << event
-  end
-end
-
-Karafka.monitor.subscribe(Listener.new)
-
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10
   config.kafka[:'max.poll.interval.ms'] = 10_000

@@ -69,6 +69,14 @@ RSpec.describe_current do
     end
   end
 
+  describe '#synchronize' do
+    it 'expect to run provided code' do
+      value = 0
+      coordinator.synchronize { value += 1 }
+      expect(value).to eq(1)
+    end
+  end
+
   describe '#success?' do
     context 'when there were no jobs' do
       it { expect(coordinator.success?).to eq(true) }

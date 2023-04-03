@@ -1,19 +1,16 @@
 # frozen_string_literal: true
 
-# Karafka should be stuck because we end up in a loop processing and failing
-
+# Karafka should be able to just process all the jobs one after another
 setup_active_job
 
 setup_karafka(allow_errors: true) do |config|
-  config.max_messages = 10
+  config.max_messages = 1
 end
 
 class Job < ActiveJob::Base
   queue_as DT.topic
 
   def perform(value)
-    raise StandardError if value == 1
-
     DT[0] << value
   end
 end
@@ -21,8 +18,10 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     active_job_topic DT.topic do
-      # mom is enabled automatically
-      throttling(limit: 10, interval: 1_000)
+      max_messages 1
+      long_running_job true
+      dead_letter_queue topic: DT.topics[1], max_retries: 4
+      throttling(limit: 3, interval: 2_000)
       virtual_partitions(
         partitioner: ->(_) { rand(10) }
       )
@@ -30,10 +29,10 @@ draw_routes do
   end
 end
 
-10.times { |value| Job.perform_later(value) }
+5.times { |value| Job.perform_later(value) }
 
 start_karafka_and_wait_until do
-  DT[:errors].size >= 10
+  DT[0].size >= 5
 end
 
-# No specs, if something goes wrong, may hang
+assert DT[0].size >= 5

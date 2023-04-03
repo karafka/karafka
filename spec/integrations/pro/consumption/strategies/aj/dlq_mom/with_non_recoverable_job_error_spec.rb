@@ -7,15 +7,7 @@
 # from the end user perspective the offset management is not manual - it is delegated to the
 # framework and realized via the ActiveJob consumer itself.
 
-class Listener
-  def on_error_occurred(event)
-    DT[:errors] << event
-  end
-end
-
 setup_active_job
-
-Karafka.monitor.subscribe(Listener.new)
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10

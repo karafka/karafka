@@ -86,6 +86,21 @@ RSpec.describe_current do
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::MomThgVp) }
   end
 
+  context 'when aj is enabled with lrj, mom, thg and vp' do
+    before do
+      topic.active_job(true)
+      topic.dead_letter_queue(topic: 'test')
+      topic.long_running_job(true)
+      topic.manual_offset_management(true)
+      topic.throttling(limit: 5, interval: 100)
+      topic.virtual_partitions(partitioner: true)
+    end
+
+    it do
+      expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqLrjMomThgVp)
+    end
+  end
+
   context 'when aj is enabled with mom' do
     before do
       topic.active_job(true)

@@ -6,6 +6,8 @@ setup_active_job
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10
+  config.kafka[:'max.poll.interval.ms'] = 10_000
+  config.kafka[:'session.timeout.ms'] = 10_000
 end
 
 class DlqConsumer < Karafka::BaseConsumer
@@ -21,6 +23,7 @@ class Job < ActiveJob::Base
 
   def perform(value)
     DT[0] << value
+    sleep(value.to_f / 20)
     raise StandardError if DT[0].size < 10
   end
 end
@@ -28,9 +31,10 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     active_job_topic DT.topic do
-      manual_offset_management true
       # We set it to 100k so it never reaches it and always recovers
       dead_letter_queue topic: DT.topics[1], max_retries: 100_000
+      long_running_job true
+      throttling(limit: 3, interval: 2_000)
       virtual_partitions(
         partitioner: ->(_) { rand(10) }
       )
