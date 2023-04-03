@@ -139,8 +139,9 @@ module Karafka
       end
 
       # Allows to run synchronized (locked) code that can operate in between virtual partitions
-      def synchronize
-        @mutex.synchronize { yield }
+      # @param block [Proc] code we want to run in the synchronized mode
+      def synchronize(&block)
+        @mutex.synchronize(&block)
       end
 
       private

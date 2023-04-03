@@ -190,7 +190,7 @@ module Karafka
     # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
     #   that we were not able and that we have lost the partition.
     def mark_as_consumed!(message)
-      # Ignore earlier offsets than the one we alread committed
+      # Ignore earlier offsets than the one we already committed
       return true if coordinator.seek_offset > message.offset
 
       unless client.mark_as_consumed!(message)
