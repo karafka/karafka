@@ -2,7 +2,15 @@
 
 # Karafka should be stuck because we end up in a loop processing and failing
 
+class Listener
+  def on_error_occurred(event)
+    DT[:errors] << event
+  end
+end
+
 setup_active_job
+
+Karafka.monitor.subscribe(Listener.new)
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10

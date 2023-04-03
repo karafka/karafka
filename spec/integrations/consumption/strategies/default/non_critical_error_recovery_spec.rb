@@ -3,6 +3,14 @@
 # Karafka should be able to recover from non-critical error with same consumer instance and it
 # also should emit an event with error details that can be logged
 
+class Listener
+  def on_error_occurred(event)
+    DT[:errors] << event
+  end
+end
+
+Karafka.monitor.subscribe(Listener.new)
+
 setup_karafka(allow_errors: true)
 
 class Consumer < Karafka::BaseConsumer

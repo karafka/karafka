@@ -13,7 +13,7 @@ setup_karafka do |config|
   config.max_wait_time = 2_500
   config.max_messages = 20
   config.concurrency = 4
-  config.shutdown_timeout = 60_000
+  config.shutdown_timeout = 100_000
 end
 
 setup_active_job
