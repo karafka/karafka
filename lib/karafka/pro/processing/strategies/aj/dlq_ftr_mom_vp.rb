@@ -29,8 +29,8 @@ module Karafka
             FEATURES = %i[
               active_job
               dead_letter_queue
-              manual_offset_management
               filtering
+              manual_offset_management
               virtual_partitions
             ].freeze
 

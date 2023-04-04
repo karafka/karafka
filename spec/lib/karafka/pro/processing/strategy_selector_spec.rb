@@ -147,7 +147,7 @@ RSpec.describe_current do
       topic.active_job(true)
       topic.long_running_job(true)
       topic.manual_offset_management(true)
-      topic.ftr -> {}
+      topic.filter -> {}
     end
 
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::FtrLrjMom) }
@@ -349,30 +349,30 @@ RSpec.describe_current do
         # that would not have MoM
         %i[active_job],
         %i[active_job dead_letter_queue],
-        %i[active_job dead_letter_queue throttling],
+        %i[active_job dead_letter_queue filtering],
         %i[active_job dead_letter_queue virtual_partitions],
         %i[active_job dead_letter_queue long_running_job],
-        %i[active_job dead_letter_queue throttling virtual_partitions],
-        %i[active_job dead_letter_queue long_running_job throttling],
+        %i[active_job dead_letter_queue filtering virtual_partitions],
+        %i[active_job dead_letter_queue long_running_job filtering],
         %i[active_job dead_letter_queue long_running_job virtual_partitions],
-        %i[active_job dead_letter_queue long_running_job virtual_partitions throttling],
+        %i[active_job dead_letter_queue long_running_job virtual_partitions filtering],
         %i[active_job long_running_job],
-        %i[active_job long_running_job throttling],
-        %i[active_job long_running_job throttling virtual_partitions],
+        %i[active_job long_running_job filtering],
+        %i[active_job long_running_job filtering virtual_partitions],
         %i[active_job virtual_partitions],
-        %i[active_job virtual_partitions throttling],
-        %i[active_job throttling],
+        %i[active_job virtual_partitions filtering],
+        %i[active_job filtering],
         %i[active_job long_running_job virtual_partitions],
         # Virtual partitions are not allowed with manual offset management in any combination
         # Hence we need to exclude any of them operating together
         mom_with_vp,
         mom_with_vp + %i[long_running_job],
-        mom_with_vp + %i[long_running_job throttling],
-        mom_with_vp + %i[throttling],
+        mom_with_vp + %i[long_running_job filtering],
+        mom_with_vp + %i[filtering],
         mom_with_vp + %i[dead_letter_queue],
         mom_with_vp + %i[dead_letter_queue long_running_job],
-        mom_with_vp + %i[dead_letter_queue throttling],
-        mom_with_vp + %i[dead_letter_queue long_running_job throttling]
+        mom_with_vp + %i[dead_letter_queue filtering],
+        mom_with_vp + %i[dead_letter_queue long_running_job filtering]
       ]
     end
 

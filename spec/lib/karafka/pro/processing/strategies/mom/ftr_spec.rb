@@ -3,9 +3,8 @@
 RSpec.describe_current do
   let(:combination) do
     %i[
-      long_running_job
+      filtering
       manual_offset_management
-      throttling
     ]
   end
 

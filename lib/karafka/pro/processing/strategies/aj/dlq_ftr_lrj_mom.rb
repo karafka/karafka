@@ -30,9 +30,9 @@ module Karafka
             FEATURES = %i[
               active_job
               dead_letter_queue
+              filtering
               long_running_job
               manual_offset_management
-              filtering
             ].freeze
 
             # This strategy assumes we do not early break on shutdown as it has VP

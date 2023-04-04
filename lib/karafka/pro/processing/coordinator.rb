@@ -26,9 +26,7 @@ module Karafka
           @executed = []
           @flow_lock = Mutex.new
           @collapser = Collapser.new
-          @filters = Filters.new.tap do |filters|
-            topic.filtering.filters.each { |tf| filters << tf }
-          end
+          @filters = Filters.new(topic.filtering.filters)
         end
 
         # Starts the coordination process

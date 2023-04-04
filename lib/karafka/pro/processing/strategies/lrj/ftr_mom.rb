@@ -26,9 +26,9 @@ module Karafka
 
             # Features for this strategy
             FEATURES = %i[
+              filtering
               long_running_job
               manual_offset_management
-              filtering
             ].freeze
 
             # LRJ standard flow after consumption with potential filtering on success

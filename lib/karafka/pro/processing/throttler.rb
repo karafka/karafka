@@ -18,12 +18,15 @@ module Karafka
       # The tricky thing is, that even if we throttle on 100 messages, if we've reached 100, we
       # still need to indicate, that we throttle despite not receiving 101. Otherwise we will
       # not pause the partition and will fetch more data that we should not process.
+      #
+      # This is a special type of a filter that always throttles and makes us wait / seek if
+      # anything is filtered out.
       class Throttler
         include Karafka::Core::Helpers::Time
 
         # @return [Karafka::Messages::Message, nil] first throttled message or nil if nothing
         #   throttled
-        attr_reader :message
+        attr_reader :cursor
 
         # @param limit [Integer] how many messages we can process in a given time
         # @param interval [Integer] interval in milliseconds for which we want to process
@@ -32,7 +35,7 @@ module Karafka
           @interval = interval
           @requests = Hash.new { |h, k| h[k] = 0 }
           @throttled = false
-          @message = nil
+          @cursor = nil
         end
 
         # Limits number of messages to a range that we can process (if needed) and keeps track
@@ -41,7 +44,7 @@ module Karafka
         #   number we can accept in the context of throttling constraints
         def filter!(messages)
           @throttled = false
-          @message = nil
+          @cursor = nil
           @time = monotonic_now
           @requests.delete_if { |timestamp, _| timestamp < (@time - @interval) }
           values = @requests.values.sum
@@ -51,7 +54,7 @@ module Karafka
             # +1 because of current
             @throttled = (values + accepted + 1) > @limit
 
-            @message = message if @throttled && @message.nil?
+            @cursor = message if @throttled && @cursor.nil?
 
             next true if @throttled
 

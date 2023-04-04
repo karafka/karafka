@@ -13,8 +13,7 @@ RSpec.describe_current do
     {
       active: false,
       limit: 1,
-      interval: 10,
-      throttler_class: nil
+      interval: 10
     }
   end
 
@@ -36,12 +35,6 @@ RSpec.describe_current do
 
   context 'when interval is less than 1' do
     before { throttling[:interval] = 0 }
-
-    it { expect(check).not_to be_success }
-  end
-
-  context 'when throttler_class is not a class' do
-    before { throttling[:throttler_class] = 0 }
 
     it { expect(check).not_to be_success }
   end

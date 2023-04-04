@@ -27,8 +27,8 @@ module Karafka
             FEATURES = %i[
               active_job
               dead_letter_queue
-              manual_offset_management
               filtering
+              manual_offset_management
             ].freeze
 
             # We write our own custom handler for after consume here, because we mark as consumed

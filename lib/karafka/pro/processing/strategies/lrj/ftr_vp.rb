@@ -26,8 +26,8 @@ module Karafka
 
             # Features for this strategy
             FEATURES = %i[
-              long_running_job
               filtering
+              long_running_job
               virtual_partitions
             ].freeze
           end

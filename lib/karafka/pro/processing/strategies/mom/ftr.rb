@@ -23,8 +23,8 @@ module Karafka
 
             # MoM + Ftr
             FEATURES = %i[
-              manual_offset_management
               filtering
+              manual_offset_management
             ].freeze
 
             # When mom is enabled, we do not mark messages as consumed after processing

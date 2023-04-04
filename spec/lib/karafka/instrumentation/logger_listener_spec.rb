@@ -221,8 +221,8 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
-  describe '#on_throttling_throttled' do
-    subject(:trigger) { listener.on_throttling_throttled(event) }
+  describe '#on_filtering_throttled' do
+    subject(:trigger) { listener.on_filtering_throttled(event) }
 
     let(:payload) { { caller: consumer, message: kafka_message } }
     let(:kafka_message) { create(:messages_message) }

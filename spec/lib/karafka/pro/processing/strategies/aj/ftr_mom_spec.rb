@@ -3,8 +3,9 @@
 RSpec.describe_current do
   let(:combination) do
     %i[
-      dead_letter_queue
-      throttling
+      active_job
+      filtering
+      manual_offset_management
     ]
   end
 

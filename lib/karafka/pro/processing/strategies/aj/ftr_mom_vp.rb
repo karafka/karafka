@@ -28,8 +28,8 @@ module Karafka
             # Features for this strategy
             FEATURES = %i[
               active_job
-              manual_offset_management
               filtering
+              manual_offset_management
               virtual_partitions
             ].freeze
 

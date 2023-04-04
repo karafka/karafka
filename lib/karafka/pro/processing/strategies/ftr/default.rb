@@ -63,7 +63,7 @@ module Karafka
               # in any type of seeking or backing off and just want to poll more data.
               return false unless coordinator.throttled?
 
-              throttle_message = coordinator.filters.message
+              throttle_message = coordinator.filters.cursor
               throttle_timeout = coordinator.filters.timeout
 
               if coordinator.filters.expired?

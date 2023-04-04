@@ -26,8 +26,8 @@ module Karafka
             # Features for this strategy
             FEATURES = %i[
               dead_letter_queue
-              manual_offset_management
               filtering
+              manual_offset_management
             ].freeze
 
             # On mom we do not mark, throttling and seeking as in other strategies

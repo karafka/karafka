@@ -3,8 +3,8 @@
 RSpec.describe_current do
   let(:combination) do
     %i[
+      filtering
       long_running_job
-      throttling
       virtual_partitions
     ]
   end

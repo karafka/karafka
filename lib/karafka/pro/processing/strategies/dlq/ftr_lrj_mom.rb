@@ -27,9 +27,9 @@ module Karafka
             # Features for this strategy
             FEATURES = %i[
               dead_letter_queue
+              filtering
               long_running_job
               manual_offset_management
-              filtering
             ].freeze
 
             # Post execution flow of this strategy
