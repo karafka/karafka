@@ -14,6 +14,7 @@
 module Karafka
   module Pro
     module Processing
+      # Namespace containing Pro out of the box filters used by various strategies
       module Filters
         # Throttler used to limit number of messages we can process in a given time interval
         # The tricky thing is, that even if we throttle on 100 messages, if we've reached 100, we
@@ -22,21 +23,15 @@ module Karafka
         #
         # This is a special type of a filter that always throttles and makes us wait / seek if
         # anything is applied out.
-        class Throttler
-          include Karafka::Core::Helpers::Time
-
-          # @return [Karafka::Messages::Message, nil] first throttled message or nil if nothing
-          #   throttled
-          attr_reader :cursor
-
+        class Throttler < Base
           # @param limit [Integer] how many messages we can process in a given time
           # @param interval [Integer] interval in milliseconds for which we want to process
           def initialize(limit, interval)
+            super()
+
             @limit = limit
             @interval = interval
             @requests = Hash.new { |h, k| h[k] = 0 }
-            @applied = false
-            @cursor = nil
           end
 
           # Limits number of messages to a range that we can process (if needed) and keeps track
@@ -67,6 +62,7 @@ module Karafka
             @requests[@time] += accepted
           end
 
+          # @return [Symbol] action to take upon throttler reaching certain state
           def action
             if applied?
               timeout.zero? ? :seek : :pause
@@ -75,16 +71,11 @@ module Karafka
             end
           end
 
-          # @return [Boolean] in case of this filter, throttling always means filtering
-          def applied?
-            @applied
-          end
-
           # @return [Integer] minimum number of milliseconds to wait before getting more messages
           #   so we are no longer throttled and so we can process at least one message
           def timeout
             timeout = @interval - (monotonic_now - @time)
-            timeout < 0 ? 0 : timeout
+            timeout <= 0 ? 0 : timeout
           end
         end
       end

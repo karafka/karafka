@@ -7,10 +7,19 @@ FactoryBot.define do
     transient do
       sequence(:topic) { |nr| "topic#{nr}" }
       partition { 0 }
+      timestamp { Time.now.utc }
     end
 
     raw_payload { '{}' }
-    metadata { build(:messages_metadata, topic: topic, partition: partition) }
+
+    metadata do
+      build(
+        :messages_metadata,
+        topic: topic,
+        partition: partition,
+        timestamp: timestamp
+      )
+    end
 
     initialize_with do
       new(raw_payload, metadata)

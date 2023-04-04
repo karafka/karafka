@@ -202,6 +202,21 @@ module Karafka
         MSG
       end
 
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_filtering_seek(event)
+        consumer = event[:caller]
+        topic = consumer.topic.name
+        # Message to which we seek
+        message = event[:message]
+        partition = message.partition
+        offset = message.offset
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Post-filtering seeking to message #{offset}
+          on #{topic}/#{partition}
+        MSG
+      end
+
       # There are many types of errors that can occur in many places, but we provide a single
       # handler for all of them to simplify error instrumentation.
       # @param event [Karafka::Core::Monitoring::Event] event details including payload

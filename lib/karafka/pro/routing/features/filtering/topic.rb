@@ -16,6 +16,7 @@ module Karafka
     module Routing
       module Features
         class Filtering < Base
+          # Filtering feature topic extensions
           module Topic
             # @param factory [#call, nil] Callable that can produce new filters instances per
             #   assigned topic partition. nil as default so this feature is disabled
@@ -25,9 +26,10 @@ module Karafka
               @filtering
             end
 
+            # @param args [Array] Anything `#filter` accepts
             # @return [Filtering::Config] alias to match the naming API for features
-            def filtering
-              filter
+            def filtering(*args)
+              filter(*args)
             end
 
             # @return [Boolean] is a given job throttled

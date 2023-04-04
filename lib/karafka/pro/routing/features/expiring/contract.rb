@@ -15,8 +15,8 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class Filtering < Base
-          # Contract to validate configuration of the filtering feature
+        class Expiring < Base
+          # Contract to validate configuration of the expiring feature
           class Contract < Contracts::Base
             configure do |config|
               config.error_messages = YAML.safe_load(
@@ -26,12 +26,9 @@ module Karafka
               ).fetch('en').fetch('validations').fetch('topic')
             end
 
-            nested(:filtering) do
+            nested(:expiring) do
               required(:active) { |val| [true, false].include?(val) }
-
-              required(:factories) do |val|
-                val.is_a?(Array) && val.all? { |factory| factory.respond_to?(:call) }
-              end
+              required(:ttl) { |val| val.nil? || (val.is_a?(Integer) && val.positive?) }
             end
           end
         end

@@ -3,29 +3,40 @@
 # When we create a filter that just skips all the messages and does not return the cursor message,
 # we should never seek and just go on with incoming messages
 
-exit 1
+class Listener
+  def on_filtering_seek(_)
+    DT[:seeks] << true
+  end
 
-setup_karafka
-
-class Consumer < Karafka::BaseConsumer
-  def consume
-    messages.each do |message|
-      DT[message.metadata.partition] << message.raw_payload
-    end
+  def on_filtering_throttled(_)
+    DT[:thr] << true
   end
 end
 
-class CustomFilter
-  def filter!(messages)
+setup_karafka do |config|
+  config.max_messages = 10
+end
+
+Karafka.monitor.subscribe(Listener.new)
+
+class Consumer < Karafka::BaseConsumer
+  def consume
+    DT[0] << true
+  end
+end
+
+class Skipper
+  def apply!(messages)
+    messages.each { |message| DT[:offsets] << message.offset }
     messages.clear
   end
 
-  def filtered?
+  def applied?
     true
   end
 
-  def throttled?
-    false
+  def action
+    :skip
   end
 
   def cursor
@@ -36,16 +47,25 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    filter
+    filter -> { Skipper.new }
   end
 end
 
-elements = DT.uuids(20)
-produce_many(DT.topic, elements)
-
 start_karafka_and_wait_until do
-  # This needs to run for a while as on slow CIs things pick up slowly
-  sleep(15)
+  produce_many(DT.topic, DT.uuids(1))
+
+  DT[:offsets].count >= 50
 end
 
-assert_equal elements[0..1], DT[0]
+assert DT[0].empty?
+assert DT[:seeks].empty?
+assert DT[:thr].empty?
+
+# Everything should be in order and no duplicates
+previous = -1
+
+DT[:offsets].each do |offset|
+  assert_equal previous + 1, offset
+
+  previous = offset
+end

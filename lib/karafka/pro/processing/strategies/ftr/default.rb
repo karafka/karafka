@@ -63,7 +63,7 @@ module Karafka
 
               case filter.action
               when :skip
-                return
+                nil
               when :seek
                 throttle_message = filter.cursor
 

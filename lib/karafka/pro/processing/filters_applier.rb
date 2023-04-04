@@ -59,11 +59,12 @@ module Karafka
         # @return [Integer] minimum timeout we need to pause. This is the minimum for all the
         #   filters to satisfy all of them.
         def timeout
-          applied.map(&:timeout).min
+          applied.map(&:timeout).compact.min || 0
         end
 
         # The first message we do need to get next time we poll. We use the minimum not to jump
         # accidentally by over any.
+        # @return [Karafka::Messages::Message, nil] cursor message or nil if none
         def cursor
           return nil unless active?
 
