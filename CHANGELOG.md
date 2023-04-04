@@ -1,5 +1,26 @@
 # Karafka framework changelog
 
+## 2.0.39 (Unreleased)
+- **[Feature]** Provide ability to throttle/limit number of messages processed in a time unit (#1203)
+- [Improvement] Track active_job_id in instrumentation (#1372)
+- [Improvement] Introduce new housekeeping job type called `Idle` for non-consumption execution flows.
+- [Improvement] Change how a manual offset management works with Long-Running Jobs. Use the last message offset to move forward instead of relying on the last message marked as consumed for a scenario where no message is marked.
+- [Improvement] Prioritize in Pro non-consumption jobs execution over consumption despite LJF. This will ensure, that housekeeping as well as other non-consumption events are not saturated when running a lot of work.
+- [Improvement] Normalize the DLQ behaviour with MoM. Always pause on dispatch for all the strategies.
+- [Improvement] Improve the manual offset management and DLQ behaviour when no markings occur for OSS.
+- [Improvement] Do not early stop ActiveJob work running under virtual partitions to prevent extensive reprocessing.
+- [Improvement] Drastically increase number of scenarios covered by integration specs (OSS and Pro).
+- [Improvement] Introduce a `Coordinator#synchronize` lock for cross virtual partitions operations.
+- [Fix] Fix `LoggerListener` cases where logs would not include caller id (when available)
+- [Fix] Fix not working benchmark tests.
+- [Fix] Fix a case where when using manual offset management with a user pause would ignore the pause and seek to the next message.
+- [Fix] Fix a case where dead letter queue would go into an infinite loop on message with first ever offset if the first ever offset would not recover.
+- [Fix] Make sure to resume always for all LRJ strategies on revocation.
+- [Refactor] Make sure that coordinator is topic aware. Needed for throttling, delayed processing and expired jobs.
+- [Refactor] Put Pro strategies into namespaces to better organize multiple combinations.
+- [Refactor] Do not rely on messages metadata for internal topic and partition operations like `#seek` so they can run independently from the consumption flow.
+- [Refactor] Hold a single topic/partition reference on a coordinator instead of in executor, coordinator and consumer.
+
 ## 2.0.38 (2023-03-27)
 - [Improvement] Introduce `Karafka::Admin#read_watermark_offsets` to get low and high watermark offsets values.
 - [Improvement] Track active_job_id in instrumentation (#1372)

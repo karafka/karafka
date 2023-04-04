@@ -10,57 +10,63 @@ module Karafka
     #   listener thread, but we go with thread-safe by default for all not to worry about potential
     #   future mistakes.
     class Coordinator
-      # @return [Karafka::TimeTrackers::Pause]
-      attr_reader :pause_tracker
+      attr_reader :pause_tracker, :seek_offset, :topic, :partition
 
-      attr_reader :seek_offset
-
+      # @param topic [Karafka::Routing::Topic]
+      # @param partition [Integer]
       # @param pause_tracker [Karafka::TimeTrackers::Pause] pause tracker for given topic partition
-      def initialize(pause_tracker)
+      def initialize(topic, partition, pause_tracker)
+        @topic = topic
+        @partition = partition
         @pause_tracker = pause_tracker
         @revoked = false
         @consumptions = {}
         @running_jobs = 0
         @manual_pause = false
         @mutex = Mutex.new
+        @marked = false
       end
 
       # Starts the coordinator for given consumption jobs
       # @param messages [Array<Karafka::Messages::Message>] batch of message for which we are
       #   going to coordinate work. Not used with regular coordinator.
       def start(messages)
-        @mutex.synchronize do
-          @running_jobs = 0
-          # We need to clear the consumption results hash here, otherwise we could end up storing
-          # consumption results of consumer instances we no longer control
-          @consumptions.clear
+        @running_jobs = 0
+        # We need to clear the consumption results hash here, otherwise we could end up storing
+        # consumption results of consumer instances we no longer control
+        @consumptions.clear
 
-          # When starting to run, no pause is expected and no manual pause as well
-          @manual_pause = false
+        # When starting to run, no pause is expected and no manual pause as well
+        @manual_pause = false
 
-          # We set it on the first encounter and never again, because then the offset setting
-          # should be up to the consumers logic (our or the end user)
-          # Seek offset needs to be always initialized as for case where manual offset management
-          # is turned on, we need to have reference to the first offset even in case of running
-          # multiple batches without marking any messages as consumed. Rollback needs to happen to
-          # the last place we know of or the last message + 1 that was marked
-          @seek_offset ||= messages.first.offset
-        end
+        # We set it on the first encounter and never again, because then the offset setting
+        # should be up to the consumers logic (our or the end user)
+        # Seek offset needs to be always initialized as for case where manual offset management
+        # is turned on, we need to have reference to the first offset even in case of running
+        # multiple batches without marking any messages as consumed. Rollback needs to happen to
+        # the last place we know of or the last message + 1 that was marked
+        #
+        # It is however worth keeping in mind, that this may need to be used with `#marked?` to
+        # make sure that the first offset is an offset that has been marked.
+        @seek_offset ||= messages.first.offset
       end
 
       # @param offset [Integer] message offset
       def seek_offset=(offset)
-        @mutex.synchronize { @seek_offset = offset }
+        synchronize do
+          @marked = true
+          @seek_offset = offset
+        end
       end
 
       # Increases number of jobs that we handle with this coordinator
       def increment
-        @mutex.synchronize { @running_jobs += 1 }
+        synchronize { @running_jobs += 1 }
       end
 
       # Decrements number of jobs we handle at the moment
       def decrement
-        @mutex.synchronize do
+        synchronize do
           @running_jobs -= 1
 
           return @running_jobs unless @running_jobs.negative?
@@ -73,7 +79,7 @@ module Karafka
 
       # Is all the consumption done and finished successfully for this coordinator
       def success?
-        @mutex.synchronize do
+        synchronize do
           @running_jobs.zero? && @consumptions.values.all?(&:success?)
         end
       end
@@ -81,7 +87,7 @@ module Karafka
       # Mark given consumption on consumer as successful
       # @param consumer [Karafka::BaseConsumer] consumer that finished successfully
       def success!(consumer)
-        @mutex.synchronize do
+        synchronize do
           consumption(consumer).success!
         end
       end
@@ -90,7 +96,7 @@ module Karafka
       # @param consumer [Karafka::BaseConsumer] consumer that failed
       # @param error [StandardError] error that occurred
       def failure!(consumer, error)
-        @mutex.synchronize do
+        synchronize do
           consumption(consumer).failure!(error)
         end
       end
@@ -105,7 +111,7 @@ module Karafka
       # listener loop dispatching the revocation job. It is ok, as effectively nothing will be
       # processed until revocation jobs are done.
       def revoke
-        @mutex.synchronize { @revoked = true }
+        synchronize { @revoked = true }
       end
 
       # @return [Boolean] is the partition we are processing revoked or not
@@ -113,15 +119,29 @@ module Karafka
         @revoked
       end
 
+      # @return [Boolean] was the new seek offset assigned at least once. This is needed because
+      #   by default we assign seek offset of a first message ever, however this is insufficient
+      #   for DLQ in a scenario where the first message would be broken. We would never move
+      #   out of it and would end up in an endless loop.
+      def marked?
+        @marked
+      end
+
       # Store in the coordinator info, that this pause was done manually by the end user and not
       # by the system itself
       def manual_pause
-        @mutex.synchronize { @manual_pause = true }
+        @manual_pause = true
       end
 
       # @return [Boolean] are we in a pause that was initiated by the user
       def manual_pause?
         @pause_tracker.paused? && @manual_pause
+      end
+
+      # Allows to run synchronized (locked) code that can operate in between virtual partitions
+      # @param block [Proc] code we want to run in the synchronized mode
+      def synchronize(&block)
+        @mutex.synchronize(&block)
       end
 
       private

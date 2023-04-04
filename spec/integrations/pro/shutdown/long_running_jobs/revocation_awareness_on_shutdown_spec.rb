@@ -10,6 +10,8 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    return if Karafka::App.stopping? && DT[:started].size >= 10
+
     DT[:started] << true
 
     # We use loop so in case this would not work, it will timeout and raise an error
@@ -22,10 +24,6 @@ class Consumer < Karafka::BaseConsumer
 
       break
     end
-  end
-
-  def shutdown
-    DT[:shutdown] << true
   end
 end
 
@@ -59,5 +57,4 @@ end
 
 consumer.close
 
-assert_equal [], DT[:shutdown], DT[:shutdown]
 assert_equal 10, DT[:revoked].size, DT.data

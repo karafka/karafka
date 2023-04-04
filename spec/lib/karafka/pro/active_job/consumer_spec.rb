@@ -5,20 +5,19 @@ RSpec.describe_current do
     described_class.new.tap do |instance|
       instance.client = client
       instance.coordinator = coordinator
-      instance.topic = topic
       instance.singleton_class.include(strategy)
     end
   end
 
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
-  let(:topic) { build(:routing_topic) }
   let(:coordinator) { build(:processing_coordinator_pro) }
+  let(:topic) { coordinator.topic }
   let(:messages) { [message1, message2] }
   let(:message1) { build(:messages_message, raw_payload: payload1.to_json) }
   let(:message2) { build(:messages_message, raw_payload: payload2.to_json) }
   let(:payload1) { { '1' => '2' } }
   let(:payload2) { { '3' => '4' } }
-  let(:strategy) { Karafka::Pro::Processing::Strategies::AjMom }
+  let(:strategy) { Karafka::Pro::Processing::Strategies::Aj::Mom }
 
   before do
     coordinator.start(messages)
@@ -39,7 +38,7 @@ RSpec.describe_current do
     end
 
     context 'when it is a lrj' do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Aj::LrjMom }
 
       before do
         consumer.messages = messages
@@ -82,7 +81,7 @@ RSpec.describe_current do
     end
 
     context 'when messages are available to the consumer and it is virtual partition' do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::AjMomVp }
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Aj::MomVp }
 
       before do
         consumer.messages = messages

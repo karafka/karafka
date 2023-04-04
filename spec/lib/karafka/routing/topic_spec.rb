@@ -111,7 +111,7 @@ RSpec.describe_current do
     end
 
     it 'expect to contain all the topic attrs plus some inherited' do
-      expect(topic.to_h.keys).to eq(expected_keys)
+      expect(topic.to_h.keys.sort).to eq(expected_keys.sort)
     end
   end
 end

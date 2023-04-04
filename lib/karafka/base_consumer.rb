@@ -7,11 +7,13 @@ module Karafka
     # Allow for consumer instance tagging for instrumentation
     include ::Karafka::Core::Taggable
 
+    extend Forwardable
+
+    def_delegators :@coordinator, :topic, :partition
+
     # @return [String] id of the current consumer
     attr_reader :id
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
-    attr_accessor :topic
-    # @return [Karafka::Messages::Messages] current messages batch
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
@@ -97,6 +99,20 @@ module Karafka
       )
     end
 
+    # Trigger method for running on idle runs without messages
+    #
+    # @private
+    def on_idle
+      handle_idle
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.idle.error'
+      )
+    end
+
     # Trigger method for running on partition revocation.
     #
     # @private
@@ -154,7 +170,7 @@ module Karafka
     #   processed but rather at the next one. This applies to both sync and async versions of this
     #   method.
     def mark_as_consumed(message)
-      # Ignore earlier offsets than the one we alread committed
+      # Ignore earlier offsets than the one we already committed
       return true if coordinator.seek_offset > message.offset
 
       unless client.mark_as_consumed(message)
@@ -174,7 +190,7 @@ module Karafka
     # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
     #   that we were not able and that we have lost the partition.
     def mark_as_consumed!(message)
-      # Ignore earlier offsets than the one we alread committed
+      # Ignore earlier offsets than the one we already committed
       return true if coordinator.seek_offset > message.offset
 
       unless client.mark_as_consumed!(message)
@@ -201,8 +217,8 @@ module Karafka
       timeout ? coordinator.pause_tracker.pause(timeout) : coordinator.pause_tracker.pause
 
       client.pause(
-        messages.metadata.topic,
-        messages.metadata.partition,
+        topic.name,
+        partition,
         offset
       )
 
@@ -213,8 +229,8 @@ module Karafka
         'consumer.consuming.pause',
         caller: self,
         manual: manual_pause,
-        topic: messages.metadata.topic,
-        partition: messages.metadata.partition,
+        topic: topic.name,
+        partition: partition,
         offset: offset,
         timeout: coordinator.pause_tracker.current_timeout,
         attempt: coordinator.pause_tracker.attempt
@@ -234,8 +250,8 @@ module Karafka
     def seek(offset)
       client.seek(
         Karafka::Messages::Seek.new(
-          messages.metadata.topic,
-          messages.metadata.partition,
+          topic.name,
+          partition,
           offset
         )
       )
@@ -258,8 +274,8 @@ module Karafka
       Karafka.monitor.instrument(
         'consumer.consuming.retry',
         caller: self,
-        topic: messages.metadata.topic,
-        partition: messages.metadata.partition,
+        topic: topic.name,
+        partition: partition,
         offset: coordinator.seek_offset,
         timeout: coordinator.pause_tracker.current_timeout,
         attempt: coordinator.pause_tracker.attempt
