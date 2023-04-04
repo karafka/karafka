@@ -31,14 +31,14 @@ module Karafka
         # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
         #
         def schedule_consumption(queue, jobs_array)
-          pt = PerformanceTracker.instance
+          perf_tracker = PerformanceTracker.instance
 
           ordered = []
 
           jobs_array.each do |job|
             ordered << [
               job,
-              processing_cost(pt, job)
+              processing_cost(perf_tracker, job)
             ]
           end
 
@@ -53,15 +53,15 @@ module Karafka
 
         private
 
-        # @return [Numeric] estimated cost of processing this job
-        # @param pt [PerformanceTracker]
+        # @param perf_tracker [PerformanceTracker]
         # @param job [Karafka::Processing::Jobs::Base] job we will be processing
-        def processing_cost(pt, job)
+        # @return [Numeric] estimated cost of processing this job
+        def processing_cost(perf_tracker, job)
           if job.is_a?(::Karafka::Processing::Jobs::Consume)
             messages = job.messages
             message = messages.first
 
-            pt.processing_time_p95(message.topic, message.partition) * messages.size
+            perf_tracker.processing_time_p95(message.topic, message.partition) * messages.size
           else
             # LJF will set first the most expensive, but we want to run the zero cost jobs
             # related to the lifecycle always first. That is why we "emulate" that they

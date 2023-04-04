@@ -389,7 +389,7 @@ RSpec.describe_current do
 
         next if not_used_combinations.any? { |not_used| not_used.sort == combination }
 
-        aggro << combination if matching_strategies.size == 0
+        aggro << combination if matching_strategies.empty?
 
         # Each combination of features should always have one matching strategy
         # expect(matching_strategies.size).to eq(1), combination.to_s
