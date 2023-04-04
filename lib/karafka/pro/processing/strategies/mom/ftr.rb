@@ -39,7 +39,7 @@ module Karafka
                   # Do not throttle if paused
                   return if coordinator.manual_pause?
 
-                  throttle_or_seek_if_needed
+                  handle_post_filtering
                 else
                   retry_after_pause
                 end

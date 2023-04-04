@@ -15,43 +15,43 @@ end
 class DelayThrottler
   include Karafka::Core::Helpers::Time
 
-  attr_reader :message
+  attr_reader :cursor
 
   def initialize
     # 5 seconds
     @min_delay = 5
   end
 
-  def filter!(messages)
-    @throttled = false
-    @message = nil
+  def apply!(messages)
+    @applied = false
+    @cursor = nil
 
     now = float_now
 
     messages.delete_if do |message|
-      @throttled = (now - message.timestamp.to_f) < @min_delay
+      @applied = (now - message.timestamp.to_f) < @min_delay
 
-      @message = message if @throttled && @message.nil?
+      @cursor = message if @applied && @cursor.nil?
 
-      @throttled
+      @applied
     end
   end
 
-  def filtered?
-    throttled?
+  def applied?
+    @applied
   end
 
-  def throttled?
-    @throttled
-  end
-
-  def expired?
-    timeout < 0
+  def action
+    if applied?
+      timeout <= 0 ? :seek : :pause
+    else
+      :skip
+    end
   end
 
   def timeout
-    # Needs to be in ms
-    @min_delay * 1_000 - (float_now - @message.timestamp.to_f) * 1_000
+    timeout = @min_delay * 1_000 - (float_now - @cursor.timestamp.to_f) * 1_000
+    timeout <= 0 ? 0 : timeout
   end
 end
 

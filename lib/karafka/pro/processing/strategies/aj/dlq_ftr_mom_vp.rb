@@ -47,7 +47,7 @@ module Karafka
 
                   mark_as_consumed(last_group_message)
 
-                  throttle_or_seek_if_needed
+                  handle_post_filtering
                 elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
                   retry_after_pause
                 # If we've reached number of retries that we could, we need to skip the first

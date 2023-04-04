@@ -6,15 +6,14 @@ RSpec.describe_current do
   let(:max_messages) { 10 }
   let(:interval) { 100 }
 
-  describe '#filter!' do
+  describe '#apply!' do
     context 'when no messages are throttled' do
       let(:messages) { ['message'] }
 
-      before { throttler.filter!(messages) }
+      before { throttler.apply!(messages) }
 
-      it { expect(throttler.throttled?).to be(false) }
-      it { expect(throttler.filtered?).to be(false) }
-      it { expect(throttler.expired?).to be(false) }
+      it { expect(throttler.applied?).to be(false) }
+      it { expect(throttler.action).to eq(:skip) }
     end
 
     context 'when some messages are throttled' do
@@ -23,13 +22,13 @@ RSpec.describe_current do
 
       before do
         allow(throttler).to receive(:monotonic_now).and_return(0)
-        max_messages.times { throttler.filter!(['msg']) }
+        max_messages.times { throttler.apply!(['msg']) }
       end
 
-      it 'sets #throttled? to true' do
-        throttler.filter!(messages)
-        expect(throttler.throttled?).to be(true)
-        expect(throttler.filtered?).to be(true)
+      it 'sets #applied? to true' do
+        throttler.apply!(messages)
+        expect(throttler.applied?).to be(true)
+        expect(throttler.action).to eq(:pause)
       end
     end
 
@@ -39,14 +38,13 @@ RSpec.describe_current do
       let(:messages) { ['message', throttled_message] }
 
       before do
-        max_messages.times { throttler.filter!(['msg']) }
-        throttler.filter!(messages)
+        max_messages.times { throttler.apply!(['msg']) }
+        throttler.apply!(messages)
         sleep(0.1)
       end
 
-      it { expect(throttler.throttled?).to be(true) }
-      it { expect(throttler.filtered?).to be(true) }
-      it { expect(throttler.expired?).to be(true) }
+      it { expect(throttler.applied?).to be(true) }
+      it { expect(throttler.action).to eq(:seek) }
       it { expect(throttler.cursor).to eq('message') }
     end
 
@@ -55,13 +53,13 @@ RSpec.describe_current do
 
       before { allow(throttler).to receive(:monotonic_now).and_return(0) }
 
-      it 'sets #throttled? to false' do
-        throttler.filter!(messages)
-        expect(throttler.throttled?).to be(false)
+      it 'sets #applied? to false' do
+        throttler.apply!(messages)
+        expect(throttler.applied?).to be(false)
       end
 
       it 'expect not to remove last message when we reached limit' do
-        throttler.filter!(messages)
+        throttler.apply!(messages)
         expect(messages.count).to eq(max_messages)
       end
     end
@@ -71,13 +69,13 @@ RSpec.describe_current do
 
       before { allow(throttler).to receive(:monotonic_now).and_return(0) }
 
-      it 'sets #throttled? to true' do
-        throttler.filter!(messages)
-        expect(throttler.throttled?).to be(true)
+      it 'sets #applied? to true' do
+        throttler.apply!(messages)
+        expect(throttler.applied?).to be(true)
       end
 
       it 'expect not to remove last message when we reached limit' do
-        throttler.filter!(messages)
+        throttler.apply!(messages)
         expect(messages.count).to eq(max_messages)
       end
     end
@@ -86,7 +84,7 @@ RSpec.describe_current do
   describe '#timeout' do
     before do
       allow(throttler).to receive(:monotonic_now).and_return(0)
-      max_messages.times { throttler.filter!(['msg']) }
+      max_messages.times { throttler.apply!(['msg']) }
     end
 
     it { expect(throttler.timeout).to eq(100) }

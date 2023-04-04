@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# When we create a filter that just skips all the messages and does not return the seek message,
+# When we create a filter that just skips all the messages and does not return the cursor message,
 # we should never seek and just go on with incoming messages
 
 exit 1
@@ -15,13 +15,28 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
+class CustomFilter
+  def filter!(messages)
+    messages.clear
+  end
+
+  def filtered?
+    true
+  end
+
+  def throttled?
+    false
+  end
+
+  def cursor
+    nil
+  end
+end
+
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    throttling(
-      limit: 2,
-      interval: 60_000
-    )
+    filter
   end
 end
 

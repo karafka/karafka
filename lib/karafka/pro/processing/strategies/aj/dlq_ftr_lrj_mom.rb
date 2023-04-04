@@ -41,8 +41,8 @@ module Karafka
                 if coordinator.success?
                   coordinator.pause_tracker.reset
 
-                  if coordinator.throttled? && !revoked?
-                    throttle_or_seek_if_needed(resume_on_seek: true)
+                  if coordinator.filtered? && !revoked?
+                    handle_post_filtering
                   elsif !revoked?
                     seek(coordinator.seek_offset)
                     resume

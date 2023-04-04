@@ -23,33 +23,37 @@ end
 # This is a funny throttler because it will always allow only one message and if more, it will
 # throttle.
 class BaseThrottler
-  attr_reader :message
+  attr_reader :cursor
 
-  def throttle!(messages)
-    @throttled = false
-    @message = nil
+  def apply!(messages)
+    @applied = false
+    @cursor = nil
 
     i = -1
 
     messages.delete_if do |message|
       i += 1
 
-      @throttled = i > 0
+      @applied = i > 0
 
-      @message = message if @throttled && @message.nil?
+      @cursor = message if @applied && @cursor.nil?
 
-      next true if @throttled
+      next true if @applied
 
       false
     end
   end
 
-  def throttled?
-    @throttled
+  def action
+    if applied?
+      timeout.zero? ? :seek : :pause
+    else
+      :skip
+    end
   end
 
-  def expired?
-    false
+  def applied?
+    @applied
   end
 
   def timeout

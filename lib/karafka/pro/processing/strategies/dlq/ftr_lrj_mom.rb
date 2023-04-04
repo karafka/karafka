@@ -40,8 +40,8 @@ module Karafka
 
                   return if coordinator.manual_pause?
 
-                  if coordinator.throttled? && !revoked?
-                    throttle_or_seek_if_needed(resume_on_seek: true)
+                  if coordinator.filtered? && !revoked?
+                    handle_post_filtering
                   elsif !revoked?
                     seek(last_group_message.offset + 1)
                     resume

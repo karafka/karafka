@@ -43,7 +43,7 @@ module Karafka
 
                   return if coordinator.manual_pause?
 
-                  throttle_or_seek_if_needed
+                  handle_post_filtering
                 elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
                   retry_after_pause
                 # If we've reached number of retries that we could, we need to skip the first

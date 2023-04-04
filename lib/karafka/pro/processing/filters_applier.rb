@@ -14,9 +14,13 @@
 module Karafka
   module Pro
     module Processing
-      # Aggregator for all filters we want to have. Whether related to limiting messages based
+      # Applier for all filters we want to have. Whether related to limiting messages based
       # on the payload or any other things.
-      class Filters
+      #
+      # From the outside world perspective, this encapsulates all the filters.
+      # This means that this is the API we expose as a single filter, allowing us to control
+      # the filtering via many filters easily.
+      class FiltersApplier
         # @param filters [Array<Object>] array of filters we want to apply on the topic partition
         def initialize(filters)
           @filters = filters
@@ -24,43 +28,38 @@ module Karafka
 
         # @param messages [Array<Karafka::Messages::Message>] array with messages from the
         #   partition
-        def filter!(messages)
+        def apply!(messages)
           return unless active?
 
-          @filters.each { |filter| filter.filter!(messages) }
+          @filters.each { |filter| filter.apply!(messages) }
         end
 
         # @return [Boolean] did we filter out any messages during filtering run
-        def filtered?
+        def applied?
           return false unless active?
 
-          !filtered.empty?
+          !applied.empty?
         end
 
-        # @return [Boolean] did we throttle and need to backoff. If we limited our data scope
-        #   in such a way, that we need to start from a certain message (first of limited), it
-        #   is considered throttling.
-        def throttled?
-          return false unless active?
+        # @return [Symbol] consumer post-filtering action that should be taken
+        def action
+          return :skip unless applied?
 
-          filtered? && !cursor.nil?
-        end
+          # The highest priority is on a potential backoff from any of the filters because it is
+          # the less risky (delay and continue later)
+          return :pause if applied.any? { |filter| filter.action == :pause }
 
-        # @return [Boolean] Did our throttling / potential timeout happened but also expired.
-        #   It means. that from the moment we filtered to now, the potential backoff timeout has
-        #   passed and no need to pause. Just potentially seeking is needed.
-        def expired?
-          return false unless active?
+          # If none of the filters wanted to pause, we can check for any that would want to seek
+          # and if there is any, we can go with this strategy
+          return :seek if applied.any? { |filter| filter.action == :seek }
 
-          timeout <= 0
+          :skip
         end
 
         # @return [Integer] minimum timeout we need to pause. This is the minimum for all the
         #   filters to satisfy all of them.
         def timeout
-          return 0 unless active?
-
-          filtered.map(&:timeout).min
+          applied.map(&:timeout).min
         end
 
         # The first message we do need to get next time we poll. We use the minimum not to jump
@@ -68,7 +67,7 @@ module Karafka
         def cursor
           return nil unless active?
 
-          filtered.map(&:cursor).compact.min_by(&:offset)
+          applied.map(&:cursor).compact.min_by(&:offset)
         end
 
         private
@@ -79,8 +78,8 @@ module Karafka
         end
 
         # @return [Array<Object>] filters that applied any sort of messages limiting
-        def filtered
-          @filters.select(&:filtered?)
+        def applied
+          @filters.select(&:applied?)
         end
       end
     end

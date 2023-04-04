@@ -14,6 +14,7 @@
 - [Improvement] Do not early stop ActiveJob work running under virtual partitions to prevent extensive reprocessing.
 - [Improvement] Drastically increase number of scenarios covered by integration specs (OSS and Pro).
 - [Improvement] Introduce a `Coordinator#synchronize` lock for cross virtual partitions operations.
+- [Fix] Do not resume partition that is not paused.
 - [Fix] Fix `LoggerListener` cases where logs would not include caller id (when available)
 - [Fix] Fix not working benchmark tests.
 - [Fix] Fix a case where when using manual offset management with a user pause would ignore the pause and seek to the next message.

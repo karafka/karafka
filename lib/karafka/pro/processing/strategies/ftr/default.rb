@@ -28,7 +28,7 @@ module Karafka
 
             # Empty run when running on idle means we need to filter
             def handle_idle
-              throttle_or_seek_if_needed
+              handle_post_filtering
             end
 
             # Standard flow without any features
@@ -45,7 +45,7 @@ module Karafka
 
                   mark_as_consumed(last_group_message)
 
-                  throttle_or_seek_if_needed
+                  handle_post_filtering
                 else
                   retry_after_pause
                 end
@@ -58,15 +58,15 @@ module Karafka
             # that we don't have to pause but we need to move the offset because we skipped some
             # messages due to throttling filtering.
             # @return [Boolean] was any form of throttling operations (pause or seek) needed
-            def throttle_or_seek_if_needed(resume_on_seek: false)
-              # Throttle message can be empty in case we filtered all and are not interested
-              # in any type of seeking or backing off and just want to poll more data.
-              return false unless coordinator.throttled?
+            def handle_post_filtering
+              filter = coordinator.filter
 
-              throttle_message = coordinator.filters.cursor
-              throttle_timeout = coordinator.filters.timeout
+              case filter.action
+              when :skip
+                return
+              when :seek
+                throttle_message = filter.cursor
 
-              if coordinator.filters.expired?
                 Karafka.monitor.instrument(
                   'filtering.seek',
                   caller: self,
@@ -75,8 +75,11 @@ module Karafka
                   seek(throttle_message.offset)
                 end
 
-                resume if resume_on_seek
-              else
+                resume
+              when :pause
+                throttle_message = filter.cursor
+                throttle_timeout = filter.timeout
+
                 Karafka.monitor.instrument(
                   'filtering.throttled',
                   caller: self,
@@ -85,9 +88,9 @@ module Karafka
                 ) do
                   pause(throttle_message.offset, throttle_timeout, false)
                 end
+              else
+                raise Karafka::Errors::UnsupportedCaseError filter.action
               end
-
-              true
             end
           end
         end

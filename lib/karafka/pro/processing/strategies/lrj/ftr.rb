@@ -43,8 +43,8 @@ module Karafka
                   mark_as_consumed(last_group_message) unless revoked?
 
                   # If still not revoked and was throttled, we need to apply throttling logic
-                  if coordinator.throttled? && !revoked?
-                    throttle_or_seek_if_needed(resume_on_seek: true)
+                  if coordinator.filtered? && !revoked?
+                    handle_post_filtering
                   elsif !revoked?
                     # If not revoked and not throttled, we move to where we were suppose to and
                     # resume

@@ -47,8 +47,8 @@ module Karafka
                   # them here. We do commit in collapsed mode but this is generalized.
                   mark_as_consumed(last_group_message) unless revoked?
 
-                  if coordinator.throttled? && !revoked?
-                    throttle_or_seek_if_needed(resume_on_seek: true)
+                  if coordinator.filtered? && !revoked?
+                    handle_post_filtering
                   elsif !revoked?
                     seek(coordinator.seek_offset)
                     resume

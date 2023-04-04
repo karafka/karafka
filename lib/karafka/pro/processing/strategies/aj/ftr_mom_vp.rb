@@ -44,7 +44,7 @@ module Karafka
 
                   mark_as_consumed(last_group_message)
 
-                  throttle_or_seek_if_needed
+                  handle_post_filtering
                 else
                   retry_after_pause
                 end
