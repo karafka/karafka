@@ -15,8 +15,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class Throttling < Base
-          # Rules around throttling settings
+        class Filtering < Base
           class Contract < Contracts::Base
             configure do |config|
               config.error_messages = YAML.safe_load(
@@ -26,11 +25,11 @@ module Karafka
               ).fetch('en').fetch('validations').fetch('topic')
             end
 
-            nested(:throttling) do
+            nested(:filtering) do
               required(:active) { |val| [true, false].include?(val) }
-              required(:interval) { |val| val.is_a?(Integer) && val.positive? }
-              required(:limit) do |val|
-                (val.is_a?(Integer) || val == Float::INFINITY) && val.positive?
+
+              required(:factories) do |val|
+                val.is_a?(Array) && val.all? { |factory| factory.respond_to?(:call) }
               end
             end
           end

@@ -39,7 +39,7 @@ module Karafka
         # of how many messages we've processed in a given time
         # @param messages [Array<Karafka::Messages::Message>] limits the number of messages to
         #   number we can accept in the context of throttling constraints
-        def throttle!(messages)
+        def filter!(messages)
           @throttled = false
           @message = nil
           @time = monotonic_now
@@ -61,6 +61,11 @@ module Karafka
           end
 
           @requests[@time] += accepted
+        end
+
+        # @return [Boolean] in case of this filter, throttling always means filtering
+        def filtered?
+          throttled?
         end
 
         # @return [Boolean] true if we had to throttle messages for processing

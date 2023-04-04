@@ -13,16 +13,24 @@
 
 module Karafka
   module Pro
-    module Routing
-      module Features
-        # Ability to throttle ingestion of data per topic partition
-        # Useful when we have fixed limit of things we can process in a given time period without
-        # getting into trouble. It can be used for example to:
-        #   - make sure we do not insert things to DB too fast
-        #   - make sure we do not dispatch HTTP requests to external resources too fast
-        #
-        # This feature is virtual. It materializes itself via the `Filtering` feature.
-        class Throttling < Base
+    module Processing
+      module Strategies
+        module Lrj
+          # Long-Running Job enabled
+          # Filtering enabled
+          # Virtual Partitions enabled
+          #
+          # Behaves same as non-VP because of the aggregated flow in the coordinator.
+          module FtrVp
+            include Strategies::Lrj::Ftr
+
+            # Features for this strategy
+            FEATURES = %i[
+              long_running_job
+              filtering
+              virtual_partitions
+            ].freeze
+          end
         end
       end
     end

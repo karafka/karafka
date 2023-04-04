@@ -9,8 +9,9 @@ en:
       throttling.active_format: needs to be either true or false
       throttling.limit_format: needs to be equal or more than 1
       throttling.interval_format: needs to be equal or more than 1
-      throttling.throttler_class_format: needs to be nil or a custom class
-      throttling.throttler_class_missing: needs to be present
+      filtering.active_missing: needs to be present
+      filtering.factory_format: 'needs to respond to #call'
+      filtering.factories_format: 'needs to contain only factories responding to #call'
 
     config:
       encryption.active_format: 'needs to be either true or false'

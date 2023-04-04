@@ -47,7 +47,8 @@ module Karafka
 
         dead_letter_queue.dispatched
 
-        throttling.throttled
+        filtering.throttled
+        filtering.seek
 
         process.notice_signal
 

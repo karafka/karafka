@@ -15,14 +15,24 @@ module Karafka
   module Pro
     module Routing
       module Features
-        # Ability to throttle ingestion of data per topic partition
-        # Useful when we have fixed limit of things we can process in a given time period without
-        # getting into trouble. It can be used for example to:
-        #   - make sure we do not insert things to DB too fast
-        #   - make sure we do not dispatch HTTP requests to external resources too fast
-        #
-        # This feature is virtual. It materializes itself via the `Filtering` feature.
-        class Throttling < Base
+        class Filtering < Base
+          # Filtering feature configuration
+          Config = Struct.new(:factories, keyword_init: true) do
+            # @return [Boolean] is this feature in use. Are any filters defined
+            def active?
+              !factories.empty?
+            end
+
+            # @return [Array<Object>] array of filters applicable to a topic partition
+            def filters
+              factories.map(&:call)
+            end
+
+            # @return [Hash] this config hash
+            def to_h
+              super.merge(active: active?)
+            end
+          end
         end
       end
     end

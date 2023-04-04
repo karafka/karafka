@@ -13,17 +13,25 @@
 
 module Karafka
   module Pro
-    module Routing
-      module Features
-        class Throttling < Base
-          # Throttling feature configuration
-          Config = Struct.new(
-            :active,
-            :limit,
-            :interval,
-            keyword_init: true
-          ) do
-            alias_method :active?, :active
+    module Processing
+      module Strategies
+        module Dlq
+          # Dead-Letter Queue enabled
+          # Filtering enabled
+          # Long-Running Job enabled
+          # Virtual Partitions
+          module FtrLrjVp
+            include Strategies::Vp::Default
+            # Same as non VP because of the coordinator post-execution lock
+            include Strategies::Dlq::FtrLrj
+
+            # Features for this strategy
+            FEATURES = %i[
+              dead_letter_queue
+              long_running_job
+              filtering
+              virtual_partitions
+            ].freeze
           end
         end
       end

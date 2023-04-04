@@ -187,7 +187,7 @@ module Karafka
       # Logs info about throttling event
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_throttling_throttled(event)
+      def on_filtering_throttled(event)
         consumer = event[:caller]
         topic = consumer.topic.name
         # Here we get last message before throttle
