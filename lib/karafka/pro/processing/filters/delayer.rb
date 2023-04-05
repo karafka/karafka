@@ -15,7 +15,9 @@ module Karafka
   module Pro
     module Processing
       module Filters
+        # A filter that allows us to delay processing by pausing until time is right.
         class Delayer < Base
+          # @param delay [Integer] ms delay / minimum age of each message we want to process
           def initialize(delay)
             super()
 
@@ -48,7 +50,7 @@ module Karafka
 
           # @return [Integer] timeout delay in ms
           def timeout
-            timeout = ::Time.now.utc - @cursor.timestamp - @delay / 1_000.to_f
+            timeout = (@delay / 1_000.to_f) - (::Time.now.utc - @cursor.timestamp)
 
             timeout <= 0 ? 0 : timeout * 1_000
           end
