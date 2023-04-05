@@ -61,6 +61,11 @@ module Karafka
             def handle_post_filtering
               filter = coordinator.filter
 
+              # We pick the timeout before the action because every action takes time. This time
+              # may then mean we end up having throttle time equal to zero when pause is needed
+              # and this should not happen
+              throttle_timeout = filter.timeout
+
               case filter.action
               when :skip
                 nil
@@ -78,7 +83,6 @@ module Karafka
                 resume
               when :pause
                 throttle_message = filter.cursor
-                throttle_timeout = filter.timeout
 
                 Karafka.monitor.instrument(
                   'filtering.throttled',

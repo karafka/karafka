@@ -20,7 +20,7 @@ RSpec.describe_current do
     context 'when we use throttling multiple times with different values' do
       it 'expect to use proper active status' do
         topic.throttling(limit: 100)
-        topic.throttling(limit: Float::INFINITY)
+        topic.throttle(limit: Float::INFINITY)
         expect(topic.throttling.active?).to eq(true)
       end
     end

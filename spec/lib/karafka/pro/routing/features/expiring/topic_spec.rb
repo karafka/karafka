@@ -20,7 +20,7 @@ RSpec.describe_current do
     context 'when we use expiring multiple times with different values' do
       before do
         topic.expiring(1)
-        topic.expiring(2)
+        topic.expire_in(2)
       end
 
       it 'expect to use proper active status' do

@@ -15,17 +15,17 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class Expiring < Base
-          # Topic expiring API extensions
+        class Delaying < Base
+          # Topic delaying API extensions
           module Topic
-            # @param ttl [Integer, nil] maximum time in ms a message is considered alive
-            def expiring(ttl = nil)
+            # @param delay [Integer, nil] minimum age of a message we want to process
+            def delaying(delay = nil)
               # Those settings are used for validation
-              @expiring ||= begin
-                config = Config.new(active: !ttl.nil?, ttl: ttl)
+              @delaying ||= begin
+                config = Config.new(active: !delay.nil?, delay: delay)
 
                 if config.active?
-                  factory = -> { Pro::Processing::Filters::Expirer.new(ttl) }
+                  factory = -> { Pro::Processing::Filters::Delayer.new(delay) }
                   filter(factory)
                 end
 
@@ -35,20 +35,20 @@ module Karafka
 
             # Just an alias for nice API
             #
-            # @param args [Array] Anything `#expiring` accepts
-            def expire_in(*args)
-              expiring(*args)
+            # @param args [Array] Anything `#delaying` accepts
+            def delay_by(*args)
+              delaying(*args)
             end
 
-            # @return [Boolean] is a given job expiring
-            def expiring?
-              expiring.active?
+            # @return [Boolean] is a given job delaying
+            def delaying?
+              delaying.active?
             end
 
-            # @return [Hash] topic with all its native configuration options plus expiring
+            # @return [Hash] topic with all its native configuration options plus delaying
             def to_h
               super.merge(
-                expiring: expiring.to_h
+                delaying: delaying.to_h
               ).freeze
             end
           end

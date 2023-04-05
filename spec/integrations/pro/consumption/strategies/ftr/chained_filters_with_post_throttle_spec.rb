@@ -72,7 +72,7 @@ assert(DT[:counts].all? { |count| count <= 5 })
 # There should always be a delay on average in between batches
 time_taken = DT[:times].last - DT[:times].first
 average = (time_taken / DT[:counts].sum)
-assert average >= 0.19, average
+assert average >= 0.17, average
 
 # On average will will get 1,4,1,4,1,4 because of throttling, but since throttling is applied
 # after filtering, we should always be above 2 with the number

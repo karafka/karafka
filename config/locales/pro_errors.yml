@@ -22,6 +22,9 @@ en:
       expiring.ttl_format: 'needs to be equal or more than 0 and an integer'
       expiring.active_format: 'needs to be boolean'
 
+      delaying.delay_format: 'needs to be equal or more than 0 and an integer'
+      delaying.active_format: 'needs to be boolean'
+
     config:
       encryption.active_format: 'needs to be either true or false'
       encryption.public_key_invalid: 'is not a valid public RSA key'
