@@ -42,6 +42,10 @@ class Skipper
   def cursor
     nil
   end
+
+  def timeout
+    0
+  end
 end
 
 draw_routes do

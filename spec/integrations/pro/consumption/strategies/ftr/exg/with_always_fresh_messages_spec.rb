@@ -16,7 +16,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     # 1 minute
-    expires_in(60_000)
+    expire_in(60_000)
   end
 end
 
