@@ -50,6 +50,8 @@ module Karafka
 
           # @return [Integer] timeout delay in ms
           def timeout
+            return 0 unless @cursor
+
             timeout = (@delay / 1_000.to_f) - (::Time.now.utc - @cursor.timestamp)
 
             timeout <= 0 ? 0 : timeout * 1_000
