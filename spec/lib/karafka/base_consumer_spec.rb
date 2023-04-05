@@ -444,11 +444,12 @@ RSpec.describe_current do
   describe '#resume' do
     before do
       allow(coordinator.pause_tracker).to receive(:expire)
+      coordinator.pause_tracker.pause(1_000)
 
       consumer.send(:resume)
     end
 
-    it 'expect to expire the pause tracker' do
+    it 'expect to expire the pause tracker if it was paused' do
       expect(coordinator.pause_tracker).to have_received(:expire)
     end
   end

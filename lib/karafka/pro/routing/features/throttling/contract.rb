@@ -27,7 +27,6 @@ module Karafka
             end
 
             nested(:throttling) do
-              required(:throttler_class) { |val| val.nil? || val.is_a?(Class) }
               required(:active) { |val| [true, false].include?(val) }
               required(:interval) { |val| val.is_a?(Integer) && val.positive? }
               required(:limit) do |val|

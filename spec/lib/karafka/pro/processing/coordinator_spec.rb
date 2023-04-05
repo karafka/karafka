@@ -53,9 +53,9 @@ RSpec.describe_current do
     end
   end
 
-  describe '#throttled?' do
-    context 'when not throttled' do
-      it { expect(coordinator.throttled?).to eq(false) }
+  describe '#filtered?' do
+    context 'when not filtered' do
+      it { expect(coordinator.filtered?).to eq(false) }
     end
   end
 

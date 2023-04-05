@@ -20,6 +20,8 @@ module Karafka
         # getting into trouble. It can be used for example to:
         #   - make sure we do not insert things to DB too fast
         #   - make sure we do not dispatch HTTP requests to external resources too fast
+        #
+        # This feature is virtual. It materializes itself via the `Filtering` feature.
         class Throttling < Base
         end
       end

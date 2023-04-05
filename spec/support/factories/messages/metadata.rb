@@ -8,6 +8,7 @@ FactoryBot.define do
     sequence(:offset) { |nr| nr }
     partition { 0 }
     deserializer { ->(message) { JSON.parse(message.raw_payload) } }
+    timestamp { Time.now.utc }
 
     initialize_with do
       new(partition: partition, topic: topic, offset: 0, deserializer: deserializer)

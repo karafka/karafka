@@ -19,21 +19,11 @@ module Karafka
           # Throttling feature configuration
           Config = Struct.new(
             :active,
-            :throttler_class,
             :limit,
             :interval,
             keyword_init: true
           ) do
             alias_method :active?, :active
-
-            # @return [Object] newly built created throttler instance. If a custom throttler is
-            #   provided, we build it without providing any arguments, because a custom may not
-            #   have same limits as the default one.
-            # @note It is always a new instance and should be cached elsewhere. Each topic
-            #   partition needs its own instance.
-            def throttler
-              throttler_class&.new || Pro::Processing::Throttler.new(limit, interval)
-            end
           end
         end
       end

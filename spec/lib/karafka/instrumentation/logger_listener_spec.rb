@@ -221,8 +221,8 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
-  describe '#on_throttling_throttled' do
-    subject(:trigger) { listener.on_throttling_throttled(event) }
+  describe '#on_filtering_throttled' do
+    subject(:trigger) { listener.on_filtering_throttled(event) }
 
     let(:payload) { { caller: consumer, message: kafka_message } }
     let(:kafka_message) { create(:messages_message) }
@@ -231,6 +231,27 @@ RSpec.describe_current do
     let(:message) do
       resume_offset = kafka_message.offset
       "[#{consumer.id}] Throttled and will resume from message #{resume_offset} on test/0"
+    end
+    let(:consumer) do
+      instance = Class.new(Karafka::BaseConsumer).new
+      instance.coordinator = coordinator
+      topic.dead_letter_queue(topic: 'dlq')
+      instance
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
+  describe '#on_filtering_seek' do
+    subject(:trigger) { listener.on_filtering_seek(event) }
+
+    let(:payload) { { caller: consumer, message: kafka_message } }
+    let(:kafka_message) { create(:messages_message) }
+    let(:coordinator) { create(:processing_coordinator, topic: topic) }
+    let(:topic) { build(:routing_topic, name: 'test') }
+    let(:message) do
+      seek_offset = kafka_message.offset
+      "[#{consumer.id}] Post-filtering seeking to message #{seek_offset} on test/0"
     end
     let(:consumer) do
       instance = Class.new(Karafka::BaseConsumer).new

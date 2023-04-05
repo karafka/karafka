@@ -187,7 +187,7 @@ module Karafka
       # Logs info about throttling event
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_throttling_throttled(event)
+      def on_filtering_throttled(event)
         consumer = event[:caller]
         topic = consumer.topic.name
         # Here we get last message before throttle
@@ -198,6 +198,21 @@ module Karafka
         info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Throttled and will resume
           from message #{offset}
+          on #{topic}/#{partition}
+        MSG
+      end
+
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_filtering_seek(event)
+        consumer = event[:caller]
+        topic = consumer.topic.name
+        # Message to which we seek
+        message = event[:message]
+        partition = message.partition
+        offset = message.offset
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Post-filtering seeking to message #{offset}
           on #{topic}/#{partition}
         MSG
       end

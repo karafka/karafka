@@ -28,7 +28,7 @@ module Karafka
           manual_offset_management
           virtual_partitions
           dead_letter_queue
-          throttling
+          filtering
         ].freeze
 
         def initialize

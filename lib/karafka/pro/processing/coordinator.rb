@@ -17,7 +17,7 @@ module Karafka
       # Pro coordinator that provides extra orchestration methods useful for parallel processing
       # within the same partition
       class Coordinator < ::Karafka::Processing::Coordinator
-        attr_reader :throttler
+        attr_reader :filter
 
         # @param args [Object] anything the base coordinator accepts
         def initialize(*args)
@@ -26,7 +26,7 @@ module Karafka
           @executed = []
           @flow_lock = Mutex.new
           @collapser = Collapser.new
-          @throttler = topic.throttling.throttler
+          @filter = FiltersApplier.new(topic.filtering.filters)
         end
 
         # Starts the coordination process
@@ -37,7 +37,7 @@ module Karafka
 
           @collapser.refresh!(messages.first.offset)
 
-          @throttler.throttle!(messages) if topic.throttling.active?
+          @filter.apply!(messages)
 
           @executed.clear
           @last_message = messages.last
@@ -57,9 +57,10 @@ module Karafka
           @collapser.collapsed?
         end
 
-        # @return [Boolean] did we filter any messages out due to throttling
-        def throttled?
-          @throttler.throttled?
+        # @return [Boolean] did any of the filters apply any logic that would cause use to run
+        #   the filtering flow
+        def filtered?
+          @filter.applied?
         end
 
         # @return [Boolean] is the coordinated work finished or not

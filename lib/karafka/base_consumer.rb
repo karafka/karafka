@@ -239,6 +239,8 @@ module Karafka
 
     # Resumes processing of the current topic partition
     def resume
+      return unless coordinator.pause_tracker.paused?
+
       # This is sufficient to expire a partition pause, as with it will be resumed by the listener
       # thread before the next poll.
       coordinator.pause_tracker.expire

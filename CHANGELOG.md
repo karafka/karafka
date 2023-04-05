@@ -2,6 +2,9 @@
 
 ## 2.0.39 (Unreleased)
 - **[Feature]** Provide ability to throttle/limit number of messages processed in a time unit (#1203)
+- **[Feature]** Provide Delayed Topics (#1000)
+- **[Feature]** Provide ability to expire messages (expiring topics)
+- **[Feature]** Provide ability to apply filters after messages are polled and before enqueued. This is a generic filter API for any usage.
 - [Improvement] Track active_job_id in instrumentation (#1372)
 - [Improvement] Introduce new housekeeping job type called `Idle` for non-consumption execution flows.
 - [Improvement] Change how a manual offset management works with Long-Running Jobs. Use the last message offset to move forward instead of relying on the last message marked as consumed for a scenario where no message is marked.
@@ -11,6 +14,7 @@
 - [Improvement] Do not early stop ActiveJob work running under virtual partitions to prevent extensive reprocessing.
 - [Improvement] Drastically increase number of scenarios covered by integration specs (OSS and Pro).
 - [Improvement] Introduce a `Coordinator#synchronize` lock for cross virtual partitions operations.
+- [Fix] Do not resume partition that is not paused.
 - [Fix] Fix `LoggerListener` cases where logs would not include caller id (when available)
 - [Fix] Fix not working benchmark tests.
 - [Fix] Fix a case where when using manual offset management with a user pause would ignore the pause and seek to the next message.

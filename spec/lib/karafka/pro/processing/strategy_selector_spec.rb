@@ -46,7 +46,7 @@ RSpec.describe_current do
       topic.throttling(limit: 5, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Lrj::MomThg) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Lrj::FtrMom) }
   end
 
   context 'when lrj is enabled' do
@@ -72,7 +72,7 @@ RSpec.describe_current do
       topic.throttling(limit: 5, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::MomThg) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::FtrMom) }
   end
 
   context 'when aj is enabled with mom, thg and vp' do
@@ -83,7 +83,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::MomThgVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::FtrMomVp) }
   end
 
   context 'when aj is enabled with lrj, mom, thg and vp' do
@@ -97,7 +97,7 @@ RSpec.describe_current do
     end
 
     it do
-      expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqLrjMomThgVp)
+      expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqFtrLrjMomVp)
     end
   end
 
@@ -139,7 +139,18 @@ RSpec.describe_current do
       topic.throttling(limit: 5, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::LrjMomThg) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::FtrLrjMom) }
+  end
+
+  context 'when aj is enabled with lrj, mom and ftr' do
+    before do
+      topic.active_job(true)
+      topic.long_running_job(true)
+      topic.manual_offset_management(true)
+      topic.filter -> {}
+    end
+
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::FtrLrjMom) }
   end
 
   context 'when we enable not supported combination' do
@@ -185,7 +196,7 @@ RSpec.describe_current do
     it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::LrjMom) }
   end
 
-  context 'when dlq, mom, lrj thg is enabled' do
+  context 'when dlq, mom, lrj and thg is enabled' do
     before do
       topic.dead_letter_queue(topic: 'test')
       topic.manual_offset_management(true)
@@ -193,7 +204,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::LrjMomThg) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::FtrLrjMom) }
   end
 
   context 'when dlq, lrj and thg is enabled' do
@@ -203,7 +214,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::LrjThg) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::FtrLrj) }
   end
 
   context 'when dlq, lrj, vp and thg is enabled' do
@@ -214,7 +225,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::LrjThgVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::FtrLrjVp) }
   end
 
   context 'when dlq and thg' do
@@ -223,7 +234,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::Thg) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::Ftr) }
   end
 
   context 'when dlq, thg and vps' do
@@ -233,7 +244,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::ThgVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Dlq::FtrVp) }
   end
 
   context 'when aj, dlq and mom is enabled' do
@@ -254,7 +265,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqMomThg) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqFtrMom) }
   end
 
   context 'when aj, dlq, mom, thg and vp is enabled' do
@@ -266,7 +277,7 @@ RSpec.describe_current do
       topic.virtual_partitions(partitioner: true)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqMomThgVp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Aj::DlqFtrMomVp) }
   end
 
   context 'when aj, dlq, mom and vp is enabled' do
@@ -297,7 +308,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Thg::Vp) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Ftr::Vp) }
   end
 
   context 'when mom and thg are enabled' do
@@ -306,7 +317,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Mom::Thg) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Mom::Ftr) }
   end
 
   context 'when lrj and thg are enabled' do
@@ -315,7 +326,7 @@ RSpec.describe_current do
       topic.throttling(limit: 100, interval: 100)
     end
 
-    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Lrj::Thg) }
+    it { expect(selected_strategy).to eq(Karafka::Pro::Processing::Strategies::Lrj::Ftr) }
   end
 
   # Those specs make sure, that every expected features combination has a matching strategy
@@ -338,30 +349,30 @@ RSpec.describe_current do
         # that would not have MoM
         %i[active_job],
         %i[active_job dead_letter_queue],
-        %i[active_job dead_letter_queue throttling],
+        %i[active_job dead_letter_queue filtering],
         %i[active_job dead_letter_queue virtual_partitions],
         %i[active_job dead_letter_queue long_running_job],
-        %i[active_job dead_letter_queue throttling virtual_partitions],
-        %i[active_job dead_letter_queue long_running_job throttling],
+        %i[active_job dead_letter_queue filtering virtual_partitions],
+        %i[active_job dead_letter_queue long_running_job filtering],
         %i[active_job dead_letter_queue long_running_job virtual_partitions],
-        %i[active_job dead_letter_queue long_running_job virtual_partitions throttling],
+        %i[active_job dead_letter_queue long_running_job virtual_partitions filtering],
         %i[active_job long_running_job],
-        %i[active_job long_running_job throttling],
-        %i[active_job long_running_job throttling virtual_partitions],
+        %i[active_job long_running_job filtering],
+        %i[active_job long_running_job filtering virtual_partitions],
         %i[active_job virtual_partitions],
-        %i[active_job virtual_partitions throttling],
-        %i[active_job throttling],
+        %i[active_job virtual_partitions filtering],
+        %i[active_job filtering],
         %i[active_job long_running_job virtual_partitions],
         # Virtual partitions are not allowed with manual offset management in any combination
         # Hence we need to exclude any of them operating together
         mom_with_vp,
         mom_with_vp + %i[long_running_job],
-        mom_with_vp + %i[long_running_job throttling],
-        mom_with_vp + %i[throttling],
+        mom_with_vp + %i[long_running_job filtering],
+        mom_with_vp + %i[filtering],
         mom_with_vp + %i[dead_letter_queue],
         mom_with_vp + %i[dead_letter_queue long_running_job],
-        mom_with_vp + %i[dead_letter_queue throttling],
-        mom_with_vp + %i[dead_letter_queue long_running_job throttling]
+        mom_with_vp + %i[dead_letter_queue filtering],
+        mom_with_vp + %i[dead_letter_queue long_running_job filtering]
       ]
     end
 
