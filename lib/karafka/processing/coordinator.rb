@@ -25,12 +25,14 @@ module Karafka
         @manual_pause = false
         @mutex = Mutex.new
         @marked = false
+        @failure = false
       end
 
       # Starts the coordinator for given consumption jobs
       # @param messages [Array<Karafka::Messages::Message>] batch of message for which we are
       #   going to coordinate work. Not used with regular coordinator.
       def start(messages)
+        @failure = false
         @running_jobs = 0
         # We need to clear the consumption results hash here, otherwise we could end up storing
         # consumption results of consumer instances we no longer control
@@ -78,6 +80,8 @@ module Karafka
       end
 
       # Is all the consumption done and finished successfully for this coordinator
+      # We do not say we're successful until all work is done, because running work may still
+      # crash.
       def success?
         synchronize do
           @running_jobs.zero? && @consumptions.values.all?(&:success?)
@@ -97,8 +101,14 @@ module Karafka
       # @param error [StandardError] error that occurred
       def failure!(consumer, error)
         synchronize do
+          @failure = true
           consumption(consumer).failure!(error)
         end
+      end
+
+      # @return [Boolean] true if any of work we were running failed
+      def failure?
+        @failure
       end
 
       # Marks given coordinator for processing group as revoked

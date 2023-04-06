@@ -22,6 +22,7 @@ module Karafka
           #
           # Behaves same as non-VP because of the aggregated flow in the coordinator.
           module FtrVp
+            include Strategies::Vp::Default
             include Strategies::Lrj::Ftr
 
             # Features for this strategy

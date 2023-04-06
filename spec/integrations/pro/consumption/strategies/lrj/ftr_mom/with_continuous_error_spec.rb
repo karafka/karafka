@@ -50,7 +50,7 @@ consumer = setup_rdkafka_consumer
 consumer.subscribe(DT.topic)
 
 consumer.each do |message|
-  assert_equal 0, message.offset
+  assert_equal 0, message.offset, message.offset
   break
 end
 

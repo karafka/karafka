@@ -221,6 +221,13 @@ module Karafka
       coordinator.revoked?
     end
 
+    # @return [Boolean] are we retrying processing after an error. This can be used to provide a
+    #   different flow after there is an error, for example for resources cleanup, small manual
+    #   backoff or different instrumentation tracking.
+    def retrying?
+      coordinator.pause_tracker.attempt > 0
+    end
+
     # Pauses the processing from the last offset to retry on given message
     # @private
     def retry_after_pause
