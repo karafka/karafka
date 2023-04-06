@@ -36,7 +36,7 @@ module Karafka
 
             # @return [Boolean] true if any of virtual partition we're operating in the entangled
             #   mode has already failed and we know we are failing collectively.
-            #   Useful for early stop to minimize number of reprocessings.
+            #   Useful for early stop to minimize number of things processed twice.
             #
             # @note We've named it `#failing?` instead of `#failure?`  because it aims to be used
             #   from within virtual partitions where we want to have notion of collective failing

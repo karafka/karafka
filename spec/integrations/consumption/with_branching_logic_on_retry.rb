@@ -9,7 +9,6 @@ SuperException = Class.new(Exception)
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-
       raise if message.offset == 5 && !retrying?
 
       DT[:offsets] << message.offset
