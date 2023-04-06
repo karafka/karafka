@@ -7,6 +7,7 @@ SAMPLES = (0..1_000).to_a.map(&:to_s)
 setup_active_job
 
 setup_karafka(allow_errors: true) do |config|
+  config.concurrency = 1
   config.max_messages = 10
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
