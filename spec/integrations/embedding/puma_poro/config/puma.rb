@@ -19,7 +19,7 @@ class ShutdownConsumer < Karafka::BaseConsumer
   end
 
   def shutdown
-    ::Process.kill('TERM', PID)
+    ::Process.kill('INT', PID)
   end
 end
 
