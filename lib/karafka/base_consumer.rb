@@ -159,51 +159,6 @@ module Karafka
     # some teardown procedures (closing file handler, etc).
     def shutdown; end
 
-    # Marks message as consumed in an async way.
-    #
-    # @param message [Messages::Message] last successfully processed message.
-    # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
-    #   that we were not able and that we have lost the partition.
-    #
-    # @note We keep track of this offset in case we would mark as consumed and got error when
-    #   processing another message. In case like this we do not pause on the message we've already
-    #   processed but rather at the next one. This applies to both sync and async versions of this
-    #   method.
-    def mark_as_consumed(message)
-      # Ignore earlier offsets than the one we already committed
-      return true if coordinator.seek_offset > message.offset
-
-      unless client.mark_as_consumed(message)
-        coordinator.revoke
-
-        return false
-      end
-
-      coordinator.seek_offset = message.offset + 1
-
-      true
-    end
-
-    # Marks message as consumed in a sync way.
-    #
-    # @param message [Messages::Message] last successfully processed message.
-    # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
-    #   that we were not able and that we have lost the partition.
-    def mark_as_consumed!(message)
-      # Ignore earlier offsets than the one we already committed
-      return true if coordinator.seek_offset > message.offset
-
-      unless client.mark_as_consumed!(message)
-        coordinator.revoke
-
-        return false
-      end
-
-      coordinator.seek_offset = message.offset + 1
-
-      true
-    end
-
     # Pauses processing on a given offset for the current topic partition
     #
     # After given partition is resumed, it will continue processing from the given offset

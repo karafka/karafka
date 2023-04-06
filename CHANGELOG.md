@@ -24,6 +24,7 @@
 - [Refactor] Put Pro strategies into namespaces to better organize multiple combinations.
 - [Refactor] Do not rely on messages metadata for internal topic and partition operations like `#seek` so they can run independently from the consumption flow.
 - [Refactor] Hold a single topic/partition reference on a coordinator instead of in executor, coordinator and consumer.
+- [Refactor] Move `#mark_as_consumed` and `#mark_as_consumed!`into `Strategies::Default` to be able to introduce marking for virtual partitions.
 
 ## 2.0.38 (2023-03-27)
 - [Improvement] Introduce `Karafka::Admin#read_watermark_offsets` to get low and high watermark offsets values.
