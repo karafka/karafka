@@ -20,9 +20,7 @@ end
 
 class DlqConsumer < Karafka::BaseConsumer
   def consume
-    messages.each do |message|
-      DT[:retried] << Time.now
-    end
+    DT[:retried] << Time.now
   end
 end
 
