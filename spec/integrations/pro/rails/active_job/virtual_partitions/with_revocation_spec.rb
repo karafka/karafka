@@ -41,7 +41,9 @@ class Job < ActiveJob::Base
   # This job is so slow, that while it is running another consumer joins in and should take over
   # one partition.
   # If this would not happen, we should not stop until all batches of jobs are processed
-  def perform(value1)
+  def perform(value1, value2)
+    return if value2.zero?
+
     DT[:started] << value1
     sleep(20)
     DT[:done] << value1
@@ -51,12 +53,13 @@ end
 consumer = setup_rdkafka_consumer
 
 # 1 and 4 are picked because they will dispatch messages to 0 and 1 partition
-10.times do
-  Job.perform_later('1')
-  Job.perform_later('4')
+10.times do |i|
+  Job.perform_later('1', i)
+  Job.perform_later('4', i)
 end
 
 revoked = false
+stopped = false
 
 # This will trigger a rebalance when the first job is being processed
 # We keep it alive so we do not trigger a second rebalance
@@ -71,6 +74,8 @@ other = Thread.new do
     sleep(5)
     revoked = true
 
+    sleep(0.1) until stopped
+
     break
   end
 end
@@ -78,6 +83,8 @@ end
 start_karafka_and_wait_until do
   DT[:started].size >= 4 && revoked
 end
+
+stopped = true
 
 assert DT[:started].size < 10
 assert DT[:done].size < 10

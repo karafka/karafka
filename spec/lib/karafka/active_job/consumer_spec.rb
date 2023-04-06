@@ -5,6 +5,7 @@ RSpec.describe_current do
     consumer = described_class.new
     consumer.client = client
     consumer.coordinator = coordinator
+    consumer.singleton_class.include Karafka::Processing::Strategies::Default
     consumer
   end
 
