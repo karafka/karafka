@@ -6,8 +6,8 @@
 # We should not change the offset
 
 class Listener
-  def on_error_occurred(event)
-    DT[:errors] << event
+  def on_error_occurred(_)
+    DT[:errors] << true
   end
 end
 
@@ -15,9 +15,11 @@ Karafka.monitor.subscribe(Listener.new)
 
 setup_karafka(allow_errors: true)
 
+ERROR_FLOW = Array.new(100) { rand(2).zero? } + [true, false]
+
 class Consumer < Karafka::BaseConsumer
   def consume
-    raise StandardError if rand(2).zero?
+    raise StandardError if ERROR_FLOW.pop
 
     messages.each { |message| DT[0] << message.offset }
 
