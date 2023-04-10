@@ -62,7 +62,7 @@ draw_routes do
   end
 end
 
-produce_many(DT.topic, Array.new(100) { |i| i.to_s })
+produce_many(DT.topic, Array.new(100, &:to_s))
 
 start_karafka_and_wait_until do
   DT[:failing].size >= 9
