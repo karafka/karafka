@@ -9,28 +9,43 @@ setup_karafka(allow_errors: true) do |config|
   config.concurrency = 10
 end
 
-MUTEX = Mutex.new
+# Ensures, that we don't process at all unless we have at least 10 messages
+# This eliminates the case of running a single virtual partition
+class Buffer < Karafka::Pro::Processing::Filters::Base
+  def apply!(messages)
+    @applied = messages.count < 10
+
+    return unless @applied
+
+    @cursor = messages.first
+    messages.clear
+  end
+
+  def action
+    if applied?
+      :pause
+    else
+      :skip
+    end
+  end
+
+  def timeout
+    250
+  end
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[:registers] << true
+    if messages.first.offset.zero?
+      sleep(0.1)
 
-    MUTEX.synchronize do
-      return if DT[:registers].size == 1
-
-      if DT[:raised].empty?
-        DT[:raised] << true
-        sleep(1)
-
-        raise StandardError
-      end
+      raise StandardError
+    else
+      sleep(2)
     end
 
     if failing?
       DT[:failing] << true
-
-      return
-
     else
       DT[:ended] << true
     end
@@ -40,6 +55,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
+    filter -> { Buffer.new }
     virtual_partitions(
       partitioner: ->(msg) { msg.raw_payload.to_i % 10 }
     )
