@@ -19,18 +19,23 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-THROTTLERS = Concurrent::Map.new
-FACTORY = ->(topic, partition) do
-  THROTTLERS.compute_if_absent("#{topic.name}-#{partition}") do
-    # We set 30 seconds so we can trigger a rebalance and check that it still complies
-    ::Karafka::Pro::Processing::Filters::Throttler.new(5, 15_000)
+module Factory
+  THROTTLERS = Concurrent::Map.new
+
+  class << self
+    def call(topic, partition)
+      THROTTLERS.compute_if_absent("#{topic.name}-#{partition}") do
+        # We set 30 seconds so we can trigger a rebalance and check that it still complies
+        ::Karafka::Pro::Processing::Filters::Throttler.new(5, 15_000)
+      end
+    end
   end
 end
 
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
-    filter(FACTORY)
+    filter(Factory)
     manual_offset_management true
   end
 end
