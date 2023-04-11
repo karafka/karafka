@@ -10,6 +10,18 @@ RSpec.describe_current do
 
   before { allow(coordinator.topic.filtering).to receive(:factories).and_return(factories) }
 
+  context 'when initializing' do
+    before { allow(factory).to receive(:call) }
+
+    let(:factory) { ->(*) {} }
+    let(:factories) { [factory] }
+
+    it 'expect factories to be called with topic and partition' do
+      applier
+      expect(factory).to have_received(:call).with(coordinator.topic, coordinator.partition)
+    end
+  end
+
   context 'when factories are empty' do
     let(:factories) { [] }
 
