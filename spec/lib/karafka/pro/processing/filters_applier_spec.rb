@@ -1,14 +1,29 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:applier) { described_class.new(filters) }
+  subject(:applier) { described_class.new(coordinator) }
 
+  let(:coordinator) { build(:processing_coordinator_pro) }
   let(:first_message) { build(:messages_message) }
   let(:last_message) { build(:messages_message) }
   let(:messages) { [first_message, last_message] }
 
-  context 'when filters are empty' do
-    let(:filters) { [] }
+  before { allow(coordinator.topic.filtering).to receive(:factories).and_return(factories) }
+
+  context 'when initializing' do
+    before { allow(factory).to receive(:call) }
+
+    let(:factory) { ->(*) {} }
+    let(:factories) { [factory] }
+
+    it 'expect factories to be called with topic and partition' do
+      applier
+      expect(factory).to have_received(:call).with(coordinator.topic, coordinator.partition)
+    end
+  end
+
+  context 'when factories are empty' do
+    let(:factories) { [] }
 
     it { expect { applier.apply!(messages) }.not_to(change { messages }) }
 
@@ -34,7 +49,7 @@ RSpec.describe_current do
   end
 
   context 'when there are no messages' do
-    let(:filters) { [Karafka::Pro::Processing::Filters::Throttler.new(10, 10)] }
+    let(:factories) { [->(*) { Karafka::Pro::Processing::Filters::Throttler.new(10, 10) }] }
     let(:messages) { [] }
 
     it { expect { applier.apply!(messages) }.not_to(change { messages }) }
@@ -61,7 +76,7 @@ RSpec.describe_current do
   end
 
   context 'when there are messages but no filtering happened' do
-    let(:filters) { [Karafka::Pro::Processing::Filters::Throttler.new(10, 10)] }
+    let(:factories) { [->(*) { Karafka::Pro::Processing::Filters::Throttler.new(10, 10) }] }
 
     it { expect { applier.apply!(messages) }.not_to(change { messages }) }
 
@@ -87,7 +102,7 @@ RSpec.describe_current do
   end
 
   context 'when there are messages and filtering happened' do
-    let(:filters) { [Karafka::Pro::Processing::Filters::Throttler.new(0, 10)] }
+    let(:factories) { [->(*) { Karafka::Pro::Processing::Filters::Throttler.new(0, 10) }] }
 
     it { expect { applier.apply!(messages) }.to(change { messages }) }
 
@@ -113,10 +128,10 @@ RSpec.describe_current do
   end
 
   context 'when there are messages and multiple filters applied' do
-    let(:filters) do
+    let(:factories) do
       [
-        Karafka::Pro::Processing::Filters::Throttler.new(0, 10),
-        Karafka::Pro::Processing::Filters::Throttler.new(1, 0)
+        ->(*) { Karafka::Pro::Processing::Filters::Throttler.new(0, 10) },
+        ->(*) { Karafka::Pro::Processing::Filters::Throttler.new(1, 0) }
       ]
     end
 
@@ -144,10 +159,10 @@ RSpec.describe_current do
   end
 
   context 'when there are messages and multiple filters applied but none pauses' do
-    let(:filters) do
+    let(:factories) do
       [
-        Karafka::Pro::Processing::Filters::Throttler.new(1, 10),
-        Karafka::Pro::Processing::Filters::Throttler.new(1, 0)
+        ->(*) { Karafka::Pro::Processing::Filters::Throttler.new(1, 10) },
+        ->(*) { Karafka::Pro::Processing::Filters::Throttler.new(1, 0) }
       ]
     end
 
@@ -175,15 +190,18 @@ RSpec.describe_current do
   end
 
   context 'when none of the filters has seek or pause' do
-    let(:filters) do
+    let(:factories) do
       [
-        Karafka::Pro::Processing::Filters::Throttler.new(1, 10),
-        Karafka::Pro::Processing::Filters::Throttler.new(1, 0)
+        ->(*) { Karafka::Pro::Processing::Filters::Throttler.new(1, 10) },
+        ->(*) { Karafka::Pro::Processing::Filters::Throttler.new(1, 0) }
       ]
     end
 
     before do
-      filters.each { |filter| allow(filter).to receive(:action).and_return(:skip) }
+      applier.instance_variable_get('@filters').each do |filter|
+        allow(filter).to receive(:action).and_return(:skip)
+      end
+
       applier.apply!(messages)
     end
 

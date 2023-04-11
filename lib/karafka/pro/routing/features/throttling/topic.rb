@@ -35,7 +35,7 @@ module Karafka
                 # If someone defined throttling setup, we need to create appropriate filter for it
                 # and inject it via filtering feature
                 if config.active?
-                  factory = -> { Pro::Processing::Filters::Throttler.new(limit, interval) }
+                  factory = ->(*) { Pro::Processing::Filters::Throttler.new(limit, interval) }
                   filter(factory)
                 end
 

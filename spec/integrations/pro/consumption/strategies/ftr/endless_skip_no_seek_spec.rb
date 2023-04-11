@@ -51,7 +51,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    filter -> { Skipper.new }
+    filter ->(*) { Skipper.new }
   end
 end
 

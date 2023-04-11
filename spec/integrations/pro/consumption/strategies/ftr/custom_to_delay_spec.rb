@@ -58,7 +58,7 @@ end
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
-    filter(-> { DelayThrottler.new })
+    filter(->(*) { DelayThrottler.new })
   end
 end
 

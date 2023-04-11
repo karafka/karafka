@@ -26,7 +26,7 @@ module Karafka
           @executed = []
           @flow_lock = Mutex.new
           @collapser = Collapser.new
-          @filter = FiltersApplier.new(topic.filtering.filters)
+          @filter = FiltersApplier.new(self)
         end
 
         # Starts the coordination process
