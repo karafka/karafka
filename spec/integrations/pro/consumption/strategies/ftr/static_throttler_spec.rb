@@ -43,17 +43,16 @@ end
 elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
-Thread.new do
+consumer = setup_rdkafka_consumer
+
+thread = Thread.new do
   sleep(5)
 
-  consumer = setup_rdkafka_consumer
   consumer.subscribe(DT.topic)
 
   consumer.each do
     break
   end
-
-  consumer.close
 end
 
 start_karafka_and_wait_until do
@@ -61,3 +60,7 @@ start_karafka_and_wait_until do
 end
 
 assert (DT[:times].last - DT[:revoked].first) >= 5
+
+thread.join
+
+consumer.close
