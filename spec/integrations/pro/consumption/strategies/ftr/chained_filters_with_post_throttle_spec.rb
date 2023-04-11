@@ -47,7 +47,7 @@ end
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
-    filter(-> { OddRemoval.new })
+    filter(->(*) { OddRemoval.new })
     throttle(limit: 5, interval: 1_000)
   end
 end

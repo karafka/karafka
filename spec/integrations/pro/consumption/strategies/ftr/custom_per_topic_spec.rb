@@ -67,12 +67,12 @@ MyThrottler10 = Class.new(BaseThrottler)
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer1
-    filter(-> { MyThrottler1.new })
+    filter(->(*) { MyThrottler1.new })
   end
 
   topic DT.topics[1] do
     consumer Consumer2
-    filter(-> { MyThrottler10.new })
+    filter(->(*) { MyThrottler10.new })
   end
 end
 

@@ -55,7 +55,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    filter -> { Buffer.new }
+    filter ->(*) { Buffer.new }
     virtual_partitions(
       partitioner: ->(msg) { msg.raw_payload.to_i % 10 }
     )

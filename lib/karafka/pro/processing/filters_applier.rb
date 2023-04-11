@@ -21,9 +21,21 @@ module Karafka
       # This means that this is the API we expose as a single filter, allowing us to control
       # the filtering via many filters easily.
       class FiltersApplier
-        # @param filters [Array<Object>] array of filters we want to apply on the topic partition
-        def initialize(filters)
-          @filters = filters
+        # @param coordinator [Pro::Coordinator] pro coordinator
+        def initialize(coordinator)
+          # Builds filters out of their factories
+          # We build it that way (providing topic and partition) because there may be a case where
+          # someone wants to have a specific logic that is per topic or partition. Like for example
+          # a case where there is a cache bypassing revocations for topic partition.
+          #
+          # We provide full Karafka routing topic here and not the name only, in case the filter
+          # would be customized based on other topic settings (like VPs, etc)
+          #
+          # This setup allows for biggest flexibility also because topic object holds the reference
+          # to the subscription group and consumer group
+          @filters = coordinator.topic.filtering.factories.map do |factory|
+            factory.call(coordinator.topic, coordinator.partition)
+          end
         end
 
         # @param messages [Array<Karafka::Messages::Message>] array with messages from the
