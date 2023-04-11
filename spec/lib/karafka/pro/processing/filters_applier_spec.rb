@@ -90,7 +90,7 @@ RSpec.describe_current do
   end
 
   context 'when there are messages and filtering happened' do
-    let(:factories) { [->(*) { Karafka::Pro::Processing::Filters::Throttler.new(10, 10) }] }
+    let(:factories) { [->(*) { Karafka::Pro::Processing::Filters::Throttler.new(0, 10) }] }
 
     it { expect { applier.apply!(messages) }.to(change { messages }) }
 
