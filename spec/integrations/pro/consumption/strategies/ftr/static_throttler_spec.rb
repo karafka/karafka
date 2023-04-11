@@ -49,7 +49,7 @@ Thread.new do
   consumer = setup_rdkafka_consumer
   consumer.subscribe(DT.topic)
 
-  consumer.each do |message|
+  consumer.each do
     break
   end
 
