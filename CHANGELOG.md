@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.39 (2022-04-11)
+## 2.0.39 (Unreleased)
 - **[Feature]** Provide ability to throttle/limit number of messages processed in a time unit (#1203)
 - **[Feature]** Provide Delayed Topics (#1000)
 - **[Feature]** Provide ability to expire messages (expiring topics)
