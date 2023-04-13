@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.0.40 (Unreleased)
+## 2.0.40 (2023-04-13)
 - [Improvement] Introduce `Karafka::Messages::Messages#empty?` method to handle Idle related cases where shutdown or revocation would be called on an empty messages set. This method allows for checking if there are any messages in the messages batch.
 - [Refactor] Require messages builder to accept partition and do not fetch it from messages.
 - [Refactor] Use empty messages set for internal APIs (Idle) (so there always is `Karafka::Messages::Messages`)
