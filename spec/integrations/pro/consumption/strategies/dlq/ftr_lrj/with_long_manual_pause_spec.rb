@@ -13,7 +13,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     DT[:paused] << messages.first.offset
 
-    pause(messages.first.offset, 1_000)
+    pause(messages.first.offset, 2_000)
   end
 end
 

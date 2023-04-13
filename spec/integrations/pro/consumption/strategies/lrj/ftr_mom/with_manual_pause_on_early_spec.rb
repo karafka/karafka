@@ -19,7 +19,7 @@ class Consumer < Karafka::BaseConsumer
 
     return if messages.first.offset < 1
 
-    pause(messages.first.offset, 500)
+    pause(messages.first.offset, 2_000)
   end
 end
 
