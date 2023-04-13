@@ -96,6 +96,23 @@ def setup_karafka(
   end
 end
 
+# Loads the web UI for integration specs of tracking
+def setup_web
+  require 'karafka/web'
+
+  # Use new groups and topics for each spec, so we don't end up with conflicts
+  Karafka::Web.setup do |config|
+    config.processing.consumer_group = SecureRandom.hex(6)
+    config.topics.consumers.reports = SecureRandom.hex(6)
+    config.topics.consumers.states = SecureRandom.hex(6)
+    config.topics.errors = SecureRandom.hex(6)
+
+    yield(config) if block_given?
+  end
+
+  Karafka::Web.enable!
+end
+
 # Switches specs into a Pro mode
 def become_pro!
   mod = Module.new do

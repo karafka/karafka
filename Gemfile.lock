@@ -22,6 +22,7 @@ GEM
     concurrent-ruby (1.2.2)
     diff-lcs (1.5.0)
     docile (1.4.0)
+    erubi (1.12.0)
     factory_bot (6.2.1)
       activesupport (>= 5.0.0)
     ffi (1.15.5)
@@ -36,9 +37,18 @@ GEM
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
+    karafka-web (0.5.0)
+      erubi (~> 1.4)
+      karafka (>= 2.0.40, < 3.0.0)
+      karafka-core (>= 2.0.12, < 3.0.0)
+      roda (~> 3.63)
+      tilt (~> 2.0)
     mini_portile2 (2.8.1)
     minitest (5.18.0)
+    rack (3.0.7)
     rake (13.0.6)
+    roda (3.67.0)
+      rack
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
       rspec-expectations (~> 3.12.0)
@@ -59,6 +69,7 @@ GEM
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
     thor (1.2.1)
+    tilt (2.1.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     waterdrop (2.5.1)
@@ -67,7 +78,6 @@ GEM
     zeitwerk (2.6.7)
 
 PLATFORMS
-  arm64-darwin-21
   x86_64-linux
 
 DEPENDENCIES
@@ -75,6 +85,7 @@ DEPENDENCIES
   byebug
   factory_bot
   karafka!
+  karafka-web
   rspec
   simplecov
 
