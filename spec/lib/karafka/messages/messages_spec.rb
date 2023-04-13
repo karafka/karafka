@@ -82,4 +82,8 @@ RSpec.describe_current do
   describe '#size' do
     it { expect(messages.size).to eq messages.to_a.size }
   end
+
+  describe '#empty?' do
+    it { expect(messages.empty?).to eq(false) }
+  end
 end

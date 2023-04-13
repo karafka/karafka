@@ -40,6 +40,11 @@ module Karafka
         map(&:raw_payload)
       end
 
+      # @return [Boolean] is the messages batch empty
+      def empty?
+        @messages_array.empty?
+      end
+
       # @return [Karafka::Messages::Message] first message
       def first
         @messages_array.first
