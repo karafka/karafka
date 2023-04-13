@@ -41,8 +41,8 @@ RSpec.describe_current do
       it { is_expected.to be_a(Karafka::Messages::BatchMetadata) }
       it { expect(result.size).to eq 0 }
       it { expect(result.partition).to eq partition }
-      it { expect(result.first_offset).to eq -1001 }
-      it { expect(result.last_offset).to eq -1001 }
+      it { expect(result.first_offset).to eq(-1001) }
+      it { expect(result.last_offset).to eq(-1001) }
       it { expect(result.topic).to eq routing_topic.name }
       it { expect(result.deserializer).to eq routing_topic.deserializer }
       it { expect(result.scheduled_at).to eq(scheduled_at) }
