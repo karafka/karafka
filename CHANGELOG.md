@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## 2.0.40 (Unreleased)
+- [Refactor] Require messages builder to accept partition and do not fetch it from messages.
+- [Refactor] Use empty messages set for internal APIs (Idle) (so there always is `Karafa::Messages::Messages`)
+- [Refactor] Allow for empty messages set initialization with -1001 and -1 on metadata (similar to `librdkafka`)
+
 ## 2.0.39 (2023-04-11)
 - **[Feature]** Provide ability to throttle/limit number of messages processed in a time unit (#1203)
 - **[Feature]** Provide Delayed Topics (#1000)

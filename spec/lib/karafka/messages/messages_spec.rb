@@ -2,7 +2,7 @@
 
 RSpec.describe_current do
   subject(:messages) do
-    Karafka::Messages::Builders::Messages.call(messages_array, topic, received_at)
+    Karafka::Messages::Builders::Messages.call(messages_array, topic, 0, received_at)
   end
 
   let(:deserialized_payload) { { rand.to_s => rand.to_s } }
