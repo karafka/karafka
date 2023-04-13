@@ -2,7 +2,7 @@
 
 RSpec.describe_current do
   subject(:messages) do
-    Karafka::Messages::Builders::Messages.call(messages_array, topic, received_at)
+    Karafka::Messages::Builders::Messages.call(messages_array, topic, 0, received_at)
   end
 
   let(:deserialized_payload) { { rand.to_s => rand.to_s } }
@@ -81,5 +81,9 @@ RSpec.describe_current do
 
   describe '#size' do
     it { expect(messages.size).to eq messages.to_a.size }
+  end
+
+  describe '#empty?' do
+    it { expect(messages.empty?).to eq(false) }
   end
 end

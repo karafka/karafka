@@ -44,10 +44,6 @@ module Karafka
       #
       # @param messages [Array<Karafka::Messages::Message>]
       def before_enqueue(messages)
-        # the moment we've received the batch or actually the moment we've enqueued it,
-        # but good enough
-        @enqueued_at = Time.now
-
         # Recreate consumer with each batch if persistence is not enabled
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
@@ -57,8 +53,11 @@ module Karafka
         # First we build messages batch...
         consumer.messages = Messages::Builders::Messages.call(
           messages,
-          coordinator.topic,
-          @enqueued_at
+          topic,
+          partition,
+          # the moment we've received the batch or actually the moment we've enqueued it,
+          # but good enough
+          Time.now
         )
 
         consumer.on_before_enqueue
@@ -84,6 +83,16 @@ module Karafka
       # This may include house-keeping or other state management changes that can occur but that
       # not mean there are any new messages available for the end user to process
       def idle
+        # Initializes the messages set in case idle operation would happen before any processing
+        # This prevents us from having no messages object at all as the messages object and
+        # its metadata may be used for statistics
+        consumer.messages ||= Messages::Builders::Messages.call(
+          [],
+          topic,
+          partition,
+          Time.now
+        )
+
         consumer.on_idle
       end
 
