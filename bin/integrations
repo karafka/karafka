@@ -152,8 +152,14 @@ class Scenario
     end
   end
 
+  # @return [Float] number of seconds that a given spec took to run
+  def time_taken
+    @finished_at - @started_at
+  end
+
   # Close all the files that are open, so they do not pile up
   def close
+    @finished_at = current_time
     @stdin.close
     @stdout.close
     @stderr.close
@@ -262,13 +268,22 @@ while finished_scenarios.size < scenarios.size
   sleep(0.1)
 end
 
+# Report longest scenarios
+puts
+puts "\nLongest scenarios:\n\n"
+
+finished_scenarios.sort_by(&:time_taken).reverse.first(10).each do |long_scenario|
+  puts "[#{'%6.2f' % long_scenario.time_taken}] #{long_scenario.name}"
+end
+
 failed_scenarios = finished_scenarios.reject(&:success?)
 
-# Report once more on the failed jobs
-# This will only list scenarios that failed without printing their stdout here.
 if failed_scenarios.empty?
   puts
 else
+  # Report once more on the failed jobs
+  # This will only list scenarios that failed without printing their stdout here.
+  puts
   puts "\nFailed scenarios:\n\n"
 
   failed_scenarios.each do |scenario|
