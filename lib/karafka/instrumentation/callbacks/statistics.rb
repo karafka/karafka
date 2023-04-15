@@ -35,14 +35,14 @@ module Karafka
         # We need to catch and handle any potential errors coming from the instrumentation pipeline
         # as otherwise, in case of statistics which run in the main librdkafka thread, any crash
         # will hang the whole process.
-        rescue StandardError => error
+        rescue StandardError => e
           ::Karafka.monitor.instrument(
             'error.occurred',
             caller: self,
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
             type: 'statistics.emitted.error',
-            error: error
+            error: e
           )
         end
       end
