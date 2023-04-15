@@ -363,6 +363,13 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context 'when it is a statistics.emitted.error' do
+      let(:type) { 'statistics.emitted.error' }
+      let(:message) { "statistics.emitted processing failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context 'when it is an unsupported error type' do
       subject(:error_trigger) { listener.on_error_occurred(event) }
 

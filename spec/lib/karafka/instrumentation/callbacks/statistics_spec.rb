@@ -71,4 +71,29 @@ RSpec.describe_current do
     it { expect(event[:statistics]).to eq(statistics) }
     it { expect(event[:statistics]['val_d']).to eq(0) }
   end
+
+  describe 'behavior on errors' do
+    context 'when an error occurs in the call' do
+      let(:events) { [] }
+      let(:event) { events.first }
+      let(:statistics) { { 'name' => client_name } }
+
+      before do
+        monitor.subscribe('statistics.emitted') do
+          raise StandardError
+        end
+
+        monitor.subscribe('error.occurred') do |event|
+          events << event
+        end
+      end
+
+      it { expect { callback.call(statistics) }.not_to raise_error }
+
+      it 'expect to catch it and pipe to the instrumentation errors' do
+        callback.call(statistics)
+        expect(events).not_to be_empty
+      end
+    end
+  end
 end
