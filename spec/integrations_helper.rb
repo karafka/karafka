@@ -111,6 +111,7 @@ def setup_web
   end
 
   Karafka::Web.enable!
+  Karafka::Web::Installer.new.bootstrap!
 end
 
 # Switches specs into a Pro mode
