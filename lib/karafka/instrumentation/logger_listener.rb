@@ -62,7 +62,10 @@ module Karafka
         consumer = job.executor.topic.consumer
         topic = job.executor.topic.name
         partition = job.executor.partition
-        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic}/#{partition} finished in #{time}ms"
+        info info <<~MSG.tr("\n", ' ').strip!
+          [#{job.id}] #{job_type} job for #{consumer}
+          on #{topic}/#{partition} finished in #{time}ms
+        MSG
       end
 
       # Prints info about a consumer pause occurrence. Irrelevant if user or system initiated.
