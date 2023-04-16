@@ -1,6 +1,9 @@
 # Karafka framework changelog
 
 ## 2.0.41 (Unreleased)
+- [Improvement] Report via `LoggerListener` information about the partition on which a given job has started and finished.
+- [Improvement] Slightly normalize the `LoggerListener` format. Always report partition related operations as followed: `TOPIC_NAME/PARTITION`.
+- [Improvement] Do not retry recovery from `unknown_topic_or_part` when Karafka is shutting down as there is no point and no risk of any data losses.
 - [Improvement] Report `client.software.name` and `client.software.version` according to `librdkafka` recommendation.
 - [Improvement] Report ten longest integration specs after the suite execution.
 - [Improvement] Prevent user originating errors related to statistics processing after listener loop crash from potentially crashing the listener loop and hanging Karafka process.

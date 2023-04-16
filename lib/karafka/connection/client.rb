@@ -369,6 +369,8 @@ module Karafka
       rescue ::Rdkafka::RdkafkaError => e
         early_report = false
 
+        retryable = time_poll.attempts <= MAX_POLL_RETRIES && time_poll.retryable?
+
         # There are retryable issues on which we want to report fast as they are source of
         # problems and can mean some bigger system instabilities
         # Those are mainly network issues and exceeding the max poll interval
@@ -389,9 +391,10 @@ module Karafka
           return nil if @subscription_group.kafka[:'allow.auto.create.topics']
 
           early_report = true
-        end
 
-        retryable = time_poll.attempts <= MAX_POLL_RETRIES && time_poll.retryable?
+          # No sense in retrying when no topic/partition and we're no longe running
+          retryable = false unless Karafka::App.running?
+        end
 
         if early_report || !retryable
           Karafka.monitor.instrument(
