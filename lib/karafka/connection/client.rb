@@ -392,7 +392,7 @@ module Karafka
 
           early_report = true
 
-          # No sense in retrying when no topic/partition and we're no longe running
+          # No sense in retrying when no topic/partition and we're no longer running
           retryable = false unless Karafka::App.running?
         end
 
