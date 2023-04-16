@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.0.41 (Unreleased)
+- [Improvement] Report `client.software.name` and `client.software.version` according to `librdkafka` recommendation.
 - [Improvement] Report ten longest integration specs after the suite execution.
 - [Improvement] Prevent user originating errors related to statistics processing after listener loop crash from potentially crashing the listener loop and hanging Karafka process.
 

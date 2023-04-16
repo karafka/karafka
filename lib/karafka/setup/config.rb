@@ -18,7 +18,13 @@ module Karafka
       KAFKA_DEFAULTS = {
         # We emit the statistics by default, so all the instrumentation and web-ui work out of
         # the box, without requiring users to take any extra actions aside from enabling.
-        'statistics.interval.ms': 5_000
+        'statistics.interval.ms': 5_000,
+        'client.software.name': 'karafka',
+        'client.software.version': [
+          "v#{Karafka::VERSION}",
+          "rdkafka-ruby-v#{Rdkafka::VERSION}",
+          "librdkafka-v#{Rdkafka::LIBRDKAFKA_VERSION}"
+        ].join('-')
       }.freeze
 
       # Contains settings that should not be used in production but make life easier in dev
