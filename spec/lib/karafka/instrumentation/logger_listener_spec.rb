@@ -78,7 +78,7 @@ RSpec.describe_current do
 
     let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
     let(:message) do
-      "[#{client.id}] Pausing partition 0 of topic Topic on offset 12"
+      "[#{client.id}] Pausing on topic Topic/0 on offset 12"
     end
     let(:payload) do
       {
@@ -97,7 +97,7 @@ RSpec.describe_current do
 
     let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
     let(:message) do
-      "[#{client.id}] Resuming partition 0 of topic Topic"
+      "[#{client.id}] Resuming on topic Topic/0"
     end
     let(:payload) do
       {
@@ -116,8 +116,7 @@ RSpec.describe_current do
     let(:consumer) { Class.new(Karafka::BaseConsumer).new }
     let(:message) do
       <<~MSG.tr("\n", ' ').strip
-        [#{consumer.id}] Retrying of #{consumer.class} after 100 ms on partition 0
-        of topic Topic from offset 12
+        [#{consumer.id}] Retrying of #{consumer.class} after 100 ms on topic Topic/0 from offset 12
       MSG
     end
     let(:payload) do

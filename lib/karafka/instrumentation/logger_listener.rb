@@ -48,7 +48,8 @@ module Karafka
         job_type = job.class.to_s.split('::').last
         consumer = job.executor.topic.consumer
         topic = job.executor.topic.name
-        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} started"
+        partition = job.executor.partition
+        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic}/#{partition} started"
       end
 
       # Prints info about the fact that a given job has finished
@@ -60,7 +61,11 @@ module Karafka
         job_type = job.class.to_s.split('::').last
         consumer = job.executor.topic.consumer
         topic = job.executor.topic.name
-        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
+        partition = job.executor.partition
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{job.id}] #{job_type} job for #{consumer}
+          on #{topic}/#{partition} finished in #{time}ms
+        MSG
       end
 
       # Prints info about a consumer pause occurrence. Irrelevant if user or system initiated.
@@ -73,7 +78,7 @@ module Karafka
         client = event[:caller]
 
         info <<~MSG.tr("\n", ' ').strip!
-          [#{client.id}] Pausing partition #{partition} of topic #{topic} on offset #{offset}
+          [#{client.id}] Pausing on topic #{topic}/#{partition} on offset #{offset}
         MSG
       end
 
@@ -86,7 +91,7 @@ module Karafka
         client = event[:caller]
 
         info <<~MSG.tr("\n", ' ').strip!
-          [#{client.id}] Resuming partition #{partition} of topic #{topic}
+          [#{client.id}] Resuming on topic #{topic}/#{partition}
         MSG
       end
 
@@ -102,7 +107,7 @@ module Karafka
 
         info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Retrying of #{consumer.class} after #{timeout} ms
-          on partition #{partition} of topic #{topic} from offset #{offset}
+          on topic #{topic}/#{partition} from offset #{offset}
         MSG
       end
 

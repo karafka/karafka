@@ -14,7 +14,10 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if messages.count < 2
+    if messages.count < 2 && @not_first.nil?
+      @not_first = true
+      return
+    end
 
     DT[:paused] << messages.first.offset
 
