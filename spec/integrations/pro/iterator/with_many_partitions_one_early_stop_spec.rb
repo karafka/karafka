@@ -24,9 +24,9 @@ partitioned_data = Hash.new { |h, v| h[v] = [] }
 
 iterator = Karafka::Pro::Iterator.new(DT.topic)
 
-iterator.each do |message, iterator|
+iterator.each do |message, internal_iterator|
   if message.partition.zero?
-    iterator.stop_partition(0)
+    internal_iterator.stop_partition(0)
 
     next
   end

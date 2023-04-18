@@ -19,8 +19,6 @@ partitioned_elements = {}
   partitioned_elements[partition] = elements
 end
 
-partitioned_data = Hash.new { |h, v| h[v] = [] }
-
 iterator = Karafka::Pro::Iterator.new(
   DT.topic,
   settings: {
@@ -30,8 +28,8 @@ iterator = Karafka::Pro::Iterator.new(
   }
 )
 
-iterator.each do |message, iterator|
-  iterator.stop_partition(message.partition)
+iterator.each do |message, internal_iterator|
+  internal_iterator.stop_partition(message.partition)
 end
 
 # No spec needed, things would hang if we would not stop
