@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When iterating over the topics, we should be able to use the pause current to stop only the
-# current topic partiion processing
+# current topic partition processing
 
 setup_karafka
 
@@ -26,7 +26,6 @@ partitioned_elements = {}
 end
 
 partitioned_data = Hash.new { |h, v| h[v] = [] }
-
 
 iterator = Karafka::Pro::Iterator.new(DT.topics[0], DT.topics[1])
 

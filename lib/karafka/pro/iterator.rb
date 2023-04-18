@@ -98,6 +98,7 @@ module Karafka
         @stopped_partitions = 0
       end
 
+      # Stops the partition we're currently yielded into
       def stop_current_partition
         stop_partition(
           @current_message.topic,
@@ -112,6 +113,7 @@ module Karafka
       #
       # We pause it forever and no longer work with it.
       #
+      # @param name [String] topic name of which partition we want to stop
       # @param partition [Integer] partition we want to stop processing
       def stop_partition(name, partition)
         @stopped_partitions += 1
@@ -175,6 +177,7 @@ module Karafka
         tpl
       end
 
+      # @param name [String] topic name
       # @return [Integer] number of partitions of the topic we want to iterate over
       def partition_count(name)
         Admin
