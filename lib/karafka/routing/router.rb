@@ -32,8 +32,23 @@ module Karafka
         nil
       end
 
+      # Finds the topic by name (in any consumer group) and if not present, will built a new
+      # representation of the topic with the defaults and default deserializer.
+      #
+      # This is used in places where we may operate on topics that are not part of the routing
+      # but we want to do something on them (display data, iterate over, etc)
+      # @param name [String] name of the topic we are looking for
+      # @return [Karafka::Routing::Topic]
+      #
+      # @note Please note, that in case of a new topic, it will have a newly built consumer group
+      #   as well, that is not part of the routing.
+      def find_or_initialize_by_name(name)
+        find_by(name: name) || Topic.new(name, ConsumerGroup.new(name))
+      end
+
       module_function :find
       module_function :find_by
+      module_function :find_or_initialize_by_name
     end
   end
 end
