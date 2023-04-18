@@ -46,16 +46,9 @@ other =  Thread.new do
   sleep(10)
 
   consumer.subscribe(DT.topic)
-  # 1 message is enough
-  consumer.each do
-    next if DT[:end].empty?
-
-    break
-  end
+  consumer.poll(100) while DT[:end].empty?
 
   sleep(2)
-
-  consumer.close
 end
 
 start_karafka_and_wait_until do
@@ -85,3 +78,4 @@ assert_not_equal [0, 1, 2], re_assigned
 assert re_assigned.size == 1 || re_assigned.size == 2
 
 other.join
+consumer.close
