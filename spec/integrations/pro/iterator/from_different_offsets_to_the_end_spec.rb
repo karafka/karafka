@@ -22,7 +22,11 @@ end
 
 partitioned_data = Hash.new { |h, v| h[v] = [] }
 
-iterator = Karafka::Pro::Iterator.new(DT.topic, partitions: { 0 => 0, 1 => 10 })
+iterator = Karafka::Pro::Iterator.new(
+  {
+    DT.topic => { 0 => 0, 1 => 10 }
+  }
+)
 
 iterator.each do |message|
   partitioned_data[message.partition] << message

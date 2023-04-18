@@ -30,7 +30,12 @@ assert_equal 20, i
 
 # From middle till the end
 i = 9
-iterator = Karafka::Pro::Iterator.new(DT.topic, partitions: { 0 => 9 })
+iterator = Karafka::Pro::Iterator.new(
+  {
+    DT.topic => { 0 => 9 }
+  }
+)
+
 iterator.each do |message|
   assert_equal i, message.offset
   assert_equal message.raw_payload, elements[i]

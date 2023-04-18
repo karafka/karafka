@@ -32,10 +32,9 @@ module Karafka
       # for data lookups. It allows for explicit stopping iteration over any partition during
       # the iteration process, allowing for optimized lookups.
       #
-      # @param name [String] name of the topic from which we want to get the data
-      # @param partitions [Array<Integer>, Range, Hash<Integer, Integer>] Array or range with
-      #   partitions to which we want to subscribe or a hash with keys with partitions and values
-      #   with initial offsets.
+      # @param topics [Array<String>, Hash] list of strings if we want to subscribe to multiple
+      #   topics and all of their partitions or a hash where keys are the topics and values are
+      #   hashes with partitions and their initial offsets.
       # @param settings [Hash] extra settings for the consumer. Please keep in mind, that if
       #   overwritten, you may want to include `auto.offset.reset` to match your case.
       #
@@ -44,11 +43,26 @@ module Karafka
       #
       # @note In case of a never-ending iterator, you need to set `enable.partition.eof` to `false`
       #   so we don't stop polling data even when reaching the end (end on a given moment)
-      def initialize(name, partitions: [], settings: { 'auto.offset.reset': 'beginning' })
-        @name = name.to_s
-        @topic = ::Karafka::Routing::Router.find_or_initialize_by_name(@name)
-        @partitions = partitions.empty? ? (0..partition_count - 1) : partitions
+      def initialize(*topics, settings: { 'auto.offset.reset': 'beginning' })
+        if topics.first.is_a?(Hash)
+          @topics_with_partitions = topics.first
+        else
+          @topics_with_partitions = topics.map do |topic|
+            [
+              topic,
+              (0..partition_count(topic.to_s) - 1).map { |partition| [partition, 0] }.to_h
+            ]
+          end.to_h
+        end
+
+        @routing_topics = @topics_with_partitions.map do |name, _|
+          [name, ::Karafka::Routing::Router.find_or_initialize_by_name(name)]
+        end.to_h
+
+        @total_partitions = @topics_with_partitions.map(&:last).sum(&:count)
+
         @stopped_partitions = 0
+
         @settings = settings
       end
 
@@ -71,16 +85,24 @@ module Karafka
 
             next unless message
 
-            yield(
-              build_message(message), self
-            )
+            @current_message = build_message(message)
+
+            yield(@current_message, self)
           end
 
+          @current_message = nil
           @current_consumer = nil
         end
 
         # Reset so we can use the same iterator again if needed
         @stopped_partitions = 0
+      end
+
+      def stop_current_partition
+        stop_partition(
+          @current_message.topic,
+          @current_message.partition
+        )
       end
 
       # Stops processing of a given partition
@@ -91,12 +113,12 @@ module Karafka
       # We pause it forever and no longer work with it.
       #
       # @param partition [Integer] partition we want to stop processing
-      def stop_partition(partition)
+      def stop_partition(name, partition)
         @stopped_partitions += 1
 
         @current_consumer.pause(
           Rdkafka::Consumer::TopicPartitionList.new(
-            @name => [Partition.new(partition, 0)]
+            name => [Partition.new(partition, 0)]
           )
         )
       end
@@ -125,7 +147,7 @@ module Karafka
       def build_message(message)
         Messages::Builders::Message.call(
           message,
-          @topic,
+          @routing_topics.fetch(message.topic),
           Time.now
         )
       end
@@ -133,7 +155,7 @@ module Karafka
       # Do we have all the data we wanted or did every topic partition has reached eof.
       # @return [Boolean]
       def done?
-        @stopped_partitions >= @partitions.size
+        @stopped_partitions >= @total_partitions
       end
 
       # Builds the tpl representing all the subscriptions we want to run
@@ -141,22 +163,24 @@ module Karafka
       def tpl
         tpl = Rdkafka::Consumer::TopicPartitionList.new
 
-        if @partitions.is_a?(Array) || @partitions.is_a?(Range)
-          partitions_with_offsets = @partitions.map { |partition| [partition, 0] }.to_h
-          tpl.add_topic_and_partitions_with_offsets(@name, partitions_with_offsets)
-        else
-          tpl.add_topic_and_partitions_with_offsets(@name, @partitions)
+        @topics_with_partitions.each do |name, partitions|
+          if partitions.is_a?(Array) || partitions.is_a?(Range)
+            partitions_with_offsets = partitions.map { |partition| [partition, 0] }.to_h
+            tpl.add_topic_and_partitions_with_offsets(name, partitions_with_offsets)
+          else
+            tpl.add_topic_and_partitions_with_offsets(name, partitions)
+          end
         end
 
         tpl
       end
 
       # @return [Integer] number of partitions of the topic we want to iterate over
-      def partition_count
+      def partition_count(name)
         Admin
           .cluster_info
           .topics
-          .find { |topic| topic.fetch(:topic_name) == @name }
+          .find { |topic| topic.fetch(:topic_name) == name }
           .fetch(:partitions)
           .count
       end

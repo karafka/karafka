@@ -29,7 +29,7 @@ iterator = Karafka::Pro::Iterator.new(
 )
 
 iterator.each do |message, internal_iterator|
-  internal_iterator.stop_partition(message.partition)
+  internal_iterator.stop_partition(DT.topic, message.partition)
 end
 
 # No spec needed, things would hang if we would not stop

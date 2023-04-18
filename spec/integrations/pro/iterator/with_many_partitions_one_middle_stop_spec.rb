@@ -26,7 +26,7 @@ iterator = Karafka::Pro::Iterator.new(DT.topic)
 
 iterator.each do |message, internal_iterator|
   if message.partition.zero? && message.offset == 10
-    internal_iterator.stop_partition(0)
+    internal_iterator.stop_partition(DT.topic, 0)
 
     next
   end
