@@ -96,13 +96,15 @@ module Karafka
           end
         end
 
+        # Use topic from routes if we can match it or create a dummy one
+        # Dummy one is used in case we cannot match the topic with routes. This can happen
+        # when admin API is used to read topics that are not part of the routing
+        topic = ::Karafka::Routing::Router.find_or_initialize_by_name(name)
+
         messages.map! do |message|
           Messages::Builders::Message.call(
             message,
-            # Use topic from routes if we can match it or create a dummy one
-            # Dummy one is used in case we cannot match the topic with routes. This can happen
-            # when admin API is used to read topics that are not part of the routing
-            Routing::Router.find_by(name: name) || Topic.new(name, App.config.deserializer),
+            topic,
             Time.now
           )
         end
@@ -173,6 +175,17 @@ module Karafka
         end
       end
 
+      # Creates consumer instance and yields it. After usage it closes the consumer instance
+      # This API can be used in other pieces of code and allows for low-level consumer usage
+      #
+      # @param settings [Hash] extra settings to customize consumer
+      def with_consumer(settings = {})
+        consumer = config(:consumer, settings).consumer
+        yield(consumer)
+      ensure
+        consumer&.close
+      end
+
       private
 
       # @return [Array<String>] topics names
@@ -193,15 +206,6 @@ module Karafka
         yield(admin)
       ensure
         admin&.close
-      end
-
-      # Creates consumer instance and yields it. After usage it closes the consumer instance
-      # @param settings [Hash] extra settings to customize consumer
-      def with_consumer(settings = {})
-        consumer = config(:consumer, settings).consumer
-        yield(consumer)
-      ensure
-        consumer&.close
       end
 
       # There are some cases where rdkafka admin operations finish successfully but without the
