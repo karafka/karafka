@@ -11,6 +11,11 @@ module Karafka
     #
     # It does **not** create a consumer group and does not have any offset management.
     class Iterator
+      # Local partition reference for librdkafka
+      Partition = Struct.new(:partition, :offset)
+
+      private_constant :Partition
+
       # A simple API allowing to iterate over topic/partition data, without having to subscribe
       # and deal with rebalances. This API allows for multi-partition streaming and is optimized
       # for data lookups. It allows for explicit stopping iteration over any partition during
@@ -28,7 +33,7 @@ module Karafka
       #
       # @note In case of a never-ending iterator, you need to set `enable.partition.eof` to `false`
       #   so we don't stop polling data even when reaching the end (end on a given moment)
-      def initialize(name, partitions = [], settings = { 'auto.offset.reset': 'beginning' })
+      def initialize(name, partitions: [], settings: { 'auto.offset.reset': 'beginning' })
         @name = name.to_s
         @topic = ::Karafka::Routing::Router.find_or_initialize_by_name(@name)
         @partitions = partitions.empty? ? (0..partition_count - 1) : partitions
@@ -79,7 +84,9 @@ module Karafka
         @stopped_partitions += 1
 
         @current_consumer.pause(
-          Rdkafka::Consumer::TopicPartitionList.new(topic => [partition])
+          Rdkafka::Consumer::TopicPartitionList.new(
+            @name => [Partition.new(partition, 0)]
+          )
         )
       end
 

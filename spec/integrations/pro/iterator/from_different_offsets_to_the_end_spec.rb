@@ -22,7 +22,7 @@ end
 
 partitioned_data = Hash.new { |h, v| h[v] = [] }
 
-iterator = Karafka::Pro::Iterator.new(DT.topic, 0 => 0, 1 => 9)
+iterator = Karafka::Pro::Iterator.new(DT.topic, partitions: { 0 => 0, 1 => 10 })
 
 iterator.each do |message|
   partitioned_data[message.partition] << message
@@ -39,11 +39,15 @@ partitioned_data[0].each do |message|
   offset += 1
 end
 
+assert_equal partitioned_elements[0].size, 20
+
 # for partition 1 we start from the middle
-offset = 9
+offset = 10
 partitioned_data[1].each do |message|
   assert_equal offset, message.offset
   assert_equal message.raw_payload, partitioned_elements[1][offset]
 
   offset += 1
 end
+
+assert_equal partitioned_data[1].size, 10, partitioned_data[1].size
