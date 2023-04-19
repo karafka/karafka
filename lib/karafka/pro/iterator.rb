@@ -37,13 +37,19 @@ module Karafka
       #   hashes with partitions and their initial offsets.
       # @param settings [Hash] extra settings for the consumer. Please keep in mind, that if
       #   overwritten, you may want to include `auto.offset.reset` to match your case.
+      # @param yield_nil [Boolean] should we yield also `nil` values when poll returns nothing.
+      #   Useful in particular for long-living iterators.
       #
       # @note It is worth keeping in mind, that this API also needs to operate within
       #   `max.poll.interval.ms` limitations on each iteration
       #
       # @note In case of a never-ending iterator, you need to set `enable.partition.eof` to `false`
       #   so we don't stop polling data even when reaching the end (end on a given moment)
-      def initialize(topics, settings: { 'auto.offset.reset': 'beginning' })
+      def initialize(
+        topics,
+        settings: { 'auto.offset.reset': 'beginning' },
+        yield_nil: false
+      )
         @topics_with_partitions = expand_topics_with_partitions(topics)
 
         @routing_topics = @topics_with_partitions.map do |name, _|
@@ -55,6 +61,7 @@ module Karafka
         @stopped_partitions = 0
 
         @settings = settings
+        @yield_nil = yield_nil
       end
 
       # Iterates over requested topic partitions and yields the results with the iterator itself
@@ -75,11 +82,16 @@ module Karafka
           until done?
             message = poll(200)
 
-            next unless message
+            # Skip nils if not explicitely required
+            next if message.nil? && !@yield_nil
 
-            @current_message = build_message(message)
+            if message
+              @current_message = build_message(message)
 
-            yield(@current_message, self)
+              yield(@current_message, self)
+            else
+              yield(nil, self)
+            end
           end
 
           @current_message = nil
