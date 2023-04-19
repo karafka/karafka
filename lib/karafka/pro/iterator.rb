@@ -43,17 +43,8 @@ module Karafka
       #
       # @note In case of a never-ending iterator, you need to set `enable.partition.eof` to `false`
       #   so we don't stop polling data even when reaching the end (end on a given moment)
-      def initialize(*topics, settings: { 'auto.offset.reset': 'beginning' })
-        if topics.first.is_a?(Hash)
-          @topics_with_partitions = topics.first
-        else
-          @topics_with_partitions = topics.map do |topic|
-            [
-              topic,
-              (0..partition_count(topic.to_s) - 1).map { |partition| [partition, 0] }.to_h
-            ]
-          end.to_h
-        end
+      def initialize(topics, settings: { 'auto.offset.reset': 'beginning' })
+        @topics_with_partitions = expand_topics_with_partitions(topics)
 
         @routing_topics = @topics_with_partitions.map do |name, _|
           [name, ::Karafka::Routing::Router.find_or_initialize_by_name(name)]
@@ -73,6 +64,7 @@ module Karafka
       # only eat up resources.
       def each
         Admin.with_consumer(@settings) do |consumer|
+          tpl = tpl_with_expanded_offsets(consumer)
           consumer.assign(tpl)
 
           # We need this for self-referenced APIs like pausing
@@ -127,6 +119,43 @@ module Karafka
 
       private
 
+      # Expands topics to which we want to subscribe with partitions information in case this
+      # info is not provided. For our convenience we want to support 5 formats of defining
+      # the subscribed topics:
+      #
+      # - 'topic1' - just a string with one topic name
+      # - ['topic1', 'topic2'] - just the names
+      # - { 'topic1' => -100 } - names with negative lookup offset
+      # - { 'topic1' => { 0 => 5 } } - names with exact partitions offsets
+      # - { 'topic1' => { 0 => -5 }, 'topic2' => { 1 => 5 } } - with per partition negative offsets
+      #
+      # @param topics [Array, Hash] topics definitions
+      # @return [Hash] hash with topics containing partitions definitions
+      def expand_topics_with_partitions(topics)
+        # Simplification for the single topic case
+        topics = [topics] if topics.is_a?(String)
+        # If we've got just array with topics, we need to convert that into a representation
+        # that we can expand with offsets
+        topics = topics.map { |name| [name, false] }.to_h if topics.is_a?(Array)
+
+        expanded = Hash.new { |h, k| h[k] = {} }
+
+        topics.map do |topic, details|
+          if details.is_a?(Hash)
+            details.each do |partition, offset|
+              expanded[topic][partition] = offset
+            end
+          else
+            partition_count(topic.to_s).times do |partition|
+              # If no offsets are provided, we just start from zero
+              expanded[topic][partition] = details || 0
+            end
+          end
+        end
+
+        expanded
+      end
+
       # @param timeout [Integer] timeout in ms
       # @return [Rdkafka::Consumer::Message, nil] message or nil if nothing to do
       def poll(timeout)
@@ -161,17 +190,37 @@ module Karafka
       end
 
       # Builds the tpl representing all the subscriptions we want to run
+      #
+      # Additionally for negative offsets, does the watermark calculation where to start
+      #
+      # @param consumer [Rdkafka::Consumer] consumer we need in case of negative offsets as
+      #   negative are going to be used to do "give me last X". We use the already initialized
+      #   consumer instance, not to start another one again.
       # @return [Rdkafka::Consumer::TopicPartitionList]
-      def tpl
+      def tpl_with_expanded_offsets(consumer)
         tpl = Rdkafka::Consumer::TopicPartitionList.new
 
         @topics_with_partitions.each do |name, partitions|
+          partitions_with_offsets = {}
+
+          # When no offsets defined, we just start from zero
           if partitions.is_a?(Array) || partitions.is_a?(Range)
             partitions_with_offsets = partitions.map { |partition| [partition, 0] }.to_h
-            tpl.add_topic_and_partitions_with_offsets(name, partitions_with_offsets)
           else
-            tpl.add_topic_and_partitions_with_offsets(name, partitions)
+            # When offsets defined, we can either use them if positive or expand and move back
+            # in case of negative (-1000 means last 1000 messages, etc)
+            partitions.each do |partition, offset|
+              if offset.negative?
+                _, high_watermark_offset = consumer.query_watermark_offsets(name, partition)
+                # We add because this offset is negative
+                partitions_with_offsets[partition] = high_watermark_offset + offset
+              else
+                partitions_with_offsets[partition] = offset
+              end
+            end
           end
+
+          tpl.add_topic_and_partitions_with_offsets(name, partitions_with_offsets)
         end
 
         tpl
