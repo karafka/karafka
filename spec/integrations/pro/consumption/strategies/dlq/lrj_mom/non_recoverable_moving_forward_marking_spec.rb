@@ -5,7 +5,7 @@
 
 class Listener
   def on_error_occurred(event)
-    DT[:errors] << event
+    DT[:errors] << true
   end
 end
 
