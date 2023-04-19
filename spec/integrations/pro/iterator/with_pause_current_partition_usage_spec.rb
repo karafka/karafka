@@ -27,7 +27,9 @@ end
 
 partitioned_data = Hash.new { |h, v| h[v] = [] }
 
-iterator = Karafka::Pro::Iterator.new(DT.topics[0], DT.topics[1])
+iterator = Karafka::Pro::Iterator.new(
+  [DT.topics[0], DT.topics[1]]
+)
 
 iterator.each do |message, internal_iterator|
   if message.topic == DT.topics[0] && message.offset == 10

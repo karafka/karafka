@@ -1,7 +1,7 @@
 # Karafka framework changelog
 
 ## 2.0.41 (Unreleased)
-- **[Feature]** Provide `Karafka::Pro::Iterator` for anonymous topic/partitions iterations and messages lookups (#1389).
+- **[Feature]** Provide `Karafka::Pro::Iterator` for anonymous topic/partitions iterations and messages lookups (#1389 and #1427).
 - [Improvement] Optimize topic lookup for `read_topic` admin method usage.
 - [Improvement] Report via `LoggerListener` information about the partition on which a given job has started and finished.
 - [Improvement] Slightly normalize the `LoggerListener` format. Always report partition related operations as followed: `TOPIC_NAME/PARTITION`.

@@ -43,7 +43,7 @@ module Karafka
       #
       # @note In case of a never-ending iterator, you need to set `enable.partition.eof` to `false`
       #   so we don't stop polling data even when reaching the end (end on a given moment)
-      def initialize(*topics, settings: { 'auto.offset.reset': 'beginning' })
+      def initialize(topics, settings: { 'auto.offset.reset': 'beginning' })
         @topics_with_partitions = expand_topics_with_partitions(topics)
 
         @routing_topics = @topics_with_partitions.map do |name, _|
@@ -120,18 +120,36 @@ module Karafka
       private
 
       # Expands topics to which we want to subscribe with partitions information in case this
-      # info is not provided
+      # info is not provided. For our convinience we want to support 5 formats of defining
+      # the subscribed topics:
+      #
+      # - 'topic1' - just a string with one topic name
+      # - ['topic1', 'topic2'] - just the names
+      # - { 'topic1' => -100 } - names with negative lookup offset
+      # - { 'topic1' => { 0 => 5 } } - names with exact partitions offsets
+      # - { 'topic1' => { 0 => -5 }, 'topic2' => { 1 => 5 } } - with per partition negative offsets
+      #
       # @param topics [Array, Hash] topics definitions
       # @return [Hash] hash with topics containing partitions definitions
       def expand_topics_with_partitions(topics)
-        return topics.first if topics.first.is_a?(Hash)
+        # Simplification for the single topic case
+        topics = [topics] if topics.is_a?(String)
+        # If we've got just array with topics, we need to convert that into a representation
+        # that we can expand with offsets
+        topics = topics.map { |name| [name, false] }.to_h if topics.is_a?(Array)
 
         expanded = Hash.new { |h, k| h[k] = {} }
 
-        # If no offset are provided, we just start from zero
-        topics.map do |topic|
-          partition_count(topic.to_s).times do |partition|
-            expanded[topic][partition] = 0
+        topics.map do |topic, details|
+          if details.is_a?(Hash)
+            details.each do |partition, offset|
+              expanded[topic][partition] = offset
+            end
+          else
+            partition_count(topic.to_s).times do |partition|
+              # If no offsets are provided, we just start from zero
+              expanded[topic][partition] = details || 0
+            end
           end
         end
 
@@ -188,6 +206,10 @@ module Karafka
           # When no offsets defined, we just start from zero
           if partitions.is_a?(Array) || partitions.is_a?(Range)
             partitions_with_offsets = partitions.map { |partition| [partition, 0] }.to_h
+          # This case supports a case when we define a topic wide negative offset
+          # This means "give me last X messages" for each of the partitions
+          elsif partitions.is_a?(Integer) && partitions.negative?
+
           else
             # When offsets defined, we can either use them if positive or expand and move back
             # in case of negative (-1000 means last 1000 messages, etc)
