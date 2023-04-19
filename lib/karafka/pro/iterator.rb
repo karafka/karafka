@@ -120,7 +120,7 @@ module Karafka
       private
 
       # Expands topics to which we want to subscribe with partitions information in case this
-      # info is not provided. For our convinience we want to support 5 formats of defining
+      # info is not provided. For our convenience we want to support 5 formats of defining
       # the subscribed topics:
       #
       # - 'topic1' - just a string with one topic name
@@ -206,10 +206,6 @@ module Karafka
           # When no offsets defined, we just start from zero
           if partitions.is_a?(Array) || partitions.is_a?(Range)
             partitions_with_offsets = partitions.map { |partition| [partition, 0] }.to_h
-          # This case supports a case when we define a topic wide negative offset
-          # This means "give me last X messages" for each of the partitions
-          elsif partitions.is_a?(Integer) && partitions.negative?
-
           else
             # When offsets defined, we can either use them if positive or expand and move back
             # in case of negative (-1000 means last 1000 messages, etc)
