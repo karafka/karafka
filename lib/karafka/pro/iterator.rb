@@ -82,7 +82,7 @@ module Karafka
           until done?
             message = poll(200)
 
-            # Skip nils if not explicitely required
+            # Skip nils if not explicitly required
             next if message.nil? && !@yield_nil
 
             if message
