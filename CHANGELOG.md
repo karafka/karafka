@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.1.0 (Unreleased)
+- [Improvement] Do not attempt to mark offsets on already revoked partitions.
+
 ## 2.0.41 (2023-14-19)
 - **[Feature]** Provide `Karafka::Pro::Iterator` for anonymous topic/partitions iterations and messages lookups (#1389 and #1427).
 - [Improvement] Optimize topic lookup for `read_topic` admin method usage.

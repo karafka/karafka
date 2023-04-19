@@ -28,6 +28,22 @@ module Karafka
               virtual_partitions
             ].freeze
 
+            def mark_as_consumed(message)
+              if collapsed?
+                super
+              else
+                super
+              end
+            end
+
+            def mark_as_consumed!(message)
+              if collapsed?
+                super
+              else
+                super
+              end
+            end
+
             # @return [Boolean] is the virtual processing collapsed in the context of given
             #   consumer.
             def collapsed?

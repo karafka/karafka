@@ -17,7 +17,7 @@ module Karafka
       # Pro coordinator that provides extra orchestration methods useful for parallel processing
       # within the same partition
       class Coordinator < ::Karafka::Processing::Coordinator
-        attr_reader :filter
+        attr_reader :filter, :offsets_manager
 
         # @param args [Object] anything the base coordinator accepts
         def initialize(*args)
@@ -27,6 +27,7 @@ module Karafka
           @flow_lock = Mutex.new
           @collapser = Collapser.new
           @filter = FiltersApplier.new(self)
+          @offsets_manager = OffsetsManager.new
         end
 
         # Starts the coordination process
@@ -40,6 +41,8 @@ module Karafka
           @filter.apply!(messages)
 
           @executed.clear
+          @offsets_manager.clear
+
           @last_message = messages.last
         end
 
