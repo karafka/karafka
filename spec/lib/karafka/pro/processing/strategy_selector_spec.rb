@@ -366,7 +366,7 @@ RSpec.describe_current do
 
         # Virtual partitions are not allowed with manual offset management in any combination
         # Hence we need to exclude any of them operating together
-        mom_with_vp + %i[long_running_job filtering],
+# mom_with_vp + %i[long_running_job filtering],
         mom_with_vp + %i[filtering],
         mom_with_vp + %i[dead_letter_queue],
         mom_with_vp + %i[dead_letter_queue long_running_job],

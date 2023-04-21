@@ -15,18 +15,23 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        module Mom
-          # - Mom enabled
-          # - Vp enabled
-          module Vp
-            include Strategies::Vp::Default
-            include Strategies::Mom::Default
-
-            # Features of this strategy
+        # Filtering related init strategies
+        module Lrj
+          # Filtering enabled
+          # LRJ enabled
+          # MoM enabled
+          # VPs enabled
+          module FtrMomVp
+            # Filtering + LRJ + Mom + VPs
             FEATURES = %i[
+              filtering
+              long_running_job
               manual_offset_management
               virtual_partitions
             ].freeze
+
+            include Strategies::Lrj::MomVp
+            include Strategies::Lrj::FtrMom
           end
         end
       end

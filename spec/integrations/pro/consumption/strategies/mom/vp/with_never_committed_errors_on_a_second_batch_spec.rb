@@ -22,7 +22,7 @@ draw_routes do
     consumer Consumer
     manual_offset_management true
     virtual_partitions(
-      partitioner: ->(msg) { rand(9) }
+      partitioner: ->(_msg) { rand(9) }
     )
   end
 end

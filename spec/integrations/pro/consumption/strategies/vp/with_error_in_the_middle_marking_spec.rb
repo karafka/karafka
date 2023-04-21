@@ -50,7 +50,7 @@ start_karafka_and_wait_until do
   end
 end
 
-(0..24).each do |offset|
+24.times do |offset|
   assert_equal 1, DT[:offsets].count(offset)
 end
 

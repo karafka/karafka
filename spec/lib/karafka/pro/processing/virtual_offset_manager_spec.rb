@@ -180,4 +180,30 @@ RSpec.describe_current do
     it { expect(manager.markable.offset).to eq(19) }
     it { expect(manager.marked).to eq(range) }
   end
+
+  context 'when marking first one higher than first offset' do
+    before do
+      manager.register([3, 4, 5, 6])
+      manager.register([7, 8, 9, 10])
+
+      manager.mark(OpenStruct.new(offset: 10))
+    end
+
+    it { expect(manager.markable?).to eq(true) }
+    it { expect(manager.markable.offset).to eq(2) }
+    it { expect(manager.marked).to eq([7, 8, 9, 10]) }
+  end
+
+  context 'when marking higher than start on 0' do
+    before do
+      manager.register([0, 1, 2, 4, 5, 6])
+      manager.register([7, 8, 9, 10])
+
+      manager.mark(OpenStruct.new(offset: 10))
+    end
+
+    it { expect(manager.markable?).to eq(false) }
+    it { expect { manager.markable }.to raise_error(Karafka::Errors::InvalidRealOffsetUsage) }
+    it { expect(manager.marked).to eq([7, 8, 9, 10]) }
+  end
 end
