@@ -29,7 +29,6 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     active_job_topic DT.topic do
-      long_running_job true
       # mom is enabled automatically
       throttling(limit: 10, interval: 1_000)
       virtual_partitions(

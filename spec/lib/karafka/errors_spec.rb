@@ -42,4 +42,10 @@ RSpec.describe_current do
 
     specify { expect(error).to be < described_class::BaseError }
   end
+
+  describe 'InvalidRealOffsetUsage' do
+    subject(:error) { described_class::InvalidRealOffsetUsage }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
 end

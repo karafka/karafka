@@ -86,6 +86,7 @@ RSpec.describe_current do
       before do
         consumer.messages = messages
 
+        allow(coordinator).to receive(:revoked?).and_return(false)
         allow(client).to receive(:mark_as_consumed)
 
         allow(ActiveJob::Base).to receive(:execute).with(payload1)
@@ -101,10 +102,10 @@ RSpec.describe_current do
         expect(ActiveJob::Base).to have_received(:execute).with(payload2)
       end
 
-      it 'expect not to mark each message during consumption' do
+      it 'expect to mark each message during consumption' do
         consumer.consume
 
-        expect(client).not_to have_received(:mark_as_consumed)
+        expect(client).to have_received(:mark_as_consumed).exactly(2).times
       end
     end
 

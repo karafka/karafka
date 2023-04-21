@@ -26,6 +26,8 @@ module Karafka
       # @note This manager is **not** thread-safe by itself. It should operate from coordinator
       #   locked locations.
       class VirtualOffsetManager
+        attr_reader :groups
+
         # @param topic [String]
         # @param partition [Integer]
         #
@@ -92,6 +94,11 @@ module Karafka
           @marked.transform_values! { true }
 
           refresh_real_offset
+        end
+
+        # @return [Array<Integer>] Messages already marked as consumed virtually
+        def marked
+          @marked.select { |offset, status| status }.map(&:first).sort
         end
 
         # Is there a real offset we can mark as consumed

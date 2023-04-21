@@ -26,7 +26,7 @@ draw_routes do
     topic DT.topic do
       consumer Consumer
       virtual_partitions(
-        partitioner: ->(msg) { [0, 1].sample }
+        partitioner: ->(_msg) { [0, 1].sample }
       )
     end
   end
