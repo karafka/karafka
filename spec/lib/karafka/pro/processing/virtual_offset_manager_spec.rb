@@ -24,7 +24,7 @@ RSpec.describe_current do
 
     before do
       manager.register(range)
-      range.reverse.each { |offset| manager.mark(OpenStruct.new(offset: offset)) }
+      range.reverse_each { |offset| manager.mark(OpenStruct.new(offset: offset)) }
     end
 
     it { expect(manager.markable?).to eq(true) }
@@ -37,7 +37,7 @@ RSpec.describe_current do
 
     before do
       manager.register(range)
-      range[1..].reverse.each { |offset| manager.mark(OpenStruct.new(offset: offset)) }
+      range[1..].reverse_each { |offset| manager.mark(OpenStruct.new(offset: offset)) }
     end
 
     it { expect(manager.markable?).to eq(true) }

@@ -85,7 +85,7 @@ module Karafka
           end
 
           # Recompute the real offset representation
-          refresh_real_offset
+          materialize_real_offset
         end
 
         # Mark all messages as consumed
@@ -93,12 +93,12 @@ module Karafka
         def mark_all
           @marked.transform_values! { true }
 
-          refresh_real_offset
+          materialize_real_offset
         end
 
         # @return [Array<Integer>] Messages already marked as consumed virtually
         def marked
-          @marked.select { |offset, status| status }.map(&:first).sort
+          @marked.select { |_, status| status }.map(&:first).sort
         end
 
         # Is there a real offset we can mark as consumed
@@ -123,7 +123,7 @@ module Karafka
         # Recomputes the biggest possible real offset we can have.
         # It picks the the biggest offset that has uninterrupted stream of virtually marked as
         # consumed because this will be the collective offset.
-        def refresh_real_offset
+        def materialize_real_offset
           @marked.to_a.sort_by(&:first).each do |offset, marked|
             break unless marked
 
