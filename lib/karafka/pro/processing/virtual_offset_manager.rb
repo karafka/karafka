@@ -130,7 +130,7 @@ module Karafka
             @real_offset = offset
           end
 
-          @real_offset = (@marked.keys.sort.first - 1) if @real_offset.negative?
+          @real_offset = (@marked.keys.min - 1) if @real_offset.negative?
         end
       end
     end
