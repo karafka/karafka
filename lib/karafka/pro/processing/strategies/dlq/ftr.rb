@@ -20,7 +20,7 @@ module Karafka
           # - Ftr
           module Ftr
             include Strategies::Ftr::Default
-            include Strategies::Dlq::Vp
+            include Strategies::Dlq::Default
 
             # Features for this strategy
             FEATURES = %i[

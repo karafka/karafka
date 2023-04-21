@@ -24,7 +24,9 @@ module Karafka
           # This case is a bit of special. Please see the `AjDlqMom` for explanation on how the
           # offset management works in this case.
           module DlqLrjMom
-            include Strategies::Aj::DlqLrjMomVp
+            include Strategies::Default
+            include Strategies::Dlq::Default
+            include Strategies::Aj::LrjMom
 
             # Features for this strategy
             FEATURES = %i[

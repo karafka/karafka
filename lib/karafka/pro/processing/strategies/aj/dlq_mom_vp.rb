@@ -20,9 +20,9 @@ module Karafka
           # Manual offset management enabled
           # Virtual Partitions enabled
           module DlqMomVp
+            include Strategies::Default
             include Strategies::Dlq::Default
             include Strategies::Vp::Default
-            include Strategies::Default
 
             # Features for this strategy
             FEATURES = %i[

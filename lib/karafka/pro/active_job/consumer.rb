@@ -42,11 +42,7 @@ module Karafka
 
             consume_job(message)
 
-            # We cannot mark jobs as done after each if there are virtual partitions. Otherwise
-            # this could create random markings.
-            # The exception here is the collapsed state where we can move one after another
-            next if topic.virtual_partitions? && !collapsed?
-
+            # We can always mark because of the virtual offset management that we have in VPs
             mark_as_consumed(message)
           end
         end
