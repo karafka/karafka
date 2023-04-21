@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # When we have an vp and not the first job fails, it should use regular Karafka retry policies
-# for parallel jobs. In general it should not mark intermediate jobs as consumed.
+# for parallel jobs. It should mark previously done work as consumed accordingly to the VPs
+# virtual offset management.
 
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 1
@@ -42,6 +43,6 @@ start_karafka_and_wait_until do
   DT[0].uniq.sort.size >= 100
 end
 
-# If we would mark as consumed
-assert_equal 2, (DT[0].count { |nr| nr == 94 })
+assert_equal 1, (DT[0].count { |nr| nr == 94 })
+assert_equal 2, (DT[0].count { |nr| nr == 95 })
 assert_equal DT[0].uniq.sort, (0..99).to_a
