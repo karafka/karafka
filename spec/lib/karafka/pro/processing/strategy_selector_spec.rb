@@ -366,7 +366,6 @@ RSpec.describe_current do
         # Virtual partitions were not allowed previously with MoM (before virtual offsets)
         # and we're slowly catching up.
         # Those strategies are remaining to be written
-        mom_with_vp + %i[filtering],
         mom_with_vp + %i[dead_letter_queue],
         mom_with_vp + %i[dead_letter_queue long_running_job],
         mom_with_vp + %i[dead_letter_queue filtering],
