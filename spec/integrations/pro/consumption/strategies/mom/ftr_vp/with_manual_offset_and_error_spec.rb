@@ -61,4 +61,5 @@ before = DT[:offsets][0..(split - 1)]
 after = DT[:offsets][split..100]
 
 # It is expected to reprocess all since consumer was created even when there are more batches
-assert_equal [], before - after
+# We need to check both because we may not reached the split moment one way or the other
+assert((before - after).empty? || (after - before).empty?)
