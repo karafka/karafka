@@ -35,7 +35,7 @@ draw_routes do
       manual_offset_management true
       throttling(limit: 2, interval: 100)
       virtual_partitions(
-        partitioner: ->(msg) { rand(2) }
+        partitioner: ->(_msg) { rand(2) }
       )
     end
   end

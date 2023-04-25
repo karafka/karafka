@@ -38,7 +38,7 @@ draw_routes do
   end
 end
 
-payloads = DT.uuids(20)
+payloads = DT.uuids(50)
 produce_many(DT.topic, payloads)
 
 start_karafka_and_wait_until do
