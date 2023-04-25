@@ -43,7 +43,7 @@ end
 produce_many(DT.topics[0], DT.uuids(50))
 
 start_karafka_and_wait_until do
-  DT[:errors].size >= 2 && DT[0].count >= 48
+  DT[:errors].size >= 2 && DT[0].count >= 46
 end
 
 assert !DT[0].include?(1)

@@ -2,6 +2,8 @@
 
 # Upon non-recoverable errors, Karafka should move forward skipping given message even if no
 # marking happens for each batch.
+# Since we mark the message prior to its processing (stupid but valid) we go to DLQ with the next
+# one, hence the skip
 
 class Listener
   def on_error_occurred(event)
@@ -47,7 +49,7 @@ end
 produce_many(DT.topics[0], DT.uuids(50))
 
 start_karafka_and_wait_until do
-  DT[:errors].size >= 2 && DT[0].count >= 48
+  DT[:errors].size >= 2 && DT[0].count >= 46
 end
 
 duplicates = DT[:firsts] - [1, 25]
@@ -64,4 +66,4 @@ duplicates.each do |duplicate|
 end
 
 assert_equal 49, DT[0].last
-assert_equal 48, DT[0].uniq.count
+assert_equal 46, DT[0].uniq.count

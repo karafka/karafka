@@ -3,6 +3,8 @@
 # Karafka should be able to recover from non-critical error when using lrj with mom but because
 # of no marking, we should move forward, however upon picking up work, we should start from zero
 # This can be risky upon rebalance but we leave it to the advanced users to manage.
+# of no marking, we should move forward, however upon picking up work, we should move offset
+# based on the crashes one by one from the first consumed or from zero
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 10
@@ -53,7 +55,7 @@ end
 produce_many(DT.topics[0], DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT[1].size >= 5
+  DT[1].size >= 1 && DT[0].uniq.size >= 3
 end
 
 # Now when w pick up the work again, it should start from the first message
@@ -67,8 +69,8 @@ consumer.each do |message|
   break
 end
 
-assert_equal [0], DT[1].uniq
-assert DT[1].size >= 5
+assert_equal [0, 1], DT[1].uniq
+assert DT[1].size >= 1
 assert_equal 0, DT[2].first
 
 consumer.close

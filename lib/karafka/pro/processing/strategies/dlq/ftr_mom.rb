@@ -56,12 +56,8 @@ module Karafka
                   skippable_message, marked = find_skippable_message
                   dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
 
-                  # Move beyond the broken message
-                  if marked
-                    pause(coordinator.seek_offset, nil, false)
-                  else
-                    pause(skippable_message.offset + 1, nil, false)
-                  end
+                  coordinator.seek_offset = skippable_message.offset + 1
+                  pause(coordinator.seek_offset, nil, false)
                 end
               end
             end
