@@ -29,7 +29,7 @@ end
 
 draw_routes do
   topic DT.topics[0] do
-    max_messages 5
+    max_messages 1
     consumer Consumer
     dead_letter_queue(topic: DT.topics[1], max_retries: 1)
     manual_offset_management true
@@ -45,7 +45,8 @@ elements = DT.uuids(20)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  (DT[0] + DT[:broken]).count >= 20
+  DT[0].count >= 20
 end
 
 assert_equal (DT[0] + DT[:broken]).sort.uniq, (0..19).to_a
+assert_equal DT[:broken], [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]

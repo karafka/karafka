@@ -6,6 +6,7 @@
 - [Improvement] Do not attempt to mark offsets on already revoked partitions.
 - [Improvement] Make sure, that VP components are not injected into non VP strategies.
 - [Improvement] Improve complex strategies inheritance flow.
+- [Improvement] Optimize offset management for DLQ + MoM feature combinations.
 
 ## 2.0.41 (2023-14-19)
 - **[Feature]** Provide `Karafka::Pro::Iterator` for anonymous topic/partitions iterations and messages lookups (#1389 and #1427).

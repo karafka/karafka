@@ -22,7 +22,7 @@ module Karafka
           # - Mom
           # - VP
           module DlqFtrMomVp
-            include Strategies::Vp::Default
+            include Strategies::Aj::DlqMomVp
             include Strategies::Aj::DlqFtrMom
 
             # Features for this strategy

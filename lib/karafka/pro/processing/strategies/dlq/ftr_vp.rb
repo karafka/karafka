@@ -23,6 +23,7 @@ module Karafka
           # Behaves same as non-VP due to coordinator lock
           module FtrVp
             include Strategies::Vp::Default
+            include Strategies::Dlq::Vp
             include Strategies::Dlq::Ftr
 
             # Features for this strategy

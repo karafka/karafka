@@ -39,6 +39,17 @@ RSpec.describe_current do
     end
 
   strategies
+    .select { |strategy| strategy::FEATURES.include?(:virtual_partitions) }
+    .select { |strategy| strategy::FEATURES.include?(:dead_letter_queue) }
+    .each do |strategy|
+      context "when having DLQ and VP strategy: #{strategy}" do
+        it 'expect to include the Dlq::Vp strategy in the chain' do
+          expect(strategy.ancestors).to include(::Karafka::Pro::Processing::Strategies::Dlq::Vp)
+        end
+      end
+    end
+
+  strategies
     .reject { |strategy| strategy::FEATURES.include?(:virtual_partitions) }
     .each do |strategy|
       context "when having non-VP strategy: #{strategy}" do

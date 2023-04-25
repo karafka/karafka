@@ -22,6 +22,7 @@ module Karafka
           module LrjVp
             # Same flow as the Dlq Lrj because VP collapses on errors, so DlqLrj can kick in
             include Strategies::Vp::Default
+            include Strategies::Dlq::Vp
             include Strategies::Dlq::Lrj
 
             # Features for this strategy

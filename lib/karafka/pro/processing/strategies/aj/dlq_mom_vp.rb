@@ -21,7 +21,7 @@ module Karafka
           # Virtual Partitions enabled
           module DlqMomVp
             include Strategies::Default
-            include Strategies::Dlq::Default
+            include Strategies::Dlq::Vp
             include Strategies::Vp::Default
 
             # Features for this strategy
