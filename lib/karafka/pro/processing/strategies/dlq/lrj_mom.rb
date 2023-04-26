@@ -47,7 +47,7 @@ module Karafka
 
                   return resume if revoked?
 
-                  skippable_message, marked = find_skippable_message
+                  skippable_message, _marked = find_skippable_message
                   dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
 
                   coordinator.seek_offset = skippable_message.offset + 1
