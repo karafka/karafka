@@ -11,13 +11,13 @@ class Consumer < Karafka::BaseConsumer
   def consume
     @runs ||= 0
 
-    messages.each do |message|
-      DT[:offsets] << message.offset
-    end
-
-    @runs += 1
-
     coordinator.synchronize do
+      messages.each do |message|
+        DT[:offsets] << message.offset
+      end
+
+      @runs += 1
+
       return unless @runs == 4 && DT[:executed].empty?
 
       DT[:executed] << true
