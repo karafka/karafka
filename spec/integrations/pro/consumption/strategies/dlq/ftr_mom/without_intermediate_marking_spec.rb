@@ -53,18 +53,5 @@ start_karafka_and_wait_until do
   DT[:offsets].count >= 20
 end
 
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topics[0])
-
-first_offset = nil
-
-consumer.each do |message|
-  first_offset = message.offset
-
-  break
-end
-
-consumer.close
-
 # None of the offsets should have been committed
-assert_equal 0, first_offset
+assert_equal 0, fetch_first_offset

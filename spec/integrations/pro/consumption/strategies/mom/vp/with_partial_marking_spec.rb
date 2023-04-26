@@ -34,17 +34,5 @@ start_karafka_and_wait_until do
   DT[:batch].count > 5
 end
 
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topic)
-
-first = nil
-consumer.each do |message|
-  first = message.offset
-
-  break
-end
-
 # Since we do middle offset marking, this should never have the last from max batch
-assert first < DT[:lasts].max
-
-consumer.close
+assert fetch_first_offset < DT[:lasts].max

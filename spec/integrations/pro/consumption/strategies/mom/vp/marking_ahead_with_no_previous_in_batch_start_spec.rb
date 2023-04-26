@@ -36,15 +36,4 @@ start_karafka_and_wait_until do
   DT[:done].count.positive? && sleep(1)
 end
 
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topic)
-first = nil
-
-consumer.each do |message|
-  first = message.offset
-  break
-end
-
-assert_equal 0, first
-
-consumer.close
+assert_equal 0, fetch_first_offset

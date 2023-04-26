@@ -38,13 +38,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal payloads, DT[0]
-
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topic)
-
-consumer.each do |message|
-  assert_equal 0, message.offset
-  break
-end
-
-consumer.close
+assert_equal 0, fetch_first_offset

@@ -45,10 +45,7 @@ produce(DT.topic, '1', partition: 1)
 start_karafka_and_wait_until do
   sleep(0.1) while DT[:any].uniq.size < 2
 
-  consumer = setup_rdkafka_consumer
-  consumer.subscribe(DT.topics[0])
-  consumer.each { break }
-  consumer.close
+  fetch_first_offset
 
   DT[:done] << true
 

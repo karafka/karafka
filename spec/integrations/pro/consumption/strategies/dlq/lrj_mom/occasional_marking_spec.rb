@@ -50,18 +50,5 @@ DT[0].each do |offset|
   previous = offset
 end
 
-# Now when w pick up the work again, it should start from the first message
-consumer = setup_rdkafka_consumer
-
-consumer.subscribe(DT.topic)
-
-consumer.each do |message|
-  DT[1] << message.offset
-
-  break
-end
-
 # We should start from the only offset marked as consumed + 1
-assert_equal DT[:marked].first + 1, DT[1].first
-
-consumer.close
+assert_equal DT[:marked].first + 1, fetch_first_offset

@@ -48,13 +48,4 @@ start_karafka_and_wait_until do
 end
 
 assert DT[:regular_time][0] < DT[:done_time][0]
-
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topics[0])
-
-consumer.each do |message|
-  assert_equal 0, message.offset
-  break
-end
-
-consumer.close
+assert_equal 0, fetch_first_offset

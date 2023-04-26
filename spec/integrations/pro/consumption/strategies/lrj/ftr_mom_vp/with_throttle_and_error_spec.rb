@@ -54,13 +54,4 @@ assert_equal StandardError, DT[:errors].first[:error].class
 assert_equal 'consumer.consume.error', DT[:errors].first[:type]
 assert_equal 'error.occurred', DT[:errors].first.id
 assert_equal 5, DT[0].uniq.size
-
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topic)
-
-consumer.each do |message|
-  assert_equal 0, message.offset
-  break
-end
-
-consumer.close
+assert_equal 0, fetch_first_offset
