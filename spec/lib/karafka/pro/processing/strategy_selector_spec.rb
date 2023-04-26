@@ -358,7 +358,7 @@ RSpec.describe_current do
         %i[active_job virtual_partitions],
         %i[active_job virtual_partitions filtering],
         %i[active_job filtering],
-        %i[active_job long_running_job virtual_partitions],
+        %i[active_job long_running_job virtual_partitions]
       ]
     end
 
