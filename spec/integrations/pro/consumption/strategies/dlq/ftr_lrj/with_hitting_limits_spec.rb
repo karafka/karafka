@@ -2,7 +2,9 @@
 
 # Karafka should throttle and wait for the expected time period before continuing the processing
 
-setup_karafka
+setup_karafka do |config|
+  config.max_wait_time = 100
+end
 
 class Consumer < Karafka::BaseConsumer
   def consume
