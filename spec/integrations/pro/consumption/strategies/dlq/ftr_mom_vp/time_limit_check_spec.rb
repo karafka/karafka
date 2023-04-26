@@ -17,6 +17,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     dead_letter_queue(topic: DT.topics[1], max_retries: 1)
+    manual_offset_management(true)
     throttling(
       limit: 2,
       interval: 60_000
@@ -36,6 +37,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal elements[0..1], DT[0]
-
-# Offset after first batch should be committed
-assert fetch_first_offset.positive?
+assert fetch_first_offset.zero?
