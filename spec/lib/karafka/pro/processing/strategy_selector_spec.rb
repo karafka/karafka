@@ -339,10 +339,6 @@ RSpec.describe_current do
 
     # Combinations that for any reason are not supported
     let(:not_used_combinations) do
-      # Those two are never allowed together except for ActiveJob. In case of ActiveJob we control
-      # the offset and not the user as we provide consumer, so it is ok.
-      mom_with_vp = %i[manual_offset_management virtual_partitions]
-
       [
         # Active Job is always with manual offset management in any combination
         # ActiveJob sets MoM automatically and there is no way to end-up with a combination
@@ -363,10 +359,6 @@ RSpec.describe_current do
         %i[active_job virtual_partitions filtering],
         %i[active_job filtering],
         %i[active_job long_running_job virtual_partitions],
-        # Virtual partitions were not allowed previously with MoM (before virtual offsets)
-        # and we're slowly catching up.
-        # Those strategies are remaining to be written
-        mom_with_vp + %i[dead_letter_queue long_running_job filtering]
       ]
     end
 
