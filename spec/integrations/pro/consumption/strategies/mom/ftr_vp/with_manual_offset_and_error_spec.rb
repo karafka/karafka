@@ -5,20 +5,23 @@
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 2
+  config.concurrency = 10
 end
 
 class Consumer < Karafka::BaseConsumer
   def consume
     @runs ||= 0
 
-    coordinator.synchronize do
-      messages.each do |message|
-        DT[:offsets] << message.offset
-      end
+    messages.each do |message|
+      DT[:offsets] << message.offset
+    end
 
+    coordinator.synchronize do
       @runs += 1
 
       return unless @runs == 4 && DT[:executed].empty?
+
+      sleep(1)
 
       DT[:executed] << true
       # The -1 will act as a divider so it's easier to spec things

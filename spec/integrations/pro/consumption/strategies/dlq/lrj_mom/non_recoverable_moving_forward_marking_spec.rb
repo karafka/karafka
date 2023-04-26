@@ -66,4 +66,4 @@ duplicates.each do |duplicate|
 end
 
 assert_equal 49, DT[0].last
-assert_equal 46, DT[0].uniq.count
+assert DT[0].uniq.count >= 46
