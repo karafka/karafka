@@ -34,13 +34,13 @@ RSpec.describe_current do
 
     context 'when some messages were throttled but expired' do
       let(:throttled_message) { 'throttled_message' }
-      let(:interval) { 1 }
+      let(:interval) { 100 }
       let(:messages) { ['message', throttled_message] }
 
       before do
         max_messages.times { throttler.apply!(['msg']) }
         throttler.apply!(messages)
-        sleep(0.1)
+        sleep(0.11)
       end
 
       it { expect(throttler.applied?).to be(true) }
