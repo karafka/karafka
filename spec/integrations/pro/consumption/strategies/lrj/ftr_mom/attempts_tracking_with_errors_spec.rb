@@ -48,12 +48,4 @@ DT[:attempts].each_slice(2) do |slice|
   assert_equal 2, slice[1]
 end
 
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topic)
-
-consumer.each do |message|
-  assert_equal 0, message.offset
-  break
-end
-
-consumer.close
+assert_equal 0, fetch_first_offset

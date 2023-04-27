@@ -36,3 +36,6 @@ start_karafka_and_wait_until do
 end
 
 assert_equal elements[0..1], DT[0]
+
+# Offset after first batch should be committed
+assert fetch_first_offset.positive?

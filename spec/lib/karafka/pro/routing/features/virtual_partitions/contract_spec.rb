@@ -39,12 +39,6 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
-  context 'when manual offset management is on with virtual partitions' do
-    let(:mom_active) { true }
-
-    it { expect(check).not_to be_success }
-  end
-
   context 'when manual offset management is on with virtual partitions for active job' do
     let(:mom_active) { true }
     let(:aj_active) { true }

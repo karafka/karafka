@@ -1,5 +1,13 @@
 # Karafka framework changelog
 
+## 2.1.0 (Unreleased)
+- **[Feature]** Introduce collective Virtual Partitions offset management
+- [Improvement] Always use Virtual offset management for Pro ActiveJobs.
+- [Improvement] Do not attempt to mark offsets on already revoked partitions.
+- [Improvement] Make sure, that VP components are not injected into non VP strategies.
+- [Improvement] Improve complex strategies inheritance flow.
+- [Improvement] Optimize offset management for DLQ + MoM feature combinations.
+
 ## 2.0.41 (2023-14-19)
 - **[Feature]** Provide `Karafka::Pro::Iterator` for anonymous topic/partitions iterations and messages lookups (#1389 and #1427).
 - [Improvement] Optimize topic lookup for `read_topic` admin method usage.

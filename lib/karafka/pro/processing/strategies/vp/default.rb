@@ -28,6 +28,42 @@ module Karafka
               virtual_partitions
             ].freeze
 
+            # @param message [Karafka::Messages::Message] marks message as consumed
+            # @note This virtual offset management uses a regular default marking API underneath.
+            #   We do not alter the "real" marking API, as VPs are just one of many cases we want
+            #   to support and we do not want to impact them with collective offsets management
+            def mark_as_consumed(message)
+              return super if collapsed?
+
+              manager = coordinator.virtual_offset_manager
+
+              coordinator.synchronize do
+                manager.mark(message)
+                # If this is last marking on a finished flow, we can use the original
+                # last message and in order to do so, we need to mark all previous messages as
+                # consumed as otherwise the computed offset could be different
+                manager.mark_all if coordinator.finished?
+
+                return revoked? unless manager.markable?
+              end
+
+              manager.markable? ? super(manager.markable) : revoked?
+            end
+
+            # @param message [Karafka::Messages::Message] blocking marks message as consumed
+            def mark_as_consumed!(message)
+              return super if collapsed?
+
+              manager = coordinator.virtual_offset_manager
+
+              coordinator.synchronize do
+                manager.mark(message)
+                manager.mark_all if coordinator.finished?
+              end
+
+              manager.markable? ? super(manager.markable) : revoked?
+            end
+
             # @return [Boolean] is the virtual processing collapsed in the context of given
             #   consumer.
             def collapsed?
@@ -44,6 +80,19 @@ module Karafka
             #   raising an error, but locally we are still processing.
             def failing?
               coordinator.failure?
+            end
+
+            private
+
+            # Prior to adding work to the queue, registers all the messages offsets into the
+            # virtual offset group.
+            #
+            # @note This can be done without the mutex, because it happens from the same thread
+            #   for all the work (listener thread)
+            def handle_before_enqueue
+              coordinator.virtual_offset_manager.register(
+                messages.map(&:offset)
+              )
             end
           end
         end

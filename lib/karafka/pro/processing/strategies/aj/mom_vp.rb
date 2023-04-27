@@ -20,8 +20,8 @@ module Karafka
           # Manual offset management enabled
           # Virtual Partitions enabled
           module MomVp
-            include Strategies::Vp::Default
             include Strategies::Default
+            include Strategies::Vp::Default
 
             # Features for this strategy
             FEATURES = %i[

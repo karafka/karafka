@@ -30,7 +30,7 @@ module Karafka
       #
       # @param subscription_group [Karafka::Routing::SubscriptionGroup] subscription group
       #   with all the configuration details needed for us to create a client
-      # @return [Karafka::Connection::Rdk::Consumer]
+      # @return [Karafka::Connection::Client]
       def initialize(subscription_group)
         @id = SecureRandom.hex(6)
         # Name is set when we build consumer

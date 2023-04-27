@@ -30,6 +30,8 @@ module Karafka
 
             # We always need to pause prior to doing any jobs for LRJ
             def handle_before_enqueue
+              super
+
               # This ensures that when running LRJ with VP, things operate as expected run only
               # once for all the virtual partitions collectively
               coordinator.on_enqueued do

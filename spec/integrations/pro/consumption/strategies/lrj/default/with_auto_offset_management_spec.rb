@@ -31,17 +31,4 @@ start_karafka_and_wait_until do
   DT[0].size >= 1
 end
 
-# Now when w pick up the work again, it should start from the first message
-consumer = setup_rdkafka_consumer
-
-consumer.subscribe(DT.topic)
-
-consumer.each do |message|
-  DT[1] << message.offset
-
-  break
-end
-
-assert_equal DT[0].last + 1, DT[1].first
-
-consumer.close
+assert_equal DT[0].last + 1, fetch_first_offset

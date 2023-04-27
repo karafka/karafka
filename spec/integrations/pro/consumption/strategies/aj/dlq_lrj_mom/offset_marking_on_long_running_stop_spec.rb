@@ -34,8 +34,4 @@ start_karafka_and_wait_until do
 end
 
 # No test needed, if it commits last offset, this will hang forever
-
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topics[0])
-consumer.each { break }
-consumer.close
+fetch_first_offset

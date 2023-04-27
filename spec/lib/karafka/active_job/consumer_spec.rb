@@ -23,6 +23,8 @@ RSpec.describe_current do
     before do
       consumer.messages = messages
 
+      allow(coordinator).to receive(:revoked?).and_return(false)
+
       allow(client).to receive(:mark_as_consumed).with(messages.first)
       allow(client).to receive(:mark_as_consumed).with(messages.last)
 

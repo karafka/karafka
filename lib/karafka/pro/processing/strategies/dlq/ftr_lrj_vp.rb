@@ -22,6 +22,7 @@ module Karafka
           # Virtual Partitions
           module FtrLrjVp
             include Strategies::Vp::Default
+            include Strategies::Dlq::Vp
             # Same as non VP because of the coordinator post-execution lock
             include Strategies::Dlq::FtrLrj
 

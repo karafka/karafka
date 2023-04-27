@@ -45,17 +45,4 @@ DT[0].each do |offset|
   previous = offset
 end
 
-# Now when w pick up the work again, it should start from the first message
-consumer = setup_rdkafka_consumer
-
-consumer.subscribe(DT.topic)
-
-consumer.each do |message|
-  DT[1] << message.offset
-
-  break
-end
-
-assert_equal 0, DT[1].first
-
-consumer.close
+assert_equal 0, fetch_first_offset

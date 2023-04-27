@@ -34,6 +34,8 @@ module Karafka
 
             # No actions needed for the standard flow here
             def handle_before_enqueue
+              super
+
               coordinator.on_enqueued do
                 pause(coordinator.seek_offset, Strategies::Lrj::Default::MAX_PAUSE_TIME, false)
               end

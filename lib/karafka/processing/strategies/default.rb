@@ -26,6 +26,7 @@ module Karafka
         def mark_as_consumed(message)
           # Ignore earlier offsets than the one we already committed
           return true if coordinator.seek_offset > message.offset
+          return false if revoked?
 
           unless client.mark_as_consumed(message)
             coordinator.revoke
@@ -46,6 +47,7 @@ module Karafka
         def mark_as_consumed!(message)
           # Ignore earlier offsets than the one we already committed
           return true if coordinator.seek_offset > message.offset
+          return false if revoked?
 
           unless client.mark_as_consumed!(message)
             coordinator.revoke
