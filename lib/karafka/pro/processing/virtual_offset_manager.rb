@@ -88,6 +88,9 @@ module Karafka
           materialize_real_offset
         end
 
+        # Mark all from all groups including the `message`.
+        # Useful when operating in a collapsed state for marking
+        # @param message [Karafka::Messages::Message]
         def mark_until(message)
           mark(message)
 

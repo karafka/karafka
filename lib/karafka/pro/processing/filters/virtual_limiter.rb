@@ -15,12 +15,12 @@ module Karafka
   module Pro
     module Processing
       module Filters
-        # Removes messages that are alredy marked as consumed in the virtual offset manager
+        # Removes messages that are already marked as consumed in the virtual offset manager
         # This should operate only when using virtual partitions.
         #
         # This cleaner prevents us from duplicated processing of messages that were virtually
         # marked as consumed even if we could not mark them as consumed in Kafka. This allows us
-        # to limit reprocessings when errors occur drastically when operating with virtual
+        # to limit reprocessing when errors occur drastically when operating with virtual
         # partitions
         #
         # @note It should be registered only when VPs are used
