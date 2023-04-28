@@ -18,7 +18,7 @@ module Karafka
         ::Karafka.producer.public_send(
           fetch_option(job, :dispatch_method, DEFAULTS),
           topic: job.queue_name,
-          payload: ::ActiveSupport::JSON.encode(job.serialize)
+          payload: ::ActiveSupport::JSON.encode(serialized_job(job))
         )
       end
 
@@ -34,7 +34,7 @@ module Karafka
 
           dispatches[d_method] << {
             topic: job.queue_name,
-            payload: ::ActiveSupport::JSON.encode(job.serialize)
+            payload: ::ActiveSupport::JSON.encode(serialized_job(job))
           }
         end
 
@@ -57,6 +57,12 @@ module Karafka
           .class
           .karafka_options
           .fetch(key, defaults.fetch(key))
+      end
+
+      # @param job [ActiveJob::Base] job
+      # @return [Hash] json representation of the job
+      def serialized_job(job)
+        job.serialize
       end
     end
   end
