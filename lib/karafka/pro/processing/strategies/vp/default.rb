@@ -42,7 +42,9 @@ module Karafka
                 # If this is last marking on a finished flow, we can use the original
                 # last message and in order to do so, we need to mark all previous messages as
                 # consumed as otherwise the computed offset could be different
-                manager.mark_all if coordinator.finished?
+                # We mark until our offset just in case of a DLQ flow or similar, where we do not
+                # want to mark all but until the expected location
+                manager.mark_until(message) if coordinator.finished?
 
                 return revoked? unless manager.markable?
               end
@@ -58,7 +60,7 @@ module Karafka
 
               coordinator.synchronize do
                 manager.mark(message)
-                manager.mark_all if coordinator.finished?
+                manager.mark_until(message) if coordinator.finished?
               end
 
               manager.markable? ? super(manager.markable) : revoked?

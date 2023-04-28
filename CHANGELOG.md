@@ -1,7 +1,8 @@
 # Karafka framework changelog
 
 ## 2.1.0 (Unreleased)
-- **[Feature]** Introduce collective Virtual Partitions offset management
+- **[Feature]** Introduce collective Virtual Partitions offset management.
+- **[Feature]** Use virtual offsets to filter out messages that would be re-processed upon retries.
 - [Improvement] Always use Virtual offset management for Pro ActiveJobs.
 - [Improvement] Do not attempt to mark offsets on already revoked partitions.
 - [Improvement] Make sure, that VP components are not injected into non VP strategies.

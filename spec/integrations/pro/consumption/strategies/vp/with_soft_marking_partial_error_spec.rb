@@ -16,7 +16,7 @@ class Consumer < Karafka::BaseConsumer
 
       DT[:collapsed_offsets] << message.offset if collapsed?
 
-      mark_as_consumed(message)
+      mark_as_consumed(message) unless message.offset == 99
     end
   end
 end
@@ -37,5 +37,3 @@ produce_many(DT.topic, DT.uuids(100))
 start_karafka_and_wait_until do
   DT[:collapsed_offsets].include?(99)
 end
-
-p DT[:collapsed_offsets].sort
