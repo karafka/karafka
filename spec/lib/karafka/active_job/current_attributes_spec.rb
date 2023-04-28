@@ -65,4 +65,43 @@ RSpec.describe_current do
     end
   end
 
+  context "consume" do
+    subject(:consumer) do
+      consumer = Karafka::ActiveJob::Consumer.new
+      consumer.client = client
+      consumer.coordinator = coordinator
+      consumer.singleton_class.include Karafka::Processing::Strategies::Default
+      consumer
+    end
+
+    let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
+    let(:coordinator) { build(:processing_coordinator, seek_offset: 0) }
+    let(:message) { build(:messages_message, raw_payload: payload.merge("cattr" => { "user_id" => 1 }).to_json) }
+    let(:payload) { { "foo" => "bar" } }
+
+    before do
+      allow(Karafka::App).to receive(:stopping?).and_return(false)
+
+      allow(client).to receive(:mark_as_consumed).with(message)
+      allow(ActiveJob::Base).to receive(:execute).with(payload)
+      allow(Karafka::CurrentAttrTest).to receive(:set).with({"user_id" => 1})
+
+      consumer.messages = [message]
+    end
+
+    it 'expect to set current attributes before running the job' do
+      consumer.consume
+
+      expect(Karafka::CurrentAttrTest).to have_received(:set).with({"user_id" => 1})
+    end
+  end
+
+  private
+
+  def with_context(attr, value)
+    Karafka::CurrentAttrTest.send("#{attr}=", value)
+    yield
+  ensure
+    Karafka::CurrentAttrTest.reset_all
+  end
 end
