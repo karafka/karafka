@@ -3,15 +3,15 @@
 require 'karafka/active_job/current_attributes'
 
 module Karafka
-  class CurrentAttrTest < ActiveSupport::CurrentAttributes
+  class CurrentAttrTest < ActiveSupport::CurrentAttributes # :nodoc:
     attribute :user_id
   end
 end
 
 RSpec.describe_current do
-  before { Karafka::ActiveJob::CurrentAttributes.persist('Karafka::CurrentAttrTest') }
+  before { described_class.persist('Karafka::CurrentAttrTest') }
 
-  context 'dispatch' do
+  context 'when dispatching jobs' do
     subject(:dispatcher) { Karafka::ActiveJob::Dispatcher.new }
 
     let(:job_class) do
@@ -67,7 +67,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'consume' do
+  context 'when consuming jobs' do
     subject(:consumer) do
       consumer = Karafka::ActiveJob::Consumer.new
       consumer.client = client

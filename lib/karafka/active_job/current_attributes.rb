@@ -10,7 +10,7 @@ module Karafka
     module CurrentAttributes
       # Module used to save current attributes before jobs are queued
       module Save
-        def self.prepended(base)
+        def self.prepended(base) # :nodoc:
           base.class_attribute :_cattr_klass
         end
 
@@ -28,7 +28,7 @@ module Karafka
 
       # Module used to load current attributes before jobs are processed
       module Load
-        def self.prepended(base)
+        def self.prepended(base) # :nodoc:
           base.class_attribute :_cattr_klass
         end
 
