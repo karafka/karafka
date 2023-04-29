@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.1.0 (Unreleased)
+- **[Feature]** Provide ability to use CurrentAttributes with ActiveJob's Karafka adapter.
 - **[Feature]** Introduce collective Virtual Partitions offset management.
 - **[Feature]** Use virtual offsets to filter out messages that would be re-processed upon retries.
 - [Improvement] No longer break processing on failing parallel virtual partitions in ActiveJob because it is compensated by virtual marking.
