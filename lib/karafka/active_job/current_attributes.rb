@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "active_support/current_attributes"
+require 'active_support/current_attributes'
 
 # This code is based on Mike Perham's approach to persisting current attributes
 # on Sidekiq (https://github.com/sidekiq/sidekiq/blob/main/lib/sidekiq/middleware/current_attributes.rb)
@@ -8,6 +8,7 @@ module Karafka
   module ActiveJob
     # Module that allows to persist current attributes on Karafka jobs
     module CurrentAttributes
+      # Module used to save current attributes before jobs are queued
       module Save
         def self.prepended(base)
           base.class_attribute :_cattr_klass
@@ -16,25 +17,25 @@ module Karafka
         def serialized_job(job)
           json = super(job)
 
-          if !json.has_key?("cattr")
+          unless json.key?('cattr')
             attrs = self.class._cattr_klass.constantize.attributes
-            json["cattr"] = attrs if attrs.any?
+            json['cattr'] = attrs if attrs.any?
           end
 
           json
         end
       end
 
+      # Module used to load current attributes before jobs are processed
       module Load
         def self.prepended(base)
           base.class_attribute :_cattr_klass
         end
 
-        def with_deserialized_job(job_message, &block)
+        def with_deserialized_job(job_message)
           super(job_message) do |job|
-
-            if job.has_key?("cattr")
-              self.class._cattr_klass.constantize.set(job.delete("cattr")) do
+            if job.key?('cattr')
+              self.class._cattr_klass.constantize.set(job.delete('cattr')) do
                 yield(job)
               end
             else

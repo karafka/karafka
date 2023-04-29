@@ -38,8 +38,7 @@ module Karafka
       end
 
       # @param job_message [Karafka::Messages::Message] message with active job
-      # @param block [Proc] block that should be executed with the deserialized job
-      def with_deserialized_job(job_message, &block)
+      def with_deserialized_job(job_message)
         # We technically speaking could set this as deserializer and reference it from the
         # message instead of using the `#raw_payload`. This is not done on purpose to simplify
         # the ActiveJob setup here
