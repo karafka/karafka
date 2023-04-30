@@ -45,7 +45,7 @@ elements = DT.uuids(20)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[0].count >= 20
+  DT[0].count >= 20 && DT[:broken].size >= 10
 end
 
 assert_equal (DT[0] + DT[:broken]).sort.uniq, (0..19).to_a
