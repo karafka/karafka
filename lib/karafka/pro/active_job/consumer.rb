@@ -35,11 +35,6 @@ module Karafka
             # double-processing
             break if Karafka::App.stopping? && !topic.virtual_partitions?
 
-            # Break if we already know, that one of virtual partitions has failed and we will
-            # be restarting processing all together after all VPs are done. This will minimize
-            # number of jobs that will be re-processed
-            break if topic.virtual_partitions? && failing?
-
             consume_job(message)
 
             # We can always mark because of the virtual offset management that we have in VPs

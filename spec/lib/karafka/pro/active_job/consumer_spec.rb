@@ -10,8 +10,8 @@ RSpec.describe_current do
   end
 
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
-  let(:coordinator) { build(:processing_coordinator_pro) }
-  let(:topic) { coordinator.topic }
+  let(:coordinator) { build(:processing_coordinator_pro, topic: topic) }
+  let(:topic) { build(:routing_topic) }
   let(:messages) { [message1, message2] }
   let(:message1) { build(:messages_message, raw_payload: payload1.to_json) }
   let(:message2) { build(:messages_message, raw_payload: payload2.to_json) }
@@ -83,6 +83,12 @@ RSpec.describe_current do
     context 'when messages are available to the consumer and it is virtual partition' do
       let(:strategy) { Karafka::Pro::Processing::Strategies::Aj::MomVp }
 
+      let(:topic) do
+        topic = build(:routing_topic)
+        topic.virtual_partitions(partitioner: ->(_) {})
+        topic
+      end
+
       before do
         consumer.messages = messages
 
@@ -91,8 +97,6 @@ RSpec.describe_current do
 
         allow(ActiveJob::Base).to receive(:execute).with(payload1)
         allow(ActiveJob::Base).to receive(:execute).with(payload2)
-
-        topic.virtual_partitions(partitioner: ->(_) {})
       end
 
       it 'expect to decode them and run active job executor' do
