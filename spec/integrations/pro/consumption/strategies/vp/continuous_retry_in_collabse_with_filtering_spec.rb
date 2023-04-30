@@ -4,7 +4,7 @@
 # filtered for as long as the collapse lasts.
 
 class Listener
-  def on_error_occurred(event)
+  def on_error_occurred(_event)
     DT[:errors] << true
   end
 end
