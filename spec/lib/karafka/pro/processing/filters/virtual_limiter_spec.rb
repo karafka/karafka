@@ -13,7 +13,7 @@ RSpec.describe_current do
 
   context 'when not collapsed' do
     it 'expect not to filter anything' do
-      expect { limiter.apply!(messages) }.not_to change { messages }
+      expect { limiter.apply!(messages) }.not_to(change { messages })
     end
   end
 
@@ -24,7 +24,7 @@ RSpec.describe_current do
     end
 
     context 'when nothing marked' do
-      it { expect { limiter.apply!(messages) }.not_to change { messages } }
+      it { expect { limiter.apply!(messages) }.not_to(change { messages }) }
     end
 
     context 'when all marked' do
