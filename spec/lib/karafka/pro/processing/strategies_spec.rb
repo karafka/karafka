@@ -78,7 +78,7 @@ RSpec.describe_current do
         end
 
         it 'expect its #handle_before_enqueue to not fail without virtual_offset_manager' do
-          expect {  consumer.send(:handle_before_enqueue) }.not_to raise_error
+          expect { consumer.send(:handle_before_enqueue) }.not_to raise_error
         end
       end
     end
