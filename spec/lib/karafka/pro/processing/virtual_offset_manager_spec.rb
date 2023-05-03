@@ -166,19 +166,19 @@ RSpec.describe_current do
     it { expect(manager.marked).to eq([1, 3, 5, 7, 9, 11, 13]) }
   end
 
-  context 'when marking all' do
+  context 'when marking until' do
     let(:range) { (0..19).to_a }
 
     before do
       manager.register(range.select(&:odd?))
       manager.register(range.reject(&:odd?))
 
-      manager.mark_all
+      manager.mark_until(OpenStruct.new(offset: 10))
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(19) }
-    it { expect(manager.marked).to eq(range) }
+    it { expect(manager.markable.offset).to eq(10) }
+    it { expect(manager.marked).to eq((0..10).to_a) }
   end
 
   context 'when marking first one higher than first offset' do

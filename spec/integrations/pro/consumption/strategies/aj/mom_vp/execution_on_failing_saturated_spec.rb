@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Karafka when running VPs with AJ and being saturated, should not run further jobs if the first
-# job in the queue failed. This saves on double processing.
+# Karafka when running VPs with AJ and being saturated, should run further jobs if the first
+# job in the queue failed because we use virtual offset management for handling this scenario.
 
 setup_active_job
 
@@ -38,6 +38,4 @@ start_karafka_and_wait_until do
   DT[0].size >= 10
 end
 
-# There is a bit of unpredictability here, but without early break on collective fail, a lot more
-# offsets would be present here
-assert(DT[0].uniq.count <= 5)
+assert(DT[0].uniq.count >= 10)

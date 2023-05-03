@@ -88,15 +88,24 @@ module Karafka
           materialize_real_offset
         end
 
-        # Mark all messages as consumed
-        # Useful for post-consumption automatic offset management cases
-        def mark_all
-          @marked.transform_values! { true }
+        # Mark all from all groups including the `message`.
+        # Useful when operating in a collapsed state for marking
+        # @param message [Karafka::Messages::Message]
+        def mark_until(message)
+          mark(message)
+
+          @groups.each do |group|
+            group.each do |offset|
+              next if offset > message.offset
+
+              @marked[offset] = true
+            end
+          end
 
           materialize_real_offset
         end
 
-        # @return [Array<Integer>] Messages already marked as consumed virtually
+        # @return [Array<Integer>] Offsets of messages already marked as consumed virtually
         def marked
           @marked.select { |_, status| status }.map(&:first).sort
         end

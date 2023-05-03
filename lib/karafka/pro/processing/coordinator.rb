@@ -27,7 +27,20 @@ module Karafka
           @flow_lock = Mutex.new
           @collapser = Collapser.new
           @filter = FiltersApplier.new(self)
-          @virtual_offset_manager = VirtualOffsetManager.new(topic.name, partition)
+
+          return unless topic.virtual_partitions?
+
+          @virtual_offset_manager = VirtualOffsetManager.new(
+            topic.name,
+            partition
+          )
+
+          # We register our own "internal" filter to support filtering of messages that were marked
+          # as consumed virtually
+          @filter.filters << Filters::VirtualLimiter.new(
+            @virtual_offset_manager,
+            @collapser
+          )
         end
 
         # Starts the coordination process
@@ -41,7 +54,10 @@ module Karafka
           @filter.apply!(messages)
 
           @executed.clear
-          @virtual_offset_manager.clear
+
+          # We keep the old processed offsets until the collapsing is done and regular processing
+          # with virtualization is restored
+          @virtual_offset_manager.clear if topic.virtual_partitions? && !@collapser.collapsed?
 
           @last_message = messages.last
         end

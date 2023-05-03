@@ -21,6 +21,10 @@ module Karafka
       # This means that this is the API we expose as a single filter, allowing us to control
       # the filtering via many filters easily.
       class FiltersApplier
+        # @return [Array] registered filters array. Useful if we want to inject internal context
+        #   aware filters.
+        attr_reader :filters
+
         # @param coordinator [Pro::Coordinator] pro coordinator
         def initialize(coordinator)
           # Builds filters out of their factories

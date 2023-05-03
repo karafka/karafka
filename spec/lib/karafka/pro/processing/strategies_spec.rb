@@ -2,7 +2,8 @@
 
 RSpec.describe_current do
   let(:message) { build(:messages_message) }
-  let(:coordinator) { build(:processing_coordinator_pro, seek_offset: 0) }
+  let(:coordinator) { build(:processing_coordinator_pro, seek_offset: 0, topic: topic) }
+  let(:topic) { build(:routing_topic) }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
   let(:consumer) do
     consumer = Karafka::BaseConsumer.new
@@ -18,6 +19,12 @@ RSpec.describe_current do
     .select { |strategy| strategy::FEATURES.include?(:virtual_partitions) }
     .each do |strategy|
       context "when having VP strategy: #{strategy}" do
+        let(:topic) do
+          topic = build(:routing_topic)
+          topic.virtual_partitions(partitioner: true)
+          topic
+        end
+
         it 'expect all of them to have #collapsed? method' do
           expect(strategy.method_defined?(:collapsed?)).to eq(true)
         end
@@ -67,7 +74,11 @@ RSpec.describe_current do
         it 'expect its #handle_before_enqueue to never register virtual offsets groups' do
           consumer.send(:handle_before_enqueue)
 
-          expect(coordinator.virtual_offset_manager.groups).to be_empty
+          expect(coordinator.virtual_offset_manager).to be_nil
+        end
+
+        it 'expect its #handle_before_enqueue to not fail without virtual_offset_manager' do
+          expect { consumer.send(:handle_before_enqueue) }.not_to raise_error
         end
       end
     end
@@ -76,6 +87,12 @@ RSpec.describe_current do
     .select { |strategy| strategy::FEATURES.include?(:long_running_job) }
     .each do |strategy|
       context "when having an LRJ strategy: #{strategy}" do
+        let(:topic) do
+          topic = build(:routing_topic)
+          topic.virtual_partitions(partitioner: true) if strategy.to_s.include?('Vp')
+          topic
+        end
+
         before do
           consumer.singleton_class.include(strategy)
           allow(client).to receive(:pause)
@@ -93,6 +110,12 @@ RSpec.describe_current do
     .reject { |strategy| strategy::FEATURES.include?(:long_running_job) }
     .each do |strategy|
       context "when having a non LRJ strategy: #{strategy}" do
+        let(:topic) do
+          topic = build(:routing_topic)
+          topic.virtual_partitions(partitioner: true) if strategy.to_s.include?('Vp')
+          topic
+        end
+
         before do
           consumer.singleton_class.include(strategy)
           allow(client).to receive(:pause)
