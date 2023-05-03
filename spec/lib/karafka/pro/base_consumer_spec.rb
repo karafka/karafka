@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe_current do
+RSpec.describe Karafka::BaseConsumer, type: :pro do
   subject(:consumer) do
     instance = working_class.new
     instance.coordinator = coordinator
