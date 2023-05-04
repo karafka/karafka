@@ -15,6 +15,7 @@
 ### Upgrade notes
 
 1. Replace `Karafka::Pro::BaseConsumer` references to `Karafka::BaseConsumer`.
+2. Replace `Karafka::Instrumentation::Vendors::Datadog:Listener` with `Karafka::Instrumentation::Vendors::Datadog::MetricsListener`.
 
 ## 2.0.41 (2023-14-19)
 - **[Feature]** Provide `Karafka::Pro::Iterator` for anonymous topic/partitions iterations and messages lookups (#1389 and #1427).
