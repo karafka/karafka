@@ -19,6 +19,17 @@ ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
 
 ExampleApp.initialize!
 
+mod = Module.new do
+  def self.token
+    ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+  end
+end
+
+Karafka.const_set('License', mod)
+require 'karafka/pro/loader'
+
+Karafka::Pro::Loader.require_all
+
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
@@ -36,3 +47,4 @@ end
 
 assert_equal 1, DT.data.size
 assert_equal '6.1.7.3', Rails.version
+assert Karafka.pro?
