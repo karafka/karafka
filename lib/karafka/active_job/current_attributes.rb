@@ -12,8 +12,11 @@ module Karafka
     module CurrentAttributes
       # Allows for persistence of given current attributes via AJ + Karafka
       #
-      # @param klass [String, Class] class or name of the current attributes class
-      def persist(klass)
+      # @param klasses [Array<String, Class>] classes or names of the current attributes classes
+      def persist(*klasses)
+        # Support providing mulitple classes
+        klasses = Array(klasses).flatten
+
         [Dispatcher, Consumer]
           .reject { |expandable| expandable.respond_to?(:_cattr_klasses) }
           .each { |expandable| expandable.class_attribute :_cattr_klasses, default: {} }
@@ -22,15 +25,15 @@ module Karafka
         Dispatcher.prepend(Persistence) unless Dispatcher.ancestors.include?(Persistence)
         Consumer.prepend(Loading) unless Consumer.ancestors.include?(Loading)
 
-        stringified_klass = klass.to_s
+        klasses.map(&:to_s).each do |stringified_klass|
+          # Prevent registering same klass multiple times
+          next if Dispatcher._cattr_klasses.value?(stringified_klass)
 
-        # Prevent registering same klass multiple times
-        return if Dispatcher._cattr_klasses.value?(stringified_klass)
+          key = "cattr_#{Dispatcher._cattr_klasses.count}"
 
-        key = "cattr_#{Dispatcher._cattr_klasses.count}"
-
-        Dispatcher._cattr_klasses[key] = stringified_klass
-        Consumer._cattr_klasses[key] = stringified_klass
+          Dispatcher._cattr_klasses[key] = stringified_klass
+          Consumer._cattr_klasses[key] = stringified_klass
+        end
       end
 
       module_function :persist
