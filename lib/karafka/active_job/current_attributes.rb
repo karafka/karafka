@@ -14,7 +14,7 @@ module Karafka
       #
       # @param klasses [Array<String, Class>] classes or names of the current attributes classes
       def persist(*klasses)
-        # Support providing mulitple classes
+        # Support for providing multiple classes
         klasses = Array(klasses).flatten
 
         [Dispatcher, Consumer]
