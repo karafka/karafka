@@ -115,7 +115,10 @@ loader = Zeitwerk::Loader.for_gem
 # Do not load Rails extensions by default, this will be handled by Railtie if they are needed
 loader.ignore(Karafka.gem_root.join('lib/active_job'))
 # Do not load CurrentAttributes components as they will be loaded if needed
+# @note We have to exclude both the .rb file as well as the whole directory so users can require
+# current attributes only when needed
 loader.ignore(Karafka.gem_root.join('lib/karafka/active_job/current_attributes'))
+loader.ignore(Karafka.gem_root.join('lib/karafka/active_job/current_attributes.rb'))
 # Do not load Railtie. It will load if after everything is ready, so we don't have to load any
 # Karafka components when we require this railtie. Railtie needs to be loaded last.
 loader.ignore(Karafka.gem_root.join('lib/karafka/railtie'))

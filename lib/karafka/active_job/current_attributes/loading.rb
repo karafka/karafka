@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support/current_attributes'
-
 module Karafka
   module ActiveJob
     module CurrentAttributes

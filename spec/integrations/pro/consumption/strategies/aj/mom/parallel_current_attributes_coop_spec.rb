@@ -45,6 +45,6 @@ start_karafka_and_wait_until do
 end
 
 DT[0].each do |result|
- assert_equal result[0], result[1]
- assert_equal result[0] + 1, result[2]
+  assert_equal result[0], result[1]
+  assert_equal result[0] + 1, result[2]
 end
