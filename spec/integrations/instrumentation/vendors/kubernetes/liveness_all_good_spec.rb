@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 begin
-  port = 3000 + rand(2000)
+  port = rand(3000..5000)
   listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
     hostname: '127.0.0.1',
     port: port

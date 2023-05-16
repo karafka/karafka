@@ -16,7 +16,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 begin
-  port = 3000 + rand(2000)
+  port = rand(3000..5000)
   listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
     hostname: '127.0.0.1',
     port: port,
@@ -29,7 +29,7 @@ end
 Karafka.monitor.subscribe(listener)
 
 Thread.new do
-  until Karafka::App.stopping? do
+  until Karafka::App.stopping?
     sleep(0.1)
     uri = URI.parse("http://127.0.0.1:#{port}/")
     response = Net::HTTP.get_response(uri)

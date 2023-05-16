@@ -5,6 +5,7 @@ require 'socket'
 module Karafka
   module Instrumentation
     module Vendors
+      # Namespace for instrumentation related with Kubernetes
       module Kubernetes
         # Kubernetes HTTP listener that does not only reply when process is not fully hanging, but
         # also allows to define max time of processing and looping.
@@ -19,7 +20,11 @@ module Karafka
 
           # @param hostname [String, nil] hostname or nil to bind on all
           # @param port [Integer] TCP port on which we want to run our HTTP status server
-          # @param ttl [Integer] time in ms after which we consider our process no longer ok.
+          # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
+          #   It allows us to define max consumption time after which k8s should consider given
+          #   process as hanging
+          # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
+          #   happen that often, process should be considered dead.
           # @note The default TTL matches the default `max.poll.interval.ms`
           def initialize(
             hostname: nil,
@@ -36,28 +41,32 @@ module Karafka
 
             Thread.new do
               loop do
-                break unless respond(@server)
+                break unless respond
               end
             end
           end
 
           # Tick on each fetch
-          def on_connection_listener_fetch_loop(_)
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_connection_listener_fetch_loop(_event)
             polling_tick
           end
 
           # Tick on starting work
-          def on_consumer_consume(_)
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_consumer_consume(_event)
             consuming_tick
           end
 
           # Tick on finished work
-          def on_consumer_consumed(_)
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_consumer_consumed(_event)
             consuming_tick
           end
 
           # Stop the http server when we stop the process
-          def on_app_stopped(_)
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_app_stopped(_event)
             @server.close
           end
 
@@ -76,14 +85,14 @@ module Karafka
           # Responds to a HTTP request with the process liveness status
           #
           # @param client [TCPSocket] socket for given http request
-          def respond(client)
-            client = @server.accept
+          def respond
+            client = server.accept
             client.gets
             client.print "HTTP/1.1 #{status}\r\n"
             client.close
 
             true
-          rescue Errno::ECONNRESET, Errno::EPIPE, IOError => e
+          rescue Errno::ECONNRESET, Errno::EPIPE, IOError
             !@server.closed?
           end
 
