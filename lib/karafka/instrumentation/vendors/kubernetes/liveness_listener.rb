@@ -83,10 +83,8 @@ module Karafka
           end
 
           # Responds to a HTTP request with the process liveness status
-          #
-          # @param client [TCPSocket] socket for given http request
           def respond
-            client = server.accept
+            client = @server.accept
             client.gets
             client.print "HTTP/1.1 #{status}\r\n"
             client.close

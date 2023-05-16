@@ -32,7 +32,7 @@ end
 Karafka.monitor.subscribe(listener)
 
 Thread.new do
-  until Karafka::App.stopping? do
+  until Karafka::App.stopping?
     sleep(0.1)
     uri = URI.parse("http://127.0.0.1:#{port}/")
     response = Net::HTTP.get_response(uri)
