@@ -35,9 +35,9 @@ module Karafka
             @server = TCPServer.new(*[hostname, port].compact)
             @polling_ttl = polling_ttl
             @consuming_ttl = consuming_ttl
-
-            polling_tick
-            consuming_tick
+            @mutex = Mutex.new
+            @pollings = {}
+            @consumptions = {}
 
             Thread.new do
               loop do
@@ -49,19 +49,45 @@ module Karafka
           # Tick on each fetch
           # @param _event [Karafka::Core::Monitoring::Event]
           def on_connection_listener_fetch_loop(_event)
-            polling_tick
+            mark_polling_tick
           end
 
           # Tick on starting work
           # @param _event [Karafka::Core::Monitoring::Event]
           def on_consumer_consume(_event)
-            consuming_tick
+            mark_consumption_tick
           end
 
           # Tick on finished work
           # @param _event [Karafka::Core::Monitoring::Event]
           def on_consumer_consumed(_event)
-            consuming_tick
+            clear_consumption_tick
+          end
+
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_consumer_revoke(_event)
+            mark_consumption_tick
+          end
+
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_consumer_revoked(_event)
+            clear_consumption_tick
+          end
+
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_consumer_shutting_down(_event)
+            mark_consumption_tick
+          end
+
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_consumer_shutdown(_event)
+            clear_consumption_tick
+          end
+
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_error_occurred(_event)
+            clear_consumption_tick
+            clear_polling_tick
           end
 
           # Stop the http server when we stop the process
@@ -72,14 +98,43 @@ module Karafka
 
           private
 
-          # Update the polling tick time
-          def polling_tick
-            @polling_tick = monotonic_now
+          # Wraps the logic with a mutex
+          # @param block [Proc] code we want to run in mutex
+          def synchronize(&block)
+            @mutex.synchronize(&block)
+          end
+
+          # @return [Integer] object id of the current thread
+          def thread_id
+            Thread.current.object_id
+          end
+
+          # Update the polling tick time for current thread
+          def mark_polling_tick
+            synchronize do
+              @pollings[thread_id] = monotonic_now
+            end
+          end
+
+          # Clear current thread polling time tracker
+          def clear_polling_tick
+            synchronize do
+              @pollings.delete(thread_id)
+            end
           end
 
           # Update the processing tick time
-          def consuming_tick
-            @consuming_tick = monotonic_now
+          def mark_consumption_tick
+            synchronize do
+              @consumptions[thread_id] = monotonic_now
+            end
+          end
+
+          # Clear current thread consumption time tracker
+          def clear_consumption_tick
+            synchronize do
+              @consumptions.delete(thread_id)
+            end
           end
 
           # Responds to a HTTP request with the process liveness status
@@ -94,11 +149,13 @@ module Karafka
             !@server.closed?
           end
 
-          # Did we exceed the ttl
-          # @return [String] "ok" or "timeout"
+          # Did we exceed any of the ttls
+          # @return [String] 204 string if ok, 500 otherwise
           def status
-            return '500' if (monotonic_now - @polling_tick) > @polling_ttl
-            return '500' if (monotonic_now - @consuming_tick) > @consuming_ttl
+            time = monotonic_now
+
+            return '500' if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
+            return '500' if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
 
             '204'
           end
