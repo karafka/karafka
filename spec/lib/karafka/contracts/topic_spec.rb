@@ -115,6 +115,46 @@ RSpec.describe_current do
     end
   end
 
+  context 'when validating max_messages' do
+    context 'when not numeric' do
+      before { config[:max_messages] = '100' }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when zero' do
+      before { config[:max_messages] = 0 }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when missing' do
+      before { config.delete(:max_messages) }
+
+      it { expect(check).not_to be_success }
+    end
+  end
+
+  context 'when validating max_wait_time' do
+    context 'when not numeric' do
+      before { config[:max_wait_time] = '100' }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when zero' do
+      before { config[:max_wait_time] = 0 }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when missing' do
+      before { config.delete(:max_wait_time) }
+
+      it { expect(check).not_to be_success }
+    end
+  end
+
   context 'when we validate consumer' do
     context 'when it is not present' do
       before { config[:consumer] = nil }

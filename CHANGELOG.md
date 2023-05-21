@@ -11,6 +11,7 @@
 - [Improvement] Improve complex strategies inheritance flow.
 - [Improvement] Optimize offset management for DLQ + MoM feature combinations.
 - [Change] Removed `Karafka::Pro::BaseConsumer` in favor of `Karafka::BaseConsumer`. (#1345)
+- [Fix] Fix for max_messages and max_wait_time not having reference in errors.yml (#1443)
 
 ### Upgrade notes
 
