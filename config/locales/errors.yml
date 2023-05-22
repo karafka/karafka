@@ -15,6 +15,13 @@ en:
       shutdown_timeout_format: needs to be an integer bigger than 0
       max_wait_time_format: needs to be an integer bigger than 0
       kafka_format: needs to be a filled hash
+      internal.processing.jobs_builder_format: cannot be nil
+      internal.processing.scheduler: cannot be nil
+      internal.processing.coordinator_class: cannot be nil
+      internal.processing.partitioner_class: cannot be nil
+      internal.active_job.dispatcher: cannot be nil
+      internal.active_job.job_options_contract: cannot be nil
+      internal.active_job.consumer_class: cannot be nil
       internal.status_format: needs to be present
       internal.process_format: needs to be present
       internal.routing.builder_format: needs to be present
@@ -31,6 +38,7 @@ en:
       topics_missing: No topics to subscribe to
 
     topic:
+      kafka: needs to be a hash with kafka scope settings details
       missing: needs to be present
       max_messages_format: 'needs to be an integer bigger than 0'
       max_wait_time_format: 'needs to be an integer bigger than 0'
