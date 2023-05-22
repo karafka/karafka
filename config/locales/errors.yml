@@ -32,6 +32,8 @@ en:
 
     topic:
       missing: needs to be present
+      max_messages_format: 'needs to be an integer bigger than 0'
+      max_wait_time_format: 'needs to be an integer bigger than 0'
       name_format: 'needs to be a string with a Kafka accepted format'
       deserializer_format: needs to be present
       consumer_format: needs to be present
