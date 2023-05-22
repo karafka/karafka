@@ -43,6 +43,16 @@ RSpec.describe_current do
     }
   end
 
+  context 'when we check for the errors yml file reference' do
+    it 'expect to have all of them defined' do
+      stringified = described_class.config.error_messages.to_s
+
+      described_class.rules.each do |rule|
+        expect(stringified).to include(rule.path.last.to_s)
+      end
+    end
+  end
+
   context 'when config is valid' do
     it { expect(contract.call(config)).to be_success }
   end
@@ -266,6 +276,12 @@ RSpec.describe_current do
 
     context 'when processing jobs_builder is missing' do
       before { config[:internal][:processing].delete(:jobs_builder) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when processing jobs_builder is nil' do
+      before { config[:internal][:processing][:jobs_builder] = nil }
 
       it { expect(contract.call(config)).not_to be_success }
     end
