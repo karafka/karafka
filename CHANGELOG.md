@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.0 (Unreleased)
+## 2.1.0 (2023-05-22)
 - **[Feature]** Provide ability to use CurrentAttributes with ActiveJob's Karafka adapter.
 - **[Feature]** Introduce collective Virtual Partitions offset management.
 - **[Feature]** Use virtual offsets to filter out messages that would be re-processed upon retries.
@@ -11,12 +11,13 @@
 - [Improvement] Improve complex strategies inheritance flow.
 - [Improvement] Optimize offset management for DLQ + MoM feature combinations.
 - [Change] Removed `Karafka::Pro::BaseConsumer` in favor of `Karafka::BaseConsumer`. (#1345)
-- [Fix] Fix for max_messages and max_wait_time not having reference in errors.yml (#1443)
+- [Fix] Fix for `max_messages` and `max_wait_time` not having reference in errors.yml (#1443)
 
 ### Upgrade notes
 
-1. Replace `Karafka::Pro::BaseConsumer` references to `Karafka::BaseConsumer`.
-2. Replace `Karafka::Instrumentation::Vendors::Datadog:Listener` with `Karafka::Instrumentation::Vendors::Datadog::MetricsListener`.
+1. Upgrade to Karafka `2.0.41` prior to upgrading to `2.1.0`.
+2. Replace `Karafka::Pro::BaseConsumer` references to `Karafka::BaseConsumer`.
+3. Replace `Karafka::Instrumentation::Vendors::Datadog:Listener` with `Karafka::Instrumentation::Vendors::Datadog::MetricsListener`.
 
 ## 2.0.41 (2023-14-19)
 - **[Feature]** Provide `Karafka::Pro::Iterator` for anonymous topic/partitions iterations and messages lookups (#1389 and #1427).
