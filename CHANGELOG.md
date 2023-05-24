@@ -1,7 +1,7 @@
 # Karafka framework changelog
 
 ## 2.1.1 (2023-05-24)
-- [Fix] Liveness Probe Doesn't Meet HTTP 1.1 Criteria - Causing Kube Restarts (#1450)
+- [Fix] Liveness Probe Doesn't Meet HTTP 1.1 Criteria - Causing Kubernetes Restarts (#1450)
 
 ## 2.1.0 (2023-05-22)
 - **[Feature]** Provide ability to use CurrentAttributes with ActiveJob's Karafka adapter.

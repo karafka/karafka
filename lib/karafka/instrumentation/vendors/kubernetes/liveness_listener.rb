@@ -18,6 +18,14 @@ module Karafka
         class LivenessListener
           include ::Karafka::Core::Helpers::Time
 
+          # All good with Karafka
+          OK_CODE = '204 No content'
+
+          # Some timeoutes, fail
+          FAIL_CODE = '500 Internal Server Error'
+
+          private_constant :OK_CODE, :FAIL_CODE
+
           # @param hostname [String, nil] hostname or nil to bind on all
           # @param port [Integer] TCP port on which we want to run our HTTP status server
           # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
@@ -142,6 +150,7 @@ module Karafka
             client = @server.accept
             client.gets
             client.print "HTTP/1.1 #{status}\r\n"
+            client.print "Content-Type: text/plain\r\n"
             client.print "\r\n"
             client.close
 
@@ -155,10 +164,10 @@ module Karafka
           def status
             time = monotonic_now
 
-            return '500' if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
-            return '500' if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
+            return FAIL_CODE if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
+            return FAIL_CODE if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
 
-            '204'
+            OK_CODE
           end
         end
       end
