@@ -21,7 +21,7 @@ module Karafka
           # All good with Karafka
           OK_CODE = '204 No Content'
 
-          # Some timeoutes, fail
+          # Some timeouts, fail
           FAIL_CODE = '500 Internal Server Error'
 
           private_constant :OK_CODE, :FAIL_CODE
