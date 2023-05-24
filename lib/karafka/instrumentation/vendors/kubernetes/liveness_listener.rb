@@ -142,6 +142,7 @@ module Karafka
             client = @server.accept
             client.gets
             client.print "HTTP/1.1 #{status}\r\n"
+            client.print "\r\n"
             client.close
 
             true
