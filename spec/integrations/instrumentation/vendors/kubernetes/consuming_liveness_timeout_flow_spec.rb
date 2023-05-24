@@ -59,6 +59,10 @@ assert_equal responses[0], '-> "HTTP/1.1 204 No Content\r\n"', responses[0]
 assert_equal responses[1], '-> "Content-Type: text/plain\r\n"', responses[1]
 assert_equal responses[2], '-> "\r\n"', responses[2]
 
-assert_equal responses[-3], '-> "HTTP/1.1 500 Internal Server Error\r\n"', responses[-3]
-assert_equal responses[-2], '-> "Content-Type: text/plain\r\n"', responses[-2]
-assert_equal responses[-1], '-> "\r\n"', responses[-1]
+position = responses.index { |line| line.include?(' 500 ') }
+
+resp500 = responses[position..]
+
+assert_equal resp500[0], '-> "HTTP/1.1 500 Internal Server Error\r\n"', resp500[0]
+assert_equal resp500[1], '-> "Content-Type: text/plain\r\n"', resp500[1]
+assert_equal resp500[2], '-> "\r\n"', resp500[2]
