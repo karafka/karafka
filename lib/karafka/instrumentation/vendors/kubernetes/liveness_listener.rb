@@ -19,7 +19,7 @@ module Karafka
           include ::Karafka::Core::Helpers::Time
 
           # All good with Karafka
-          OK_CODE = '204 No content'
+          OK_CODE = '204 No Content'
 
           # Some timeoutes, fail
           FAIL_CODE = '500 Internal Server Error'
