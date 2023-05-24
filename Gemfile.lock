@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.1.0)
+    karafka (2.1.1)
       karafka-core (>= 2.0.12, < 3.0.0)
       thor (>= 0.20)
       waterdrop (>= 2.4.10, < 3.0.0)
@@ -28,12 +28,12 @@ GEM
     ffi (1.15.5)
     globalid (1.1.0)
       activesupport (>= 5.0)
-    i18n (1.12.0)
+    i18n (1.13.0)
       concurrent-ruby (~> 1.0)
     karafka-core (2.0.12)
       concurrent-ruby (>= 1.1)
       karafka-rdkafka (>= 0.12.1)
-    karafka-rdkafka (0.12.1)
+    karafka-rdkafka (0.12.2)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
@@ -47,15 +47,15 @@ GEM
     minitest (5.18.0)
     rack (3.0.7)
     rake (13.0.6)
-    roda (3.67.0)
+    roda (3.68.0)
       rack
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
       rspec-expectations (~> 3.12.0)
       rspec-mocks (~> 3.12.0)
-    rspec-core (3.12.1)
+    rspec-core (3.12.2)
       rspec-support (~> 3.12.0)
-    rspec-expectations (3.12.2)
+    rspec-expectations (3.12.3)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.12.0)
     rspec-mocks (3.12.5)
@@ -78,7 +78,6 @@ GEM
     zeitwerk (2.6.8)
 
 PLATFORMS
-  arm64-darwin-21
   x86_64-linux
 
 DEPENDENCIES
@@ -91,4 +90,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   2.4.10
+   2.4.12

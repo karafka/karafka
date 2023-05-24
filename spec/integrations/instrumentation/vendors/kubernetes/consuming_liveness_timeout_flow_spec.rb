@@ -27,12 +27,18 @@ end
 
 Karafka.monitor.subscribe(listener)
 
+raw_flows = +''
+
 Thread.new do
   until Karafka::App.stopping?
-    sleep(0.1)
-    uri = URI.parse("http://127.0.0.1:#{port}/")
-    response = Net::HTTP.get_response(uri)
+    req = Net::HTTP::Get.new('/')
+    client = Net::HTTP.new('127.0.0.1', port)
+    client.set_debug_output(raw_flows)
+    response = client.request(req)
+
     DT[:probing] << response.code
+
+    sleep(0.1)
   end
 end
 
@@ -46,3 +52,17 @@ end
 
 assert DT[:probing].include?('204')
 assert DT[:probing].include?('500')
+
+responses = raw_flows.split("\n").select { |line| line.start_with?('->') }
+
+assert_equal responses[0], '-> "HTTP/1.1 204 No Content\r\n"', responses[0]
+assert_equal responses[1], '-> "Content-Type: text/plain\r\n"', responses[1]
+assert_equal responses[2], '-> "\r\n"', responses[2]
+
+position = responses.index { |line| line.include?(' 500 ') }
+
+resp500 = responses[position..]
+
+assert_equal resp500[0], '-> "HTTP/1.1 500 Internal Server Error\r\n"', resp500[0]
+assert_equal resp500[1], '-> "Content-Type: text/plain\r\n"', resp500[1]
+assert_equal resp500[2], '-> "\r\n"', resp500[2]
