@@ -4,10 +4,10 @@ require 'karafka/instrumentation/vendors/prometheus_exporter/metrics_collector'
 
 # Vendors specific support components
 module Vendors
-  # Namespace for DD specific support classes
+  # Namespace for Prometheus Exporter specific support classes
   module PrometheusExporter
-    # Dummy statsd client that accumulates metrics that are added instead of sending them
-    # This allows us not to be dependent on the statsd gem but also be able to test out the
+    # Dummy prometheus client that accumulates metrics that are added instead of sending them
+    # This allows us not to be dependent on the prometheus exporter gem but also be able to test out the
     # integration
     class DummyClient
       attr_reader :collector
