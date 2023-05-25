@@ -96,6 +96,8 @@ module Karafka
             messages = consumer.messages
             metadata = messages.metadata
             time_taken = event[:time] / 1000 # convert to seconds to adhere to prometheus standards
+            proccess_lag = metadata.processing_lag / 1000
+            consumption_lag = metadata.consumption_lag / 1000
 
             labels = default_labels.merge(consumer_labels(consumer))
 
@@ -105,8 +107,8 @@ module Karafka
               karafka_consumer_offset: [metadata.last_offset, labels],
               karafka_consumer_consumed_time_taken_seconds: [time_taken, labels],
               karafka_consumer_batch_size: [messages.count, labels],
-              karafka_consumer_processing_lag_seconds: [metadata.processing_lag, labels],
-              karafka_consumer_consumption_lag_seconds: [metadata.consumption_lag, labels]
+              karafka_consumer_processing_lag_seconds: [processing_lag, labels],
+              karafka_consumer_consumption_lag_seconds: [consumption_lag, labels]
             )
           end
 
