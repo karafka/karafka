@@ -75,7 +75,7 @@ module Karafka
           #
           # @param event [Karafka::Core::Monitoring::Event]
           def on_connection_listener_fetch_loop_received(event)
-            time_taken = event[:time] / 1000 # convert to seconds to adhere to prometheus standards
+            time_taken = event[:time] / 1_000.0 # convert to seconds to adhere to prometheus standards
             message_count = event[:messages_buffer].size
 
             consumer_group_id = event[:subscription_group].consumer_group_id
@@ -95,9 +95,9 @@ module Karafka
             consumer = event.payload[:caller]
             messages = consumer.messages
             metadata = messages.metadata
-            time_taken = event[:time] / 1000 # convert to seconds to adhere to prometheus standards
-            proccess_lag = metadata.processing_lag / 1000
-            consumption_lag = metadata.consumption_lag / 1000
+            time_taken = event[:time] / 1000.0 # convert to seconds to adhere to prometheus standards
+            proccess_lag = metadata.processing_lag / 1000.0
+            consumption_lag = metadata.consumption_lag / 1000.0
 
             labels = default_labels.merge(consumer_labels(consumer))
 
