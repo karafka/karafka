@@ -45,6 +45,8 @@ GEM
       tilt (~> 2.0)
     mini_portile2 (2.8.2)
     minitest (5.18.0)
+    prometheus_exporter (2.0.8)
+      webrick
     rack (3.0.7)
     rake (13.0.6)
     roda (3.68.0)
@@ -75,9 +77,11 @@ GEM
     waterdrop (2.5.2)
       karafka-core (>= 2.0.12, < 3.0.0)
       zeitwerk (~> 2.3)
+    webrick (1.8.1)
     zeitwerk (2.6.8)
 
 PLATFORMS
+  arm64-darwin-21
   x86_64-linux
 
 DEPENDENCIES
@@ -86,6 +90,7 @@ DEPENDENCIES
   factory_bot
   karafka!
   karafka-web
+  prometheus_exporter
   rspec
   simplecov
 
