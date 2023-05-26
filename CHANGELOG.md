@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 2.1.2 (2023-05-26)
+- Set minimum `karafka-core` on `2.0.13` to make sure correct version of `karafka-rdkafka` is used.
+- Set minimum `waterdrop` on `2.5.3` to make sure correct version of `waterdrop` is used.
+
 ## 2.1.1 (2023-05-24)
 - [Fix] Liveness Probe Doesn't Meet HTTP 1.1 Criteria - Causing Kubernetes Restarts (#1450)
 
