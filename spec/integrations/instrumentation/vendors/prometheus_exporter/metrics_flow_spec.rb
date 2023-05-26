@@ -59,6 +59,7 @@ end
   karafka_consumer_messages_total
   karafka_consumer_batches_total
   karafka_consumer_shutdown_total
+  karafka_consumer_revoked_total
 ].each do |count_key|
   assert_equal true, prom_dummy.collector.registry.key?(count_key), "#{count_key} missing"
 end

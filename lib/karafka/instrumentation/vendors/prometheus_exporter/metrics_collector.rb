@@ -44,7 +44,7 @@ module Karafka
 
           # @param [Hash] hash of metric names to values: {'consumer_lags_delta' => [2, {label: 1 }] }
           def observe_metrics!(obj)
-            if obj.nil? || obj.empty? || obj["payload"].nil? || obj["payload"].empty? # standard:disable Rails/Blank
+            if obj.nil? || obj.empty? || obj["payload"].nil? || obj["payload"].empty?
               return warn("No kafka metrics to observe")
             end
 

@@ -138,9 +138,21 @@ module Karafka
             )
           end
 
+          def on_dead_letter_queue_dispatched(event)
+            consumer = event[:caller]
+            dlq_topic = event[:caller].topic.dead_letter_queue.topic
+            dlq_labels = {dead_letter_queue_topic: dlq_topic}
+            labels = default_labels.merge(consumer_labels(consumer), dlq_labels)
+            observe(karafka_dead_letter_queue_total: [1, labels])
+          end
+
+          def on_app_stopped(event)
+            observe(app_stopped_total: [1, default_labels])
+          end
+
           # We report this metric before and after processing for higher accuracy
           # Without this, the utilization would not be fully reflected
-          # @param event [Karafka::Core::Monitoring::Event]
+          # param event [Karafka::Core::Monitoring::Event]
           def on_worker_processed(event)
             jobs_queue_stats = event[:jobs_queue].statistics
             count = jobs_queue_stats[:busy] || 0

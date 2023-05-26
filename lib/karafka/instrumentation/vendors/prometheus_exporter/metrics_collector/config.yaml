@@ -24,11 +24,6 @@ karafka_listener_polling_messages:
   description: Average number of messages fetched in a single polling cycle.
   scope: listener
   source: karafka
-karafka_listener_threads:
-  type: Gauge
-  description: Number of listener threads assigned to a Karafka server for polling messages.
-  scope: listener
-  source: karafka
 karafka_dead_letter_queue_total:
   type: Counter
   description: Number of messages that were sent to the dead letter queue.
@@ -205,12 +200,6 @@ karafka_deliver_errors_total:
   scope: brokers
   source: rd_kafka
   key_location: [txerrs_d]
-karafka_receive_errors_total:
-  type: Counter
-  description: From librdkafka - the total number of errors receiving messages.
-  scope: brokers
-  source: rd_kafka
-  key_location: [rxerrs_d]
 karafka_queue_latency_avg_seconds:
   type: Gauge
   description: From librdkafka - average elapsed time in seconds between the request to enqueue to the transmit queue and the request being written to TCP socket
