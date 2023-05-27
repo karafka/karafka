@@ -225,7 +225,7 @@ module Karafka
     #   different flow after there is an error, for example for resources cleanup, small manual
     #   backoff or different instrumentation tracking.
     def retrying?
-      coordinator.pause_tracker.attempt.positive?
+      coordinator.pause_tracker.attempt > 1
     end
 
     # Pauses the processing from the last offset to retry on given message
