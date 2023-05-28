@@ -149,7 +149,7 @@ assert_equal(
   2
 )
 
-# #mark_as_consumed! will raise for the contested message instead of returning `true` ...
+# #mark_as_consumed! will raise for the contested message instead of returning `false` ...
 absent_return_value = DT[:mark_as_consumed_return_values].find do |key, _|
   key == DT[:contested_message].first.payload['key']
 end
