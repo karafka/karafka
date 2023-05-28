@@ -1,5 +1,10 @@
 # Karafka framework changelog
 
+## 2.1.3 (Unreleased)
+- Fix #retrying? helper (Aerdayne)
+- Enable phantom tests
+- Add linter to ensure, that all integration specs end with `_spec.rb`
+
 ## 2.1.2 (2023-05-26)
 - Set minimum `karafka-core` on `2.0.13` to make sure correct version of `karafka-rdkafka` is used.
 - Set minimum `waterdrop` on `2.5.3` to make sure correct version of `waterdrop` is used.
