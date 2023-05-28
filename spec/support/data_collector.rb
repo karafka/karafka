@@ -83,6 +83,12 @@ class DataCollector
     def to_s
       inspect
     end
+
+    # @param key [Object] anything we use as a key
+    # @return [Boolean] is there anything under given key
+    def key?(key)
+      instance.data.key?(key)
+    end
   end
 
   # Creates a collector
