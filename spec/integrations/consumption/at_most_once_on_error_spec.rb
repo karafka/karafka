@@ -5,8 +5,6 @@
 
 setup_karafka(allow_errors: true)
 
-SuperException = Class.new(Exception)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
