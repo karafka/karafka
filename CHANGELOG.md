@@ -1,9 +1,10 @@
 # Karafka framework changelog
 
 ## 2.1.3 (Unreleased)
-- Fix #retrying? helper (Aerdayne)
-- Enable phantom tests
-- Add linter to ensure, that all integration specs end with `_spec.rb`
+- [Maintenance] Add linter to ensure, that all integration specs end with `_spec.rb`.
+- [Fix] #retrying? helper (Aerdayne).
+- [Fix] Enable phantom tests.
+- [Fix] `mark_as_consumed!` raises an error instead of `false` on `unknown_member_id` (#1461).
 
 ## 2.1.2 (2023-05-26)
 - Set minimum `karafka-core` on `2.0.13` to make sure correct version of `karafka-rdkafka` is used.
@@ -13,7 +14,7 @@
 - [Fix] Liveness Probe Doesn't Meet HTTP 1.1 Criteria - Causing Kubernetes Restarts (#1450)
 
 ## 2.1.0 (2023-05-22)
-- **[Feature]** Provide ability to use CurrentAttributes with ActiveJob's Karafka adapter.
+- **[Feature]** Provide ability to use CurrentAttributes with ActiveJob's Karafka adapter (federicomoretti).
 - **[Feature]** Introduce collective Virtual Partitions offset management.
 - **[Feature]** Use virtual offsets to filter out messages that would be re-processed upon retries.
 - [Improvement] No longer break processing on failing parallel virtual partitions in ActiveJob because it is compensated by virtual marking.

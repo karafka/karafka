@@ -305,6 +305,8 @@ module Karafka
         case e.code
         when :assignment_lost
           return false
+        when :unknown_member_id
+          return false
         when :no_offset
           return true
         when :coordinator_load_in_progress
