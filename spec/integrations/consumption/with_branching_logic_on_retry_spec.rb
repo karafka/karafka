@@ -4,12 +4,12 @@
 
 setup_karafka(allow_errors: true)
 
-SuperException = Class.new(Exception)
+SuperStandardError = Class.new(StandardError)
 
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      raise if message.offset == 5 && !retrying?
+      raise SuperStandardError if message.offset == 5 && !retrying?
 
       DT[:offsets] << message.offset
 
@@ -20,10 +20,18 @@ end
 
 draw_routes(Consumer)
 
+Karafka.monitor.subscribe('error.occurred') do |event|
+  next unless event[:type] == 'consumer.consume.error'
+
+  DT[:errors] << event[:error]
+end
+
 produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
   DT[:offsets].count >= 10
 end
 
+assert_equal true, DT[:errors].count == 1
+assert_equal true, DT[:errors].first.instance_of?(SuperStandardError)
 assert_equal DT[:offsets], (0..9).to_a
