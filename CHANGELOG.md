@@ -1,10 +1,10 @@
 # Karafka framework changelog
 
-## 2.1.3 (Unreleased)
+## 2.1.3 (2023-05-29)
 - [Maintenance] Add linter to ensure, that all integration specs end with `_spec.rb`.
-- [Fix] #retrying? helper (Aerdayne).
+- [Fix] Fix `#retrying?` helper result value (Aerdayne).
+- [Fix] Fix `mark_as_consumed!` raising an error instead of `false` on `unknown_member_id` (#1461).
 - [Fix] Enable phantom tests.
-- [Fix] `mark_as_consumed!` raises an error instead of `false` on `unknown_member_id` (#1461).
 
 ## 2.1.2 (2023-05-26)
 - Set minimum `karafka-core` on `2.0.13` to make sure correct version of `karafka-rdkafka` is used.
