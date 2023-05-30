@@ -28,7 +28,7 @@ produce_many(DT.topic, DT.uuids(20), partition: 0)
 produce_many(DT.topic, DT.uuids(20), partition: 1)
 
 start_karafka_and_wait_until do
-  if DT[0].size >= 1
+  if DT.key?(0)
     consumer = setup_rdkafka_consumer
     consumer.subscribe(DT.topic)
     consumer.poll(1_000)
