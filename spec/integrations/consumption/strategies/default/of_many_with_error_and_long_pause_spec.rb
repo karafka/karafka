@@ -47,8 +47,7 @@ elements.each do |data|
 end
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1 &&
-    DT[1].size >= 5
+  DT.key?(0) && DT[1].size >= 5
 end
 
 assert_equal 1, DT[0].size

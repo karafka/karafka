@@ -54,7 +54,7 @@ end
 produce_many(DT.topics[0], DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT[1].size >= 1 && DT[0].uniq.size >= 3
+  DT.key?(1) && DT[0].uniq.size >= 3
 end
 
 assert_equal [0, 1], DT[1].uniq

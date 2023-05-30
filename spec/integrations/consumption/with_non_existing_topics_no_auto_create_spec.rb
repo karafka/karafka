@@ -35,7 +35,7 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:events].count >= 1
+  DT.key?(:events)
 end
 
 payload = DT[:events].last.payload

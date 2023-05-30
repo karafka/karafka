@@ -44,7 +44,7 @@ produce(DT.topic, '2', key: '1')
 sleep(30)
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1
+  DT.key?(0)
 end
 
 assert_equal [nil, 2], DT[0]

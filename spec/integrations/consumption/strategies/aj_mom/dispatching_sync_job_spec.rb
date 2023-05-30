@@ -30,7 +30,7 @@ VALUE2 = rand
 Job.perform_later(VALUE1, VALUE2)
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1
+  DT.key?(0)
 end
 
 aj_config = Karafka::App.config.internal.active_job

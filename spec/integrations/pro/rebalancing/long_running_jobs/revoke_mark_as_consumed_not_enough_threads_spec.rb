@@ -60,10 +60,7 @@ thread = Thread.new do
 end
 
 start_karafka_and_wait_until do
-  (
-    DT['0-revoked'].size >= 1 ||
-      DT['1-revoked'].size >= 1
-  ) && DT[:revoked_data].size >= 1
+  (DT.key?('0-revoked') || DT.key?('1-revoked')) && DT.key?(:revoked_data)
 end
 
 thread.join

@@ -47,7 +47,7 @@ draw_routes(Consumer)
 produce_many(DT.topic, DT.uuids(1))
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1
+  DT.key?(0)
 end
 
 assert DT[:probing].include?('204')

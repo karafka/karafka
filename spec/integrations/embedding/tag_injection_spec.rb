@@ -21,7 +21,7 @@ produce_many(DT.topic, elements)
 # Run Karafka
 Karafka::Embedded.start
 
-sleep(0.1) until DT[0].size >= 1
+sleep(0.1) until DT.key?(0)
 
 Karafka::Embedded.stop
 

@@ -41,7 +41,7 @@ elements = DT.uuids(15)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:retried].size >= 1
+  DT.key?(:retried)
 end
 
 assert DT[:retried].first - DT[:errored].first > 15
