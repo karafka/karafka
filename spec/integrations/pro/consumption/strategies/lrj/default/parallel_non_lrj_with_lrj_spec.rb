@@ -38,7 +38,7 @@ end
 produce(DT.topics[0], '1')
 
 start_karafka_and_wait_until do
-  DT[:done_time].size >= 1
+  DT.key?(:done_time)
 end
 
 assert DT[:regular_time][0] < DT[:done_time][0]

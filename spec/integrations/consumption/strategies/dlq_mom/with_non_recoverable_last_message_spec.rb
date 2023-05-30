@@ -53,8 +53,7 @@ start_karafka_and_wait_until do
     produce(DT.topic, SecureRandom.hex(6))
   end
 
-  DT[:offsets].uniq.count >= 100 &&
-    DT[:broken].size >= 1
+  DT[:offsets].uniq.count >= 100 && DT.key?(:broken)
 end
 
 # first error and two errors on retries prior to moving on

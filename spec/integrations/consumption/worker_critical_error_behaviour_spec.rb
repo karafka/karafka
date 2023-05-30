@@ -35,7 +35,7 @@ raised = false
 begin
   start_karafka_and_wait_until do
     # This means, that listener received critical error
-    DT[:errors].size >= 1
+    DT.key?(:errors)
   end
 rescue SuperException
   raised = true

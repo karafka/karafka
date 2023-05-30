@@ -28,7 +28,7 @@ end
 produce_many(DT.topic, DT.uuids(20))
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1
+  DT.key?(0)
 end
 
 assert_equal DT[0].last + 1, fetch_first_offset

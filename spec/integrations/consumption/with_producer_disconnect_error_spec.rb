@@ -30,8 +30,8 @@ sleep(5)
 produce_many(DT.topic, ['1'])
 
 start_karafka_and_wait_until do
-  DT[0].size >= 2 && DT[:errors].size >= 1
+  DT[0].size >= 2 && DT.key?(:errors)
 end
 
 assert_equal 2, DT[0].size
-assert DT[:errors].count >= 1
+assert DT.key?(:errors)

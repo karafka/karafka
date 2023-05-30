@@ -43,7 +43,7 @@ elements = DT.uuids(1)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:broken].size >= 1
+  DT.key?(:broken)
 end
 
 assert_equal 1, DT[:broken].size
