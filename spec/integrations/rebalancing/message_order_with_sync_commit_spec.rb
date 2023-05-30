@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 
-# Messages should not be reprocessed out of order during a rebalance with
-# additional manual synchronous commits using #mark_as_consumed!.
+# Messages should not be reprocessed out of order during a rebalance
+# triggered by an unhealthy consumer with additional manual synchronous
+# commits using #mark_as_consumed!.
 
-setup_karafka(allow_errors: %w[consumer.consume.error connection.client.poll.error]) do |config|
+setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
-  # Default librdkafka auto commit interval
   config.kafka[:'auto.commit.interval.ms'] = 5_000
 
-  # Attempt ot batch messages to help trigger the condition for a contested message
   config.max_wait_time = 10_000
   config.max_messages = 20
   config.initial_offset = 'latest'
@@ -31,11 +30,11 @@ class Consumer < Karafka::BaseConsumer
 
       DT.data[:consecutive_messages] << [message.payload['key'], message.partition, message.offset]
 
-      # #mark_as_consumed! will raise on the contesed message since by that time
-      # the partition will be revoked
       return_value = mark_as_consumed!(message)
-      DT[:mark_as_consumed_return_values] << [message.payload, return_value]
-      return if return_value == false
+      next if return_value == true
+
+      DT[:failed_commits] << message.payload['key']
+      return
     end
   end
 end
@@ -47,12 +46,6 @@ draw_routes do
       consumer Consumer
     end
   end
-end
-
-Karafka.monitor.subscribe('error.occurred') do |event|
-  next unless event[:type] == 'consumer.consume.error'
-
-  DT[:errors] << event[:error]
 end
 
 Thread.new { Karafka::Server.run }
@@ -108,7 +101,7 @@ end
 
 wait_until do
   # Wait until the second consumer gets to the contested message and processes it
-  other_consumer.join && DT.data[:second_closed] == true && DT[:errors].count == 1
+  other_consumer.join && DT.data[:second_closed] == true && DT[:failed_commits].size == 1
 end
 
 # Make sure that strict order is preserved (excluding the duplicated message)
@@ -141,7 +134,7 @@ contested_message_key, = messages_processed_by_second_consumer.first
 
 assert_equal contested_message_key, DT[:contested_message].first.payload['key']
 
-assert_equal(true, second_consumer_offsets.none? { |offset| offset < DT[:contested_message].first.offset })
+assert(second_consumer_offsets.none? { |offset| offset < DT[:contested_message].first.offset })
 
 # Contested message should have been reprocessed twice
 assert_equal(
@@ -149,14 +142,6 @@ assert_equal(
   2
 )
 
-# #mark_as_consumed! will raise for the contested message instead of returning `false` ...
-absent_return_value = DT[:mark_as_consumed_return_values].find do |key, _|
-  key == DT[:contested_message].first.payload['key']
-end
-assert_equal absent_return_value, nil
-
-# ... it will raise Rdkafka::RdkafkaError instead
-assert_equal DT[:errors].count, 1
-consumption_error = DT[:errors].first
-assert_equal consumption_error.code, :unknown_member_id
-assert_equal consumption_error.class, Rdkafka::RdkafkaError
+# The only failed commit should be that of the contested message
+assert_equal 1, DT[:failed_commits].size
+assert_equal DT[:contested_message].first.payload['key'], DT[:failed_commits].first
