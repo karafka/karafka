@@ -16,13 +16,10 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      # Wait until we receive a batch with more than 3 messages, where the current one follows
-      # at least 2 other messages in order to avoid false positives and give the second consumer
-      # a chance to reprocess the whole batch.
-      condition_met = ((messages.metadata.first_offset + 2)..(messages.metadata.last_offset - 1)).cover?(message.offset)
-
       # Wait until some amount of messages has been already processed to spice things up
-      if condition_met && DT.data[:contested_message].empty? && DT.data[:consecutive_messages].count >= 60
+      if condition_met?(message) &&
+         DT.data[:contested_message].empty? &&
+         DT.data[:consecutive_messages].count >= 60
         DT[:contested_message_tuple] << [message, messages.metadata.first_offset]
         sleep(0.1) until DT.data.key?(:second_closed)
       end
@@ -33,6 +30,17 @@ class Consumer < Karafka::BaseConsumer
 
   def revoked
     DT[:revoked] << true
+  end
+
+  private
+
+  # Wait until we receive a batch with more than 3 messages, where the current one follows
+  # at least 2 other messages in order to avoid false positives and give the second consumer
+  # a chance to reprocess the whole batch.
+  def condition_met?(message)
+    (
+      (messages.metadata.first_offset + 2)..(messages.metadata.last_offset - 1)
+    ).cover?(message.offset)
   end
 end
 
@@ -102,12 +110,23 @@ wait_until do
 end
 
 contested_message, contested_batch_first_offset = DT[:contested_message_tuple].first
-message_from_contested_partition = DT[:consecutive_messages].select { |_, partition, _| partition == contested_message.partition }
-contested_offset_range = (contested_batch_first_offset..contested_message.offset)
-messages_from_contested_batch = message_from_contested_partition.select { |_, _, offset| contested_offset_range.cover?(offset) }
 
-# Each message from the contested batch should have been processed once by both consumers, twice in total
-duplicate_counts = messages_from_contested_batch.group_by { |_, _, offset| offset }.values.map { |group| group.uniq.count }
+message_from_contested_partition = DT[:consecutive_messages].select do |_, partition, _|
+  partition == contested_message.partition
+end
+
+contested_offset_range = (contested_batch_first_offset..contested_message.offset)
+messages_from_contested_batch = message_from_contested_partition.select do |_, _, offset|
+  contested_offset_range.cover?(offset)
+end
+
+# Each message from the contested batch should have been processed once by both consumers,
+# twice in total
+duplicate_counts = messages_from_contested_batch
+                     .group_by { |_, _, offset| offset }
+                     .values
+                     .map { |group| group.uniq.count }
+
 assert(duplicate_counts.all? { |size| size == 2 })
 
 # Second consumer should have started from the first offset in a contested batch

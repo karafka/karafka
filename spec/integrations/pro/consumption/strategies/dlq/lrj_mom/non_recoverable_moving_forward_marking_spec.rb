@@ -6,7 +6,7 @@
 # one, hence the skip
 
 class Listener
-  def on_error_occurred(event)
+  def on_error_occurred(_event)
     DT[:errors] << true
   end
 end
