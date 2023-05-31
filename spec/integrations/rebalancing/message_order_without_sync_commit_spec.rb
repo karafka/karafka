@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Messages can be reprocessed out of order during a rebalance triggered
-# by an unhealthy consumer without additional manual sycnhronous commits.
+# by an unhealthy consumer without additional manual synchronous commits.
 
 setup_karafka(allow_errors: %w[connection.client.poll.error]) do |config|
   config.kafka[:'max.poll.interval.ms'] = 10_000

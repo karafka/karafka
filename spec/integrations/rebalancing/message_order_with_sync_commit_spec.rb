@@ -17,25 +17,34 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      # Wait until we receive a batch with more than 3 messages, where the current one follows
-      # at least 2 other messages in order to avoid false positives and give the second consumer
-      # a chance to reprocess the whole batch.
-      condition_met = ((messages.metadata.first_offset + 2)..(messages.metadata.last_offset - 1)).cover?(message.offset)
-
       # Wait until some amount of messages has been already processed to spice things up
-      if condition_met && DT.data[:contested_message].empty? && DT.data[:consecutive_messages].count >= 60
+      if condition_met?(message) &&
+          !DT.key?(:contested_message) &&
+          DT[:consecutive_messages].count >= 60
         DT[:contested_message] << message
-        sleep(0.1) until DT.data.key?(:second_closed)
+
+        sleep(0.1) until DT.key?(:second_closed)
       end
 
-      DT.data[:consecutive_messages] << [message.payload['key'], message.partition, message.offset]
+      DT[:consecutive_messages] << [message.payload['key'], message.partition, message.offset]
 
-      return_value = mark_as_consumed!(message)
-      next if return_value == true
+      next if mark_as_consumed!(message)
 
       DT[:failed_commits] << message.payload['key']
+
       return
     end
+  end
+
+  private
+
+  def condition_met?(message)
+    # Wait until we receive a batch with more than 3 messages, where the current one follows
+    # at least 2 other messages in order to avoid false positives and give the second consumer
+    # a chance to reprocess the whole batch.
+    (
+      (messages.metadata.first_offset + 2)..(messages.metadata.last_offset - 1)
+    ).cover?(message.offset)
   end
 end
 
@@ -101,7 +110,7 @@ end
 
 wait_until do
   # Wait until the second consumer gets to the contested message and processes it
-  other_consumer.join && DT.data[:second_closed] == true && DT[:failed_commits].size == 1
+  other_consumer.join && DT[:second_closed] == true && DT.key?(:failed_commits)
 end
 
 # Make sure that strict order is preserved (excluding the duplicated message)
@@ -137,10 +146,11 @@ assert_equal contested_message_key, DT[:contested_message].first.payload['key']
 assert(second_consumer_offsets.none? { |offset| offset < DT[:contested_message].first.offset })
 
 # Contested message should have been reprocessed twice
-assert_equal(
-  DT[:consecutive_messages].select { |key, _, _| key == DT[:contested_message].first.payload['key'] }.count,
-  2
-)
+count = DT[:consecutive_messages].count do |key, _, _|
+  key == DT[:contested_message].first.payload['key']
+end
+
+assert_equal(count, 2)
 
 # The only failed commit should be that of the contested message
 assert_equal 1, DT[:failed_commits].size
