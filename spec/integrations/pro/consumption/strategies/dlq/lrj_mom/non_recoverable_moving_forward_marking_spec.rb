@@ -58,5 +58,5 @@ end
 DT[:errored][0..-2].each do |errored_offset|
   # The way we move offset makes it such, that we consider +1 offset message as the one that failed
   # This means, that after skip to DLQ it's the +2 from which we should start
-  assert DT[:groups].any? { |group| group[0] == errored_offset + 2 }
+  assert(DT[:groups].any? { |group| group[0] == errored_offset + 2 })
 end
