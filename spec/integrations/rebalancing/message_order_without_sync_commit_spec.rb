@@ -123,9 +123,9 @@ end
 # Each message from the contested batch should have been processed once by both consumers,
 # twice in total
 duplicate_counts = messages_from_contested_batch
-                     .group_by { |_, _, offset| offset }
-                     .values
-                     .map { |group| group.uniq.count }
+                   .group_by { |_, _, offset| offset }
+                   .values
+                   .map { |group| group.uniq.count }
 
 assert(duplicate_counts.all? { |size| size == 2 })
 
