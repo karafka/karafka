@@ -15,13 +15,10 @@ module Karafka
           include ::Karafka::Core::Configurable
           extend Forwardable
 
-          def_delegators :config, :client, :metric_config, :namespace, :default_labels
+          def_delegators :config, :client, :metric_config, :default_labels
 
           # Value object for storing a single rdkafka metric publishing details
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
-
-          # Namespace under which the DD metrics should be published
-          setting :namespace, default: 'karafka'
 
           # Prometheus Exporter client that we should use to publish the metrics
           # Usually you'll want ::PrometheusExporter::Client.default
@@ -68,7 +65,7 @@ module Karafka
               labels = labels.merge(consumer_labels(event.payload[:caller]))
             end
 
-            observe(karafka_error_total: [1, labels])
+            observe(error_total: [1, labels])
           end
 
           # Reports how many messages we've polled and how much time did we spend on it
@@ -83,8 +80,8 @@ module Karafka
             labels = default_labels.merge(consumer_group: consumer_group_id)
 
             observe(
-              karafka_listener_polling_time_seconds: [time_taken, labels],
-              karafka_listener_polling_messages: [message_count, labels]
+              listener_polling_time_seconds: [time_taken, labels],
+              listener_polling_messages: [message_count, labels]
             )
           end
 
@@ -102,13 +99,13 @@ module Karafka
             labels = default_labels.merge(consumer_labels(consumer))
 
             observe(
-              karafka_consumer_messages_total: [messages.count, labels],
-              karafka_consumer_batches_total: [1, labels],
-              karafka_consumer_offset: [metadata.last_offset, labels],
-              karafka_consumer_consumed_time_taken_seconds: [time_taken, labels],
-              karafka_consumer_batch_size: [messages.count, labels],
-              karafka_consumer_processing_lag_seconds: [processing_lag, labels],
-              karafka_consumer_consumption_lag_seconds: [consumption_lag, labels]
+              consumer_messages_total: [messages.count, labels],
+              consumer_batches_total: [1, labels],
+              consumer_offset: [metadata.last_offset, labels],
+              consumer_consumed_time_taken_seconds: [time_taken, labels],
+              consumer_batch_size: [messages.count, labels],
+              consumer_processing_lag_seconds: [processing_lag, labels],
+              consumer_consumption_lag_seconds: [consumption_lag, labels]
             )
           end
 
@@ -116,14 +113,14 @@ module Karafka
           def on_consumer_revoked(event)
             labels = default_labels.merge(consumer_labels(event.payload[:caller]))
 
-            observe(karafka_consumer_revoked_total: [1, labels])
+            observe(consumer_revoked_total: [1, labels])
           end
 
           # @param event [Karafka::Core::Monitoring::Event]
           def on_consumer_shutdown(event)
             labels = default_labels.merge(consumer_labels(event.payload[:caller]))
 
-            observe(karafka_consumer_shutdown_total: [1, labels])
+            observe(consumer_shutdown_total: [1, labels])
           end
 
           # Worker related metrics
@@ -132,9 +129,9 @@ module Karafka
             jobs_queue_stats = event[:jobs_queue].statistics
 
             observe(
-              karafka_worker_threads: [Karafka::App.config.concurrency, default_labels],
-              karafka_worker_threads_busy: [jobs_queue_stats[:busy], default_labels],
-              karafka_worker_enqueued_jobs: [jobs_queue_stats[:enqueued], default_labels]
+              worker_threads: [Karafka::App.config.concurrency, default_labels],
+              worker_threads_busy: [jobs_queue_stats[:busy], default_labels],
+              worker_enqueued_jobs: [jobs_queue_stats[:enqueued], default_labels]
             )
           end
 
@@ -143,7 +140,7 @@ module Karafka
             dlq_topic = event[:caller].topic.dead_letter_queue.topic
             dlq_labels = {dead_letter_queue_topic: dlq_topic}
             labels = default_labels.merge(consumer_labels(consumer), dlq_labels)
-            observe(karafka_dead_letter_queue_total: [1, labels])
+            observe(dead_letter_queue_total: [1, labels])
           end
 
           def on_app_stopped(event)
@@ -156,7 +153,7 @@ module Karafka
           def on_worker_processed(event)
             jobs_queue_stats = event[:jobs_queue].statistics
             count = jobs_queue_stats[:busy] || 0
-            observe(karafka_worker_threads_busy: [count, default_labels])
+            observe(worker_threads_busy: [count, default_labels])
           end
 
           private
@@ -164,7 +161,7 @@ module Karafka
           # @param [Hash] metrics to send to the prometheus exporter server
           def observe(metrics)
             client.send_json({
-              type: "kafka",
+              type: "karafka",
               payload: metrics
             })
           end

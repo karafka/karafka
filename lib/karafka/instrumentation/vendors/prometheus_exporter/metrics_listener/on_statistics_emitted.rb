@@ -28,7 +28,7 @@ module Karafka
             # Extract & observe metric from Karafka::Core::Monitoring::Event
             # @return [self]
             def call
-              extract_metrics!
+              extract_metrics
               self
             end
 
@@ -38,7 +38,7 @@ module Karafka
 
             private
 
-            def extract_metrics!
+            def extract_metrics
               metric_config.each do |name, metric|
                 scope, source = metric.values_at("scope", "source")
                 next unless source == "rd_kafka"
