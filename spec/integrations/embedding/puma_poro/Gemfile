@@ -3,5 +3,5 @@
 source 'https://rubygems.org'
 
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
-gem 'puma', '6.2.2', require: true
+gem 'puma', '6.3.0', require: true
 gem 'sinatra', '3.0.6', require: true
