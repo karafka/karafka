@@ -21,11 +21,13 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    DT[:groups] << messages.map(&:offset)
+
     messages.each do |message|
       mark_as_consumed(message)
 
-      if message.offset == 1 || message.offset == 25
-        DT[:firsts] << messages.first.offset
+      if !DT[:errored].include?(message.offset) && (message.offset % 5) == 4
+        DT[:errored] << message.offset
 
         raise StandardError
       end
@@ -46,24 +48,15 @@ draw_routes do
   end
 end
 
-produce_many(DT.topics[0], DT.uuids(50))
+produce_many(DT.topics[0], DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT[:errors].size >= 2 && DT[0].count >= 46
+  DT[:errors].size >= 2 && DT[0].count >= 60
 end
 
-duplicates = DT[:firsts] - [1, 25]
-
-# Failing messages should not be there
-assert !DT[0].include?(1)
-assert !DT[0].include?(25)
-
-# Failing messages that are not first in batch should cause some reprocessing
-duplicates.each do |duplicate|
-  next if duplicate + 1 == 1 || duplicate + 1 == 25
-
-  assert_equal(1, DT[0].count { |nr| nr == (duplicate + 1) })
+# We skip last errored because it will not have continuity
+DT[:errored][0..-2].each do |errored_offset|
+  # The way we move offset makes it such, that we consider +1 offset message as the one that failed
+  # This means, that after skip to DLQ it's the +2 from which we should start
+  assert(DT[:groups].any? { |group| group[0] == errored_offset + 2 })
 end
-
-assert_equal 49, DT[0].last
-assert DT[0].uniq.count >= 46
