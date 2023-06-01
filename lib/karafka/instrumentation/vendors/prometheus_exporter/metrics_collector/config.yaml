@@ -9,21 +9,24 @@ worker_threads_busy:
   scope: worker
   source: karafka
 worker_enqueued_jobs:
-  type: Summary
+  type: Histogram
   description: Number of jobs waiting to be processed while workers are busy.
   scope: worker
   source: karafka
+  buckets: [0, 1, 5, 10, 25, 50, 100, 250, 500, 1_000]
 listener_polling_time_seconds:
-  type: Summary
+  type: Histogram
   description: Time between two message polling cycles in a consumer. #  If a consumer is healthy it should be close or equal to the max_wait_time.
   scope: listener
   source: karafka
   conversion: milliseconds_to_seconds # karafka sends measurements in milliseconds
+  buckets: [0.25, 0.5, 1, 1.25, 1.5, 2, 2.5, 5.0, 10.0, 20.0, 60.0, 100.0]
 listener_polling_messages:
-  type: Summary
-  description: Average number of messages fetched in a single polling cycle.
+  type: Histogram
+  description: Number of messages fetched in a single polling cycle.
   scope: listener
   source: karafka
+  buckets: [0, 1, 5, 10, 25, 50, 100, 250, 500, 1_000]
 dead_letter_queue_total:
   type: Counter
   description: Number of messages that were sent to the dead letter queue.
@@ -45,37 +48,41 @@ consumer_offset:
   scope: consumer
   source: karafka
 consumer_consumed_time_taken_seconds:
-  type: Summary
+  type: Histogram
   description: Time taken to consume a batch of messages.
   scope: consumer
   source: karafka
   conversion: milliseconds_to_seconds # karafka sends measurements in milliseconds
+  buckets: [0.5, 1, 2.5, 5.0, 10.0, 30.0, 60.0, 90.0, 120.0, 180.0, 240.0, 300.0]
 consumer_batch_size:
-  type: Summary
+  type: Histogram
   description: Number of messages in a batch of messages when polled.
   scope: consumer
   source: karafka
+  buckets: [0, 1, 5, 10, 25, 50, 100, 250, 500, 1_000]
 consumer_processing_lag_seconds:
-  type: Summary
+  type: Histogram
   description: Elapsed time between batch consumption job being scheduled and batch job completion
   scope: consumer
   source: karafka
   conversion: milliseconds_to_seconds # karafka sends measurements in milliseconds
+  buckets: [0.5, 1, 2.5, 5.0, 10.0, 30.0, 60.0, 90.0, 120.0, 180.0, 240.0, 300.0]
 consumer_consumption_lag_seconds:
-  type: Summary
+  type: Histogram
   description: Elapsed time between batch creation and batch consumption
   scope: consumer
   source: karafka
-  conversion: milliseconds_to_seconds # karafka sends measurements in milliseconds
+  conversion: milliseconds_to_seconds # karafka sends measurements in millisecond
+  buckets: [0.01, 0.025, 0.1, 0.25, 0.5, 1, 2.5, 5.0, 10.0, 30.0, 60.0]
 consumer_revoked_total:
   type: Counter
   description: Amount of consumers that were revoked.
   scope: consumer
   source: karafka
-error_total:
+consumer_error_total:
   type: Counter
-  description: Number of errors that occurred in karafka.
-  scope: any
+  description: Number of errors that occurred in a karafka consumer.
+  scope: consumer
   source: karafka
 consumer_shutdown_total:
   type: Counter
@@ -87,40 +94,27 @@ app_stopped_total:
   description: Number of times the app was stopped.
   scope: consumer
   source: karafka
-
 messages_consumed_total:
   type: Counter
-  description: From librdkafka - the total number of messages consumed.
+  description: librdkafka - the total number of messages consumed.
   scope: root
   source: rd_kafka
   key_location: [rxmsgs_d]
 messages_consumed_bytes_total:
   type: Counter
-  description: From librdkafka - the total number of (message) bytes consumed.
+  description: librdkafka - the total number of (message) bytes consumed.
   scope: root
   source: rd_kafka
   key_location: [rxmsg_bytes]
-consume_attempts_total:
-  type: Counter
-  description: From librdkafka - the total number of consume attempts.
-  scope: brokers
-  source: rd_kafka
-  key_location: [txretries_d]
 consume_errors_total:
   type: Counter
-  description: From librdkafka - the total number of errors consuming messages.
+  description: librdkafka - the total number of errors consuming messages.
   scope: brokers
   source: rd_kafka
   key_location: [txerrs_d]
-receive_errors_total:
-  type: Counter
-  description: From librdkafka - the total number of errors receiving messages.
-  scope: brokers
-  source: rd_kafka
-  key_location: [rxerrs_d]
 connection_attempts_total:
   type: Counter
-  description: From librdkafka - the total number of connection attempts.
+  description: librdkafka - the total number of connection attempts.
   scope: brokers
   source: rd_kafka
   key_location: [connects_d]
@@ -148,6 +142,7 @@ producer_buffer_size:
   description: The number of messages waiting to be sent to the broker.
   source: karafka
   scope: producer
+  buckets: [0, 1, 5, 10, 25, 50, 100, 250, 500, 1_000]
 producer_error_total:
   type: Counter
   description: The total number of errors encountered while sending messages.
@@ -168,56 +163,62 @@ producer_messages_acknowledged_total:
   description: The total number of messages ack'd by the karafka before being sent to the broker.
   source: karafka
   scope: producer
-deliver_attempts_total:
+request_retries_total:
   type: Counter
-  description: From librdkafka - the total number of delivery attempts.
+  description: librdkafka - brokers- the total number of request retries
   scope: brokers
   source: rd_kafka
   key_location: [txretries_d]
-deliver_errors_total:
+transmission_errors_total:
   type: Counter
-  description: From librdkafka - the total number of errors delivering messages.
+  description: librdkafka - brokers - the total number of transmission errors.
   scope: brokers
   source: rd_kafka
   key_location: [txerrs_d]
+receive_errors_total:
+  type: Counter
+  description: librdkafka - brokers - the total number of errors receiving messages.
+  scope: brokers
+  source: rd_kafka
+  key_location: [rxerrs_d]
 queue_latency_avg_seconds:
   type: Gauge
-  description: From librdkafka - average elapsed time in seconds between the request to enqueue to the transmit queue and the request being written to TCP socket
+  description: librdkafka - average elapsed time in seconds between the request to enqueue to the transmit queue and the request being written to TCP socket
   scope: brokers
   source: rd_kafka
   key_location: [outbuf_latency, avg]
   conversion: microseconds_to_seconds # librdkafka sends measurements in microseconds
 queue_latency_p95_seconds:
   type: Gauge
-  description: From librdkafka - p95 elapsed time in seconds between the request to enqueue to the transmit queue and the request being written to TCP socket
+  description: librdkafka - p95 elapsed time in seconds between the request to enqueue to the transmit queue and the request being written to TCP socket
   scope: brokers
   source: rd_kafka
   key_location: [outbuf_latency, p95]
   conversion: microseconds_to_seconds # librdkafka sends measurements in microseconds
 queue_latency_p99_seconds:
   type: Gauge
-  description: From librdkafka - p99 elapsed time in seconds between the request to enqueue to the transmit queue and the request being written to TCP socket
+  description: librdkafka - p99 elapsed time in seconds between the request to enqueue to the transmit queue and the request being written to TCP socket
   scope: brokers
   source: rd_kafka
   key_location: [outbuf_latency, p99]
   conversion: microseconds_to_seconds # librdkafka sends measurements in microseconds
 network_latency_avg_seconds:
   type: Gauge
-  description: From librdkafka - broker round-trip time, per protocol request, between the request being written to the TCP socket and the time the response is received from the broker.
+  description: librdkafka - broker round-trip time, per protocol request, between the request being written to the TCP socket and the time the response is received from the broker.
   scope: brokers
   source: rd_kafka
   key_location: [rtt, avg]
   conversion: microseconds_to_seconds # librdkafka sends measurements in microseconds
 network_latency_p95_seconds:
   type: Gauge
-  description: From librdkafka - broker round-trip time, per protocol request, between the request being written to the TCP socket and the time the response is received from the broker.
+  description: librdkafka - broker round-trip time, per protocol request, between the request being written to the TCP socket and the time the response is received from the broker.
   scope: brokers
   source: rd_kafka
   key_location: [rtt, p95]
   conversion: microseconds_to_seconds # librdkafka sends measurements in microseconds
 network_latency_p99_seconds:
   type: Gauge
-  description: From librdkafka - broker round-trip time, per protocol request, between the request being written to the TCP socket and the time the response is received from the broker.
+  description: librdkafka - broker round-trip time, per protocol request, between the request being written to the TCP socket and the time the response is received from the broker.
   scope: brokers
   source: rd_kafka
   key_location: [rtt, p99]

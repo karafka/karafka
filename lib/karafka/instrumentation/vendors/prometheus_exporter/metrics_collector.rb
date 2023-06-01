@@ -21,7 +21,7 @@ module Karafka
           ).freeze
 
           def initialize
-            @expireable_metrics = MetricsContainer.new(ttl: MAX_METRIC_AGE)
+            @expireable_metrics = ::PrometheusExporter::Server::MetricsContainer.new(ttl: MAX_METRIC_AGE)
             @persistent_metrics = []
             @gauge_names = []
             @registry = {}
@@ -63,9 +63,9 @@ module Karafka
 
           def collect_metrics(obj)
             obj["payload"].each do |metric_name, payload|
-              name = namespaced_metric(metric_name)
+              name = namespace(metric_name)
               container = gauge_names.include?(name) ? expireable_metrics : persistent_metrics
-              container << { "name" => metric_name, "payload" => payload }
+              container << { "name" => name, "payload" => payload }
             end
           end
 
@@ -73,7 +73,7 @@ module Karafka
           # @param [Array] payload, tuple or array of tuples [value, {label: 1}] or [[value, {label: 1}], [value, {label: 2}]]
           def observe_metric(metric, payload)
             observe = ->(tuple) { metric.observe(*tuple) }
-            return observe.call(payload) unless payload[0].is_a? Array
+            return observe[payload] unless payload[0].is_a? Array
             payload.each(&observe)
           end
 
@@ -84,13 +84,13 @@ module Karafka
             CONFIG.each do |metric_name, config|
               type, description, buckets, quantiles = config.values_at("type", "description", "buckets", "quantiles")
               metric_klass = ::PrometheusExporter::Metric.const_get(type)
-              name = namespaced_metric(metric_name)
+              name = namespace(metric_name)
               args = [name, description]
 
               registry[name] = if buckets && type == "Histogram"
                 metric_klass.new(*args, buckets: buckets)
-              elsif quantiles && type == "Summary"
-                metric_klass.new(*args, quantiles: quantiles)
+              # elsif quantiles && type == "Summary" # Note: Remove? Karafka does not use Summary in DG, Summaries are also not aggregatable so aren't accurate for > 1 karafka server
+              #   metric_klass.new(*args, quantiles: quantiles)
               else
                 metric_klass.new(*args)
               end
@@ -99,7 +99,7 @@ module Karafka
             end
           end
 
-          def namespaced_metric(metric_name)
+          def namespace(metric_name)
             "karafka_#{metric_name}"
           end
         end

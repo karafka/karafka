@@ -18,6 +18,7 @@ module Vendors
 
       def send_json(obj)
         @collector.collect(JSON.parse(obj.to_json)) # Fake the JSON serialization
+        @collector.metrics # Fake a hit to the metrics endpoint
       end
     end
   end

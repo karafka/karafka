@@ -65,7 +65,7 @@ module Karafka
               labels = labels.merge(consumer_labels(event.payload[:caller]))
             end
 
-            observe(error_total: [1, labels])
+            observe(consumer_error_total: [1, labels])
           end
 
           # Reports how many messages we've polled and how much time did we spend on it
