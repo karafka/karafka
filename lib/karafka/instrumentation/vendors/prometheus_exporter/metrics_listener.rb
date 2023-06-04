@@ -22,7 +22,9 @@ module Karafka
 
           # Prometheus Exporter client that we should use to publish the metrics
           # Usually you'll want ::PrometheusExporter::Client.default
-          setting :client
+          setting :client, default: ::PrometheusExporter::Client.default
+
+          setting :logger, default: Karafka.logger
 
           # Default labels we want to publish (for example hostname)
           # Format as followed (example for hostname): `{ host: Socket.gethostname }`
@@ -160,10 +162,7 @@ module Karafka
 
           # @param [Hash] metrics to send to the prometheus exporter server
           def observe(metrics)
-            client.send_json({
-              type: "karafka",
-              payload: metrics
-            })
+            client.send_json(type: "karafka", payload: metrics)
           end
 
           # Builds basic per consumer labels for publication

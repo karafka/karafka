@@ -20,7 +20,7 @@ listener_polling_time_seconds:
   scope: listener
   source: karafka
   conversion: milliseconds_to_seconds # karafka sends measurements in milliseconds
-  buckets: [0.25, 0.5, 1, 1.25, 1.5, 2, 2.5, 5.0, 10.0, 20.0, 60.0, 100.0]
+  buckets: [0.25, 0.5, 1, 1.25, 1.5, 2, 2.5, 5.0, 10.0, 20.0, 60.0, 100.0, 180.0, 300.0]
 listener_polling_messages:
   type: Histogram
   description: Number of messages fetched in a single polling cycle.
@@ -136,33 +136,33 @@ consumer_lags_delta:
   source: rd_kafka
   scope: topics
   key_location: [consumer_lag_stored_d]
-# Producer metrics
-producer_buffer_size:
-  type: Histogram
-  description: The number of messages waiting to be sent to the broker.
-  source: karafka
-  scope: producer
-  buckets: [0, 1, 5, 10, 25, 50, 100, 250, 500, 1_000]
-producer_error_total:
-  type: Counter
-  description: The total number of errors encountered while sending messages.
-  source: karafka
-  scope: producer
-producer_closed_total:
-  type: Counter
-  description: The total number of times the producer connection was closed.
-  source: karafka
-  scope: producer
-producer_messages_sent_total:
-  type: Counter
-  description: The total number of messages sent.
-  source: karafka
-  scope: producer
-producer_messages_acknowledged_total:
-  type: Counter
-  description: The total number of messages ack'd by the karafka before being sent to the broker.
-  source: karafka
-  scope: producer
+# Producer metrics TODO: Move to Waterdrop PR
+# producer_buffer_size:
+#   type: Histogram
+#   description: The number of messages waiting to be sent to the broker.
+#   source: karafka
+#   scope: producer
+#   buckets: [0, 1, 5, 10, 25, 50, 100, 250, 500, 1_000]
+# producer_error_total:
+#   type: Counter
+#   description: The total number of errors encountered while sending messages.
+#   source: karafka
+#   scope: producer
+# producer_closed_total:
+#   type: Counter
+#   description: The total number of times the producer connection was closed.
+#   source: karafka
+#   scope: producer
+# producer_messages_sent_total:
+#   type: Counter
+#   description: The total number of messages sent.
+#   source: karafka
+#   scope: producer
+# producer_messages_acknowledged_total:
+#   type: Counter
+#   description: The total number of messages ack'd by the karafka before being sent to the broker.
+#   source: karafka
+#   scope: producer
 request_retries_total:
   type: Counter
   description: librdkafka - brokers- the total number of request retries

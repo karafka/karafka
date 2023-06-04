@@ -48,6 +48,18 @@ start_karafka_and_wait_until do
   DT[0].size >= 100 && sleep(5)
 end
 
+# Error reporting
+
+error_tracks = prom_dummy.collector.registry['karafka_consumer_error_total']
+
+# Expect to have one error report from te consumption
+assert_equal 1, error_tracks.data.size
+assert_equal true, error_tracks.data.all? do |(label, _value)|
+  %w[host type topic partition consumer_group].all? { |key| label.key?(key) }
+end
+
+assert_equal true, error_tracks.data.keys.any? { |labels| labels["type"] == "consumer.consume.error" }
+
 # karafka_request_retries_total is renamed from karafka.consume.attempts
 %w[
   karafka_messages_consumed_total
@@ -66,15 +78,6 @@ end
   assert_equal true, prom_dummy.collector.registry.key?(count_key), "#{count_key} missing"
   assert_equal true, prom_dummy.collector.registry[count_key].is_a?(::PrometheusExporter::Metric::Counter), "#{count_key} is not a Counter"
 end
-
-error_tracks = prom_dummy.collector.registry['karafka_consumer_error_total']
-
-# Expect to have one error report from te consumption
-assert_equal 1, error_tracks.data.size
-assert_equal true, error_tracks.data.all? do |(label, _value)|
-  %w[host type topic partition consumer_group].all? { |key| label.key?(key) }
-end
-assert_equal true, error_tracks.data.keys.any? { |labels| labels["type"] == "consumer.consume.error" }
 
 %w[
   karafka_network_latency_avg_seconds

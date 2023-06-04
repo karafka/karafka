@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "prometheus_exporter" # Added for specs
+require "prometheus_exporter/server" # Added for specs
 require "yaml"
 # Note prometheus exporter does not load rails and dependencies
 # You must manually require anything you need outside of prometheus_exporter
@@ -43,6 +45,7 @@ module Karafka
             registry.values
           end
 
+          # @return [String] karafka, the type of metrics collected
           def type
             "karafka"
           end
