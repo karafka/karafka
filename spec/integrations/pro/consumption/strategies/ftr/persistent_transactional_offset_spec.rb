@@ -126,5 +126,7 @@ start_karafka_and_wait_until do
   DT[:offsets].count >= 20
 end
 
+other.join
+
 # There should be no duplicates
 assert_equal DT[:offsets], (1..20).to_a
