@@ -10,6 +10,7 @@
 #
 # We do not have to care about topics and partitions because for spec like this we use one
 # partition
+
 class DbPause
   class << self
     def pause(offset, time)
