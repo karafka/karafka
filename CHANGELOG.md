@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.1.4 (2023-06-06)
+- [Fix] `processing_lag` and `consumption_lag` on empty batch fail on shutdown usage (#1475)
+
 ## 2.1.3 (2023-05-29)
 - [Maintenance] Add linter to ensure, that all integration specs end with `_spec.rb`.
 - [Fix] Fix `#retrying?` helper result value (Aerdayne).
