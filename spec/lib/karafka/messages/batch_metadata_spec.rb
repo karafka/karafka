@@ -59,6 +59,12 @@ RSpec.describe_current do
     it 'expect to calculate it as a distance in between message creation time and processing' do
       expect(metadata.consumption_lag).to eq(((processed_at - created_at) * 1_000).round)
     end
+
+    context 'when processed_at is not set' do
+      let(:processed_at) { nil }
+
+      it { expect(metadata.consumption_lag).to eq(-1) }
+    end
   end
 
   describe '#processing_lag' do
@@ -72,6 +78,12 @@ RSpec.describe_current do
 
     it 'expect to calculate it as a distance in between message schedule time and processing' do
       expect(metadata.processing_lag).to eq(((processed_at - scheduled_at) * 1_000).round)
+    end
+
+    context 'when processed_at is not set' do
+      let(:processed_at) { nil }
+
+      it { expect(metadata.processing_lag).to eq(-1) }
     end
   end
 end
