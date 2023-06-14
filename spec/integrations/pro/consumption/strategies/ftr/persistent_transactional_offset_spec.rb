@@ -61,7 +61,7 @@ end
 
 class OffsetManager
   def initialize(topic, partition)
-    @topics = topic
+    @topic = topic
     @partition = partition
     @executed = false
     @reset = false

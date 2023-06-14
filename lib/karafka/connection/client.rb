@@ -41,9 +41,6 @@ module Karafka
         @buffer = RawMessagesBuffer.new
         @rebalance_manager = RebalanceManager.new
         @kafka = build_consumer
-        # Marks if we need to offset. If we did not store offsets, we should not commit the offset
-        # position as it will crash rdkafka
-        @offsetting = false
         # We need to keep track of what we have paused for resuming
         # In case we loose partition, we still need to resume it, otherwise it won't be fetched
         # again if we get reassigned to it later on. We need to keep them as after revocation we
@@ -256,7 +253,6 @@ module Karafka
 
         @mutex.synchronize do
           @closed = false
-          @offsetting = false
           @paused_tpls.clear
           @kafka = build_consumer
         end
@@ -281,7 +277,6 @@ module Karafka
       # @param message [Karafka::Messages::Message]
       # @return [Boolean] true if we could store the offset (if we still own the partition)
       def internal_store_offset(message)
-        @offsetting = true
         @kafka.store_offset(message)
         true
       rescue Rdkafka::RdkafkaError => e
@@ -294,11 +289,11 @@ module Karafka
       # Non thread-safe message committing method
       # @param async [Boolean] should the commit happen async or sync (async by default)
       # @return [Boolean] true if offset commit worked, false if we've lost the assignment
+      # @note We do **not** consider `no_offset` as any problem and we allow to commit offsets
+      #   even when no stored, because with sync commit, it refreshes the ownership state of the
+      #   consumer in a sync way.
       def internal_commit_offsets(async: true)
-        return true unless @offsetting
-
         @kafka.commit(nil, async)
-        @offsetting = false
 
         true
       rescue Rdkafka::RdkafkaError => e
