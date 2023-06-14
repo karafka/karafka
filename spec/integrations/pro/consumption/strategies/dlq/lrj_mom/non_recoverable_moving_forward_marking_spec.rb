@@ -21,7 +21,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if messages.count < 3
+    return if messages.count < 2
 
     DT[:groups] << messages.map(&:offset)
 
