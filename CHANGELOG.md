@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.4 (Unreleased)
+## 2.1.5 (Unreleased)
 - [Ehnancement] Expose `#commit_offsets` and `#commit_offsets!` methods in the consumer to provide ability to commit offsets directly to Kafka without having to mark new messages as consumed.
 - [Enhancement] No longer skip offset commit when no messages marked as consumed as `librdkafka` has fixed the crashes there.
 
