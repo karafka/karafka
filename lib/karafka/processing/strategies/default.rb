@@ -60,6 +60,24 @@ module Karafka
           true
         end
 
+        # Triggers an async offset commit
+        #
+        # @return [Boolean] true if we still own the partition.
+        # @note Due to its async nature, this may not fully represent the offset state in some
+        #   edge cases (like for example going beyond max.poll.interval)
+        def commit_offsets
+          client.commit_offsets(async: true)
+        end
+
+        # Triggers a synchronous offsets commit to Kafka
+        #
+        # @return [Boolean] true if we still own the partition, false otherwise.
+        # @note This is fully synchronous, hence the result of this can be used in DB transactions
+        #   etc as a way of making sure, that we still own the partition.
+        def commit_offsets!
+          client.commit_offsets(async: false)
+        end
+
         # No actions needed for the standard flow here
         def handle_before_enqueue
           nil

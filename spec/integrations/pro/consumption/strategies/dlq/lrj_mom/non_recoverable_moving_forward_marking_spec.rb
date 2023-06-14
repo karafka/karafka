@@ -24,7 +24,7 @@ class Consumer < Karafka::BaseConsumer
     DT[:groups] << messages.map(&:offset)
 
     messages.each do |message|
-      mark_as_consumed(message)
+      mark_as_consumed!(message)
 
       if !DT[:errored].include?(message.offset) && (message.offset % 5) == 4
         DT[:errored] << message.offset
