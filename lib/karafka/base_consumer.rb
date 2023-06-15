@@ -222,7 +222,6 @@ module Karafka
     #   the coordinator state after the revocation (but prior to running more jobs)
     def revoked?
       client.assignment_lost? || coordinator.revoked?
-      return coordinator.revoked?
     end
 
     # @return [Boolean] are we retrying processing after an error. This can be used to provide a
