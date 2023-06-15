@@ -21,9 +21,9 @@ Gem::Specification.new do |spec|
     without having to focus on things that are not your business domain.
   DESC
 
-  spec.add_dependency 'karafka-core', '>= 2.0.13', '< 3.0.0'
+  spec.add_dependency 'karafka-core', '>= 2.1.0', '< 2.2.0'
   spec.add_dependency 'thor', '>= 0.20'
-  spec.add_dependency 'waterdrop', '>= 2.5.3', '< 3.0.0'
+  spec.add_dependency 'waterdrop', '>= 2.6.1', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   if $PROGRAM_NAME.end_with?('gem')

@@ -49,14 +49,13 @@ module Karafka
           #
           # @param code [Integer]
           # @param opaque [Rdkafka::Opaque]
-          # @param consumer [Rdkafka::Consumer]
           # @param tpl [Rdkafka::Consumer::TopicPartitionList]
-          def trigger_callbacks(code, opaque, consumer, tpl)
+          def trigger_callbacks(code, opaque, tpl)
             case code
             when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
-              opaque.call_on_partitions_assigned(consumer, tpl)
+              opaque.call_on_partitions_assigned(tpl)
             when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
-              opaque.call_on_partitions_revoked(consumer, tpl)
+              opaque.call_on_partitions_revoked(tpl)
             end
           rescue StandardError => e
             Karafka.monitor.instrument(
@@ -92,9 +91,8 @@ module Karafka
           return unless opaque
 
           tpl = ::Rdkafka::Consumer::TopicPartitionList.from_native_tpl(partitions_ptr).freeze
-          consumer = ::Rdkafka::Consumer.new(client_ptr)
 
-          pr.trigger_callbacks(code, opaque, consumer, tpl)
+          pr.trigger_callbacks(code, opaque, tpl)
         end
       end
     end

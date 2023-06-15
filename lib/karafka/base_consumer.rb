@@ -215,10 +215,14 @@ module Karafka
     end
 
     # @return [Boolean] true if partition was revoked from the current consumer
-    # @note We know that partition got revoked because when we try to mark message as consumed,
-    #   unless if is successful, it will return false
+    # @note There are two "levels" on which we can know that partition was revoked. First one is
+    #   when we loose the assignment involuntarily and second is when coordinator gets this info
+    #   after we poll with the rebalance callbacks. The first check allows us to get this notion
+    #   even before we poll but it gets reset when polling happens, hence we also need to switch
+    #   the coordinator state after the revocation (but prior to running more jobs)
     def revoked?
-      coordinator.revoked?
+      client.assignment_lost? || coordinator.revoked?
+      return coordinator.revoked?
     end
 
     # @return [Boolean] are we retrying processing after an error. This can be used to provide a

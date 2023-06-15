@@ -3,7 +3,7 @@
 # When we have a batch of ActiveJobs jobs and we loose our partition assignment, jobs that
 # did not start prior to the revocation should not start at all.
 
-# To simulate this we will jobs on two partitions in parallel and we will "loose" one
+# To simulate this we will have jobs on two partitions in parallel and we will "loose" one
 # of them and detect this. We need to make consumption jobs long enough to jump with a rebalance
 # in the middle. Since we internally mark as consumed on each job, we can be aware of revocation
 # early enough. We need to run in an LRJ mode to make this happen, so rebalance does not block
