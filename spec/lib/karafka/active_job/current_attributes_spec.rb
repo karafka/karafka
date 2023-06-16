@@ -87,6 +87,7 @@ RSpec.describe_current do
       allow(Karafka::App).to receive(:stopping?).and_return(false)
 
       allow(client).to receive(:mark_as_consumed).with(message)
+      allow(client).to receive(:assignment_lost?).and_return(false)
       allow(ActiveJob::Base).to receive(:execute).with(payload)
       allow(Karafka::CurrentAttrTest).to receive(:user_id=).with(1)
 

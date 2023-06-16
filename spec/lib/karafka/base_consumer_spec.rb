@@ -38,6 +38,8 @@ RSpec.describe_current do
     end
   end
 
+  before { allow(client).to receive(:assignment_lost?).and_return(false) }
+
   describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(described_class) }
 
