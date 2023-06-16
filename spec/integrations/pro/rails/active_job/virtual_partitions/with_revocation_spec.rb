@@ -9,8 +9,11 @@
 # early enough. We need to run in an LRJ mode to make this happen, so rebalance does not block
 # revocation.
 
+# Note that for LRJ + VP, under shutdown we need to finish processing all because otherwise we
+# might end up having extensive reprocessing
+
 setup_karafka do |config|
-  config.max_wait_time = 2_500
+  config.max_wait_time = 1_000
   config.max_messages = 20
   config.concurrency = 4
   config.shutdown_timeout = 100_000
@@ -42,8 +45,6 @@ class Job < ActiveJob::Base
   # one partition.
   # If this would not happen, we should not stop until all batches of jobs are processed
   def perform(value1, value2)
-    return if value2.zero?
-
     DT[:started] << value1
     sleep(20)
     DT[:done] << value1
@@ -64,7 +65,7 @@ stopped = false
 # This will trigger a rebalance when the first job is being processed
 # We keep it alive so we do not trigger a second rebalance
 other = Thread.new do
-  sleep(10)
+  sleep(0.1) until DT[:started].size >= 4
 
   consumer.subscribe(DT.topic)
 
@@ -81,7 +82,7 @@ other = Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:started].size >= 4 && revoked
+  DT[:started].size >= 4 && revoked && sleep(5)
 end
 
 stopped = true
