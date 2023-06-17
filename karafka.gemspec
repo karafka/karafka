@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'karafka-core', '>= 2.1.0.beta1', '< 2.2.0'
   spec.add_dependency 'thor', '>= 0.20'
-  spec.add_dependency 'waterdrop', '>= 2.6.1', '< 3.0.0'
+  spec.add_dependency 'waterdrop', '>= 2.6.1.beta1', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   if $PROGRAM_NAME.end_with?('gem')
