@@ -1,8 +1,13 @@
 # Karafka framework changelog
 
 ## 2.1.5 (Unreleased)
-- [Enhancement] Expose `#commit_offsets` and `#commit_offsets!` methods in the consumer to provide ability to commit offsets directly to Kafka without having to mark new messages as consumed.
-- [Enhancement] No longer skip offset commit when no messages marked as consumed as `librdkafka` has fixed the crashes there.
+- [Improvement] Drastically improve `#revoked?` response quality by checking the real time assignment lost state on librdkafka.
+- [Improvement] Improve eviction of saturated jobs that would run on already revoked assignments.
+- [Improvement] Expose `#commit_offsets` and `#commit_offsets!` methods in the consumer to provide ability to commit offsets directly to Kafka without having to mark new messages as consumed.
+- [Improvement] No longer skip offset commit when no messages marked as consumed as `librdkafka` has fixed the crashes there.
+- [Improvement] Remove no longer needed patches.
+- [Change] Require `karafka-core` `>= 2.1.0`
+- [Change] Require `waterdrop` `>= 2.6.1`
 
 ## 2.1.4 (2023-06-06)
 - [Fix] `processing_lag` and `consumption_lag` on empty batch fail on shutdown usage (#1475)

@@ -49,9 +49,8 @@ module Karafka
       # Callback that kicks in inside of rdkafka, when new partitions are assigned.
       #
       # @private
-      # @param _ [Rdkafka::Consumer]
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
-      def on_partitions_assigned(_, partitions)
+      def on_partitions_assigned(partitions)
         @assigned_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
         @changed = true
       end
@@ -59,9 +58,8 @@ module Karafka
       # Callback that kicks in inside of rdkafka, when partitions are revoked.
       #
       # @private
-      # @param _ [Rdkafka::Consumer]
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
-      def on_partitions_revoked(_, partitions)
+      def on_partitions_revoked(partitions)
         @revoked_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
         @changed = true
       end

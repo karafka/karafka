@@ -171,7 +171,9 @@ module Karafka
       # @return [Rdkafka::Metadata] cluster metadata info
       def cluster_info
         with_admin do |admin|
-          Rdkafka::Metadata.new(admin.instance_variable_get('@native_kafka'))
+          admin.instance_variable_get('@native_kafka').with_inner do |inner|
+            Rdkafka::Metadata.new(inner)
+          end
         end
       end
 

@@ -106,8 +106,14 @@ module Karafka
         end
       end
 
+      # @return [Boolean] true if our current assignment has been lost involuntarily.
+      def assignment_lost?
+        @mutex.synchronize do
+          @kafka.assignment_lost?
+        end
+      end
+
       # Commits the offset on a current consumer in a non-blocking or blocking way.
-      # Ignoring a case where there would not be an offset (for example when rebalance occurs).
       #
       # @param async [Boolean] should the commit happen async or sync (async by default)
       # @return [Boolean] did committing was successful. It may be not, when we no longer own
@@ -115,7 +121,7 @@ module Karafka
       #
       # @note This will commit all the offsets for the whole consumer. In order to achieve
       #   granular control over where the offset should be for particular topic partitions, the
-      #   store_offset should be used to only store new offset when we want to to be flushed
+      #   store_offset should be used to only store new offset when we want them to be flushed
       def commit_offsets(async: true)
         @mutex.lock
 
