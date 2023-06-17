@@ -46,19 +46,17 @@ Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
 end
 
 Thread.new do
-  begin
-    loop do
-      3.times do |i|
-        produce_many(DT.topic, DT.uuids(10), partition: i)
-      end
-
-      break if DT.key?(:enough)
-
-      sleep(0.5)
+  loop do
+    3.times do |i|
+      produce_many(DT.topic, DT.uuids(10), partition: i)
     end
-  rescue WaterDrop::Errors::ProducerClosedError
-    nil
+
+    break if DT.key?(:enough)
+
+    sleep(0.5)
   end
+rescue WaterDrop::Errors::ProducerClosedError
+  nil
 end
 
 # We need a second producer to trigger the rebalances

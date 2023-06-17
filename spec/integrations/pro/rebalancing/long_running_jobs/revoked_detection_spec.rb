@@ -53,7 +53,7 @@ Thread.new do
   sleep(0.1) until Karafka::App.running?
 
   5.times do
-    10.times do |i|
+    10.times do
       produce(DT.topic, '1', partition: 0)
       produce(DT.topic, '1', partition: 1)
     rescue StandardError
