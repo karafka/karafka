@@ -12,9 +12,6 @@ module Karafka
           # @param received_at [Time] moment when we've received the message
           # @return [Karafka::Messages::Message] message object with payload and metadata
           def call(kafka_message, topic, received_at)
-            # @see https://github.com/appsignal/rdkafka-ruby/issues/168
-            kafka_message.headers.transform_keys!(&:to_s)
-
             metadata = Karafka::Messages::Metadata.new(
               timestamp: kafka_message.timestamp,
               headers: kafka_message.headers,

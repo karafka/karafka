@@ -14,7 +14,7 @@ RSpec.describe_current do
     end
 
     context 'when some partitions were revoked and not assigned' do
-      before { manager.on_partitions_revoked(nil, partitions) }
+      before { manager.on_partitions_revoked(partitions) }
 
       it 'expect to return them' do
         expect(manager.revoked_partitions).to eq({ 'topic_name' => [partition1.partition] })
@@ -25,7 +25,7 @@ RSpec.describe_current do
 
     context 'when we clear the manager' do
       before do
-        manager.on_partitions_revoked(nil, partitions)
+        manager.on_partitions_revoked(partitions)
         manager.clear
       end
 
@@ -35,8 +35,8 @@ RSpec.describe_current do
 
     context 'when some of the revoked partitions were assigned back' do
       before do
-        manager.on_partitions_assigned(nil, { 'topic_name' => [partition1] })
-        manager.on_partitions_revoked(nil, { 'topic_name' => [partition1, partition2] })
+        manager.on_partitions_assigned({ 'topic_name' => [partition1] })
+        manager.on_partitions_revoked({ 'topic_name' => [partition1, partition2] })
       end
 
       it 'expect not to include them in the lost partitions back' do

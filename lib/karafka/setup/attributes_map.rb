@@ -47,6 +47,7 @@ module Karafka
         fetch.max.bytes
         fetch.message.max.bytes
         fetch.min.bytes
+        fetch.queue.backoff.ms
         fetch.wait.max.ms
         group.id
         group.instance.id

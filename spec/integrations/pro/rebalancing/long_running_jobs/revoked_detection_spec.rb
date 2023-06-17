@@ -36,15 +36,17 @@ draw_routes do
   end
 end
 
-# We need a second producer to trigger a rebalance
-consumer = setup_rdkafka_consumer
-
 Thread.new do
   sleep(0.1) until Karafka::App.running?
-  sleep(10)
 
-  consumer.subscribe(DT.topic)
-  consumer.poll(1_000)
+  until DT[:revoked].uniq.size >= 2
+    sleep(10)
+    # We need a second producer to trigger a rebalance
+    consumer = setup_rdkafka_consumer
+    consumer.subscribe(DT.topic)
+    consumer.poll(1_000)
+    consumer.close
+  end
 end
 
 Thread.new do
@@ -66,7 +68,5 @@ start_karafka_and_wait_until do
   DT[:revoked].uniq.size >= 2
 end
 
-# Both partitions should be revoked
+# Many partitions should be revoked
 assert_equal [0, 1], DT[:revoked].uniq.sort.to_a
-
-consumer.close

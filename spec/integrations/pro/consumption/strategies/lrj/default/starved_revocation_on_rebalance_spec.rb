@@ -12,7 +12,7 @@ DT[:started] = Set.new
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    until revoked?
+    until revoked? || DT[:revoked].size >= 2
       sleep(0.1)
       DT[:started] << object_id
     end

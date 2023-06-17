@@ -22,6 +22,8 @@ RSpec.describe_current do
   before do
     coordinator.start(messages)
     coordinator.increment
+
+    allow(client).to receive(:assignment_lost?).and_return(false)
   end
 
   it { expect(described_class).to be < Karafka::BaseConsumer }
