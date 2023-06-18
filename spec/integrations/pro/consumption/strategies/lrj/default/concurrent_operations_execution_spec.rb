@@ -21,29 +21,45 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[:start] = Time.now
     # Wait so the long poll kicks in
     sleep(5)
+    marking
+    commiting
+    pausing
+    revoking
 
+    DT[:times] << Time.now
+    DT[:done] = true
+  end
+
+  private
+
+  def marking
     DT[:times] << Time.now
     mark_as_consumed(messages.first)
     DT[:times] << Time.now
     mark_as_consumed!(messages.first)
+  end
+
+  def commiting
     DT[:times] << Time.now
     commit_offsets
     DT[:times] << Time.now
     commit_offsets!
+  end
+
+  def pausing
     DT[:times] << Time.now
     pause(messages.first.offset)
     DT[:times] << Time.now
     resume
+  end
+
+  def revoking
     DT[:times] << Time.now
     revoked?
     DT[:times] << Time.now
     retrying?
-    DT[:times] << Time.now
-
-    DT[:done] = true
   end
 end
 
