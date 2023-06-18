@@ -94,7 +94,7 @@ class DataCollector
   # Creates a collector
   def initialize
     @mutex = Mutex.new
-    @topics = Concurrent::Array.new(100) { SecureRandom.hex(6) }
+    @topics = Concurrent::Array.new(100) { SecureRandom.hex(8) }
     @consumer_groups = @topics
     # We need to use a concurrent hash and not a map because we want to print this data upon
     # failures and debugging
