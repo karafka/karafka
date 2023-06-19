@@ -20,6 +20,36 @@
   zeitwerk
 ].each(&method(:require))
 
+unless ENV.key?('I_ACCEPT_CRITICAL_ERRORS_IN_KARAFKA_1_4')
+  3.times { puts }
+  puts '~' * 50
+  puts "~~~ \033[31mCRITICAL\033[0m NOTICE ON KARAFKA 1.4 reliability ~~~"
+  puts '~' * 50
+  puts
+  puts 'Karafka 1.4 is no longer supported and contains critical errors, included but not limited to:'
+  puts
+  puts '  - Double processing of messages'
+  puts '  - Skipping messages'
+  puts '  - Hanging during processing'
+  puts '  - Unexpectedly stopping message processing'
+  puts '  - Failure to deliver messages to Kafka'
+  puts '  - Resetting the consumer group and starting from the beginning'
+  puts
+  puts 'To resolve these issues, it is highly recommended to upgrade to Karafka 2.1 or higher.'
+  puts
+  puts 'If you want to ignore this message and continue, set the I_ACCEPT_CRITICAL_ERRORS_IN_KARAFKA_1_4 env variable to true.'
+  puts
+  puts 'Apologies for any inconvenience caused by this release.'
+  puts 'There is no other way to make sure, that you are notified about those issues and their severity.'
+  puts
+  puts 'If you need help with the upgrade, we do have a Slack channel you can join: https://slack.karafka.io/'
+  puts
+  puts '~' * 50
+  puts
+
+  raise RuntimeError
+end
+
 # Karafka library
 module Karafka
   extend Envlogic
