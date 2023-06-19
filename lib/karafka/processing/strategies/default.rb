@@ -27,12 +27,7 @@ module Karafka
           # Ignore earlier offsets than the one we already committed
           return true if coordinator.seek_offset > message.offset
           return false if revoked?
-
-          unless client.mark_as_consumed(message)
-            coordinator.revoke
-
-            return false
-          end
+          return revoked? unless client.mark_as_consumed(message)
 
           coordinator.seek_offset = message.offset + 1
 
@@ -49,11 +44,7 @@ module Karafka
           return true if coordinator.seek_offset > message.offset
           return false if revoked?
 
-          unless client.mark_as_consumed!(message)
-            coordinator.revoke
-
-            return false
-          end
+          return revoked? unless client.mark_as_consumed!(message)
 
           coordinator.seek_offset = message.offset + 1
 
@@ -62,11 +53,18 @@ module Karafka
 
         # Triggers an async offset commit
         #
+        # @param async [Boolean] should we use async (default) or sync commit
         # @return [Boolean] true if we still own the partition.
         # @note Due to its async nature, this may not fully represent the offset state in some
         #   edge cases (like for example going beyond max.poll.interval)
-        def commit_offsets
-          client.commit_offsets(async: true)
+        def commit_offsets(async: true)
+          # Do not commit if we already lost the assignment
+          return false if revoked?
+          return true if client.commit_offsets(async: async)
+
+          # This will once more check the librdkafka revocation status and will revoke the
+          # coordinator in case it was not revoked
+          revoked?
         end
 
         # Triggers a synchronous offsets commit to Kafka
@@ -75,7 +73,7 @@ module Karafka
         # @note This is fully synchronous, hence the result of this can be used in DB transactions
         #   etc as a way of making sure, that we still own the partition.
         def commit_offsets!
-          client.commit_offsets(async: false)
+          commit_offsets(async: false)
         end
 
         # No actions needed for the standard flow here

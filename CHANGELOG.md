@@ -6,6 +6,8 @@
 - [Improvement] Expose `#commit_offsets` and `#commit_offsets!` methods in the consumer to provide ability to commit offsets directly to Kafka without having to mark new messages as consumed.
 - [Improvement] No longer skip offset commit when no messages marked as consumed as `librdkafka` has fixed the crashes there.
 - [Improvement] Remove no longer needed patches.
+- [Improvement] Ensure, that the coordinator revocation status is switched upon revocation detection when using `#revoked?`
+- [Improvement] Add benchmarks for marking as consumed (sync and async).
 - [Change] Require `karafka-core` `>= 2.1.0`
 - [Change] Require `waterdrop` `>= 2.6.1`
 

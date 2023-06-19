@@ -221,7 +221,12 @@ module Karafka
     #   even before we poll but it gets reset when polling happens, hence we also need to switch
     #   the coordinator state after the revocation (but prior to running more jobs)
     def revoked?
-      client.assignment_lost? || coordinator.revoked?
+      return true if coordinator.revoked?
+      return false unless client.assignment_lost?
+
+      coordinator.revoke
+
+      true
     end
 
     # @return [Boolean] are we retrying processing after an error. This can be used to provide a

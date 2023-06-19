@@ -122,6 +122,10 @@ module Karafka
       # @note This will commit all the offsets for the whole consumer. In order to achieve
       #   granular control over where the offset should be for particular topic partitions, the
       #   store_offset should be used to only store new offset when we want them to be flushed
+      #
+      # @note This method for async may return `true` despite involuntary partition revocation as
+      #   it does **not** resolve to `lost_assignment?`. It returns only the commit state operation
+      #   result.
       def commit_offsets(async: true)
         @mutex.lock
 
@@ -238,9 +242,10 @@ module Karafka
       # @param [Karafka::Messages::Message] message that we want to mark as processed
       # @return [Boolean] true if successful. False if we no longer own given partition
       # @note This method won't trigger automatic offsets commits, rather relying on the offset
-      #   check-pointing trigger that happens with each batch processed
+      #   check-pointing trigger that happens with each batch processed. It will however check the
+      #   `librdkafka` assignment ownership to increase accuracy for involuntary revocations.
       def mark_as_consumed(message)
-        store_offset(message)
+        store_offset(message) && !assignment_lost?
       end
 
       # Marks a given message as consumed and commits the offsets in a blocking way.

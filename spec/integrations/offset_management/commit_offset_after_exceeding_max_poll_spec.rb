@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# When we exceed max poll interval but did not poll yet, the async offset commit may return true
-# while the sync should give us accurate representation of the ownership.
+# When we exceed max poll interval but did not poll yet, the async and sync offset commits should
+# give us accurate representation of the ownership because of lost assignment check.
 
 setup_karafka(allow_errors: true) do |config|
   config.kafka[:'max.poll.interval.ms'] = 10_000
@@ -33,4 +33,4 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal DT[:results], [true, false]
+assert_equal DT[:results], [false, false]
