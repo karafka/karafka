@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.5 (Unreleased)
+## 2.1.5 (2023-06-19)
 - [Improvement] Drastically improve `#revoked?` response quality by checking the real time assignment lost state on librdkafka.
 - [Improvement] Improve eviction of saturated jobs that would run on already revoked assignments.
 - [Improvement] Expose `#commit_offsets` and `#commit_offsets!` methods in the consumer to provide ability to commit offsets directly to Kafka without having to mark new messages as consumed.
