@@ -45,7 +45,7 @@ end
 # All consumption should work fine, just throttled
 assert_equal elements.sort, DT[0].sort
 
-DT[:times].each_with_index do |slot, index|
+DT[:times].each do |slot|
   in_window = DT[:messages_times].count { |time| time < slot && time >= slot - 5 }
 
   # At most 5 in a given time window
