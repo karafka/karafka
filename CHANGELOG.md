@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 2.1.6 (Unreleased)
+- [Change] Require `waterdrop` `>= 2.6.2`
+- [Fix] Fix unstable spec.
+
 ## 2.1.5 (2023-06-19)
 - [Improvement] Drastically improve `#revoked?` response quality by checking the real time assignment lost state on librdkafka.
 - [Improvement] Improve eviction of saturated jobs that would run on already revoked assignments.
