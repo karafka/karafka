@@ -46,13 +46,7 @@ other =  Thread.new do
   sleep(10)
 
   consumer.subscribe(DT.topic)
-  # 1 message is enough
-  consumer.each do
-    next if DT[:end].empty?
-
-    break
-  end
-
+  consumer.poll(500) until DT.key?(:end)
   consumer.close
 end
 
