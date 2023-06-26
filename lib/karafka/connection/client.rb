@@ -35,7 +35,6 @@ module Karafka
         @id = SecureRandom.hex(6)
         # Name is set when we build consumer
         @name = ''
-        @mutex = Mutex.new
         @closed = false
         @subscription_group = subscription_group
         @buffer = RawMessagesBuffer.new
@@ -101,16 +100,12 @@ module Karafka
       #
       # @param message [Karafka::Messages::Message]
       def store_offset(message)
-        @mutex.synchronize do
-          internal_store_offset(message)
-        end
+        internal_store_offset(message)
       end
 
       # @return [Boolean] true if our current assignment has been lost involuntarily.
       def assignment_lost?
-        @mutex.synchronize do
-          @kafka.assignment_lost?
-        end
+        @kafka.assignment_lost?
       end
 
       # Commits the offset on a current consumer in a non-blocking or blocking way.
@@ -127,11 +122,7 @@ module Karafka
       #   it does **not** resolve to `lost_assignment?`. It returns only the commit state operation
       #   result.
       def commit_offsets(async: true)
-        @mutex.lock
-
         internal_commit_offsets(async: async)
-      ensure
-        @mutex.unlock
       end
 
       # Commits offset in a synchronous way.
@@ -146,11 +137,7 @@ module Karafka
       #
       # @param message [Messages::Message, Messages::Seek] message to which we want to seek to
       def seek(message)
-        @mutex.lock
-
         @kafka.seek(message)
-      ensure
-        @mutex.unlock
       end
 
       # Pauses given partition and moves back to last successful offset processed.
@@ -161,8 +148,6 @@ module Karafka
       #   be reprocessed after getting back to processing)
       # @note This will pause indefinitely and requires manual `#resume`
       def pause(topic, partition, offset)
-        @mutex.lock
-
         # Do not pause if the client got closed, would not change anything
         return if @closed
 
@@ -190,8 +175,6 @@ module Karafka
         @kafka.pause(tpl)
 
         @kafka.seek(pause_msg)
-      ensure
-        @mutex.unlock
       end
 
       # Resumes processing of a give topic partition after it was paused.
@@ -199,8 +182,6 @@ module Karafka
       # @param topic [String] topic name
       # @param partition [Integer] partition
       def resume(topic, partition)
-        @mutex.lock
-
         return if @closed
 
         # We now commit offsets on rebalances, thus we can do it async just to make sure
@@ -224,8 +205,6 @@ module Karafka
         )
 
         @kafka.resume(tpl)
-      ensure
-        @mutex.unlock
       end
 
       # Gracefully stops topic consumption.
@@ -262,11 +241,9 @@ module Karafka
       def reset
         close
 
-        @mutex.synchronize do
-          @closed = false
-          @paused_tpls.clear
-          @kafka = build_consumer
-        end
+        @closed = false
+        @paused_tpls.clear
+        @kafka = build_consumer
       end
 
       # Runs a single poll ignoring all the potential errors
@@ -327,24 +304,21 @@ module Karafka
       def close
         # Allow only one client to be closed at the same time
         SHUTDOWN_MUTEX.synchronize do
-          # Make sure that no other operations are happening on this client when we close it
-          @mutex.synchronize do
-            # Once client is closed, we should not close it again
-            # This could only happen in case of a race-condition when forceful shutdown happens
-            # and triggers this from a different thread
-            return if @closed
+          # Once client is closed, we should not close it again
+          # This could only happen in case of a race-condition when forceful shutdown happens
+          # and triggers this from a different thread
+          return if @closed
 
-            @closed = true
+          @closed = true
 
-            # Remove callbacks runners that were registered
-            ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
-            ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
+          # Remove callbacks runners that were registered
+          ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
+          ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
-            @kafka.close
-            @buffer.clear
-            # @note We do not clear rebalance manager here as we may still have revocation info
-            # here that we want to consider valid prior to running another reconnection
-          end
+          @kafka.close
+          @buffer.clear
+          # @note We do not clear rebalance manager here as we may still have revocation info
+          # here that we want to consider valid prior to running another reconnection
         end
       end
 
