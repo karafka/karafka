@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.1.6 (Unreleased)
+- [Improvement] Remove no longer needed locks for client operations.
 - [Change] Require `waterdrop` `>= 2.6.2`
 - [Fix] Fix unstable spec.
 
