@@ -48,6 +48,9 @@ module Karafka
     StrategyNotFoundError = Class.new(BaseError)
 
     # This should never happen. Please open an issue if it does.
-    InvalidRealOffsetUsage = Class.new(BaseError)
+    InvalidRealOffsetUsageError = Class.new(BaseError)
+
+    # This should never happen. Please open an issue if it does.
+    InvalidTimeBasedOffsetError = Class.new(BaseError)
   end
 end

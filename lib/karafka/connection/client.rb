@@ -135,8 +135,31 @@ module Karafka
       # Seek to a particular message. The next poll on the topic/partition will return the
       # message at the given offset.
       #
-      # @param message [Messages::Message, Messages::Seek] message to which we want to seek to
+      # @param message [Messages::Message, Messages::Seek] message to which we want to seek to.
+      #   It can have the time based offset.
+      # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
       def seek(message)
+        # If the seek message offset is in a time format, we need to find the closest "real"
+        # offset matching before we seek
+        if message.offset.is_a?(Time)
+          tpl = ::Rdkafka::Consumer::TopicPartitionList.new
+          tpl.add_topic_and_partitions_with_offsets(
+            message.topic,
+            message.partition => message.offset
+          )
+
+          # Now we can overwrite the seek message offset with our resolved offset and we can
+          # then seek to the appropriate message
+          # We set the timeout to 2_000 to make sure that remote clusters handle this well
+          real_offsets = @kafka.offsets_for_times(tpl, 2_000)
+          detected_partition = real_offsets.to_h.dig(message.topic, message.partition)
+
+          # There always needs to be an offset. In case we seek into the future, where there
+          # are no offsets yet, we get -1 which indicates the most recent offset
+          # We should always detect offset, whether it is 0, -1 or a corresponding
+          message.offset = detected_partition&.offset || raise(Errors::InvalidTimeBasedOffsetError)
+        end
+
         @kafka.seek(message)
       end
 

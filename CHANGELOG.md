@@ -1,8 +1,11 @@
 # Karafka framework changelog
 
 ## 2.1.6 (Unreleased)
+- [Improvement] Provide time support for admin `#read_topic`
+- [Improvement] Provide time support for consumer `#seek`.
 - [Improvement] Remove no longer needed locks for client operations.
 - [Change] Require `waterdrop` `>= 2.6.2`
+- [Fix] Rename `InvalidRealOffsetUsage` to `InvalidRealOffsetUsageError` to align with naming of other errors.
 - [Fix] Fix unstable spec.
 
 ## 2.1.5 (2023-06-19)

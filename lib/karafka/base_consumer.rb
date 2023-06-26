@@ -204,7 +204,9 @@ module Karafka
 
     # Seeks in the context of current topic and partition
     #
-    # @param offset [Integer] offset where we want to seek
+    # @param offset [Integer, Time] offset where we want to seek or time of the offset where we
+    #   want to seek.
+    # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
     def seek(offset)
       client.seek(
         Karafka::Messages::Seek.new(
