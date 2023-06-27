@@ -27,12 +27,15 @@ module Karafka
       # This builder resolves that and builds a tpl to which we can safely subscribe the way
       # we want it.
       class TplBuilder
+        # @param consumer [::Rdkafka::Consumer] consumer instance needed to talk with Kafka
+        # @param expanded_topics [Hash] hash with expanded and normalized topics data
         def initialize(consumer, expanded_topics)
           @consumer = consumer
           @expanded_topics = expanded_topics
           @mapped_topics = Hash.new { |h, k| h[k] = {} }
         end
 
+        # @return [Rdkafka::Consumer::TopicPartitionList] final tpl we can use to subscribe
         def call
           resolve_partitions_without_offsets
           resolve_partitions_with_exact_offsets

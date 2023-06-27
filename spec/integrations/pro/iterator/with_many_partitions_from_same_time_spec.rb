@@ -12,15 +12,13 @@ draw_routes do
   end
 end
 
-partitioned_elements = {}
-
 start_time = nil
 
-10.times.with_index do |partition, index|
+10.times do |index|
   start_time = Time.now if index == 5
 
-  5.times do |partition|
-    produce(DT.topic, DT.uuid, partition: partition)
+  5.times do |partition_nr|
+    produce(DT.topic, DT.uuid, partition: partition_nr)
   end
 
   sleep(0.5)
@@ -28,9 +26,9 @@ end
 
 partitioned_data = Hash.new { |h, v| h[v] = [] }
 
-iterator = Karafka::Pro::Iterator.new({DT.topic => start_time})
+iterator = Karafka::Pro::Iterator.new({ DT.topic => start_time })
 
-iterator.each do |message, internal_iterator|
+iterator.each do |message|
   partitioned_data[message.partition] << message.offset
 end
 
