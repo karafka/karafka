@@ -37,7 +37,9 @@ module Karafka
 
                   return if coordinator.manual_pause?
 
-                  seek(last_group_message.offset + 1, false) unless revoked? || coordinator.manual_seek?
+                  unless revoked? || coordinator.manual_seek?
+                    seek(last_group_message.offset + 1, false)
+                  end
 
                   resume
                 elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
