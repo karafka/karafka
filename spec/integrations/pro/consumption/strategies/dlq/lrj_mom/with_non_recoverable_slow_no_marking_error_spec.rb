@@ -14,6 +14,8 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    seek(0) if messages.count < 2
+
     @sleep ||= 20
     @sleep -= 5
     @sleep = 1 if @sleep < 1

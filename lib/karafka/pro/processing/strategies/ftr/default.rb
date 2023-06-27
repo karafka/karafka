@@ -71,7 +71,8 @@ module Karafka
                 nil
               when :seek
                 # User direct actions take priority over automatic operations
-                return nil if coordinator.manual_seek?
+                # If we've already seeked we can just resume operations, nothing extra needed
+                return resume if coordinator.manual_seek?
 
                 throttle_message = filter.cursor
 
