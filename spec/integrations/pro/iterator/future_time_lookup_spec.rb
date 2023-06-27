@@ -16,8 +16,5 @@ iterator = Karafka::Pro::Iterator.new(
   { DT.topic => { 0 => Time.now + 60 } }
 )
 
-iterator.each do |message|
-  raise
-end
-
 # No checks needed as in case we would get something older, it will raise
+iterator.each { raise }
