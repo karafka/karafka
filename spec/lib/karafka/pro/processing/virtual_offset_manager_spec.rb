@@ -64,7 +64,7 @@ RSpec.describe_current do
     before { manager.register(range) }
 
     it { expect(manager.markable?).to eq(false) }
-    it { expect { manager.markable }.to raise_error(Karafka::Errors::InvalidRealOffsetUsage) }
+    it { expect { manager.markable }.to raise_error(Karafka::Errors::InvalidRealOffsetUsageError) }
     it { expect(manager.marked).to eq([]) }
   end
 
@@ -133,7 +133,7 @@ RSpec.describe_current do
     end
 
     it { expect(manager.markable?).to eq(false) }
-    it { expect { manager.markable }.to raise_error(Karafka::Errors::InvalidRealOffsetUsage) }
+    it { expect { manager.markable }.to raise_error(Karafka::Errors::InvalidRealOffsetUsageError) }
     it { expect(manager.marked).to eq([1, 3, 5, 7, 9]) }
   end
 
@@ -162,7 +162,7 @@ RSpec.describe_current do
     end
 
     it { expect(manager.markable?).to eq(false) }
-    it { expect { manager.markable }.to raise_error(Karafka::Errors::InvalidRealOffsetUsage) }
+    it { expect { manager.markable }.to raise_error(Karafka::Errors::InvalidRealOffsetUsageError) }
     it { expect(manager.marked).to eq([1, 3, 5, 7, 9, 11, 13]) }
   end
 
@@ -203,7 +203,7 @@ RSpec.describe_current do
     end
 
     it { expect(manager.markable?).to eq(false) }
-    it { expect { manager.markable }.to raise_error(Karafka::Errors::InvalidRealOffsetUsage) }
+    it { expect { manager.markable }.to raise_error(Karafka::Errors::InvalidRealOffsetUsageError) }
     it { expect(manager.marked).to eq([7, 8, 9, 10]) }
   end
 end
