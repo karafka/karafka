@@ -53,7 +53,7 @@ draw_routes do
   end
 end
 
-produce_many(DT.topics[0], DT.uuids(100))
+produce_many(DT.topics[0], DT.uuids(20))
 
 start_karafka_and_wait_until do
   DT.key?(1) && DT[0].uniq.size >= 3
