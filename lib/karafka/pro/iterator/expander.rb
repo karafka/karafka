@@ -70,9 +70,7 @@ module Karafka
           topics = topics.map { |name| [name, false] }.to_h if topics.is_a?(Array)
           # We remap by creating new hash, just in case the hash came as the argument for this
           # expanded. We do not want to modify user provided hash
-          topics = topics.transform_keys(&:to_s)
-
-          topics
+          topics.transform_keys(&:to_s)
         end
 
         # List of topics with their partition information for expansion
