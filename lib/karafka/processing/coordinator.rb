@@ -23,6 +23,7 @@ module Karafka
         @consumptions = {}
         @running_jobs = 0
         @manual_pause = false
+        @manual_seek = false
         @mutex = Mutex.new
         @marked = false
         @failure = false
@@ -146,6 +147,16 @@ module Karafka
       # @return [Boolean] are we in a pause that was initiated by the user
       def manual_pause?
         @pause_tracker.paused? && @manual_pause
+      end
+
+      # Marks seek as manual for coordination purposes
+      def manual_seek
+        @manual_seek = true
+      end
+
+      # @return [Boolean] did a user invoke seek in the current operations scope
+      def manual_seek?
+        @manual_seek
       end
 
       # Allows to run synchronized (locked) code that can operate in between virtual partitions

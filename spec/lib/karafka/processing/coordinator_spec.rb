@@ -18,6 +18,7 @@ RSpec.describe_current do
     it { expect(coordinator.success?).to eq(true) }
     it { expect(coordinator.revoked?).to eq(false) }
     it { expect(coordinator.manual_pause?).to eq(false) }
+    it { expect(coordinator.manual_seek?).to eq(false) }
 
     context 'when previous coordinator usage had a manual pause' do
       before do
@@ -29,6 +30,17 @@ RSpec.describe_current do
       it { expect(coordinator.success?).to eq(true) }
       it { expect(coordinator.revoked?).to eq(false) }
       it { expect(coordinator.manual_pause?).to eq(false) }
+    end
+
+    context 'when previous coordinator usage had a manual seek' do
+      before do
+        coordinator.manual_seek
+        coordinator.start([message])
+      end
+
+      it { expect(coordinator.success?).to eq(true) }
+      it { expect(coordinator.revoked?).to eq(false) }
+      it { expect(coordinator.manual_seek?).to eq(false) }
     end
   end
 
@@ -149,6 +161,18 @@ RSpec.describe_current do
       end
 
       it { expect(coordinator.manual_pause?).to eq(true) }
+    end
+  end
+
+  describe '#manual_seek and manual_seek?' do
+    context 'when there is no seek' do
+      it { expect(coordinator.manual_seek?).to eq(false) }
+    end
+
+    context 'when there is a manual seek' do
+      before { coordinator.manual_seek }
+
+      it { expect(coordinator.manual_seek?).to eq(true) }
     end
   end
 end

@@ -49,9 +49,6 @@ module Karafka
         def start(messages)
           super
 
-          # When we start, there are no seeks, hence no user invoked seek as well
-          @manual_seek = false
-
           @collapser.refresh!(messages.first.offset)
 
           @filter.apply!(messages)
@@ -88,16 +85,6 @@ module Karafka
         # @return [Boolean] is the coordinated work finished or not
         def finished?
           @running_jobs.zero?
-        end
-
-        # Marks seek as manual for coordination purposes
-        def manual_seek
-          @manual_seek = true
-        end
-
-        # @return [Boolean] did a user invoke seek in the current operations scope
-        def manual_seek?
-          @manual_seek
         end
 
         # Runs synchronized code once for a collective of virtual partitions prior to work being
