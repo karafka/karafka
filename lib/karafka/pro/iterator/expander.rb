@@ -37,19 +37,9 @@ module Karafka
         # @param topics [Array, Hash, String] topics definitions
         # @return [Hash] expanded and normalized requested topics and partitions data
         def call(topics)
-          # Simplification for the single topic case
-          topics = [topics] if topics.is_a?(String)
-
-          # If we've got just array with topics, we need to convert that into a representation
-          # that we can expand with offsets
-          topics = topics.map { |name| [name, false] }.to_h if topics.is_a?(Array)
-          # We remap by creating new hash, just in case the hash came as the argument for this
-          # expanded. We do not want to modify user provided hash
-          topics = topics.transform_keys(&:to_s)
-
           expanded = Hash.new { |h, k| h[k] = {} }
 
-          topics.map do |topic, details|
+          normalize_format(topics).map do |topic, details|
             if details.is_a?(Hash)
               details.each do |partition, offset|
                 expanded[topic][partition] = offset
@@ -66,6 +56,24 @@ module Karafka
         end
 
         private
+
+        # Input can be provided in multiple formats. Here we normalize it to one (hash).
+        #
+        # @param topics [Array, Hash, String] requested topics
+        # @return [Hash] normalized hash with topics data
+        def normalize_format(topics)
+          # Simplification for the single topic case
+          topics = [topics] if topics.is_a?(String)
+
+          # If we've got just array with topics, we need to convert that into a representation
+          # that we can expand with offsets
+          topics = topics.map { |name| [name, false] }.to_h if topics.is_a?(Array)
+          # We remap by creating new hash, just in case the hash came as the argument for this
+          # expanded. We do not want to modify user provided hash
+          topics = topics.transform_keys(&:to_s)
+
+          topics
+        end
 
         # List of topics with their partition information for expansion
         # We cache it so we do not have to run consecutive requests to obtain data about multiple
