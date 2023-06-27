@@ -43,6 +43,7 @@ module Karafka
         @buffer = RawMessagesBuffer.new
         @rebalance_manager = RebalanceManager.new
         @kafka = build_consumer
+        @mutex = Mutex.new
         # We need to keep track of what we have paused for resuming
         # In case we loose partition, we still need to resume it, otherwise it won't be fetched
         # again if we get reassigned to it later on. We need to keep them as after revocation we
@@ -174,33 +175,34 @@ module Karafka
       #   be reprocessed after getting back to processing)
       # @note This will pause indefinitely and requires manual `#resume`
       def pause(topic, partition, offset)
-        # Do not pause if the client got closed, would not change anything
-        return if @closed
+        @mutex.synchronize do
+          # Do not pause if the client got closed, would not change anything
+          return if @closed
 
-        pause_msg = Messages::Seek.new(topic, partition, offset)
+          pause_msg = Messages::Seek.new(topic, partition, offset)
 
-        internal_commit_offsets(async: true)
+          internal_commit_offsets(async: true)
 
-        # Here we do not use our cached tpls because we should not try to pause something we do
-        # not own anymore.
-        tpl = topic_partition_list(topic, partition)
+          # Here we do not use our cached tpls because we should not try to pause something we do
+          # not own anymore.
+          tpl = topic_partition_list(topic, partition)
 
-        return unless tpl
+          return unless tpl
 
-        Karafka.monitor.instrument(
-          'client.pause',
-          caller: self,
-          subscription_group: @subscription_group,
-          topic: topic,
-          partition: partition,
-          offset: offset
-        )
+          Karafka.monitor.instrument(
+            'client.pause',
+            caller: self,
+            subscription_group: @subscription_group,
+            topic: topic,
+            partition: partition,
+            offset: offset
+          )
 
-        @paused_tpls[topic][partition] = tpl
+          @paused_tpls[topic][partition] = tpl
 
-        @kafka.pause(tpl)
-
-        @kafka.seek(pause_msg)
+          @kafka.pause(tpl)
+          @kafka.seek(pause_msg)
+        end
       end
 
       # Resumes processing of a give topic partition after it was paused.
@@ -208,29 +210,31 @@ module Karafka
       # @param topic [String] topic name
       # @param partition [Integer] partition
       def resume(topic, partition)
-        return if @closed
+        @mutex.synchronize do
+          return if @closed
 
-        # We now commit offsets on rebalances, thus we can do it async just to make sure
-        internal_commit_offsets(async: true)
+          # We now commit offsets on rebalances, thus we can do it async just to make sure
+          internal_commit_offsets(async: true)
 
-        # If we were not able, let's try to reuse the one we have (if we have)
-        tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
+          # If we were not able, let's try to reuse the one we have (if we have)
+          tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
 
-        return unless tpl
+          return unless tpl
 
-        # If we did not have it, it means we never paused this partition, thus no resume should
-        # happen in the first place
-        return unless @paused_tpls[topic].delete(partition)
+          # If we did not have it, it means we never paused this partition, thus no resume should
+          # happen in the first place
+          return unless @paused_tpls[topic].delete(partition)
 
-        Karafka.monitor.instrument(
-          'client.resume',
-          caller: self,
-          subscription_group: @subscription_group,
-          topic: topic,
-          partition: partition
-        )
+          Karafka.monitor.instrument(
+            'client.resume',
+            caller: self,
+            subscription_group: @subscription_group,
+            topic: topic,
+            partition: partition
+          )
 
-        @kafka.resume(tpl)
+          @kafka.resume(tpl)
+        end
       end
 
       # Gracefully stops topic consumption.
