@@ -20,11 +20,14 @@ module Karafka
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
+      # Max time for a TPL request. We increase it to compensate for remote clusters latency
+      TPL_REQUEST_TIMEOUT = 2_000
+
       # We want to make sure we never close several clients in the same moment to prevent
       # potential race conditions and other issues
       SHUTDOWN_MUTEX = Mutex.new
 
-      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX
+      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX, :TPL_REQUEST_TIMEOUT
 
       # Creates a new consumer instance.
       #
@@ -151,7 +154,7 @@ module Karafka
           # Now we can overwrite the seek message offset with our resolved offset and we can
           # then seek to the appropriate message
           # We set the timeout to 2_000 to make sure that remote clusters handle this well
-          real_offsets = @kafka.offsets_for_times(tpl, 2_000)
+          real_offsets = @kafka.offsets_for_times(tpl, TPL_REQUEST_TIMEOUT)
           detected_partition = real_offsets.to_h.dig(message.topic, message.partition)
 
           # There always needs to be an offset. In case we seek into the future, where there

@@ -1,10 +1,13 @@
 # Karafka framework changelog
 
 ## 2.1.6 (Unreleased)
+- [Improvement] Provide time support for iterator
 - [Improvement] Provide time support for admin `#read_topic`
 - [Improvement] Provide time support for consumer `#seek`.
 - [Improvement] Remove no longer needed locks for client operations.
+- [Improvement] Raise `Karafka::Errors::TopicNotFoundError` when trying to iterate over non-existing topic.
 - [Change] Require `waterdrop` `>= 2.6.2`
+- [Refactor] Clean-up iterator code.
 - [Fix] Rename `InvalidRealOffsetUsage` to `InvalidRealOffsetUsageError` to align with naming of other errors.
 - [Fix] Fix unstable spec.
 
