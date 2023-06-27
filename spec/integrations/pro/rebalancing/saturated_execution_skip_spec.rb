@@ -18,7 +18,7 @@ class Consumer < Karafka::BaseConsumer
 
     DT[:executed] << messages.metadata.partition
 
-    sleep(11)
+    sleep(15)
   end
 
   def revoked
