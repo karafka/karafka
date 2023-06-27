@@ -70,11 +70,11 @@ if Karafka.rails?
         # We can have many listeners, but it does not matter in which we will reload the code
         # as long as all the consumers will be re-created as Rails reload is thread-safe
         ::Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
-          # Reload code each time there is a change in the code
-          next unless Rails.application.reloaders.any?(&:updated?)
           # If consumer persistence is enabled, no reason to reload because we will still keep
           # old consumer instances in memory.
           next if Karafka::App.config.consumer_persistence
+          # Reload code each time there is a change in the code
+          next unless Rails.application.reloaders.any?(&:updated?)
 
           Rails.application.reloader.reload!
         end
