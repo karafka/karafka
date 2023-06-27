@@ -10,6 +10,8 @@
 - [Refactor] Clean-up iterator code.
 - [Fix] Rename `InvalidRealOffsetUsage` to `InvalidRealOffsetUsageError` to align with naming of other errors.
 - [Fix] Fix unstable spec.
+- [Fix] Fix a case where automatic `#seek` would overwrite manual seek of a user when running LRJ.
+- [Fix] Make sure, that user direct `#seek` and `#pause` operations take precedence over system actions.
 
 ## 2.1.5 (2023-06-19)
 - [Improvement] Drastically improve `#revoked?` response quality by checking the real time assignment lost state on librdkafka.

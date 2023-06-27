@@ -206,8 +206,13 @@ module Karafka
     #
     # @param offset [Integer, Time] offset where we want to seek or time of the offset where we
     #   want to seek.
+    # @param manual_seek [Boolean] Flag to differentiate between user seek and system/strategy
+    #   based seek. User seek operations should take precedence over system actions, hence we need
+    #   to know who invoked it.
     # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
-    def seek(offset)
+    def seek(offset, manual_seek = true)
+      coordinator.manual_seek if manual_seek
+
       client.seek(
         Karafka::Messages::Seek.new(
           topic.name,

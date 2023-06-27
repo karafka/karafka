@@ -43,10 +43,10 @@ module Karafka
                   # If still not revoked and was throttled, we need to apply filtering logic
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
-                  elsif !revoked?
+                  elsif !revoked? && !coordinator.manual_seek?
                     # If not revoked and not throttled, we move to where we were suppose to and
                     # resume
-                    seek(last_group_message.offset + 1)
+                    seek(last_group_message.offset + 1, false)
                     resume
                   else
                     resume

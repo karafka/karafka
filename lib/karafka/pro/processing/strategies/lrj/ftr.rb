@@ -45,10 +45,10 @@ module Karafka
                   # If still not revoked and was throttled, we need to apply throttling logic
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
-                  elsif !revoked?
+                  elsif !revoked? && !coordinator.manual_seek?
                     # If not revoked and not throttled, we move to where we were suppose to and
                     # resume
-                    seek(coordinator.seek_offset)
+                    seek(coordinator.seek_offset, false)
                     resume
                   else
                     resume

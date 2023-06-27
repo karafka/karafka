@@ -38,7 +38,8 @@ module Karafka
                   return if coordinator.manual_pause?
 
                   mark_as_consumed(last_group_message) unless revoked?
-                  seek(coordinator.seek_offset) unless revoked?
+                  # We should not overwrite user manual seel request with our seek
+                  seek(coordinator.seek_offset, false) unless revoked? || coordinator.manual_seek?
 
                   resume
                 elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
