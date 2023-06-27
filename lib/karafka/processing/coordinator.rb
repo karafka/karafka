@@ -42,6 +42,9 @@ module Karafka
         # When starting to run, no pause is expected and no manual pause as well
         @manual_pause = false
 
+        # No user invoked seeks on a new run
+        @manual_seek = false
+
         # We set it on the first encounter and never again, because then the offset setting
         # should be up to the consumers logic (our or the end user)
         # Seek offset needs to be always initialized as for case where manual offset management
