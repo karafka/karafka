@@ -39,4 +39,6 @@ start_karafka_and_wait_until do
   sleep(15)
 end
 
-assert_equal elements[0..1], DT[0]
+# Since it runs with VPs, we need to sort to make sure it matches as the messages can
+# be distributed into independent VPs and run not in dispatch order
+assert_equal elements[0..1].sort, DT[0].sort

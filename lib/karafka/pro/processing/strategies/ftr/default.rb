@@ -70,6 +70,10 @@ module Karafka
               when :skip
                 nil
               when :seek
+                # User direct actions take priority over automatic operations
+                # If we've already seeked we can just resume operations, nothing extra needed
+                return resume if coordinator.manual_seek?
+
                 throttle_message = filter.cursor
 
                 Karafka.monitor.instrument(
@@ -77,11 +81,14 @@ module Karafka
                   caller: self,
                   message: throttle_message
                 ) do
-                  seek(throttle_message.offset)
+                  seek(throttle_message.offset, false)
                 end
 
                 resume
               when :pause
+                # User direct actions take priority over automatic operations
+                return nil if coordinator.manual_pause?
+
                 throttle_message = filter.cursor
 
                 Karafka.monitor.instrument(

@@ -48,7 +48,10 @@ module Karafka
                   coordinator.pause_tracker.reset
 
                   mark_as_consumed(last_group_message) unless revoked?
-                  seek(coordinator.seek_offset) unless revoked?
+
+                  # no need to check for manual seek because AJ consumer is internal and
+                  # fully controlled by us
+                  seek(coordinator.seek_offset, false) unless revoked?
 
                   resume
                 else

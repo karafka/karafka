@@ -81,6 +81,7 @@ module Karafka
         # The first message we do need to get next time we poll. We use the minimum not to jump
         # accidentally by over any.
         # @return [Karafka::Messages::Message, nil] cursor message or nil if none
+        # @note Cursor message can also return the offset in the time format
         def cursor
           return nil unless active?
 

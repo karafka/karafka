@@ -42,7 +42,9 @@ module Karafka
                 if coordinator.success?
                   coordinator.pause_tracker.reset
 
-                  seek(coordinator.seek_offset) unless revoked?
+                  # no need to check for manual seek because AJ consumer is internal and
+                  # fully controlled by us
+                  seek(coordinator.seek_offset, false) unless revoked?
 
                   resume
                 elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries

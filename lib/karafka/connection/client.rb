@@ -20,11 +20,14 @@ module Karafka
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
+      # Max time for a TPL request. We increase it to compensate for remote clusters latency
+      TPL_REQUEST_TIMEOUT = 2_000
+
       # We want to make sure we never close several clients in the same moment to prevent
       # potential race conditions and other issues
       SHUTDOWN_MUTEX = Mutex.new
 
-      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX
+      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX, :TPL_REQUEST_TIMEOUT
 
       # Creates a new consumer instance.
       #
@@ -40,6 +43,11 @@ module Karafka
         @buffer = RawMessagesBuffer.new
         @rebalance_manager = RebalanceManager.new
         @kafka = build_consumer
+        # There are few operations that can happen in parallel from the listener threads as well
+        # as from the workers. They are not fully thread-safe because they may be composed out of
+        # few calls to Kafka or out of few internal state changes. That is why we mutex them.
+        # It mostly revolves around pausing and resuming.
+        @mutex = Mutex.new
         # We need to keep track of what we have paused for resuming
         # In case we loose partition, we still need to resume it, otherwise it won't be fetched
         # again if we get reassigned to it later on. We need to keep them as after revocation we
@@ -135,9 +143,11 @@ module Karafka
       # Seek to a particular message. The next poll on the topic/partition will return the
       # message at the given offset.
       #
-      # @param message [Messages::Message, Messages::Seek] message to which we want to seek to
+      # @param message [Messages::Message, Messages::Seek] message to which we want to seek to.
+      #   It can have the time based offset.
+      # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
       def seek(message)
-        @kafka.seek(message)
+        @mutex.synchronize { internal_seek(message) }
       end
 
       # Pauses given partition and moves back to last successful offset processed.
@@ -148,33 +158,34 @@ module Karafka
       #   be reprocessed after getting back to processing)
       # @note This will pause indefinitely and requires manual `#resume`
       def pause(topic, partition, offset)
-        # Do not pause if the client got closed, would not change anything
-        return if @closed
+        @mutex.synchronize do
+          # Do not pause if the client got closed, would not change anything
+          return if @closed
 
-        pause_msg = Messages::Seek.new(topic, partition, offset)
+          pause_msg = Messages::Seek.new(topic, partition, offset)
 
-        internal_commit_offsets(async: true)
+          internal_commit_offsets(async: true)
 
-        # Here we do not use our cached tpls because we should not try to pause something we do
-        # not own anymore.
-        tpl = topic_partition_list(topic, partition)
+          # Here we do not use our cached tpls because we should not try to pause something we do
+          # not own anymore.
+          tpl = topic_partition_list(topic, partition)
 
-        return unless tpl
+          return unless tpl
 
-        Karafka.monitor.instrument(
-          'client.pause',
-          caller: self,
-          subscription_group: @subscription_group,
-          topic: topic,
-          partition: partition,
-          offset: offset
-        )
+          Karafka.monitor.instrument(
+            'client.pause',
+            caller: self,
+            subscription_group: @subscription_group,
+            topic: topic,
+            partition: partition,
+            offset: offset
+          )
 
-        @paused_tpls[topic][partition] = tpl
+          @paused_tpls[topic][partition] = tpl
 
-        @kafka.pause(tpl)
-
-        @kafka.seek(pause_msg)
+          @kafka.pause(tpl)
+          internal_seek(pause_msg)
+        end
       end
 
       # Resumes processing of a give topic partition after it was paused.
@@ -182,29 +193,31 @@ module Karafka
       # @param topic [String] topic name
       # @param partition [Integer] partition
       def resume(topic, partition)
-        return if @closed
+        @mutex.synchronize do
+          return if @closed
 
-        # We now commit offsets on rebalances, thus we can do it async just to make sure
-        internal_commit_offsets(async: true)
+          # We now commit offsets on rebalances, thus we can do it async just to make sure
+          internal_commit_offsets(async: true)
 
-        # If we were not able, let's try to reuse the one we have (if we have)
-        tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
+          # If we were not able, let's try to reuse the one we have (if we have)
+          tpl = topic_partition_list(topic, partition) || @paused_tpls[topic][partition]
 
-        return unless tpl
+          return unless tpl
 
-        # If we did not have it, it means we never paused this partition, thus no resume should
-        # happen in the first place
-        return unless @paused_tpls[topic].delete(partition)
+          # If we did not have it, it means we never paused this partition, thus no resume should
+          # happen in the first place
+          return unless @paused_tpls[topic].delete(partition)
 
-        Karafka.monitor.instrument(
-          'client.resume',
-          caller: self,
-          subscription_group: @subscription_group,
-          topic: topic,
-          partition: partition
-        )
+          Karafka.monitor.instrument(
+            'client.resume',
+            caller: self,
+            subscription_group: @subscription_group,
+            topic: topic,
+            partition: partition
+          )
 
-        @kafka.resume(tpl)
+          @kafka.resume(tpl)
+        end
       end
 
       # Gracefully stops topic consumption.
@@ -298,6 +311,36 @@ module Karafka
         end
 
         raise e
+      end
+
+      # Non-mutexed seek that should be used only internally. Outside we expose `#seek` that is
+      # wrapped with a mutex.
+      #
+      # @param message [Messages::Message, Messages::Seek] message to which we want to seek to.
+      #   It can have the time based offset.
+      def internal_seek(message)
+        # If the seek message offset is in a time format, we need to find the closest "real"
+        # offset matching before we seek
+        if message.offset.is_a?(Time)
+          tpl = ::Rdkafka::Consumer::TopicPartitionList.new
+          tpl.add_topic_and_partitions_with_offsets(
+            message.topic,
+            message.partition => message.offset
+          )
+
+          # Now we can overwrite the seek message offset with our resolved offset and we can
+          # then seek to the appropriate message
+          # We set the timeout to 2_000 to make sure that remote clusters handle this well
+          real_offsets = @kafka.offsets_for_times(tpl, TPL_REQUEST_TIMEOUT)
+          detected_partition = real_offsets.to_h.dig(message.topic, message.partition)
+
+          # There always needs to be an offset. In case we seek into the future, where there
+          # are no offsets yet, we get -1 which indicates the most recent offset
+          # We should always detect offset, whether it is 0, -1 or a corresponding
+          message.offset = detected_partition&.offset || raise(Errors::InvalidTimeBasedOffsetError)
+        end
+
+        @kafka.seek(message)
       end
 
       # Commits the stored offsets in a sync way and closes the consumer.

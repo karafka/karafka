@@ -63,7 +63,12 @@ class DataCollector
     # @param amount [Integer] number of uuids we want to get
     # @return [Array<String>] array with uuids
     def uuids(amount)
-      Array.new(amount) { SecureRandom.uuid }
+      Array.new(amount) { uuid }
+    end
+
+    # @return [String] single uuid
+    def uuid
+      SecureRandom.uuid
     end
 
     # Removes all the data from the collector

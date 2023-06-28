@@ -42,8 +42,8 @@ module Karafka
 
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
-                  elsif !revoked?
-                    seek(last_group_message.offset + 1)
+                  elsif !revoked? && !coordinator.manual_seek?
+                    seek(last_group_message.offset + 1, false)
                     resume
                   else
                     resume

@@ -1,9 +1,20 @@
 # Karafka framework changelog
 
 ## 2.1.6 (Unreleased)
+- [Improvement] Provide time support for iterator
+- [Improvement] Provide time support for admin `#read_topic`
+- [Improvement] Provide time support for consumer `#seek`.
 - [Improvement] Remove no longer needed locks for client operations.
+- [Improvement] Raise `Karafka::Errors::TopicNotFoundError` when trying to iterate over non-existing topic.
+- [Improvement] Ensure that Kafka multi-command operations run under mutex together.
 - [Change] Require `waterdrop` `>= 2.6.2`
+- [Refactor] Clean-up iterator code.
+- [Fix]  Improve performance in dev environment for a Rails app (juike)
+- [Fix] Rename `InvalidRealOffsetUsage` to `InvalidRealOffsetUsageError` to align with naming of other errors.
 - [Fix] Fix unstable spec.
+- [Fix] Fix a case where automatic `#seek` would overwrite manual seek of a user when running LRJ.
+- [Fix] Make sure, that user direct `#seek` and `#pause` operations take precedence over system actions.
+- [Fix] Make sure, that `#pause` and `#resume` with one underlying connection do not race-condition.
 
 ## 2.1.5 (2023-06-19)
 - [Improvement] Drastically improve `#revoked?` response quality by checking the real time assignment lost state on librdkafka.

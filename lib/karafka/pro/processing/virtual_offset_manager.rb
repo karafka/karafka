@@ -118,7 +118,7 @@ module Karafka
 
         # @return [Messages::Seek] markable message for real offset marking
         def markable
-          raise Errors::InvalidRealOffsetUsage unless markable?
+          raise Errors::InvalidRealOffsetUsageError unless markable?
 
           Messages::Seek.new(
             @topic,

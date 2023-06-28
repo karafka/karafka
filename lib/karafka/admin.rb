@@ -18,6 +18,9 @@ module Karafka
     # retry after checking that the operation was finished or failed using external factor.
     MAX_WAIT_TIMEOUT = 1
 
+    # Max time for a TPL request. We increase it to compensate for remote clusters latency
+    TPL_REQUEST_TIMEOUT = 2_000
+
     # How many times should be try. 1 x 60 => 60 seconds wait in total
     MAX_ATTEMPTS = 60
 
@@ -34,7 +37,8 @@ module Karafka
       'enable.auto.commit': false
     }.freeze
 
-    private_constant :Topic, :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :MAX_ATTEMPTS
+    private_constant :Topic, :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :TPL_REQUEST_TIMEOUT,
+                     :MAX_ATTEMPTS
 
     class << self
       # Allows us to read messages from the topic
@@ -42,8 +46,9 @@ module Karafka
       # @param name [String, Symbol] topic name
       # @param partition [Integer] partition
       # @param count [Integer] how many messages we want to get at most
-      # @param start_offset [Integer] offset from which we should start. If -1 is provided
-      #   (default) we will start from the latest offset
+      # @param start_offset [Integer, Time] offset from which we should start. If -1 is provided
+      #   (default) we will start from the latest offset. If time is provided, the appropriate
+      #   offset will be resolved.
       # @param settings [Hash] kafka extra settings (optional)
       #
       # @return [Array<Karafka::Messages::Message>] array with messages
@@ -53,6 +58,9 @@ module Karafka
         low_offset, high_offset = nil
 
         with_consumer(settings) do |consumer|
+          # Convert the time offset (if needed)
+          start_offset = resolve_offset(consumer, name.to_s, partition, start_offset)
+
           low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
 
           # Select offset dynamically if -1 or less
@@ -242,6 +250,29 @@ module Karafka
         )
 
         ::Rdkafka::Config.new(config_hash)
+      end
+
+      # Resolves the offset if offset is in a time format. Otherwise returns the offset without
+      # resolving.
+      # @param consumer [::Rdkafka::Consumer]
+      # @param name [String, Symbol] expected topic name
+      # @param partition [Integer]
+      # @param offset [Integer, Time]
+      # @return [Integer] expected offset
+      def resolve_offset(consumer, name, partition, offset)
+        if offset.is_a?(Time)
+          tpl = ::Rdkafka::Consumer::TopicPartitionList.new
+          tpl.add_topic_and_partitions_with_offsets(
+            name, partition => offset
+          )
+
+          real_offsets = consumer.offsets_for_times(tpl, TPL_REQUEST_TIMEOUT)
+          detected_offset = real_offsets.to_h.dig(name, partition)
+
+          detected_offset&.offset || raise(Errors::InvalidTimeBasedOffsetError)
+        else
+          offset
+        end
       end
     end
   end

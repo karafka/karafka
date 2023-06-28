@@ -52,7 +52,9 @@ module Karafka
 
                   return if coordinator.manual_pause?
 
-                  seek(last_group_message.offset + 1) unless revoked?
+                  unless revoked? || coordinator.manual_seek?
+                    seek(last_group_message.offset + 1, false)
+                  end
 
                   resume
                 else

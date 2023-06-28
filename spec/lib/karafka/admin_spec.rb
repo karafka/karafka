@@ -168,6 +168,60 @@ RSpec.describe_current do
         expect(reading.first.topic).to eq(name)
       end
     end
+
+    context 'when trying to read empty topic from the future' do
+      let(:offset) { Time.now + 60 }
+
+      before { described_class.create_topic(name, 1, 1) }
+
+      it { expect(reading.size).to eq(0) }
+    end
+
+    context 'when trying to read topic with data from the future' do
+      let(:offset) { Time.now + 60 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+
+        ::Karafka.producer.produce_sync(topic: name, payload: '1')
+      end
+
+      it { expect(reading.size).to eq(1) }
+      it { expect(reading.first.offset).to eq(0) }
+      it { expect(reading.first.raw_payload).to eq('1') }
+    end
+
+    context 'when reading from far in the past' do
+      let(:count) { 10 }
+      let(:offset) { Time.now - 60 * 5 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(20) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(reading.size).to eq(10) }
+      it { expect(reading.last.offset).to eq(9) }
+      it { expect(reading.first.offset).to eq(0) }
+    end
+
+    context 'when reading from far in the past and trying to read more than present' do
+      let(:count) { 1_000 }
+      let(:offset) { Time.now - 60 * 5 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(reading.size).to eq(10) }
+      it { expect(reading.last.offset).to eq(9) }
+      it { expect(reading.first.offset).to eq(0) }
+    end
   end
 
   describe '#create_partitions and #cluster_info' do

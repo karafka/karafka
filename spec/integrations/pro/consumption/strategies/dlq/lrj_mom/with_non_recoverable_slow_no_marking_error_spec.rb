@@ -14,6 +14,8 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    return seek(0) if messages.count < 2
+
     @sleep ||= 20
     @sleep -= 5
     @sleep = 1 if @sleep < 1
@@ -51,7 +53,7 @@ draw_routes do
   end
 end
 
-produce_many(DT.topics[0], DT.uuids(100))
+produce_many(DT.topics[0], DT.uuids(20))
 
 start_karafka_and_wait_until do
   DT.key?(1) && DT[0].uniq.size >= 3

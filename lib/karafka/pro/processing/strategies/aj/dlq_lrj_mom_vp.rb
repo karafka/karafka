@@ -46,7 +46,9 @@ module Karafka
                   # Since we have VP here we do not commit intermediate offsets and need to commit
                   # them here. We do commit in collapsed mode but this is generalized.
                   mark_as_consumed(last_group_message) unless revoked?
-                  seek(coordinator.seek_offset) unless revoked?
+                  # no need to check for manual seek because AJ consumer is internal and
+                  # fully controlled by us
+                  seek(coordinator.seek_offset, false) unless revoked?
 
                   resume
                 elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries

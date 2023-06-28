@@ -44,7 +44,9 @@ module Karafka
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
                   elsif !revoked?
-                    seek(coordinator.seek_offset)
+                    # no need to check for manual seek because AJ consumer is internal and
+                    # fully controlled by us
+                    seek(coordinator.seek_offset, false)
                     resume
                   else
                     resume
