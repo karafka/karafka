@@ -6,6 +6,7 @@
 - [Improvement] Provide time support for consumer `#seek`.
 - [Improvement] Remove no longer needed locks for client operations.
 - [Improvement] Raise `Karafka::Errors::TopicNotFoundError` when trying to iterate over non-existing topic.
+- [Improvement] Ensure that Kafka multi-command operations run under mutex together.
 - [Change] Require `waterdrop` `>= 2.6.2`
 - [Refactor] Clean-up iterator code.
 - [Fix] Rename `InvalidRealOffsetUsage` to `InvalidRealOffsetUsageError` to align with naming of other errors.
