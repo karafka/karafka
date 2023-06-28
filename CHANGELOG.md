@@ -9,6 +9,7 @@
 - [Improvement] Ensure that Kafka multi-command operations run under mutex together.
 - [Change] Require `waterdrop` `>= 2.6.2`
 - [Refactor] Clean-up iterator code.
+- [Fix]  Improve performance in dev environment for a Rails app (juike)
 - [Fix] Rename `InvalidRealOffsetUsage` to `InvalidRealOffsetUsageError` to align with naming of other errors.
 - [Fix] Fix unstable spec.
 - [Fix] Fix a case where automatic `#seek` would overwrite manual seek of a user when running LRJ.

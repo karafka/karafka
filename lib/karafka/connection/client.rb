@@ -43,6 +43,10 @@ module Karafka
         @buffer = RawMessagesBuffer.new
         @rebalance_manager = RebalanceManager.new
         @kafka = build_consumer
+        # There are few operations that can happen in parallel from the listener threads as well
+        # as from the workers. They are not fully thread-safe because they may be composed out of
+        # few calls to Kafka or out of few internal state changes. That is why we mutex them.
+        # It mostly revolves around pausing and resuming.
         @mutex = Mutex.new
         # We need to keep track of what we have paused for resuming
         # In case we loose partition, we still need to resume it, otherwise it won't be fetched
@@ -143,28 +147,7 @@ module Karafka
       #   It can have the time based offset.
       # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
       def seek(message)
-        # If the seek message offset is in a time format, we need to find the closest "real"
-        # offset matching before we seek
-        if message.offset.is_a?(Time)
-          tpl = ::Rdkafka::Consumer::TopicPartitionList.new
-          tpl.add_topic_and_partitions_with_offsets(
-            message.topic,
-            message.partition => message.offset
-          )
-
-          # Now we can overwrite the seek message offset with our resolved offset and we can
-          # then seek to the appropriate message
-          # We set the timeout to 2_000 to make sure that remote clusters handle this well
-          real_offsets = @kafka.offsets_for_times(tpl, TPL_REQUEST_TIMEOUT)
-          detected_partition = real_offsets.to_h.dig(message.topic, message.partition)
-
-          # There always needs to be an offset. In case we seek into the future, where there
-          # are no offsets yet, we get -1 which indicates the most recent offset
-          # We should always detect offset, whether it is 0, -1 or a corresponding
-          message.offset = detected_partition&.offset || raise(Errors::InvalidTimeBasedOffsetError)
-        end
-
-        @kafka.seek(message)
+        @mutex.synchronize { internal_seek(message) }
       end
 
       # Pauses given partition and moves back to last successful offset processed.
@@ -201,7 +184,7 @@ module Karafka
           @paused_tpls[topic][partition] = tpl
 
           @kafka.pause(tpl)
-          @kafka.seek(pause_msg)
+          internal_seek(pause_msg)
         end
       end
 
@@ -328,6 +311,36 @@ module Karafka
         end
 
         raise e
+      end
+
+      # Non-mutexed seek that should be used only internally. Outside we expose `#seek` that is
+      # wrapped with a mutex.
+      #
+      # @param message [Messages::Message, Messages::Seek] message to which we want to seek to.
+      #   It can have the time based offset.
+      def internal_seek(message)
+        # If the seek message offset is in a time format, we need to find the closest "real"
+        # offset matching before we seek
+        if message.offset.is_a?(Time)
+          tpl = ::Rdkafka::Consumer::TopicPartitionList.new
+          tpl.add_topic_and_partitions_with_offsets(
+            message.topic,
+            message.partition => message.offset
+          )
+
+          # Now we can overwrite the seek message offset with our resolved offset and we can
+          # then seek to the appropriate message
+          # We set the timeout to 2_000 to make sure that remote clusters handle this well
+          real_offsets = @kafka.offsets_for_times(tpl, TPL_REQUEST_TIMEOUT)
+          detected_partition = real_offsets.to_h.dig(message.topic, message.partition)
+
+          # There always needs to be an offset. In case we seek into the future, where there
+          # are no offsets yet, we get -1 which indicates the most recent offset
+          # We should always detect offset, whether it is 0, -1 or a corresponding
+          message.offset = detected_partition&.offset || raise(Errors::InvalidTimeBasedOffsetError)
+        end
+
+        @kafka.seek(message)
       end
 
       # Commits the stored offsets in a sync way and closes the consumer.
