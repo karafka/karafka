@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.6 (Unreleased)
+## 2.1.6 (2023-06-29)
 - [Improvement] Provide time support for iterator
 - [Improvement] Provide time support for admin `#read_topic`
 - [Improvement] Provide time support for consumer `#seek`.
@@ -8,6 +8,7 @@
 - [Improvement] Raise `Karafka::Errors::TopicNotFoundError` when trying to iterate over non-existing topic.
 - [Improvement] Ensure that Kafka multi-command operations run under mutex together.
 - [Change] Require `waterdrop` `>= 2.6.2`
+- [Change] Require `karafka-core` `>= 2.1.1`
 - [Refactor] Clean-up iterator code.
 - [Fix]  Improve performance in dev environment for a Rails app (juike)
 - [Fix] Rename `InvalidRealOffsetUsage` to `InvalidRealOffsetUsageError` to align with naming of other errors.
