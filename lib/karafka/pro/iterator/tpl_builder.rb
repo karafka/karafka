@@ -96,9 +96,10 @@ module Karafka
               # Care only about negative offsets (last n messages)
               next unless offset.is_a?(Integer) && offset.negative?
 
-              _, high_watermark_offset = @consumer.query_watermark_offsets(name, partition)
+              low_offset, high_offset = @consumer.query_watermark_offsets(name, partition)
+
               # We add because this offset is negative
-              @mapped_topics[name][partition] = high_watermark_offset + offset
+              @mapped_topics[name][partition] = [high_offset + offset, low_offset].max
             end
           end
         end

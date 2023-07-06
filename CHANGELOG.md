@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 2.1.7 (Unreleased)
+- [Fix] Fix a case where Iterator with per partition offsets with negative lookups would go below the number of available messages.
+- [Fix] Remove unused constant from Admin module.
+
 ## 2.1.6 (2023-06-29)
 - [Improvement] Provide time support for iterator
 - [Improvement] Provide time support for admin `#read_topic`

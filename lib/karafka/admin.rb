@@ -9,11 +9,6 @@ module Karafka
   # @note It always uses the primary defined cluster and does not support multi-cluster work.
   #   If you need this, just replace the cluster info for the time you use this
   module Admin
-    # A fake admin topic representation that we use for messages fetched using this API
-    # We cannot use the topics directly because we may want to request data from topics that we
-    # do not have in the routing
-    Topic = Struct.new(:name, :deserializer)
-
     # We wait only for this amount of time before raising error as we intercept this error and
     # retry after checking that the operation was finished or failed using external factor.
     MAX_WAIT_TIMEOUT = 1
@@ -37,7 +32,7 @@ module Karafka
       'enable.auto.commit': false
     }.freeze
 
-    private_constant :Topic, :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :TPL_REQUEST_TIMEOUT,
+    private_constant :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :TPL_REQUEST_TIMEOUT,
                      :MAX_ATTEMPTS
 
     class << self
