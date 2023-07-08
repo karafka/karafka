@@ -25,6 +25,7 @@ module Karafka
         broker.version.fallback
         builtin.features
         check.crcs
+        client.dns.lookup
         client.id
         client.rack
         closesocket_cb
@@ -161,6 +162,7 @@ module Karafka
         broker.address.ttl
         broker.version.fallback
         builtin.features
+        client.dns.lookup
         client.id
         client.rack
         closesocket_cb
