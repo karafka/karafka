@@ -278,7 +278,7 @@ module Karafka
           error "Data polling error occurred: #{error}"
           error details
         when 'connection.client.rebalance_callback.error'
-          error "Rebalance callack error occurred: #{error}"
+          error "Rebalance callback error occurred: #{error}"
           error details
         else
           # This should never happen. Please contact the maintainers
