@@ -39,6 +39,7 @@ module Karafka
       #   overwritten, you may want to include `auto.offset.reset` to match your case.
       # @param yield_nil [Boolean] should we yield also `nil` values when poll returns nothing.
       #   Useful in particular for long-living iterators.
+      # @param max_wait_time [Integer] max wait in ms when iterator did not receive any messages
       #
       # @note It is worth keeping in mind, that this API also needs to operate within
       #   `max.poll.interval.ms` limitations on each iteration
@@ -48,7 +49,8 @@ module Karafka
       def initialize(
         topics,
         settings: { 'auto.offset.reset': 'beginning' },
-        yield_nil: false
+        yield_nil: false,
+        max_wait_time: 200
       )
         @topics_with_partitions = Expander.new.call(topics)
 
@@ -62,6 +64,7 @@ module Karafka
 
         @settings = settings
         @yield_nil = yield_nil
+        @max_wait_time = max_wait_time
       end
 
       # Iterates over requested topic partitions and yields the results with the iterator itself
@@ -80,7 +83,7 @@ module Karafka
           # Stream data until we reach the end of all the partitions or until the end user
           # indicates that they are done
           until done?
-            message = poll(200)
+            message = poll(@max_wait_time)
 
             # Skip nils if not explicitly required
             next if message.nil? && !@yield_nil

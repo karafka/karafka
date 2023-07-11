@@ -369,6 +369,13 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context 'when it is a connection.client.rebalance_callback.error' do
+      let(:type) { 'connection.client.rebalance_callback.error' }
+      let(:message) { "Rebalance callback error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context 'when it is an unsupported error type' do
       subject(:error_trigger) { listener.on_error_occurred(event) }
 
