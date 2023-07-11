@@ -277,6 +277,9 @@ module Karafka
         when 'connection.client.poll.error'
           error "Data polling error occurred: #{error}"
           error details
+        when 'connection.client.rebalance_callback.error'
+          error "Rebalance callack error occurred: #{error}"
+          error details
         else
           # This should never happen. Please contact the maintainers
           raise Errors::UnsupportedCaseError, event

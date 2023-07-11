@@ -1,8 +1,10 @@
 # Karafka framework changelog
 
 ## 2.1.7 (Unreleased)
+- [Improvement] Add `max_wait_time` option to the Iterator.
 - [Fix] Fix a case where Iterator with per partition offsets with negative lookups would go below the number of available messages.
 - [Fix] Remove unused constant from Admin module.
+- [Fix] Add missing `connection.client.rebalance_callback.error` `LoggerListener` instrumentation hook.
 
 ## 2.1.6 (2023-06-29)
 - [Improvement] Provide time support for iterator
