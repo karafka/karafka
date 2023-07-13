@@ -21,18 +21,21 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[:groups] << messages.map(&:offset)
+    group = messages.map(&:offset)
+    DT[:groups] << group
 
     messages.each do |message|
       mark_as_consumed!(message)
 
-      if !DT[:errored].include?(message.offset) && (message.offset % 5) == 4
-        DT[:errored] << message.offset
+      offset = message.offset
+
+      if !DT[:errored].include?(offset) && (offset % 5) == 4 && group.last != offset
+        DT[:errored] << offset
 
         raise StandardError
       end
 
-      DT[0] << message.offset
+      DT[0] << offset
     end
   end
 end
