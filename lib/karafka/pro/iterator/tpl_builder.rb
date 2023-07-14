@@ -93,12 +93,15 @@ module Karafka
             next unless partitions.is_a?(Hash)
 
             partitions.each do |partition, offset|
-              # Care only about numerical offsets (last n messages)
+              # Care only about numerical offsets
+              #
+              # For time based we already resolve them via librdkafka lookup API
               next unless offset.is_a?(Integer)
 
               low_offset, high_offset = @consumer.query_watermark_offsets(name, partition)
 
               # Care only about negative offsets (last n messages)
+              #
               # We reject the above results but we **NEED** to run the `#query_watermark_offsets`
               # for each topic partition nonetheless. Without this, librdkafka fetches a lot more
               # metadata about each topic and each partition and this takes much more time than
