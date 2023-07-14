@@ -93,10 +93,21 @@ module Karafka
             next unless partitions.is_a?(Hash)
 
             partitions.each do |partition, offset|
-              # Care only about negative offsets (last n messages)
-              next unless offset.is_a?(Integer) && offset.negative?
+              # Care only about numerical offsets (last n messages)
+              next unless offset.is_a?(Integer)
 
               low_offset, high_offset = @consumer.query_watermark_offsets(name, partition)
+
+              # Care only about negative offsets (last n messages)
+              # We reject the above results but we **NEED** to run the `#query_watermark_offsets`
+              # for each topic partition nonetheless. Without this, librdkafka fetches a lot more
+              # metadata about each topic and each partition and this takes much more time than
+              # just getting watermarks. If we do not run watermark, at least an extra second
+              # is added at the beginning of iterator flow
+              #
+              # This may not be significant when this runs in the background but in case of
+              # using iterator in thins like Puma, it heavily impacts the end user experience
+              next unless offset.negative?
 
               # We add because this offset is negative
               @mapped_topics[name][partition] = [high_offset + offset, low_offset].max

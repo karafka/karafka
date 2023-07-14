@@ -83,7 +83,7 @@ module Karafka
           # Stream data until we reach the end of all the partitions or until the end user
           # indicates that they are done
           until done?
-            message = poll(@max_wait_time)
+            message = poll
 
             # Skip nils if not explicitly required
             next if message.nil? && !@yield_nil
@@ -134,10 +134,9 @@ module Karafka
 
       private
 
-      # @param timeout [Integer] timeout in ms
       # @return [Rdkafka::Consumer::Message, nil] message or nil if nothing to do
-      def poll(timeout)
-        @current_consumer.poll(timeout)
+      def poll
+        @current_consumer.poll(@max_wait_time)
       rescue Rdkafka::RdkafkaError => e
         # End of partition
         if e.code == :partition_eof
