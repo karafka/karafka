@@ -3,6 +3,7 @@
 ## 2.1.7 (Unreleased)
 - [Improvement] Always query for watermarks in the Iterator to improve the initial response time.
 - [Improvement] Add `max_wait_time` option to the Iterator.
+- [Fix] Fix a case where `Admin#read_topic` would wait for poll interval on non-existing messages instead of early exit.
 - [Fix] Fix a case where Iterator with per partition offsets with negative lookups would go below the number of available messages.
 - [Fix] Remove unused constant from Admin module.
 - [Fix] Add missing `connection.client.rebalance_callback.error` to the `LoggerListener` instrumentation hook.
