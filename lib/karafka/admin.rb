@@ -66,7 +66,7 @@ module Karafka
           requested_range = (start_offset..start_offset + (count - 1))
           # Establish theoretical available range. Note, that this does not handle cases related to
           # log retention or compaction
-          available_range = (low_offset..high_offset)
+          available_range = (low_offset..(high_offset - 1))
           # Select only offset that we can select. This will remove all the potential offsets that
           # are below the low watermark offset
           possible_range = requested_range.select { |offset| available_range.include?(offset) }
