@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.7 (Unreleased)
+## 2.1.7 (2023-07-22)
 - [Improvement] Always query for watermarks in the Iterator to improve the initial response time.
 - [Improvement] Add `max_wait_time` option to the Iterator.
 - [Fix] Fix a case where `Admin#read_topic` would wait for poll interval on non-existing messages instead of early exit.
