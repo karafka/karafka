@@ -48,7 +48,7 @@ module Karafka
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
         # middle state, where re-creation of a consumer instance would occur only sometimes
-        @consumer = nil unless ::Karafka::App.config.consumer_persistence
+        @consumer = nil unless topic.consumer_persistence
 
         # First we build messages batch...
         consumer.messages = Messages::Builders::Messages.call(

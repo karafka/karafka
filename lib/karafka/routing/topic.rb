@@ -17,6 +17,7 @@ module Karafka
         max_messages
         max_wait_time
         initial_offset
+        consumer_persistence
       ].freeze
 
       private_constant :INHERITABLE_ATTRIBUTES
@@ -50,7 +51,7 @@ module Karafka
 
       # @return [Class] consumer class that we should use
       def consumer
-        if Karafka::App.config.consumer_persistence
+        if consumer_persistence
           # When persistence of consumers is on, no need to reload them
           @consumer
         else

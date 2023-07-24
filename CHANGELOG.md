@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.1.8 (Unreleased)
+- [Improvement] Provide ability to overwrite `consumer_persistence` per subscribed topic. This is mostly useful for plugins and extensions developers.
+
 ## 2.1.7 (2023-07-22)
 - [Improvement] Always query for watermarks in the Iterator to improve the initial response time.
 - [Improvement] Add `max_wait_time` option to the Iterator.
