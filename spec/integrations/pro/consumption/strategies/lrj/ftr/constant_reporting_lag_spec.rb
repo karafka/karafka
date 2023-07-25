@@ -2,6 +2,9 @@
 
 # When using running with a delay and producing in a loop, we should always have a lag not bigger
 # than the total of things that are in front of our marked offset
+#
+# If we run a non-blocking marking that happens less frequently than polling, this can go beyond
+# what we currently process + what is ahead, because technically we are behind
 
 PRODUCER = -> { produce_many(DT.topic, DT.uuids(5)) }
 
@@ -17,6 +20,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     PRODUCER.call
     sleep(2)
+    mark_as_consumed!
   end
 end
 
