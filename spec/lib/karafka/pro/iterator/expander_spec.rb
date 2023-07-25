@@ -4,7 +4,7 @@ RSpec.describe_current do
   subject(:expand) { described_class.new.call(topics) }
 
   context 'when trying to expand on a non-existing topic' do
-    let(:topics) { 'topic' }
+    let(:topics) { "topic-#{SecureRandom.uuid}" }
 
     it { expect { expand }.to raise_error(Karafka::Errors::TopicNotFoundError) }
   end
