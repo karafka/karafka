@@ -8,6 +8,8 @@ RSpec.describe_current do
   let(:partitions) { { 'topic_name' => [partition1] } }
 
   describe '#revoked_partitions, #on_partitions_revoked, #lost_partitions and #changed?' do
+    it { expect(manager.active?).to eq(false) }
+
     context 'when there are no revoked partitions' do
       it { expect(manager.revoked_partitions).to eq({}) }
       it { expect(manager.changed?).to eq(false) }
@@ -15,6 +17,8 @@ RSpec.describe_current do
 
     context 'when some partitions were revoked and not assigned' do
       before { manager.on_partitions_revoked(partitions) }
+
+      it { expect(manager.active?).to eq(true) }
 
       it 'expect to return them' do
         expect(manager.revoked_partitions).to eq({ 'topic_name' => [partition1.partition] })
@@ -38,6 +42,8 @@ RSpec.describe_current do
         manager.on_partitions_assigned({ 'topic_name' => [partition1] })
         manager.on_partitions_revoked({ 'topic_name' => [partition1, partition2] })
       end
+
+      it { expect(manager.active?).to eq(true) }
 
       it 'expect not to include them in the lost partitions back' do
         expect(manager.lost_partitions).to eq({ 'topic_name' => [partition2.partition] })

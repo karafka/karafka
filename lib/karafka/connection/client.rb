@@ -23,11 +23,17 @@ module Karafka
       # Max time for a TPL request. We increase it to compensate for remote clusters latency
       TPL_REQUEST_TIMEOUT = 2_000
 
+      # 1 minute of max wait for the first rebalance before a forceful attempt
+      # This applies only to a case when a short-lived Karafka instance with a client would be
+      # closed before first rebalance. Mitigates a librdkafka bug.
+      COOPERATIVE_STICKY_MAX_WAIT = 60_000
+
       # We want to make sure we never close several clients in the same moment to prevent
       # potential race conditions and other issues
       SHUTDOWN_MUTEX = Mutex.new
 
-      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX, :TPL_REQUEST_TIMEOUT
+      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX, :TPL_REQUEST_TIMEOUT,
+                       :COOPERATIVE_STICKY_MAX_WAIT
 
       # Creates a new consumer instance.
       #
@@ -226,6 +232,22 @@ module Karafka
       #   as until all the consumers are stopped, the server will keep running serving only
       #   part of the messages
       def stop
+        # This ensures, that we do not stop the underlying client until it passes the first
+        # rebalance for cooperative-sticky. Otherwise librdkafka may crash
+        #
+        # We set a timeout just in case the rebalance would never happen or would last for an
+        # extensive time period.
+        #
+        # @see https://github.com/confluentinc/librdkafka/issues/4312
+        if @subscription_group.kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
+          (COOPERATIVE_STICKY_MAX_WAIT / 100).times do
+            # If we're past the first rebalance, no need to wait
+            break if @rebalance_manager.active?
+
+            sleep(0.1)
+          end
+        end
+
         close
       end
 
