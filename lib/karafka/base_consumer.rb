@@ -25,6 +25,7 @@ module Karafka
     # Creates new consumer and assigns it an id
     def initialize
       @id = SecureRandom.hex(6)
+      @used = false
     end
 
     # Can be used to run preparation code prior to the job being enqueued
@@ -34,6 +35,7 @@ module Karafka
     #   not as a part of the public api. This should not perform any extensive operations as it is
     #   blocking and running in the listener thread.
     def on_before_enqueue
+      @used = true
       handle_before_enqueue
     rescue StandardError => e
       Karafka.monitor.instrument(
@@ -159,6 +161,14 @@ module Karafka
     # Method that will be executed when the process is shutting down. You can use it for
     # some teardown procedures (closing file handler, etc).
     def shutdown; end
+
+    # @return [Boolean] was this consumer in active use. Active use means running `#consume` at
+    #   least once. Consumer may have to run `#revoked` or `#shutdown` despite not running
+    #   `#consume` previously in delayed job cases and other cases that potentially involve running
+    #   the `Jobs::Idle` for house-keeping
+    def used?
+      @used
+    end
 
     # Pauses processing on a given offset for the current topic partition
     #
