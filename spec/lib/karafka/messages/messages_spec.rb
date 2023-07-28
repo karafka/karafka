@@ -17,6 +17,13 @@ RSpec.describe_current do
     it 'expect not to deserialize data and return raw messages' do
       expect(messages.to_a.first.deserialized?).to eq false
     end
+
+    it 'expect to return copy of the underlying array' do
+      ar1 = messages.to_a
+      ar2 = messages.to_a
+
+      expect(ar1).not_to be(ar2)
+    end
   end
 
   describe '#deserialize!' do

@@ -60,10 +60,12 @@ module Karafka
         @messages_array.size
       end
 
-      # @return [Array<Karafka::Messages::Message>] pure array with messages
+      # @return [Array<Karafka::Messages::Message>] copy of the pure array with messages
       def to_a
-        @messages_array
+        @messages_array.dup
       end
+
+      alias count size
     end
   end
 end
