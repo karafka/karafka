@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.1.8 (Unreleased)
+- [Improvement] Mitigate a librdkafka `cooperative-sticky`.
 - [Improvement] Provide ability to overwrite `consumer_persistence` per subscribed topic. This is mostly useful for plugins and extensions developers.
 
 ## 2.1.7 (2023-07-22)

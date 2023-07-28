@@ -30,6 +30,7 @@ module Karafka
         @assigned_partitions = {}
         @revoked_partitions = {}
         @changed = false
+        @active = false
       end
 
       # Resets the rebalance manager state
@@ -46,11 +47,20 @@ module Karafka
         @changed
       end
 
+      # @return [Boolean] true if there was at least one rebalance
+      # @note This method is needed to make sure that when using cooperative-sticky, we do not
+      #   close until first rebalance. Otherwise librdkafka may crash.
+      # @see https://github.com/confluentinc/librdkafka/issues/4312
+      def active?
+        @active
+      end
+
       # Callback that kicks in inside of rdkafka, when new partitions are assigned.
       #
       # @private
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       def on_partitions_assigned(partitions)
+        @active = true
         @assigned_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
         @changed = true
       end
@@ -60,6 +70,7 @@ module Karafka
       # @private
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
       def on_partitions_revoked(partitions)
+        @active = true
         @revoked_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
         @changed = true
       end

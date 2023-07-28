@@ -43,8 +43,15 @@ end
 lags = Set.new
 
 statistics_events.each do |event|
-  lags << event[:statistics]['topics'][DT.topic]['partitions']['0']['consumer_lag_stored']
+  lag = event[:statistics].dig('topics', DT.topic, 'partitions', '0', 'consumer_lag_stored')
+
+  # Lag may not be present when first reporting happens before data processing
+  next unless lag
+
+  lags << lag
 end
+
+assert !lags.empty?
 
 # Reported lag can equal to what we are processing + what we have ahead of us but should never
 # exceed those values
