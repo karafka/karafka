@@ -17,10 +17,6 @@ draw_routes do
   end
 end
 
-consumer = setup_rdkafka_consumer(
-  'partition.assignment.strategy': 'cooperative-sticky'
-)
-
 start_karafka_and_wait_until do
   true
 end
