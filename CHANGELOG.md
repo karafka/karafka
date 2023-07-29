@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.8 (Unreleased)
+## 2.1.8 (2023-07-29)
 - [Improvement] Introduce `Karafka::BaseConsumer#used?` method to indicate, that at least one invocation of `#consume` took or will take place. This can be used as a replacement to the non-direct `messages.count` check for shutdown and revocation to ensure, that the consumption took place or is taking place (in case of running LRJ).
 - [Improvement] Make `messages#to_a` return copy of the underlying array to prevent scenarios, where the mutation impacts offset management.
 - [Improvement] Mitigate a librdkafka `cooperative-sticky` rebalance crash issue.
