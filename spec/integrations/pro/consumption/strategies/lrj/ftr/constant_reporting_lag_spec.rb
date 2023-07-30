@@ -19,8 +19,8 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     PRODUCER.call
-    sleep(2)
     mark_as_consumed!(messages.last)
+    sleep(2)
   end
 end
 

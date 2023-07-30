@@ -33,7 +33,7 @@ consumer = setup_rdkafka_consumer(
 other = Thread.new do
   consumer.subscribe(DT.topic)
 
-  until DT.key?(:done) do
+  until DT.key?(:done)
     DT[:ok] = true if consumer.poll(100)
     sleep(0.1)
   end
