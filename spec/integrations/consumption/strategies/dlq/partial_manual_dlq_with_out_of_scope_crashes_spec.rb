@@ -8,7 +8,7 @@
 # Note: This example illustrates a misuse of the DLQ flow and should not be used.
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.max_messages = 10
+  config.max_messages = 100
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -50,7 +50,7 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:broken].size >= 1000
+  DT[:broken].include?(elements.last)
 end
 
 # All DLQ dispatches should be based on dispatched data
