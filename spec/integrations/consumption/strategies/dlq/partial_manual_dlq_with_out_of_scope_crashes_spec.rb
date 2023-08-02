@@ -14,12 +14,10 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      begin
-        # Simulate something went wrong on a per message basis
-        raise StandardError
-      rescue
-        dispatch_to_dlq(message)
-      end
+      # Simulate something went wrong on a per message basis
+      raise StandardError
+    rescue StandardError
+      dispatch_to_dlq(message)
     end
 
     # Crash whole batch outside of per message error handling
