@@ -43,7 +43,13 @@ class KarafkaApp < Karafka::App
   # This logger prints the producer development info using the Karafka logger.
   # It is similar to the consumer logger listener but producer oriented.
   Karafka.producer.monitor.subscribe(
-    WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
+    WaterDrop::Instrumentation::LoggerListener.new(
+      # Log producer operations using the Karafka logger
+      Karafka.logger,
+      # If you set this to true, logs will contain each message details
+      # Please note, that this can be extensive
+      log_messages: false
+    )
   )
 
   routes.draw do
