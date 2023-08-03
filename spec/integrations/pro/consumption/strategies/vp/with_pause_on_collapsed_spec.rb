@@ -5,6 +5,10 @@
 
 setup_karafka(allow_errors: true) do |config|
   config.concurrency = 10
+  # We need to have less than 5 messages polled at once because if we poll more, then in case
+  # all are fetched in one go (5) and error is raised, post collapse message recording will
+  # automatically stop processing too fast
+  config.max_messages = 3
 end
 
 class Consumer < Karafka::BaseConsumer
