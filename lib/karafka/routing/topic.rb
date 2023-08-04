@@ -18,6 +18,9 @@ module Karafka
         max_wait_time
         initial_offset
         consumer_persistence
+        pause_timeout
+        pause_max_timeout
+        pause_with_exponential_backoff
       ].freeze
 
       private_constant :INHERITABLE_ATTRIBUTES
