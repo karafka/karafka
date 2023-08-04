@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:manager) { described_class.new }
 
-  let(:topic) { rand.to_s }
+  let(:topic) { build(:routing_topic) }
   let(:partition) { rand(0..100) }
   let(:fetched_pause) { manager.fetch(topic, partition) }
 

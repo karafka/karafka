@@ -4,7 +4,8 @@ RSpec.describe_current do
   subject(:buffer) { described_class.new(topics) }
 
   let(:topics) { create(:routing_topics) }
-  let(:topic_name) { topics.first.name }
+  let(:topic) { topics.first }
+  let(:topic_name) { topic.name }
 
   describe '#find_or_create' do
     context 'when coordinator did not exist' do
@@ -38,7 +39,7 @@ RSpec.describe_current do
       end
 
       it 'expect to delegate to pauses manager' do
-        expect { |block| buffer.resume(&block) }.to yield_with_args(topic_name, 1)
+        expect { |block| buffer.resume(&block) }.to yield_with_args(topic, 1)
       end
     end
   end

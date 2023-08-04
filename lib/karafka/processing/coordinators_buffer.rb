@@ -17,14 +17,18 @@ module Karafka
         @topics = topics
       end
 
-      # @param topic [String] topic name
+      # @param topic_name [String] topic name
       # @param partition [Integer] partition number
-      def find_or_create(topic, partition)
-        @coordinators[topic][partition] ||= @coordinator_class.new(
-          @topics.find(topic),
-          partition,
-          @pauses_manager.fetch(topic, partition)
-        )
+      def find_or_create(topic_name, partition)
+        @coordinators[topic_name][partition] ||= begin
+          routing_topic = @topics.find(topic_name)
+
+          @coordinator_class.new(
+            routing_topic,
+            partition,
+            @pauses_manager.fetch(routing_topic, partition)
+          )
+        end
       end
 
       # Resumes processing of partitions for which pause time has ended.
@@ -35,16 +39,16 @@ module Karafka
         @pauses_manager.resume(&block)
       end
 
-      # @param topic [String] topic name
+      # @param topic_name [String] topic name
       # @param partition [Integer] partition number
-      def revoke(topic, partition)
-        return unless @coordinators[topic].key?(partition)
+      def revoke(topic_name, partition)
+        return unless @coordinators[topic_name].key?(partition)
 
         # The fact that we delete here does not change the fact that the executor still holds the
         # reference to this coordinator. We delete it here, as we will no longer process any
         # new stuff with it and we may need a new coordinator if we regain this partition, but the
         # coordinator may still be in use
-        @coordinators[topic].delete(partition).revoke
+        @coordinators[topic_name].delete(partition).revoke
       end
 
       # Clears coordinators and re-created the pauses manager

@@ -16,6 +16,7 @@ module Karafka
     module Routing
       module Features
         class Pausing < Base
+          # Expansion allowing for a per topic pause strategy definitions
           module Topic
             # Allows for per-topic pausing strategy setting
             #
