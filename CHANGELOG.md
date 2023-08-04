@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.1.9 (Unreleased)
+- **[Feature]** Introduce ability to customize pause strategy on a per topic basis (Pro).
 - [Improvement] Disable the extensive messages logging in the default `karafka.rb` template.
 - [Change] Require `waterdrop` `>= 2.6.6` due to extra `LoggerListener` API.
 

@@ -14,20 +14,20 @@ module Karafka
 
       # Creates or fetches pause tracker of a given topic partition.
       #
-      # @param topic [String] topic name
+      # @param topic [::Karafka::Routing::Topic] topic
       # @param partition [Integer] partition number
       # @return [Karafka::TimeTrackers::Pause] pause tracker instance
       def fetch(topic, partition)
         @pauses[topic][partition] ||= TimeTrackers::Pause.new(
-          timeout: Karafka::App.config.pause_timeout,
-          max_timeout: Karafka::App.config.pause_max_timeout,
-          exponential_backoff: Karafka::App.config.pause_with_exponential_backoff
+          timeout: topic.pause_timeout,
+          max_timeout: topic.pause_max_timeout,
+          exponential_backoff: topic.pause_with_exponential_backoff
         )
       end
 
       # Resumes processing of partitions for which pause time has ended.
       #
-      # @yieldparam [String] topic name
+      # @yieldparam [Karafka::Routing::Topic] topic
       # @yieldparam [Integer] partition number
       def resume
         @pauses.each do |topic, partitions|

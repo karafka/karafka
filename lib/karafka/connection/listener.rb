@@ -192,7 +192,7 @@ module Karafka
       # Resumes processing of partitions that were paused due to an error.
       def resume_paused_partitions
         @coordinators.resume do |topic, partition|
-          @client.resume(topic, partition)
+          @client.resume(topic.name, partition)
         end
       end
 
