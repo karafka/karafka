@@ -35,6 +35,8 @@ module Karafka
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
 
+        connection.client.rebalance_callback
+
         consumer.consume
         consumer.consumed
         consumer.consuming.pause

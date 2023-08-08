@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.1.10 (Unreleased)
+- [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
+
 ## 2.1.9 (2023-08-06)
 - **[Feature]** Introduce ability to customize pause strategy on a per topic basis (Pro).
 - [Improvement] Disable the extensive messages logging in the default `karafka.rb` template.

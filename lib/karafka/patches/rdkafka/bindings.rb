@@ -51,11 +51,18 @@ module Karafka
           # @param opaque [Rdkafka::Opaque]
           # @param tpl [Rdkafka::Consumer::TopicPartitionList]
           def trigger_callbacks(code, opaque, tpl)
-            case code
-            when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
-              opaque.call_on_partitions_assigned(tpl)
-            when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
-              opaque.call_on_partitions_revoked(tpl)
+            Karafka.monitor.instrument(
+              'connection.client.rebalance_callback',
+              caller: self,
+              code: code,
+              tpl: tpl
+            ) do
+              case code
+              when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
+                opaque.call_on_partitions_assigned(tpl)
+              when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
+                opaque.call_on_partitions_revoked(tpl)
+              end
             end
           rescue StandardError => e
             Karafka.monitor.instrument(
