@@ -67,7 +67,7 @@ module Karafka
             configure(&block)
           end
 
-          # Hooks up to WaterDrop instrumentation for emitted statistics
+          # Hooks up to Karafka instrumentation for emitted statistics
           #
           # @param event [Karafka::Core::Monitoring::Event]
           def on_statistics_emitted(event)
@@ -220,6 +220,7 @@ module Karafka
                   next if partition_name == '-1'
                   # Skip until lag info is available
                   next if partition_statistics['consumer_lag'] == -1
+                  next if partition_statistics['consumer_lag_stored'] == -1
 
                   public_send(
                     metric.type,
