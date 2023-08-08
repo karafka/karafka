@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 module Karafka
+  # Namespace for other libs patches
   module Patches
+    # Rdkafka related patches. Things we cannot or do not want to add to the rdkafka-ruby lib
+    # mostly because of being less generic than what is in rdkafka-ruby
     module Rdkafka
       # Binding patches that slightly change how rdkafka operates in certain places
       module Bindings
