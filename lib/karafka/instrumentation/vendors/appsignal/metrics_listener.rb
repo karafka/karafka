@@ -20,8 +20,8 @@ module Karafka
 
           setting :rd_kafka_metrics, default: [
             # Broker metrics
-            RdKafkaMetric.new(:count, :brokers, 'consume_attempts', 'txretries_d'),
-            RdKafkaMetric.new(:count, :brokers, 'consume_errors', 'txerrs_d'),
+            RdKafkaMetric.new(:count, :brokers, 'requests_retries', 'txretries_d'),
+            RdKafkaMetric.new(:count, :brokers, 'transmission_errors', 'txerrs_d'),
             RdKafkaMetric.new(:count, :brokers, 'receive_errors', 'rxerrs_d'),
             RdKafkaMetric.new(:count, :brokers, 'connection_connects', 'connects_d'),
             RdKafkaMetric.new(:count, :brokers, 'connection_disconnects', 'disconnects_d'),
@@ -65,9 +65,9 @@ module Karafka
             messages = consumer.messages
             metadata = messages.metadata
 
-            count('consumed_messages', messages.size, consumer_tags(consumer))
-            count('consumed_batches', 1, consumer_tags(consumer))
-            gauge('consumed_offsets', metadata.last_offset, consumer_tags(consumer))
+            count('consumer_messages', messages.size, consumer_tags(consumer))
+            count('consumer_batches', 1, consumer_tags(consumer))
+            gauge('consumer_offsets', metadata.last_offset, consumer_tags(consumer))
 
             stop_transaction
           end
@@ -108,7 +108,7 @@ module Karafka
           def on_dead_letter_queue_dispatched(event)
             consumer = event.payload[:caller]
             count(
-              'consumed_dead',
+              'consumer_dead',
               1,
               consumer_tags(consumer)
             )
@@ -122,7 +122,7 @@ module Karafka
             # If this is a user consumption related error, we bump the counters for metrics
             if event[:type] == 'consumer.consume.error'
               consumer = event.payload[:caller]
-              count('consumed_errors', 1, consumer_tags(consumer))
+              count('consumer_errors', 1, consumer_tags(consumer))
             end
 
             stop_transaction
