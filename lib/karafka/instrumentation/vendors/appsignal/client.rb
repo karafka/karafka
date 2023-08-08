@@ -35,7 +35,7 @@ module Karafka
           # Sets metadata on a current transaction (if any)
           #
           # @param metadata_hash [Hash] hash with metadata we want to set
-          def set_metadata(metadata_hash)
+          def metadata=(metadata_hash)
             return unless transaction?
 
             transaction = ::Appsignal::Transaction.current

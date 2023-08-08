@@ -46,7 +46,7 @@ module Karafka
 
             start_transaction(consumer, 'consume')
 
-            client.set_metadata(
+            client.metadata = {
               batch_size: consumer.messages.size,
               first_offset: consumer.messages.metadata.first_offset,
               last_offset: consumer.messages.metadata.last_offset,
@@ -54,7 +54,7 @@ module Karafka
               topic: consumer.topic.name,
               partition: consumer.partition,
               attempt: consumer.coordinator.pause_tracker.attempt
-            )
+            }
           end
 
           # Once we're done with consumption, we bump counters about that
@@ -149,7 +149,7 @@ module Karafka
             when :root
               # Do nothing on the root metrics as the same metrics are reported in a granular
               # way from other places
-              return
+              nil
             when :brokers
               statistics.fetch('brokers').each_value do |broker_statistics|
                 # Skip bootstrap nodes
@@ -162,7 +162,7 @@ module Karafka
                   metric.name,
                   broker_statistics.dig(*metric.key_location),
                   {
-                    broker: "#{broker_statistics['nodename']}"
+                    broker: broker_statistics['nodename']
                   }
                 )
               end
@@ -174,16 +174,16 @@ module Karafka
                   next if partition_statistics['consumer_lag'] == -1
                   next if partition_statistics['consumer_lag_stored'] == -1
 
-                 public_send(
-                   metric.type,
-                   metric.name,
-                   partition_statistics.dig(*metric.key_location),
-                   {
+                  public_send(
+                    metric.type,
+                    metric.name,
+                    partition_statistics.dig(*metric.key_location),
+                    {
                       consumer_group: consumer_group_id,
                       topic: topic_name,
                       partition: partition_name
                     }
-                 )
+                  )
                 end
               end
             else
