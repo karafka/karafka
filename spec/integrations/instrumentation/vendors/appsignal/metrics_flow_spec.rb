@@ -55,8 +55,8 @@ end
 transactions_started = appsignal_dummy.buffer[:start_transaction].values.flatten
 transactions_ended = appsignal_dummy.buffer[:stop_transaction].values.flatten
 
-assert transactions_started.size > 0
-assert transactions_ended.size > 0
+assert !transactions_started.empty?
+assert !transactions_ended.size.empty?
 assert_equal transactions_started.size, transactions_ended.size
 
 # We should not report errors from metrics listener
