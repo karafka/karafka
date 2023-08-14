@@ -380,6 +380,12 @@ module Karafka
           ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
           ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
+          # This should prevent from a race condition when we unsubscribe during brokers metadata
+          # states refreshes. With unsubscribed consumer there should be way less of potential
+          # refreshes running.
+          #
+          # @see https://github.com/appsignal/rdkafka-ruby/issues/273
+          @kafka.unsubscribe
           @kafka.close
           @buffer.clear
           # @note We do not clear rebalance manager here as we may still have revocation info
