@@ -188,7 +188,19 @@ module Karafka
         consumer = config(:consumer, settings).consumer
         yield(consumer)
       ensure
-        consumer&.close
+        return unless consumer
+
+        # Always unsubscribe consumer just to be sure, that no metadata requests are running
+        # when we close the consumer. This in theory should prevent from some race-conditions
+        # that originate from librdkafka
+        begin
+          consumer.unsubscribe
+        # Ignore any errors and continue to close consumer despite them
+        rescue Rdkafka::RdkafkaError
+          nil
+        end
+
+        consumer.close
       end
 
       private
