@@ -14,7 +14,9 @@ class Consumer2 < Karafka::BaseConsumer
   def consume; end
 end
 
-draw_routes do
+Karafka::Admin.create_topic(DT.topics[1], 1, 1)
+
+draw_routes(create_topics: false) do
   topic DT.topic do
     consumer Consumer
   end
