@@ -39,7 +39,7 @@ start_karafka_and_wait_until do
         consumer_group 'regular' do
           topic 'test-me' do
             consumer Consumer
-            max_wait_time -2
+            max_wait_time(-2)
           end
         end
       end
