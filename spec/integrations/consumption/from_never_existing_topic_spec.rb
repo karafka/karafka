@@ -7,8 +7,7 @@
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
-  def consume
-  end
+  def consume; end
 end
 
 draw_routes(create_topics: false) do
