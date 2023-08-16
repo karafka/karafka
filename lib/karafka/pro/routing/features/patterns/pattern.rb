@@ -18,14 +18,14 @@ module Karafka
         class Patterns < Base
           # Karafka topic pattern object
           # It represents a topic that is not yet materialized and that contains a name that is a
-          # regexp and not a "real" value. Underneath we define a dynamic topic, that is not active,
-          # that can be a subject to normal flow validations, etc.
+          # regexp and not a "real" value. Underneath we define a dynamic topic, that is not
+          # active, that can be a subject to normal flow validations, etc.
           class Pattern
             # Pattern regexp
             attr_accessor :regexp
 
-            # Each pattern has its own "topic" that we use as a routing reference that we define with
-            # non-existing topic for the routing to correctly pick it up for operations
+            # Each pattern has its own "topic" that we use as a routing reference that we define
+            # with non-existing topic for the routing to correctly pick it up for operations
             # Virtual topic name for initial subscription
             attr_reader :topic_name
 

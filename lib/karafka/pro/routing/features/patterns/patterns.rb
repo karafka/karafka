@@ -22,8 +22,8 @@ module Karafka
             #
             # @param topic_name [String] topic name that may match a pattern
             # @return [Karafka::Routing::Pattern, nil] pattern or nil if not found
-            # @note Please keep in mind, that there may be many patterns matching given topic name and
-            #   we always pick the first one (defined first)
+            # @note Please keep in mind, that there may be many patterns matching given topic name
+            #   and we always pick the first one (defined first)
             def find(topic_name)
               @accumulator.find { |pattern| pattern.regexp =~ topic_name }
             end

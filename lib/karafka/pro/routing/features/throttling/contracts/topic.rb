@@ -16,6 +16,7 @@ module Karafka
     module Routing
       module Features
         class Throttling < Base
+          # Namespace for throttling contracts
           module Contracts
             # Rules around throttling settings
             class Topic < Karafka::Contracts::Base

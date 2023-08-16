@@ -16,6 +16,7 @@ module Karafka
     module Routing
       module Features
         class LongRunningJob < Base
+          # Namespace for LRJ contracts
           module Contracts
             # Rules around long-running job settings
             class Topic < Karafka::Contracts::Base

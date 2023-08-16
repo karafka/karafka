@@ -41,10 +41,10 @@ module Karafka
                     scope::Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
                   end
 
-                  if scope::Contracts.const_defined?('Topic', false)
-                    consumer_group.topics.each do |topic|
-                      scope::Contracts::Topic.new.validate!(topic.to_h)
-                    end
+                  next unless scope::Contracts.const_defined?('Topic', false)
+
+                  consumer_group.topics.each do |topic|
+                    scope::Contracts::Topic.new.validate!(topic.to_h)
                   end
                 end
 

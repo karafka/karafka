@@ -16,6 +16,7 @@ module Karafka
     module Routing
       module Features
         class VirtualPartitions < Base
+          # Namespace for VP contracts
           module Contracts
             # Rules around virtual partitions
             class Topic < Karafka::Contracts::Base

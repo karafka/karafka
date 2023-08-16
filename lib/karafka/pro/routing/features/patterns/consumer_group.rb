@@ -34,7 +34,8 @@ module Karafka
             # @param block [Proc] appropriate underlying topic settings
             def pattern=(regexp, &block)
               pattern = Pattern.new(regexp, block)
-              pattern.topic = self.public_send(:topic=, pattern.topic_name, &block)
+              virtual_topic = public_send(:topic=, pattern.topic_name, &block)
+              pattern.topic = virtual_topic
             end
 
             # @return [Hash] consumer group with patterns injected

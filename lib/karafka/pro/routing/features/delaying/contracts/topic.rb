@@ -16,6 +16,7 @@ module Karafka
     module Routing
       module Features
         class Delaying < Base
+          # Namespace for delaying feature contracts
           module Contracts
             # Contract to validate configuration of the expiring feature
             class Topic < Karafka::Contracts::Base

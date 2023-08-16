@@ -16,6 +16,7 @@ module Karafka
     module Routing
       module Features
         class Expiring < Base
+          # Namespace for expiring messages contracts
           module Contracts
             # Contract to validate configuration of the expiring feature
             class Topic < Karafka::Contracts::Base
