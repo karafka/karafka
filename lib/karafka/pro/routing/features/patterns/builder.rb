@@ -16,22 +16,15 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
-          # Namespace for patterns related contracts
-          module Contracts
-            # Contract used to validate pattern data
-            class Pattern < Karafka::Contracts::Base
-              configure do |config|
-                config.error_messages = YAML.safe_load(
-                  File.read(
-                    File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                  )
-                ).fetch('en').fetch('validations').fetch('pattern')
-
-                required(:regexp) { |val| val.is_a?(Regexp) }
-
-                required(:topic_name) do |val|
-                  val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
-                end
+          # Expansions for the routing builder
+          module Builder
+            # Allows us to define the simple routing pattern matching
+            #
+            # @param regexp [Regexp]
+            # @param block [Proc]
+            def pattern(regexp, &block)
+              consumer_group('app') do
+                pattern(regexp, &block)
               end
             end
           end

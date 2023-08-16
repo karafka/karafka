@@ -33,8 +33,8 @@ en:
       patterns_missing: needs to be present
 
     pattern:
-      name_format: must be a regular expression
-      name_missing: needs to be present
+      regexp_format: must be a regular expression
+      regexp_missing: needs to be present
       topic_name_format: 'needs to be a string with a Kafka accepted format'
       topic_name_missing: needs to be present
 
