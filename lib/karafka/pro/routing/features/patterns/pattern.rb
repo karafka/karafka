@@ -29,6 +29,9 @@ module Karafka
             # Virtual topic name for initial subscription
             attr_reader :topic_name
 
+            # Associated created virtual topic reference
+            attr_accessor :topic
+
             # @param regexp [Regexp] regular expression to match topics
             # @param config [Proc] config for topic bootstrap
             def initialize(regexp, config)
