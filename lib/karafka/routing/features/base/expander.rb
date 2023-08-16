@@ -37,11 +37,11 @@ module Karafka
                 result = super(&block)
 
                 each do |consumer_group|
-                  if scope.const_defined?('ConsumerGroup', false)
+                  if scope::Contracts.const_defined?('ConsumerGroup', false)
                     scope::Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
                   end
 
-                  if scope.const_defined?('Topic', false)
+                  if scope::Contracts.const_defined?('Topic', false)
                     consumer_group.topics.each do |topic|
                       scope::Contracts::Topic.new.validate!(topic.to_h)
                     end
