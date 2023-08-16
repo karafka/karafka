@@ -36,6 +36,7 @@ module Karafka
               pattern = Pattern.new(regexp, block)
               virtual_topic = public_send(:topic=, pattern.topic_name, &block)
               pattern.topic = virtual_topic
+              @patterns << pattern
             end
 
             # @return [Hash] consumer group with patterns injected
