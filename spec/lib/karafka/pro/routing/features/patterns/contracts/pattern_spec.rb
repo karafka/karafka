@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:check) { described_class.new.call(pattern) }
 
-  let(:pattern) { { regexp: /.*/, topic_regexp: 'xda' } }
+  let(:pattern) { { regexp: /.*/, topic_name: 'xda' } }
 
   context 'when config is valid' do
     it { expect(check).to be_success }
@@ -27,20 +27,20 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
-  context 'when topic_regexp is missing' do
-    before { pattern.delete(:topic_regexp) }
+  context 'when topic_name is missing' do
+    before { pattern.delete(:topic_name) }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when topic_regexp is not a string' do
-    before { pattern[:topic_regexp] = 123 }
+  context 'when topic_name is not a string' do
+    before { pattern[:topic_name] = 123 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when topic_regexp is an invalid string' do
-    before { pattern[:topic_regexp] = '%^&*(' }
+  context 'when topic_name is an invalid string' do
+    before { pattern[:topic_name] = '%^&*(' }
 
     it { expect(check).not_to be_success }
   end
