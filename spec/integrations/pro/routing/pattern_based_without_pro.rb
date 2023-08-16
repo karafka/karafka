@@ -8,7 +8,7 @@ not_found = false
 
 begin
   draw_routes do
-    pattern /.*/ do
+    pattern(/.*/) do
       consumer Class.new
     end
   end
