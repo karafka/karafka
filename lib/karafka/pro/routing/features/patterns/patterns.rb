@@ -15,20 +15,17 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class Delaying < Base
-          # Contract to validate configuration of the expiring feature
-          class Contract < Contracts::Base
-            configure do |config|
-              config.error_messages = YAML.safe_load(
-                File.read(
-                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                )
-              ).fetch('en').fetch('validations').fetch('topic')
-            end
-
-            nested(:delaying) do
-              required(:active) { |val| [true, false].include?(val) }
-              required(:delay) { |val| val.nil? || (val.is_a?(Integer) && val.positive?) }
+        class Patterns < Base
+          # Representation of groups of topics
+          class Patterns < ::Karafka::Routing::Topics
+            # Finds first pattern matching given topic name
+            #
+            # @param topic_name [String] topic name that may match a pattern
+            # @return [Karafka::Routing::Pattern, nil] pattern or nil if not found
+            # @note Please keep in mind, that there may be many patterns matching given topic name and
+            #   we always pick the first one (defined first)
+            def find(topic_name)
+              @accumulator.find { |pattern| pattern.regexp =~ topic_name }
             end
           end
         end

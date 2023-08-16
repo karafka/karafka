@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.1.10 (Unreleased)
+- **[Feature]** Introduce dynamic topic subscriptions based on patterns.
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
 - [Fix] Always try to unsubscribe short-lived consumers used throughout the system, especially in the admin APIs.
 - [Fix] Always unsubscribe long-lived consumers prior to shutdown.

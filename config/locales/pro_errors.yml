@@ -28,6 +28,16 @@ en:
       pause_with_exponential_backoff_format: needs to be either true or false
       pause_timeout_max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
 
+    consumer_group:
+      patterns_format: must be an array with hashes
+      patterns_missing: needs to be present
+
+    pattern:
+      name_format: must be a regular expression
+      name_missing: needs to be present
+      topic_name_format: 'needs to be a string with a Kafka accepted format'
+      topic_name_missing: needs to be present
+
     config:
       encryption.active_format: 'needs to be either true or false'
       encryption.public_key_invalid: 'is not a valid public RSA key'

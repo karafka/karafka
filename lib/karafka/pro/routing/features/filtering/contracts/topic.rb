@@ -16,21 +16,23 @@ module Karafka
     module Routing
       module Features
         class Filtering < Base
-          # Contract to validate configuration of the filtering feature
-          class Contract < Contracts::Base
-            configure do |config|
-              config.error_messages = YAML.safe_load(
-                File.read(
-                  File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                )
-              ).fetch('en').fetch('validations').fetch('topic')
-            end
+          module Contracts
+            # Contract to validate configuration of the filtering feature
+            class Topic < Karafka::Contracts::Base
+              configure do |config|
+                config.error_messages = YAML.safe_load(
+                  File.read(
+                    File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
+                  )
+                ).fetch('en').fetch('validations').fetch('topic')
+              end
 
-            nested(:filtering) do
-              required(:active) { |val| [true, false].include?(val) }
+              nested(:filtering) do
+                required(:active) { |val| [true, false].include?(val) }
 
-              required(:factories) do |val|
-                val.is_a?(Array) && val.all? { |factory| factory.respond_to?(:call) }
+                required(:factories) do |val|
+                  val.is_a?(Array) && val.all? { |factory| factory.respond_to?(:call) }
+                end
               end
             end
           end
