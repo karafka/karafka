@@ -4,6 +4,9 @@
 - **[Feature]** Introduce Appsignal integration for errors and metrics tracking.
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
 - [Fix] do not report negative lag stored in the DD listener.
+- [Fix] Always try to unsubscribe short-lived consumers used throughout the system, especially in the admin APIs.
+- [Fix] Always unsubscribe long-lived consumers prior to shutdown.
+- [Fix] Add missing `connection.client.poll.error` error type reference.
 
 ## 2.1.9 (2023-08-06)
 - **[Feature]** Introduce ability to customize pause strategy on a per topic basis (Pro).

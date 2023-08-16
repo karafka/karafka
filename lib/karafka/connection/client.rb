@@ -380,11 +380,32 @@ module Karafka
           ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
           ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
+          # This should prevent from a race condition when we unsubscribe during brokers metadata
+          # states refreshes. With unsubscribed consumer there should be way less of potential
+          # refreshes running.
+          #
+          # @see https://github.com/appsignal/rdkafka-ruby/issues/273
+          unsubscribe
           @kafka.close
           @buffer.clear
           # @note We do not clear rebalance manager here as we may still have revocation info
           # here that we want to consider valid prior to running another reconnection
         end
+      end
+
+      # Unsubscribes from all the subscriptions
+      # @note This is a private API to be used only on shutdown
+      # @note We do not re-raise since this is supposed to be only used on close and can be safely
+      #   ignored. We do however want to instrument on it
+      def unsubscribe
+        @kafka.unsubscribe
+      rescue ::Rdkafka::RdkafkaError => e
+        Karafka.monitor.instrument(
+          'error.occurred',
+          caller: self,
+          error: e,
+          type: 'connection.client.unsubscribe.error'
+        )
       end
 
       # @param topic [String]

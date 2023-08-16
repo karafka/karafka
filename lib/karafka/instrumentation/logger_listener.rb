@@ -280,6 +280,9 @@ module Karafka
         when 'connection.client.rebalance_callback.error'
           error "Rebalance callback error occurred: #{error}"
           error details
+        when 'connection.client.unsubscribe.error'
+          error "Client unsubscribe error occurred: #{error}"
+          error details
         else
           # This should never happen. Please contact the maintainers
           raise Errors::UnsupportedCaseError, event
