@@ -26,9 +26,12 @@ module Karafka
                        :BROKERS_DOWN_BACKOFF_TIME, :TPL_REQUEST_TIMEOUT
 
       attr_accessor :wrapped
-      alias_method :__getobj__, :wrapped
 
+      alias __getobj__ wrapped
+
+      # @param obj [Rdkafka::Consumer, Proxy] rdkafka consumer or consumer wrapped with proxy
       def initialize(obj)
+        super
         # Do not allow for wrapping proxy with a proxy. This will prevent a case where we might
         # wrap an already wrapped object with another proxy level. Simplifies passing consumers
         # and makes it self to wrap without type checking

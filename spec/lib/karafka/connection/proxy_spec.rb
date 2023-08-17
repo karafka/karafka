@@ -41,7 +41,9 @@ RSpec.describe_current do
     end
 
     context 'when an all_brokers_down error occurs' do
-      before { allow(wrapped_object).to receive(:query_watermark_offsets).and_raise(all_down_error) }
+      before do
+        allow(wrapped_object).to receive(:query_watermark_offsets).and_raise(all_down_error)
+      end
 
       it 'retries up to the max attempts and then raises the error' do
         expect { proxy.query_watermark_offsets(topic, partition) }
