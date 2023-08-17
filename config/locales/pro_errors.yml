@@ -28,6 +28,9 @@ en:
       pause_with_exponential_backoff_format: needs to be either true or false
       pause_timeout_max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
 
+      patterns.active_format: 'needs to be boolean'
+      patterns.type_format: 'needs to be :placeholder or :discovered'
+
     consumer_group:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present
