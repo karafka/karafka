@@ -32,6 +32,9 @@ module Karafka
             # Associated created virtual topic reference
             attr_accessor :topic
 
+            # Config for real-topic configuration during injection
+            attr_reader :config
+
             # @param regexp [Regexp] regular expression to match topics
             # @param config [Proc] config for topic bootstrap
             def initialize(regexp, config)
