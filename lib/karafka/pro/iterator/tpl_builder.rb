@@ -14,14 +14,6 @@
 module Karafka
   module Pro
     class Iterator
-      # Max time for a TPL request. We increase it to compensate for remote clusters latency
-      TPL_REQUEST_TIMEOUT = 5_000
-
-      # Max time for watermark requests to compensate for remote clusters
-      WATERMARK_REQUEST_TIMEOUT = 5_000
-
-      private_constant :TPL_REQUEST_TIMEOUT, :WATERMARK_REQUEST_TIMEOUT
-
       # Because we have various formats in which we can provide the offsets, before we can
       # subscribe to them, there needs to be a bit of normalization.
       #
@@ -33,7 +25,7 @@ module Karafka
         # @param consumer [::Rdkafka::Consumer] consumer instance needed to talk with Kafka
         # @param expanded_topics [Hash] hash with expanded and normalized topics data
         def initialize(consumer, expanded_topics)
-          @consumer = consumer
+          @consumer = Connection::Proxy.new(consumer)
           @expanded_topics = expanded_topics
           @mapped_topics = Hash.new { |h, k| h[k] = {} }
         end
@@ -101,11 +93,7 @@ module Karafka
               # For time based we already resolve them via librdkafka lookup API
               next unless offset.is_a?(Integer)
 
-              low_offset, high_offset = @consumer.query_watermark_offsets(
-                name,
-                partition,
-                WATERMARK_REQUEST_TIMEOUT
-              )
+              low_offset, high_offset = @consumer.query_watermark_offsets(name, partition)
 
               # Care only about negative offsets (last n messages)
               #
@@ -151,7 +139,7 @@ module Karafka
           # If there were no time-based, no need to query Kafka
           return if time_tpl.empty?
 
-          real_offsets = @consumer.offsets_for_times(time_tpl, TPL_REQUEST_TIMEOUT)
+          real_offsets = @consumer.offsets_for_times(time_tpl)
 
           real_offsets.to_h.each do |name, results|
             results.each do |result|

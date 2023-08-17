@@ -13,12 +13,6 @@ module Karafka
     # retry after checking that the operation was finished or failed using external factor.
     MAX_WAIT_TIMEOUT = 1
 
-    # Max time for a TPL request. We increase it to compensate for remote clusters latency
-    TPL_REQUEST_TIMEOUT = 5_000
-
-    # Max time for watermark requests to compensate for remote clusters
-    WATERMARK_REQUEST_TIMEOUT = 5_000
-
     # How many times should be try. 1 x 60 => 60 seconds wait in total
     MAX_ATTEMPTS = 60
 
@@ -35,8 +29,7 @@ module Karafka
       'enable.auto.commit': false
     }.freeze
 
-    private_constant :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :TPL_REQUEST_TIMEOUT, :MAX_ATTEMPTS,
-                     :WATERMARK_REQUEST_TIMEOUT
+    private_constant :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :MAX_ATTEMPTS
 
     class << self
       # Allows us to read messages from the topic
@@ -59,11 +52,7 @@ module Karafka
           # Convert the time offset (if needed)
           start_offset = resolve_offset(consumer, name.to_s, partition, start_offset)
 
-          low_offset, high_offset = consumer.query_watermark_offsets(
-            name,
-            partition,
-            WATERMARK_REQUEST_TIMEOUT
-          )
+          low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
 
           # Select offset dynamically if -1 or less
           start_offset = high_offset - count if start_offset.negative?
@@ -174,7 +163,7 @@ module Karafka
       # @return [Array<Integer, Integer>] low watermark offset and high watermark offset
       def read_watermark_offsets(name, partition)
         with_consumer do |consumer|
-          consumer.query_watermark_offsets(name, partition, WATERMARK_REQUEST_TIMEOUT)
+          consumer.query_watermark_offsets(name, partition)
         end
       end
 
@@ -191,9 +180,13 @@ module Karafka
       # This API can be used in other pieces of code and allows for low-level consumer usage
       #
       # @param settings [Hash] extra settings to customize consumer
+      #
+      # @note We always ship and yield a proxied consumer because admin API performance is not
+      #   that relevant. That is, there are no high frequency calls that would have to be delegated
       def with_consumer(settings = {})
         consumer = config(:consumer, settings).consumer
-        yield(consumer)
+        proxy = ::Karafka::Connection::Proxy.new(consumer)
+        yield(proxy)
       ensure
         # Always unsubscribe consumer just to be sure, that no metadata requests are running
         # when we close the consumer. This in theory should prevent from some race-conditions
@@ -278,7 +271,7 @@ module Karafka
             name, partition => offset
           )
 
-          real_offsets = consumer.offsets_for_times(tpl, TPL_REQUEST_TIMEOUT)
+          real_offsets = consumer.offsets_for_times(tpl)
           detected_offset = real_offsets.to_h.dig(name, partition)
 
           detected_offset&.offset || raise(Errors::InvalidTimeBasedOffsetError)
