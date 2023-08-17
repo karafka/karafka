@@ -6,6 +6,8 @@ module Karafka
     # Starts listening on all the listeners asynchronously and handles the jobs queue closing
     # after listeners are done with their work.
     def call
+      Karafka.monitor.instrument('runner.before_call', caller: self)
+
       # Despite possibility of having several independent listeners, we aim to have one queue for
       # jobs across and one workers poll for that
       jobs_queue = Processing::JobsQueue.new

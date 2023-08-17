@@ -56,6 +56,8 @@ module Karafka
 
         process.notice_signal
 
+        runner.before_call
+
         statistics.emitted
 
         worker.process

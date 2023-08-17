@@ -3,6 +3,7 @@
 ## 2.1.10 (Unreleased)
 - **[Feature]** Introduce dynamic topic subscriptions based on patterns.
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
+- [Enhancement] Introduce new `runner.before_call` monitor event.
 - [Refactor] Introduce low level commands proxy to handle deviation in how we want to run certain commands and how rdkafka-ruby runs that by design.
 - [Fix] Improve the `query_watermark_offsets` operations by increasing too low timeout.
 - [Fix] Increase `TplBuilder` timeouts to compensate for remote clusters.
