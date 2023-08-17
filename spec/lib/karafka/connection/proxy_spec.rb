@@ -8,6 +8,8 @@ RSpec.describe_current do
   let(:wrapped_object) { consumer }
   let(:all_down_error) { Rdkafka::RdkafkaError.new(-187) }
 
+  after { consumer.close }
+
   describe '#initialize' do
     context 'when the given object is not a proxy' do
       it 'expect to wrap the provided object' do
