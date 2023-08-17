@@ -34,7 +34,7 @@ module Karafka
         super
         # Do not allow for wrapping proxy with a proxy. This will prevent a case where we might
         # wrap an already wrapped object with another proxy level. Simplifies passing consumers
-        # and makes it self to wrap without type checking
+        # and makes it safe to wrap without type checking
         @wrapped = obj.is_a?(self.class) ? obj.wrapped : obj
       end
 
