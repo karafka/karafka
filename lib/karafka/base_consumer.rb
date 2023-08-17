@@ -70,9 +70,9 @@ module Karafka
 
     # Executes the default consumer flow.
     #
-    # @return [Boolean] true if there was no exception, otherwise false.
-    #
     # @private
+    #
+    # @return [Boolean] true if there was no exception, otherwise false.
     # @note We keep the seek offset tracking, and use it to compensate for async offset flushing
     #   that may not yet kick in when error occurs. That way we pause always on the last processed
     #   message.
