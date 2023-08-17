@@ -2,8 +2,9 @@
 
 ## 2.1.10 (Unreleased)
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
+- [Fix] Improve the `query_watermark_offsets` operations by increasing too low timeout.
+- [Fix] Increase `TplBuilder` timeouts to compensate for remote clusters.
 - [Fix] Always try to unsubscribe short-lived consumers used throughout the system, especially in the admin APIs.
-- [Fix] Always unsubscribe long-lived consumers prior to shutdown.
 - [Fix] Add missing `connection.client.poll.error` error type reference.
 
 ## 2.1.9 (2023-08-06)

@@ -15,9 +15,12 @@ module Karafka
   module Pro
     class Iterator
       # Max time for a TPL request. We increase it to compensate for remote clusters latency
-      TPL_REQUEST_TIMEOUT = 2_000
+      TPL_REQUEST_TIMEOUT = 5_000
 
-      private_constant :TPL_REQUEST_TIMEOUT
+      # Max time for watermark requests to compensate for remote clusters
+      WATERMARK_REQUEST_TIMEOUT = 5_000
+
+      private_constant :TPL_REQUEST_TIMEOUT, :WATERMARK_REQUEST_TIMEOUT
 
       # Because we have various formats in which we can provide the offsets, before we can
       # subscribe to them, there needs to be a bit of normalization.
@@ -98,7 +101,11 @@ module Karafka
               # For time based we already resolve them via librdkafka lookup API
               next unless offset.is_a?(Integer)
 
-              low_offset, high_offset = @consumer.query_watermark_offsets(name, partition)
+              low_offset, high_offset = @consumer.query_watermark_offsets(
+                name,
+                partition,
+                WATERMARK_REQUEST_TIMEOUT
+              )
 
               # Care only about negative offsets (last n messages)
               #
