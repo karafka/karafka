@@ -38,12 +38,14 @@ RSpec.describe_current do
 
     it { expect(contract.call(config)).not_to be_success }
 
-    context 'when we have pattern matching defined and topic does not exist initially' do
-      pending
-    end
+    context 'when we have pattern matching defined' do
+      before do
+        Karafka::App.consumer_groups.pattern(/test/) do
+          consumer Class.new
+        end
+      end
 
-    context 'when we have pattern matching defined and topic exist initially' do
-      pending
+      it { expect(contract.call(config)).to be_success }
     end
   end
 
@@ -52,12 +54,14 @@ RSpec.describe_current do
 
     it { expect(contract.call(config)).not_to be_success }
 
-    context 'when we have pattern matching defined and topic does not exist initially' do
-      pending
-    end
+    context 'when we have pattern matching defined' do
+      before do
+        Karafka::App.consumer_groups.pattern(/test/) do
+          consumer Class.new
+        end
+      end
 
-    context 'when we have pattern matching defined and topic exist initially' do
-      pending
+      it { expect(contract.call(config)).to be_success }
     end
   end
 
