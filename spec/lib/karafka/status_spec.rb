@@ -17,6 +17,7 @@ RSpec.describe_current do
     it { expect(status_manager.quieting?).to eq false }
     it { expect(status_manager.quiet?).to eq false }
     it { expect(status_manager.terminated?).to eq false }
+    it { expect(status_manager.done?).to eq false }
   end
 
   describe 'running?' do
@@ -33,6 +34,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq false }
     end
   end
 
@@ -49,6 +51,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq false }
     end
   end
 
@@ -64,6 +67,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq false }
     end
 
     context 'when status is set to stopping' do
@@ -78,6 +82,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq true }
     end
   end
 
@@ -96,6 +101,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq true }
     end
   end
 
@@ -116,6 +122,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq true }
     end
   end
 
@@ -126,6 +133,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq false }
     end
 
     context 'when status is set to initializing' do
@@ -137,6 +145,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq false }
     end
   end
 
@@ -153,6 +162,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq false }
     end
   end
 
@@ -170,6 +180,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq false }
     end
   end
 
@@ -188,6 +199,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq false }
     end
   end
 
@@ -206,6 +218,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq true }
       it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq true }
     end
   end
 
@@ -224,6 +237,7 @@ RSpec.describe_current do
       it { expect(status_manager.terminated?).to eq false }
       it { expect(status_manager.quieting?).to eq false }
       it { expect(status_manager.quiet?).to eq true }
+      it { expect(status_manager.done?).to eq true }
     end
   end
 end

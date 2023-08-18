@@ -85,7 +85,7 @@ module Karafka
       #   propagate this far.
       def fetch_loop
         # Run the main loop as long as we are not stopping or moving into quiet mode
-        until Karafka::App.stopping? || Karafka::App.quieting? || Karafka::App.quiet?
+        until Karafka::App.done?
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop',
             caller: self,
