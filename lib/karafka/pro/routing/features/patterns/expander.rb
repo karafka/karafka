@@ -74,6 +74,16 @@ module Karafka
               # Inject into subscription group topics array
               subscription_group.topics << topic
 
+              # Make sure, that we only clean on placeholder topics when we detected a topic that
+              # is not excluded via the CLI. This is an edge case but can occur if someone defined
+              # a pattern and defined that aside from that there should be explicit exclusions
+              # via topics exclusion list. For example /.*/ (subscribe to all topics) plus
+              # --exclude-topics xda (exclude this one special). The same applies to consumer and
+              # subscription groups but in their case patterns are lower in the hierachy, hence
+              # patterns will be collectively excluded as their owning group won't be active
+              # in case it is excluded
+              return unless topic.active?
+
               # Remove the pattern one if present to avoid running a dummy subscription now
               # This is useful on boot where if topic is discovered, will basically replace the
               # placeholder one in place, effectively getting rid of the placeholder subscription

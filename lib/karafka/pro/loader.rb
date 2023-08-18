@@ -78,6 +78,8 @@ module Karafka
         def reconfigure(config)
           icfg = config.internal
 
+          icfg.cli.contract = Contracts::ServerCliOptions.new
+
           icfg.processing.coordinator_class = Processing::Coordinator
           icfg.processing.partitioner_class = Processing::Partitioner
           icfg.processing.scheduler = Processing::Scheduler.new
