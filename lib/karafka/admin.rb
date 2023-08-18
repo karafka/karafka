@@ -26,7 +26,9 @@ module Karafka
       'fetch.message.max.bytes': 5 * 1_048_576,
       # Do not commit offset automatically, this prevents offset tracking for operations involving
       # a consumer instance
-      'enable.auto.commit': false
+      'enable.auto.commit': false,
+      # Make sure that topic metadata lookups do not create topics accidentally
+      'allow.auto.create.topics': false
     }.freeze
 
     private_constant :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :MAX_ATTEMPTS
