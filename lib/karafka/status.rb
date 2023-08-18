@@ -67,7 +67,7 @@ module Karafka
     #   process incoming data. It is a meta status built from others and not a separate state in
     #   the sense of a state machine
     def done?
-      # Short-track for the most commont case not to invoke all others on normal execution
+      # Short-track for the most common case not to invoke all others on normal execution
       return false if running?
 
       stopping? || stopped? || quieting? || quiet? || terminated?
