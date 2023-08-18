@@ -5,6 +5,9 @@
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
 - [Enhancement] Introduce new `runner.before_call` monitor event.
 - [Refactor] Introduce low level commands proxy to handle deviation in how we want to run certain commands and how rdkafka-ruby runs that by design.
+- [Fix] do not report negative lag stored in the DD listener.
+- [Fix] Extremely fast shutdown after boot in specs can cause process not to stop.
+- [Fix] Disable `allow.auto.create.topics` for admin by default to prevent accidental topics creation on topics metadata lookups.
 - [Fix] Improve the `query_watermark_offsets` operations by increasing too low timeout.
 - [Fix] Increase `TplBuilder` timeouts to compensate for remote clusters.
 - [Fix] Always try to unsubscribe short-lived consumers used throughout the system, especially in the admin APIs.

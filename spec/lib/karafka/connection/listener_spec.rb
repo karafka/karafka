@@ -20,7 +20,7 @@ RSpec.describe_current do
     workers_batch
 
     allow(client.class).to receive(:new).and_return(client)
-    allow(Karafka::App).to receive(:stopping?).and_return(false, true)
+    allow(Karafka::App).to receive(:done?).and_return(false, true)
     allow(client).to receive(:batch_poll).and_return([])
     allow(client).to receive(:ping)
     allow(consumer_group_coordinator).to receive(:shutdown?).and_return(true)
