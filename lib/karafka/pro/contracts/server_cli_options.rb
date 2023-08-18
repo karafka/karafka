@@ -52,8 +52,8 @@ module Karafka
 
             value = data.fetch(:"#{action}_subscription_groups")
 
-            # If there were no subscription_groups declared in the server cli, it means that we will
-            # run all of them and no need to validate them here at all
+            # If there were no subscription_groups declared in the server cli, it means that we
+            # will run all of them and no need to validate them here at all
             next if value.empty?
 
             subscription_groups = Karafka::App

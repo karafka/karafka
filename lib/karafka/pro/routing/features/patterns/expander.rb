@@ -79,7 +79,7 @@ module Karafka
               # a pattern and defined that aside from that there should be explicit exclusions
               # via topics exclusion list. For example /.*/ (subscribe to all topics) plus
               # --exclude-topics xda (exclude this one special). The same applies to consumer and
-              # subscription groups but in their case patterns are lower in the hierachy, hence
+              # subscription groups but in their case patterns are lower in the hierarchy, hence
               # patterns will be collectively excluded as their owning group won't be active
               # in case it is excluded
               return unless topic.active?
