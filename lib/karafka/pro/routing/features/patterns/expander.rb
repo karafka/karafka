@@ -62,7 +62,7 @@ module Karafka
 
               # Build new topic and register within the consumer group
               topic = consumer_group.public_send(:topic=, available_topic, &pattern.config)
-              topic.patterns(true, :discovered)
+              topic.patterns(active: true, type: :discovered)
 
               # Find matching subscription group
               subscription_group = consumer_group.subscription_groups.find do |subscription_group|

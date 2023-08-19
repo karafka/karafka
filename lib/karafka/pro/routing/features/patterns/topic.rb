@@ -20,7 +20,7 @@ module Karafka
           module Topic
             # @param active [Boolean] is this topic active member of patterns
             # @param type [Symbol] is this a placeholder or discovered topic
-            def patterns(active = false, type = :regular)
+            def patterns(active: false, type: :regular)
               @patterns ||= Config.new(active: active, type: type)
             end
 

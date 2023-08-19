@@ -12,14 +12,14 @@ RSpec.describe_current do
 
     context 'when we use patterns with a active and a type' do
       it 'expect to use proper active status' do
-        topic.patterns(true, 1)
+        topic.patterns(active: true, type: 1)
         expect(topic.patterns.active?).to eq(true)
       end
     end
 
     context 'when we use patterns multiple times with different values' do
       before do
-        topic.patterns(true)
+        topic.patterns(active: true)
         topic.expire_in(false)
       end
 
@@ -31,7 +31,7 @@ RSpec.describe_current do
 
   describe '#patterns?' do
     context 'when active' do
-      before { topic.patterns(true) }
+      before { topic.patterns(active: true) }
 
       it { expect(topic.patterns?).to eq(true) }
     end

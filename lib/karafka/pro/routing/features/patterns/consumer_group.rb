@@ -36,7 +36,7 @@ module Karafka
               pattern = Pattern.new(regexp, block)
               virtual_topic = public_send(:topic=, pattern.topic_name, &block)
               # Indicate the nature of this topic (placeholder)
-              virtual_topic.patterns(true, :placeholder)
+              virtual_topic.patterns(active: true, type: :placeholder)
               pattern.topic = virtual_topic
               @patterns << pattern
             end
