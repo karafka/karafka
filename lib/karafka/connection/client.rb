@@ -510,7 +510,7 @@ module Karafka
 
         # Subscription needs to happen after we assigned the rebalance callbacks just in case of
         # a race condition
-        consumer.subscribe(*@subscription_group.topics.map(&:name))
+        consumer.subscribe(*@subscription_group.subscriptions)
         consumer
       end
 

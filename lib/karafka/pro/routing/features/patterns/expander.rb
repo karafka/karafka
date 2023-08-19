@@ -22,7 +22,12 @@ module Karafka
           # @note Works only on the primary cluster without option to run on other clusters
           #   If you are seeking this functionality please reach-out.
           class Expander
+            include Singleton
+
             def inject
+              # Do nothing if there are no patterns
+              return if ::Karafka::App.consumer_groups.flat_map(&:patterns).empty?
+
               ::Karafka::App.consumer_groups.each do |consumer_group|
                 topics = available_topics
 
