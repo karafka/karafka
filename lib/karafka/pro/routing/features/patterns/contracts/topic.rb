@@ -16,7 +16,7 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
-          # Namespace for palceholder feature contracts
+          # Namespace for placeholder feature contracts
           module Contracts
             # Contract to validate configuration of the placeholder feature
             class Topic < Karafka::Contracts::Base
@@ -30,7 +30,7 @@ module Karafka
 
               nested(:patterns) do
                 required(:active) { |val| [true, false].include?(val) }
-                required(:type) { |val| %i[placeholder discovered].include?(val) }
+                required(:type) { |val| %i[placeholder discovered regular].include?(val) }
               end
             end
           end

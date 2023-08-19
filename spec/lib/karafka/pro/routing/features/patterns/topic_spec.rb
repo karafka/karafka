@@ -43,6 +43,141 @@ RSpec.describe_current do
     end
   end
 
+  describe '#active?' do
+    context 'when there are no topics in the topics' do
+      it { expect(topic.active?).to eq true }
+    end
+
+    context 'when our topic name is in server topics' do
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:topics, topic.name)
+      end
+
+      it { expect(topic.active?).to eq true }
+    end
+
+    context 'when there is only a pattern placeholder active topic and not in included' do
+      before do
+        topic.patterns.type = :placeholder
+        topic.patterns.active = true
+
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:topics, 'z')
+      end
+
+      it 'expect to always be active despite not being included' do
+        expect(topic.active?).to eq true
+      end
+    end
+
+    context 'when there is only a pattern placeholder inactive topic and not in included' do
+      before do
+        topic.patterns.type = :placeholder
+        topic.patterns.active = true
+        topic.active(false)
+
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:topics, 'z')
+      end
+
+      it 'expect to always be active despite not being included' do
+        expect(topic.active?).to eq false
+      end
+    end
+
+    context 'when there is only a pattern placeholder active topic and not in excluded' do
+      before do
+        topic.patterns.type = :placeholder
+        topic.patterns.active = true
+
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .exclude(:topics, 'z')
+      end
+
+      it 'expect to always be active' do
+        expect(topic.active?).to eq true
+      end
+    end
+
+    context 'when there is only a pattern placeholder active topic and being in excluded' do
+      before do
+        topic.patterns.type = :placeholder
+        topic.patterns.active = true
+
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .exclude(:topics, topic.name)
+      end
+
+      it 'expect to always be active despite in being excluded as it is a placeholder' do
+        expect(topic.active?).to eq true
+      end
+    end
+
+    context 'when there is only a pattern placeholder inactive topic and being in excluded' do
+      before do
+        topic.patterns.type = :placeholder
+        topic.patterns.active = false
+
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .exclude(:topics, topic.name)
+      end
+
+      it 'expect not to be active as it was switched to inactive' do
+        expect(topic.active?).to eq false
+      end
+    end
+
+    context 'when our topic name is not in server topics' do
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:topics, 'na')
+      end
+
+      it { expect(topic.active?).to eq false }
+    end
+
+    context 'when we set the topic to active via #active' do
+      before { topic.active(true) }
+
+      it { expect(topic.active?).to eq true }
+    end
+
+    context 'when we set the topic to inactive via #active' do
+      before { topic.active(false) }
+
+      it { expect(topic.active?).to eq false }
+    end
+  end
+
   describe '#to_h' do
     it { expect(topic.to_h[:patterns]).to eq(topic.patterns.to_h) }
   end

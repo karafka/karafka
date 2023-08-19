@@ -84,11 +84,18 @@ module Karafka
               # in case it is excluded
               return unless topic.active?
 
-              # Remove the pattern one if present to avoid running a dummy subscription now
+              # Deactivate the pattern one if present to avoid running a dummy subscription now
               # This is useful on boot where if topic is discovered, will basically replace the
               # placeholder one in place, effectively getting rid of the placeholder subscription
-              subscription_group.topics.delete_if { |topic| topic.patterns.placeholder? }
-              consumer_group.topics.delete_if { |topic| topic.patterns.placeholder? }
+              subscription_group
+                .topics
+                .select { |topic| topic.patterns.placeholder? }
+                .each { |topic| topic.active(false) }
+
+              consumer_group
+                .topics
+                .select { |topic| topic.patterns.placeholder? }
+                .each { |topic| topic.active(false) }
             end
           end
         end

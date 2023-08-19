@@ -37,7 +37,12 @@ module Karafka
 
             # @return [Boolean] is this a discovered topic
             def discovered?
-              !placeholder?
+              type == :discovered
+            end
+
+            # @return [Boolean] is this a regular topic
+            def regular?
+              type == :regular
             end
           end
         end

@@ -20,13 +20,25 @@ module Karafka
           module Topic
             # @param active [Boolean] is this topic active member of patterns
             # @param type [Symbol] is this a placeholder or discovered topic
-            def patterns(active = false, type = :placeholder)
+            def patterns(active = false, type = :regular)
               @patterns ||= Config.new(active: active, type: type)
             end
 
             # @return [Boolean] is this topic a member of patterns
             def patterns?
               patterns.active?
+            end
+
+            # We overwrite the default decision making on whether the topic is or is not active for
+            # boot because placeholder topics always need to be subscribed. Otherwise we would not
+            # be able to later run the dynamic subscriptions and topics detection
+            #
+            # @return [Boolean] should this topic be in use. Active placeholder topics are always
+            #   in use, as otherwise pattern matching could go crazy
+            def active?
+              return true if patterns.placeholder? && patterns.active? && @active
+
+              super
             end
 
             # @return [Hash] topic with all its native configuration options plus patterns
