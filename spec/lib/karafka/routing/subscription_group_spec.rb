@@ -30,7 +30,7 @@ RSpec.describe_current do
     it { expect(group.subscriptions).to eq([topic.name]) }
 
     context 'when there are inactive topics in given group' do
-      let(:topic2) { build(:routing_topic).tap { |top| top.active(false)  } }
+      let(:topic2) { build(:routing_topic).tap { |top| top.active(false) } }
 
       before { topics << topic2 }
 

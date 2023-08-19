@@ -51,6 +51,7 @@ module Karafka
 
             private
 
+            # @return [Array<String>] available topics in the cluster
             def available_topics
               @available_topics ||= ::Karafka::Admin
                                     .cluster_info
@@ -62,11 +63,16 @@ module Karafka
               @available_topics.dup
             end
 
-            def install(pattern, available_topic)
+            # Adds the discovered topic into the routing
+            #
+            # @param pattern [Karafka::Pro::Routing::Features::Patterns::Pattern] matched pattern
+            # @param discovered_topic [String] topic that we discovered that should be part of the
+            #   routing from now on.
+            def install(pattern, discovered_topic)
               consumer_group = pattern.topic.consumer_group
 
               # Build new topic and register within the consumer group
-              topic = consumer_group.public_send(:topic=, available_topic, &pattern.config)
+              topic = consumer_group.public_send(:topic=, discovered_topic, &pattern.config)
               topic.patterns(active: true, type: :discovered)
 
               # Find matching subscription group
