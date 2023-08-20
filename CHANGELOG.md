@@ -3,7 +3,8 @@
 ## 2.1.10 (Unreleased)
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
 - [Refactor] Introduce low level commands proxy to handle deviation in how we want to run certain commands and how rdkafka-ruby runs that by design.
-- [Fix] do not report negative lag stored in the DD listener.
+- [Fix] Do not report lags in the DD listener for cases where the assignment is not workable.
+- [Fix] Do not report negative lags in the DD listener.
 - [Fix] Extremely fast shutdown after boot in specs can cause process not to stop.
 - [Fix] Disable `allow.auto.create.topics` for admin by default to prevent accidental topics creation on topics metadata lookups.
 - [Fix] Improve the `query_watermark_offsets` operations by increasing too low timeout.
