@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.10 (Unreleased)
+## 2.1.10 (2023-08-21)
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
 - [Refactor] Introduce low level commands proxy to handle deviation in how we want to run certain commands and how rdkafka-ruby runs that by design.
 - [Fix] Do not report lags in the DD listener for cases where the assignment is not workable.
