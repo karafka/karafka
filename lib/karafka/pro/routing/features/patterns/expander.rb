@@ -23,28 +23,46 @@ module Karafka
           #   If you are seeking this functionality please reach-out.
           class Expander
             include Singleton
+            include ::Karafka::Core::Helpers::Time
+
+            MUTEX = Mutex.new
+
+            private_constant :MUTEX
+
+            def initialize
+              @last_checked = 0
+              @usable = !::Karafka::App.consumer_groups.flat_map(&:patterns).empty?
+              @ttl = ::Karafka::App.config.patterns.ttl
+            end
 
             def inject
               # Do nothing if there are no patterns
-              return if ::Karafka::App.consumer_groups.flat_map(&:patterns).empty?
+              return unless @usable
+              return if (float_now - @last_checked) < @ttl
 
-              ::Karafka::App.consumer_groups.each do |consumer_group|
-                topics = available_topics
+              @last_checked = float_now
 
-                # Remove topics that are already recognized
-                consumer_group.topics.each do |topic|
-                  topics.delete(topic)
-                end
+              available_topics = fetch_topics
 
-                # Take remaining topics and locate first matching (if any)
-                topics.each do |available_topic|
-                  pattern = consumer_group.patterns.find(available_topic)
+              MUTEX.synchronize do
+                ::Karafka::App.consumer_groups.each do |consumer_group|
+                  topics = available_topics.dup
 
-                  # If there is no pattern we can use, we just move on
-                  next unless pattern
+                  # Remove topics that are already recognized
+                  consumer_group.topics.each do |topic|
+                    topics.delete(topic)
+                  end
 
-                  # If there is a topic, we can use it and add it to the routing
-                  install(pattern, available_topic)
+                  # Take remaining topics and locate first matching (if any)
+                  topics.each do |available_topic|
+                    pattern = consumer_group.patterns.find(available_topic)
+
+                    # If there is no pattern we can use, we just move on
+                    next unless pattern
+
+                    # If there is a topic, we can use it and add it to the routing
+                    install(pattern, available_topic)
+                  end
                 end
               end
             end
@@ -52,15 +70,12 @@ module Karafka
             private
 
             # @return [Array<String>] available topics in the cluster
-            def available_topics
-              @available_topics ||= ::Karafka::Admin
-                                    .cluster_info
-                                    .topics
-                                    .map { |topic| topic.fetch(:topic_name) }
-                                    .freeze
-
-              # Make it non-destructive
-              @available_topics.dup
+            def fetch_topics
+              ::Karafka::Admin
+                .cluster_info
+                .topics
+                .map { |topic| topic.fetch(:topic_name) }
+                .freeze
             end
 
             # Adds the discovered topic into the routing
@@ -82,9 +97,6 @@ module Karafka
 
               subscription_group || raise(StandardError)
 
-              # Inject into subscription group topics array
-              subscription_group.topics << topic
-
               # Make sure, that we only clean on placeholder topics when we detected a topic that
               # is not excluded via the CLI. This is an edge case but can occur if someone defined
               # a pattern and defined that aside from that there should be explicit exclusions
@@ -93,20 +105,35 @@ module Karafka
               # subscription groups but in their case patterns are lower in the hierarchy, hence
               # patterns will be collectively excluded as their owning group won't be active
               # in case it is excluded
-              return unless topic.active?
+              #
+              # We need to clean first before adding new topics because routing operations are not
+              # in transactions. This means, that there could be a refresh of subscriptions
+              # after removal of placeholder but before the new topic is added. This would mean
+              # we would first trigger unsubscribe (which is expected) and only later the additive
+              # subscribe on new. This is ok, but in case we would first add and then remove, we
+              # could have a case where we would unsubscribe from a state that had all things
+              # subscribed including the newly detected topic
+              #
+              # Unsubscribing can happen anyhow only in a case where we had no topics and the
+              # placeholder one was running, so this should not be a problem (no real rebalance)
+              if topic.active?
+                # Deactivate the pattern one if present to avoid running a dummy subscription now
+                # This is useful on boot where if topic is discovered, will basically replace the
+                # placeholder one in place, effectively getting rid of the placeholder subscription
+                subscription_group
+                  .topics
+                  .select { |topic| topic.patterns.placeholder? }
+                  .each { |topic| topic.active(false) }
 
-              # Deactivate the pattern one if present to avoid running a dummy subscription now
-              # This is useful on boot where if topic is discovered, will basically replace the
-              # placeholder one in place, effectively getting rid of the placeholder subscription
-              subscription_group
-                .topics
-                .select { |topic| topic.patterns.placeholder? }
-                .each { |topic| topic.active(false) }
+                consumer_group
+                  .topics
+                  .select { |topic| topic.patterns.placeholder? }
+                  .each { |topic| topic.active(false) }
+              end
 
-              consumer_group
-                .topics
-                .select { |topic| topic.patterns.placeholder? }
-                .each { |topic| topic.active(false) }
+              # Inject into subscription group topics array always, so everything is reflected
+              # there but since it is not active, will not be picked
+              subscription_group.topics << topic
             end
           end
         end

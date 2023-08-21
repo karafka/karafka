@@ -29,25 +29,14 @@ module Karafka
         # We inject a virtual topic to hold a connection but also to be able to run validations
         # during boot to ensure consistency of the pattern base setup
         class Patterns < Base
-          class << self
-            # Sets up additional config scope, validations and other things
-            #
-            # @param config [Karafka::Core::Configurable::Node] root node config
-            def pre_setup(config)
-              # Expand the config with this feature specific stuff
-              config.instance_eval do
-                setting(:patterns, default: Setup::Config.config)
-              end
-            end
+          module Setup
+            # Config for patterns
+            class Config
+              extend ::Karafka::Core::Configurable
 
-            # After setup this validates patterns config and if all ok, injects the needed listener
-            # that can periodically re-check available cluster topics and subscribe to them if
-            # needed.
-            #
-            # @param config [Karafka::Core::Configurable::Node] root node config
-            def post_setup(config)
-              Contracts::Config.new.validate!(config.to_h)
-              ::Karafka.monitor.subscribe(Listener.new)
+              setting(:ttl, default: 5 * 60 * 1_000)
+
+              configure
             end
           end
         end

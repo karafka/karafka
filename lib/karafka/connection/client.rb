@@ -56,6 +56,10 @@ module Karafka
         # no longer may be able to fetch them from Kafka. We could build them but it is easier
         # to just keep them here and use if needed when cannot be obtained
         @paused_tpls = Hash.new { |h, k| h[k] = {} }
+
+        # Subscription needs to happen after we assigned the rebalance callbacks just in case of
+        # a race condition
+        subscription_manager.refresh
       end
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
@@ -68,6 +72,7 @@ module Karafka
 
         @buffer.clear
         @rebalance_manager.clear
+        subscription_manager.refresh
 
         loop do
           time_poll.start
@@ -275,6 +280,9 @@ module Karafka
         @closed = false
         @paused_tpls.clear
         @kafka = build_consumer
+        @subscription_manager = nil
+
+        subscription_manager.refresh
       end
 
       # Runs a single poll ignoring all the potential errors
@@ -508,10 +516,13 @@ module Karafka
           )
         )
 
-        # Subscription needs to happen after we assigned the rebalance callbacks just in case of
-        # a race condition
-        consumer.subscribe(*@subscription_group.subscriptions)
         consumer
+      end
+
+      # @return [SubscriptionManager] subscription manager that manages current and new (potential)
+      #   subscriptions based on the routing changes.
+      def subscription_manager
+        @subscription_manager ||= SubscriptionManager.new(@subscription_group, @kafka)
       end
 
       # We may have a case where in the middle of data polling, we've lost a partition.

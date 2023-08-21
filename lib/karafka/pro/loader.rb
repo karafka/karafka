@@ -66,10 +66,14 @@ module Karafka
 
         private
 
-        # @return [Array<Module>] extra non-routing related pro features
+        # @return [Array<Module>] extra non-routing related pro features and routing components
+        #   that need to have some special configuration stuff injected into config, etc
         def features
           [
-            Encryption
+            Encryption,
+            # Routing topics patterns need to have config and some post-setup stuff injected,
+            # so they need to operate as regular expandable features
+            Routing::Features::Patterns
           ]
         end
 
