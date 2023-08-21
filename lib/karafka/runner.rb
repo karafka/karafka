@@ -23,6 +23,18 @@ module Karafka
       Karafka::Server.listeners = listeners
       Karafka::Server.jobs_queue = jobs_queue
 
+      # We have it in ms but Ruby `#join` requires seconds
+      tick = ::Karafka::App.config.internal.runner.tick / 1_000.to_f
+
+      # We use this approach to provide thread-safe, single threaded tick engine for internal
+      # karafka operations that would require periodic run. It is critical to make sure, that
+      # there are no exceptions during any tick stuff, as it would cause the process to stop.
+      while alive = listeners.find(&:alive?) do
+        alive.join(tick)
+
+        Karafka.monitor.instrument('runner.tick', caller: self)
+      end
+
       # All the listener threads need to finish
       listeners.each(&:join)
 

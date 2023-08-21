@@ -222,6 +222,10 @@ module Karafka
                   next if partition_statistics['consumer_lag'] == -1
                   next if partition_statistics['consumer_lag_stored'] == -1
 
+                  # Skip if we do not own the fetch assignment
+                  next if partition_statistics['fetch_state'] == 'stopped'
+                  next if partition_statistics['fetch_state'] == 'none'
+
                   public_send(
                     metric.type,
                     metric.name,

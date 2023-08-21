@@ -57,6 +57,7 @@ module Karafka
         process.notice_signal
 
         runner.before_call
+        runner.tick
 
         statistics.emitted
 

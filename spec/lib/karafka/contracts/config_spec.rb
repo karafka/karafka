@@ -21,6 +21,9 @@ RSpec.describe_current do
       internal: {
         status: Karafka::Status.new,
         process: Karafka::Process.new,
+        runner: {
+          tick: 100
+        },
         routing: {
           builder: Karafka::Routing::Builder.new,
           subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new
@@ -264,6 +267,12 @@ RSpec.describe_current do
   context 'when we validate internal components' do
     context 'when internals are missing' do
       before { config.delete(:internal) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when runner.tick is less than 100' do
+      before { config[:internal][:runner][:tick] = 99 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
