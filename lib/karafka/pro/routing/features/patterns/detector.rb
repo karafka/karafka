@@ -16,12 +16,12 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
-          # Expands the notion of topics available to the routing with the once that are
-          # dynamically recognized
+          # Detects the new topics available to the routing with the once that are dynamically
+          # recognized
           #
           # @note Works only on the primary cluster without option to run on other clusters
           #   If you are seeking this functionality please reach-out.
-          class Expander
+          class Detector
             include Singleton
             include ::Karafka::Core::Helpers::Time
 
@@ -35,7 +35,7 @@ module Karafka
               @ttl = ::Karafka::App.config.patterns.ttl
             end
 
-            def inject
+            def detect
               # Do nothing if there are no patterns
               return unless @usable
               return if (float_now - @last_checked) < @ttl

@@ -16,13 +16,14 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
+          # Listener used to run the periodic new topics detection
           class Listener
             def on_runner_before_call(_)
-              Expander.instance.inject
+              Detector.instance.detect
             end
 
             def on_connection_listener_fetch_loop(_)
-              Expander.instance.inject
+              Detector.instance.detect
             end
           end
         end
