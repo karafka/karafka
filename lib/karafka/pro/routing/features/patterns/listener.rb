@@ -16,14 +16,32 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
-          # Listener used to run the periodic new topics detection
+          # Listener used to run the periodic new topics detection via the runner tick engine.
           class Listener
+            # Run the topics detection before first subscriptions start so we can immediately
+            # subscribe to topics via patterns matching.
+            #
+            # @param _ [Karafka::Core::Monitoring::Event]
             def on_runner_before_call(_)
-              Detector.instance.detect
+              detector.detect
             end
 
-            def on_connection_listener_fetch_loop(_)
-              Detector.instance.detect
+            # Runs detection once in a while as often as the ticking frequency
+            #
+            # @param _ [Karafka::Core::Monitoring::Event]
+            def on_runner_tick(_)
+              detector.detect
+            end
+
+            private
+
+            # Creates detector upon first usage.
+            # @return [Detector] new topics detector
+            # @note We do not create it in the initializer because we may not have the routing
+            #   defined at this stage yet. We do know however that it will be defined on the first
+            #   usage of listener.
+            def detector
+              @detector ||= Detector.new
             end
           end
         end

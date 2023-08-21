@@ -17,6 +17,7 @@ module Karafka
       module Features
         class Patterns < Base
           module Contracts
+            # Patterns related config rules validations
             class Config < Karafka::Contracts::Base
               configure do |config|
                 config.error_messages = YAML.safe_load(
@@ -26,7 +27,7 @@ module Karafka
                 ).fetch('en').fetch('validations').fetch('config')
 
                 nested(:patterns) do
-                  required(:ttl) { |val| val.is_a?(Integer) && val > 0 }
+                  required(:ttl) { |val| val.is_a?(Integer) && val.positive? }
                 end
               end
             end

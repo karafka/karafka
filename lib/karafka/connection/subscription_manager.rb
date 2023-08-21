@@ -2,7 +2,7 @@
 
 module Karafka
   module Connection
-    # Manages the subscriptions of a rdkafka consumer baesd on the routing state
+    # Manages the subscriptions of a rdkafka consumer based on the routing state
     #
     # Subscriptions can be changed in some cases during runtime and if that happens, we need to
     # figure out the diff and be able to unsubscribe (when some topics removed) as well as

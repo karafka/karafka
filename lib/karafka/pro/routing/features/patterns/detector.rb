@@ -21,50 +21,56 @@ module Karafka
           #
           # @note Works only on the primary cluster without option to run on other clusters
           #   If you are seeking this functionality please reach-out.
+          #
+          # @note This is NOT thread-safe and should run in a thread-safe context that warranties
+          #   that there won't be any race conditions
           class Detector
-            include Singleton
             include ::Karafka::Core::Helpers::Time
-
-            MUTEX = Mutex.new
-
-            private_constant :MUTEX
 
             def initialize
               @last_checked = 0
               @usable = !::Karafka::App.consumer_groups.flat_map(&:patterns).empty?
-              @ttl = ::Karafka::App.config.patterns.ttl
+              # `#float_now` operates in seconds
+              @ttl = ::Karafka::App.config.patterns.ttl / 1_000.to_f
+              @known_topics = []
             end
 
+            # Looks for new topics matching patterns and if any, will add them to appropriate
+            # subscription group and consumer group
+            #
+            # @note It uses ttl not to request topics with each poll
             def detect
               # Do nothing if there are no patterns
               return unless @usable
               return if (float_now - @last_checked) < @ttl
 
-              @last_checked = float_now
-
               available_topics = fetch_topics
 
-              MUTEX.synchronize do
-                ::Karafka::App.consumer_groups.each do |consumer_group|
-                  topics = available_topics.dup
+              return if @known_topics == available_topics
 
-                  # Remove topics that are already recognized
-                  consumer_group.topics.each do |topic|
-                    topics.delete(topic)
-                  end
+              @known_topics = available_topics
 
-                  # Take remaining topics and locate first matching (if any)
-                  topics.each do |available_topic|
-                    pattern = consumer_group.patterns.find(available_topic)
+              ::Karafka::App.consumer_groups.each do |consumer_group|
+                topics = available_topics.dup
 
-                    # If there is no pattern we can use, we just move on
-                    next unless pattern
+                # Remove topics that are already recognized
+                consumer_group.topics.each do |topic|
+                  topics.delete(topic)
+                end
 
-                    # If there is a topic, we can use it and add it to the routing
-                    install(pattern, available_topic)
-                  end
+                # Take remaining topics and locate first matching (if any)
+                topics.each do |available_topic|
+                  pattern = consumer_group.patterns.find(available_topic)
+
+                  # If there is no pattern we can use, we just move on
+                  next unless pattern
+
+                  # If there is a topic, we can use it and add it to the routing
+                  install(pattern, available_topic)
                 end
               end
+
+              @last_checked = float_now
             end
 
             private
@@ -76,6 +82,23 @@ module Karafka
                 .topics
                 .map { |topic| topic.fetch(:topic_name) }
                 .freeze
+            # In case of any errors, we need to recover and continue because we do not want to
+            # impact the runner (from which we run the detection via ticking) not to break the
+            # whole process. There may be some temporary issues with the cluster and they should
+            # not impact the stability of processing. The worse scenario is, that we will retry
+            # next time
+            #
+            # We do not need any back-off or anything else because we run from ticks that also run
+            # once in a while
+            rescue StandardError => e
+              Karafka.monitor.instrument(
+                'error.occurred',
+                caller: self,
+                error: e,
+                type: 'routing.features.patterns.detector.fetch_topics.error'
+              )
+
+              @known_topics
             end
 
             # Adds the discovered topic into the routing
