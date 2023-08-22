@@ -39,6 +39,22 @@ module Karafka
         required(:status) { |val| !val.nil? }
         required(:process) { |val| !val.nil? }
 
+        nested(:connection) do
+          nested(:proxy) do
+            nested(:query_watermark_offsets) do
+              required(:timeout) { |val| val.is_a?(Integer) && val.positive? }
+              required(:max_attempts) { |val| val.is_a?(Integer) && val.positive? }
+              required(:wait_time) { |val| val.is_a?(Integer) && val.positive? }
+            end
+
+            nested(:offsets_for_times) do
+              required(:timeout) { |val| val.is_a?(Integer) && val.positive? }
+              required(:max_attempts) { |val| val.is_a?(Integer) && val.positive? }
+              required(:wait_time) { |val| val.is_a?(Integer) && val.positive? }
+            end
+          end
+        end
+
         nested(:routing) do
           required(:builder) { |val| !val.nil? }
           required(:subscription_groups_builder) { |val| !val.nil? }
