@@ -29,7 +29,7 @@ module Karafka
       # We use this approach to provide thread-safe, single threaded tick engine for internal
       # karafka operations that would require periodic run. It is critical to make sure, that
       # there are no exceptions during any tick stuff, as it would cause the process to stop.
-      while alive = listeners.find(&:alive?) do
+      while (alive = listeners.find(&:alive?))
         alive.join(tick)
 
         Karafka.monitor.instrument('runner.tick', caller: self)

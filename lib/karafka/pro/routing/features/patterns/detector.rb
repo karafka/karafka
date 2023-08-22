@@ -114,11 +114,14 @@ module Karafka
               topic.patterns(active: true, type: :discovered)
 
               # Find matching subscription group
-              subscription_group = consumer_group.subscription_groups.find do |subscription_group|
-                subscription_group.name == topic.subscription_group
+              subscription_group = consumer_group.subscription_groups.find do |existing_sg|
+                existing_sg.name == topic.subscription_group
               end
 
-              subscription_group || raise(StandardError)
+              subscription_group || raise(
+                ::Karafka::Errors::SubscriptionGroupNotFoundError,
+                topic.subscription_group
+              )
 
               # Make sure, that we only clean on placeholder topics when we detected a topic that
               # is not excluded via the CLI. This is an edge case but can occur if someone defined

@@ -29,11 +29,14 @@ module Karafka
         # We inject a virtual topic to hold a connection but also to be able to run validations
         # during boot to ensure consistency of the pattern base setup
         class Patterns < Base
+          # Setup namespace for patterns extensions
           module Setup
             # Config for patterns
             class Config
               extend ::Karafka::Core::Configurable
 
+              # Run re-discovery at most once every five minutes. This is not cheap because it
+              # creates a new admin librdkafka instance and lists all the topics, hence the limit
               setting(:ttl, default: 5 * 60 * 1_000)
 
               configure
