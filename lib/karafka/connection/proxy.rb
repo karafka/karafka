@@ -17,13 +17,19 @@ module Karafka
       TPL_REQUEST_TIMEOUT = 5_000
 
       # How many attempts we want to take for something that would end up with all_brokers_down
-      BROKERS_DOWN_MAX_ATTEMPTS = 3
+      OFFSETS_MAX_ATTEMPTS = 3
 
       # How long should we wait in between all_brokers_down
-      BROKERS_DOWN_BACKOFF_TIME = 1
+      OFFSETS_BACKOFF_TIME = 1
 
-      private_constant :WATERMARK_REQUEST_TIMEOUT, :BROKERS_DOWN_MAX_ATTEMPTS,
-                       :BROKERS_DOWN_BACKOFF_TIME, :TPL_REQUEST_TIMEOUT
+      # Errors on which we want to retry
+      RETRYABLE_ERRORS = %i[
+        all_brokers_down
+        timed_out
+      ].freeze
+
+      private_constant :WATERMARK_REQUEST_TIMEOUT, :OFFSETS_MAX_ATTEMPTS, :RETRYABLE_ERRORS,
+                       :OFFSETS_BACKOFF_TIME, :TPL_REQUEST_TIMEOUT
 
       attr_accessor :wrapped
 
@@ -46,7 +52,7 @@ module Karafka
       # @param partition [Partition]
       # @return [Array<Integer, Integer>] watermark offsets
       def query_watermark_offsets(topic, partition)
-        with_brokers_down_retry do
+        with_broker_errors_retry do
           @wrapped.query_watermark_offsets(
             topic,
             partition,
@@ -61,7 +67,7 @@ module Karafka
       # @param tpl [Rdkafka::Consumer::TopicPartitionList] tpl to get time offsets
       # @return [Rdkafka::Consumer::TopicPartitionList] tpl with time offsets
       def offsets_for_times(tpl)
-        with_brokers_down_retry do
+        with_broker_errors_retry do
           @wrapped.offsets_for_times(tpl, TPL_REQUEST_TIMEOUT)
         end
       end
@@ -71,16 +77,16 @@ module Karafka
       # Runs expected block of code with few retries on all_brokers_down
       # librdkafka can return `all_brokers_down` for scenarios when broker is overloaded or not
       # reachable due to latency.
-      def with_brokers_down_retry
+      def with_broker_errors_retry
         attempt ||= 0
         attempt += 1
 
         yield
       rescue Rdkafka::RdkafkaError => e
-        raise if e.code != :all_brokers_down
+        raise unless RETRYABLE_ERRORS.include?(e.code)
 
-        if attempt <= BROKERS_DOWN_MAX_ATTEMPTS
-          sleep(BROKERS_DOWN_BACKOFF_TIME)
+        if attempt <= OFFSETS_MAX_ATTEMPTS
+          sleep(OFFSETS_BACKOFF_TIME)
 
           retry
         end
