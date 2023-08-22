@@ -73,6 +73,10 @@ module Karafka
       # Runs expected block of code with few retries on all_brokers_down
       # librdkafka can return `all_brokers_down` for scenarios when broker is overloaded or not
       # reachable due to latency.
+      # @param max_attempts [Integer] how many attempts (not retries) should we take before failing
+      #   completely.
+      # @param wait_time [Integer, Float] how many seconds should we wait. It uses `#sleep` of Ruby
+      #   so it needs time in seconds.
       def with_broker_errors_retry(max_attempts:, wait_time: 1)
         attempt ||= 0
         attempt += 1
