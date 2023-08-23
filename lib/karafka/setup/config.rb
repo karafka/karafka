@@ -144,6 +144,32 @@ module Karafka
           setting :activity_manager, default: Routing::ActivityManager.new
         end
 
+        # Namespace for internal connection related settings
+        setting :connection do
+          # Settings that are altered by our client proxy layer
+          setting :proxy do
+            # Watermark offsets request settings
+            setting :query_watermark_offsets do
+              # timeout for this request. For busy or remote clusters, this should be high enough
+              setting :timeout, default: 5_000
+              # How many times should we try to run this call before raising an error
+              setting :max_attempts, default: 3
+              # How long should we wait before next attempt in case of a failure
+              setting :wait_time, default: 1_000
+            end
+
+            # Offsets for times request settings
+            setting :offsets_for_times do
+              # timeout for this request. For busy or remote clusters, this should be high enough
+              setting :timeout, default: 5_000
+              # How many times should we try to run this call before raising an error
+              setting :max_attempts, default: 3
+              # How long should we wait before next attempt in case of a failure
+              setting :wait_time, default: 1_000
+            end
+          end
+        end
+
         setting :processing do
           # option scheduler [Object] scheduler we will be using
           setting :scheduler, default: Processing::Scheduler.new

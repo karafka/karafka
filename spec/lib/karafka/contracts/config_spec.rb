@@ -24,6 +24,20 @@ RSpec.describe_current do
         runner: {
           tick: 100
         },
+        connection: {
+          proxy: {
+            query_watermark_offsets: {
+              timeout: 100,
+              max_attempts: 5,
+              wait_time: 1_000
+            },
+            offsets_for_times: {
+              timeout: 100,
+              max_attempts: 5,
+              wait_time: 1_000
+            }
+          }
+        },
         routing: {
           builder: Karafka::Routing::Builder.new,
           subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new
@@ -275,6 +289,53 @@ RSpec.describe_current do
       before { config[:internal][:runner][:tick] = 99 }
 
       it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when connection is missing' do
+      before { config[:internal].delete(:connection) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when proxy is missing' do
+      before { config[:internal][:connection].delete(:proxy) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    %i[
+      query_watermark_offsets
+      offsets_for_times
+    ].each do |scope|
+      context "when proxy #{scope} is missing" do
+        before { config[:internal][:connection][:proxy].delete(scope) }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
+
+      %i[
+        timeout
+        max_attempts
+        wait_time
+      ].each do |field|
+        context "when proxy #{scope} #{field} is 0" do
+          before { config[:internal][:connection][:proxy][scope][field] = 0 }
+
+          it { expect(contract.call(config)).not_to be_success }
+        end
+
+        context "when proxy #{scope} #{field} is not an integer" do
+          before { config[:internal][:connection][:proxy][scope][field] = 100.2 }
+
+          it { expect(contract.call(config)).not_to be_success }
+        end
+
+        context "when proxy #{scope} #{field} is a string" do
+          before { config[:internal][:connection][:proxy][scope][field] = 'test' }
+
+          it { expect(contract.call(config)).not_to be_success }
+        end
+      end
     end
 
     context 'when routing builder is missing' do

@@ -1,8 +1,12 @@
 # Karafka framework changelog
 
-## 2.1.11 (Unreleased)
+## 2.1.12 (Unreleased)
 - **[Feature]** Introduce dynamic topic subscriptions based on patterns.
 - [Enhancement] Introduce `runner.tick` that can operate with given frequency for providing period thread-safe operations via a runner loop outside of the processing flow.
+
+## 2.1.11 (2023-08-23)
+- [Enhancement] Expand the error handling for offset related queries with timeout error retries.
+- [Enhancement] Allow for connection proxy timeouts configuration.
 
 ## 2.1.10 (2023-08-21)
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
