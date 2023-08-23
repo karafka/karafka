@@ -12,10 +12,12 @@ module Karafka
           include ::Karafka::Core::Configurable
           extend Forwardable
 
-          def_delegators :config, :client
+          def_delegators :config, :client, :service_name
 
           # `Datadog::Tracing` client that we should use to trace stuff
           setting :client
+
+          setting :service_name
 
           configure
 
@@ -44,7 +46,7 @@ module Karafka
           #
           # @param event [Karafka::Core::Monitoring::Event] event details including payload
           def on_worker_process(event)
-            current_span = client.trace('karafka.consumer')
+            current_span = client.trace('karafka.consumer', service: service_name)
             push_tags
 
             job = event[:job]
