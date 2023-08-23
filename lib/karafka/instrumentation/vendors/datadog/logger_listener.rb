@@ -12,7 +12,7 @@ module Karafka
           include ::Karafka::Core::Configurable
           extend Forwardable
 
-          def_delegators :config, :client
+          def_delegators :config, :client, :service_name
 
           # `Datadog::Tracing` client that we should use to trace stuff
           setting :client
