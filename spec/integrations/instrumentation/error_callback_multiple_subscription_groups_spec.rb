@@ -44,7 +44,14 @@ unique = error_events
          .transform_values(&:count)
 
 assert_equal 2, error_events.keys.size
+
+
+g1 = error_events.values.first.map { |event| event.payload[:error] }
+g2 = error_events.values.last.map { |event| event.payload[:error] }
+
 # Each error published, should be published only once
-assert_equal [2], unique.values.uniq
+# If this would not be true, all would go everywhere
+assert (g1 & g2).empty?
+
 assert_equal 'error.occurred', error_events.values.first.first.id
 assert_equal 'librdkafka.error', error_events.values.first.first[:type]
