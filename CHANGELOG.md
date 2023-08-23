@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.11 (2023-08-22)
+## 2.1.11 (2023-08-23)
 - [Enhancement] Expand the error handling for offset related queries with timeout error retries.
 - [Enhancement] Allow for connection proxy timeouts configuration
 
