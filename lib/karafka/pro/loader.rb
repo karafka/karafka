@@ -70,10 +70,7 @@ module Karafka
         #   that need to have some special configuration stuff injected into config, etc
         def features
           [
-            Encryption,
-            # Routing topics patterns need to have config and some post-setup stuff injected,
-            # so they need to operate as regular expandable features
-            Routing::Features::Patterns
+            Encryption
           ]
         end
 

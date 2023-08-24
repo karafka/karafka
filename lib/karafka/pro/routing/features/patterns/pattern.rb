@@ -27,7 +27,7 @@ module Karafka
             # Each pattern has its own "topic" that we use as a routing reference that we define
             # with non-existing topic for the routing to correctly pick it up for operations
             # Virtual topic name for initial subscription
-            attr_reader :topic_name
+            attr_reader :name
 
             # Associated created virtual topic reference
             attr_accessor :topic
@@ -39,10 +39,13 @@ module Karafka
             # @param config [Proc] config for topic bootstrap
             def initialize(regexp, config)
               @regexp = regexp
-              @topic_name = "karafka-pattern-#{SecureRandom.hex(6)}"
+              @name = "karafka-pattern-#{SecureRandom.hex(6)}"
               @config = config
             end
 
+            # @return [String] defined regexp representation as a string that is compatible with
+            #   librdkafka expectations. We use it as a subscription name for initial patterns
+            #   subscription start.
             def regexp_string
               "^#{regexp.source}"
             end
@@ -51,7 +54,8 @@ module Karafka
             def to_h
               {
                 regexp: regexp,
-                topic_name: topic_name
+                name: name,
+                regexp_string: regexp_string
               }.freeze
             end
           end

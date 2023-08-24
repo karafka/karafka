@@ -20,17 +20,23 @@ module Karafka
           module Topics
             # Finds topic by its name
             #
+            # If topic does not exist, it will try to run discovery in case there are patterns
+            # defined that would match it.
+            # This allows us to support lookups for newly appearing topics based on their regexp
+            # patterns.
+            #
             # @param topic_name [String] topic name
             # @return [Karafka::Routing::Topic]
-            # @raise [Karafka::Errors::TopicNotFoundError] this should never happen. If you see it,
-            #   please create an issue.
+            # @raise [Karafka::Errors::TopicNotFoundError] This can happen only if you defined
+            #   a pattern that would potentially contradict exclusions or in case the regular
+            #   expression matching in librdkafka and Ruby itself would misalign.
             def find(topic_name)
               attempt ||= 0
               attempt += 1
 
               super
             rescue Karafka::Errors::TopicNotFoundError
-              Detector.instance.detect(topic_name)
+              Detector.instance.expand(self, topic_name)
 
               attempt > 1 ? raise : retry
             end

@@ -18,6 +18,8 @@ module Karafka
         class Patterns < Base
           # Patterns feature topic extensions
           module Topic
+            # @return [String] subscription name or the regexp string representing matching of
+            #   new topics that should be detected.
             def subscription_name
               patterns.active? && patterns.matcher? ? patterns.pattern.regexp_string : super
             end
@@ -31,18 +33,6 @@ module Karafka
             # @return [Boolean] is this topic a member of patterns
             def patterns?
               patterns.active?
-            end
-
-            # We overwrite the default decision making on whether the topic is or is not active for
-            # boot because matcher topics always need to be subscribed. Otherwise we would not
-            # be able to later run the dynamic subscriptions and topics detection
-            #
-            # @return [Boolean] should this topic be in use. Active matcher topics are always
-            #   in use, as otherwise pattern matching could go crazy
-            def active?
-              return true if patterns.matcher? && patterns.active? && @active
-
-              super
             end
 
             # @return [Hash] topic with all its native configuration options plus patterns

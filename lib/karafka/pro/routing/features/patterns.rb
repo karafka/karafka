@@ -16,36 +16,20 @@ module Karafka
     module Routing
       module Features
         # Dynamic topics builder feature.
+        #
         # Allows you to define patterns in routes that would then automatically subscribe and
-        # start consuming new topics
+        # start consuming new topics.
         #
         # This feature works by injecting a virtual topics and running blank subscriptions on
         # customers for future detection of topics that could be then subscribed on cluster
         # changes after the refreshes
         #
-        # The cost of having this is that we run a blank consumer group client connection but
-        # there is no other easy way at the moment.
+        # The cost of having this is that we run a blank consumer group client connection in case
+        # no subscription groups match and that we do have a matcher topic in routing.
         #
-        # We inject a virtual topic to hold a connection but also to be able to run validations
-        # during boot to ensure consistency of the pattern base setup
+        # We inject a virtual topic to hold settings but also to be able to run validations
+        # during boot to ensure consistency of the pattern base setup.
         class Patterns < Base
-          class << self
-            # Sets up additional config scope, validations and other things
-            #
-            # @param config [Karafka::Core::Configurable::Node] root node config
-            def pre_setup(config)
-              # Expand the config with this feature specific stuff
-            end
-
-            # After setup this validates patterns config and if all ok, injects the needed listener
-            # that can periodically re-check available cluster topics and subscribe to them if
-            # needed.
-            #
-            # @param config [Karafka::Core::Configurable::Node] root node config
-            def post_setup(config)
-              #
-            end
-          end
         end
       end
     end

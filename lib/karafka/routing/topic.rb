@@ -52,6 +52,7 @@ module Karafka
         end
       end
 
+      # @return [String] name of subscription that will go to librdkafka
       def subscription_name
         name
       end

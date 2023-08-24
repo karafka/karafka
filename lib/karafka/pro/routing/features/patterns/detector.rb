@@ -16,8 +16,7 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
-          # Detects the new topics available to the routing with the once that are dynamically
-          # recognized
+          # Detects if a given topic matches any of the patterns 
           #
           # @note Works only on the primary cluster without option to run on other clusters
           #   If you are seeking this functionality please reach-out.
