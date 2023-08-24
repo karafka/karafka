@@ -191,14 +191,14 @@ def fetch_first_offset(topic = DT.topic)
 
     next unless message
 
-    first = message
+    first = message.offset
 
     break
   end
 
   consumer.close
 
-  false
+  first
 end
 
 # @return [Array<Karafka::Routing::Topic>] all topics (declaratives and non-declaratives)
