@@ -16,20 +16,23 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
-          module Contracts
-            # Patterns related config rules validations
-            class Config < Karafka::Contracts::Base
-              configure do |config|
-                config.error_messages = YAML.safe_load(
-                  File.read(
-                    File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
-                  )
-                ).fetch('en').fetch('validations').fetch('config')
+          # Patterns feature topic extensions
+          module Topics
+            # Finds topic by its name
+            #
+            # @param topic_name [String] topic name
+            # @return [Karafka::Routing::Topic]
+            # @raise [Karafka::Errors::TopicNotFoundError] this should never happen. If you see it,
+            #   please create an issue.
+            def find(topic_name)
+              attempt ||= 0
+              attempt += 1
 
-                nested(:patterns) do
-                  required(:ttl) { |val| val.is_a?(Integer) && val.positive? }
-                end
-              end
+              super
+            rescue Karafka::Errors::TopicNotFoundError
+              Detector.instance.detect(topic_name)
+
+              attempt > 1 ? raise : retry
             end
           end
         end

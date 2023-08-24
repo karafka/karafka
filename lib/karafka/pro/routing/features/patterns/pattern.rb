@@ -43,6 +43,10 @@ module Karafka
               @config = config
             end
 
+            def regexp_string
+              "^#{regexp.source}"
+            end
+
             # @return [Hash] hash representation of this routing pattern
             def to_h
               {

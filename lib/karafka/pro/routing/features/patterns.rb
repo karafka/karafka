@@ -35,9 +35,6 @@ module Karafka
             # @param config [Karafka::Core::Configurable::Node] root node config
             def pre_setup(config)
               # Expand the config with this feature specific stuff
-              config.instance_eval do
-                setting(:patterns, default: Setup::Config.config)
-              end
             end
 
             # After setup this validates patterns config and if all ok, injects the needed listener
@@ -46,8 +43,7 @@ module Karafka
             #
             # @param config [Karafka::Core::Configurable::Node] root node config
             def post_setup(config)
-              Contracts::Config.new.validate!(config.to_h)
-              ::Karafka.monitor.subscribe(Listener.new)
+              #
             end
           end
         end

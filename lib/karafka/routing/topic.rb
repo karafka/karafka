@@ -52,6 +52,10 @@ module Karafka
         end
       end
 
+      def subscription_name
+        name
+      end
+
       # @return [Class] consumer class that we should use
       def consumer
         if consumer_persistence

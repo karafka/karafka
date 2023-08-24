@@ -64,10 +64,10 @@ module Karafka
       # @return [Array<String>] names of topics to which we should subscribe.
       #
       # @note Most of the time it should not include inactive topics but in case of pattern
-      #   matching the placeholder topics become inactive down the road, hence we filter out so
+      #   matching the matcher topics become inactive down the road, hence we filter out so
       #   they are later removed.
       def subscriptions
-        topics.select(&:active?).map(&:name)
+        topics.select(&:active?).map(&:subscription_name)
       end
 
       private
