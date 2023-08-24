@@ -82,7 +82,7 @@ end
 end
 
 start_karafka_and_wait_until do
-  sleep(15)
+  sleep(20)
 end
 
 assert DT[1].count > DT[0].count * 2
