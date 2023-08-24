@@ -33,8 +33,12 @@ module Karafka
             # subscription group and consumer group
             #
             # @note It uses ttl not to request topics with each poll
-            def detect(new_topic)
+            def expand(sg_topics, new_topic)
               MUTEX.synchronize do
+                sg_topics
+                  .select { |tg| tg.patterns.active? }
+                  .select { |tg| tg.patterns.pattern  }
+
                 ::Karafka::App.consumer_groups.each do |consumer_group|
                   pattern = consumer_group.patterns.find(new_topic)
 

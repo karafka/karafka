@@ -18,7 +18,9 @@ module Karafka
         class Patterns < Base
           # Patterns feature topic extensions
           module Topics
-            # Finds topic by its name
+            # Finds topic by its name in a more extensive way than the regular. Regular uses the
+            # pre-existing topics definitions. This extension also runs the expansion based on
+            # defined routing patterns (if any)
             #
             # If topic does not exist, it will try to run discovery in case there are patterns
             # defined that would match it.
