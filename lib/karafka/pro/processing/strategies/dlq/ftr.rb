@@ -31,7 +31,7 @@ module Karafka
             # DLQ flow is standard here, what is not, is the success component where we need to
             # take into consideration the filtering
             def handle_after_consume
-              coordinator.on_finished do
+              coordinator.on_finished do |last_group_message|
                 return if revoked?
 
                 if coordinator.success?
@@ -39,7 +39,7 @@ module Karafka
 
                   return if coordinator.manual_pause?
 
-                  mark_as_consumed(messages.last)
+                  mark_as_consumed(last_group_message)
 
                   handle_post_filtering
                 elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
