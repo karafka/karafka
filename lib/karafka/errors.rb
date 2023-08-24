@@ -52,8 +52,5 @@ module Karafka
 
     # This should never happen. Please open an issue if it does.
     InvalidTimeBasedOffsetError = Class.new(BaseError)
-
-    # This should never happen. Please open an issue if it does.
-    SubscriptionGroupNotFoundError = Class.new(BaseError)
   end
 end

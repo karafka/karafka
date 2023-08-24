@@ -16,7 +16,7 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
-          # Detects if a given topic matches any of the patterns 
+          # Detects if a given topic matches any of the patterns
           #
           # @note Works only on the primary cluster without option to run on other clusters
           #   If you are seeking this functionality please reach-out.
@@ -25,30 +25,20 @@ module Karafka
           #   that there won't be any race conditions
           class Detector
             include ::Karafka::Core::Helpers::Time
-            include Singleton
-
-            MUTEX = Mutex.new
 
             # Looks for new topics matching patterns and if any, will add them to appropriate
             # subscription group and consumer group
             #
             # @note It uses ttl not to request topics with each poll
             def expand(sg_topics, new_topic)
-              MUTEX.synchronize do
-                sg_topics
-                  .select { |tg| tg.patterns.active? }
-                  .select { |tg| tg.patterns.pattern  }
-
-                ::Karafka::App.consumer_groups.each do |consumer_group|
-                  pattern = consumer_group.patterns.find(new_topic)
-
-                  # If there is no pattern we can use, we just move on
-                  next unless pattern
-
-                  # If there is a topic, we can use it and add it to the routing
-                  install(pattern, new_topic)
-                end
-              end
+              sg_topics
+                .map(&:patterns)
+                .select(&:active?)
+                .select(&:matcher?)
+                .map(&:pattern)
+                .then { |pts| Patterns.new(pts) }
+                .find(new_topic)
+                .then { |pattern| install(pattern, new_topic) }
             end
 
             private
