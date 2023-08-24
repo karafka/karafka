@@ -184,10 +184,16 @@ def fetch_first_offset(topic = DT.topic)
   consumer = setup_rdkafka_consumer
   consumer.subscribe(topic)
 
+  first = false
+
   10.times do
     message = consumer.poll(250)
 
-    return message.offset if message
+    if message
+      first = message
+
+      break
+    end
   end
 
   consumer.close
