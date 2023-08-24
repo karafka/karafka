@@ -189,11 +189,11 @@ def fetch_first_offset(topic = DT.topic)
   10.times do
     message = consumer.poll(250)
 
-    if message
-      first = message
+    next unless message
 
-      break
-    end
+    first = message
+
+    break
   end
 
   consumer.close
