@@ -16,7 +16,8 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
-          # Detects if a given topic matches any of the patterns
+          # Detects if a given topic matches any of the patterns and if so, injects it into the
+          # given subscription group routing
           #
           # @note Works only on the primary cluster without option to run on other clusters
           #   If you are seeking this functionality please reach-out.
@@ -29,6 +30,8 @@ module Karafka
             # Looks for new topics matching patterns and if any, will add them to appropriate
             # subscription group and consumer group
             #
+            #
+            #
             # @note It uses ttl not to request topics with each poll
             def expand(sg_topics, new_topic)
               sg_topics
@@ -38,6 +41,7 @@ module Karafka
                 .map(&:pattern)
                 .then { |pts| Patterns.new(pts) }
                 .find(new_topic)
+                .then { |pattern| pattern || raise(Errors::PatternNotMatchedError, new_topic) }
                 .then { |pattern| install(pattern, new_topic) }
             end
 
@@ -61,7 +65,7 @@ module Karafka
               end
 
               subscription_group || raise(
-                ::Karafka::Errors::SubscriptionGroupNotFoundError,
+                Errors::SubscriptionGroupNotFoundError,
                 topic.subscription_group
               )
 

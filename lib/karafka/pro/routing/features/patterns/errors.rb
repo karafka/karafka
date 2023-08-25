@@ -16,6 +16,7 @@ module Karafka
     module Routing
       module Features
         class Patterns < Base
+          # Patterns specific errors
           module Errors
             # Base class for all the patterns related errors
             BaseError = Class.new(::Karafka::Errors::BaseError)
