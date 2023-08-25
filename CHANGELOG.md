@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.12 (Unreleased)
+## 2.1.12 (2023-08-25)
 - [Fix] Fix a case where DLQ + VP without intermediate marking would mark earlier message then the last one.
 
 ## 2.1.11 (2023-08-23)
