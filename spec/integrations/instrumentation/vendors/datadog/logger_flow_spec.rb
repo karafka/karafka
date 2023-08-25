@@ -35,7 +35,7 @@ client = Vendors::Datadog::LoggerDummyClient.new
 
 listener = ::Karafka::Instrumentation::Vendors::Datadog::LoggerListener.new do |config|
   config.client = client
-  config.service_name = "myservice-karafka"
+  config.service_name = 'myservice-karafka'
 end
 
 Karafka.monitor.subscribe(listener)

@@ -17,7 +17,8 @@ module Karafka
           # `Datadog::Tracing` client that we should use to trace stuff
           setting :client
 
-          setting :service_name
+          # @see https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/ruby
+          setting :service_name, default: nil
 
           configure
 
