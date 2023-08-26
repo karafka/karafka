@@ -26,3 +26,4 @@ end
 assert_equal elements, DT[0]
 assert_equal 2, DT.data.size
 assert_equal [true], DT[:uses].uniq
+assert !fetch_first_offset

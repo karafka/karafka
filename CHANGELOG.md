@@ -1,8 +1,10 @@
 # Karafka framework changelog
 
-## 2.1.12 (Unreleased)
-- **[Feature]** Introduce dynamic topic subscriptions based on patterns.
-- [Enhancement] Introduce `runner.tick` that can operate with given frequency for providing period thread-safe operations via a runner loop outside of the processing flow.
+## 2.1.13 (Unreleased)
+- **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
+
+## 2.1.12 (2023-08-25)
+- [Fix] Fix a case where DLQ + VP without intermediate marking would mark earlier message then the last one.
 
 ## 2.1.11 (2023-08-23)
 - [Enhancement] Expand the error handling for offset related queries with timeout error retries.
