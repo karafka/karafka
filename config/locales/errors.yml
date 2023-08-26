@@ -26,7 +26,6 @@ en:
       internal.process_format: needs to be present
       internal.routing.builder_format: needs to be present
       internal.routing.subscription_groups_builder_format: needs to be present
-      internal.runner.tick_format: needs to be integer bigger or equal to 100
       internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
       internal.connection.proxy.query_watermark_offsets.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.query_watermark_offsets.wait_time_format: needs to be an integer bigger than 0

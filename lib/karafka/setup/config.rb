@@ -114,17 +114,6 @@ module Karafka
         #   instances
         setting :process, default: Process.new
 
-        # Namespace for settings related to the runner operations
-        setting :runner do
-          # option tick [Integer] number of ms to wait between ticks. Ticking does not take into
-          # consideration the instrumentation execution times so it is a "best effort" and
-          # simplicity rather than exact precision.
-          #
-          # We set it up to tick once every 60 seconds as for majority of users and use-cases this
-          # is enough and does not impact the performance
-          setting :tick, default: 60_000
-        end
-
         # Namespace for CLI related settings
         setting :cli do
           # option contract [Object] cli setup validation contract (in the context of options and

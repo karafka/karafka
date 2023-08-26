@@ -39,11 +39,6 @@ module Karafka
         required(:status) { |val| !val.nil? }
         required(:process) { |val| !val.nil? }
 
-        nested(:runner) do
-          # Do not allow less than 100ms not to overload the process
-          required(:tick) { |val| val.is_a?(Integer) && val >= 100 }
-        end
-
         nested(:connection) do
           nested(:proxy) do
             nested(:query_watermark_offsets) do
