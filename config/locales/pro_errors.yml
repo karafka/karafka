@@ -29,7 +29,7 @@ en:
       pause_timeout_max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
 
       patterns.active_format: 'needs to be boolean'
-      patterns.type_format: 'needs to be :placeholder or :discovered'
+      patterns.type_format: 'needs to be :matcher, :discovered or :regular'
 
     consumer_group:
       patterns_format: must be an array with hashes
