@@ -181,4 +181,22 @@ RSpec.describe_current do
   describe '#to_h' do
     it { expect(topic.to_h[:patterns]).to eq(topic.patterns.to_h) }
   end
+
+  describe '#subscription_name' do
+    context 'when this is a regular topic' do
+      it { expect(topic.subscription_name).to eq(topic.name) }
+    end
+
+    context 'when it is an active pattern matching topic' do
+      before do
+        topic.patterns(
+          active: true,
+          type: :matcher,
+          pattern: ::Karafka::Pro::Routing::Features::Patterns::Pattern.new(/xda/, -> {})
+        )
+      end
+
+      it { expect(topic.subscription_name).to eq(topic.patterns.pattern.regexp_string) }
+    end
+  end
 end

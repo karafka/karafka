@@ -26,6 +26,7 @@ module Karafka
 
             # @param active [Boolean] is this topic active member of patterns
             # @param type [Symbol] type of topic taking part in pattern matching
+            # @param pattern [Regexp] regular expression for matching
             def patterns(active: false, type: :regular, pattern: nil)
               @patterns ||= Config.new(active: active, type: type, pattern: pattern)
             end
