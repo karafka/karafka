@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When we define a pattern that gets assigned a matcher topic and this matcher topic is not part of
-# the 
+# the exclusion, it should work
 
 setup_karafka
 

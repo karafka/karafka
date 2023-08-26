@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should be able to match existing topic with pattern when starting processing and given
-# topic already exists
+# Karafka should match over postfix regexp
 
 setup_karafka do |config|
   config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000
@@ -13,15 +12,19 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
-  pattern(/#{DT.topic}/) do
+draw_routes(create_topics: false) do
+  pattern(/#{DT.topics[1]}.*/) do
     consumer Consumer
   end
 end
 
-produce_many(DT.topic, DT.uuids(1))
-
 start_karafka_and_wait_until do
+  unless @created
+    sleep(5)
+    produce_many("#{DT.topics[1]}-#{DT.topics[0]}", DT.uuids(1))
+    @created = true
+  end
+
   DT.key?(0)
 end
 

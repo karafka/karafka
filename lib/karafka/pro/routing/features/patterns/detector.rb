@@ -25,7 +25,8 @@ module Karafka
             # Checks if the provided topic matches any of the patterns and when detected, expands
             # the routing with it.
             #
-            # @param sg_topics []
+            # @param sg_topics [Array<Karafka::Routing::Topic>] given subscription group routing
+            #   topics.
             # @param new_topic [String] new topic that we have detected
             def expand(sg_topics, new_topic)
               sg_topics
