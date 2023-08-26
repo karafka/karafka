@@ -36,15 +36,7 @@ start_karafka_and_wait_until do
     error_events.values.all? { |errors| errors.size >= 2 }
 end
 
-unique = error_events
-         .values
-         .flatten
-         .map { |event| event[:subscription_group_id] }
-         .group_by(&:itself)
-         .transform_values(&:count)
-
 assert_equal 2, error_events.keys.size
-
 
 g1 = error_events.values.first.map { |event| event.payload[:error] }
 g2 = error_events.values.last.map { |event| event.payload[:error] }

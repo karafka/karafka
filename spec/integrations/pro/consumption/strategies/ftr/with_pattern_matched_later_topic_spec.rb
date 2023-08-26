@@ -15,7 +15,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes(create_topics: false) do
-  pattern /#{DT.topic}/ do
+  pattern(/#{DT.topic}/) do
     consumer Consumer
     throttling(
       limit: 2,

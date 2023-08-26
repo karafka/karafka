@@ -38,7 +38,7 @@ module Karafka
                 .then { |pts| Patterns.new(pts) }
                 .find(new_topic)
                 .then { |pattern| pattern || raise(Errors::PatternNotMatchedError, new_topic) }
-                .then { |pattern| install(pattern, new_topic) }
+                .then { |pattern| install(pattern, new_topic, sg_topics) }
             end
 
             private
@@ -48,26 +48,17 @@ module Karafka
             # @param pattern [Karafka::Pro::Routing::Features::Patterns::Pattern] matched pattern
             # @param discovered_topic [String] topic that we discovered that should be part of the
             #   routing from now on.
-            def install(pattern, discovered_topic)
+            # @param sg_topics [Array<Karafka::Routing::Topic>]
+            def install(pattern, discovered_topic, sg_topics)
               consumer_group = pattern.topic.consumer_group
 
               # Build new topic and register within the consumer group
               topic = consumer_group.public_send(:topic=, discovered_topic, &pattern.config)
               topic.patterns(active: true, type: :discovered)
 
-              # Find matching subscription group
-              subscription_group = consumer_group.subscription_groups.find do |existing_sg|
-                existing_sg.name == topic.subscription_group
-              end
-
-              subscription_group || raise(
-                Errors::SubscriptionGroupNotFoundError,
-                topic.subscription_group
-              )
-
               # Inject into subscription group topics array always, so everything is reflected
               # there but since it is not active, will not be picked
-              subscription_group.topics << topic
+              sg_topics << topic
             end
           end
         end

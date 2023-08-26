@@ -21,7 +21,7 @@ end
 
 draw_routes(create_topics: false) do
   consumer_group DT.consumer_group do
-    pattern /.*#{DT.topic}/ do
+    pattern(/.*#{DT.topic}/) do
       consumer Consumer
       virtual_partitions(
         partitioner: ->(msg) { msg.raw_payload }
@@ -29,7 +29,6 @@ draw_routes(create_topics: false) do
     end
   end
 end
-
 
 start_karafka_and_wait_until do
   sleep(1)
