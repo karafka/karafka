@@ -33,7 +33,7 @@ RSpec.describe_current do
       end
 
       it 'expect not to change the group' do
-        expect { safe_detection }.not_to change { group_topics.size }
+        expect { safe_detection }.not_to change(group_topics, :size)
       end
 
       it { expect { detection }.to raise_error(expected_errror) }
@@ -48,14 +48,12 @@ RSpec.describe_current do
 
       context 'when none matches' do
         let(:safe_detection) do
-          begin
-            detection
-          rescue StandardError
-          end
+          detection
+        rescue StandardError
         end
 
         it 'expect not to change the group' do
-          expect { safe_detection }.to change { group_topics.size }
+          expect { safe_detection }.to change(group_topics, :size)
         end
 
         it { expect { detection }.not_to raise_error }

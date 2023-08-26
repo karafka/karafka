@@ -47,7 +47,6 @@ FactoryBot.define do
       )
 
       instance
-
     end
   end
 end
