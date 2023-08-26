@@ -23,7 +23,7 @@ RSpec.describe_current do
     it do
       adding_pattern
 
-      expect(cg.topics.last.name).to eq(cg.patterns.last.topic_name)
+      expect(cg.topics.last.name).to eq(cg.patterns.last.name)
     end
   end
 
@@ -33,10 +33,12 @@ RSpec.describe_current do
     end
 
     context 'when there are patterns' do
+      let(:expected_hash) { { regexp: /test/, name: cg.topics.last.name, regexp_string: '^test' } }
+
       before { adding_pattern }
 
       it 'expect to add patterns to hash' do
-        expect(cg.to_h[:patterns]).to eq([{ regexp: /test/, topic_name: cg.topics.last.name }])
+        expect(cg.to_h[:patterns]).to eq([expected_hash])
       end
     end
   end

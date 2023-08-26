@@ -37,9 +37,9 @@ en:
 
     pattern:
       regexp_format: must be a regular expression
-      regexp_missing: needs to be present
-      topic_name_format: 'needs to be a string with a Kafka accepted format'
-      topic_name_missing: needs to be present
+      name_format: 'needs to be a string with a Kafka accepted format'
+      regexp_string_format: 'needs to be a string and start with ^'
+      missing: needs to be present
 
     config:
       encryption.active_format: 'needs to be either true or false'

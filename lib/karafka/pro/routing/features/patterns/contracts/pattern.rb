@@ -28,7 +28,10 @@ module Karafka
                 ).fetch('en').fetch('validations').fetch('pattern')
 
                 required(:regexp) { |val| val.is_a?(Regexp) }
-                required(:regexp_string) { |val| val.is_a?(String) && val.start_with?('^') }
+
+                required(:regexp_string) do |val|
+                  val.is_a?(String) && val.start_with?('^') && val.size >= 2
+                end
 
                 required(:name) do |val|
                   val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)

@@ -61,9 +61,9 @@ RSpec.describe_current do
       it { expect(topic.active?).to eq true }
     end
 
-    context 'when there is only a pattern placeholder active topic and not in included' do
+    context 'when there is only a pattern matcher active topic and not in included' do
       before do
-        topic.patterns.type = :placeholder
+        topic.patterns.type = :matcher
         topic.patterns.active = true
 
         Karafka::App
@@ -74,14 +74,14 @@ RSpec.describe_current do
           .include(:topics, 'z')
       end
 
-      it 'expect to always be active despite not being included' do
-        expect(topic.active?).to eq true
+      it 'expect not to be active because there is an explicit include request' do
+        expect(topic.active?).to eq false
       end
     end
 
-    context 'when there is only a pattern placeholder inactive topic and not in included' do
+    context 'when there is only a pattern matcher inactive topic and not in included' do
       before do
-        topic.patterns.type = :placeholder
+        topic.patterns.type = :matcher
         topic.patterns.active = true
         topic.active(false)
 
@@ -98,9 +98,9 @@ RSpec.describe_current do
       end
     end
 
-    context 'when there is only a pattern placeholder active topic and not in excluded' do
+    context 'when there is only a pattern matcher active topic and not in excluded' do
       before do
-        topic.patterns.type = :placeholder
+        topic.patterns.type = :matcher
         topic.patterns.active = true
 
         Karafka::App
@@ -116,9 +116,9 @@ RSpec.describe_current do
       end
     end
 
-    context 'when there is only a pattern placeholder active topic and being in excluded' do
+    context 'when there is only a pattern matcher active topic and being in excluded' do
       before do
-        topic.patterns.type = :placeholder
+        topic.patterns.type = :matcher
         topic.patterns.active = true
 
         Karafka::App
@@ -129,14 +129,14 @@ RSpec.describe_current do
           .exclude(:topics, topic.name)
       end
 
-      it 'expect to always be active despite in being excluded as it is a placeholder' do
-        expect(topic.active?).to eq true
+      it 'expect to not be active because it was explicitely excluded' do
+        expect(topic.active?).to eq false
       end
     end
 
-    context 'when there is only a pattern placeholder inactive topic and being in excluded' do
+    context 'when there is only a pattern matcher inactive topic and being in excluded' do
       before do
-        topic.patterns.type = :placeholder
+        topic.patterns.type = :matcher
         topic.patterns.active = false
 
         Karafka::App

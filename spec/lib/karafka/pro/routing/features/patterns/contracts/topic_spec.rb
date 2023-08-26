@@ -10,7 +10,7 @@ RSpec.describe_current do
       {
         patterns: {
           active: true,
-          type: :placeholder
+          type: :matcher
         }
       }
     end
@@ -23,7 +23,7 @@ RSpec.describe_current do
       {
         patterns: {
           active: nil,
-          type: :placeholder
+          type: :matcher
         }
       }
     end

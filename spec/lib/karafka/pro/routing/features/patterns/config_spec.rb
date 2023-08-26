@@ -19,10 +19,10 @@ RSpec.describe_current do
   end
 
   describe 'types values' do
-    context 'when placeholder' do
-      let(:type) { :placeholder }
+    context 'when matcher' do
+      let(:type) { :matcher }
 
-      it { expect(config.placeholder?).to eq(true) }
+      it { expect(config.matcher?).to eq(true) }
       it { expect(config.discovered?).to eq(false) }
       it { expect(config.regular?).to eq(false) }
     end
@@ -30,7 +30,7 @@ RSpec.describe_current do
     context 'when discovered' do
       let(:type) { :discovered }
 
-      it { expect(config.placeholder?).to eq(false) }
+      it { expect(config.matcher?).to eq(false) }
       it { expect(config.discovered?).to eq(true) }
       it { expect(config.regular?).to eq(false) }
     end
@@ -38,7 +38,7 @@ RSpec.describe_current do
     context 'when regular' do
       let(:type) { :regular }
 
-      it { expect(config.placeholder?).to eq(false) }
+      it { expect(config.matcher?).to eq(false) }
       it { expect(config.discovered?).to eq(false) }
       it { expect(config.regular?).to eq(true) }
     end

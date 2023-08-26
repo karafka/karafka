@@ -39,7 +39,16 @@ module Karafka
             # @param config [Proc] config for topic bootstrap
             def initialize(regexp, config)
               @regexp = regexp
-              @name = "karafka-pattern-#{SecureRandom.hex(6)}"
+              # This name is also used as the underlying matcher topic name
+              # We generate it based on the regexp so within the same consumer group they are
+              # always unique (checked by topic validations)
+              #
+              # This will not prevent users from creating a different regexps matching the same
+              # topic but this minimizes simple mistakes
+              #
+              # This sub-part of sh1 should be unique enough and short-enough to use it here
+              digest = Digest::SHA1.hexdigest(regexp.source)[8..16]
+              @name = "karafka-pattern-#{digest}"
               @config = config
             end
 

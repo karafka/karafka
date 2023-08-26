@@ -28,7 +28,7 @@ RSpec.describe_current do
   end
 
   context 'when pattern is valid' do
-    before { config[:patterns] = [{ regexp: /.*/, topic_name: 'xda' }] }
+    before { config[:patterns] = [{ regexp: /.*/, name: 'xda', regexp_string: '^test' }] }
 
     it { expect(check).to be_success }
   end

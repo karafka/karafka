@@ -11,13 +11,13 @@ RSpec.describe_current do
       expect(pattern.regexp).to eq(regexp)
     end
 
-    it 'expect to generate a topic_name' do
-      expect(pattern.topic_name).to start_with('karafka-pattern-')
+    it 'expect to generate a name' do
+      expect(pattern.name).to start_with('karafka-pattern-')
     end
 
-    it 'expect to generate a unique topic_name each time' do
-      another_pattern = described_class.new(regexp, config)
-      expect(pattern.topic_name).not_to eq(another_pattern.topic_name)
+    it 'expect to generate a unique name each time for different regexp' do
+      another_pattern = described_class.new(/test/, config)
+      expect(pattern.name).not_to eq(another_pattern.name)
     end
   end
 
@@ -26,7 +26,8 @@ RSpec.describe_current do
       expect(pattern.to_h).to eq(
         {
           regexp: regexp,
-          topic_name: pattern.topic_name
+          name: pattern.name,
+          regexp_string: '^test_'
         }
       )
     end
