@@ -16,6 +16,7 @@ module Karafka
     module Routing
       module Features
         class ActiveJob < Base
+          # Pro ActiveJob builder expansions
           module Builder
             # This method simplifies routes definition for ActiveJob patterns / queues by
             # auto-injecting the consumer class and other things needed
