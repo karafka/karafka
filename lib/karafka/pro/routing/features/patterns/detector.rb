@@ -34,6 +34,7 @@ module Karafka
                 .select(&:active?)
                 .select(&:matcher?)
                 .map(&:pattern)
+                .then { |pts| pts.empty? ? return : pts }
                 .then { |pts| Patterns.new(pts) }
                 .find(new_topic)
                 .then { |pattern| pattern || raise(Errors::PatternNotMatchedError, new_topic) }
