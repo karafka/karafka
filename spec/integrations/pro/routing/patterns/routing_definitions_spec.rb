@@ -33,6 +33,6 @@ assert !Karafka::App.routes.first.topics.first.patterns.active?
 assert Karafka::App.routes.first.topics.last.name.include?('karafka-pattern-')
 assert Karafka::App.routes.last.topics.first.name.include?('karafka-pattern-')
 assert Karafka::App.routes.first.topics.last.patterns.active?
-assert Karafka::App.routes.first.topics.last.patterns.placeholder?
+assert Karafka::App.routes.first.topics.last.patterns.matcher?
 assert Karafka::App.routes.last.topics.last.patterns.active?
-assert Karafka::App.routes.last.topics.last.patterns.placeholder?
+assert Karafka::App.routes.last.topics.last.patterns.matcher?

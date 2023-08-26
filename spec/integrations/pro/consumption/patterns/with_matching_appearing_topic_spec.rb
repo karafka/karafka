@@ -3,8 +3,6 @@
 # Karafka should be able to match non-existing topic when it appears later on.
 
 setup_karafka do |config|
-#  config.patterns.ttl = 1_000
-#  config.internal.runner.tick = 100
   config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000
 end
 

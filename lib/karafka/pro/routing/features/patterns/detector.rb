@@ -19,20 +19,14 @@ module Karafka
           # Detects if a given topic matches any of the patterns and if so, injects it into the
           # given subscription group routing
           #
-          # @note Works only on the primary cluster without option to run on other clusters
-          #   If you are seeking this functionality please reach-out.
-          #
           # @note This is NOT thread-safe and should run in a thread-safe context that warranties
           #   that there won't be any race conditions
           class Detector
-            include ::Karafka::Core::Helpers::Time
-
-            # Looks for new topics matching patterns and if any, will add them to appropriate
-            # subscription group and consumer group
+            # Checks if the provided topic matches any of the patterns and when detected, expands
+            # the routing with it.
             #
-            #
-            #
-            # @note It uses ttl not to request topics with each poll
+            # @param sg_topics []
+            # @param new_topic [String] new topic that we have detected
             def expand(sg_topics, new_topic)
               sg_topics
                 .map(&:patterns)
