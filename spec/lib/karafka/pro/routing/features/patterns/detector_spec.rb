@@ -33,14 +33,33 @@ RSpec.describe_current do
       end
 
       it 'expect not to change the group' do
-        expect { safe_detection }.not_to change { group_topics }
+        expect { safe_detection }.not_to change { group_topics.size }
       end
 
       it { expect { detection }.to raise_error(expected_errror) }
     end
 
     context 'when one matches' do
-      pending
+      let(:group_topics) do
+        topics = build(:routing_subscription_group).topics
+        topics << build(:pattern_routing_topic, regexp: /.*/)
+        topics
+      end
+
+      context 'when none matches' do
+        let(:safe_detection) do
+          begin
+            detection
+          rescue StandardError
+          end
+        end
+
+        it 'expect not to change the group' do
+          expect { safe_detection }.to change { group_topics.size }
+        end
+
+        it { expect { detection }.not_to raise_error }
+      end
     end
   end
 end
