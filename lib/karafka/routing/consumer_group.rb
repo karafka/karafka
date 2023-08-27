@@ -55,7 +55,7 @@ module Karafka
       def subscription_group=(name = SubscriptionGroup.id, &block)
         # We cast it here, so the routing supports symbol based but that's anyhow later on
         # validated as a string
-        @current_subscription_group_id = name
+        @current_subscription_group_id = name.to_s
 
         Proxy.new(self, &block)
 

@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-# When we define a pattern that gets assigned a matcher topic and this matcher topic is part of
-# the topics we do not want to include (by assigned name) it should not use it
+# When naming a pattern and then not including it, it should not be used
 
 setup_karafka
 
 draw_routes(create_topics: false) do
-  pattern(/non-existing-ever-na/) do
+  pattern('super-name', /non-existing-ever-na/) do
     consumer Class.new
   end
 end

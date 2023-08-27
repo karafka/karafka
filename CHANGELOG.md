@@ -2,6 +2,7 @@
 
 ## 2.1.13 (Unreleased)
 - **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
+- [Fix] Fix a case where subscription group would not accept a symbol name.
 
 ## 2.1.12 (2023-08-25)
 - [Fix] Fix a case where DLQ + VP without intermediate marking would mark earlier message then the last one.
