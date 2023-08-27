@@ -74,6 +74,12 @@ module Karafka
             # @param skippable_message [Array<Karafka::Messages::Message>] message we want to
             #   dispatch to DLQ
             def dispatch_to_dlq(skippable_message)
+              # DLQ should never try to dispatch a message that was cleaned. It message was
+              # cleaned, we will not have all the needed data. If you see this error, it means
+              # that your processing flow is not as expected and you have cleaned message that
+              # should not be cleaned as it should go to the DLQ
+              raise(Cleaner::Errors::MessageCleanedError) if skippable_message.cleaned?
+
               producer.produce_async(
                 build_dlq_message(
                   skippable_message

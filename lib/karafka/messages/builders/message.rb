@@ -23,9 +23,16 @@ module Karafka
               received_at: received_at
             ).freeze
 
+            # Get the raw payload
+            payload = kafka_message.payload
+
+            # And nulify it in the kafka message. This will save a lot of memory when using
+            # `clear!` message API.
+            kafka_message.instance_variable_set('@payload', nil)
+
             # Karafka messages cannot be frozen because of the lazy deserialization feature
             Karafka::Messages::Message.new(
-              kafka_message.payload,
+              payload,
               metadata
             )
           end

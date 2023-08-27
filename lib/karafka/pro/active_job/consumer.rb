@@ -25,7 +25,7 @@ module Karafka
       class Consumer < ::Karafka::ActiveJob::Consumer
         # Runs ActiveJob jobs processing and handles lrj if needed
         def consume
-          messages.each do |message|
+          messages.each(clean: true) do |message|
             # If for any reason we've lost this partition, not worth iterating over new messages
             # as they are no longer ours
             break if revoked?
