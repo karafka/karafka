@@ -7,8 +7,8 @@ RSpec.describe_current do
 
   describe '#find' do
     let(:topic_name) { 'test_topic' }
-    let(:matching_pattern) { pattern_class.new(/test_/, -> {}) }
-    let(:non_matching_pattern) { pattern_class.new(/not_matching_/, -> {}) }
+    let(:matching_pattern) { pattern_class.new(nil, /test_/, -> {}) }
+    let(:non_matching_pattern) { pattern_class.new(nil, /not_matching_/, -> {}) }
 
     before do
       patterns << non_matching_pattern
@@ -20,7 +20,7 @@ RSpec.describe_current do
     end
 
     context 'when multiple patterns match' do
-      let(:another_matching_pattern) { pattern_class.new(/_topic/, -> {}) }
+      let(:another_matching_pattern) { pattern_class.new(nil, /_topic/, -> {}) }
 
       before { patterns << another_matching_pattern }
 

@@ -25,7 +25,7 @@ FactoryBot.define do
   factory :pattern_routing_topic, parent: :routing_topic do
     transient do
       regexp { /xda/ }
-      pattern { Karafka::Pro::Routing::Features::Patterns::Pattern.new(regexp, ->(_) {}) }
+      pattern { Karafka::Pro::Routing::Features::Patterns::Pattern.new(nil, regexp, ->(_) {}) }
     end
 
     skip_create

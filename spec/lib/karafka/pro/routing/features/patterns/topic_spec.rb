@@ -192,7 +192,7 @@ RSpec.describe_current do
         topic.patterns(
           active: true,
           type: :matcher,
-          pattern: ::Karafka::Pro::Routing::Features::Patterns::Pattern.new(/xda/, -> {})
+          pattern: ::Karafka::Pro::Routing::Features::Patterns::Pattern.new(nil, /xda/, -> {})
         )
       end
 

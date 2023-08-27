@@ -30,10 +30,23 @@ module Karafka
             end
 
             # Creates the pattern for topic matching with appropriate virtual topic
-            # @param regexp [Regexp] regular expression that should match newly discovered topics
+            # @param regexp_or_name [Symbol, String, Regexp] name of the pattern or regexp for
+            #   automatic-based named patterns
+            # @param regexp [Regexp, nil] nil if we use auto-generated name based on the regexp or
+            #   the regexp if we used named patterns
             # @param block [Proc] appropriate underlying topic settings
-            def pattern=(regexp, &block)
-              pattern = Pattern.new(regexp, block)
+            def pattern=(regexp_or_name, regexp = nil, &block)
+              # This code allows us to have a nice nameless (automatic-named) patterns that do not
+              # have to be explicitly named. However if someone wants to use names for exclusions
+              # it can be done by providing both
+              if regexp_or_name.is_a?(Regexp)
+                name = nil
+                regexp = regexp_or_name
+              else
+                name = regexp_or_name
+              end
+
+              pattern = Pattern.new(name, regexp, block)
               virtual_topic = public_send(:topic=, pattern.name, &block)
               # Indicate the nature of this topic (matcher)
               virtual_topic.patterns(active: true, type: :matcher, pattern: pattern)

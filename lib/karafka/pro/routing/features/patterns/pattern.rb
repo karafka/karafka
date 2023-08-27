@@ -35,11 +35,17 @@ module Karafka
             # Config for real-topic configuration during injection
             attr_reader :config
 
+            # @param name [String, Symbol, nil] name or the regexp for building the topic name or
+            #   nil if we want to make it based on the regexp content
             # @param regexp [Regexp] regular expression to match topics
             # @param config [Proc] config for topic bootstrap
-            def initialize(regexp, config)
+            def initialize(name, regexp, config)
               @regexp = regexp
               # This name is also used as the underlying matcher topic name
+              #
+              # It can be used provided by the user in case user wants to use exclusions of topics
+              # or we can generate it if irrelevant.
+              #
               # We generate it based on the regexp so within the same consumer group they are
               # always unique (checked by topic validations)
               #
@@ -48,7 +54,7 @@ module Karafka
               #
               # This sub-part of sh1 should be unique enough and short-enough to use it here
               digest = Digest::SHA1.hexdigest(regexp.source)[8..16]
-              @name = "karafka-pattern-#{digest}"
+              @name = name ? name.to_s : "karafka-pattern-#{digest}"
               @config = config
             end
 

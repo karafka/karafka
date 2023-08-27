@@ -20,11 +20,14 @@ module Karafka
           module Builder
             # Allows us to define the simple routing pattern matching
             #
-            # @param regexp [Regexp]
+            # @param regexp_or_name [Symbol, String, Regexp] name of the pattern or regexp for
+            #   automatic-based named patterns
+            # @param regexp [Regexp, nil] nil if we use auto-generated name based on the regexp or
+            #   the regexp if we used named patterns
             # @param block [Proc]
-            def pattern(regexp, &block)
+            def pattern(regexp_or_name, regexp = nil, &block)
               consumer_group('app') do
-                pattern(regexp, &block)
+                pattern(regexp_or_name, regexp, &block)
               end
             end
           end

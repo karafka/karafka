@@ -21,10 +21,13 @@ module Karafka
             # This method simplifies routes definition for ActiveJob patterns / queues by
             # auto-injecting the consumer class and other things needed
             #
-            # @param regexp [Regexp] activejob regexp pattern
+            # @param regexp_or_name [String, Symbol, Regexp] pattern name or regexp to use
+            #   auto-generated regexp names
+            # @param regexp [Regexp, nil] activejob regexp pattern or nil when regexp is provided
+            #   as the first argument
             # @param block [Proc] block that we can use for some extra configuration
-            def active_job_pattern(regexp, &block)
-              pattern(regexp) do
+            def active_job_pattern(regexp_or_name, regexp = nil, &block)
+              pattern(regexp_or_name, regexp) do
                 consumer App.config.internal.active_job.consumer_class
                 active_job true
                 manual_offset_management true
