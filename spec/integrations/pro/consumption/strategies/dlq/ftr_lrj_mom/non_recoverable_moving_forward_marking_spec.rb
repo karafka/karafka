@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Listener
-  def on_error_occurred(event)
-    DT[:errors] << event
+  def on_error_occurred(_)
+    DT[:errors] << true
   end
 end
 
