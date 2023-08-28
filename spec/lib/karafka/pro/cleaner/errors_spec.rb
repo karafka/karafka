@@ -7,7 +7,7 @@ RSpec.describe_current do
     specify { expect(error).to be < ::Karafka::Errors::BaseError }
   end
 
-  describe 'BaseError' do
+  describe 'MessageCleanedError' do
     subject(:error) { described_class::MessageCleanedError }
 
     specify { expect(error).to be < described_class::BaseError }
