@@ -50,16 +50,6 @@ module Karafka
         @deserialized
       end
 
-      # Clears the message payload and removes the deserialized data references
-      # This is useful when working with big messages that take a lot of space.
-      #
-      # After the message content is no longer needed, it can be removed so it does not consume
-      # space anymore.
-      def clear!
-        @deserialized = false
-        @payload = nil
-      end
-
       private
 
       # @return [Object] deserialized data
