@@ -70,7 +70,8 @@ module Karafka
         #   that need to have some special configuration stuff injected into config, etc
         def features
           [
-            Encryption
+            Encryption,
+            Cleaner
           ]
         end
 

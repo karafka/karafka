@@ -1,8 +1,14 @@
 # Karafka framework changelog
 
-## 2.1.13 (Unreleased)
+## 2.1.14 (Unreleased)
 - **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
 - [Fix] Fix a case where subscription group would not accept a symbol name.
+
+## 2.1.13 (2023-08-28)
+- **[Feature]** Introduce Cleaning API for much better memory management for iterative data processing [Pro].
+- [Enhancement] Automatically free message resources after processed for ActiveJob jobs [Pro]
+- [Enhancement] Free memory used by the raw payload as fast as possible after obtaining it from `karafka-rdkafka`.
+- [Enhancement] Support changing `service_name` in DataDog integration.
 
 ## 2.1.12 (2023-08-25)
 - [Fix] Fix a case where DLQ + VP without intermediate marking would mark earlier message then the last one.

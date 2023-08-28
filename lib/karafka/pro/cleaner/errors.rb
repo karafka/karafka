@@ -13,14 +13,14 @@
 
 module Karafka
   module Pro
-    module Encryption
-      # Encryption related errors
+    module Cleaner
+      # Cleaner related errors
       module Errors
-        # Base for all the encryption errors
+        # Base for all the clearer errors
         BaseError = Class.new(::Karafka::Errors::BaseError)
 
-        # Raised when we have encountered encryption key with version we do not have
-        PrivateKeyNotFound = Class.new(BaseError)
+        # Raised when trying to deserialize a message that has already been cleaned
+        MessageCleanedError = Class.new(BaseError)
       end
     end
   end
