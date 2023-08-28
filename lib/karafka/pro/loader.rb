@@ -69,7 +69,8 @@ module Karafka
         # @return [Array<Module>] extra non-routing related pro features
         def features
           [
-            Encryption
+            Encryption,
+            Cleaner
           ]
         end
 
