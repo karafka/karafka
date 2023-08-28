@@ -35,6 +35,7 @@ client = Vendors::Datadog::LoggerDummyClient.new
 
 listener = ::Karafka::Instrumentation::Vendors::Datadog::LoggerListener.new do |config|
   config.client = client
+  config.service_name = 'myservice-karafka'
 end
 
 Karafka.monitor.subscribe(listener)
@@ -48,7 +49,7 @@ start_karafka_and_wait_until do
   DT[0].size >= 100 && sleep(5)
 end
 
-assert client.buffer.include?('karafka.consumer'), client.buffer
+assert client.buffer.include?(['karafka.consumer', 'myservice-karafka']), client.buffer
 assert client.buffer.include?('Consumer#consume'), client.buffer
 assert client.errors.any? { |error| error.is_a?(StandardError) }, client.errors
 assert client.errors.all? { |error| error.is_a?(StandardError) }, client.errors
