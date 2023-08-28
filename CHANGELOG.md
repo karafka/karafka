@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.13 (Unreleased)
+## 2.1.13 (2023-08-28)
 - **[Feature]** Introduce Cleaning API for much better memory management for iterative data processing [Pro].
 - [Enhancement] Automatically free message resources after processed for ActiveJob jobs [Pro]
 - [Enhancement] Free memory used by the raw payload as fast as possible after obtaining it from `karafka-rdkafka`.
