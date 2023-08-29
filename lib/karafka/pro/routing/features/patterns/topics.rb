@@ -31,15 +31,19 @@ module Karafka
             # @return [Karafka::Routing::Topic]
             # @raise [Karafka::Errors::TopicNotFoundError] this should never happen. If you see it,
             #   please create an issue.
+            #
+            # @note This method should not be used in context of finding multiple missing topics in
+            #   loops because it catches exceptions and attempts to expand routes. If this is used
+            #   in a loop for lookups on thousands of topics with detector expansion, this may
+            #   be slow. It should be used in the context where newly discovered topics are found
+            #   and should by design match a pattern. For quick lookups on batches of topics, it
+            #   is recommended to use a custom built lookup with conditional expander.
             def find(topic_name)
-              attempt ||= 0
-              attempt += 1
-
               super
             rescue Karafka::Errors::TopicNotFoundError
               Detector.new.expand(self, topic_name)
 
-              attempt > 1 ? raise : retry
+              super
             end
           end
         end

@@ -37,7 +37,7 @@ module Karafka
                 .then { |pts| pts.empty? ? return : pts }
                 .then { |pts| Patterns.new(pts) }
                 .find(new_topic)
-                .then { |pattern| pattern || raise(Errors::PatternNotMatchedError, new_topic) }
+                .then { |pattern| pattern || return }
                 .then { |pattern| install(pattern, new_topic, sg_topics) }
             end
 

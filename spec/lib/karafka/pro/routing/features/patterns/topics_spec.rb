@@ -21,22 +21,14 @@ RSpec.describe_current do
     context 'when patterns exist but none matches' do
       let(:pattern_topic) { build(:pattern_routing_topic) }
 
-      let(:expected_errror) do
-        ::Karafka::Pro::Routing::Features::Patterns::Errors::PatternNotMatchedError
-      end
-
       before { topics << pattern_topic }
 
       it ' expect to raise an error as this should not happen' do
-        expect { topics.find('na') }.to raise_error(expected_errror, 'na')
+        expect { topics.find('na') }.to raise_error(Karafka::Errors::TopicNotFoundError, 'na')
       end
     end
 
     context 'when patterns exist and matched' do
-      let(:expected_errror) do
-        ::Karafka::Pro::Routing::Features::Patterns::Errors::PatternNotMatchedError
-      end
-
       let(:pattern_topic) { build(:pattern_routing_topic, regexp: /.*/) }
 
       before { topics << pattern_topic }

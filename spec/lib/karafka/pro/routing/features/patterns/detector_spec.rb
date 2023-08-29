@@ -21,22 +21,11 @@ RSpec.describe_current do
     end
 
     context 'when none matches' do
-      let(:expected_errror) do
-        ::Karafka::Pro::Routing::Features::Patterns::Errors::PatternNotMatchedError
-      end
-
-      let(:safe_detection) do
-        begin
-          detection
-        rescue StandardError
-        end
-      end
-
       it 'expect not to change the group' do
-        expect { safe_detection }.not_to change(group_topics, :size)
+        expect { detection }.not_to change(group_topics, :size)
       end
 
-      it { expect { detection }.to raise_error(expected_errror) }
+      it { expect { detection }.not_to raise_error }
     end
 
     context 'when one matches' do
