@@ -1,5 +1,9 @@
 # Karafka framework changelog
 
+## 2.2.0 (Unreleased)
+- **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
+- [Fix] Fix a case where subscription group would not accept a symbol name.
+
 ## 2.1.13 (2023-08-28)
 - **[Feature]** Introduce Cleaning API for much better memory management for iterative data processing [Pro].
 - [Enhancement] Automatically free message resources after processed for ActiveJob jobs [Pro]
@@ -15,7 +19,10 @@
 
 ## 2.1.10 (2023-08-21)
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
+- [Enhancement] Introduce new `runner.before_call` monitor event.
 - [Refactor] Introduce low level commands proxy to handle deviation in how we want to run certain commands and how rdkafka-ruby runs that by design.
+- [Change] No longer validate excluded topics routing presence if patterns any as it does not match pattern subscriptions where you can exclude things that could be subscribed in the future.
+- [Fix] do not report negative lag stored in the DD listener.
 - [Fix] Do not report lags in the DD listener for cases where the assignment is not workable.
 - [Fix] Do not report negative lags in the DD listener.
 - [Fix] Extremely fast shutdown after boot in specs can cause process not to stop.

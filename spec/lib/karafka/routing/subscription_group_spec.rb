@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:group) { described_class.new(0, [topic]) }
+  subject(:group) { described_class.new(0, topics) }
 
   let(:topic) { build(:routing_topic, kafka: { 'bootstrap.servers': 'kafka://kafka:9092' }) }
+  let(:topics) { [topic] }
 
   describe '#id' do
     it { expect(group.id).to eq("#{topic.subscription_group}_0") }
@@ -23,6 +24,20 @@ RSpec.describe_current do
 
   describe '#consumer_group' do
     it { expect(group.consumer_group).to eq(topic.consumer_group) }
+  end
+
+  describe '#subscriptions' do
+    it { expect(group.subscriptions).to eq([topic.name]) }
+
+    context 'when there are inactive topics in given group' do
+      let(:topic2) { build(:routing_topic).tap { |top| top.active(false) } }
+
+      before { topics << topic2 }
+
+      it 'expect not to include inactive topics' do
+        expect(group.subscriptions).to eq([topic.name])
+      end
+    end
   end
 
   describe '#kafka' do

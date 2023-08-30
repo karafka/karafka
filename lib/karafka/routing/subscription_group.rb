@@ -61,6 +61,15 @@ module Karafka
         Karafka::App.config.internal.routing.activity_manager.active?(:subscription_groups, name)
       end
 
+      # @return [Array<String>] names of topics to which we should subscribe.
+      #
+      # @note Most of the time it should not include inactive topics but in case of pattern
+      #   matching the matcher topics become inactive down the road, hence we filter out so
+      #   they are later removed.
+      def subscriptions
+        topics.select(&:active?).map(&:subscription_name)
+      end
+
       private
 
       # @return [Hash] kafka settings are a bit special. They are exactly the same for all of the

@@ -30,15 +30,21 @@ module Karafka
             scope = @scope
 
             Module.new do
-              # Runs validations related to this feature on a topic
+              # Runs validations related to this feature on a routing resources
               #
               # @param block [Proc] routing defining block
               define_method :draw do |&block|
                 result = super(&block)
 
                 each do |consumer_group|
+                  if scope::Contracts.const_defined?('ConsumerGroup', false)
+                    scope::Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
+                  end
+
+                  next unless scope::Contracts.const_defined?('Topic', false)
+
                   consumer_group.topics.each do |topic|
-                    scope::Contract.new.validate!(topic.to_h)
+                    scope::Contracts::Topic.new.validate!(topic.to_h)
                   end
                 end
 

@@ -52,6 +52,11 @@ module Karafka
         end
       end
 
+      # @return [String] name of subscription that will go to librdkafka
+      def subscription_name
+        name
+      end
+
       # @return [Class] consumer class that we should use
       def consumer
         if consumer_persistence
