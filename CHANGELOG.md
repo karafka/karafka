@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.1.14 (Unreleased)
+## 2.2.0 (Unreleased)
 - **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
 - [Fix] Fix a case where subscription group would not accept a symbol name.
 
