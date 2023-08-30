@@ -29,7 +29,10 @@ RSpec.describe_current do
       end
 
       it 'expect to serialize current attributes as part of the job' do
-        with_context(:user_id, 1) { dispatcher.dispatch(job) }
+        with_context(:user_id, 1) do
+          serialized_job
+          dispatcher.dispatch(job)
+        end
 
         expect(::Karafka.producer).to have_received(:produce_async).with(
           topic: job.queue_name,
@@ -60,7 +63,10 @@ RSpec.describe_current do
       end
 
       it 'expect to serialize current attributes as part of the jobs' do
-        with_context(:user_id, 1) { dispatcher.dispatch_many(jobs) }
+        with_context(:user_id, 1) do
+          jobs_messages
+          dispatcher.dispatch_many(jobs)
+        end
 
         expect(::Karafka.producer).to have_received(:produce_many_async).with(jobs_messages)
       end
