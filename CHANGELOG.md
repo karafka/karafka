@@ -2,7 +2,13 @@
 
 ## 2.2.0 (Unreleased)
 - **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
+- [Enhancement] Allow for `Karafka::Admin` setup reconfiguration via `config.admin` scope.
+- [Enhancement] Make sure that consumer group used by `Karafka::Admin` obeys the `ConsumerMapper` setup.
 - [Fix] Fix a case where subscription group would not accept a symbol name.
+
+### Upgrade notes
+
+TBA
 
 ## 2.1.13 (2023-08-28)
 - **[Feature]** Introduce Cleaning API for much better memory management for iterative data processing [Pro].
