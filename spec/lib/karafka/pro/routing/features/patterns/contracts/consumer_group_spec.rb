@@ -40,6 +40,7 @@ RSpec.describe_current do
         { regexp: /.*/, name: 'xda2', regexp_string: '^test' }
       ]
     end
+
     it { expect(check).not_to be_success }
   end
 end
