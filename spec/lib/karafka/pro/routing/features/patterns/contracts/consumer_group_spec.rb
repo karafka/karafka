@@ -32,4 +32,15 @@ RSpec.describe_current do
 
     it { expect(check).to be_success }
   end
+
+  context 'when two patterns have different names but same regexp_string' do
+    before do
+      config[:patterns] = [
+        { regexp: /.*/, name: 'xda1', regexp_string: '^test' },
+        { regexp: /.*/, name: 'xda2', regexp_string: '^test' }
+      ]
+    end
+
+    it { expect(check).not_to be_success }
+  end
 end

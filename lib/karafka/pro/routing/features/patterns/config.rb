@@ -16,7 +16,9 @@ module Karafka
     module Routing
       module Features
         # Holds pattern info reference
-        # Type is set to:-
+        # Type is set to:
+        #   `:regular` - in case patterns are not used and topic is just a regular existing topic
+        #                matched directly based on the name
         #   `:discovered` - in case it is a real topic on which we started to listed
         #   `:matcher` - represents a regular expression used by librdkafka
         class Patterns < Base

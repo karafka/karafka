@@ -39,6 +39,19 @@ module Karafka
 
                   nil
                 end
+
+                # Make sure, that there are no same regular expressions with different names
+                # in a single consumer group
+                virtual do |data, errors|
+                  next unless errors.empty?
+
+                  regexp_strings = data[:patterns].map { |pattern| pattern.fetch(:regexp_string) }
+
+                  next if regexp_strings.empty?
+                  next if regexp_strings.uniq.size == regexp_strings.size
+
+                  [[%i[patterns], :regexps_not_unique]]
+                end
               end
             end
           end
