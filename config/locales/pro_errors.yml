@@ -34,6 +34,7 @@ en:
     consumer_group:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present
+      patterns_regexps_not_unique: 'must be unique within consumer group'
 
     pattern:
       regexp_format: must be a regular expression
