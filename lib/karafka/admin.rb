@@ -238,6 +238,7 @@ module Karafka
           .merge(app_config.admin.kafka)
           .merge!(settings)
           .tap { |config| config[:'group.id'] = group_id }
+          .then { |config| Karafka::Setup::AttributesMap.public_send(type, config) }
           .then { |config| ::Rdkafka::Config.new(config) }
       end
 
