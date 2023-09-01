@@ -1,5 +1,37 @@
 # Karafka framework changelog
 
+## 2.2.0 (Unreleased)
+- **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
+- [Enhancement] Allow for `Karafka::Admin` setup reconfiguration via `config.admin` scope.
+- [Enhancement] Make sure that consumer group used by `Karafka::Admin` obeys the `ConsumerMapper` setup.
+- [Fix] Fix a case where subscription group would not accept a symbol name.
+
+### Upgrade notes
+
+As always, please make sure you have upgraded to the most recent version of `2.1` before upgrading to `2.2`.
+
+If you are not using Kafka ACLs, there is no action you need to take.
+
+If you are using Kafka ACLs and you've set up permissions for `karafka_admin` group, please note that this name has now been changed and is subject to [Consumer Name Mapping](https://karafka.io/docs/Consumer-mappers/).
+
+That means you must ensure that the new consumer group that by default equals `CLIENT_ID_karafka_admin` has appropriate permissions. Please note that the Web UI also uses this group.
+
+`Karafka::Admin` now has its own set of configuration options available, and you can find more details about that [here](https://karafka.io/docs/Topics-management-and-administration/#configuration).
+
+If you want to maintain the `2.1` behavior, that is `karafka_admin` admin group, we recommend introducing this case inside your consumer mapper. Assuming you use the default one, the code will look as follows:
+
+```ruby
+  class MyMapper
+    def call(raw_consumer_group_name)
+      # If group is the admin one, use as it was in 2.1
+      return 'karafka_admin' if raw_consumer_group_name == 'karafka_admin'
+
+      # Otherwise use default karafka strategy for the rest
+      "#{Karafka::App.config.client_id}_#{raw_consumer_group_name}"
+    end
+  end
+```
+
 ## 2.1.13 (2023-08-28)
 - **[Feature]** Introduce Cleaning API for much better memory management for iterative data processing [Pro].
 - [Enhancement] Automatically free message resources after processed for ActiveJob jobs [Pro]
@@ -15,7 +47,10 @@
 
 ## 2.1.10 (2023-08-21)
 - [Enhancement] Introduce `connection.client.rebalance_callback` event for instrumentation of rebalances.
+- [Enhancement] Introduce new `runner.before_call` monitor event.
 - [Refactor] Introduce low level commands proxy to handle deviation in how we want to run certain commands and how rdkafka-ruby runs that by design.
+- [Change] No longer validate excluded topics routing presence if patterns any as it does not match pattern subscriptions where you can exclude things that could be subscribed in the future.
+- [Fix] do not report negative lag stored in the DD listener.
 - [Fix] Do not report lags in the DD listener for cases where the assignment is not workable.
 - [Fix] Do not report negative lags in the DD listener.
 - [Fix] Extremely fast shutdown after boot in specs can cause process not to stop.

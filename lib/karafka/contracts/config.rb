@@ -34,6 +34,14 @@ module Karafka
       required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
 
+      nested(:admin) do
+        # Can be empty because inherits values from the root kafka
+        required(:kafka) { |val| val.is_a?(Hash) }
+        required(:group_id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
+        required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
+        required(:max_attempts) { |val| val.is_a?(Integer) && val.positive? }
+      end
+
       # We validate internals just to be sure, that they are present and working
       nested(:internal) do
         required(:status) { |val| !val.nil? }
@@ -74,6 +82,7 @@ module Karafka
         end
       end
 
+      # Ensure all root kafka keys are symbols
       virtual do |data, errors|
         next unless errors.empty?
 
@@ -83,6 +92,21 @@ module Karafka
           next if key.is_a?(Symbol)
 
           detected_errors << [[:kafka, key], :key_must_be_a_symbol]
+        end
+
+        detected_errors
+      end
+
+      # Ensure all admin kafka keys are symbols
+      virtual do |data, errors|
+        next unless errors.empty?
+
+        detected_errors = []
+
+        data.fetch(:admin).fetch(:kafka).each_key do |key|
+          next if key.is_a?(Symbol)
+
+          detected_errors << [[:admin, :kafka, key], :key_must_be_a_symbol]
         end
 
         detected_errors

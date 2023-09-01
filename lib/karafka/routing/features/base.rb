@@ -14,9 +14,11 @@ module Karafka
           # Extends topic and builder with given feature API
           def activate
             Topic.prepend(self::Topic) if const_defined?('Topic', false)
-            Proxy.prepend(self::Builder) if const_defined?('Builder', false)
+            Topics.prepend(self::Topics) if const_defined?('Topics', false)
+            ConsumerGroup.prepend(self::ConsumerGroup) if const_defined?('ConsumerGroup', false)
+            Proxy.prepend(self::Proxy) if const_defined?('Proxy', false)
             Builder.prepend(self::Builder) if const_defined?('Builder', false)
-            Builder.prepend(Base::Expander.new(self)) if const_defined?('Contract', false)
+            Builder.prepend(Base::Expander.new(self)) if const_defined?('Contracts', false)
           end
 
           # Loads all the features and activates them

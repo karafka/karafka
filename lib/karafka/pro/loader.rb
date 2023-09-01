@@ -66,7 +66,8 @@ module Karafka
 
         private
 
-        # @return [Array<Module>] extra non-routing related pro features
+        # @return [Array<Module>] extra non-routing related pro features and routing components
+        #   that need to have some special configuration stuff injected into config, etc
         def features
           [
             Encryption,
@@ -78,6 +79,8 @@ module Karafka
         # @param config [::Karafka::Core::Configurable::Node] root config node
         def reconfigure(config)
           icfg = config.internal
+
+          icfg.cli.contract = Contracts::ServerCliOptions.new
 
           icfg.processing.coordinator_class = Processing::Coordinator
           icfg.processing.partitioner_class = Processing::Partitioner
