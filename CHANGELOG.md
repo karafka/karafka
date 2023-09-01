@@ -8,7 +8,29 @@
 
 ### Upgrade notes
 
-TBA
+As always, please make sure you have upgraded to the most recent version of `2.1` before upgrading to `2.2`.
+
+If you are not using Kafka ACLs, there is no action you need to take.
+
+If you are using Kafka ACLs and you've set up permissions for `karafka_admin` group, please note that this name has now been changed and is subject to [Consumer Name Mapping](https://karafka.io/docs/Consumer-mappers/).
+
+That means you must ensure that the new consumer group that by default equals `CLIENT_ID_karafka_admin` has appropriate permissions. Please note that the Web UI also uses this group.
+
+`Karafka::Admin` now has its own set of configuration options available, and you can find more details about that [here](https://karafka.io/docs/Topics-management-and-administration/#configuration).
+
+If you want to maintain the `2.1` behavior, that is `karafka_admin` admin group, we recommend introducing this case inside your consumer mapper. Assuming you use the default one, the code will look as follows:
+
+```ruby
+  class MyMapper
+    def call(raw_consumer_group_name)
+      # If group is the admin one, use as it was in 2.1
+      return 'karafka_admin' if raw_consumer_group_name == 'karafka_admin'
+
+      # Otherwise use default karafka strategy for the rest
+      "#{Karafka::App.config.client_id}_#{raw_consumer_group_name}"
+    end
+  end
+```
 
 ## 2.1.13 (2023-08-28)
 - **[Feature]** Introduce Cleaning API for much better memory management for iterative data processing [Pro].
