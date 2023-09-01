@@ -53,7 +53,7 @@ module Karafka
               # topic but this minimizes simple mistakes
               #
               # This sub-part of sh1 should be unique enough and short-enough to use it here
-              digest = Digest::SHA1.hexdigest(regexp.source)[8..16]
+              digest = Digest::SHA1.hexdigest(safe_regexp.source)[8..16]
               @name = name ? name.to_s : "karafka-pattern-#{digest}"
               @config = config
             end
@@ -62,7 +62,7 @@ module Karafka
             #   librdkafka expectations. We use it as a subscription name for initial patterns
             #   subscription start.
             def regexp_string
-              "^#{regexp.source}"
+              "^#{safe_regexp.source}"
             end
 
             # @return [Hash] hash representation of this routing pattern
@@ -72,6 +72,20 @@ module Karafka
                 name: name,
                 regexp_string: regexp_string
               }.freeze
+            end
+
+            private
+
+            # Since pattern building happens before validations and we rely internally on the fact
+            # that regexp is provided and nothing else, we here "sanitize" the regexp for our
+            # internal usage. Karafka will not run anyhow because our post-routing contracts will
+            # prevent it from running but internally in this component we need to ensure, that
+            # prior to the validations we operate on a regexp
+            #
+            # @return [Regexp] returns a regexp always even if what we've received was not a regexp
+            def safe_regexp
+              # This regexp will never match anything
+              regexp.is_a?(Regexp) ? regexp : /$a/
             end
           end
         end
