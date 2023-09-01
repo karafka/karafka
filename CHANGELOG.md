@@ -1,7 +1,8 @@
 # Karafka framework changelog
 
-## 2.2.1 (Unreleased)
+## 2.2.1 (2023-09-01)
 - [Fix] Fix insufficient validation of named patterns
+- [Maintenance] Rely on `2.2.x` `karafka-core`.
 
 ## 2.2.0 (2023-09-01)
 - **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
