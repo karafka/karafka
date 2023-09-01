@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.2.0 (Unreleased)
+## 2.2.0 (2023-09-01)
 - **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
 - [Enhancement] Allow for `Karafka::Admin` setup reconfiguration via `config.admin` scope.
 - [Enhancement] Make sure that consumer group used by `Karafka::Admin` obeys the `ConsumerMapper` setup.
