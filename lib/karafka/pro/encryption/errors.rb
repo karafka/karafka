@@ -16,8 +16,11 @@ module Karafka
     module Encryption
       # Encryption related errors
       module Errors
+        # Base for all the encryption errors
+        BaseError = Class.new(::Karafka::Errors::BaseError)
+
         # Raised when we have encountered encryption key with version we do not have
-        PrivateKeyNotFound = Class.new(::Karafka::Errors::BaseError)
+        PrivateKeyNotFound = Class.new(BaseError)
       end
     end
   end

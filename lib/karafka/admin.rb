@@ -7,34 +7,9 @@ module Karafka
   #   Since admin actions are not performed that often, that should be ok.
   #
   # @note It always uses the primary defined cluster and does not support multi-cluster work.
-  #   If you need this, just replace the cluster info for the time you use this
+  #   Cluster on which operations are performed can be changed via `admin.kafka` config, however
+  #   there is no multi-cluster runtime support.
   module Admin
-    # We wait only for this amount of time before raising error as we intercept this error and
-    # retry after checking that the operation was finished or failed using external factor.
-    MAX_WAIT_TIMEOUT = 1
-
-    # Max time for a TPL request. We increase it to compensate for remote clusters latency
-    TPL_REQUEST_TIMEOUT = 2_000
-
-    # How many times should be try. 1 x 60 => 60 seconds wait in total
-    MAX_ATTEMPTS = 60
-
-    # Defaults for config
-    CONFIG_DEFAULTS = {
-      'group.id': 'karafka_admin',
-      # We want to know when there is no more data not to end up with an endless loop
-      'enable.partition.eof': true,
-      'statistics.interval.ms': 0,
-      # Fetch at most 5 MBs when using admin
-      'fetch.message.max.bytes': 5 * 1_048_576,
-      # Do not commit offset automatically, this prevents offset tracking for operations involving
-      # a consumer instance
-      'enable.auto.commit': false
-    }.freeze
-
-    private_constant :CONFIG_DEFAULTS, :MAX_WAIT_TIMEOUT, :TPL_REQUEST_TIMEOUT,
-                     :MAX_ATTEMPTS
-
     class << self
       # Allows us to read messages from the topic
       #
@@ -125,7 +100,7 @@ module Karafka
           handler = admin.create_topic(name, partitions, replication_factor, topic_config)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: MAX_WAIT_TIMEOUT) },
+            -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
             -> { topics_names.include?(name) }
           )
         end
@@ -139,7 +114,7 @@ module Karafka
           handler = admin.delete_topic(name)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: MAX_WAIT_TIMEOUT) },
+            -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
             -> { !topics_names.include?(name) }
           )
         end
@@ -154,7 +129,7 @@ module Karafka
           handler = admin.create_partitions(name, partitions)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: MAX_WAIT_TIMEOUT) },
+            -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
             -> { topic(name).fetch(:partition_count) >= partitions }
           )
         end
@@ -184,9 +159,13 @@ module Karafka
       # This API can be used in other pieces of code and allows for low-level consumer usage
       #
       # @param settings [Hash] extra settings to customize consumer
+      #
+      # @note We always ship and yield a proxied consumer because admin API performance is not
+      #   that relevant. That is, there are no high frequency calls that would have to be delegated
       def with_consumer(settings = {})
         consumer = config(:consumer, settings).consumer
-        yield(consumer)
+        proxy = ::Karafka::Connection::Proxy.new(consumer)
+        yield(proxy)
       ensure
         # Always unsubscribe consumer just to be sure, that no metadata requests are running
         # when we close the consumer. This in theory should prevent from some race-conditions
@@ -240,7 +219,7 @@ module Karafka
       rescue Rdkafka::AbstractHandle::WaitTimeoutError
         return if breaker.call
 
-        retry if attempt <= MAX_ATTEMPTS
+        retry if attempt <= app_config.admin.max_attempts
 
         raise
       end
@@ -249,12 +228,18 @@ module Karafka
       # @param settings [Hash] extra settings for config (if needed)
       # @return [::Rdkafka::Config] rdkafka config
       def config(type, settings)
-        config_hash = Karafka::Setup::AttributesMap.public_send(
-          type,
-          Karafka::App.config.kafka.dup.merge(CONFIG_DEFAULTS).merge!(settings)
+        group_id = app_config.consumer_mapper.call(
+          app_config.admin.group_id
         )
 
-        ::Rdkafka::Config.new(config_hash)
+        app_config
+          .kafka
+          .then(&:dup)
+          .merge(app_config.admin.kafka)
+          .merge!(settings)
+          .tap { |config| config[:'group.id'] = group_id }
+          .then { |config| Karafka::Setup::AttributesMap.public_send(type, config) }
+          .then { |config| ::Rdkafka::Config.new(config) }
       end
 
       # Resolves the offset if offset is in a time format. Otherwise returns the offset without
@@ -271,13 +256,18 @@ module Karafka
             name, partition => offset
           )
 
-          real_offsets = consumer.offsets_for_times(tpl, TPL_REQUEST_TIMEOUT)
+          real_offsets = consumer.offsets_for_times(tpl)
           detected_offset = real_offsets.to_h.dig(name, partition)
 
           detected_offset&.offset || raise(Errors::InvalidTimeBasedOffsetError)
         else
           offset
         end
+      end
+
+      # @return [Karafka::Core::Configurable::Node] root node config
+      def app_config
+        ::Karafka::App.config
       end
     end
   end

@@ -28,7 +28,7 @@ module Karafka
 
             # When we encounter non-recoverable message, we skip it and go on with our lives
             def handle_after_consume
-              coordinator.on_finished do
+              coordinator.on_finished do |last_group_message|
                 return if revoked?
 
                 if coordinator.success?
@@ -36,7 +36,7 @@ module Karafka
 
                   return if coordinator.manual_pause?
 
-                  mark_as_consumed(messages.last)
+                  mark_as_consumed(last_group_message)
                 elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
                   retry_after_pause
                 # If we've reached number of retries that we could, we need to skip the first
@@ -74,6 +74,12 @@ module Karafka
             # @param skippable_message [Array<Karafka::Messages::Message>] message we want to
             #   dispatch to DLQ
             def dispatch_to_dlq(skippable_message)
+              # DLQ should never try to dispatch a message that was cleaned. It message was
+              # cleaned, we will not have all the needed data. If you see this error, it means
+              # that your processing flow is not as expected and you have cleaned message that
+              # should not be cleaned as it should go to the DLQ
+              raise(Cleaner::Errors::MessageCleanedError) if skippable_message.cleaned?
+
               producer.produce_async(
                 build_dlq_message(
                   skippable_message

@@ -20,9 +20,6 @@ module Karafka
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
-      # Max time for a TPL request. We increase it to compensate for remote clusters latency
-      TPL_REQUEST_TIMEOUT = 2_000
-
       # 1 minute of max wait for the first rebalance before a forceful attempt
       # This applies only to a case when a short-lived Karafka instance with a client would be
       # closed before first rebalance. Mitigates a librdkafka bug.
@@ -32,8 +29,7 @@ module Karafka
       # potential race conditions and other issues
       SHUTDOWN_MUTEX = Mutex.new
 
-      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX, :TPL_REQUEST_TIMEOUT,
-                       :COOPERATIVE_STICKY_MAX_WAIT
+      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX, :COOPERATIVE_STICKY_MAX_WAIT
 
       # Creates a new consumer instance.
       #
@@ -350,10 +346,12 @@ module Karafka
             message.partition => message.offset
           )
 
+          proxy = Proxy.new(@kafka)
+
           # Now we can overwrite the seek message offset with our resolved offset and we can
           # then seek to the appropriate message
           # We set the timeout to 2_000 to make sure that remote clusters handle this well
-          real_offsets = @kafka.offsets_for_times(tpl, TPL_REQUEST_TIMEOUT)
+          real_offsets = proxy.offsets_for_times(tpl)
           detected_partition = real_offsets.to_h.dig(message.topic, message.partition)
 
           # There always needs to be an offset. In case we seek into the future, where there
@@ -380,12 +378,6 @@ module Karafka
           ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
           ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
-          # This should prevent from a race condition when we unsubscribe during brokers metadata
-          # states refreshes. With unsubscribed consumer there should be way less of potential
-          # refreshes running.
-          #
-          # @see https://github.com/appsignal/rdkafka-ruby/issues/273
-          unsubscribe
           @kafka.close
           @buffer.clear
           # @note We do not clear rebalance manager here as we may still have revocation info
@@ -518,7 +510,7 @@ module Karafka
 
         # Subscription needs to happen after we assigned the rebalance callbacks just in case of
         # a race condition
-        consumer.subscribe(*@subscription_group.topics.map(&:name))
+        consumer.subscribe(*@subscription_group.subscriptions)
         consumer
       end
 

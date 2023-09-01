@@ -44,7 +44,7 @@ class Job < ActiveJob::Base
   # This job is so slow, that while it is running another consumer joins in and should take over
   # one partition.
   # If this would not happen, we should not stop until all batches of jobs are processed
-  def perform(value1, value2)
+  def perform(value1, _value2)
     DT[:started] << value1
     sleep(20)
     DT[:done] << value1

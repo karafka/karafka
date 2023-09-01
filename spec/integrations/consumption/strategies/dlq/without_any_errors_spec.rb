@@ -54,3 +54,5 @@ assert_equal (0..99).to_a, DT[:offsets]
 
 # No broken messages
 assert_equal 0, DT[:broken].size
+
+assert !fetch_first_offset

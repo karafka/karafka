@@ -105,6 +105,44 @@ module Karafka
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
 
+      # Admin specific settings.
+      #
+      # Since admin operations are often specific, they may require specific librdkafka settings
+      # or other settings that are unique to admin.
+      setting :admin do
+        # Specific kafka settings that are tuned to operate within the Admin.
+        #
+        # Please do not change them unless you know what you are doing as their misconfiguration
+        # may cause Admin API to misbehave
+        # option [Hash] extra changes to the default root kafka settings
+        setting :kafka, default: {
+          # We want to know when there is no more data not to end up with an endless loop
+          'enable.partition.eof': true,
+          # Do not publish statistics from admin as they are not relevant
+          'statistics.interval.ms': 0,
+          # Fetch at most 5 MBs when using admin
+          'fetch.message.max.bytes': 5 * 1_048_576,
+          # Do not commit offset automatically, this prevents offset tracking for operations
+          # involving a consumer instance
+          'enable.auto.commit': false,
+          # Make sure that topic metadata lookups do not create topics accidentally
+          'allow.auto.create.topics': false
+        }
+
+        # option [String] default name for the admin consumer group. Please note, that this is a
+        # subject to be remapped by the consumer mapper as any other consumer group in the routes
+        setting :group_id, default: 'karafka_admin'
+
+        # option max_wait_time [Integer] We wait only for this amount of time before raising error
+        # as we intercept this error and retry after checking that the operation was finished or
+        # failed using external factor.
+        setting :max_wait_time, default: 1_000
+
+        # How many times should be try. 1 000 ms x 60 => 60 seconds wait in total and then we give
+        # up on pending operations
+        setting :max_attempts, default: 60
+      end
+
       # Namespace for internal settings that should not be modified directly
       setting :internal do
         # option status [Karafka::Status] app status
@@ -113,6 +151,13 @@ module Karafka
         # @note In the future, we need to have a single process representation for all the karafka
         #   instances
         setting :process, default: Process.new
+
+        # Namespace for CLI related settings
+        setting :cli do
+          # option contract [Object] cli setup validation contract (in the context of options and
+          # topics)
+          setting :contract, default: Contracts::ServerCliOptions.new
+        end
 
         setting :routing do
           # option builder [Karafka::Routing::Builder] builder instance
@@ -124,6 +169,32 @@ module Karafka
           # Internally assigned list of limits on routings active for the current process
           # This can be altered by the CLI command
           setting :activity_manager, default: Routing::ActivityManager.new
+        end
+
+        # Namespace for internal connection related settings
+        setting :connection do
+          # Settings that are altered by our client proxy layer
+          setting :proxy do
+            # Watermark offsets request settings
+            setting :query_watermark_offsets do
+              # timeout for this request. For busy or remote clusters, this should be high enough
+              setting :timeout, default: 5_000
+              # How many times should we try to run this call before raising an error
+              setting :max_attempts, default: 3
+              # How long should we wait before next attempt in case of a failure
+              setting :wait_time, default: 1_000
+            end
+
+            # Offsets for times request settings
+            setting :offsets_for_times do
+              # timeout for this request. For busy or remote clusters, this should be high enough
+              setting :timeout, default: 5_000
+              # How many times should we try to run this call before raising an error
+              setting :max_attempts, default: 3
+              # How long should we wait before next attempt in case of a failure
+              setting :wait_time, default: 1_000
+            end
+          end
         end
 
         setting :processing do

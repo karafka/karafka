@@ -28,6 +28,20 @@ en:
       pause_with_exponential_backoff_format: needs to be either true or false
       pause_timeout_max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
 
+      patterns.active_format: 'needs to be boolean'
+      patterns.type_format: 'needs to be :matcher, :discovered or :regular'
+
+    consumer_group:
+      patterns_format: must be an array with hashes
+      patterns_missing: needs to be present
+      patterns_regexps_not_unique: 'must be unique within consumer group'
+
+    pattern:
+      regexp_format: must be a regular expression
+      name_format: 'needs to be a string with a Kafka accepted format'
+      regexp_string_format: 'needs to be a string and start with ^'
+      missing: needs to be present
+
     config:
       encryption.active_format: 'needs to be either true or false'
       encryption.public_key_invalid: 'is not a valid public RSA key'
@@ -37,3 +51,6 @@ en:
       encryption.version_format: must be a non-empty string
       encryption.public_key_format: 'is not a valid public RSA key'
       encryption.private_keys_invalid: 'contains an invalid private RSA key string'
+
+      patterns.ttl_format: needs to be an integer bigger than 0
+      patterns.ttl_missing: needs to be present

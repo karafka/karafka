@@ -41,6 +41,9 @@ module Karafka
     # Raised when the license token is not valid
     InvalidLicenseTokenError = Class.new(BaseError)
 
+    # Raised on attempt to deserializer a cleared message
+    MessageClearedError = Class.new(BaseError)
+
     # This should never happen. Please open an issue if it does.
     InvalidCoordinatorStateError = Class.new(BaseError)
 
