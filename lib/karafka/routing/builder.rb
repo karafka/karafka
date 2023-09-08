@@ -12,6 +12,7 @@ module Karafka
     class Builder < Concurrent::Array
       def initialize
         @draws = Concurrent::Array.new
+        @defaults = ->(_) {}
         super
       end
 
@@ -60,11 +61,10 @@ module Karafka
         super
       end
 
+      # @param block [Proc] block with per-topic evaluated defaults
+      # @return [Proc] defaults that should be evaluated per topic
       def defaults(&block)
-        unless block
-          @defaults ||= ->(_) {}
-          return @defaults
-        end
+        retrun @defaults unless block
 
         @defaults = block
       end

@@ -90,6 +90,7 @@ module Karafka
 
       private
 
+      # @return [Karafka::Core::Configurable::Node] root node config
       def config
         ::Karafka::App.config
       end
