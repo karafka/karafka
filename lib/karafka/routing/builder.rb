@@ -64,7 +64,7 @@ module Karafka
       # @param block [Proc] block with per-topic evaluated defaults
       # @return [Proc] defaults that should be evaluated per topic
       def defaults(&block)
-        retrun @defaults unless block
+        return @defaults unless block
 
         @defaults = block
       end
