@@ -55,8 +55,18 @@ module Karafka
 
       # Clears the builder and the draws memory
       def clear
+        @defaults = nil
         @draws.clear
         super
+      end
+
+      def defaults(&block)
+        unless block
+          @defaults ||= ->(_) {}
+          return @defaults
+        end
+
+        @defaults = block
       end
 
       private
