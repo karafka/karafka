@@ -22,7 +22,7 @@ module Karafka
       #   kafka and don't understand the concept of consumer groups.
       def initialize(name)
         @name = name.to_s
-        @id = Karafka::App.config.consumer_mapper.call(name)
+        @id = config.consumer_mapper.call(name)
         @topics = Topics.new([])
         # Initialize the subscription group so there's always a value for it, since even if not
         # defined directly, a subscription group will be created
@@ -31,7 +31,7 @@ module Karafka
 
       # @return [Boolean] true if this consumer group should be active in our current process
       def active?
-        Karafka::App.config.internal.routing.activity_manager.active?(:consumer_groups, name)
+        config.internal.routing.activity_manager.active?(:consumer_groups, name)
       end
 
       # Builds a topic representation inside of a current consumer group route
@@ -40,7 +40,11 @@ module Karafka
       # @return [Karafka::Routing::Topic] newly built topic instance
       def topic=(name, &block)
         topic = Topic.new(name, self)
-        @topics << Proxy.new(topic, &block).target
+        @topics << Proxy.new(
+          topic,
+          config.internal.routing.builder.defaults,
+          &block
+        ).target
         built_topic = @topics.last
         # We overwrite it conditionally in case it was not set by the user inline in the topic
         # block definition
@@ -67,8 +71,7 @@ module Karafka
       # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
       #   the consumer group topics
       def subscription_groups
-        @subscription_groups ||= App
-                                 .config
+        @subscription_groups ||= config
                                  .internal
                                  .routing
                                  .subscription_groups_builder
@@ -83,6 +86,13 @@ module Karafka
           topics: topics.map(&:to_h),
           id: id
         }.freeze
+      end
+
+      private
+
+      # @return [Karafka::Core::Configurable::Node] root node config
+      def config
+        ::Karafka::App.config
       end
     end
   end
