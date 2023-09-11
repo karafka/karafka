@@ -5,7 +5,7 @@
 
 setup_karafka
 
-draw_routes do
+draw_routes(create_topics: false) do
   defaults do
     manual_offset_management false
     config(replication_factor: 2, partitions: 5)
