@@ -2,7 +2,7 @@
 
 ## 2.2.2 (2023-09-11)
 - [Feature] Provide ability to define routing defaults.
-- [Maintenance] Require `karafka-core` `>=` `2.2.1`
+- [Maintenance] Require `karafka-core` `>=` `2.2.2`
 
 ## 2.2.1 (2023-09-01)
 - [Fix] Fix insufficient validation of named patterns
