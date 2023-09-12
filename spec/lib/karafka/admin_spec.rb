@@ -207,6 +207,24 @@ RSpec.describe_current do
       it { expect(reading.first.offset).to eq(0) }
     end
 
+    context 'when reading from far in the past on a higher partition' do
+      let(:count) { 10 }
+      let(:offset) { Time.now - 60 * 5 }
+      let(:partition) { 5 }
+
+      before do
+        described_class.create_topic(name, partition + 1, 1)
+        messages = Array.new(20) { |i| { topic: name, payload: i.to_s, partition: partition } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(reading.size).to eq(10) }
+      it { expect(reading.last.offset).to eq(9) }
+      it { expect(reading.first.offset).to eq(0) }
+      it { expect(reading.first.partition).to eq(partition) }
+    end
+
     context 'when reading from far in the past and trying to read more than present' do
       let(:count) { 1_000 }
       let(:offset) { Time.now - 60 * 5 }

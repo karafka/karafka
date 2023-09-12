@@ -257,7 +257,10 @@ module Karafka
           )
 
           real_offsets = consumer.offsets_for_times(tpl)
-          detected_offset = real_offsets.to_h.dig(name, partition)
+          detected_offset = real_offsets
+                            .to_h
+                            .fetch(name)
+                            .find { |p_data| p_data.partition == partition }
 
           detected_offset&.offset || raise(Errors::InvalidTimeBasedOffsetError)
         else
