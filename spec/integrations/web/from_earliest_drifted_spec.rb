@@ -7,9 +7,13 @@ setup_karafka
 setup_web
 
 # This will "fake" drift of five seconds of the cluster, so cluster is in the future
-class Karafka::Messages::Message
-  def timestamp
-    metadata.timestamp + 5
+module Karafka
+  module Messages
+    class Message
+      def timestamp
+        metadata.timestamp + 5
+      end
+    end
   end
 end
 
