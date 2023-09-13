@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-### 2.2.3 (2023-09-12)
+## 2.2.3 (2023-09-12)
 - [Fix] Karafka admin time based offset lookup can break for one non-default partition.
 
 ## 2.2.2 (2023-09-11)
