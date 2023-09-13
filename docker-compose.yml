@@ -1,14 +1,14 @@
 version: '2'
 services:
   zookeeper:
-    container_name: karafka_21_zookeeper
+    container_name: karafka_22_zookeeper
     image: wurstmeister/zookeeper
     restart: on-failure
     ports:
       - '2181:2181'
 
   kafka:
-    container_name: karafka_21_kafka
+    container_name: karafka_22_kafka
     image: wurstmeister/kafka
     ports:
       - '9092:9092'
