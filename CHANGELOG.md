@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.2.4 (Unreleased)
+## 2.2.4 (2023-09-13)
 - [Enhancement] Compensate for potential Kafka cluster drifts vs consumer drift in batch metadata (#1611).
 
 ## 2.2.3 (2023-09-12)
