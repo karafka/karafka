@@ -47,5 +47,13 @@ RSpec.describe_current do
       it { expect(result.deserializer).to eq routing_topic.deserializer }
       it { expect(result.scheduled_at).to eq(scheduled_at) }
     end
+
+    context 'when building with messages from the future (time drift)' do
+      before { allow(message2).to receive(:timestamp).and_return(now + 100) }
+
+      it 'expect to use current machine now as the batch should not come from the future' do
+        expect(result.created_at).to eq(now)
+      end
+    end
   end
 end

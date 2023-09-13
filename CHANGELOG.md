@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.4 (Unreleased)
+- [Enhancement] Compensate for potential Kafka cluster drifts vs consumer drift in batch metadata (#1611).
+
 ## 2.2.3 (2023-09-12)
 - [Fix] Karafka admin time based offset lookup can break for one non-default partition.
 

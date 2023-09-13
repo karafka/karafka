@@ -41,6 +41,6 @@ assert_equal messages.metadata.first_offset, -1001
 assert_equal messages.metadata.last_offset, -1001
 assert_equal messages.metadata.partition, 0
 assert_equal messages.metadata.size, 0
-assert_equal messages.metadata.created_at, nil
 assert_equal messages.metadata.processed_at, nil
+assert !messages.metadata.created_at.nil?
 assert messages.empty?
