@@ -108,31 +108,50 @@ RSpec.describe_current do
     end
 
     context 'when we have to wait for a job' do
-      before { queue << job1 }
-
-      it 'expect to pass until no longer needing to wait' do
+      let(:thread) do
         Thread.new do
           sleep(0.01)
           queue.complete(job1)
         end
+      end
 
+      before do
+        thread
+        queue << job1
+      end
+
+      after { thread.join }
+
+      it 'expect to pass until no longer needing to wait' do
         queue.wait(job1.group_id)
       end
     end
 
     context 'when we have to wait and tick runs' do
-      before do
-        queue << job1
-
+      let(:thread1) do
         Thread.new do
           sleep(0.1)
           10.times { queue.tick(job1.group_id) }
         end
+      end
 
+      let(:thread2) do
         Thread.new do
           sleep(1)
           queue.complete(job1)
         end
+      end
+
+      before do
+        queue << job1
+
+        thread1
+        thread2
+      end
+
+      after do
+        thread1.join
+        thread2.join
       end
 
       # tick should not allow for wait skipping, it should just trigger a re-check
@@ -160,17 +179,24 @@ RSpec.describe_current do
     end
 
     context 'when Karafka is stopping and the queue is not empty' do
-      before do
-        allow(Karafka::App).to receive(:stopping?).and_return(true)
-        queue << job1
-      end
-
-      it 'expect to wait' do
+      let(:thread) do
         Thread.new do
           sleep(0.01)
           queue.complete(job1)
         end
+      end
 
+      before do
+        thread
+        allow(Karafka::App).to receive(:stopping?).and_return(true)
+        queue << job1
+      end
+
+      after do
+        thread.join
+      end
+
+      it 'expect to wait' do
         queue.wait(job1.group_id)
       end
     end

@@ -9,6 +9,8 @@ RSpec.describe_current do
   # any specs
   before { worker }
 
+  after { worker.terminate }
+
   describe '#join' do
     before { queue.close }
 
