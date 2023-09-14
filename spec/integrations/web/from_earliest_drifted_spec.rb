@@ -11,7 +11,7 @@ module Karafka
   module Messages
     class Message
       def timestamp
-        metadata.timestamp + 5
+        metadata.timestamp + 10
       end
     end
   end
