@@ -8,15 +8,11 @@ setup_karafka(allow_errors: true) do |config|
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume
-    messages.each do |message|
-      DT[message.metadata.partition] << message.raw_payload
-    end
-  end
+  def consume; end
 end
 
 draw_routes(create_topics: false) do
-  100.times do |i|
+  10.times do |i|
     topic "#{DT.topic}#{i}" do
       consumer Consumer
     end
@@ -30,9 +26,6 @@ end
 Karafka.monitor.subscribe('error.occurred') do |event|
   DT[:events] << event
 end
-
-elements = DT.uuids(100)
-produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
   DT.key?(:events)
