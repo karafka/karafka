@@ -49,7 +49,7 @@ module Karafka
         # Loads all the pro components and configures them wherever it is expected
         # @param config [Karafka::Core::Configurable::Node] app config that we can alter with pro
         #   components
-        def pre_setup(config)
+        def pre_setup_all(config)
           features.each { |feature| feature.pre_setup(config) }
 
           reconfigure(config)
@@ -60,7 +60,7 @@ module Karafka
         # Runs post setup features configuration operations
         #
         # @param config [Karafka::Core::Configurable::Node]
-        def post_setup(config)
+        def post_setup_all(config)
           features.each { |feature| feature.post_setup(config) }
         end
 

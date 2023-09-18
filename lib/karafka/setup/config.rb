@@ -208,6 +208,8 @@ module Karafka
           setting :partitioner_class, default: Processing::Partitioner
           # option strategy_selector [Object] processing strategy selector to be used
           setting :strategy_selector, default: Processing::StrategySelector.new
+          # option expansions_selector [Object] processing expansions seletor to be used
+          setting :expansions_selector, default: Processing::ExpansionsSelector.new
         end
 
         # Things related to operating on messages
@@ -238,10 +240,14 @@ module Karafka
         def setup(&block)
           # Will prepare and verify license if present
           Licenser.prepare_and_verify(config.license)
+
+          # Pre-setup configure all routing features that would need this
+          Routing::Features::Base.pre_setup_all(config)
+
           # Will configure all the pro components
           # This needs to happen before end user configuration as the end user may overwrite some
           # of the pro defaults with custom components
-          Pro::Loader.pre_setup(config) if Karafka.pro?
+          Pro::Loader.pre_setup_all(config) if Karafka.pro?
 
           configure(&block)
           merge_kafka_defaults!(config)
@@ -253,9 +259,12 @@ module Karafka
           # Refreshes the references that are cached that might have been changed by the config
           ::Karafka.refresh!
 
+          # Post-setup configure all routing features that would need this
+          Routing::Features::Base.post_setup_all(config)
+
           # Runs things that need to be executed after config is defined and all the components
           # are also configured
-          Pro::Loader.post_setup(config) if Karafka.pro?
+          Pro::Loader.post_setup_all(config) if Karafka.pro?
 
           Karafka::App.initialized!
         end
