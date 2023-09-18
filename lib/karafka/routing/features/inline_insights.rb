@@ -16,15 +16,12 @@ module Karafka
                           .flat_map(&:itself)
                           .flat_map(&:topics)
                           .flat_map(&:to_a)
-                          .any?(&:inline_statistics?)
+                          .any?(&:inline_insights?)
 
-              require 'karafka/instrumentation/vendors/karafka/inline/tracker'
-              require 'karafka/instrumentation/vendors/karafka/inline/listener'
-
-              ::Karafka::Instrumentation::InlineInsights::Tracker.instance
+              ::Karafka::Processing::InlineInsights::Tracker.instance
 
               ::Karafka.monitor.subscribe(
-                ::Karafka::Instrumentation::InlineInsights::Listener.new
+                ::Karafka::Processing::InlineInsights::Listener.new
               )
             end
           end

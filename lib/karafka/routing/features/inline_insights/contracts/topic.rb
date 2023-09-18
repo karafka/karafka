@@ -14,7 +14,7 @@ module Karafka
               ).fetch('en').fetch('validations').fetch('topic')
             end
 
-            nested :declaratives do
+            nested :inline_insights do
               required(:active) { |val| [true, false].include?(val) }
             end
           end
