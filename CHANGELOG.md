@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.5 (Unreleased)
+- [Maintenance] Align connection clearing API with Rails 7.1 deprecation warning.
+
 ## 2.2.4 (2023-09-13)
 - [Enhancement] Compensate for potential Kafka cluster drifts vs consumer drift in batch metadata (#1611).
 
