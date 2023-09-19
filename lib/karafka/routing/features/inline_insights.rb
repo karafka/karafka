@@ -3,8 +3,14 @@
 module Karafka
   module Routing
     module Features
+      # Feature allowing us to get visibility during the consumption into metrics of particular
+      # partition we operate on. It can be useful when making context-aware consumers that change
+      # their behaviours based on the lag and other parameters.
       class InlineInsights < Base
         class << self
+          # If needed installs the needed listener and initializes tracker
+          #
+          # @param config [Karafka::Core::Configurable::Node] app config
           def post_setup(config)
             ::Karafka::App.monitor.subscribe('app.running') do
               # Do not activate tracking of statistics if none of our active topics uses it
@@ -18,8 +24,10 @@ module Karafka
                           .flat_map(&:to_a)
                           .any?(&:inline_insights?)
 
+              # Initialize the tracker prior to becoming multi-threaded
               ::Karafka::Processing::InlineInsights::Tracker.instance
 
+              # Subscribe to the statistics reports and collect them
               ::Karafka.monitor.subscribe(
                 ::Karafka::Processing::InlineInsights::Listener.new
               )

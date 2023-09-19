@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.5 (Unreleased)
+- **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics 
+
 ## 2.2.4 (2023-09-13)
 - [Enhancement] Compensate for potential Kafka cluster drifts vs consumer drift in batch metadata (#1611).
 
