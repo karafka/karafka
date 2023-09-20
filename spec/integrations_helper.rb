@@ -187,7 +187,7 @@ def fetch_first_offset(topic = DT.topic)
   first = false
 
   10.times do
-    message = consumer.poll(250)
+    message = consumer.poll(1_000)
 
     next unless message
 
