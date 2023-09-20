@@ -8,6 +8,11 @@ module Karafka
     class Topic
       attr_reader :id, :name, :consumer_group
       attr_writer :consumer
+
+      attr_accessor :subscription_group_id
+
+      # Full subscription group reference can be built only when we have knowledge about the
+      # whole routing tree, this is why it is going to be set later on
       attr_accessor :subscription_group
 
       # Attributes we can inherit from the root unless they were defined on this level
@@ -112,7 +117,7 @@ module Karafka
           active: active?,
           consumer: consumer,
           consumer_group_id: consumer_group.id,
-          subscription_group: subscription_group
+          subscription_group_id: subscription_group_id
         ).freeze
       end
     end

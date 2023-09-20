@@ -31,6 +31,6 @@ assert_equal 3, Karafka::App.consumer_groups.first.topics.size
 assert_equal 'topic1', Karafka::App.consumer_groups.first.topics.first.name
 assert_equal 'topic2', Karafka::App.consumer_groups.first.topics[1].name
 assert_equal 'topic3', Karafka::App.consumer_groups.first.topics[2].name
-assert_equal 'group1', subscription_groups.first.topics.first.subscription_group
+assert_equal 'group1', subscription_groups.first.topics.first.subscription_group.name
 assert !subscription_groups[1].topics.first.subscription_group.nil?
-assert_equal 'group2', subscription_groups[2].topics.first.subscription_group
+assert_equal 'group2', subscription_groups[2].topics.first.subscription_group.name

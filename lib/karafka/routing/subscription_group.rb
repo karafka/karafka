@@ -32,7 +32,7 @@ module Karafka
       # @param topics [Karafka::Routing::Topics] all the topics that share the same key settings
       # @return [SubscriptionGroup] built subscription group
       def initialize(position, topics)
-        @name = topics.first.subscription_group
+        @name = topics.first.subscription_group_id
         @consumer_group = topics.first.consumer_group
         @id = "#{@name}_#{position}"
         @position = position

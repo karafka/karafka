@@ -48,7 +48,7 @@ module Karafka
         built_topic = @topics.last
         # We overwrite it conditionally in case it was not set by the user inline in the topic
         # block definition
-        built_topic.subscription_group ||= current_subscription_group_id
+        built_topic.subscription_group_id ||= current_subscription_group_id
         built_topic
       end
 
