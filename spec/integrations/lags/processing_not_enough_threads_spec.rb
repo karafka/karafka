@@ -12,6 +12,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     sleep(0.2)
+    DT[:topics] << messages.metadata.topic
     DT[:processing_lags] << messages.metadata.processing_lag
   end
 end
@@ -30,7 +31,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DT[:processing_lags].size >= 2
+  DT[:processing_lags].size >= 2 && DT[:topics].uniq.size >= 2
 end
 
 max_lag = DT[:processing_lags].max
