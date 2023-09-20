@@ -1,28 +1,24 @@
 version: '2'
+
 services:
   zookeeper:
-    container_name: karafka_21_zookeeper
-    image: wurstmeister/zookeeper
-    restart: on-failure
-    ports:
-      - '2181:2181'
+    container_name: karafka_22_zookeeper
+    image: confluentinc/cp-zookeeper:5.2.6
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    container_name: karafka_21_kafka
-    image: wurstmeister/kafka
+    container_name: karafka_22_kafka
+    image: confluentinc/cp-kafka:5.2.5-10
+    depends_on:
+      - zookeeper
     ports:
-      - '9092:9092'
+      - 9092:9092
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
-      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      KAFKA_CREATE_TOPICS:
-        "benchmarks_00_01:1:1,\
-         benchmarks_00_05:5:1,\
-         benchmarks_01_05:5:1,\
-         benchmarks_00_10:10:1"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
-    restart: on-failure
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
