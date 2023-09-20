@@ -44,7 +44,8 @@ def setup_karafka(
       # We need to send this often as in specs we do time sensitive things and we may be kicked
       # out of the consumer group if it is not delivered fast enough
       'heartbeat.interval.ms': 1_000,
-      'queue.buffering.max.ms': 5
+      'queue.buffering.max.ms': 5,
+      'partition.assignment.strategy': 'range,roundrobin'
     }
     config.client_id = caller_id
     config.pause_timeout = 1
@@ -145,7 +146,8 @@ def setup_rdkafka_consumer(options = {})
     'bootstrap.servers': 'localhost:9092',
     'group.id': Karafka::App.consumer_groups.first.id,
     'auto.offset.reset': 'earliest',
-    'enable.auto.offset.store': 'false'
+    'enable.auto.offset.store': 'false',
+    'partition.assignment.strategy': 'range,roundrobin'
   }.merge!(options)
 
   Rdkafka::Config.new(
