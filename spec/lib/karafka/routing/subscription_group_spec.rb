@@ -7,7 +7,11 @@ RSpec.describe_current do
   let(:topics) { [topic] }
 
   describe '#id' do
-    it { expect(group.id).to eq("#{topic.subscription_group_id}_0") }
+    it { expect(group.id).to eq("#{topic.subscription_group_name}_0") }
+  end
+
+  describe '#to_s' do
+    it { expect(group.to_s).to eq(group.id) }
   end
 
   describe '#max_messages' do
@@ -59,7 +63,7 @@ RSpec.describe_current do
           .internal
           .routing
           .activity_manager
-          .include(:subscription_groups, topic.subscription_group_id)
+          .include(:subscription_groups, topic.subscription_group_name)
       end
 
       it { expect(group.active?).to eq true }

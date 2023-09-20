@@ -9,7 +9,7 @@ module Karafka
       attr_reader :id, :name, :consumer_group
       attr_writer :consumer
 
-      attr_accessor :subscription_group_id
+      attr_accessor :subscription_group_name
 
       # Full subscription group reference can be built only when we have knowledge about the
       # whole routing tree, this is why it is going to be set later on
@@ -117,7 +117,7 @@ module Karafka
           active: active?,
           consumer: consumer,
           consumer_group_id: consumer_group.id,
-          subscription_group_id: subscription_group_id
+          subscription_group_name: subscription_group_name
         ).freeze
       end
     end

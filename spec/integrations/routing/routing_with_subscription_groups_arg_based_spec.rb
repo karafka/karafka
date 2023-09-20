@@ -7,7 +7,7 @@ setup_karafka
 draw_routes do
   topic 'topic1' do
     consumer Class.new
-    subscription_group_id 'group1'
+    subscription_group_name 'group1'
   end
 
   topic 'topic2' do
@@ -16,7 +16,7 @@ draw_routes do
 
   topic 'topic3' do
     consumer Class.new
-    subscription_group_id 'group2'
+    subscription_group_name 'group2'
   end
 end
 
