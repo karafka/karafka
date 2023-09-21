@@ -232,7 +232,9 @@ end
 # If a topic is already created for example with more partitions, this will do nothing
 #
 # @note This code ensures that we do not create multiple topics from multiple tests at the same
-#   time because under heavy creation load, Kafka hangs sometimes
+#   time because under heavy creation load, Kafka hangs sometimes. Keep in mind, this lowers number
+#   of topics created concurrently but some particular specs create topics on their own. The
+#   quantity however should be small enough for Kafka to handle.
 def create_routes_topics
   lock = File.open(File.join(Dir.tmpdir, 'create_routes_topics.lock'), File::CREAT | File::RDWR)
   lock.flock(File::LOCK_EX)
