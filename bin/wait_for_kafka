@@ -11,9 +11,14 @@ end
 
 60.times do
   begin
-    return if Karafka::Admin.cluster_info
+    # Stop if we can connect to the cluster and get info
+    exit if Karafka::Admin.cluster_info
   rescue Rdkafka::RdkafkaError
     puts "Kafka not available, retrying..."
     sleep(1)
   end
 end
+
+puts 'Kafka not available!'
+
+exit 1

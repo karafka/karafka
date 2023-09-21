@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.2.5 (Unreleased)
+- [Enhancement] Stabilize cooperative-sticky early shutdown procedure.
 - [Maintenance] Align connection clearing API with Rails 7.1 deprecation warning.
 - [Maintenance] Make `#subscription_group` reference consistent in the Routing and Instrumentation.
 - [Maintenance] Align the consumer pause instrumentation with client pause instrumentation by adding `subscription_group` visibility to the consumer.
