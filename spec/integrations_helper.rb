@@ -13,6 +13,7 @@ end
 
 require 'singleton'
 require 'securerandom'
+require 'tmpdir'
 require_relative './support/data_collector'
 
 Thread.abort_on_exception = true
@@ -229,7 +230,13 @@ end
 # Creates topics defined in the routes so they are available for the specs
 # Code below will auto-create all the routing based topics so we don't have to do it per spec
 # If a topic is already created for example with more partitions, this will do nothing
+#
+# @note This code ensures that we do not create multiple topics from multiple tests at the same
+#   time because under heavy creation load, Kafka hangs sometimes
 def create_routes_topics
+  lock = File.open(File.join(Dir.tmpdir, 'create_routes_topics.lock'), File::CREAT | File::RDWR)
+  lock.flock(File::LOCK_EX)
+
   fetch_declarative_routes_topics_configs.each do |name, config|
     args = if config
              [config.partitions, config.replication_factor, config.details]
@@ -247,6 +254,8 @@ def create_routes_topics
       e.code == :topic_already_exists ? return : raise
     end
   end
+ensure
+  lock.close
 end
 
 # Waits until block yields true
