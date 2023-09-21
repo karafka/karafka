@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 # Karafka should be able to recover from non-critical error when using lrj the same way as any
