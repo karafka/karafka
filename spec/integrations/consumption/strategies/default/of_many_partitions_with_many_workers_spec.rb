@@ -33,11 +33,17 @@ draw_routes do
   end
 end
 
+polls = 0
+
+Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
+  polls += 1
+end
+
 # Start Karafka
 Thread.new { Karafka::Server.run }
 
-# Give it some time to boot and connect before dispatching messages
-sleep(5)
+# Wait until we've polled few times
+sleep(0.1) until polls >= 10
 
 # We send only one message to each topic partition, so when messages are consumed, it forces them
 # to be in separate worker threads
