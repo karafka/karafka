@@ -50,7 +50,6 @@ Thread.new do
   end
 end
 
-
 start_karafka_and_wait_until do
   DT[:processing_lags].size >= 2 && DT[:topics].uniq.size >= 2 && DT.key?(:both)
 end
