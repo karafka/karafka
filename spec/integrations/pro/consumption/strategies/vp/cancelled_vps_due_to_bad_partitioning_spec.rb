@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
 
     sleep(rand / 10.to_f)
 
-    DT[:ranges] << (start..Time.now.to_f )
+    DT[:ranges] << start..Time.now.to_f
   end
 end
 
