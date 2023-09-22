@@ -8,7 +8,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[0] = true
+    DT[0] = topic
   end
 end
 
@@ -18,6 +18,7 @@ draw_routes(create_topics: false) do
   end
 end
 
+# If works, won't hang.
 start_karafka_and_wait_until do
   unless @created
     sleep(5)
@@ -28,4 +29,6 @@ start_karafka_and_wait_until do
   DT.key?(0)
 end
 
-# No assertions needed. If works, won't hang.
+# Make sure that the expansion of routing works and that proper subscription group is assigned
+assert_equal 2, Karafka::App.subscription_groups.values.first.first.topics.size
+assert_equal DT[0].subscription_group, Karafka::App.subscription_groups.values.first.first

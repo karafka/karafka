@@ -13,6 +13,7 @@ end
 
 require 'singleton'
 require 'securerandom'
+require 'tmpdir'
 require_relative './support/data_collector'
 
 Thread.abort_on_exception = true
@@ -44,7 +45,8 @@ def setup_karafka(
       # We need to send this often as in specs we do time sensitive things and we may be kicked
       # out of the consumer group if it is not delivered fast enough
       'heartbeat.interval.ms': 1_000,
-      'queue.buffering.max.ms': 5
+      'queue.buffering.max.ms': 5,
+      'partition.assignment.strategy': 'range,roundrobin'
     }
     config.client_id = caller_id
     config.pause_timeout = 1
@@ -145,7 +147,8 @@ def setup_rdkafka_consumer(options = {})
     'bootstrap.servers': 'localhost:9092',
     'group.id': Karafka::App.consumer_groups.first.id,
     'auto.offset.reset': 'earliest',
-    'enable.auto.offset.store': 'false'
+    'enable.auto.offset.store': 'false',
+    'partition.assignment.strategy': 'range,roundrobin'
   }.merge!(options)
 
   Rdkafka::Config.new(
@@ -187,7 +190,7 @@ def fetch_first_offset(topic = DT.topic)
   first = false
 
   10.times do
-    message = consumer.poll(250)
+    message = consumer.poll(1_000)
 
     next unless message
 
@@ -227,7 +230,15 @@ end
 # Creates topics defined in the routes so they are available for the specs
 # Code below will auto-create all the routing based topics so we don't have to do it per spec
 # If a topic is already created for example with more partitions, this will do nothing
+#
+# @note This code ensures that we do not create multiple topics from multiple tests at the same
+#   time because under heavy creation load, Kafka hangs sometimes. Keep in mind, this lowers number
+#   of topics created concurrently but some particular specs create topics on their own. The
+#   quantity however should be small enough for Kafka to handle.
 def create_routes_topics
+  lock = File.open(File.join(Dir.tmpdir, 'create_routes_topics.lock'), File::CREAT | File::RDWR)
+  lock.flock(File::LOCK_EX)
+
   fetch_declarative_routes_topics_configs.each do |name, config|
     args = if config
              [config.partitions, config.replication_factor, config.details]
@@ -245,6 +256,8 @@ def create_routes_topics
       e.code == :topic_already_exists ? return : raise
     end
   end
+ensure
+  lock.close
 end
 
 # Waits until block yields true

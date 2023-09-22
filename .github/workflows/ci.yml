@@ -96,6 +96,10 @@ jobs:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
 
+      - name: Wait for Kafka
+        run: |
+          bundle exec bin/wait_for_kafka
+
       - name: Run all specs
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}
@@ -131,6 +135,10 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
+          # Do not use cache here as we run bundle install also later in some of the integration
+          # tests and we need to be able to run it without cache
+          #
+          # We also want to check that librdkafka is compiling as expected on all versions of Ruby
           ruby-version: ${{matrix.ruby}}
 
       - name: Install latest Bundler
@@ -143,6 +151,10 @@ jobs:
         run: |
           bundle config set without development
           bundle install
+
+      - name: Wait for Kafka
+        run: |
+          bundle exec bin/wait_for_kafka
 
       - name: Run integration tests
         env:
