@@ -216,7 +216,11 @@ module Karafka
         attempt += 1
 
         handler.call
-      rescue Rdkafka::AbstractHandle::WaitTimeoutError
+
+        # If breaker does not operate, it means that the requested change was applied but is still
+        # not visible and we need to wait
+        raise(Errors::ResultNotVisibleError) unless breaker.call
+      rescue Rdkafka::AbstractHandle::WaitTimeoutError, Errors::ResultNotVisibleError
         return if breaker.call
 
         retry if attempt <= app_config.admin.max_attempts
