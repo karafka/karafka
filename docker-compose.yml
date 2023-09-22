@@ -2,14 +2,13 @@ version: '2'
 
 services:
   zookeeper:
-    container_name: karafka_22_zookeeper
+    container_name: karafka_zookeeper
     image: confluentinc/cp-zookeeper:7.5.0
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 100
 
   kafka:
-    container_name: karafka_22_kafka
+    container_name: karafka_kafka
     image: confluentinc/cp-kafka:7.5.0
     depends_on:
       - zookeeper
