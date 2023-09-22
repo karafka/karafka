@@ -47,7 +47,14 @@ sleep(0.1) until polls >= 10
 
 # We send only one message to each topic partition, so when messages are consumed, it forces them
 # to be in separate worker threads
-10.times { |i| produce(DT.topic, SecureRandom.hex(6), partition: i) }
+Thread.new do
+  loop do
+    10.times { |i| produce(DT.topic, SecureRandom.hex(6), partition: i) }
+    sleep(0.5)
+  rescue WaterDrop::Errors::ProducerClosedError
+    break
+  end
+end
 
 wait_until do
   DT.data.values.flatten.size >= 10
