@@ -75,8 +75,7 @@ module Karafka
 
             info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
 
-            current_span = client.active_span
-            current_span.finish if current_span.present?
+            client.active_span&.finish
 
             pop_tags
           end
