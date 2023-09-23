@@ -156,12 +156,6 @@ jobs:
           bundle exec bin/wait_for_kafka
 
       - name: Run OSS integration tests
-        env:
-          KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
-          KARAFKA_PRO_USERNAME: ${{ secrets.KARAFKA_PRO_USERNAME }}
-          KARAFKA_PRO_PASSWORD: ${{ secrets.KARAFKA_PRO_PASSWORD }}
-          KARAFKA_PRO_VERSION: ${{ secrets.KARAFKA_PRO_VERSION }}
-          KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
         run: bin/integrations --exclude '/pro'
 
   integrations_pro:
