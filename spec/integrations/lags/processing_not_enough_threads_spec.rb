@@ -5,9 +5,20 @@
 # available
 
 setup_karafka do |config|
-  config.max_messages = 1_000
+  config.max_messages = 10
   config.concurrency = 1
   config.kafka[:'fetch.message.max.bytes'] = 1
+  config.max_wait_time = 5_000
+end
+
+Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
+  total = 0
+
+  event[:messages_buffer].each do |_topic, _partition, _messages|
+    total += 1
+  end
+
+  DT[:both] = true if total >= 2
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -19,26 +30,28 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  names = []
-
   DT.topics.first(2).each do |topic_name|
-    names << topic_name
-
     topic topic_name do
       consumer Consumer
     end
   end
+end
 
-  5.times do
-    names.each do |topic_name|
+Thread.new do
+  loop do
+    DT.topics.first(2).each do |topic_name|
       # Dispatching in a loop per topic will ensure the delivery order
-      produce_many(topic_name, DT.uuids(4))
+      produce(topic_name, DT.uuids(10).first)
     end
+
+    sleep(0.1)
+  rescue WaterDrop::Errors::ProducerClosedError
+    break
   end
 end
 
 start_karafka_and_wait_until do
-  DT[:processing_lags].size >= 2 && DT[:topics].uniq.size >= 2
+  DT[:processing_lags].size >= 2 && DT[:topics].uniq.size >= 2 && DT.key?(:both)
 end
 
 max_lag = DT[:processing_lags].max

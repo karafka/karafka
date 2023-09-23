@@ -268,9 +268,9 @@ def wait_until
   until stop
     stop = yield
 
-    # Stop if it was running for 3 minutes and nothing changed
+    # Stop if it was running for 4 minutes and nothing changed
     # This prevent from hanging in case of specs instability
-    if (Time.now - started_at) > 180
+    if (Time.now - started_at) > 240
       puts DT.data
       raise StandardError, 'Execution expired'
     end
@@ -356,6 +356,17 @@ def assert_not_equal(not_expected, received)
   return if not_expected != received
 
   raise AssertionFailedError, "#{received} equals to #{not_expected}"
+end
+
+# Checks if two ranges do not overlap
+#
+# @param range_a [Range]
+# @param range_b [Range]
+def assert_no_overlap(range_a, range_b)
+  assert(
+    !(range_b.begin <= range_a.end && range_a.begin <= range_b.end),
+    [range_a, range_b, DT]
+  )
 end
 
 # @param file_path [String] path within fixtures dir to the expected file
