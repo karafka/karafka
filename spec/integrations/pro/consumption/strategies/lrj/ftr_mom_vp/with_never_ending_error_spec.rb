@@ -33,8 +33,8 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:attempts].size >= 20
+  DT[:attempts].uniq.size >= 20
 end
 
-assert_equal [], (1..20).to_a - DT[:attempts], DT[:attempts]
+assert_equal [], (1..20).to_a - DT[:attempts].uniq, DT[:attempts]
 assert_equal 0, fetch_first_offset

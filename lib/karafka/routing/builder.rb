@@ -10,8 +10,14 @@ module Karafka
     #     end
     #   end
     class Builder < Concurrent::Array
+      # Empty default per-topic config
+      EMPTY_DEFAULTS = ->(_) {}.freeze
+
+      private_constant :EMPTY_DEFAULTS
+
       def initialize
         @draws = Concurrent::Array.new
+        @defaults = EMPTY_DEFAULTS
         super
       end
 
@@ -55,8 +61,17 @@ module Karafka
 
       # Clears the builder and the draws memory
       def clear
+        @defaults = EMPTY_DEFAULTS
         @draws.clear
         super
+      end
+
+      # @param block [Proc] block with per-topic evaluated defaults
+      # @return [Proc] defaults that should be evaluated per topic
+      def defaults(&block)
+        return @defaults unless block
+
+        @defaults = block
       end
 
       private

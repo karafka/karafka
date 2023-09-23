@@ -25,8 +25,8 @@ module Factory
   class << self
     def call(topic, partition)
       THROTTLERS.compute_if_absent("#{topic.name}-#{partition}") do
-        # We set 30 seconds so we can trigger a rebalance and check that it still complies
-        ::Karafka::Pro::Processing::Filters::Throttler.new(5, 15_000)
+        # We set 10 seconds so we can trigger a rebalance and check that it still complies
+        ::Karafka::Pro::Processing::Filters::Throttler.new(5, 10_000)
       end
     end
   end
@@ -46,7 +46,7 @@ produce_many(DT.topic, elements)
 consumer = setup_rdkafka_consumer
 
 thread = Thread.new do
-  sleep(5)
+  sleep(10)
 
   consumer.subscribe(DT.topic)
 

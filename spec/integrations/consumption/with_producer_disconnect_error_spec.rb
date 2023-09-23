@@ -5,7 +5,7 @@
 #   value. Usually you have it higher and it may be, that it is Kafka that is disconnecting.
 #   In such cases you can ignore those errors as the reconnect will happen.
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.kafka.merge!('connections.max.idle.ms': 1_000)
 end
 

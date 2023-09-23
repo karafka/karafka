@@ -32,7 +32,7 @@ module Karafka
       # @param topics [Karafka::Routing::Topics] all the topics that share the same key settings
       # @return [SubscriptionGroup] built subscription group
       def initialize(position, topics)
-        @name = topics.first.subscription_group
+        @name = topics.first.subscription_group_name
         @consumer_group = topics.first.consumer_group
         @id = "#{@name}_#{position}"
         @position = position
@@ -68,6 +68,12 @@ module Karafka
       #   they are later removed.
       def subscriptions
         topics.select(&:active?).map(&:subscription_name)
+      end
+
+      # @return [String] id of the subscription group
+      # @note This is an alias for displaying in places where we print the stringified version.
+      def to_s
+        id
       end
 
       private

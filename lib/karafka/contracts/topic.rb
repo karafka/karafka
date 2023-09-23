@@ -20,7 +20,7 @@ module Karafka
       required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
       required(:name) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
       required(:active) { |val| [true, false].include?(val) }
-      required(:subscription_group) { |val| val.is_a?(String) && !val.empty? }
+      required(:subscription_group_name) { |val| val.is_a?(String) && !val.empty? }
 
       # Consumer needs to be present only if topic is active
       # We allow not to define consumer for non-active because they may be only used via admin
