@@ -61,8 +61,10 @@ jobs:
       - name: Run Coditsu
         run: \curl -sSL https://api.coditsu.io/run/ci | bash
 
+  # We do not split RSpec specs to OSS and Pro like integrations because they do not overload
+  # Kafka heavily, compute total coverage for specs and are fast enough
   specs:
-    timeout-minutes: 30
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     needs: diffend
     strategy:
@@ -88,7 +90,7 @@ jobs:
 
       - name: Start Kafka with docker-compose
         run: |
-          docker-compose up -d
+          docker-compose up -d || (sleep 5 && docker-compose up -d)
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -106,7 +108,7 @@ jobs:
         run: bin/rspecs
 
   integrations_oss:
-    timeout-minutes: 45
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     needs: diffend
     strategy:
@@ -130,7 +132,7 @@ jobs:
 
       - name: Start Kafka with docker-compose
         run: |
-          docker-compose up -d
+          docker-compose up -d || (sleep 5 && docker-compose up -d)
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -167,7 +169,7 @@ jobs:
         run: bin/integrations --exclude '/pro'
 
   integrations_pro:
-    timeout-minutes: 45
+    timeout-minutes: 40
     runs-on: ubuntu-latest
     needs: diffend
     strategy:
@@ -191,7 +193,7 @@ jobs:
 
       - name: Start Kafka with docker-compose
         run: |
-          docker-compose up -d
+          docker-compose up -d || (sleep 5 && docker-compose up -d)
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
