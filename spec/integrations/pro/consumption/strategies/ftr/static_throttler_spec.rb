@@ -46,7 +46,7 @@ produce_many(DT.topic, elements)
 consumer = setup_rdkafka_consumer
 
 thread = Thread.new do
-  sleep(5)
+  sleep(10)
 
   consumer.subscribe(DT.topic)
 
