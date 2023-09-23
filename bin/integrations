@@ -218,12 +218,25 @@ end
 # Load all the specs
 specs = Dir[ROOT_PATH.join('spec/integrations/**/*_spec.rb')]
 
+FILTER_TYPE = ARGV[0] == '--exclude' ? 'exclude' : 'include'
+
+# Remove the exclude flag
+ARGV.shift if FILTER_TYPE == '--exclude'
+
 # If filters is provided, apply
 # Allows to provide several filters one after another and applies all of them
 ARGV.each do |filter|
-  specs.delete_if { |name| !name.include?(filter) }
+  specs.delete_if do |name|
+    case FILTER_TYPE
+    when 'include'
+      !name.include?(filter)
+    when 'exclude'
+      name.include?(filter)
+    else
+      raise 'Invalid filter type'
+    end
+  end
 end
-
 
 raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
 
