@@ -9,7 +9,7 @@ services:
       - 9092:9092
 
     environment:
-      CLUSTER_ID: adqr22r231e223131231ww
+      CLUSTER_ID: kafka-docker-cluster-1
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_PROCESS_ROLES: broker,controller
