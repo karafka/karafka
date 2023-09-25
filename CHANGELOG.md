@@ -1,10 +1,13 @@
 # Karafka framework changelog
 
-## 2.2.5 (Unreleased)
+## 2.2.6 (Unreleased)
 - **[Feature]** Introduce Appsignal integration for errors and metrics tracking.
+
+## 2.2.5 (2023-09-25)
+
 - [Enhancement] Ensure, that when topic related operations end, the result is usable. There were few cases where admin operations on topics would finish successfully but internal Kafka caches would not report changes for a short period of time.
 - [Enhancement] Stabilize cooperative-sticky early shutdown procedure.
-- [Fix] use nil? instead of present? on DataDog::Tracing::SpanOperation (vitellochris)
+- [Fix] use `#nil?` instead of `#present?` on `DataDog::Tracing::SpanOperation` (vitellochris)
 - [Maintenance] Align connection clearing API with Rails 7.1 deprecation warning.
 - [Maintenance] Make `#subscription_group` reference consistent in the Routing and Instrumentation.
 - [Maintenance] Align the consumer pause instrumentation with client pause instrumentation by adding `subscription_group` visibility to the consumer.
@@ -22,7 +25,6 @@
 ## 2.2.1 (2023-09-01)
 - [Fix] Fix insufficient validation of named patterns
 - [Maintenance] Rely on `2.2.x` `karafka-core`.
->>>>>>> master
 
 ## 2.2.0 (2023-09-01)
 - **[Feature]** Introduce dynamic topic subscriptions based on patterns [Pro].
