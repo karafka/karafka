@@ -1,9 +1,9 @@
 # Karafka framework changelog
 
-## 2.2.5 (Unreleased)
+## 2.2.5 (2023-09-25)
 - [Enhancement] Ensure, that when topic related operations end, the result is usable. There were few cases where admin operations on topics would finish successfully but internal Kafka caches would not report changes for a short period of time.
 - [Enhancement] Stabilize cooperative-sticky early shutdown procedure.
-- [Fix] use nil? instead of present? on DataDog::Tracing::SpanOperation (vitellochris)
+- [Fix] use `#nil?` instead of `#present?` on `DataDog::Tracing::SpanOperation` (vitellochris)
 - [Maintenance] Align connection clearing API with Rails 7.1 deprecation warning.
 - [Maintenance] Make `#subscription_group` reference consistent in the Routing and Instrumentation.
 - [Maintenance] Align the consumer pause instrumentation with client pause instrumentation by adding `subscription_group` visibility to the consumer.
