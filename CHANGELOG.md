@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.2.6 (Unreleased)
+## 2.2.6 (2023-09-26)
 - [Enhancement] Retry `Karafka::Admin#read_watermark_offsets` fetching upon `not_leader_for_partition` that can occur mostly on newly created topics in KRaft and after crashes during leader selection.
 
 ## 2.2.5 (2023-09-25)
