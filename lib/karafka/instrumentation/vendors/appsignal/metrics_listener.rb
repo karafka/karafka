@@ -65,9 +65,11 @@ module Karafka
             messages = consumer.messages
             metadata = messages.metadata
 
-            count('consumer_messages', messages.size, consumer_tags(consumer))
-            count('consumer_batches', 1, consumer_tags(consumer))
-            gauge('consumer_offsets', metadata.last_offset, consumer_tags(consumer))
+            with_multiple_resolutions(consumer) do |tags|
+              count('consumer_messages', messages.size, tags)
+              count('consumer_batches', 1, tags)
+              gauge('consumer_offsets', metadata.last_offset, tags)
+            end
 
             stop_transaction
           end
@@ -107,11 +109,10 @@ module Karafka
           # @param event [Karafka::Core::Monitoring::Event]
           def on_dead_letter_queue_dispatched(event)
             consumer = event.payload[:caller]
-            count(
-              'consumer_dead',
-              1,
-              consumer_tags(consumer)
-            )
+
+            with_multiple_resolutions(consumer) do |tags|
+              count('consumer_dead', 1, tags)
+            end
           end
 
           # Reports on **any** error that occurs. This also includes non-user related errors
@@ -122,7 +123,10 @@ module Karafka
             # If this is a user consumption related error, we bump the counters for metrics
             if event[:type] == 'consumer.consume.error'
               consumer = event.payload[:caller]
-              count('consumer_errors', 1, consumer_tags(consumer))
+
+              with_multiple_resolutions(consumer) do |tags|
+                count('consumer_errors', 1, tags)
+              end
             end
 
             stop_transaction
@@ -242,17 +246,18 @@ module Karafka
           end
 
           # @param consumer [Karafka::BaseConsumer] Karafka consumer instance
-          # @return [Hash] consumer related tags
-          def consumer_tags(consumer)
+          def with_multiple_resolutions(consumer)
             topic_name = consumer.topic.name
             consumer_group_name = consumer.topic.consumer_group.name
             partition = consumer.partition
 
-            {
+            tags = {
               consumer_group: consumer_group_name,
-              topic: topic_name,
-              partition: partition
+              topic: topic_name
             }
+
+            yield(tags)
+            yield(tags.merge(partition: partition))
           end
         end
       end
