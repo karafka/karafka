@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.2.5)
+    karafka (2.2.6)
       karafka-core (>= 2.2.2, < 2.3.0)
       thor (>= 0.20)
       waterdrop (>= 2.6.6, < 3.0.0)
