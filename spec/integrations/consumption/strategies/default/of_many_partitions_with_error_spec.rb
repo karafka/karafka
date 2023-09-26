@@ -43,7 +43,7 @@ end
 Thread.new { Karafka::Server.run }
 
 # Give it some time to boot and connect before dispatching messages
-sleep(5)
+sleep(10)
 
 10.times { |i| produce(DT.topic, SecureRandom.hex(6), partition: i) }
 
