@@ -19,6 +19,19 @@ def cmd(dir, cmd)
   ["#{stdout}\n#{stderr}", status.exitstatus]
 end
 
+# Removes the Ruby def from the Gemfile as preview versions cause problems.
+#
+# @param file_path [String] path to a Gemfile from which we should remove Ruby def
+def remove_ruby_def(file_path)
+  lines = File.readlines(file_path)
+
+  filtered_lines = lines.reject { |line| line.start_with?('ruby "') }
+
+  File.open(file_path, 'w') do |file|
+    file.puts(filtered_lines)
+  end
+end
+
 Dir.mktmpdir do |dir|
   FileUtils.cp(
     File.join(spec_dir, 'Gemfile'),
@@ -39,6 +52,8 @@ Dir.mktmpdir do |dir|
     File.open("#{dir}/Gemfile", 'a') do |f|
       f.puts 'gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR"), require: true'
     end
+
+    remove_ruby_def("#{dir}/Gemfile")
 
     be_install = cmd(dir, 'bundle install')
     assert_equal 0, be_install[1], be_install[0]
