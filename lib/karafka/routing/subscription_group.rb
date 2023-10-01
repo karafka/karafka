@@ -34,9 +34,10 @@ module Karafka
       def initialize(position, topics)
         @name = topics.first.subscription_group_name
         @consumer_group = topics.first.consumer_group
-        # We include the cgroup id here because we want to have unique ids of subscription groups
-        # across the system. Otherwise user could set the same name for multiple subscription
-        # groups in many consumer groups effectively having same id for different entities
+        # We include the consumer group id here because we want to have unique ids of subscription
+        # groups across the system. Otherwise user could set the same name for multiple
+        # subscription groups in many consumer groups effectively having same id for different
+        # entities
         @id = "#{@consumer_group.id}_#{@name}_#{position}"
         @position = position
         @topics = topics
