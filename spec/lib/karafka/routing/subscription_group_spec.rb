@@ -7,7 +7,7 @@ RSpec.describe_current do
   let(:topics) { [topic] }
 
   describe '#id' do
-    it { expect(group.id).to eq("#{topic.subscription_group_name}_0") }
+    it { expect(group.id).to eq("#{topic.consumer_group.id}_#{topic.subscription_group_name}_0") }
   end
 
   describe '#to_s' do
