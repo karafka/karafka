@@ -2,6 +2,7 @@
 
 ## 2.2.7 (Unreleased)
 - **[Feature]** Introduce Appsignal integration for errors and metrics tracking.
+- **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics from the consumer instance and use them to alter the processing flow.
 - [Enhancement] Make sure, that subscription groups ids are unique by including their consumer group id in them similar to how topics ids are handled (not a breaking change).
 
 ## 2.2.6 (2023-09-26)

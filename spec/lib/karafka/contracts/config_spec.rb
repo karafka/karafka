@@ -49,7 +49,9 @@ RSpec.describe_current do
           scheduler: Karafka::Processing::Scheduler.new,
           jobs_builder: Karafka::Processing::JobsBuilder.new,
           coordinator_class: Karafka::Processing::Coordinator,
-          partitioner_class: Karafka::Processing::Partitioner
+          partitioner_class: Karafka::Processing::Partitioner,
+          strategy_selector: Karafka::Processing::StrategySelector.new,
+          expansions_selector: Karafka::Processing::ExpansionsSelector.new
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
@@ -429,16 +431,25 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when processing jobs_builder is missing' do
-      before { config[:internal][:processing].delete(:jobs_builder) }
+    %i[
+      jobs_builder
+      scheduler
+      coordinator_class
+      partitioner_class
+      strategy_selector
+      expansions_selector
+    ].each do |key|
+      context "when processing #{key} is missing" do
+        before { config[:internal][:processing].delete(key) }
 
-      it { expect(contract.call(config)).not_to be_success }
-    end
+        it { expect(contract.call(config)).not_to be_success }
+      end
 
-    context 'when processing jobs_builder is nil' do
-      before { config[:internal][:processing][:jobs_builder] = nil }
+      context "when processing #{key} is nil" do
+        before { config[:internal][:processing][key] = nil }
 
-      it { expect(contract.call(config)).not_to be_success }
+        it { expect(contract.call(config)).not_to be_success }
+      end
     end
 
     context 'when status is missing' do

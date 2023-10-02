@@ -23,11 +23,46 @@ module Karafka
 
           # Loads all the features and activates them
           def load_all
+            features.each(&:activate)
+          end
+
+          # @param config [Karafka::Core::Configurable::Node] app config that we can alter with
+          #   particular routing feature specific stuff if needed
+          def pre_setup_all(config)
+            features.each { |feature| feature.pre_setup(config) }
+          end
+
+          # Runs post setup routing features configuration operations
+          #
+          # @param config [Karafka::Core::Configurable::Node]
+          def post_setup_all(config)
+            features.each { |feature| feature.post_setup(config) }
+          end
+
+          private
+
+          # @return [Array<Class>] all available routing features
+          def features
             ObjectSpace
               .each_object(Class)
               .select { |klass| klass < self }
               .sort_by(&:to_s)
-              .each(&:activate)
+          end
+
+          protected
+
+          # Runs pre-setup configuration of a particular routing feature
+          #
+          # @param _config [Karafka::Core::Configurable::Node] app config node
+          def pre_setup(_config)
+            true
+          end
+
+          # Runs post-setup configuration of a particular routing feature
+          #
+          # @param _config [Karafka::Core::Configurable::Node] app config node
+          def post_setup(_config)
+            true
           end
         end
       end

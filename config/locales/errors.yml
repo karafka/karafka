@@ -16,9 +16,11 @@ en:
       max_wait_time_format: needs to be an integer bigger than 0
       kafka_format: needs to be a filled hash
       internal.processing.jobs_builder_format: cannot be nil
-      internal.processing.scheduler: cannot be nil
-      internal.processing.coordinator_class: cannot be nil
-      internal.processing.partitioner_class: cannot be nil
+      internal.processing.scheduler_format: cannot be nil
+      internal.processing.coordinator_class_format: cannot be nil
+      internal.processing.partitioner_class_format: cannot be nil
+      internal.processing.strategy_selector_format: cannot be nil
+      internal.processing.expansions_selector_format: cannot be nil
       internal.active_job.dispatcher: cannot be nil
       internal.active_job.job_options_contract: cannot be nil
       internal.active_job.consumer_class: cannot be nil
@@ -59,8 +61,9 @@ en:
       initial_offset_format: needs to be either earliest or latest
       subscription_group_name_format: must be a non-empty string
       manual_offset_management.active_format: needs to be either true or false
-      consumer_active_job_missing: ActiveJob needs to be available
       manual_offset_management_must_be_enabled: cannot be disabled for ActiveJob topics
+      inline_insights.active_format: needs to be either true or false
+      consumer_active_job_missing: ActiveJob needs to be available
       dead_letter_queue.max_retries_format: needs to be equal or bigger than 0
       dead_letter_queue.topic_format: 'needs to be a string with a Kafka accepted format'
       dead_letter_queue.active_format: needs to be either true or false
