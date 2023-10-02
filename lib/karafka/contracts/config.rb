@@ -73,6 +73,8 @@ module Karafka
           required(:scheduler) { |val| !val.nil? }
           required(:coordinator_class) { |val| !val.nil? }
           required(:partitioner_class) { |val| !val.nil? }
+          required(:strategy_selector) { |val| !val.nil? }
+          required(:expansions_selector) { |val| !val.nil? }
         end
 
         nested(:active_job) do

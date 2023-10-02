@@ -16,9 +16,11 @@ en:
       max_wait_time_format: needs to be an integer bigger than 0
       kafka_format: needs to be a filled hash
       internal.processing.jobs_builder_format: cannot be nil
-      internal.processing.scheduler: cannot be nil
-      internal.processing.coordinator_class: cannot be nil
-      internal.processing.partitioner_class: cannot be nil
+      internal.processing.scheduler_format: cannot be nil
+      internal.processing.coordinator_class_format: cannot be nil
+      internal.processing.partitioner_class_format: cannot be nil
+      internal.processing.strategy_selector_format: cannot be nil
+      internal.processing.expansions_selector_format: cannot be nil
       internal.active_job.dispatcher: cannot be nil
       internal.active_job.job_options_contract: cannot be nil
       internal.active_job.consumer_class: cannot be nil
