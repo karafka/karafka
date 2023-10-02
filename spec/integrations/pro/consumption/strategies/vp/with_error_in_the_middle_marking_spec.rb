@@ -40,7 +40,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  if DT[:offsets].size >= 50 && DT[:offsets].count(25)
+  if DT[:offsets].size >= 50 && DT[:offsets].count(25) >= 2
     true
   else
     produce_many(DT.topic, DT.uuids(10))

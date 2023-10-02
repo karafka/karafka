@@ -34,7 +34,11 @@ module Karafka
       def initialize(position, topics)
         @name = topics.first.subscription_group_name
         @consumer_group = topics.first.consumer_group
-        @id = "#{@name}_#{position}"
+        # We include the consumer group id here because we want to have unique ids of subscription
+        # groups across the system. Otherwise user could set the same name for multiple
+        # subscription groups in many consumer groups effectively having same id for different
+        # entities
+        @id = "#{@consumer_group.id}_#{@name}_#{position}"
         @position = position
         @topics = topics
         @kafka = build_kafka
@@ -87,7 +91,7 @@ module Karafka
         # If we use static group memberships, there can be a case, where same instance id would
         # be set on many subscription groups as the group instance id from Karafka perspective is
         # set per config. Each instance even if they are subscribed to different topics needs to
-        # have if fully unique. To make sure of that, we just add extra postfix at the end that
+        # have it fully unique. To make sure of that, we just add extra postfix at the end that
         # increments.
         group_instance_id = kafka.fetch(:'group.instance.id', false)
 

@@ -221,6 +221,7 @@ module Karafka
         request.timeout.ms
         resolve_cb
         retries
+        retry.backoff.max.ms
         retry.backoff.ms
         sasl.kerberos.keytab
         sasl.kerberos.kinit.cmd
