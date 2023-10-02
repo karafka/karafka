@@ -13,6 +13,13 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..'))
 
 ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
 
+BENCHMARK_TOPICS = {
+  'benchmarks_00_01' => 1,
+  'benchmarks_00_05' => 5,
+  'benchmarks_01_05' => 5,
+  'benchmarks_00_10' => 10
+}
+
 # Load all the benchmarks
 benchmarks = Dir[ROOT_PATH.join('spec/benchmarks/**/*.rb')]
 
@@ -36,6 +43,13 @@ if ENV['SEED']
 
   # We make our data json compatible so we can also benchmark serialization
   elements = Array.new(100_000) { { a: :b }.to_json }
+
+  topics = Karafka::Admin.cluster_info.topics.map { |details| details.fetch(:topic_name) }
+
+  BENCHMARK_TOPICS.each do |topic_name, partitions_count|
+    ::Karafka::Admin.delete_topic(topic_name) if topics.include?(topic_name)
+    ::Karafka::Admin.create_topic(topic_name, partitions_count, 1)
+  end
 
   # We do not populate data of benchmarks_0_10 as we use it with life-stream data only
   %w[

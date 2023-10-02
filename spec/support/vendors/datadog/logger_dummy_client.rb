@@ -47,11 +47,6 @@ module Vendors
         self
       end
 
-      # @return [Boolean]
-      def present?
-        true
-      end
-
       # API compatibility hook
       def finish
         self

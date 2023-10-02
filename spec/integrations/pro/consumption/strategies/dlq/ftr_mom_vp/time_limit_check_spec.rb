@@ -36,5 +36,5 @@ start_karafka_and_wait_until do
   sleep(15)
 end
 
-assert_equal elements[0..1], DT[0]
+assert_equal elements[0..1].sort, DT[0].sort
 assert fetch_first_offset.zero?

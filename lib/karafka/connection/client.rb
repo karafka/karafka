@@ -236,9 +236,23 @@ module Karafka
         #
         # @see https://github.com/confluentinc/librdkafka/issues/4312
         if @subscription_group.kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
+          active_wait = false
+
           (COOPERATIVE_STICKY_MAX_WAIT / 100).times do
             # If we're past the first rebalance, no need to wait
-            break if @rebalance_manager.active?
+            if @rebalance_manager.active?
+              # We give it a a bit of time because librdkafka has a tendency to do some-post
+              # callback work that from its perspective is still under rebalance
+              sleep(5) if active_wait
+
+              break
+            end
+
+            active_wait = true
+
+            # poll to trigger potential rebalances that could occur during stopping and to trigger
+            # potential callbacks
+            poll(100)
 
             sleep(0.1)
           end

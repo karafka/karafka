@@ -15,7 +15,7 @@ class Consumer < Karafka::BaseConsumer
 
       DT[:done] << true
 
-      mark_as_consumed Karafka::Messages::Seek.new(topic, partition, 5)
+      mark_as_consumed Karafka::Messages::Seek.new(topic, partition, 51)
     end
   end
 end
@@ -36,4 +36,4 @@ start_karafka_and_wait_until do
   DT[:done].count.positive? && sleep(1)
 end
 
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_first_offset, nil

@@ -142,7 +142,12 @@ module Karafka
       # @return [Array<Integer, Integer>] low watermark offset and high watermark offset
       def read_watermark_offsets(name, partition)
         with_consumer do |consumer|
-          consumer.query_watermark_offsets(name, partition)
+          # For newly created topics or in cases where we're trying to get them but there is no
+          # leader, this can fail. It happens more often for new topics under KRaft, however we
+          # still want to make sure things operate as expected even then
+          with_rdkafka_retry(codes: %i[not_leader_for_partition]) do
+            consumer.query_watermark_offsets(name, partition)
+          end
         end
       end
 
@@ -216,12 +221,41 @@ module Karafka
         attempt += 1
 
         handler.call
-      rescue Rdkafka::AbstractHandle::WaitTimeoutError
+
+        # If breaker does not operate, it means that the requested change was applied but is still
+        # not visible and we need to wait
+        raise(Errors::ResultNotVisibleError) unless breaker.call
+      rescue Rdkafka::AbstractHandle::WaitTimeoutError, Errors::ResultNotVisibleError
         return if breaker.call
 
         retry if attempt <= app_config.admin.max_attempts
 
         raise
+      end
+
+      # Handles retries for rdkafka related errors that we specify in `:codes`.
+      #
+      # Some operations temporarily fail, especially for cases where we changed something fast
+      # like topic creation or repartitioning. In cases like this it is ok to retry operations that
+      # do not change the state as it will usually recover.
+      #
+      # @param codes [Array<Symbol>] librdkafka error codes on which we want to retry
+      # @param max_attempts [Integer] number of attempts (including initial) after which we should
+      #   give up
+      #
+      # @note This code implements a simple backoff that increases with each attempt.
+      def with_rdkafka_retry(codes:, max_attempts: 5)
+        attempt ||= 0
+        attempt += 1
+
+        yield
+      rescue Rdkafka::RdkafkaError => e
+        raise unless codes.include?(e.code)
+        raise if attempt >= max_attempts
+
+        sleep(max_attempts)
+
+        retry
       end
 
       # @param type [Symbol] type of config we want

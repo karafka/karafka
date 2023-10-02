@@ -27,6 +27,9 @@ setup_karafka do |config|
   config.concurrency = 20
   config.max_messages = 100
   config.max_wait_time = 500
+  # Fetch one message a a time from partition (or something like that)
+  # to make sure we have a chance to operate in parallel
+  config.kafka[:'fetch.message.max.bytes'] = 1
 end
 
 class Current < ActiveSupport::CurrentAttributes

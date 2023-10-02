@@ -45,7 +45,7 @@ consumer = setup_rdkafka_consumer
 consumer.subscribe(DT.topic)
 
 consumer.each do |message|
-  assert message.offset >= 30
+  assert message.offset >= 30, [DT, message.offset]
   break
 end
 

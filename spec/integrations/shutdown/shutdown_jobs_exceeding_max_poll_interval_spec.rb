@@ -39,13 +39,14 @@ end
 consumer = setup_rdkafka_consumer
 
 other = Thread.new do
-  sleep(5)
+  sleep(10)
 
   consumer.subscribe(DT.topic)
 
-  consumer.poll(1_000)
-
-  sleep(0.1) while DT[:done].empty?
+  while DT[:done].empty?
+    consumer.poll(1_000)
+    sleep(0.1)
+  end
 end
 
 start_karafka_and_wait_until do

@@ -1,7 +1,19 @@
 # Karafka framework changelog
 
-## 2.2.5 (Unreleased)
+## 2.2.7 (Unreleased)
 - **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics 
+- [Enhancement] Make sure, that subscription groups ids are unique by including their consumer group id in them similar to how topics ids are handled (not a breaking change).
+
+## 2.2.6 (2023-09-26)
+- [Enhancement] Retry `Karafka::Admin#read_watermark_offsets` fetching upon `not_leader_for_partition` that can occur mostly on newly created topics in KRaft and after crashes during leader selection.
+
+## 2.2.5 (2023-09-25)
+- [Enhancement] Ensure, that when topic related operations end, the result is usable. There were few cases where admin operations on topics would finish successfully but internal Kafka caches would not report changes for a short period of time.
+- [Enhancement] Stabilize cooperative-sticky early shutdown procedure.
+- [Fix] use `#nil?` instead of `#present?` on `DataDog::Tracing::SpanOperation` (vitellochris)
+- [Maintenance] Align connection clearing API with Rails 7.1 deprecation warning.
+- [Maintenance] Make `#subscription_group` reference consistent in the Routing and Instrumentation.
+- [Maintenance] Align the consumer pause instrumentation with client pause instrumentation by adding `subscription_group` visibility to the consumer.
 
 ## 2.2.4 (2023-09-13)
 - [Enhancement] Compensate for potential Kafka cluster drifts vs consumer drift in batch metadata (#1611).

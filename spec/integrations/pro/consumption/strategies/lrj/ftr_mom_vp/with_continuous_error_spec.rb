@@ -19,7 +19,9 @@ ERROR_FLOW = Array.new(100) { rand(2).zero? } + [true, false]
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    raise StandardError if ERROR_FLOW.pop
+    # Skip the one with zero to simulate a case where we still need to retry
+    # from 0 but the batch with 0 element passed through
+    raise StandardError if ERROR_FLOW.pop && !messages.map(&:offset).include?(0)
 
     messages.each { |message| DT[0] << message.offset }
 

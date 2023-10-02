@@ -55,5 +55,10 @@ module Karafka
 
     # This should never happen. Please open an issue if it does.
     InvalidTimeBasedOffsetError = Class.new(BaseError)
+
+    # For internal usage only
+    # Raised when we run operations that require certain result but despite successfully finishing
+    # it is not yet available due to some synchronization mechanisms and caches
+    ResultNotVisibleError = Class.new(BaseError)
   end
 end

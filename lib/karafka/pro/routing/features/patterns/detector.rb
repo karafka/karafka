@@ -56,6 +56,9 @@ module Karafka
               topic = consumer_group.public_send(:topic=, discovered_topic, &pattern.config)
               topic.patterns(active: true, type: :discovered)
 
+              # Assign the appropriate subscription group to this topic
+              topic.subscription_group = pattern.topic.subscription_group
+
               # Inject into subscription group topics array always, so everything is reflected
               # there but since it is not active, will not be picked
               sg_topics << topic
