@@ -5,6 +5,7 @@ module Karafka
     module Features
       class InlineInsights < Base
         module Contracts
+          # Contract for inline insights topic setup
           class Topic < Karafka::Contracts::Base
             configure do |config|
               config.error_messages = YAML.safe_load(

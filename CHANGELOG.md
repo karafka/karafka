@@ -1,7 +1,7 @@
 # Karafka framework changelog
 
 ## 2.2.7 (Unreleased)
-- **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics 
+- **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics.
 - [Enhancement] Make sure, that subscription groups ids are unique by including their consumer group id in them similar to how topics ids are handled (not a breaking change).
 
 ## 2.2.6 (2023-09-26)

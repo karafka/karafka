@@ -5,16 +5,20 @@ module Karafka
     module Features
       class InlineInsights < Base
         module Topic
+          # Routing topic inline insights API
+          # @param active [Boolean] should inline insights be activated
           def inline_insights(active = false)
             @inline_insights ||= Config.new(
               active: active
             )
           end
 
+          # @return [Boolean] Are inline insights active
           def inline_insights?
             inline_insights.active?
           end
 
+          # @return [Hash] topic setup hash
           def to_h
             super.merge(
               inline_insights: inline_insights.to_h
