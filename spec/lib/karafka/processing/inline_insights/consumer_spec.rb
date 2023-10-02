@@ -12,7 +12,7 @@ RSpec.describe_current do
   end
 
   describe '#insights' do
-    subject { consumer.insights }
+    subject(:insights) { consumer.insights }
 
     context 'when insights exist' do
       let(:insight_data) { { 'key' => 'value' } }
@@ -22,7 +22,7 @@ RSpec.describe_current do
       end
 
       it 'returns the insights data' do
-        expect(subject).to eq(insight_data)
+        expect(insights).to eq(insight_data)
       end
     end
 
@@ -32,7 +32,7 @@ RSpec.describe_current do
       end
 
       it 'returns an empty hash' do
-        expect(subject).to eq({})
+        expect(insights).to eq({})
       end
     end
   end
