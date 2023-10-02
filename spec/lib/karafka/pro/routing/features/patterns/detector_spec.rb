@@ -9,7 +9,7 @@ RSpec.describe_current do
     let(:group_topics) { build(:routing_subscription_group).topics }
 
     it 'expect to do nothing' do
-      expect { detection }.not_to change { group_topics }
+      expect { detection }.not_to(change { group_topics })
     end
   end
 
