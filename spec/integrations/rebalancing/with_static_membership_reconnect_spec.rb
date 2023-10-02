@@ -79,14 +79,14 @@ other = Thread.new do
 end
 
 # Give it some time to start before starting Karafka main process
-sleep 5
+sleep 10
 
 start_karafka_and_wait_until(reset_status: true) do
   DT[:process2].size >= 20
 end
 
 # Wait to make sure, that the process 1 does not get the partitions back
-sleep 5
+sleep 10
 
 # After stopping start once again
 
@@ -95,7 +95,7 @@ start_karafka_and_wait_until(reset_status: true) do
 end
 
 # Give it some time, so we allow (potentially) to assing all messages to process 1
-sleep 5
+sleep 10
 
 # Close the first consumer instance
 DT[:terminate] = true

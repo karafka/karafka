@@ -2,6 +2,7 @@
 
 ## 2.2.7 (Unreleased)
 - **[Feature]** Introduce Appsignal integration for errors and metrics tracking.
+- [Enhancement] Make sure, that subscription groups ids are unique by including their consumer group id in them similar to how topics ids are handled (not a breaking change).
 
 ## 2.2.6 (2023-09-26)
 - [Enhancement] Retry `Karafka::Admin#read_watermark_offsets` fetching upon `not_leader_for_partition` that can occur mostly on newly created topics in KRaft and after crashes during leader selection.
