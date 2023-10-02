@@ -4,8 +4,8 @@ module Karafka
   module Routing
     module Features
       class InlineInsights < Base
+        # Routing topic inline insights API
         module Topic
-          # Routing topic inline insights API
           # @param active [Boolean] should inline insights be activated
           def inline_insights(active = false)
             @inline_insights ||= Config.new(

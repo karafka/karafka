@@ -4,6 +4,7 @@ module Karafka
   module Routing
     module Features
       class InlineInsights < Base
+        # Config of this feature
         Config = Struct.new(
           :active,
           keyword_init: true

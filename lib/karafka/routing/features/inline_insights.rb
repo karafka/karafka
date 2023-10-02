@@ -10,8 +10,8 @@ module Karafka
         class << self
           # If needed installs the needed listener and initializes tracker
           #
-          # @param config [Karafka::Core::Configurable::Node] app config
-          def post_setup(config)
+          # @param _config [Karafka::Core::Configurable::Node] app config
+          def post_setup(_config)
             ::Karafka::App.monitor.subscribe('app.running') do
               # Do not activate tracking of statistics if none of our active topics uses it
               # This prevents us from tracking metrics when user just runs a subset of topics

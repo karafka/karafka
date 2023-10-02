@@ -208,7 +208,7 @@ module Karafka
           setting :partitioner_class, default: Processing::Partitioner
           # option strategy_selector [Object] processing strategy selector to be used
           setting :strategy_selector, default: Processing::StrategySelector.new
-          # option expansions_selector [Object] processing expansions seletor to be used
+          # option expansions_selector [Object] processing expansions selector to be used
           setting :expansions_selector, default: Processing::ExpansionsSelector.new
         end
 
