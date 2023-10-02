@@ -20,15 +20,8 @@ module Karafka
           Tracker.exists?(topic, partition)
         end
 
-        # @return [Hash] alias for `#insights`
-        def statistics
-          insights
-        end
-
-        # @return [Hash] alias for `#insights?`
-        def statistics?
-          insights?
-        end
+        alias statistics insights
+        alias statistics? insights?
       end
     end
   end
