@@ -67,6 +67,7 @@ RSpec.configure do |config|
     Karafka::App.routes.clear
     Karafka.monitor.notifications_bus.clear
     Karafka::App.config.internal.routing.activity_manager.clear
+    Karafka::Processing::InlineInsights::Tracker.clear
   end
 end
 

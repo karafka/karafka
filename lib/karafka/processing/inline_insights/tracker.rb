@@ -21,7 +21,7 @@ module Karafka
         class << self
           extend Forwardable
 
-          def_delegators :instance, :find, :add, :exists?
+          def_delegators :instance, :find, :add, :exists?, :clear
         end
 
         def initialize
@@ -73,6 +73,11 @@ module Karafka
         # @return [Boolean] true if statistics of a given topic exist, otherwise false
         def exists?(topic, partition)
           !find(topic, partition).empty?
+        end
+
+        # Clears the tracker
+        def clear
+          @mutex.synchronize { @accu.clear }
         end
       end
     end
