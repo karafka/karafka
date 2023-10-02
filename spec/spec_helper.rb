@@ -60,7 +60,7 @@ RSpec.configure do |config|
 
     next unless example.metadata[:type] == :pro
 
-    Karafka::Pro::Loader.pre_setup(Karafka::App.config)
+    Karafka::Pro::Loader.pre_setup_all(Karafka::App.config)
   end
 
   config.after do
