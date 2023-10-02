@@ -24,7 +24,7 @@ module Karafka
             @delay = delay
           end
 
-          # Removes too old messages
+          # Removes too young messages
           #
           # @param messages [Array<Karafka::Messages::Message>]
           def apply!(messages)
