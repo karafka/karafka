@@ -39,7 +39,7 @@ start_karafka_and_wait_until do
 end
 
 DT.data.each do |key, values|
-  topic, partition = key.split('-')
+  _topic, partition = key.split('-')
 
   assert_equal partition.to_i, values.last['partition']
 end
