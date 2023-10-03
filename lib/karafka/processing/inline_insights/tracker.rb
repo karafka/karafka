@@ -15,7 +15,7 @@ module Karafka
       #   when using LRJ a lost partition data would not be present anymore, however we would still
       #   be in the processing phase. Since those metrics are published with each `poll`, regular
       #   processing is not a subject of this issue. For LRJ we keep the reference. The only case
-      #   where this could be switched midway is when LRJ is running for an extended perio of time
+      #   where this could be switched midway is when LRJ is running for an extended period of time
       #   after the involuntary revocation. Having a time based cache instead of tracking
       #   simplifies the design as we do not have to deal with state tracking, especially since
       #   we would have to track also operations running in a revoked state.
