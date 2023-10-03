@@ -93,13 +93,6 @@ module Karafka
           @accu.fetch(key, EMPTY_ARRAY).last || EMPTY_HASH
         end
 
-        # @param topic [Karafka::Routing::Topic]
-        # @param partition [Integer]
-        # @return [Boolean] true if statistics of a given topic exist, otherwise false
-        def exists?(topic, partition)
-          !find(topic, partition).empty?
-        end
-
         # Clears the tracker
         def clear
           @mutex.synchronize { @accu.clear }

@@ -11,13 +11,26 @@ module Karafka
       # Module that adds extra methods to the consumer that allow us to fetch the insights
       module Consumer
         # @return [Hash] empty hash or hash with given partition insights if already present
+        # @note We cache insights on the consumer, as in some scenarios we may no longer have them
+        #   inside the Tracker, for example under involuntary revocation, incoming statistics may
+        #   no longer have lost partition insights. Since we want to be consistent during single
+        #   batch operations, we want to ensure, that if we have insights they are available
+        #   throughout the whole processing.
         def insights
-          Tracker.find(topic, partition)
+          insights = Tracker.find(topic, partition)
+
+          # If we no longer have new insights but we still have them locally, we can use them
+          return @insights if @insights && insights.empty?
+          # If insights are still the same, we can use them
+          return @insights if @insights == insights
+
+          # If we've received new insights that are not empty, we can cache them
+          @insights = insights
         end
 
         # @return [Boolean] true if there are insights to work with, otherwise false
         def insights?
-          Tracker.exists?(topic, partition)
+          !insights.empty?
         end
 
         alias statistics insights

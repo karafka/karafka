@@ -43,21 +43,7 @@ RSpec.describe_current do
     subject(:result) { tracker.add(consumer_group_id, statistics) }
 
     it 'adds the statistics to the tracker' do
-      expect { result }.to change { tracker.exists?(topic, partition) }.from(false).to(true)
-    end
-  end
-
-  describe '#exists?' do
-    subject(:result) { tracker.exists?(topic, partition) }
-
-    context 'when statistics exist' do
-      before { tracker.add(consumer_group_id, statistics) }
-
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when statistics do not exist' do
-      it { is_expected.to be_falsey }
+      expect { result }.to change { tracker.find(topic, partition) }.from({})
     end
   end
 end
