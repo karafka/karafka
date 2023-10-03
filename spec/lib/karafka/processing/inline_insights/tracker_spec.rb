@@ -46,7 +46,6 @@ RSpec.describe_current do
       end
     end
 
-
     context 'when statistics do not exist' do
       it 'returns an empty hash' do
         expect(result).to eq({})
