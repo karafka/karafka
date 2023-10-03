@@ -109,10 +109,16 @@ module Karafka
         # Should we track given partition
         #
         # We do not track stopped partitions and the once we do not work with actively
+        # @param partition_id [String] partition id as a string
+        # @param p_details [Hash] partition statistics details
+        # @return [Boolean] true if we should track given partition
         def track?(partition_id, p_details)
           return false if partition_id == '-1'
-          return false if p_details.fetch('fetch_state') == 'stopped'
-          return false if p_details.fetch('fetch_state') == 'none'
+
+          fetch_state = p_details.fetch('fetch_state')
+
+          return false if fetch_state == 'stopped'
+          return false if fetch_state == 'none'
 
           true
         end
