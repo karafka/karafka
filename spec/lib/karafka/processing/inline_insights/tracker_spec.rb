@@ -14,7 +14,10 @@ RSpec.describe_current do
       'topics' => {
         'topic_name' => {
           'partitions' => {
-            '5' => { 'some_key' => 'some_value' }
+            '5' => {
+              'some_key' => 'some_value',
+              'fetch_state' => 'active'
+            }
           }
         }
       }
@@ -28,9 +31,21 @@ RSpec.describe_current do
       before { tracker.add(consumer_group_id, statistics) }
 
       it 'returns the statistics for the given topic and partition' do
-        expect(result).to eq('some_key' => 'some_value')
+        expect(result).to eq('some_key' => 'some_value', 'fetch_state' => 'active')
       end
     end
+
+    context 'when statistics exist but for not active partition' do
+      before do
+        statistics['topics']['topic_name']['partitions']['5']['fetch_state'] = 'none'
+        tracker.add(consumer_group_id, statistics)
+      end
+
+      it 'returns nothing' do
+        expect(result).to eq({})
+      end
+    end
+
 
     context 'when statistics do not exist' do
       it 'returns an empty hash' do
