@@ -69,8 +69,9 @@ module Karafka
           @mutex.synchronize do
             statistics.fetch('topics', EMPTY_HASH).each do |topic_name, t_details|
               t_details.fetch('partitions', EMPTY_HASH).each do |partition_id, p_details|
-                key = "#{consumer_group_id}_#{topic_name}_#{partition_id}"
+                next unless track?(partition_id, p_details)
 
+                key = "#{consumer_group_id}_#{topic_name}_#{partition_id}"
                 @accu[key] = [monotonic_now, p_details]
               end
             end
@@ -103,6 +104,17 @@ module Karafka
         # Evicts expired data from the cache
         def evict
           @accu.delete_if { |_, details| monotonic_now - details.first > TTL }
+        end
+
+        # Should we track given partition
+        #
+        # We do not track stopped partitions and the once we do not work with actively
+        def track?(partition_id, p_details)
+          return false if partition_id == '-1'
+          return false if p_details.fetch('fetch_state') == 'stopped'
+          return false if p_details.fetch('fetch_state') == 'none'
+
+          true
         end
       end
     end
