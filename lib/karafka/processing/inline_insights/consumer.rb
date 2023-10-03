@@ -22,7 +22,7 @@ module Karafka
           # If we no longer have new insights but we still have them locally, we can use them
           return @insights if @insights && insights.empty?
           # If insights are still the same, we can use them
-          return @insights if @insights == insights
+          return @insights if @insights.equal?(insights)
 
           # If we've received new insights that are not empty, we can cache them
           @insights = insights
