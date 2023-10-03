@@ -112,7 +112,7 @@ module Karafka
           # distributing consuming jobs as upon revoking, we might get assigned to the same
           # partitions, thus getting their jobs. The revoking jobs need to finish before
           # appropriate consumers are taken down and re-created
-          build_and_schedule_revoke_lost_partitions_jobs
+          build_and_schedule_revoked_jobs_for_revoked_partitions
 
           # We wait only on jobs from our subscription group. Other groups are independent.
           # This will block on revoked jobs until they are finished. Those are not meant to last
@@ -140,7 +140,7 @@ module Karafka
         # that occurred in the cluster.
         wait_pinging(
           wait_until: -> { @jobs_queue.empty?(@subscription_group.id) },
-          after_ping: -> { build_and_schedule_revoke_lost_partitions_jobs }
+          after_ping: -> { build_and_schedule_revoked_jobs_for_revoked_partitions }
         )
 
         # We do not want to schedule the shutdown jobs prior to finishing all the jobs
@@ -197,7 +197,7 @@ module Karafka
       end
 
       # Enqueues revoking jobs for partitions that were taken away from the running process.
-      def build_and_schedule_revoke_lost_partitions_jobs
+      def build_and_schedule_revoked_jobs_for_revoked_partitions
         revoked_partitions = @client.rebalance_manager.revoked_partitions
 
         # Stop early to save on some execution and array allocation
