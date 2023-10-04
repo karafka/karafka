@@ -17,7 +17,7 @@ RSpec.describe_current do
 
   context 'when insights exist' do
     before do
-      expect(Karafka::Processing::InlineInsights::Tracker)
+      allow(Karafka::Processing::InlineInsights::Tracker)
         .to receive(:find)
         .with(topic, partition)
         .and_return(rand => rand)
