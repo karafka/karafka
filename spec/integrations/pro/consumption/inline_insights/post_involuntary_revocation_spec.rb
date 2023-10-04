@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # When given partition is lost involuntary, we still should have last info
+# In Pro despite extra option, should behave same as in OSS when no forced required
 
 setup_karafka(allow_errors: true) do |config|
   config.max_messages = 1
