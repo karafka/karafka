@@ -21,7 +21,11 @@ module Karafka
         # In case it would take more than five seconds to load insights, it will just pause again
         #
         # This filter ensures, that we always have inline insights that a consumer can use
+        #
+        # It is relevant in most cases only during the process start, when first poll may not
+        # yield statistics yet but will give some data.
         class InlineInsightsDelayer < Base
+          # Minimum how long should we pause when there are no metrics
           PAUSE_TIMEOUT = 5_000
 
           private_constant :PAUSE_TIMEOUT
