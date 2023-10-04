@@ -458,4 +458,12 @@ RSpec.describe_current do
       expect(coordinator.pause_tracker).to have_received(:expire)
     end
   end
+
+  describe '#attempt' do
+    before { allow(consumer.coordinator.pause_tracker).to receive(:attempt).and_return(1) }
+
+    it 'expect to return attempt from the pause tracker' do
+      expect(consumer.send(:attempt)).to eq(1)
+    end
+  end
 end

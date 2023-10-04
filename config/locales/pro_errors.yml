@@ -31,6 +31,9 @@ en:
       patterns.active_format: 'needs to be boolean'
       patterns.type_format: 'needs to be :matcher, :discovered or :regular'
 
+      inline_insights.active_format: 'needs to be boolean'
+      inline_insights.required_format: 'needs to be boolean'
+
     consumer_group:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present

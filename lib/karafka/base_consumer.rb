@@ -253,7 +253,13 @@ module Karafka
     #   different flow after there is an error, for example for resources cleanup, small manual
     #   backoff or different instrumentation tracking.
     def retrying?
-      coordinator.pause_tracker.attempt > 1
+      attempt > 1
+    end
+
+    # @return [Integer] attempt of processing given batch. 1 if this is the first attempt or higher
+    #  in case it is a retry
+    def attempt
+      coordinator.pause_tracker.attempt
     end
 
     # Pauses the processing from the last offset to retry on given message
