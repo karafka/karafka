@@ -6,7 +6,7 @@ setup_karafka(allow_errors: true)
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[0] << [retrying?, coordinator.pause_tracker.attempt]
+    DT[0] << [retrying?, attempt]
 
     raise StandardError
   end

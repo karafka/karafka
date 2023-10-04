@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # When given partition is revoked for LRJ, we should still have its last available statistics
+# In Pro despite extra option, should behave same as in OSS when no forced required
 
 setup_karafka do |config|
   config.max_messages = 1
