@@ -19,7 +19,6 @@ def cmd(dir, cmd)
   ["#{stdout}\n#{stderr}", status.exitstatus]
 end
 
-
 # Removes the Ruby def from the Gemfile as preview versions cause problems.
 #
 # @param file_path [String] path to a Gemfile from which we should remove Ruby def
