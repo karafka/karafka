@@ -12,7 +12,6 @@
 - [Enhancement] Retry `Karafka::Admin#read_watermark_offsets` fetching upon `not_leader_for_partition` that can occur mostly on newly created topics in KRaft and after crashes during leader selection.
 
 ## 2.2.5 (2023-09-25)
-
 - [Enhancement] Ensure, that when topic related operations end, the result is usable. There were few cases where admin operations on topics would finish successfully but internal Kafka caches would not report changes for a short period of time.
 - [Enhancement] Stabilize cooperative-sticky early shutdown procedure.
 - [Fix] use `#nil?` instead of `#present?` on `DataDog::Tracing::SpanOperation` (vitellochris)

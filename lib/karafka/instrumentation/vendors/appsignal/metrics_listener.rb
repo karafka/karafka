@@ -29,9 +29,15 @@ module Karafka
             RdKafkaMetric.new(:gauge, :brokers, 'network_latency_p95', %w[rtt p95]),
             RdKafkaMetric.new(:gauge, :brokers, 'network_latency_p99', %w[rtt p99]),
 
-            # Topics metrics
-            RdKafkaMetric.new(:gauge, :topics, 'consumer_lags', 'consumer_lag_stored'),
-            RdKafkaMetric.new(:gauge, :topics, 'consumer_lags_delta', 'consumer_lag_stored_d')
+            # Topics partitions metrics
+            RdKafkaMetric.new(:gauge, :topics, 'consumer_lag', 'consumer_lag_stored'),
+            RdKafkaMetric.new(:gauge, :topics, 'consumer_lag_delta', 'consumer_lag_stored_d')
+          ].freeze
+
+          # Metrics that sum values on topics levels and not on partition levels
+          setting :aggregated_rd_kafka_metrics, default: [
+            # Topic aggregated metrics
+            RdKafkaMetric.new(:gauge, :topics, 'consumer_aggregated_lag', 'consumer_lag_stored')
           ].freeze
 
           configure
@@ -50,7 +56,7 @@ module Karafka
               batch_size: consumer.messages.size,
               first_offset: consumer.messages.metadata.first_offset,
               last_offset: consumer.messages.metadata.last_offset,
-              consumer_group: consumer.topic.consumer_group.name,
+              consumer_group: consumer.topic.consumer_group.id,
               topic: consumer.topic.name,
               partition: consumer.partition,
               attempt: consumer.coordinator.pause_tracker.attempt
@@ -142,6 +148,8 @@ module Karafka
             rd_kafka_metrics.each do |metric|
               report_metric(metric, statistics, consumer_group_id)
             end
+
+            report_aggregated_topics_metrics(statistics, consumer_group_id)
           end
 
           # Reports a given metric statistics to Appsignal
@@ -178,6 +186,10 @@ module Karafka
                   next if partition_statistics['consumer_lag'] == -1
                   next if partition_statistics['consumer_lag_stored'] == -1
 
+                  # Skip if we do not own the fetch assignment
+                  next if partition_statistics['fetch_state'] == 'stopped'
+                  next if partition_statistics['fetch_state'] == 'none'
+
                   public_send(
                     metric.type,
                     metric.name,
@@ -192,6 +204,37 @@ module Karafka
               end
             else
               raise ArgumentError, metric.scope
+            end
+          end
+
+          # Publishes aggregated topic-level metrics that are sum of per partition metrics
+          #
+          # @param statistics [Hash] hash with all the statistics emitted
+          # @param consumer_group_id [String] cg in context which we operate
+          def report_aggregated_topics_metrics(statistics, consumer_group_id)
+            config.aggregated_rd_kafka_metrics.each do |metric|
+              statistics.fetch('topics').each do |topic_name, topic_values|
+                sum = 0
+
+                topic_values['partitions'].each do |partition_name, partition_statistics|
+                  next if partition_name == '-1'
+                  # Skip until lag info is available
+                  next if partition_statistics['consumer_lag'] == -1
+                  next if partition_statistics['consumer_lag_stored'] == -1
+
+                  sum += partition_statistics.dig(*metric.key_location)
+                end
+
+                public_send(
+                  metric.type,
+                  metric.name,
+                  sum,
+                  {
+                    consumer_group: consumer_group_id,
+                    topic: topic_name
+                  }
+                )
+              end
             end
           end
 
@@ -248,11 +291,11 @@ module Karafka
           # @param consumer [Karafka::BaseConsumer] Karafka consumer instance
           def with_multiple_resolutions(consumer)
             topic_name = consumer.topic.name
-            consumer_group_name = consumer.topic.consumer_group.name
+            consumer_group_id = consumer.topic.consumer_group.id
             partition = consumer.partition
 
             tags = {
-              consumer_group: consumer_group_name,
+              consumer_group: consumer_group_id,
               topic: topic_name
             }
 
