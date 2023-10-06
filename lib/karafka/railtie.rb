@@ -33,7 +33,7 @@ if Karafka.rails?
       # server + will support code reloading with each fetched loop. We do it only for karafka
       # based commands as Rails processes and console will have it enabled already
       initializer 'karafka.configure_rails_logger' do
-        # Make Karafka use Rails logger
+        # Make Karafka uses Rails logger
         ::Karafka::App.config.logger = Rails.logger
 
         next unless Rails.env.development?
@@ -42,15 +42,22 @@ if Karafka.rails?
         # If added again, would print stuff twice
         next if ActiveSupport::Logger.logger_outputs_to?(Rails.logger, $stdout)
 
-        logger = ActiveSupport::Logger.new($stdout)
+        stdout_logger = ActiveSupport::Logger.new($stdout)
         # Inherit the logger level from Rails, otherwise would always run with the debug level
-        logger.level = Rails.logger.level
+        stdout_logger.level = Rails.logger.level
 
-        Rails.logger.extend(
-          ActiveSupport::Logger.broadcast(
-            logger
+        rails71plus = Rails.gem_version >= Gem::Version.new('7.1.0')
+
+        # Rails 7.1 replaced the broadcast module with a broadcast logger
+        if rails71plus
+          Rails.logger.broadcast_to(stdout_logger)
+        else
+          Rails.logger.extend(
+            ActiveSupport::Logger.broadcast(
+              stdout_logger
+            )
           )
-        )
+        end
       end
 
       initializer 'karafka.configure_rails_auto_load_paths' do |app|

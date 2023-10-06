@@ -2,5 +2,8 @@
 
 source 'https://rubygems.org'
 
+gem 'activerecord', '7.1.0'
+gem 'activesupport', '7.1.0'
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
-gem 'rails'
+gem 'railties', '7.1.0'
+gem 'rspec-rails'
