@@ -16,7 +16,7 @@ proper_stderr = $stderr
 $stdout = strio
 $stderr = strio
 
-require 'active_support/core_ext/integer/time'
+require 'active_support/core_ext/integer/numeric/time'
 
 class CustomFormatter < ::Logger::Formatter
   def call(severity, timestamp, _, input)

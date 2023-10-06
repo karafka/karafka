@@ -40,7 +40,9 @@ class Job < ActiveJob::Base
   end
 end
 
-ActiveJob.perform_all_later 5.times.map { Job.new }
+ActiveJob.perform_all_later(
+  Array.new(5) { Job.new }
+)
 
 start_karafka_and_wait_until do
   DT[0].size >= 5
