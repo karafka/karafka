@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.2.7 (Unreleased)
+## 2.2.7 (2023-10-07)
 - **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics from the consumer instance and use them to alter the processing flow. In Pro, there's an extra filter flow allowing to ensure, that the insights exist during consumption.
 - [Enhancement] Make sure, that subscription groups ids are unique by including their consumer group id in them similar to how topics ids are handled (not a breaking change).
 - [Enhancement] Expose `#attempt` method on a consumer to directly indicate number of attempt of processing given data.
