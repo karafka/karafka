@@ -55,7 +55,7 @@ module Karafka
         @active
       end
 
-      # Callback that kicks in inside of rdkafka, when new partitions are assigned.
+      # Callback that kicks in inside of rdkafka, when new partitions were assigned.
       #
       # @private
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]
@@ -65,7 +65,7 @@ module Karafka
         @changed = true
       end
 
-      # Callback that kicks in inside of rdkafka, when partitions are revoked.
+      # Callback that kicks in inside of rdkafka, when partitions were revoked.
       #
       # @private
       # @param partitions [Rdkafka::Consumer::TopicPartitionList]

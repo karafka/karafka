@@ -44,6 +44,10 @@ module Karafka
         @subscription_group = subscription_group
         @buffer = RawMessagesBuffer.new
         @rebalance_manager = RebalanceManager.new
+
+        ::Karafka.monitor.subscribe(@rebalance_manager)
+
+        @rebalance_listener = RebalanceListener.new(@subscription_group)
         @kafka = build_consumer
         # There are few operations that can happen in parallel from the listener threads as well
         # as from the workers. They are not fully thread-safe because they may be composed out of
@@ -498,7 +502,7 @@ module Karafka
       def build_consumer
         ::Rdkafka::Config.logger = ::Karafka::App.config.logger
         config = ::Rdkafka::Config.new(@subscription_group.kafka)
-        config.consumer_rebalance_listener = @rebalance_manager
+        config.consumer_rebalance_listener = @rebalance_listener
         consumer = config.consumer
         @name = consumer.name
 
