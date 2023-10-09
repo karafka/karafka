@@ -38,10 +38,10 @@ module Karafka
         connection.client.poll.error
         connection.client.unsubscribe.error
 
-        connection.client.rebalance_manager.partitions_assign
-        connection.client.rebalance_manager.partitions_assigned
-        connection.client.rebalance_manager.partitions_revoke
-        connection.client.rebalance_manager.partitions_revoked
+        rebalance.partitions_assign
+        rebalance.partitions_assigned
+        rebalance.partitions_revoke
+        rebalance.partitions_revoked
 
         consumer.consume
         consumer.consumed

@@ -21,22 +21,18 @@ module Karafka
           def on_cooperative_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
             case code
             when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
-              instrumented(
-                '',
-                caller: self,
-                code: code,
-                tpl: tpl
-              ) { opaque&.call_on_partitions_assign(tpl) }
-
+              opaque&.call_on_partitions_assign(tpl)
               RB.rd_kafka_incremental_assign(client_ptr, partitions_ptr)
-              opaque.call_on_partitions_assigned(tpl) if opaque
+              opaque&.call_on_partitions_assigned(tpl)
             when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
-              opaque.call_on_partitions_revoke(tpl) if opaque
+              opaque&.call_on_partitions_revoke(tpl)
               RB.rd_kafka_commit(client_ptr, nil, false)
               RB.rd_kafka_incremental_unassign(client_ptr, partitions_ptr)
-              opaque.call_on_partitions_revoked(tpl) if opaque
+              opaque&.call_on_partitions_revoked(tpl)
             else
+              opaque&.call_on_partitions_assign(tpl)
               RB.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
+              opaque&.call_on_partitions_assigned(tpl)
             end
           end
 
@@ -48,45 +44,19 @@ module Karafka
           def on_eager_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
             case code
             when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
-              opaque.call_on_partitions_assign(tpl) if opaque
+              opaque&.call_on_partitions_assign(tpl)
               RB.rd_kafka_assign(client_ptr, partitions_ptr)
-              opaque.call_on_partitions_assigned(tpl) if opaque
+              opaque&.call_on_partitions_assigned(tpl)
             when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
-              opaque.call_on_partitions_revoke(tpl) if opaque
+              opaque&.call_on_partitions_revoke(tpl)
               RB.rd_kafka_commit(client_ptr, nil, false)
               RB.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
-              opaque.call_on_partitions_revoked(tpl) if opaque
+              opaque&.call_on_partitions_revoked(tpl)
             else
+              opaque&.call_on_partitions_assign(tpl)
               RB.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
+              opaque&.call_on_partitions_assigned(tpl)
             end
-          end
-
-          # Trigger Karafka callbacks
-          #
-          # @param code [Integer]
-          # @param opaque [Rdkafka::Opaque]
-          # @param tpl [Rdkafka::Consumer::TopicPartitionList]
-          def trigger_callbacks(code, opaque, tpl)
-            Karafka.monitor.instrument(
-              'connection.client.rebalance_callback',
-              caller: self,
-              code: code,
-              tpl: tpl
-            ) do
-              case code
-              when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
-                opaque.call_on_partitions_assigned(tpl)
-              when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
-                opaque.call_on_partitions_revoked(tpl)
-              end
-            end
-          rescue StandardError => e
-            Karafka.monitor.instrument(
-              'error.occurred',
-              caller: self,
-              error: e,
-              type: 'connection.client.rebalance_callback.error'
-            )
           end
         end
 
@@ -111,10 +81,6 @@ module Karafka
           else
             pr.on_eager_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
           end
-
-          return unless opaque
-
-          pr.trigger_callbacks(code, opaque, tpl)
         end
       end
     end
