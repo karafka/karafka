@@ -35,9 +35,13 @@ module Karafka
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
 
-        connection.client.rebalance_callback
         connection.client.poll.error
         connection.client.unsubscribe.error
+
+        rebalance.partitions_assign
+        rebalance.partitions_assigned
+        rebalance.partitions_revoke
+        rebalance.partitions_revoked
 
         consumer.consume
         consumer.consumed

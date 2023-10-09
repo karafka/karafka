@@ -101,7 +101,7 @@ module Karafka
             time_taken = event[:time]
             messages_count = event[:messages_buffer].size
 
-            consumer_group_id = event[:subscription_group].consumer_group_id
+            consumer_group_id = event[:subscription_group].consumer_group.id
 
             extra_tags = ["consumer_group:#{consumer_group_id}"]
 

@@ -16,7 +16,7 @@ end
 draw_routes(Consumer)
 produce(DT.topic, '1')
 
-Karafka.monitor.subscribe('connection.client.rebalance_callback') do
+Karafka.monitor.subscribe('rebalance.partitions_assigned') do
   DT[:stop] = true
 end
 
