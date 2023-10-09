@@ -107,6 +107,7 @@ def setup_web
     config.processing.consumer_group = SecureRandom.hex(6)
     config.topics.consumers.reports = SecureRandom.hex(6)
     config.topics.consumers.states = SecureRandom.hex(6)
+    config.topics.consumers.metrics = SecureRandom.hex(6)
     config.topics.errors = SecureRandom.hex(6)
 
     yield(config) if block_given?
