@@ -68,8 +68,9 @@ assert_equal [], error_tracks
   karafka_network_latency_p95
   karafka_network_latency_p99
   karafka_consumer_offsets
-  karafka_consumer_lags
-  karafka_consumer_lags_delta
+  karafka_consumer_lag
+  karafka_consumer_lag_delta
+  karafka_consumer_aggregated_lag
 ].each do |gauge_key|
   assert_equal true, appsignal_dummy.buffer[:gauge].key?(gauge_key), "#{gauge_key} missing"
 end
