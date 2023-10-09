@@ -10,7 +10,9 @@ RSpec.describe_current do
   let(:subscription_group_id) { subscription_group.id }
   let(:event) { { subscription_group_id: subscription_group_id, tpl: partitions } }
 
-  describe '#revoked_partitions, #on_rebalance_partitions_revoked, #lost_partitions and #changed?' do
+  describe(
+    '#revoked_partitions, #on_rebalance_partitions_revoked, #lost_partitions and #changed?'
+  ) do
     it { expect(manager.active?).to eq(false) }
 
     context 'when there are no revoked partitions' do
