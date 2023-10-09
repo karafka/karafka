@@ -54,8 +54,6 @@ Thread.new do
   DT[:rebalanced] << true
 end
 
-i = 0
-
 start_karafka_and_wait_until do
   produce(DT.topics[0], rand.to_s)
   produce(DT.topics[1], rand.to_s)
