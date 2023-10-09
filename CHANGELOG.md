@@ -1,5 +1,12 @@
 # Karafka framework changelog
 
+## 2.2.8 (Unreleased)
+- [Refactor] Reorganize how rebalance events are propagated from `librdkafka` to Karafka. Replace `connection.client.rebalance_callback` with `rebalance.partitions_assigned` and `rebalance.partitions_revoked`. Introduce two extra events: `rebalance.partitions_assign` and `rebalance.partitions_revoke` to handle pre-rebalance future work.
+
+### Upgrade notes
+
+Unless you were using `connection.client.rebalance_callback` which was considered private, nothing.
+
 ## 2.2.7 (2023-10-07)
 - **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics from the consumer instance and use them to alter the processing flow. In Pro, there's an extra filter flow allowing to ensure, that the insights exist during consumption.
 - [Enhancement] Make sure, that subscription groups ids are unique by including their consumer group id in them similar to how topics ids are handled (not a breaking change).
