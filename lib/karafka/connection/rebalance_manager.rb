@@ -78,7 +78,7 @@ module Karafka
       # Callback that kicks in inside of rdkafka, when new partitions were assigned.
       #
       # @private
-      # @param partitions [Rdkafka::Consumer::TopicPartitionList]
+      # @param event [Karafka::Core::Monitoring::Event]
       def on_rebalance_partitions_assigned(event)
         # Apply changes only for our subscription group
         return unless event[:subscription_group_id] == @subscription_group_id
@@ -91,7 +91,7 @@ module Karafka
       # Callback that kicks in inside of rdkafka, when partitions were revoked.
       #
       # @private
-      # @param partitions [Rdkafka::Consumer::TopicPartitionList]
+      # @param event [Karafka::Core::Monitoring::Event]
       def on_rebalance_partitions_revoked(event)
         # Apply changes only for our subscription group
         return unless event[:subscription_group_id] == @subscription_group_id
