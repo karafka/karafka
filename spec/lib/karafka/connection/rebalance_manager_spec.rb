@@ -69,5 +69,34 @@ RSpec.describe_current do
 
       it { expect(manager.changed?).to eq(true) }
     end
+
+    context 'when rebalance is of a different subscription group' do
+      before do
+        manager.on_rebalance_partitions_assigned(
+          {
+            subscription_group_id: SecureRandom.uuid,
+            tpl: { 'topic_name' => [partition1] }
+          }
+        )
+        manager.on_rebalance_partitions_revoked(
+          {
+            subscription_group_id: SecureRandom.uuid,
+            tpl: { 'topic_name' => [partition1, partition2] }
+          }
+        )
+      end
+
+      it { expect(manager.active?).to eq(false) }
+
+      it 'expect not to include them in the lost partitions back' do
+        expect(manager.lost_partitions).to eq({})
+      end
+
+      it 'expect to include them in the revoked partitions back' do
+        expect(manager.revoked_partitions).to eq({})
+      end
+
+      it { expect(manager.changed?).to eq(false) }
+    end
   end
 end

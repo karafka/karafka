@@ -18,6 +18,8 @@ module Karafka
           # @param client_ptr [FFI::Pointer]
           # @param code [Integer]
           # @param partitions_ptr [FFI::Pointer]
+          # @param tpl [Rdkafka::Consumer::TopicPartitionList]
+          # @param opaque [Rdkafka::Opaque]
           def on_cooperative_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
             case code
             when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
@@ -41,6 +43,8 @@ module Karafka
           # @param client_ptr [FFI::Pointer]
           # @param code [Integer]
           # @param partitions_ptr [FFI::Pointer]
+          # @param tpl [Rdkafka::Consumer::TopicPartitionList]
+          # @param opaque [Rdkafka::Opaque]
           def on_eager_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
             case code
             when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
