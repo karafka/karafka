@@ -46,7 +46,7 @@ module Karafka
         @rebalance_manager = RebalanceManager.new(@subscription_group.id)
         @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(
           @subscription_group.id,
-          @subscription_group.consumer_group_id
+          @subscription_group.consumer_group.id
         )
         @kafka = build_consumer
         # There are few operations that can happen in parallel from the listener threads as well
@@ -512,7 +512,7 @@ module Karafka
           @subscription_group.id,
           Instrumentation::Callbacks::Statistics.new(
             @subscription_group.id,
-            @subscription_group.consumer_group_id,
+            @subscription_group.consumer_group.id,
             @name
           )
         )
@@ -522,7 +522,7 @@ module Karafka
           @subscription_group.id,
           Instrumentation::Callbacks::Error.new(
             @subscription_group.id,
-            @subscription_group.consumer_group_id,
+            @subscription_group.consumer_group.id,
             @name
           )
         )
