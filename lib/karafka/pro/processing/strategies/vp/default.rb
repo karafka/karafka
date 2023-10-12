@@ -72,6 +72,15 @@ module Karafka
               coordinator.collapsed?
             end
 
+            # @param offset [Integer] first offset from which we should not operate in a collapsed
+            #   mode.
+            # @note Keep in mind, that if a batch contains this but also messages earlier messages
+            #   that should be collapsed, all will continue to operate in a collapsed mode until
+            #   first full batch with only messages that should not be collapsed.
+            def collapse_until!(offset)
+              coordinator.collapse_until!(offset)
+            end
+
             # @return [Boolean] true if any of virtual partition we're operating in the entangled
             #   mode has already failed and we know we are failing collectively.
             #   Useful for early stop to minimize number of things processed twice.
