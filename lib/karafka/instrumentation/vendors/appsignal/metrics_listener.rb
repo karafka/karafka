@@ -40,6 +40,14 @@ module Karafka
             RdKafkaMetric.new(:gauge, :topics, 'consumer_aggregated_lag', 'consumer_lag_stored')
           ].freeze
 
+          # @param args [Array] Anything that the `Base` accepts
+          def initialize(*args)
+            super
+
+            # Registers the minutely probe for one-every-minute metrics
+            ::Appsignal::Minutely.probes.register(:karafka, method(:minute_probe))
+          end
+
           configure
 
           # Before each consumption process, lets start a transaction associated with it
@@ -301,6 +309,14 @@ module Karafka
 
             yield(tags)
             yield(tags.merge(partition: partition))
+          end
+
+          # Sends minute based probing metrics
+          def minute_probe
+            concurrency = Karafka::App.config.concurrency
+
+            ::Appsignal.increment_counter('karafka_processes_count', 1)
+            ::Appsignal.increment_counter('karafka_threads_count', concurrency)
           end
         end
       end
