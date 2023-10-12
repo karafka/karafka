@@ -93,6 +93,17 @@ module Karafka
               coordinator.failure?
             end
 
+            # Allows for cross-virtual-partition consumers locks
+            #
+            # This is not needed in the non-VP flows because there is always only one consumer
+            # per partition at the same time, so no coordination is needed directly for the
+            # end users
+            #
+            # @param block [Proc] block we want to run in a mutex to prevent race-conditions
+            def synchronize(&block)
+              coordinator.synchronize(&block)
+            end
+
             private
 
             # Prior to adding work to the queue, registers all the messages offsets into the

@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.2.8 (Unreleased)
+- [Improvement] Expose `#synchronize` for VPs to allow for locks when cross-VP consumers work is needed.
 - [Improvement] Provide `#collapse_until!` direct consumer API to allow for collapsed virtual partitions consumer operations together with the Filtering API for advanced use-cases.
 - [Refactor] Reorganize how rebalance events are propagated from `librdkafka` to Karafka. Replace `connection.client.rebalance_callback` with `rebalance.partitions_assigned` and `rebalance.partitions_revoked`. Introduce two extra events: `rebalance.partitions_assign` and `rebalance.partitions_revoke` to handle pre-rebalance future work.
 
