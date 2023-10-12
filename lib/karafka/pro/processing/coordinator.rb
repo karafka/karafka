@@ -21,6 +21,8 @@ module Karafka
 
         def_delegators :@collapser, :collapsed?, :collapse_until!
 
+        def_delegators :@consumers_lock, :synchronize
+
         attr_reader :filter, :virtual_offset_manager
 
         # @param args [Object] anything the base coordinator accepts
@@ -29,6 +31,8 @@ module Karafka
 
           @executed = []
           @flow_lock = Mutex.new
+          # Cross-consumer lock for consumers operating in the same VP
+          @consumers_lock = Mutex.new
           @collapser = Collapser.new
           @filter = FiltersApplier.new(self)
 

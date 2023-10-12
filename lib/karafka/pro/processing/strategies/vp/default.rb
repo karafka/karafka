@@ -93,6 +93,11 @@ module Karafka
               coordinator.failure?
             end
 
+            # Allows for cross-virtual-partition consumers locks
+            def synchronize(&block)
+              coordinator.synchronize(&block)
+            end
+
             private
 
             # Prior to adding work to the queue, registers all the messages offsets into the
