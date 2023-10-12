@@ -55,7 +55,7 @@ groups = Array.new(100) { [] }
 group = 0
 
 DT[:pauses].each do |pause|
-  group += 1 unless ((current_time - 3)..(current_time + 3)).include?(pause.last)
+  group += 1 unless ((current_time - 3)..(current_time + 3)).cover?(pause.last)
 
   groups[group] << pause.first
 
