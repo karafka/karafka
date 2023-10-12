@@ -40,6 +40,15 @@ module Vendors
         @buffer[:errors][0] << error
       end
 
+      # Registers and runs the probe once
+      # @param name [Symbol] probe name
+      # @param probe [Block] probing block
+      # @note We run it immediately to make sure it does not crash because in real life is should
+      #   operate async
+      def register_probe(name, probe)
+        @buffer[:probes][name] << probe.call
+      end
+
       %i[
         count
         gauge

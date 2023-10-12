@@ -78,6 +78,13 @@ module Karafka
             ::Appsignal.send_error(error)
           end
 
+          # Registers the probe under a given name
+          # @param name [Symbol] probe name
+          # @param probe [Proc] code to run every minute
+          def register_probe(name, probe)
+            ::Appsignal::Minutely.probes.register(name, probe)
+          end
+
           private
 
           # @return [Boolean] do we have a transaction

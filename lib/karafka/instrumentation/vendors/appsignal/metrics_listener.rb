@@ -45,7 +45,7 @@ module Karafka
             super
 
             # Registers the minutely probe for one-every-minute metrics
-            ::Appsignal::Minutely.probes.register(:karafka, method(:minute_probe))
+            client.register_probe(:karafka, -> { minute_probe })
           end
 
           configure
@@ -315,8 +315,8 @@ module Karafka
           def minute_probe
             concurrency = Karafka::App.config.concurrency
 
-            ::Appsignal.increment_counter('karafka_processes_count', 1)
-            ::Appsignal.increment_counter('karafka_threads_count', concurrency)
+            count('processes_count', 1, {})
+            count('threads_count', concurrency, {})
           end
         end
       end

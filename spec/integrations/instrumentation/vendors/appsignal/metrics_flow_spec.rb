@@ -48,6 +48,8 @@ end
   karafka_consumer_errors
   karafka_consumer_messages
   karafka_consumer_batches
+  karafka_processes_count
+  karafka_threads_count
 ].each do |count_key|
   assert_equal true, appsignal_dummy.buffer[:count].key?(count_key), "#{count_key} missing"
 end
@@ -74,3 +76,5 @@ assert_equal [], error_tracks
 ].each do |gauge_key|
   assert_equal true, appsignal_dummy.buffer[:gauge].key?(gauge_key), "#{gauge_key} missing"
 end
+
+assert appsignal_dummy.buffer[:probes].key?(:karafka)
