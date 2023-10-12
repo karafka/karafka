@@ -17,6 +17,10 @@ module Karafka
       # Pro coordinator that provides extra orchestration methods useful for parallel processing
       # within the same partition
       class Coordinator < ::Karafka::Processing::Coordinator
+        extend Forwardable
+
+        def_delegators :@collapser, :collapsed?, :collapse_until!
+
         attr_reader :filter, :virtual_offset_manager
 
         # @param args [Object] anything the base coordinator accepts
@@ -57,7 +61,7 @@ module Karafka
 
           # We keep the old processed offsets until the collapsing is done and regular processing
           # with virtualization is restored
-          @virtual_offset_manager.clear if topic.virtual_partitions? && !@collapser.collapsed?
+          @virtual_offset_manager.clear if topic.virtual_partitions? && !collapsed?
 
           @last_message = messages.last
         end
@@ -68,12 +72,7 @@ module Karafka
         # @param error [StandardError] error from the failure
         def failure!(consumer, error)
           super
-          @collapser.collapse_until!(@last_message.offset + 1)
-        end
-
-        # @return [Boolean] are we in a collapsed state at the moment
-        def collapsed?
-          @collapser.collapsed?
+          collapse_until!(@last_message.offset + 1)
         end
 
         # @return [Boolean] did any of the filters apply any logic that would cause use to run
