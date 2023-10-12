@@ -9,18 +9,17 @@ setup_karafka(allow_errors: true) do |config|
 end
 
 MUTEX = Mutex.new
-$in_progress = 0
-
+DT[:in_progress] = 0
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    MUTEX.synchronize { $in_progress += 1 }
+    MUTEX.synchronize { DT[:in_progress] += 1 }
 
     messages.each do
       DT[0] << true
     end
 
-    if $in_progress > 1 && !DT.key?(:collapsed)
+    if DT[:in_progress] > 1 && !DT.key?(:collapsed)
       # Something far in the future, so we're collapsed from start
       collapse_until!(10_000)
 
@@ -33,7 +32,7 @@ class Consumer < Karafka::BaseConsumer
 
     sleep(5) unless DT.key?(:collapsed)
 
-    MUTEX.synchronize { $in_progress -= 1 }
+    MUTEX.synchronize { DT[:in_progress] -= 1 }
   end
 end
 
@@ -55,7 +54,7 @@ end
 threads = []
 
 # None of those should report as true because the collapse should only impact future batches and
-# not the one currelty being processed in VPs
+# not the one currently being processed in VPs
 DT[:collisions].each do |sample|
   threads << sample.last
   assert_equal false, sample.first
