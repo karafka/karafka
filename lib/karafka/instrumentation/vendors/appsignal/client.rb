@@ -75,7 +75,17 @@ module Karafka
           #
           # @param error [Object] error we want to ship to Appsignal
           def send_error(error)
-            ::Appsignal.send_error(error)
+            # If we have an active transaction we should use it instead of creating a generic one
+            # That way proper namespace and other data may be transferred
+            #
+            # In case there is no transaction, a new generic background job one will be used
+            if transaction?
+              transaction.set_error(error)
+            else
+              ::Appsignal.send_error(error) do |transaction|
+                transaction.set_namespace(::Appsignal::Transaction::BACKGROUND_JOB)
+              end
+            end
           end
 
           # Registers the probe under a given name
@@ -90,6 +100,11 @@ module Karafka
           # @return [Boolean] do we have a transaction
           def transaction?
             ::Appsignal::Transaction.current?
+          end
+
+          # @return [::Appsignal::Transaction, nil] transaction or nil if not started
+          def transaction
+            ::Appsignal::Transaction.current
           end
 
           # Converts both keys and values of a hash into strings
