@@ -67,7 +67,7 @@ module Karafka
             configure(&block)
           end
 
-          # Hooks up to WaterDrop instrumentation for emitted statistics
+          # Hooks up to Karafka instrumentation for emitted statistics
           #
           # @param event [Karafka::Core::Monitoring::Event]
           def on_statistics_emitted(event)

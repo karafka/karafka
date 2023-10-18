@@ -69,7 +69,7 @@ GEM
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
     thor (1.2.2)
-    tilt (2.2.0)
+    tilt (2.3.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     waterdrop (2.6.7)
