@@ -40,14 +40,6 @@ module Karafka
             RdKafkaMetric.new(:gauge, :topics, 'consumer_aggregated_lag', 'consumer_lag_stored')
           ].freeze
 
-          # @param args [Array] Anything that the `Base` accepts
-          def initialize(*args)
-            super
-
-            # Registers the minutely probe for one-every-minute metrics
-            client.register_probe(:karafka, -> { minute_probe })
-          end
-
           configure
 
           # Before each consumption process, lets start a transaction associated with it
@@ -86,6 +78,20 @@ module Karafka
             end
 
             stop_transaction
+          end
+
+          # Register minute based probe only on app running. Otherwise if we would always register
+          # minute probe, it would report on processes using Karafka but not running the
+          # consumption process
+          #
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_app_running(_event)
+            return if @probe_registered
+
+            @probe_registered = true
+
+            # Registers the minutely probe for one-every-minute metrics
+            client.register_probe(:karafka, -> { minute_probe })
           end
 
           # Keeps track of revocation user code execution
