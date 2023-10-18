@@ -1,6 +1,6 @@
 {
   "title": "Karafka",
-  "description": "",
+  "description": "This dashboard gives an overview of the overall Karafka status.\nCheckout topics lag, throughput/performance per consumer,\nprocess/worker counts, and many other things.\n",
   "visuals": [
     {
       "title": "Consumed messages",
