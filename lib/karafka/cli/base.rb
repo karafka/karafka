@@ -5,8 +5,8 @@ module Karafka
     # Base class for all the command that we want to define
     # This base class provides an interface to easier separate single independent commands
     class Base
-      # We can use it to call other cli methods via this object
-      attr_reader :cli, :options
+      # @return [Hash] given command cli options
+      attr_reader :options
 
       # Creates new CLI command instance
       def initialize
@@ -70,6 +70,7 @@ module Karafka
             opts.banner = "Usage: karafka #{name} [options]"
 
             (@options || []).each do |option|
+              # Creates aliases for backwards compatibility
               names = option[3].flat_map { |name| [name, name.tr('_', '-')] }
               names.map! { |name| "#{name} value1,value2,valueN" } if option[2] == Array
               names.uniq!

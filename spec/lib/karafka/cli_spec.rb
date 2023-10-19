@@ -10,7 +10,8 @@ RSpec.describe_current do
         Karafka::Cli::Info,
         Karafka::Cli::Install,
         Karafka::Cli::Server,
-        Karafka::Cli::Topics
+        Karafka::Cli::Topics,
+        Karafka::Cli::Help
       ].map(&:to_s).sort
     end
 

@@ -6,8 +6,6 @@ module Karafka
   # If you want to add/modify command that belongs to CLI, please review all commands
   # available in cli/ directory inside Karafka source code.
   class Cli
-    # package_name 'Karafka'
-
     class << self
       # Starts the CLI
       def start
