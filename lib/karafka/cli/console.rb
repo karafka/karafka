@@ -6,7 +6,8 @@ module Karafka
     # Console Karafka Cli action
     class Console < Base
       desc 'Start the Karafka console (short-cut alias: "c")'
-      option aliases: 'c'
+
+      aliases :c
 
       class << self
         # @return [String] Console executing command for non-Rails setup

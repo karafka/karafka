@@ -14,7 +14,7 @@ module Karafka
 
       desc 'Start the Karafka server (short-cut alias: "s")'
 
-      option aliases: 's'
+      aliases :s
 
       # Thor does not work well with many aliases combinations, hence we remap the aliases
       # by ourselves in the code

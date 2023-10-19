@@ -68,6 +68,13 @@ module Karafka
           @desc ||= desc
         end
 
+        # Allows to set aliases for a given cli command
+        # @param args [Array] list of aliases that we can use to run given cli command
+        def aliases(*args)
+          @aliases ||= []
+          @aliases << args.map(&:to_s)
+        end
+
         # This method will bind a given Cli command into Karafka Cli
         # This method is a wrapper to way Thor defines its commands
         # @param cli_class [Karafka::Cli] Karafka cli_class
@@ -80,6 +87,10 @@ module Karafka
 
           cli_class.send :define_method, name do |*args|
             context.new(self).call(*args)
+          end
+
+          (@aliases || []).each do |cmd_aliases|
+            cmd_aliases.each { |cmd_alias| cli_class.map cmd_alias => name.to_s }
           end
         end
 
