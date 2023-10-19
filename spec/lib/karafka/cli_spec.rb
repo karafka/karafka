@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:cli) { described_class }
 
-  describe '.cli_commands' do
+  describe '.commands' do
     let(:available_commands) do
       [
         Karafka::Cli::Console,
@@ -16,7 +16,7 @@ RSpec.describe_current do
     end
 
     it 'expect to return all cli commands classes' do
-      expect(cli.send(:cli_commands).map(&:to_s).sort).to eq available_commands
+      expect(cli.send(:commands).map(&:to_s).sort).to eq available_commands
     end
   end
 end
