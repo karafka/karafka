@@ -11,5 +11,15 @@ RSpec.describe_current do
     describe '#names' do
       it { expect(base_cli_class.names).to eq %w[base] }
     end
+
+    describe '#load' do
+      it { expect { base_cli_class.load }.to raise_error(::Karafka::Errors::MissingBootFileError) }
+    end
+  end
+
+  describe '#call' do
+    subject(:base_cli) { described_class.new }
+
+    it { expect { base_cli.call }.to raise_error(NotImplementedError) }
   end
 end
