@@ -9,6 +9,32 @@ module Karafka
     # package_name 'Karafka'
 
     class << self
+      # Starts the CLI
+      def start
+        # Command we want to run, like install, server, etc
+        command_name = ARGV[0]
+        # Action for action-based commands like topics migrate
+        action = ARGV[1].to_s.start_with?('-') ? false : ARGV[1]
+
+        command = ObjectSpace
+                  .each_object(Class).select { |klass| klass < Karafka::Cli::Base }
+                  .find { |command| command.names.include?(command_name) }
+
+        if command
+          # Only actionable commands require command as an argument
+          args = action ? [action] : []
+
+          command.new.call(*args)
+        else
+          raise(
+            Karafka::Errors::UnrecognizedCommandError,
+            "Unrecognized command \"#{command_name}\""
+          )
+        end
+      end
+
+      private
+
       # @return [Array<Class>] Array with Cli action classes that can be used as commands
       def cli_commands
         constants

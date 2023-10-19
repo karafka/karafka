@@ -46,6 +46,16 @@ module Karafka
           --include_topics
         ]
       )
+
+      option(
+        :exclude_consumer_groups,
+        'Runs server without specified consumer groups',
+        Array,
+        %w[
+          --exclude_consumer_groups
+        ]
+      )
+
       option(
         :exclude_subscription_groups,
         'Runs server without specified subscription groups',
@@ -69,8 +79,8 @@ module Karafka
         # Print our banner and info in the dev mode
         print_marketing_info if Karafka::App.env.development?
 
-        register_inclusions(cli)
-        register_exclusions(cli)
+        register_inclusions
+        register_exclusions
 
         Karafka::Server.run
       end
@@ -78,8 +88,7 @@ module Karafka
       private
 
       # Registers things we want to include (if defined)
-      # @param cli [Karafka::Cli] Thor cli handler
-      def register_inclusions(cli)
+      def register_inclusions
         activities = ::Karafka::App.config.internal.routing.activity_manager
 
         SUPPORTED_TYPES.each do |type|
@@ -91,7 +100,7 @@ module Karafka
 
       # Registers things we want to exclude (if defined)
       # @param cli [Karafka::Cli] Thor cli handler
-      def register_exclusions(cli)
+      def register_exclusions
         activities = ::Karafka::App.config.internal.routing.activity_manager
 
         activities.class::SUPPORTED_TYPES.each do |type|
