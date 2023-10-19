@@ -2,8 +2,6 @@
 
 # karafka topics delete should skip non-existing topics defined in routes and nothing should break
 
-Karafka::Cli.prepare
-
 Consumer = Class.new(Karafka::BaseConsumer)
 
 setup_karafka
@@ -20,6 +18,8 @@ end
 
 ARGV[0] = 'topics'
 ARGV[1] = 'delete'
+
+Karafka::Cli.start
 
 cluster_topics = Karafka::Admin.cluster_info.topics.map { |topic| topic.fetch(:topic_name) }
 

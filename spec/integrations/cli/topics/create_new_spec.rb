@@ -2,8 +2,6 @@
 
 # karafka topics create should create topics when defined in routing
 
-Karafka::Cli.prepare
-
 Consumer = Class.new(Karafka::BaseConsumer)
 
 setup_karafka
