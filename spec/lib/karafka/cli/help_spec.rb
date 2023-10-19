@@ -18,14 +18,8 @@ RSpec.describe_current do
       HELP
     end
 
-    let(:tmp_stdout) { StringIO.new }
-
     it 'expect to print details of this Karafka app instance' do
-      original_stdout = $stdout
-      $stdout = tmp_stdout
-      help_cli.call
-      $stdout = original_stdout
-      expect(tmp_stdout.string).to eq(help)
+      expect { help_cli.call }.to output(help).to_stdout
     end
   end
 end
