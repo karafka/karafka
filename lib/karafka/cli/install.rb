@@ -27,8 +27,9 @@ module Karafka
       }.freeze
 
       # @param args [Array] all the things that Thor CLI accepts
-      def initialize(*args)
+      def initialize
         super
+
         dependencies = Bundler::LockfileParser.new(
           Bundler.read_file(
             Bundler.default_lockfile

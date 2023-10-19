@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:install_cli) { described_class.new(cli) }
-
-  let(:cli) { Karafka::Cli.new }
+  subject(:install_cli) { described_class.new }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
@@ -32,7 +30,7 @@ RSpec.describe_current do
   end
 
   describe '#rails?' do
-    subject(:is_rails) { described_class.new(cli).rails? }
+    subject(:is_rails) { described_class.new.rails? }
 
     before { allow(Bundler).to receive(:read_file).and_return(gemfile) }
 

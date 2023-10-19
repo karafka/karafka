@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:info_cli) { described_class.new(cli) }
-
-  let(:cli) { Karafka::Cli.new }
+  subject(:info_cli) { described_class.new }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 

@@ -7,7 +7,6 @@
   rdkafka
   waterdrop
   json
-  thor
   forwardable
   fileutils
   openssl
