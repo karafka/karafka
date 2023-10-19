@@ -6,5 +6,5 @@ require 'karafka'
 # our bin/karafka cli
 ENV['KARAFKA_CLI'] = 'true'
 
-Karafka::Cli::Base.load
-Karafka::Cli.start
+::Karafka::Cli::Base.load
+::Karafka::Cli.start

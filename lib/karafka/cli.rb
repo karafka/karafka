@@ -14,9 +14,7 @@ module Karafka
         # Action for action-based commands like topics migrate
         action = ARGV[1].to_s.start_with?('-') ? false : ARGV[1]
 
-        command = Base
-                  .commands
-                  .find { |cmd| cmd.names.include?(command_name) }
+        command = commands.find { |cmd| cmd.names.include?(command_name) }
 
         if command
           # Only actionable commands require command as an argument
@@ -33,13 +31,9 @@ module Karafka
 
       private
 
-      # @return [Array<Class>] Array with Cli action classes that can be used as commands
-      def cli_commands
-        constants
-          .map! { |object| const_get(object) }
-          .keep_if do |object|
-            object.instance_of?(Class) && (object < Cli::Base)
-          end
+      # @return [Array<Class>] command classes
+      def commands
+        Base.commands
       end
     end
   end

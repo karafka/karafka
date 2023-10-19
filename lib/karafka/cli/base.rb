@@ -67,8 +67,6 @@ module Karafka
           options = {}
 
           OptionParser.new do |opts|
-            opts.banner = "Usage: karafka #{name} [options]"
-
             (@options || []).each do |option|
               # Creates aliases for backwards compatibility
               names = option[3].flat_map { |name| [name, name.tr('_', '-')] }
@@ -88,7 +86,8 @@ module Karafka
         def commands
           ObjectSpace
             .each_object(Class)
-            .select { |klass| klass < Karafka::Cli::Base }
+            .select { |klass| klass.superclass == Karafka::Cli::Base }
+            .reject { |klass| klass.to_s.end_with?('::Base') }
             .sort_by(&:name)
         end
 
