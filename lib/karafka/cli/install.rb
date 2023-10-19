@@ -26,7 +26,6 @@ module Karafka
         'example_consumer.rb.erb' => 'app/consumers/example_consumer.rb'
       }.freeze
 
-      # @param args [Array] all the things that Thor CLI accepts
       def initialize
         super
 

@@ -8,7 +8,7 @@ module Karafka
       # We can use it to call other cli methods via this object
       attr_reader :cli, :options
 
-      # @param cli [Karafka::Cli] current Karafka Cli instance
+      # Creates new CLI command instance
       def initialize
         # Parses the given command CLI options
         @options = self.class.parse_options
@@ -70,12 +70,12 @@ module Karafka
             opts.banner = "Usage: karafka #{name} [options]"
 
             (@options || []).each do |option|
-              names = option[3].flat_map { |name| [name, name.gsub('_', '-')] }
+              names = option[3].flat_map { |name| [name, name.tr('_', '-')] }
               names.map! { |name| "#{name} value1,value2,valueN" } if option[2] == Array
               names.uniq!
 
               opts.on(
-                *([names, option[2], option[1]].flatten)
+                *[names, option[2], option[1]].flatten
               ) { |value| options[option[0]] = value }
             end
           end.parse!
