@@ -46,4 +46,8 @@ RSpec.describe_current do
       it { expect(is_rails).to eq true }
     end
   end
+
+  describe '#names' do
+    it { expect(install_cli.class.names).to eq %w[install] }
+  end
 end

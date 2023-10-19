@@ -21,4 +21,8 @@ RSpec.describe_current do
   describe '#print_marketing_info' do
     it { expect { server_cli.send(:print_marketing_info) }.not_to raise_error }
   end
+
+  describe '#names' do
+    it { expect(server_cli.class.names).to eq %w[s server] }
+  end
 end

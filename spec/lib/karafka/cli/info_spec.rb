@@ -70,4 +70,8 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#names' do
+    it { expect(info_cli.class.names).to eq %w[info] }
+  end
 end

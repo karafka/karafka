@@ -49,4 +49,8 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#names' do
+    it { expect(console_cli.class.names).to eq %w[c console] }
+  end
 end
