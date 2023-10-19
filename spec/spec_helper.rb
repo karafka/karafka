@@ -115,3 +115,6 @@ def fixture_file(file_path)
     )
   )
 end
+
+# We need to clear argv because otherwise we would get reports on invalid options for CLI specs
+ARGV.clear

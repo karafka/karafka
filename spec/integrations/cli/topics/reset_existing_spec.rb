@@ -2,8 +2,6 @@
 
 # karafka topics reset should delete and re-create topics defined in routes
 
-Karafka::Cli.prepare
-
 Consumer = Class.new(Karafka::BaseConsumer)
 
 setup_karafka
@@ -24,7 +22,10 @@ draw_routes(create_topics: false) do
   end
 end
 
-Karafka::Cli.start %w[topics reset]
+ARGV[0] = 'topics'
+ARGV[1] = 'reset'
+
+Karafka::Cli.start
 
 cluster_topics = Karafka::Admin.cluster_info.topics.map do |topic|
   [topic.fetch(:topic_name), topic.fetch(:partition_count)]

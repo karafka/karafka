@@ -6,8 +6,6 @@ setup_karafka
 
 guarded = []
 
-Karafka::Cli::Base.load
-
 begin
   draw_routes do
     consumer_group 'regular' do

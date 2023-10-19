@@ -37,8 +37,6 @@ ARGV[0] = 'server'
 ARGV[1] = '--consumer-groups'
 ARGV[2] = 'non-existing'
 
-Karafka::Cli.prepare
-
 begin
   Karafka::Cli.start
 rescue Karafka::Errors::InvalidConfigurationError => e

@@ -2,8 +2,6 @@
 
 # karafka topics create should skip topics that already exist
 
-Karafka::Cli.prepare
-
 Consumer = Class.new(Karafka::BaseConsumer)
 
 setup_karafka
@@ -30,7 +28,10 @@ assert cluster_topics.include?(DT.topics[1])
 
 # This should not remove nor change the topics
 # Since the `draw_routes` auto-creator
-Karafka::Cli.start %w[topics create]
+ARGV[0] = 'topics'
+ARGV[1] = 'create'
+
+Karafka::Cli.start
 
 cluster_topics = Karafka::Admin.cluster_info.topics.map { |topic| topic.fetch(:topic_name) }
 
