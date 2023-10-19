@@ -7,7 +7,7 @@ RSpec.describe_current do
 
   describe '#call' do
     let(:helps) do
-      <<~HELP.split("\n").map(&:strip)
+      <<~HELP.split("\n").map(&:strip).map { |str| str.tr(' ', '') }
         Karafka commands:
           console    # Starts the Karafka console (short-cut alias: "c")
           help       # Describes available commands
@@ -26,7 +26,7 @@ RSpec.describe_current do
       help_cli.call
       $stdout = original_stdout
 
-      helps.each { |help| expect(tmp_stdout.string).to include(help) }
+      helps.each { |help| expect(tmp_stdout.string.tr(' ', '')).to include(help) }
     end
   end
 
