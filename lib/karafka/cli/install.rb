@@ -9,7 +9,7 @@ module Karafka
     class Install < Base
       include Helpers::Colorize
 
-      desc 'Install all required things for Karafka application in current directory'
+      desc 'Installs all required things for Karafka application in current directory'
 
       # Directories created by default
       INSTALL_DIRS = %w[

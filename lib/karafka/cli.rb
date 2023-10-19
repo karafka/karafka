@@ -16,8 +16,8 @@ module Karafka
         # Action for action-based commands like topics migrate
         action = ARGV[1].to_s.start_with?('-') ? false : ARGV[1]
 
-        command = ObjectSpace
-                  .each_object(Class).select { |klass| klass < Karafka::Cli::Base }
+        command = Base
+                  .commands
                   .find { |command| command.names.include?(command_name) }
 
         if command

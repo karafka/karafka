@@ -12,7 +12,7 @@ module Karafka
 
       private_constant :SUPPORTED_TYPES
 
-      desc 'Start the Karafka server (short-cut alias: "s")'
+      desc 'Starts the Karafka server (short-cut alias: "s")'
 
       aliases :s
 

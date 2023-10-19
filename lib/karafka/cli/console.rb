@@ -5,7 +5,7 @@ module Karafka
   class Cli
     # Console Karafka Cli action
     class Console < Base
-      desc 'Start the Karafka console (short-cut alias: "c")'
+      desc 'Starts the Karafka console (short-cut alias: "c")'
 
       aliases :c
 

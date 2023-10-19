@@ -5,7 +5,7 @@ module Karafka
   class Cli
     # Info Karafka Cli action
     class Info < Base
-      desc 'Print configuration details and other options of your application'
+      desc 'Prints configuration details and other options of your application'
 
       # Nice karafka banner
       BANNER = <<~BANNER

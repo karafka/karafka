@@ -50,7 +50,7 @@ module Karafka
 
         # Allows to set description of a given cli command
         # @param desc [String] Description of a given cli command
-        def desc(desc)
+        def desc(desc = nil)
           @desc ||= desc
         end
 
@@ -81,6 +81,11 @@ module Karafka
           end.parse!
 
           options
+        end
+
+        # @return [Array<Class>] available commands
+        def commands
+          ObjectSpace.each_object(Class).select { |klass| klass < Karafka::Cli::Base }
         end
 
         # @return [String] downcased current class name that we use to define name for
