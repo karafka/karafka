@@ -2,7 +2,7 @@
 
 module Karafka
   # Karafka framework Cli
-  class Cli < Thor
+  class Cli
     # Server Karafka Cli action
     class Server < Base
       include Helpers::Colorize
@@ -16,24 +16,53 @@ module Karafka
 
       aliases :s
 
-      # Thor does not work well with many aliases combinations, hence we remap the aliases
-      # by ourselves in the code
-      option :consumer_groups, type: :array, default: [], aliases: :g
-      option :subscription_groups, type: :array, default: []
-      option :topics, type: :array, default: []
+      option(
+        :consumer_groups,
+        'Runs server only with specified consumer groups',
+        Array,
+        %w[
+          -g
+          --consumer_groups
+          --include_consumer_groups
+        ]
+      )
 
-      %i[
-        include
-        exclude
-      ].each do |action|
-        SUPPORTED_TYPES.each do |type|
-          option(
-            "#{action}_#{type}",
-            type: :array,
-            default: []
-          )
-        end
-      end
+      option(
+        :subscription_groups,
+        'Runs server only with specified subscription groups',
+        Array,
+        %w[
+          --subscription_groups
+          --include_subscription_groups
+        ]
+      )
+
+      option(
+        :topics,
+        'Runs server only with specified topics',
+        Array,
+        %w[
+          --topics
+          --include_topics
+        ]
+      )
+      option(
+        :exclude_subscription_groups,
+        'Runs server without specified subscription groups',
+        Array,
+        %w[
+          --exclude_subscription_groups
+        ]
+      )
+
+      option(
+        :exclude_topics,
+        'Runs server without specified topics',
+        Array,
+        %w[
+          --exclude_topics
+        ]
+      )
 
       # Start the Karafka server
       def call
@@ -54,9 +83,7 @@ module Karafka
         activities = ::Karafka::App.config.internal.routing.activity_manager
 
         SUPPORTED_TYPES.each do |type|
-          v1 = cli.options[type] || []
-          v2 = cli.options[:"include_#{type}"] || []
-          names = v1 + v2
+          names = options[type] || []
 
           names.each { |name| activities.include(type, name) }
         end
@@ -68,7 +95,7 @@ module Karafka
         activities = ::Karafka::App.config.internal.routing.activity_manager
 
         activities.class::SUPPORTED_TYPES.each do |type|
-          names = cli.options[:"exclude_#{type}"] || []
+          names = options[:"exclude_#{type}"] || []
 
           names.each { |name| activities.exclude(type, name) }
         end

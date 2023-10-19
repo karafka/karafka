@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
-  class Cli < Thor
+  class Cli
     # CLI actions related to Kafka cluster topics management
     class Topics < Base
       include Helpers::Colorize

@@ -1,11 +1,28 @@
 #!/usr/bin/env ruby
 
-require 'karafka'
+require_relative '../lib/karafka'
+require 'optparse'
 
 # We set this to indicate, that the process in which we are (whatever it does) was started using
 # our bin/karafka cli
 ENV['KARAFKA_CLI'] = 'true'
 
+# Command we want to run, like install, server, etc
+command_name = ARGV[0]
+# Action for action-based commands like topics migrate
+action = ARGV[1] unless ARGV[1].to_s.start_with?('-')
+
 Karafka::Cli::Base.load
-Karafka::Cli.prepare
-Karafka::Cli.start
+
+ObjectSpace
+  .each_object(Class).select { |klass| klass < Karafka::Cli::Base }
+  .each do |command|
+    next unless command.names.include?(command_name)
+
+    # Only actionable commands require command as an argument
+    args = action ? [action] : []
+
+    return command.new.call(*args)
+  end
+
+raise

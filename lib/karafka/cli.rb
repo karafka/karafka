@@ -5,24 +5,10 @@ module Karafka
   #
   # If you want to add/modify command that belongs to CLI, please review all commands
   # available in cli/ directory inside Karafka source code.
-  #
-  # @note Whole Cli is built using Thor
-  # @see https://github.com/erikhuda/thor
-  class Cli < Thor
-    package_name 'Karafka'
+  class Cli
+    # package_name 'Karafka'
 
     class << self
-      # Loads all Cli commands into Thor framework.
-      # This method should be executed before we run Karafka::Cli.start, otherwise we won't
-      # have any Cli commands available.
-      def prepare
-        cli_commands.each do |action|
-          action.bind_to(self)
-        end
-      end
-
-      private
-
       # @return [Array<Class>] Array with Cli action classes that can be used as commands
       def cli_commands
         constants
