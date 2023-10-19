@@ -16,7 +16,7 @@ module Karafka
 
         command = Base
                   .commands
-                  .find { |command| command.names.include?(command_name) }
+                  .find { |cmd| cmd.names.include?(command_name) }
 
         if command
           # Only actionable commands require command as an argument

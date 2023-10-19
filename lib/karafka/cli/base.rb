@@ -86,7 +86,10 @@ module Karafka
 
         # @return [Array<Class>] available commands
         def commands
-          ObjectSpace.each_object(Class).select { |klass| klass < Karafka::Cli::Base }
+          ObjectSpace
+            .each_object(Class)
+            .select { |klass| klass < Karafka::Cli::Base }
+            .sort_by(&:name)
         end
 
         # @return [String] downcased current class name that we use to define name for

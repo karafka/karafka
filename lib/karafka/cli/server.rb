@@ -99,7 +99,6 @@ module Karafka
       end
 
       # Registers things we want to exclude (if defined)
-      # @param cli [Karafka::Cli] Thor cli handler
       def register_exclusions
         activities = ::Karafka::App.config.internal.routing.activity_manager
 
