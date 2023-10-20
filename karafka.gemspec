@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
   DESC
 
   spec.add_dependency 'karafka-core', '>= 2.2.2', '< 2.3.0'
-  spec.add_dependency 'thor', '>= 0.20'
   spec.add_dependency 'waterdrop', '>= 2.6.6', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 

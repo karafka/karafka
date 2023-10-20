@@ -2,8 +2,6 @@
 
 # karafka topics delete should never delete topics that are not defined in the routes
 
-Karafka::Cli.prepare
-
 Consumer = Class.new(Karafka::BaseConsumer)
 
 setup_karafka
@@ -21,7 +19,11 @@ cluster_topics = Karafka::Admin.cluster_info.topics.map { |topic| topic.fetch(:t
 assert cluster_topics.include?(DT.topics[0])
 
 Karafka::App.routes.clear
-Karafka::Cli.start %w[topics delete]
+
+ARGV[0] = 'topics'
+ARGV[1] = 'delete'
+
+Karafka::Cli.start
 
 # Should still exist because not part of the routing after routes were cleared
 cluster_topics = Karafka::Admin.cluster_info.topics.map { |topic| topic.fetch(:topic_name) }

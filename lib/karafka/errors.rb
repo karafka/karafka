@@ -60,5 +60,8 @@ module Karafka
     # Raised when we run operations that require certain result but despite successfully finishing
     # it is not yet available due to some synchronization mechanisms and caches
     ResultNotVisibleError = Class.new(BaseError)
+
+    # Raised when there is an attempt to run an unrecognized CLI command
+    UnrecognizedCommandError = Class.new(BaseError)
   end
 end

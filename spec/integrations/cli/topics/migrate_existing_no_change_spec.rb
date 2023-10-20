@@ -2,8 +2,6 @@
 
 # karafka topics migrate should do nothing when all stays the same
 
-Karafka::Cli.prepare
-
 Consumer = Class.new(Karafka::BaseConsumer)
 
 setup_karafka
@@ -24,7 +22,10 @@ draw_routes(create_topics: false) do
   end
 end
 
-Karafka::Cli.start %w[topics repartition]
+ARGV[0] = 'topics'
+ARGV[1] = 'repartition'
+
+Karafka::Cli.start
 
 cluster_topics = Karafka::Admin.cluster_info.topics.map do |topic|
   [topic.fetch(:topic_name), topic.fetch(:partition_count)]

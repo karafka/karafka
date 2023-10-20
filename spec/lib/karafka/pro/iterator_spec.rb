@@ -11,4 +11,18 @@ RSpec.describe_current do
   it 'expect to start and stop iterator' do
     iterator.each {}
   end
+
+  context 'when there is some data in the topic' do
+    before { Karafka.producer.produce_sync(topic: topic, payload: {}.to_json) }
+
+    it 'expect start, stop and get data' do
+      existing = nil
+
+      iterator.each do |message|
+        existing = message
+      end
+
+      expect(existing).not_to be_nil
+    end
+  end
 end

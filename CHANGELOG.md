@@ -5,10 +5,12 @@
 - [Improvement] Expose `#synchronize` for VPs to allow for locks when cross-VP consumers work is needed.
 - [Improvement] Provide `#collapse_until!` direct consumer API to allow for collapsed virtual partitions consumer operations together with the Filtering API for advanced use-cases.
 - [Refactor] Reorganize how rebalance events are propagated from `librdkafka` to Karafka. Replace `connection.client.rebalance_callback` with `rebalance.partitions_assigned` and `rebalance.partitions_revoked`. Introduce two extra events: `rebalance.partitions_assign` and `rebalance.partitions_revoke` to handle pre-rebalance future work.
+- [Refactor] Remove `thor` as a CLI layer and rely on Ruby `OptParser`
 
 ### Upgrade notes
 
-Unless you were using `connection.client.rebalance_callback` which was considered private, nothing.
+1. Unless you were using `connection.client.rebalance_callback` which was considered private, nothing.
+2. None of the CLI commands should change but `thor` has been removed so please report if you find any bugs.
 
 ## 2.2.7 (2023-10-07)
 - **[Feature]** Introduce Inline Insights to both OSS and Pro. Inline Insights allow you to get the Kafka insights/metrics from the consumer instance and use them to alter the processing flow. In Pro, there's an extra filter flow allowing to ensure, that the insights exist during consumption.

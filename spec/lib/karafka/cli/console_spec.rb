@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:console_cli) { described_class.new(cli) }
-
-  let(:cli) { Karafka::Cli.new }
+  subject(:console_cli) { described_class.new }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
+
+  let(:info) { Karafka::Cli::Info.new }
+
+  before { allow(info.class).to receive(:new).and_return(info) }
 
   describe '#call' do
     context 'when running without rails' do
@@ -18,13 +20,13 @@ RSpec.describe_current do
       end
 
       before do
-        allow(cli).to receive(:info)
+        allow(info).to receive(:call)
         allow(console_cli).to receive(:exec)
       end
 
       it 'expect to execute irb with boot file required' do
         console_cli.call
-        expect(cli).to have_received(:info)
+        expect(info).to have_received(:call)
         expect(console_cli).to have_received(:exec).with(cmd)
       end
     end
@@ -36,15 +38,19 @@ RSpec.describe_current do
 
       before do
         allow(::Karafka).to receive(:rails?).and_return(true)
-        allow(cli).to receive(:info)
+        allow(info).to receive(:call)
         allow(console_cli).to receive(:exec)
       end
 
       it 'expect to execute rails console' do
         console_cli.call
-        expect(cli).to have_received(:info)
+        expect(info).to have_received(:call)
         expect(console_cli).to have_received(:exec).with(cmd)
       end
     end
+  end
+
+  describe '#names' do
+    it { expect(console_cli.class.names).to eq %w[c console] }
   end
 end

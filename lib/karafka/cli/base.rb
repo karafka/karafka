@@ -1,31 +1,17 @@
 # frozen_string_literal: true
 
 module Karafka
-  class Cli < Thor
+  class Cli
     # Base class for all the command that we want to define
-    # This base class provides a nicer interface to Thor and allows to easier separate single
-    # independent commands
-    # In order to define a new command you need to:
-    #   - specify its desc
-    #   - implement call method
-    #
-    # @example Create a dummy command
-    #   class Dummy < Base
-    #     self.desc = 'Dummy command'
-    #
-    #     def call
-    #       puts 'I'm doing nothing!
-    #     end
-    #   end
+    # This base class provides an interface to easier separate single independent commands
     class Base
-      include Thor::Shell
+      # @return [Hash] given command cli options
+      attr_reader :options
 
-      # We can use it to call other cli methods via this object
-      attr_reader :cli
-
-      # @param cli [Karafka::Cli] current Karafka Cli instance
-      def initialize(cli)
-        @cli = cli
+      # Creates new CLI command instance
+      def initialize
+        # Parses the given command CLI options
+        @options = self.class.parse_options
       end
 
       # This method should implement proper cli action
@@ -64,7 +50,7 @@ module Karafka
 
         # Allows to set description of a given cli command
         # @param desc [String] Description of a given cli command
-        def desc(desc)
+        def desc(desc = nil)
           @desc ||= desc
         end
 
@@ -75,26 +61,35 @@ module Karafka
           @aliases << args.map(&:to_s)
         end
 
-        # This method will bind a given Cli command into Karafka Cli
-        # This method is a wrapper to way Thor defines its commands
-        # @param cli_class [Karafka::Cli] Karafka cli_class
-        def bind_to(cli_class)
-          cli_class.desc name, @desc
+        # Parses the CLI options
+        # @return [Hash] hash with parsed values
+        def parse_options
+          options = {}
 
-          (@options || []).each { |option| cli_class.option(*option) }
+          OptionParser.new do |opts|
+            (@options || []).each do |option|
+              # Creates aliases for backwards compatibility
+              names = option[3].flat_map { |name| [name, name.tr('_', '-')] }
+              names.map! { |name| "#{name} value1,value2,valueN" } if option[2] == Array
+              names.uniq!
 
-          context = self
+              opts.on(
+                *[names, option[2], option[1]].flatten
+              ) { |value| options[option[0]] = value }
+            end
+          end.parse!
 
-          cli_class.send :define_method, name do |*args|
-            context.new(self).call(*args)
-          end
-
-          (@aliases || []).each do |cmd_aliases|
-            cmd_aliases.each { |cmd_alias| cli_class.map cmd_alias => name.to_s }
-          end
+          options
         end
 
-        private
+        # @return [Array<Class>] available commands
+        def commands
+          ObjectSpace
+            .each_object(Class)
+            .select { |klass| klass.superclass == Karafka::Cli::Base }
+            .reject { |klass| klass.to_s.end_with?('::Base') }
+            .sort_by(&:name)
+        end
 
         # @return [String] downcased current class name that we use to define name for
         #   given Cli command
@@ -102,6 +97,11 @@ module Karafka
         #   name #=> 'install'
         def name
           to_s.split('::').last.downcase
+        end
+
+        # @return [Array<String>] names and aliases for command matching
+        def names
+          ((@aliases || []) << name).flatten.map(&:to_s)
         end
       end
     end

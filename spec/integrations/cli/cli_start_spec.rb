@@ -1,7 +1,13 @@
 # frozen_string_literal: true
 
-# Karafka CLI should work and should not fail
+# Karafka CLI should work and should fail with unknown command error
 
-Karafka::Cli.prepare
+failed = false
 
-Karafka::Cli.start
+begin
+  Karafka::Cli.start
+rescue Karafka::Errors::UnrecognizedCommandError
+  failed = true
+end
+
+assert failed

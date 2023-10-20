@@ -2,8 +2,6 @@
 
 # karafka topics delete should delete existing topics defined in routes
 
-Karafka::Cli.prepare
-
 Consumer = Class.new(Karafka::BaseConsumer)
 
 setup_karafka
@@ -18,7 +16,10 @@ draw_routes do
   end
 end
 
-Karafka::Cli.start %w[topics delete]
+ARGV[0] = 'topics'
+ARGV[1] = 'delete'
+
+Karafka::Cli.start
 
 cluster_topics = Karafka::Admin.cluster_info.topics.map { |topic| topic.fetch(:topic_name) }
 

@@ -2,6 +2,6 @@
 
 # Karafka CLI should work and should not fail
 
-Karafka::Cli.prepare
+ARGV[0] = 'info'
 
-Karafka::Cli.start ['info']
+Karafka::Cli.start

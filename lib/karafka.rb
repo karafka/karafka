@@ -7,10 +7,10 @@
   rdkafka
   waterdrop
   json
-  thor
   forwardable
   fileutils
   openssl
+  optparse
   base64
   date
   singleton

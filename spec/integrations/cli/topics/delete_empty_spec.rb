@@ -4,6 +4,7 @@
 
 setup_karafka
 
-Karafka::Cli.prepare
+ARGV[0] = 'topics'
+ARGV[1] = 'delete'
 
-Karafka::Cli.start %w[topics delete]
+Karafka::Cli.start

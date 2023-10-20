@@ -37,8 +37,6 @@ ARGV[0] = 'server'
 ARGV[1] = '--consumer-groups'
 ARGV[2] = 'non-existing'
 
-Karafka::Cli.prepare
-
 begin
   Karafka::Cli.start
 rescue Karafka::Errors::InvalidConfigurationError => e
@@ -56,8 +54,6 @@ ARGV[0] = 'server'
 ARGV[1] = '--subscription-groups'
 ARGV[2] = 'non-existing'
 
-Karafka::Cli.prepare
-
 begin
   Karafka::Cli.start
 rescue Karafka::Errors::InvalidConfigurationError => e
@@ -74,8 +70,6 @@ assert_equal 4, guarded.size
 ARGV[0] = 'server'
 ARGV[1] = '--topics'
 ARGV[2] = 'non-existing'
-
-Karafka::Cli.prepare
 
 begin
   Karafka::Cli.start
