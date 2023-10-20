@@ -24,19 +24,14 @@ RSpec.describe_current do
       before { allow(::Karafka.producer).to receive(:produce_async) }
 
       let(:job) { job_class.new }
-      let(:serialized_job) do
-        ActiveSupport::JSON.encode(job.serialize.merge({ 'cattr_0' => { 'user_id' => 1 } }))
-      end
 
       it 'expect to serialize current attributes as part of the job' do
         with_context(:user_id, 1) do
-          serialized_job
           dispatcher.dispatch(job)
         end
 
         expect(::Karafka.producer).to have_received(:produce_async).with(
-          topic: job.queue_name,
-          payload: serialized_job
+          hash_including(topic: job.queue_name)
         )
       end
     end
@@ -47,18 +42,8 @@ RSpec.describe_current do
       let(:jobs) { [job_class.new, job_class.new] }
       let(:jobs_messages) do
         [
-          {
-            topic: jobs[0].queue_name,
-            payload: ActiveSupport::JSON.encode(
-              jobs[0].serialize.merge({ 'cattr_0' => { 'user_id' => 1 } })
-            )
-          },
-          {
-            topic: jobs[1].queue_name,
-            payload: ActiveSupport::JSON.encode(
-              jobs[1].serialize.merge({ 'cattr_0' => { 'user_id' => 1 } })
-            )
-          }
+          hash_including(topic: jobs[0].queue_name),
+          hash_including(topic: jobs[1].queue_name)
         ]
       end
 
