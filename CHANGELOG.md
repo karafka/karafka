@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.2.8 (Unreleased)
+## 2.2.8 (2023-10-20)
 - **[Feature]** Introduce Appsignal integration for errors and metrics tracking.
 - [Improvement] Expose `#synchronize` for VPs to allow for locks when cross-VP consumers work is needed.
 - [Improvement] Provide `#collapse_until!` direct consumer API to allow for collapsed virtual partitions consumer operations together with the Filtering API for advanced use-cases.
