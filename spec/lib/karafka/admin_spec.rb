@@ -98,6 +98,8 @@ RSpec.describe_current do
         messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
 
         PRODUCERS.transactional.produce_many_sync(messages)
+        # Give the transaction some time to finalize under load
+        sleep(1)
       end
 
       it { expect(reading.size).to eq(10) }
