@@ -34,7 +34,7 @@ module Karafka
           low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
 
           # Select offset dynamically if -1 or less and move backwards with the negative
-          # offset, allowing to start from N messages back from highwatermark
+          # offset, allowing to start from N messages back from high-watermark
           start_offset = high_offset - count - start_offset.abs + 1 if start_offset.negative?
           start_offset = low_offset if start_offset.negative?
 
