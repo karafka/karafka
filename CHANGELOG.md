@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.9 (Unreleased)
+- [Improvement] Allow using negative offset references in `Karafka::Admin#read_topic`.
+
 ## 2.2.8 (2023-10-20)
 - **[Feature]** Introduce Appsignal integration for errors and metrics tracking.
 - [Improvement] Expose `#synchronize` for VPs to allow for locks when cross-VP consumers work is needed.
