@@ -240,6 +240,57 @@ RSpec.describe_current do
       it { expect(reading.last.offset).to eq(9) }
       it { expect(reading.first.offset).to eq(0) }
     end
+
+    context 'when reading from a negative offset to read few messages' do
+      let(:count) { 2 }
+      let(:offset) { -2 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(20) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(reading.size).to eq(2) }
+      it { expect(reading.last.offset).to eq(18) }
+      it { expect(reading.first.offset).to eq(17) }
+    end
+
+    context 'when reading from a too low negative offset to read few messages' do
+      let(:count) { 2 }
+      let(:offset) { -10_000 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(20) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(reading.size).to eq(2) }
+      it { expect(reading.last.offset).to eq(1) }
+      it { expect(reading.first.offset).to eq(0) }
+    end
+
+    # This may be a bit counter-intuitive in the first place.
+    # We move the offset by -2 + 1 plus the requested count so we move it by 102 from high
+    # watermark offset
+    context 'when reading from a negative offset to read a lot but not enough data' do
+      let(:count) { 100 }
+      let(:offset) { -2 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(20) { |i| { topic: name, payload: i.to_s } }
+
+        ::Karafka.producer.produce_many_sync(messages)
+      end
+
+      it { expect(reading.size).to eq(20) }
+      it { expect(reading.last.offset).to eq(19) }
+      it { expect(reading.first.offset).to eq(0) }
+    end
   end
 
   describe '#create_partitions and #cluster_info' do

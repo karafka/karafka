@@ -18,7 +18,7 @@ module Karafka
       # @param count [Integer] how many messages we want to get at most
       # @param start_offset [Integer, Time] offset from which we should start. If -1 is provided
       #   (default) we will start from the latest offset. If time is provided, the appropriate
-      #   offset will be resolved.
+      #   offset will be resolved. If negative beyond -1 is provided, we move backwards more.
       # @param settings [Hash] kafka extra settings (optional)
       #
       # @return [Array<Karafka::Messages::Message>] array with messages
@@ -33,8 +33,10 @@ module Karafka
 
           low_offset, high_offset = consumer.query_watermark_offsets(name, partition)
 
-          # Select offset dynamically if -1 or less
-          start_offset = high_offset - count if start_offset.negative?
+          # Select offset dynamically if -1 or less and move backwards with the negative
+          # offset, allowing to start from N messages back from high-watermark
+          start_offset = high_offset - count - start_offset.abs + 1 if start_offset.negative?
+          start_offset = low_offset if start_offset.negative?
 
           # Build the requested range - since first element is on the start offset we need to
           # subtract one from requested count to end up with expected number of elements
