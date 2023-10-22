@@ -69,6 +69,11 @@ RSpec.configure do |config|
     Karafka::App.config.internal.routing.activity_manager.clear
     Karafka::Processing::InlineInsights::Tracker.clear
   end
+
+  config.after(:all) do
+    PRODUCERS.regular.close
+    PRODUCERS.transactional.close
+  end
 end
 
 require 'karafka'
@@ -96,6 +101,17 @@ module Karafka
 end
 
 RSpec.extend RSpecLocator.new(__FILE__)
+
+# Alias for two producers that we need in specs. Regular one that is not transactional and the
+# other one that is transactional for transactional specs
+PRODUCERS = OpenStruct.new(
+  regular: Karafka.producer,
+  transactional: ::WaterDrop::Producer.new do |p_config|
+    p_config.kafka = ::Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+    p_config.kafka[:'transactional.id'] = SecureRandom.uuid
+    p_config.logger = Karafka::App.config.logger
+  end
+)
 
 # We by default use the default listeners for specs to check how they work and that
 # they don't not break anything

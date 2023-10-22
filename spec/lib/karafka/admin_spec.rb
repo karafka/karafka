@@ -66,12 +66,64 @@ RSpec.describe_current do
       before do
         described_class.create_topic(name, 1, 1)
 
-        ::Karafka.producer.produce_sync(topic: name, payload: '1')
+        PRODUCERS.regular.produce_sync(topic: name, payload: '1')
       end
 
       it { expect(reading.size).to eq(1) }
       it { expect(reading.first.offset).to eq(0) }
       it { expect(reading.first.raw_payload).to eq('1') }
+    end
+
+    context 'when trying to read data from topic with only aborted transactions' do
+      let(:count) { 100 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
+
+        PRODUCERS.transactional.transaction do
+          PRODUCERS.transactional.produce_many_async(messages)
+          throw(:abort)
+        end
+      end
+
+      it { expect(reading.size).to eq(0) }
+    end
+
+    context 'when trying to read data from topic with only committed transactions' do
+      let(:count) { 100 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+        messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
+
+        PRODUCERS.transactional.produce_many_async(messages)
+      end
+
+      it { expect(reading.size).to eq(10) }
+      it { expect(reading.first.offset).to eq(0) }
+      it { expect(reading.first.raw_payload).to eq('0') }
+    end
+
+    context 'when trying to read data from topic with messages and aborted transactions' do
+      let(:count) { 100 }
+
+      before do
+        described_class.create_topic(name, 1, 1)
+
+        PRODUCERS.regular.produce_sync(topic: name, payload: '-1')
+
+        messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
+
+        PRODUCERS.transactional.transaction do
+          PRODUCERS.transactional.produce_many_async(messages)
+          throw(:abort)
+        end
+      end
+
+      it { expect(reading.size).to eq(1) }
+      it { expect(reading.first.offset).to eq(0) }
+      it { expect(reading.first.raw_payload).to eq('-1') }
     end
 
     context 'when trying to read less than in topic' do
@@ -81,7 +133,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(5) }
@@ -99,7 +151,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(0) }
@@ -113,7 +165,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(7) }
@@ -129,7 +181,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(3) }
@@ -157,7 +209,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(1) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it 'expect to assign proper deserializer to messages' do
@@ -183,7 +235,7 @@ RSpec.describe_current do
       before do
         described_class.create_topic(name, 1, 1)
 
-        ::Karafka.producer.produce_sync(topic: name, payload: '1')
+        PRODUCERS.regular.produce_sync(topic: name, payload: '1')
       end
 
       it { expect(reading.size).to eq(1) }
@@ -199,7 +251,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(20) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(10) }
@@ -216,7 +268,7 @@ RSpec.describe_current do
         described_class.create_topic(name, partition + 1, 1)
         messages = Array.new(20) { |i| { topic: name, payload: i.to_s, partition: partition } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(10) }
@@ -233,7 +285,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(10) }
@@ -249,7 +301,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(20) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(2) }
@@ -265,7 +317,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(20) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(2) }
@@ -284,7 +336,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(20) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(20) }
@@ -363,7 +415,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
 
-        ::Karafka.producer.produce_many_sync(messages)
+        PRODUCERS.regular.produce_many_sync(messages)
       end
 
       it { expect(offsets.first).to eq(0) }
