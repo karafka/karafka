@@ -70,7 +70,7 @@ RSpec.configure do |config|
     Karafka::Processing::InlineInsights::Tracker.clear
   end
 
-  config.after(:all) do
+  config.after(:suite) do
     PRODUCERS.regular.close
     PRODUCERS.transactional.close
   end
