@@ -97,7 +97,7 @@ RSpec.describe_current do
         described_class.create_topic(name, 1, 1)
         messages = Array.new(10) { |i| { topic: name, payload: i.to_s } }
 
-        PRODUCERS.transactional.produce_many_async(messages)
+        PRODUCERS.transactional.produce_many_sync(messages)
       end
 
       it { expect(reading.size).to eq(10) }
