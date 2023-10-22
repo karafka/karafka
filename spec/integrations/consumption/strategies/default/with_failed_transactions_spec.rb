@@ -19,7 +19,7 @@ draw_routes(Consumer)
 elements = DT.uuids(100)
 
 2.times do
-  # And here we will fail the transcation just for the sake of having aborted data
+  # And here we will fail the transaction just for the sake of having aborted data
   messages = elements.map { |payload| { topic: DT.topic, payload: payload } }
   Karafka::App.producer.transaction do
     Karafka::App.producer.produce_many_sync(messages)
