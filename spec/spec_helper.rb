@@ -63,6 +63,14 @@ RSpec.configure do |config|
     Karafka::Pro::Loader.pre_setup_all(Karafka::App.config)
   end
 
+  config.before(:each) do
+    PRODUCERS.transactional = ::WaterDrop::Producer.new do |p_config|
+        p_config.kafka = ::Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+        p_config.kafka[:'transactional.id'] = SecureRandom.uuid
+        p_config.logger = Karafka::App.config.logger
+    end
+  end
+
   config.after do
     Karafka::App.routes.clear
     Karafka.monitor.notifications_bus.clear
