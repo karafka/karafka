@@ -98,7 +98,7 @@ RSpec.describe_current do
         existing = message
       end
 
-      expect(existing).not_to be_nil
+      expect(existing).to be_nil
     end
   end
 end
