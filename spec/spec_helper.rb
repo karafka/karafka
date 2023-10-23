@@ -69,6 +69,11 @@ RSpec.configure do |config|
     Karafka::App.config.internal.routing.activity_manager.clear
     Karafka::Processing::InlineInsights::Tracker.clear
   end
+
+  config.after(:suite) do
+    PRODUCERS.regular.close
+    PRODUCERS.transactional.close
+  end
 end
 
 require 'karafka'
@@ -97,6 +102,17 @@ end
 
 RSpec.extend RSpecLocator.new(__FILE__)
 
+# Alias for two producers that we need in specs. Regular one that is not transactional and the
+# other one that is transactional for transactional specs
+PRODUCERS = OpenStruct.new(
+  regular: Karafka.producer,
+  transactional: ::WaterDrop::Producer.new do |p_config|
+    p_config.kafka = ::Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
+    p_config.kafka[:'transactional.id'] = SecureRandom.uuid
+    p_config.logger = Karafka::App.config.logger
+  end
+)
+
 # We by default use the default listeners for specs to check how they work and that
 # they don't not break anything
 Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
@@ -114,6 +130,17 @@ def fixture_file(file_path)
       file_path
     )
   )
+end
+
+# Some operations in Kafka, like topics creation can finish successfully but cluster on a loaded
+# machine may still perform some internal operations. In such cases, when using transactional
+# producer, state may be refreshed during transaction causing critical errors.
+#
+# We can run this when waiting is needed to ensure state stability.
+def wait_if_needed
+  return unless ENV.key?('CI')
+
+  sleep(1)
 end
 
 # We need to clear argv because otherwise we would get reports on invalid options for CLI specs
