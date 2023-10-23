@@ -6,7 +6,7 @@ RSpec.describe_current do
 
   let(:topic) { SecureRandom.uuid }
 
-  before { Karafka::Admin.create_topic(topic, 2, 1) }
+  before { Karafka::Admin.create_topic(topic, 2, 1); sleep(1) }
 
   it 'expect to start and stop iterator' do
     iterator.each {}
@@ -71,6 +71,8 @@ RSpec.describe_current do
       PRODUCERS.transactional.transaction do
         PRODUCERS.transactional.produce_sync(topic: topic, payload: {}.to_json)
       end
+
+      sleep(1)
 
       PRODUCERS.transactional.transaction do
         50.times do
