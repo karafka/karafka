@@ -6,7 +6,7 @@ RSpec.describe_current do
 
   let(:topic) { SecureRandom.uuid }
 
-  before { Karafka::Admin.create_topic(topic, 2, 1); sleep(1) }
+  before { Karafka::Admin.create_topic(topic, 2, 1) }
 
   it 'expect to start and stop iterator' do
     iterator.each {}
@@ -28,6 +28,8 @@ RSpec.describe_current do
 
   context 'when there are only aborted transactions in the topic' do
     before do
+      wait_if_needed
+
       PRODUCERS.transactional.transaction do
         PRODUCERS.transactional.produce_sync(topic: topic, payload: {}.to_json)
 
@@ -48,6 +50,8 @@ RSpec.describe_current do
 
   context 'when there are committed transactions in the topic' do
     before do
+      wait_if_needed
+
       PRODUCERS.transactional.transaction do
         PRODUCERS.transactional.produce_sync(topic: topic, payload: {}.to_json)
       end
@@ -68,11 +72,13 @@ RSpec.describe_current do
     subject(:iterator) { described_class.new({ topic => -20 }) }
 
     before do
+      wait_if_needed
+
       PRODUCERS.transactional.transaction do
         PRODUCERS.transactional.produce_sync(topic: topic, payload: {}.to_json)
       end
 
-      sleep(1)
+      wait_if_needed
 
       PRODUCERS.transactional.transaction do
         50.times do

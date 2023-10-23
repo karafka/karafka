@@ -106,7 +106,108 @@ jobs:
       - name: Run all specs
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}
+        run: bin/rspecs
+
+  integrations_oss:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    needs: diffend
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '3.3.0-preview2'
+          - '3.2'
+          - '3.1'
+          - '3.0'
+          - '2.7'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install package dependencies
+        run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
+
+      - name: Remove libzstd-dev to check no supported compressions
+        run: sudo apt-get -y remove libzstd-dev
+
+      - name: Start Kafka with docker-compose
         run: |
-          docker-compose logs -f &
-          sleep 2
-          SPECS_TYPE=pro bundle exec rspec --tag type:pro  ./spec/lib/karafka/pro/iterator_spec.rb
+          docker-compose up -d || (sleep 5 && docker-compose up -d)
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # Do not use cache here as we run bundle install also later in some of the integration
+          # tests and we need to be able to run it without cache
+          #
+          # We also want to check that librdkafka is compiling as expected on all versions of Ruby
+          ruby-version: ${{matrix.ruby}}
+
+      - name: Install latest Bundler
+        run: |
+          gem install bundler --no-document
+          gem update --system --no-document
+          bundle config set without 'tools benchmarks docs'
+
+      - name: Bundle install
+        run: |
+          bundle config set without development
+          bundle install
+
+      - name: Wait for Kafka
+        run: |
+          bundle exec bin/wait_for_kafka
+
+      - name: Run OSS integration tests
+        run: bin/integrations --exclude '/pro'
+
+  integrations_pro:
+    timeout-minutes: 40
+    runs-on: ubuntu-latest
+    needs: diffend
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '3.3.0-preview2'
+          - '3.2'
+          - '3.1'
+          - '3.0'
+          - '2.7'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install package dependencies
+        run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
+
+      - name: Start Kafka with docker-compose
+        run: |
+          docker-compose up -d || (sleep 5 && docker-compose up -d)
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{matrix.ruby}}
+
+      - name: Install latest Bundler
+        run: |
+          gem install bundler --no-document
+          gem update --system --no-document
+          bundle config set without 'tools benchmarks docs'
+
+      - name: Bundle install
+        run: |
+          bundle config set without development
+          bundle install
+
+      - name: Wait for Kafka
+        run: |
+          bundle exec bin/wait_for_kafka
+
+      - name: Run Pro integration tests
+        env:
+          KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
+          KARAFKA_PRO_USERNAME: ${{ secrets.KARAFKA_PRO_USERNAME }}
+          KARAFKA_PRO_PASSWORD: ${{ secrets.KARAFKA_PRO_PASSWORD }}
+          KARAFKA_PRO_VERSION: ${{ secrets.KARAFKA_PRO_VERSION }}
+          KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
+
+        run: bin/integrations '/pro'

@@ -63,14 +63,6 @@ RSpec.configure do |config|
     Karafka::Pro::Loader.pre_setup_all(Karafka::App.config)
   end
 
-  config.before(:each) do
-    PRODUCERS.transactional = ::WaterDrop::Producer.new do |p_config|
-        p_config.kafka = ::Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
-        p_config.kafka[:'transactional.id'] = SecureRandom.uuid
-        p_config.logger = Karafka::App.config.logger
-    end
-  end
-
   config.after do
     Karafka::App.routes.clear
     Karafka.monitor.notifications_bus.clear
@@ -138,6 +130,17 @@ def fixture_file(file_path)
       file_path
     )
   )
+end
+
+# Some operations in Kafka, like topics creation can finish successfully but cluster on a loaded
+# machine may still perform some internal operations. In such cases, when using transactional
+# producer, state may be refreshed during transaction causing critical errors.
+#
+# We can run this when waiting is needed to ensure state stability.
+def wait_if_needed
+  return unless ENV.key?('CI')
+
+  sleep(1)
 end
 
 # We need to clear argv because otherwise we would get reports on invalid options for CLI specs
