@@ -92,7 +92,6 @@ jobs:
       - name: Start Kafka with docker-compose
         run: |
           docker-compose up -d || (sleep 5 && docker-compose up -d)
-          docker-compose logs -f &
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -107,4 +106,7 @@ jobs:
       - name: Run all specs
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}
-        run: SPECS_TYPE=pro bundle exec rspec --tag type:pro  ./spec/lib/karafka/pro/iterator_spec.rb
+        run: |
+          docker-compose logs -f &
+          sleep 2
+          SPECS_TYPE=pro bundle exec rspec --tag type:pro  ./spec/lib/karafka/pro/iterator_spec.rb
