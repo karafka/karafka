@@ -82,7 +82,7 @@ RSpec.describe_current do
 
       PRODUCERS.transactional.transaction do
         50.times do
-          PRODUCERS.transactional.produce_async(topic: topic, payload: {}.to_json)
+          PRODUCERS.transactional.produce_sync(topic: topic, payload: {}.to_json)
         end
 
         throw(:abort)
