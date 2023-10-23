@@ -109,4 +109,4 @@ jobs:
         run: |
           docker-compose logs -f &
           sleep 2
-          SPECS_TYPE=pro bundle exec rspec --tag type:pro  ./spec/lib/karafka/pro/iterator_spec.rb:65
+          SPECS_TYPE=pro bundle exec rspec --tag type:pro  ./spec/lib/karafka/pro/iterator_spec.rb:56
