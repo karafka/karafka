@@ -1,7 +1,8 @@
 # Karafka framework changelog
 
-## 2.2.9 (Unreleased)
+## 2.2.9 (2023-10-24)
 - [Improvement] Allow using negative offset references in `Karafka::Admin#read_topic`.
+- [Change] Make sure that WaterDrop `2.6.10` or higher is used with this release to support transactions fully and the Web-UI.
 
 ## 2.2.8 (2023-10-20)
 - **[Feature]** Introduce Appsignal integration for errors and metrics tracking.
