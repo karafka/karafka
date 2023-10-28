@@ -85,6 +85,8 @@ RSpec.describe_current do
           PRODUCERS.transactional.produce_sync(topic: topic, payload: {}.to_json)
         end
 
+        wait_if_needed
+
         throw(:abort)
       end
 
