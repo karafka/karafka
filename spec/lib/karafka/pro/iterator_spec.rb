@@ -101,7 +101,7 @@ RSpec.describe_current do
       end
 
       puts existing
-      puts existing.offset
+      puts existing&.offset
       expect(existing).to be_nil
     end
   end
