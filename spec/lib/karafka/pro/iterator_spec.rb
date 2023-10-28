@@ -90,7 +90,7 @@ RSpec.describe_current do
         throw(:abort)
       end
 
-      2.times { wait_if_needed }
+      wait_if_needed
     end
 
     it 'expect start, stop and get no data' do
