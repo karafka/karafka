@@ -88,7 +88,7 @@ RSpec.describe_current do
         throw(:abort)
       end
 
-      wait_if_needed
+      2.times { wait_if_needed }
     end
 
     it 'expect start, stop and get no data' do
