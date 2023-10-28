@@ -100,8 +100,7 @@ RSpec.describe_current do
         existing = message
       end
 
-      puts existing
-      puts existing&.offset
+      expect(existing&.offset).to be_nil
       expect(existing).to be_nil
     end
   end
