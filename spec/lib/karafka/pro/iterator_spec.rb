@@ -85,6 +85,8 @@ RSpec.describe_current do
           PRODUCERS.transactional.produce_sync(topic: topic, payload: {}.to_json)
         end
 
+        wait_if_needed
+
         throw(:abort)
       end
 
@@ -98,6 +100,7 @@ RSpec.describe_current do
         existing = message
       end
 
+      expect(existing&.offset).to be_nil
       expect(existing).to be_nil
     end
   end
