@@ -2,5 +2,10 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:base"
-  ]
+  ],
+  // Do not auto-update locked Rails versions in integrations
+  // Otherwise it was trying to updat Rails 7 to 7.1 etc, where we want to always test each
+  "ignorePaths": [
+      "spec/integrations"
+  ],
 }
