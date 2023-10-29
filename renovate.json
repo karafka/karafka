@@ -7,5 +7,5 @@
   // Otherwise it was trying to updat Rails 7 to 7.1 etc, where we want to always test each
   "ignorePaths": [
       "spec/integrations"
-  ],
+  ]
 }
