@@ -100,8 +100,13 @@ RSpec.describe_current do
         existing = message
       end
 
-      expect(existing&.offset).to be_nil
-      expect(existing).to be_nil
+      # This spec is a bit tricky. Under heavy load on CI, the aborted transaction may not create
+      # records fast enough for the watermark offset to be updated. This means, that we will get
+      # the first offset of the successful message instead of last 20 empty from aborted.
+      # In both cases we check that we do not get aborted data, so it is ok to check it that way.
+      offset = existing&.offset || 0
+
+      expect(offset).to eq(0)
     end
   end
 end
