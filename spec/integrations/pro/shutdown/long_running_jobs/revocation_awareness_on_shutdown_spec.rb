@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
     # We use loop so in case this would not work, it will timeout and raise an error
     loop do
       # In case we were given back some of the partitions after rebalance, this could get into
-      # an infinte loop, hence we need to check it
+      # an infinite loop, hence we need to check it
       return if done?
 
       sleep(0.1)
