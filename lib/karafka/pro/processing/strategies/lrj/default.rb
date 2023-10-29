@@ -37,9 +37,6 @@ module Karafka
               coordinator.on_enqueued do
                 # Pause at the first message in a batch. That way in case of a crash, we will not
                 # loose any messages.
-                #
-                # For VP it applies the same way and since VP cannot be used with MOM we should not
-                # have any edge cases here.
                 pause(coordinator.seek_offset, MAX_PAUSE_TIME, false)
               end
             end

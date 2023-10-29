@@ -10,12 +10,16 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if Karafka::App.stopping? && DT[:started].size >= 10
+    return if done?
 
     DT[:started] << true
 
     # We use loop so in case this would not work, it will timeout and raise an error
     loop do
+      # In case we were given back some of the partitions after rebalance, this could get into
+      # an infinite loop, hence we need to check it
+      return if done?
+
       sleep(0.1)
 
       next unless revoked?
@@ -24,6 +28,12 @@ class Consumer < Karafka::BaseConsumer
 
       break
     end
+  end
+
+  private
+
+  def done?
+    Karafka::App.stopping? && DT[:started].size >= 10
   end
 end
 
