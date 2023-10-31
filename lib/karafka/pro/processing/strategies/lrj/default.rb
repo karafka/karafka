@@ -35,9 +35,10 @@ module Karafka
               # This ensures that when running LRJ with VP, things operate as expected run only
               # once for all the virtual partitions collectively
               coordinator.on_enqueued do
-                # Pause at the first message in a batch. That way in case of a crash, we will not
-                # loose any messages.
-                pause(coordinator.seek_offset, MAX_PAUSE_TIME, false)
+                # Pause and continue with another batch in case of a regular resume.
+                # In case of an error, the `#retry_after_pause` will move the offset to the first
+                # message out of this batch.
+                pause(:consecutive, MAX_PAUSE_TIME, false)
               end
             end
 
