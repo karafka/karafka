@@ -74,22 +74,43 @@ RSpec.describe_current do
   end
 
   describe '#on_client_pause' do
-    subject(:trigger) { listener.on_client_pause(event) }
+    context 'when pausing offset is provided' do
+      subject(:trigger) { listener.on_client_pause(event) }
 
-    let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
-    let(:message) do
-      "[#{client.id}] Pausing on topic Topic/0 on offset 12"
-    end
-    let(:payload) do
-      {
-        caller: client,
-        topic: 'Topic',
-        partition: 0,
-        offset: 12
-      }
+      let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
+      let(:message) do
+        "[#{client.id}] Pausing on topic Topic/0 on offset 12"
+      end
+      let(:payload) do
+        {
+          caller: client,
+          topic: 'Topic',
+          partition: 0,
+          offset: 12
+        }
+      end
+
+      it { expect(Karafka.logger).to have_received(:info).with(message) }
     end
 
-    it { expect(Karafka.logger).to have_received(:info).with(message) }
+    context 'when pausing offset is not provided (leading)' do
+      subject(:trigger) { listener.on_client_pause(event) }
+
+      let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
+      let(:message) do
+        "[#{client.id}] Pausing on topic Topic/0 on the leading offset"
+      end
+      let(:payload) do
+        {
+          caller: client,
+          topic: 'Topic',
+          partition: 0,
+          offset: nil
+        }
+      end
+
+      it { expect(Karafka.logger).to have_received(:info).with(message) }
+    end
   end
 
   describe '#on_client_resume' do

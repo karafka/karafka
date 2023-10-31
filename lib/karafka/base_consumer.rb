@@ -171,16 +171,22 @@ module Karafka
       @used
     end
 
-    # Pauses processing on a given offset for the current topic partition
+    # Pauses processing on a given offset or leading offset for the current topic partition
     #
     # After given partition is resumed, it will continue processing from the given offset
-    # @param offset [Integer] offset from which we want to restart the processing
+    # @param offset [Integer, nil] offset from which we want to restart the processing or nil if we
+    #   want to pause and continue without changing the leading offset (cursor position)
     # @param timeout [Integer, nil] how long in milliseconds do we want to pause or nil to use the
     #   default exponential pausing strategy defined for retries
     # @param manual_pause [Boolean] Flag to differentiate between user pause and system/strategy
     #   based pause. While they both pause in exactly the same way, the strategy application
     #   may need to differentiate between them.
-    def pause(offset, timeout = nil, manual_pause = true)
+    #
+    # @note It is **critical** to understand how pause with `nil` offset operates. While it provides
+    #   benefit of not purging librdkafka buffer, in case of usage of filters, retries or other
+    #   advanced options the leading offset may not be the one you want to pause on. Test it well
+    #   to ensure, that this behaviour is expected by you.
+    def pause(offset = nil, timeout = nil, manual_pause = true)
       timeout ? coordinator.pause_tracker.pause(timeout) : coordinator.pause_tracker.pause
 
       client.pause(

@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.10 (Unreleased)
+- [Improvement] Allow for running `#pause` without specifying the offset (provide nil when with timeout or just `#pause`). This allows for pausing on the leading message, so after resume we will get last message received + 1 effectively not using `#seek` and not purging `librdafka` buffer preserving on networking. Please be mindful that this uses notion of last message passed from **librdkafka**, and not the last one available in the consumer (`messages.last`). While for regular cases they will be the same, when using things like DLQ, LRJs, VPs or Filtering API, those may not be the same.
+
 ## 2.2.9 (2023-10-24)
 - [Improvement] Allow using negative offset references in `Karafka::Admin#read_topic`.
 - [Change] Make sure that WaterDrop `2.6.10` or higher is used with this release to support transactions fully and the Web-UI.
