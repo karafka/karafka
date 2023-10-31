@@ -37,7 +37,7 @@ module Karafka
               super
 
               coordinator.on_enqueued do
-                pause(coordinator.seek_offset, Strategies::Lrj::Default::MAX_PAUSE_TIME, false)
+                pause(:consecutive, Strategies::Lrj::Default::MAX_PAUSE_TIME, false)
               end
             end
 

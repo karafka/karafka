@@ -363,6 +363,9 @@ module Karafka
       #
       # @param message [Messages::Message, Messages::Seek] message to which we want to seek to.
       #   It can have the time based offset.
+      #
+      # @note Will not invoke seeking if the desired seek would lead us to the current position.
+      #   This prevents us from flushing librdkafka buffer when it is not needed.
       def internal_seek(message)
         # If the seek message offset is in a time format, we need to find the closest "real"
         # offset matching before we seek
@@ -386,6 +389,14 @@ module Karafka
           # We should always detect offset, whether it is 0, -1 or a corresponding
           message.offset = detected_partition&.offset || raise(Errors::InvalidTimeBasedOffsetError)
         end
+
+        # Never seek if we would get the same location as we would get without seeking
+        # This prevents us from the expensive buffer purges that can lead to increased network
+        # traffic and can cost a lot of money
+        #
+        # This code adds around 0.01 ms per seek but saves from many user unexpected behaviours in
+        # seeking and pausing
+        return if message.offset == topic_partition_position(message.topic, message.partition)
 
         @kafka.seek(message)
       end
@@ -439,6 +450,18 @@ module Karafka
         return unless rdkafka_partition
 
         Rdkafka::Consumer::TopicPartitionList.new({ topic => [rdkafka_partition] })
+      end
+
+      # @param topic [String]
+      # @param partition [Integer]
+      # @return [Integer] current position within topic partition or `-1` if it could not be
+      #   established. It may be `-1` in case we lost the assignment or we did not yet fetch data
+      #   for this topic partition
+      def topic_partition_position(topic, partition)
+        rd_partition = ::Rdkafka::Consumer::Partition.new(partition, nil, 0)
+        tpl = ::Rdkafka::Consumer::TopicPartitionList.new(topic => [rd_partition])
+
+        @kafka.position(tpl).to_h.fetch(topic).first.offset || -1
       end
 
       # Performs a single poll operation and handles retries and error
