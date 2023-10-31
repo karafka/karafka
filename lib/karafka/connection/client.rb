@@ -160,15 +160,16 @@ module Karafka
       #
       # @param topic [String] topic name
       # @param partition [Integer] partition
-      # @param offset [Integer] offset of the message on which we want to pause (this message will
-      #   be reprocessed after getting back to processing)
+      # @param offset [Integer, nil] offset of the message on which we want to pause (this message
+      #   will be reprocessed after getting back to processing) or nil if we want to pause and
+      #   resume from the consecutive offset (+1 from the last message passed to us by librdkafka)
       # @note This will pause indefinitely and requires manual `#resume`
-      def pause(topic, partition, offset)
+      # @note When `#internal_seek` is not involved (when offset is `nil`) we will not purge the
+      #   librdkafka buffers and continue from the last cursor offset
+      def pause(topic, partition, offset = nil)
         @mutex.synchronize do
           # Do not pause if the client got closed, would not change anything
           return if @closed
-
-          pause_msg = Messages::Seek.new(topic, partition, offset)
 
           internal_commit_offsets(async: true)
 
@@ -190,6 +191,14 @@ module Karafka
           @paused_tpls[topic][partition] = tpl
 
           @kafka.pause(tpl)
+
+          # If offset is not provided, will pause where it finished.
+          # This makes librdkafka not purge buffers and can provide significant network savings
+          # when we just want to pause before further processing without changing the offsets
+          return unless offset
+
+          pause_msg = Messages::Seek.new(topic, partition, offset)
+
           internal_seek(pause_msg)
         end
       end
