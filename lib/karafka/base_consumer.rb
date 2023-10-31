@@ -171,11 +171,11 @@ module Karafka
       @used
     end
 
-    # Pauses processing on a given offset or leading offset for the current topic partition
+    # Pauses processing on a given offset or consecutive offset for the current topic partition
     #
     # After given partition is resumed, it will continue processing from the given offset
     # @param offset [Integer, Symbol] offset from which we want to restart the processing or
-    #  `:leading` if we want to pause and continue without changing the leading offset
+    #  `:consecutive` if we want to pause and continue without changing the consecutive offset
     #  (cursor position)
     # @param timeout [Integer, nil] how long in milliseconds do we want to pause or nil to use the
     #   default exponential pausing strategy defined for retries
@@ -183,14 +183,14 @@ module Karafka
     #   based pause. While they both pause in exactly the same way, the strategy application
     #   may need to differentiate between them.
     #
-    # @note It is **critical** to understand how pause with `:leading` offset operates. While it
-    #   provides benefit of not purging librdkafka buffer, in case of usage of filters, retries or
-    #   other advanced options the leading offset may not be the one you want to pause on. Test it
-    #   well to ensure, that this behaviour is expected by you.
+    # @note It is **critical** to understand how pause with `:consecutive` offset operates. While
+    #   it provides benefit of not purging librdkafka buffer, in case of usage of filters, retries
+    #   or other advanced options the consecutive offset may not be the one you want to pause on.
+    #   Test it well to ensure, that this behaviour is expected by you.
     def pause(offset, timeout = nil, manual_pause = true)
       timeout ? coordinator.pause_tracker.pause(timeout) : coordinator.pause_tracker.pause
 
-      offset = nil if offset == :leading
+      offset = nil if offset == :consecutive
 
       client.pause(topic.name, partition, offset)
 

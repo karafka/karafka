@@ -71,7 +71,7 @@ module Karafka
       # Prints info about a consumer pause occurrence. Irrelevant if user or system initiated.
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
-      # @note There may be no offset provided in case user wants to pause on the leading offset
+      # @note There may be no offset provided in case user wants to pause on the consecutive offset
       #   position. This can be beneficial when not wanting to purge the buffers.
       def on_client_pause(event)
         topic = event[:topic]
@@ -82,7 +82,7 @@ module Karafka
         info <<~MSG.tr("\n", ' ').strip!
           [#{client.id}]
           Pausing on topic #{topic}/#{partition}
-          on #{offset ? "offset #{offset}" : 'the leading offset'}
+          on #{offset ? "offset #{offset}" : 'the consecutive offset'}
         MSG
       end
 

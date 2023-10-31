@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# We should be able to pause without any arguments and then pause will pause on the leading offset
+# We should be able to pause without any arguments and then pause will pause on the
+# consecutive offset
 
 setup_karafka do |config|
   config.max_messages = 20
@@ -17,7 +18,7 @@ class Consumer < Karafka::BaseConsumer
 
     DT[:times] << Time.now.to_f
 
-    pause(:leading)
+    pause(:consecutive)
   end
 end
 

@@ -162,7 +162,7 @@ module Karafka
       # @param partition [Integer] partition
       # @param offset [Integer, nil] offset of the message on which we want to pause (this message
       #   will be reprocessed after getting back to processing) or nil if we want to pause and
-      #   resume from the leading offset (+1 from the last message passed to us by librdkafka)
+      #   resume from the consecutive offset (+1 from the last message passed to us by librdkafka)
       # @note This will pause indefinitely and requires manual `#resume`
       # @note When `#internal_seek` is not involved (when offset is `nil`) we will not purge the
       #   librdkafka buffers and continue from the last cursor offset
