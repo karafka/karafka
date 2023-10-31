@@ -3,6 +3,7 @@
 ## 2.2.10 (Unreleased)
 - [Improvement] Allow for running `#pause` without specifying the offset (provide offset or `:consecutive`). This allows for pausing on the consecutive message (last received + 1), so after resume we will get last message received + 1 effectively not using `#seek` and not purging `librdafka` buffer preserving on networking. Please be mindful that this uses notion of last message passed from **librdkafka**, and not the last one available in the consumer (`messages.last`). While for regular cases they will be the same, when using things like DLQ, LRJs, VPs or Filtering API, those may not be the same.
 - [Improvement] **Drastically** improve network efficiency of operating with LRJ by using the `:consecutive` offset as default strategy for running LRJs without moving the offset in place and purging the data.
+- [Improvement] Do not "seek in place". When pausing and/or seeking to the same location as the current position, do nothing not to purge buffers and not to move to the same place where we are.
 
 ## 2.2.9 (2023-10-24)
 - [Improvement] Allow using negative offset references in `Karafka::Admin#read_topic`.
