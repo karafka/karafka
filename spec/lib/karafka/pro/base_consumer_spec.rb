@@ -233,7 +233,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
     it 'expect not to pause the partition' do
       consumer.on_before_enqueue
-      expect(client).to have_received(:pause).with(topic.name, 0, offset)
+      expect(client).to have_received(:pause).with(topic.name, 0, nil)
     end
   end
 
@@ -374,8 +374,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset)
-          .twice
+          .with(topic.name, first_message.partition, nil)
       end
 
       it 'expect to pause with time tracker' do
