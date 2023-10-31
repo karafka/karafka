@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
 
     DT[:times] << Time.now.to_f
 
-    pause
+    pause(:leading)
   end
 end
 
