@@ -93,12 +93,12 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:info).with(message) }
     end
 
-    context 'when pausing offset is not provided (leading)' do
+    context 'when pausing offset is not provided (consecutive)' do
       subject(:trigger) { listener.on_client_pause(event) }
 
       let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
       let(:message) do
-        "[#{client.id}] Pausing on topic Topic/0 on the leading offset"
+        "[#{client.id}] Pausing on topic Topic/0 on the consecutive offset"
       end
       let(:payload) do
         {
