@@ -182,18 +182,14 @@ module Karafka
     #   based pause. While they both pause in exactly the same way, the strategy application
     #   may need to differentiate between them.
     #
-    # @note It is **critical** to understand how pause with `nil` offset operates. While it provides
-    #   benefit of not purging librdkafka buffer, in case of usage of filters, retries or other
-    #   advanced options the leading offset may not be the one you want to pause on. Test it well
-    #   to ensure, that this behaviour is expected by you.
+    # @note It is **critical** to understand how pause with `nil` offset operates. While it
+    #   provides benefit of not purging librdkafka buffer, in case of usage of filters, retries or
+    #   other advanced options the leading offset may not be the one you want to pause on. Test it
+    #   well to ensure, that this behaviour is expected by you.
     def pause(offset = nil, timeout = nil, manual_pause = true)
       timeout ? coordinator.pause_tracker.pause(timeout) : coordinator.pause_tracker.pause
 
-      client.pause(
-        topic.name,
-        partition,
-        offset
-      )
+      client.pause(topic.name, partition, offset)
 
       # Indicate, that user took a manual action of pausing
       coordinator.manual_pause if manual_pause

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-
+# We should be able to pause without any arguments and then pause will pause on the leading offset
 
 setup_karafka do |config|
   config.max_messages = 20
