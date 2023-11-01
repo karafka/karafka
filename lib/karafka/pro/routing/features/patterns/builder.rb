@@ -27,9 +27,6 @@ module Karafka
             # @param block [Proc]
             def pattern(regexp_or_name, regexp = nil, &block)
               consumer_group('app') do
-                # Pattern subscriptions should never be part of declarative topics definitions
-                # Since they are subscribed by regular expressions, we do not know the target
-                # topics names so we cannot manage them via declaratives
                 pattern(regexp_or_name, regexp, &block)
               end
             end
