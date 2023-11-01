@@ -50,6 +50,10 @@ module Karafka
               virtual_topic = public_send(:topic=, pattern.name, &block)
               # Indicate the nature of this topic (matcher)
               virtual_topic.patterns(active: true, type: :matcher, pattern: pattern)
+              # Pattern subscriptions should never be part of declarative topics definitions
+              # Since they are subscribed by regular expressions, we do not know the target
+              # topics names so we cannot manage them via declaratives
+              virtual_topic.config(active: false)
               pattern.topic = virtual_topic
               @patterns << pattern
             end

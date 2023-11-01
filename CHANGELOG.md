@@ -4,6 +4,11 @@
 - [Improvement] Allow for running `#pause` without specifying the offset (provide offset or `:consecutive`). This allows for pausing on the consecutive message (last received + 1), so after resume we will get last message received + 1 effectively not using `#seek` and not purging `librdafka` buffer preserving on networking. Please be mindful that this uses notion of last message passed from **librdkafka**, and not the last one available in the consumer (`messages.last`). While for regular cases they will be the same, when using things like DLQ, LRJs, VPs or Filtering API, those may not be the same.
 - [Improvement] **Drastically** improve network efficiency of operating with LRJ by using the `:consecutive` offset as default strategy for running LRJs without moving the offset in place and purging the data.
 - [Improvement] Do not "seek in place". When pausing and/or seeking to the same location as the current position, do nothing not to purge buffers and not to move to the same place where we are.
+- [Fix] Pattern regexps should not be part of declaratives even when configured.
+
+### Upgrade Notes
+
+In the latest Karafka release, there are no breaking changes. However, please note the updates to #pause and #seek. If you spot any issues, please report them immediately. Your feedback is crucial.
 
 ## 2.2.9 (2023-10-24)
 - [Improvement] Allow using negative offset references in `Karafka::Admin#read_topic`.
@@ -16,7 +21,7 @@
 - [Refactor] Reorganize how rebalance events are propagated from `librdkafka` to Karafka. Replace `connection.client.rebalance_callback` with `rebalance.partitions_assigned` and `rebalance.partitions_revoked`. Introduce two extra events: `rebalance.partitions_assign` and `rebalance.partitions_revoke` to handle pre-rebalance future work.
 - [Refactor] Remove `thor` as a CLI layer and rely on Ruby `OptParser`
 
-### Upgrade notes
+### Upgrade Notes
 
 1. Unless you were using `connection.client.rebalance_callback` which was considered private, nothing.
 2. None of the CLI commands should change but `thor` has been removed so please report if you find any bugs.
@@ -58,7 +63,7 @@
 - [Enhancement] Make sure that consumer group used by `Karafka::Admin` obeys the `ConsumerMapper` setup.
 - [Fix] Fix a case where subscription group would not accept a symbol name.
 
-### Upgrade notes
+### Upgrade Notes
 
 As always, please make sure you have upgraded to the most recent version of `2.1` before upgrading to `2.2`.
 
@@ -189,7 +194,7 @@ If you want to maintain the `2.1` behavior, that is `karafka_admin` admin group,
 - [Change] Removed `Karafka::Pro::BaseConsumer` in favor of `Karafka::BaseConsumer`. (#1345)
 - [Fix] Fix for `max_messages` and `max_wait_time` not having reference in errors.yml (#1443)
 
-### Upgrade notes
+### Upgrade Notes
 
 1. Upgrade to Karafka `2.0.41` prior to upgrading to `2.1.0`.
 2. Replace `Karafka::Pro::BaseConsumer` references to `Karafka::BaseConsumer`.
@@ -261,7 +266,7 @@ If you want to maintain the `2.1` behavior, that is `karafka_admin` admin group,
 - [Improvement] Attach an `embedded` tag to Karafka processes started using the embedded API.
 - [Change] Renamed `Datadog::Listener` to `Datadog::MetricsListener` for consistency. (#1124)
 
-### Upgrade notes
+### Upgrade Notes
 
 1. Replace `Datadog::Listener` references to `Datadog::MetricsListener`.
 
@@ -275,7 +280,7 @@ If you want to maintain the `2.1` behavior, that is `karafka_admin` admin group,
 - [Improvement] Introduce a `strict_topics_namespacing` config option to enable/disable the strict topics naming validations. This can be useful when working with pre-existing topics which we cannot or do not want to rename.
 - [Fix] Karafka monitor is prematurely cached (#1314)
 
-### Upgrade notes
+### Upgrade Notes
 
 Since `#tags` were introduced on consumers, the `#tags` method is now part of the consumers API.
 
@@ -337,7 +342,7 @@ end
 - [Improvement] Include `original_consumer_group` in the DLQ dispatched messages in Pro.
 - [Improvement] Use Karafka `client_id` as kafka `client.id` value by default
 
-### Upgrade notes
+### Upgrade Notes
 
 If you want to continue to use `karafka` as default for kafka `client.id`, assign it manually:
 
@@ -390,7 +395,7 @@ class KarafkaApp < Karafka::App
 - [Fix] Do not trigger code reloading when `consumer_persistence` is enabled.
 - [Fix] Shutdown producer after all the consumer components are down and the status is stopped. This will ensure, that any instrumentation related Kafka messaging can still operate.
 
-### Upgrade notes
+### Upgrade Notes
 
 If you want to disable `librdkafka` statistics because you do not use them at all, update the `kafka` `statistics.interval.ms` setting and set it to `0`:
 
@@ -452,7 +457,7 @@ end
 - [Fix] Few typos around DLQ and Pro DLQ Dispatch original metadata naming.
 - [Fix] Narrow the components lookup to the appropriate scope (#1114)
 
-### Upgrade notes
+### Upgrade Notes
 
 1. Replace `original-*` references from DLQ dispatched metadata with `original_*`
 
@@ -495,7 +500,7 @@ end
 - [Specs] Split specs into regular and pro to simplify how resources are loaded
 - [Specs] Add specs to ensure, that all the Pro components have a proper per-file license (#1099)
 
-### Upgrade notes
+### Upgrade Notes
 
 1. Remove the `manual_offset_management` setting from the main config if you use it:
 
