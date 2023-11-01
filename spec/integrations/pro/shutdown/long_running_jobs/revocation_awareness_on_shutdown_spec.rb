@@ -18,19 +18,23 @@ class Consumer < Karafka::BaseConsumer
     loop do
       # In case we were given back some of the partitions after rebalance, this could get into
       # an infinite loop, hence we need to check it
-      return if done?
+      return if done? && signaled?
 
       sleep(0.1)
 
       next unless revoked?
 
-      DT[:revoked] << true
+      DT[:revoked] << partition
 
       break
     end
   end
 
   private
+
+  def signaled?
+    DT[:revoked].include?(partition)
+  end
 
   def done?
     Karafka::App.stopping? && DT[:started].size >= 10
