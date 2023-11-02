@@ -59,10 +59,8 @@ module Karafka
 
       # @param offset [Integer] message offset
       def seek_offset=(offset)
-        synchronize do
-          @marked = true
-          @seek_offset = offset
-        end
+        @marked = true
+        @seek_offset = offset
       end
 
       # Increases number of jobs that we handle with this coordinator

@@ -47,9 +47,9 @@ module Karafka
                 manager.mark_until(message) if coordinator.finished?
 
                 return revoked? unless manager.markable?
-              end
 
-              manager.markable? ? super(manager.markable) : revoked?
+                manager.markable? ? super(manager.markable) : revoked?
+              end
             end
 
             # @param message [Karafka::Messages::Message] blocking marks message as consumed
@@ -61,9 +61,8 @@ module Karafka
               coordinator.synchronize do
                 manager.mark(message)
                 manager.mark_until(message) if coordinator.finished?
+                manager.markable? ? super(manager.markable) : revoked?
               end
-
-              manager.markable? ? super(manager.markable) : revoked?
             end
 
             # @return [Boolean] is the virtual processing collapsed in the context of given

@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.11 (Unreleased)
+- [Improvement] Make whole Pro VP marking as consumed concurrency safe for both async and sync scenarios.
+
 ## 2.2.10 (2023-11-02)
 - [Improvement] Allow for running `#pause` without specifying the offset (provide offset or `:consecutive`). This allows for pausing on the consecutive message (last received + 1), so after resume we will get last message received + 1 effectively not using `#seek` and not purging `librdafka` buffer preserving on networking. Please be mindful that this uses notion of last message passed from **librdkafka**, and not the last one available in the consumer (`messages.last`). While for regular cases they will be the same, when using things like DLQ, LRJs, VPs or Filtering API, those may not be the same.
 - [Improvement] **Drastically** improve network efficiency of operating with LRJ by using the `:consecutive` offset as default strategy for running LRJs without moving the offset in place and purging the data.
