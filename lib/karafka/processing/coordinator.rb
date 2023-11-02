@@ -59,8 +59,10 @@ module Karafka
 
       # @param offset [Integer] message offset
       def seek_offset=(offset)
-        @marked = true
-        @seek_offset = offset
+        synchronize do
+          @marked = true
+          @seek_offset = offset
+        end
       end
 
       # Increases number of jobs that we handle with this coordinator
@@ -160,13 +162,18 @@ module Karafka
         @manual_seek
       end
 
-      # Allows to run synchronized (locked) code that can operate in between virtual partitions
+      # Allows to run synchronized (locked) code that can operate only from a given thread
+      #
       # @param block [Proc] code we want to run in the synchronized mode
+      # @note We check if mutex is not owned already by the current thread so we won't end up with
+      #   a deadlock in case user runs coordinated code from inside of his own lock
       def synchronize(&block)
-        @mutex.synchronize(&block)
+        if @mutex.owned?
+          yield
+        else
+          @mutex.synchronize(&block)
+        end
       end
-
-      private
 
       # @param consumer [Object] karafka consumer (normal or pro)
       # @return [Karafka::Processing::Result] result object which we can use to indicate
