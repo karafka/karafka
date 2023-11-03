@@ -12,9 +12,9 @@ module Karafka
 
       private_constant :SUPPORTED_TYPES
 
-      desc 'Starts the Karafka server (short-cut alias: "s")'
+      desc 'Starts the Karafka server (short-cut aliases: "s", "consumer")'
 
-      aliases :s
+      aliases :s, :consumer
 
       option(
         :consumer_groups,
