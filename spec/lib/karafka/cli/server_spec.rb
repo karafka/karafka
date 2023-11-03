@@ -23,6 +23,6 @@ RSpec.describe_current do
   end
 
   describe '#names' do
-    it { expect(server_cli.class.names).to eq %w[s server] }
+    it { expect(server_cli.class.names.sort).to eq %w[s server consumer].sort }
   end
 end
