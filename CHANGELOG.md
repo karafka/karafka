@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.2.11 (Unreleased)
+## 2.2.11 (2023-11-03)
 - [Improvement] Allow marking as consumed in the user `#synchronize` block.
 - [Improvement] Make whole Pro VP marking as consumed concurrency safe for both async and sync scenarios.
 
