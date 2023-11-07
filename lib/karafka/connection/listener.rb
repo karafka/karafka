@@ -14,7 +14,7 @@ module Karafka
       # @return [String] id of this listener
       attr_reader :id
 
-      # How long to wait in the initial events poll. Increases changes of having the initial events
+      # How long to wait in the initial events poll. Increases chances of having the initial events
       # immediately available
       INITIAL_EVENTS_POLL_TIMEOUT = 100
 

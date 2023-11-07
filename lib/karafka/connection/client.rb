@@ -311,13 +311,13 @@ module Karafka
         @kafka = build_consumer
       end
 
-      # Runs a single poll ignoring all the potential errors
+      # Runs a single poll on the main queue and consumer queue ignoring all the potential errors
       # This is used as a keep-alive in the shutdown stage and any errors that happen here are
       # irrelevant from the shutdown process perspective
       #
-      # This is used only to trigger rebalance callbacks
+      # This is used only to trigger rebalance callbacks and other callbacks
       def ping
-        @events_poller.call
+        events_poll(100)
         poll(100)
       rescue Rdkafka::RdkafkaError
         nil
