@@ -97,7 +97,7 @@ module Karafka
         # In theory this may slow down the initial boot but we limit it up to 100ms, so it should
         # not have a big initial impact. It may not be enough but Karafka does not give the boot
         # warranties of statistics or other callbacks being immediately available, hence this is
-        # a fair tradeoff
+        # a fair trade-off
         @client.events_poll(INITIAL_EVENTS_POLL_TIMEOUT)
 
         # Run the main loop as long as we are not stopping or moving into quiet mode
