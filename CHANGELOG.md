@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.12 (Unreleased)
+- [Improvement] Rewrite the polling engine to update statistics and error callbacks despite longer non LRJ processings or long `max_wait_time` setups. This change provides stability to the statistics and background error emitting making them time-reliable.
+
 ## 2.2.11 (2023-11-03)
 - [Improvement] Allow marking as consumed in the user `#synchronize` block.
 - [Improvement] Make whole Pro VP marking as consumed concurrency safe for both async and sync scenarios.

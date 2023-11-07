@@ -14,6 +14,12 @@ module Karafka
       # @return [String] id of this listener
       attr_reader :id
 
+      # How long to wait in the initial events poll. Increases changes of having the initial events
+      # immediately available
+      INITIAL_EVENTS_POLL_TIMEOUT = 100
+
+      private_constant :INITIAL_EVENTS_POLL_TIMEOUT
+
       # @param consumer_group_coordinator [Karafka::Connection::ConsumerGroupCoordinator]
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
@@ -32,6 +38,7 @@ module Karafka
         @partitioner = proc_config.partitioner_class.new(subscription_group)
         # We reference scheduler here as it is much faster than fetching this each time
         @scheduler = proc_config.scheduler
+        @events_poller = Helpers::IntervalRunner.new { @client.events_poll }
         # We keep one buffer for messages to preserve memory and not allocate extra objects
         # We can do this that way because we always first schedule jobs using messages before we
         # fetch another batch.
@@ -84,6 +91,15 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far.
       def fetch_loop
+        # Run the initial events fetch to improve chances of having metrics and initial callbacks
+        # triggers on start.
+        #
+        # In theory this may slow down the initial boot but we limit it up to 100ms, so it should
+        # not have a big initial impact. It may not be enough but Karafka does not give the boot
+        # warranties of statistics or other callbacks being immediately available, hence this is
+        # a fair tradeoff
+        @client.events_poll(INITIAL_EVENTS_POLL_TIMEOUT)
+
         # Run the main loop as long as we are not stopping or moving into quiet mode
         until Karafka::App.done?
           Karafka.monitor.instrument(
@@ -287,7 +303,7 @@ module Karafka
 
       # Waits for all the jobs from a given subscription group to finish before moving forward
       def wait
-        @jobs_queue.wait(@subscription_group.id)
+        @jobs_queue.wait(@subscription_group.id) { @events_poller.call }
       end
 
       # Waits without blocking the polling
@@ -318,6 +334,7 @@ module Karafka
         # resetting.
         @jobs_queue.wait(@subscription_group.id)
         @jobs_queue.clear(@subscription_group.id)
+        @events_poller.reset
         @client.reset
         @coordinators.reset
         @executors = Processing::ExecutorsBuffer.new(@client, @subscription_group)

@@ -43,11 +43,13 @@ module Karafka
         @closed = false
         @subscription_group = subscription_group
         @buffer = RawMessagesBuffer.new
+        @tick_interval = ::Karafka::App.config.internal.tick_interval
         @rebalance_manager = RebalanceManager.new(@subscription_group.id)
         @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(
           @subscription_group.id,
           @subscription_group.consumer_group.id
         )
+        @events_poller = Helpers::IntervalRunner.new { events_poll }
         @kafka = build_consumer
         # There are few operations that can happen in parallel from the listener threads as well
         # as from the workers. They are not fully thread-safe because they may be composed out of
@@ -73,6 +75,8 @@ module Karafka
         @buffer.clear
         @rebalance_manager.clear
 
+        events_poll
+
         loop do
           time_poll.start
 
@@ -96,6 +100,8 @@ module Karafka
             remove_revoked_and_duplicated_messages
             break
           end
+
+          @events_poller.call
 
           # Track time spent on all of the processing and polling
           time_poll.checkpoint
@@ -299,6 +305,7 @@ module Karafka
       def reset
         close
 
+        @events_poller.reset
         @closed = false
         @paused_tpls.clear
         @kafka = build_consumer
@@ -310,9 +317,23 @@ module Karafka
       #
       # This is used only to trigger rebalance callbacks
       def ping
+        @events_poller.call
         poll(100)
       rescue Rdkafka::RdkafkaError
         nil
+      end
+
+      # Triggers the rdkafka main queue events by consuming this queue. This is not the consumer
+      # consumption queue but the one with:
+      #   - error callbacks
+      #   - stats callbacks
+      #   - OAUTHBEARER token refresh callbacks
+      #
+      # @param timeout [Integer] number of milliseconds to wait on events or 0 not to wait.
+      #
+      # @note It is non-blocking when timeout 0 and will not wait if queue empty
+      def events_poll(timeout = 0)
+        @kafka.events_poll(timeout)
       end
 
       private
@@ -475,7 +496,10 @@ module Karafka
 
         time_poll.start
 
-        @kafka.poll(timeout)
+        # We should not run a single poll longer than the tick frequency. Otherwise during a single
+        # `#batch_poll` we would not be able to run `#events_poll` often enough effectively
+        # blocking events from being handled.
+        @kafka.poll(timeout > @tick_interval ? @tick_interval : timeout)
       rescue ::Rdkafka::RdkafkaError => e
         early_report = false
 
@@ -535,6 +559,10 @@ module Karafka
         ::Rdkafka::Config.logger = ::Karafka::App.config.logger
         config = ::Rdkafka::Config.new(@subscription_group.kafka)
         config.consumer_rebalance_listener = @rebalance_callback
+        # We want to manage the events queue independently from the messages queue. Thanks to that
+        # we can ensure, that we get statistics and errors often enough even when not polling
+        # new messages. This allows us to report statistics while data is still being processed
+        config.consumer_poll_set = false
 
         consumer = config.consumer
         @name = consumer.name

@@ -27,6 +27,7 @@ RSpec.describe_current do
       internal: {
         status: Karafka::Status.new,
         process: Karafka::Process.new,
+        tick_interval: 5_000,
         connection: {
           proxy: {
             query_watermark_offsets: {
@@ -374,6 +375,18 @@ RSpec.describe_current do
   context 'when we validate internal components' do
     context 'when internals are missing' do
       before { config.delete(:internal) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context  'when tick_interval is less than 1 second' do
+      before { config[:internal][:tick_interval] = 999 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context  'when tick_interval is missing' do
+      before { config[:internal].delete(:tick_interval) }
 
       it { expect(contract.call(config)).not_to be_success }
     end

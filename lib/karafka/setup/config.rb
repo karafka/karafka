@@ -152,6 +152,17 @@ module Karafka
         #   instances
         setting :process, default: Process.new
 
+        # Interval of "ticking". This is used to define the maximum time between consecutive
+        # polling of the main rdkafka queue. It should match also the `statistics.interval.ms`
+        # smallest value defined in any of the per-kafka settings, so metrics are published with
+        # the desired frequency. It is set to 5 seconds because `statistics.interval.ms` is also
+        # set to five seconds.
+        #
+        # It is NOT allowed to set it to a value less than 1 seconds because it could cause polling
+        # not to have enough time to run. This (not directly) defines also a single poll
+        # max timeout as to allow for frequent enough events polling
+        setting :tick_interval, default: 5_000
+
         # Namespace for CLI related settings
         setting :cli do
           # option contract [Object] cli setup validation contract (in the context of options and
