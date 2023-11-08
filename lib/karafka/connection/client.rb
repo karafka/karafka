@@ -100,7 +100,7 @@ module Karafka
           #
           # We also do early break, so the information about rebalance is used as soon as possible
           if @rebalance_manager.changed?
-            # Since rebalanes do not occur often, we can run events polling as well without
+            # Since rebalances do not occur often, we can run events polling as well without
             # any throttling
             events_poll
             remove_revoked_and_duplicated_messages
@@ -530,16 +530,14 @@ module Karafka
         # polling again as we are withing user expected max wait time
         used = remaining - time_poll.remaining
 
-        if used >= poll_tick
-          # If we did not exceed total time allocated, it means that we finished because of the
-          # tick interval time limitations and not because time run out without any data
-          time_poll.exceeded? ? nil : :tick_time
-        else
-          # In case we did not use enough time, it means that an internal event occured that
-          # means that something has changed without messages being published. For example a
-          # rebalance. In cases like this we finish early as well
-          nil
-        end
+        # In case we did not use enough time, it means that an internal event occured that means
+        # that something has changed without messages being published. For example a rebalance.
+        # In cases like this we finish early as well
+        return nil if used < poll_tick
+
+        # If we did not exceed total time allocated, it means that we finished because of the
+        # tick interval time limitations and not because time run out without any data
+        time_poll.exceeded? ? nil : :tick_time
       rescue ::Rdkafka::RdkafkaError => e
         early_report = false
 

@@ -37,7 +37,7 @@ end
 
 range = DT[:start]..DT[:stop]
 
-in_between = DT[:stats].select { |time| range.include?(time) }.size
+in_between = DT[:stats].count { |time| range.include?(time) }
 
 # It should be in between 14 and 16 as we have 15 seconds and we tick every second
 assert in_between >= 14

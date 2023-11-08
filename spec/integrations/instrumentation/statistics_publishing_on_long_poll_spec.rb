@@ -25,7 +25,7 @@ draw_routes(nil, create_topics: false) do
   end
 end
 
-Karafka::App.monitor.subscribe('statistics.emitted') do |event|
+Karafka::App.monitor.subscribe('statistics.emitted') do |_event|
   DT[:stats] << Time.now.to_f
 end
 
