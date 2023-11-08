@@ -21,9 +21,12 @@ module Karafka
         # We cannot use a single semaphore as it could potentially block in listeners that should
         # process with their data and also could unlock when a given group needs to remain locked
         @semaphores = Concurrent::Map.new do |h, k|
-          h.compute_if_absent(k) { Queue.new }
+          # Ruby prior to 3.2 did not have queue with a timeout on `#pop`, that is why for those
+          # versions we use our custom queue wrapper
+          h.compute_if_absent(k) { RUBY_VERSION < '3.2' ? TimedQueue.new : Queue.new }
         end
 
+        @tick_interval = ::Karafka::App.config.internal.tick_interval
         @in_processing = Hash.new { |h, k| h[k] = [] }
 
         @mutex = Mutex.new
@@ -118,11 +121,19 @@ module Karafka
       #   jobs from a given group are completed
       #
       # @param group_id [String] id of the group in which jobs we're interested.
+      # @yieldparam [Block] block we want to run before each pop (in case of Ruby pre 3.2) or
+      #   before each pop and on every tick interval.
+      #   This allows us to run extra code that needs to be executed even when we are waiting on
+      #   the work to be finished.
       # @note This method is blocking.
       def wait(group_id)
         # Go doing other things while we cannot process and wait for anyone to finish their work
         # and re-check the wait status
-        @semaphores[group_id].pop while wait?(group_id)
+        while wait?(group_id)
+          yield if block_given?
+
+          @semaphores[group_id].pop(timeout: @tick_interval / 1_000.0)
+        end
       end
 
       # - `busy` - number of jobs that are currently being processed (active work)

@@ -46,6 +46,9 @@ module Karafka
       nested(:internal) do
         required(:status) { |val| !val.nil? }
         required(:process) { |val| !val.nil? }
+        # In theory this could be less than a second, however this would impact the maximum time
+        # of a single consumer queue poll, hence we prevent it
+        required(:tick_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
 
         nested(:connection) do
           nested(:proxy) do

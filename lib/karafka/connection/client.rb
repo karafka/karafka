@@ -43,11 +43,13 @@ module Karafka
         @closed = false
         @subscription_group = subscription_group
         @buffer = RawMessagesBuffer.new
+        @tick_interval = ::Karafka::App.config.internal.tick_interval
         @rebalance_manager = RebalanceManager.new(@subscription_group.id)
         @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(
           @subscription_group.id,
           @subscription_group.consumer_group.id
         )
+        @events_poller = Helpers::IntervalRunner.new { events_poll }
         @kafka = build_consumer
         # There are few operations that can happen in parallel from the listener threads as well
         # as from the workers. They are not fully thread-safe because they may be composed out of
@@ -64,6 +66,8 @@ module Karafka
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
       #
+      # Also periodically runs the events polling to trigger events callbacks.
+      #
       # @return [Karafka::Connection::MessagesBuffer] messages buffer that holds messages per topic
       #   partition
       # @note This method should not be executed from many threads at the same time
@@ -73,38 +77,46 @@ module Karafka
         @buffer.clear
         @rebalance_manager.clear
 
+        events_poll
+
         loop do
           time_poll.start
 
           # Don't fetch more messages if we do not have any time left
           break if time_poll.exceeded?
-          # Don't fetch more messages if we've fetched max as we've wanted
+          # Don't fetch more messages if we've fetched max that we've wanted
           break if @buffer.size >= @subscription_group.max_messages
 
           # Fetch message within our time boundaries
-          message = poll(time_poll.remaining)
+          response = poll(time_poll.remaining)
 
           # Put a message to the buffer if there is one
-          @buffer << message if message
+          @buffer << response if response && response != :tick_time
 
           # Upon polling rebalance manager might have been updated.
           # If partition revocation happens, we need to remove messages from revoked partitions
           # as well as ensure we do not have duplicated due to the offset reset for partitions
           # that we got assigned
+          #
           # We also do early break, so the information about rebalance is used as soon as possible
           if @rebalance_manager.changed?
+            # Since rebalances do not occur often, we can run events polling as well without
+            # any throttling
+            events_poll
             remove_revoked_and_duplicated_messages
             break
           end
+
+          @events_poller.call
 
           # Track time spent on all of the processing and polling
           time_poll.checkpoint
 
           # Finally once we've (potentially) removed revoked, etc, if no messages were returned
-          # we can break.
+          # and it was not an early poll exist, we can break.
           # Worth keeping in mind, that the rebalance manager might have been updated despite no
           # messages being returned during a poll
-          break unless message
+          break unless response
         end
 
         @buffer
@@ -299,20 +311,36 @@ module Karafka
       def reset
         close
 
+        @events_poller.reset
         @closed = false
         @paused_tpls.clear
         @kafka = build_consumer
       end
 
-      # Runs a single poll ignoring all the potential errors
+      # Runs a single poll on the main queue and consumer queue ignoring all the potential errors
       # This is used as a keep-alive in the shutdown stage and any errors that happen here are
       # irrelevant from the shutdown process perspective
       #
-      # This is used only to trigger rebalance callbacks
+      # This is used only to trigger rebalance callbacks and other callbacks
       def ping
+        events_poll(100)
         poll(100)
       rescue Rdkafka::RdkafkaError
         nil
+      end
+
+      # Triggers the rdkafka main queue events by consuming this queue. This is not the consumer
+      # consumption queue but the one with:
+      #   - error callbacks
+      #   - stats callbacks
+      #   - OAUTHBEARER token refresh callbacks
+      #
+      # @param timeout [Integer] number of milliseconds to wait on events or 0 not to wait.
+      #
+      # @note It is non-blocking when timeout 0 and will not wait if queue empty. It costs up to
+      #   2ms when no callbacks are triggered.
+      def events_poll(timeout = 0)
+        @kafka.events_poll(timeout)
       end
 
       private
@@ -464,18 +492,52 @@ module Karafka
         @kafka.position(tpl).to_h.fetch(topic).first.offset || -1
       end
 
-      # Performs a single poll operation and handles retries and error
+      # Performs a single poll operation and handles retries and errors
       #
-      # @param timeout [Integer] timeout for a single poll
-      # @return [Rdkafka::Consumer::Message, nil] fetched message or nil if nothing polled
+      # Keep in mind, that this timeout will be limited by a tick interval value, because we cannot
+      # block on a single poll longer than that. Otherwise our events polling would not be able to
+      # run frequently enough. This means, that even if you provide big value, it will not block
+      # for that long. This is anyhow compensated by the `#batch_poll` that can run for extended
+      # period of time but will run events polling frequently while waiting for the requested total
+      # time.
+      #
+      # @param timeout [Integer] timeout for a single poll.
+      # @return [Rdkafka::Consumer::Message, nil, Symbol] fetched message, nil if nothing polled
+      #   within the time we had or symbol indicating the early return reason
       def poll(timeout)
         time_poll ||= TimeTrackers::Poll.new(timeout)
 
         return nil if time_poll.exceeded?
 
         time_poll.start
+        remaining = time_poll.remaining
 
-        @kafka.poll(timeout)
+        # We should not run a single poll longer than the tick frequency. Otherwise during a single
+        # `#batch_poll` we would not be able to run `#events_poll` often enough effectively
+        # blocking events from being handled.
+        poll_tick = timeout > @tick_interval ? @tick_interval : timeout
+
+        result = @kafka.poll(poll_tick)
+
+        # If we've got a message, we can return it
+        return result if result
+
+        time_poll.checkpoint
+
+        # We need to check if we have used all the allocated time as depending on the outcome, the
+        # batch loop behavior will differ. Using all time means, that we had nothing to do as no
+        # messages were present but if we did not exceed total time, it means we can still try
+        # polling again as we are withing user expected max wait time
+        used = remaining - time_poll.remaining
+
+        # In case we did not use enough time, it means that an internal event occured that means
+        # that something has changed without messages being published. For example a rebalance.
+        # In cases like this we finish early as well
+        return nil if used < poll_tick
+
+        # If we did not exceed total time allocated, it means that we finished because of the
+        # tick interval time limitations and not because time run out without any data
+        time_poll.exceeded? ? nil : :tick_time
       rescue ::Rdkafka::RdkafkaError => e
         early_report = false
 
@@ -535,6 +597,10 @@ module Karafka
         ::Rdkafka::Config.logger = ::Karafka::App.config.logger
         config = ::Rdkafka::Config.new(@subscription_group.kafka)
         config.consumer_rebalance_listener = @rebalance_callback
+        # We want to manage the events queue independently from the messages queue. Thanks to that
+        # we can ensure, that we get statistics and errors often enough even when not polling
+        # new messages. This allows us to report statistics while data is still being processed
+        config.consumer_poll_set = false
 
         consumer = config.consumer
         @name = consumer.name

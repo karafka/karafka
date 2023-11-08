@@ -76,7 +76,7 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal 2, DT[:polls].size
+assert DT[:polls].size >= 2
 
 border_poll = DT[:polls].last
 
