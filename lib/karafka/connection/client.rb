@@ -66,6 +66,8 @@ module Karafka
 
       # Fetches messages within boundaries defined by the settings (time, size, topics, etc).
       #
+      # Also periodically runs the events polling to trigger events callbacks.
+      #
       # @return [Karafka::Connection::MessagesBuffer] messages buffer that holds messages per topic
       #   partition
       # @note This method should not be executed from many threads at the same time
@@ -82,21 +84,25 @@ module Karafka
 
           # Don't fetch more messages if we do not have any time left
           break if time_poll.exceeded?
-          # Don't fetch more messages if we've fetched max as we've wanted
+          # Don't fetch more messages if we've fetched max that we've wanted
           break if @buffer.size >= @subscription_group.max_messages
 
           # Fetch message within our time boundaries
-          message = poll(time_poll.remaining)
+          response = poll(time_poll.remaining)
 
           # Put a message to the buffer if there is one
-          @buffer << message if message
+          @buffer << response if response && response != :tick_time
 
           # Upon polling rebalance manager might have been updated.
           # If partition revocation happens, we need to remove messages from revoked partitions
           # as well as ensure we do not have duplicated due to the offset reset for partitions
           # that we got assigned
+          #
           # We also do early break, so the information about rebalance is used as soon as possible
           if @rebalance_manager.changed?
+            # Since rebalanes do not occur often, we can run events polling as well without
+            # any throttling
+            events_poll
             remove_revoked_and_duplicated_messages
             break
           end
@@ -107,10 +113,10 @@ module Karafka
           time_poll.checkpoint
 
           # Finally once we've (potentially) removed revoked, etc, if no messages were returned
-          # we can break.
+          # and it was not an early poll exist, we can break.
           # Worth keeping in mind, that the rebalance manager might have been updated despite no
           # messages being returned during a poll
-          break unless message
+          break unless response
         end
 
         @buffer
@@ -331,7 +337,8 @@ module Karafka
       #
       # @param timeout [Integer] number of milliseconds to wait on events or 0 not to wait.
       #
-      # @note It is non-blocking when timeout 0 and will not wait if queue empty
+      # @note It is non-blocking when timeout 0 and will not wait if queue empty. It costs up to
+      #   2ms when no callbacks are triggered.
       def events_poll(timeout = 0)
         @kafka.events_poll(timeout)
       end
@@ -485,21 +492,54 @@ module Karafka
         @kafka.position(tpl).to_h.fetch(topic).first.offset || -1
       end
 
-      # Performs a single poll operation and handles retries and error
+      # Performs a single poll operation and handles retries and errors
       #
-      # @param timeout [Integer] timeout for a single poll
-      # @return [Rdkafka::Consumer::Message, nil] fetched message or nil if nothing polled
+      # Keep in mind, that this timeout will be limited by a tick interval value, because we cannot
+      # block on a single poll longer than that. Otherwise our events polling would not be able to
+      # run frequently enough. This means, that even if you provide big value, it will not block
+      # for that long. This is anyhow compensated by the `#batch_poll` that can run for extended
+      # period of time but will run events polling frequently while waiting for the requested total
+      # time.
+      #
+      # @param timeout [Integer] timeout for a single poll.
+      # @return [Rdkafka::Consumer::Message, nil, Symbol] fetched message, nil if nothing polled
+      #   within the time we had or symbol indicating the early return reason
       def poll(timeout)
         time_poll ||= TimeTrackers::Poll.new(timeout)
 
         return nil if time_poll.exceeded?
 
         time_poll.start
+        remaining = time_poll.remaining
 
         # We should not run a single poll longer than the tick frequency. Otherwise during a single
         # `#batch_poll` we would not be able to run `#events_poll` often enough effectively
         # blocking events from being handled.
-        @kafka.poll(timeout > @tick_interval ? @tick_interval : timeout)
+        poll_tick = timeout > @tick_interval ? @tick_interval : timeout
+
+        result = @kafka.poll(poll_tick)
+
+        # If we've got a message, we can return it
+        return result if result
+
+        time_poll.checkpoint
+
+        # We need to check if we have used all the allocated time as depending on the outcome, the
+        # batch loop behavior will differ. Using all time means, that we had nothing to do as no
+        # messages were present but if we did not exceed total time, it means we can still try
+        # polling again as we are withing user expected max wait time
+        used = remaining - time_poll.remaining
+
+        if used >= poll_tick
+          # If we did not exceed total time allocated, it means that we finished because of the
+          # tick interval time limitations and not because time run out without any data
+          time_poll.exceeded? ? nil : :tick_time
+        else
+          # In case we did not use enough time, it means that an internal event occured that
+          # means that something has changed without messages being published. For example a
+          # rebalance. In cases like this we finish early as well
+          nil
+        end
       rescue ::Rdkafka::RdkafkaError => e
         early_report = false
 
