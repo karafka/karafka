@@ -35,6 +35,8 @@ module Karafka
 
         alias statistics insights
         alias statistics? insights?
+        alias inline_insights insights
+        alias inline_insights? insights?
       end
     end
   end
