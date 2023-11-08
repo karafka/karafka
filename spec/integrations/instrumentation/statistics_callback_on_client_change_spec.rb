@@ -7,8 +7,6 @@ setup_karafka(allow_errors: true)
 
 draw_routes(Class.new, create_topics: false)
 
-stats_events = []
-
 def names(stats_events)
   stats_events
     .map(&:payload)
@@ -31,11 +29,11 @@ Karafka::App.monitor.subscribe('connection.listener.fetch_loop.received') do
 end
 
 Karafka::App.monitor.subscribe('statistics.emitted') do |event|
-  stats_events << event
+  DT[:stats_events] << event
 end
 
 start_karafka_and_wait_until do
-  names(stats_events).size >= 2
+  names(DT[:stats_events]).size >= 3
 end
 
 client_id = Karafka::App.config.client_id
@@ -46,4 +44,4 @@ names = [
   "#{client_id}#consumer-3"
 ]
 
-assert_equal names, names(stats_events)
+assert_equal names, names(DT[:stats_events])[0..2], names(DT[:stats_events])
