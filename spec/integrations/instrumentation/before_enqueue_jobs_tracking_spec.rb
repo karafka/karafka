@@ -23,4 +23,4 @@ start_karafka_and_wait_until do
   DT[:events].size >= 10
 end
 
-assert DT[:events].all? { |detail| detail.is_a?(Consumer) }
+assert(DT[:events].all? { |detail| detail.is_a?(Consumer) })
