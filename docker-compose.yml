@@ -3,7 +3,7 @@ version: '2'
 services:
   kafka:
     container_name: kafka
-    image: confluentinc/cp-kafka:7.5.1
+    image: confluentinc/cp-kafka:7.5.2
 
     ports:
       - 9092:9092
