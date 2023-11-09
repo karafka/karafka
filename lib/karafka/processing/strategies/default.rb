@@ -78,6 +78,8 @@ module Karafka
 
         # No actions needed for the standard flow here
         def handle_before_enqueue
+          Karafka.monitor.instrument('consumer.before_enqueue', caller: self)
+
           nil
         end
 

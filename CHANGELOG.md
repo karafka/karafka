@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.13 (Unreleased)
+- [Improvement] Instrument `consumer.before_enqueue`.
+
 ## 2.2.12 (2023-11-09)
 - [Improvement] Rewrite the polling engine to update statistics and error callbacks despite longer non LRJ processing or long `max_wait_time` setups. This change provides stability to the statistics and background error emitting making them time-reliable.
 - [Improvement] Auto-update Inline Insights if new insights are present for all consumers and not only LRJ (OSS and Pro).
