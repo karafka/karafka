@@ -111,6 +111,8 @@ module Karafka
             # @note This can be done without the mutex, because it happens from the same thread
             #   for all the work (listener thread)
             def handle_before_enqueue
+              super
+
               coordinator.virtual_offset_manager.register(
                 messages.map(&:offset)
               )

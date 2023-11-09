@@ -43,6 +43,7 @@ module Karafka
         rebalance.partitions_revoke
         rebalance.partitions_revoked
 
+        consumer.before_enqueue
         consumer.consume
         consumer.consumed
         consumer.consuming.pause
