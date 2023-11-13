@@ -6,7 +6,7 @@
 
 setup_karafka
 
-DT[:revoked] = Concurrent::Array.new
+DT[:revoked] = []
 DT[:pre] = Set.new
 DT[:post] = Set.new
 
