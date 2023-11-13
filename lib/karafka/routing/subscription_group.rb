@@ -10,19 +10,24 @@ module Karafka
     class SubscriptionGroup
       attr_reader :id, :name, :topics, :kafka, :consumer_group
 
-      # Numeric for counting groups
-      GROUP_COUNT = Concurrent::AtomicFixnum.new
+      # Lock for generating new ids safely
+      ID_LOCK = Mutex.new
 
-      private_constant :GROUP_COUNT
+      private_constant :ID_LOCK
 
       class << self
         # Generates new subscription group id that will be used in case of anonymous subscription
         #   groups
         # @return [String] hex(6) compatible reproducible id
         def id
-          ::Digest::MD5.hexdigest(
-            GROUP_COUNT.increment.to_s
-          )[0..11]
+          ID_LOCK.synchronize do
+            @group_counter ||= 0
+            @group_counter += 1
+
+            ::Digest::MD5.hexdigest(
+              @group_counter.to_s
+            )[0..11]
+          end
         end
       end
 

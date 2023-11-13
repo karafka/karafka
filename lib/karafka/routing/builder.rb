@@ -3,20 +3,25 @@
 module Karafka
   module Routing
     # Builder used as a DSL layer for building consumers and telling them which topics to consume
+    #
+    # @note We lock the access just in case this is used in patterns. The locks here do not have
+    #   any impact on routing usage unless being expanded, so no race conditions risks.
+    #
     # @example Build a simple (most common) route
     #   consumers do
     #     topic :new_videos do
     #       consumer NewVideosConsumer
     #     end
     #   end
-    class Builder < Concurrent::Array
+    class Builder < Array
       # Empty default per-topic config
       EMPTY_DEFAULTS = ->(_) {}.freeze
 
       private_constant :EMPTY_DEFAULTS
 
       def initialize
-        @draws = Concurrent::Array.new
+        @mutex = Mutex.new
+        @draws = []
         @defaults = EMPTY_DEFAULTS
         super
       end
@@ -34,21 +39,23 @@ module Karafka
       #     end
       #   end
       def draw(&block)
-        @draws << block
+        @mutex.synchronize do
+          @draws << block
 
-        instance_eval(&block)
+          instance_eval(&block)
 
-        each do |consumer_group|
-          # Validate consumer group settings
-          Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
+          each do |consumer_group|
+            # Validate consumer group settings
+            Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
 
-          # and then its topics settings
-          consumer_group.topics.each do |topic|
-            Contracts::Topic.new.validate!(topic.to_h)
+            # and then its topics settings
+            consumer_group.topics.each do |topic|
+              Contracts::Topic.new.validate!(topic.to_h)
+            end
+
+            # Initialize subscription groups after all the routing is done
+            consumer_group.subscription_groups
           end
-
-          # Initialize subscription groups after all the routing is done
-          consumer_group.subscription_groups
         end
       end
 
@@ -61,9 +68,11 @@ module Karafka
 
       # Clears the builder and the draws memory
       def clear
-        @defaults = EMPTY_DEFAULTS
-        @draws.clear
-        super
+        @mutex.synchronize do
+          @defaults = EMPTY_DEFAULTS
+          @draws.clear
+          super
+        end
       end
 
       # @param block [Proc] block with per-topic evaluated defaults
@@ -71,7 +80,13 @@ module Karafka
       def defaults(&block)
         return @defaults unless block
 
-        @defaults = block
+        if @mutex.owned?
+          @defaults = block
+        else
+          @mutex.synchronize do
+            @defaults = block
+          end
+        end
       end
 
       private

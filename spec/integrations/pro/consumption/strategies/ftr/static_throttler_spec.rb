@@ -19,14 +19,17 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-module Factory
-  THROTTLERS = Concurrent::Map.new
+class Factory
+  MUTEX = Mutex.new
 
   class << self
     def call(topic, partition)
-      THROTTLERS.compute_if_absent("#{topic.name}-#{partition}") do
+      MUTEX.synchronize do
+        @cache ||= {}
+
+        key = "#{topic.name}-#{partition}"
         # We set 10 seconds so we can trigger a rebalance and check that it still complies
-        ::Karafka::Pro::Processing::Filters::Throttler.new(5, 10_000)
+        @cache[key] ||= ::Karafka::Pro::Processing::Filters::Throttler.new(5, 10_000)
       end
     end
   end

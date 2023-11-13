@@ -25,7 +25,7 @@ class DataCollector
       instance.topics
     end
 
-    # @return [Concurrent::Hash] structure for aggregating data
+    # @return [Hash] structure for aggregating data
     def data
       instance.data
     end
@@ -99,15 +99,13 @@ class DataCollector
   # Creates a collector
   def initialize
     @mutex = Mutex.new
-    @topics = Concurrent::Array.new(100) { SecureRandom.hex(8) }
+    @topics = Array.new(100) { SecureRandom.hex(8) }
     @consumer_groups = @topics
-    # We need to use a concurrent hash and not a map because we want to print this data upon
-    # failures and debugging
-    @data = Concurrent::Hash.new do |hash, key|
+    @data = Hash.new do |hash, key|
       @mutex.synchronize do
         break hash[key] if hash.key?(key)
 
-        hash[key] = ::Concurrent::Array.new
+        hash[key] = []
       end
     end
   end
