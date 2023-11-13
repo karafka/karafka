@@ -19,18 +19,17 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-module Factory
-  THROTTLERS = {}
-
+class Factory
   MUTEX = Mutex.new
 
   class << self
     def call(topic, partition)
       MUTEX.synchronize do
-        THROTTLERS["#{topic.name}-#{partition}"] ||= begin
-          # We set 10 seconds so we can trigger a rebalance and check that it still complies
-          ::Karafka::Pro::Processing::Filters::Throttler.new(5, 10_000)
-        end
+        @cache ||= {}
+
+        key = "#{topic.name}-#{partition}"
+        # We set 10 seconds so we can trigger a rebalance and check that it still complies
+        @cache[key] ||= ::Karafka::Pro::Processing::Filters::Throttler.new(5, 10_000)
       end
     end
   end
