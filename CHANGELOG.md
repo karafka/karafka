@@ -2,6 +2,7 @@
 
 ## 2.2.13 (Unreleased)
 - [Improvement] Instrument `consumer.before_enqueue`.
+- [Improvement] Limit usage of `concurrent-ruby` (plan to remove it as a dependency fully)
 
 ## 2.2.12 (2023-11-09)
 - [Improvement] Rewrite the polling engine to update statistics and error callbacks despite longer non LRJ processing or long `max_wait_time` setups. This change provides stability to the statistics and background error emitting making them time-reliable.

@@ -21,7 +21,7 @@ module Karafka
 
       def initialize
         @mutex = Mutex.new
-        @draws = Array.new
+        @draws = []
         @defaults = EMPTY_DEFAULTS
         super
       end
@@ -78,9 +78,9 @@ module Karafka
       # @param block [Proc] block with per-topic evaluated defaults
       # @return [Proc] defaults that should be evaluated per topic
       def defaults(&block)
-        @mutex.synchronize do
-          return @defaults unless block
+        return @defaults unless block
 
+        @mutex.synchronize do
           @defaults = block
         end
       end
