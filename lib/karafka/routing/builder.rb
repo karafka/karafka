@@ -80,8 +80,12 @@ module Karafka
       def defaults(&block)
         return @defaults unless block
 
-        @mutex.synchronize do
+        if @mutex.owned?
           @defaults = block
+        else
+          @mutex.synchronize do
+            @defaults = block
+          end
         end
       end
 
