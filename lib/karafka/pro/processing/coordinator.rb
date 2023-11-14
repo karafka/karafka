@@ -21,14 +21,20 @@ module Karafka
 
         def_delegators :@collapser, :collapsed?, :collapse_until!
 
-        attr_reader :filter, :virtual_offset_manager
+        attr_reader :filter, :virtual_offset_manager, :shared_mutex
 
         # @param args [Object] anything the base coordinator accepts
         def initialize(*args)
           super
 
           @executed = []
-          @flow_lock = Mutex.new
+          @flow_mutex = Mutex.new
+          # Lock for user code synchronization
+          # We do not want to mix coordinator lock with the user lock not to create cases where
+          # user imposed lock would lock the internal operations of Karafka
+          # This shared lock can be used by the end user as it is not used internally by the
+          # framework and can be used for user-facing locking
+          @shared_mutex = Mutex.new
           @collapser = Collapser.new
           @filter = FiltersApplier.new(self)
 
@@ -89,7 +95,7 @@ module Karafka
         # Runs synchronized code once for a collective of virtual partitions prior to work being
         # enqueued
         def on_enqueued
-          @flow_lock.synchronize do
+          @flow_mutex.synchronize do
             return unless executable?(:on_enqueued)
 
             yield(@last_message)
@@ -98,7 +104,7 @@ module Karafka
 
         # Runs given code only once per all the coordinated jobs upon starting first of them
         def on_started
-          @flow_lock.synchronize do
+          @flow_mutex.synchronize do
             return unless executable?(:on_started)
 
             yield(@last_message)
@@ -109,7 +115,7 @@ module Karafka
         # It runs once per all the coordinated jobs and should be used to run any type of post
         # jobs coordination processing execution
         def on_finished
-          @flow_lock.synchronize do
+          @flow_mutex.synchronize do
             return unless finished?
             return unless executable?(:on_finished)
 
@@ -119,7 +125,7 @@ module Karafka
 
         # Runs once after a partition is revoked
         def on_revoked
-          @flow_lock.synchronize do
+          @flow_mutex.synchronize do
             return unless executable?(:on_revoked)
 
             yield(@last_message)

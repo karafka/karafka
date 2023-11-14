@@ -162,24 +162,30 @@ module Karafka
         @manual_seek
       end
 
+      # @param consumer [Object] karafka consumer (normal or pro)
+      # @return [Karafka::Processing::Result] result object which we can use to indicate
+      #   consumption processing state.
+      def consumption(consumer)
+        @consumptions[consumer] ||= Processing::Result.new
+      end
+
       # Allows to run synchronized (locked) code that can operate only from a given thread
       #
       # @param block [Proc] code we want to run in the synchronized mode
+      #
       # @note We check if mutex is not owned already by the current thread so we won't end up with
       #   a deadlock in case user runs coordinated code from inside of his own lock
+      #
+      # @note This is internal and should **not** be used to synchronize user-facing code.
+      #   Otherwise user indirectly could cause deadlocks or prolonged locks by running his logic.
+      #   This can and should however be used for multi-thread strategy applications and other
+      #   internal operations locks.
       def synchronize(&block)
         if @mutex.owned?
           yield
         else
           @mutex.synchronize(&block)
         end
-      end
-
-      # @param consumer [Object] karafka consumer (normal or pro)
-      # @return [Karafka::Processing::Result] result object which we can use to indicate
-      #   consumption processing state.
-      def consumption(consumer)
-        @consumptions[consumer] ||= Processing::Result.new
       end
     end
   end

@@ -11,16 +11,16 @@ module Karafka
       attr_reader :id, :name, :topics, :kafka, :consumer_group
 
       # Lock for generating new ids safely
-      ID_LOCK = Mutex.new
+      ID_MUTEX = Mutex.new
 
-      private_constant :ID_LOCK
+      private_constant :ID_MUTEX
 
       class << self
         # Generates new subscription group id that will be used in case of anonymous subscription
         #   groups
         # @return [String] hex(6) compatible reproducible id
         def id
-          ID_LOCK.synchronize do
+          ID_MUTEX.synchronize do
             @group_counter ||= 0
             @group_counter += 1
 
