@@ -209,6 +209,7 @@ module Karafka
         end
 
         setting :processing do
+          setting :jobs_queue_class, default: Processing::JobsQueue
           # option scheduler [Object] scheduler we will be using
           setting :scheduler_class, default: Processing::Scheduler
           # option jobs_builder [Object] jobs builder we want to use

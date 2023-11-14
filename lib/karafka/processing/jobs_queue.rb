@@ -8,11 +8,8 @@ module Karafka
     # We need to take into consideration fact, that more than one subscription group can operate
     # on this queue, that's why internally we keep track of processing per group.
     #
-    # This job queue provides also an API for complex schedulers that can distribute work only
-    # to some threads, etc
+    # We work with the assumption, that partitions data is evenly distributed.
     class JobsQueue
-      attr_reader :in_processing
-
       # @return [Karafka::Processing::JobsQueue]
       def initialize
         @queue = Queue.new
@@ -31,7 +28,6 @@ module Karafka
 
         @tick_interval = ::Karafka::App.config.internal.tick_interval
         @in_processing = Hash.new { |h, k| h[k] = [] }
-        @in_waiting = Hash.new { |h, k| h[k] = [] }
 
         @mutex = Mutex.new
       end
@@ -60,31 +56,6 @@ module Karafka
           group << job
 
           @queue << job
-        end
-      end
-
-      # Method that allows us to lock queue on a given subscription group without enqueuing the a
-      # job. This can be used when building complex schedulers that want to postpone enqueuing
-      # before certain conditions are met.
-      #
-      # @param job [Jobs::Base] job used for locking
-      def lock(job)
-        @mutex.synchronize do
-          group = @in_waiting[job.group_id]
-
-          raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.include?(job)
-
-          group << job
-        end
-      end
-
-      # Method for unlocking the given subscription group queue space that was locked with a given
-      # job that was **not** added to the queue but used via `#lock`.
-      #
-      # @param job [Jobs::Base] job that locked the queue
-      def unlock(job)
-        @mutex.synchronize do
-          @in_waiting[job.group_id].delete(job)
         end
       end
 
@@ -121,8 +92,6 @@ module Karafka
       def clear(group_id)
         @mutex.synchronize do
           @in_processing[group_id].clear
-          @in_waiting[group_id].clear
-
           # We unlock it just in case it was blocked when clearing started
           tick(group_id)
         end
@@ -144,8 +113,7 @@ module Karafka
       # a given group.
       def empty?(group_id)
         @mutex.synchronize do
-          @in_processing[group_id].empty? &&
-            @in_waiting[group_id].empty?
+          @in_processing[group_id].empty?
         end
       end
 
@@ -186,10 +154,7 @@ module Karafka
       # @note We do not wait for non-blocking jobs. Their flow should allow for `poll` running
       #   as they may exceed `max.poll.interval`
       def wait?(group_id)
-        !(
-          @in_processing[group_id].all?(&:non_blocking?) &&
-          @in_waiting[group_id].all?(&:non_blocking?)
-        )
+        !@in_processing[group_id].all?(&:non_blocking?)
       end
     end
   end
