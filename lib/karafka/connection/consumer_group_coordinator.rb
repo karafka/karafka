@@ -16,7 +16,7 @@ module Karafka
     class ConsumerGroupCoordinator
       # @param group_size [Integer] number of separate subscription groups in a consumer group
       def initialize(group_size)
-        @shutdown_lock = Mutex.new
+        @shutdown_mutex = Mutex.new
         @group_size = group_size
         @finished = Set.new
       end
@@ -30,12 +30,12 @@ module Karafka
       # @return [Boolean] can we start shutdown on a given listener
       # @note If true, will also obtain a lock so no-one else will be closing the same time we do
       def shutdown?
-        finished? && @shutdown_lock.try_lock
+        finished? && @shutdown_mutex.try_lock
       end
 
       # Unlocks the shutdown lock
       def unlock
-        @shutdown_lock.unlock if @shutdown_lock.owned?
+        @shutdown_mutex.unlock if @shutdown_mutex.owned?
       end
 
       # Marks given listener as finished
