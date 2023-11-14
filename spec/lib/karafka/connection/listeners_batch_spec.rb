@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:batch) { described_class.new(jobs_queue, scheduler) }
+  subject(:batch) { described_class.new(jobs_queue) }
 
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
-  let(:scheduler) { Karafka::Processing::Scheduler.new(jobs_queue) }
   let(:consumer_group) { build(:routing_consumer_group) }
   let(:subscription_group) { build(:routing_subscription_group) }
 

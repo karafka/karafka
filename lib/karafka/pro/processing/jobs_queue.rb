@@ -40,8 +40,8 @@ module Karafka
           end
         end
 
-        # Method for unlocking the given subscription group queue space that was locked with a given
-        # job that was **not** added to the queue but used via `#lock`.
+        # Method for unlocking the given subscription group queue space that was locked with a
+        # given job that was **not** added to the queue but used via `#lock`.
         #
         # @param job [Jobs::Base] job that locked the queue
         def unlock(job)

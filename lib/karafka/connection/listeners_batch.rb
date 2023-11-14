@@ -9,9 +9,12 @@ module Karafka
       attr_reader :coordinators
 
       # @param jobs_queue [JobsQueue]
-      # @param scheduler [Karafka::Processing::Scheduler] scheduler we want to use
       # @return [ListenersBatch]
-      def initialize(jobs_queue, scheduler)
+      def initialize(jobs_queue)
+        # We need one scheduler for all the listeners because in case of complex schedulers, they
+        # should be able to distribute work whenever any work is done in any of the listeners
+        scheduler = App.config.internal.processing.scheduler_class.new(jobs_queue)
+
         @coordinators = []
 
         @batch = App.subscription_groups.flat_map do |_consumer_group, subscription_groups|
