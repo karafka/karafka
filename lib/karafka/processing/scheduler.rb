@@ -13,7 +13,6 @@ module Karafka
       #
       # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
       def schedule_consumption(jobs_array)
-        p 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
         jobs_array.each do |job|
           @queue << job
         end
