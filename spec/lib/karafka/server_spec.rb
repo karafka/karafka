@@ -17,9 +17,8 @@ RSpec.describe_current do
     allow(runner).to receive(:call)
 
     jobs_queue = Karafka::Processing::JobsQueue.new
-    scheduler = Karafka::Processing::Scheduler.new(jobs_queue)
 
-    described_class.listeners = ::Karafka::Connection::ListenersBatch.new(jobs_queue, scheduler)
+    described_class.listeners = ::Karafka::Connection::ListenersBatch.new(jobs_queue)
     described_class.workers = []
   end
 
