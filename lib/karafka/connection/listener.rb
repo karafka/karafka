@@ -23,8 +23,9 @@ module Karafka
       # @param consumer_group_coordinator [Karafka::Connection::ConsumerGroupCoordinator]
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
+      # @param scheduler [Karafka::Processing::Scheduler] scheduler we want to use
       # @return [Karafka::Connection::Listener] listener instance
-      def initialize(consumer_group_coordinator, subscription_group, jobs_queue)
+      def initialize(consumer_group_coordinator, subscription_group, jobs_queue, scheduler)
         proc_config = ::Karafka::App.config.internal.processing
 
         @id = SecureRandom.hex(6)
@@ -36,8 +37,7 @@ module Karafka
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         @jobs_builder = proc_config.jobs_builder
         @partitioner = proc_config.partitioner_class.new(subscription_group)
-        # We reference scheduler here as it is much faster than fetching this each time
-        @scheduler = proc_config.scheduler
+        @scheduler = scheduler
         @events_poller = Helpers::IntervalRunner.new { @client.events_poll }
         # We keep one buffer for messages to preserve memory and not allocate extra objects
         # We can do this that way because we always first schedule jobs using messages before we
@@ -243,7 +243,7 @@ module Karafka
           end
         end
 
-        @scheduler.schedule_revocation(@jobs_queue, jobs)
+        @scheduler.schedule_revocation(jobs)
       end
 
       # Enqueues the shutdown jobs for all the executors that exist in our subscription group
@@ -256,7 +256,7 @@ module Karafka
           jobs << job
         end
 
-        @scheduler.schedule_shutdown(@jobs_queue, jobs)
+        @scheduler.schedule_shutdown(jobs)
       end
 
       # Polls messages within the time and amount boundaries defined in the settings and then
@@ -298,12 +298,15 @@ module Karafka
 
         jobs.each(&:before_enqueue)
 
-        @scheduler.schedule_consumption(@jobs_queue, jobs)
+        @scheduler.schedule_consumption(jobs)
       end
 
       # Waits for all the jobs from a given subscription group to finish before moving forward
       def wait
-        @jobs_queue.wait(@subscription_group.id) { @events_poller.call }
+        @jobs_queue.wait(@subscription_group.id) do
+          @events_poller.call
+          @scheduler.manage
+        end
       end
 
       # Waits without blocking the polling
@@ -319,6 +322,8 @@ module Karafka
       def wait_pinging(wait_until:, after_ping: -> {})
         until wait_until.call
           @client.ping
+          @scheduler.manage
+
           after_ping.call
           sleep(0.2)
         end
@@ -334,6 +339,7 @@ module Karafka
         # resetting.
         @jobs_queue.wait(@subscription_group.id)
         @jobs_queue.clear(@subscription_group.id)
+        @scheduler.clear(@subscription_group.id)
         @events_poller.reset
         @client.reset
         @coordinators.reset

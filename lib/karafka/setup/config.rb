@@ -210,7 +210,7 @@ module Karafka
 
         setting :processing do
           # option scheduler [Object] scheduler we will be using
-          setting :scheduler, default: Processing::Scheduler.new
+          setting :scheduler_class, default: Processing::Scheduler
           # option jobs_builder [Object] jobs builder we want to use
           setting :jobs_builder, default: Processing::JobsBuilder.new
           # option coordinator [Class] work coordinator we want to user for processing coordination

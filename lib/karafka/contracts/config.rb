@@ -73,7 +73,7 @@ module Karafka
 
         nested(:processing) do
           required(:jobs_builder) { |val| !val.nil? }
-          required(:scheduler) { |val| !val.nil? }
+          required(:scheduler_class) { |val| !val.nil? }
           required(:coordinator_class) { |val| !val.nil? }
           required(:partitioner_class) { |val| !val.nil? }
           required(:strategy_selector) { |val| !val.nil? }

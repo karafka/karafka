@@ -9,9 +9,12 @@ module Karafka
       # Despite possibility of having several independent listeners, we aim to have one queue for
       # jobs across and one workers poll for that
       jobs_queue = Processing::JobsQueue.new
+      # We need one scheduler for all the listeners because in case of complex schedulers, they
+      # should be able to distribute work whenever any work is done in any of the listeners
+      scheduler = App.config.internal.processing.scheduler_class.new(jobs_queue)
 
       workers = Processing::WorkersBatch.new(jobs_queue)
-      listeners = Connection::ListenersBatch.new(jobs_queue)
+      listeners = Connection::ListenersBatch.new(jobs_queue, scheduler)
 
       workers.each(&:async_call)
       listeners.each(&:async_call)

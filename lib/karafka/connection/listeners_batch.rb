@@ -9,8 +9,9 @@ module Karafka
       attr_reader :coordinators
 
       # @param jobs_queue [JobsQueue]
+      # @param scheduler [Karafka::Processing::Scheduler] scheduler we want to use
       # @return [ListenersBatch]
-      def initialize(jobs_queue)
+      def initialize(jobs_queue, scheduler)
         @coordinators = []
 
         @batch = App.subscription_groups.flat_map do |_consumer_group, subscription_groups|
@@ -24,7 +25,8 @@ module Karafka
             Connection::Listener.new(
               consumer_group_coordinator,
               subscription_group,
-              jobs_queue
+              jobs_queue,
+              scheduler
             )
           end
         end
