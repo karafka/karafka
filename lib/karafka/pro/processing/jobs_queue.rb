@@ -16,6 +16,8 @@ module Karafka
     module Processing
       # Enhanced processing queue that provides ability to build complex work-distribution
       # schedulers dedicated to particular job types
+      #
+      # Aside from the OSS queue capabilities it allows for jobless locking for advanced schedulers
       class JobsQueue < Karafka::Processing::JobsQueue
         # @return [Karafka::Pro::Processing::JobsQueue]
         def initialize
