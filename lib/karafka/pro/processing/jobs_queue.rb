@@ -23,6 +23,17 @@ module Karafka
         def initialize
           super
           @in_waiting = Hash.new { |h, k| h[k] = [] }
+          @in_waiting_count = 0
+        end
+
+        # Returns number of jobs that are either enqueued or in processing (but not finished) or
+        #   in waiting. All of those jobs need to finish.
+        #
+        # @return [Integer] number of elements in the queue or waiting to go there or being
+        #   processed
+        # @note Using `#pop` won't decrease this number as only marking job as completed does this
+        def size
+          @in_processing_count + @in_waiting_count
         end
 
         # Method that allows us to lock queue on a given subscription group without enqueuing the a
@@ -36,6 +47,7 @@ module Karafka
 
             raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.include?(job)
 
+            @in_waiting_count += 1
             group << job
           end
         end
@@ -46,6 +58,7 @@ module Karafka
         # @param job [Jobs::Base] job that locked the queue
         def unlock(job)
           @mutex.synchronize do
+            @in_waiting_count -= 1
             @in_waiting[job.group_id].delete(job)
           end
         end
@@ -56,7 +69,10 @@ module Karafka
         # @param group_id [String]
         def clear(group_id)
           @mutex.synchronize do
+            @in_processing_count -= @in_processing[group_id].size
             @in_processing[group_id].clear
+
+            @in_waiting_count -= @in_waiting[group_id].size
             @in_waiting[group_id].clear
 
             # We unlock it just in case it was blocked when clearing started
@@ -73,6 +89,17 @@ module Karafka
             @in_processing[group_id].empty? &&
               @in_waiting[group_id].empty?
           end
+        end
+
+        # - `busy` - number of jobs that are currently being processed (active work)
+        # - `enqueued` - number of jobs in the queue that are waiting to be picked up by a worker
+        #
+        # @return [Hash] hash with basic usage statistics of this queue.
+        def statistics
+          {
+            busy: size - @queue.size - @in_waiting_count,
+            enqueued: @queue.size + @in_waiting_count
+          }.freeze
         end
 
         private

@@ -74,6 +74,14 @@ RSpec.describe_current do
     end
   end
 
+  describe '#lock' do
+    pending
+  end
+
+  describe '#unlock' do
+    pending
+  end
+
   describe '#close' do
     context 'when queues are closed already' do
       before { internal_queue.close }
@@ -267,5 +275,35 @@ RSpec.describe_current do
 
   describe '#statistics' do
     it { expect(queue.statistics).to eq(enqueued: 0, busy: 0) }
+
+    context 'when we have enqueued and waiting jobs' do
+      before do
+        queue << job1
+        queue << job2
+        queue.lock(job2)
+      end
+
+      it { expect(queue.statistics).to eq(enqueued: 3, busy: 0) }
+    end
+
+    context 'when we have enqueued, waiting and running jobs' do
+      before do
+        queue << job1
+        queue << job2
+        queue.lock(job2)
+        queue.pop
+      end
+
+      it { expect(queue.statistics).to eq(enqueued: 2, busy: 1) }
+    end
+
+    context 'when we have only waiting jobs' do
+      before do
+        queue.lock(job1)
+        queue.lock(job2)
+      end
+
+      it { expect(queue.statistics).to eq(enqueued: 2, busy: 0) }
+    end
   end
 end

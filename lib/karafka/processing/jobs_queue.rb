@@ -28,15 +28,16 @@ module Karafka
 
         @tick_interval = ::Karafka::App.config.internal.tick_interval
         @in_processing = Hash.new { |h, k| h[k] = [] }
+        @in_processing_count = 0
 
         @mutex = Mutex.new
       end
 
       # Returns number of jobs that are either enqueued or in processing (but not finished)
-      # @return [Integer] number of elements in the queue
+      # @return [Integer] number of elements in the queue plus the once in processing
       # @note Using `#pop` won't decrease this number as only marking job as completed does this
       def size
-        @in_processing.values.map(&:size).sum
+        @in_processing_count
       end
 
       # Adds the job to the internal main queue, scheduling it for execution in a worker and marks
@@ -54,6 +55,7 @@ module Karafka
           raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.include?(job)
 
           group << job
+          @in_processing_count += 1
 
           @queue << job
         end
@@ -80,6 +82,7 @@ module Karafka
       # @param [Jobs::Base] job that was completed
       def complete(job)
         @mutex.synchronize do
+          @in_processing_count -= 1
           @in_processing[job.group_id].delete(job)
           tick(job.group_id)
         end
@@ -91,6 +94,7 @@ module Karafka
       # @param group_id [String]
       def clear(group_id)
         @mutex.synchronize do
+          @in_processing_count -= @in_processing[group_id].size
           @in_processing[group_id].clear
           # We unlock it just in case it was blocked when clearing started
           tick(group_id)
