@@ -75,11 +75,36 @@ RSpec.describe_current do
   end
 
   describe '#lock' do
-    pending
+    context 'when we lock a job' do
+      before { queue.lock(job1) }
+
+      it { expect(queue.size).to eq(1) }
+      it { expect(queue.statistics).to eq(busy: 0, enqueued: 1) }
+
+      context 'when we try to lock the same job twice' do
+        let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
+
+        it { expect { queue.lock(job1) }.to raise_error(expected_error) }
+      end
+    end
   end
 
   describe '#unlock' do
-    pending
+    context 'when we unlock a job' do
+      before do
+        queue.lock(job1)
+        queue.unlock(job1)
+      end
+
+      it { expect(queue.size).to eq(0) }
+      it { expect(queue.statistics).to eq(busy: 0, enqueued: 0) }
+
+      context 'when we try to unlock the same job twice' do
+        let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
+
+        it { expect { queue.unlock(job1) }.to raise_error(expected_error) }
+      end
+    end
   end
 
   describe '#close' do

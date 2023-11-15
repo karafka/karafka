@@ -19,6 +19,8 @@ module Karafka
       #
       # Aside from the OSS queue capabilities it allows for jobless locking for advanced schedulers
       class JobsQueue < Karafka::Processing::JobsQueue
+        attr_accessor :in_processing
+
         # @return [Karafka::Pro::Processing::JobsQueue]
         def initialize
           super
@@ -45,6 +47,7 @@ module Karafka
           @mutex.synchronize do
             group = @in_waiting[job.group_id]
 
+            # This should never happen. Same job should not be locked twice
             raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.include?(job)
 
             @in_waiting_count += 1
@@ -59,7 +62,12 @@ module Karafka
         def unlock(job)
           @mutex.synchronize do
             @in_waiting_count -= 1
-            @in_waiting[job.group_id].delete(job)
+
+            return if @in_waiting[job.group_id].delete(job)
+
+            # This should never happen. It means there was a job being unlocked that was never
+            # locked in the first place
+            raise(Errors::JobsQueueSynchronizationError, job.group_id)
           end
         end
 
