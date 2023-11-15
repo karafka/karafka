@@ -52,7 +52,6 @@ end
 setup_karafka do |config|
   config.concurrency = 10
   config.max_messages = 50
-  config.shutdown_timeout = 5_000
   config.internal.processing.scheduler_class = OneThreadScheduler
 end
 
