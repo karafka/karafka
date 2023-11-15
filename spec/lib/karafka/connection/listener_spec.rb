@@ -65,7 +65,7 @@ RSpec.describe_current do
     end
 
     it 'expect the revoke job to be consumed meanwhile' do
-      expect(jobs_queue.size).to eq(0)
+      expect(jobs_queue.statistics).to eq(busy: 0, enqueued: 0)
     end
   end
 

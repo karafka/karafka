@@ -3,9 +3,12 @@
 RSpec.describe_current do
   subject(:queue) { described_class.new }
 
-  let(:job1) { OpenStruct.new(group_id: 1, id: 1, call: true, non_blocking?: false) }
-  let(:job2) { OpenStruct.new(group_id: 2, id: 1, call: true, non_blocking?: false) }
+  let(:job1) { job_n.call }
+  let(:job2) { job_n.call }
   let(:internal_queue) { ::Queue.new }
+  let(:job_n) do
+    -> { OpenStruct.new(group_id: 2, id: SecureRandom.uuid, call: true, non_blocking?: false) }
+  end
 
   before { queue.instance_variable_set('@queue', internal_queue) }
 
@@ -16,15 +19,13 @@ RSpec.describe_current do
         queue << job1
       end
 
-      it { expect(queue.size).to eq(0) }
       it { expect(queue.statistics).to eq(enqueued: 0, busy: 0) }
     end
 
     context 'when the queue is not closed' do
       before { queue << job1 }
 
-      it { expect(queue.size).to eq(1) }
-      it { expect(queue.statistics).to eq(enqueued: 1, busy: 0) }
+      it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
     end
 
     context 'when we want to add a job from a group that is in processing' do
@@ -39,8 +40,13 @@ RSpec.describe_current do
       before { queue << job1 }
 
       it { expect { queue << job2 }.not_to raise_error }
-      it { expect { queue << job2 }.to change(queue, :size).from(1).to(2) }
-      it { expect(queue.statistics).to eq(enqueued: 1, busy: 0) }
+      it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
+
+      context 'when all workers are busy' do
+        before { 10.times { queue << job_n.call } }
+
+        it { expect(queue.statistics).to eq(busy: 5, enqueued: 6) }
+      end
     end
   end
 
@@ -48,8 +54,7 @@ RSpec.describe_current do
     before { queue << job1 }
 
     it { expect(queue.pop).to eq(job1) }
-    it { expect { queue.pop }.not_to change(queue, :size) }
-    it { expect(queue.statistics).to eq(enqueued: 1, busy: 0) }
+    it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
   end
 
   describe '#complete' do
@@ -59,7 +64,19 @@ RSpec.describe_current do
     end
 
     context 'when there is a job in the queue and we mark it as completed' do
-      it { expect { queue.complete(job1) }.to change(queue, :size).from(2).to(1) }
+      before { queue.complete(queue.pop) }
+
+      it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
+    end
+
+    context 'when there are more jobs than concurrency and we complete' do
+      before do
+        8.times { queue << job_n.call }
+
+        queue.complete(queue.pop)
+      end
+
+      it { expect(queue.statistics).to eq(busy: 5, enqueued: 4) }
     end
   end
 
@@ -70,7 +87,7 @@ RSpec.describe_current do
     end
 
     it 'expect to clear a given group only' do
-      expect { queue.clear(job1.group_id) }.to change(queue, :size).from(2).to(1)
+      expect { queue.clear(job1.group_id) }.not_to change(queue, :statistics)
     end
   end
 
@@ -218,9 +235,9 @@ RSpec.describe_current do
     end
   end
 
-  describe '#size' do
+  describe '#statistics' do
     context 'when there are no jobs' do
-      it { expect(queue.size).to eq(0) }
+      it { expect(queue.statistics).to eq(busy: 0, enqueued: 0) }
     end
 
     context 'when there are jobs from one group' do
@@ -232,7 +249,7 @@ RSpec.describe_current do
         queue << job2
       end
 
-      it { expect(queue.size).to eq(2) }
+      it { expect(queue.statistics).to eq(busy: 2, enqueued: 0) }
     end
 
     context 'when there are jobs from multiple groups' do
@@ -241,7 +258,7 @@ RSpec.describe_current do
         queue << job2
       end
 
-      it { expect(queue.size).to eq(2) }
+      it { expect(queue.statistics).to eq(busy: 2, enqueued: 0) }
     end
   end
 
@@ -263,9 +280,5 @@ RSpec.describe_current do
 
       it { expect(queue.empty?(job.group_id)).to eq(false) }
     end
-  end
-
-  describe '#statistics' do
-    it { expect(queue.statistics).to eq(enqueued: 0, busy: 0) }
   end
 end
