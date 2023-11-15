@@ -10,7 +10,10 @@ RSpec.describe_current do
     -> { OpenStruct.new(group_id: 2, id: SecureRandom.uuid, call: true, non_blocking?: false) }
   end
 
-  before { queue.instance_variable_set('@queue', internal_queue) }
+  before do
+    allow(Karafka::App.config).to receive(:concurrency).and_return(5)
+    queue.instance_variable_set('@queue', internal_queue)
+  end
 
   describe '#<<' do
     context 'when queue is closed' do
