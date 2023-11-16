@@ -3,6 +3,7 @@ PATH
   specs:
     karafka (2.2.13)
       karafka-core (>= 2.2.7, < 2.3.0)
+      karafka-rdkafka (>= 0.14.0.beta1)
       waterdrop (>= 2.6.11, < 3.0.0)
       zeitwerk (~> 2.3)
 
@@ -42,7 +43,7 @@ GEM
     karafka-core (2.2.7)
       concurrent-ruby (>= 1.1)
       karafka-rdkafka (>= 0.13.9, < 0.15.0)
-    karafka-rdkafka (0.13.9)
+    karafka-rdkafka (0.14.0.beta1)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
