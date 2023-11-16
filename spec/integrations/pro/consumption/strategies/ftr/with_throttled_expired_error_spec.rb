@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When we reach throttling limit and error, we should process again from the errored place
-# If throttling went beyound and we should continue, this should not change anything
+# If throttling went beyond and we should continue, this should not change anything
 
 setup_karafka(allow_errors: true)
 
