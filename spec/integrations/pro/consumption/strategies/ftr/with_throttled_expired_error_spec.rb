@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # When we reach throttling limit and error, we should process again from the errored place
+# If throttling went beyound and we should continue, this should not change anything
 
 setup_karafka(allow_errors: true)
 
@@ -16,6 +17,9 @@ class Consumer < Karafka::BaseConsumer
     return if @batches < 2
 
     DT[:started] = messages.first.offset unless DT.key?(:started)
+
+    # Go beyond throttling wait
+    sleep(6)
 
     raise StandardError
   end
