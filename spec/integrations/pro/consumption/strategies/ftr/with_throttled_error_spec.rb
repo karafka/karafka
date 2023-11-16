@@ -42,4 +42,4 @@ started = DT[:started]
 
 assert DT[0].count(started) > 1
 # Should not move beyond the failing batch + throttling
-assert DT[0].none? { started + 5 }
+assert DT[0].none? { |element| element > started + 5 }
