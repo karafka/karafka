@@ -27,10 +27,9 @@ module Karafka
       class Scheduler < ::Karafka::Processing::Scheduler
         # Schedules jobs in the LJF order for consumption
         #
-        # @param queue [Karafka::Processing::JobsQueue] queue where we want to put the jobs
         # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
         #
-        def schedule_consumption(queue, jobs_array)
+        def schedule_consumption(jobs_array)
           perf_tracker = PerformanceTracker.instance
 
           ordered = []
@@ -47,7 +46,7 @@ module Karafka
           ordered.map!(&:first)
 
           ordered.each do |job|
-            queue << job
+            @queue << job
           end
         end
 

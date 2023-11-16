@@ -22,13 +22,13 @@ RSpec.describe_current do
         queue << job1
       end
 
-      it { expect(queue.statistics).to eq(enqueued: 0, busy: 0) }
+      it { expect(queue.statistics).to eq(enqueued: 0, busy: 0, waiting: 0) }
     end
 
     context 'when the queue is not closed' do
       before { queue << job1 }
 
-      it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
+      it { expect(queue.statistics).to eq(busy: 1, enqueued: 0, waiting: 0) }
     end
 
     context 'when we want to add a job from a group that is in processing' do
@@ -43,12 +43,12 @@ RSpec.describe_current do
       before { queue << job1 }
 
       it { expect { queue << job2 }.not_to raise_error }
-      it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
+      it { expect(queue.statistics).to eq(busy: 1, enqueued: 0, waiting: 0) }
 
       context 'when all workers are busy' do
         before { 10.times { queue << job_n.call } }
 
-        it { expect(queue.statistics).to eq(busy: 5, enqueued: 6) }
+        it { expect(queue.statistics).to eq(busy: 5, enqueued: 6, waiting: 0) }
       end
     end
   end
@@ -57,7 +57,7 @@ RSpec.describe_current do
     before { queue << job1 }
 
     it { expect(queue.pop).to eq(job1) }
-    it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
+    it { expect(queue.statistics).to eq(busy: 1, enqueued: 0, waiting: 0) }
   end
 
   describe '#complete' do
@@ -69,7 +69,7 @@ RSpec.describe_current do
     context 'when there is a job in the queue and we mark it as completed' do
       before { queue.complete(queue.pop) }
 
-      it { expect(queue.statistics).to eq(busy: 1, enqueued: 0) }
+      it { expect(queue.statistics).to eq(busy: 1, enqueued: 0, waiting: 0) }
     end
 
     context 'when there are more jobs than concurrency and we complete' do
@@ -79,7 +79,7 @@ RSpec.describe_current do
         queue.complete(queue.pop)
       end
 
-      it { expect(queue.statistics).to eq(busy: 5, enqueued: 4) }
+      it { expect(queue.statistics).to eq(busy: 5, enqueued: 4, waiting: 0) }
     end
   end
 
@@ -91,6 +91,37 @@ RSpec.describe_current do
 
     it 'expect to clear a given group only' do
       expect { queue.clear(job1.group_id) }.not_to change(queue, :statistics)
+    end
+  end
+
+  describe '#lock' do
+    context 'when we lock a job' do
+      before { queue.lock(job1) }
+
+      it { expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 1) }
+
+      context 'when we try to lock the same job twice' do
+        let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
+
+        it { expect { queue.lock(job1) }.to raise_error(expected_error) }
+      end
+    end
+  end
+
+  describe '#unlock' do
+    context 'when we unlock a job' do
+      before do
+        queue.lock(job1)
+        queue.unlock(job1)
+      end
+
+      it { expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 0) }
+
+      context 'when we try to unlock the same job twice' do
+        let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
+
+        it { expect { queue.unlock(job1) }.to raise_error(expected_error) }
+      end
     end
   end
 
@@ -240,7 +271,7 @@ RSpec.describe_current do
 
   describe '#statistics' do
     context 'when there are no jobs' do
-      it { expect(queue.statistics).to eq(busy: 0, enqueued: 0) }
+      it { expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 0) }
     end
 
     context 'when there are jobs from one group' do
@@ -252,7 +283,7 @@ RSpec.describe_current do
         queue << job2
       end
 
-      it { expect(queue.statistics).to eq(busy: 2, enqueued: 0) }
+      it { expect(queue.statistics).to eq(busy: 2, enqueued: 0, waiting: 0) }
     end
 
     context 'when there are jobs from multiple groups' do
@@ -261,7 +292,7 @@ RSpec.describe_current do
         queue << job2
       end
 
-      it { expect(queue.statistics).to eq(busy: 2, enqueued: 0) }
+      it { expect(queue.statistics).to eq(busy: 2, enqueued: 0, waiting: 0) }
     end
   end
 

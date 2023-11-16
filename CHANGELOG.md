@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.2.13 (Unreleased)
+- **[Feature]** Introduce low-level extended Scheduling API for granular control of schedulers and jobs execution [Pro].
 - [Improvement] Use separate lock for user-facing synchronization.
 - [Improvement] Instrument `consumer.before_enqueue`.
 - [Improvement] Limit usage of `concurrent-ruby` (plan to remove it as a dependency fully)

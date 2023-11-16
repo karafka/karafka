@@ -9,6 +9,9 @@ module Karafka
     # on this queue, that's why internally we keep track of processing per group.
     #
     # We work with the assumption, that partitions data is evenly distributed.
+    #
+    # @note This job queue also keeps track / understands number of busy workers. This is because
+    #   we use a single workers poll that can have granular scheduling.
     class JobsQueue
       # @return [Karafka::Processing::JobsQueue]
       def initialize
@@ -26,17 +29,12 @@ module Karafka
           h.compute_if_absent(k) { RUBY_VERSION < '3.2' ? TimedQueue.new : Queue.new }
         end
 
+        @concurrency = Karafka::App.config.concurrency
         @tick_interval = ::Karafka::App.config.internal.tick_interval
         @in_processing = Hash.new { |h, k| h[k] = [] }
+        @statistics = { busy: 0, enqueued: 0 }
 
         @mutex = Mutex.new
-      end
-
-      # Returns number of jobs that are either enqueued or in processing (but not finished)
-      # @return [Integer] number of elements in the queue
-      # @note Using `#pop` won't decrease this number as only marking job as completed does this
-      def size
-        @in_processing.values.map(&:size).sum
       end
 
       # Adds the job to the internal main queue, scheduling it for execution in a worker and marks
@@ -54,6 +52,16 @@ module Karafka
           raise(Errors::JobsQueueSynchronizationError, job.group_id) if group.include?(job)
 
           group << job
+
+          # Assume that moving to queue means being picked up immediately not to create stats
+          # race conditions because of pop overhead. If there are workers available, we assume
+          # work is going to be handled as we never reject enqueued jobs
+          if @statistics[:busy] < @concurrency
+            @statistics[:busy] += 1
+          else
+            # If system is fully loaded, it means this job is indeed enqueued
+            @statistics[:enqueued] += 1
+          end
 
           @queue << job
         end
@@ -80,7 +88,16 @@ module Karafka
       # @param [Jobs::Base] job that was completed
       def complete(job)
         @mutex.synchronize do
+          # We finish one job and if there is another, we pick it up
+          if @statistics[:enqueued].positive?
+            @statistics[:enqueued] -= 1
+          # If no more enqueued jobs, we will be just less busy
+          else
+            @statistics[:busy] -= 1
+          end
+
           @in_processing[job.group_id].delete(job)
+
           tick(job.group_id)
         end
       end
@@ -141,10 +158,10 @@ module Karafka
       #
       # @return [Hash] hash with basic usage statistics of this queue.
       def statistics
-        {
-          busy: size - @queue.size,
-          enqueued: @queue.size
-        }.freeze
+        # Ensures there are no race conditions when returning this data
+        @mutex.synchronize do
+          @statistics.dup.freeze
+        end
       end
 
       private

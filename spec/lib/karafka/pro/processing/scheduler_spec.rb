@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
+  subject(:scheduler) { described_class.new(queue) }
+
   let(:queue) { [] }
 
   describe '#schedule_consumption' do
-    subject(:schedule) { described_class.new.schedule_consumption(queue, jobs_array) }
+    subject(:schedule) { scheduler.schedule_consumption(jobs_array) }
 
     4.times { |i| let("message#{i}") { build(:messages_message) } }
 

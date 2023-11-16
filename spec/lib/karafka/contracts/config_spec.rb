@@ -47,8 +47,9 @@ RSpec.describe_current do
           subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new
         },
         processing: {
-          scheduler: Karafka::Processing::Scheduler.new,
+          scheduler_class: Karafka::Processing::Scheduler,
           jobs_builder: Karafka::Processing::JobsBuilder.new,
+          jobs_queue_class: Karafka::Processing::JobsQueue,
           coordinator_class: Karafka::Processing::Coordinator,
           partitioner_class: Karafka::Processing::Partitioner,
           strategy_selector: Karafka::Processing::StrategySelector.new,
@@ -446,7 +447,8 @@ RSpec.describe_current do
 
     %i[
       jobs_builder
-      scheduler
+      jobs_queue_class
+      scheduler_class
       coordinator_class
       partitioner_class
       strategy_selector
@@ -483,8 +485,14 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when processing scheduler is missing' do
-      before { config[:internal][:processing].delete(:scheduler) }
+    context 'when processing scheduler_class is missing' do
+      before { config[:internal][:processing].delete(:scheduler_class) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when processing jobs_queue_class is missing' do
+      before { config[:internal][:processing].delete(:jobs_queue_class) }
 
       it { expect(contract.call(config)).not_to be_success }
     end
