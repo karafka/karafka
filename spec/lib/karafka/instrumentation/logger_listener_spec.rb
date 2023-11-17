@@ -310,9 +310,9 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
-    context 'when it is a consumer.before_enqueue.error' do
-      let(:type) { 'consumer.before_enqueue.error' }
-      let(:message) { "Consumer before enqueue failed due to an error: #{error}" }
+    context 'when it is a consumer.before_schedule.error' do
+      let(:type) { 'consumer.before_schedule.error' }
+      let(:message) { "Consumer before schedule failed due to an error: #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
