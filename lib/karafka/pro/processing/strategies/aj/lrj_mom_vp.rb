@@ -33,7 +33,7 @@ module Karafka
             ].freeze
 
             # No actions needed for the standard flow here
-            def handle_before_enqueue
+            def handle_before_schedule
               super
 
               coordinator.on_enqueued do

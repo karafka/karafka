@@ -230,7 +230,7 @@ module Karafka
             # here. In cases like this, we do not run a revocation job
             @executors.find_all(topic, partition).each do |executor|
               job = @jobs_builder.revoked(executor)
-              job.before_enqueue
+              job.before_schedule
               jobs << job
             end
 
@@ -252,7 +252,7 @@ module Karafka
 
         @executors.each do |executor|
           job = @jobs_builder.shutdown(executor)
-          job.before_enqueue
+          job.before_schedule
           jobs << job
         end
 
@@ -296,7 +296,7 @@ module Karafka
           end
         end
 
-        jobs.each(&:before_enqueue)
+        jobs.each(&:before_schedule)
 
         @scheduler.schedule_consumption(jobs)
       end

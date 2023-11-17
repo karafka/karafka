@@ -241,8 +241,8 @@ module Karafka
         when 'consumer.revoked.error'
           error "Consumer on revoked failed due to an error: #{error}"
           error details
-        when 'consumer.before_enqueue.error'
-          error "Consumer before enqueue failed due to an error: #{error}"
+        when 'consumer.before_schedule.error'
+          error "Consumer before schedule failed due to an error: #{error}"
           error details
         when 'consumer.before_consume.error'
           error "Consumer before consume failed due to an error: #{error}"

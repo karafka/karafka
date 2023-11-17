@@ -11,8 +11,8 @@ RSpec.describe_current do
     klass.new
   end
 
-  describe '#handle_before_enqueue' do
-    it { expect { runner.handle_before_enqueue }.to raise_error(NotImplementedError) }
+  describe '#handle_before_schedule' do
+    it { expect { runner.handle_before_schedule }.to raise_error(NotImplementedError) }
   end
 
   describe '#handle_before_consume' do

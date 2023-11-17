@@ -29,7 +29,7 @@ module Karafka
             ].freeze
 
             # We always need to pause prior to doing any jobs for LRJ
-            def handle_before_enqueue
+            def handle_before_schedule
               super
 
               # This ensures that when running LRJ with VP, things operate as expected run only

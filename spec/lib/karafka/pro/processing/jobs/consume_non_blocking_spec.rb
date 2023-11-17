@@ -10,15 +10,15 @@ RSpec.describe_current do
   it { expect(job.non_blocking?).to eq(true) }
   it { expect(described_class).to be < ::Karafka::Processing::Jobs::Consume }
 
-  describe '#before_enqueue' do
+  describe '#before_schedule' do
     before do
       allow(Time).to receive(:now).and_return(time_now)
-      allow(executor).to receive(:before_enqueue)
+      allow(executor).to receive(:before_schedule)
     end
 
-    it 'expect to run before_enqueue on the executor with time and messages' do
-      job.before_enqueue
-      expect(executor).to have_received(:before_enqueue).with(messages)
+    it 'expect to run before_schedule on the executor with time and messages' do
+      job.before_schedule
+      expect(executor).to have_received(:before_schedule).with(messages)
     end
   end
 end

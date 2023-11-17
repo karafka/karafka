@@ -15,7 +15,7 @@ draw_routes(Consumer)
 elements = DT.uuids(10)
 produce_many(DT.topic, elements)
 
-Karafka::App.monitor.subscribe('consumer.before_enqueue') do |event|
+Karafka::App.monitor.subscribe('consumer.before_schedule') do |event|
   DT[:events] << event[:caller]
 end
 
