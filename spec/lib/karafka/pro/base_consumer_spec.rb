@@ -59,13 +59,13 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     allow(client).to receive(:assignment_lost?).and_return(false)
   end
 
-  describe '#on_before_enqueue for non LRJ' do
+  describe '#on_before_schedule for non LRJ' do
     let(:strategy) { Karafka::Pro::Processing::Strategies::Default }
 
     before { allow(client).to receive(:pause) }
 
     it 'expect not to pause the partition' do
-      consumer.on_before_enqueue
+      consumer.on_before_schedule
       expect(client).not_to have_received(:pause)
     end
   end
@@ -87,7 +87,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
     let(:consume_with_after) do
       lambda do
-        consumer.on_before_enqueue
+        consumer.on_before_schedule
         consumer.on_before_consume
         consumer.on_consume
         consumer.on_after_consume
@@ -222,7 +222,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     end
   end
 
-  describe '#on_before_enqueue for LRJ' do
+  describe '#on_before_schedule for LRJ' do
     let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
 
     before do
@@ -232,7 +232,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     end
 
     it 'expect not to pause the partition' do
-      consumer.on_before_enqueue
+      consumer.on_before_schedule
       expect(client).to have_received(:pause).with(topic.name, 0, nil)
     end
   end
@@ -252,7 +252,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
       consumer.coordinator = coordinator
       consumer.client = client
       consumer.messages = messages
-      consumer.on_before_enqueue
+      consumer.on_before_schedule
       consumer.on_before_consume
       allow(coordinator.pause_tracker).to receive(:pause)
     end

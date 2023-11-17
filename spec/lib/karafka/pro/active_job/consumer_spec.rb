@@ -28,12 +28,12 @@ RSpec.describe_current do
 
   it { expect(described_class).to be < Karafka::BaseConsumer }
 
-  describe '#on_before_enqueue behaviour' do
+  describe '#on_before_schedule behaviour' do
     before { allow(consumer).to receive(:pause) }
 
     context 'when it is not a lrj' do
       it 'expect not to pause' do
-        consumer.on_before_enqueue
+        consumer.on_before_schedule
 
         expect(consumer).not_to have_received(:pause)
       end
@@ -48,7 +48,7 @@ RSpec.describe_current do
       end
 
       it 'expect to pause forever on our first message' do
-        consumer.on_before_enqueue
+        consumer.on_before_schedule
 
         expect(consumer).to have_received(:pause).with(:consecutive, 1_000_000_000_000, false)
       end

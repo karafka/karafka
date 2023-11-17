@@ -39,11 +39,11 @@ module Karafka
       end
 
       # Allows us to prepare the consumer in the listener thread prior to the job being send to
-      # the queue. It also allows to run some code that is time sensitive and cannot wait in the
+      # be scheduled. It also allows to run some code that is time sensitive and cannot wait in the
       # queue as it could cause starvation.
       #
       # @param messages [Array<Karafka::Messages::Message>]
-      def before_enqueue(messages)
+      def before_schedule(messages)
         # Recreate consumer with each batch if persistence is not enabled
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
@@ -60,7 +60,7 @@ module Karafka
           Time.now
         )
 
-        consumer.on_before_enqueue
+        consumer.on_before_schedule
       end
 
       # Runs setup and warm-up code in the worker prior to running the consumption

@@ -11,9 +11,9 @@ module Karafka
     module Strategies
       # Base strategy that should be included in each strategy, just to ensure the API
       module Base
-        # What should happen before jobs are enqueued
+        # What should happen before jobs are scheduled
         # @note This runs from the listener thread, not recommended to put anything slow here
-        def handle_before_enqueue
+        def handle_before_schedule
           raise NotImplementedError, 'Implement in a subclass'
         end
 

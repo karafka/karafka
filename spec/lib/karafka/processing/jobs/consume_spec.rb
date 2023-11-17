@@ -8,14 +8,14 @@ RSpec.describe_current do
 
   it { expect(job.non_blocking?).to eq(false) }
 
-  describe '#before_enqueue' do
+  describe '#before_schedule' do
     before do
-      allow(executor).to receive(:before_enqueue)
-      job.before_enqueue
+      allow(executor).to receive(:before_schedule)
+      job.before_schedule
     end
 
-    it 'expect to run before_enqueue on the executor with time and messages' do
-      expect(executor).to have_received(:before_enqueue).with(messages)
+    it 'expect to run before_schedule on the executor with time and messages' do
+      expect(executor).to have_received(:before_schedule).with(messages)
     end
   end
 

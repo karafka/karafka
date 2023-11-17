@@ -34,15 +34,15 @@ module Karafka
     # @note This should not be used by the end users as it is part of the lifecycle of things and
     #   not as a part of the public api. This should not perform any extensive operations as it is
     #   blocking and running in the listener thread.
-    def on_before_enqueue
+    def on_before_schedule
       @used = true
-      handle_before_enqueue
+      handle_before_schedule
     rescue StandardError => e
       Karafka.monitor.instrument(
         'error.occurred',
         error: e,
         caller: self,
-        type: 'consumer.before_enqueue.error'
+        type: 'consumer.before_schedule.error'
       )
     end
 

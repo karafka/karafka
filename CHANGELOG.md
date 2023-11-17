@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.14 (Unreleased)
+- [Change] Rename `before_enqueue` to `before_schedule` to reflect what it does and when (internal).
+
 ## 2.2.13 (2023-11-17)
 - **[Feature]** Introduce low-level extended Scheduling API for granular control of schedulers and jobs execution [Pro].
 - [Improvement] Use separate lock for user-facing synchronization.
