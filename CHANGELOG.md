@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.2.13 (Unreleased)
+## 2.2.13 (2023-11-17)
 - **[Feature]** Introduce low-level extended Scheduling API for granular control of schedulers and jobs execution [Pro].
 - [Improvement] Use separate lock for user-facing synchronization.
 - [Improvement] Instrument `consumer.before_enqueue`.
