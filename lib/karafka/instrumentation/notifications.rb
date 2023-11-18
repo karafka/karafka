@@ -43,14 +43,17 @@ module Karafka
         rebalance.partitions_revoke
         rebalance.partitions_revoked
 
-        consumer.before_schedule
+        consumer.before_schedule_consume
         consumer.consume
         consumer.consumed
         consumer.consuming.pause
         consumer.consuming.retry
+        consumer.before_schedule_idle
         consumer.idle
+        consumer.before_schedule_revoked
         consumer.revoke
         consumer.revoked
+        consumer.before_schedule_shutdown
         consumer.shutting_down
         consumer.shutdown
 

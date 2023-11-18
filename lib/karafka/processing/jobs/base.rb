@@ -22,9 +22,11 @@ module Karafka
           @non_blocking = false
         end
 
-        # When redefined can run any code prior to the job being enqueued
+        # When redefined can run any code prior to the job being scheduled
         # @note This will run in the listener thread and not in the worker
-        def before_schedule; end
+        def before_schedule
+          raise NotImplementedError, 'Please implement in a subclass'
+        end
 
         # When redefined can run any code that should run before executing the proper code
         def before_call; end

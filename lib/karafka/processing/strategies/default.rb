@@ -13,6 +13,23 @@ module Karafka
         # Apply strategy for a non-feature based flow
         FEATURES = %i[].freeze
 
+        # By default on all "before schedule" we just run instrumentation, nothing more
+        %i[
+          consume
+          idle
+          revoked
+          shutdown
+        ].each do |action|
+          class_eval <<~RUBY, __FILE__, __LINE__ + 1
+            # No actions needed for the standard flow here
+            def handle_before_schedule_#{action}
+              Karafka.monitor.instrument('consumer.before_schedule_#{action}', caller: self)
+
+              nil
+            end
+          RUBY
+        end
+
         # Marks message as consumed in an async way.
         #
         # @param message [Messages::Message] last successfully processed message.
@@ -74,13 +91,6 @@ module Karafka
         #   etc as a way of making sure, that we still own the partition.
         def commit_offsets!
           commit_offsets(async: false)
-        end
-
-        # No actions needed for the standard flow here
-        def handle_before_schedule
-          Karafka.monitor.instrument('consumer.before_schedule', caller: self)
-
-          nil
         end
 
         # Increment number of attempts

@@ -11,6 +11,15 @@ module Karafka
     #
     # @note Executors are not removed after partition is revoked. They are not that big and will
     #   be re-used in case of a re-claim
+    #
+    # @note Since given consumer can run various operations, executor manages that and its
+    #   lifecycle. There are following types of operations with appropriate before/after, etc:
+    #
+    #   - consume - primary operation related to running user consumption code
+    #   - idle - cleanup job that runs on idle runs where no messages would be passed to the end
+    #     user. This is used for complex flows with filters, etc
+    #   - revoked - runs after the partition was revoked
+    #   - shutdown - runs when process is going to shutdown
     class Executor
       extend Forwardable
 
@@ -43,7 +52,7 @@ module Karafka
       # queue as it could cause starvation.
       #
       # @param messages [Array<Karafka::Messages::Message>]
-      def before_schedule(messages)
+      def before_schedule_consume(messages)
         # Recreate consumer with each batch if persistence is not enabled
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
@@ -60,7 +69,7 @@ module Karafka
           Time.now
         )
 
-        consumer.on_before_schedule
+        consumer.on_before_schedule_consume
       end
 
       # Runs setup and warm-up code in the worker prior to running the consumption
@@ -77,6 +86,11 @@ module Karafka
       # Runs consumer after consumption code
       def after_consume
         consumer.on_after_consume
+      end
+
+      # Runs the code needed before idle work is scheduled
+      def before_schedule_idle
+        consumer.on_before_schedule_idle
       end
 
       # Runs consumer idle operations
@@ -96,6 +110,11 @@ module Karafka
         consumer.on_idle
       end
 
+      # Runs code needed before revoked job is scheduled
+      def before_schedule_revoked
+        consumer.on_before_schedule_revoked if @consumer
+      end
+
       # Runs the controller `#revoked` method that should be triggered when a given consumer is
       # no longer needed due to partitions reassignment.
       #
@@ -110,6 +129,11 @@ module Karafka
       #   consumer instance.
       def revoked
         consumer.on_revoked if @consumer
+      end
+
+      # Runs code needed before shutdown job is scheduled
+      def before_schedule_shutdown
+        consumer.on_before_schedule_shutdown if @consumer
       end
 
       # Runs the controller `#shutdown` method that should be triggered when a given consumer is

@@ -31,31 +31,31 @@ RSpec.describe_current do
     it { expect(executor.group_id).to eq(group_id) }
   end
 
-  describe '#before_schedule' do
-    before { allow(consumer).to receive(:on_before_schedule) }
+  describe '#before_schedule_consume' do
+    before { allow(consumer).to receive(:on_before_schedule_consume) }
 
     it do
-      expect { executor.before_schedule(messages) }.not_to raise_error
+      expect { executor.before_schedule_consume(messages) }.not_to raise_error
     end
 
     it 'expect to build appropriate messages batch' do
-      executor.before_schedule(messages)
+      executor.before_schedule_consume(messages)
       expect(consumer.messages.first.raw_payload).to eq(messages.first.raw_payload)
     end
 
     it 'expect to assign appropriate coordinator' do
-      executor.before_schedule(messages)
+      executor.before_schedule_consume(messages)
       expect(consumer.coordinator).to eq(coordinator)
     end
 
     it 'expect to build metadata with proper details' do
-      executor.before_schedule(messages)
+      executor.before_schedule_consume(messages)
       expect(consumer.messages.metadata.topic).to eq(topic.name)
     end
 
-    it 'expect to run consumer on_before_schedule' do
-      executor.before_schedule(messages)
-      expect(consumer).to have_received(:on_before_schedule).with(no_args)
+    it 'expect to run consumer on_before_schedule_consume' do
+      executor.before_schedule_consume(messages)
+      expect(consumer).to have_received(:on_before_schedule_consume).with(no_args)
     end
   end
 
@@ -78,6 +78,34 @@ RSpec.describe_current do
 
     it 'expect to run consumer' do
       expect(consumer).to have_received(:on_consume)
+    end
+  end
+
+  describe '#before_schedule_revoked' do
+    before { allow(consumer).to receive(:on_before_schedule_revoked) }
+
+    context 'when consumer is defined as it was in use' do
+      before { executor.send(:consumer) }
+
+      it do
+        expect { executor.before_schedule_revoked }.not_to raise_error
+      end
+
+      it 'expect to run consumer on_before_schedule' do
+        executor.before_schedule_revoked
+        expect(consumer).to have_received(:on_before_schedule_revoked).with(no_args)
+      end
+    end
+
+    context 'when consumer is not defined as it was not in use' do
+      it do
+        expect { executor.before_schedule_revoked }.not_to raise_error
+      end
+
+      it 'expect not to run consumer on_before_schedule' do
+        executor.before_schedule_revoked
+        expect(consumer).not_to have_received(:on_before_schedule_revoked)
+      end
     end
   end
 
@@ -118,6 +146,19 @@ RSpec.describe_current do
     end
   end
 
+  describe '#before_schedule_idle' do
+    before { allow(consumer).to receive(:on_before_schedule_idle) }
+
+    it do
+      expect { executor.before_schedule_idle }.not_to raise_error
+    end
+
+    it 'expect to run consumer on_before_schedule' do
+      executor.before_schedule_idle
+      expect(consumer).to have_received(:on_before_schedule_idle).with(no_args)
+    end
+  end
+
   describe '#idle' do
     before do
       allow(consumer).to receive(:on_idle)
@@ -126,6 +167,34 @@ RSpec.describe_current do
 
     it 'expect to run consumer on_idle' do
       expect(consumer).to have_received(:on_idle).with(no_args)
+    end
+  end
+
+  describe '#before_schedule_shutdown' do
+    before { allow(consumer).to receive(:on_before_schedule_shutdown) }
+
+    context 'when consumer is defined as it was in use' do
+      before { executor.send(:consumer) }
+
+      it do
+        expect { executor.before_schedule_shutdown }.not_to raise_error
+      end
+
+      it 'expect to run consumer on_before_schedule' do
+        executor.before_schedule_shutdown
+        expect(consumer).to have_received(:on_before_schedule_shutdown).with(no_args)
+      end
+    end
+
+    context 'when consumer is not defined as it was not in use' do
+      it do
+        expect { executor.before_schedule_shutdown }.not_to raise_error
+      end
+
+      it 'expect not to run consumer on_before_schedule' do
+        executor.before_schedule_shutdown
+        expect(consumer).not_to have_received(:on_before_schedule_shutdown)
+      end
     end
   end
 

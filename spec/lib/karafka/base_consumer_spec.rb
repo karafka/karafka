@@ -196,7 +196,7 @@ RSpec.describe_current do
 
       it { expect { consumer.on_revoked }.not_to raise_error }
 
-      it 'expect to run the error instrumentation' do
+      it 'expect to raise' do
         Karafka.monitor.subscribe('error.occurred') do |event|
           expect(event.payload[:caller]).to eq(consumer)
           expect(event.payload[:error]).to be_a(StandardError)

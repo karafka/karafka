@@ -34,16 +34,9 @@ module Karafka
     # @note This should not be used by the end users as it is part of the lifecycle of things and
     #   not as a part of the public api. This should not perform any extensive operations as it is
     #   blocking and running in the listener thread.
-    def on_before_schedule
+    def on_before_schedule_consume
       @used = true
-      handle_before_schedule
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        error: e,
-        caller: self,
-        type: 'consumer.before_schedule.error'
-      )
+      handle_before_schedule_consume
     end
 
     # Can be used to run preparation code in the worker
@@ -59,13 +52,6 @@ module Karafka
       # We run this after the full metadata setup, so we can use all the messages information
       # if needed
       handle_before_consume
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        error: e,
-        caller: self,
-        type: 'consumer.before_consume.error'
-      )
     end
 
     # Executes the default consumer flow.
@@ -94,13 +80,13 @@ module Karafka
     #   not as part of the public api.
     def on_after_consume
       handle_after_consume
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        error: e,
-        caller: self,
-        type: 'consumer.after_consume.error'
-      )
+    end
+
+    # Can be used to run code prior to scheduling of idle execution
+    #
+    # @private
+    def on_before_schedule_idle
+      handle_before_schedule_idle
     end
 
     # Trigger method for running on idle runs without messages
@@ -108,13 +94,13 @@ module Karafka
     # @private
     def on_idle
       handle_idle
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        error: e,
-        caller: self,
-        type: 'consumer.idle.error'
-      )
+    end
+
+    # Can be used to run code prior to scheduling of revoked execution
+    #
+    # @private
+    def on_before_schedule_revoked
+      handle_before_schedule_revoked
     end
 
     # Trigger method for running on partition revocation.
@@ -129,6 +115,13 @@ module Karafka
         caller: self,
         type: 'consumer.revoked.error'
       )
+    end
+
+    # Can be used to run code prior to scheduling of revoked execution
+    #
+    # @private
+    def on_before_schedule_shutdown
+      handle_before_schedule_shutdown
     end
 
     # Trigger method for running on shutdown.

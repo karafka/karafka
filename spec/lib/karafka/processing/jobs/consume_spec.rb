@@ -10,12 +10,12 @@ RSpec.describe_current do
 
   describe '#before_schedule' do
     before do
-      allow(executor).to receive(:before_schedule)
+      allow(executor).to receive(:before_schedule_consume)
       job.before_schedule
     end
 
-    it 'expect to run before_schedule on the executor with time and messages' do
-      expect(executor).to have_received(:before_schedule).with(messages)
+    it 'expect to run before_schedule_consume on the executor with time and messages' do
+      expect(executor).to have_received(:before_schedule_consume).with(messages)
     end
   end
 

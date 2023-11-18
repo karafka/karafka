@@ -17,4 +17,15 @@ RSpec.describe_current do
   it 'expect to run shutdown on the executor' do
     expect(executor).to have_received(:shutdown).with(no_args)
   end
+
+  describe '#before_schedule' do
+    before do
+      allow(executor).to receive(:before_schedule_shutdown)
+      job.before_schedule
+    end
+
+    it 'expect to run before_schedule_shutdown on the executor' do
+      expect(executor).to have_received(:before_schedule_shutdown)
+    end
+  end
 end

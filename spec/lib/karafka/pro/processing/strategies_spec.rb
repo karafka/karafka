@@ -36,8 +36,8 @@ RSpec.describe_current do
         context 'when using VPs and VPs virtual marking' do
           before { consumer.singleton_class.include(strategy) }
 
-          it 'expect its #handle_before_schedule to always register virtual offsets groups' do
-            consumer.send(:handle_before_schedule)
+          it 'expect #handle_before_schedule_consume to always register virtual offsets groups' do
+            consumer.send(:handle_before_schedule_consume)
 
             expect(coordinator.virtual_offset_manager.groups).not_to be_empty
           end
@@ -71,14 +71,14 @@ RSpec.describe_current do
           end
         end
 
-        it 'expect its #handle_before_schedule to never register virtual offsets groups' do
-          consumer.send(:handle_before_schedule)
+        it 'expect #handle_before_schedule_consume to never register virtual offsets groups' do
+          consumer.send(:handle_before_schedule_consume)
 
           expect(coordinator.virtual_offset_manager).to be_nil
         end
 
-        it 'expect its #handle_before_schedule to not fail without virtual_offset_manager' do
-          expect { consumer.send(:handle_before_schedule) }.not_to raise_error
+        it 'expect #handle_before_schedule_consume to not fail without virtual_offset_manager' do
+          expect { consumer.send(:handle_before_schedule_consume) }.not_to raise_error
         end
       end
     end
@@ -98,8 +98,8 @@ RSpec.describe_current do
           allow(client).to receive(:pause)
         end
 
-        it 'expect its #handle_before_schedule to invoke pause on a client' do
-          consumer.send(:handle_before_schedule)
+        it 'expect #handle_before_schedule_consume to invoke pause on a client' do
+          consumer.send(:handle_before_schedule_consume)
 
           expect(client).to have_received(:pause)
         end
@@ -121,8 +121,8 @@ RSpec.describe_current do
           allow(client).to receive(:pause)
         end
 
-        it 'expect its #handle_before_schedule to never invoke pause on a client' do
-          consumer.send(:handle_before_schedule)
+        it 'expect #handle_before_schedule_consume to never invoke pause on a client' do
+          consumer.send(:handle_before_schedule_consume)
 
           expect(client).not_to have_received(:pause)
         end
