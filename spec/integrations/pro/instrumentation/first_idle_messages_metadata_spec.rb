@@ -2,11 +2,17 @@
 
 # When the idle job kicks in before we had a chance to process any data, it should still have
 # access to empty messages batch with proper offset positions (-1001) and no messages.
+#
+# It should also kick in proper instrumentation event that we can use prior to scheduling
 
 setup_karafka
 
 Karafka.monitor.subscribe('filtering.throttled') do
   DT[:done] << true
+end
+
+Karafka.monitor.subscribe('consumer.before_schedule_idle') do
+  DT[:before_schedule_idle] << true
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -44,3 +50,4 @@ assert_equal messages.metadata.size, 0
 assert_equal messages.metadata.processed_at, nil
 assert !messages.metadata.created_at.nil?
 assert messages.empty?
+assert DT.key?(:before_schedule_idle)
