@@ -1,7 +1,7 @@
 # Karafka framework changelog
 
 ## 2.2.14 (Unreleased)
-- [Change] Replace single `#before_schedule` with appropriate methods and events for scheduling various types of work. This is needed as we first of all may run different framework logic on those and second for accurate jobs tracking with advanced schedulers.
+- [Change] Replace single #before_schedule with appropriate methods and events for scheduling various types of work. This is needed as we may run different framework logic on those and, second, for accurate job tracking with advanced schedulers.
 - [Change] Rename `before_enqueue` to `before_schedule` to reflect what it does and when (internal).
 - [Change] Remove not needed error catchers for strategies code. This code if errors, should be considered critical and should not be silenced.
 
