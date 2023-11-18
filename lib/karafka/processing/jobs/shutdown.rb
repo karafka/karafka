@@ -13,6 +13,11 @@ module Karafka
           super()
         end
 
+        # Runs code prior to scheduling this shutdown job
+        def before_schedule
+          executor.before_schedule_shutdown
+        end
+
         # Runs the shutdown job via an executor.
         def call
           executor.shutdown

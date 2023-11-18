@@ -310,27 +310,6 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
-    context 'when it is a consumer.before_schedule.error' do
-      let(:type) { 'consumer.before_schedule.error' }
-      let(:message) { "Consumer before schedule failed due to an error: #{error}" }
-
-      it { expect(Karafka.logger).to have_received(:error).with(message) }
-    end
-
-    context 'when it is a consumer.before_consume.error' do
-      let(:type) { 'consumer.before_consume.error' }
-      let(:message) { "Consumer before consume failed due to an error: #{error}" }
-
-      it { expect(Karafka.logger).to have_received(:error).with(message) }
-    end
-
-    context 'when it is a consumer.after_consume.error' do
-      let(:type) { 'consumer.after_consume.error' }
-      let(:message) { "Consumer after consume failed due to an error: #{error}" }
-
-      it { expect(Karafka.logger).to have_received(:error).with(message) }
-    end
-
     context 'when it is a consumer.idle.error' do
       let(:type) { 'consumer.idle.error' }
       let(:message) { "Consumer idle failed due to an error: #{error}" }

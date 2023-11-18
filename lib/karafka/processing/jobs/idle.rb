@@ -14,6 +14,11 @@ module Karafka
           super()
         end
 
+        # Runs code prior to scheduling this idle job
+        def before_schedule
+          executor.before_schedule_idle
+        end
+
         # Run the idle work via the executor
         def call
           executor.idle

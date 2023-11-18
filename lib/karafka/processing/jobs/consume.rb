@@ -20,9 +20,9 @@ module Karafka
         end
 
         # Runs all the preparation code on the executor that needs to happen before the job is
-        # enqueued.
+        # scheduled.
         def before_schedule
-          executor.before_schedule(@messages)
+          executor.before_schedule_consume(@messages)
         end
 
         # Runs the before consumption preparations on the executor

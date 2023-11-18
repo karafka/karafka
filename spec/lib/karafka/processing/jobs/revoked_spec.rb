@@ -17,4 +17,15 @@ RSpec.describe_current do
   it 'expect to run revoked on the executor' do
     expect(executor).to have_received(:revoked).with(no_args)
   end
+
+  describe '#before_schedule' do
+    before do
+      allow(executor).to receive(:before_schedule_revoked)
+      job.before_schedule
+    end
+
+    it 'expect to run before_schedule_revoked on the executor' do
+      expect(executor).to have_received(:before_schedule_revoked)
+    end
+  end
 end
