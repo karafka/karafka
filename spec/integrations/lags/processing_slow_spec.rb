@@ -24,4 +24,15 @@ start_karafka_and_wait_until do
   DT[:processing_lags].size >= 20
 end
 
-assert DT[:processing_lags].max <= 50
+def median(array)
+  return nil if array.empty?
+
+  sorted = array.sort
+  len = sorted.length
+  (sorted[(len - 1) / 2] + sorted[len / 2]) / 2.0
+end
+
+assert_equal 0, median(DT[:processing_lags])
+
+# 100ms for slow ci
+assert DT[:processing_lags].max <= 100

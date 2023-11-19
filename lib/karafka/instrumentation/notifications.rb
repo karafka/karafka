@@ -17,6 +17,9 @@ module Karafka
       #   complete list of all the events. Please use the #available_events on fully loaded
       #   Karafka system to determine all of the events you can use.
       EVENTS = %w[
+        active_job.consume
+        active_job.consumed
+
         app.initialized
         app.running
         app.quieting
@@ -32,16 +35,32 @@ module Karafka
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
 
+        connection.client.poll.error
+        connection.client.unsubscribe.error
+
+        rebalance.partitions_assign
+        rebalance.partitions_assigned
+        rebalance.partitions_revoke
+        rebalance.partitions_revoked
+
+        consumer.before_schedule_consume
         consumer.consume
         consumer.consumed
         consumer.consuming.pause
         consumer.consuming.retry
+        consumer.before_schedule_idle
+        consumer.idle
+        consumer.before_schedule_revoked
         consumer.revoke
         consumer.revoked
+        consumer.before_schedule_shutdown
         consumer.shutting_down
         consumer.shutdown
 
         dead_letter_queue.dispatched
+
+        filtering.throttled
+        filtering.seek
 
         process.notice_signal
 
@@ -53,8 +72,6 @@ module Karafka
 
         error.occurred
       ].freeze
-
-      private_constant :EVENTS
 
       # @return [Karafka::Instrumentation::Monitor] monitor instance for system instrumentation
       def initialize

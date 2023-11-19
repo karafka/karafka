@@ -21,9 +21,8 @@ Gem::Specification.new do |spec|
     without having to focus on things that are not your business domain.
   DESC
 
-  spec.add_dependency 'karafka-core', '>= 2.0.9', '< 3.0.0'
-  spec.add_dependency 'thor', '>= 0.20'
-  spec.add_dependency 'waterdrop', '>= 2.4.9', '< 3.0.0'
+  spec.add_dependency 'karafka-core', '>= 2.2.7', '< 2.3.0'
+  spec.add_dependency 'waterdrop', '>= 2.6.11', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   if $PROGRAM_NAME.end_with?('gem')
@@ -38,7 +37,7 @@ Gem::Specification.new do |spec|
   spec.metadata = {
     'funding_uri' => 'https://karafka.io/#become-pro',
     'homepage_uri' => 'https://karafka.io',
-    'changelog_uri' => 'https://github.com/karafka/karafka/blob/master/CHANGELOG.md',
+    'changelog_uri' => 'https://karafka.io/docs/Changelog-Karafka',
     'bug_tracker_uri' => 'https://github.com/karafka/karafka/issues',
     'source_code_uri' => 'https://github.com/karafka/karafka',
     'documentation_uri' => 'https://karafka.io/docs',

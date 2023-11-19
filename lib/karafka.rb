@@ -7,16 +7,15 @@
   rdkafka
   waterdrop
   json
-  thor
   forwardable
   fileutils
   openssl
+  optparse
   base64
   date
   singleton
   digest
   zeitwerk
-  concurrent/atomic/atomic_fixnum
 ].each(&method(:require))
 
 # Karafka framework main namespace
@@ -70,6 +69,19 @@ module Karafka
       App.config.license.token != false
     end
 
+    # @return [Boolean] Do we run within/with Rails. We use this to initialize Railtie and proxy
+    #   the console invocation to Rails
+    def rails?
+      return @rails if instance_variable_defined?('@rails')
+
+      # Do not load Rails again if already loaded
+      Object.const_defined?('Rails::Railtie') || require('rails')
+
+      @rails = true
+    rescue LoadError
+      @rails = false
+    end
+
     # @return [String] path to a default file that contains booting procedure etc
     # @note By default it is a file called 'karafka.rb' but it can be specified as you wish if you
     #   have Karafka that is merged into a Sinatra/Rails app and karafka.rb is taken.
@@ -82,12 +94,30 @@ module Karafka
     def boot_file
       Pathname.new(ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'karafka.rb'))
     end
+
+    # We need to be able to overwrite both monitor and logger after the configuration in case they
+    # would be changed because those two (with defaults) can be used prior to the setup and their
+    # state change should be reflected in the updated setup
+    #
+    # This method refreshes the things that might have been altered by the configuration
+    def refresh!
+      config = ::Karafka::App.config
+
+      @logger = config.logger
+      @producer = config.producer
+      @monitor = config.monitor
+    end
   end
 end
 
 loader = Zeitwerk::Loader.for_gem
 # Do not load Rails extensions by default, this will be handled by Railtie if they are needed
 loader.ignore(Karafka.gem_root.join('lib/active_job'))
+# Do not load CurrentAttributes components as they will be loaded if needed
+# @note We have to exclude both the .rb file as well as the whole directory so users can require
+# current attributes only when needed
+loader.ignore(Karafka.gem_root.join('lib/karafka/active_job/current_attributes'))
+loader.ignore(Karafka.gem_root.join('lib/karafka/active_job/current_attributes.rb'))
 # Do not load Railtie. It will load if after everything is ready, so we don't have to load any
 # Karafka components when we require this railtie. Railtie needs to be loaded last.
 loader.ignore(Karafka.gem_root.join('lib/karafka/railtie'))

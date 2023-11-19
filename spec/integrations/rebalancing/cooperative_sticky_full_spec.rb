@@ -7,7 +7,22 @@ setup_karafka(allow_errors: true) do |config|
   config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
 end
 
-create_topic(partitions: 5)
+class Consumer < Karafka::BaseConsumer
+  def consume
+    mark_as_consumed! messages.last
+  end
+
+  def on_revoked
+    DT[:revoked] << messages.metadata.partition
+  end
+end
+
+draw_routes do
+  topic DT.topic do
+    config(partitions: 5)
+    consumer Consumer
+  end
+end
 
 Thread.new do
   loop do
@@ -24,18 +39,6 @@ Thread.new do
     sleep(1)
   end
 end
-
-class Consumer < Karafka::BaseConsumer
-  def consume
-    mark_as_consumed! messages.last
-  end
-
-  def on_revoked
-    DT[:revoked] << messages.metadata.partition
-  end
-end
-
-draw_routes(Consumer)
 
 # We do it twice as it's an edge case that can but does not have to happen
 # It should not happen if sync marking is not used though

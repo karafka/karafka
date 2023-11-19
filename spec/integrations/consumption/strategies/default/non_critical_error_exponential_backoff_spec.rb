@@ -36,9 +36,9 @@ end
 # that we run this in parallel, we add some extra time to compensate.
 BACKOFF_RANGES = [
   0..0.5,
-  0..1.5,
-  0..1.5,
-  0..1.5,
+  0..1.7,
+  0..1.7,
+  0..1.8,
   1..3,
   2..5,
   4..7,

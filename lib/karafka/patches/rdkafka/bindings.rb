@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module Karafka
+  # Namespace for third-party libraries patches
   module Patches
+    # Rdkafka patches specific to Karafka
     module Rdkafka
       # Binding patches that slightly change how rdkafka operates in certain places
       module Bindings
@@ -16,15 +18,23 @@ module Karafka
           # @param client_ptr [FFI::Pointer]
           # @param code [Integer]
           # @param partitions_ptr [FFI::Pointer]
-          def on_cooperative_rebalance(client_ptr, code, partitions_ptr)
+          # @param tpl [Rdkafka::Consumer::TopicPartitionList]
+          # @param opaque [Rdkafka::Opaque]
+          def on_cooperative_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
             case code
             when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
+              opaque&.call_on_partitions_assign(tpl)
               RB.rd_kafka_incremental_assign(client_ptr, partitions_ptr)
+              opaque&.call_on_partitions_assigned(tpl)
             when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
+              opaque&.call_on_partitions_revoke(tpl)
               RB.rd_kafka_commit(client_ptr, nil, false)
               RB.rd_kafka_incremental_unassign(client_ptr, partitions_ptr)
+              opaque&.call_on_partitions_revoked(tpl)
             else
+              opaque&.call_on_partitions_assign(tpl)
               RB.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
+              opaque&.call_on_partitions_assigned(tpl)
             end
           end
 
@@ -33,38 +43,24 @@ module Karafka
           # @param client_ptr [FFI::Pointer]
           # @param code [Integer]
           # @param partitions_ptr [FFI::Pointer]
-          def on_eager_rebalance(client_ptr, code, partitions_ptr)
+          # @param tpl [Rdkafka::Consumer::TopicPartitionList]
+          # @param opaque [Rdkafka::Opaque]
+          def on_eager_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
             case code
             when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
+              opaque&.call_on_partitions_assign(tpl)
               RB.rd_kafka_assign(client_ptr, partitions_ptr)
+              opaque&.call_on_partitions_assigned(tpl)
             when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
+              opaque&.call_on_partitions_revoke(tpl)
               RB.rd_kafka_commit(client_ptr, nil, false)
               RB.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
+              opaque&.call_on_partitions_revoked(tpl)
             else
+              opaque&.call_on_partitions_assign(tpl)
               RB.rd_kafka_assign(client_ptr, FFI::Pointer::NULL)
+              opaque&.call_on_partitions_assigned(tpl)
             end
-          end
-
-          # Trigger Karafka callbacks
-          #
-          # @param code [Integer]
-          # @param opaque [Rdkafka::Opaque]
-          # @param consumer [Rdkafka::Consumer]
-          # @param tpl [Rdkafka::Consumer::TopicPartitionList]
-          def trigger_callbacks(code, opaque, consumer, tpl)
-            case code
-            when RB::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
-              opaque.call_on_partitions_assigned(consumer, tpl)
-            when RB::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
-              opaque.call_on_partitions_revoked(consumer, tpl)
-            end
-          rescue StandardError => e
-            Karafka.monitor.instrument(
-              'error.occurred',
-              caller: self,
-              error: e,
-              type: 'connection.client.rebalance_callback.error'
-            )
           end
         end
 
@@ -81,20 +77,14 @@ module Karafka
         ) do |client_ptr, code, partitions_ptr, opaque_ptr|
           # Patch reference
           pr = ::Karafka::Patches::Rdkafka::Bindings
+          tpl = ::Rdkafka::Consumer::TopicPartitionList.from_native_tpl(partitions_ptr).freeze
+          opaque = ::Rdkafka::Config.opaques[opaque_ptr.to_i]
 
           if RB.rd_kafka_rebalance_protocol(client_ptr) == 'COOPERATIVE'
-            pr.on_cooperative_rebalance(client_ptr, code, partitions_ptr)
+            pr.on_cooperative_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
           else
-            pr.on_eager_rebalance(client_ptr, code, partitions_ptr)
+            pr.on_eager_rebalance(client_ptr, code, partitions_ptr, tpl, opaque)
           end
-
-          opaque = ::Rdkafka::Config.opaques[opaque_ptr.to_i]
-          return unless opaque
-
-          tpl = ::Rdkafka::Consumer::TopicPartitionList.from_native_tpl(partitions_ptr).freeze
-          consumer = ::Rdkafka::Consumer.new(client_ptr)
-
-          pr.trigger_callbacks(code, opaque, consumer, tpl)
         end
       end
     end

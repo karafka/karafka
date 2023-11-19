@@ -11,8 +11,6 @@ setup_karafka do |config|
   config.kafka[:'group.instance.id'] = SecureRandom.hex(6)
 end
 
-create_topic(partitions: 2)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -25,7 +23,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    config(partitions: 2)
+    consumer Consumer
+  end
+end
 
 # @note We use external messages producer here, as the one from Karafka will be closed upon first
 # process shutdown.
@@ -76,14 +79,14 @@ other = Thread.new do
 end
 
 # Give it some time to start before starting Karafka main process
-sleep 5
+sleep 10
 
 start_karafka_and_wait_until(reset_status: true) do
   DT[:process2].size >= 20
 end
 
 # Wait to make sure, that the process 1 does not get the partitions back
-sleep 5
+sleep 10
 
 # After stopping start once again
 
@@ -92,7 +95,7 @@ start_karafka_and_wait_until(reset_status: true) do
 end
 
 # Give it some time, so we allow (potentially) to assing all messages to process 1
-sleep 5
+sleep 10
 
 # Close the first consumer instance
 DT[:terminate] = true

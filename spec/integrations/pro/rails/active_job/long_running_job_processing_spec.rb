@@ -33,7 +33,7 @@ end
 Job.perform_later
 
 start_karafka_and_wait_until do
-  if DT[0].size >= 1
+  if DT.key?(0)
     sleep(15)
     true
   end

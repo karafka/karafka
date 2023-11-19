@@ -15,13 +15,34 @@ en:
       shutdown_timeout_format: needs to be an integer bigger than 0
       max_wait_time_format: needs to be an integer bigger than 0
       kafka_format: needs to be a filled hash
+      internal.processing.jobs_builder_format: cannot be nil
+      internal.processing.jobs_queue_class_format: cannot be nil
+      internal.processing.scheduler_class_format: cannot be nil
+      internal.processing.coordinator_class_format: cannot be nil
+      internal.processing.partitioner_class_format: cannot be nil
+      internal.processing.strategy_selector_format: cannot be nil
+      internal.processing.expansions_selector_format: cannot be nil
+      internal.active_job.dispatcher: cannot be nil
+      internal.active_job.job_options_contract: cannot be nil
+      internal.active_job.consumer_class: cannot be nil
       internal.status_format: needs to be present
       internal.process_format: needs to be present
+      internal.tick_interval_format: needs to be an integer bigger or equal to 1000
       internal.routing.builder_format: needs to be present
       internal.routing.subscription_groups_builder_format: needs to be present
+      internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
+      internal.connection.proxy.query_watermark_offsets.max_attempts_format: needs to be an integer bigger than 0
+      internal.connection.proxy.query_watermark_offsets.wait_time_format: needs to be an integer bigger than 0
+      internal.connection.proxy.offsets_for_times.timeout_format: needs to be an integer bigger than 0
+      internal.connection.proxy.offsets_for_times.max_attempts_format: needs to be an integer bigger than 0
+      internal.connection.proxy.offsets_for_times.wait_time_format: needs to be an integer bigger than 0
       key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
       max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
       shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
+      admin.kafka_format: needs to be a hash
+      admin.group_id_format: 'needs to be a string with a Kafka accepted format'
+      admin.max_wait_time_format: 'needs to be an integer bigger than 0'
+      admin.max_attempts_format: 'needs to be an integer bigger than 0'
 
     server_cli_options:
       missing: needs to be present
@@ -31,40 +52,48 @@ en:
       topics_missing: No topics to subscribe to
 
     topic:
+      kafka: needs to be a hash with kafka scope settings details
       missing: needs to be present
+      max_messages_format: 'needs to be an integer bigger than 0'
+      max_wait_time_format: 'needs to be an integer bigger than 0'
       name_format: 'needs to be a string with a Kafka accepted format'
       deserializer_format: needs to be present
       consumer_format: needs to be present
       id_format: 'needs to be a string with a Kafka accepted format'
       initial_offset_format: needs to be either earliest or latest
-      subscription_group_format: must be a non-empty string
+      subscription_group_name_format: must be a non-empty string
       manual_offset_management.active_format: needs to be either true or false
-      consumer_active_job_missing: ActiveJob needs to be available
       manual_offset_management_must_be_enabled: cannot be disabled for ActiveJob topics
+      inline_insights.active_format: needs to be either true or false
+      consumer_active_job_missing: ActiveJob needs to be available
       dead_letter_queue.max_retries_format: needs to be equal or bigger than 0
       dead_letter_queue.topic_format: 'needs to be a string with a Kafka accepted format'
       dead_letter_queue.active_format: needs to be either true or false
       active_format: needs to be either true or false
+      declaratives.partitions_format: needs to be more or equal to 1
+      declaratives.active_format: needs to be true
+      declaratives.replication_factor_format: needs to be more or equal to 1
+      declaratives.details_format: needs to be a hash with only symbol keys
+      inconsistent_namespacing: |
+        needs to be consistent namespacing style
+        disable this validation by setting config.strict_topics_namespacing to false
 
     consumer_group:
       missing: needs to be present
       topics_names_not_unique: all topic names within a single consumer group must be unique
       id_format: 'needs to be a string with a Kafka accepted format'
       topics_format: needs to be a non-empty array
+      topics_namespaced_names_not_unique: |
+        all topic names within a single consumer group must be unique considering namespacing styles
+        disable this validation by setting config.strict_topics_namespacing to false
 
     job_options:
       missing: needs to be present
       dispatch_method_format: needs to be either :produce_async or :produce_sync
+      dispatch_many_method_format: needs to be either :produce_many_async or :produce_many_sync
       partitioner_format: 'needs to respond to #call'
       partition_key_type_format: 'needs to be either :key or :partition_key'
 
     test:
       missing: needs to be present
       id_format: needs to be a String
-
-    pro_topic:
-      virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
-      virtual_partitions.max_partitions_format: needs to be equal or more than 1
-      manual_offset_management_not_with_virtual_partitions: cannot be used together with Virtual Partitions
-      long_running_job.active_format: needs to be either true or false
-      dead_letter_queue_not_with_virtual_partitions: cannot be used together with Virtual Partitions

@@ -6,8 +6,21 @@ setup_karafka do |config|
   config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
 end
 
-# We use a lot of partitions to make sure we never revoke part of them on rebalances
-create_topic(partitions: 10)
+class Consumer < Karafka::BaseConsumer
+  def consume; end
+
+  def on_revoked
+    DT[:revoked] << messages.metadata.partition
+  end
+end
+
+draw_routes do
+  topic DT.topic do
+    # We use a lot of partitions to make sure we never revoke part of them on rebalances
+    config(partitions: 10)
+    consumer Consumer
+  end
+end
 
 Thread.new do
   loop do
@@ -22,16 +35,6 @@ Thread.new do
     sleep(1)
   end
 end
-
-class Consumer < Karafka::BaseConsumer
-  def consume; end
-
-  def on_revoked
-    DT[:revoked] << messages.metadata.partition
-  end
-end
-
-draw_routes(Consumer)
 
 consumer = setup_rdkafka_consumer(
   'partition.assignment.strategy': 'cooperative-sticky'

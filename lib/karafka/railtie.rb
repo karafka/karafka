@@ -2,14 +2,7 @@
 
 # This file contains Railtie for auto-configuration
 
-rails = false
-
-begin
-  # Do not load Rails again if already loaded
-  Object.const_defined?('Rails::Railtie') || require('rails')
-
-  rails = true
-rescue LoadError
+unless Karafka.rails?
   # Without defining this in any way, Zeitwerk ain't happy so we do it that way
   module Karafka
     class Railtie
@@ -17,7 +10,7 @@ rescue LoadError
   end
 end
 
-if rails
+if Karafka.rails?
   # Load ActiveJob adapter
   require 'active_job/karafka'
 
@@ -40,7 +33,7 @@ if rails
       # server + will support code reloading with each fetched loop. We do it only for karafka
       # based commands as Rails processes and console will have it enabled already
       initializer 'karafka.configure_rails_logger' do
-        # Make Karafka use Rails logger
+        # Make Karafka uses Rails logger
         ::Karafka::App.config.logger = Rails.logger
 
         next unless Rails.env.development?
@@ -49,15 +42,22 @@ if rails
         # If added again, would print stuff twice
         next if ActiveSupport::Logger.logger_outputs_to?(Rails.logger, $stdout)
 
-        logger = ActiveSupport::Logger.new($stdout)
+        stdout_logger = ActiveSupport::Logger.new($stdout)
         # Inherit the logger level from Rails, otherwise would always run with the debug level
-        logger.level = Rails.logger.level
+        stdout_logger.level = Rails.logger.level
 
-        Rails.logger.extend(
-          ActiveSupport::Logger.broadcast(
-            logger
+        rails71plus = Rails.gem_version >= Gem::Version.new('7.1.0')
+
+        # Rails 7.1 replaced the broadcast module with a broadcast logger
+        if rails71plus
+          Rails.logger.broadcast_to(stdout_logger)
+        else
+          Rails.logger.extend(
+            ActiveSupport::Logger.broadcast(
+              stdout_logger
+            )
           )
-        )
+        end
       end
 
       initializer 'karafka.configure_rails_auto_load_paths' do |app|
@@ -77,23 +77,32 @@ if rails
         # We can have many listeners, but it does not matter in which we will reload the code
         # as long as all the consumers will be re-created as Rails reload is thread-safe
         ::Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
-          # Reload code each time there is a change in the code
-          next unless Rails.application.reloaders.any?(&:updated?)
           # If consumer persistence is enabled, no reason to reload because we will still keep
           # old consumer instances in memory.
           next if Karafka::App.config.consumer_persistence
+          # Reload code each time there is a change in the code
+          next unless Rails.application.reloaders.any?(&:updated?)
 
           Rails.application.reloader.reload!
         end
       end
 
       initializer 'karafka.release_active_record_connections' do
+        rails7plus = Rails.gem_version >= Gem::Version.new('7.0.0')
+
         ActiveSupport.on_load(:active_record) do
           ::Karafka::App.monitor.subscribe('worker.completed') do
             # Always release the connection after processing is done. Otherwise thread may hang
             # blocking the reload and further processing
             # @see https://github.com/rails/rails/issues/44183
-            ActiveRecord::Base.clear_active_connections!
+            #
+            # The change technically happens in 7.1 but 7.0 already supports this so we can make
+            # a proper change for 7.0+
+            if rails7plus
+              ActiveRecord::Base.connection_handler.clear_active_connections!
+            else
+              ActiveRecord::Base.clear_active_connections!
+            end
           end
         end
       end

@@ -31,8 +31,7 @@ Job1.perform_later
 Job2.perform_later
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1 &&
-    DT[1].size >= 1
+  DT.key?(0) && DT.key?(1)
 end
 
 assert_equal 'job1', DT[0][0]

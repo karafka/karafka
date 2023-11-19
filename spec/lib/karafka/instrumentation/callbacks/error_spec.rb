@@ -5,15 +5,14 @@ RSpec.describe_current do
     described_class.new(
       subscription_group_id,
       consumer_group_id,
-      client_name,
-      monitor
+      client_name
     )
   end
 
   let(:subscription_group_id) { SecureRandom.hex(6) }
   let(:consumer_group_id) { SecureRandom.hex(6) }
   let(:client_name) { SecureRandom.hex(6) }
-  let(:monitor) { ::Karafka::Instrumentation::Monitor.new }
+  let(:monitor) { ::Karafka.monitor }
   let(:error) { ::Rdkafka::RdkafkaError.new(1, []) }
 
   describe '#call' do
@@ -29,7 +28,7 @@ RSpec.describe_current do
 
     context 'when emitted error refer different producer' do
       subject(:callback) do
-        described_class.new(subscription_group_id, consumer_group_id, 'other', monitor)
+        described_class.new(subscription_group_id, consumer_group_id, 'other')
       end
 
       it 'expect not to emit them' do

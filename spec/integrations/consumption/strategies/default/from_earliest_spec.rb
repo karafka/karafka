@@ -6,6 +6,8 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    DT[:uses] << used?
+
     messages.each do |message|
       DT[message.metadata.partition] << message.raw_payload
     end
@@ -22,4 +24,6 @@ start_karafka_and_wait_until do
 end
 
 assert_equal elements, DT[0]
-assert_equal 1, DT.data.size
+assert_equal 2, DT.data.size
+assert_equal [true], DT[:uses].uniq
+assert !fetch_first_offset

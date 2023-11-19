@@ -49,7 +49,7 @@ module Karafka
         # Loads all the pro components and configures them wherever it is expected
         # @param config [Karafka::Core::Configurable::Node] app config that we can alter with pro
         #   components
-        def pre_setup(config)
+        def pre_setup_all(config)
           features.each { |feature| feature.pre_setup(config) }
 
           reconfigure(config)
@@ -60,16 +60,18 @@ module Karafka
         # Runs post setup features configuration operations
         #
         # @param config [Karafka::Core::Configurable::Node]
-        def post_setup(config)
+        def post_setup_all(config)
           features.each { |feature| feature.post_setup(config) }
         end
 
         private
 
-        # @return [Array<Module>] extra non-routing related pro features
+        # @return [Array<Module>] extra non-routing related pro features and routing components
+        #   that need to have some special configuration stuff injected into config, etc
         def features
           [
-            Encryption
+            Encryption,
+            Cleaner
           ]
         end
 
@@ -78,9 +80,12 @@ module Karafka
         def reconfigure(config)
           icfg = config.internal
 
+          icfg.cli.contract = Contracts::ServerCliOptions.new
+
           icfg.processing.coordinator_class = Processing::Coordinator
           icfg.processing.partitioner_class = Processing::Partitioner
-          icfg.processing.scheduler = Processing::Scheduler.new
+          icfg.processing.scheduler_class = Processing::Scheduler
+          icfg.processing.jobs_queue_class = Processing::JobsQueue
           icfg.processing.jobs_builder = Processing::JobsBuilder.new
           icfg.processing.strategy_selector = Processing::StrategySelector.new
 

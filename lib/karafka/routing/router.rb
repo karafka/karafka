@@ -7,16 +7,6 @@ module Karafka
     # @note Since Kafka does not provide namespaces or modules for topics, they all have "flat"
     #  structure so all the routes are being stored in a single level array
     module Router
-      # Find a proper topic based on full topic id
-      # @param topic_id [String] proper topic id (already mapped, etc) for which we want to find
-      #   routing topic
-      # @return [Karafka::Routing::Topic] proper route details
-      # @raise [Karafka::Topic::NonMatchingTopicError] raised if topic name does not match
-      #   any route defined by user using routes.draw
-      def find(topic_id)
-        find_by(id: topic_id) || raise(Errors::NonMatchingRouteError, topic_id)
-      end
-
       # Finds first reference of a given topic based on provided lookup attribute
       # @param lookup [Hash<Symbol, String>] hash with attribute - value key pairs
       # @return [Karafka::Routing::Topic, nil] proper route details or nil if not found
@@ -32,8 +22,22 @@ module Karafka
         nil
       end
 
-      module_function :find
+      # Finds the topic by name (in any consumer group) and if not present, will built a new
+      # representation of the topic with the defaults and default deserializer.
+      #
+      # This is used in places where we may operate on topics that are not part of the routing
+      # but we want to do something on them (display data, iterate over, etc)
+      # @param name [String] name of the topic we are looking for
+      # @return [Karafka::Routing::Topic]
+      #
+      # @note Please note, that in case of a new topic, it will have a newly built consumer group
+      #   as well, that is not part of the routing.
+      def find_or_initialize_by_name(name)
+        find_by(name: name) || Topic.new(name, ConsumerGroup.new(name))
+      end
+
       module_function :find_by
+      module_function :find_or_initialize_by_name
     end
   end
 end

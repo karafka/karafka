@@ -4,11 +4,10 @@ RSpec.describe_current do
   subject(:builder) { described_class.new }
 
   let(:executor) { build(:processing_executor) }
-  let(:coordinator) { build(:processing_coordinator) }
 
   describe '#consume' do
     it do
-      job = builder.consume(executor, [], coordinator)
+      job = builder.consume(executor, [])
       expect(job).to be_a(Karafka::Processing::Jobs::Consume)
     end
   end

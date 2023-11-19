@@ -20,14 +20,13 @@ module Karafka
       # @param topic [String] topic name
       # @param partition [Integer] partition number
       # @param parallel_key [String] parallel group key
+      # @param coordinator [Karafka::Processing::Coordinator]
       # @return [Executor] consumer executor
-      def find_or_create(topic, partition, parallel_key)
-        ktopic = find_topic(topic)
-
-        @buffer[ktopic][partition][parallel_key] ||= Executor.new(
+      def find_or_create(topic, partition, parallel_key, coordinator)
+        @buffer[topic][partition][parallel_key] ||= Executor.new(
           @subscription_group.id,
           @client,
-          ktopic
+          coordinator
         )
       end
 
@@ -37,9 +36,7 @@ module Karafka
       # @param topic [String] topic name
       # @param partition [Integer] partition number
       def revoke(topic, partition)
-        ktopic = find_topic(topic)
-
-        @buffer[ktopic][partition].clear
+        @buffer[topic][partition].clear
       end
 
       # Finds all the executors available for a given topic partition
@@ -48,9 +45,7 @@ module Karafka
       # @param partition [Integer] partition number
       # @return [Array<Executor>] executors in use for this topic + partition
       def find_all(topic, partition)
-        ktopic = find_topic(topic)
-
-        @buffer[ktopic][partition].values
+        @buffer[topic][partition].values
       end
 
       # Iterates over all available executors and yields them together with topic and partition
@@ -59,11 +54,10 @@ module Karafka
       # @yieldparam [Integer] partition number
       # @yieldparam [Executor] given executor
       def each
-        @buffer.each do |ktopic, partitions|
-          partitions.each do |partition, executors|
-            executors.each do |_parallel_key, executor|
-              # We skip the parallel key here as it does not serve any value when iterating
-              yield(ktopic, partition, executor)
+        @buffer.each do |_, partitions|
+          partitions.each do |_, executors|
+            executors.each do |_, executor|
+              yield(executor)
             end
           end
         end
@@ -72,16 +66,6 @@ module Karafka
       # Clears the executors buffer. Useful for critical errors recovery.
       def clear
         @buffer.clear
-      end
-
-      private
-
-      # Finds topic based on its name
-      #
-      # @param topic [String] topic we're looking for
-      # @return [Karafka::Routing::Topic] topic we're interested in
-      def find_topic(topic)
-        @subscription_group.topics.find(topic) || raise(Errors::TopicNotFoundError, topic)
       end
     end
   end

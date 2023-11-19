@@ -13,9 +13,84 @@ module Karafka
         # Apply strategy for a non-feature based flow
         FEATURES = %i[].freeze
 
-        # No actions needed for the standard flow here
-        def handle_before_enqueue
-          nil
+        # By default on all "before schedule" we just run instrumentation, nothing more
+        %i[
+          consume
+          idle
+          revoked
+          shutdown
+        ].each do |action|
+          class_eval <<~RUBY, __FILE__, __LINE__ + 1
+            # No actions needed for the standard flow here
+            def handle_before_schedule_#{action}
+              Karafka.monitor.instrument('consumer.before_schedule_#{action}', caller: self)
+
+              nil
+            end
+          RUBY
+        end
+
+        # Marks message as consumed in an async way.
+        #
+        # @param message [Messages::Message] last successfully processed message.
+        # @return [Boolean] true if we were able to mark the offset, false otherwise.
+        #   False indicates that we were not able and that we have lost the partition.
+        #
+        # @note We keep track of this offset in case we would mark as consumed and got error when
+        #   processing another message. In case like this we do not pause on the message we've
+        #   already processed but rather at the next one. This applies to both sync and async
+        #   versions of this method.
+        def mark_as_consumed(message)
+          # Ignore earlier offsets than the one we already committed
+          return true if coordinator.seek_offset > message.offset
+          return false if revoked?
+          return revoked? unless client.mark_as_consumed(message)
+
+          coordinator.seek_offset = message.offset + 1
+
+          true
+        end
+
+        # Marks message as consumed in a sync way.
+        #
+        # @param message [Messages::Message] last successfully processed message.
+        # @return [Boolean] true if we were able to mark the offset, false otherwise.
+        #   False indicates that we were not able and that we have lost the partition.
+        def mark_as_consumed!(message)
+          # Ignore earlier offsets than the one we already committed
+          return true if coordinator.seek_offset > message.offset
+          return false if revoked?
+
+          return revoked? unless client.mark_as_consumed!(message)
+
+          coordinator.seek_offset = message.offset + 1
+
+          true
+        end
+
+        # Triggers an async offset commit
+        #
+        # @param async [Boolean] should we use async (default) or sync commit
+        # @return [Boolean] true if we still own the partition.
+        # @note Due to its async nature, this may not fully represent the offset state in some
+        #   edge cases (like for example going beyond max.poll.interval)
+        def commit_offsets(async: true)
+          # Do not commit if we already lost the assignment
+          return false if revoked?
+          return true if client.commit_offsets(async: async)
+
+          # This will once more check the librdkafka revocation status and will revoke the
+          # coordinator in case it was not revoked
+          revoked?
+        end
+
+        # Triggers a synchronous offsets commit to Kafka
+        #
+        # @return [Boolean] true if we still own the partition, false otherwise.
+        # @note This is fully synchronous, hence the result of this can be used in DB transactions
+        #   etc as a way of making sure, that we still own the partition.
+        def commit_offsets!
+          commit_offsets(async: false)
         end
 
         # Increment number of attempts
@@ -61,6 +136,11 @@ module Karafka
           else
             retry_after_pause
           end
+        end
+
+        # Code that should run on idle runs without messages available
+        def handle_idle
+          nil
         end
 
         # We need to always un-pause the processing in case we have lost a given partition.

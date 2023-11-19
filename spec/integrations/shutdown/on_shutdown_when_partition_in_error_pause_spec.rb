@@ -24,7 +24,7 @@ draw_routes(Consumer)
 produce(DT.topic, '1')
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1
+  DT.key?(0)
 end
 
 assert_equal [true], DT[:shutdown]

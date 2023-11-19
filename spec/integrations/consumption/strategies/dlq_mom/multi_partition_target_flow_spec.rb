@@ -4,8 +4,6 @@
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
-create_topic(name: DT.topics[1], partitions: 10)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     raise StandardError
@@ -28,6 +26,7 @@ draw_routes do
   end
 
   topic DT.topics[1] do
+    config(partitions: 10)
     consumer DlqConsumer
     manual_offset_management true
   end

@@ -32,8 +32,8 @@ module Karafka
         # embedded
         # We cannot validate this during the start because config needs to be populated and routes
         # need to be defined.
-        Contracts::ServerCliOptions.new.validate!(
-          Karafka::App.config.internal.routing.active.to_h
+        config.internal.cli.contract.validate!(
+          config.internal.routing.activity_manager.to_h
         )
 
         process.on_sigint { stop }
@@ -82,7 +82,7 @@ module Karafka
 
         Karafka::App.stop!
 
-        timeout = Karafka::App.config.shutdown_timeout
+        timeout = config.shutdown_timeout
 
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
@@ -148,9 +148,14 @@ module Karafka
 
       private
 
+      # @return [Karafka::Core::Configurable::Node] root config node
+      def config
+        Karafka::App.config
+      end
+
       # @return [Karafka::Process] process wrapper instance used to catch system signal calls
       def process
-        Karafka::App.config.internal.process
+        config.internal.process
       end
     end
   end

@@ -12,10 +12,13 @@ module Karafka
           include ::Karafka::Core::Configurable
           extend Forwardable
 
-          def_delegators :config, :client
+          def_delegators :config, :client, :service_name
 
           # `Datadog::Tracing` client that we should use to trace stuff
           setting :client
+
+          # @see https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/ruby
+          setting :service_name, default: nil
 
           configure
 
@@ -44,7 +47,7 @@ module Karafka
           #
           # @param event [Karafka::Core::Monitoring::Event] event details including payload
           def on_worker_process(event)
-            current_span = client.trace('karafka.consumer')
+            current_span = client.trace('karafka.consumer', service: service_name)
             push_tags
 
             job = event[:job]
@@ -72,8 +75,7 @@ module Karafka
 
             info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
 
-            current_span = client.active_span
-            current_span.finish if current_span.present?
+            client.active_span&.finish
 
             pop_tags
           end
@@ -92,8 +94,8 @@ module Karafka
               error "Consumer consuming error: #{error}"
             when 'consumer.revoked.error'
               error "Consumer on revoked failed due to an error: #{error}"
-            when 'consumer.before_enqueue.error'
-              error "Consumer before enqueue failed due to an error: #{error}"
+            when 'consumer.before_schedule.error'
+              error "Consumer before schedule failed due to an error: #{error}"
             when 'consumer.before_consume.error'
               error "Consumer before consume failed due to an error: #{error}"
             when 'consumer.after_consume.error'

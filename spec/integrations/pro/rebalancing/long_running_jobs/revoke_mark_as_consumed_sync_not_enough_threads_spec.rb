@@ -10,8 +10,6 @@ setup_karafka do |config|
   config.shutdown_timeout = 60_000
 end
 
-create_topic(partitions: 2)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     partition = messages.metadata.partition
@@ -33,6 +31,7 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
+      config(partitions: 2)
       consumer Consumer
       long_running_job true
     end
@@ -60,15 +59,12 @@ Thread.new do
   consumer.each do |message|
     DT[:revoked_data] << message.partition
 
-    break if DT[:revoked_data].size >= 1
+    break if DT.key?(:revoked_data)
   end
 end
 
 start_karafka_and_wait_until do
-  (
-    DT['0-revoked'].size >= 1 ||
-      DT['1-revoked'].size >= 1
-  ) && DT[:revoked_data].size >= 1
+  (DT.key?('0-revoked') || DT.key?('1-revoked')) && DT.key?(:revoked_data)
 end
 
 consumer.close

@@ -32,8 +32,8 @@ draw_routes(Consumer)
 produce(DT.topic, '1')
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1
+  DT.key?(0)
 end
 
 assert_equal 1, DT.data.size
-assert_equal '6.1.7', Rails.version
+assert_equal '6.1.7.6', Rails.version

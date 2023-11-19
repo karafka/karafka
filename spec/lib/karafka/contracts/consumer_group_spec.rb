@@ -19,12 +19,23 @@ RSpec.describe_current do
       }
     ]
   end
+
   let(:config) do
     {
       id: 'id',
       deserializer: Class.new,
       topics: topics
     }
+  end
+
+  context 'when we check for the errors yml file reference' do
+    it 'expect to have all of them defined' do
+      stringified = described_class.config.error_messages.to_s
+
+      described_class.rules.each do |rule|
+        expect(stringified).to include(rule.path.last.to_s)
+      end
+    end
   end
 
   context 'when config is valid' do
@@ -58,6 +69,40 @@ RSpec.describe_current do
       end
 
       it { expect(check).to be_success }
+    end
+
+    context 'when considering namespacing' do
+      before { config[:topics][0][:name] = 'some.namespaced.topic-name' }
+
+      context 'when topics names are unique' do
+        before do
+          config[:topics][1] = config[:topics][0].dup
+          config[:topics][1][:name] = 'another_namespaced_topic-name'
+        end
+
+        it { expect(check).to be_success }
+      end
+
+      context 'when topics names are not unique' do
+        before do
+          config[:topics][1] = config[:topics][0].dup
+          config[:topics][1][:name] = 'some_namespaced_topic-name'
+        end
+
+        it { expect(check).not_to be_success }
+      end
+
+      context 'when strict_topics_namespacing is set to false' do
+        before do
+          config[:topics][1] = config[:topics][0].dup
+          config[:topics][1][:name] = 'some_namespaced_topic-name'
+          ::Karafka::App.config.strict_topics_namespacing = false
+        end
+
+        after { ::Karafka::App.config.strict_topics_namespacing = true }
+
+        it { expect(check).to be_success }
+      end
     end
   end
 

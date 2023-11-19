@@ -18,7 +18,7 @@ draw_routes(Consumer)
 produce(DT.topic, nil, key: 'a')
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1
+  DT.key?(0)
 end
 
 assert_equal 1, DT.data.size

@@ -1,0 +1,33 @@
+# frozen_string_literal: true
+
+# This Karafka component is a Pro component under a commercial license.
+# This Karafka component is NOT licensed under LGPL.
+#
+# All of the commercial components are present in the lib/karafka/pro directory of this
+# repository and their usage requires commercial license agreement.
+#
+# Karafka has also commercial-friendly license, commercial support and commercial components.
+#
+# By sending a pull request to the pro components, you are agreeing to transfer the copyright of
+# your code to Maciej Mensfeld.
+
+module Karafka
+  module Pro
+    module Routing
+      module Features
+        # Dynamic topics builder feature.
+        #
+        # Allows you to define patterns in routes that would then automatically subscribe and
+        # start consuming new topics.
+        #
+        # This feature works by injecting a topic that represents a regexp subscription (matcher)
+        # that at the same time holds the builder block for full config of a newly detected topic.
+        #
+        # We inject a virtual topic to hold settings but also to be able to run validations
+        # during boot to ensure consistency of the pattern base setup.
+        class Patterns < Base
+        end
+      end
+    end
+  end
+end

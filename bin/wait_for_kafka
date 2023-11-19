@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+# Waits for Kafka to be ready
+# Useful in CI where Kafka needs to be fully started before we run any tests
+
+require 'karafka'
+
+Karafka::App.setup do |config|
+  config.kafka[:'bootstrap.servers'] = '127.0.0.1:9092'
+end
+
+60.times do
+  begin
+    # Stop if we can connect to the cluster and get info
+    exit if Karafka::Admin.cluster_info
+  rescue Rdkafka::RdkafkaError
+    puts "Kafka not available, retrying..."
+    sleep(1)
+  end
+end
+
+puts 'Kafka not available!'
+
+exit 1

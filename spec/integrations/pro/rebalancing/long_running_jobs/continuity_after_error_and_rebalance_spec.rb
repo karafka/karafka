@@ -8,8 +8,6 @@ setup_karafka(allow_errors: true) do |config|
   config.max_messages = 1
 end
 
-create_topic(partitions: 2)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     sleep(15)
@@ -23,6 +21,7 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
+      config(partitions: 2)
       consumer Consumer
       long_running_job true
     end

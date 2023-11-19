@@ -48,7 +48,8 @@ module Karafka
         job_type = job.class.to_s.split('::').last
         consumer = job.executor.topic.consumer
         topic = job.executor.topic.name
-        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} started"
+        partition = job.executor.partition
+        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic}/#{partition} started"
       end
 
       # Prints info about the fact that a given job has finished
@@ -60,12 +61,18 @@ module Karafka
         job_type = job.class.to_s.split('::').last
         consumer = job.executor.topic.consumer
         topic = job.executor.topic.name
-        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} finished in #{time}ms"
+        partition = job.executor.partition
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{job.id}] #{job_type} job for #{consumer}
+          on #{topic}/#{partition} finished in #{time}ms
+        MSG
       end
 
       # Prints info about a consumer pause occurrence. Irrelevant if user or system initiated.
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      # @note There may be no offset provided in case user wants to pause on the consecutive offset
+      #   position. This can be beneficial when not wanting to purge the buffers.
       def on_client_pause(event)
         topic = event[:topic]
         partition = event[:partition]
@@ -73,7 +80,9 @@ module Karafka
         client = event[:caller]
 
         info <<~MSG.tr("\n", ' ').strip!
-          [#{client.id}] Pausing partition #{partition} of topic #{topic} on offset #{offset}
+          [#{client.id}]
+          Pausing on topic #{topic}/#{partition}
+          on #{offset ? "offset #{offset}" : 'the consecutive offset'}
         MSG
       end
 
@@ -86,7 +95,7 @@ module Karafka
         client = event[:caller]
 
         info <<~MSG.tr("\n", ' ').strip!
-          [#{client.id}] Resuming partition #{partition} of topic #{topic}
+          [#{client.id}] Resuming on topic #{topic}/#{partition}
         MSG
       end
 
@@ -102,7 +111,7 @@ module Karafka
 
         info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Retrying of #{consumer.class} after #{timeout} ms
-          on partition #{partition} of topic #{topic} from offset #{offset}
+          on topic #{topic}/#{partition} from offset #{offset}
         MSG
       end
 
@@ -170,13 +179,51 @@ module Karafka
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_dead_letter_queue_dispatched(event)
+        consumer = event[:caller]
+        topic = consumer.topic.name
         message = event[:message]
         offset = message.offset
-        topic = event[:caller].topic.name
-        dlq_topic = event[:caller].topic.dead_letter_queue.topic
+        dlq_topic = consumer.topic.dead_letter_queue.topic
         partition = message.partition
 
-        info "Dispatched message #{offset} from #{topic}/#{partition} to DLQ topic: #{dlq_topic}"
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Dispatched message #{offset}
+          from #{topic}/#{partition}
+          to DLQ topic: #{dlq_topic}
+        MSG
+      end
+
+      # Logs info about throttling event
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_filtering_throttled(event)
+        consumer = event[:caller]
+        topic = consumer.topic.name
+        # Here we get last message before throttle
+        message = event[:message]
+        partition = message.partition
+        offset = message.offset
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Throttled and will resume
+          from message #{offset}
+          on #{topic}/#{partition}
+        MSG
+      end
+
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_filtering_seek(event)
+        consumer = event[:caller]
+        topic = consumer.topic.name
+        # Message to which we seek
+        message = event[:message]
+        partition = message.partition
+        offset = message.offset
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Post-filtering seeking to message #{offset}
+          on #{topic}/#{partition}
+        MSG
       end
 
       # There are many types of errors that can occur in many places, but we provide a single
@@ -194,14 +241,8 @@ module Karafka
         when 'consumer.revoked.error'
           error "Consumer on revoked failed due to an error: #{error}"
           error details
-        when 'consumer.before_enqueue.error'
-          error "Consumer before enqueue failed due to an error: #{error}"
-          error details
-        when 'consumer.before_consume.error'
-          error "Consumer before consume failed due to an error: #{error}"
-          error details
-        when 'consumer.after_consume.error'
-          error "Consumer after consume failed due to an error: #{error}"
+        when 'consumer.idle.error'
+          error "Consumer idle failed due to an error: #{error}"
           error details
         when 'consumer.shutdown.error'
           error "Consumer on shutdown failed due to an error: #{error}"
@@ -220,10 +261,22 @@ module Karafka
         when 'librdkafka.error'
           error "librdkafka internal error occurred: #{error}"
           error details
+        # Those can occur when emitted statistics are consumed by the end user and the processing
+        # of statistics fails. The statistics are emitted from librdkafka main loop thread and
+        # any errors there crash the whole thread
+        when 'statistics.emitted.error'
+          error "statistics.emitted processing failed due to an error: #{error}"
+          error details
         # Those will only occur when retries in the client fail and when they did not stop after
         # back-offs
         when 'connection.client.poll.error'
           error "Data polling error occurred: #{error}"
+          error details
+        when 'connection.client.rebalance_callback.error'
+          error "Rebalance callback error occurred: #{error}"
+          error details
+        when 'connection.client.unsubscribe.error'
+          error "Client unsubscribe error occurred: #{error}"
           error details
         else
           # This should never happen. Please contact the maintainers

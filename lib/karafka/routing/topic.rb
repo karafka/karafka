@@ -8,6 +8,11 @@ module Karafka
     class Topic
       attr_reader :id, :name, :consumer_group
       attr_writer :consumer
+
+      attr_accessor :subscription_group_name
+
+      # Full subscription group reference can be built only when we have knowledge about the
+      # whole routing tree, this is why it is going to be set later on
       attr_accessor :subscription_group
 
       # Attributes we can inherit from the root unless they were defined on this level
@@ -17,6 +22,10 @@ module Karafka
         max_messages
         max_wait_time
         initial_offset
+        consumer_persistence
+        pause_timeout
+        pause_max_timeout
+        pause_with_exponential_backoff
       ].freeze
 
       private_constant :INHERITABLE_ATTRIBUTES
@@ -48,9 +57,14 @@ module Karafka
         end
       end
 
+      # @return [String] name of subscription that will go to librdkafka
+      def subscription_name
+        name
+      end
+
       # @return [Class] consumer class that we should use
       def consumer
-        if Karafka::App.config.consumer_persistence
+        if consumer_persistence
           # When persistence of consumers is on, no need to reload them
           @consumer
         else
@@ -87,10 +101,7 @@ module Karafka
         # Never active if disabled via routing
         return false unless @active
 
-        topics = Karafka::App.config.internal.routing.active.topics
-
-        # When empty it means no topics were specified, hence all should be used
-        topics.empty? || topics.include?(name)
+        Karafka::App.config.internal.routing.activity_manager.active?(:topics, name)
       end
 
       # @return [Hash] hash with all the topic attributes
@@ -106,7 +117,7 @@ module Karafka
           active: active?,
           consumer: consumer,
           consumer_group_id: consumer_group.id,
-          subscription_group: subscription_group
+          subscription_group_name: subscription_group_name
         ).freeze
       end
     end

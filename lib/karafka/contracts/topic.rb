@@ -20,7 +20,7 @@ module Karafka
       required(:max_wait_time) { |val| val.is_a?(Integer) && val >= 10 }
       required(:name) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
       required(:active) { |val| [true, false].include?(val) }
-      required(:subscription_group) { |val| val.is_a?(String) && !val.empty? }
+      required(:subscription_group_name) { |val| val.is_a?(String) && !val.empty? }
 
       # Consumer needs to be present only if topic is active
       # We allow not to define consumer for non-active because they may be only used via admin
@@ -47,6 +47,18 @@ module Karafka
         rescue Rdkafka::Config::ConfigError => e
           [[%w[kafka], e.message]]
         end
+      end
+
+      virtual do |data, errors|
+        next unless errors.empty?
+        next unless ::Karafka::App.config.strict_topics_namespacing
+
+        value = data.fetch(:name)
+        namespacing_chars_count = value.chars.find_all { |c| ['.', '_'].include?(c) }.uniq.count
+
+        next if namespacing_chars_count <= 1
+
+        [[%w[name], :inconsistent_namespacing]]
       end
     end
   end

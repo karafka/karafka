@@ -17,13 +17,17 @@ module Karafka
       # Pro jobs builder that supports lrj
       class JobsBuilder < ::Karafka::Processing::JobsBuilder
         # @param executor [Karafka::Processing::Executor]
+        def idle(executor)
+          Karafka::Processing::Jobs::Idle.new(executor)
+        end
+
+        # @param executor [Karafka::Processing::Executor]
         # @param messages [Karafka::Messages::Messages] messages batch to be consumed
-        # @param coordinator [Karafka::Processing::Coordinator]
         # @return [Karafka::Processing::Jobs::Consume] blocking job
         # @return [Karafka::Pro::Processing::Jobs::ConsumeNonBlocking] non blocking for lrj
-        def consume(executor, messages, coordinator)
+        def consume(executor, messages)
           if executor.topic.long_running_job?
-            Jobs::ConsumeNonBlocking.new(executor, messages, coordinator)
+            Jobs::ConsumeNonBlocking.new(executor, messages)
           else
             super
           end

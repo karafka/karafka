@@ -37,14 +37,15 @@ Here's an example:
 
 ```
 $ [bundle exec] karafka info
-Karafka version: 1.3.0
-Ruby version: 2.6.3
-Ruby-kafka version: 0.7.9
-Application client id: karafka-local
-Backend: inline
-Batch fetching: true
-Batch consuming: true
-Boot file: /app/karafka/karafka.rb
+Karafka version: 2.2.10 + Pro
+Ruby version: ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-linux]
+Rdkafka version: 0.13.8
+Consumer groups count: 2
+Subscription groups count: 2
+Workers count: 2
+Application client id: example_app
+Boot file: /app/karafka.rb
 Environment: development
-Kafka seed brokers: ["kafka://kafka:9092"]
+License: Commercial
+License entity: karafka-ci
 ```

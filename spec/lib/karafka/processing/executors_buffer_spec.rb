@@ -5,13 +5,14 @@ RSpec.describe_current do
 
   let(:client) { instance_double(Karafka::Connection::Client) }
   let(:group_id) { SecureRandom.hex(6) }
+  let(:coordinator) { build(:processing_coordinator) }
   let(:topic_name) { 'topic_name1' }
   let(:partition_id) { 0 }
   let(:parallel_key) { 0 }
   let(:subscription_group) { consumer_groups.first.subscription_groups.first }
 
   let(:fetched_executor) do
-    buffer.find_or_create(topic_name, partition_id, parallel_key)
+    buffer.find_or_create(topic_name, partition_id, parallel_key, coordinator)
   end
 
   let(:consumer_groups) do
@@ -35,7 +36,7 @@ RSpec.describe_current do
 
     context 'when executor is in a buffer' do
       let(:existing_executor) do
-        buffer.find_or_create(topic_name, partition_id, parallel_key)
+        buffer.find_or_create(topic_name, partition_id, parallel_key, coordinator)
       end
 
       before { existing_executor }
@@ -59,8 +60,7 @@ RSpec.describe_current do
       before { fetched_executor }
 
       it 'expect to yield with executor from this topic partition' do
-        expect { |block| buffer.each(&block) }
-          .to yield_with_args(consumer_groups.first.topics.first, partition_id, fetched_executor)
+        expect { |block| buffer.each(&block) }.to yield_with_args(fetched_executor)
       end
     end
   end
@@ -70,14 +70,14 @@ RSpec.describe_current do
 
     it 'expect to remove all executors from a given topic partition' do
       buffer.revoke(topic_name, partition_id)
-      executor = buffer.find_or_create(topic_name, partition_id, parallel_key)
+      executor = buffer.find_or_create(topic_name, partition_id, parallel_key, coordinator)
       expect(executor).not_to eq(fetched_executor)
     end
   end
 
   describe '#clear' do
     let(:pre_cleaned_executor) do
-      buffer.find_or_create(topic_name, partition_id, parallel_key)
+      buffer.find_or_create(topic_name, partition_id, parallel_key, coordinator)
     end
 
     before do

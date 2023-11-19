@@ -9,8 +9,6 @@ setup_karafka do |config|
   config.max_messages = 5
 end
 
-create_topic(partitions: 2, name: DT.topic)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     partition = messages.metadata.partition
@@ -31,7 +29,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    config(partitions: 2)
+    consumer Consumer
+  end
+end
 
 Thread.new do
   loop do

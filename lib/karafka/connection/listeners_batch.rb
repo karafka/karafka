@@ -11,6 +11,10 @@ module Karafka
       # @param jobs_queue [JobsQueue]
       # @return [ListenersBatch]
       def initialize(jobs_queue)
+        # We need one scheduler for all the listeners because in case of complex schedulers, they
+        # should be able to distribute work whenever any work is done in any of the listeners
+        scheduler = App.config.internal.processing.scheduler_class.new(jobs_queue)
+
         @coordinators = []
 
         @batch = App.subscription_groups.flat_map do |_consumer_group, subscription_groups|
@@ -24,7 +28,8 @@ module Karafka
             Connection::Listener.new(
               consumer_group_coordinator,
               subscription_group,
-              jobs_queue
+              jobs_queue,
+              scheduler
             )
           end
         end

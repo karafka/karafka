@@ -18,18 +18,42 @@ RSpec.describe_current do
         token: false,
         entity: ''
       },
+      admin: {
+        kafka: {},
+        group_id: 'karafka_admin',
+        max_wait_time: 1_000,
+        max_attempts: 10
+      },
       internal: {
         status: Karafka::Status.new,
         process: Karafka::Process.new,
+        tick_interval: 5_000,
+        connection: {
+          proxy: {
+            query_watermark_offsets: {
+              timeout: 100,
+              max_attempts: 5,
+              wait_time: 1_000
+            },
+            offsets_for_times: {
+              timeout: 100,
+              max_attempts: 5,
+              wait_time: 1_000
+            }
+          }
+        },
         routing: {
           builder: Karafka::Routing::Builder.new,
           subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new
         },
         processing: {
-          scheduler: Karafka::Processing::Scheduler.new,
+          scheduler_class: Karafka::Processing::Scheduler,
           jobs_builder: Karafka::Processing::JobsBuilder.new,
+          jobs_queue_class: Karafka::Processing::JobsQueue,
           coordinator_class: Karafka::Processing::Coordinator,
-          partitioner_class: Karafka::Processing::Partitioner
+          partitioner_class: Karafka::Processing::Partitioner,
+          strategy_selector: Karafka::Processing::StrategySelector.new,
+          expansions_selector: Karafka::Processing::ExpansionsSelector.new
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
@@ -41,6 +65,16 @@ RSpec.describe_current do
         'bootstrap.servers': '127.0.0.1:9092'
       }
     }
+  end
+
+  context 'when we check for the errors yml file reference' do
+    it 'expect to have all of them defined' do
+      stringified = described_class.config.error_messages.to_s
+
+      described_class.rules.each do |rule|
+        expect(stringified).to include(rule.path.last.to_s)
+      end
+    end
   end
 
   context 'when config is valid' do
@@ -68,6 +102,94 @@ RSpec.describe_current do
 
     context 'when kafka scope has non symbolized keys' do
       before { config[:kafka] = { 'test' => 1 } }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when validating admin details' do
+    let(:admin_cfg) { config[:admin] }
+
+    context 'when kafka is missing' do
+      before { admin_cfg.delete(:kafka) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when kafka scope is empty' do
+      before { admin_cfg[:kafka] = {} }
+
+      it { expect(contract.call(config)).to be_success }
+    end
+
+    context 'when kafka scope is not a hash' do
+      before { admin_cfg[:kafka] = [1, 2, 3] }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when kafka scope has non symbolized keys' do
+      before { admin_cfg[:kafka] = { 'test' => 1 } }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when group_id is missing' do
+      before { admin_cfg.delete(:group_id) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when group_id is not in an accepted format' do
+      before { admin_cfg[:group_id] = '#$%^&*()' }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when group_id is not a string' do
+      before { admin_cfg[:group_id] = 100 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when group_id is empty' do
+      before { admin_cfg[:group_id] = '' }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_wait_time is missing' do
+      before { admin_cfg.delete(:max_wait_time) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_wait_time is not bigger than 0' do
+      before { admin_cfg[:max_wait_time] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_wait_time is float' do
+      before { admin_cfg[:max_wait_time] = 1.1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_attempts is missing' do
+      before { admin_cfg.delete(:max_attempts) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_attempts is not bigger than 0' do
+      before { admin_cfg[:max_attempts] = 0 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_attempts is float' do
+      before { admin_cfg[:max_attempts] = 1.1 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
@@ -258,16 +380,91 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
+    context  'when tick_interval is less than 1 second' do
+      before { config[:internal][:tick_interval] = 999 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context  'when tick_interval is missing' do
+      before { config[:internal].delete(:tick_interval) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when connection is missing' do
+      before { config[:internal].delete(:connection) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when proxy is missing' do
+      before { config[:internal][:connection].delete(:proxy) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    %i[
+      query_watermark_offsets
+      offsets_for_times
+    ].each do |scope|
+      context "when proxy #{scope} is missing" do
+        before { config[:internal][:connection][:proxy].delete(scope) }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
+
+      %i[
+        timeout
+        max_attempts
+        wait_time
+      ].each do |field|
+        context "when proxy #{scope} #{field} is 0" do
+          before { config[:internal][:connection][:proxy][scope][field] = 0 }
+
+          it { expect(contract.call(config)).not_to be_success }
+        end
+
+        context "when proxy #{scope} #{field} is not an integer" do
+          before { config[:internal][:connection][:proxy][scope][field] = 100.2 }
+
+          it { expect(contract.call(config)).not_to be_success }
+        end
+
+        context "when proxy #{scope} #{field} is a string" do
+          before { config[:internal][:connection][:proxy][scope][field] = 'test' }
+
+          it { expect(contract.call(config)).not_to be_success }
+        end
+      end
+    end
+
     context 'when routing builder is missing' do
       before { config[:internal][:routing].delete(:builder) }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when processing jobs_builder is missing' do
-      before { config[:internal][:processing].delete(:jobs_builder) }
+    %i[
+      jobs_builder
+      jobs_queue_class
+      scheduler_class
+      coordinator_class
+      partitioner_class
+      strategy_selector
+      expansions_selector
+    ].each do |key|
+      context "when processing #{key} is missing" do
+        before { config[:internal][:processing].delete(key) }
 
-      it { expect(contract.call(config)).not_to be_success }
+        it { expect(contract.call(config)).not_to be_success }
+      end
+
+      context "when processing #{key} is nil" do
+        before { config[:internal][:processing][key] = nil }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
     end
 
     context 'when status is missing' do
@@ -288,8 +485,14 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when processing scheduler is missing' do
-      before { config[:internal][:processing].delete(:scheduler) }
+    context 'when processing scheduler_class is missing' do
+      before { config[:internal][:processing].delete(:scheduler_class) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when processing jobs_queue_class is missing' do
+      before { config[:internal][:processing].delete(:jobs_queue_class) }
 
       it { expect(contract.call(config)).not_to be_success }
     end

@@ -6,8 +6,6 @@
 
 setup_karafka
 
-create_topic(partitions: 3)
-
 DT[:revoked] = Concurrent::Array.new
 DT[:pre] = Set.new
 DT[:post] = Set.new
@@ -32,6 +30,7 @@ end
 draw_routes do
   consumer_group DT.topic do
     topic DT.topic do
+      config(partitions: 3)
       consumer Consumer
       manual_offset_management true
     end
@@ -47,13 +46,7 @@ other =  Thread.new do
   sleep(10)
 
   consumer.subscribe(DT.topic)
-  # 1 message is enough
-  consumer.each do
-    next if DT[:end].empty?
-
-    break
-  end
-
+  consumer.poll(500) until DT.key?(:end)
   consumer.close
 end
 

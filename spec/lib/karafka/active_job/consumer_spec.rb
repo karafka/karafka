@@ -5,6 +5,7 @@ RSpec.describe_current do
     consumer = described_class.new
     consumer.client = client
     consumer.coordinator = coordinator
+    consumer.singleton_class.include Karafka::Processing::Strategies::Default
     consumer
   end
 
@@ -16,11 +17,16 @@ RSpec.describe_current do
   let(:payload1) { { '1' => '2' } }
   let(:payload2) { { '3' => '4' } }
 
-  before { allow(Karafka::App).to receive(:stopping?).and_return(false) }
+  before do
+    allow(Karafka::App).to receive(:stopping?).and_return(false)
+    allow(client).to receive(:assignment_lost?).and_return(false)
+  end
 
   context 'when messages are available to the consumer' do
     before do
       consumer.messages = messages
+
+      allow(coordinator).to receive(:revoked?).and_return(false)
 
       allow(client).to receive(:mark_as_consumed).with(messages.first)
       allow(client).to receive(:mark_as_consumed).with(messages.last)

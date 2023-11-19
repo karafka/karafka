@@ -13,8 +13,6 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
-create_topic(partitions: 2, name: DT.topics[1])
-
 class Consumer < Karafka::BaseConsumer
   def consume
     if messages.metadata.partition.zero?
@@ -36,6 +34,7 @@ draw_routes do
   consumer_group DT.consumer_group do
     # Special topic with 2 partitions available
     topic DT.topics[1] do
+      config(partitions: 2)
       consumer Consumer
     end
   end
@@ -44,7 +43,7 @@ end
 draw_routes(Consumer)
 
 Thread.new do
-  sleep(5)
+  sleep(10)
 
   sleep(0.1) while DT[:running].empty?
 

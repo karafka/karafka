@@ -28,7 +28,9 @@ module Karafka
           FEATURES = %i[].freeze
 
           # No actions needed for the standard flow here
-          def handle_before_enqueue
+          def handle_before_schedule_consume
+            Karafka.monitor.instrument('consumer.before_schedule_consume', caller: self)
+
             nil
           end
 

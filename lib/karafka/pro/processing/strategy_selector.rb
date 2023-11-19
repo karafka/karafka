@@ -18,39 +18,65 @@ module Karafka
       # When using Karafka Pro, there is a different set of strategies than for regular, as there
       # are different features.
       class StrategySelector
+        attr_reader :strategies
+
+        # Strategies that we support in the Pro offering
+        # They can be combined
+        SUPPORTED_FEATURES = %i[
+          active_job
+          long_running_job
+          manual_offset_management
+          virtual_partitions
+          dead_letter_queue
+          filtering
+        ].freeze
+
         def initialize
+          # Preload the strategies
           # We load them once for performance reasons not to do too many lookups
-          @available_strategies = Strategies
-                                  .constants
-                                  .delete_if { |k| k == :Base }
-                                  .map { |k| Strategies.const_get(k) }
+          @strategies = find_all
         end
 
         # @param topic [Karafka::Routing::Topic] topic with settings based on which we find
         #   the strategy
         # @return [Module] module with proper strategy
         def find(topic)
-          feature_set = features_map(topic)
+          feature_set = SUPPORTED_FEATURES.map do |feature_name|
+            topic.public_send("#{feature_name}?") ? feature_name : nil
+          end
 
-          @available_strategies.find do |strategy|
+          feature_set.compact!
+          feature_set.sort!
+
+          @strategies.find do |strategy|
             strategy::FEATURES.sort == feature_set
           end || raise(Errors::StrategyNotFoundError, topic.name)
         end
 
         private
 
-        # Builds features map used to find matching processing strategy
-        #
-        # @param topic [Karafka::Routing::Topic]
-        # @return [Array<Symbol>]
-        def features_map(topic)
-          [
-            topic.active_job? ? :active_job : nil,
-            topic.long_running_job? ? :long_running_job : nil,
-            topic.manual_offset_management? ? :manual_offset_management : nil,
-            topic.virtual_partitions? ? :virtual_partitions : nil,
-            topic.dead_letter_queue? ? :dead_letter_queue : nil
-          ].compact.sort
+        # @return [Array<Module>] all available strategies
+        def find_all
+          scopes = [Strategies]
+          modules = Strategies.constants
+
+          modules.each do |const|
+            scopes << Strategies.const_get(const)
+            modules += scopes.last.constants
+          end
+
+          scopes.flat_map do |scope|
+            modules.map do |const|
+              next if const == :FEATURES
+              next unless scope.const_defined?(const)
+
+              candidate = scope.const_get(const)
+
+              next unless candidate.const_defined?(:FEATURES)
+
+              candidate
+            end
+          end.uniq.compact
         end
       end
     end

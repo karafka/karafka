@@ -14,7 +14,9 @@ class Consumer2 < Karafka::BaseConsumer
   def consume; end
 end
 
-draw_routes do
+Karafka::Admin.create_topic(DT.topics[1], 1, 1)
+
+draw_routes(create_topics: false) do
   topic DT.topic do
     consumer Consumer
   end
@@ -32,7 +34,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[0].size >= 1
+  DT.key?(0)
 end
 
 # No assertion needed as 5 minutes is more than we allow spec to run (3 minutes)

@@ -10,19 +10,24 @@ module Karafka
     class SubscriptionGroup
       attr_reader :id, :name, :topics, :kafka, :consumer_group
 
-      # Numeric for counting groups
-      GROUP_COUNT = Concurrent::AtomicFixnum.new
+      # Lock for generating new ids safely
+      ID_MUTEX = Mutex.new
 
-      private_constant :GROUP_COUNT
+      private_constant :ID_MUTEX
 
       class << self
         # Generates new subscription group id that will be used in case of anonymous subscription
         #   groups
         # @return [String] hex(6) compatible reproducible id
         def id
-          ::Digest::MD5.hexdigest(
-            GROUP_COUNT.increment.to_s
-          )[0..11]
+          ID_MUTEX.synchronize do
+            @group_counter ||= 0
+            @group_counter += 1
+
+            ::Digest::MD5.hexdigest(
+              @group_counter.to_s
+            )[0..11]
+          end
         end
       end
 
@@ -32,9 +37,13 @@ module Karafka
       # @param topics [Karafka::Routing::Topics] all the topics that share the same key settings
       # @return [SubscriptionGroup] built subscription group
       def initialize(position, topics)
-        @name = topics.first.subscription_group
+        @name = topics.first.subscription_group_name
         @consumer_group = topics.first.consumer_group
-        @id = "#{@name}_#{position}"
+        # We include the consumer group id here because we want to have unique ids of subscription
+        # groups across the system. Otherwise user could set the same name for multiple
+        # subscription groups in many consumer groups effectively having same id for different
+        # entities
+        @id = "#{@consumer_group.id}_#{@name}_#{position}"
         @position = position
         @topics = topics
         @kafka = build_kafka
@@ -58,10 +67,22 @@ module Karafka
 
       # @return [Boolean] is this subscription group one of active once
       def active?
-        sgs = Karafka::App.config.internal.routing.active.subscription_groups
+        Karafka::App.config.internal.routing.activity_manager.active?(:subscription_groups, name)
+      end
 
-        # When empty it means no groups were specified, hence all should be used
-        sgs.empty? || sgs.include?(name)
+      # @return [Array<String>] names of topics to which we should subscribe.
+      #
+      # @note Most of the time it should not include inactive topics but in case of pattern
+      #   matching the matcher topics become inactive down the road, hence we filter out so
+      #   they are later removed.
+      def subscriptions
+        topics.select(&:active?).map(&:subscription_name)
+      end
+
+      # @return [String] id of the subscription group
+      # @note This is an alias for displaying in places where we print the stringified version.
+      def to_s
+        id
       end
 
       private
@@ -75,13 +96,13 @@ module Karafka
         # If we use static group memberships, there can be a case, where same instance id would
         # be set on many subscription groups as the group instance id from Karafka perspective is
         # set per config. Each instance even if they are subscribed to different topics needs to
-        # have if fully unique. To make sure of that, we just add extra postfix at the end that
+        # have it fully unique. To make sure of that, we just add extra postfix at the end that
         # increments.
         group_instance_id = kafka.fetch(:'group.instance.id', false)
 
         kafka[:'group.instance.id'] = "#{group_instance_id}_#{@position}" if group_instance_id
         kafka[:'client.id'] ||= Karafka::App.config.client_id
-        kafka[:'group.id'] ||= @topics.first.consumer_group.id
+        kafka[:'group.id'] ||= @consumer_group.id
         kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
         # rdkafka offset auto-storing

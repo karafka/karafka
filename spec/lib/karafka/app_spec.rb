@@ -34,6 +34,7 @@ RSpec.describe_current do
       run!
       running?
       stop!
+      done?
     ].each do |delegation|
       describe "##{delegation}" do
         let(:return_value) { double }

@@ -11,8 +11,6 @@ setup_karafka do |config|
   config.kafka[:'group.instance.id'] = SecureRandom.hex(6)
 end
 
-create_topic(partitions: 2)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
@@ -25,7 +23,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    config(partitions: 2)
+    consumer Consumer
+  end
+end
 
 # @note We use external messages producer here, as the one from Karafka will be closed upon first
 # process shutdown.

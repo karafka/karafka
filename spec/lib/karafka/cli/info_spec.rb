@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:info_cli) { described_class.new(cli) }
-
-  let(:cli) { Karafka::Cli.new }
+  subject(:info_cli) { described_class.new }
 
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
@@ -71,5 +69,9 @@ RSpec.describe_current do
         expect(Karafka.logger).to have_received(:info).with(info)
       end
     end
+  end
+
+  describe '#names' do
+    it { expect(info_cli.class.names).to eq %w[info] }
   end
 end

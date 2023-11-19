@@ -2,7 +2,7 @@
 
 RSpec.describe_current do
   subject(:messages) do
-    Karafka::Messages::Builders::Messages.call(messages_array, topic, received_at)
+    Karafka::Messages::Builders::Messages.call(messages_array, topic, 0, received_at)
   end
 
   let(:deserialized_payload) { { rand.to_s => rand.to_s } }
@@ -16,6 +16,13 @@ RSpec.describe_current do
   describe '#to_a' do
     it 'expect not to deserialize data and return raw messages' do
       expect(messages.to_a.first.deserialized?).to eq false
+    end
+
+    it 'expect to return copy of the underlying array' do
+      ar1 = messages.to_a
+      ar2 = messages.to_a
+
+      expect(ar1).not_to be(ar2)
     end
   end
 
@@ -81,5 +88,9 @@ RSpec.describe_current do
 
   describe '#size' do
     it { expect(messages.size).to eq messages.to_a.size }
+  end
+
+  describe '#empty?' do
+    it { expect(messages.empty?).to eq(false) }
   end
 end

@@ -8,40 +8,51 @@ setup_karafka do |config|
   config.concurrency = 20
 end
 
-create_topic(partitions: 10)
-
-10.times do |i|
-  produce(DT.topic, (i + 1).to_s, partition: i)
-end
-
 class Consumer < Karafka::BaseConsumer
   def consume
+    return if done?
+
     DT[:started] << true
 
     # We use loop so in case this would not work, it will timeout and raise an error
     loop do
+      # In case we were given back some of the partitions after rebalance, this could get into
+      # an infinite loop, hence we need to check it
+      return if done? && signaled?
+
       sleep(0.1)
 
       next unless revoked?
 
-      DT[:revoked] << true
+      DT[:revoked] << partition
 
       break
     end
   end
 
-  def shutdown
-    DT[:shutdown] << true
+  private
+
+  def signaled?
+    DT[:revoked].include?(partition)
+  end
+
+  def done?
+    Karafka::App.stopping? && DT[:started].size >= 10
   end
 end
 
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
+      config(partitions: 10)
       consumer Consumer
       long_running_job true
     end
   end
+end
+
+10.times do |i|
+  produce(DT.topic, (i + 1).to_s, partition: i)
 end
 
 consumer = setup_rdkafka_consumer
@@ -60,5 +71,4 @@ end
 
 consumer.close
 
-assert_equal [], DT[:shutdown], DT[:shutdown]
 assert_equal 10, DT[:revoked].size, DT.data

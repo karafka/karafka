@@ -7,7 +7,22 @@ setup_karafka do |config|
   config.kafka[:'enable.auto.commit'] = false
 end
 
-create_topic(partitions: 2)
+class Consumer < Karafka::BaseConsumer
+  def consume
+    messages.each do |message|
+      next if DT[:picked].size.positive?
+
+      DT[message.partition] << message.offset
+    end
+  end
+end
+
+draw_routes do
+  topic DT.topic do
+    config(partitions: 2)
+    consumer Consumer
+  end
+end
 
 Thread.new do
   loop do
@@ -21,18 +36,6 @@ Thread.new do
     sleep(1)
   end
 end
-
-class Consumer < Karafka::BaseConsumer
-  def consume
-    messages.each do |message|
-      next if DT[:picked].size.positive?
-
-      DT[message.partition] << message.offset
-    end
-  end
-end
-
-draw_routes(Consumer)
 
 consumer = setup_rdkafka_consumer
 

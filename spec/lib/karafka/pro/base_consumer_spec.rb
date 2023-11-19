@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe_current do
+RSpec.describe Karafka::BaseConsumer, type: :pro do
   subject(:consumer) do
     instance = working_class.new
     instance.coordinator = coordinator
-    instance.topic = topic
     instance.client = client
     instance.singleton_class.include(strategy)
     instance
@@ -56,15 +55,17 @@ RSpec.describe_current do
   before do
     coordinator.start(messages)
     coordinator.increment
+
+    allow(client).to receive(:assignment_lost?).and_return(false)
   end
 
-  describe '#on_before_enqueue for non LRU' do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+  describe '#on_before_schedule_consume for non LRJ' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Default }
 
     before { allow(client).to receive(:pause) }
 
     it 'expect not to pause the partition' do
-      consumer.on_before_enqueue
+      consumer.on_before_schedule_consume
       expect(client).not_to have_received(:pause)
     end
   end
@@ -81,12 +82,12 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_consume and #on_after_consume for non LRU' do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Mom }
+  describe '#on_consume and #on_after_consume for non LRJ' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Mom::Default }
 
     let(:consume_with_after) do
       lambda do
-        consumer.on_before_enqueue
+        consumer.on_before_schedule_consume
         consumer.on_before_consume
         consumer.on_consume
         consumer.on_after_consume
@@ -158,7 +159,7 @@ RSpec.describe_current do
     end
 
     context 'when everything went ok on consume with automatic offset management' do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
 
       before do
         topic.manual_offset_management false
@@ -221,8 +222,8 @@ RSpec.describe_current do
     end
   end
 
-  describe '#on_before_enqueue for LRU' do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+  describe '#on_before_schedule_consume for LRJ' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
 
     before do
       topic.long_running_job true
@@ -231,13 +232,13 @@ RSpec.describe_current do
     end
 
     it 'expect not to pause the partition' do
-      consumer.on_before_enqueue
-      expect(client).to have_received(:pause).with(topic.name, 0, offset)
+      consumer.on_before_schedule_consume
+      expect(client).to have_received(:pause).with(topic.name, 0, nil)
     end
   end
 
-  describe '#on_consume and #on_after_consume for LRU' do
-    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj }
+  describe '#on_consume and #on_after_consume for LRJ' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Default }
 
     let(:consume_with_after) do
       lambda do
@@ -251,13 +252,13 @@ RSpec.describe_current do
       consumer.coordinator = coordinator
       consumer.client = client
       consumer.messages = messages
-      consumer.on_before_enqueue
+      consumer.on_before_schedule_consume
       consumer.on_before_consume
       allow(coordinator.pause_tracker).to receive(:pause)
     end
 
     context 'when everything went ok on consume with manual offset management' do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::LrjMom }
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Lrj::Mom }
 
       before { topic.manual_offset_management true }
 
@@ -285,7 +286,7 @@ RSpec.describe_current do
     end
 
     context 'when there was an error on consume with manual offset management' do
-      let(:strategy) { Karafka::Pro::Processing::Strategies::Mom }
+      let(:strategy) { Karafka::Pro::Processing::Strategies::Mom::Default }
 
       let(:working_class) do
         ClassBuilder.inherit(described_class) do
@@ -373,8 +374,7 @@ RSpec.describe_current do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset)
-          .twice
+          .with(topic.name, first_message.partition, nil)
       end
 
       it 'expect to pause with time tracker' do

@@ -39,19 +39,5 @@ end
 
 sleep(1)
 
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topic)
-
-first_continued = nil
-
-consumer.each do |message|
-  first_continued = message
-  break
-end
-
 # Intermediate jobs should be processed
-assert first_continued.offset > 0
-
-first_continued = nil
-
-consumer.close
+assert fetch_first_offset > 0

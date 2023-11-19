@@ -15,7 +15,18 @@ module Karafka
         ).fetch('en').fetch('validations').fetch('job_options')
       end
 
-      optional(:dispatch_method) { |val| %i[produce_async produce_sync].include?(val) }
+      optional(:dispatch_method) do |val|
+        %i[
+          produce_async
+          produce_sync
+        ].include?(val)
+      end
+      optional(:dispatch_many_method) do |val|
+        %i[
+          produce_many_async
+          produce_many_sync
+        ].include?(val)
+      end
     end
   end
 end

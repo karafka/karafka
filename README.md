@@ -10,6 +10,7 @@
 
 Karafka is a Ruby and Rails multi-threaded efficient Kafka processing framework that:
 
+- Has a built-in [Web UI](https://karafka.io/docs/Web-UI-Features/) providing a convenient way to monitor and manage Karafka-based applications.
 - Supports parallel processing in [multiple threads](https://karafka.io/docs/Concurrency-and-multithreading) (also for a [single topic partition](https://karafka.io/docs/Pro-Virtual-Partitions) work)
 - [Automatically integrates](https://karafka.io/docs/Integrating-with-Ruby-on-Rails-and-other-frameworks#integrating-with-ruby-on-rails) with Ruby on Rails
 - Has [ActiveJob backend](https://karafka.io/docs/Active-Job) support (including [ordered jobs](https://karafka.io/docs/Pro-Enhanced-Active-Job#ordered-jobs))
@@ -58,7 +59,8 @@ We also maintain many [integration specs](https://github.com/karafka/karafka/tre
 1. Add and install Karafka:
 
 ```bash
-bundle add karafka
+# Make sure to install Karafka 2.2
+bundle add karafka --version ">= 2.2.10"
 
 bundle exec karafka install
 ```
@@ -82,11 +84,11 @@ bundle exec karafka server
 
 ## Want to Upgrade? LGPL is not for you? Want to help?
 
-I also sell Karafka Pro subscriptions. It includes a commercial-friendly license, priority support, architecture consultations, and high throughput data processing-related features (virtual partitions, long-running jobs, and more).
+I also sell Karafka Pro subscriptions. It includes a commercial-friendly license, priority support, architecture consultations, enhanced Web UI and high throughput data processing-related features (virtual partitions, long-running jobs, and more).
 
-**20%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
+**10%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
 
-Help me provide high-quality open-source software. Please see the Karafka [homepage](https://karafka.io) for more details.
+Help me provide high-quality open-source software. Please see the Karafka [homepage](https://karafka.io/#become-pro) for more details.
 
 ## Support
 

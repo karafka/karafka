@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:coordinator) { described_class.new(pause_tracker) }
+  subject(:coordinator) { described_class.new(topic, partition, pause_tracker) }
 
+  let(:topic) { build(:routing_topic) }
+  let(:partition) { 0 }
   let(:pause_tracker) { build(:time_trackers_pause) }
   let(:last_message) { build(:messages_message) }
   let(:messages) { [last_message] }
@@ -48,6 +50,12 @@ RSpec.describe_current do
       before { coordinator.increment }
 
       it { expect(coordinator.finished?).to eq(false) }
+    end
+  end
+
+  describe '#filtered?' do
+    context 'when not filtered' do
+      it { expect(coordinator.filtered?).to eq(false) }
     end
   end
 

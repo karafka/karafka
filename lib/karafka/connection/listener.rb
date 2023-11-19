@@ -14,24 +14,31 @@ module Karafka
       # @return [String] id of this listener
       attr_reader :id
 
+      # How long to wait in the initial events poll. Increases chances of having the initial events
+      # immediately available
+      INITIAL_EVENTS_POLL_TIMEOUT = 100
+
+      private_constant :INITIAL_EVENTS_POLL_TIMEOUT
+
       # @param consumer_group_coordinator [Karafka::Connection::ConsumerGroupCoordinator]
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
+      # @param scheduler [Karafka::Processing::Scheduler] scheduler we want to use
       # @return [Karafka::Connection::Listener] listener instance
-      def initialize(consumer_group_coordinator, subscription_group, jobs_queue)
+      def initialize(consumer_group_coordinator, subscription_group, jobs_queue, scheduler)
         proc_config = ::Karafka::App.config.internal.processing
 
         @id = SecureRandom.hex(6)
         @consumer_group_coordinator = consumer_group_coordinator
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
-        @coordinators = Processing::CoordinatorsBuffer.new
+        @coordinators = Processing::CoordinatorsBuffer.new(subscription_group.topics)
         @client = Client.new(@subscription_group)
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         @jobs_builder = proc_config.jobs_builder
         @partitioner = proc_config.partitioner_class.new(subscription_group)
-        # We reference scheduler here as it is much faster than fetching this each time
-        @scheduler = proc_config.scheduler
+        @scheduler = scheduler
+        @events_poller = Helpers::IntervalRunner.new { @client.events_poll }
         # We keep one buffer for messages to preserve memory and not allocate extra objects
         # We can do this that way because we always first schedule jobs using messages before we
         # fetch another batch.
@@ -84,8 +91,17 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far.
       def fetch_loop
+        # Run the initial events fetch to improve chances of having metrics and initial callbacks
+        # triggers on start.
+        #
+        # In theory this may slow down the initial boot but we limit it up to 100ms, so it should
+        # not have a big initial impact. It may not be enough but Karafka does not give the boot
+        # warranties of statistics or other callbacks being immediately available, hence this is
+        # a fair trade-off
+        @client.events_poll(INITIAL_EVENTS_POLL_TIMEOUT)
+
         # Run the main loop as long as we are not stopping or moving into quiet mode
-        until Karafka::App.stopping? || Karafka::App.quieting? || Karafka::App.quiet?
+        until Karafka::App.done?
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop',
             caller: self,
@@ -112,7 +128,7 @@ module Karafka
           # distributing consuming jobs as upon revoking, we might get assigned to the same
           # partitions, thus getting their jobs. The revoking jobs need to finish before
           # appropriate consumers are taken down and re-created
-          build_and_schedule_revoke_lost_partitions_jobs
+          build_and_schedule_revoked_jobs_for_revoked_partitions
 
           # We wait only on jobs from our subscription group. Other groups are independent.
           # This will block on revoked jobs until they are finished. Those are not meant to last
@@ -140,7 +156,7 @@ module Karafka
         # that occurred in the cluster.
         wait_pinging(
           wait_until: -> { @jobs_queue.empty?(@subscription_group.id) },
-          after_ping: -> { build_and_schedule_revoke_lost_partitions_jobs }
+          after_ping: -> { build_and_schedule_revoked_jobs_for_revoked_partitions }
         )
 
         # We do not want to schedule the shutdown jobs prior to finishing all the jobs
@@ -192,12 +208,12 @@ module Karafka
       # Resumes processing of partitions that were paused due to an error.
       def resume_paused_partitions
         @coordinators.resume do |topic, partition|
-          @client.resume(topic, partition)
+          @client.resume(topic.name, partition)
         end
       end
 
       # Enqueues revoking jobs for partitions that were taken away from the running process.
-      def build_and_schedule_revoke_lost_partitions_jobs
+      def build_and_schedule_revoked_jobs_for_revoked_partitions
         revoked_partitions = @client.rebalance_manager.revoked_partitions
 
         # Stop early to save on some execution and array allocation
@@ -214,7 +230,7 @@ module Karafka
             # here. In cases like this, we do not run a revocation job
             @executors.find_all(topic, partition).each do |executor|
               job = @jobs_builder.revoked(executor)
-              job.before_enqueue
+              job.before_schedule
               jobs << job
             end
 
@@ -227,20 +243,20 @@ module Karafka
           end
         end
 
-        @scheduler.schedule_revocation(@jobs_queue, jobs)
+        @scheduler.schedule_revocation(jobs)
       end
 
       # Enqueues the shutdown jobs for all the executors that exist in our subscription group
       def build_and_schedule_shutdown_jobs
         jobs = []
 
-        @executors.each do |_, _, executor|
+        @executors.each do |executor|
           job = @jobs_builder.shutdown(executor)
-          job.before_enqueue
+          job.before_schedule
           jobs << job
         end
 
-        @scheduler.schedule_shutdown(@jobs_queue, jobs)
+        @scheduler.schedule_shutdown(jobs)
       end
 
       # Polls messages within the time and amount boundaries defined in the settings and then
@@ -263,26 +279,34 @@ module Karafka
 
         @messages_buffer.each do |topic, partition, messages|
           coordinator = @coordinators.find_or_create(topic, partition)
-
           # Start work coordination for this topic partition
           coordinator.start(messages)
 
-          @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
-            # Count the job we're going to create here
-            coordinator.increment
-            executor = @executors.find_or_create(topic, partition, group_id)
-            job = @jobs_builder.consume(executor, partition_messages, coordinator)
-            job.before_enqueue
-            jobs << job
+          # We do not increment coordinator for idle job because it's not a user related one
+          # and it will not go through a standard lifecycle. Same applies to revoked and shutdown
+          if messages.empty?
+            executor = @executors.find_or_create(topic, partition, 0, coordinator)
+            jobs << @jobs_builder.idle(executor)
+          else
+            @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
+              executor = @executors.find_or_create(topic, partition, group_id, coordinator)
+              coordinator.increment
+              jobs << @jobs_builder.consume(executor, partition_messages)
+            end
           end
         end
 
-        @scheduler.schedule_consumption(@jobs_queue, jobs)
+        jobs.each(&:before_schedule)
+
+        @scheduler.schedule_consumption(jobs)
       end
 
       # Waits for all the jobs from a given subscription group to finish before moving forward
       def wait
-        @jobs_queue.wait(@subscription_group.id)
+        @jobs_queue.wait(@subscription_group.id) do
+          @events_poller.call
+          @scheduler.manage
+        end
       end
 
       # Waits without blocking the polling
@@ -298,6 +322,8 @@ module Karafka
       def wait_pinging(wait_until:, after_ping: -> {})
         until wait_until.call
           @client.ping
+          @scheduler.manage
+
           after_ping.call
           sleep(0.2)
         end
@@ -313,6 +339,8 @@ module Karafka
         # resetting.
         @jobs_queue.wait(@subscription_group.id)
         @jobs_queue.clear(@subscription_group.id)
+        @scheduler.clear(@subscription_group.id)
+        @events_poller.reset
         @client.reset
         @coordinators.reset
         @executors = Processing::ExecutorsBuffer.new(@client, @subscription_group)

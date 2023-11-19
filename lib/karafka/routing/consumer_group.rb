@@ -14,7 +14,7 @@ module Karafka
       # It allows us to store the "current" subscription group defined in the routing
       # This subscription group id is then injected into topics, so we can compute the subscription
       # groups
-      attr_accessor :current_subscription_group_id
+      attr_accessor :current_subscription_group_name
 
       # @param name [String, Symbol] raw name of this consumer group. Raw means, that it does not
       #   yet have an application client_id namespace, this will be added here by default.
@@ -22,19 +22,16 @@ module Karafka
       #   kafka and don't understand the concept of consumer groups.
       def initialize(name)
         @name = name.to_s
-        @id = Karafka::App.config.consumer_mapper.call(name)
+        @id = config.consumer_mapper.call(name)
         @topics = Topics.new([])
         # Initialize the subscription group so there's always a value for it, since even if not
         # defined directly, a subscription group will be created
-        @current_subscription_group_id = SubscriptionGroup.id
+        @current_subscription_group_name = SubscriptionGroup.id
       end
 
       # @return [Boolean] true if this consumer group should be active in our current process
       def active?
-        cgs = Karafka::App.config.internal.routing.active.consumer_groups
-
-        # When empty it means no groups were specified, hence all should be used
-        cgs.empty? || cgs.include?(name)
+        config.internal.routing.activity_manager.active?(:consumer_groups, name)
       end
 
       # Builds a topic representation inside of a current consumer group route
@@ -43,11 +40,15 @@ module Karafka
       # @return [Karafka::Routing::Topic] newly built topic instance
       def topic=(name, &block)
         topic = Topic.new(name, self)
-        @topics << Proxy.new(topic, &block).target
+        @topics << Proxy.new(
+          topic,
+          config.internal.routing.builder.defaults,
+          &block
+        ).target
         built_topic = @topics.last
         # We overwrite it conditionally in case it was not set by the user inline in the topic
         # block definition
-        built_topic.subscription_group ||= current_subscription_group_id
+        built_topic.subscription_group_name ||= current_subscription_group_name
         built_topic
       end
 
@@ -58,20 +59,19 @@ module Karafka
       def subscription_group=(name = SubscriptionGroup.id, &block)
         # We cast it here, so the routing supports symbol based but that's anyhow later on
         # validated as a string
-        @current_subscription_group_id = name
+        @current_subscription_group_name = name.to_s
 
         Proxy.new(self, &block)
 
         # We need to reset the current subscription group after it is used, so it won't leak
         # outside to other topics that would be defined without a defined subscription group
-        @current_subscription_group_id = SubscriptionGroup.id
+        @current_subscription_group_name = SubscriptionGroup.id
       end
 
       # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
       #   the consumer group topics
       def subscription_groups
-        @subscription_groups ||= App
-                                 .config
+        @subscription_groups ||= config
                                  .internal
                                  .routing
                                  .subscription_groups_builder
@@ -86,6 +86,13 @@ module Karafka
           topics: topics.map(&:to_h),
           id: id
         }.freeze
+      end
+
+      private
+
+      # @return [Karafka::Core::Configurable::Node] root node config
+      def config
+        ::Karafka::App.config
       end
     end
   end

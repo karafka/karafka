@@ -11,7 +11,20 @@ module Karafka
     #
     # @note Executors are not removed after partition is revoked. They are not that big and will
     #   be re-used in case of a re-claim
+    #
+    # @note Since given consumer can run various operations, executor manages that and its
+    #   lifecycle. There are following types of operations with appropriate before/after, etc:
+    #
+    #   - consume - primary operation related to running user consumption code
+    #   - idle - cleanup job that runs on idle runs where no messages would be passed to the end
+    #     user. This is used for complex flows with filters, etc
+    #   - revoked - runs after the partition was revoked
+    #   - shutdown - runs when process is going to shutdown
     class Executor
+      extend Forwardable
+
+      def_delegators :@coordinator, :topic, :partition
+
       # @return [String] unique id that we use to ensure, that we use for state tracking
       attr_reader :id
 
@@ -21,49 +34,42 @@ module Karafka
       # @return [Karafka::Messages::Messages] messages batch
       attr_reader :messages
 
-      # Topic accessibility may be needed for the jobs builder to be able to build a proper job
-      # based on the topic settings defined by the end user
-      #
-      # @return [Karafka::Routing::Topic] topic of this executor
-      attr_reader :topic
+      # @return [Karafka::Processing::Coordinator] coordinator for this executor
+      attr_reader :coordinator
 
       # @param group_id [String] id of the subscription group to which the executor belongs
       # @param client [Karafka::Connection::Client] kafka client
-      # @param topic [Karafka::Routing::Topic] topic for which this executor will run
-      def initialize(group_id, client, topic)
+      # @param coordinator [Karafka::Processing::Coordinator]
+      def initialize(group_id, client, coordinator)
         @id = SecureRandom.hex(6)
         @group_id = group_id
         @client = client
-        @topic = topic
+        @coordinator = coordinator
       end
 
       # Allows us to prepare the consumer in the listener thread prior to the job being send to
-      # the queue. It also allows to run some code that is time sensitive and cannot wait in the
+      # be scheduled. It also allows to run some code that is time sensitive and cannot wait in the
       # queue as it could cause starvation.
       #
       # @param messages [Array<Karafka::Messages::Message>]
-      # @param coordinator [Karafka::Processing::Coordinator] coordinator for processing management
-      def before_enqueue(messages, coordinator)
-        # the moment we've received the batch or actually the moment we've enqueued it,
-        # but good enough
-        @enqueued_at = Time.now
-
+      def before_schedule_consume(messages)
         # Recreate consumer with each batch if persistence is not enabled
         # We reload the consumers with each batch instead of relying on some external signals
         # when needed for consistency. That way devs may have it on or off and not in this
         # middle state, where re-creation of a consumer instance would occur only sometimes
-        @consumer = nil unless ::Karafka::App.config.consumer_persistence
-
-        consumer.coordinator = coordinator
+        @consumer = nil unless topic.consumer_persistence
 
         # First we build messages batch...
         consumer.messages = Messages::Builders::Messages.call(
           messages,
-          @topic,
-          @enqueued_at
+          topic,
+          partition,
+          # the moment we've received the batch or actually the moment we've enqueued it,
+          # but good enough
+          Time.now
         )
 
-        consumer.on_before_enqueue
+        consumer.on_before_schedule_consume
       end
 
       # Runs setup and warm-up code in the worker prior to running the consumption
@@ -82,6 +88,33 @@ module Karafka
         consumer.on_after_consume
       end
 
+      # Runs the code needed before idle work is scheduled
+      def before_schedule_idle
+        consumer.on_before_schedule_idle
+      end
+
+      # Runs consumer idle operations
+      # This may include house-keeping or other state management changes that can occur but that
+      # not mean there are any new messages available for the end user to process
+      def idle
+        # Initializes the messages set in case idle operation would happen before any processing
+        # This prevents us from having no messages object at all as the messages object and
+        # its metadata may be used for statistics
+        consumer.messages ||= Messages::Builders::Messages.call(
+          [],
+          topic,
+          partition,
+          Time.now
+        )
+
+        consumer.on_idle
+      end
+
+      # Runs code needed before revoked job is scheduled
+      def before_schedule_revoked
+        consumer.on_before_schedule_revoked if @consumer
+      end
+
       # Runs the controller `#revoked` method that should be triggered when a given consumer is
       # no longer needed due to partitions reassignment.
       #
@@ -96,6 +129,11 @@ module Karafka
       #   consumer instance.
       def revoked
         consumer.on_revoked if @consumer
+      end
+
+      # Runs code needed before shutdown job is scheduled
+      def before_schedule_shutdown
+        consumer.on_before_schedule_shutdown if @consumer
       end
 
       # Runs the controller `#shutdown` method that should be triggered when a given consumer is
@@ -114,15 +152,24 @@ module Karafka
       # @return [Object] cached consumer instance
       def consumer
         @consumer ||= begin
-          strategy = ::Karafka::App.config.internal.processing.strategy_selector.find(@topic)
+          topic = @coordinator.topic
 
-          consumer = @topic.consumer_class.new
+          strategy = ::Karafka::App.config.internal.processing.strategy_selector.find(topic)
+          expansions = ::Karafka::App.config.internal.processing.expansions_selector.find(topic)
+
+          consumer = topic.consumer_class.new
           # We use singleton class as the same consumer class may be used to process different
           # topics with different settings
           consumer.singleton_class.include(strategy)
-          consumer.topic = @topic
+
+          # Specific features may expand consumer API beyond the injected strategy. The difference
+          # here is that strategy impacts the flow of states while extra APIs just provide some
+          # extra methods with informations, etc but do no deviate the flow behavior
+          expansions.each { |expansion| consumer.singleton_class.include(expansion) }
+
           consumer.client = @client
           consumer.producer = ::Karafka::App.producer
+          consumer.coordinator = @coordinator
 
           consumer
         end

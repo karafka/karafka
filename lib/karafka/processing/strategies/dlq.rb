@@ -34,7 +34,7 @@ module Karafka
             # We reset the pause to indicate we will now consider it as "ok".
             coordinator.pause_tracker.reset
 
-            skippable_message = find_skippable_message
+            skippable_message, = find_skippable_message
 
             # Send skippable message to the dql topic
             dispatch_to_dlq(skippable_message)
@@ -49,11 +49,20 @@ module Karafka
           end
         end
 
-        # Finds the message we want to skip
+        # Finds the message may want to skip (all, starting from first)
         # @private
+        # @return [Array<Karafka::Messages::Message, Boolean>] message we may want to skip and
+        #   information if this message was from marked offset or figured out via mom flow
         def find_skippable_message
-          skippable_message = messages.find { |message| message.offset == coordinator.seek_offset }
-          skippable_message || raise(Errors::SkipMessageNotFoundError, topic.name)
+          skippable_message = messages.find do |msg|
+            coordinator.marked? && msg.offset == coordinator.seek_offset
+          end
+
+          # If we don't have the message matching the last comitted offset, it means that
+          # user operates with manual offsets and we're beyond the batch in which things
+          # broke for the first time. Then we skip the first (as no markings) and we
+          # move on one by one.
+          skippable_message ? [skippable_message, true] : [messages.first, false]
         end
 
         # Moves the broken message into a separate queue defined via the settings

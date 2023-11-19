@@ -38,7 +38,7 @@ end
 produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
-  DT[:done].size >= 1
+  DT.key?(:done)
 end
 
 assert_equal [true], DT[:aware]

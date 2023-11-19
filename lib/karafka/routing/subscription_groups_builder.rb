@@ -19,7 +19,7 @@ module Karafka
         max_messages
         max_wait_time
         initial_offset
-        subscription_group
+        subscription_group_name
       ].freeze
 
       private_constant :DISTRIBUTION_KEYS
@@ -39,6 +39,13 @@ module Karafka
           .map { |value| value.map(&:last) }
           .map { |topics_array| Routing::Topics.new(topics_array) }
           .map { |grouped_topics| SubscriptionGroup.new(@position += 1, grouped_topics) }
+          .tap do |subscription_groups|
+            subscription_groups.each do |subscription_group|
+              subscription_group.topics.each do |topic|
+                topic.subscription_group = subscription_group
+              end
+            end
+          end
       end
 
       private

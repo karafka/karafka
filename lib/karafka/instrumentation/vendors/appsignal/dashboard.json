@@ -1,0 +1,222 @@
+{
+  "title": "Karafka",
+  "description": "This dashboard gives an overview of the overall Karafka status.\nCheckout topics lag, throughput/performance per consumer,\nprocess/worker counts, and many other things.\n",
+  "visuals": [
+    {
+      "title": "Consumed messages",
+      "description": "",
+      "line_label": "%topic%[%consumer_group%]",
+      "display": "LINE",
+      "format": "number",
+      "draw_null_as_zero": true,
+      "metrics": [
+        {
+          "name": "karafka_consumer_messages",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": [
+            {
+              "key": "consumer_group",
+              "value": "*"
+            },
+            {
+              "key": "topic",
+              "value": "*"
+            }
+          ]
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "title": "Consumed batches",
+      "line_label": "%topic%[%consumer_group%]",
+      "display": "LINE",
+      "format": "number",
+      "draw_null_as_zero": true,
+      "metrics": [
+        {
+          "name": "karafka_consumer_batches",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": [
+            {
+              "key": "consumer_group",
+              "value": "*"
+            },
+            {
+              "key": "topic",
+              "value": "*"
+            }
+          ]
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "title": "Lags",
+      "line_label": "%topic%[%consumer_group%]",
+      "display": "LINE",
+      "format": "number",
+      "draw_null_as_zero": true,
+      "metrics": [
+        {
+          "name": "karafka_consumer_aggregated_lag",
+          "fields": [
+            {
+              "field": "GAUGE"
+            }
+          ],
+          "tags": [
+            {
+              "key": "consumer_group",
+              "value": "*"
+            },
+            {
+              "key": "topic",
+              "value": "*"
+            }
+          ]
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "title": "Errors and DLQ",
+      "description": "",
+      "line_label": "%name% %topic%[%consumer_group%]",
+      "display": "LINE",
+      "format": "number",
+      "draw_null_as_zero": true,
+      "metrics": [
+        {
+          "name": "karafka_consumer_errors",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": [
+            {
+              "key": "consumer_group",
+              "value": "*"
+            },
+            {
+              "key": "topic",
+              "value": "*"
+            }
+          ]
+        },
+        {
+          "name": "karafka_consumer_dead",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": [
+            {
+              "key": "consumer_group",
+              "value": "*"
+            },
+            {
+              "key": "topic",
+              "value": "*"
+            }
+          ]
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "title": "Connection stability",
+      "description": "",
+      "line_label": "%name%",
+      "display": "LINE",
+      "format": "number",
+      "draw_null_as_zero": true,
+      "metrics": [
+        {
+          "name": "karafka_connection_disconnects",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": []
+        },
+        {
+          "name": "karafka_connection_connects",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": []
+        },
+        {
+          "name": "karafka_requests_retries",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": []
+        },
+        {
+          "name": "karafka_transmission_errors",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": []
+        },
+        {
+          "name": "karafka_receive_errors",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": []
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "title": "Concurrency",
+      "line_label": "%name%",
+      "display": "LINE",
+      "format": "number",
+      "draw_null_as_zero": true,
+      "metrics": [
+        {
+          "name": "karafka_processes_count",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": []
+        },
+        {
+          "name": "karafka_threads_count",
+          "fields": [
+            {
+              "field": "COUNTER"
+            }
+          ],
+          "tags": []
+        }
+      ],
+      "type": "timeseries"
+    }
+  ]
+}

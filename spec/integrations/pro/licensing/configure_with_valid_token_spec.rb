@@ -24,10 +24,10 @@ assert const_visible?('Karafka::BaseConsumer')
 assert const_visible?('Karafka::Pro::Processing::JobsBuilder')
 assert const_visible?('Karafka::Pro::Processing::Scheduler')
 assert const_visible?('Karafka::Pro::Routing::Features::LongRunningJob::Topic')
-assert const_visible?('Karafka::Pro::Routing::Features::LongRunningJob::Contract')
+assert const_visible?('Karafka::Pro::Routing::Features::LongRunningJob::Contracts')
 assert const_visible?('Karafka::Pro::Routing::Features::LongRunningJob::Config')
 assert const_visible?('Karafka::Pro::Routing::Features::VirtualPartitions::Topic')
-assert const_visible?('Karafka::Pro::Routing::Features::VirtualPartitions::Contract')
+assert const_visible?('Karafka::Pro::Routing::Features::VirtualPartitions::Contracts')
 assert const_visible?('Karafka::Pro::Routing::Features::VirtualPartitions::Config')
 assert const_visible?('Karafka::Pro::Processing::Jobs::ConsumeNonBlocking')
 assert const_visible?('Karafka::Pro::ActiveJob::Consumer')
@@ -37,7 +37,8 @@ assert const_visible?('Karafka::Pro::PerformanceTracker')
 assert_equal pro::Processing::StrategySelector, config.processing.strategy_selector.class
 assert_equal pro::Processing::Partitioner, config.processing.partitioner_class
 assert_equal pro::Processing::Coordinator, config.processing.coordinator_class
-assert_equal pro::Processing::Scheduler, config.processing.scheduler.class
+assert_equal pro::Processing::Scheduler, config.processing.scheduler_class
+assert_equal pro::Processing::JobsQueue, config.processing.jobs_queue_class
 assert_equal pro::Processing::JobsBuilder, config.processing.jobs_builder.class
 assert_equal pro::ActiveJob::Dispatcher, config.active_job.dispatcher.class
 assert_equal pro::ActiveJob::Consumer, config.active_job.consumer_class

@@ -4,12 +4,12 @@ RSpec.describe_current do
   subject(:consumer) do
     instance = working_class.new
     instance.coordinator = coordinator
-    instance.topic = topic
+    instance.singleton_class.include Karafka::Processing::Strategies::Default
     instance
   end
 
   let(:coordinator) { build(:processing_coordinator, seek_offset: -1) }
-  let(:topic) { build(:routing_topic) }
+  let(:topic) { coordinator.topic }
   let(:client) { instance_double(Karafka::Connection::Client, pause: true) }
   let(:first_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
   let(:last_message) { instance_double(Karafka::Messages::Message, offset: offset, partition: 0) }
@@ -37,6 +37,10 @@ RSpec.describe_current do
       end
     end
   end
+
+  before { allow(client).to receive(:assignment_lost?).and_return(false) }
+
+  it { expect(consumer.send(:used?)).to eq(false) }
 
   describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(described_class) }
@@ -192,7 +196,7 @@ RSpec.describe_current do
 
       it { expect { consumer.on_revoked }.not_to raise_error }
 
-      it 'expect to run the error instrumentation' do
+      it 'expect to raise' do
         Karafka.monitor.subscribe('error.occurred') do |event|
           expect(event.payload[:caller]).to eq(consumer)
           expect(event.payload[:error]).to be_a(StandardError)
@@ -445,12 +449,21 @@ RSpec.describe_current do
   describe '#resume' do
     before do
       allow(coordinator.pause_tracker).to receive(:expire)
+      coordinator.pause_tracker.pause(1_000)
 
       consumer.send(:resume)
     end
 
-    it 'expect to expire the pause tracker' do
+    it 'expect to expire the pause tracker if it was paused' do
       expect(coordinator.pause_tracker).to have_received(:expire)
+    end
+  end
+
+  describe '#attempt' do
+    before { allow(consumer.coordinator.pause_tracker).to receive(:attempt).and_return(1) }
+
+    it 'expect to return attempt from the pause tracker' do
+      expect(consumer.send(:attempt)).to eq(1)
     end
   end
 end

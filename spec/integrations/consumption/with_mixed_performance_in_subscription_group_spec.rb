@@ -19,7 +19,7 @@ setup_karafka do |config|
   config.concurrency = 10
 end
 
-POLL = Concurrent::Array.new(6) { |i| i }
+POLL = Array.new(6) { |i| i }
 POLL << 8
 POLL.reverse!
 

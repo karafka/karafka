@@ -32,14 +32,4 @@ start_karafka_and_wait_until do
   DT[:paused].size >= 3
 end
 
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topic)
-
-consumer.each do |message|
-  DT[:jumped] << message.offset
-  break
-end
-
-consumer.close
-
-assert_equal DT[:jumped].last, DT[:last].max + 1
+assert_equal fetch_first_offset, DT[:last].max + 1

@@ -14,8 +14,18 @@ RSpec.describe_current do
       max_messages: 10,
       max_wait_time: 10_000,
       initial_offset: 'earliest',
-      subscription_group: SecureRandom.hex(6)
+      subscription_group_name: SecureRandom.hex(6)
     }
+  end
+
+  context 'when we check for the errors yml file reference' do
+    it 'expect to have all of them defined' do
+      stringified = described_class.config.error_messages.to_s
+
+      described_class.rules.each do |rule|
+        expect(stringified).to include(rule.path.last.to_s)
+      end
+    end
   end
 
   context 'when config is valid' do
@@ -60,23 +70,96 @@ RSpec.describe_current do
 
       it { expect(check).not_to be_success }
     end
+
+    context 'when considering namespaces' do
+      context 'with consistent namespacing style' do
+        context 'with dot style' do
+          before { config[:name] = 'yc.auth.cmd.shopper-registrations.1' }
+
+          it { expect(check).to be_success }
+        end
+
+        context 'with underscore style' do
+          before { config[:name] = 'yc_auth_cmd_shopper-registrations_1' }
+
+          it { expect(check).to be_success }
+        end
+      end
+
+      context 'with inconsistent namespacing style' do
+        before { config[:name] = 'yc.auth.cmd.shopper-registrations_1' }
+
+        it { expect(check).not_to be_success }
+      end
+
+      context 'when strict_topics_namespacing is set to false' do
+        before do
+          config[:name] = 'yc.auth.cmd.shopper-registrations_1'
+          ::Karafka::App.config.strict_topics_namespacing = false
+        end
+
+        after { ::Karafka::App.config.strict_topics_namespacing = true }
+
+        it { expect(check).to be_success }
+      end
+    end
   end
 
-  context 'when we subscription_group' do
+  context 'when we subscription_group_name' do
     context 'when it is nil' do
-      before { config[:subscription_group] = nil }
+      before { config[:subscription_group_name] = nil }
 
       it { expect(check).not_to be_success }
     end
 
     context 'when it is not a string' do
-      before { config[:subscription_group] = 2 }
+      before { config[:subscription_group_name] = 2 }
 
       it { expect(check).not_to be_success }
     end
 
     context 'when it is an empty string' do
-      before { config[:subscription_group] = '' }
+      before { config[:subscription_group_name] = '' }
+
+      it { expect(check).not_to be_success }
+    end
+  end
+
+  context 'when validating max_messages' do
+    context 'when not numeric' do
+      before { config[:max_messages] = '100' }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when zero' do
+      before { config[:max_messages] = 0 }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when missing' do
+      before { config.delete(:max_messages) }
+
+      it { expect(check).not_to be_success }
+    end
+  end
+
+  context 'when validating max_wait_time' do
+    context 'when not numeric' do
+      before { config[:max_wait_time] = '100' }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when zero' do
+      before { config[:max_wait_time] = 0 }
+
+      it { expect(check).not_to be_success }
+    end
+
+    context 'when missing' do
+      before { config.delete(:max_wait_time) }
 
       it { expect(check).not_to be_success }
     end

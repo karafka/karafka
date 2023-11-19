@@ -27,21 +27,18 @@ module Karafka
       class Scheduler < ::Karafka::Processing::Scheduler
         # Schedules jobs in the LJF order for consumption
         #
-        # @param queue [Karafka::Processing::JobsQueue] queue where we want to put the jobs
         # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
         #
-        def schedule_consumption(queue, jobs_array)
-          pt = PerformanceTracker.instance
+        def schedule_consumption(jobs_array)
+          perf_tracker = PerformanceTracker.instance
 
           ordered = []
 
           jobs_array.each do |job|
-            messages = job.messages
-            message = messages.first
-
-            cost = pt.processing_time_p95(message.topic, message.partition) * messages.size
-
-            ordered << [job, cost]
+            ordered << [
+              job,
+              processing_cost(perf_tracker, job)
+            ]
           end
 
           ordered.sort_by!(&:last)
@@ -49,7 +46,26 @@ module Karafka
           ordered.map!(&:first)
 
           ordered.each do |job|
-            queue << job
+            @queue << job
+          end
+        end
+
+        private
+
+        # @param perf_tracker [PerformanceTracker]
+        # @param job [Karafka::Processing::Jobs::Base] job we will be processing
+        # @return [Numeric] estimated cost of processing this job
+        def processing_cost(perf_tracker, job)
+          if job.is_a?(::Karafka::Processing::Jobs::Consume)
+            messages = job.messages
+            message = messages.first
+
+            perf_tracker.processing_time_p95(message.topic, message.partition) * messages.size
+          else
+            # LJF will set first the most expensive, but we want to run the zero cost jobs
+            # related to the lifecycle always first. That is why we "emulate" that they
+            # the longest possible jobs that anyone can run
+            Float::INFINITY
           end
         end
       end

@@ -2,29 +2,35 @@
 
 module Karafka
   # Karafka framework Cli
-  class Cli < Thor
+  class Cli
     # Console Karafka Cli action
     class Console < Base
-      desc 'Start the Karafka console (short-cut alias: "c")'
-      option aliases: 'c'
+      desc 'Starts the Karafka console (short-cut alias: "c")'
+
+      aliases :c
 
       class << self
-        # @return [String] Console executing command
+        # @return [String] Console executing command for non-Rails setup
         # @example
         #   Karafka::Cli::Console.command #=> 'KARAFKA_CONSOLE=true bundle exec irb...'
-        def command
-          envs = [
-            "IRBRC='#{Karafka.gem_root}/.console_irbrc'",
-            'KARAFKA_CONSOLE=true'
-          ]
-          "#{envs.join(' ')} bundle exec irb -r #{Karafka.boot_file}"
+        def console
+          "IRBRC='#{Karafka.gem_root}/.console_irbrc' bundle exec irb -r #{Karafka.boot_file}"
+        end
+
+        # @return [String] Console executing command for Rails setup
+        # @note In case of Rails, it has its own console, hence we can just defer to it
+        def rails_console
+          'bundle exec rails console'
         end
       end
 
       # Start the Karafka console
       def call
-        cli.info
-        exec self.class.command
+        Info.new.call
+
+        command = ::Karafka.rails? ? self.class.rails_console : self.class.console
+
+        exec "KARAFKA_CONSOLE=true #{command}"
       end
     end
   end

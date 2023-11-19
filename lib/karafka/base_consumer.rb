@@ -4,11 +4,16 @@
 module Karafka
   # Base consumer from which all Karafka consumers should inherit
   class BaseConsumer
+    # Allow for consumer instance tagging for instrumentation
+    include ::Karafka::Core::Taggable
+
+    extend Forwardable
+
+    def_delegators :@coordinator, :topic, :partition
+
     # @return [String] id of the current consumer
     attr_reader :id
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
-    attr_accessor :topic
-    # @return [Karafka::Messages::Messages] current messages batch
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
@@ -20,6 +25,7 @@ module Karafka
     # Creates new consumer and assigns it an id
     def initialize
       @id = SecureRandom.hex(6)
+      @used = false
     end
 
     # Can be used to run preparation code prior to the job being enqueued
@@ -28,15 +34,9 @@ module Karafka
     # @note This should not be used by the end users as it is part of the lifecycle of things and
     #   not as a part of the public api. This should not perform any extensive operations as it is
     #   blocking and running in the listener thread.
-    def on_before_enqueue
-      handle_before_enqueue
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        error: e,
-        caller: self,
-        type: 'consumer.before_enqueue.error'
-      )
+    def on_before_schedule_consume
+      @used = true
+      handle_before_schedule_consume
     end
 
     # Can be used to run preparation code in the worker
@@ -52,16 +52,11 @@ module Karafka
       # We run this after the full metadata setup, so we can use all the messages information
       # if needed
       handle_before_consume
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        error: e,
-        caller: self,
-        type: 'consumer.before_consume.error'
-      )
     end
 
     # Executes the default consumer flow.
+    #
+    # @private
     #
     # @return [Boolean] true if there was no exception, otherwise false.
     #
@@ -85,13 +80,27 @@ module Karafka
     #   not as part of the public api.
     def on_after_consume
       handle_after_consume
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        error: e,
-        caller: self,
-        type: 'consumer.after_consume.error'
-      )
+    end
+
+    # Can be used to run code prior to scheduling of idle execution
+    #
+    # @private
+    def on_before_schedule_idle
+      handle_before_schedule_idle
+    end
+
+    # Trigger method for running on idle runs without messages
+    #
+    # @private
+    def on_idle
+      handle_idle
+    end
+
+    # Can be used to run code prior to scheduling of revoked execution
+    #
+    # @private
+    def on_before_schedule_revoked
+      handle_before_schedule_revoked
     end
 
     # Trigger method for running on partition revocation.
@@ -106,6 +115,13 @@ module Karafka
         caller: self,
         type: 'consumer.revoked.error'
       )
+    end
+
+    # Can be used to run code prior to scheduling of revoked execution
+    #
+    # @private
+    def on_before_schedule_shutdown
+      handle_before_schedule_shutdown
     end
 
     # Trigger method for running on shutdown.
@@ -140,68 +156,36 @@ module Karafka
     # some teardown procedures (closing file handler, etc).
     def shutdown; end
 
-    # Marks message as consumed in an async way.
-    #
-    # @param message [Messages::Message] last successfully processed message.
-    # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
-    #   that we were not able and that we have lost the partition.
-    #
-    # @note We keep track of this offset in case we would mark as consumed and got error when
-    #   processing another message. In case like this we do not pause on the message we've already
-    #   processed but rather at the next one. This applies to both sync and async versions of this
-    #   method.
-    def mark_as_consumed(message)
-      # Ignore earlier offsets than the one we alread committed
-      return true if coordinator.seek_offset > message.offset
-
-      unless client.mark_as_consumed(message)
-        coordinator.revoke
-
-        return false
-      end
-
-      coordinator.seek_offset = message.offset + 1
-
-      true
+    # @return [Boolean] was this consumer in active use. Active use means running `#consume` at
+    #   least once. Consumer may have to run `#revoked` or `#shutdown` despite not running
+    #   `#consume` previously in delayed job cases and other cases that potentially involve running
+    #   the `Jobs::Idle` for house-keeping
+    def used?
+      @used
     end
 
-    # Marks message as consumed in a sync way.
-    #
-    # @param message [Messages::Message] last successfully processed message.
-    # @return [Boolean] true if we were able to mark the offset, false otherwise. False indicates
-    #   that we were not able and that we have lost the partition.
-    def mark_as_consumed!(message)
-      # Ignore earlier offsets than the one we alread committed
-      return true if coordinator.seek_offset > message.offset
-
-      unless client.mark_as_consumed!(message)
-        coordinator.revoke
-
-        return false
-      end
-
-      coordinator.seek_offset = message.offset + 1
-
-      true
-    end
-
-    # Pauses processing on a given offset for the current topic partition
+    # Pauses processing on a given offset or consecutive offset for the current topic partition
     #
     # After given partition is resumed, it will continue processing from the given offset
-    # @param offset [Integer] offset from which we want to restart the processing
+    # @param offset [Integer, Symbol] offset from which we want to restart the processing or
+    #  `:consecutive` if we want to pause and continue without changing the consecutive offset
+    #  (cursor position)
     # @param timeout [Integer, nil] how long in milliseconds do we want to pause or nil to use the
     #   default exponential pausing strategy defined for retries
     # @param manual_pause [Boolean] Flag to differentiate between user pause and system/strategy
     #   based pause. While they both pause in exactly the same way, the strategy application
     #   may need to differentiate between them.
+    #
+    # @note It is **critical** to understand how pause with `:consecutive` offset operates. While
+    #   it provides benefit of not purging librdkafka buffer, in case of usage of filters, retries
+    #   or other advanced options the consecutive offset may not be the one you want to pause on.
+    #   Test it well to ensure, that this behaviour is expected by you.
     def pause(offset, timeout = nil, manual_pause = true)
       timeout ? coordinator.pause_tracker.pause(timeout) : coordinator.pause_tracker.pause
 
-      client.pause(
-        messages.metadata.topic,
-        messages.metadata.partition,
-        offset
-      )
+      offset = nil if offset == :consecutive
+
+      client.pause(topic.name, partition, offset)
 
       # Indicate, that user took a manual action of pausing
       coordinator.manual_pause if manual_pause
@@ -210,8 +194,9 @@ module Karafka
         'consumer.consuming.pause',
         caller: self,
         manual: manual_pause,
-        topic: messages.metadata.topic,
-        partition: messages.metadata.partition,
+        topic: topic.name,
+        partition: partition,
+        subscription_group: topic.subscription_group,
         offset: offset,
         timeout: coordinator.pause_tracker.current_timeout,
         attempt: coordinator.pause_tracker.attempt
@@ -220,6 +205,8 @@ module Karafka
 
     # Resumes processing of the current topic partition
     def resume
+      return unless coordinator.pause_tracker.paused?
+
       # This is sufficient to expire a partition pause, as with it will be resumed by the listener
       # thread before the next poll.
       coordinator.pause_tracker.expire
@@ -227,22 +214,50 @@ module Karafka
 
     # Seeks in the context of current topic and partition
     #
-    # @param offset [Integer] offset where we want to seek
-    def seek(offset)
+    # @param offset [Integer, Time] offset where we want to seek or time of the offset where we
+    #   want to seek.
+    # @param manual_seek [Boolean] Flag to differentiate between user seek and system/strategy
+    #   based seek. User seek operations should take precedence over system actions, hence we need
+    #   to know who invoked it.
+    # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
+    def seek(offset, manual_seek = true)
+      coordinator.manual_seek if manual_seek
+
       client.seek(
         Karafka::Messages::Seek.new(
-          messages.metadata.topic,
-          messages.metadata.partition,
+          topic.name,
+          partition,
           offset
         )
       )
     end
 
     # @return [Boolean] true if partition was revoked from the current consumer
-    # @note We know that partition got revoked because when we try to mark message as consumed,
-    #   unless if is successful, it will return false
+    # @note There are two "levels" on which we can know that partition was revoked. First one is
+    #   when we loose the assignment involuntarily and second is when coordinator gets this info
+    #   after we poll with the rebalance callbacks. The first check allows us to get this notion
+    #   even before we poll but it gets reset when polling happens, hence we also need to switch
+    #   the coordinator state after the revocation (but prior to running more jobs)
     def revoked?
-      coordinator.revoked?
+      return true if coordinator.revoked?
+      return false unless client.assignment_lost?
+
+      coordinator.revoke
+
+      true
+    end
+
+    # @return [Boolean] are we retrying processing after an error. This can be used to provide a
+    #   different flow after there is an error, for example for resources cleanup, small manual
+    #   backoff or different instrumentation tracking.
+    def retrying?
+      attempt > 1
+    end
+
+    # @return [Integer] attempt of processing given batch. 1 if this is the first attempt or higher
+    #  in case it is a retry
+    def attempt
+      coordinator.pause_tracker.attempt
     end
 
     # Pauses the processing from the last offset to retry on given message
@@ -255,8 +270,8 @@ module Karafka
       Karafka.monitor.instrument(
         'consumer.consuming.retry',
         caller: self,
-        topic: messages.metadata.topic,
-        partition: messages.metadata.partition,
+        topic: topic.name,
+        partition: partition,
         offset: coordinator.seek_offset,
         timeout: coordinator.pause_tracker.current_timeout,
         attempt: coordinator.pause_tracker.attempt

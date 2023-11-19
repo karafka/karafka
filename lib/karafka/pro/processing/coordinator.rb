@@ -17,13 +17,40 @@ module Karafka
       # Pro coordinator that provides extra orchestration methods useful for parallel processing
       # within the same partition
       class Coordinator < ::Karafka::Processing::Coordinator
+        extend Forwardable
+
+        def_delegators :@collapser, :collapsed?, :collapse_until!
+
+        attr_reader :filter, :virtual_offset_manager, :shared_mutex
+
         # @param args [Object] anything the base coordinator accepts
         def initialize(*args)
           super
 
           @executed = []
-          @flow_lock = Mutex.new
+          @flow_mutex = Mutex.new
+          # Lock for user code synchronization
+          # We do not want to mix coordinator lock with the user lock not to create cases where
+          # user imposed lock would lock the internal operations of Karafka
+          # This shared lock can be used by the end user as it is not used internally by the
+          # framework and can be used for user-facing locking
+          @shared_mutex = Mutex.new
           @collapser = Collapser.new
+          @filter = FiltersApplier.new(self)
+
+          return unless topic.virtual_partitions?
+
+          @virtual_offset_manager = VirtualOffsetManager.new(
+            topic.name,
+            partition
+          )
+
+          # We register our own "internal" filter to support filtering of messages that were marked
+          # as consumed virtually
+          @filter.filters << Filters::VirtualLimiter.new(
+            @virtual_offset_manager,
+            @collapser
+          )
         end
 
         # Starts the coordination process
@@ -34,10 +61,15 @@ module Karafka
 
           @collapser.refresh!(messages.first.offset)
 
-          @mutex.synchronize do
-            @executed.clear
-            @last_message = messages.last
-          end
+          @filter.apply!(messages)
+
+          @executed.clear
+
+          # We keep the old processed offsets until the collapsing is done and regular processing
+          # with virtualization is restored
+          @virtual_offset_manager.clear if topic.virtual_partitions? && !collapsed?
+
+          @last_message = messages.last
         end
 
         # Sets the consumer failure status and additionally starts the collapse until
@@ -46,12 +78,13 @@ module Karafka
         # @param error [StandardError] error from the failure
         def failure!(consumer, error)
           super
-          @collapser.collapse_until!(@last_message.offset + 1)
+          collapse_until!(@last_message.offset + 1)
         end
 
-        # @return [Boolean] are we in a collapsed state at the moment
-        def collapsed?
-          @collapser.collapsed?
+        # @return [Boolean] did any of the filters apply any logic that would cause use to run
+        #   the filtering flow
+        def filtered?
+          @filter.applied?
         end
 
         # @return [Boolean] is the coordinated work finished or not
@@ -62,7 +95,7 @@ module Karafka
         # Runs synchronized code once for a collective of virtual partitions prior to work being
         # enqueued
         def on_enqueued
-          @flow_lock.synchronize do
+          @flow_mutex.synchronize do
             return unless executable?(:on_enqueued)
 
             yield(@last_message)
@@ -71,7 +104,7 @@ module Karafka
 
         # Runs given code only once per all the coordinated jobs upon starting first of them
         def on_started
-          @flow_lock.synchronize do
+          @flow_mutex.synchronize do
             return unless executable?(:on_started)
 
             yield(@last_message)
@@ -82,7 +115,7 @@ module Karafka
         # It runs once per all the coordinated jobs and should be used to run any type of post
         # jobs coordination processing execution
         def on_finished
-          @flow_lock.synchronize do
+          @flow_mutex.synchronize do
             return unless finished?
             return unless executable?(:on_finished)
 
@@ -92,7 +125,7 @@ module Karafka
 
         # Runs once after a partition is revoked
         def on_revoked
-          @flow_lock.synchronize do
+          @flow_mutex.synchronize do
             return unless executable?(:on_revoked)
 
             yield(@last_message)

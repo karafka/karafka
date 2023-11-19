@@ -8,13 +8,13 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
-create_topic(partitions: 3)
-
 setup_active_job
 
 draw_routes do
   consumer_group DT.consumer_group do
-    active_job_topic DT.topic
+    active_job_topic DT.topic do
+      config(partitions: 3)
+    end
   end
 end
 
@@ -35,11 +35,11 @@ end
 counts = 0
 
 # First loop kicks in before initialization of the connection and we want to publish after, that
-# is why we don't run it on the first run
+# is why we don't run it on the first runs
 Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
   counts += 1
 
-  if counts == 5
+  if counts == 20
     # We dispatch in order per partition, in case it all would go to one without partitioner or
     # in case it would fail, the order will break
     2.downto(0) do |partition|

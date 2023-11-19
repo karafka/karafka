@@ -11,10 +11,19 @@ module Karafka
     module Strategies
       # Base strategy that should be included in each strategy, just to ensure the API
       module Base
-        # What should happen before jobs are enqueued
-        # @note This runs from the listener thread, not recommended to put anything slow here
-        def handle_before_enqueue
-          raise NotImplementedError, 'Implement in a subclass'
+        # Defines all the before schedule handlers for appropriate actions
+        %i[
+          consume
+          idle
+          revoked
+          shutdown
+        ].each do |action|
+          class_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def handle_before_schedule_#{action}
+              # What should happen before scheduling this work
+              raise NotImplementedError, 'Implement in a subclass'
+            end
+          RUBY
         end
 
         # What should happen before we kick in the processing
@@ -29,6 +38,11 @@ module Karafka
 
         # Post-consumption handling
         def handle_after_consume
+          raise NotImplementedError, 'Implement in a subclass'
+        end
+
+        # Idle run handling
+        def handle_idle
           raise NotImplementedError, 'Implement in a subclass'
         end
 

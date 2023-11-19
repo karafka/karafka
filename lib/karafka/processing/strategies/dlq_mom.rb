@@ -29,10 +29,17 @@ module Karafka
             # We reset the pause to indicate we will now consider it as "ok".
             coordinator.pause_tracker.reset
 
-            skippable_message = find_skippable_message
+            skippable_message, = find_skippable_message
+
             dispatch_to_dlq(skippable_message)
 
-            # We pause to backoff once just in case.
+            # Save the next offset we want to go with after moving given message to DLQ
+            # Without this, we would not be able to move forward and we would end up
+            # in an infinite loop trying to un-pause from the message we've already processed
+            # Of course, since it's a MoM a rebalance or kill, will move it back as no
+            # offsets are being committed
+            coordinator.seek_offset = skippable_message.offset + 1
+
             pause(coordinator.seek_offset, nil, false)
           end
         end

@@ -95,7 +95,7 @@ class Tracker
     # @param messages_count [Integer, nil] how many messages did we process overall or nil if
     #   the benchmark is not per message data related
     # @param block [Proc] code we want to run in iterations
-    def run(messages_count: nil, iterations: 10, &block)
+    def run(messages_count: nil, iterations: 1, &block)
       instance = new(iterations: iterations, messages_count: messages_count)
 
       instance.iterate { block.call }

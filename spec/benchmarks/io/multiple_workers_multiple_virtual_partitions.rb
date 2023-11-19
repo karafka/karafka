@@ -4,6 +4,8 @@
 # Here we stream data in real-time (which works differently than catching up) and simulate IO
 # by sleeping 1ms per message to benchmark parallel processing.
 
+become_pro!
+
 setup_karafka do |config|
   config.kafka[:'auto.offset.reset'] = 'latest'
   config.concurrency = ENV.fetch('THREADS', 5).to_i
@@ -48,6 +50,7 @@ class Consumer < Karafka::BaseConsumer
     return if $stop
 
     $stop = Time.monotonic
+
     Thread.new { Karafka::Server.stop }
   end
 end
@@ -58,8 +61,9 @@ Karafka::App.routes.draw do
       max_messages 1_000
       max_wait_time 1_000
       consumer Consumer
-      manual_offset_management true
-      virtual_partitioner ->(msg) { msg.raw_payload }
+      virtual_partitions(
+        partitioner: ->(msg) { msg.raw_payload }
+      )
     end
   end
 end
@@ -69,6 +73,7 @@ Tracker.run(messages_count: MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT) do
   $start = false
   $stop = false
 
+  Karafka::App.config.internal.status.reset!
   Karafka::Server.run
 
   $stop - $start

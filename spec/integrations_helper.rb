@@ -13,6 +13,7 @@ end
 
 require 'singleton'
 require 'securerandom'
+require 'tmpdir'
 require_relative './support/data_collector'
 
 Thread.abort_on_exception = true
@@ -44,7 +45,8 @@ def setup_karafka(
       # We need to send this often as in specs we do time sensitive things and we may be kicked
       # out of the consumer group if it is not delivered fast enough
       'heartbeat.interval.ms': 1_000,
-      'queue.buffering.max.ms': 5
+      'queue.buffering.max.ms': 5,
+      'partition.assignment.strategy': 'range,roundrobin'
     }
     config.client_id = caller_id
     config.pause_timeout = 1
@@ -96,6 +98,25 @@ def setup_karafka(
   end
 end
 
+# Loads the web UI for integration specs of tracking
+def setup_web
+  require 'karafka/web'
+
+  # Use new groups and topics for each spec, so we don't end up with conflicts
+  Karafka::Web.setup do |config|
+    config.processing.consumer_group = SecureRandom.hex(6)
+    config.topics.consumers.reports = SecureRandom.hex(6)
+    config.topics.consumers.states = SecureRandom.hex(6)
+    config.topics.consumers.metrics = SecureRandom.hex(6)
+    config.topics.errors = SecureRandom.hex(6)
+
+    yield(config) if block_given?
+  end
+
+  Karafka::Web.enable!
+  Karafka::Web::Installer.new.migrate
+end
+
 # Switches specs into a Pro mode
 def become_pro!
   mod = Module.new do
@@ -127,30 +148,13 @@ def setup_rdkafka_consumer(options = {})
     'bootstrap.servers': 'localhost:9092',
     'group.id': Karafka::App.consumer_groups.first.id,
     'auto.offset.reset': 'earliest',
-    'enable.auto.offset.store': 'false'
+    'enable.auto.offset.store': 'false',
+    'partition.assignment.strategy': 'range,roundrobin'
   }.merge!(options)
 
   Rdkafka::Config.new(
     Karafka::Setup::AttributesMap.consumer(config)
   ).consumer
-end
-
-# A simple helper for creation of topics with given partitions count. Single partition topics are
-# automatically created during our specs, but for some we need more than one. In those cases we
-# use this helper.
-#
-# The name is equal to the default spec topic, that is `DT.topic`
-#
-# @param name [String] topic name
-# @param partitions [Integer] number of partitions for this topic
-# @param config [Hash] optional topic configuration settings
-def create_topic(name: DT.topic, partitions: 1, config: {})
-  Karafka::Admin.create_topic(
-    name,
-    partitions,
-    1,
-    config
-  )
 end
 
 # Sets up default routes (mostly used in integration specs) or allows to configure custom routes
@@ -176,26 +180,85 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
   create_routes_topics
 end
 
+# @param topic [String] topic to which we want to subscribe
+# @return [Integer, false] first offset from which consumption will (re)start or false if we could
+#   not establish because all messages are consumed from the topic
+# @note If no data available, this will hang!
+def fetch_first_offset(topic = DT.topic)
+  consumer = setup_rdkafka_consumer
+  consumer.subscribe(topic)
+
+  first = false
+
+  10.times do
+    message = consumer.poll(1_000)
+
+    next unless message
+
+    first = message.offset
+
+    break
+  end
+
+  consumer.close
+
+  first
+end
+
+# @return [Array<Karafka::Routing::Topic>] all topics (declaratives and non-declaratives)
+def fetch_routes_topics
+  Karafka::App.routes.map(&:topics).map(&:to_a).flatten
+end
+
+# @return [Hash] hash with names of topics and configs as values or false for topics for which
+#   we should use the defaults
+def fetch_declarative_routes_topics_configs
+  fetch_routes_topics.each_with_object({}) do |topic, accu|
+    next unless topic.declaratives.active?
+
+    accu[topic.name] ||= topic.declaratives
+
+    next unless topic.dead_letter_queue?
+    next unless topic.dead_letter_queue.topic
+
+    # Setting to false will force defaults, useful when we do not want to declare DLQ topics
+    # manually. This will ensure we always create DLQ topics if their details are not defined
+    # in the routing
+    accu[topic.name] ||= false
+  end
+end
+
 # Creates topics defined in the routes so they are available for the specs
 # Code below will auto-create all the routing based topics so we don't have to do it per spec
 # If a topic is already created for example with more partitions, this will do nothing
+#
+# @note This code ensures that we do not create multiple topics from multiple tests at the same
+#   time because under heavy creation load, Kafka hangs sometimes. Keep in mind, this lowers number
+#   of topics created concurrently but some particular specs create topics on their own. The
+#   quantity however should be small enough for Kafka to handle.
 def create_routes_topics
-  topics_names = Set.new
+  lock = File.open(File.join(Dir.tmpdir, 'create_routes_topics.lock'), File::CREAT | File::RDWR)
+  lock.flock(File::LOCK_EX)
 
-  Karafka::App.routes.map(&:topics).flatten.each do |topics|
-    topics.each do |topic|
-      next unless topic.active?
+  fetch_declarative_routes_topics_configs.each do |name, config|
+    args = if config
+             [config.partitions, config.replication_factor, config.details]
+           else
+             [1, 1, {}]
+           end
 
-      topics_names << topic.name
-
-      next unless topic.dead_letter_queue?
-      next unless topic.dead_letter_queue.topic
-
-      topics_names << topic.dead_letter_queue.topic
+    begin
+      Karafka::Admin.create_topic(
+        name,
+        *args
+      )
+    # Ignore if exists, some specs may try to create few times
+    rescue Rdkafka::RdkafkaError => e
+      e.code == :topic_already_exists ? return : raise
     end
   end
-
-  topics_names.each { |topic_name| create_topic(name: topic_name) }
+ensure
+  lock.close
 end
 
 # Waits until block yields true
@@ -206,9 +269,9 @@ def wait_until
   until stop
     stop = yield
 
-    # Stop if it was running for 3 minutes and nothing changed
+    # Stop if it was running for 4 minutes and nothing changed
     # This prevent from hanging in case of specs instability
-    if (Time.now - started_at) > 180
+    if (Time.now - started_at) > 240
       puts DT.data
       raise StandardError, 'Execution expired'
     end
@@ -294,6 +357,17 @@ def assert_not_equal(not_expected, received)
   return if not_expected != received
 
   raise AssertionFailedError, "#{received} equals to #{not_expected}"
+end
+
+# Checks if two ranges do not overlap
+#
+# @param range_a [Range]
+# @param range_b [Range]
+def assert_no_overlap(range_a, range_b)
+  assert(
+    !(range_b.begin <= range_a.end && range_a.begin <= range_b.end),
+    [range_a, range_b, DT]
+  )
 end
 
 # @param file_path [String] path within fixtures dir to the expected file

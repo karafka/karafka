@@ -12,6 +12,11 @@ module Karafka
           super()
         end
 
+        # Runs code prior to scheduling this revoked job
+        def before_schedule
+          executor.before_schedule_revoked
+        end
+
         # Runs the revoking job via an executor.
         def call
           executor.revoked

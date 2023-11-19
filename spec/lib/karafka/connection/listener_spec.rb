@@ -5,13 +5,15 @@ RSpec.describe_current do
     described_class.new(
       consumer_group_coordinator,
       subscription_group,
-      jobs_queue
+      jobs_queue,
+      scheduler
     )
   end
 
   let(:consumer_group_coordinator) { Karafka::Connection::ConsumerGroupCoordinator.new(0) }
   let(:subscription_group) { build(:routing_subscription_group, topics: [routing_topic]) }
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
+  let(:scheduler) { Karafka::Processing::Scheduler.new(jobs_queue) }
   let(:client) { Karafka::Connection::Client.new(subscription_group) }
   let(:routing_topic) { build(:routing_topic) }
   let(:workers_batch) { Karafka::Processing::WorkersBatch.new(jobs_queue).each(&:async_call) }
@@ -20,7 +22,7 @@ RSpec.describe_current do
     workers_batch
 
     allow(client.class).to receive(:new).and_return(client)
-    allow(Karafka::App).to receive(:stopping?).and_return(false, true)
+    allow(Karafka::App).to receive(:done?).and_return(false, true)
     allow(client).to receive(:batch_poll).and_return([])
     allow(client).to receive(:ping)
     allow(consumer_group_coordinator).to receive(:shutdown?).and_return(true)
@@ -63,7 +65,7 @@ RSpec.describe_current do
     end
 
     it 'expect the revoke job to be consumed meanwhile' do
-      expect(jobs_queue.size).to eq(0)
+      expect(jobs_queue.statistics).to eq(busy: 0, enqueued: 0)
     end
   end
 

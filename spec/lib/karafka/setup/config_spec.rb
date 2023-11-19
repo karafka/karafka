@@ -56,7 +56,13 @@ RSpec.describe_current do
         'bootstrap.servers': '127.0.0.1:9092',
         'client.id': defaults[:'client.id'],
         'statistics.interval.ms': 5_000,
-        'topic.metadata.refresh.interval.ms': 5_000
+        'topic.metadata.refresh.interval.ms': 5_000,
+        'client.software.name': 'karafka',
+        'client.software.version': [
+          "v#{Karafka::VERSION}",
+          "rdkafka-ruby-v#{Rdkafka::VERSION}",
+          "librdkafka-v#{Rdkafka::LIBRDKAFKA_VERSION}"
+        ].join('-')
       }
     end
 

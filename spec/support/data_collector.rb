@@ -25,7 +25,7 @@ class DataCollector
       instance.topics
     end
 
-    # @return [Concurrent::Hash] structure for aggregating data
+    # @return [Hash] structure for aggregating data
     def data
       instance.data
     end
@@ -63,7 +63,12 @@ class DataCollector
     # @param amount [Integer] number of uuids we want to get
     # @return [Array<String>] array with uuids
     def uuids(amount)
-      Array.new(amount) { SecureRandom.uuid }
+      Array.new(amount) { uuid }
+    end
+
+    # @return [String] single uuid
+    def uuid
+      SecureRandom.uuid
     end
 
     # Removes all the data from the collector
@@ -83,20 +88,24 @@ class DataCollector
     def to_s
       inspect
     end
+
+    # @param key [Object] anything we use as a key
+    # @return [Boolean] is there anything under given key
+    def key?(key)
+      instance.data.key?(key)
+    end
   end
 
   # Creates a collector
   def initialize
     @mutex = Mutex.new
-    @topics = Concurrent::Array.new(100) { SecureRandom.hex(6) }
+    @topics = Array.new(100) { SecureRandom.hex(8) }
     @consumer_groups = @topics
-    # We need to use a concurrent hash and not a map because we want to print this data upon
-    # failures and debugging
-    @data = Concurrent::Hash.new do |hash, key|
+    @data = Hash.new do |hash, key|
       @mutex.synchronize do
         break hash[key] if hash.key?(key)
 
-        hash[key] = ::Concurrent::Array.new
+        hash[key] = []
       end
     end
   end

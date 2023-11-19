@@ -1,12 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:group) { described_class.new(0, [topic]) }
+  subject(:group) { described_class.new(0, topics) }
 
   let(:topic) { build(:routing_topic, kafka: { 'bootstrap.servers': 'kafka://kafka:9092' }) }
+  let(:topics) { [topic] }
 
   describe '#id' do
-    it { expect(group.id).to eq("#{topic.subscription_group}_0") }
+    it { expect(group.id).to eq("#{topic.consumer_group.id}_#{topic.subscription_group_name}_0") }
+  end
+
+  describe '#to_s' do
+    it { expect(group.to_s).to eq(group.id) }
   end
 
   describe '#max_messages' do
@@ -25,6 +30,20 @@ RSpec.describe_current do
     it { expect(group.consumer_group).to eq(topic.consumer_group) }
   end
 
+  describe '#subscriptions' do
+    it { expect(group.subscriptions).to eq([topic.name]) }
+
+    context 'when there are inactive topics in given group' do
+      let(:topic2) { build(:routing_topic).tap { |top| top.active(false) } }
+
+      before { topics << topic2 }
+
+      it 'expect not to include inactive topics' do
+        expect(group.subscriptions).to eq([topic.name])
+      end
+    end
+  end
+
   describe '#kafka' do
     it { expect(group.kafka[:'client.id']).to eq(Karafka::App.config.client_id) }
     it { expect(group.kafka[:'auto.offset.reset']).to eq('earliest') }
@@ -34,23 +53,31 @@ RSpec.describe_current do
 
   describe '#active?' do
     context 'when there are no topics in the subscription group' do
-      before { Karafka::App.config.internal.routing.active.subscription_groups = [] }
-
       it { expect(group.active?).to eq true }
     end
 
     context 'when our subscription group name is in server subscription groups' do
       before do
-        Karafka::App.config.internal.routing.active.subscription_groups = [
-          topic.subscription_group
-        ]
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:subscription_groups, topic.subscription_group_name)
       end
 
       it { expect(group.active?).to eq true }
     end
 
     context 'when our subscription group name is not in server subscription groups' do
-      before { Karafka::App.config.internal.routing.active.subscription_groups = ['na'] }
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:subscription_groups, 'na')
+      end
 
       it { expect(group.active?).to eq false }
     end

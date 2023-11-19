@@ -8,8 +8,6 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
-create_topic(partitions: 2)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     # We should never try to consume new batch with a revoked consumer
@@ -35,6 +33,7 @@ end
 draw_routes do
   consumer_group DT.consumer_group do
     topic DT.topic do
+      config(partitions: 2)
       consumer Consumer
       long_running_job true
     end
@@ -57,6 +56,12 @@ end
 # We need a second producer to trigger a rebalance
 consumer = setup_rdkafka_consumer
 
+# This part makes sure we do not run rebalance until karafka got both partitions work to do
+def got_both?
+  DT['0-object_ids'].uniq.size >= 1 &&
+    DT['1-object_ids'].uniq.size >= 1
+end
+
 other = Thread.new do
   sleep(0.1) until got_both?
 
@@ -74,12 +79,6 @@ other = Thread.new do
   end
 
   consumer.close
-end
-
-# This part makes sure we do not run rebalance until karafka got both partitions work to do
-def got_both?
-  DT['0-object_ids'].uniq.size >= 1 &&
-    DT['1-object_ids'].uniq.size >= 1
 end
 
 start_karafka_and_wait_until do

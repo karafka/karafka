@@ -18,7 +18,13 @@ module Karafka
       KAFKA_DEFAULTS = {
         # We emit the statistics by default, so all the instrumentation and web-ui work out of
         # the box, without requiring users to take any extra actions aside from enabling.
-        'statistics.interval.ms': 5_000
+        'statistics.interval.ms': 5_000,
+        'client.software.name': 'karafka',
+        'client.software.version': [
+          "v#{Karafka::VERSION}",
+          "rdkafka-ruby-v#{Rdkafka::VERSION}",
+          "librdkafka-v#{Rdkafka::LIBRDKAFKA_VERSION}"
+        ].join('-')
       }.freeze
 
       # Contains settings that should not be used in production but make life easier in dev
@@ -89,10 +95,53 @@ module Karafka
       # option [::WaterDrop::Producer, nil]
       # Unless configured, will be created once Karafka is configured based on user Karafka setup
       setting :producer, default: nil
+      # option [Boolean] when set to true, Karafka will ensure that the routing topic naming
+      # convention is strict
+      # Disabling this may be needed in scenarios where we do not have control over topics names
+      # and/or we work with existing systems where we cannot change topics names.
+      setting :strict_topics_namespacing, default: true
 
       # rdkafka default options
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
+
+      # Admin specific settings.
+      #
+      # Since admin operations are often specific, they may require specific librdkafka settings
+      # or other settings that are unique to admin.
+      setting :admin do
+        # Specific kafka settings that are tuned to operate within the Admin.
+        #
+        # Please do not change them unless you know what you are doing as their misconfiguration
+        # may cause Admin API to misbehave
+        # option [Hash] extra changes to the default root kafka settings
+        setting :kafka, default: {
+          # We want to know when there is no more data not to end up with an endless loop
+          'enable.partition.eof': true,
+          # Do not publish statistics from admin as they are not relevant
+          'statistics.interval.ms': 0,
+          # Fetch at most 5 MBs when using admin
+          'fetch.message.max.bytes': 5 * 1_048_576,
+          # Do not commit offset automatically, this prevents offset tracking for operations
+          # involving a consumer instance
+          'enable.auto.commit': false,
+          # Make sure that topic metadata lookups do not create topics accidentally
+          'allow.auto.create.topics': false
+        }
+
+        # option [String] default name for the admin consumer group. Please note, that this is a
+        # subject to be remapped by the consumer mapper as any other consumer group in the routes
+        setting :group_id, default: 'karafka_admin'
+
+        # option max_wait_time [Integer] We wait only for this amount of time before raising error
+        # as we intercept this error and retry after checking that the operation was finished or
+        # failed using external factor.
+        setting :max_wait_time, default: 1_000
+
+        # How many times should be try. 1 000 ms x 60 => 60 seconds wait in total and then we give
+        # up on pending operations
+        setting :max_attempts, default: 60
+      end
 
       # Namespace for internal settings that should not be modified directly
       setting :internal do
@@ -103,6 +152,24 @@ module Karafka
         #   instances
         setting :process, default: Process.new
 
+        # Interval of "ticking". This is used to define the maximum time between consecutive
+        # polling of the main rdkafka queue. It should match also the `statistics.interval.ms`
+        # smallest value defined in any of the per-kafka settings, so metrics are published with
+        # the desired frequency. It is set to 5 seconds because `statistics.interval.ms` is also
+        # set to five seconds.
+        #
+        # It is NOT allowed to set it to a value less than 1 seconds because it could cause polling
+        # not to have enough time to run. This (not directly) defines also a single poll
+        # max timeout as to allow for frequent enough events polling
+        setting :tick_interval, default: 5_000
+
+        # Namespace for CLI related settings
+        setting :cli do
+          # option contract [Object] cli setup validation contract (in the context of options and
+          # topics)
+          setting :contract, default: Contracts::ServerCliOptions.new
+        end
+
         setting :routing do
           # option builder [Karafka::Routing::Builder] builder instance
           setting :builder, default: Routing::Builder.new
@@ -111,17 +178,40 @@ module Karafka
           setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
 
           # Internally assigned list of limits on routings active for the current process
-          # This should be overwritten by the CLI command
-          setting :active do
-            setting :consumer_groups, default: [].freeze
-            setting :subscription_groups, default: [].freeze
-            setting :topics, default: [].freeze
+          # This can be altered by the CLI command
+          setting :activity_manager, default: Routing::ActivityManager.new
+        end
+
+        # Namespace for internal connection related settings
+        setting :connection do
+          # Settings that are altered by our client proxy layer
+          setting :proxy do
+            # Watermark offsets request settings
+            setting :query_watermark_offsets do
+              # timeout for this request. For busy or remote clusters, this should be high enough
+              setting :timeout, default: 5_000
+              # How many times should we try to run this call before raising an error
+              setting :max_attempts, default: 3
+              # How long should we wait before next attempt in case of a failure
+              setting :wait_time, default: 1_000
+            end
+
+            # Offsets for times request settings
+            setting :offsets_for_times do
+              # timeout for this request. For busy or remote clusters, this should be high enough
+              setting :timeout, default: 5_000
+              # How many times should we try to run this call before raising an error
+              setting :max_attempts, default: 3
+              # How long should we wait before next attempt in case of a failure
+              setting :wait_time, default: 1_000
+            end
           end
         end
 
         setting :processing do
+          setting :jobs_queue_class, default: Processing::JobsQueue
           # option scheduler [Object] scheduler we will be using
-          setting :scheduler, default: Processing::Scheduler.new
+          setting :scheduler_class, default: Processing::Scheduler
           # option jobs_builder [Object] jobs builder we want to use
           setting :jobs_builder, default: Processing::JobsBuilder.new
           # option coordinator [Class] work coordinator we want to user for processing coordination
@@ -130,6 +220,8 @@ module Karafka
           setting :partitioner_class, default: Processing::Partitioner
           # option strategy_selector [Object] processing strategy selector to be used
           setting :strategy_selector, default: Processing::StrategySelector.new
+          # option expansions_selector [Object] processing expansions selector to be used
+          setting :expansions_selector, default: Processing::ExpansionsSelector.new
         end
 
         # Things related to operating on messages
@@ -160,10 +252,14 @@ module Karafka
         def setup(&block)
           # Will prepare and verify license if present
           Licenser.prepare_and_verify(config.license)
+
+          # Pre-setup configure all routing features that would need this
+          Routing::Features::Base.pre_setup_all(config)
+
           # Will configure all the pro components
           # This needs to happen before end user configuration as the end user may overwrite some
           # of the pro defaults with custom components
-          Pro::Loader.pre_setup(config) if Karafka.pro?
+          Pro::Loader.pre_setup_all(config) if Karafka.pro?
 
           configure(&block)
           merge_kafka_defaults!(config)
@@ -172,9 +268,15 @@ module Karafka
 
           configure_components
 
+          # Refreshes the references that are cached that might have been changed by the config
+          ::Karafka.refresh!
+
+          # Post-setup configure all routing features that would need this
+          Routing::Features::Base.post_setup_all(config)
+
           # Runs things that need to be executed after config is defined and all the components
           # are also configured
-          Pro::Loader.post_setup(config) if Karafka.pro?
+          Pro::Loader.post_setup_all(config) if Karafka.pro?
 
           Karafka::App.initialized!
         end

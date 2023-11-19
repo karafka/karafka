@@ -53,7 +53,7 @@ start_karafka_and_wait_until do
 
   sleep(1)
 
-  DT[:rebalanced].size >= 1
+  DT.key?(:rebalanced)
 end
 
 previous = nil

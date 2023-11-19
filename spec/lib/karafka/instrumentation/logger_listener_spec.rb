@@ -74,22 +74,43 @@ RSpec.describe_current do
   end
 
   describe '#on_client_pause' do
-    subject(:trigger) { listener.on_client_pause(event) }
+    context 'when pausing offset is provided' do
+      subject(:trigger) { listener.on_client_pause(event) }
 
-    let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
-    let(:message) do
-      "[#{client.id}] Pausing partition 0 of topic Topic on offset 12"
-    end
-    let(:payload) do
-      {
-        caller: client,
-        topic: 'Topic',
-        partition: 0,
-        offset: 12
-      }
+      let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
+      let(:message) do
+        "[#{client.id}] Pausing on topic Topic/0 on offset 12"
+      end
+      let(:payload) do
+        {
+          caller: client,
+          topic: 'Topic',
+          partition: 0,
+          offset: 12
+        }
+      end
+
+      it { expect(Karafka.logger).to have_received(:info).with(message) }
     end
 
-    it { expect(Karafka.logger).to have_received(:info).with(message) }
+    context 'when pausing offset is not provided (consecutive)' do
+      subject(:trigger) { listener.on_client_pause(event) }
+
+      let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
+      let(:message) do
+        "[#{client.id}] Pausing on topic Topic/0 on the consecutive offset"
+      end
+      let(:payload) do
+        {
+          caller: client,
+          topic: 'Topic',
+          partition: 0,
+          offset: nil
+        }
+      end
+
+      it { expect(Karafka.logger).to have_received(:info).with(message) }
+    end
   end
 
   describe '#on_client_resume' do
@@ -97,7 +118,7 @@ RSpec.describe_current do
 
     let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
     let(:message) do
-      "[#{client.id}] Resuming partition 0 of topic Topic"
+      "[#{client.id}] Resuming on topic Topic/0"
     end
     let(:payload) do
       {
@@ -116,8 +137,7 @@ RSpec.describe_current do
     let(:consumer) { Class.new(Karafka::BaseConsumer).new }
     let(:message) do
       <<~MSG.tr("\n", ' ').strip
-        [#{consumer.id}] Retrying of #{consumer.class} after 100 ms on partition 0
-        of topic Topic from offset 12
+        [#{consumer.id}] Retrying of #{consumer.class} after 100 ms on topic Topic/0 from offset 12
       MSG
     end
     let(:payload) do
@@ -206,11 +226,57 @@ RSpec.describe_current do
 
     let(:payload) { { caller: consumer, message: kafka_message } }
     let(:kafka_message) { create(:messages_message) }
-    let(:message) { "Dispatched message #{kafka_message.offset} from test/0 to DLQ topic: dlq" }
+    let(:coordinator) { create(:processing_coordinator, topic: topic) }
+    let(:topic) { build(:routing_topic, name: 'test') }
+    let(:message) do
+      "[#{consumer.id}] Dispatched message #{kafka_message.offset} from test/0 to DLQ topic: dlq"
+    end
     let(:consumer) do
       instance = Class.new(Karafka::BaseConsumer).new
-      instance.topic = build(:routing_topic, name: 'test')
-      instance.topic.dead_letter_queue(topic: 'dlq')
+      instance.coordinator = coordinator
+      topic.dead_letter_queue(topic: 'dlq')
+      instance
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
+  describe '#on_filtering_throttled' do
+    subject(:trigger) { listener.on_filtering_throttled(event) }
+
+    let(:payload) { { caller: consumer, message: kafka_message } }
+    let(:kafka_message) { create(:messages_message) }
+    let(:coordinator) { create(:processing_coordinator, topic: topic) }
+    let(:topic) { build(:routing_topic, name: 'test') }
+    let(:message) do
+      resume_offset = kafka_message.offset
+      "[#{consumer.id}] Throttled and will resume from message #{resume_offset} on test/0"
+    end
+    let(:consumer) do
+      instance = Class.new(Karafka::BaseConsumer).new
+      instance.coordinator = coordinator
+      topic.dead_letter_queue(topic: 'dlq')
+      instance
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
+  describe '#on_filtering_seek' do
+    subject(:trigger) { listener.on_filtering_seek(event) }
+
+    let(:payload) { { caller: consumer, message: kafka_message } }
+    let(:kafka_message) { create(:messages_message) }
+    let(:coordinator) { create(:processing_coordinator, topic: topic) }
+    let(:topic) { build(:routing_topic, name: 'test') }
+    let(:message) do
+      seek_offset = kafka_message.offset
+      "[#{consumer.id}] Post-filtering seeking to message #{seek_offset} on test/0"
+    end
+    let(:consumer) do
+      instance = Class.new(Karafka::BaseConsumer).new
+      instance.coordinator = coordinator
+      topic.dead_letter_queue(topic: 'dlq')
       instance
     end
 
@@ -244,23 +310,9 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
-    context 'when it is a consumer.before_enqueue.error' do
-      let(:type) { 'consumer.before_enqueue.error' }
-      let(:message) { "Consumer before enqueue failed due to an error: #{error}" }
-
-      it { expect(Karafka.logger).to have_received(:error).with(message) }
-    end
-
-    context 'when it is a consumer.before_consume.error' do
-      let(:type) { 'consumer.before_consume.error' }
-      let(:message) { "Consumer before consume failed due to an error: #{error}" }
-
-      it { expect(Karafka.logger).to have_received(:error).with(message) }
-    end
-
-    context 'when it is a consumer.after_consume.error' do
-      let(:type) { 'consumer.after_consume.error' }
-      let(:message) { "Consumer after consume failed due to an error: #{error}" }
+    context 'when it is a consumer.idle.error' do
+      let(:type) { 'consumer.idle.error' }
+      let(:message) { "Consumer idle failed due to an error: #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
@@ -306,6 +358,27 @@ RSpec.describe_current do
     context 'when it is a connection.client.poll.error' do
       let(:type) { 'connection.client.poll.error' }
       let(:message) { "Data polling error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a statistics.emitted.error' do
+      let(:type) { 'statistics.emitted.error' }
+      let(:message) { "statistics.emitted processing failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a connection.client.rebalance_callback.error' do
+      let(:type) { 'connection.client.rebalance_callback.error' }
+      let(:message) { "Rebalance callback error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a connection.client.unsubscribe.error' do
+      let(:type) { 'connection.client.unsubscribe.error' }
+      let(:message) { "Client unsubscribe error occurred: #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end

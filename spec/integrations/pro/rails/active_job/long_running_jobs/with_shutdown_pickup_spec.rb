@@ -48,18 +48,4 @@ end
 # Give Karafka time to finalize everything
 sleep(2)
 
-# We need a second producer to check where fi started from
-consumer = setup_rdkafka_consumer
-
-consumer.subscribe(DT.topic)
-
-consumer.each do |message|
-  DT[1] << message.offset
-
-  # One is enough
-  break
-end
-
-consumer.close
-
-assert_equal DT[0][0] + 1, DT[1][0]
+assert_equal DT[0][0] + 1, fetch_first_offset

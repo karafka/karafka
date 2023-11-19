@@ -58,19 +58,31 @@ RSpec.describe_current do
 
   describe '#active?' do
     context 'when there are no topics in the consumer group' do
-      before { Karafka::App.config.internal.routing.active.consumer_groups = [] }
-
       it { expect(consumer_group.active?).to eq true }
     end
 
     context 'when our consumer group name is in server consumer groups' do
-      before { Karafka::App.config.internal.routing.active.consumer_groups = [name] }
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:consumer_groups, name)
+      end
 
       it { expect(consumer_group.active?).to eq true }
     end
 
     context 'when our consumer group name is not in server consumer groups' do
-      before { Karafka::App.config.internal.routing.active.consumer_groups = ['na'] }
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:consumer_groups, 'na')
+      end
 
       it { expect(consumer_group.active?).to eq false }
     end

@@ -10,7 +10,7 @@ end
 Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
   next if event.payload[:messages_buffer].empty?
 
-  DT[:batches] << Concurrent::Array.new
+  DT[:batches] << []
 end
 
 class Consumer < Karafka::BaseConsumer

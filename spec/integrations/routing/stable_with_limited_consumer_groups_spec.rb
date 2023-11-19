@@ -30,7 +30,8 @@ draw_routes do
 end
 
 # We skip the middle one and check the positions later
-Karafka::App.config.internal.routing.active.consumer_groups = %w[test1 app]
+Karafka::App.config.internal.routing.activity_manager.include(:consumer_groups, 'test1')
+Karafka::App.config.internal.routing.activity_manager.include(:consumer_groups, 'app')
 
 # Two consumer groups
 assert_equal 2, Karafka::App.subscription_groups.keys.size

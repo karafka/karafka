@@ -12,9 +12,6 @@ module Karafka
           # @param received_at [Time] moment when we've received the message
           # @return [Karafka::Messages::Message] message object with payload and metadata
           def call(kafka_message, topic, received_at)
-            # @see https://github.com/appsignal/rdkafka-ruby/issues/168
-            kafka_message.headers.transform_keys!(&:to_s)
-
             metadata = Karafka::Messages::Metadata.new(
               timestamp: kafka_message.timestamp,
               headers: kafka_message.headers,
@@ -26,11 +23,15 @@ module Karafka
               received_at: received_at
             ).freeze
 
+            # Get the raw payload
+            payload = kafka_message.payload
+
+            # And nullify it in the kafka message. This can save a lot of memory when used with
+            # the Pro Cleaner API
+            kafka_message.instance_variable_set('@payload', nil)
+
             # Karafka messages cannot be frozen because of the lazy deserialization feature
-            Karafka::Messages::Message.new(
-              kafka_message.payload,
-              metadata
-            )
+            Karafka::Messages::Message.new(payload, metadata)
           end
         end
       end

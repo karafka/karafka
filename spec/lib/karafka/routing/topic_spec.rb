@@ -59,19 +59,43 @@ RSpec.describe_current do
 
   describe '#active?' do
     context 'when there are no topics in the topics' do
-      before { Karafka::App.config.internal.routing.active.topics = [] }
-
       it { expect(topic.active?).to eq true }
     end
 
     context 'when our topic name is in server topics' do
-      before { Karafka::App.config.internal.routing.active.topics = [name] }
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:topics, name)
+      end
 
       it { expect(topic.active?).to eq true }
     end
 
     context 'when our topic name is not in server topics' do
-      before { Karafka::App.config.internal.routing.active.topics = ['na'] }
+      before do
+        Karafka::App
+          .config
+          .internal
+          .routing
+          .activity_manager
+          .include(:topics, 'na')
+      end
+
+      it { expect(topic.active?).to eq false }
+    end
+
+    context 'when we set the topic to active via #active' do
+      before { topic.active(true) }
+
+      it { expect(topic.active?).to eq true }
+    end
+
+    context 'when we set the topic to inactive via #active' do
+      before { topic.active(false) }
 
       it { expect(topic.active?).to eq false }
     end
@@ -81,12 +105,14 @@ RSpec.describe_current do
     let(:expected_keys) do
       %i[
         kafka deserializer max_messages max_wait_time initial_offset id name active consumer
-        consumer_group_id subscription_group active_job dead_letter_queue manual_offset_management
+        consumer_group_id pause_max_timeout pause_timeout pause_with_exponential_backoff
+        subscription_group_name active_job consumer_persistence dead_letter_queue declaratives
+        inline_insights manual_offset_management
       ]
     end
 
     it 'expect to contain all the topic attrs plus some inherited' do
-      expect(topic.to_h.keys).to eq(expected_keys)
+      expect(topic.to_h.keys.sort).to eq(expected_keys.sort)
     end
   end
 end

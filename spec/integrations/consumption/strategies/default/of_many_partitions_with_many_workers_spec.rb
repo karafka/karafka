@@ -7,8 +7,6 @@ setup_karafka do |config|
   config.initial_offset = 'latest'
 end
 
-create_topic(partitions: 10)
-
 class Consumer < Karafka::BaseConsumer
   def consume
     # This will simulate, that the thread is busy in a bit random way, so more worker threads can
@@ -29,20 +27,34 @@ draw_routes do
   consumer_group DT.consumer_group do
     # Special topic with 10 partitions available
     topic DT.topic do
+      config(partitions: 10)
       consumer Consumer
     end
   end
 end
 
+polls = 0
+
+Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
+  polls += 1
+end
+
 # Start Karafka
 Thread.new { Karafka::Server.run }
 
-# Give it some time to boot and connect before dispatching messages
-sleep(5)
+# Wait until we've polled few times
+sleep(0.1) until polls >= 10
 
 # We send only one message to each topic partition, so when messages are consumed, it forces them
 # to be in separate worker threads
-10.times { |i| produce(DT.topic, SecureRandom.hex(6), partition: i) }
+Thread.new do
+  loop do
+    10.times { |i| produce(DT.topic, SecureRandom.hex(6), partition: i) }
+    sleep(0.5)
+  rescue WaterDrop::Errors::ProducerClosedError
+    break
+  end
+end
 
 wait_until do
   DT.data.values.flatten.size >= 10

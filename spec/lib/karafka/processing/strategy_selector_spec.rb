@@ -48,4 +48,50 @@ RSpec.describe_current do
 
     it { expect(selected_strategy).to eq(Karafka::Processing::Strategies::AjMom) }
   end
+
+  # Those specs make sure, that every expected features combination has a matching strategy
+  # That way when we add a new feature, we can ensure, that all the combinations of features are
+  # usable with it or that a given combination is one of the not supported or not needed
+  #
+  # We also need to prevent a case where a given combination would be defined twice by mistake, etc
+  describe 'strategies presence vs. features combinations' do
+    subject(:selector) { described_class.new }
+
+    # Combinations that for any reason are not supported
+    let(:not_used_combinations) do
+      [
+        # Active Job is always with manual offset management
+        %i[active_job],
+        # ActiveJob is always with MoM and when with DLQ, also MoM is needed
+        %i[active_job dead_letter_queue]
+      ]
+    end
+
+    let(:combinations) do
+      combinations = []
+
+      features = described_class::SUPPORTED_FEATURES
+
+      features.size.times.each do |i|
+        combinations += features.combination(i + 1).to_a
+      end
+
+      combinations.each(&:sort!)
+      combinations.uniq!
+      combinations
+    end
+
+    it 'expect each features combination to be supported expect the explicitly ignored' do
+      combinations.each do |combination|
+        matching_strategies = selector.strategies.select do |strategy|
+          strategy::FEATURES.sort == combination
+        end
+
+        next if not_used_combinations.any? { |not_used| not_used.sort == combination }
+
+        # Each combination of features should always have one matching strategy
+        expect(matching_strategies.size).to eq(1)
+      end
+    end
+  end
 end

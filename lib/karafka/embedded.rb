@@ -7,7 +7,10 @@ module Karafka
       # Starts Karafka without supervision and without ownership of signals in a background thread
       # so it won't interrupt other things running
       def start
-        Thread.new { Karafka::Server.start }
+        Thread.new do
+          Karafka::Process.tags.add(:execution_mode, 'embedded')
+          Karafka::Server.start
+        end
       end
 
       # Stops Karafka upon any event

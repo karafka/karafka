@@ -8,10 +8,13 @@ module Karafka
       attr_reader :target
 
       # @param target [Object] target object to which we proxy any DSL call
+      # @param defaults [Proc] defaults for target that should be applicable after the proper
+      #   proxy context (if needed)
       # @param block [Proc] block that we want to evaluate in the proxy context
-      def initialize(target, &block)
+      def initialize(target, defaults = ->(_) {}, &block)
         @target = target
         instance_eval(&block)
+        instance_eval(&defaults)
       end
 
       # Ruby 2.7.0 to 2.7.2 do not have arg forwarding, so we fallback to the old way

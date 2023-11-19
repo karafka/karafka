@@ -38,16 +38,6 @@ end
 
 producer.produce_async(topic: DT.topics[0], payload: '{}')
 
-consumer = setup_rdkafka_consumer
-consumer.subscribe(DT.topics[0])
+assert_equal 1, fetch_first_offset
 
-consumer.each do |message|
-  DT[:picked] << message.offset
-
-  break
-end
-
-assert_equal [1], DT[:picked]
-
-consumer.close
 producer.close

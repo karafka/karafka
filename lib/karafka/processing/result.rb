@@ -32,6 +32,11 @@ module Karafka
         @success = false
         @cause = cause
       end
+
+      # @return [Boolean] true if processing failed
+      def failure?
+        !@success
+      end
     end
   end
 end

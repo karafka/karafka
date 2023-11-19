@@ -35,6 +35,7 @@ Tracker.run(messages_count: MAX_MESSAGES_PER_PARTITION * PARTITIONS_COUNT) do
   $start = false
   $stop = false
 
+  Karafka::App.config.internal.status.reset!
   Karafka::Server.run
 
   $stop - $start

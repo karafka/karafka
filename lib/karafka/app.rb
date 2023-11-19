@@ -53,6 +53,12 @@ module Karafka
         RUBY
       end
 
+      # @return [Boolean] true if we should be done in general with processing anything
+      # @note It is a meta status from the status object
+      def done?
+        App.config.internal.status.done?
+      end
+
       # Methods that should be delegated to Karafka module
       %i[
         root

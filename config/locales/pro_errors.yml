@@ -3,9 +3,47 @@ en:
     topic:
       virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
       virtual_partitions.max_partitions_format: needs to be equal or more than 1
-      manual_offset_management_not_with_virtual_partitions: cannot be used together with Virtual Partitions
+
       long_running_job.active_format: needs to be either true or false
+
       dead_letter_queue_with_virtual_partitions: when using Dead Letter Queue with Virtual Partitions, at least one retry is required.
+
+      throttling.active_format: needs to be either true or false
+      throttling.limit_format: needs to be equal or more than 1
+      throttling.interval_format: needs to be equal or more than 1
+
+      filtering.active_missing: needs to be present
+      filtering.factory_format: 'needs to respond to #call'
+      filtering.factories_format: 'needs to contain only factories responding to #call'
+      filtering.active_format: 'needs to be boolean'
+
+      expiring.ttl_format: 'needs to be equal or more than 0 and an integer'
+      expiring.active_format: 'needs to be boolean'
+
+      delaying.delay_format: 'needs to be equal or more than 0 and an integer'
+      delaying.active_format: 'needs to be boolean'
+
+      pause_timeout_format: needs to be an integer bigger than 0
+      pause_max_timeout_format: needs to be an integer bigger than 0
+      pause_with_exponential_backoff_format: needs to be either true or false
+      pause_timeout_max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
+
+      patterns.active_format: 'needs to be boolean'
+      patterns.type_format: 'needs to be :matcher, :discovered or :regular'
+
+      inline_insights.active_format: 'needs to be boolean'
+      inline_insights.required_format: 'needs to be boolean'
+
+    consumer_group:
+      patterns_format: must be an array with hashes
+      patterns_missing: needs to be present
+      patterns_regexps_not_unique: 'must be unique within consumer group'
+
+    pattern:
+      regexp_format: must be a regular expression
+      name_format: 'needs to be a string with a Kafka accepted format'
+      regexp_string_format: 'needs to be a string and start with ^'
+      missing: needs to be present
 
     config:
       encryption.active_format: 'needs to be either true or false'
@@ -16,3 +54,6 @@ en:
       encryption.version_format: must be a non-empty string
       encryption.public_key_format: 'is not a valid public RSA key'
       encryption.private_keys_invalid: 'contains an invalid private RSA key string'
+
+      patterns.ttl_format: needs to be an integer bigger than 0
+      patterns.ttl_missing: needs to be present

@@ -13,8 +13,9 @@ module Vendors
 
       # Store key trace
       # @param key [Object] key we want to start tracing
-      def trace(key)
-        @buffer << key
+      # @param service [String] Datadog service name
+      def trace(key, service: nil)
+        @buffer << [key, service]
         self
       end
 
@@ -44,11 +45,6 @@ module Vendors
       def set_error(error)
         @errors << error
         self
-      end
-
-      # @return [Boolean]
-      def present?
-        true
       end
 
       # API compatibility hook

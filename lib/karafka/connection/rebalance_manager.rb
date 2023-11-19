@@ -2,7 +2,7 @@
 
 module Karafka
   module Connection
-    # Manager for tracking changes in the partitions assignment.
+    # Manager for tracking changes in the partitions assignment after the assignment is done.
     #
     # We need tracking of those to clean up consumers that will no longer process given partitions
     # as they were taken away.
@@ -17,6 +17,10 @@ module Karafka
     #
     # @note For cooperative-sticky `#assigned_partitions` holds only the recently assigned
     #   partitions, not all the partitions that are owned
+    #
+    # @note We have to have the `subscription_group` reference because we have a global pipeline
+    #   for notifications and we need to make sure we track changes only for things that are of
+    #   relevance to our subscription group
     class RebalanceManager
       # Empty array for internal usage not to create new objects
       EMPTY_ARRAY = [].freeze
@@ -25,11 +29,17 @@ module Karafka
 
       private_constant :EMPTY_ARRAY
 
+      # @param subscription_group_id [String] subscription group id
       # @return [RebalanceManager]
-      def initialize
+      def initialize(subscription_group_id)
         @assigned_partitions = {}
         @revoked_partitions = {}
         @changed = false
+        @active = false
+        @subscription_group_id = subscription_group_id
+
+        # Connects itself to the instrumentation pipeline so rebalances can be tracked
+        ::Karafka.monitor.subscribe(self)
       end
 
       # Resets the rebalance manager state
@@ -46,24 +56,12 @@ module Karafka
         @changed
       end
 
-      # Callback that kicks in inside of rdkafka, when new partitions are assigned.
-      #
-      # @private
-      # @param _ [Rdkafka::Consumer]
-      # @param partitions [Rdkafka::Consumer::TopicPartitionList]
-      def on_partitions_assigned(_, partitions)
-        @assigned_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
-        @changed = true
-      end
-
-      # Callback that kicks in inside of rdkafka, when partitions are revoked.
-      #
-      # @private
-      # @param _ [Rdkafka::Consumer]
-      # @param partitions [Rdkafka::Consumer::TopicPartitionList]
-      def on_partitions_revoked(_, partitions)
-        @revoked_partitions = partitions.to_h.transform_values { |part| part.map(&:partition) }
-        @changed = true
+      # @return [Boolean] true if there was at least one rebalance
+      # @note This method is needed to make sure that when using cooperative-sticky, we do not
+      #   close until first rebalance. Otherwise librdkafka may crash.
+      # @see https://github.com/confluentinc/librdkafka/issues/4312
+      def active?
+        @active
       end
 
       # We consider as lost only partitions that were taken away and not re-assigned back to us
@@ -75,6 +73,32 @@ module Karafka
         end
 
         lost_partitions
+      end
+
+      # Callback that kicks in inside of rdkafka, when new partitions were assigned.
+      #
+      # @private
+      # @param event [Karafka::Core::Monitoring::Event]
+      def on_rebalance_partitions_assigned(event)
+        # Apply changes only for our subscription group
+        return unless event[:subscription_group_id] == @subscription_group_id
+
+        @active = true
+        @assigned_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
+        @changed = true
+      end
+
+      # Callback that kicks in inside of rdkafka, when partitions were revoked.
+      #
+      # @private
+      # @param event [Karafka::Core::Monitoring::Event]
+      def on_rebalance_partitions_revoked(event)
+        # Apply changes only for our subscription group
+        return unless event[:subscription_group_id] == @subscription_group_id
+
+        @active = true
+        @revoked_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
+        @changed = true
       end
     end
   end
