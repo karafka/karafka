@@ -45,6 +45,8 @@ module Karafka
         @messages_buffer = MessagesBuffer.new(subscription_group)
         @mutex = Mutex.new
         @stopped = false
+
+        @jobs_queue.register(@subscription_group.id)
       end
 
       # Runs the main listener fetch loop.
