@@ -23,18 +23,29 @@ module Karafka
         # scheduled by Ruby hundreds of thousands of times per group.
         # We cannot use a single semaphore as it could potentially block in listeners that should
         # process with their data and also could unlock when a given group needs to remain locked
-        @semaphores = Concurrent::Map.new do |h, k|
-          # Ruby prior to 3.2 did not have queue with a timeout on `#pop`, that is why for those
-          # versions we use our custom queue wrapper
-          h.compute_if_absent(k) { RUBY_VERSION < '3.2' ? TimedQueue.new : Queue.new }
-        end
-
+        @semaphores = {}
         @concurrency = Karafka::App.config.concurrency
         @tick_interval = ::Karafka::App.config.internal.tick_interval
         @in_processing = Hash.new { |h, k| h[k] = [] }
         @statistics = { busy: 0, enqueued: 0 }
 
         @mutex = Mutex.new
+      end
+
+      # Registers given subscription group id in the queue. It is needed so we do not dynamically
+      # create semaphore, hence avoiding potential race conditions
+      #
+      # @param group_id [String]
+      def register(group_id)
+        # Ruby prior to 3.2 did not have queue with a timeout on `#pop`, that is why for those
+        @mutex.synchronize do
+          # versions we use our custom queue wrapper
+          #
+          # Initializes this semaphore from the mutex, so it is never auto-created
+          # Since we always schedule a job before waiting using semaphores, there won't be any
+          # concurrency problems
+          @semaphores[group_id] = RUBY_VERSION < '3.2' ? TimedQueue.new : Queue.new
+        end
       end
 
       # Adds the job to the internal main queue, scheduling it for execution in a worker and marks
@@ -79,7 +90,7 @@ module Karafka
       # @param group_id [String] id of the group we want to unlock for one tick
       # @note This does not release the wait lock. It just causes a conditions recheck
       def tick(group_id)
-        @semaphores[group_id] << true
+        @semaphores.fetch(group_id) << true
       end
 
       # Marks a given job from a given group as completed. When there are no more jobs from a given
@@ -149,7 +160,7 @@ module Karafka
         while wait?(group_id)
           yield if block_given?
 
-          @semaphores[group_id].pop(timeout: @tick_interval / 1_000.0)
+          @semaphores.fetch(group_id).pop(timeout: @tick_interval / 1_000.0)
         end
       end
 
