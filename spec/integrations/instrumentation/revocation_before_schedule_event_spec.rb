@@ -15,8 +15,10 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     if DT[:revoked].empty?
+      DT[:pre_states] << Karafka::App.assignments
       DT[:pre] << messages.metadata.partition
     else
+      DT[:post_states] << Karafka::App.assignments
       DT[:post] << messages.metadata.partition
     end
   end
@@ -65,3 +67,9 @@ assert DT.key?(:revoked)
 
 other.join
 consumer.close
+
+last_pre = DT[:pre_states].last.values.last
+last_post = DT[:post_states].last.values.last
+
+# post revocation should not report on lost partitions
+assert last_pre.size > last_post.size

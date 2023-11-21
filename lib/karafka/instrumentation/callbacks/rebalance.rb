@@ -6,11 +6,10 @@ module Karafka
       # Callback that connects to the librdkafka rebalance callback and converts those events into
       # our internal events
       class Rebalance
-        # @param subscription_group_id [String] id of the current subscription group instance
-        # @param consumer_group_id [String] id of the current consumer group
-        def initialize(subscription_group_id, consumer_group_id)
-          @subscription_group_id = subscription_group_id
-          @consumer_group_id = consumer_group_id
+        # @param subscription_group [Karafka::Routes::SubscriptionGroup] subscription group for
+        #   which we want to manage rebalances
+        def initialize(subscription_group)
+          @subscription_group = subscription_group
         end
 
         # Publishes an event that partitions are going to be revoked.
@@ -53,8 +52,12 @@ module Karafka
           ::Karafka.monitor.instrument(
             "rebalance.#{name}",
             caller: self,
-            subscription_group_id: @subscription_group_id,
-            consumer_group_id: @consumer_group_id,
+            # We keep the id references here for backwards compatibility as some of the monitors
+            # may use the id references
+            subscription_group_id: @subscription_group.id,
+            subscription_group: @subscription_group,
+            consumer_group_id: @subscription_group.consumer_group.id,
+            consumer_group: @subscription_group.consumer_group,
             tpl: tpl
           )
         end

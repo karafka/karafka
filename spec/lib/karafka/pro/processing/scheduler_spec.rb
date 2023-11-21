@@ -10,7 +10,7 @@ RSpec.describe_current do
 
     4.times { |i| let("message#{i}") { build(:messages_message) } }
 
-    let(:tracker) { Karafka::Pro::PerformanceTracker.instance }
+    let(:tracker) { Karafka::Pro::Instrumentation::PerformanceTracker.instance }
     let(:jobs_array) { [] }
 
     context 'when there are no metrics on any of the topics data' do

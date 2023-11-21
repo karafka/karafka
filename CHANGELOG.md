@@ -1,10 +1,13 @@
 # Karafka framework changelog
 
 ## 2.2.14 (Unreleased)
+- **[Feature]** Provide `Karafka::App.assignments` that will return real-time assignments tracking.
+- [Improvement] Provide `client.reset` notification event.
 - [Improvement] Remove all usage of concurrent-ruby from Karafka
 - [Change] Replace single #before_schedule with appropriate methods and events for scheduling various types of work. This is needed as we may run different framework logic on those and, second, for accurate job tracking with advanced schedulers.
 - [Change] Rename `before_enqueue` to `before_schedule` to reflect what it does and when (internal).
 - [Change] Remove not needed error catchers for strategies code. This code if errors, should be considered critical and should not be silenced.
+- [Change] Remove not used notifications events.
 
 ## 2.2.13 (2023-11-17)
 - **[Feature]** Introduce low-level extended Scheduling API for granular control of schedulers and jobs execution [Pro].

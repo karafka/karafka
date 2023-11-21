@@ -33,7 +33,7 @@ assert const_visible?('Karafka::Pro::Processing::Jobs::ConsumeNonBlocking')
 assert const_visible?('Karafka::Pro::ActiveJob::Consumer')
 assert const_visible?('Karafka::Pro::ActiveJob::Dispatcher')
 assert const_visible?('Karafka::Pro::ActiveJob::JobOptionsContract')
-assert const_visible?('Karafka::Pro::PerformanceTracker')
+assert const_visible?('Karafka::Pro::Instrumentation::PerformanceTracker')
 assert_equal pro::Processing::StrategySelector, config.processing.strategy_selector.class
 assert_equal pro::Processing::Partitioner, config.processing.partitioner_class
 assert_equal pro::Processing::Coordinator, config.processing.coordinator_class

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  let(:tracker) { Karafka::Pro::PerformanceTracker.instance }
+  let(:tracker) { Karafka::Pro::Instrumentation::PerformanceTracker.instance }
 
   describe '#processing_time_p95 and #on_consumer_consumed' do
     let(:p95) { tracker.processing_time_p95(topic, partition) }
@@ -56,5 +56,9 @@ RSpec.describe_current do
         it { expect(p95).to eq(9) }
       end
     end
+  end
+
+  describe 'events mapping' do
+    it { expect(NotificationsChecker.valid?(tracker)).to eq(true) }
   end
 end

@@ -45,10 +45,7 @@ module Karafka
         @buffer = RawMessagesBuffer.new
         @tick_interval = ::Karafka::App.config.internal.tick_interval
         @rebalance_manager = RebalanceManager.new(@subscription_group.id)
-        @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(
-          @subscription_group.id,
-          @subscription_group.consumer_group.id
-        )
+        @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group)
         @events_poller = Helpers::IntervalRunner.new { events_poll }
         @kafka = build_consumer
         # There are few operations that can happen in parallel from the listener threads as well
@@ -309,12 +306,18 @@ module Karafka
 
       # Closes and resets the client completely.
       def reset
-        close
+        Karafka.monitor.instrument(
+          'client.reset',
+          caller: self,
+          subscription_group: @subscription_group
+        ) do
+          close
 
-        @events_poller.reset
-        @closed = false
-        @paused_tpls.clear
-        @kafka = build_consumer
+          @events_poller.reset
+          @closed = false
+          @paused_tpls.clear
+          @kafka = build_consumer
+        end
       end
 
       # Runs a single poll on the main queue and consumer queue ignoring all the potential errors

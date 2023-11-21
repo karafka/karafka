@@ -31,6 +31,7 @@ SimpleCov.start do
   add_filter '/processing/strategies'
   # CLI commands are also checked via integrations
   add_filter '/cli/topics.rb'
+  add_filter '/vendors/'
 
   # enable_coverage :branch
   command_name SPECS_TYPE

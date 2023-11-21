@@ -93,7 +93,7 @@ module Karafka
           icfg.active_job.dispatcher = ActiveJob::Dispatcher.new
           icfg.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 
-          config.monitor.subscribe(PerformanceTracker.instance)
+          config.monitor.subscribe(Instrumentation::PerformanceTracker.instance)
         end
 
         # Loads the Pro features of Karafka

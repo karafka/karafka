@@ -30,7 +30,7 @@ module Karafka
         # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
         #
         def schedule_consumption(jobs_array)
-          perf_tracker = PerformanceTracker.instance
+          perf_tracker = Instrumentation::PerformanceTracker.instance
 
           ordered = []
 
