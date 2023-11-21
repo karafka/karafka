@@ -8,7 +8,9 @@ FactoryBot.define do
     skip_create
 
     initialize_with do
-      new(position, topics)
+      instance = new(position, topics)
+      topics.each { |topic| topic.subscription_group = instance }
+      instance
     end
   end
 end

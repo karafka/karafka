@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
+# Checker for matching system notifications events with method names to look for typos, etc
 module NotificationsChecker
   class << self
     # @return [Array<String>] map of events to methods
     def events_methods
-      Karafka::Instrumentation::Notifications::EVENTS.map { |event| "on_#{event.gsub('.', '_')}" }
+      Karafka::Instrumentation::Notifications::EVENTS.map { |event| "on_#{event.tr('.', '_')}" }
     end
 
     # @param object [Object] object that should have `on_*` methods for notifications listening
