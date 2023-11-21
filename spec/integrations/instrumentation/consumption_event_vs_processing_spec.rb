@@ -36,7 +36,7 @@ assert_equal DT[0], DT[1]
 assert_equal DT[1], DT[2]
 
 # Make sure that we have detected proper assignments
-assert_equal DT[:assignments].keys.first, DT.topic
+assert_equal DT[:assignments].keys.first.name, DT.topic
 assert_equal DT[:assignments].values.first, [0]
 
 # Last state after shutdown should indicate no assignments

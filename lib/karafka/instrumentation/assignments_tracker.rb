@@ -3,7 +3,7 @@
 module Karafka
   module Instrumentation
     # Keeps track of active assignments and materializes them by returning the routing topics
-    # with appropriate partitions that are assigned at a given moment'
+    # with appropriate partitions that are assigned at a given moment
     #
     # It is auto-subscribed as part of Karafka itself.
     #
