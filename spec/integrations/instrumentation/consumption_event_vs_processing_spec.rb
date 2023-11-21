@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 # Karafka should publish same number of consumed events as batches consumed
+# We also should track the assignments correctly
 
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    DT[:assignments] = Karafka::App.assignments
+
     DT[0] << messages.count
   end
 end
@@ -31,3 +34,10 @@ end
 
 assert_equal DT[0], DT[1]
 assert_equal DT[1], DT[2]
+
+# Make sure that we have detected proper assignments
+assert_equal DT[:assignments].keys.first.name, DT.topic
+assert_equal DT[:assignments].values.first, [0]
+
+# Last state after shutdown should indicate no assignments
+assert Karafka::App.assignments.empty?

@@ -17,4 +17,8 @@ RSpec.describe_current do
       expect(tracker).to have_received(:add).with(consumer_group_id, statistics)
     end
   end
+
+  describe 'events mapping' do
+    it { expect(NotificationsChecker.valid?(listener)).to eq(true) }
+  end
 end

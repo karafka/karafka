@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:callback) { described_class.new(subscription_group_id, consumer_group_id) }
+  subject(:callback) { described_class.new(subscription_group) }
 
-  let(:subscription_group_id) { SecureRandom.hex(6) }
-  let(:consumer_group_id) { SecureRandom.hex(6) }
+  let(:subscription_group) { build(:routing_subscription_group) }
+  let(:subscription_group_id) { subscription_group.id }
+  let(:consumer_group_id) { consumer_group.id }
+  let(:consumer_group) { subscription_group.consumer_group }
   let(:tpl) { rand }
 
   before { allow(::Karafka.monitor).to receive(:instrument) }
@@ -17,7 +19,9 @@ RSpec.describe_current do
         'rebalance.partitions_revoke',
         caller: callback,
         subscription_group_id: subscription_group_id,
+        subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
+        consumer_group: consumer_group,
         tpl: tpl
       )
     end
@@ -31,7 +35,9 @@ RSpec.describe_current do
         'rebalance.partitions_assign',
         caller: callback,
         subscription_group_id: subscription_group_id,
+        subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
+        consumer_group: consumer_group,
         tpl: tpl
       )
     end
@@ -45,7 +51,9 @@ RSpec.describe_current do
         'rebalance.partitions_revoked',
         caller: callback,
         subscription_group_id: subscription_group_id,
+        subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
+        consumer_group: consumer_group,
         tpl: tpl
       )
     end
@@ -59,7 +67,9 @@ RSpec.describe_current do
         'rebalance.partitions_assigned',
         caller: callback,
         subscription_group_id: subscription_group_id,
+        subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
+        consumer_group: consumer_group,
         tpl: tpl
       )
     end

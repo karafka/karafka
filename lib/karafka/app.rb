@@ -36,6 +36,13 @@ module Karafka
       # Just a nicer name for the consumer groups
       alias routes consumer_groups
 
+      # Returns current assignments of this process. Both topics and partitions
+      #
+      # @return [Hash<Karafka::Routing::Topic, Array<Integer>>]
+      def assignments
+        Instrumentation::AssignmentsTracker.instance.current
+      end
+
       # Allow for easier status management via `Karafka::App` by aliasing status methods here
       Status::STATES.each do |state, transition|
         class_eval <<~RUBY, __FILE__, __LINE__ + 1

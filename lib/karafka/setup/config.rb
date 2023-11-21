@@ -278,6 +278,9 @@ module Karafka
           # are also configured
           Pro::Loader.post_setup_all(config) if Karafka.pro?
 
+          # Subscribe the assignments tracker so we can always query all current assignments
+          config.monitor.subscribe(Instrumentation::AssignmentsTracker.instance)
+
           Karafka::App.initialized!
         end
 

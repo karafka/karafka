@@ -20,6 +20,7 @@ module Karafka
         active_job.consume
         active_job.consumed
 
+        app.initializing
         app.initialized
         app.running
         app.quieting
@@ -30,13 +31,11 @@ module Karafka
 
         client.pause
         client.resume
+        client.reset
 
         connection.listener.before_fetch_loop
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
-
-        connection.client.poll.error
-        connection.client.unsubscribe.error
 
         rebalance.partitions_assign
         rebalance.partitions_assigned

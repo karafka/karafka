@@ -101,4 +101,8 @@ RSpec.describe_current do
       it { expect(manager.changed?).to eq(false) }
     end
   end
+
+  describe 'events mapping' do
+    it { expect(NotificationsChecker.valid?(manager)).to eq(true) }
+  end
 end
