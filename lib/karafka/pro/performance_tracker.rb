@@ -15,6 +15,8 @@ module Karafka
   module Pro
     # Tracker used to keep track of performance metrics
     # It provides insights that can be used to optimize processing flow
+    # @note Even if we have some race-conditions here it is relevant due to the quantity of data.
+    #   This is why we do not mutex it.
     class PerformanceTracker
       include Singleton
 
@@ -25,13 +27,9 @@ module Karafka
 
       # Builds up nested concurrent hash for data tracking
       def initialize
-        @processing_times = Concurrent::Map.new do |topics_hash, topic|
-          topics_hash.compute_if_absent(topic) do
-            Concurrent::Map.new do |partitions_hash, partition|
-              # This array does not have to be concurrent because we always access single
-              # partition data via instrumentation that operates in a single thread via consumer
-              partitions_hash.compute_if_absent(partition) { [] }
-            end
+        @processing_times = Hash.new do |topics_hash, topic|
+          topics_hash[topic] = Hash.new do |partitions_hash, partition|
+            partitions_hash[partition] = []
           end
         end
       end
