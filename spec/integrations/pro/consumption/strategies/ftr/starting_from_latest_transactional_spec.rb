@@ -27,9 +27,9 @@ class Jumper < Karafka::Pro::Processing::Filters::Base
     @applied = false
     @cursor = nil
 
-    return if @seeked
+    return if @executed
 
-    @seeked = true
+    @executed = true
     @applied = true
 
     high_watermark = Karafka::Admin.read_watermark_offsets(@topic, @partition).last
