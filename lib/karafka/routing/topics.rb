@@ -9,7 +9,7 @@ module Karafka
       include Enumerable
       extend Forwardable
 
-      def_delegators :@accumulator, :[], :size, :empty?, :last, :<<
+      def_delegators :@accumulator, :[], :size, :empty?, :last, :<<, :map!, :sort_by!, :reverse!
 
       # @param topics_array [Array<Karafka::Routing::Topic>] array with topics
       def initialize(topics_array)
