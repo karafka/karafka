@@ -42,7 +42,7 @@ GEM
     karafka-core (2.2.7)
       concurrent-ruby (>= 1.1)
       karafka-rdkafka (>= 0.13.9, < 0.15.0)
-    karafka-rdkafka (0.14.0)
+    karafka-rdkafka (0.14.1)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
