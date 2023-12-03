@@ -54,7 +54,7 @@ DT[0].each_with_index do |timestamp, index|
   end
 
   backoff = (timestamp - previous)
-  expected_range = (BACKOFF_RANGES[index] || BACKOFF_RANGES.last)
+  expected_range = BACKOFF_RANGES[index] || BACKOFF_RANGES.last
 
   assert_equal(
     true,

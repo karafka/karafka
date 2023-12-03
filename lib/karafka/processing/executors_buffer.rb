@@ -54,9 +54,9 @@ module Karafka
       # @yieldparam [Integer] partition number
       # @yieldparam [Executor] given executor
       def each
-        @buffer.each do |_, partitions|
-          partitions.each do |_, executors|
-            executors.each do |_, executor|
+        @buffer.each_value do |partitions|
+          partitions.each_value do |executors|
+            executors.each_value do |executor|
               yield(executor)
             end
           end
