@@ -32,6 +32,6 @@ iterator.each do |message|
   partitioned_data[message.partition] << message.offset
 end
 
-partitioned_data.each do |_, data|
+partitioned_data.each_value do |data|
   assert_equal (5..9).to_a, data
 end

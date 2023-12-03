@@ -115,7 +115,7 @@ end
 
 # Make sure that strict order is preserved (excluding the duplicated message)
 offsets_by_partition = DT[:consecutive_messages].group_by { |_, partition, _| partition }
-offsets_by_partition.each do |_, triples|
+offsets_by_partition.each_value do |triples|
   previous = nil
 
   triples.each do |_, _, offset|
