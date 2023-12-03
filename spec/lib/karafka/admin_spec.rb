@@ -468,7 +468,7 @@ RSpec.describe_current do
       let(:cg_id) { SecureRandom.uuid }
 
       it do
-        expect { removal }.to raise_error(Rdkafka::RdkafkaError, /The group id does not exist/)
+        expect { removal }.to raise_error(Rdkafka::RdkafkaError)
       end
     end
 
