@@ -2,7 +2,7 @@
 
 RSpec.describe_current do
   let(:name) { SecureRandom.hex(6) }
-  let(:topics) { Karafka::Admin.cluster_info.topics.map { |tp| tp[:topic_name] } }
+  let(:topics) { described_class.cluster_info.topics.map { |tp| tp[:topic_name] } }
 
   describe '#create_topic and #cluster_info' do
     context 'when creating topic with one partition' do
@@ -422,6 +422,42 @@ RSpec.describe_current do
 
       it { expect(offsets.first).to eq(0) }
       it { expect(offsets.last).to eq(10) }
+    end
+  end
+
+  # More specs in the integrations
+  describe '#seek_consumer_group' do
+    subject(:seeking) { described_class.seek_consumer_group(cg_id, map) }
+
+    let(:cg_id) { SecureRandom.uuid }
+    let(:topic) { SecureRandom.uuid }
+    let(:partition) { 0 }
+    let(:offset) { 0 }
+    let(:map) { { topic => { partition => offset } } }
+
+    before { described_class.create_topic(topic, 1, 1) }
+
+    context 'when given consumer group does not exist' do
+      it 'expect not to throw error and operate' do
+        expect { seeking }.not_to raise_error
+      end
+    end
+
+    context 'when using the topic level map' do
+      let(:map) { { topic => offset } }
+
+      it 'expect not to throw error and operate' do
+        expect { seeking }.not_to raise_error
+      end
+    end
+
+    context 'when using the topic level map with time reference on empty topic' do
+      let(:offset) { Time.now - 60 }
+      let(:map) { { topic => offset } }
+
+      it 'expect not to throw error and operate' do
+        expect { seeking }.not_to raise_error
+      end
     end
   end
 
