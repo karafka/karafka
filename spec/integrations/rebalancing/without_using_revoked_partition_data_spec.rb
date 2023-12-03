@@ -101,7 +101,7 @@ process2.each do |partition, messages|
 end
 
 # There should be no duplicated data received till rebalance
-process1.each do |_, messages|
+process1.each_value do |messages|
   assert_equal messages.size, messages.uniq.size
 
   previous = nil
@@ -118,7 +118,7 @@ process1.each do |_, messages|
     end
 end
 
-process2.each do |_, messages|
+process2.each_value do |messages|
   assert_equal messages.size, messages.uniq.size
 
   previous = nil

@@ -57,6 +57,6 @@ end
 groups = DT[0].group_by { |element| element[0] }
 groups.transform_values! { |group| group.map(&:to_i) }
 
-groups.each do |_, values|
+groups.each_value do |values|
   assert_equal values.sort, values
 end

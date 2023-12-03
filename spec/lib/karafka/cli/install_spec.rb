@@ -13,7 +13,7 @@ RSpec.describe_current do
           .with(Karafka.root.join(dir))
       end
 
-      described_class::INSTALL_FILES_MAP.each do |_source, target|
+      described_class::INSTALL_FILES_MAP.each_value do |target|
         allow(Bundler)
           .to receive(:read_file)
           .and_return('')

@@ -45,7 +45,7 @@ assert average >= 8
 assert average <= 12
 
 # All data within partitions should be in order
-DT.data.each do |_object_id, offsets|
+DT.data.each_value do |offsets|
   previous_offset = nil
 
   offsets.each do |offset|
