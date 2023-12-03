@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Simple admin actions that we can perform via Karafka on our Kafka cluster
+  # Admin actions that we can perform via Karafka on our Kafka cluster
   #
   # @note It always initializes a new admin instance as we want to ensure it is always closed
   #   Since admin actions are not performed that often, that should be ok.
@@ -137,6 +137,109 @@ module Karafka
         end
       end
 
+      # Moves the offset on a given consumer group and provided topic to the requested location
+      #
+      # @param consumer_group_id [String] id of the consumer group for which we want to move the
+      #   existing offset
+      # @param topics_with_partitions_and_offsets [Hash] Hash with list of topics and settings to
+      #   where to move given consumer. It allows us to move particular partitions or whole topics
+      #   if we want to reset all partitions to for example a point in time.
+      #
+      # @note This method should **not** be executed on a running consumer group as it creates a
+      #   "fake" consumer and uses it to move offsets.
+      #
+      # @example Move a single topic partition nr 1 offset to 100
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 1 => 100 } })
+      #
+      # @example Move offsets on all partitions of a topic to 100
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => 100 })
+      #
+      # @example Move offset to 5 seconds ago on partition 2
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 2 => 5.seconds.ago } })
+      def seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
+        tpl_base = {}
+
+        # Normalize the data so we always have all partitions and topics in the same format
+        # That is in a format where we have topics and all partitions with their per partition
+        # assigned offsets
+        topics_with_partitions_and_offsets.each do |topic, partitions_with_offsets|
+          tpl_base[topic] = {}
+
+          if partitions_with_offsets.is_a?(Hash)
+            tpl_base[topic] = partitions_with_offsets
+          else
+            topic(topic)[:partition_count].times do |partition|
+              tpl_base[topic][partition] = partitions_with_offsets
+            end
+          end
+        end
+
+        tpl = Rdkafka::Consumer::TopicPartitionList.new
+        # In case of time based location, we need to to a pre-resolution, that's why we keep it
+        # separately
+        time_tpl = Rdkafka::Consumer::TopicPartitionList.new
+
+        # Distribute properly the offset type
+        tpl_base.each do |topic, partitions_with_offsets|
+          partitions_with_offsets.each do |partition, offset|
+            target = offset.is_a?(Time) ? time_tpl : tpl
+            target.add_topic_and_partitions_with_offsets(topic, [[partition, offset]])
+          end
+        end
+
+        # We set this that way so we can impersonate this consumer group and seek where we want
+        mapped_consumer_group_id = app_config.consumer_mapper.call(consumer_group_id)
+        settings = { 'group.id': mapped_consumer_group_id }
+
+        with_consumer(settings) do |consumer|
+          # If we have any time based stuff to resolve, we need to do it prior to commits
+          unless time_tpl.empty?
+            real_offsets = consumer.offsets_for_times(time_tpl)
+
+            real_offsets.to_h.each do |name, results|
+              results.each do |result|
+                raise(Errors::InvalidTimeBasedOffsetError) unless result
+
+                partition = result.partition
+
+                # Negative offset means we're beyond last message and we need to query for the
+                # high watermark offset to get the most recent offset and move there
+                if result.offset.negative?
+                  _, offset = consumer.query_watermark_offsets(name, result.partition)
+                else
+                  # If we get an offset, it means there existed a message close to this time
+                  # location
+                  offset = result.offset
+                end
+
+                # Since now we have proper offsets, we can add this to the final tpl for commit
+                tpl.add_topic_and_partitions_with_offsets(name, [[partition, offset]])
+              end
+            end
+          end
+
+          consumer.commit(tpl, false)
+        end
+      end
+
+      # Removes given consumer group (if exists)
+      #
+      # @param consumer_group_id [String] consumer group name without the mapper name (if any used)
+      #
+      # @note Please note, Karafka will apply the consumer group mapper on the provided consumer
+      #   group.
+      #
+      # @note This method should not be used on a running consumer group as it will not yield any
+      #   results.
+      def delete_consumer_group(consumer_group_id)
+        mapped_consumer_group_id = app_config.consumer_mapper.call(consumer_group_id)
+
+        with_admin do |admin|
+          handler = admin.delete_group(mapped_consumer_group_id)
+          handler.wait(max_wait_timeout: app_config.admin.max_wait_time)
+        end
+      end
+
       # Fetches the watermark offsets for a given topic partition
       #
       # @param name [String, Symbol] topic name
@@ -264,7 +367,7 @@ module Karafka
       # @param settings [Hash] extra settings for config (if needed)
       # @return [::Rdkafka::Config] rdkafka config
       def config(type, settings)
-        group_id = app_config.consumer_mapper.call(
+        mapped_admin_group_id = app_config.consumer_mapper.call(
           app_config.admin.group_id
         )
 
@@ -272,8 +375,11 @@ module Karafka
           .kafka
           .then(&:dup)
           .merge(app_config.admin.kafka)
+          .tap { |config| config[:'group.id'] = mapped_admin_group_id }
+          # We merge after setting the group id so it can be altered if needed
+          # In general in admin we only should alter it when we need to impersonate a given
+          # consumer group or do something similar
           .merge!(settings)
-          .tap { |config| config[:'group.id'] = group_id }
           .then { |config| Karafka::Setup::AttributesMap.public_send(type, config) }
           .then { |config| ::Rdkafka::Config.new(config) }
       end

@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.2.14 (Unreleased)
+- **[Feature]** Provide `Karafka::Admin#delete_consumer_group` and `Karafka::Admin#seek_consumer_group`.
 - **[Feature]** Provide `Karafka::App.assignments` that will return real-time assignments tracking.
 - [Improvement] Provide `client.reset` notification event.
 - [Improvement] Remove all usage of concurrent-ruby from Karafka
