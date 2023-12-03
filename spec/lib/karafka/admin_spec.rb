@@ -424,4 +424,19 @@ RSpec.describe_current do
       it { expect(offsets.last).to eq(10) }
     end
   end
+
+  describe '#delete_consumer_group' do
+    subject(:removal) { described_class.delete_consumer_group(cg_id) }
+
+    context 'when requested consumer group does not exist' do
+      let(:cg_id) { SecureRandom.uuid }
+
+      it do
+        expect { removal }.to raise_error(Rdkafka::RdkafkaError, /The group id does not exist/)
+      end
+    end
+
+    # The case where given consumer group exists we check in the integrations, because it is
+    # much easier to test with integrations on created consumer group
+  end
 end
