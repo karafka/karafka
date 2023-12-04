@@ -20,6 +20,7 @@ module Karafka
           # All jobs are blocking by default and they can release the lock when blocking operations
           # are done (if needed)
           @non_blocking = false
+          @status = :pending
         end
 
         # When redefined can run any code prior to the job being scheduled
@@ -50,6 +51,20 @@ module Karafka
         #   the blocking things (pausing partition, etc).
         def non_blocking?
           @non_blocking
+        end
+
+        # @return [Boolean] was this job finished.
+        def finished?
+          @status == :finished
+        end
+
+        # Marks the job as finished. Used by the worker to indicate, that this job is done.
+        #
+        # @note Since the scheduler knows exactly when it schedules jobs and when it keeps them
+        #   pending, we do not need advanced state tracking and the only information from the
+        #   "outside" is whether it was finished or not after it was scheduled for execution.
+        def finish!
+          @status = :finished
         end
       end
     end

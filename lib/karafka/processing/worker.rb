@@ -83,7 +83,10 @@ module Karafka
         )
       ensure
         # job can be nil when the queue is being closed
-        @jobs_queue.complete(job) if job
+        if job
+          @jobs_queue.complete(job)
+          job.finish!
+        end
 
         # Always publish info, that we completed all the work despite its result
         Karafka.monitor.instrument('worker.completed', instrument_details)
