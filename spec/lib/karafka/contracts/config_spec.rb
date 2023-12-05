@@ -47,7 +47,7 @@ RSpec.describe_current do
           subscription_groups_builder: Karafka::Routing::SubscriptionGroupsBuilder.new
         },
         processing: {
-          scheduler_class: Karafka::Processing::Scheduler,
+          scheduler_class: Karafka::Processing::Schedulers::Default,
           jobs_builder: Karafka::Processing::JobsBuilder.new,
           jobs_queue_class: Karafka::Processing::JobsQueue,
           coordinator_class: Karafka::Processing::Coordinator,

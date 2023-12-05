@@ -13,7 +13,7 @@ RSpec.describe_current do
   let(:consumer_group_coordinator) { Karafka::Connection::ConsumerGroupCoordinator.new(0) }
   let(:subscription_group) { build(:routing_subscription_group, topics: [routing_topic]) }
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
-  let(:scheduler) { Karafka::Processing::Scheduler.new(jobs_queue) }
+  let(:scheduler) { Karafka::Processing::Schedulers::Default.new(jobs_queue) }
   let(:client) { Karafka::Connection::Client.new(subscription_group) }
   let(:routing_topic) { build(:routing_topic) }
   let(:workers_batch) { Karafka::Processing::WorkersBatch.new(jobs_queue).each(&:async_call) }
