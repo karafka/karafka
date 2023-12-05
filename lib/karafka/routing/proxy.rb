@@ -10,11 +10,12 @@ module Karafka
       # @param target [Object] target object to which we proxy any DSL call
       # @param defaults [Proc] defaults for target that should be applicable after the proper
       #   proxy context (if needed)
-      # @param block [Proc] block that we want to evaluate in the proxy context
+      # @param block [Proc, nil] block that we want to evaluate in the proxy context or nil if no
+      #   proxy block context for example because whole context is taken from defaults
       def initialize(target, defaults = ->(_) {}, &block)
         @target = target
-        instance_eval(&block)
-        instance_eval(&defaults)
+        instance_eval(&block) if block
+        instance_eval(&defaults) if defaults
       end
 
       # Ruby 2.7.0 to 2.7.2 do not have arg forwarding, so we fallback to the old way
