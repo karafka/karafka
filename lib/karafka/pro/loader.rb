@@ -84,7 +84,7 @@ module Karafka
 
           icfg.processing.coordinator_class = Processing::Coordinator
           icfg.processing.partitioner_class = Processing::Partitioner
-          icfg.processing.scheduler_class = Processing::Scheduler
+          icfg.processing.scheduler_class = Processing::Schedulers::Default
           icfg.processing.jobs_queue_class = Processing::JobsQueue
           icfg.processing.jobs_builder = Processing::JobsBuilder.new
           icfg.processing.strategy_selector = Processing::StrategySelector.new

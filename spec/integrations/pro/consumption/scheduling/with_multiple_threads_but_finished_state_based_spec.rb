@@ -8,35 +8,28 @@
 
 become_pro!
 
-class WorkBasedScheduler < ::Karafka::Pro::Processing::Scheduler
+class WorkBasedScheduler < ::Karafka::Pro::Processing::Schedulers::Base
   def initialize(queue)
     super
-    @mutex = Mutex.new
     @jobs_buffer = []
     @in_progress = nil
   end
 
   def schedule_consumption(jobs_array)
-    @mutex.synchronize do
-      jobs_array.each do |job|
-        @jobs_buffer << job
-        @queue.lock(job)
-      end
-
-      internal_manage
+    jobs_array.each do |job|
+      @jobs_buffer << job
+      @queue.lock(job)
     end
+
+    internal_manage
   end
 
   def manage
-    @mutex.synchronize do
-      internal_manage
-    end
+    internal_manage
   end
 
   def clear(group_id)
-    @mutex.synchronize do
-      @jobs_buffer.delete_if { |job| job.group_id == group_id }
-    end
+    @jobs_buffer.delete_if { |job| job.group_id == group_id }
   end
 
   private

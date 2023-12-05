@@ -245,7 +245,7 @@ module Karafka
           end
         end
 
-        @scheduler.schedule_revocation(jobs)
+        @scheduler.on_schedule_revocation(jobs)
       end
 
       # Enqueues the shutdown jobs for all the executors that exist in our subscription group
@@ -258,7 +258,7 @@ module Karafka
           jobs << job
         end
 
-        @scheduler.schedule_shutdown(jobs)
+        @scheduler.on_schedule_shutdown(jobs)
       end
 
       # Polls messages within the time and amount boundaries defined in the settings and then
@@ -300,14 +300,14 @@ module Karafka
 
         jobs.each(&:before_schedule)
 
-        @scheduler.schedule_consumption(jobs)
+        @scheduler.on_schedule_consumption(jobs)
       end
 
       # Waits for all the jobs from a given subscription group to finish before moving forward
       def wait
         @jobs_queue.wait(@subscription_group.id) do
           @events_poller.call
-          @scheduler.manage
+          @scheduler.on_manage
         end
       end
 
@@ -324,7 +324,7 @@ module Karafka
       def wait_pinging(wait_until:, after_ping: -> {})
         until wait_until.call
           @client.ping
-          @scheduler.manage
+          @scheduler.on_manage
 
           after_ping.call
           sleep(0.2)
@@ -341,7 +341,7 @@ module Karafka
         # resetting.
         @jobs_queue.wait(@subscription_group.id)
         @jobs_queue.clear(@subscription_group.id)
-        @scheduler.clear(@subscription_group.id)
+        @scheduler.on_clear(@subscription_group.id)
         @events_poller.reset
         @client.reset
         @coordinators.reset
