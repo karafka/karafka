@@ -62,7 +62,7 @@ module Karafka
           #
           # @note We provide a default scheduler logic here because by default revocation jobs
           #   should be scheduled as fast as possible.
-          def schedule_revoke(jobs_array)
+          def schedule_revocation(jobs_array)
             jobs_array.each do |job|
               @queue << job
             end
@@ -96,8 +96,9 @@ module Karafka
 
           # Should manage scheduling on jobs state changes
           #
+          # By default does nothing as default schedulers are stateless
           def manage
-            raise NotImplementedError, 'Implement in a subclass'
+            nil
           end
 
           # Runs clearing under mutex
