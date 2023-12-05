@@ -139,4 +139,12 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#manage' do
+    it { expect { scheduler.on_manage }.not_to raise_error }
+  end
+
+  describe '#clear' do
+    it { expect { scheduler.on_clear(rand.to_s) }.not_to raise_error }
+  end
 end
