@@ -114,6 +114,12 @@ module Karafka
           def clear(_group_id)
             nil
           end
+
+          private
+
+          # @return [Karafka::Processing::JobsQueue] jobs queue reference for internal usage
+          #   inside of the scheduler
+          attr_reader :queue
         end
       end
     end
