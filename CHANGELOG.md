@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.2.14 (Unreleased)
+## 2.2.14 (2023-12-07)
 - **[Feature]** Provide `Karafka::Admin#delete_consumer_group` and `Karafka::Admin#seek_consumer_group`.
 - **[Feature]** Provide `Karafka::App.assignments` that will return real-time assignments tracking.
 - [Enhancement] Make sure that the Scheduling API is thread-safe by default and allow for lock-less schedulers when schedulers are stateless.
