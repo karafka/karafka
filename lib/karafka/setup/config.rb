@@ -222,6 +222,8 @@ module Karafka
           setting :strategy_selector, default: Processing::StrategySelector.new
           # option expansions_selector [Object] processing expansions selector to be used
           setting :expansions_selector, default: Processing::ExpansionsSelector.new
+          # option [Class] executor class
+          setting :executor_class, default: Processing::Executor
         end
 
         # Things related to operating on messages

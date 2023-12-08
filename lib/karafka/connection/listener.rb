@@ -140,6 +140,10 @@ module Karafka
 
           build_and_schedule_flow_jobs
 
+          # tick jobs never run on topics and partitions that were scheduled, so no risk in having
+          # collective wait after both
+          build_and_schedule_tick_jobs
+
           wait
         end
 

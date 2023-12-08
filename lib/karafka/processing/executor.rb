@@ -97,15 +97,7 @@ module Karafka
       # This may include house-keeping or other state management changes that can occur but that
       # not mean there are any new messages available for the end user to process
       def idle
-        # Initializes the messages set in case idle operation would happen before any processing
-        # This prevents us from having no messages object at all as the messages object and
-        # its metadata may be used for statistics
-        consumer.messages ||= Messages::Builders::Messages.call(
-          [],
-          topic,
-          partition,
-          Time.now
-        )
+        consumer.messages ||= empty_messages
 
         consumer.on_idle
       end
@@ -173,6 +165,18 @@ module Karafka
 
           consumer
         end
+      end
+
+      # Initializes the messages set in case given operation would happen before any processing
+      # This prevents us from having no messages object at all as the messages object and
+      # its metadata may be used for statistics
+      def empty_messages
+        Messages::Builders::Messages.call(
+          [],
+          topic,
+          partition,
+          Time.now
+        )
       end
     end
   end
