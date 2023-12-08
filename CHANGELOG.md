@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.2.15 (Unreleased)
+- [Fix] Fix a case where internal Idle job scheduling would go via the consumption flow.
+
 ## 2.2.14 (2023-12-07)
 - **[Feature]** Provide `Karafka::Admin#delete_consumer_group` and `Karafka::Admin#seek_consumer_group`.
 - **[Feature]** Provide `Karafka::App.assignments` that will return real-time assignments tracking.

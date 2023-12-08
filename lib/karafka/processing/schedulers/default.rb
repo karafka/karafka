@@ -13,16 +13,17 @@ module Karafka
 
         # Schedules jobs in the fifo order
         #
-        # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
+        # @param jobs_array [Array<Karafka::Processing::Jobs::Consume>] jobs we want to schedule
         def on_schedule_consumption(jobs_array)
           jobs_array.each do |job|
             @queue << job
           end
         end
 
-        # Both revocation and shutdown jobs can also run in fifo by default
+        # Revocation, shutdown and idle jobs can also run in fifo by default
         alias on_schedule_revocation on_schedule_consumption
         alias on_schedule_shutdown on_schedule_consumption
+        alias on_schedule_idle on_schedule_consumption
 
         # This scheduler does not have anything to manage as it is a pass through and has no state
         def on_manage
