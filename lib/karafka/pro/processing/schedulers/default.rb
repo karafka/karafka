@@ -31,7 +31,9 @@ module Karafka
         class Default < Base
           # Schedules jobs in the LJF order for consumption
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
+          # @param jobs_array
+          #   [Array<Karafka::Processing::Jobs::Consume, Processing::Jobs::ConsumeNonBlocking>]
+          #   jobs for scheduling
           def on_schedule_consumption(jobs_array)
             perf_tracker = Instrumentation::PerformanceTracker.instance
 
@@ -55,7 +57,9 @@ module Karafka
 
           # Schedules jobs in the fifo order
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
+          # @param jobs_array
+          #   [Array<Karafka::Processing::Jobs::Revoked, Processing::Jobs::RevokedNonBlocking>]
+          #   jobs for scheduling
           def on_schedule_revocation(jobs_array)
             jobs_array.each do |job|
               @queue << job
@@ -64,8 +68,17 @@ module Karafka
 
           # Schedules jobs in the fifo order
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs we want to schedule
+          # @param jobs_array [Array<Karafka::Processing::Jobs::Shutdown>] jobs we want to schedule
           def on_schedule_shutdown(jobs_array)
+            jobs_array.each do |job|
+              @queue << job
+            end
+          end
+
+          # Schedules jobs in the fifo order
+          #
+          # @param jobs_array [Array<Karafka::Processing::Jobs::Idle>] jobs we want to schedule
+          def on_schedule_idle(jobs_array)
             jobs_array.each do |job|
               @queue << job
             end
@@ -87,7 +100,7 @@ module Karafka
           private
 
           # @param perf_tracker [PerformanceTracker]
-          # @param job [Karafka::Processing::Jobs::Base] job we will be processing
+          # @param job [Karafka::Processing::Jobs::Consume] job we will be processing
           # @return [Numeric] estimated cost of processing this job
           def processing_cost(perf_tracker, job)
             if job.is_a?(::Karafka::Processing::Jobs::Consume)

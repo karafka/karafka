@@ -138,7 +138,7 @@ module Karafka
           # simplifies the overall design and prevents from race conditions
           wait
 
-          build_and_schedule_consumption_jobs
+          build_and_schedule_flow_jobs
 
           wait
         end
@@ -273,11 +273,13 @@ module Karafka
       end
 
       # Takes the messages per topic partition and enqueues processing jobs in threads using
-      # given scheduler.
-      def build_and_schedule_consumption_jobs
+      # given scheduler. It also handles the idle jobs when filtering API removed all messages
+      # and we need to run house-keeping
+      def build_and_schedule_flow_jobs
         return if @messages_buffer.empty?
 
-        jobs = []
+        consume_jobs = []
+        idle_jobs = []
 
         @messages_buffer.each do |topic, partition, messages|
           coordinator = @coordinators.find_or_create(topic, partition)
@@ -288,19 +290,24 @@ module Karafka
           # and it will not go through a standard lifecycle. Same applies to revoked and shutdown
           if messages.empty?
             executor = @executors.find_or_create(topic, partition, 0, coordinator)
-            jobs << @jobs_builder.idle(executor)
+            idle_jobs << @jobs_builder.idle(executor)
           else
             @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
               executor = @executors.find_or_create(topic, partition, group_id, coordinator)
               coordinator.increment
-              jobs << @jobs_builder.consume(executor, partition_messages)
+              consume_jobs << @jobs_builder.consume(executor, partition_messages)
             end
           end
         end
 
-        jobs.each(&:before_schedule)
+        # We schedule the idle jobs before running the `#before_schedule` on the consume jobs so
+        # workers can already pick up the idle jobs while the `#before_schedule` on consumption
+        # jobs runs
+        idle_jobs.each(&:before_schedule)
+        @scheduler.on_schedule_idle(idle_jobs)
 
-        @scheduler.on_schedule_consumption(jobs)
+        consume_jobs.each(&:before_schedule)
+        @scheduler.on_schedule_consumption(consume_jobs)
       end
 
       # Waits for all the jobs from a given subscription group to finish before moving forward

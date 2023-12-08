@@ -33,7 +33,9 @@ module Karafka
 
           # Runs the consumption jobs scheduling flow under a mutex
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs for scheduling
+          # @param jobs_array
+          #   [Array<Karafka::Processing::Jobs::Consume, Processing::Jobs::ConsumeNonBlocking>]
+          #   jobs for scheduling
           def on_schedule_consumption(jobs_array)
             @mutex.synchronize do
               schedule_consumption(jobs_array)
@@ -42,14 +44,18 @@ module Karafka
 
           # Should schedule the consumption jobs
           #
-          # @param _jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs for scheduling
+          # @param _jobs_array
+          #   [Array<Karafka::Processing::Jobs::Consume, Processing::Jobs::ConsumeNonBlocking>]
+          #   jobs for scheduling
           def schedule_consumption(_jobs_array)
             raise NotImplementedError, 'Implement in a subclass'
           end
 
           # Runs the revocation jobs scheduling flow under a mutex
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs for scheduling
+          # @param jobs_array
+          #   [Array<Karafka::Processing::Jobs::Revoked, Processing::Jobs::RevokedNonBlocking>]
+          #   jobs for scheduling
           def on_schedule_revocation(jobs_array)
             @mutex.synchronize do
               schedule_revocation(jobs_array)
@@ -58,7 +64,9 @@ module Karafka
 
           # Schedules the revocation jobs.
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs for scheduling
+          # @param jobs_array
+          #   [Array<Karafka::Processing::Jobs::Revoked, Processing::Jobs::RevokedNonBlocking>]
+          #   jobs for scheduling
           #
           # @note We provide a default scheduler logic here because by default revocation jobs
           #   should be scheduled as fast as possible.
@@ -70,7 +78,7 @@ module Karafka
 
           # Runs the shutdown jobs scheduling flow under a mutex
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs for scheduling
+          # @param jobs_array [Array<Karafka::Processing::Jobs::Shutdown>] jobs for scheduling
           def on_schedule_shutdown(jobs_array)
             @mutex.synchronize do
               schedule_shutdown(jobs_array)
@@ -79,11 +87,32 @@ module Karafka
 
           # Schedules the shutdown jobs.
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>] jobs for scheduling
+          # @param jobs_array [Array<Karafka::Processing::Jobs::Shutdown>] jobs for scheduling
           #
           # @note We provide a default scheduler logic here because by default revocation jobs
           #   should be scheduled as fast as possible.
           def schedule_shutdown(jobs_array)
+            jobs_array.each do |job|
+              @queue << job
+            end
+          end
+
+          # Runes the idle jobs scheduling flow under a mutex
+          #
+          # @param jobs_array [Array<Karafka::Processing::Jobs::Idle>] jobs for scheduling
+          def on_schedule_idle(jobs_array)
+            @mutex.synchronize do
+              schedule_idle(jobs_array)
+            end
+          end
+
+          # Schedules the idle jobs.
+          #
+          # @param jobs_array [Array<Karafka::Processing::Jobs::Idle>] jobs for scheduling
+          #
+          # @note We provide a default scheduler logic here because by default idle jobs
+          #   should be scheduled as fast as possible.
+          def schedule_idle(jobs_array)
             jobs_array.each do |job|
               @queue << job
             end

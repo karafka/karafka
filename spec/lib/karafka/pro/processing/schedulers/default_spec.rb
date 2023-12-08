@@ -111,6 +111,7 @@ RSpec.describe_current do
   %i[
     on_schedule_revocation
     on_schedule_shutdown
+    on_schedule_idle
   ].each do |action|
     describe "##{action}" do
       subject(:schedule) { scheduler.public_send(action, jobs_array) }
