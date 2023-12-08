@@ -300,10 +300,13 @@ module Karafka
           end
         end
 
+        # We schedule the idle jobs before running the `#before_schedule` on the consume jobs so
+        # workers can already pick up the idle jobs while the `#before_schedule` on consumption
+        # jobs runs
         idle_jobs.each(&:before_schedule)
-        consume_jobs.each(&:before_schedule)
-
         @scheduler.on_schedule_idle(idle_jobs)
+
+        consume_jobs.each(&:before_schedule)
         @scheduler.on_schedule_consumption(consume_jobs)
       end
 
