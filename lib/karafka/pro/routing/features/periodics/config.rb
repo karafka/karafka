@@ -15,9 +15,12 @@ module Karafka
   module Pro
     module Routing
       module Features
-        # Feature allowing to run consumer operations even when no data is present.
-        # This allows for advanced window-based operations regardless of income of new data
-        class DatalessFlows < Base
+        class Periodics < Base
+          # Config for periodics topics feature
+          Config = Struct.new(
+            :active,
+            keyword_init: true
+          ) { alias_method :active?, :active }
         end
       end
     end

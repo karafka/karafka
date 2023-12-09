@@ -15,18 +15,24 @@ module Karafka
   module Pro
     module Processing
       module Jobs
-        class Tick < ::Karafka::Processing::Jobs::Base
+        # Job that represents a "ticking" work. Work that we run periodically for the Periodics
+        # enabled topics.
+        class Periodic < ::Karafka::Processing::Jobs::Base
+          # @param executor [Karafka::Pro::Processing::Executor] pro executor that is suppose to
+          #   run a given job
           def initialize(executor)
             @executor = executor
             super()
           end
 
+          # Code executed before we schedule this job
           def before_schedule
-            executor.before_schedule_tick
+            executor.before_schedule_periodic
           end
 
+          # Runs the executor periodic action
           def call
-            executor.tick
+            executor.periodic
           end
         end
       end

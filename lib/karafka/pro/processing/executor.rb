@@ -15,11 +15,11 @@ module Karafka
   module Pro
     module Processing
       class Executor < Karafka::Processing::Executor
-        def before_schedule_tick
+        def before_schedule_periodic
           consumer.on_before_schedule_tick
         end
 
-        def tick
+        def periodic
           consumer.messages ||= empty_messages
 
           consumer.on_tick

@@ -15,13 +15,11 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class DatalessFlows < Base
-          # Config for triggers topics feature
-          Config = Struct.new(
-            :active,
-            :on,
-            keyword_init: true
-          ) { alias_method :active?, :active }
+        # Feature allowing to run consumer operations even when no data is present on periodic
+        # frequency.
+        # This allows for advanced window-based operations regardless of income of new data and
+        # other advanced cases where the consumer is needed even when no data is coming
+        class Periodics < Base
         end
       end
     end

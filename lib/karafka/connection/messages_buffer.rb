@@ -67,6 +67,13 @@ module Karafka
         end
       end
 
+      def present?(topic, partition)
+        return false unless @groups.include?(topic)
+        return false unless @groups[topic].include?(partition)
+
+        true
+      end
+
       # @return [Boolean] is the buffer empty or does it contain any messages
       def empty?
         @size.zero?

@@ -53,6 +53,7 @@ module Karafka
           features.each { |feature| feature.pre_setup(config) }
 
           reconfigure(config)
+          expand
 
           load_topic_features
         end
@@ -95,6 +96,11 @@ module Karafka
           icfg.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 
           config.monitor.subscribe(Instrumentation::PerformanceTracker.instance)
+        end
+
+        # Adds extra modules to certain classes
+        def expand
+          Karafka::BaseConsumer.include Pro::BaseConsumer
         end
 
         # Loads the Pro features of Karafka

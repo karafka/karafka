@@ -15,27 +15,26 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class DatalessFlows < Base
-          # Topic action dataless flows extensions
+        class Periodics < Base
+          # Periodic topic action flows extensions
           module Topic
-            def dataless_flows(active: false, on: %i[])
-              @dataless_flows ||= begin
-                active = true unless on.empty?
-                on << :polling if active && on.empty?
-
-                Config.new(active: active, on: on.uniq)
-              end
+            def periodic(active = false)
+              @periodics ||= Config.new(active: active)
             end
 
-            def dataless_flows?
-              dataless_flow.active?
+            def periodics
+              periodic
             end
 
-            # @return [Hash] topic with all its native configuration options plus dataless flows
+            def periodics?
+              periodics.active?
+            end
+
+            # @return [Hash] topic with all its native configuration options plus periodics flows
             #   settings
             def to_h
               super.merge(
-                dataless_flows: dataless_flows.to_h
+                periodics: periodics.to_h
               ).freeze
             end
           end

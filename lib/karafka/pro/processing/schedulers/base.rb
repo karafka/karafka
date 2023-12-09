@@ -97,22 +97,26 @@ module Karafka
             end
           end
 
-          # Runes the idle jobs scheduling flow under a mutex
+          # Runes the periodic jobs scheduling flow under a mutex
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Idle>] jobs for scheduling
-          def on_schedule_idle(jobs_array)
+          # @param jobs_array
+          #   [Array<Processing::Jobs::Periodic, Processing::Jobs::PeriodicNonBlocking>]
+          #   jobs for scheduling
+          def on_schedule_periodic(jobs_array)
             @mutex.synchronize do
-              schedule_idle(jobs_array)
+              schedule_periodic(jobs_array)
             end
           end
 
-          # Schedules the idle jobs.
+          # Schedules the periodic jobs.
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Idle>] jobs for scheduling
+          # @param jobs_array
+          #   [Array<Processing::Jobs::Periodic, Processing::Jobs::PeriodicNonBlocking>]
+          #   jobs for scheduling
           #
-          # @note We provide a default scheduler logic here because by default idle jobs
+          # @note We provide a default scheduler logic here because by default periodic jobs
           #   should be scheduled as fast as possible.
-          def schedule_idle(jobs_array)
+          def schedule_periodic(jobs_array)
             jobs_array.each do |job|
               @queue << job
             end

@@ -101,15 +101,11 @@ module Karafka
             end
           end
 
-          # No action needed for the ticking standard flow
+          # No action needed for the tick standard flow
           def handle_before_schedule_tick
             Karafka.monitor.instrument('consumer.before_schedule_tick', caller: self)
 
             nil
-          end
-
-          def on_tick
-            handle_tick
           end
 
           def handle_tick
@@ -118,9 +114,6 @@ module Karafka
               tick
             end
           end
-
-          # Do nothing on default ticking
-          def tick; end
         end
       end
     end

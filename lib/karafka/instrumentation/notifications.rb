@@ -55,9 +55,9 @@ module Karafka
         consumer.revoke
         consumer.revoked
 
-        consumer.before_schedule_ticked
-        consumed.tick
-        consumed.ticked
+        consumer.before_schedule_tick
+        consumer.tick
+        consumer.ticked
 
         consumer.before_schedule_shutdown
         consumer.shutting_down

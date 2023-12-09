@@ -15,7 +15,11 @@ module Karafka
   module Pro
     module Processing
       module Jobs
-        class TickNonBlocking < Tick
+        # Non-Blocking version of the Periodic job
+        # We use this version for LRJ topics for cases where saturated resources would not allow
+        # to run this job for extended period of time. Under such scenarios, if we would not use
+        # a non-blocking one, we would reach max.poll.interval.ms.
+        class PeriodicNonBlocking < Periodic
           def initialize(*args)
             super
             @non_blocking = true

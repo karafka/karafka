@@ -55,34 +55,19 @@ module Karafka
             end
           end
 
-          # Schedules jobs in the fifo order
-          #
-          # @param jobs_array
-          #   [Array<Karafka::Processing::Jobs::Revoked, Processing::Jobs::RevokedNonBlocking>]
-          #   jobs for scheduling
-          def on_schedule_revocation(jobs_array)
+          # Schedules any jobs provided in a fifo order
+          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>]
+          def schedule_fifo(jobs_array)
             jobs_array.each do |job|
               @queue << job
             end
           end
 
-          # Schedules jobs in the fifo order
-          #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Shutdown>] jobs we want to schedule
-          def on_schedule_shutdown(jobs_array)
-            jobs_array.each do |job|
-              @queue << job
-            end
-          end
-
-          # Schedules jobs in the fifo order
-          #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Idle>] jobs we want to schedule
-          def on_schedule_idle(jobs_array)
-            jobs_array.each do |job|
-              @queue << job
-            end
-          end
+          # By default all non-consumption work is scheduled in a fifo order
+          alias on_schedule_revocation schedule_fifo
+          alias on_schedule_shutdown schedule_fifo
+          alias on_schedule_idle schedule_fifo
+          alias on_schedule_periodic schedule_fifo
 
           # This scheduler does not have anything to manage as it is a pass through and has no
           # state
