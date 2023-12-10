@@ -43,6 +43,7 @@ module Karafka
         # We can do this that way because we always first schedule jobs using messages before we
         # fetch another batch.
         @messages_buffer = MessagesBuffer.new(subscription_group)
+        @usage_tracker = TimeTrackers::PartitionUsage.new
         @mutex = Mutex.new
         @stopped = false
 
@@ -240,6 +241,7 @@ module Karafka
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
+            @usage_tracker.revoke(topic, partition)
             @coordinators.revoke(topic, partition)
 
             # There may be a case where we have lost partition of which data we have never
@@ -290,6 +292,8 @@ module Karafka
         idle_jobs = []
 
         @messages_buffer.each do |topic, partition, messages|
+          @usage_tracker.track(topic, partition)
+
           coordinator = @coordinators.find_or_create(topic, partition)
           # Start work coordination for this topic partition
           coordinator.start(messages)
@@ -323,8 +327,9 @@ module Karafka
       end
 
       # Builds and schedules periodic jobs for topics partitions for which no messages were
-      # received. In case `Idle` job is invoked, we do not run periodic. Idle means that a complex
-      # flow kicked in and it was a user choice not to run consumption but messages were shipped.
+      # received recently. In case `Idle` job is invoked, we do not run periodic. Idle means that
+      # a complex flow kicked in and it was a user choice not to run consumption but messages were
+      # shipped.
       def build_and_schedule_periodic_jobs
         # Shortcut if periodics are not used at all. No need to run the complex flow when it will
         # never end up with anything. If periodics on any of the topics are not even defined, we
@@ -338,27 +343,28 @@ module Karafka
         # We select only currently assigned topics and partitions from the current subscription
         # group as only those are of our interest. We then filter that to only pick those for whom
         # we want to run periodic jobs and then we select only those that did not receive any
-        # messages in the current polling.
-        Karafka::App
-          .assignments
-          .select { |topic, _| topic.subscription_group == @subscription_group }
-          .select { |topic, _| topic.periodics? }
-          .flat_map { |topic, partitions| partitions.map { |partition| [topic.name, partition] } }
-          .reject { |topic, partition| @messages_buffer.present?(topic, partition) }
-          .each do |topic, partition|
-            present = false
+        # messages recently. This ensures, that we do not tick close to recent arrival of messages
+        # but rather after certain period of inactivity
+        Karafka::App.assignments.each do |topic, partitions|
+          # Skip for assignments not from our subscription group
+          next unless topic.subscription_group == @subscription_group
 
-            @executors.find_all(topic, partition).each do |executor|
+          topic_name = topic.name
+
+          partitions.each do |partition|
+            # Skip if we were operating on a given topic partition recently
+            next if @usage_tracker.active?(topic_name, partition)
+
+            # Track so we do not run periodic job again too soon
+            @usage_tracker.track(topic_name, partition)
+
+            coordinator = @coordinators.find_or_create(topic_name, partition)
+
+            @executors.find_all_or_create(topic_name, partition, coordinator).each do |executor|
               jobs << @jobs_builder.periodic(executor)
-              present = true
             end
-
-            next if present
-
-            coordinator = @coordinators.find_or_create(topic, partition)
-            executor = @executors.find_or_create(topic, partition, 0, coordinator)
-            jobs << @jobs_builder.periodic(executor)
           end
+        end
 
         return if jobs.empty?
 

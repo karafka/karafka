@@ -22,13 +22,26 @@ module Karafka
       # @param partition [Integer] partition number
       # @param parallel_key [String] parallel group key
       # @param coordinator [Karafka::Processing::Coordinator]
-      # @return [Executor] consumer executor
+      # @return [Executor, Pro::Processing::Executor] consumer executor
       def find_or_create(topic, partition, parallel_key, coordinator)
         @buffer[topic][partition][parallel_key] ||= @executor_class.new(
           @subscription_group.id,
           @client,
           coordinator
         )
+      end
+
+      # Finds all existing executors for given topic partition or creates one for it
+      # @param topic [String] topic name
+      # @param partition [Integer] partition number
+      # @param coordinator [Karafka::Processing::Coordinator]
+      # @return [Array<Executor, Pro::Processing::Executor>]
+      def find_all_or_create(topic, partition, coordinator)
+        existing = find_all(topic, partition)
+
+        return existing unless existing.empty?
+
+        [find_or_create(topic, partition, 0, coordinator)]
       end
 
       # Revokes executors of a given topic partition, so they won't be used anymore for incoming
@@ -44,7 +57,8 @@ module Karafka
       #
       # @param topic [String] topic name
       # @param partition [Integer] partition number
-      # @return [Array<Executor>] executors in use for this topic + partition
+      # @return [Array<Executor, Pro::Processing::Executor>] executors in use for this
+      #   topic + partition
       def find_all(topic, partition)
         @buffer[topic][partition].values
       end
@@ -53,7 +67,7 @@ module Karafka
       # info
       # @yieldparam [Routing::Topic] karafka routing topic object
       # @yieldparam [Integer] partition number
-      # @yieldparam [Executor] given executor
+      # @yieldparam [Executor, Pro::Processing::Executor] given executor
       def each
         @buffer.each_value do |partitions|
           partitions.each_value do |executors|
