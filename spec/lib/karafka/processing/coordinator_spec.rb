@@ -122,6 +122,7 @@ RSpec.describe_current do
       end
 
       it { expect(coordinator.success?).to eq(false) }
+      it { expect(coordinator.failure?).to eq(true) }
     end
   end
 
