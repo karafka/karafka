@@ -17,6 +17,7 @@ RSpec.describe_current do
   %i[
     on_schedule_revocation
     on_schedule_shutdown
+    on_schedule_idle
     on_schedule_periodic
   ].each do |action|
     describe "##{action}" do
