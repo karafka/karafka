@@ -108,6 +108,7 @@ module Karafka
             nil
           end
 
+          # Runs the consumer `#tick` method with reporting
           def handle_tick
             Karafka.monitor.instrument('consumer.tick', caller: self)
             Karafka.monitor.instrument('consumer.ticked', caller: self) do

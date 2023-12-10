@@ -322,7 +322,17 @@ module Karafka
         end
       end
 
+      # Builds and schedules periodic jobs for topics partitions for which no messages were
+      # received. In case `Idle` job is invoked, we do not run periodic. Idle means that a complex
+      # flow kicked in and it was a user choice not to run consumption but messages were shipped.
       def build_and_schedule_periodic_jobs
+        # Shortcut if periodics are not used at all. No need to run the complex flow when it will
+        # never end up with anything. If periodics on any of the topics are not even defined, we
+        # can finish fast
+        @periodics ||= @subscription_group.topics.count(&:periodics?)
+
+        return if @periodics.zero?
+
         jobs = []
 
         # We select only currently assigned topics and partitions from the current subscription
