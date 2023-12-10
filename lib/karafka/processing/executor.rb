@@ -97,8 +97,6 @@ module Karafka
       # This may include house-keeping or other state management changes that can occur but that
       # not mean there are any new messages available for the end user to process
       def idle
-        consumer.messages ||= empty_messages
-
         consumer.on_idle
       end
 
@@ -162,6 +160,10 @@ module Karafka
           consumer.client = @client
           consumer.producer = ::Karafka::App.producer
           consumer.coordinator = @coordinator
+          # Since we have some message-less flows (idle, etc), we initialize consumer with empty
+          # messages set. In production we have persistent consumers, so this is not a performance
+          # overhead as this will happen only once per consumer lifetime
+          consumer.messages = empty_messages
 
           consumer
         end

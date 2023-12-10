@@ -18,14 +18,19 @@ module Karafka
         class Periodics < Base
           # Periodic topic action flows extensions
           module Topic
+            # Defines topic as periodic. Periodic topics consumers will invoke `#tick` with each
+            # poll where messages were not received.
+            # @param active [Boolean] should ticking happen for this topic assignments.
             def periodic(active = false)
               @periodics ||= Config.new(active: active)
             end
 
+            # @return [Periodics::Config] periodics config
             def periodics
               periodic
             end
 
+            # @return [Boolean] is periodics active
             def periodics?
               periodics.active?
             end

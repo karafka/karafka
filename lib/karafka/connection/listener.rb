@@ -332,9 +332,8 @@ module Karafka
         Karafka::App
           .assignments
           .select { |topic, _| topic.subscription_group == @subscription_group }
-          .select { |topic, _| topic.periodics.active? }
-          .map { |topic, partitions| partitions.map { |partition| [topic.name, partition] } }
-          .flatten(1)
+          .select { |topic, _| topic.periodics? }
+          .flat_map { |topic, partitions| partitions.map { |partition| [topic.name, partition] } }
           .reject { |topic, partition| @messages_buffer.present?(topic, partition) }
           .each do |topic, partition|
             present = false
@@ -347,7 +346,7 @@ module Karafka
             next if present
 
             coordinator = @coordinators.find_or_create(topic, partition)
-            executor = @executors.find_or_create(topic, partition, 0, executor)
+            executor = @executors.find_or_create(topic, partition, 0, coordinator)
             jobs << @jobs_builder.periodic(executor)
           end
 
