@@ -9,10 +9,11 @@ RSpec.describe_current do
   let(:raw_message1) { build(:kafka_fetched_message, topic: topic_name) }
   let(:raw_message2) { build(:kafka_fetched_message, topic: topic_name) }
 
-  describe '#size, #empty? and #each' do
+  describe '#size, #empty?, #each and #present?' do
     context 'when there are no messages' do
       it { expect(buffer.size).to eq(0) }
       it { expect(buffer.empty?).to eq(true) }
+      it { expect(buffer.present?(topic_name, 0)).to eq(false) }
 
       it 'expect not to yield anything' do
         expect { |block| buffer.each(&block) }.not_to yield_control
@@ -41,6 +42,8 @@ RSpec.describe_current do
       it { expect(buffer_messages[0][1]).to eq(0) }
       it { expect(buffer_messages[0][2][0]).to be_a(Karafka::Messages::Message) }
       it { expect(buffer_messages[0][2][1]).to be_a(Karafka::Messages::Message) }
+      it { expect(buffer.present?(topic_name, 0)).to eq(true) }
+      it { expect(buffer.present?(topic_name, 10)).to eq(false) }
     end
   end
 

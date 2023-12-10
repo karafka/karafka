@@ -99,6 +99,9 @@ module Karafka
         end
 
         # Adds extra modules to certain classes
+        # This expands their functionalities with things that are needed when operating in Pro
+        # It is used only when given class is part of the end user API and cannot be swapped by
+        # a pluggable component
         def expand
           Karafka::BaseConsumer.include Pro::BaseConsumer
         end
