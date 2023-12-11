@@ -27,6 +27,8 @@ class Consumer < Karafka::BaseConsumer
 end
 
 class Skipper
+  attr_reader :cursor
+
   def apply!(messages)
     @cursor = messages.first
     messages.clear
@@ -38,10 +40,6 @@ class Skipper
 
   def action
     :seek
-  end
-
-  def cursor
-    @cursor
   end
 
   def timeout
