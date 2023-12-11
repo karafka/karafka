@@ -53,6 +53,7 @@ module Karafka
           features.each { |feature| feature.pre_setup(config) }
 
           reconfigure(config)
+          expand
 
           load_topic_features
         end
@@ -86,6 +87,7 @@ module Karafka
           icfg.processing.partitioner_class = Processing::Partitioner
           icfg.processing.scheduler_class = Processing::Schedulers::Default
           icfg.processing.jobs_queue_class = Processing::JobsQueue
+          icfg.processing.executor_class = Processing::Executor
           icfg.processing.jobs_builder = Processing::JobsBuilder.new
           icfg.processing.strategy_selector = Processing::StrategySelector.new
 
@@ -94,6 +96,14 @@ module Karafka
           icfg.active_job.job_options_contract = ActiveJob::JobOptionsContract.new
 
           config.monitor.subscribe(Instrumentation::PerformanceTracker.instance)
+        end
+
+        # Adds extra modules to certain classes
+        # This expands their functionalities with things that are needed when operating in Pro
+        # It is used only when given class is part of the end user API and cannot be swapped by
+        # a pluggable component
+        def expand
+          Karafka::BaseConsumer.include Pro::BaseConsumer
         end
 
         # Loads the Pro features of Karafka

@@ -31,6 +31,9 @@ en:
       patterns.active_format: 'needs to be boolean'
       patterns.type_format: 'needs to be :matcher, :discovered or :regular'
 
+      periodics.active_missing: needs to be present
+      periodics.active_format: 'needs to be boolean'
+
       inline_insights.active_format: 'needs to be boolean'
       inline_insights.required_format: 'needs to be boolean'
 

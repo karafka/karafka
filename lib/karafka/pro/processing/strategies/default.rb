@@ -87,7 +87,7 @@ module Karafka
             end
           end
 
-          # Standard
+          # Standard flow for revocation
           def handle_revoked
             coordinator.on_revoked do
               resume
@@ -98,6 +98,21 @@ module Karafka
             Karafka.monitor.instrument('consumer.revoke', caller: self)
             Karafka.monitor.instrument('consumer.revoked', caller: self) do
               revoked
+            end
+          end
+
+          # No action needed for the tick standard flow
+          def handle_before_schedule_tick
+            Karafka.monitor.instrument('consumer.before_schedule_tick', caller: self)
+
+            nil
+          end
+
+          # Runs the consumer `#tick` method with reporting
+          def handle_tick
+            Karafka.monitor.instrument('consumer.tick', caller: self)
+            Karafka.monitor.instrument('consumer.ticked', caller: self) do
+              tick
             end
           end
         end

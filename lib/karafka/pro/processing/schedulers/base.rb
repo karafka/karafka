@@ -31,6 +31,14 @@ module Karafka
             @mutex = Mutex.new
           end
 
+          # Schedules any jobs provided in a fifo order
+          # @param jobs_array [Array<Karafka::Processing::Jobs::Base>]
+          def schedule_fifo(jobs_array)
+            jobs_array.each do |job|
+              @queue << job
+            end
+          end
+
           # Runs the consumption jobs scheduling flow under a mutex
           #
           # @param jobs_array
@@ -62,20 +70,6 @@ module Karafka
             end
           end
 
-          # Schedules the revocation jobs.
-          #
-          # @param jobs_array
-          #   [Array<Karafka::Processing::Jobs::Revoked, Processing::Jobs::RevokedNonBlocking>]
-          #   jobs for scheduling
-          #
-          # @note We provide a default scheduler logic here because by default revocation jobs
-          #   should be scheduled as fast as possible.
-          def schedule_revocation(jobs_array)
-            jobs_array.each do |job|
-              @queue << job
-            end
-          end
-
           # Runs the shutdown jobs scheduling flow under a mutex
           #
           # @param jobs_array [Array<Karafka::Processing::Jobs::Shutdown>] jobs for scheduling
@@ -85,19 +79,7 @@ module Karafka
             end
           end
 
-          # Schedules the shutdown jobs.
-          #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Shutdown>] jobs for scheduling
-          #
-          # @note We provide a default scheduler logic here because by default revocation jobs
-          #   should be scheduled as fast as possible.
-          def schedule_shutdown(jobs_array)
-            jobs_array.each do |job|
-              @queue << job
-            end
-          end
-
-          # Runes the idle jobs scheduling flow under a mutex
+          # Runs the idle jobs scheduling flow under a mutex
           #
           # @param jobs_array [Array<Karafka::Processing::Jobs::Idle>] jobs for scheduling
           def on_schedule_idle(jobs_array)
@@ -106,17 +88,22 @@ module Karafka
             end
           end
 
-          # Schedules the idle jobs.
+          # Runs the periodic jobs scheduling flow under a mutex
           #
-          # @param jobs_array [Array<Karafka::Processing::Jobs::Idle>] jobs for scheduling
-          #
-          # @note We provide a default scheduler logic here because by default idle jobs
-          #   should be scheduled as fast as possible.
-          def schedule_idle(jobs_array)
-            jobs_array.each do |job|
-              @queue << job
+          # @param jobs_array
+          #   [Array<Processing::Jobs::Periodic, Processing::Jobs::PeriodicNonBlocking>]
+          #   jobs for scheduling
+          def on_schedule_periodic(jobs_array)
+            @mutex.synchronize do
+              schedule_periodic(jobs_array)
             end
           end
+
+          # Schedule by default all except consumption as fifo
+          alias schedule_revocation schedule_fifo
+          alias schedule_shutdown schedule_fifo
+          alias schedule_idle schedule_fifo
+          alias schedule_periodic schedule_fifo
 
           # Runs the manage tick under mutex
           def on_manage

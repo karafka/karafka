@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.2.15 (Unreleased)
+- **[Feature]** Periodic Jobs (Pro)
 - [Fix] Fix a case where internal Idle job scheduling would go via the consumption flow.
 
 ## 2.2.14 (2023-12-07)
