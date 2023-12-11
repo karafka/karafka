@@ -10,6 +10,8 @@ class Consumer < Karafka::BaseConsumer
   def consume; end
 
   def tick
+    return if messages.empty?
+
     DT[:marked] << messages.first.offset
     mark_as_consumed messages.first
     DT[:ticks] << true
