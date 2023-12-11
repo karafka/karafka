@@ -5,6 +5,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     instance = working_class.new
     instance.coordinator = coordinator
     instance.client = client
+    instance.singleton_class.include Karafka::Pro::BaseConsumer
     instance.singleton_class.include(strategy)
     instance
   end
@@ -67,6 +68,14 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     it 'expect not to pause the partition' do
       consumer.on_before_schedule_consume
       expect(client).not_to have_received(:pause)
+    end
+  end
+
+  describe '#on_before_schedule_tick' do
+    let(:strategy) { Karafka::Pro::Processing::Strategies::Default }
+
+    it 'expect to run handle_before_schedule_tick' do
+      expect { consumer.handle_before_schedule_tick }.not_to raise_error
     end
   end
 
@@ -492,6 +501,54 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
       it 'expect to not increase seek_offset' do
         expect(consumer.coordinator.seek_offset).to eq(first_message.offset)
+      end
+    end
+  end
+
+  describe '#on_tick' do
+    context 'when everything went ok on tick' do
+      before { consumer.singleton_class.include(Karafka::Processing::Strategies::Default) }
+
+      it { expect { consumer.on_tick }.not_to raise_error }
+
+      it 'expect to run proper instrumentation' do
+        Karafka.monitor.subscribe('consumer.tick') do |event|
+          expect(event.payload[:caller]).to eq(consumer)
+        end
+
+        consumer.on_tick
+      end
+
+      it 'expect not to run error instrumentation' do
+        Karafka.monitor.subscribe('error.occurred') do |event|
+          expect(event.payload[:caller]).not_to eq(consumer)
+          expect(event.payload[:error]).not_to be_a(StandardError)
+          expect(event.payload[:type]).to eq('consumer.tick.error')
+        end
+
+        consumer.on_tick
+      end
+    end
+
+    context 'when something goes wrong on tick' do
+      let(:working_class) do
+        ClassBuilder.inherit(described_class) do
+          def tick
+            raise StandardError
+          end
+        end
+      end
+
+      it { expect { consumer.on_tick }.not_to raise_error }
+
+      it 'expect to raise' do
+        Karafka.monitor.subscribe('error.occurred') do |event|
+          expect(event.payload[:caller]).to eq(consumer)
+          expect(event.payload[:error]).to be_a(StandardError)
+          expect(event.payload[:type]).to eq('consumer.tick.error')
+        end
+
+        consumer.on_tick
       end
     end
   end

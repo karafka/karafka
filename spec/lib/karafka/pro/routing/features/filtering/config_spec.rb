@@ -17,6 +17,27 @@ RSpec.describe_current do
     end
   end
 
+  describe '#filters' do
+    context 'when no factories are registered' do
+      let(:factories) { [] }
+
+      it { expect(config.filters).to eq([]) }
+    end
+
+    context 'when factories are registered' do
+      let(:factories) do
+        [
+          -> { 1 },
+          -> { 2 }
+        ]
+      end
+
+      it 'expect to use them to build' do
+        expect(config.filters).to eq([1, 2])
+      end
+    end
+  end
+
   describe '#to_h' do
     let(:factories) { [1] }
 

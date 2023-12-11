@@ -247,6 +247,9 @@ module Karafka
         when 'consumer.shutdown.error'
           error "Consumer on shutdown failed due to an error: #{error}"
           error details
+        when 'consumer.tick.error'
+          error "Consumer tick failed due to an error: #{error}"
+          error details
         when 'worker.process.error'
           fatal "Worker processing failed due to an error: #{error}"
           fatal details

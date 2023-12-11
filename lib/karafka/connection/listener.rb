@@ -43,6 +43,7 @@ module Karafka
         # We can do this that way because we always first schedule jobs using messages before we
         # fetch another batch.
         @messages_buffer = MessagesBuffer.new(subscription_group)
+        @usage_tracker = TimeTrackers::PartitionUsage.new
         @mutex = Mutex.new
         @stopped = false
 
@@ -140,6 +141,10 @@ module Karafka
 
           build_and_schedule_flow_jobs
 
+          # periodic jobs never run on topics and partitions that were scheduled, so no risk in
+          # having collective wait after both
+          build_and_schedule_periodic_jobs if Karafka.pro?
+
           wait
         end
 
@@ -214,6 +219,17 @@ module Karafka
         end
       end
 
+      # Polls messages within the time and amount boundaries defined in the settings and then
+      # builds karafka messages based on the raw rdkafka messages buffer returned by the
+      # `#batch_poll` method.
+      #
+      # @note There are two buffers, one for raw messages and one for "built" karafka messages
+      def poll_and_remap_messages
+        @messages_buffer.remap(
+          @client.batch_poll
+        )
+      end
+
       # Enqueues revoking jobs for partitions that were taken away from the running process.
       def build_and_schedule_revoked_jobs_for_revoked_partitions
         revoked_partitions = @client.rebalance_manager.revoked_partitions
@@ -225,6 +241,7 @@ module Karafka
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
+            @usage_tracker.revoke(topic, partition)
             @coordinators.revoke(topic, partition)
 
             # There may be a case where we have lost partition of which data we have never
@@ -232,7 +249,6 @@ module Karafka
             # here. In cases like this, we do not run a revocation job
             @executors.find_all(topic, partition).each do |executor|
               job = @jobs_builder.revoked(executor)
-              job.before_schedule
               jobs << job
             end
 
@@ -245,6 +261,9 @@ module Karafka
           end
         end
 
+        return if jobs.empty?
+
+        jobs.each(&:before_schedule)
         @scheduler.on_schedule_revocation(jobs)
       end
 
@@ -254,22 +273,13 @@ module Karafka
 
         @executors.each do |executor|
           job = @jobs_builder.shutdown(executor)
-          job.before_schedule
           jobs << job
         end
 
-        @scheduler.on_schedule_shutdown(jobs)
-      end
+        return if jobs.empty?
 
-      # Polls messages within the time and amount boundaries defined in the settings and then
-      # builds karafka messages based on the raw rdkafka messages buffer returned by the
-      # `#batch_poll` method.
-      #
-      # @note There are two buffers, one for raw messages and one for "built" karafka messages
-      def poll_and_remap_messages
-        @messages_buffer.remap(
-          @client.batch_poll
-        )
+        jobs.each(&:before_schedule)
+        @scheduler.on_schedule_shutdown(jobs)
       end
 
       # Takes the messages per topic partition and enqueues processing jobs in threads using
@@ -282,6 +292,8 @@ module Karafka
         idle_jobs = []
 
         @messages_buffer.each do |topic, partition, messages|
+          @usage_tracker.track(topic, partition)
+
           coordinator = @coordinators.find_or_create(topic, partition)
           # Start work coordination for this topic partition
           coordinator.start(messages)
@@ -303,11 +315,61 @@ module Karafka
         # We schedule the idle jobs before running the `#before_schedule` on the consume jobs so
         # workers can already pick up the idle jobs while the `#before_schedule` on consumption
         # jobs runs
-        idle_jobs.each(&:before_schedule)
-        @scheduler.on_schedule_idle(idle_jobs)
+        unless idle_jobs.empty?
+          idle_jobs.each(&:before_schedule)
+          @scheduler.on_schedule_idle(idle_jobs)
+        end
 
-        consume_jobs.each(&:before_schedule)
-        @scheduler.on_schedule_consumption(consume_jobs)
+        unless consume_jobs.empty?
+          consume_jobs.each(&:before_schedule)
+          @scheduler.on_schedule_consumption(consume_jobs)
+        end
+      end
+
+      # Builds and schedules periodic jobs for topics partitions for which no messages were
+      # received recently. In case `Idle` job is invoked, we do not run periodic. Idle means that
+      # a complex flow kicked in and it was a user choice not to run consumption but messages were
+      # shipped.
+      def build_and_schedule_periodic_jobs
+        # Shortcut if periodics are not used at all. No need to run the complex flow when it will
+        # never end up with anything. If periodics on any of the topics are not even defined, we
+        # can finish fast
+        @periodics ||= @subscription_group.topics.count(&:periodics?)
+
+        return if @periodics.zero?
+
+        jobs = []
+
+        # We select only currently assigned topics and partitions from the current subscription
+        # group as only those are of our interest. We then filter that to only pick those for whom
+        # we want to run periodic jobs and then we select only those that did not receive any
+        # messages recently. This ensures, that we do not tick close to recent arrival of messages
+        # but rather after certain period of inactivity
+        Karafka::App.assignments.each do |topic, partitions|
+          # Skip for assignments not from our subscription group
+          next unless topic.subscription_group == @subscription_group
+
+          topic_name = topic.name
+
+          partitions.each do |partition|
+            # Skip if we were operating on a given topic partition recently
+            next if @usage_tracker.active?(topic_name, partition)
+
+            # Track so we do not run periodic job again too soon
+            @usage_tracker.track(topic_name, partition)
+
+            coordinator = @coordinators.find_or_create(topic_name, partition)
+
+            @executors.find_all_or_create(topic_name, partition, coordinator).each do |executor|
+              jobs << @jobs_builder.periodic(executor)
+            end
+          end
+        end
+
+        return if jobs.empty?
+
+        jobs.each(&:before_schedule)
+        @scheduler.on_schedule_periodic(jobs)
       end
 
       # Waits for all the jobs from a given subscription group to finish before moving forward

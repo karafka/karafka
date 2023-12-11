@@ -12,6 +12,8 @@ RSpec.describe_current do
 
     it { expect(result).to be_success }
     it { expect(result.cause).to eq(false) }
+    it { expect(result.success?).to eq(true) }
+    it { expect(result.failure?).to eq(false) }
   end
 
   context 'when we fail' do
@@ -19,6 +21,8 @@ RSpec.describe_current do
 
     it { expect(result).not_to be_success }
     it { expect(result.cause).to eq(cause) }
+    it { expect(result.success?).to eq(false) }
+    it { expect(result.failure?).to eq(true) }
   end
 
   context 'when we fail and succeed' do
@@ -29,5 +33,7 @@ RSpec.describe_current do
 
     it { expect(result).to be_success }
     it { expect(result.cause).to eq(false) }
+    it { expect(result.success?).to eq(true) }
+    it { expect(result.failure?).to eq(false) }
   end
 end

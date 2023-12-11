@@ -65,6 +65,38 @@ RSpec.describe_current do
     end
   end
 
+  describe '#find_all' do
+    context 'when no executors present' do
+      it { expect(buffer.find_all(topic_name, partition_id)).to eq([]) }
+    end
+
+    context 'when executors are present' do
+      before { fetched_executor }
+
+      it { expect(buffer.find_all(topic_name, partition_id)).to eq([fetched_executor]) }
+    end
+  end
+
+  describe '#find_all_or_create' do
+    let(:found) { buffer.find_all_or_create(topic_name, partition_id, coordinator) }
+
+    context 'when executors are present' do
+      before { fetched_executor }
+
+      it { expect(found).to eq([fetched_executor]) }
+    end
+
+    context 'when no executors were present' do
+      let(:fetched_executor) { nil }
+
+      it { expect(found.size).to eq(1) }
+
+      it 'expect to build a new one' do
+        expect(found.first).to be_a(Karafka::Processing::Executor)
+      end
+    end
+  end
+
   describe '#revoke' do
     before { fetched_executor }
 
