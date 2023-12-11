@@ -18,6 +18,8 @@ module Karafka
     class PartitionUsage < Base
       # Creates new partition usage time tracker
       def initialize
+        super
+
         @recent_time = ::Karafka::App.config.internal.tick_interval
 
         @last_usage = Hash.new do |topics_hash, topic_name|
