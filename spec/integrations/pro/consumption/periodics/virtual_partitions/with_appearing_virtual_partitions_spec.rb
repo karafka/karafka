@@ -34,7 +34,6 @@ Thread.new do
   produce_many(DT.topic, elements)
 end
 
-
 start_karafka_and_wait_until do
   DT[:ticks].map(&:first).uniq.size >= 10
 end
