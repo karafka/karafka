@@ -88,7 +88,7 @@ module Karafka
             end
           end
 
-          # Runes the periodic jobs scheduling flow under a mutex
+          # Runs the periodic jobs scheduling flow under a mutex
           #
           # @param jobs_array
           #   [Array<Processing::Jobs::Periodic, Processing::Jobs::PeriodicNonBlocking>]
