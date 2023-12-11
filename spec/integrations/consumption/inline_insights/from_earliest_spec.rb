@@ -20,10 +20,9 @@ draw_routes do
   end
 end
 
-elements = DT.uuids(10)
-produce_many(DT.topic, elements)
-
 start_karafka_and_wait_until do
+  produce_many(DT.topic, DT.uuids(10))
+
   DT.key?(:stats) && DT[:stats_exist].include?(true) && !DT[:stats].last.empty?
 end
 
