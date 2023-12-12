@@ -21,8 +21,16 @@ module Karafka
             # Defines topic as periodic. Periodic topics consumers will invoke `#tick` with each
             # poll where messages were not received.
             # @param active [Boolean] should ticking happen for this topic assignments.
-            def periodic_job(active = false)
-              @periodic_job ||= Config.new(active: active)
+            # @param frequency [Integer] minimum frequency to run periodic jobs on given topic.
+            def periodic_job(active = false, frequency: nil)
+              @periodic_job ||= begin
+                # If only frequency defined, it means we want to use so set to active
+                active = true if frequency.is_a?(Integer)
+                # If no frequency, use default
+                frequency ||= ::Karafka::App.config.internal.tick_interval
+
+                Config.new(active: active, frequency: frequency)
+              end
             end
 
             alias periodic periodic_job
