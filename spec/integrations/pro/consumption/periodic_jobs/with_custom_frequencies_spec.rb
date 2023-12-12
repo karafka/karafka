@@ -55,10 +55,10 @@ end
       next
     end
 
-    delta = time - previous
+    delta = (time - previous) * 1_000
 
-    assert delta >= min
-    assert delta >= max
+    assert delta >= min, [delta, min]
+    assert delta <= max, [delta, max]
 
     previous = time
   end
