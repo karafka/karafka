@@ -50,7 +50,7 @@ end
 
   DT[DT.topics[index]].each do |time|
     unless previous
-      periodic = time
+      previous = time
 
       next
     end
