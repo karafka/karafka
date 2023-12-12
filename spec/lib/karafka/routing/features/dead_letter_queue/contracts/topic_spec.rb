@@ -8,7 +8,8 @@ RSpec.describe_current do
       dead_letter_queue: {
         active: true,
         topic: 'deads',
-        max_retries: 5
+        max_retries: 5,
+        independent: false
       }
     }
   end
@@ -19,6 +20,12 @@ RSpec.describe_current do
 
   context 'when active flag is not boolean' do
     before { config[:dead_letter_queue][:active] = rand }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when independent flag is not boolean' do
+    before { config[:dead_letter_queue][:independent] = rand }
 
     it { expect(check).not_to be_success }
   end

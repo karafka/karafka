@@ -11,8 +11,13 @@ module Karafka
           :max_retries,
           # To what topic the skipped messages should be moved
           :topic,
+          # Should retries be handled collectively on a batch or independently per message
+          :independent,
           keyword_init: true
-        ) { alias_method :active?, :active }
+        ) do
+          alias_method :active?, :active
+          alias_method :independent?, :independent
+        end
       end
     end
   end
