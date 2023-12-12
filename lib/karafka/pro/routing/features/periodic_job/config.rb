@@ -15,7 +15,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class Periodics < Base
+        class PeriodicJob < Base
           # Config for periodics topics feature
           Config = Struct.new(
             :active,

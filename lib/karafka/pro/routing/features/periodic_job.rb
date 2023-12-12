@@ -19,7 +19,7 @@ module Karafka
         # frequency.
         # This allows for advanced window-based operations regardless of income of new data and
         # other advanced cases where the consumer is needed even when no data is coming
-        class Periodics < Base
+        class PeriodicJob < Base
         end
       end
     end

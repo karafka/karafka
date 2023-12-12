@@ -23,6 +23,8 @@ module Karafka
               @long_running_job ||= Config.new(active: active)
             end
 
+            alias long_running long_running_job
+
             # @return [Boolean] is a given job on a topic a long-running one
             def long_running_job?
               long_running_job.active?

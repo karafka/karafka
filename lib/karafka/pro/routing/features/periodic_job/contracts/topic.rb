@@ -15,7 +15,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class Periodics < Base
+        class PeriodicJob < Base
           # Namespace for periodics messages contracts
           module Contracts
             # Contract to validate configuration of the periodics feature
@@ -28,7 +28,7 @@ module Karafka
                 ).fetch('en').fetch('validations').fetch('topic')
               end
 
-              nested(:periodics) do
+              nested(:periodic_job) do
                 required(:active) { |val| [true, false].include?(val) }
               end
             end
