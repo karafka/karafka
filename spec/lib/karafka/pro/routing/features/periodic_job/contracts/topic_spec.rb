@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   let(:config) do
     {
-      periodics: {
+      periodic_job: {
         active: true
       }
     }
@@ -16,7 +16,7 @@ RSpec.describe_current do
   end
 
   context 'when active flag is not boolean' do
-    before { config[:periodics][:active] = rand }
+    before { config[:periodic_job][:active] = rand }
 
     it { expect(check).not_to be_success }
   end

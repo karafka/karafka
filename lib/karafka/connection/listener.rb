@@ -331,12 +331,12 @@ module Karafka
       # a complex flow kicked in and it was a user choice not to run consumption but messages were
       # shipped.
       def build_and_schedule_periodic_jobs
-        # Shortcut if periodics are not used at all. No need to run the complex flow when it will
-        # never end up with anything. If periodics on any of the topics are not even defined, we
-        # can finish fast
-        @periodics ||= @subscription_group.topics.count(&:periodics?)
+        # Shortcut if periodic jobs are not used at all. No need to run the complex flow when it
+        # will never end up with anything. If periodics on any of the topics are not even defined,
+        # we can finish fast
+        @periodic_jobs ||= @subscription_group.topics.count(&:periodic_job?)
 
-        return if @periodics.zero?
+        return if @periodic_jobs.zero?
 
         jobs = []
 

@@ -15,31 +15,28 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class Periodics < Base
+        class PeriodicJob < Base
           # Periodic topic action flows extensions
           module Topic
             # Defines topic as periodic. Periodic topics consumers will invoke `#tick` with each
             # poll where messages were not received.
             # @param active [Boolean] should ticking happen for this topic assignments.
-            def periodic(active = false)
-              @periodics ||= Config.new(active: active)
+            def periodic_job(active = false)
+              @periodic_job ||= Config.new(active: active)
             end
 
-            # @return [Periodics::Config] periodics config
-            def periodics
-              periodic
-            end
+            alias periodic periodic_job
 
             # @return [Boolean] is periodics active
-            def periodics?
-              periodics.active?
+            def periodic_job?
+              periodic_job.active?
             end
 
             # @return [Hash] topic with all its native configuration options plus periodics flows
             #   settings
             def to_h
               super.merge(
-                periodics: periodics.to_h
+                periodic_job: periodic_job.to_h
               ).freeze
             end
           end

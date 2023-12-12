@@ -20,7 +20,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    periodic true
+    periodic_job true # periodic is an alias, we support both
     virtual_partitions(
       partitioner: ->(msg) { msg.raw_payload }
     )
