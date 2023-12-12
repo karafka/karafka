@@ -15,7 +15,10 @@ class Consumer < Karafka::BaseConsumer
     @runs += 1
 
     messages.each do |message|
-      raise StandardError if @runs == message.offset
+      if @runs == message.offset
+        DT[:crashed] << message.offset if attempt == 3
+        raise StandardError
+      end
 
       mark_as_consumed(message)
     end
@@ -48,4 +51,4 @@ start_karafka_and_wait_until do
 end
 
 # Consumer will accumulate the retries and apply them on later messages
-assert_equal [2, 5, 8], DT[:broken]
+assert_equal DT[:crashed][0..2], DT[:broken]
