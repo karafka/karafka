@@ -18,6 +18,7 @@ module Karafka
 
             nested :dead_letter_queue do
               required(:active) { |val| [true, false].include?(val) }
+              required(:independent) { |val| [true, false].include?(val) }
               required(:max_retries) { |val| val.is_a?(Integer) && val >= 0 }
             end
 

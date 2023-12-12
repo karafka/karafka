@@ -14,6 +14,42 @@ module Karafka
           dead_letter_queue
         ].freeze
 
+        # Override of the standard `#mark_as_consumed` in order to handle the pause tracker
+        # reset in case DLQ is marked as fully independent. When DLQ is marked independent,
+        # any offset marking causes the pause count tracker to reset. This is useful when
+        # the error is not due to the collective batch operations state but due to intermediate
+        # "crawling" errors that move with it
+        #
+        # @see `Strategies::Default#mark_as_consumed` for more details
+        # @param message [Messages::Message]
+        def mark_as_consumed(message)
+          # If we are not retrying pause count is already 0, no need to try to reset the state
+          return super unless retrying?
+          # If we do not use independent marking on DLQ, we just mark as consumed
+          return super unless topic.dead_letter_queue.independent?
+          # If we were not able to mark no need to reset
+          return false unless super
+
+          coordinator.pause_tracker.reset
+
+          true
+        end
+
+        # Overrriden similarly to `#mark_as_consumed`. Resets the pause tracker count in case
+        # DLQ was configured with the `independent` flag.
+        #
+        # @see `Strategies::Default#mark_as_consumed!` for more details
+        # @param message [Messages::Message]
+        def mark_as_consumed!(message)
+          return super unless retrying?
+          return super unless topic.dead_letter_queue.independent?
+          return false unless super
+
+          coordinator.pause_tracker.reset
+
+          true
+        end
+
         # When manual offset management is on, we do not mark anything as consumed automatically
         # and we rely on the user to figure things out
         def handle_after_consume
