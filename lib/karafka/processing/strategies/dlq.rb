@@ -35,7 +35,7 @@ module Karafka
           true
         end
 
-        # Overrriden similarly to `#mark_as_consumed`. Resets the pause tracker count in case
+        # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in case
         # DLQ was configured with the `independent` flag.
         #
         # @see `Strategies::Default#mark_as_consumed!` for more details
