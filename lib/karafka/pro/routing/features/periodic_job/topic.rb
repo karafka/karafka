@@ -22,10 +22,7 @@ module Karafka
             # poll where messages were not received.
             # @param active [Boolean] should ticking happen for this topic assignments.
             # @param frequency [Integer] minimum frequency to run periodic jobs on given topic.
-            def periodic_job(
-              active = false,
-              frequency: nil
-            )
+            def periodic_job(active = false, frequency: nil)
               @periodic_job ||= begin
                 # If only frequency defined, it means we want to use so set to active
                 active = true if frequency.is_a?(Integer)
