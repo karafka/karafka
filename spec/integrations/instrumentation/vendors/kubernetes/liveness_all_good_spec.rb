@@ -34,6 +34,9 @@ Karafka.monitor.subscribe(listener)
 raw_flows = +''
 
 Thread.new do
+  sleep(0.1) until Karafka::App.running?
+  sleep(0.5) # Give a bit of time for the tcp server to start after the app starts running
+
   until Karafka::App.stopping?
     sleep(0.1)
 

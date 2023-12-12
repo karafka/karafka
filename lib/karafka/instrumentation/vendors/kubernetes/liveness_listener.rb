@@ -15,6 +15,14 @@ module Karafka
         # data would be processed, but process itself would still be active. This listener allows
         # for defining of a ttl that gets bumped on each poll loop and before and after processing
         # of a given messages batch.
+        #
+        # @note This listener will bind itself only when Karafka will actually attempt to start
+        #   and moves from initializing to running. Before that, the TCP server will NOT be active.
+        #   This is done on purpose to mitigate a case where users would subscribe this listener
+        #   in `karafka.rb` without checking the recommendations of conditional assignment.
+        #
+        # @note In case of usage within an embedding with Puma, you need to select different port
+        #   then the one used by Puma itself.
         class LivenessListener
           include ::Karafka::Core::Helpers::Time
 
@@ -40,18 +48,30 @@ module Karafka
             consuming_ttl: 5 * 60 * 1_000,
             polling_ttl: 5 * 60 * 1_000
           )
-            @server = TCPServer.new(*[hostname, port].compact)
+            @hostname = hostname
+            @port = port
             @polling_ttl = polling_ttl
             @consuming_ttl = consuming_ttl
             @mutex = Mutex.new
             @pollings = {}
             @consumptions = {}
+          end
+
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_app_running(_event)
+            @server = TCPServer.new(*[@hostname, @port].compact)
 
             Thread.new do
               loop do
                 break unless respond
               end
             end
+          end
+
+          # Stop the http server when we stop the process
+          # @param _event [Karafka::Core::Monitoring::Event]
+          def on_app_stopped(_event)
+            @server.close
           end
 
           # Tick on each fetch
@@ -96,12 +116,6 @@ module Karafka
           def on_error_occurred(_event)
             clear_consumption_tick
             clear_polling_tick
-          end
-
-          # Stop the http server when we stop the process
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_app_stopped(_event)
-            @server.close
           end
 
           private
