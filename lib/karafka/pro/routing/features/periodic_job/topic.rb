@@ -30,7 +30,7 @@ module Karafka
                 # If only frequency defined, it means we want to use so set to active
                 active = true if frequency.is_a?(Integer)
                 # If no frequency, use default
-                frequency = ::Karafka::App.config.internal.tick_interval unless frequency
+                frequency ||= ::Karafka::App.config.internal.tick_interval
 
                 Config.new(active: active, frequency: frequency)
               end
