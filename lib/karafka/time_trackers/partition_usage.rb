@@ -20,8 +20,6 @@ module Karafka
       def initialize
         super
 
-        @recent_time = ::Karafka::App.config.internal.tick_interval
-
         @last_usage = Hash.new do |topics_hash, topic_name|
           topics_hash[topic_name] = Hash.new do |partitions_hash, partition_id|
             partitions_hash[partition_id] = 0
@@ -31,9 +29,10 @@ module Karafka
 
       # @param topic [String]
       # @param partition [Integer]
+      # @param frequency [Integer] minimum frequency
       # @return [Boolean] was this topic partition active
-      def active?(topic, partition)
-        monotonic_now - @last_usage[topic][partition] < @recent_time
+      def active?(topic, partition, frequency)
+        monotonic_now - @last_usage[topic][partition] < frequency
       end
 
       # Marks usage of given partition

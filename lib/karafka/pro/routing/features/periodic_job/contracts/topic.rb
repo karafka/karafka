@@ -30,6 +30,7 @@ module Karafka
 
               nested(:periodic_job) do
                 required(:active) { |val| [true, false].include?(val) }
+                required(:frequency) { |val| val.is_a?(Integer) && val >= 100 }
               end
             end
           end

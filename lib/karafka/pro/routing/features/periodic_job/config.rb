@@ -19,6 +19,7 @@ module Karafka
           # Config for periodics topics feature
           Config = Struct.new(
             :active,
+            :frequency,
             keyword_init: true
           ) { alias_method :active?, :active }
         end
