@@ -11,14 +11,14 @@ RSpec.describe_current do
     context 'when we use periodic_job without any arguments' do
       it 'expect to initialize with defaults' do
         expect(topic.periodic_job.active?).to eq(false)
-        expect(topic.periodic_job.frequency).to eq(5_000)
+        expect(topic.periodic_job.interval).to eq(5_000)
       end
     end
 
     context 'when used via the periodic alias without any arguments' do
       it 'expect to initialize with defaults' do
         expect(topic.periodic.active?).to eq(false)
-        expect(topic.periodic_job.frequency).to eq(5_000)
+        expect(topic.periodic_job.interval).to eq(5_000)
       end
     end
 
@@ -34,15 +34,15 @@ RSpec.describe_current do
         topic.periodic(true)
         topic.periodic(false)
         expect(topic.periodic_job.active?).to eq(true)
-        expect(topic.periodic_job.frequency).to eq(5_000)
+        expect(topic.periodic_job.interval).to eq(5_000)
       end
     end
 
-    context 'when initialized only with frequency' do
-      it 'expect to use proper active status and frequency' do
-        topic.periodic(frequency: 2_500)
+    context 'when initialized only with interval' do
+      it 'expect to use proper active status and interval' do
+        topic.periodic(interval: 2_500)
         expect(topic.periodic_job.active?).to eq(true)
-        expect(topic.periodic_job.frequency).to eq(2_500)
+        expect(topic.periodic_job.interval).to eq(2_500)
       end
     end
   end

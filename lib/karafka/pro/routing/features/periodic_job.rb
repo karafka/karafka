@@ -16,7 +16,7 @@ module Karafka
     module Routing
       module Features
         # Feature allowing to run consumer operations even when no data is present on periodic
-        # frequency.
+        # interval.
         # This allows for advanced window-based operations regardless of income of new data and
         # other advanced cases where the consumer is needed even when no data is coming
         class PeriodicJob < Base
