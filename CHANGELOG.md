@@ -3,6 +3,7 @@
 ## 2.2.15 (Unreleased)
 - **[Feature]** Periodic Jobs (Pro)
 - [Enhancement] Provide an `:independent` configuration to DLQ allowing to reset pause count track on each marking as consumed when retrying.
+- [Change] Make `Kubernetes::LivenessListener` not start until Karafka app starts running.
 - [Fix] Fix a case where internal Idle job scheduling would go via the consumption flow.
 
 ## 2.2.14 (2023-12-07)
