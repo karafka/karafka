@@ -20,16 +20,11 @@ class SlowConsumer < Karafka::BaseConsumer
   end
 end
 
-begin
-  port = rand(3000..5000)
-  listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
-    hostname: '127.0.0.1',
-    port: port,
-    consuming_ttl: 2_000
-  )
-rescue Errno::EADDRINUSE
-  retry
-end
+listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
+  hostname: '127.0.0.1',
+  port: 9001,
+  consuming_ttl: 2_000
+)
 
 Karafka.monitor.subscribe(listener)
 
@@ -39,7 +34,7 @@ Thread.new do
 
   until Karafka::App.stopping?
     sleep(0.1)
-    uri = URI.parse("http://127.0.0.1:#{port}/")
+    uri = URI.parse('http://127.0.0.1:9001/')
     response = Net::HTTP.get_response(uri)
     DT[:probing] << response.code
   end

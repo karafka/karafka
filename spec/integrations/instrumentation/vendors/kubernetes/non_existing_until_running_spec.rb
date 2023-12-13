@@ -11,15 +11,10 @@ class Consumer < Karafka::BaseConsumer
   def consume; end
 end
 
-begin
-  port = rand(3000..5000)
-  listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
-    hostname: '127.0.0.1',
-    port: port
-  )
-rescue Errno::EADDRINUSE
-  retry
-end
+listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
+  hostname: '127.0.0.1',
+  port: 9004
+)
 
 Karafka.monitor.subscribe(listener)
 
@@ -31,7 +26,7 @@ not_available = false
 
 begin
   req = Net::HTTP::Get.new('/')
-  client = Net::HTTP.new('127.0.0.1', port)
+  client = Net::HTTP.new('127.0.0.1', 9004)
   client.request(req)
 rescue Errno::ECONNREFUSED
   not_available = true
