@@ -33,8 +33,8 @@ en:
 
       periodic_job.active_missing: needs to be present
       periodic_job.active_format: 'needs to be boolean'
-      periodic_job.frequency_missing: 'needs to be present'
-      periodic_job.frequency_format: 'needs to be an integer equal or more than 100'
+      periodic_job.interval_missing: 'needs to be present'
+      periodic_job.interval_format: 'needs to be an integer equal or more than 100'
 
       inline_insights.active_format: 'needs to be boolean'
       inline_insights.required_format: 'needs to be boolean'

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:config) { described_class.new(active: active, frequency: frequency) }
+  subject(:config) { described_class.new(active: active, interval: interval) }
 
   let(:active) { true }
-  let(:frequency) { 1_000 }
+  let(:interval) { 1_000 }
 
   describe '#active?' do
     context 'when active' do

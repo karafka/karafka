@@ -29,10 +29,10 @@ module Karafka
 
       # @param topic [String]
       # @param partition [Integer]
-      # @param frequency [Integer] minimum frequency
+      # @param interval [Integer] minimum interval
       # @return [Boolean] was this topic partition active
-      def active?(topic, partition, frequency)
-        monotonic_now - @last_usage[topic][partition] < frequency
+      def active?(topic, partition, interval)
+        monotonic_now - @last_usage[topic][partition] < interval
       end
 
       # Marks usage of given partition
