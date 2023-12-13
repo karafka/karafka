@@ -49,7 +49,7 @@ File.open('karafka.rb', 'a') do |file|
   LISTENER
 end
 
-Thread::abort_on_exception = true
+Thread.abort_on_exception = true
 
 thread = Thread.new do
   # Make sure Rails console can start
@@ -67,7 +67,7 @@ begin
   req = Net::HTTP::Get.new('/')
   client = Net::HTTP.new('127.0.0.1', 9006)
   client.request(req)
-rescue Errno::ECONNREFUSED => e
+rescue Errno::ECONNREFUSED
   not_available = true
 end
 
