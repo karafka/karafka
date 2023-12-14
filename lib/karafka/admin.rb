@@ -290,6 +290,14 @@ module Karafka
         consumer&.close
       end
 
+      # Creates admin instance and yields it. After usage it closes the admin instance
+      def with_admin
+        admin = config(:producer, {}).admin
+        yield(admin)
+      ensure
+        admin&.close
+      end
+
       private
 
       # @return [Array<String>] topics names
@@ -302,14 +310,6 @@ module Karafka
       # @return [Hash] topic details
       def topic(name)
         cluster_info.topics.find { |topic| topic[:topic_name] == name }
-      end
-
-      # Creates admin instance and yields it. After usage it closes the admin instance
-      def with_admin
-        admin = config(:producer, {}).admin
-        yield(admin)
-      ensure
-        admin&.close
       end
 
       # There are some cases where rdkafka admin operations finish successfully but without the
