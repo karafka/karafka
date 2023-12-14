@@ -9,6 +9,8 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    DT[:post_runs] << true if DT.key?(:split)
+
     @runs ||= 0
 
     messages.each do |message|
@@ -45,7 +47,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:offsets].size >= 10
+  DT[:offsets].size >= 10 && DT[:post_runs].size >= 4
 end
 
 split = DT[:split].first
