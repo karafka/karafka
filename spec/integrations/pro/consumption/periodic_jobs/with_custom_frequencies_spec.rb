@@ -27,11 +27,11 @@ draw_routes do
   end
 
   topic DT.topics[1] do
-    periodic frequency: 100
+    periodic interval: 100
   end
 
   topic DT.topics[2] do
-    periodic frequency: 1_000
+    periodic interval: 1_000
   end
 end
 

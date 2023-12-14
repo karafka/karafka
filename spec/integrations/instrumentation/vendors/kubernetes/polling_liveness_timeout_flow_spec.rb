@@ -15,23 +15,21 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-begin
-  port = rand(3000..5000)
-  listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
-    hostname: '127.0.0.1',
-    port: port,
-    polling_ttl: 1_000
-  )
-rescue Errno::EADDRINUSE
-  retry
-end
+listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
+  hostname: '127.0.0.1',
+  port: 9005,
+  polling_ttl: 1_000
+)
 
 Karafka.monitor.subscribe(listener)
 
 Thread.new do
+  sleep(0.1) until Karafka::App.running?
+  sleep(0.5) # Give a bit of time for the tcp server to start after the app starts running
+
   until Karafka::App.stopping?
     sleep(0.1)
-    uri = URI.parse("http://127.0.0.1:#{port}/")
+    uri = URI.parse('http://127.0.0.1:9005/')
     response = Net::HTTP.get_response(uri)
     DT[:probing] << response.code
   end

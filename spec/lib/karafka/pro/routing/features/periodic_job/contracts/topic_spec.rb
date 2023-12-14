@@ -7,7 +7,7 @@ RSpec.describe_current do
     {
       periodic_job: {
         active: true,
-        frequency: 2_500
+        interval: 2_500
       }
     }
   end
@@ -22,14 +22,14 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
-  context 'when frequency is not integer' do
-    before { config[:periodic_job][:frequency] = 1.4 }
+  context 'when interval is not integer' do
+    before { config[:periodic_job][:interval] = 1.4 }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when frequency is less than 100ms' do
-    before { config[:periodic_job][:frequency] = 99 }
+  context 'when interval is less than 100ms' do
+    before { config[:periodic_job][:interval] = 99 }
 
     it { expect(check).not_to be_success }
   end

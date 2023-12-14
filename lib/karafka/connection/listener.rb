@@ -350,11 +350,11 @@ module Karafka
           next unless topic.subscription_group == @subscription_group
 
           topic_name = topic.name
-          frequency = topic.periodic_job.frequency
+          interval = topic.periodic_job.interval
 
           partitions.each do |partition|
             # Skip if we were operating on a given topic partition recently
-            next if @usage_tracker.active?(topic_name, partition, frequency)
+            next if @usage_tracker.active?(topic_name, partition, interval)
 
             # Track so we do not run periodic job again too soon
             @usage_tracker.track(topic_name, partition)

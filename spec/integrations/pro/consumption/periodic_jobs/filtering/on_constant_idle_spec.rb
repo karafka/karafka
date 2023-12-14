@@ -20,9 +20,11 @@ class Consumer < Karafka::BaseConsumer
     DT[0] << true
   end
 
-  # Should never tick because of constant ftr
+  # Should not tick often because of constant ftr
+  # It may tick however on constant ftr in case of seek and poll of zero where no messages
+  # are fetched instead of being fetched and not processed
   def tick
-    raise
+    DT[:ticks] << true
   end
 end
 
@@ -60,3 +62,5 @@ start_karafka_and_wait_until do
 
   DT[:seeks].count >= 50
 end
+
+assert DT[:ticks].size <= 5
