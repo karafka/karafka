@@ -150,9 +150,9 @@ module Karafka
               resource_name: nil,
               resource_pattern_type: :any,
               principal: nil,
-              host: '*',
               operation: :any,
-              permission_type: :any
+              permission_type: :any,
+              host: '*'
             )
           )
         end
