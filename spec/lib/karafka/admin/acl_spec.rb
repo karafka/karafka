@@ -21,6 +21,14 @@ RSpec.describe_current do
     }
   end
 
+  describe '#new' do
+    context 'when trying to create with attribute that cannot be mapped' do
+      let(:resource_type) { :nothing_useful }
+
+      it { expect { acl }.to raise_error(Karafka::Errors::UnsupportedCaseError) }
+    end
+  end
+
   describe '#create' do
     subject(:creation) { described_class.create(acl) }
 
