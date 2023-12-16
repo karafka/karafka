@@ -5,7 +5,6 @@ require 'socket'
 module Karafka
   module Instrumentation
     module Vendors
-      # Namespace for instrumentation related with Kubernetes
       module Kubernetes
         # Kubernetes HTTP listener that does not only reply when process is not fully hanging, but
         # also allows to define max time of processing and looping.
