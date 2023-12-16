@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Skip until all explicit modules gems are released due to loading issues
+exit if RUBY_VERSION.include?('2.7.8')
+
 # Karafka should be able to recover from non-critical errors and web tracking instrumentation
 # should not break anything and should not crash
 

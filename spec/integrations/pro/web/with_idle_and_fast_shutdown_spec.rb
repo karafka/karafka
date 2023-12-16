@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Skip until all explicit modules gems are released due to loading issues
+exit if RUBY_VERSION.include?('2.7.8')
+
 # When the idle job kicks in before we had a chance to process any data, it should still have
 # access to empty messages batch with proper offset positions (-1001) and no messages.
 # Web tracking should pick it up and not fail

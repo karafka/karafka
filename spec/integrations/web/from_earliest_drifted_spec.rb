@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Skip until all explicit modules gems are released due to loading issues
+exit if RUBY_VERSION.include?('2.7.8')
+
 # Karafka should be able to handle a case where the cluster and consumer times drifted
 # Some metrics may not be 100% accurate and this should not happen often but may
 
