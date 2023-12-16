@@ -198,7 +198,6 @@ jobs:
         run: |
           if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
             gem install bundler -v 2.4.4 --no-document
-            gem update --system --no-document
           else
             gem install bundler --no-document
             gem update --system --no-document
