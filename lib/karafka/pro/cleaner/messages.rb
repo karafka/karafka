@@ -13,9 +13,9 @@
 
 module Karafka
   module Pro
-    module Contracts
-      # Base for all the Pro contracts
-      class Base < ::Karafka::Contracts::Base
+    module Cleaner
+      # Cleaner messages components related enhancements
+      module Messages
       end
     end
   end

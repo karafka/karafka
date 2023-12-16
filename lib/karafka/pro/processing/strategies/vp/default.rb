@@ -15,7 +15,6 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # VP starting strategies
         module Vp
           # Just Virtual Partitions enabled
           module Default

@@ -16,7 +16,6 @@ module Karafka
     module Routing
       module Features
         class PeriodicJob < Base
-          # Namespace for periodics messages contracts
           module Contracts
             # Contract to validate configuration of the periodics feature
             class Topic < Karafka::Contracts::Base

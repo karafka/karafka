@@ -15,7 +15,6 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # Namespace for all the strategies starting with DLQ
         module Dlq
           # Only dead letter queue enabled
           module Default

@@ -13,9 +13,11 @@
 
 module Karafka
   module Pro
-    module Contracts
-      # Base for all the Pro contracts
-      class Base < ::Karafka::Contracts::Base
+    module Processing
+      module Strategies
+        # VP starting strategies
+        module Vp
+        end
       end
     end
   end

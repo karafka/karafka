@@ -15,7 +15,6 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # Filtering related init strategies
         module Ftr
           # Only filtering enabled
           module Default

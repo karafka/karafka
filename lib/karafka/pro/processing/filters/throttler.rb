@@ -14,7 +14,6 @@
 module Karafka
   module Pro
     module Processing
-      # Namespace containing Pro out of the box filters used by various strategies
       module Filters
         # Throttler used to limit number of messages we can process in a given time interval
         # The tricky thing is, that even if we throttle on 100 messages, if we've reached 100, we

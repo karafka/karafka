@@ -16,7 +16,6 @@ module Karafka
     module Routing
       module Features
         class DeadLetterQueue < Base
-          # Namespace for DLQ contracts
           module Contracts
             # Extended rules for dead letter queue settings
             class Topic < Karafka::Contracts::Base

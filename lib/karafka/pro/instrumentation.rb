@@ -13,10 +13,8 @@
 
 module Karafka
   module Pro
-    module Contracts
-      # Base for all the Pro contracts
-      class Base < ::Karafka::Contracts::Base
-      end
+    # Namespace for Pro components instrumentation related code
+    module Instrumentation
     end
   end
 end

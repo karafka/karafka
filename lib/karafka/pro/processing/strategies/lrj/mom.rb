@@ -15,7 +15,6 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # Namespace for all the LRJ starting strategies
         module Lrj
           # Long-Running Job enabled
           # Manual offset management enabled

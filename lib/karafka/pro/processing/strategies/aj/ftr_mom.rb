@@ -15,7 +15,6 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # Namespace for ActiveJob related strategies
         module Aj
           # ActiveJob enabled
           # Filtering enabled

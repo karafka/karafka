@@ -16,7 +16,6 @@ module Karafka
     module Routing
       module Features
         class Filtering < Base
-          # Namespace for filtering feature contracts
           module Contracts
             # Contract to validate configuration of the filtering feature
             class Topic < Karafka::Contracts::Base

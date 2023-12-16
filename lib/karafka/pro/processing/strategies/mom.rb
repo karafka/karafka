@@ -13,9 +13,11 @@
 
 module Karafka
   module Pro
-    module Contracts
-      # Base for all the Pro contracts
-      class Base < ::Karafka::Contracts::Base
+    module Processing
+      module Strategies
+        # Namespace for Mom starting strategies
+        module Mom
+        end
       end
     end
   end

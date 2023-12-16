@@ -14,7 +14,6 @@
 module Karafka
   module Pro
     module Processing
-      # Namespace for Pro schedulers related components
       module Schedulers
         # Base for all the Pro custom schedulers
         #

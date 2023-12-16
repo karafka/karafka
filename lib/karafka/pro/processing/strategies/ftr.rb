@@ -13,9 +13,11 @@
 
 module Karafka
   module Pro
-    module Contracts
-      # Base for all the Pro contracts
-      class Base < ::Karafka::Contracts::Base
+    module Processing
+      module Strategies
+        # Filtering related init strategies
+        module Ftr
+        end
       end
     end
   end

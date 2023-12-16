@@ -13,7 +13,6 @@
 
 module Karafka
   module Pro
-    # Namespace for Pro components instrumentation related code
     module Instrumentation
       # Tracker used to keep track of performance metrics
       # It provides insights that can be used to optimize processing flow

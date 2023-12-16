@@ -13,9 +13,9 @@
 
 module Karafka
   module Pro
-    module Contracts
-      # Base for all the Pro contracts
-      class Base < ::Karafka::Contracts::Base
+    module Processing
+      # Namespace for Pro schedulers related components
+      module Schedulers
       end
     end
   end

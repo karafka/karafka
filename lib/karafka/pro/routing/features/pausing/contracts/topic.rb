@@ -16,7 +16,6 @@ module Karafka
     module Routing
       module Features
         class Pausing < Base
-          # Namespace for pausing feature
           module Contracts
             # Contract to make sure, that the pause settings on a per topic basis are as expected
             class Topic < Karafka::Contracts::Base

@@ -13,9 +13,11 @@
 
 module Karafka
   module Pro
-    module Contracts
-      # Base for all the Pro contracts
-      class Base < ::Karafka::Contracts::Base
+    module Processing
+      module Strategies
+        # Namespace for all the LRJ starting strategies
+        module Lrj
+        end
       end
     end
   end

@@ -15,7 +15,6 @@ module Karafka
   module Pro
     module Processing
       module Strategies
-        # Namespace for Mom starting strategies
         module Mom
           # Manual offset management enabled
           module Default

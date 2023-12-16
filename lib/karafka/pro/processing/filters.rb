@@ -13,9 +13,9 @@
 
 module Karafka
   module Pro
-    module Contracts
-      # Base for all the Pro contracts
-      class Base < ::Karafka::Contracts::Base
+    module Processing
+      # Namespace containing Pro out of the box filters used by various strategies
+      module Filters
       end
     end
   end
