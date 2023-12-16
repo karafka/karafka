@@ -203,12 +203,12 @@ class Scenario
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
         BUNDLE_AUTO_INSTALL=true \
         PRISTINE_MODE=true \
-        bundle exec #{bundler_v} ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{file_name}
+        bundle #{bundler_v} exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{file_name}
       CMD
     else
       <<~CMD
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
-        bundle exec #{bundler_v} ruby -r ./spec/integrations_helper.rb #{@path}
+        bundle #{bundler_v} exec ruby -r ./spec/integrations_helper.rb #{@path}
       CMD
     end
   end
