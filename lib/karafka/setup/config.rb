@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Module containing all Karafka setup related elements like configuration settings,
-  # config validations and configurators for external gems integration
   module Setup
     # Configurator for setting up all the framework details that are required to make it work
     # @note If you want to do some configurations after all of this is done, please add to

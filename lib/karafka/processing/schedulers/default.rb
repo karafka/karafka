@@ -2,7 +2,6 @@
 
 module Karafka
   module Processing
-    # Namespace for Karafka OSS schedulers
     module Schedulers
       # FIFO scheduler for messages coming from various topics and partitions
       class Default

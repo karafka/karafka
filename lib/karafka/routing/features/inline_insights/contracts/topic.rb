@@ -4,7 +4,6 @@ module Karafka
   module Routing
     module Features
       class InlineInsights < Base
-        # Inline Insights related contracts namespace
         module Contracts
           # Contract for inline insights topic setup
           class Topic < Karafka::Contracts::Base

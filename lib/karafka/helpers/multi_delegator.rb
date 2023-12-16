@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Module containing classes and methods that provide some additional helper functionalities.
   module Helpers
     # @note Taken from http://stackoverflow.com/questions/6407141
     # Multidelegator is used to delegate calls to multiple targets.

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Namespace for Kafka connection related logic
   module Connection
     # An abstraction layer on top of the rdkafka consumer.
     #

@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Module for all supported by default serialization and deserialization ways.
   module Serialization
-    # Namespace for json serializers and deserializers.
     module Json
       # Default Karafka Json deserializer for loading JSON data.
       class Deserializer

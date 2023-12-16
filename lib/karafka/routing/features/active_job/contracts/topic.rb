@@ -4,7 +4,6 @@ module Karafka
   module Routing
     module Features
       class ActiveJob < Base
-        # This feature validation contracts
         module Contracts
           # Rules around using ActiveJob routing - basically you need to have ActiveJob available
           # in order to be able to use active job routing

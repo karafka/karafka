@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Namespace for all elements related to requests routing
   module Routing
     # Karafka framework Router for routing incoming messages to proper consumers
     # @note Since Kafka does not provide namespaces or modules for topics, they all have "flat"

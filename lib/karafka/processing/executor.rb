@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Namespace that encapsulates all the logic related to processing data.
   module Processing
     # Executors:
     # - run consumers code (for `#call`) or run given preparation / teardown operations when needed

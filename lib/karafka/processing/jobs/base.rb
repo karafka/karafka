@@ -2,7 +2,6 @@
 
 module Karafka
   module Processing
-    # Namespace for all the jobs that are supposed to run in workers.
     module Jobs
       # Base class for all the jobs types that are suppose to run in workers threads.
       # Each job can have 3 main entry-points: `#before_call`, `#call` and `#after_call`

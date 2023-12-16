@@ -4,7 +4,6 @@ module Karafka
   module Routing
     module Features
       class Declaratives < Base
-        # This feature validation contracts
         module Contracts
           # Basic validation of the Kafka expected config details
           class Topic < Karafka::Contracts::Base

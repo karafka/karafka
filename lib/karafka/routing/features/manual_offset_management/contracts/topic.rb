@@ -4,7 +4,6 @@ module Karafka
   module Routing
     module Features
       class ManualOffsetManagement < Base
-        # This feature validation contracts
         module Contracts
           # Rules around manual offset management settings
           class Topic < Karafka::Contracts::Base

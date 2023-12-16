@@ -2,7 +2,6 @@
 
 module Karafka
   module Messages
-    # Builders encapsulate logic related to creating messages related objects.
     module Builders
       # Builder of a single message based on raw rdkafka message.
       module Message

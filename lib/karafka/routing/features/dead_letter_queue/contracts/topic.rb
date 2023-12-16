@@ -4,7 +4,6 @@ module Karafka
   module Routing
     module Features
       class DeadLetterQueue < Base
-        # This feature validation contracts
         module Contracts
           # Rules around dead letter queue settings
           class Topic < Karafka::Contracts::Base

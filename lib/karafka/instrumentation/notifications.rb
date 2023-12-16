@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Namespace for all the things related with Karafka instrumentation process
   module Instrumentation
     # Monitor is used to hookup external monitoring services to monitor how Karafka works
     # It provides a standardized API for checking incoming messages/enqueueing etc

@@ -11,14 +11,21 @@
 # always having the module.rb file for stability.
 
 # Do it for now for pro
-lib_location = File.join(Karafka.gem_root, 'lib', 'karafka', 'pro', '**/**')
+lib_location = File.join(Karafka.gem_root, 'lib', 'karafka', '**/**')
 
 failed = []
+
+EXCLUSIONS = %w[
+  karafka/templates
+]
 
 Dir[lib_location].each do |path|
   next unless File.directory?(path)
 
   next if File.exist?("#{path}.rb")
+  next if EXCLUSIONS.any? { |exclusion| path.end_with?(exclusion) }
+
+  p path
 
   failed << path
 end
