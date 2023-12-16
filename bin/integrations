@@ -170,6 +170,10 @@ class Scenario
   # Sets up a proper environment for a given spec to run and returns the run command
   # @return [String] run command
   def init_and_build_cmd
+    # use system default
+    bundler_v = nil
+    bundler_v = '_2.4.4_' if RUBY_VERSION.include?('2.7.8')
+
     case type
     when :poro
       scenario_dir = File.dirname(@path)
@@ -184,7 +188,7 @@ class Scenario
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
         BUNDLE_AUTO_INSTALL=true \
         PRISTINE_MODE=true \
-        bundle exec ruby #{file_name}
+        bundle #{bundler_v} exec ruby #{file_name}
       CMD
     when :pristine
       scenario_dir = File.dirname(@path)
@@ -199,12 +203,12 @@ class Scenario
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
         BUNDLE_AUTO_INSTALL=true \
         PRISTINE_MODE=true \
-        bundle exec ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{file_name}
+        bundle exec #{bundler_v} ruby -r #{ROOT_PATH}/spec/integrations_helper.rb #{file_name}
       CMD
     else
       <<~CMD
         KARAFKA_GEM_DIR=#{ROOT_PATH} \
-        bundle exec ruby -r ./spec/integrations_helper.rb #{@path}
+        bundle exec #{bundler_v} ruby -r ./spec/integrations_helper.rb #{@path}
       CMD
     end
   end
