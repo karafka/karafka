@@ -2,9 +2,7 @@
 
 module Karafka
   module Instrumentation
-    # Namespace for vendor specific instrumentation
     module Vendors
-      # Datadog specific instrumentation
       module Datadog
         # A karafka's logger listener for Datadog
         # It depends on the 'ddtrace' gem

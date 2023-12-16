@@ -17,15 +17,13 @@ failed = []
 
 EXCLUSIONS = %w[
   karafka/templates
-]
+].freeze
 
 Dir[lib_location].each do |path|
   next unless File.directory?(path)
 
   next if File.exist?("#{path}.rb")
   next if EXCLUSIONS.any? { |exclusion| path.end_with?(exclusion) }
-
-  p path
 
   failed << path
 end

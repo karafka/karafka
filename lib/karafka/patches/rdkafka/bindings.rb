@@ -2,7 +2,6 @@
 
 module Karafka
   module Patches
-    # Rdkafka patches specific to Karafka
     module Rdkafka
       # Binding patches that slightly change how rdkafka operates in certain places
       module Bindings
