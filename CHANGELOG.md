@@ -6,6 +6,7 @@
 - [Enhancement] Provide an `:independent` configuration to DLQ allowing to reset pause count track on each marking as consumed when retrying.
 - [Change] Make `Kubernetes::LivenessListener` not start until Karafka app starts running.
 - [Fix] Fix a case where internal Idle job scheduling would go via the consumption flow.
+- [Fix] Create module files for all modules not to rely on their auto-creation via Zeitwerk.
 
 ## 2.2.14 (2023-12-07)
 - **[Feature]** Provide `Karafka::Admin#delete_consumer_group` and `Karafka::Admin#seek_consumer_group`.

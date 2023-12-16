@@ -13,7 +13,6 @@
 
 module Karafka
   module Pro
-    # Karafka Pro ActiveJob components
     module ActiveJob
       # Pro dispatcher that sends the ActiveJob job to a proper topic based on the queue name
       # and that allows to inject additional options into the producer, effectively allowing for a

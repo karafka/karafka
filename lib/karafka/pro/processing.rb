@@ -13,14 +13,8 @@
 
 module Karafka
   module Pro
-    module Routing
-      module Features
-        # Long-Running Jobs feature config and DSL namespace.
-        #
-        # Long-Running Jobs allow you to run Karafka jobs beyond `max.poll.interval.ms`
-        class LongRunningJob < Base
-        end
-      end
+    #  Pro components related to processing part of Karafka
+    module Processing
     end
   end
 end

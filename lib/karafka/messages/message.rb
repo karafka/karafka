@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Messages namespace encapsulating all the logic that is directly related to messages handling
   module Messages
     # It provides lazy loading not only until the first usage, but also allows us to skip
     # using deserializer until we execute our logic. That way we can operate with

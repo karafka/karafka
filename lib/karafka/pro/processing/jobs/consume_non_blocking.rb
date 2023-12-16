@@ -13,9 +13,7 @@
 
 module Karafka
   module Pro
-    # Pro components related to processing part of Karafka
     module Processing
-      # Pro jobs
       module Jobs
         # The main job type in a non-blocking variant.
         # This variant works "like" the regular consumption but does not block the queue.

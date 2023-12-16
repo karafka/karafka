@@ -14,7 +14,6 @@
 module Karafka
   module Pro
     module Encryption
-      # Encryption related messages components
       module Messages
         # Middleware for WaterDrop. It automatically encrypts messages payload.
         # It is injected only if encryption is enabled.

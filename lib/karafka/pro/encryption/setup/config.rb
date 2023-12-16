@@ -14,7 +14,6 @@
 module Karafka
   module Pro
     module Encryption
-      # Setup and config related encryption components
       module Setup
         # Config for encryption
         class Config
