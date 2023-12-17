@@ -9,6 +9,13 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    # Remove flow edge cases and always require at least 3 messages for the sake of consistency
+    if messages.size < 3
+      seek(messages.first.offset)
+
+      return
+    end
+
     DT[:ticks] << true
 
     @runs ||= -1
