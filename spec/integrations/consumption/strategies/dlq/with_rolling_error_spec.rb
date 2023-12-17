@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 
 # Without the independent flag (default) Karafka will accumulate attempts on a batch in a rolling
