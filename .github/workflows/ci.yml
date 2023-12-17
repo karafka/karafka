@@ -148,7 +148,7 @@ jobs:
         run: |
           if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
             gem install bundler -v 2.4.4 --no-document
-            gem install rubygems-update
+            gem install rubygems-update -v 3.4.22
             update_rubygems
           else
             gem install bundler --no-document
@@ -201,7 +201,7 @@ jobs:
         run: |
           if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
             gem install bundler -v 2.4.4 --no-document
-            gem install rubygems-update
+            gem install rubygems-update -v 3.4.22
             update_rubygems
           else
             gem install bundler --no-document
