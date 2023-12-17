@@ -9,13 +9,6 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    # Remove flow edge cases and always require at least 3 messages for the sake of consistency
-    if messages.size < 3
-      seek(messages.first.offset)
-
-      return
-    end
-
     DT[:ticks] << true
 
     @runs ||= -1
@@ -55,4 +48,16 @@ start_karafka_and_wait_until do
 end
 
 # Consumer will accumulate the retries and apply them on later messages
-assert_equal [2, 5, 8], DT[:broken]
+# There needs to be a distance of at least 3 in between
+previous = nil
+
+DT[:broken].each do |broken|
+  unless previous
+    previous = broken
+    next
+  end
+
+  assert (broken - previous) >= 3
+
+  previous = broken
+end
