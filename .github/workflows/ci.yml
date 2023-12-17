@@ -205,7 +205,6 @@ jobs:
             update_rubygems
           else
             gem install bundler --no-document
-            gem install rubygems-update
             update_rubygems
             gem update --system --no-document
           fi
