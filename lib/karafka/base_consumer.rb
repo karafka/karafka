@@ -11,6 +11,9 @@ module Karafka
 
     def_delegators :@coordinator, :topic, :partition
 
+    def_delegators :producer, :produce_async, :produce_sync,:produce_many_async,
+                   :produce_many_sync
+
     # @return [String] id of the current consumer
     attr_reader :id
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
