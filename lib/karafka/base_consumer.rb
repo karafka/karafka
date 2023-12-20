@@ -11,7 +11,7 @@ module Karafka
 
     def_delegators :@coordinator, :topic, :partition
 
-    def_delegators :producer, :produce_async, :produce_sync,:produce_many_async,
+    def_delegators :producer, :produce_async, :produce_sync, :produce_many_async,
                    :produce_many_sync
 
     # @return [String] id of the current consumer
