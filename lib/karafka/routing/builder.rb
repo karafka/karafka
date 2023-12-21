@@ -109,10 +109,20 @@ module Karafka
       # subscription group customization
       # @param subscription_group_name [String, Symbol] subscription group id. When not provided,
       #   a random uuid will be used
+      # @param args [Array] any extra arguments accepted by the subscription group builder
       # @param block [Proc] further topics definitions
-      def subscription_group(subscription_group_name = SubscriptionGroup.id, &block)
+      def subscription_group(
+        subscription_group_name = SubscriptionGroup.id,
+        **args,
+        &block
+      )
         consumer_group('app') do
-          target.public_send(:subscription_group=, subscription_group_name.to_s, &block)
+          target.public_send(
+            :subscription_group=,
+            subscription_group_name.to_s,
+            **args,
+            &block
+          )
         end
       end
 

@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.2.15 (Unreleased)
+- **[Feature]** Provide ability to multiplex subscription groups (Pro)
 - **[Feature]** Provide `Karafka::Admin::Acl` for Kafka ACL management via the Admin APIs.
 - **[Feature]** Periodic Jobs (Pro)
 - [Enhancement] Alias producer operations in consumer to skip `#producer` reference.

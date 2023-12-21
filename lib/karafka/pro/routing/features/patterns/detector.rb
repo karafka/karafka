@@ -22,6 +22,12 @@ module Karafka
           # @note This is NOT thread-safe and should run in a thread-safe context that warranties
           #   that there won't be any race conditions
           class Detector
+            # Mutex for making sure that we do not modify same consumer group in runtime at the
+            # same time from multiple subscription groups if they operate in a multiplexed mode
+            MUTEX = Mutex.new
+
+            private_constant :MUTEX
+
             # Checks if the provided topic matches any of the patterns and when detected, expands
             # the routing with it.
             #
@@ -29,16 +35,18 @@ module Karafka
             #   topics.
             # @param new_topic [String] new topic that we have detected
             def expand(sg_topics, new_topic)
-              sg_topics
-                .map(&:patterns)
-                .select(&:active?)
-                .select(&:matcher?)
-                .map(&:pattern)
-                .then { |pts| pts.empty? ? return : pts }
-                .then { |pts| Patterns.new(pts) }
-                .find(new_topic)
-                .then { |pattern| pattern || return }
-                .then { |pattern| install(pattern, new_topic, sg_topics) }
+              MUTEX.synchronize do
+                sg_topics
+                  .map(&:patterns)
+                  .select(&:active?)
+                  .select(&:matcher?)
+                  .map(&:pattern)
+                  .then { |pts| pts.empty? ? return : pts }
+                  .then { |pts| Patterns.new(pts) }
+                  .find(new_topic)
+                  .then { |pattern| pattern || return }
+                  .then { |pattern| install(pattern, new_topic, sg_topics) }
+              end
             end
 
             private
