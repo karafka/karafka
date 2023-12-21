@@ -27,7 +27,7 @@ module Karafka
             def subscription_group=(name = SubscriptionGroup.id, multiplex: 1, &block)
               multiplex.times do |i|
                 super(
-                  multiplex > 1 ? "#{name}-#{i}" : name.to_s,
+                  multiplex > 1 ? "#{name}_multiplex_#{i}" : name.to_s,
                   &block
                 )
               end

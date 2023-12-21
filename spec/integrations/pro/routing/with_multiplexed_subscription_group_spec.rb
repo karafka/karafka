@@ -25,8 +25,8 @@ end
 assert_equal 5, Karafka::App.routes.first.subscription_groups.size
 
 Karafka::App.routes.first.subscription_groups.each_with_index do |sg, i|
-  assert sg.id.include?("#{SG_UUID}-#{i}_#{i}")
-  assert_equal sg.name, "#{SG_UUID}-#{i}"
+  assert sg.id.include?("#{SG_UUID}_multiplex_#{i}_#{i}")
+  assert_equal sg.name, "#{SG_UUID}_multiplex_#{i}"
 end
 
 assert !failed
