@@ -15,7 +15,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  subscription_group :sg, concurrency: 5 do
+  subscription_group :sg, multiplex: 5 do
     topic DT.topic do
       config(partitions: 10)
       consumer Consumer
