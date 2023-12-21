@@ -18,7 +18,7 @@ module Karafka
       virtual do |data, errors|
         next unless errors.empty?
 
-        names = data.fetch(:topics).map { |topic| topic[:name] }
+        names = data.fetch(:topics).map { |topic| topic_unique_key(topic) }
 
         next if names.size == names.uniq.size
 
@@ -50,6 +50,14 @@ module Karafka
         next unless error_occured
 
         [[%i[topics], :topics_namespaced_names_not_unique]]
+      end
+
+      class << self
+        # @param topic [Hash] topic config hash
+        # @return [String] topic unique key for validators
+        def topic_unique_key(topic)
+          topic[:name]
+        end
       end
     end
   end

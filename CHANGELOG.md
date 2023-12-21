@@ -1,8 +1,10 @@
 # Karafka framework changelog
 
 ## 2.2.15 (Unreleased)
+- **[Feature]** Provide ability to multiplex subscription groups (Pro)
 - **[Feature]** Provide `Karafka::Admin::Acl` for Kafka ACL management via the Admin APIs.
 - **[Feature]** Periodic Jobs (Pro)
+- [Enhancement] Allow for multiple connections to the same topic within same consumer group using separate subscription groups.
 - [Enhancement] Alias producer operations in consumer to skip `#producer` reference.
 - [Enhancement] Provide an `:independent` configuration to DLQ allowing to reset pause count track on each marking as consumed when retrying.
 - [Change] Make `Kubernetes::LivenessListener` not start until Karafka app starts running.
