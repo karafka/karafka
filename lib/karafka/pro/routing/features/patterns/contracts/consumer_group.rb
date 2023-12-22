@@ -46,7 +46,11 @@ module Karafka
                   next unless errors.empty?
 
                   regexp_strings = data[:patterns].map { |pattern| pattern.fetch(:regexp_string) }
+                  regexp_names = data[:patterns].map { |pattern| pattern.fetch(:name) }
 
+                  # If all names are the same for the same regexp, it means its a multiplex and
+                  # we can allow it
+                  next if regexp_names.uniq.size == 1 && regexp_strings.uniq.size == 1
                   next if regexp_strings.empty?
                   next if regexp_strings.uniq.size == regexp_strings.size
 
