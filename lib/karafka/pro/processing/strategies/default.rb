@@ -24,6 +24,53 @@ module Karafka
           include Base
           include ::Karafka::Processing::Strategies::Default
 
+          def transaction
+            @_in_transaction ||= 0
+
+            producer.transaction do
+              @_in_transaction += 1
+
+              yield
+
+              @_in_transaction = false
+            end
+
+            @_in_transaction -= 1
+
+            return unless @_in_transaction.zero?
+            return unless @_in_transaction_marked
+
+            mark_as_consumed(@_in_transaction_marked)
+
+            @_in_transaction_marked = nil
+          end
+
+          # Marks message as consumed in an async way.
+          #
+          # @param message [Messages::Message] last successfully processed message.
+          # @return [Boolean] true if we were able to mark the offset, false otherwise.
+          #   False indicates that we were not able and that we have lost the partition.
+          #
+          # @note We keep track of this offset in case we would mark as consumed and got error when
+          #   processing another message. In case like this we do not pause on the message we've
+          #   already processed but rather at the next one. This applies to both sync and async
+          #   versions of this method.
+          def mark_as_consumed(message)
+            if @_in_transaction
+              producer.transactional_store_offset(client, topic.name, partition, message.offset + 1)
+              @_in_transaction_marked = message
+            else
+              # Ignore earlier offsets than the one we already committed
+              return true if coordinator.seek_offset > message.offset
+              return false if revoked?
+              return revoked? unless client.mark_as_consumed(message)
+
+              coordinator.seek_offset = message.offset + 1
+
+              true
+            end
+          end
+
           # Apply strategy for a non-feature based flow
           FEATURES = %i[].freeze
 

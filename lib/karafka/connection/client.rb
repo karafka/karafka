@@ -346,6 +346,14 @@ module Karafka
         @kafka.events_poll(timeout)
       end
 
+
+      # @return [Test]
+      def consumer_group_metadata_pointer
+        a = @kafka.consumer_group_metadata_pointer
+        p a.class
+        a
+      end
+
       private
 
       # When we cannot store an offset, it means we no longer own the partition
