@@ -18,12 +18,12 @@ class Consumer < Karafka::BaseConsumer
         return
       end
 
-      if message.offset == 10 && !@moved
-        coordinator.seek_offset = 0
-        @moved = true
-        seek(0)
-        break
-      end
+      next unless message.offset == 10 && !@moved
+
+      @moved = true
+      seek(0, reset_offset: true)
+
+      break
     end
   end
 end
