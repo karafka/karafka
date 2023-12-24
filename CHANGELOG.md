@@ -4,6 +4,7 @@
 - **[Feature]** Provide ability to multiplex subscription groups (Pro)
 - **[Feature]** Provide `Karafka::Admin::Acl` for Kafka ACL management via the Admin APIs.
 - **[Feature]** Periodic Jobs (Pro)
+- [Enhancement] Introduce `non_blocking` routing API that aliases LRJ to indicate a different use-case for LRJ flow approach.
 - [Enhancement] Allow to reset offset when seeking backwards by using the `reset_offset` keyword attribute set to `true`.
 - [Enhancement] Alias producer operations in consumer to skip `#producer` reference.
 - [Enhancement] Provide an `:independent` configuration to DLQ allowing to reset pause count track on each marking as consumed when retrying.
