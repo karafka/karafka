@@ -26,12 +26,8 @@ draw_routes do
   end
 end
 
-ticks = 0
-
-Karafka.monitor.subscribe('connection.listener.before_fetch_loop') do
-  ticks += 1
-
-  next unless ticks >= 2
+Karafka.monitor.subscribe('connection.listener.before_fetch_loop') do |event|
+  next if event[:subscription_group].topics.map(&:name).include?(DT.topics[0])
 
   # Wait on the second SG until first topic stores offset
   sleep(0.1) until DT.key?(:offset)
