@@ -46,15 +46,13 @@ module Karafka
       INHERITABLE_ATTRIBUTES.each do |attribute|
         attr_writer attribute
 
-        define_method attribute do
-          current_value = instance_variable_get(:"@#{attribute}")
+        class_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def #{attribute}
+            return @#{attribute} unless @#{attribute}.nil?
 
-          return current_value unless current_value.nil?
-
-          value = Karafka::App.config.send(attribute)
-
-          instance_variable_set(:"@#{attribute}", value)
-        end
+            @#{attribute} = Karafka::App.config.send(:#{attribute})
+          end
+        RUBY
       end
 
       # @return [String] name of subscription that will go to librdkafka
