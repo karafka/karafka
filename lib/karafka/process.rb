@@ -25,9 +25,11 @@ module Karafka
       #     Karafka.logger.info('Log something here')
       #     exit
       #   end
-      define_method :"on_#{signal.to_s.downcase}" do |&block|
-        @callbacks[signal] << block
-      end
+      class_eval <<~RUBY, __FILE__, __LINE__ + 1
+        def on_#{signal.to_s.downcase}(&block)
+          @callbacks[:#{signal}] << block
+        end
+      RUBY
     end
 
     # Creates an instance of process and creates empty hash for callbacks

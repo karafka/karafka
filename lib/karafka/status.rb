@@ -42,25 +42,27 @@ module Karafka
     end
 
     STATES.each do |state, transition|
-      define_method :"#{state}?" do
-        @status == state
-      end
-
-      define_method transition do
-        MUTEX.synchronize do
-          # Do not allow reverse state transitions (we always go one way) or transition to the same
-          # state as currently
-          return if @status && STATES.keys.index(state) <= STATES.keys.index(@status)
-
-          @status = state
-
-          # Skip on creation (initializing)
-          # We skip as during this state we do not have yet a monitor
-          return if initializing?
-
-          Karafka.monitor.instrument("app.#{state}")
+      class_eval <<~RUBY, __FILE__, __LINE__ + 1
+        def #{state}?
+          @status == :#{state}
         end
-      end
+
+        def #{transition}
+          MUTEX.synchronize do
+            # Do not allow reverse state transitions (we always go one way) or transition to the same
+            # state as currently
+            return if @status && STATES.keys.index(:#{state}) <= STATES.keys.index(@status)
+
+            @status = :#{state}
+
+            # Skip on creation (initializing)
+            # We skip as during this state we do not have yet a monitor
+            return if initializing?
+
+            Karafka.monitor.instrument("app.#{state}")
+          end
+        end
+      RUBY
     end
 
     # @return [Boolean] true if we are in any of the status that would indicate we should no longer
