@@ -186,6 +186,16 @@ module Karafka
         setting :connection do
           # Settings that are altered by our client proxy layer
           setting :proxy do
+            # Committed offsets for given CG query
+            setting :committed do
+              # timeout for this request. For busy or remote clusters, this should be high enough
+              setting :timeout, default: 5_000
+              # How many times should we try to run this call before raising an error
+              setting :max_attempts, default: 3
+              # How long should we wait before next attempt in case of a failure
+              setting :wait_time, default: 1_000
+            end
+
             # Watermark offsets request settings
             setting :query_watermark_offsets do
               # timeout for this request. For busy or remote clusters, this should be high enough
