@@ -23,7 +23,7 @@ module Karafka
     # It does **not** create a consumer group and does not have any offset management.
     class Iterator
       # Local partition reference for librdkafka
-      Partition = Struct.new(:partition, :offset)
+      Partition = Struct.new(:partition, :offset, :metadata)
 
       private_constant :Partition
 
