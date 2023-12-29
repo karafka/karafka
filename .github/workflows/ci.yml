@@ -99,6 +99,7 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
+          bundler: 'latest'
 
       - name: Wait for Kafka
         run: |
