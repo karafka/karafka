@@ -44,7 +44,7 @@ RSpec.describe_current do
               timeout: 100,
               max_attempts: 5,
               wait_time: 1_000
-            },
+            }
           }
         },
         routing: {
