@@ -143,6 +143,7 @@ jobs:
           #
           # We also want to check that librdkafka is compiling as expected on all versions of Ruby
           ruby-version: ${{matrix.ruby}}
+          bundler: 'latest'
 
       - name: Install latest Bundler
         run: |
@@ -194,6 +195,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{matrix.ruby}}
+          bundler: 'latest'
 
       - name: Install latest Bundler
         run: |
