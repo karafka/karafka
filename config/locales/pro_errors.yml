@@ -3,6 +3,7 @@ en:
     topic:
       virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
       virtual_partitions.max_partitions_format: needs to be equal or more than 1
+      virtual_partitions.offset_metadata_strategy_format: needs to be either :exact or :current
 
       long_running_job.active_format: needs to be either true or false
 
