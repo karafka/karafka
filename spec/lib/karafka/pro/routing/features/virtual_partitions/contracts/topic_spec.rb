@@ -8,7 +8,8 @@ RSpec.describe_current do
       virtual_partitions: {
         active: true,
         partitioner: ->(_) { 1 },
-        max_partitions: 2
+        max_partitions: 2,
+        offset_metadata_strategy: :exact
       },
       manual_offset_management: {
         active: mom_active
@@ -29,6 +30,12 @@ RSpec.describe_current do
 
   context 'when virtual partitions max_partitions is too low' do
     before { config[:virtual_partitions][:max_partitions] = 0 }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when virtual partitions offset_metadata_strategy is not a symbol' do
+    before { config[:virtual_partitions][:offset_metadata_strategy] = 0 }
 
     it { expect(check).not_to be_success }
   end

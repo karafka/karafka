@@ -122,9 +122,9 @@ module Karafka
       # Stores offset for a given partition of a given topic based on the provided message.
       #
       # @param message [Karafka::Messages::Message]
-      # @param metadata [String, nil] offset storage metadata or nil if none
-      def store_offset(message, metadata = nil)
-        internal_store_offset(message, metadata)
+      # @param offset_metadata [String, nil] offset storage metadata or nil if none
+      def store_offset(message, offset_metadata = nil)
+        internal_store_offset(message, offset_metadata)
       end
 
       # @return [Boolean] true if our current assignment has been lost involuntarily.

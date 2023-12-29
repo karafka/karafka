@@ -60,8 +60,8 @@ RSpec.describe_current do
       before do
         consumer.messages = messages
 
-        allow(client).to receive(:mark_as_consumed).with(messages.first).and_return(true)
-        allow(client).to receive(:mark_as_consumed).with(messages.last).and_return(true)
+        allow(client).to receive(:mark_as_consumed).with(messages.first, nil).and_return(true)
+        allow(client).to receive(:mark_as_consumed).with(messages.last, nil).and_return(true)
 
         allow(ActiveJob::Base).to receive(:execute).with(payload1)
         allow(ActiveJob::Base).to receive(:execute).with(payload2)
@@ -77,8 +77,8 @@ RSpec.describe_current do
       it 'expect to mark as consumed on each message' do
         consumer.consume
 
-        expect(client).to have_received(:mark_as_consumed).with(messages.first)
-        expect(client).to have_received(:mark_as_consumed).with(messages.last)
+        expect(client).to have_received(:mark_as_consumed).with(messages.first, nil)
+        expect(client).to have_received(:mark_as_consumed).with(messages.last, nil)
       end
     end
 
@@ -121,8 +121,8 @@ RSpec.describe_current do
         consumer.coordinator.decrement
         consumer.on_revoked
 
-        allow(client).to receive(:mark_as_consumed).with(messages.first).and_return(true)
-        allow(client).to receive(:mark_as_consumed).with(messages.last).and_return(true)
+        allow(client).to receive(:mark_as_consumed).with(messages.first, nil).and_return(true)
+        allow(client).to receive(:mark_as_consumed).with(messages.last, nil).and_return(true)
 
         allow(ActiveJob::Base).to receive(:execute).with(payload1)
         allow(ActiveJob::Base).to receive(:execute).with(payload2)

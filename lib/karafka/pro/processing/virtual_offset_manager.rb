@@ -30,23 +30,30 @@ module Karafka
 
         # @param topic [String]
         # @param partition [Integer]
+        # @param offset_metadata_strategy [Symbol] what metadata should we select. That is, should
+        #   we use the most recent or one picked from the offset that is going to be committed
         #
         # @note We need topic and partition because we use a seek message (virtual) for real offset
         #   management. We could keep real message reference but this can be memory consuming
         #   and not worth it.
-        def initialize(topic, partition)
+        def initialize(topic, partition, offset_metadata_strategy)
           @topic = topic
           @partition = partition
           @groups = []
           @marked = {}
+          @offsets_metadata = {}
           @real_offset = -1
+          @offset_metadata_strategy = offset_metadata_strategy
+          @current_offset_metadata = nil
         end
 
         # Clears the manager for a next collective operation
         def clear
           @groups.clear
-          @marked = {}
+          @offsets_metadata.clear
+          @marked.clear
           @real_offset = -1
+          @current_offset_metadata = nil
         end
 
         # Registers an offset group coming from one virtual consumer. In order to move the real
@@ -65,8 +72,13 @@ module Karafka
         # and we can refresh our real offset representation based on that as it might have changed
         # to a newer real offset.
         # @param message [Karafka::Messages::Message] message coming from VP we want to mark
-        def mark(message)
+        # @param offset_metadata [String, nil] offset metadata. `nil` if none
+        def mark(message, offset_metadata)
           offset = message.offset
+
+          # Store metadata when we materialize the most stable offset
+          @offsets_metadata[offset] = offset_metadata
+          @current_offset_metadata = offset_metadata
 
           group = @groups.find { |reg_group| reg_group.include?(offset) }
 
@@ -91,13 +103,15 @@ module Karafka
         # Mark all from all groups including the `message`.
         # Useful when operating in a collapsed state for marking
         # @param message [Karafka::Messages::Message]
-        def mark_until(message)
-          mark(message)
+        # @param offset_metadata [String, nil]
+        def mark_until(message, offset_metadata)
+          mark(message, offset_metadata)
 
           @groups.each do |group|
             group.each do |offset|
               next if offset > message.offset
 
+              @offsets_metadata[offset] = offset_metadata
               @marked[offset] = true
             end
           end
@@ -116,15 +130,28 @@ module Karafka
           !@real_offset.negative?
         end
 
-        # @return [Messages::Seek] markable message for real offset marking
+        # @return [Array<Messages::Seek, String>] markable message for real offset marking and
+        #   its associated metadata
         def markable
           raise Errors::InvalidRealOffsetUsageError unless markable?
 
-          Messages::Seek.new(
-            @topic,
-            @partition,
-            @real_offset
-          )
+          offset_metadata = case @offset_metadata_strategy
+                            when :exact
+                              @offsets_metadata.fetch(@real_offset)
+                            when :current
+                              @current_offset_metadata
+                            else
+                              raise Errors::UnsupportedCaseError, @offset_metadata_strategy
+                            end
+
+          [
+            Messages::Seek.new(
+              @topic,
+              @partition,
+              @real_offset
+            ),
+            offset_metadata
+          ]
         end
 
         private

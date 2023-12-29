@@ -21,6 +21,7 @@ module Karafka
             :active,
             :partitioner,
             :max_partitions,
+            :offset_metadata_strategy,
             keyword_init: true
           ) { alias_method :active?, :active }
         end

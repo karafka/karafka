@@ -6,7 +6,7 @@ RSpec.describe_current do
   4.times { |i| let(:"message#{i + 1}") { build(:messages_message) } }
 
   let(:messages) { [message1, message2, message3, message4] }
-  let(:manager) { Karafka::Pro::Processing::VirtualOffsetManager.new('topic', 0) }
+  let(:manager) { Karafka::Pro::Processing::VirtualOffsetManager.new('topic', 0, :exact) }
   let(:collapser) { Karafka::Pro::Processing::Collapser.new }
 
   before { manager.register(messages.map(&:offset)) }
@@ -28,7 +28,7 @@ RSpec.describe_current do
     end
 
     context 'when all marked' do
-      before { manager.mark_until(messages.last) }
+      before { manager.mark_until(messages.last, nil) }
 
       it 'expect to remove all' do
         limiter.apply!(messages)
@@ -38,8 +38,8 @@ RSpec.describe_current do
 
     context 'when some marked' do
       before do
-        manager.mark(messages[0])
-        manager.mark(messages[1])
+        manager.mark(messages[0], nil)
+        manager.mark(messages[1], nil)
       end
 
       it 'expect to remove non-marked' do

@@ -1,21 +1,23 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:manager) { described_class.new(topic, partition) }
+  subject(:manager) { described_class.new(topic, partition, offset_metadata_strategy) }
 
   let(:topic) { rand.to_s }
   let(:partition) { rand(100) }
+  let(:offset_metadata_strategy) { :current }
+  let(:offset_metadata) { nil }
 
   context 'when having a regular linear marking flow on one group' do
     let(:range) { (0..9).to_a }
 
     before do
       manager.register(range)
-      range.each { |offset| manager.mark(OpenStruct.new(offset: offset)) }
+      range.each { |offset| manager.mark(OpenStruct.new(offset: offset), offset_metadata) }
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(9) }
+    it { expect(manager.markable.first.offset).to eq(9) }
     it { expect(manager.marked).to eq(range) }
   end
 
@@ -24,11 +26,27 @@ RSpec.describe_current do
 
     before do
       manager.register(range)
-      range.reverse_each { |offset| manager.mark(OpenStruct.new(offset: offset)) }
+      range.reverse_each { |offset| manager.mark(OpenStruct.new(offset: offset), offset.to_s) }
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(9) }
+    it { expect(manager.markable.first.offset).to eq(9) }
+    it { expect(manager.markable.last).to eq('0') }
+    it { expect(manager.marked).to eq(range) }
+  end
+
+  context 'when having a reverse linear marking flow on one group with exact strategy' do
+    let(:range) { (0..9).to_a }
+    let(:offset_metadata_strategy) { :exact }
+
+    before do
+      manager.register(range)
+      range.reverse_each { |offset| manager.mark(OpenStruct.new(offset: offset), offset.to_s) }
+    end
+
+    it { expect(manager.markable?).to eq(true) }
+    it { expect(manager.markable.first.offset).to eq(9) }
+    it { expect(manager.markable.last).to eq('9') }
     it { expect(manager.marked).to eq(range) }
   end
 
@@ -37,11 +55,13 @@ RSpec.describe_current do
 
     before do
       manager.register(range)
-      range[1..].reverse_each { |offset| manager.mark(OpenStruct.new(offset: offset)) }
+      range[1..].reverse_each do |offset|
+        manager.mark(OpenStruct.new(offset: offset), offset_metadata)
+      end
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(9) }
+    it { expect(manager.markable.first.offset).to eq(9) }
     it { expect(manager.marked).to eq(range) }
   end
 
@@ -50,11 +70,11 @@ RSpec.describe_current do
 
     before do
       manager.register(range)
-      manager.mark(OpenStruct.new(offset: 9))
+      manager.mark(OpenStruct.new(offset: 9), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(9) }
+    it { expect(manager.markable.first.offset).to eq(9) }
     it { expect(manager.marked).to eq(range) }
   end
 
@@ -73,11 +93,11 @@ RSpec.describe_current do
 
     before do
       manager.register(range)
-      manager.mark(OpenStruct.new(offset: 0))
+      manager.mark(OpenStruct.new(offset: 0), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(0) }
+    it { expect(manager.markable.first.offset).to eq(0) }
     it { expect(manager.marked).to eq([0]) }
   end
 
@@ -85,11 +105,11 @@ RSpec.describe_current do
     before do
       range = (10..19).to_a
       manager.register(range)
-      manager.mark(OpenStruct.new(offset: 5))
+      manager.mark(OpenStruct.new(offset: 5), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(5) }
+    it { expect(manager.markable.first.offset).to eq(5) }
     it { expect(manager.marked).to eq([5]) }
   end
 
@@ -100,11 +120,11 @@ RSpec.describe_current do
       manager.register(range.select(&:odd?))
       manager.register(range.reject(&:odd?))
 
-      range.each { |offset| manager.mark(OpenStruct.new(offset: offset)) }
+      range.each { |offset| manager.mark(OpenStruct.new(offset: offset), offset_metadata) }
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(19) }
+    it { expect(manager.markable.first.offset).to eq(19) }
     it { expect(manager.marked).to eq(range) }
   end
 
@@ -115,11 +135,11 @@ RSpec.describe_current do
       manager.register(range.select(&:odd?))
       manager.register(range.reject(&:odd?))
 
-      manager.mark(OpenStruct.new(offset: 10))
+      manager.mark(OpenStruct.new(offset: 10), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(0) }
+    it { expect(manager.markable.first.offset).to eq(0) }
     it { expect(manager.marked).to eq([0, 2, 4, 6, 8, 10]) }
   end
 
@@ -129,7 +149,7 @@ RSpec.describe_current do
       manager.register(range.select(&:odd?))
       manager.register(range.reject(&:odd?))
 
-      manager.mark(OpenStruct.new(offset: 9))
+      manager.mark(OpenStruct.new(offset: 9), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(false) }
@@ -143,12 +163,12 @@ RSpec.describe_current do
       manager.register(range.select(&:odd?))
       manager.register(range.reject(&:odd?))
 
-      manager.mark(OpenStruct.new(offset: 3))
-      manager.mark(OpenStruct.new(offset: 12))
+      manager.mark(OpenStruct.new(offset: 3), offset_metadata)
+      manager.mark(OpenStruct.new(offset: 12), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(4) }
+    it { expect(manager.markable.first.offset).to eq(4) }
     it { expect(manager.marked).to eq([0, 1, 2, 3, 4, 6, 8, 10, 12]) }
   end
 
@@ -158,7 +178,7 @@ RSpec.describe_current do
       manager.register(range.select(&:odd?))
       manager.register(range.reject(&:odd?))
 
-      manager.mark(OpenStruct.new(offset: 13))
+      manager.mark(OpenStruct.new(offset: 13), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(false) }
@@ -173,11 +193,11 @@ RSpec.describe_current do
       manager.register(range.select(&:odd?))
       manager.register(range.reject(&:odd?))
 
-      manager.mark_until(OpenStruct.new(offset: 10))
+      manager.mark_until(OpenStruct.new(offset: 10), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(10) }
+    it { expect(manager.markable.first.offset).to eq(10) }
     it { expect(manager.marked).to eq((0..10).to_a) }
   end
 
@@ -186,11 +206,11 @@ RSpec.describe_current do
       manager.register([3, 4, 5, 6])
       manager.register([7, 8, 9, 10])
 
-      manager.mark(OpenStruct.new(offset: 10))
+      manager.mark(OpenStruct.new(offset: 10), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(true) }
-    it { expect(manager.markable.offset).to eq(2) }
+    it { expect(manager.markable.first.offset).to eq(2) }
     it { expect(manager.marked).to eq([7, 8, 9, 10]) }
   end
 
@@ -199,7 +219,7 @@ RSpec.describe_current do
       manager.register([0, 1, 2, 4, 5, 6])
       manager.register([7, 8, 9, 10])
 
-      manager.mark(OpenStruct.new(offset: 10))
+      manager.mark(OpenStruct.new(offset: 10), offset_metadata)
     end
 
     it { expect(manager.markable?).to eq(false) }

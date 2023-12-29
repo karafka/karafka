@@ -23,16 +23,21 @@ module Karafka
             #   create more work than workers. When less, can ensure we have spare resources to
             #   process other things in parallel.
             # @param partitioner [nil, #call] nil or callable partitioner
+            # @param offset_metadata_strategy [Symbol] how we should match the metadata for the
+            #   offset. `:exact` will match the offset matching metadata and `:current` will select
+            #   the most recently reported metadata
             # @return [VirtualPartitions] method that allows to set the virtual partitions details
             #   during the routing configuration and then allows to retrieve it
             def virtual_partitions(
               max_partitions: Karafka::App.config.concurrency,
-              partitioner: nil
+              partitioner: nil,
+              offset_metadata_strategy: :current
             )
               @virtual_partitions ||= Config.new(
                 active: !partitioner.nil?,
                 max_partitions: max_partitions,
-                partitioner: partitioner
+                partitioner: partitioner,
+                offset_metadata_strategy: offset_metadata_strategy
               )
             end
 

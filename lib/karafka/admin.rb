@@ -258,9 +258,7 @@ module Karafka
 
       # @return [Rdkafka::Metadata] cluster metadata info
       def cluster_info
-        with_admin do |admin|
-          admin.metadata
-        end
+        with_admin(&:metadata)
       end
 
       # Creates consumer instance and yields it. After usage it closes the consumer instance

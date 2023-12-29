@@ -42,7 +42,8 @@ module Karafka
 
           @virtual_offset_manager = VirtualOffsetManager.new(
             topic.name,
-            partition
+            partition,
+            topic.virtual_partitions.offset_metadata_strategy
           )
 
           # We register our own "internal" filter to support filtering of messages that were marked

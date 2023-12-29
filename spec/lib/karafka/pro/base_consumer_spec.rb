@@ -187,7 +187,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
       it 'expect to never run consumption marking' do
         consume_with_after.call
-        expect(client).to have_received(:mark_as_consumed).with(last_message)
+        expect(client).to have_received(:mark_as_consumed).with(last_message, nil)
       end
     end
 
@@ -354,7 +354,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
       it 'expect to never run consumption marking' do
         consume_with_after.call
-        expect(client).to have_received(:mark_as_consumed).with(last_message)
+        expect(client).to have_received(:mark_as_consumed).with(last_message, nil)
       end
     end
 
@@ -444,7 +444,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
       end
 
       it 'expect to proxy pass to client' do
-        expect(client).to have_received(:mark_as_consumed).with(last_message)
+        expect(client).to have_received(:mark_as_consumed).with(last_message, nil)
       end
 
       it 'expect to increase seek_offset' do
@@ -460,7 +460,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
       end
 
       it 'expect to proxy pass to client' do
-        expect(client).to have_received(:mark_as_consumed).with(last_message)
+        expect(client).to have_received(:mark_as_consumed).with(last_message, nil)
       end
 
       it 'expect to not increase seek_offset' do
@@ -480,7 +480,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
       end
 
       it 'expect to proxy pass to client' do
-        expect(client).to have_received(:mark_as_consumed!).with(last_message)
+        expect(client).to have_received(:mark_as_consumed!).with(last_message, nil)
       end
 
       it 'expect to increase seek_offset' do
@@ -496,7 +496,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
       end
 
       it 'expect to proxy pass to client' do
-        expect(client).to have_received(:mark_as_consumed!).with(last_message)
+        expect(client).to have_received(:mark_as_consumed!).with(last_message, nil)
       end
 
       it 'expect to not increase seek_offset' do
