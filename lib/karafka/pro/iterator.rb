@@ -22,11 +22,6 @@ module Karafka
     #
     # It does **not** create a consumer group and does not have any offset management.
     class Iterator
-      # Local partition reference for librdkafka
-      Partition = Struct.new(:partition, :offset, :metadata)
-
-      private_constant :Partition
-
       # A simple API allowing to iterate over topic/partition data, without having to subscribe
       # and deal with rebalances. This API allows for multi-partition streaming and is optimized
       # for data lookups. It allows for explicit stopping iteration over any partition during
@@ -127,7 +122,7 @@ module Karafka
 
         @current_consumer.pause(
           Rdkafka::Consumer::TopicPartitionList.new(
-            name => [Partition.new(partition, 0)]
+            name => [Rdkafka::Consumer::Partition.new(partition, 0)]
           )
         )
       end
