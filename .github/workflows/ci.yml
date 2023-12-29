@@ -161,7 +161,12 @@ jobs:
       - name: Bundle install
         run: |
           bundle config set without development
-          bundle install
+
+          if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
+            BUNDLER_VERSION=2.4.22 bundle install
+          else
+            bundle install
+          fi
 
       - name: Wait for Kafka
         run: |
@@ -214,7 +219,12 @@ jobs:
       - name: Bundle install
         run: |
           bundle config set without development
-          bundle install
+
+          if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
+            BUNDLER_VERSION=2.4.22 bundle install
+          else
+            bundle install
+          fi
 
       - name: Wait for Kafka
         run: |
