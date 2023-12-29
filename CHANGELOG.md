@@ -11,6 +11,7 @@
 - [Change] Make `Kubernetes::LivenessListener` not start until Karafka app starts running.
 - [Refactor] Replace `define_method` with `class_eval` in some locations.
 - [Fix] Fix a case where internal Idle job scheduling would go via the consumption flow.
+- [Fix] Make the Iterator `#stop_partition` work with karafka-rdkafka `0.14.6`.
 
 ## 2.2.14 (2023-12-07)
 - **[Feature]** Provide `Karafka::Admin#delete_consumer_group` and `Karafka::Admin#seek_consumer_group`.

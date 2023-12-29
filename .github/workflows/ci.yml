@@ -99,6 +99,7 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
+          bundler: 'latest'
 
       - name: Wait for Kafka
         run: |
@@ -142,11 +143,13 @@ jobs:
           #
           # We also want to check that librdkafka is compiling as expected on all versions of Ruby
           ruby-version: ${{matrix.ruby}}
+          bundler: 'latest'
 
       - name: Install latest Bundler
         run: |
           if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
             gem install bundler -v 2.4.22 --no-document
+            bundle config set version 2.4.22
             gem update --system 3.4.22 --no-document
           else
             gem install bundler --no-document
@@ -158,7 +161,12 @@ jobs:
       - name: Bundle install
         run: |
           bundle config set without development
-          bundle install
+
+          if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
+            BUNDLER_VERSION=2.4.22 bundle install --jobs 4 --retry 3
+          else
+            bundle install --jobs 4 --retry 3
+          fi
 
       - name: Wait for Kafka
         run: |
@@ -193,11 +201,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{matrix.ruby}}
+          bundler: 'latest'
 
       - name: Install latest Bundler
         run: |
           if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
             gem install bundler -v 2.4.22 --no-document
+            bundle config set version 2.4.22
             gem update --system 3.4.22 --no-document
           else
             gem install bundler --no-document
@@ -209,7 +219,12 @@ jobs:
       - name: Bundle install
         run: |
           bundle config set without development
-          bundle install
+
+          if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
+            BUNDLER_VERSION=2.4.22 bundle install --jobs 4 --retry 3
+          else
+            bundle install --jobs 4 --retry 3
+          fi
 
       - name: Wait for Kafka
         run: |

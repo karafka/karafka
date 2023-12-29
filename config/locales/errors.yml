@@ -36,6 +36,9 @@ en:
       internal.connection.proxy.offsets_for_times.timeout_format: needs to be an integer bigger than 0
       internal.connection.proxy.offsets_for_times.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.offsets_for_times.wait_time_format: needs to be an integer bigger than 0
+      internal.connection.proxy.committed.timeout_format: needs to be an integer bigger than 0
+      internal.connection.proxy.committed.max_attempts_format: needs to be an integer bigger than 0
+      internal.connection.proxy.committed.wait_time_format: needs to be an integer bigger than 0
       key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
       max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
       shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time

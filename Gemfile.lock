@@ -42,7 +42,7 @@ GEM
     karafka-core (2.2.7)
       concurrent-ruby (>= 1.1)
       karafka-rdkafka (>= 0.13.9, < 0.15.0)
-    karafka-rdkafka (0.14.5)
+    karafka-rdkafka (0.14.6)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
@@ -88,6 +88,7 @@ GEM
     zeitwerk (2.6.12)
 
 PLATFORMS
+  ruby
   x86_64-linux
 
 DEPENDENCIES
@@ -100,4 +101,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   2.4.22
+   2.5.3
