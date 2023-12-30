@@ -6,22 +6,16 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    p committed_offset_metadata(cached: true)
+    p committed_offset_metadata
     mark_as_consumed!(messages.last, 'test')
     DT[:done] = true
 
     t = Time.now.to_f
-    p committed_offset_metadata(cached: true)
+    p offset_metadata(cache: false)
     p (Time.now.to_f - t) * 1000
     t = Time.now.to_f
-    p committed_offset_metadata(cached: false)
+    p offset_metadata
     p (Time.now.to_f - t) * 1000
-  end
-
-  def committed_offset_metadata(cached: true)
-    return false if revoked?
-
-    Karafka::Pro::Processing::OffsetMetadata::Fetcher.find(topic, partition, cached: cached)
   end
 end
 

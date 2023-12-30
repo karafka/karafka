@@ -20,8 +20,12 @@ module Karafka
           Config = Struct.new(
             :active,
             :deserializer,
+            :cache,
             keyword_init: true
-          ) { alias_method :active?, :active }
+          ) do
+            alias_method :active?, :active
+            alias_method :cache?, :cache
+          end
         end
       end
     end

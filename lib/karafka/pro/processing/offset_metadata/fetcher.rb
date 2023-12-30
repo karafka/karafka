@@ -46,13 +46,16 @@ module Karafka
           #
           # @param topic [Karafka::Routing::Topic] routing topic with subscription group reference
           # @param partition [Integer] partition for which we want to get stored offset metadata
-          # @param cached [Boolean] when set to true, will retrieve data from cache if exists. If
-          #   set to false, will query Kafka and update the cache.
+          # @param cache [Boolean] forces explicit query to Kafka when false and cache refresh.
+          #   By default we use the setting from the topic level but this can be overwritten on
+          #   a per request basis if needed.
           # @return [Object, false] deserialized metadata (string deserializer by default) or
           #   false in case we were not able to obtain the details because we have lost the
           #   assignment
-          def find(topic, partition, cached: true)
-            tpls = fetch(topic, cached)
+          def find(topic, partition, cache: true)
+            cache = topic.offset_metadata.cache? && cache
+
+            tpls = fetch(topic, cache)
             t_partitions = tpls.fetch(topic.name, [])
             t_partition = t_partitions.find { |t_p| t_p.partition == partition }
 
@@ -83,13 +86,13 @@ module Karafka
           #   querying as we get all data for all partitions in one go.
           #
           # @param topic [Karafka::Routing::Topic] topic for which we want to fetch tpls data
-          # @param cached [Boolean] should we return cached data if present
-          def fetch(topic, cached)
+          # @param cache [Boolean] should we return cached data if present
+          def fetch(topic, cache)
             subscription_group = topic.subscription_group
             t_tpls = @tpls[subscription_group]
             t_tpl = t_tpls[topic]
 
-            return t_tpl if t_tpl && cached
+            return t_tpl if t_tpl && cache
 
             assigned_tpls = @clients[subscription_group].assignment
             t_tpl = assigned_tpls.to_h.fetch(topic.name, false)

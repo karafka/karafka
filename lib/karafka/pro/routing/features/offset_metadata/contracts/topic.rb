@@ -30,6 +30,7 @@ module Karafka
 
               nested(:offset_metadata) do
                 required(:active) { |val| val == true }
+                required(:cache) { |val| [true, false].include?(val) }
                 required(:deserializer) { |val| val.respond_to?(:call) }
               end
             end

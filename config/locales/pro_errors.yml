@@ -41,6 +41,7 @@ en:
       inline_insights.required_format: 'needs to be boolean'
 
       offset_metadata.active_format: 'needs to be boolean'
+      offset_metadata.cache_format: 'needs to be boolean'
       offset_metadata.deserializer_missing: needs to be present
       offset_metadata.deserializer_format: 'needs to respond to #call'
 

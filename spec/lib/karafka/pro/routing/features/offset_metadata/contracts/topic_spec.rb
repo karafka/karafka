@@ -7,7 +7,8 @@ RSpec.describe_current do
     {
       offset_metadata: {
         active: true,
-        deserializer: -> {}
+        deserializer: -> {},
+        cache: true
       }
     }
   end
@@ -18,6 +19,12 @@ RSpec.describe_current do
 
   context 'when active flag is not boolean' do
     before { config[:offset_metadata][:active] = rand }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when cache flag is not boolean' do
+    before { config[:offset_metadata][:cache] = rand }
 
     it { expect(check).not_to be_success }
   end

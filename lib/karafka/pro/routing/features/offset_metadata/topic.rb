@@ -33,11 +33,16 @@ module Karafka
 
           # Commit Metadata API extensions
           module Topic
+            # @param cache [Boolean] should we cache the response until rebalance
             # @param deserializer [#call] deserializer that will get raw data and should return
             #   deserialized metadata
             # @return [Config] this feature config
-            def offset_metadata(deserializer: STRING_DESERIALIZER)
-              @offset_metadata ||= Config.new(active: true, deserializer: deserializer)
+            def offset_metadata(cache: true, deserializer: STRING_DESERIALIZER)
+              @offset_metadata ||= Config.new(
+                active: true,
+                cache: cache,
+                deserializer: deserializer
+              )
             end
 
             # @return [true] is offset metadata active (it always is)
