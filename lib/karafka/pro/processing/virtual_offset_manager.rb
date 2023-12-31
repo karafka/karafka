@@ -93,6 +93,9 @@ module Karafka
 
           # Mark all previous messages from the same group also as virtually consumed
           group[0..position].each do |markable_offset|
+            # Set previous messages metadata offset as the offset of higher one for overwrites
+            # unless a different metadata were set explicitely
+            @offsets_metadata[markable_offset] ||= offset_metadata
             @marked[markable_offset] = true
           end
 
