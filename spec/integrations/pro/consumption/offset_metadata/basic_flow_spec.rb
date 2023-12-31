@@ -2,6 +2,8 @@
 
 # Karafka should be able to get offset metadata when non-existing, save it and force refresh
 # with defaults and cache on
+#
+# @note We use mark_as_consumed! to instantly flush
 
 setup_karafka
 

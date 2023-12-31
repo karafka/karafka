@@ -32,4 +32,10 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#committed_offset_metadata' do
+    it do
+      expect(consumer.method(:offset_metadata)).to eq(consumer.method(:committed_offset_metadata))
+    end
+  end
 end

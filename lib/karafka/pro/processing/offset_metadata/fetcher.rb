@@ -100,12 +100,12 @@ module Karafka
           # @param cache [Boolean] should we return cached data if present
           def fetch(topic, cache)
             subscription_group = topic.subscription_group
-            t_tpls = @tpls[subscription_group]
+            t_tpls = @tpls.fetch(subscription_group)
             t_tpl = t_tpls[topic]
 
             return t_tpl if t_tpl && cache
 
-            assigned_tpls = @clients[subscription_group].assignment
+            assigned_tpls = @clients.fetch(subscription_group).assignment
             t_tpl = assigned_tpls.to_h.fetch(topic.name, false)
 
             # May be false in case we lost given assignment but still run LRJ
