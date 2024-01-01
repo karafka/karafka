@@ -27,7 +27,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
+          ruby-version: 3.3
           bundler-cache: true
 
       - name: Install Diffend plugin
@@ -73,7 +73,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '3.3.0-rc1'
+          - '3.3'
           - '3.2'
           # We run it against the oldest and the newest of a given major to make sure, that there
           # are no syntax-sugars that we would use that were introduced down the road
@@ -82,9 +82,8 @@ jobs:
           - '3.0'
           - '3.0.0'
           - '2.7'
-          - '2.7.0'
         include:
-          - ruby: '3.2'
+          - ruby: '3.3'
             coverage: 'true'
     steps:
       - uses: actions/checkout@v4
@@ -100,6 +99,7 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
+          bundler: 'latest'
 
       - name: Wait for Kafka
         run: |
@@ -118,7 +118,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '3.3.0-rc1'
+          - '3.3'
           - '3.2'
           - '3.1'
           - '3.0'
@@ -143,11 +143,13 @@ jobs:
           #
           # We also want to check that librdkafka is compiling as expected on all versions of Ruby
           ruby-version: ${{matrix.ruby}}
+          bundler: 'latest'
 
       - name: Install latest Bundler
         run: |
           if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
             gem install bundler -v 2.4.22 --no-document
+            bundle config set version 2.4.22
             gem update --system 3.4.22 --no-document
           else
             gem install bundler --no-document
@@ -159,7 +161,12 @@ jobs:
       - name: Bundle install
         run: |
           bundle config set without development
-          bundle install
+
+          if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
+            BUNDLER_VERSION=2.4.22 bundle install --jobs 4 --retry 3
+          else
+            bundle install --jobs 4 --retry 3
+          fi
 
       - name: Wait for Kafka
         run: |
@@ -176,7 +183,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '3.3.0-rc1'
+          - '3.3'
           - '3.2'
           - '3.1'
           - '3.0'
@@ -194,11 +201,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{matrix.ruby}}
+          bundler: 'latest'
 
       - name: Install latest Bundler
         run: |
           if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
             gem install bundler -v 2.4.22 --no-document
+            bundle config set version 2.4.22
             gem update --system 3.4.22 --no-document
           else
             gem install bundler --no-document
@@ -210,7 +219,12 @@ jobs:
       - name: Bundle install
         run: |
           bundle config set without development
-          bundle install
+
+          if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
+            BUNDLER_VERSION=2.4.22 bundle install --jobs 4 --retry 3
+          else
+            bundle install --jobs 4 --retry 3
+          fi
 
       - name: Wait for Kafka
         run: |

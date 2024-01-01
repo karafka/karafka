@@ -10,6 +10,10 @@ module Karafka
     class Client
       attr_reader :rebalance_manager
 
+      # @return [Karafka::Routing::SubscriptionGroup] subscription group to which this client
+      #   belongs to
+      attr_reader :subscription_group
+
       # @return [String] underlying consumer name
       # @note Consumer name may change in case we regenerate it
       attr_reader :name
@@ -122,13 +126,19 @@ module Karafka
       # Stores offset for a given partition of a given topic based on the provided message.
       #
       # @param message [Karafka::Messages::Message]
-      def store_offset(message)
-        internal_store_offset(message)
+      # @param offset_metadata [String, nil] offset storage metadata or nil if none
+      def store_offset(message, offset_metadata = nil)
+        internal_store_offset(message, offset_metadata)
       end
 
       # @return [Boolean] true if our current assignment has been lost involuntarily.
       def assignment_lost?
         @kafka.assignment_lost?
+      end
+
+      # @return [Rdkafka::Consumer::TopicPartitionList] current active assignment
+      def assignment
+        @kafka.assignment
       end
 
       # Commits the offset on a current consumer in a non-blocking or blocking way.
@@ -285,21 +295,23 @@ module Karafka
 
       # Marks given message as consumed.
       #
-      # @param [Karafka::Messages::Message] message that we want to mark as processed
+      # @param message [Karafka::Messages::Message] message that we want to mark as processed
+      # @param metadata [String, nil] offset storage metadata or nil if none
       # @return [Boolean] true if successful. False if we no longer own given partition
       # @note This method won't trigger automatic offsets commits, rather relying on the offset
       #   check-pointing trigger that happens with each batch processed. It will however check the
       #   `librdkafka` assignment ownership to increase accuracy for involuntary revocations.
-      def mark_as_consumed(message)
-        store_offset(message) && !assignment_lost?
+      def mark_as_consumed(message, metadata = nil)
+        store_offset(message, metadata) && !assignment_lost?
       end
 
       # Marks a given message as consumed and commits the offsets in a blocking way.
       #
-      # @param [Karafka::Messages::Message] message that we want to mark as processed
+      # @param message [Karafka::Messages::Message] message that we want to mark as processed
+      # @param metadata [String, nil] offset storage metadata or nil if none
       # @return [Boolean] true if successful. False if we no longer own given partition
-      def mark_as_consumed!(message)
-        return false unless mark_as_consumed(message)
+      def mark_as_consumed!(message, metadata = nil)
+        return false unless mark_as_consumed(message, metadata)
 
         commit_offsets!
       end
@@ -346,12 +358,22 @@ module Karafka
         @kafka.events_poll(timeout)
       end
 
-
       # @return [Test]
       def consumer_group_metadata_pointer
-        a = @kafka.consumer_group_metadata_pointer
-        p a.class
-        a
+        @kafka.consumer_group_metadata_pointer
+      end
+
+      # Return the current committed offset per partition for this consumer group.
+      # The offset field of each requested partition will either be set to stored offset or to
+      # -1001 in case there was no stored offset for that partition.
+      #
+      # @param tpl [Rdkafka::Consumer::TopicPartitionList] for which we want to get committed
+      # @return [Rdkafka::Consumer::TopicPartitionList]
+      # @raise [Rdkafka::RdkafkaError] When getting the committed positions fails.
+      # @note It is recommended to use this only on rebalances to get positions with metadata
+      #   when working with metadata as this is synchronous
+      def committed(tpl = nil)
+        Proxy.new(@kafka).committed(tpl)
       end
 
       private
@@ -360,9 +382,10 @@ module Karafka
       #
       # Non thread-safe offset storing method
       # @param message [Karafka::Messages::Message]
+      # @param metadata [String, nil] offset storage metadata or nil if none
       # @return [Boolean] true if we could store the offset (if we still own the partition)
-      def internal_store_offset(message)
-        @kafka.store_offset(message)
+      def internal_store_offset(message, metadata)
+        @kafka.store_offset(message, metadata)
         true
       rescue Rdkafka::RdkafkaError => e
         return false if e.code == :assignment_lost

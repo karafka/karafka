@@ -41,6 +41,9 @@ module Karafka
         #   already processed but rather at the next one. This applies to both sync and async
         #   versions of this method.
         def mark_as_consumed(message)
+          # seek offset can be nil only in case `#seek` was invoked with offset reset request
+          # In case like this we ignore marking
+          return true if coordinator.seek_offset.nil?
           # Ignore earlier offsets than the one we already committed
           return true if coordinator.seek_offset > message.offset
           return false if revoked?
@@ -57,6 +60,9 @@ module Karafka
         # @return [Boolean] true if we were able to mark the offset, false otherwise.
         #   False indicates that we were not able and that we have lost the partition.
         def mark_as_consumed!(message)
+          # seek offset can be nil only in case `#seek` was invoked with offset reset request
+          # In case like this we ignore marking
+          return true if coordinator.seek_offset.nil?
           # Ignore earlier offsets than the one we already committed
           return true if coordinator.seek_offset > message.offset
           return false if revoked?

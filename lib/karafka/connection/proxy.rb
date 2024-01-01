@@ -68,6 +68,23 @@ module Karafka
         end
       end
 
+      # Similar to `#query_watermark_offsets`.
+      #
+      # @param tpl [Rdkafka::Consumer::TopicPartitionList, nil] tpl or nil for full current
+      #   assignment tpl usage
+      # @return [Rdkafka::Consumer::TopicPartitionList] tpl with committed offsets and metadata
+      def committed(tpl = nil)
+        c_config = @config.committed
+
+        with_broker_errors_retry(
+          # required to be in seconds, not ms
+          wait_time: c_config.wait_time / 1_000.to_f,
+          max_attempts: c_config.max_attempts
+        ) do
+          @wrapped.committed(tpl, c_config.timeout)
+        end
+      end
+
       private
 
       # Runs expected block of code with few retries on all_brokers_down

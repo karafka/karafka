@@ -74,6 +74,52 @@ module Karafka
           # Apply strategy for a non-feature based flow
           FEATURES = %i[].freeze
 
+          # Marks message as consumed in an async way.
+          #
+          # @param message [Messages::Message] last successfully processed message.
+          # @param offset_metadata [String, nil] offset metadata string or nil if nothing
+          # @return [Boolean] true if we were able to mark the offset, false otherwise.
+          #   False indicates that we were not able and that we have lost the partition.
+          #
+          # @note We keep track of this offset in case we would mark as consumed and got error when
+          #   processing another message. In case like this we do not pause on the message we've
+          #   already processed but rather at the next one. This applies to both sync and async
+          #   versions of this method.
+          def mark_as_consumed(message, offset_metadata = nil)
+            # seek offset can be nil only in case `#seek` was invoked with offset reset request
+            # In case like this we ignore marking
+            return true if coordinator.seek_offset.nil?
+            # Ignore earlier offsets than the one we already committed
+            return true if coordinator.seek_offset > message.offset
+            return false if revoked?
+            return revoked? unless client.mark_as_consumed(message, offset_metadata)
+
+            coordinator.seek_offset = message.offset + 1
+
+            true
+          end
+
+          # Marks message as consumed in a sync way.
+          #
+          # @param message [Messages::Message] last successfully processed message.
+          # @param offset_metadata [String, nil] offset metadata string or nil if nothing
+          # @return [Boolean] true if we were able to mark the offset, false otherwise.
+          #   False indicates that we were not able and that we have lost the partition.
+          def mark_as_consumed!(message, offset_metadata = nil)
+            # seek offset can be nil only in case `#seek` was invoked with offset reset request
+            # In case like this we ignore marking
+            return true if coordinator.seek_offset.nil?
+            # Ignore earlier offsets than the one we already committed
+            return true if coordinator.seek_offset > message.offset
+            return false if revoked?
+
+            return revoked? unless client.mark_as_consumed!(message, offset_metadata)
+
+            coordinator.seek_offset = message.offset + 1
+
+            true
+          end
+
           # No actions needed for the standard flow here
           def handle_before_schedule_consume
             Karafka.monitor.instrument('consumer.before_schedule_consume', caller: self)

@@ -3,6 +3,7 @@ en:
     topic:
       virtual_partitions.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
       virtual_partitions.max_partitions_format: needs to be equal or more than 1
+      virtual_partitions.offset_metadata_strategy_format: needs to be either :exact or :current
 
       long_running_job.active_format: needs to be either true or false
 
@@ -38,6 +39,11 @@ en:
 
       inline_insights.active_format: 'needs to be boolean'
       inline_insights.required_format: 'needs to be boolean'
+
+      offset_metadata.active_format: 'needs to be boolean'
+      offset_metadata.cache_format: 'needs to be boolean'
+      offset_metadata.deserializer_missing: needs to be present
+      offset_metadata.deserializer_format: 'needs to respond to #call'
 
     consumer_group:
       patterns_format: must be an array with hashes

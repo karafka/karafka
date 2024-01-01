@@ -34,7 +34,8 @@ module Karafka
             #
             # @see `Strategies::Default#mark_as_consumed` for more details
             # @param message [Messages::Message]
-            def mark_as_consumed(message)
+            # @param offset_metadata [String, nil]
+            def mark_as_consumed(message, offset_metadata = nil)
               return super unless retrying?
               return super unless topic.dead_letter_queue.independent?
               return false unless super
@@ -49,7 +50,8 @@ module Karafka
             #
             # @see `Strategies::Default#mark_as_consumed!` for more details
             # @param message [Messages::Message]
-            def mark_as_consumed!(message)
+            # @param offset_metadata [String, nil]
+            def mark_as_consumed!(message, offset_metadata = nil)
               return super unless retrying?
               return super unless topic.dead_letter_queue.independent?
               return false unless super

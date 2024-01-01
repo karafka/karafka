@@ -4,10 +4,15 @@
 - **[Feature]** Provide ability to multiplex subscription groups (Pro)
 - **[Feature]** Provide `Karafka::Admin::Acl` for Kafka ACL management via the Admin APIs.
 - **[Feature]** Periodic Jobs (Pro)
+- **[Feature]** Offset Metadata storage (Pro)
+- [Enhancement] Introduce `non_blocking` routing API that aliases LRJ to indicate a different use-case for LRJ flow approach.
+- [Enhancement] Allow to reset offset when seeking backwards by using the `reset_offset` keyword attribute set to `true`.
 - [Enhancement] Alias producer operations in consumer to skip `#producer` reference.
 - [Enhancement] Provide an `:independent` configuration to DLQ allowing to reset pause count track on each marking as consumed when retrying.
 - [Change] Make `Kubernetes::LivenessListener` not start until Karafka app starts running.
+- [Refactor] Replace `define_method` with `class_eval` in some locations.
 - [Fix] Fix a case where internal Idle job scheduling would go via the consumption flow.
+- [Fix] Make the Iterator `#stop_partition` work with karafka-rdkafka `0.14.6`.
 
 ## 2.2.14 (2023-12-07)
 - **[Feature]** Provide `Karafka::Admin#delete_consumer_group` and `Karafka::Admin#seek_consumer_group`.

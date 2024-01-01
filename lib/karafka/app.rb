@@ -75,9 +75,11 @@ module Karafka
         monitor
         pro?
       ].each do |delegated|
-        define_method(delegated) do
-          Karafka.send(delegated)
-        end
+        class_eval <<~RUBY, __FILE__, __LINE__ + 1
+          def #{delegated}
+            Karafka.#{delegated}
+          end
+        RUBY
       end
     end
   end

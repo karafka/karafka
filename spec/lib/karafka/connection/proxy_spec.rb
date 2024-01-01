@@ -81,4 +81,28 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#committed' do
+    let(:result) { double }
+
+    before do
+      allow(wrapped_object).to receive(:committed).with(nil, 5_000).and_return(result)
+    end
+
+    it 'expect to delegate to the wrapped object' do
+      expect(proxy.committed).to eq(result)
+    end
+
+    context 'when an all_brokers_down error occurs' do
+      before { allow(wrapped_object).to receive(:committed).and_raise(all_down_error) }
+
+      it 'expect to retry up to the max attempts and then raises the error' do
+        expect { proxy.committed }
+          .to raise_error(Rdkafka::RdkafkaError, /all_brokers_down/)
+
+        expect(wrapped_object)
+          .to have_received(:committed).exactly(3 + 1).times
+      end
+    end
+  end
 end

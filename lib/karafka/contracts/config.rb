@@ -52,16 +52,17 @@ module Karafka
 
         nested(:connection) do
           nested(:proxy) do
-            nested(:query_watermark_offsets) do
-              required(:timeout) { |val| val.is_a?(Integer) && val.positive? }
-              required(:max_attempts) { |val| val.is_a?(Integer) && val.positive? }
-              required(:wait_time) { |val| val.is_a?(Integer) && val.positive? }
-            end
-
-            nested(:offsets_for_times) do
-              required(:timeout) { |val| val.is_a?(Integer) && val.positive? }
-              required(:max_attempts) { |val| val.is_a?(Integer) && val.positive? }
-              required(:wait_time) { |val| val.is_a?(Integer) && val.positive? }
+            # All of them have the same requirements
+            %i[
+              query_watermark_offsets
+              offsets_for_times
+              committed
+            ].each do |scope|
+              nested(scope) do
+                required(:timeout) { |val| val.is_a?(Integer) && val.positive? }
+                required(:max_attempts) { |val| val.is_a?(Integer) && val.positive? }
+                required(:wait_time) { |val| val.is_a?(Integer) && val.positive? }
+              end
             end
           end
         end
