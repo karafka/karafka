@@ -6,6 +6,13 @@ PATH
       waterdrop (>= 2.6.11, < 3.0.0)
       zeitwerk (~> 2.3)
 
+PATH
+  remote: /mnt/software/Karafka/waterdrop
+  specs:
+    waterdrop (2.6.12)
+      karafka-core (>= 2.2.3, < 3.0.0)
+      zeitwerk (~> 2.3)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -82,9 +89,6 @@ GEM
     tilt (2.3.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    waterdrop (2.6.11)
-      karafka-core (>= 2.2.3, < 3.0.0)
-      zeitwerk (~> 2.3)
     zeitwerk (2.6.12)
 
 PLATFORMS
@@ -99,6 +103,7 @@ DEPENDENCIES
   karafka-web
   rspec
   simplecov
+  waterdrop!
 
 BUNDLED WITH
    2.5.3

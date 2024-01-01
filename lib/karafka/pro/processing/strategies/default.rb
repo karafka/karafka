@@ -24,53 +24,6 @@ module Karafka
           include Base
           include ::Karafka::Processing::Strategies::Default
 
-          def transaction
-            @_in_transaction ||= 0
-
-            producer.transaction do
-              @_in_transaction += 1
-
-              yield
-
-              @_in_transaction = false
-            end
-
-            @_in_transaction -= 1
-
-            return unless @_in_transaction.zero?
-            return unless @_in_transaction_marked
-
-            mark_as_consumed(@_in_transaction_marked)
-
-            @_in_transaction_marked = nil
-          end
-
-          # Marks message as consumed in an async way.
-          #
-          # @param message [Messages::Message] last successfully processed message.
-          # @return [Boolean] true if we were able to mark the offset, false otherwise.
-          #   False indicates that we were not able and that we have lost the partition.
-          #
-          # @note We keep track of this offset in case we would mark as consumed and got error when
-          #   processing another message. In case like this we do not pause on the message we've
-          #   already processed but rather at the next one. This applies to both sync and async
-          #   versions of this method.
-          def mark_as_consumed(message)
-            if @_in_transaction
-              producer.transactional_store_offset(client, topic.name, partition, message.offset + 1)
-              @_in_transaction_marked = message
-            else
-              # Ignore earlier offsets than the one we already committed
-              return true if coordinator.seek_offset > message.offset
-              return false if revoked?
-              return revoked? unless client.mark_as_consumed(message)
-
-              coordinator.seek_offset = message.offset + 1
-
-              true
-            end
-          end
-
           # Apply strategy for a non-feature based flow
           FEATURES = %i[].freeze
 
@@ -86,15 +39,19 @@ module Karafka
           #   already processed but rather at the next one. This applies to both sync and async
           #   versions of this method.
           def mark_as_consumed(message, offset_metadata = nil)
-            # seek offset can be nil only in case `#seek` was invoked with offset reset request
-            # In case like this we ignore marking
-            return true if coordinator.seek_offset.nil?
-            # Ignore earlier offsets than the one we already committed
-            return true if coordinator.seek_offset > message.offset
-            return false if revoked?
-            return revoked? unless client.mark_as_consumed(message, offset_metadata)
+            if in_transaction?
+              mark_in_transaction(message, offset_metadata)
+            else
+              # seek offset can be nil only in case `#seek` was invoked with offset reset request
+              # In case like this we ignore marking
+              return true if coordinator.seek_offset.nil?
+              # Ignore earlier offsets than the one we already committed
+              return true if coordinator.seek_offset > message.offset
+              return false if revoked?
+              return revoked? unless client.mark_as_consumed(message, offset_metadata)
 
-            coordinator.seek_offset = message.offset + 1
+              coordinator.seek_offset = message.offset + 1
+            end
 
             true
           end
@@ -106,18 +63,95 @@ module Karafka
           # @return [Boolean] true if we were able to mark the offset, false otherwise.
           #   False indicates that we were not able and that we have lost the partition.
           def mark_as_consumed!(message, offset_metadata = nil)
-            # seek offset can be nil only in case `#seek` was invoked with offset reset request
-            # In case like this we ignore marking
-            return true if coordinator.seek_offset.nil?
-            # Ignore earlier offsets than the one we already committed
-            return true if coordinator.seek_offset > message.offset
-            return false if revoked?
+            if in_transaction?
+              mark_in_transaction(message, offset_metadata)
+            else
+              # seek offset can be nil only in case `#seek` was invoked with offset reset request
+              # In case like this we ignore marking
+              return true if coordinator.seek_offset.nil?
+              # Ignore earlier offsets than the one we already committed
+              return true if coordinator.seek_offset > message.offset
+              return false if revoked?
 
-            return revoked? unless client.mark_as_consumed!(message, offset_metadata)
+              return revoked? unless client.mark_as_consumed!(message, offset_metadata)
 
-            coordinator.seek_offset = message.offset + 1
+              coordinator.seek_offset = message.offset + 1
+            end
 
             true
+          end
+
+          # Starts producer transaction, saves the transaction context for transactional marking
+          # and runs user code in this context
+          def transaction(&block)
+            raise Errors::TransactionAlreadyInitializedError if in_transaction?
+
+            @_transaction_level ||= 0
+            error = nil
+
+            begin
+              @_transaction_level += 1
+
+              producer.transaction(&block)
+            rescue StandardError => e
+              error = e
+            end
+
+            @_transaction_level -= 1
+
+            if error
+              @_transaction_marked = nil
+
+              raise e
+            end
+
+            return unless @_transaction_level.zero?
+            return unless @_transaction_marked
+
+            # This offset is already stored in transaction but we set it here anyhow because we
+            # want to make sure our internal in-memory state is aligned with the transaction
+            # @note We never need to use the blocking `#mark_as_consumed!` here because the offset
+            #   anyhow was already stored during the transaction
+            mark_as_consumed(*@_transaction_marked)
+
+            @_transaction_marked = nil
+          end
+
+          # @param message [Messages::Message] message we want to commit inside of a transaction
+          # @param offset_metadata [String, nil] offset metadata or nil if none
+          def mark_in_transaction(message, offset_metadata)
+            raise Errors::TransactionRequiredError unless in_transaction?
+
+            producer.transactional_store_offset(
+              client,
+              topic.name,
+              partition,
+              message.offset + 1,
+              offset_metadata
+            )
+
+            @_transaction_marked = [message, offset_metadata]
+          end
+
+          # @return [Boolean] true if invoked inside of a transaction block
+          def in_transaction?
+            @_transaction_level && @_transaction_level.positive?
+          end
+
+          # Allows for cross-virtual-partition consumers locks, transactional locks on LRJ and
+          # other cases where we would run any work on same consumer in parallel
+          #
+          # This is not needed in the non-VP flows except LRJ because there is always only one
+          # consumer per partition at the same time, so no coordination is needed directly for
+          # the end users. With LRJ it is needed and provided in the `LRJ::Default` strategy,
+          # because lifecycle events on revocation can run in parallel to the LRJ job as it is
+          # non-blocking.
+          #
+          # 
+          #
+          # @param block [Proc] block we want to run in a mutex to prevent race-conditions
+          def synchronize(&block)
+            coordinator.shared_mutex.synchronize(&block)
           end
 
           # No actions needed for the standard flow here
