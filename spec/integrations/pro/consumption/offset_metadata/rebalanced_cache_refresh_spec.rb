@@ -21,12 +21,6 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class JsonDeserializer
-  def call(raw_metadata)
-    JSON.parse(raw_metadata)
-  end
-end
-
 Thread.new do
   sleep(0.1) until DT.key?(:trigger)
 
