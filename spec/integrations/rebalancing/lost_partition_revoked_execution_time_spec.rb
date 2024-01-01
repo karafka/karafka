@@ -44,4 +44,4 @@ start_karafka_and_wait_until do
   DT.key?(:lost)
 end
 
-assert !(DT[:run].last..DT[:run].first).include?(DT[:revoked_at])
+assert !(DT[:run].last..DT[:run].first).cover?(DT[:revoked_at])
