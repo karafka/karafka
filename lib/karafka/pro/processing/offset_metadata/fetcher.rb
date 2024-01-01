@@ -67,6 +67,9 @@ module Karafka
             cache = topic.offset_metadata.cache? && cache
 
             tpls = fetch(topic, cache)
+
+            return false unless tpls
+
             t_partitions = tpls.fetch(topic.name, [])
             t_partition = t_partitions.find { |t_p| t_p.partition == partition }
 
@@ -110,6 +113,7 @@ module Karafka
 
             # May be false in case we lost given assignment but still run LRJ
             return false unless t_tpl
+            return false if t_tpl.empty?
 
             @mutexes.fetch(subscription_group).synchronize do
               rd_tpl = Rdkafka::Consumer::TopicPartitionList.new(topic.name => t_tpl)
