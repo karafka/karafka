@@ -362,8 +362,7 @@ module Karafka
       # The offset field of each requested partition will either be set to stored offset or to
       # -1001 in case there was no stored offset for that partition.
       #
-      # @param [Rdkafka::Consumer::TopicPartitionList] tpl for which we want to get committed
-      #   offsets
+      # @param tpl [Rdkafka::Consumer::TopicPartitionList] for which we want to get committed
       # @return [Rdkafka::Consumer::TopicPartitionList]
       # @raise [Rdkafka::RdkafkaError] When getting the committed positions fails.
       # @note It is recommended to use this only on rebalances to get positions with metadata
