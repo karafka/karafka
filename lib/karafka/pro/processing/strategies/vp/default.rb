@@ -29,39 +29,41 @@ module Karafka
             ].freeze
 
             # @param message [Karafka::Messages::Message] marks message as consumed
+            # @param offset_metadata [String, nil]
             # @note This virtual offset management uses a regular default marking API underneath.
             #   We do not alter the "real" marking API, as VPs are just one of many cases we want
             #   to support and we do not want to impact them with collective offsets management
-            def mark_as_consumed(message)
+            def mark_as_consumed(message, offset_metadata = nil)
               return super if collapsed?
 
               manager = coordinator.virtual_offset_manager
 
               coordinator.synchronize do
-                manager.mark(message)
+                manager.mark(message, offset_metadata)
                 # If this is last marking on a finished flow, we can use the original
                 # last message and in order to do so, we need to mark all previous messages as
                 # consumed as otherwise the computed offset could be different
                 # We mark until our offset just in case of a DLQ flow or similar, where we do not
                 # want to mark all but until the expected location
-                manager.mark_until(message) if coordinator.finished?
+                manager.mark_until(message, offset_metadata) if coordinator.finished?
 
                 return revoked? unless manager.markable?
 
-                manager.markable? ? super(manager.markable) : revoked?
+                manager.markable? ? super(*manager.markable) : revoked?
               end
             end
 
             # @param message [Karafka::Messages::Message] blocking marks message as consumed
-            def mark_as_consumed!(message)
+            # @param offset_metadata [String, nil]
+            def mark_as_consumed!(message, offset_metadata = nil)
               return super if collapsed?
 
               manager = coordinator.virtual_offset_manager
 
               coordinator.synchronize do
-                manager.mark(message)
-                manager.mark_until(message) if coordinator.finished?
-                manager.markable? ? super(manager.markable) : revoked?
+                manager.mark(message, offset_metadata)
+                manager.mark_until(message, offset_metadata) if coordinator.finished?
+                manager.markable? ? super(*manager.markable) : revoked?
               end
             end
 

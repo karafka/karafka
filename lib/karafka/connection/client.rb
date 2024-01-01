@@ -10,6 +10,10 @@ module Karafka
     class Client
       attr_reader :rebalance_manager
 
+      # @return [Karafka::Routing::SubscriptionGroup] subscription group to which this client
+      #   belongs to
+      attr_reader :subscription_group
+
       # @return [String] underlying consumer name
       # @note Consumer name may change in case we regenerate it
       attr_reader :name
@@ -122,14 +126,19 @@ module Karafka
       # Stores offset for a given partition of a given topic based on the provided message.
       #
       # @param message [Karafka::Messages::Message]
-      # @param metadata [String, nil] offset storage metadata or nil if none
-      def store_offset(message, metadata = nil)
-        internal_store_offset(message, metadata)
+      # @param offset_metadata [String, nil] offset storage metadata or nil if none
+      def store_offset(message, offset_metadata = nil)
+        internal_store_offset(message, offset_metadata)
       end
 
       # @return [Boolean] true if our current assignment has been lost involuntarily.
       def assignment_lost?
         @kafka.assignment_lost?
+      end
+
+      # @return [Rdkafka::Consumer::TopicPartitionList] current active assignment
+      def assignment
+        @kafka.assignment
       end
 
       # Commits the offset on a current consumer in a non-blocking or blocking way.
@@ -353,12 +362,13 @@ module Karafka
       # The offset field of each requested partition will either be set to stored offset or to
       # -1001 in case there was no stored offset for that partition.
       #
+      # @param tpl [Rdkafka::Consumer::TopicPartitionList] for which we want to get committed
       # @return [Rdkafka::Consumer::TopicPartitionList]
       # @raise [Rdkafka::RdkafkaError] When getting the committed positions fails.
       # @note It is recommended to use this only on rebalances to get positions with metadata
       #   when working with metadata as this is synchronous
-      def committed
-        Proxy.new(@kafka).committed
+      def committed(tpl = nil)
+        Proxy.new(@kafka).committed(tpl)
       end
 
       private

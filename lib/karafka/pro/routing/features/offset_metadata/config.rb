@@ -15,15 +15,17 @@ module Karafka
   module Pro
     module Routing
       module Features
-        class VirtualPartitions < Base
-          # Config for virtual partitions
+        class OffsetMetadata < Base
+          # Config for commit metadata feature
           Config = Struct.new(
             :active,
-            :partitioner,
-            :max_partitions,
-            :offset_metadata_strategy,
+            :deserializer,
+            :cache,
             keyword_init: true
-          ) { alias_method :active?, :active }
+          ) do
+            alias_method :active?, :active
+            alias_method :cache?, :cache
+          end
         end
       end
     end
