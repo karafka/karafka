@@ -84,28 +84,13 @@ module Karafka
           # Starts producer transaction, saves the transaction context for transactional marking
           # and runs user code in this context
           def transaction(&block)
+            # Prevent from nested transactions. It would not make any sense
             raise Errors::TransactionAlreadyInitializedError if in_transaction?
 
-            @_transaction_level ||= 0
-            error = nil
+            @in_transaction = true
 
-            begin
-              @_transaction_level += 1
+            producer.transaction(&block)
 
-              producer.transaction(&block)
-            rescue StandardError => e
-              error = e
-            end
-
-            @_transaction_level -= 1
-
-            if error
-              @_transaction_marked = nil
-
-              raise e
-            end
-
-            return unless @_transaction_level.zero?
             return unless @_transaction_marked
 
             # This offset is already stored in transaction but we set it here anyhow because we
@@ -115,6 +100,9 @@ module Karafka
             mark_as_consumed(*@_transaction_marked)
 
             @_transaction_marked = nil
+          ensure
+            @_transaction_marked = nil
+            @in_transaction = false
           end
 
           # @param message [Messages::Message] message we want to commit inside of a transaction
@@ -135,23 +123,7 @@ module Karafka
 
           # @return [Boolean] true if invoked inside of a transaction block
           def in_transaction?
-            @_transaction_level && @_transaction_level.positive?
-          end
-
-          # Allows for cross-virtual-partition consumers locks, transactional locks on LRJ and
-          # other cases where we would run any work on same consumer in parallel
-          #
-          # This is not needed in the non-VP flows except LRJ because there is always only one
-          # consumer per partition at the same time, so no coordination is needed directly for
-          # the end users. With LRJ it is needed and provided in the `LRJ::Default` strategy,
-          # because lifecycle events on revocation can run in parallel to the LRJ job as it is
-          # non-blocking.
-          #
-          # 
-          #
-          # @param block [Proc] block we want to run in a mutex to prevent race-conditions
-          def synchronize(&block)
-            coordinator.shared_mutex.synchronize(&block)
+            @in_transaction && @in_transaction.positive?
           end
 
           # No actions needed for the standard flow here

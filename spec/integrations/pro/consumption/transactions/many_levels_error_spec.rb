@@ -22,7 +22,8 @@ class Consumer < Karafka::BaseConsumer
           end
         end
       end
-    rescue StandardError
+    rescue StandardError => e
+      p e
       DT[:metadata] << offset_metadata
       DT[:done] = true
     end
