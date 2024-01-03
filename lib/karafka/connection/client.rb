@@ -358,7 +358,9 @@ module Karafka
         @kafka.events_poll(timeout)
       end
 
-      # @return [Test]
+      # Returns pointer to the consumer group metadata. It is used only in the context of
+      # exactly-once-semantics in transactions, this is why it is never remapped to Ruby
+      # @return [FFI::Pointer]
       def consumer_group_metadata_pointer
         @kafka.consumer_group_metadata_pointer
       end
