@@ -39,7 +39,7 @@ module Karafka
           #   already processed but rather at the next one. This applies to both sync and async
           #   versions of this method.
           def mark_as_consumed(message, offset_metadata = nil)
-            if in_transaction?
+            if @_in_transaction
               mark_in_transaction(message, offset_metadata)
             else
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
@@ -63,7 +63,7 @@ module Karafka
           # @return [Boolean] true if we were able to mark the offset, false otherwise.
           #   False indicates that we were not able and that we have lost the partition.
           def mark_as_consumed!(message, offset_metadata = nil)
-            if in_transaction?
+            if @_in_transaction
               mark_in_transaction(message, offset_metadata)
             else
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
@@ -83,14 +83,23 @@ module Karafka
 
           # Starts producer transaction, saves the transaction context for transactional marking
           # and runs user code in this context
+          #
+          # Transactions on a consumer level differ from those initiated by the producer as they
+          # allow to mark offsets inside of the transaction. If the transaction is initialized
+          # only from the consumer, the offset will be stored in a regular fashion.
+          #
+          # @param block [Proc] code that we want to run in a transaction
           def transaction(&block)
             # Prevent from nested transactions. It would not make any sense
-            raise Errors::TransactionAlreadyInitializedError if in_transaction?
+            raise Errors::TransactionAlreadyInitializedError if @_in_transaction
 
-            @in_transaction = true
+            @_in_transaction = true
 
             producer.transaction(&block)
 
+            @_in_transaction = false
+
+            # If there was no offset stored in the transaction, we mark nothing and exit
             return unless @_transaction_marked
 
             # This offset is already stored in transaction but we set it here anyhow because we
@@ -102,28 +111,23 @@ module Karafka
             @_transaction_marked = nil
           ensure
             @_transaction_marked = nil
-            @in_transaction = false
+            @_in_transaction = false
           end
 
+          # Stores the next offset for processing inside of the transaction
+          #
           # @param message [Messages::Message] message we want to commit inside of a transaction
           # @param offset_metadata [String, nil] offset metadata or nil if none
           def mark_in_transaction(message, offset_metadata)
-            raise Errors::TransactionRequiredError unless in_transaction?
+            raise Errors::TransactionRequiredError unless @_in_transaction
 
-            producer.transactional_store_offset(
+            producer.transaction_mark_as_consumed(
               client,
-              topic.name,
-              partition,
-              message.offset + 1,
+              message,
               offset_metadata
             )
 
             @_transaction_marked = [message, offset_metadata]
-          end
-
-          # @return [Boolean] true if invoked inside of a transaction block
-          def in_transaction?
-            @in_transaction && @in_transaction.positive?
           end
 
           # No actions needed for the standard flow here

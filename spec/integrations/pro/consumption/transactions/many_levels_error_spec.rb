@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# If transaction fails even if nested blocks, it should not mark as nested transactions do nothing
-# except code yielding
+# Nested transactions should not be allowed.
 
 setup_karafka do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid
@@ -22,8 +21,7 @@ class Consumer < Karafka::BaseConsumer
           end
         end
       end
-    rescue StandardError => e
-      p e
+    rescue Karafka::Errors::TransactionAlreadyInitializedError
       DT[:metadata] << offset_metadata
       DT[:done] = true
     end
