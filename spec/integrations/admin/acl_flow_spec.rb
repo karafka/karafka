@@ -36,5 +36,8 @@ acl2 = Karafka::Admin::Acl.new(
 
 Karafka::Admin::Acl.create(acl2)
 
+# Give some time to create rule
+sleep(1)
+
 assert_equal 1, Karafka::Admin::Acl.describe(acl2).size
 assert Karafka::Admin::Acl.all.map(&:resource_name).include?(uuid2)

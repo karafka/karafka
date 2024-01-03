@@ -16,6 +16,8 @@ class Consumer < Karafka::BaseConsumer
         mark_as_consumed(messages.first, 'test-metadata')
       end
     else
+      sleep(1)
+
       transaction do
         messages.each do |message|
           mark_as_consumed(message, 'second')
@@ -51,4 +53,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal DT[:metadata].last, 'second'
-assert_equal fetch_first_offset, 2
+assert_equal fetch_first_offset, 10
