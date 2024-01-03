@@ -12,6 +12,8 @@ class Consumer < Karafka::BaseConsumer
     return if DT.key?(:done)
 
     transaction do
+      mark_as_consumed(messages.first)
+
       2.times do
         transaction do
           nil
@@ -19,8 +21,6 @@ class Consumer < Karafka::BaseConsumer
       rescue Karafka::Errors::TransactionAlreadyInitializedError
         DT[:done] << true
       end
-
-      mark_as_consumed(messages.first)
     end
   end
 end

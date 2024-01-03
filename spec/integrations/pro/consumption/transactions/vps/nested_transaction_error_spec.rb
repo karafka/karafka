@@ -9,15 +9,13 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    begin
+    transaction do
       transaction do
-        transaction do
-          nil
-        end
+        nil
       end
-    rescue Karafka::Errors::TransactionAlreadyInitializedError
-      DT[:done] = true
     end
+  rescue Karafka::Errors::TransactionAlreadyInitializedError
+    DT[:done] = true
   end
 end
 

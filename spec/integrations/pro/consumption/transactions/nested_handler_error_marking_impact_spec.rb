@@ -13,13 +13,11 @@ class Consumer < Karafka::BaseConsumer
 
     transaction do
       2.times do
-        begin
-          transaction do
-            nil
-          end
-        rescue Karafka::Errors::TransactionAlreadyInitializedError
-          DT[:done] << true
+        transaction do
+          nil
         end
+      rescue Karafka::Errors::TransactionAlreadyInitializedError
+        DT[:done] << true
       end
 
       mark_as_consumed(messages.first)
