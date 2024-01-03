@@ -40,7 +40,7 @@ module Karafka
           #   versions of this method.
           def mark_as_consumed(message, offset_metadata = nil)
             if @_in_transaction
-              mark_in_transaction(message, offset_metadata)
+              mark_in_transaction(message, offset_metadata, true)
             else
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
               # In case like this we ignore marking
@@ -64,7 +64,7 @@ module Karafka
           #   False indicates that we were not able and that we have lost the partition.
           def mark_as_consumed!(message, offset_metadata = nil)
             if @_in_transaction
-              mark_in_transaction(message, offset_metadata)
+              mark_in_transaction(message, offset_metadata, false)
             else
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
               # In case like this we ignore marking
@@ -90,35 +90,49 @@ module Karafka
           #
           # @param block [Proc] code that we want to run in a transaction
           def transaction(&block)
+            transaction_started = false
+
             # Prevent from nested transactions. It would not make any sense
             raise Errors::TransactionAlreadyInitializedError if @_in_transaction
 
+            transaction_started = true
+            @_transaction_marked = []
             @_in_transaction = true
 
             producer.transaction(&block)
 
             @_in_transaction = false
 
-            # If there was no offset stored in the transaction, we mark nothing and exit
-            return unless @_transaction_marked
-
             # This offset is already stored in transaction but we set it here anyhow because we
             # want to make sure our internal in-memory state is aligned with the transaction
+            #
             # @note We never need to use the blocking `#mark_as_consumed!` here because the offset
             #   anyhow was already stored during the transaction
-            mark_as_consumed(*@_transaction_marked)
-
-            @_transaction_marked = nil
+            #
+            # @note In theory we could only keep reference to the most recent marking and reject
+            #   others. We however do not do it for two reasons:
+            #   - User may have non standard flow relying on some alternative order and we want to
+            #     mimic this
+            #   - Complex strategies like VPs can use this in VPs to mark in parallel without
+            #     having to redefine the transactional flow completely
+            @_transaction_marked.each do |marking|
+              marking.pop ? mark_as_consumed(*marking) : mark_as_consumed!(*marking)
+            end
           ensure
-            @_transaction_marked = nil
-            @_in_transaction = false
+            if transaction_started
+              @_transaction_marked.clear
+              @_in_transaction = false
+            end
           end
 
-          # Stores the next offset for processing inside of the transaction
+          # Stores the next offset for processing inside of the transaction and stores it in a
+          # local accumulator for post-transaction status update
           #
           # @param message [Messages::Message] message we want to commit inside of a transaction
           # @param offset_metadata [String, nil] offset metadata or nil if none
-          def mark_in_transaction(message, offset_metadata)
+          # @param async [Boolean] should we mark in async or sync way (applicable only to post
+          #   transaction state synchronization usage as within transaction it is always sync)
+          def mark_in_transaction(message, offset_metadata, async)
             raise Errors::TransactionRequiredError unless @_in_transaction
 
             producer.transaction_mark_as_consumed(
@@ -127,7 +141,8 @@ module Karafka
               offset_metadata
             )
 
-            @_transaction_marked = [message, offset_metadata]
+            @_transaction_marked ||= []
+            @_transaction_marked << [message, offset_metadata, async]
           end
 
           # No actions needed for the standard flow here

@@ -26,35 +26,13 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-# Make sure we get 100 messages just not to deal with edge cases
-class DelayThrottler < Karafka::Pro::Processing::Filters::Base
-  def apply!(messages)
-    @applied = false
-    @cursor = nil
-
-    return if messages.size >= 100
-
-    @cursor = messages.first
-    messages.clear
-    @applied = true
-  end
-
-  def applied?
-    @applied
-  end
-
-  def action
-    applied? ? :seek : :skip
-  end
-end
-
 DT[:iterator] = (0..9).cycle
 
 draw_routes do
   topic DT.topic do
     consumer Consumer
     manual_offset_management true
-    filter(->(*) { DelayThrottler.new })
+    filter(VpStabilizer)
     virtual_partitions(
       partitioner: ->(_msg) { DT[:iterator].next },
       offset_metadata_strategy: :current

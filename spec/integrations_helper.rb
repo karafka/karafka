@@ -127,8 +127,8 @@ def become_pro!
 
   Karafka.const_set('License', mod)
   require 'karafka/pro/loader'
-
   Karafka::Pro::Loader.require_all
+  require_relative './support/vp_stabilizer'
 end
 
 # Configures ActiveJob stuff in a similar way as the Railtie does for full Rails setup
