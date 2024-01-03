@@ -4,7 +4,7 @@
 # Kafka can sometimes ship few messages in first fetch and this makes things complicated to test
 # parallel operations on VPs with reproducible env. This filter ensures we wait until we get all
 # that we needed
-class VpStabilizer < Karafka::Pro::Processing::Filters::Base
+class VpStabilizer
   class << self
     # Builds the stabilizer
     def call(*)

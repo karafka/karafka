@@ -9,7 +9,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if DT.key?(:done)
+    return if DT.key?(:done) && @done
 
     transaction do
       mark_as_consumed(messages.first)
@@ -22,6 +22,8 @@ class Consumer < Karafka::BaseConsumer
         DT[:done] << true
       end
     end
+
+    @done = true
   end
 end
 
@@ -44,4 +46,5 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
+p fetch_first_offset
 assert fetch_first_offset > 0
