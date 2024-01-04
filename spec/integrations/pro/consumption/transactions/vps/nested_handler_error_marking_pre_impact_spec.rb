@@ -46,5 +46,4 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-p fetch_first_offset
 assert fetch_first_offset > 0

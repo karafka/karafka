@@ -9,7 +9,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if DT.key?(:done)
+    return if DT.key?(:done) && @done
 
     transaction do
       2.times do
@@ -22,6 +22,8 @@ class Consumer < Karafka::BaseConsumer
 
       mark_as_consumed(messages.first)
     end
+
+    @done = true
   end
 end
 
