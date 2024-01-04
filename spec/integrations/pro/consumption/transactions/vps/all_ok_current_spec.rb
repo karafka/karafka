@@ -17,8 +17,11 @@ class Consumer < Karafka::BaseConsumer
       sleep(5) if messages.first.offset.zero?
 
       messages.each do |message|
-        mark_as_consumed!(message, message.offset.to_s)
-        DT[:last] << message.offset.to_s
+        # Synchronize here ensures that we record the offset reference with marking
+        synchronize do
+          mark_as_consumed!(message, message.offset.to_s)
+          DT[:last] << message.offset.to_s
+        end
       end
     end
   end
@@ -49,5 +52,5 @@ start_karafka_and_wait_until do
   DT[:done].uniq.size >= 10
 end
 
-assert_equal fetch_first_offset, false
 assert_equal DT[:metadata].last, DT[:last].last
+assert_equal fetch_first_offset, false
