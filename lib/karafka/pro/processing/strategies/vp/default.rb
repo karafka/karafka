@@ -34,13 +34,17 @@ module Karafka
             #   We do not alter the "real" marking API, as VPs are just one of many cases we want
             #   to support and we do not want to impact them with collective offsets management
             def mark_as_consumed(message, offset_metadata = nil)
+              manager = coordinator.virtual_offset_manager
+
               if @_in_transaction && !collapsed?
                 mark_in_transaction(message, offset_metadata, true)
+
+                coordinator.synchronize do
+                  manager.mark(message, offset_metadata)
+                end
               elsif collapsed?
                 super
               else
-                manager = coordinator.virtual_offset_manager
-
                 coordinator.synchronize do
                   manager.mark(message, offset_metadata)
                   # If this is last marking on a finished flow, we can use the original
@@ -60,13 +64,17 @@ module Karafka
             # @param message [Karafka::Messages::Message] blocking marks message as consumed
             # @param offset_metadata [String, nil]
             def mark_as_consumed!(message, offset_metadata = nil)
+              manager = coordinator.virtual_offset_manager
+
               if @_in_transaction && !collapsed?
                 mark_in_transaction(message, offset_metadata, false)
+
+                coordinator.synchronize do
+                  manager.mark(message, offset_metadata)
+                end
               elsif collapsed?
                 super
               else
-                manager = coordinator.virtual_offset_manager
-
                 coordinator.synchronize do
                   manager.mark(message, offset_metadata)
                   manager.mark_until(message, offset_metadata) if coordinator.finished?

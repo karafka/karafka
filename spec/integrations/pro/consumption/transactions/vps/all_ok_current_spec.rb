@@ -52,5 +52,7 @@ start_karafka_and_wait_until do
   DT[:done].uniq.size >= 10
 end
 
-assert_equal DT[:metadata].last, DT[:last].last
+last = DT[:last].last
+
+assert_equal DT[:metadata].last, last
 assert_equal fetch_first_offset, false

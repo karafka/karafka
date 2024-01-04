@@ -26,8 +26,6 @@ module Karafka
       # @note This manager is **not** thread-safe by itself. It should operate from coordinator
       #   locked locations.
       class VirtualOffsetManager
-        include Karafka::Core::Helpers::Time
-
         attr_reader :groups
 
         # @param topic [String]
@@ -46,12 +44,14 @@ module Karafka
           @offsets_metadata = {}
           @real_offset = -1
           @offset_metadata_strategy = offset_metadata_strategy
+          @current_offset_metadata = nil
         end
 
         # Clears the manager for a next collective operation
         def clear
           @groups.clear
           @offsets_metadata.clear
+          @current_offset_metadata = nil
           @marked.clear
           @real_offset = -1
         end
@@ -77,7 +77,8 @@ module Karafka
           offset = message.offset
 
           # Store metadata when we materialize the most stable offset
-          @offsets_metadata[offset] = [monotonic_now, offset_metadata]
+          @offsets_metadata[offset] = offset_metadata
+          @current_offset_metadata = offset_metadata
 
           group = @groups.find { |reg_group| reg_group.include?(offset) }
 
@@ -113,7 +114,7 @@ module Karafka
             group.each do |offset|
               next if offset > message.offset
 
-              @offsets_metadata[offset] = [monotonic_now, offset_metadata]
+              @offsets_metadata[offset] = offset_metadata
               @marked[offset] = true
             end
           end
@@ -139,12 +140,9 @@ module Karafka
 
           offset_metadata = case @offset_metadata_strategy
                             when :exact
-                              @offsets_metadata.fetch(@real_offset).last
+                              @offsets_metadata.fetch(@real_offset)
                             when :current
-                              # Picks the current that is the most recent metadata value that was
-                              # marked. We store all of them
-                              p @offsets_metadata.values.sort_by(&:first).map(&:last)
-                              @offsets_metadata.values.sort_by(&:first).last.last
+                              @current_offset_metadata
                             else
                               raise Errors::UnsupportedCaseError, @offset_metadata_strategy
                             end
