@@ -348,6 +348,8 @@ module Karafka
         Karafka::App.assignments.each do |topic, partitions|
           # Skip for assignments not from our subscription group
           next unless topic.subscription_group == @subscription_group
+          # Skip if this topic does not have periodic jobs enabled
+          next unless topic.periodic_job?
 
           topic_name = topic.name
           interval = topic.periodic_job.interval
