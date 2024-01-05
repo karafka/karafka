@@ -9,8 +9,6 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    sleep(rand / 10)
-
     DT[:done] << object_id
 
     transaction do
