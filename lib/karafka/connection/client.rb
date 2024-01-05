@@ -358,6 +358,13 @@ module Karafka
         @kafka.events_poll(timeout)
       end
 
+      # Returns pointer to the consumer group metadata. It is used only in the context of
+      # exactly-once-semantics in transactions, this is why it is never remapped to Ruby
+      # @return [FFI::Pointer]
+      def consumer_group_metadata_pointer
+        @kafka.consumer_group_metadata_pointer
+      end
+
       # Return the current committed offset per partition for this consumer group.
       # The offset field of each requested partition will either be set to stored offset or to
       # -1001 in case there was no stored offset for that partition.

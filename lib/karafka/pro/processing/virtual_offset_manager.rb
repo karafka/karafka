@@ -51,9 +51,9 @@ module Karafka
         def clear
           @groups.clear
           @offsets_metadata.clear
+          @current_offset_metadata = nil
           @marked.clear
           @real_offset = -1
-          @current_offset_metadata = nil
         end
 
         # Registers an offset group coming from one virtual consumer. In order to move the real

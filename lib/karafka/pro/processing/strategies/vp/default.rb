@@ -34,37 +34,69 @@ module Karafka
             #   We do not alter the "real" marking API, as VPs are just one of many cases we want
             #   to support and we do not want to impact them with collective offsets management
             def mark_as_consumed(message, offset_metadata = nil)
-              return super if collapsed?
+              if @_in_transaction && !collapsed?
+                mark_in_transaction(message, offset_metadata, true)
+              elsif collapsed?
+                super
+              else
+                manager = coordinator.virtual_offset_manager
 
-              manager = coordinator.virtual_offset_manager
+                coordinator.synchronize do
+                  manager.mark(message, offset_metadata)
+                  # If this is last marking on a finished flow, we can use the original
+                  # last message and in order to do so, we need to mark all previous messages as
+                  # consumed as otherwise the computed offset could be different
+                  # We mark until our offset just in case of a DLQ flow or similar, where we do not
+                  # want to mark all but until the expected location
+                  manager.mark_until(message, offset_metadata) if coordinator.finished?
 
-              coordinator.synchronize do
-                manager.mark(message, offset_metadata)
-                # If this is last marking on a finished flow, we can use the original
-                # last message and in order to do so, we need to mark all previous messages as
-                # consumed as otherwise the computed offset could be different
-                # We mark until our offset just in case of a DLQ flow or similar, where we do not
-                # want to mark all but until the expected location
-                manager.mark_until(message, offset_metadata) if coordinator.finished?
+                  return revoked? unless manager.markable?
 
-                return revoked? unless manager.markable?
-
-                manager.markable? ? super(*manager.markable) : revoked?
+                  manager.markable? ? super(*manager.markable) : revoked?
+                end
               end
             end
 
             # @param message [Karafka::Messages::Message] blocking marks message as consumed
             # @param offset_metadata [String, nil]
             def mark_as_consumed!(message, offset_metadata = nil)
+              if @_in_transaction && !collapsed?
+                mark_in_transaction(message, offset_metadata, false)
+              elsif collapsed?
+                super
+              else
+                manager = coordinator.virtual_offset_manager
+
+                coordinator.synchronize do
+                  manager.mark(message, offset_metadata)
+                  manager.mark_until(message, offset_metadata) if coordinator.finished?
+                  manager.markable? ? super(*manager.markable) : revoked?
+                end
+              end
+            end
+
+            # Stores the next offset for processing inside of the transaction when collapsed and
+            # accumulates marking as consumed in the local buffer.
+            #
+            # Due to nature of VPs we cannot provide full EOS support but we can simulate it,
+            # making sure that no offset are stored unless transaction is finished. We do it by
+            # accumulating the post-transaction marking requests and after it is successfully done
+            # we mark each as consumed. This effectively on errors "rollbacks" the state and
+            # prevents offset storage.
+            #
+            # Since the EOS here is "weak", we do not have to worry about the race-conditions and
+            # we do not have to have any mutexes.
+            #
+            # @param message [Messages::Message] message we want to commit inside of a transaction
+            # @param offset_metadata [String, nil] offset metadata or nil if none
+            # @param async [Boolean] should we mark in async or sync way (applicable only to post
+            #   transaction state synchronization usage as within transaction it is always sync)
+            def mark_in_transaction(message, offset_metadata, async)
+              raise Errors::TransactionRequiredError unless @_in_transaction
+
               return super if collapsed?
 
-              manager = coordinator.virtual_offset_manager
-
-              coordinator.synchronize do
-                manager.mark(message, offset_metadata)
-                manager.mark_until(message, offset_metadata) if coordinator.finished?
-                manager.markable? ? super(*manager.markable) : revoked?
-              end
+              @_transaction_marked << [message, offset_metadata, async]
             end
 
             # @return [Boolean] is the virtual processing collapsed in the context of given

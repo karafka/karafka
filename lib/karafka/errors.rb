@@ -63,5 +63,12 @@ module Karafka
 
     # Raised when there is an attempt to run an unrecognized CLI command
     UnrecognizedCommandError = Class.new(BaseError)
+
+    # Raised when we attempt to perform operation that is only allowed inside of a transaction and
+    # there is no transaction around us
+    TransactionRequiredError = Class.new(BaseError)
+
+    # Raised in case user would want to perform nested transactions.
+    TransactionAlreadyInitializedError = Class.new(BaseError)
   end
 end

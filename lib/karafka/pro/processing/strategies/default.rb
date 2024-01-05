@@ -39,15 +39,19 @@ module Karafka
           #   already processed but rather at the next one. This applies to both sync and async
           #   versions of this method.
           def mark_as_consumed(message, offset_metadata = nil)
-            # seek offset can be nil only in case `#seek` was invoked with offset reset request
-            # In case like this we ignore marking
-            return true if coordinator.seek_offset.nil?
-            # Ignore earlier offsets than the one we already committed
-            return true if coordinator.seek_offset > message.offset
-            return false if revoked?
-            return revoked? unless client.mark_as_consumed(message, offset_metadata)
+            if @_in_transaction
+              mark_in_transaction(message, offset_metadata, true)
+            else
+              # seek offset can be nil only in case `#seek` was invoked with offset reset request
+              # In case like this we ignore marking
+              return true if coordinator.seek_offset.nil?
+              # Ignore earlier offsets than the one we already committed
+              return true if coordinator.seek_offset > message.offset
+              return false if revoked?
+              return revoked? unless client.mark_as_consumed(message, offset_metadata)
 
-            coordinator.seek_offset = message.offset + 1
+              coordinator.seek_offset = message.offset + 1
+            end
 
             true
           end
@@ -59,18 +63,86 @@ module Karafka
           # @return [Boolean] true if we were able to mark the offset, false otherwise.
           #   False indicates that we were not able and that we have lost the partition.
           def mark_as_consumed!(message, offset_metadata = nil)
-            # seek offset can be nil only in case `#seek` was invoked with offset reset request
-            # In case like this we ignore marking
-            return true if coordinator.seek_offset.nil?
-            # Ignore earlier offsets than the one we already committed
-            return true if coordinator.seek_offset > message.offset
-            return false if revoked?
+            if @_in_transaction
+              mark_in_transaction(message, offset_metadata, false)
+            else
+              # seek offset can be nil only in case `#seek` was invoked with offset reset request
+              # In case like this we ignore marking
+              return true if coordinator.seek_offset.nil?
+              # Ignore earlier offsets than the one we already committed
+              return true if coordinator.seek_offset > message.offset
+              return false if revoked?
 
-            return revoked? unless client.mark_as_consumed!(message, offset_metadata)
+              return revoked? unless client.mark_as_consumed!(message, offset_metadata)
 
-            coordinator.seek_offset = message.offset + 1
+              coordinator.seek_offset = message.offset + 1
+            end
 
             true
+          end
+
+          # Starts producer transaction, saves the transaction context for transactional marking
+          # and runs user code in this context
+          #
+          # Transactions on a consumer level differ from those initiated by the producer as they
+          # allow to mark offsets inside of the transaction. If the transaction is initialized
+          # only from the consumer, the offset will be stored in a regular fashion.
+          #
+          # @param block [Proc] code that we want to run in a transaction
+          def transaction(&block)
+            transaction_started = false
+
+            # Prevent from nested transactions. It would not make any sense
+            raise Errors::TransactionAlreadyInitializedError if @_in_transaction
+
+            transaction_started = true
+            @_transaction_marked = []
+            @_in_transaction = true
+
+            producer.transaction(&block)
+
+            @_in_transaction = false
+
+            # This offset is already stored in transaction but we set it here anyhow because we
+            # want to make sure our internal in-memory state is aligned with the transaction
+            #
+            # @note We never need to use the blocking `#mark_as_consumed!` here because the offset
+            #   anyhow was already stored during the transaction
+            #
+            # @note In theory we could only keep reference to the most recent marking and reject
+            #   others. We however do not do it for two reasons:
+            #   - User may have non standard flow relying on some alternative order and we want to
+            #     mimic this
+            #   - Complex strategies like VPs can use this in VPs to mark in parallel without
+            #     having to redefine the transactional flow completely
+            @_transaction_marked.each do |marking|
+              marking.pop ? mark_as_consumed(*marking) : mark_as_consumed!(*marking)
+            end
+          ensure
+            if transaction_started
+              @_transaction_marked.clear
+              @_in_transaction = false
+            end
+          end
+
+          # Stores the next offset for processing inside of the transaction and stores it in a
+          # local accumulator for post-transaction status update
+          #
+          # @param message [Messages::Message] message we want to commit inside of a transaction
+          # @param offset_metadata [String, nil] offset metadata or nil if none
+          # @param async [Boolean] should we mark in async or sync way (applicable only to post
+          #   transaction state synchronization usage as within transaction it is always sync)
+          def mark_in_transaction(message, offset_metadata, async)
+            raise Errors::TransactionRequiredError unless @_in_transaction
+
+            producer.transaction_mark_as_consumed(
+              client,
+              message,
+              offset_metadata
+            )
+
+            @_transaction_marked ||= []
+            @_transaction_marked << [message, offset_metadata, async]
           end
 
           # No actions needed for the standard flow here
