@@ -17,13 +17,14 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  defaults do
+  topic DT.topics[0] do
     consumer Consumer
     periodic interval: 100
   end
 
-  topic DT.topics[0]
-  topic DT.topics[1]
+  topic DT.topics[1] do
+    consumer Consumer
+  end
 end
 
 start_karafka_and_wait_until do
