@@ -10,7 +10,11 @@ module Karafka
     #   listener thread, but we go with thread-safe by default for all not to worry about potential
     #   future mistakes.
     class Coordinator
+      extend Forwardable
+
       attr_reader :pause_tracker, :seek_offset, :topic, :partition
+
+      def_delegators :@pause_tracker, :attempt, :paused?
 
       # @param topic [Karafka::Routing::Topic]
       # @param partition [Integer]
@@ -149,7 +153,7 @@ module Karafka
 
       # @return [Boolean] are we in a pause that was initiated by the user
       def manual_pause?
-        @pause_tracker.paused? && @manual_pause
+        paused? && @manual_pause
       end
 
       # Marks seek as manual for coordination purposes

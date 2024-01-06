@@ -7,7 +7,10 @@ RSpec.describe_current do
     {
       periodic_job: {
         active: true,
-        interval: 2_500
+        interval: 2_500,
+        during_pause: true,
+        during_retry: true,
+        materialized: true
       }
     }
   end
@@ -18,6 +21,18 @@ RSpec.describe_current do
 
   context 'when active flag is not boolean' do
     before { config[:periodic_job][:active] = rand }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when during_pause flag is not boolean' do
+    before { config[:periodic_job][:during_pause] = rand }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when during_retry flag is not boolean' do
+    before { config[:periodic_job][:during_retry] = rand }
 
     it { expect(check).not_to be_success }
   end

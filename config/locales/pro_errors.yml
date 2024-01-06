@@ -36,6 +36,10 @@ en:
       periodic_job.active_format: 'needs to be boolean'
       periodic_job.interval_missing: 'needs to be present'
       periodic_job.interval_format: 'needs to be an integer equal or more than 100'
+      periodic_job.during_pause_format: 'needs to be boolean'
+      periodic_job.during_retry_format: 'needs to be boolean'
+      periodic_job.materialized_format: 'needs to be boolean'
+      periodic_job.materialized_missing: 'needs to be present'
 
       inline_insights.active_format: 'needs to be boolean'
       inline_insights.required_format: 'needs to be boolean'

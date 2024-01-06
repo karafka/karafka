@@ -31,6 +31,9 @@ module Karafka
               nested(:periodic_job) do
                 required(:active) { |val| [true, false].include?(val) }
                 required(:interval) { |val| val.is_a?(Integer) && val >= 100 }
+                required(:during_pause) { |val| [true, false].include?(val) }
+                required(:during_retry) { |val| [true, false].include?(val) }
+                required(:materialized) { |val| [true, false].include?(val) }
               end
             end
           end

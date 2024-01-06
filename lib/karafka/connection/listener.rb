@@ -358,10 +358,19 @@ module Karafka
             # Skip if we were operating on a given topic partition recently
             next if @usage_tracker.active?(topic_name, partition, interval)
 
+            coordinator = @coordinators.find_or_create(topic_name, partition)
+
+            # Do not tick if we do not want to tick during pauses
+            next if coordinator.paused? && !topic.periodic_job.during_pause?
+
+            # If we do not want to run periodics during retry flows, we should not
+            # Since this counter is incremented before processing, here it is always -1 from what
+            # we see in the consumer flow. This is why attempt 0 means that we will have first
+            # run (ok) but attempt 1 means, there was an error and we will retry
+            next if coordinator.attempt.positive? && !topic.periodic_job.during_retry?
+
             # Track so we do not run periodic job again too soon
             @usage_tracker.track(topic_name, partition)
-
-            coordinator = @coordinators.find_or_create(topic_name, partition)
 
             @executors.find_all_or_create(topic_name, partition, coordinator).each do |executor|
               jobs << @jobs_builder.periodic(executor)
