@@ -22,12 +22,12 @@ module Karafka
             # poll where messages were not received.
             # @param active [Boolean] should ticking happen for this topic assignments.
             # @param interval [Integer] minimum interval to run periodic jobs on given topic.
-            # @param during_pause [Boolean] Should periodic jobs run when partition is paused. It
-            #   is true by default but can be set to false if we do not want to run it when pausing
-            #   occurs
-            # @param during_retry [Boolean] Should we run when there was an error and we are in
-            #   a retry flow. Please not that for this to work, `during_pause` also needs to be
-            #   set to true as on errors retry happens after pause.
+            # @param during_pause [Boolean, nil] Should periodic jobs run when partition is paused.
+            #   It is set to `nil` by default allowing for detection when this value is not
+            #   configured but should be built dynamically based on LRJ status.
+            # @param during_retry [Boolean, nil] Should we run when there was an error and we are
+            #   in a retry flow. Please note that for this to work, `during_pause` also needs to be
+            #   set to true as errors retry happens after pause.
             def periodic_job(
               active = false,
               interval: nil,
@@ -35,10 +35,11 @@ module Karafka
               during_retry: nil
             )
               @periodic_job ||= begin
-                # If only interval defined, it means we want to use so set to active
+                # Set to active if any of the values was configured
                 active = true unless interval.nil?
                 active = true unless during_pause.nil?
                 active = true unless during_retry.nil?
+                # Default is not to retry during retry flow
                 during_retry = false if during_retry.nil?
 
                 # If no interval, use default
@@ -51,7 +52,7 @@ module Karafka
                   during_retry: during_retry,
                   # This is internal setting for state management, not part of the configuration
                   # Do not overwrite.
-                  # If during_pause is explicit, we do not select it based on LRJ setup and we
+                  # If `during_pause` is explicit, we do not select it based on LRJ setup and we
                   # consider if fully ready out of the box
                   materialized: !during_pause.nil?
                 )

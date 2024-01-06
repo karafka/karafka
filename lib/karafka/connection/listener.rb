@@ -364,9 +364,9 @@ module Karafka
             next if coordinator.paused? && !topic.periodic_job.during_pause?
 
             # If we do not want to run periodics during retry flows, we should not
-            # Since this counter is incremented before processing here it is always -1 from what
-            # we see in the consumer flow. THat is why attempt 0 means that we will have first
-            # run (ok) but attempt 1 means, there was an error
+            # Since this counter is incremented before processing, here it is always -1 from what
+            # we see in the consumer flow. This is why attempt 0 means that we will have first
+            # run (ok) but attempt 1 means, there was an error and we will retry
             next if coordinator.attempt.positive? && !topic.periodic_job.during_retry?
 
             # Track so we do not run periodic job again too soon
