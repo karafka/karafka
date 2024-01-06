@@ -9,7 +9,8 @@ RSpec.describe_current do
         active: true,
         interval: 2_500,
         during_pause: true,
-        during_retry: true
+        during_retry: true,
+        materialized: true
       }
     }
   end
