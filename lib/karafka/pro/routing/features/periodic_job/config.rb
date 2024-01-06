@@ -19,9 +19,17 @@ module Karafka
           # Config for periodics topics feature
           Config = Struct.new(
             :active,
+            :during_pause,
+            :during_retry,
             :interval,
+            :materialized,
             keyword_init: true
-          ) { alias_method :active?, :active }
+          ) do
+            alias_method :active?, :active
+            alias_method :during_pause?, :during_pause
+            alias_method :during_retry?, :during_retry
+            alias_method :materialized?, :materialized
+          end
         end
       end
     end

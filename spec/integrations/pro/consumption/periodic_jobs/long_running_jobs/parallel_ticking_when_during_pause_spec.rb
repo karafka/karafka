@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When running on LRJ, ticking should happen alongside long processing because it is non blocking
-# on proper periods
+# on proper periods when `during_pause` is set to true.
 
 setup_karafka
 
@@ -21,7 +21,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    periodic true
+    periodic(during_pause: true)
     long_running_job true
   end
 end

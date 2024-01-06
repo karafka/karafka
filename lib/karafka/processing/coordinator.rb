@@ -141,6 +141,16 @@ module Karafka
         @marked
       end
 
+      # @return [Boolean] true if paused, false otherwise
+      def paused?
+        @pause_tracker.paused?
+      end
+
+      # @return [Integer] attempt we're in when processing given batch
+      def attempt
+        @pause_tracker.attempt
+      end
+
       # Store in the coordinator info, that this pause was done manually by the end user and not
       # by the system itself
       def manual_pause
