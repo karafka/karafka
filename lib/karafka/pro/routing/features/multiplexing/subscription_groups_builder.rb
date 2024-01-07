@@ -17,7 +17,7 @@ module Karafka
       module Features
         class Multiplexing < Base
           # Expands the builder to multiply multiplexed groups
-          module SubscriptionGroupBuilder
+          module SubscriptionGroupsBuilder
             # Takes into consideration multiplexing and builds the more groups
             #
             # @param topics_array [Array<Routing::Topic>] group of topics that have the same
@@ -27,7 +27,7 @@ module Karafka
               factor = topics_array.first.subscription_group_details.fetch(:multiplexing_count, 1)
 
               Array.new(factor) do |i|
-                Routing::Topics.new(i.zero? ? topics_array : topics_array.map(&:dup))
+                ::Karafka::Routing::Topics.new(i.zero? ? topics_array : topics_array.map(&:dup))
               end
             end
           end
