@@ -14,7 +14,9 @@ RSpec.describe_current do
       max_messages: 10,
       max_wait_time: 10_000,
       initial_offset: 'earliest',
-      subscription_group_name: SecureRandom.hex(6)
+      subscription_group_details: {
+        name: SecureRandom.hex(6)
+      }
     }
   end
 
@@ -105,21 +107,21 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we subscription_group_name' do
-    context 'when it is nil' do
-      before { config[:subscription_group_name] = nil }
+  context 'when we validate subscription_group_details' do
+    context 'when name is nil' do
+      before { config[:subscription_group_details][:name] = nil }
 
       it { expect(check).not_to be_success }
     end
 
-    context 'when it is not a string' do
-      before { config[:subscription_group_name] = 2 }
+    context 'when name is not a string' do
+      before { config[:subscription_group_details][:name] = 2 }
 
       it { expect(check).not_to be_success }
     end
 
     context 'when it is an empty string' do
-      before { config[:subscription_group_name] = '' }
+      before { config[:subscription_group_details][:name] = '' }
 
       it { expect(check).not_to be_success }
     end

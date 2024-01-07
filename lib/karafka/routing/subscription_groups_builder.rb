@@ -19,7 +19,7 @@ module Karafka
         max_messages
         max_wait_time
         initial_offset
-        subscription_group_name
+        subscription_group_details
       ].freeze
 
       private_constant :DISTRIBUTION_KEYS

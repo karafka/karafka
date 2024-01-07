@@ -9,6 +9,7 @@ FactoryBot.define do
     max_messages { 1000 }
     max_wait_time { 10_000 }
     subscription_group { SecureRandom.hex(6) }
+    subscription_group_details { { name: SecureRandom.uuid } }
 
     skip_create
 
@@ -18,6 +19,7 @@ FactoryBot.define do
       instance.tap do |topic|
         topic.consumer = consumer
         topic.subscription_group = subscription_group
+        topic.subscription_group_details = subscription_group_details
       end
     end
   end
@@ -36,6 +38,7 @@ FactoryBot.define do
       instance.tap do |topic|
         topic.consumer = consumer
         topic.subscription_group = subscription_group
+        topic.subscription_group_details = subscription_group_details
       end
 
       pattern.topic = instance

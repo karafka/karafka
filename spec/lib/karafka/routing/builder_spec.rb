@@ -42,10 +42,10 @@ RSpec.describe_current do
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_app_topic_name1" }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_app_topic_name2" }
       it { expect(builder.size).to eq 1 }
-      it { expect(topic1.subscription_group_name).not_to eq(nil) }
+      it { expect(topic1.subscription_group_details).not_to eq(nil) }
       it { expect(topic1.name).to eq 'topic_name1' }
       it { expect(topic2.name).to eq 'topic_name2' }
-      it { expect(topic2.subscription_group_name).not_to eq(nil) }
+      it { expect(topic2.subscription_group_details).not_to eq(nil) }
       it { expect(builder.first.id).to eq "#{Karafka::App.config.client_id}_app" }
     end
 
@@ -64,7 +64,7 @@ RSpec.describe_current do
 
       before { draw }
 
-      it { expect(topic.subscription_group_name).to eq 'test' }
+      it { expect(topic.subscription_group_details).to eq(name: 'test') }
     end
 
     context 'when we use simple topic style with one subscription group and two topics' do
@@ -88,8 +88,8 @@ RSpec.describe_current do
 
       before { draw }
 
-      it { expect(topic1.subscription_group_name).to eq 'test' }
-      it { expect(topic2.subscription_group_name).to eq 'test' }
+      it { expect(topic1.subscription_group_details).to eq(name: 'test') }
+      it { expect(topic2.subscription_group_details).to eq(name: 'test') }
     end
 
     context 'when we use simple topic style with many subscription groups' do
@@ -115,8 +115,8 @@ RSpec.describe_current do
 
       before { draw }
 
-      it { expect(topic1.subscription_group_name).to eq 'test1' }
-      it { expect(topic2.subscription_group_name).to eq 'test2' }
+      it { expect(topic1.subscription_group_details).to eq(name: 'test1') }
+      it { expect(topic2.subscription_group_details).to eq(name: 'test2') }
     end
 
     context 'when we mix subscription group definitions styles' do
@@ -140,8 +140,8 @@ RSpec.describe_current do
 
       before { draw }
 
-      it { expect(topic1.subscription_group_name).to eq 'test1' }
-      it { expect(topic2.subscription_group_name).not_to eq(nil) }
+      it { expect(topic1.subscription_group_details).to eq(name: 'test1') }
+      it { expect(topic2.subscription_group_details).not_to eq(nil) }
     end
 
     context 'when we use 0.6 simple topic style single topic groups' do
@@ -176,9 +176,9 @@ RSpec.describe_current do
       end
 
       it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
-      it { expect(topic1.subscription_group_name).not_to eq(nil) }
+      it { expect(topic1.subscription_group_details).not_to eq(nil) }
       it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
-      it { expect(topic2.subscription_group_name).not_to eq(nil) }
+      it { expect(topic2.subscription_group_details).not_to eq(nil) }
       it { expect(builder.size).to eq 2 }
     end
 
