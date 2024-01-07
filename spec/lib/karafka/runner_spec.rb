@@ -19,6 +19,10 @@ RSpec.describe_current do
         allow(Karafka::Connection::ListenersBatch)
           .to receive(:new)
           .and_return(listeners)
+
+        allow(Karafka::App)
+          .to receive(:done?)
+          .and_return(true)
       end
 
       it 'starts asynchronously consumption for each listener' do

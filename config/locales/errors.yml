@@ -28,6 +28,7 @@ en:
       internal.status_format: needs to be present
       internal.process_format: needs to be present
       internal.tick_interval_format: needs to be an integer bigger or equal to 1000
+      internal.join_timeout_format: needs to be an integer bigger or equal to 1000
       internal.routing.builder_format: needs to be present
       internal.routing.subscription_groups_builder_format: needs to be present
       internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0

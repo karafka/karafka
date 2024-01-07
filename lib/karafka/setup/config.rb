@@ -165,7 +165,7 @@ module Karafka
 
         # Interval of "join" expire in the runner. It is used to run operations from the runner
         # thread once in a while. It is meant to run management operations at a low frequency
-        setting :join_interval, default: 60_000
+        setting :join_timeout, default: 60_000
 
         # Namespace for CLI related settings
         setting :cli do

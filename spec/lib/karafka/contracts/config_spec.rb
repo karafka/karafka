@@ -28,7 +28,7 @@ RSpec.describe_current do
         status: Karafka::Status.new,
         process: Karafka::Process.new,
         tick_interval: 5_000,
-        join_interval: 5_000,
+        join_timeout: 5_000,
         connection: {
           proxy: {
             query_watermark_offsets: {
@@ -398,14 +398,14 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context  'when join_interval is less than 1 second' do
-      before { config[:internal][:join_interval] = 999 }
+    context  'when join_timeout is less than 1 second' do
+      before { config[:internal][:join_timeout] = 999 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context  'when join_interval is missing' do
-      before { config[:internal].delete(:join_interval) }
+    context  'when join_timeout is missing' do
+      before { config[:internal].delete(:join_timeout) }
 
       it { expect(contract.call(config)).not_to be_success }
     end

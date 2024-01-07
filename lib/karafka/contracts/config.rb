@@ -51,7 +51,7 @@ module Karafka
         required(:tick_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
         # Similar argument as above. We should not wait for short periods of time as it could
         # impact the performance
-        required(:join_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
+        required(:join_timeout) { |val| val.is_a?(Integer) && val >= 1_000 }
 
         nested(:connection) do
           nested(:proxy) do
