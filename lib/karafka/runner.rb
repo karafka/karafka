@@ -21,8 +21,7 @@ module Karafka
       Karafka::Server.listeners = listeners
       Karafka::Server.jobs_queue = jobs_queue
 
-      # All the listener threads need to finish
-      listeners.each(&:join)
+      wait_actively(listeners)
 
       # We close the jobs queue only when no listener threads are working.
       # This ensures, that everything was closed prior to us not accepting anymore jobs and that
@@ -47,6 +46,36 @@ module Karafka
       )
       Karafka::App.stop!
       raise e
+    end
+
+    private
+
+    # Waits actively and publishes notification on each tick. This can be used to perform listener
+    # related operations.
+    #
+    # @param listeners [Connection::ListenersBatch]
+    def wait_actively(listeners)
+      # Thread#join requires time in seconds, thus the conversion
+      join_timeout = Karafka::App.config.internal.join_timeout / 10_000
+
+      listeners.cycle do |listener|
+        listener.join(join_timeout)
+
+        # Do not manage rebalances if we're done and shutting down
+        break if Karafka::App.done?
+
+        Karafka.monitor.instrument(
+          'runner.joined',
+          caller: self,
+          listeners: listeners
+        )
+      end
+
+      # All the listener threads need to finish when shutdown is happening
+      # If we are here it means we're done and shutdown has started. During this period we no
+      # longer tick from the runner but we still need to wait on all the listeners to finish all
+      # the work
+      listeners.each(&:join)
     end
   end
 end

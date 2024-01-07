@@ -7,12 +7,17 @@ module Karafka
     # critical errors by restarting everything in a safe manner.
     #
     # This is the heart of the consumption process.
+    # @note Pausing and resuming API is meant to be used only frm the runner thread and no other
+    #   threads.
     class Listener
       include Helpers::Async
 
       # Can be useful for logging
       # @return [String] id of this listener
       attr_reader :id
+
+      # @return [Karafka::Routing::SubscriptionGroup] subscription group that this listener handles
+      attr_reader :subscription_group
 
       # How long to wait in the initial events poll. Increases chances of having the initial events
       # immediately available
@@ -46,6 +51,7 @@ module Karafka
         @usage_tracker = TimeTrackers::PartitionUsage.new
         @mutex = Mutex.new
         @stopped = false
+        @paused = false
 
         @jobs_queue.register(@subscription_group.id)
       end
@@ -63,6 +69,37 @@ module Karafka
         )
 
         fetch_loop
+      end
+
+      # Pauses processing that is happening using this listener in a synchronous way
+      # It will block until this listener is fully stopped
+      #
+      # @note This API is to be used only from the Runner thread context
+      def pause
+        raise Errors::InvalidListenerPauseError if paused?
+
+        @paused = true
+        join
+      end
+
+      # Is listening using this listener paused
+      #
+      # @return [Boolean] true if processing has been paused
+      # @note This API is to be used only from the Runner thread context
+      def paused?
+        @paused
+      end
+
+      # Starts processing again after a pause
+      #
+      # @note This API is to be used only from the Runner thread context
+      def resume
+        raise Errors::InvalidListenerResumeError unless paused?
+
+        @paused = false
+
+        restart
+        async_call
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
@@ -104,7 +141,7 @@ module Karafka
         @client.events_poll(INITIAL_EVENTS_POLL_TIMEOUT)
 
         # Run the main loop as long as we are not stopping or moving into quiet mode
-        until Karafka::App.done?
+        until Karafka::App.done? || @paused
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop',
             caller: self,
@@ -186,7 +223,10 @@ module Karafka
         # We need to wait until all the work in the whole consumer group (local to the process)
         # is done. Otherwise we may end up with locks and `Timed out LeaveGroupRequest in flight`
         # warning notifications.
-        wait_pinging(wait_until: -> { @consumer_group_coordinator.shutdown? })
+        #
+        # In case of paused processing we do not wait on the whole coordinator group as pausing
+        # is meant to stop only listeners without assignments
+        wait_pinging(wait_until: -> { @consumer_group_coordinator.shutdown? || @paused })
 
         # This extra ping will make sure we've refreshed the rebalance state after other instances
         # potentially shutdown. This will prevent us from closing with a dangling callback

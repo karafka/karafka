@@ -163,6 +163,10 @@ module Karafka
         # max timeout as to allow for frequent enough events polling
         setting :tick_interval, default: 5_000
 
+        # Interval of "join" expire in the runner. It is used to run operations from the runner
+        # thread once in a while. It is meant to run management operations at a low frequency
+        setting :join_interval, default: 60_000
+
         # Namespace for CLI related settings
         setting :cli do
           # option contract [Object] cli setup validation contract (in the context of options and

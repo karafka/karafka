@@ -10,6 +10,13 @@ module Karafka
     class SubscriptionGroup
       attr_reader :id, :name, :topics, :kafka, :consumer_group
 
+      # Family of a subscription group defines relationship connection between multiple sgs that
+      # belong to the same consumer group and operate on the same topics. This can be used for
+      # dynamic scaling without risk of misclassification.
+      #
+      # @return [String] string representing family of the given subscription group.
+      attr_reader :family
+
       # Lock for generating new ids safely
       ID_MUTEX = Mutex.new
 
@@ -44,6 +51,7 @@ module Karafka
         # subscription groups in many consumer groups effectively having same id for different
         # entities
         @id = "#{@consumer_group.id}_#{@name}_#{position}"
+        @family = "#{@consumer_group.id}_#{@name}".gsub(/_multiplex_(\d)+\z/, '')
         @position = position
         @topics = topics
         @kafka = build_kafka

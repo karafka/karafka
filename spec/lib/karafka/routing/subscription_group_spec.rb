@@ -44,6 +44,17 @@ RSpec.describe_current do
     end
   end
 
+  describe '#family' do
+    it { expect(group.family).to eq("#{group.consumer_group.id}_#{group.name}") }
+
+    context 'when we have two groups handling same topics in the same consumer group' do
+      let(:group1) { described_class.new(0, topics) }
+      let(:group2) { described_class.new(1, topics) }
+
+      it { expect(group1.family).to eq(group2.family) }
+    end
+  end
+
   describe '#consumer_group_id' do
     it { expect(group.consumer_group_id).to eq(topic.consumer_group.id) }
   end
