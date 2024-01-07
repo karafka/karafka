@@ -16,23 +16,16 @@ module Karafka
     module Routing
       module Features
         class Multiplexing < Base
-          # Patches to Karafka OSS
-          module Patches
-            # Contracts patches
-            module Contracts
-              # Consumer group contract patches
-              module ConsumerGroup
-                # Redefines the setup allowing for multiple sgs as long as with different names
-                #
-                # @param topic [Hash] topic config hash
-                # @return [Array] topic unique key for validators
-                def topic_unique_key(topic)
-                  [
-                    topic[:name],
-                    topic[:subscription_group_details]
-                  ]
-                end
-              end
+          # Allows for multiplexing setup inside a consumer group definition
+          module Proxy
+            # @param count [Integer] max multiplexing count
+            # @param dynamic [Boolean] can we manage connections dynamically depending on the
+            #   state of subscriptions
+            def multiplexing(count: 1, dynamic: false)
+              @target.current_subscription_group_details.merge!(
+                multiplexing_count: count,
+                multiplexing_dynamic: dynamic
+              )
             end
           end
         end

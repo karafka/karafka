@@ -16,22 +16,18 @@ module Karafka
     module Routing
       module Features
         class Multiplexing < Base
-          # Patches to Karafka OSS
-          module Patches
-            # Contracts patches
-            module Contracts
-              # Consumer group contract patches
-              module ConsumerGroup
-                # Redefines the setup allowing for multiple sgs as long as with different names
-                #
-                # @param topic [Hash] topic config hash
-                # @return [Array] topic unique key for validators
-                def topic_unique_key(topic)
-                  [
-                    topic[:name],
-                    topic[:subscription_group_details]
-                  ]
-                end
+          # Expands the builder to multiply multiplexed groups
+          module SubscriptionGroupBuilder
+            # Takes into consideration multiplexing and builds the more groups
+            #
+            # @param topics_array [Array<Routing::Topic>] group of topics that have the same
+            #   settings and can use the same connection
+            # @return [Array<Array<Routing::Topics>>] expanded groups
+            def expand(topics_array)
+              factor = topics_array.first.subscription_group_details.fetch(:multiplexing_count, 1)
+
+              Array.new(factor) do |i|
+                Routing::Topics.new(i.zero? ? topics_array : topics_array.map(&:dup))
               end
             end
           end

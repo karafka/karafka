@@ -14,7 +14,9 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes(create_topics: false) do
-  subscription_group :sg, multiplex: 5 do
+  subscription_group :sg do
+    multiplexing(count: 5)
+
     pattern('test', /#{DT.topic}/) do
       consumer Consumer
     end
