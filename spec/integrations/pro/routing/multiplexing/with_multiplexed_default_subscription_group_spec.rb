@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should allow for multiplexing subscription group
+# Karafka should allow for multiplexing of the default anonymous subscription group
 
 setup_karafka do |config|
   config.strict_topics_namespacing = false
@@ -12,16 +12,14 @@ SG_UUID = SecureRandom.uuid
 
 begin
   draw_routes(create_topics: false) do
-    consumer_group :test do
-      subscription_group SG_UUID do
-        multiplexing(
-          count: 5,
-          dynamic: true
-        )
+    subscription_group SG_UUID do
+      multiplexing(
+        count: 5,
+        dynamic: true
+      )
 
-        topic 'namespace_collision' do
-          consumer Class.new
-        end
+      topic 'namespace_collision' do
+        consumer Class.new
       end
     end
   end

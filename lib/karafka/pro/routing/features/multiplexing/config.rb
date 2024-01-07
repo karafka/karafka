@@ -22,7 +22,10 @@ module Karafka
             :count,
             :dynamic,
             keyword_init: true
-          ) { alias_method :active?, :active }
+          ) do
+            alias_method :active?, :active
+            alias_method :dynamic?, :dynamic
+          end
         end
       end
     end
