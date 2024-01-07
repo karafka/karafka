@@ -56,16 +56,19 @@ module Karafka
     # @param listeners [Connection::ListenersBatch]
     def wait_actively(listeners)
       # Thread#join requires time in seconds, thus the conversion
-      join_timeout = Karafka::App.config.internal.join_timeout / 10_000
+      join_timeout = Karafka::App.config.internal.join_timeout / 1_000.to_f
 
       listeners.cycle do |listener|
-        listener.join(join_timeout)
-
         # Do not manage rebalances if we're done and shutting down
         break if Karafka::App.done?
 
+        # If join returns something else than nil, it means this listener is either stopped or
+        # paused and its timeout will not kick in. In such cases we do not use its timeout because
+        # it is not time reliable and could trigger the event too often
+        next unless listener.join(join_timeout).nil?
+
         Karafka.monitor.instrument(
-          'runner.joined',
+          'runner.join_timeout',
           caller: self,
           listeners: listeners
         )

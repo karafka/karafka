@@ -70,7 +70,7 @@ module Karafka
         rebalance.partitions_revoke
         rebalance.partitions_revoked
 
-        runner.joined
+        runner.join_timeout
 
         statistics.emitted
 
