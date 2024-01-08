@@ -18,13 +18,13 @@ module Karafka
         class Multiplexing < Base
           # Allows for multiplexing setup inside a consumer group definition
           module Proxy
-            # @param count [Integer] max multiplexing count
-            # @param dynamic [Boolean] can we manage connections dynamically depending on the
-            #   state of subscriptions
-            def multiplexing(count: 1, dynamic: false)
+            # @param min [Integer, nil] min multiplexing count or nil to set it to max, effectively
+            #   disabling dynamic multiplexing
+            # @param max [Integer] max multiplexing count
+            def multiplexing(min: nil, max: 1)
               @target.current_subscription_group_details.merge!(
-                multiplexing_count: count,
-                multiplexing_dynamic: dynamic
+                multiplexing_min: min || max,
+                multiplexing_max: max
               )
             end
           end

@@ -15,7 +15,7 @@ end
 
 draw_routes(create_topics: false) do
   subscription_group :sg do
-    multiplexing(count: 5)
+    multiplexing(max: 5)
 
     pattern('test', /#{DT.topic}/) do
       consumer Consumer

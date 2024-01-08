@@ -4,14 +4,14 @@ RSpec.describe_current do
   subject(:config) do
     described_class.new(
       active: active,
-      count: count,
-      dynamic: dynamic
+      min: min,
+      max: max
     )
   end
 
   let(:active) { true }
-  let(:count) { 1 }
-  let(:dynamic) { false }
+  let(:min) { 1 }
+  let(:max) { 1 }
 
   describe '#active?' do
     context 'when not active' do

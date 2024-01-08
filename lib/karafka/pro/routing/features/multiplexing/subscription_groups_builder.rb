@@ -24,7 +24,7 @@ module Karafka
             #   settings and can use the same connection
             # @return [Array<Array<Routing::Topics>>] expanded groups
             def expand(topics_array)
-              factor = topics_array.first.subscription_group_details.fetch(:multiplexing_count, 1)
+              factor = topics_array.first.subscription_group_details.fetch(:multiplexing_max, 1)
 
               Array.new(factor) do |i|
                 ::Karafka::Routing::Topics.new(

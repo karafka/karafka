@@ -7,7 +7,7 @@ setup_karafka
 
 draw_routes(create_topics: false) do
   subscription_group :test do
-    multiplexing(count: 10)
+    multiplexing(max: 10)
 
     topic DT.topics[0] do
       consumer Consumer

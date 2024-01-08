@@ -21,9 +21,9 @@ module Karafka
             # @return [Config] multiplexing config
             def multiplexing
               @multiplexing ||= Config.new(
-                active: @details.fetch(:multiplexing_count) > 1,
-                count: @details.fetch(:multiplexing_count),
-                dynamic: @details.fetch(:multiplexing_dynamic)
+                active: @details.fetch(:multiplexing_max) > 1,
+                min: @details.fetch(:multiplexing_min),
+                max: @details.fetch(:multiplexing_max)
               )
             end
 

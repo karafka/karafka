@@ -13,13 +13,13 @@ RSpec.describe_current do
 
   describe '#expand' do
     context 'when multiplexing is off' do
-      before { topic1.subscription_group_details[:multiplexing_count] = 1 }
+      before { topic1.subscription_group_details[:multiplexing_max] = 1 }
 
       it { expect(expansion.size).to eq(1) }
     end
 
     context 'when multiplexing is on with 3 copies' do
-      before { topic1.subscription_group_details[:multiplexing_count] = 3 }
+      before { topic1.subscription_group_details[:multiplexing_max] = 3 }
 
       it { expect(expansion.size).to eq(3) }
 

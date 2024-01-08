@@ -10,7 +10,7 @@ RSpec.describe_current do
       builder.draw do
         consumer_group(:a) do
           subscription_group(:test) do
-            multiplexing(count: 2, dynamic: false)
+            multiplexing(min: 2, max: 3)
 
             topic(:test) { active(false) }
           end
@@ -18,8 +18,8 @@ RSpec.describe_current do
       end
     end
 
-    it { expect(topic.subscription_group_details[:multiplexing_count]).to eq(2) }
-    it { expect(topic.subscription_group_details[:multiplexing_dynamic]).to eq(false) }
+    it { expect(topic.subscription_group_details[:multiplexing_min]).to eq(2) }
+    it { expect(topic.subscription_group_details[:multiplexing_max]).to eq(3) }
     it { expect(topic.subscription_group_details[:name]).to eq('test') }
   end
 end

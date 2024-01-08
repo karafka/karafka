@@ -19,12 +19,16 @@ module Karafka
           # Multiplexing configuration
           Config = Struct.new(
             :active,
-            :count,
-            :dynamic,
+            :min,
+            :max,
             keyword_init: true
           ) do
             alias_method :active?, :active
-            alias_method :dynamic?, :dynamic
+
+            # @return [Boolean] true if we are allowed to upscale and downscale
+            def dynamic?
+              min < max
+            end
           end
         end
       end

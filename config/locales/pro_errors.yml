@@ -49,6 +49,10 @@ en:
       offset_metadata.deserializer_missing: needs to be present
       offset_metadata.deserializer_format: 'needs to respond to #call'
 
+      subscription_group_details.multiplexing_min_format: 'needs to be an integer equal or more than 1'
+      subscription_group_details.multiplexing_max_format: 'needs to be an integer equal or more than 1'
+      subscription_group_details_multiplexing_min_max_mismatch: 'min needs to be equal or less than max'
+
     consumer_group:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present

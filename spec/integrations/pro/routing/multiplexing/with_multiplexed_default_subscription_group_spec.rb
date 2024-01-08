@@ -13,10 +13,7 @@ SG_UUID = SecureRandom.uuid
 begin
   draw_routes(create_topics: false) do
     subscription_group SG_UUID do
-      multiplexing(
-        count: 5,
-        dynamic: true
-      )
+      multiplexing(min: 2, max: 5)
 
       topic 'namespace_collision' do
         consumer Class.new
