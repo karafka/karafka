@@ -21,6 +21,8 @@ module Karafka
             # Validates the subscription group multiplexing setup
             # We validate it on the topic level as subscription groups are not built during the
             # routing as they are pre-run dynamically built.
+            #
+            # multiplexing attributes are optional since multiplexing may not be enabled
             class Topic < Karafka::Contracts::Base
               configure do |config|
                 config.error_messages = YAML.safe_load(
@@ -31,15 +33,18 @@ module Karafka
               end
 
               nested(:subscription_group_details) do
-                required(:multiplexing_min) { |val| val.is_a?(Integer) && val >= 1 }
-                required(:multiplexing_max) { |val| val.is_a?(Integer) && val >= 1 }
+                optional(:multiplexing_min) { |val| val.is_a?(Integer) && val >= 1 }
+                optional(:multiplexing_max) { |val| val.is_a?(Integer) && val >= 1 }
               end
 
               virtual do |data, errors|
                 next unless errors.empty?
 
-                min = data[:subscription_group_details].fetch(:multiplexing_min)
-                max = data[:subscription_group_details].fetch(:multiplexing_max)
+                next unless data[:subscription_group_details].key?(:multiplexing_min)
+                next unless data[:subscription_group_details].key?(:multiplexing_max)
+
+                min = data[:subscription_group_details][:multiplexing_min]
+                max = data[:subscription_group_details][:multiplexing_max]
 
                 next if min <= max
 
