@@ -12,7 +12,7 @@ RSpec.describe_current do
   let(:topics_array) { [topic1, topic2] }
 
   describe '#expand' do
-    context '#when multiplexing is off' do
+    context 'when multiplexing is off' do
       before { topic1.subscription_group_details[:multiplexing_count] = 1 }
 
       it { expect(expansion.size).to eq(1) }

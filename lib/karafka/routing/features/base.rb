@@ -46,9 +46,13 @@ module Karafka
             end
           end
 
-          # Loads all the features and activates them
+          # Loads all the features and activates them once
           def load_all
+            return if @loaded
+
             features.each(&:activate)
+
+            @loaded = true
           end
 
           # @param config [Karafka::Core::Configurable::Node] app config that we can alter with

@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:builder) do
-    Karafka::Routing::Builder.new.tap do |builder|
-      builder.singleton_class.prepend described_class
-    end
-  end
+  subject(:builder) { Karafka::Routing::Builder.new }
 
   let(:topic) { builder.first.topics.first }
 

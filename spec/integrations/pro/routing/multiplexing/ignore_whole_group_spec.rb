@@ -19,5 +19,12 @@ ARGV[0] = 'server'
 ARGV[1] = '--exclude-subscription-groups'
 ARGV[2] = 'test'
 
-Karafka::Cli.start
+failed = false
 
+begin
+  Karafka::Cli.start
+rescue Karafka::Errors::InvalidConfigurationError
+  failed = true
+end
+
+assert failed
