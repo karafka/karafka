@@ -165,7 +165,7 @@ module Karafka
 
         # Interval of "join" expire in the runner. It is used to run operations from the runner
         # thread once in a while. It is meant to run management operations at a low frequency
-        setting :join_timeout, default: 60_000
+        setting :join_timeout, default: 1_000
 
         # Namespace for CLI related settings
         setting :cli do
@@ -188,6 +188,8 @@ module Karafka
 
         # Namespace for internal connection related settings
         setting :connection do
+          setting :manager, default: Connection::Manager.new
+
           # Settings that are altered by our client proxy layer
           setting :proxy do
             # Committed offsets for given CG query

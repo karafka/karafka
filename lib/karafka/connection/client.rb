@@ -24,16 +24,7 @@ module Karafka
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
-      # 1 minute of max wait for the first rebalance before a forceful attempt
-      # This applies only to a case when a short-lived Karafka instance with a client would be
-      # closed before first rebalance. Mitigates a librdkafka bug.
-      COOPERATIVE_STICKY_MAX_WAIT = 60_000
-
-      # We want to make sure we never close several clients in the same moment to prevent
-      # potential race conditions and other issues
-      SHUTDOWN_MUTEX = Mutex.new
-
-      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX, :COOPERATIVE_STICKY_MAX_WAIT
+      private_constant :MAX_POLL_RETRIES
 
       # Creates a new consumer instance.
       #
@@ -260,36 +251,6 @@ module Karafka
       #   as until all the consumers are stopped, the server will keep running serving only
       #   part of the messages
       def stop
-        # This ensures, that we do not stop the underlying client until it passes the first
-        # rebalance for cooperative-sticky. Otherwise librdkafka may crash
-        #
-        # We set a timeout just in case the rebalance would never happen or would last for an
-        # extensive time period.
-        #
-        # @see https://github.com/confluentinc/librdkafka/issues/4312
-        if @subscription_group.kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
-          active_wait = false
-
-          (COOPERATIVE_STICKY_MAX_WAIT / 100).times do
-            # If we're past the first rebalance, no need to wait
-            if @rebalance_manager.active?
-              # We give it a a bit of time because librdkafka has a tendency to do some-post
-              # callback work that from its perspective is still under rebalance
-              sleep(5) if active_wait
-
-              break
-            end
-
-            active_wait = true
-
-            # poll to trigger potential rebalances that could occur during stopping and to trigger
-            # potential callbacks
-            poll(100)
-
-            sleep(0.1)
-          end
-        end
-
         close
       end
 
@@ -467,24 +428,21 @@ module Karafka
 
       # Commits the stored offsets in a sync way and closes the consumer.
       def close
-        # Allow only one client to be closed at the same time
-        SHUTDOWN_MUTEX.synchronize do
-          # Once client is closed, we should not close it again
-          # This could only happen in case of a race-condition when forceful shutdown happens
-          # and triggers this from a different thread
-          return if @closed
+        # Once client is closed, we should not close it again
+        # This could only happen in case of a race-condition when forceful shutdown happens
+        # and triggers this from a different thread
+        return if @closed
 
-          @closed = true
+        @closed = true
 
-          # Remove callbacks runners that were registered
-          ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
-          ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
+        # Remove callbacks runners that were registered
+        ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
+        ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
-          @kafka.close
-          @buffer.clear
-          # @note We do not clear rebalance manager here as we may still have revocation info
-          # here that we want to consider valid prior to running another reconnection
-        end
+        @kafka.close
+        @buffer.clear
+        # @note We do not clear rebalance manager here as we may still have revocation info
+        # here that we want to consider valid prior to running another reconnection
       end
 
       # Unsubscribes from all the subscriptions

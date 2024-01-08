@@ -88,7 +88,10 @@ module Karafka
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
         ((timeout / 1_000) * SUPERVISION_CHECK_FACTOR).to_i.times do
-          return if listeners.count(&:alive?).zero? && workers.count(&:alive?).zero?
+          running_listeners = listeners.active.count(&:alive?)
+          running_workers = workers.count(&:alive?)
+
+          return if running_listeners.zero? && running_workers.zero?
 
           sleep SUPERVISION_SLEEP
         end
@@ -104,10 +107,10 @@ module Karafka
 
         # We're done waiting, lets kill them!
         workers.each(&:terminate)
-        listeners.each(&:terminate)
+        listeners.active.each(&:terminate)
         # We always need to shutdown clients to make sure we do not force the GC to close consumer.
         # This can cause memory leaks and crashes.
-        listeners.each(&:shutdown)
+        listeners.active.each(&:shutdown)
 
         # We also do not forcefully terminate everything when running in the embedded mode,
         # otherwise we would overwrite the shutdown process of the process that started Karafka

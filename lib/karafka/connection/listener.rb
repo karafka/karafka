@@ -51,7 +51,7 @@ module Karafka
         @usage_tracker = TimeTrackers::PartitionUsage.new
         @mutex = Mutex.new
         @stopped = false
-        @paused = false
+        @paused = true
 
         @jobs_queue.register(@subscription_group.id)
       end
@@ -69,6 +69,20 @@ module Karafka
         )
 
         fetch_loop
+
+        Karafka.monitor.instrument(
+          'connection.listener.after_fetch_loop',
+          caller: self,
+          client: @client,
+          subscription_group: @subscription_group
+        )
+      end
+
+      # Starts this listener in a background thread
+      def start
+        @consumer_group_coordinator.start_work(id)
+        async_call
+        @paused = false
       end
 
       # Pauses processing that is happening using this listener in a synchronous way
@@ -80,6 +94,11 @@ module Karafka
 
         @paused = true
         join
+      end
+
+      # @return [Boolean] true if not paused
+      def active?
+        !paused?
       end
 
       # Is listening using this listener paused
@@ -98,8 +117,9 @@ module Karafka
 
         @paused = false
 
-        restart
-        async_call
+        @consumer_group_coordinator.start_work(id)
+        reset
+        start
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
@@ -226,7 +246,13 @@ module Karafka
         #
         # In case of paused processing we do not wait on the whole coordinator group as pausing
         # is meant to stop only listeners without assignments
-        wait_pinging(wait_until: -> { @consumer_group_coordinator.shutdown? || @paused })
+        #
+        # In case we are pausing one of subscription group listeners, we do not wait for all but
+        # we do lock for shutdown the same way as during shutdown
+        #
+        # Shutdown will also be allowed during downscaling if inactive listeners. In cases like
+        # that there is no risk of timeouts as they should have no assignments
+        wait_pinging(wait_until: -> { @consumer_group_coordinator.shutdown?(id) })
 
         # This extra ping will make sure we've refreshed the rebalance state after other instances
         # potentially shutdown. This will prevent us from closing with a dangling callback
@@ -245,7 +271,7 @@ module Karafka
           type: 'connection.listener.fetch_loop.error'
         )
 
-        restart
+        reset
 
         sleep(1) && retry
       ensure
@@ -456,7 +482,7 @@ module Karafka
       # `#fetch_loop` again. We just need to remember to also reset the runner as it is a long
       # running one, so with a new connection to Kafka, we need to initialize the state of the
       # runner and underlying consumers once again.
-      def restart
+      def reset
         # If there was any problem with processing, before we reset things we need to make sure,
         # there are no jobs in the queue. Otherwise it could lead to leakage in between client
         # resetting.

@@ -9,6 +9,8 @@
 - [Enhancement] Allow to reset offset when seeking backwards by using the `reset_offset` keyword attribute set to `true`.
 - [Enhancement] Alias producer operations in consumer to skip `#producer` reference.
 - [Enhancement] Provide an `:independent` configuration to DLQ allowing to reset pause count track on each marking as consumed when retrying.
+- [Enhancement] Remove no longer needed shutdown patches for `librdkafka` improving multi-sg shutdown times for `cooperative-sticky`.
+- [Enhancement] Allow for parallel closing of connections from independent consumer groups.
 - [Change] Make `Kubernetes::LivenessListener` not start until Karafka app starts running.
 - [Change] Remove the legacy "inside of topics" way of defining subscription groups names
 - [Refactor] Replace `define_method` with `class_eval` in some locations.

@@ -20,11 +20,13 @@ module Karafka
           module SubscriptionGroup
             # @return [Config] multiplexing config
             def multiplexing
-              @multiplexing ||= Config.new(
-                active: @details.fetch(:multiplexing_max) > 1,
-                min: @details.fetch(:multiplexing_min),
-                max: @details.fetch(:multiplexing_max)
-              )
+              @multiplexing ||= begin
+                max = @details.fetch(:multiplexing_max, 1)
+                min = @details.fetch(:multiplexing_min, max)
+                active = max > 1
+
+                Config.new(active: active, min: min, max: max)
+              end
             end
 
             # @return [Boolean] is multiplexing active

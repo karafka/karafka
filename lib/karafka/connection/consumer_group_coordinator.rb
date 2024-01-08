@@ -14,23 +14,35 @@ module Karafka
     # This prevents a scenario, where a rebalance is not acknowledged and we loose assignment
     # without having a chance to commit changes.
     class ConsumerGroupCoordinator
-      # @param group_size [Integer] number of separate subscription groups in a consumer group
-      def initialize(group_size)
+      attr_accessor :listeners
+
+      def initialize
         @shutdown_mutex = Mutex.new
-        @group_size = group_size
-        @finished = Set.new
+        @running = Set.new
       end
 
       # @return [Boolean] true if all the subscription groups from a given consumer group are
       #   finished
       def finished?
-        @finished.size == @group_size
+        @listeners.map(&:id)
       end
 
       # @return [Boolean] can we start shutdown on a given listener
       # @note If true, will also obtain a lock so no-one else will be closing the same time we do
-      def shutdown?
-        finished? && @shutdown_mutex.try_lock
+      def shutdown?(listener_id)
+        return true if @running.empty? && @shutdown_mutex.try_lock
+        return true if @running.empty? && @shutdown_mutex.owned?
+
+        # If it is in running it means, that even if paused, did not yet finish. If so, we should
+        # not allow it to stop fully until it deregisters itself
+        return false if @running.include?(listener_id)
+
+        paused = @listeners.find { |ls| ls.id == listener_id }.paused?
+
+        return true if paused && @shutdown_mutex.try_lock
+        return true if paused && @shutdown_mutex.owned?
+
+        false
       end
 
       # Unlocks the shutdown lock
@@ -38,10 +50,14 @@ module Karafka
         @shutdown_mutex.unlock if @shutdown_mutex.owned?
       end
 
+      def start_work(listener_id)
+        @running << listener_id
+      end
+
       # Marks given listener as finished
       # @param listener_id [String]
       def finish_work(listener_id)
-        @finished << listener_id
+        @running.delete(listener_id)
       end
     end
   end

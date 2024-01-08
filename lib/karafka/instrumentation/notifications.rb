@@ -36,6 +36,7 @@ module Karafka
         connection.listener.before_fetch_loop
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
+        connection.listener.after_fetch_loop
 
         consumer.before_schedule_consume
         consumer.consume

@@ -18,13 +18,11 @@ module Karafka
         @coordinators = []
 
         @batch = App.subscription_groups.flat_map do |_consumer_group, subscription_groups|
-          consumer_group_coordinator = Connection::ConsumerGroupCoordinator.new(
-            subscription_groups.size
-          )
+          consumer_group_coordinator = Connection::ConsumerGroupCoordinator.new
 
           @coordinators << consumer_group_coordinator
 
-          subscription_groups.map do |subscription_group|
+          consumer_group_coordinator.listeners = subscription_groups.map do |subscription_group|
             Connection::Listener.new(
               consumer_group_coordinator,
               subscription_group,
@@ -39,6 +37,10 @@ module Karafka
       # @param block [Proc] block we want to run
       def each(&block)
         @batch.each(&block)
+      end
+
+      def active
+        select(&:active?)
       end
     end
   end
