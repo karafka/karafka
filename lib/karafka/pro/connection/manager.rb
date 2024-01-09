@@ -18,7 +18,7 @@ module Karafka
       #
       # This manager takes into consideration the number of partitions assigned to the topics and
       # does it best to balance. Additional connections may not always be utilized because
-      # alongside of them, other processes may "highjack" the assignment. In such cases those extra
+      # alongside of them, other processes may "hijack" the assignment. In such cases those extra
       # empty connections will be turned off after a while.
       #
       # @note Manager operations relate to consumer groups and not subscription groups. Since

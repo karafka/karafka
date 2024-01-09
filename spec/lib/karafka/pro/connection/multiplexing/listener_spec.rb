@@ -19,7 +19,7 @@ RSpec.describe_current do
 
   describe '#on_rebalance_partitions_revoked' do
     it 'expect to be noticed' do
-      listener.on_rebalance_partitions_assigned(event)
+      listener.on_rebalance_partitions_revoked(event)
 
       expect(manager).to have_received(:notice).with(consumer_group_id)
     end
