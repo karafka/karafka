@@ -49,11 +49,11 @@ module Karafka
         # In theory this could be less than a second, however this would impact the maximum time
         # of a single consumer queue poll, hence we prevent it
         required(:tick_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
-        # Similar argument as above. We should not wait for short periods of time as it could
-        # impact the performance
-        required(:join_timeout) { |val| val.is_a?(Integer) && val >= 1_000 }
 
         nested(:connection) do
+          required(:manager) { |val| !val.nil? }
+          required(:conductor) { |val| !val.nil? }
+
           nested(:proxy) do
             # All of them have the same requirements
             %i[

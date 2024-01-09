@@ -3,31 +3,24 @@
 RSpec.describe_current do
   subject(:listener) do
     described_class.new(
-      consumer_group_coordinator,
       subscription_group,
       jobs_queue,
       scheduler
     )
   end
 
-  let(:consumer_group_coordinator) { Karafka::Connection::ConsumerGroupCoordinator.new(0) }
   let(:subscription_group) { build(:routing_subscription_group, topics: [routing_topic]) }
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:scheduler) { Karafka::Processing::Schedulers::Default.new(jobs_queue) }
   let(:client) { Karafka::Connection::Client.new(subscription_group) }
   let(:routing_topic) { build(:routing_topic) }
-  let(:workers_batch) { Karafka::Processing::WorkersBatch.new(jobs_queue).each(&:async_call) }
 
   before do
-    workers_batch
-
     allow(client.class).to receive(:new).and_return(client)
-    allow(Karafka::App).to receive(:done?).and_return(false, true)
     allow(client).to receive(:batch_poll).and_return([])
     allow(client).to receive(:ping)
-    allow(consumer_group_coordinator).to receive(:shutdown?).and_return(true)
-
-    consumer_group_coordinator.finish_work(listener.id)
+    allow(listener.status).to receive(:running?).and_return(true, false)
+    allow(listener.status).to receive(:quiet?).and_return(true, false)
   end
 
   after { client.stop }

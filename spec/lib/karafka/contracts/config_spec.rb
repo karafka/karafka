@@ -28,8 +28,9 @@ RSpec.describe_current do
         status: Karafka::Status.new,
         process: Karafka::Process.new,
         tick_interval: 5_000,
-        join_timeout: 5_000,
         connection: {
+          manager: 1,
+          conductor: 1,
           proxy: {
             query_watermark_offsets: {
               timeout: 100,
@@ -398,14 +399,14 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context  'when join_timeout is less than 1 second' do
-      before { config[:internal][:join_timeout] = 999 }
+    context  'when conductor is missing' do
+      before { config[:internal][:connection].delete(:conductor) }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context  'when join_timeout is missing' do
-      before { config[:internal].delete(:join_timeout) }
+    context  'when manager is missing' do
+      before { config[:internal][:connection].delete(:manager) }
 
       it { expect(contract.call(config)).not_to be_success }
     end

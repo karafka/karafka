@@ -59,6 +59,13 @@ module Karafka
             # We skip as during this state we do not have yet a monitor
             return if initializing?
 
+            # We do not set conductor in the initializer because this status object is created
+            # before the configuration kicks in
+            # We need to signal conductor on each state change as those may be relevant to
+            # listeners operations
+            @conductor ||= Karafka::App.config.internal.connection.conductor
+            @conductor.signal
+
             Karafka.monitor.instrument("app.#{state}")
           end
         end

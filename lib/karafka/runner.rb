@@ -3,6 +3,11 @@
 module Karafka
   # Class used to run the Karafka listeners in separate threads
   class Runner
+    def initialize
+      @manager = App.config.internal.connection.manager
+      @conductor = App.config.internal.connection.conductor
+    end
+
     # Starts listening on all the listeners asynchronously and handles the jobs queue closing
     # after listeners are done with their work.
     def call
@@ -13,16 +18,21 @@ module Karafka
       workers = Processing::WorkersBatch.new(jobs_queue)
       listeners = Connection::ListenersBatch.new(jobs_queue)
 
-      workers.each(&:async_call)
+      # Register all the listeners so they can be started and managed
+      @manager.register(listeners)
 
-      App.config.internal.connection.manager.register(listeners)
+      workers.each(&:async_call)
 
       # We aggregate threads here for a supervised shutdown process
       Karafka::Server.workers = workers
       Karafka::Server.listeners = listeners
       Karafka::Server.jobs_queue = jobs_queue
 
-      wait_actively(listeners)
+      until @manager.done?
+        @conductor.wait
+
+        @manager.control
+      end
 
       # We close the jobs queue only when no listener threads are working.
       # This ensures, that everything was closed prior to us not accepting anymore jobs and that
@@ -47,37 +57,6 @@ module Karafka
       )
       Karafka::App.stop!
       raise e
-    end
-
-    private
-
-    # Waits actively and publishes notification on each tick. This can be used to perform listener
-    # related operations.
-    #
-    # @param listeners [Connection::ListenersBatch]
-    def wait_actively(listeners)
-      # Thread#join requires time in seconds, thus the conversion
-      join_timeout = Karafka::App.config.internal.join_timeout / 1_000.0
-
-      listeners.cycle do |listener|
-        # Do not manage rebalances if we're done and shutting down
-        break if Karafka::App.done?
-
-        next unless listener.active?
-
-        # If join returns something else than nil, it means this listener is either stopped or
-        # paused and its timeout will not kick in. In such cases we do not use its timeout because
-        # it is not time reliable and could trigger the event too often
-        next unless listener.join(join_timeout).nil?
-
-        Karafka.monitor.instrument('runner.join_timeout', caller: self)
-      end
-
-      # All the active listener threads need to finish when shutdown is happening
-      # If we are here it means we're done and shutdown has started. During this period we no
-      # longer tick from the runner but we still need to wait on all the listeners to finish all
-      # the work
-      listeners.active.each(&:join)
     end
   end
 end

@@ -24,14 +24,6 @@ module Karafka
             @manager = App.config.internal.connection.manager
           end
 
-          # Triggers manager once in a while on automatic join timeouts to scale (if needed)
-          # subscription groups that would require that.
-          #
-          # @param event [Karafka::Core::Monitoring::Event] event with listeners
-          def on_runner_join_timeout(event)
-            @manager.scale
-          end
-
           # Indicates that there was a rebalance on a given consumer group
           #
           # @param event [Karafka::Core::Monitoring::Event] event with listeners

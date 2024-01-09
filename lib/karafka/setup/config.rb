@@ -163,10 +163,6 @@ module Karafka
         # max timeout as to allow for frequent enough events polling
         setting :tick_interval, default: 5_000
 
-        # Interval of "join" expire in the runner. It is used to run operations from the runner
-        # thread once in a while. It is meant to run management operations at a low frequency
-        setting :join_timeout, default: 1_000
-
         # Namespace for CLI related settings
         setting :cli do
           # option contract [Object] cli setup validation contract (in the context of options and
@@ -188,7 +184,10 @@ module Karafka
 
         # Namespace for internal connection related settings
         setting :connection do
+          # Manages starting up and stopping Kafka connections
           setting :manager, default: Connection::Manager.new
+          # Controls frequency of connections management checks
+          setting :conductor, default: Connection::Conductor.new
 
           # Settings that are altered by our client proxy layer
           setting :proxy do

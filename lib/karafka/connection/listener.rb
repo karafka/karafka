@@ -7,8 +7,8 @@ module Karafka
     # critical errors by restarting everything in a safe manner.
     #
     # This is the heart of the consumption process.
-    # @note Pausing and resuming API is meant to be used only frm the runner thread and no other
-    #   threads.
+    #
+    # It provides async API for managing, so all status changes are expected to be async.
     class Listener
       include Helpers::Async
 
@@ -25,16 +25,16 @@ module Karafka
 
       private_constant :INITIAL_EVENTS_POLL_TIMEOUT
 
-      # @param consumer_group_coordinator [Karafka::Connection::ConsumerGroupCoordinator]
+      attr_reader :status
+
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
       # @param scheduler [Karafka::Processing::Scheduler] scheduler we want to use
       # @return [Karafka::Connection::Listener] listener instance
-      def initialize(consumer_group_coordinator, subscription_group, jobs_queue, scheduler)
+      def initialize(subscription_group, jobs_queue, scheduler)
         proc_config = ::Karafka::App.config.internal.processing
 
         @id = SecureRandom.hex(6)
-        @consumer_group_coordinator = consumer_group_coordinator
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
         @coordinators = Processing::CoordinatorsBuffer.new(subscription_group.topics)
@@ -50,8 +50,7 @@ module Karafka
         @messages_buffer = MessagesBuffer.new(subscription_group)
         @usage_tracker = TimeTrackers::PartitionUsage.new
         @mutex = Mutex.new
-        @stopped = false
-        @paused = true
+        @status = Status.new
 
         @jobs_queue.register(@subscription_group.id)
       end
@@ -78,48 +77,35 @@ module Karafka
         )
       end
 
-      # Starts this listener in a background thread
-      def start
-        @consumer_group_coordinator.start_work(id)
-        async_call
-        @paused = false
+      # Aliases all statuses operations directly on the listener so we have a listener-facing API
+      Status::STATES.each do |state, transition|
+        # @return [Boolean] is the listener in a given state
+        define_method "#{state}?" do
+          @status.public_send("#{state}?")
+        end
+
+        # Moves listener to a given state
+        define_method transition do
+          @status.public_send(transition)
+        end
       end
 
-      # Pauses processing that is happening using this listener in a synchronous way
-      # It will block until this listener is fully stopped
-      #
-      # @note This API is to be used only from the Runner thread context
-      def pause
-        raise Errors::InvalidListenerPauseError if paused?
-
-        @paused = true
-        join
-      end
-
-      # @return [Boolean] true if not paused
+      # @return [Boolean] is this listener active (not stopped and not pending)
       def active?
-        !paused?
+        @status.active?
       end
 
-      # Is listening using this listener paused
-      #
-      # @return [Boolean] true if processing has been paused
-      # @note This API is to be used only from the Runner thread context
-      def paused?
-        @paused
-      end
+      # We overwrite the state `#start` because on start we need to also start running listener in
+      # the async thread. While other state transitions happen automatically and status state
+      # change is enough, here we need to run the background threads
+      def start!
+        if stopped?
+          @client.reset
+          pending!
+        end
 
-      # Starts processing again after a pause
-      #
-      # @note This API is to be used only from the Runner thread context
-      def resume
-        raise Errors::InvalidListenerResumeError unless paused?
-
-        @paused = false
-
-        @consumer_group_coordinator.start_work(id)
-        reset
-        start
+        @status.start!
+        async_call
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
@@ -130,13 +116,16 @@ module Karafka
       #
       # @note We wrap it with a mutex exactly because of the above case of forceful shutdown
       def shutdown
-        return if @stopped
-
         @mutex.synchronize do
-          @stopped = true
+          return if stopped?
+          # Nothing to clear if it was not even running
+          return stopped! if pending?
+
           @executors.clear
           @coordinators.reset
           @client.stop
+
+          stopped!
         end
       end
 
@@ -151,6 +140,7 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far.
       def fetch_loop
+        running!
         # Run the initial events fetch to improve chances of having metrics and initial callbacks
         # triggers on start.
         #
@@ -161,7 +151,7 @@ module Karafka
         @client.events_poll(INITIAL_EVENTS_POLL_TIMEOUT)
 
         # Run the main loop as long as we are not stopping or moving into quiet mode
-        until Karafka::App.done? || @paused
+        while running?
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop',
             caller: self,
@@ -232,27 +222,11 @@ module Karafka
         # Wait until all the shutdown jobs are done
         wait_pinging(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
 
-        # Once all the work is done, we need to decrement counter of active subscription groups
-        # within this consumer group
-        @consumer_group_coordinator.finish_work(id)
+        quieted!
 
         # Wait if we're in the process of finishing started work or finished all the work and
         # just sitting and being quiet
-        wait_pinging(wait_until: -> { !(Karafka::App.quieting? || Karafka::App.quiet?) })
-
-        # We need to wait until all the work in the whole consumer group (local to the process)
-        # is done. Otherwise we may end up with locks and `Timed out LeaveGroupRequest in flight`
-        # warning notifications.
-        #
-        # In case of paused processing we do not wait on the whole coordinator group as pausing
-        # is meant to stop only listeners without assignments
-        #
-        # In case we are pausing one of subscription group listeners, we do not wait for all but
-        # we do lock for shutdown the same way as during shutdown
-        #
-        # Shutdown will also be allowed during downscaling if inactive listeners. In cases like
-        # that there is no risk of timeouts as they should have no assignments
-        wait_pinging(wait_until: -> { @consumer_group_coordinator.shutdown?(id) })
+        wait_pinging(wait_until: -> { !quiet? })
 
         # This extra ping will make sure we've refreshed the rebalance state after other instances
         # potentially shutdown. This will prevent us from closing with a dangling callback
@@ -274,8 +248,6 @@ module Karafka
         reset
 
         sleep(1) && retry
-      ensure
-        @consumer_group_coordinator.unlock
       end
 
       # Resumes processing of partitions that were paused due to an error.

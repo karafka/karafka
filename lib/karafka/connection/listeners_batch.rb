@@ -6,8 +6,6 @@ module Karafka
     class ListenersBatch
       include Enumerable
 
-      attr_reader :coordinators
-
       # @param jobs_queue [JobsQueue]
       # @return [ListenersBatch]
       def initialize(jobs_queue)
@@ -15,16 +13,9 @@ module Karafka
         # should be able to distribute work whenever any work is done in any of the listeners
         scheduler = App.config.internal.processing.scheduler_class.new(jobs_queue)
 
-        @coordinators = []
-
         @batch = App.subscription_groups.flat_map do |_consumer_group, subscription_groups|
-          consumer_group_coordinator = Connection::ConsumerGroupCoordinator.new
-
-          @coordinators << consumer_group_coordinator
-
-          consumer_group_coordinator.listeners = subscription_groups.map do |subscription_group|
+          subscription_groups.map do |subscription_group|
             Connection::Listener.new(
-              consumer_group_coordinator,
               subscription_group,
               jobs_queue,
               scheduler
@@ -39,6 +30,7 @@ module Karafka
         @batch.each(&block)
       end
 
+      # @return [Array<Listener>] active listeners
       def active
         select(&:active?)
       end

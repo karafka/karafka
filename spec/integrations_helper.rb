@@ -299,6 +299,11 @@ def start_karafka_and_wait_until(reset_status: false, &block)
   return unless reset_status
 
   Karafka::App.config.internal.status.reset!
+  # Listeners have their own state and need to be moved back to be restarted
+  Karafka::Server.listeners.each(&:pending!)
+  # Since manager is for the whole lifecycle of the process, it needs to be re-created
+  manager_class = Karafka::App.config.internal.connection.manager.class
+  Karafka::App.config.internal.connection.manager = manager_class.new
 end
 
 # Sends data to Kafka in a sync way

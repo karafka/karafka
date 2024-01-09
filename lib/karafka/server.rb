@@ -88,10 +88,10 @@ module Karafka
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
         ((timeout / 1_000) * SUPERVISION_CHECK_FACTOR).to_i.times do
-          running_listeners = listeners.active.count(&:alive?)
-          running_workers = workers.count(&:alive?)
+          all_listeners_stopped = listeners.all?(&:stopped?)
+          all_workers_stopped = workers.none?(&:alive?)
 
-          return if running_listeners.zero? && running_workers.zero?
+          return if all_listeners_stopped && all_workers_stopped
 
           sleep SUPERVISION_SLEEP
         end
@@ -110,7 +110,7 @@ module Karafka
         listeners.active.each(&:terminate)
         # We always need to shutdown clients to make sure we do not force the GC to close consumer.
         # This can cause memory leaks and crashes.
-        listeners.active.each(&:shutdown)
+        listeners.each(&:shutdown)
 
         # We also do not forcefully terminate everything when running in the embedded mode,
         # otherwise we would overwrite the shutdown process of the process that started Karafka
@@ -140,13 +140,6 @@ module Karafka
         # We don't have to safe-guard it with check states as the state transitions work only
         # in one direction
         Karafka::App.quiet!
-
-        # We need one more thread to monitor the process and move to quieted once everything
-        # is quiet and no processing is happening anymore
-        Thread.new do
-          sleep(0.1) until listeners.coordinators.all?(&:finished?)
-          Karafka::App.quieted!
-        end
       end
 
       private
