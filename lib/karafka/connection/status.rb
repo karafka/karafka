@@ -48,7 +48,7 @@ module Karafka
       # Will do nothing if it was already stopped
       def stop!
         if pending?
-          stop!
+          @status = :stopping
           stopped!
         elsif stopped?
           nil
