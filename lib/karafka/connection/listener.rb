@@ -25,8 +25,6 @@ module Karafka
 
       private_constant :INITIAL_EVENTS_POLL_TIMEOUT
 
-      attr_reader :status
-
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
       # @param scheduler [Karafka::Processing::Scheduler] scheduler we want to use
