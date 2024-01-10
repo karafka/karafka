@@ -21,10 +21,13 @@ module Karafka
             # @param min [Integer, nil] min multiplexing count or nil to set it to max, effectively
             #   disabling dynamic multiplexing
             # @param max [Integer] max multiplexing count
-            def multiplexing(min: nil, max: 1)
+            # @param boot [Integer] how many listeners should we start during boot by default
+            def multiplexing(min: nil, max: 1, boot: nil)
               @target.current_subscription_group_details.merge!(
                 multiplexing_min: min || max,
-                multiplexing_max: max
+                multiplexing_max: max,
+                # Picks half of max by default as long as possible. Otherwise goes with min
+                multiplexing_boot: boot || [min, (max / 2)].max
               )
             end
           end

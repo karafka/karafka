@@ -21,6 +21,7 @@ module Karafka
             :active,
             :min,
             :max,
+            :boot,
             keyword_init: true
           ) do
             alias_method :active?, :active

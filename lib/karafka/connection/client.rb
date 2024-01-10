@@ -24,12 +24,7 @@ module Karafka
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
-      # We want to make sure we never close several clients in the same moment to prevent
-      # potential race conditions and other issues. librdkafka has a tendency to lock itself when
-      # several consumers are closed at the same time
-      SHUTDOWN_MUTEX = Mutex.new
-
-      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX
+      private_constant :MAX_POLL_RETRIES
 
       # Creates a new consumer instance.
       #
@@ -250,11 +245,21 @@ module Karafka
       end
 
       # Gracefully stops topic consumption.
-      #
-      # @note Stopping running consumers without a really important reason is not recommended
-      #   as until all the consumers are stopped, the server will keep running serving only
-      #   part of the messages
       def stop
+        # In case of cooperative-sticky, there is a bug in librdkafka that may hang it.
+        # To mitigate it we first need to unsubscribe so we will not receive any assignments and
+        # only then we should be good to go.
+        # @see https://github.com/confluentinc/librdkafka/issues/4527
+        if @subscription_group.kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
+          unsubscribe
+
+          until assignment.empty?
+            sleep(0.1)
+
+            ping
+          end
+        end
+
         close
       end
 
@@ -431,29 +436,24 @@ module Karafka
 
       # Commits the stored offsets in a sync way and closes the consumer.
       def close
-        p 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu'
+        # Once client is closed, we should not close it again
+        # This could only happen in case of a race-condition when forceful shutdown happens
+        # and triggers this from a different thread
+        return if @closed
 
-        SHUTDOWN_MUTEX.synchronize do
-          # Once client is closed, we should not close it again
-          # This could only happen in case of a race-condition when forceful shutdown happens
-          # and triggers this from a different thread
-          return if @closed
+        @closed = true
 
-          @closed = true
+        return unless @kafka
 
-          return unless @kafka
+        # Remove callbacks runners that were registered
+        ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
+        ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
-          # Remove callbacks runners that were registered
-          ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
-          ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
-
-          p 'stopping'
-          kafka.close
-          @kafka = nil
-          @buffer.clear
-          # @note We do not clear rebalance manager here as we may still have revocation info
-          # here that we want to consider valid prior to running another reconnection
-        end
+        kafka.close
+        @kafka = nil
+        @buffer.clear
+        # @note We do not clear rebalance manager here as we may still have revocation info
+        # here that we want to consider valid prior to running another reconnection
       end
 
       # Unsubscribes from all the subscriptions

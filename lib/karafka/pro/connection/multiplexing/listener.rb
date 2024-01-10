@@ -24,6 +24,9 @@ module Karafka
             @manager = App.config.internal.connection.manager
           end
 
+          # Triggers connection manage subscription groups details noticing
+          #
+          # @param event [Karafka::Core::Monitoring::Event] event with statistics
           def on_statistics_emitted(event)
             @manager.notice(
               event[:subscription_group_id],

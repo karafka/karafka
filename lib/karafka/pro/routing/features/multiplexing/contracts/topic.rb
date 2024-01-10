@@ -35,20 +35,57 @@ module Karafka
               nested(:subscription_group_details) do
                 optional(:multiplexing_min) { |val| val.is_a?(Integer) && val >= 1 }
                 optional(:multiplexing_max) { |val| val.is_a?(Integer) && val >= 1 }
+                optional(:multiplexing_boot) { |val| val.is_a?(Integer) && val >= 1 }
               end
 
+              # Makes sure min is not more than max
               virtual do |data, errors|
                 next unless errors.empty?
+                next unless min(data)
+                next unless max(data)
 
-                next unless data[:subscription_group_details].key?(:multiplexing_min)
-                next unless data[:subscription_group_details].key?(:multiplexing_max)
-
-                min = data[:subscription_group_details][:multiplexing_min]
-                max = data[:subscription_group_details][:multiplexing_max]
+                min = min(data)
+                max = max(data)
 
                 next if min <= max
 
                 [[%w[subscription_group_details], :multiplexing_min_max_mismatch]]
+              end
+
+              # Makes sure that boot is between min and max
+              virtual do |data, errors|
+                next unless errors.empty?
+                next unless min(data)
+                next unless max(data)
+                next unless boot(data)
+
+                min = min(data)
+                max = max(data)
+                boot = boot(data)
+
+                next if boot >= min && boot <= max
+
+                [[%w[subscription_group_details], :multiplexing_boot_mismatch]]
+              end
+
+              class << self
+                # @param data [Hash] topic details
+                # @return [Integer, false] min or false if missing
+                def min(data)
+                  data[:subscription_group_details].fetch(:multiplexing_min, false)
+                end
+
+                # @param data [Hash] topic details
+                # @return [Integer, false] max or false if missing
+                def max(data)
+                  data[:subscription_group_details].fetch(:multiplexing_max, false)
+                end
+
+                # @param data [Hash] topic details
+                # @return [Integer, false] boot or false if missing
+                def boot(data)
+                  data[:subscription_group_details].fetch(:multiplexing_boot, false)
+                end
               end
             end
           end

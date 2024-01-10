@@ -23,9 +23,10 @@ module Karafka
               @multiplexing ||= begin
                 max = @details.fetch(:multiplexing_max, 1)
                 min = @details.fetch(:multiplexing_min, max)
+                boot = @details.fetch(:multiplexing_boot, max / 2)
                 active = max > 1
 
-                Config.new(active: active, min: min, max: max)
+                Config.new(active: active, min: min, max: max, boot: boot)
               end
             end
 

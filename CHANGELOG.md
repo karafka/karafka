@@ -6,7 +6,7 @@
 - **[Feature]** Periodic Jobs (Pro)
 - **[Feature]** Offset Metadata storage (Pro)
 - **[Feature]** Provide low-level listeners management API for dynamic resources scaling (Pro)
-- [Enhancement] Improve shutdown process.
+- [Enhancement] Improve shutdown process by allowing for parallel connections shutdown.
 - [Enhancement] Introduce `non_blocking` routing API that aliases LRJ to indicate a different use-case for LRJ flow approach.
 - [Enhancement] Allow to reset offset when seeking backwards by using the `reset_offset` keyword attribute set to `true`.
 - [Enhancement] Alias producer operations in consumer to skip `#producer` reference.
