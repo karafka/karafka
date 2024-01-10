@@ -60,7 +60,9 @@ module Karafka
         def register(listeners)
           @listeners = listeners
 
-          in_sg_families do |multiplexing, sg_listeners|
+          in_sg_families do |first_subscription_group, sg_listeners|
+            multiplexing = first_subscription_group.multiplexing
+
             if multiplexing.active? && multiplexing.dynamic?
               # Start as many boot listeners as user wants. If not configured, starts half of max.
               sg_listeners.first(multiplexing.boot).each(&:start!)
@@ -146,16 +148,16 @@ module Karafka
 
           # Since separate subscription groups are subscribed to different topics, there is no risk
           # in shutting them down independently even if they operate in the same subscription group
-          in_sg_families do |subscription_group, sg_listeners|
+          in_sg_families do |first_subscription_group, sg_listeners|
             active_sg_listeners = sg_listeners.select(&:active?)
 
             # Do nothing until all listeners from the same consumer group are quiet. Otherwise we
             # could have problems with in-flight rebalances during shutdown
             next unless active_sg_listeners.all?(&:quiet?)
-            # Do not stop the same sg twice
-            next if @stopped_subscription_groups.include?(subscription_group)
+            # Do not stop the same family twice
+            next if @stopped_subscription_groups.include?(first_subscription_group.name)
 
-            @stopped_subscription_groups << subscription_group
+            @stopped_subscription_groups << first_subscription_group.name
 
             active_sg_listeners.each(&:stop!)
           end
@@ -187,11 +189,10 @@ module Karafka
           sgs_in_use = Karafka::App.assignments.keys.map(&:subscription_group).uniq
 
           # Select connections for scaling down
-          in_sg_families do |sg_listeners|
+          in_sg_families do |first_subscription_group, sg_listeners|
             next unless stable?(sg_listeners)
 
-            subscription_group = sg_listeners.first.subscription_group
-            multiplexing = subscription_group.multiplexing
+            multiplexing = first_subscription_group.multiplexing
 
             next unless multiplexing.active?
             next unless multiplexing.dynamic?
@@ -226,11 +227,10 @@ module Karafka
                                     .uniq
 
           # Select connections for scaling up
-          in_sg_families do |sg_listeners|
+          in_sg_families do |first_subscription_group, sg_listeners|
             next unless stable?(sg_listeners)
 
-            subscription_group = sg_listeners.first.subscription_group
-            multiplexing = subscription_group.multiplexing
+            multiplexing = first_subscription_group.multiplexing
 
             next unless multiplexing.active?
             next unless multiplexing.dynamic?
@@ -286,13 +286,21 @@ module Karafka
           end
         end
 
-        # Yields listeners in groups based on their subscription groups with multiplexing settings
-        # @param block [Proc] code we want to run on each family
+        # Yields listeners in groups based on their subscription groups
+        # @yieldparam [Karafka::Routing::SubscriptionGroup] first subscription group out of the
+        #   family
         # @yieldparam [Array<Listener>] listeners of a single subscription group
-        def in_sg_families(&block)
-          @listeners
-            .group_by { |listener| listener.subscription_group.name }
-            .each_value(&block)
+        def in_sg_families
+          grouped = @listeners.group_by { |listener| listener.subscription_group.name }
+
+          grouped.each_value do |listeners|
+            listener = listeners.first
+
+            yield(
+              listener.subscription_group,
+              listeners
+            )
+          end
         end
       end
     end

@@ -27,7 +27,7 @@ module Karafka
                 multiplexing_min: min || max,
                 multiplexing_max: max,
                 # Picks half of max by default as long as possible. Otherwise goes with min
-                multiplexing_boot: boot || [min, (max / 2)].max
+                multiplexing_boot: boot || [min || max, (max / 2)].max
               )
             end
           end
