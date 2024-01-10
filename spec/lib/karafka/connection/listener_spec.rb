@@ -14,13 +14,15 @@ RSpec.describe_current do
   let(:scheduler) { Karafka::Processing::Schedulers::Default.new(jobs_queue) }
   let(:client) { Karafka::Connection::Client.new(subscription_group) }
   let(:routing_topic) { build(:routing_topic) }
+  let(:status) { Karafka::Connection::Status.new }
 
   before do
+    allow(status.class).to receive(:new).and_return(status)
     allow(client.class).to receive(:new).and_return(client)
     allow(client).to receive(:batch_poll).and_return([])
     allow(client).to receive(:ping)
-    allow(listener.status).to receive(:running?).and_return(true, false)
-    allow(listener.status).to receive(:quiet?).and_return(true, false)
+    allow(status).to receive(:running?).and_return(true, false)
+    allow(status).to receive(:quiet?).and_return(true, false)
   end
 
   after { client.stop }

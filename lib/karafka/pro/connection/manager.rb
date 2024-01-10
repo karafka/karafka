@@ -187,7 +187,7 @@ module Karafka
           sgs_in_use = Karafka::App.assignments.keys.map(&:subscription_group).uniq
 
           # Select connections for scaling down
-          in_sg_families do |subscription_group_name, sg_listeners|
+          in_sg_families do |sg_listeners|
             next unless stable?(sg_listeners)
 
             subscription_group = sg_listeners.first.subscription_group
@@ -226,7 +226,7 @@ module Karafka
                                     .uniq
 
           # Select connections for scaling up
-          in_sg_families do |subscription_group_name, sg_listeners|
+          in_sg_families do |sg_listeners|
             next unless stable?(sg_listeners)
 
             subscription_group = sg_listeners.first.subscription_group
@@ -287,19 +287,12 @@ module Karafka
         end
 
         # Yields listeners in groups based on their subscription groups with multiplexing settings
-        # @yieldparam [Karafka::Pro::Routing::Features::Multiplexing::Config]
+        # @param block [Proc] code we want to run on each family
         # @yieldparam [Array<Listener>] listeners of a single subscription group
-        def in_sg_families
-          grouped = @listeners.group_by { |listener| listener.subscription_group.name }
-
-          grouped.each_value do |listeners|
-            listener = listeners.first
-
-            yield(
-              listener.subscription_group.multiplexing,
-              listeners
-            )
-          end
+        def in_sg_families(&block)
+          @listeners
+            .group_by { |listener| listener.subscription_group.name }
+            .each_value(&block)
         end
       end
     end
