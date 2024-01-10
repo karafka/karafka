@@ -82,4 +82,22 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#reset!' do
+    context 'when trying to reset from active' do
+      before { status_manager.running! }
+
+      it 'expect not to change' do
+        expect { status_manager.reset! }.not_to change(status_manager, :running?)
+      end
+    end
+
+    context 'when trying to reset from stopped' do
+      before { status_manager.stopped! }
+
+      it 'expect to change' do
+        expect { status_manager.reset! }.to change(status_manager, :pending?).from(false).to(true)
+      end
+    end
+  end
 end
