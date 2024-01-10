@@ -9,7 +9,10 @@ RSpec.describe_current do
     let(:client_id) { SecureRandom.hex(6) }
     let(:start_nr) { client.name.split('-').last.to_i }
 
-    before { Karafka::App.config.client_id = client_id }
+    before do
+      Karafka::App.config.client_id = client_id
+      client.send(:kafka)
+    end
 
     after { client.stop }
 
@@ -18,9 +21,11 @@ RSpec.describe_current do
     it 'expect to give it proper names within the lifecycle' do
       expect(client.name).to eq("#{Karafka::App.config.client_id}#consumer-#{start_nr}")
       client.reset
+      client.send(:kafka)
       expect(client.name).to eq("#{Karafka::App.config.client_id}#consumer-#{start_nr + 1}")
       client.stop
-      expect(client.name).to eq("#{Karafka::App.config.client_id}#consumer-#{start_nr + 1}")
+      client.send(:kafka)
+      expect(client.name).to eq("#{Karafka::App.config.client_id}#consumer-#{start_nr + 2}")
     end
   end
 end

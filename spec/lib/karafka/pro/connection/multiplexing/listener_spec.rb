@@ -4,24 +4,17 @@ RSpec.describe_current do
   subject(:listener) { described_class.new }
 
   let(:manager) { Karafka::App.config.internal.connection.manager }
-  let(:consumer_group_id) { SecureRandom.uuid }
-  let(:event) { { consumer_group_id: consumer_group_id } }
+  let(:subscription_group_id) { SecureRandom.uuid }
+  let(:event) { { subscription_group_id: subscription_group_id, statistics: statistics } }
+  let(:statistics) { { rand => rand } }
 
   before { allow(manager).to receive(:notice) }
 
-  describe '#on_rebalance_partitions_assigned' do
+  describe '#on_statistics_emitted' do
     it 'expect to be noticed' do
-      listener.on_rebalance_partitions_assigned(event)
+      listener.on_statistics_emitted(event)
 
-      expect(manager).to have_received(:notice).with(consumer_group_id)
-    end
-  end
-
-  describe '#on_rebalance_partitions_revoked' do
-    it 'expect to be noticed' do
-      listener.on_rebalance_partitions_revoked(event)
-
-      expect(manager).to have_received(:notice).with(consumer_group_id)
+      expect(manager).to have_received(:notice).with(subscription_group_id, statistics)
     end
   end
 end

@@ -7,13 +7,15 @@ RSpec.describe_current do
     {
       subscription_group_details: {
         multiplexing_min: min,
-        multiplexing_max: max
+        multiplexing_max: max,
+        multiplexing_boot: boot
       }
     }
   end
 
   let(:min) { 1 }
   let(:max) { 1 }
+  let(:boot) { 1 }
 
   context 'when config is valid' do
     it { expect(check).to be_success }
