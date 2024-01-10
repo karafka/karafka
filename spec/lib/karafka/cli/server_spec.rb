@@ -20,6 +20,12 @@ RSpec.describe_current do
 
   describe '#print_marketing_info' do
     it { expect { server_cli.send(:print_marketing_info) }.not_to raise_error }
+
+    context 'when in pro' do
+      before { allow(Karafka).to receive(:pro?).and_return(true) }
+
+      it { expect { server_cli.send(:print_marketing_info) }.not_to raise_error }
+    end
   end
 
   describe '#names' do

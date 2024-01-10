@@ -39,4 +39,26 @@ RSpec.describe_current do
 
     it { expect(check).not_to be_success }
   end
+
+  context 'when boot is below 1' do
+    let(:boot) { 0 }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when boot is less than min' do
+    let(:max) { 10 }
+    let(:min) { 7 }
+    let(:boot) { 2 }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when boot is more than max' do
+    let(:max) { 10 }
+    let(:min) { 7 }
+    let(:boot) { 22 }
+
+    it { expect(check).not_to be_success }
+  end
 end

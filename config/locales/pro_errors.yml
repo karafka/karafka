@@ -53,6 +53,7 @@ en:
       subscription_group_details.multiplexing_max_format: 'needs to be an integer equal or more than 1'
       subscription_group_details_multiplexing_min_max_mismatch: 'min needs to be equal or less than max'
       subscription_group_details_multiplexing_boot_mismatch: 'boot needs to be between min and max'
+      subscription_group_details.multiplexing_boot_format: 'needs to be an integer equal or more than 1'
 
     consumer_group:
       patterns_format: must be an array with hashes

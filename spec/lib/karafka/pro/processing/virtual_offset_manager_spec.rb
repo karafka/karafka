@@ -50,6 +50,18 @@ RSpec.describe_current do
     it { expect(manager.marked).to eq(range) }
   end
 
+  context 'when trying to work with an invalid strategy' do
+    let(:offset_metadata_strategy) { :na }
+    let(:range) { (0..9).to_a }
+
+    before do
+      manager.register(range)
+      range.reverse_each { |offset| manager.mark(OpenStruct.new(offset: offset), offset.to_s) }
+    end
+
+    it { expect { manager.markable }.to raise_error(Karafka::Errors::UnsupportedCaseError) }
+  end
+
   context 'when having a reverse linear marking flow on one group except last' do
     let(:range) { (0..9).to_a }
 

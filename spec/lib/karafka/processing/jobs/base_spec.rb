@@ -13,6 +13,10 @@ RSpec.describe_current do
     it { expect { job.call }.to raise_error(NotImplementedError) }
   end
 
+  describe '#before_schedule' do
+    it { expect { job.before_schedule }.to raise_error(NotImplementedError) }
+  end
+
   describe '#finished? and #finish!' do
     it { expect(job.finished?).to eq(false) }
 
