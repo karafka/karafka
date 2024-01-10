@@ -24,18 +24,11 @@ module Karafka
             @manager = App.config.internal.connection.manager
           end
 
-          # Indicates that there was a rebalance on a given consumer group
-          #
-          # @param event [Karafka::Core::Monitoring::Event] event with listeners
-          def on_rebalance_partitions_assigned(event)
-            @manager.notice(event[:consumer_group_id])
-          end
-
-          # Indicates that there was a rebalance on a given consumer group
-          #
-          # @param event [Karafka::Core::Monitoring::Event] event with listeners
-          def on_rebalance_partitions_revoked(event)
-            @manager.notice(event[:consumer_group_id])
+          def on_statistics_emitted(event)
+            @manager.notice(
+              event[:subscription_group_id],
+              event[:statistics]
+            )
           end
         end
       end

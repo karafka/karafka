@@ -57,6 +57,14 @@ module Karafka
         end
       end
 
+      # Moves status back from stopped to pending (and only that). We should not be able to reset
+      # listeners that are not stopped
+      def reset!
+        return unless stopped?
+
+        @status = :pending
+      end
+
       # @return [Boolean] listener is considered active when it has a client reference that may
       #   be active and connected to Kafka
       def active?

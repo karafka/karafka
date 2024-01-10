@@ -29,29 +29,38 @@ module Karafka
       # @note It is important to ensure, that all listeners from the same consumer group are always
       #   all quiet before we can fully shutdown given consumer group. Skipping this can cause
       #   `Timed out LeaveGroupRequest in flight` and other errors.
+      #
+      # @note This manager works with the assumption, that all listeners are executed on register.
       def control
         # Do nothing until shutdown or quiet
         return unless Karafka::App.done?
 
         # When we are done processing immediately quiet all the listeners so they do not pick up
         # new work to do
-        @listeners.each(&:quiet!) unless @silencing
-        @silencing = true
-
-        # Switch to quieted status only when all listeners are fully quieted and do nothing after
-        # that until further state changes
-        if @listeners.all?(&:quiet?) && Karafka::App.quieting?
-          Karafka::App.quieted!
+        unless @silencing
+          @listeners.each(&:quiet!)
+          @silencing = true
 
           return
         end
+
+        # If we are in the process of moving to quiet state, we need to check it.
+        if Karafka::App.quieting?
+          # Switch to quieted status only when all listeners are fully quieted and do nothing after
+          # that until further state changes
+          return unless @listeners.all?(&:quiet?)
+
+          Karafka::App.quieted!
+        end
+
+        return if Karafka::App.quiet?
 
         @stopped_consumer_groups ||= Set.new
 
         in_cg_families do |consumer_group, cg_listeners|
           # Do nothing until all listeners from the same consumer group are quiet. Otherwise we
           # could have problems with in-flight rebalances during shutdown
-          next unless cg_listeners.all?(&:quiet?)
+          next unless @listeners.active.all?(&:quiet?)
           # Do not stop the same cg twice
           next if @stopped_consumer_groups.include?(consumer_group)
 
