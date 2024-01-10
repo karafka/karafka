@@ -35,8 +35,8 @@ module Karafka
         #
         # @param scale_delay [Integer] How long should we wait before making any changes. Any
         #   change related to this consumer group will postpone the scaling operations. This is
-        #   done that way to prevent too many friction in the cluster.
-        def initialize(scale_delay: 5 * 60 * 10.0)
+        #   done that way to prevent too many friction in the cluster. It is 1 minute by default
+        def initialize(scale_delay: 60 * 1_000)
           super()
           @scale_delay = scale_delay
           @mutex = Mutex.new
@@ -46,7 +46,7 @@ module Karafka
               join_state: '',
               state_age: 0,
               state_age_sync: monotonic_now,
-              change_age: 0
+              changed_at: monotonic_now
             }
           end
         end
@@ -90,11 +90,11 @@ module Karafka
             times << statistics['cgrp']['stateage']
 
             # Keep the previous change age for changes that were triggered by us
-            previous_change_age = @changes[subscription_group_id][:change_age]
+            previous_changed_at = @changes[subscription_group_id][:changed_at]
 
             @changes[subscription_group_id] = {
               state_age: times.min,
-              change_age: previous_change_age,
+              changed_at: previous_changed_at,
               join_state: statistics['cgrp']['join_state'],
               state: statistics['cgrp']['state'],
               state_age_sync: monotonic_now
@@ -107,7 +107,7 @@ module Karafka
         # @param subscription_group_id [String]
         def touch(subscription_group_id)
           @mutex.synchronize do
-            @changes[subscription_group_id][:change_age] = 0
+            @changes[subscription_group_id][:changed_at] = 0
             @changes[subscription_group_id][:state_age_sync] = monotonic_now
           end
         end
@@ -271,7 +271,7 @@ module Karafka
             state = @changes[sg_listener.subscription_group.id]
 
             state[:state_age] >= @scale_delay &&
-              state[:change_age] >= @scale_delay &&
+              (monotonic_now - state[:changed_at]) >= @scale_delay &&
               state[:state] == 'up' &&
               state[:join_state] == 'steady'
           end
@@ -281,7 +281,7 @@ module Karafka
         def evict
           @mutex.synchronize do
             @changes.delete_if do |_, details|
-              monotonic_now - details[:state_age_sync] >= @scale_delay
+              monotonic_now - details[:state_age_sync] >= 60 * 1_000
             end
           end
         end
