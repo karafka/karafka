@@ -59,4 +59,18 @@ RSpec.describe_current do
       it { expect(app_class.subscription_groups).to eq({}) }
     end
   end
+
+  describe '#assignments' do
+    let(:assignments) { rand }
+
+    before do
+      allow(Karafka::Instrumentation::AssignmentsTracker.instance)
+        .to receive(:current)
+        .and_return(assignments)
+    end
+
+    it 'expect to delegate to the assignments tracker' do
+      expect(app_class.assignments).to eq(assignments)
+    end
+  end
 end
