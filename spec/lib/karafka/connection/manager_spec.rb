@@ -4,13 +4,13 @@ RSpec.describe_current do
   subject(:manager) { described_class.new }
 
   let(:listener_class) { Karafka::Connection::Listener }
-  let(:listener_g1_1) { listener_class.new(subscription_group1, jobs_queue, scheduler) }
-  let(:listener_g1_2) { listener_class.new(subscription_group1, jobs_queue, scheduler) }
+  let(:listener_g11) { listener_class.new(subscription_group1, jobs_queue, scheduler) }
+  let(:listener_g12) { listener_class.new(subscription_group1, jobs_queue, scheduler) }
   let(:subscription_group1) { build(:routing_subscription_group, topics: [routing_topic]) }
-  let(:listener_g2_1) { listener_class.new(subscription_group2, jobs_queue, scheduler) }
-  let(:listener_g2_2) { listener_class.new(subscription_group2, jobs_queue, scheduler) }
+  let(:listener_g21) { listener_class.new(subscription_group2, jobs_queue, scheduler) }
+  let(:listener_g22) { listener_class.new(subscription_group2, jobs_queue, scheduler) }
   let(:subscription_group2) { build(:routing_subscription_group, topics: [routing_topic]) }
-  let(:listeners) { [listener_g1_1, listener_g1_2, listener_g2_1, listener_g2_2] }
+  let(:listeners) { [listener_g11, listener_g12, listener_g21, listener_g22] }
   let(:routing_topic) { build(:routing_topic) }
   let(:status) { Karafka::Connection::Status.new }
 
@@ -19,7 +19,7 @@ RSpec.describe_current do
   let(:app) { Karafka::App }
 
   before do
-    Karafka::Connection::Status::STATES.each do |state, transition|
+    Karafka::Connection::Status::STATES.each_value do |transition|
       listeners.each do |listener|
         allow(listener).to receive(transition).and_call_original
         allow(listener).to receive(:"#{transition}?").and_call_original
@@ -136,7 +136,7 @@ RSpec.describe_current do
       it 'expect to do nothing' do
         manager.control
 
-        expect { listeners }.not_to change { listeners.all?(&:quieting?) }
+        expect { listeners }.not_to(change { listeners.all?(&:quieting?) })
       end
     end
   end
