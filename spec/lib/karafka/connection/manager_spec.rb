@@ -33,7 +33,7 @@ RSpec.describe_current do
     it 'expect to start all listeners' do
       manager.register(listeners)
 
-      listeners.each { |listener| expect(listener).to have_received(:start!) }
+      expect(listeners).to all have_received(:start!)
     end
   end
 
