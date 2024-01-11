@@ -125,10 +125,6 @@ module Karafka
 
           # If we are in the process of moving to quiet state, we need to check it.
           if Karafka::App.quieting? && active_listeners.all?(&:quiet?)
-            # Switch to quieted status only when all listeners are fully quieted and do nothing
-            # after that until further state changes
-            return unless active_listeners.all?(&:quiet?)
-
             once(:quieted!) { Karafka::App.quieted! }
           end
 

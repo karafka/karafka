@@ -12,10 +12,14 @@ RSpec.describe_current do
   let(:listener_g21) { listener_class.new(subscription_group2, jobs_queue, scheduler) }
   let(:listener_g22) { listener_class.new(subscription_group2, jobs_queue, scheduler) }
   let(:subscription_group2) { build(:routing_subscription_group, topics: [routing_topic2]) }
-  let(:listeners) { [listener_g11, listener_g12, listener_g21, listener_g22] }
   let(:routing_topic1) { build(:routing_topic) }
   let(:routing_topic2) { build(:routing_topic) }
   let(:status) { Karafka::Connection::Status.new }
+  let(:listeners) do
+    batch = Karafka::Connection::ListenersBatch.new(nil)
+    batch.instance_variable_set(:@batch, [listener_g11, listener_g12, listener_g21, listener_g22])
+    batch
+  end
 
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:scheduler) { Karafka::Processing::Schedulers::Default.new(jobs_queue) }
@@ -100,7 +104,7 @@ RSpec.describe_current do
   end
 
   describe '#control' do
-    before { allow(Karafka::App).to receive(:done?).and_return(done) }
+    before { allow(app).to receive(:done?).and_return(done) }
 
     context 'when processing is done' do
       let(:done) { true }
@@ -119,6 +123,66 @@ RSpec.describe_current do
         allow(manager).to receive(:rescale)
         manager.control
         expect(manager).to have_received(:rescale)
+      end
+    end
+  end
+
+  describe '#shutdown' do
+    let(:quiet) { false }
+
+    before do
+      listener_g11.running!
+      listener_g21.running!
+
+      manager.register(listeners)
+      allow(app).to receive(:done?).and_return(true)
+      allow(app).to receive(:quiet?).and_return(quiet)
+    end
+
+    context 'when under quiet' do
+      before do
+        allow(app).to receive(:done?).and_return(true)
+        allow(app).to receive(:quieting?).and_return(true)
+        allow(app).to receive(:quieted!).and_return(true)
+      end
+
+      context 'when it just started' do
+        it 'expect to switch listeners to quieting' do
+          manager.control
+
+          expect(listener_g11).to have_received(:quiet!)
+          expect(listener_g21).to have_received(:quiet!)
+          expect(listener_g12).to_not have_received(:quiet!)
+          expect(listener_g22).to_not have_received(:quiet!)
+        end
+      end
+
+      context 'when not all listeners are quieted' do
+        it 'expect not to switch process to quiet' do
+          manager.control
+
+          expect(app).not_to have_received(:quieted!)
+        end
+      end
+
+      context 'when all listeners are quieted' do
+        before do
+          allow(app).to receive(:quiet?).and_return(true)
+
+          manager.control
+          listeners.each(&:quieted!)
+          manager.control
+        end
+
+        it 'expect to switch whole process to quieted' do
+          expect(app).to have_received(:quieted!)
+        end
+
+        it 'expect not to move them forward to stopping' do
+          listeners.each do |listener|
+            expect(listener).not_to have_received(:stop!)
+          end
+        end
       end
     end
   end
