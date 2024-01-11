@@ -126,25 +126,18 @@ module Karafka
 
           # When we are done processing immediately quiet all the listeners so they do not pick up
           # new work to do
-          unless @silencing
-            active_listeners.each(&:quiet!)
-            @silencing = true
-
-            return
-          end
+          once(:quiet!) { active_listeners.each(&:quiet!) }
 
           # If we are in the process of moving to quiet state, we need to check it.
-          if Karafka::App.quieting?
+          if Karafka::App.quieting? && active_listeners.all?(&:quiet?)
             # Switch to quieted status only when all listeners are fully quieted and do nothing
             # after that until further state changes
             return unless active_listeners.all?(&:quiet?)
 
-            Karafka::App.quieted!
+            once(:quieted!) { Karafka::App.quieted! }
           end
 
           return if Karafka::App.quiet?
-
-          @stopped_subscription_groups ||= Set.new
 
           # Since separate subscription groups are subscribed to different topics, there is no risk
           # in shutting them down independently even if they operate in the same subscription group
@@ -154,19 +147,16 @@ module Karafka
             # Do nothing until all listeners from the same consumer group are quiet. Otherwise we
             # could have problems with in-flight rebalances during shutdown
             next unless active_sg_listeners.all?(&:quiet?)
+
             # Do not stop the same family twice
-            next if @stopped_subscription_groups.include?(first_subscription_group.name)
-
-            @stopped_subscription_groups << first_subscription_group.name
-
-            active_sg_listeners.each(&:stop!)
+            once(:stop!, first_subscription_group.name) { active_sg_listeners.each(&:stop!) }
           end
 
           return unless @listeners.active.all?(&:stopped?)
 
           # All listeners including pending need to be moved at the end to stopped state for
           # the whole server to stop
-          @listeners.each(&:stop!)
+          once(:stop!) { @listeners.each(&:stop!) }
         end
 
         # Handles two scenarios:

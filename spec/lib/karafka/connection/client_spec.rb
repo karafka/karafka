@@ -28,4 +28,34 @@ RSpec.describe_current do
       expect(client.name).to eq("#{Karafka::App.config.client_id}#consumer-#{start_nr + 2}")
     end
   end
+
+  describe '#assignment' do
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+
+    before do
+      allow(client).to receive(:kafka).and_return(kafka)
+      allow(kafka).to receive(:assignment)
+    end
+
+    it 'expect to delegate to client' do
+      client.assignment
+
+      expect(kafka).to have_received(:assignment)
+    end
+  end
+
+  describe '#assignment_lost?' do
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+
+    before do
+      allow(client).to receive(:kafka).and_return(kafka)
+      allow(kafka).to receive(:assignment_lost?)
+    end
+
+    it 'expect to delegate to client' do
+      client.assignment_lost?
+
+      expect(kafka).to have_received(:assignment_lost?)
+    end
+  end
 end
