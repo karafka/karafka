@@ -31,12 +31,17 @@ module Karafka
       class Manager < Karafka::Connection::Manager
         include Core::Helpers::Time
 
+        # How long should we keep stale stats before evicting them completely
+        EVICTION_DELAY = 5 * 60 * 1_000
+
+        private_constant :EVICTION_DELAY
+
         # How long should we wait after a rebalance before doing anything on a consumer group
         #
         # @param scale_delay [Integer] How long should we wait before making any changes. Any
         #   change related to this consumer group will postpone the scaling operations. This is
         #   done that way to prevent too many friction in the cluster. It is 1 minute by default
-        def initialize(scale_delay: 60 * 1_000)
+        def initialize(scale_delay = 60 * 1_000)
           super()
           @scale_delay = scale_delay
           @mutex = Mutex.new
@@ -271,7 +276,7 @@ module Karafka
         def evict
           @mutex.synchronize do
             @changes.delete_if do |_, details|
-              monotonic_now - details[:state_age_sync] >= 60 * 1_000
+              monotonic_now - details[:state_age_sync] >= EVICTION_DELAY
             end
           end
         end
