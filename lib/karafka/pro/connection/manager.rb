@@ -107,16 +107,6 @@ module Karafka
           end
         end
 
-        # Indicates, that something has changed on a subscription group. We consider every single
-        # change we make as a change to the setup as well.
-        # @param subscription_group_id [String]
-        def touch(subscription_group_id)
-          @mutex.synchronize do
-            @changes[subscription_group_id][:changed_at] = 0
-            @changes[subscription_group_id][:state_age_sync] = monotonic_now
-          end
-        end
-
         # Shuts down all the listeners when it is time (including moving to quiet) or rescales
         # when it is needed
         def control
@@ -245,6 +235,25 @@ module Karafka
           end
         end
 
+        # Removes states that are no longer being reported for stopped/pending listeners
+        def evict
+          @mutex.synchronize do
+            @changes.delete_if do |_, details|
+              monotonic_now - details[:state_age_sync] >= EVICTION_DELAY
+            end
+          end
+        end
+
+        # Indicates, that something has changed on a subscription group. We consider every single
+        # change we make as a change to the setup as well.
+        # @param subscription_group_id [String]
+        def touch(subscription_group_id)
+          @mutex.synchronize do
+            @changes[subscription_group_id][:changed_at] = 0
+            @changes[subscription_group_id][:state_age_sync] = monotonic_now
+          end
+        end
+
         # @param sg_listeners [Array<Listener>] listeners from one multiplexed sg
         # @return [Boolean] is given subscription group listeners set stable. It is considered
         #   stable when it had no changes happening on it recently and all relevant states in it
@@ -269,15 +278,6 @@ module Karafka
               (monotonic_now - state[:changed_at]) >= @scale_delay &&
               state[:state] == 'up' &&
               state[:join_state] == 'steady'
-          end
-        end
-
-        # Removes states that are no longer being reported for stopped/pending listeners
-        def evict
-          @mutex.synchronize do
-            @changes.delete_if do |_, details|
-              monotonic_now - details[:state_age_sync] >= EVICTION_DELAY
-            end
           end
         end
 
