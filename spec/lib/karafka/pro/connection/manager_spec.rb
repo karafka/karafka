@@ -147,14 +147,12 @@ RSpec.describe_current do
       end
 
       context 'when it just started' do
-        it 'expect to switch listeners to quieting' do
-          manager.control
+        before { manager.control }
 
-          expect(listener_g11).to have_received(:quiet!)
-          expect(listener_g21).to have_received(:quiet!)
-          expect(listener_g12).to_not have_received(:quiet!)
-          expect(listener_g22).to_not have_received(:quiet!)
-        end
+        it { expect(listener_g11).to have_received(:quiet!) }
+        it { expect(listener_g21).to have_received(:quiet!) }
+        it { expect(listener_g12).not_to have_received(:quiet!) }
+        it { expect(listener_g22).not_to have_received(:quiet!) }
       end
 
       context 'when not all listeners are quieted' do
