@@ -70,11 +70,18 @@ module Karafka
 
           private
 
-          # @return [Array<Class>] all available routing features
+          # @return [Array<Class>] all available routing features that are direct descendants of
+          #   the features base.Approach with using `#superclass` prevents us from accidentally
+          #   loading Pro components
           def features
             ObjectSpace
               .each_object(Class)
               .select { |klass| klass < self }
+              # Ensures, that Pro components are only loaded when we operate in Pro mode. Since
+              # outside of specs Zeitwerk does not require them at all, they will not be loaded
+              # anyhow, but for specs this needs to be done as RSpec requires all files to be
+              # present
+              .reject { |klass| Karafka.pro? ? false : klass.superclass != self }
               .sort_by(&:to_s)
           end
 

@@ -29,6 +29,26 @@ RSpec.describe_current do
     it { expect(topic.consumer).to eq(topic.consumer_class) }
   end
 
+  describe '#consumer' do
+    context 'when persistence is turned on' do
+      it { expect(topic.consumer).to eq(topic.consumer_class) }
+    end
+
+    context 'when persistence is off' do
+      before { topic.consumer_persistence = false }
+
+      it { expect(topic.consumer).to eq(topic.consumer_class) }
+
+      context 'when given class cannot be found' do
+        before { topic.consumer = 'Na' }
+
+        it 'expect to return the consumer as it is expected to be an anonymous class' do
+          expect(topic.consumer).to eq(topic.consumer_class)
+        end
+      end
+    end
+  end
+
   describe '#deserializer=' do
     let(:deserializer) { double }
 
