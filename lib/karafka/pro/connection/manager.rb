@@ -177,6 +177,7 @@ module Karafka
 
             next unless multiplexing.active?
             next unless multiplexing.dynamic?
+
             # If we cannot downscale, do not
             next if sg_listeners.count(&:active?) <= multiplexing.min
 

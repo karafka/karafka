@@ -3,27 +3,42 @@
 RSpec.describe_current do
   include Karafka::Core::Helpers::Time
 
-  subject(:manager) { described_class.new }
+  subject(:manager) { described_class.new(0) }
 
+  let(:statistics) { JSON.parse(fixture_file('statistics.json')) }
   let(:listener_class) { Karafka::Connection::Listener }
-  let(:listener_g11) { listener_class.new(subscription_group1, jobs_queue, scheduler) }
-  let(:listener_g12) { listener_class.new(subscription_group1, jobs_queue, scheduler) }
-  let(:subscription_group1) { build(:routing_subscription_group, topics: [routing_topic1]) }
-  let(:listener_g21) { listener_class.new(subscription_group2, jobs_queue, scheduler) }
-  let(:listener_g22) { listener_class.new(subscription_group2, jobs_queue, scheduler) }
-  let(:subscription_group2) { build(:routing_subscription_group, topics: [routing_topic2]) }
+  let(:listener_g11) { listener_class.new(subscription_group1, jobs_queue, nil) }
+  let(:listener_g12) { listener_class.new(subscription_group2, jobs_queue, nil) }
+  let(:listener_g21) { listener_class.new(subscription_group3, jobs_queue, nil) }
+  let(:listener_g22) { listener_class.new(subscription_group4, jobs_queue, nil) }
   let(:routing_topic1) { build(:routing_topic) }
   let(:routing_topic2) { build(:routing_topic) }
-  let(:status) { Karafka::Connection::Status.new }
+  let(:routing_topic3) { build(:routing_topic) }
+  let(:routing_topic4) { build(:routing_topic) }
+  let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
+  let(:app) { Karafka::App }
+
+  let(:subscription_group1) do
+    build(:routing_subscription_group, name: 'g1', topics: [routing_topic1])
+  end
+
+  let(:subscription_group2) do
+    build(:routing_subscription_group, name: 'g1', topics: [routing_topic2])
+  end
+
+  let(:subscription_group3) do
+    build(:routing_subscription_group, name: 'g2', topics: [routing_topic3])
+  end
+
+  let(:subscription_group4) do
+    build(:routing_subscription_group, name: 'g2', topics: [routing_topic4])
+  end
+
   let(:listeners) do
     batch = Karafka::Connection::ListenersBatch.new(nil)
     batch.instance_variable_set(:@batch, [listener_g11, listener_g12, listener_g21, listener_g22])
     batch
   end
-
-  let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
-  let(:scheduler) { Karafka::Processing::Schedulers::Default.new(jobs_queue) }
-  let(:app) { Karafka::App }
 
   before do
     Karafka::Connection::Status::STATES.each_value do |transition|
@@ -81,7 +96,6 @@ RSpec.describe_current do
   end
 
   describe '#notice' do
-    let(:statistics) { JSON.parse(fixture_file('statistics.json')) }
     let(:changes) { manager.instance_variable_get(:@changes) }
     let(:details) { changes.values.first }
 
@@ -252,14 +266,67 @@ RSpec.describe_current do
       allow(app).to receive(:assignments).and_return(assignments)
       allow(manager).to receive(:scale_up)
       manager.register(listeners)
+      manager.notice(routing_topic1.subscription_group.id, statistics)
     end
 
-    context 'when no consumer groups are stable' do
+    context 'when there are no assignments' do
       before { manager.control }
 
       it do
         listeners.each do |listener|
           expect(listener).not_to have_received(:stop!)
+        end
+      end
+    end
+
+    context 'when there are assignments that are maxed out and active but one with partition' do
+      let(:assignments) { { routing_topic1 => [0] } }
+
+      context 'when multiplexing is off for this group' do
+        before do
+          subscription_group1.multiplexing.active = false
+          manager.control
+        end
+
+        it 'expect not to downscale' do
+          listeners.each do |listener|
+            expect(listener).not_to have_received(:stop!)
+          end
+        end
+      end
+
+      context 'when multiplexing is on but not in dynamic mode' do
+        before do
+          subscription_group1.multiplexing.active = true
+          subscription_group1.multiplexing.min = 5
+          subscription_group1.multiplexing.max = 5
+          manager.control
+        end
+
+        it 'expect not to downscale' do
+          listeners.each do |listener|
+            expect(listener).not_to have_received(:stop!)
+          end
+        end
+      end
+
+      context 'when multiplexing is on and in a dynamic mode and we could downscale' do
+        before do
+          subscription_group1.multiplexing.active = true
+          subscription_group1.multiplexing.min = 1
+          subscription_group1.multiplexing.max = 5
+          listeners.each(&:running!)
+          manager.control
+        end
+
+        it 'expect to downscale one listener out of stable group' do
+          listeners.each.with_index do |listener, i|
+            if i == 1
+              expect(listener).to have_received(:stop!)
+            else
+              expect(listener).not_to have_received(:stop!)
+            end
+          end
         end
       end
     end
