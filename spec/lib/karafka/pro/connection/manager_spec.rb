@@ -183,5 +183,85 @@ RSpec.describe_current do
         end
       end
     end
+
+    context 'when stopping' do
+      before do
+        allow(app).to receive(:done?).and_return(true)
+        allow(app).to receive(:quieting?).and_return(true)
+        allow(app).to receive(:quieted!).and_return(true)
+        allow(app).to receive(:quiet?).and_return(false)
+      end
+
+      context 'when it just started' do
+        before { manager.control }
+
+        it { expect(listener_g11).to have_received(:quiet!) }
+        it { expect(listener_g21).to have_received(:quiet!) }
+        it { expect(listener_g12).not_to have_received(:quiet!) }
+        it { expect(listener_g22).not_to have_received(:quiet!) }
+      end
+
+      context 'when not all listeners are quieted' do
+        it 'expect not to switch process to quiet' do
+          manager.control
+
+          expect(app).not_to have_received(:quieted!)
+        end
+      end
+
+      context 'when all listeners are quieted' do
+        before do
+          allow(app).to receive(:quiet?).and_return(false)
+
+          manager.control
+          listeners.each(&:quieted!)
+          manager.control
+        end
+
+        it 'expect to switch whole process to quieted' do
+          expect(app).to have_received(:quieted!)
+        end
+
+        it 'expect to move them forward to stopping' do
+          expect(listeners).to all have_received(:stop!)
+        end
+      end
+
+      context 'when all listeners are stopped' do
+        before do
+          allow(app).to receive(:quiet?).and_return(false)
+
+          manager.control
+          listeners.each(&:stopped!)
+          manager.control
+        end
+
+        it 'expect to move them forward to stopping' do
+          expect(listeners).to all have_received(:stopped!).twice
+        end
+      end
+    end
+  end
+
+  describe '#scale_down' do
+    let(:done) { false }
+    let(:assignments) { {} }
+
+    # Ignore scale up scenario completely in this scope
+    before do
+      allow(app).to receive(:assignments).and_return(assignments)
+      allow(manager).to receive(:scale_up)
+      manager.register(listeners)
+    end
+
+    context 'when no consumer groups are stable' do
+      before { manager.control }
+
+      it do
+        listeners.each do |listener|
+          expect(listener).not_to have_received(:stop!)
+        end
+      end
+    end
   end
 end

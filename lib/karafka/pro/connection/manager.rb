@@ -147,7 +147,7 @@ module Karafka
 
           # All listeners including pending need to be moved at the end to stopped state for
           # the whole server to stop
-          once(:stop!) { @listeners.each(&:stop!) }
+          once(:stop!) { @listeners.each(&:stopped!) }
         end
 
         # Handles two scenarios:
