@@ -331,4 +331,76 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#scale_up' do
+    let(:done) { false }
+    let(:assignments) { {} }
+
+    # Ignore scale down scenario completely in this scope
+    before do
+      allow(app).to receive(:assignments).and_return(assignments)
+      allow(manager).to receive(:scale_down)
+      manager.register(listeners)
+      manager.notice(routing_topic1.subscription_group.id, statistics)
+    end
+
+    context 'when there are no assignments' do
+      before { manager.control }
+
+      it do
+        listeners.each do |listener|
+          expect(listener).not_to have_received(:stop!)
+        end
+      end
+    end
+
+    context 'when there are assignments that are maxed out and active with many partitions' do
+      let(:assignments) { { routing_topic1 => [0, 1, 2] } }
+
+      context 'when multiplexing is off for this group' do
+        before do
+          subscription_group1.multiplexing.active = false
+          manager.control
+        end
+
+        it 'expect not to upscale' do
+          expect(listeners).to all have_received(:start!).once
+        end
+      end
+
+      context 'when multiplexing is on but not in dynamic mode' do
+        before do
+          subscription_group1.multiplexing.active = true
+          subscription_group1.multiplexing.min = 5
+          subscription_group1.multiplexing.max = 5
+          manager.control
+        end
+
+        it 'expect not to upscale' do
+          expect(listeners).to all have_received(:start!).once
+        end
+      end
+
+      context 'when multiplexing is on and in a dynamic mode and we could upscale' do
+        before do
+          subscription_group1.multiplexing.active = true
+          subscription_group1.multiplexing.min = 1
+          subscription_group1.multiplexing.max = 5
+          listener_g11.running!
+          listener_g12.stopped!
+          manager.control
+        end
+
+        it 'expect to upscale one listener out of stable group' do
+          listeners.each.with_index do |listener, i|
+            if i == 1
+              expect(listener).to have_received(:start!).twice
+            else
+              expect(listener).to have_received(:start!).once
+            end
+          end
+        end
+      end
+    end
+  end
 end
