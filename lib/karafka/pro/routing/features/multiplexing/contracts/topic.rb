@@ -52,7 +52,7 @@ module Karafka
                 [[%w[subscription_group_details], :multiplexing_min_max_mismatch]]
               end
 
-              # Makes sure that boot is between min and max
+              # Makes sure, that boot is between min and max
               virtual do |data, errors|
                 next unless errors.empty?
                 next unless min(data)
@@ -66,6 +66,24 @@ module Karafka
                 next if boot >= min && boot <= max
 
                 [[%w[subscription_group_details], :multiplexing_boot_mismatch]]
+              end
+
+              # Makes sure, that boot is equal to min and max when not in dynamic mode
+              virtual do |data, errors|
+                next unless errors.empty?
+                next unless min(data)
+                next unless max(data)
+                next unless boot(data)
+
+                min = min(data)
+                max = max(data)
+                boot = boot(data)
+
+                # In dynamic mode there are other rules to check boot
+                next if min != max
+                next if boot == min
+
+                [[%w[subscription_group_details], :multiplexing_boot_not_dynamic]]
               end
 
               class << self

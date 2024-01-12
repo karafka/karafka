@@ -61,4 +61,12 @@ RSpec.describe_current do
 
     it { expect(check).not_to be_success }
   end
+
+  context 'when not in dynamic mode, boot should not be different than min and max' do
+    let(:max) { 5 }
+    let(:min) { 5 }
+    let(:boot) { 2 }
+
+    it { expect(check).not_to be_success }
+  end
 end
