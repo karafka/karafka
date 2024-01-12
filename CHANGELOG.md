@@ -19,6 +19,7 @@
 - [Fix] Fix a case where internal Idle job scheduling would go via the consumption flow.
 - [Fix] Make the Iterator `#stop_partition` work with karafka-rdkafka `0.14.6`.
 - [Fix] Ensure Pro components are not loaded during OSS specs execution (not affecting usage).
+- [Ignore] option --include-consumer-groups not working as intended after removal of "thor"
 
 ## 2.2.14 (2023-12-07)
 - **[Feature]** Provide `Karafka::Admin#delete_consumer_group` and `Karafka::Admin#seek_consumer_group`.
