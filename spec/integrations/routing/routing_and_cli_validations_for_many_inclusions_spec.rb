@@ -44,7 +44,6 @@ def redraw
   Karafka::Cli.start
 end
 
-
 # We stub the server so we don't have to start Kafka connections as it is irrelevant in this
 # particular flow of specs
 #
