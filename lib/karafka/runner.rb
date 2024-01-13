@@ -3,6 +3,11 @@
 module Karafka
   # Class used to run the Karafka listeners in separate threads
   class Runner
+    def initialize
+      @manager = App.config.internal.connection.manager
+      @conductor = App.config.internal.connection.conductor
+    end
+
     # Starts listening on all the listeners asynchronously and handles the jobs queue closing
     # after listeners are done with their work.
     def call
@@ -13,16 +18,21 @@ module Karafka
       workers = Processing::WorkersBatch.new(jobs_queue)
       listeners = Connection::ListenersBatch.new(jobs_queue)
 
+      # Register all the listeners so they can be started and managed
+      @manager.register(listeners)
+
       workers.each(&:async_call)
-      listeners.each(&:async_call)
 
       # We aggregate threads here for a supervised shutdown process
       Karafka::Server.workers = workers
       Karafka::Server.listeners = listeners
       Karafka::Server.jobs_queue = jobs_queue
 
-      # All the listener threads need to finish
-      listeners.each(&:join)
+      until @manager.done?
+        @conductor.wait
+
+        @manager.control
+      end
 
       # We close the jobs queue only when no listener threads are working.
       # This ensures, that everything was closed prior to us not accepting anymore jobs and that

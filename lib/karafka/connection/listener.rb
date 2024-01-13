@@ -7,6 +7,8 @@ module Karafka
     # critical errors by restarting everything in a safe manner.
     #
     # This is the heart of the consumption process.
+    #
+    # It provides async API for managing, so all status changes are expected to be async.
     class Listener
       include Helpers::Async
 
@@ -14,22 +16,23 @@ module Karafka
       # @return [String] id of this listener
       attr_reader :id
 
+      # @return [Karafka::Routing::SubscriptionGroup] subscription group that this listener handles
+      attr_reader :subscription_group
+
       # How long to wait in the initial events poll. Increases chances of having the initial events
       # immediately available
       INITIAL_EVENTS_POLL_TIMEOUT = 100
 
       private_constant :INITIAL_EVENTS_POLL_TIMEOUT
 
-      # @param consumer_group_coordinator [Karafka::Connection::ConsumerGroupCoordinator]
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
       # @param scheduler [Karafka::Processing::Scheduler] scheduler we want to use
       # @return [Karafka::Connection::Listener] listener instance
-      def initialize(consumer_group_coordinator, subscription_group, jobs_queue, scheduler)
+      def initialize(subscription_group, jobs_queue, scheduler)
         proc_config = ::Karafka::App.config.internal.processing
 
         @id = SecureRandom.hex(6)
-        @consumer_group_coordinator = consumer_group_coordinator
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
         @coordinators = Processing::CoordinatorsBuffer.new(subscription_group.topics)
@@ -45,7 +48,7 @@ module Karafka
         @messages_buffer = MessagesBuffer.new(subscription_group)
         @usage_tracker = TimeTrackers::PartitionUsage.new
         @mutex = Mutex.new
-        @stopped = false
+        @status = Status.new
 
         @jobs_queue.register(@subscription_group.id)
       end
@@ -63,6 +66,44 @@ module Karafka
         )
 
         fetch_loop
+
+        Karafka.monitor.instrument(
+          'connection.listener.after_fetch_loop',
+          caller: self,
+          client: @client,
+          subscription_group: @subscription_group
+        )
+      end
+
+      # Aliases all statuses operations directly on the listener so we have a listener-facing API
+      Status::STATES.each do |state, transition|
+        # @return [Boolean] is the listener in a given state
+        define_method "#{state}?" do
+          @status.public_send("#{state}?")
+        end
+
+        # Moves listener to a given state
+        define_method transition do
+          @status.public_send(transition)
+        end
+      end
+
+      # @return [Boolean] is this listener active (not stopped and not pending)
+      def active?
+        @status.active?
+      end
+
+      # We overwrite the state `#start` because on start we need to also start running listener in
+      # the async thread. While other state transitions happen automatically and status state
+      # change is enough, here we need to run the background threads
+      def start!
+        if stopped?
+          @client.reset
+          @status.reset!
+        end
+
+        @status.start!
+        async_call
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
@@ -73,13 +114,16 @@ module Karafka
       #
       # @note We wrap it with a mutex exactly because of the above case of forceful shutdown
       def shutdown
-        return if @stopped
-
         @mutex.synchronize do
-          @stopped = true
+          return if stopped?
+          # Nothing to clear if it was not even running
+          return stopped! if pending?
+
           @executors.clear
           @coordinators.reset
           @client.stop
+
+          stopped!
         end
       end
 
@@ -94,6 +138,7 @@ module Karafka
       #   Kafka connections / Internet connection issues / Etc. Business logic problems should not
       #   propagate this far.
       def fetch_loop
+        running!
         # Run the initial events fetch to improve chances of having metrics and initial callbacks
         # triggers on start.
         #
@@ -104,7 +149,7 @@ module Karafka
         @client.events_poll(INITIAL_EVENTS_POLL_TIMEOUT)
 
         # Run the main loop as long as we are not stopping or moving into quiet mode
-        until Karafka::App.done?
+        while running?
           Karafka.monitor.instrument(
             'connection.listener.fetch_loop',
             caller: self,
@@ -175,18 +220,11 @@ module Karafka
         # Wait until all the shutdown jobs are done
         wait_pinging(wait_until: -> { @jobs_queue.empty?(@subscription_group.id) })
 
-        # Once all the work is done, we need to decrement counter of active subscription groups
-        # within this consumer group
-        @consumer_group_coordinator.finish_work(id)
+        quieted!
 
         # Wait if we're in the process of finishing started work or finished all the work and
         # just sitting and being quiet
-        wait_pinging(wait_until: -> { !(Karafka::App.quieting? || Karafka::App.quiet?) })
-
-        # We need to wait until all the work in the whole consumer group (local to the process)
-        # is done. Otherwise we may end up with locks and `Timed out LeaveGroupRequest in flight`
-        # warning notifications.
-        wait_pinging(wait_until: -> { @consumer_group_coordinator.shutdown? })
+        wait_pinging(wait_until: -> { !quiet? })
 
         # This extra ping will make sure we've refreshed the rebalance state after other instances
         # potentially shutdown. This will prevent us from closing with a dangling callback
@@ -205,11 +243,9 @@ module Karafka
           type: 'connection.listener.fetch_loop.error'
         )
 
-        restart
+        reset
 
         sleep(1) && retry
-      ensure
-        @consumer_group_coordinator.unlock
       end
 
       # Resumes processing of partitions that were paused due to an error.
@@ -416,7 +452,7 @@ module Karafka
       # `#fetch_loop` again. We just need to remember to also reset the runner as it is a long
       # running one, so with a new connection to Kafka, we need to initialize the state of the
       # runner and underlying consumers once again.
-      def restart
+      def reset
         # If there was any problem with processing, before we reset things we need to make sure,
         # there are no jobs in the queue. Otherwise it could lead to leakage in between client
         # resetting.

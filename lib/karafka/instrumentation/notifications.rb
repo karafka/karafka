@@ -36,11 +36,7 @@ module Karafka
         connection.listener.before_fetch_loop
         connection.listener.fetch_loop
         connection.listener.fetch_loop.received
-
-        rebalance.partitions_assign
-        rebalance.partitions_assigned
-        rebalance.partitions_revoke
-        rebalance.partitions_revoked
+        connection.listener.after_fetch_loop
 
         consumer.before_schedule_consume
         consumer.consume
@@ -69,6 +65,11 @@ module Karafka
         filtering.seek
 
         process.notice_signal
+
+        rebalance.partitions_assign
+        rebalance.partitions_assigned
+        rebalance.partitions_revoke
+        rebalance.partitions_revoked
 
         statistics.emitted
 

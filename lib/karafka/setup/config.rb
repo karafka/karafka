@@ -184,6 +184,11 @@ module Karafka
 
         # Namespace for internal connection related settings
         setting :connection do
+          # Manages starting up and stopping Kafka connections
+          setting :manager, default: Connection::Manager.new
+          # Controls frequency of connections management checks
+          setting :conductor, default: Connection::Conductor.new
+
           # Settings that are altered by our client proxy layer
           setting :proxy do
             # Committed offsets for given CG query

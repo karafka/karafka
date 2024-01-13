@@ -70,5 +70,11 @@ module Karafka
 
     # Raised in case user would want to perform nested transactions.
     TransactionAlreadyInitializedError = Class.new(BaseError)
+
+    # Raised in case a listener that was paused is being resumed
+    InvalidListenerResumeError = Class.new(BaseError)
+
+    # Raised when we want to un-pause listener that was not paused
+    InvalidListenerPauseError = Class.new(BaseError)
   end
 end

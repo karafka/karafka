@@ -16,19 +16,19 @@ module Karafka
     module Routing
       module Features
         class Multiplexing < Base
-          # Expansions of routing for multiplexing support
-          module ConsumerGroup
-            # Assigns the current subscription group id based on the defined one and allows for
-            # further topic definition
-            # @param name [String, Symbol] name of the current subscription group
-            # @param multiplex [Integer] how many subscription groups initialize out of this
-            #   definition
-            # @param block [Proc] block that may include topics definitions
-            def subscription_group=(name = SubscriptionGroup.id, multiplex: 1, &block)
-              multiplex.times do |i|
-                super(
-                  multiplex > 1 ? "#{name}_multiplex_#{i}" : name.to_s,
-                  &block
+          # Expands the builder to multiply multiplexed groups
+          module SubscriptionGroupsBuilder
+            # Takes into consideration multiplexing and builds the more groups
+            #
+            # @param topics_array [Array<Routing::Topic>] group of topics that have the same
+            #   settings and can use the same connection
+            # @return [Array<Array<Routing::Topics>>] expanded groups
+            def expand(topics_array)
+              factor = topics_array.first.subscription_group_details.fetch(:multiplexing_max, 1)
+
+              Array.new(factor) do |i|
+                ::Karafka::Routing::Topics.new(
+                  i.zero? ? topics_array : topics_array.map(&:dup)
                 )
               end
             end

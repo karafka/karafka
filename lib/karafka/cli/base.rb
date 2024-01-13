@@ -101,7 +101,7 @@ module Karafka
 
         # @return [Array<String>] names and aliases for command matching
         def names
-          ((@aliases || []) << name).flatten.map(&:to_s)
+          ((@aliases || []) << name).flatten.map(&:to_s).uniq
         end
       end
     end

@@ -13,17 +13,46 @@ module Karafka
         class << self
           # Extends topic and builder with given feature API
           def activate
-            Topic.prepend(self::Topic) if const_defined?('Topic', false)
-            Topics.prepend(self::Topics) if const_defined?('Topics', false)
-            ConsumerGroup.prepend(self::ConsumerGroup) if const_defined?('ConsumerGroup', false)
-            Proxy.prepend(self::Proxy) if const_defined?('Proxy', false)
-            Builder.prepend(self::Builder) if const_defined?('Builder', false)
-            Builder.prepend(Base::Expander.new(self)) if const_defined?('Contracts', false)
+            if const_defined?('Topic', false)
+              Topic.prepend(self::Topic)
+            end
+
+            if const_defined?('Topics', false)
+              Topics.prepend(self::Topics)
+            end
+
+            if const_defined?('ConsumerGroup', false)
+              ConsumerGroup.prepend(self::ConsumerGroup)
+            end
+
+            if const_defined?('Proxy', false)
+              Proxy.prepend(self::Proxy)
+            end
+
+            if const_defined?('Builder', false)
+              Builder.prepend(self::Builder)
+            end
+
+            if const_defined?('Contracts', false)
+              Builder.prepend(Base::Expander.new(self))
+            end
+
+            if const_defined?('SubscriptionGroup', false)
+              SubscriptionGroup.prepend(self::SubscriptionGroup)
+            end
+
+            if const_defined?('SubscriptionGroupsBuilder', false)
+              SubscriptionGroupsBuilder.prepend(self::SubscriptionGroupsBuilder)
+            end
           end
 
-          # Loads all the features and activates them
+          # Loads all the features and activates them once
           def load_all
+            return if @loaded
+
             features.each(&:activate)
+
+            @loaded = true
           end
 
           # @param config [Karafka::Core::Configurable::Node] app config that we can alter with
@@ -41,11 +70,18 @@ module Karafka
 
           private
 
-          # @return [Array<Class>] all available routing features
+          # @return [Array<Class>] all available routing features that are direct descendants of
+          #   the features base.Approach with using `#superclass` prevents us from accidentally
+          #   loading Pro components
           def features
             ObjectSpace
               .each_object(Class)
               .select { |klass| klass < self }
+              # Ensures, that Pro components are only loaded when we operate in Pro mode. Since
+              # outside of specs Zeitwerk does not require them at all, they will not be loaded
+              # anyhow, but for specs this needs to be done as RSpec requires all files to be
+              # present
+              .reject { |klass| Karafka.pro? ? false : klass.superclass != self }
               .sort_by(&:to_s)
           end
 

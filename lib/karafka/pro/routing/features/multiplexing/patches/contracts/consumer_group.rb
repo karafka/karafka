@@ -29,7 +29,7 @@ module Karafka
                 def topic_unique_key(topic)
                   [
                     topic[:name],
-                    topic[:subscription_group_name]
+                    topic[:subscription_group_details]
                   ]
                 end
               end

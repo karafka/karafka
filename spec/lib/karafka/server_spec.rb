@@ -158,15 +158,19 @@ RSpec.describe_current do
         let(:active_thread) do
           instance_double(
             Karafka::Connection::Listener,
-            alive?: true,
+            stopped?: true,
             terminate: true,
-            join: true,
             shutdown: true
           )
         end
 
         before do
-          described_class.listeners = [active_thread]
+          described_class.listeners = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: [active_thread],
+            all?: false,
+            each: nil
+          )
           server_class.stop
         end
 
@@ -181,16 +185,21 @@ RSpec.describe_current do
         let(:active_thread) do
           instance_double(
             Karafka::Connection::Listener,
-            alive?: true,
+            stopped?: false,
             terminate: true,
-            join: true,
             shutdown: true
           )
         end
 
         before do
+          described_class.listeners = instance_double(
+            Karafka::Connection::ListenersBatch,
+            active: [active_thread],
+            all?: false,
+            each: nil
+          )
+
           allow(process).to receive(:supervised?).and_return(false)
-          described_class.listeners = [active_thread]
           server_class.stop
         end
 
@@ -206,6 +215,7 @@ RSpec.describe_current do
           instance_double(
             Karafka::Connection::Listener,
             alive?: true,
+            stopped?: false,
             terminate: true,
             join: true,
             shutdown: true

@@ -7,7 +7,10 @@ RSpec.describe_current do
   let(:topics) { [topic] }
 
   describe '#id' do
-    it { expect(group.id).to eq("#{topic.consumer_group.id}_#{topic.subscription_group_name}_0") }
+    it do
+      expect(group.id)
+        .to eq("#{topic.consumer_group.id}_#{topic.subscription_group_details.fetch(:name)}_0")
+    end
   end
 
   describe '#to_s' do
@@ -67,7 +70,7 @@ RSpec.describe_current do
           .internal
           .routing
           .activity_manager
-          .include(:subscription_groups, topic.subscription_group_name)
+          .include(:subscription_groups, topic.subscription_group_details.fetch(:name))
       end
 
       it { expect(group.active?).to eq true }

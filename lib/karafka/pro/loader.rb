@@ -83,6 +83,9 @@ module Karafka
 
           icfg.cli.contract = Contracts::ServerCliOptions.new
 
+          # Use manager that supports multiplexing
+          icfg.connection.manager = Connection::Manager.new
+
           icfg.processing.coordinator_class = Processing::Coordinator
           icfg.processing.partitioner_class = Processing::Partitioner
           icfg.processing.scheduler_class = Processing::Schedulers::Default

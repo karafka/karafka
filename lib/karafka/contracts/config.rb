@@ -51,6 +51,9 @@ module Karafka
         required(:tick_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
 
         nested(:connection) do
+          required(:manager) { |val| !val.nil? }
+          required(:conductor) { |val| !val.nil? }
+
           nested(:proxy) do
             # All of them have the same requirements
             %i[

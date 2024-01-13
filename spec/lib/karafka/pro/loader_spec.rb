@@ -32,11 +32,6 @@ RSpec.describe_current do
         expect(aj_config.dispatcher).to be_a(Karafka::Pro::ActiveJob::Dispatcher)
         expect(aj_config.job_options_contract).to be_a(Karafka::Pro::ActiveJob::JobOptionsContract)
       end
-
-      it 'expect to load pro routing features' do
-        expect(::Karafka::Pro::Routing::Features::VirtualPartitions).to have_received(:activate)
-        expect(::Karafka::Pro::Routing::Features::LongRunningJob).to have_received(:activate)
-      end
     end
   end
 end

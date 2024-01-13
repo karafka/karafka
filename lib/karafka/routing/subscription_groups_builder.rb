@@ -19,7 +19,7 @@ module Karafka
         max_messages
         max_wait_time
         initial_offset
-        subscription_group_name
+        subscription_group_details
       ].freeze
 
       private_constant :DISTRIBUTION_KEYS
@@ -37,7 +37,7 @@ module Karafka
           .group_by(&:first)
           .values
           .map { |value| value.map(&:last) }
-          .map { |topics_array| Routing::Topics.new(topics_array) }
+          .flat_map { |value| expand(value) }
           .map { |grouped_topics| SubscriptionGroup.new(@position += 1, grouped_topics) }
           .tap do |subscription_groups|
             subscription_groups.each do |subscription_group|
@@ -59,6 +59,15 @@ module Karafka
         DISTRIBUTION_KEYS.each { |key| accu[key] = topic.public_send(key) }
 
         accu.hash
+      end
+
+      # Hook for optional expansion of groups based on subscription group features
+      #
+      # @param topics_array [Array<Routing::Topic>] group of topics that have the same settings
+      #   and can use the same connection
+      # @return [Array<Array<Routing::Topics>>] expanded groups
+      def expand(topics_array)
+        [Routing::Topics.new(topics_array)]
       end
     end
   end

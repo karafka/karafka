@@ -10,15 +10,37 @@ RSpec.describe_current do
 
     after { Karafka::App.config.concurrency = 5 }
 
+    let(:subscription_group) { create(:routing_subscription_group) }
+
     context 'when everything is ok' do
       let(:listeners) { [listener] }
       let(:async_scope) { listener }
-      let(:listener) { instance_double(Karafka::Connection::Listener, async_call: nil, join: nil) }
+      let(:listener) do
+        instance_double(
+          Karafka::Connection::Listener,
+          start!: nil,
+          stopped?: false,
+          quiet!: true,
+          quiet?: true,
+          stop!: true,
+          subscription_group: subscription_group
+        )
+      end
 
       before do
+        allow(Karafka::App.config.internal.connection.conductor)
+          .to receive(:wait)
+        allow(Karafka::App.config.internal.connection.manager)
+          .to receive(:done?)
+          .and_return(true)
+
         allow(Karafka::Connection::ListenersBatch)
           .to receive(:new)
           .and_return(listeners)
+
+        allow(Karafka::App)
+          .to receive(:done?)
+          .and_return(true)
       end
 
       it 'starts asynchronously consumption for each listener' do

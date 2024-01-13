@@ -103,7 +103,7 @@ module Karafka
           # @param cache [Boolean] should we return cached data if present
           def fetch(topic, cache)
             subscription_group = topic.subscription_group
-            t_tpls = @tpls.fetch(subscription_group)
+            t_tpls = @tpls.fetch(subscription_group, false)
             t_tpl = t_tpls[topic]
 
             return t_tpl if t_tpl && cache

@@ -30,6 +30,8 @@ en:
       internal.tick_interval_format: needs to be an integer bigger or equal to 1000
       internal.routing.builder_format: needs to be present
       internal.routing.subscription_groups_builder_format: needs to be present
+      internal.connection.manager_format: needs to be present
+      internal.connection.conductor_format: needs to be present
       internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
       internal.connection.proxy.query_watermark_offsets.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.query_watermark_offsets.wait_time_format: needs to be an integer bigger than 0
@@ -64,7 +66,7 @@ en:
       consumer_format: needs to be present
       id_format: 'needs to be a string with a Kafka accepted format'
       initial_offset_format: needs to be either earliest or latest
-      subscription_group_name_format: must be a non-empty string
+      subscription_group_details.name_format: must be a non-empty string
       manual_offset_management.active_format: needs to be either true or false
       manual_offset_management_must_be_enabled: cannot be disabled for ActiveJob topics
       inline_insights.active_format: needs to be either true or false

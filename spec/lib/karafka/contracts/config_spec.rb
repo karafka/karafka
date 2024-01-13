@@ -29,6 +29,8 @@ RSpec.describe_current do
         process: Karafka::Process.new,
         tick_interval: 5_000,
         connection: {
+          manager: 1,
+          conductor: 1,
           proxy: {
             query_watermark_offsets: {
               timeout: 100,
@@ -393,6 +395,18 @@ RSpec.describe_current do
 
     context  'when tick_interval is missing' do
       before { config[:internal].delete(:tick_interval) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context  'when conductor is missing' do
+      before { config[:internal][:connection].delete(:conductor) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context  'when manager is missing' do
+      before { config[:internal][:connection].delete(:manager) }
 
       it { expect(contract.call(config)).not_to be_success }
     end

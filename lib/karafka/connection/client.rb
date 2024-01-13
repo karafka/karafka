@@ -24,16 +24,7 @@ module Karafka
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
-      # 1 minute of max wait for the first rebalance before a forceful attempt
-      # This applies only to a case when a short-lived Karafka instance with a client would be
-      # closed before first rebalance. Mitigates a librdkafka bug.
-      COOPERATIVE_STICKY_MAX_WAIT = 60_000
-
-      # We want to make sure we never close several clients in the same moment to prevent
-      # potential race conditions and other issues
-      SHUTDOWN_MUTEX = Mutex.new
-
-      private_constant :MAX_POLL_RETRIES, :SHUTDOWN_MUTEX, :COOPERATIVE_STICKY_MAX_WAIT
+      private_constant :MAX_POLL_RETRIES
 
       # Creates a new consumer instance.
       #
@@ -51,7 +42,6 @@ module Karafka
         @rebalance_manager = RebalanceManager.new(@subscription_group.id)
         @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group)
         @events_poller = Helpers::IntervalRunner.new { events_poll }
-        @kafka = build_consumer
         # There are few operations that can happen in parallel from the listener threads as well
         # as from the workers. They are not fully thread-safe because they may be composed out of
         # few calls to Kafka or out of few internal state changes. That is why we mutex them.
@@ -133,12 +123,12 @@ module Karafka
 
       # @return [Boolean] true if our current assignment has been lost involuntarily.
       def assignment_lost?
-        @kafka.assignment_lost?
+        kafka.assignment_lost?
       end
 
       # @return [Rdkafka::Consumer::TopicPartitionList] current active assignment
       def assignment
-        @kafka.assignment
+        kafka.assignment
       end
 
       # Commits the offset on a current consumer in a non-blocking or blocking way.
@@ -209,7 +199,7 @@ module Karafka
 
           @paused_tpls[topic][partition] = tpl
 
-          @kafka.pause(tpl)
+          kafka.pause(tpl)
 
           # If offset is not provided, will pause where it finished.
           # This makes librdkafka not purge buffers and can provide significant network savings
@@ -250,43 +240,23 @@ module Karafka
             partition: partition
           )
 
-          @kafka.resume(tpl)
+          kafka.resume(tpl)
         end
       end
 
       # Gracefully stops topic consumption.
-      #
-      # @note Stopping running consumers without a really important reason is not recommended
-      #   as until all the consumers are stopped, the server will keep running serving only
-      #   part of the messages
       def stop
-        # This ensures, that we do not stop the underlying client until it passes the first
-        # rebalance for cooperative-sticky. Otherwise librdkafka may crash
-        #
-        # We set a timeout just in case the rebalance would never happen or would last for an
-        # extensive time period.
-        #
-        # @see https://github.com/confluentinc/librdkafka/issues/4312
+        # In case of cooperative-sticky, there is a bug in librdkafka that may hang it.
+        # To mitigate it we first need to unsubscribe so we will not receive any assignments and
+        # only then we should be good to go.
+        # @see https://github.com/confluentinc/librdkafka/issues/4527
         if @subscription_group.kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
-          active_wait = false
+          unsubscribe
 
-          (COOPERATIVE_STICKY_MAX_WAIT / 100).times do
-            # If we're past the first rebalance, no need to wait
-            if @rebalance_manager.active?
-              # We give it a a bit of time because librdkafka has a tendency to do some-post
-              # callback work that from its perspective is still under rebalance
-              sleep(5) if active_wait
-
-              break
-            end
-
-            active_wait = true
-
-            # poll to trigger potential rebalances that could occur during stopping and to trigger
-            # potential callbacks
-            poll(100)
-
+          until assignment.empty?
             sleep(0.1)
+
+            ping
           end
         end
 
@@ -328,7 +298,6 @@ module Karafka
           @events_poller.reset
           @closed = false
           @paused_tpls.clear
-          @kafka = build_consumer
         end
       end
 
@@ -355,14 +324,14 @@ module Karafka
       # @note It is non-blocking when timeout 0 and will not wait if queue empty. It costs up to
       #   2ms when no callbacks are triggered.
       def events_poll(timeout = 0)
-        @kafka.events_poll(timeout)
+        kafka.events_poll(timeout)
       end
 
       # Returns pointer to the consumer group metadata. It is used only in the context of
       # exactly-once-semantics in transactions, this is why it is never remapped to Ruby
       # @return [FFI::Pointer]
       def consumer_group_metadata_pointer
-        @kafka.consumer_group_metadata_pointer
+        kafka.consumer_group_metadata_pointer
       end
 
       # Return the current committed offset per partition for this consumer group.
@@ -375,7 +344,7 @@ module Karafka
       # @note It is recommended to use this only on rebalances to get positions with metadata
       #   when working with metadata as this is synchronous
       def committed(tpl = nil)
-        Proxy.new(@kafka).committed(tpl)
+        Proxy.new(kafka).committed(tpl)
       end
 
       private
@@ -387,7 +356,7 @@ module Karafka
       # @param metadata [String, nil] offset storage metadata or nil if none
       # @return [Boolean] true if we could store the offset (if we still own the partition)
       def internal_store_offset(message, metadata)
-        @kafka.store_offset(message, metadata)
+        kafka.store_offset(message, metadata)
         true
       rescue Rdkafka::RdkafkaError => e
         return false if e.code == :assignment_lost
@@ -403,7 +372,7 @@ module Karafka
       #   even when no stored, because with sync commit, it refreshes the ownership state of the
       #   consumer in a sync way.
       def internal_commit_offsets(async: true)
-        @kafka.commit(nil, async)
+        kafka.commit(nil, async)
 
         true
       rescue Rdkafka::RdkafkaError => e
@@ -440,7 +409,7 @@ module Karafka
             message.partition => message.offset
           )
 
-          proxy = Proxy.new(@kafka)
+          proxy = Proxy.new(kafka)
 
           # Now we can overwrite the seek message offset with our resolved offset and we can
           # then seek to the appropriate message
@@ -462,29 +431,29 @@ module Karafka
         # seeking and pausing
         return if message.offset == topic_partition_position(message.topic, message.partition)
 
-        @kafka.seek(message)
+        kafka.seek(message)
       end
 
       # Commits the stored offsets in a sync way and closes the consumer.
       def close
-        # Allow only one client to be closed at the same time
-        SHUTDOWN_MUTEX.synchronize do
-          # Once client is closed, we should not close it again
-          # This could only happen in case of a race-condition when forceful shutdown happens
-          # and triggers this from a different thread
-          return if @closed
+        # Once client is closed, we should not close it again
+        # This could only happen in case of a race-condition when forceful shutdown happens
+        # and triggers this from a different thread
+        return if @closed
 
-          @closed = true
+        @closed = true
 
-          # Remove callbacks runners that were registered
-          ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
-          ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
+        return unless @kafka
 
-          @kafka.close
-          @buffer.clear
-          # @note We do not clear rebalance manager here as we may still have revocation info
-          # here that we want to consider valid prior to running another reconnection
-        end
+        # Remove callbacks runners that were registered
+        ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
+        ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
+
+        kafka.close
+        @kafka = nil
+        @buffer.clear
+        # @note We do not clear rebalance manager here as we may still have revocation info
+        # here that we want to consider valid prior to running another reconnection
       end
 
       # Unsubscribes from all the subscriptions
@@ -492,7 +461,7 @@ module Karafka
       # @note We do not re-raise since this is supposed to be only used on close and can be safely
       #   ignored. We do however want to instrument on it
       def unsubscribe
-        @kafka.unsubscribe
+        kafka.unsubscribe
       rescue ::Rdkafka::RdkafkaError => e
         Karafka.monitor.instrument(
           'error.occurred',
@@ -506,7 +475,7 @@ module Karafka
       # @param partition [Integer]
       # @return [Rdkafka::Consumer::TopicPartitionList]
       def topic_partition_list(topic, partition)
-        rdkafka_partition = @kafka
+        rdkafka_partition = kafka
                             .assignment
                             .to_h[topic]
                             &.detect { |part| part.partition == partition }
@@ -525,7 +494,7 @@ module Karafka
         rd_partition = ::Rdkafka::Consumer::Partition.new(partition, nil, 0)
         tpl = ::Rdkafka::Consumer::TopicPartitionList.new(topic => [rd_partition])
 
-        @kafka.position(tpl).to_h.fetch(topic).first.offset || -1
+        kafka.position(tpl).to_h.fetch(topic).first.offset || -1
       end
 
       # Performs a single poll operation and handles retries and errors
@@ -553,7 +522,7 @@ module Karafka
         # blocking events from being handled.
         poll_tick = timeout > @tick_interval ? @tick_interval : timeout
 
-        result = @kafka.poll(poll_tick)
+        result = kafka.poll(poll_tick)
 
         # If we've got a message, we can return it
         return result if result
@@ -679,6 +648,11 @@ module Karafka
         end
 
         @buffer.uniq!
+      end
+
+      # @return [Rdkafka::Consumer] librdkafka consumer instance
+      def kafka
+        @kafka ||= build_consumer
       end
     end
   end

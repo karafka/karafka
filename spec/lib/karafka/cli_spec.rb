@@ -19,4 +19,10 @@ RSpec.describe_current do
       expect(cli.send(:commands).map(&:to_s).sort).to eq available_commands
     end
   end
+
+  describe '.start' do
+    it 'expect to raise error when no command provided' do
+      expect { cli.start }.to raise_error(Karafka::Errors::UnrecognizedCommandError)
+    end
+  end
 end

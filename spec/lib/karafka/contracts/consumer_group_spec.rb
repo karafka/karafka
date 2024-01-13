@@ -125,4 +125,12 @@ RSpec.describe_current do
       it { expect(check).not_to be_success }
     end
   end
+
+  describe '#topic_unique_key' do
+    let(:topic) { topics.first }
+
+    it 'expect it to be based by name' do
+      expect(described_class.topic_unique_key(topic)).to eq('name')
+    end
+  end
 end
