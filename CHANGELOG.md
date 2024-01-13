@@ -20,6 +20,7 @@
 - [Fix] Fix a case where internal Idle job scheduling would go via the consumption flow.
 - [Fix] Make the Iterator `#stop_partition` work with karafka-rdkafka `0.14.6`.
 - [Fix] Ensure Pro components are not loaded during OSS specs execution (not affecting usage).
+- [Fix] Fix invalid action label for consumers in DataDog logger instrumentation.
 - [Ignore] option --include-consumer-groups not working as intended after removal of "thor"
 
 ## 2.2.14 (2023-12-07)
