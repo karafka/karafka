@@ -55,7 +55,24 @@ module Karafka
             consumer = job.executor.topic.consumer
             topic = job.executor.topic.name
 
-            current_span.resource = "#{consumer}#consume"
+            action = case job_type
+                     when 'Periodic'
+                       'tick'
+                     when 'PeriodicNonBlocking'
+                       'tick'
+                     when 'Shutdown'
+                       'shutdown'
+                     when 'Revoked'
+                       'revoked'
+                     when 'RevokedNonBlocking'
+                       'revoked'
+                     when 'Idle'
+                       'idle'
+                     else
+                       'consume'
+                     end
+
+            current_span.resource = "#{consumer}##{action}"
             info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} started"
 
             pop_tags
@@ -102,6 +119,8 @@ module Karafka
               error "Consumer after consume failed due to an error: #{error}"
             when 'consumer.shutdown.error'
               error "Consumer on shutdown failed due to an error: #{error}"
+            when 'consumer.tick.error'
+              error "Consumer tick failed due to an error: #{error}"
             when 'worker.process.error'
               fatal "Worker processing failed due to an error: #{error}"
             when 'connection.listener.fetch_loop.error'

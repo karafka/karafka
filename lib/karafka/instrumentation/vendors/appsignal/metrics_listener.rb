@@ -42,6 +42,16 @@ module Karafka
 
           configure
 
+          # Types of errors originating from user code in the consumer flow
+          USER_CONSUMER_ERROR_TYPES = %w[
+            consumer.consume.error
+            consumer.revoked.error
+            consumer.shutdown.error
+            consumer.tick.error
+          ].freeze
+
+          private_constant :USER_CONSUMER_ERROR_TYPES
+
           # Before each consumption process, lets start a transaction associated with it
           # We also set some basic metadata about the given consumption that can be useful for
           # debugging
@@ -94,34 +104,27 @@ module Karafka
             client.register_probe(:karafka, -> { minute_probe })
           end
 
-          # Keeps track of revocation user code execution
-          #
-          # @param event [Karafka::Core::Monitoring::Event]
-          def on_consumer_revoke(event)
-            consumer = event.payload[:caller]
-            start_transaction(consumer, 'revoked')
-          end
+          [
+            %i[revoke revoked revoked],
+            %i[shutting_down shutdown shutdown],
+            %i[tick ticked tick]
+          ].each do |before, after, name|
+            class_eval <<~RUBY, __FILE__, __LINE__ + 1
+              # Keeps track of user code execution
+              #
+              # @param event [Karafka::Core::Monitoring::Event]
+              def on_consumer_#{before}(event)
+                consumer = event.payload[:caller]
+                start_transaction(consumer, '#{name}')
+              end
 
-          # Finishes the revocation transaction
-          #
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_consumer_revoked(_event)
-            stop_transaction
-          end
-
-          # Keeps track of revocation user code execution
-          #
-          # @param event [Karafka::Core::Monitoring::Event]
-          def on_consumer_shutting_down(event)
-            consumer = event.payload[:caller]
-            start_transaction(consumer, 'shutdown')
-          end
-
-          # Finishes the shutdown transaction
-          #
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_consumer_shutdown(_event)
-            stop_transaction
+              # Finishes the transaction
+              #
+              # @param _event [Karafka::Core::Monitoring::Event]
+              def on_consumer_#{after}(_event)
+                stop_transaction
+              end
+            RUBY
           end
 
           # Counts DLQ dispatches
@@ -141,7 +144,7 @@ module Karafka
           # @param event [Karafka::Core::Monitoring::Event] error event details
           def on_error_occurred(event)
             # If this is a user consumption related error, we bump the counters for metrics
-            if event[:type] == 'consumer.consume.error'
+            if USER_CONSUMER_ERROR_TYPES.include?(event[:type])
               consumer = event.payload[:caller]
 
               with_multiple_resolutions(consumer) do |tags|
