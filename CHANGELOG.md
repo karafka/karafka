@@ -15,6 +15,7 @@
 - [Enhancement] Allow for parallel closing of connections from independent consumer groups.
 - [Change] Make `Kubernetes::LivenessListener` not start until Karafka app starts running.
 - [Change] Remove the legacy "inside of topics" way of defining subscription groups names
+- [Change] Update supported instrumentation to report on `#tick`.
 - [Refactor] Replace `define_method` with `class_eval` in some locations.
 - [Fix] Fix a case where internal Idle job scheduling would go via the consumption flow.
 - [Fix] Make the Iterator `#stop_partition` work with karafka-rdkafka `0.14.6`.

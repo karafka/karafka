@@ -128,18 +128,21 @@ module Karafka
             histogram('consumer.consumption_lag', metadata.consumption_lag, tags: tags)
           end
 
-          # @param event [Karafka::Core::Monitoring::Event]
-          def on_consumer_revoked(event)
-            tags = default_tags + consumer_tags(event.payload[:caller])
+          {
+            revoked: :revoked,
+            shutdown: :shutdown,
+            ticked: :tick
+          }.each do |after, name|
+            class_eval <<~RUBY, __FILE__, __LINE__ + 1
+              # Keeps track of user code execution
+              #
+              # @param event [Karafka::Core::Monitoring::Event]
+              def on_consumer_#{after}(event)
+                tags = default_tags + consumer_tags(event.payload[:caller])
 
-            count('consumer.revoked', 1, tags: tags)
-          end
-
-          # @param event [Karafka::Core::Monitoring::Event]
-          def on_consumer_shutdown(event)
-            tags = default_tags + consumer_tags(event.payload[:caller])
-
-            count('consumer.shutdown', 1, tags: tags)
+                count('consumer.#{name}', 1, tags: tags)
+              end
+            RUBY
           end
 
           # Worker related metrics

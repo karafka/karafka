@@ -80,36 +80,25 @@ module Karafka
             mark_polling_tick
           end
 
-          # Tick on starting work
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_consumer_consume(_event)
-            mark_consumption_tick
-          end
+          {
+            consume: :consumed,
+            revoke: :revoked,
+            shutting_down: :shutdown,
+            tick: :ticked
+          }.each do |before, after|
+            class_eval <<~RUBY, __FILE__, __LINE__ + 1
+              # Tick on starting work
+              # @param _event [Karafka::Core::Monitoring::Event]
+              def on_consumer_#{before}(_event)
+                mark_consumption_tick
+              end
 
-          # Tick on finished work
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_consumer_consumed(_event)
-            clear_consumption_tick
-          end
-
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_consumer_revoke(_event)
-            mark_consumption_tick
-          end
-
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_consumer_revoked(_event)
-            clear_consumption_tick
-          end
-
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_consumer_shutting_down(_event)
-            mark_consumption_tick
-          end
-
-          # @param _event [Karafka::Core::Monitoring::Event]
-          def on_consumer_shutdown(_event)
-            clear_consumption_tick
+              # Tick on finished work
+              # @param _event [Karafka::Core::Monitoring::Event]
+              def on_consumer_#{after}(_event)
+                clear_consumption_tick
+              end
+            RUBY
           end
 
           # @param _event [Karafka::Core::Monitoring::Event]
