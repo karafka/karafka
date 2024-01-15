@@ -7,8 +7,8 @@ module Vendors
       attr_reader :buffer, :errors
 
       def initialize
-        @buffer = Concurrent::Array.new
-        @errors = Concurrent::Array.new
+        @buffer = []
+        @errors = []
       end
 
       # Store key trace
