@@ -99,21 +99,15 @@ RSpec.describe_current do
     let(:changes) { manager.instance_variable_get(:@changes) }
     let(:details) { changes.values.first }
 
-    before do
-      manager.register(listeners)
-    end
-
-    it { expect(changes).to be_empty }
+    before { manager.register(listeners) }
 
     context 'when notice was used' do
       before { manager.notice(subscription_group1.id, statistics) }
 
-      it { expect(changes.keys).to eq([subscription_group1.id]) }
       it { expect(details[:state_age]).to eq(13_995) }
       it { expect(details[:join_state]).to eq('steady') }
       it { expect(details[:state]).to eq('up') }
       it { expect(monotonic_now - details[:changed_at]).to be < 10 }
-      it { expect(monotonic_now - details[:state_age_sync]).to be < 10 }
     end
   end
 
@@ -316,6 +310,11 @@ RSpec.describe_current do
           subscription_group1.multiplexing.min = 1
           subscription_group1.multiplexing.max = 5
           listeners.each(&:running!)
+
+          listeners.each do |listener|
+            manager.notice(listener.subscription_group.id, statistics)
+          end
+
           manager.control
         end
 

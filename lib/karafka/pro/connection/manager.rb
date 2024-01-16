@@ -24,17 +24,8 @@ module Karafka
       # @note Manager operations relate to consumer groups and not subscription groups. Since
       #   cluster operations can cause consumer group wide effects, we always apply only one
       #   change on a consumer group.
-      #
-      # @note Since we collect statistical data from listeners and this happens in a background
-      #   thread, we need to make sure we lock not to have race conditions with expired data
-      #   eviction.
       class Manager < Karafka::Connection::Manager
         include Core::Helpers::Time
-
-        # How long should we keep stale stats before evicting them completely
-        EVICTION_DELAY = 5 * 60 * 1_000
-
-        private_constant :EVICTION_DELAY
 
         # How long should we wait after a rebalance before doing anything on a consumer group
         #
@@ -50,7 +41,6 @@ module Karafka
               state: '',
               join_state: '',
               state_age: 0,
-              state_age_sync: monotonic_now,
               changed_at: monotonic_now
             }
           end
@@ -64,6 +54,9 @@ module Karafka
         # @param listeners [Connection::ListenersBatch]
         def register(listeners)
           @listeners = listeners
+
+          # Preload all the keys into the hash so we never add keys to changes but just change them
+          listeners.each { |listener| @changes[listener.subscription_group.id] }
 
           in_sg_families do |first_subscription_group, sg_listeners|
             multiplexing = first_subscription_group.multiplexing
@@ -86,25 +79,22 @@ module Karafka
         # @note Please note that while we collect here per subscription group, we use those metrics
         #   collectively on a whole consumer group. This reduces the friction.
         def notice(subscription_group_id, statistics)
-          @mutex.synchronize do
-            times = []
-            # stateage is in microseconds
-            # We monitor broker changes to make sure we do not introduce extra friction
-            times << statistics['brokers'].values.map { |stats| stats['stateage'] }.min / 1_000
-            times << statistics['cgrp']['rebalance_age']
-            times << statistics['cgrp']['stateage']
+          times = []
+          # stateage is in microseconds
+          # We monitor broker changes to make sure we do not introduce extra friction
+          times << statistics['brokers'].values.map { |stats| stats['stateage'] }.min / 1_000
+          times << statistics['cgrp']['rebalance_age']
+          times << statistics['cgrp']['stateage']
 
-            # Keep the previous change age for changes that were triggered by us
-            previous_changed_at = @changes[subscription_group_id][:changed_at]
+          # Keep the previous change age for changes that were triggered by us
+          previous_changed_at = @changes[subscription_group_id][:changed_at]
 
-            @changes[subscription_group_id] = {
-              state_age: times.min,
-              changed_at: previous_changed_at,
-              join_state: statistics['cgrp']['join_state'],
-              state: statistics['cgrp']['state'],
-              state_age_sync: monotonic_now
-            }
-          end
+          @changes[subscription_group_id].merge!(
+            state_age: times.min,
+            changed_at: previous_changed_at,
+            join_state: statistics['cgrp']['join_state'],
+            state: statistics['cgrp']['state']
+          )
         end
 
         # Shuts down all the listeners when it is time (including moving to quiet) or rescales
@@ -158,8 +148,6 @@ module Karafka
         #
         # We always run scaling down and up because it may be applicable to different CGs
         def rescale
-          evict
-
           scale_down
           scale_up
         end
@@ -232,23 +220,11 @@ module Karafka
           end
         end
 
-        # Removes states that are no longer being reported for stopped/pending listeners
-        def evict
-          @mutex.synchronize do
-            @changes.delete_if do |_, details|
-              monotonic_now - details[:state_age_sync] >= EVICTION_DELAY
-            end
-          end
-        end
-
         # Indicates, that something has changed on a subscription group. We consider every single
         # change we make as a change to the setup as well.
         # @param subscription_group_id [String]
         def touch(subscription_group_id)
-          @mutex.synchronize do
-            @changes[subscription_group_id][:changed_at] = 0
-            @changes[subscription_group_id][:state_age_sync] = monotonic_now
-          end
+          @changes[subscription_group_id][:changed_at] = 0
         end
 
         # @param sg_listeners [Array<Listener>] listeners from one multiplexed sg
@@ -257,17 +233,10 @@ module Karafka
         #   are also stable. This is a strong indicator that no rebalances or other operations are
         #   happening at a given moment.
         def stable?(sg_listeners)
-          # If none of listeners has changes reported it means we did not yet start collecting
-          # metrics about any of them and at least one must be present. We do not consider it
-          # stable in such case as we still are waiting for metrics.
-          return false if sg_listeners.none? do |sg_listener|
-            @changes.key?(sg_listener.subscription_group.id)
-          end
-
           sg_listeners.all? do |sg_listener|
-            # Not all SGs may be started initially or may be stopped, we ignore them here as they
-            # are irrelevant from the point of view of establishing stability
-            next true unless @changes.key?(sg_listener.subscription_group.id)
+            # If a listener is not active, we do not take it into consideration when looking at
+            # the stability data
+            next true unless sg_listener.active?
 
             state = @changes[sg_listener.subscription_group.id]
 
