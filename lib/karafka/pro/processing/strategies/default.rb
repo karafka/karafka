@@ -134,6 +134,7 @@ module Karafka
           #   transaction state synchronization usage as within transaction it is always sync)
           def mark_in_transaction(message, offset_metadata, async)
             raise Errors::TransactionRequiredError unless @_in_transaction
+            raise Errors::AssignmentLostError if revoked?
 
             producer.transaction_mark_as_consumed(
               client,
