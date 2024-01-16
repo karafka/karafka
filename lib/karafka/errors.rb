@@ -76,5 +76,9 @@ module Karafka
 
     # Raised when we want to un-pause listener that was not paused
     InvalidListenerPauseError = Class.new(BaseError)
+
+    # Raised in transactions when we attempt to store offset for a partition that we have lost
+    # This does not affect producer only transactions, hence we raise it only on offset storage
+    AssignmentLostError = Class.new(BaseError)
   end
 end

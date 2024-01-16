@@ -93,6 +93,8 @@ module Karafka
             #   transaction state synchronization usage as within transaction it is always sync)
             def mark_in_transaction(message, offset_metadata, async)
               raise Errors::TransactionRequiredError unless @_in_transaction
+              # Prevent from attempts of offset storage when we no longer own the assignment
+              raise Errors::AssignmentLostError if revoked?
 
               return super if collapsed?
 
