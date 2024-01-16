@@ -20,7 +20,7 @@ SuperException = Class.new(Exception)
 
 Karafka::App.monitor.subscribe('connection.listener.before_fetch_loop') do
   # We sleep to make sure events from clients have time to be published
-  sleep 0.5
+  sleep 1
 end
 
 # This will force listener to reload client (hacky, but works)
@@ -33,7 +33,7 @@ Karafka::App.monitor.subscribe('statistics.emitted') do |event|
 end
 
 start_karafka_and_wait_until do
-  names(DT[:stats_events]).size >= 3
+  names(DT[:stats_events]).size >= 5
 end
 
 client_id = Karafka::App.config.client_id
