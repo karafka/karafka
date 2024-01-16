@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.3.0 (Unreleased)
+- **[Feature]** Introduce Exactly-Once Semantics within consumers `#transaction` block (Pro)
 - **[Feature]** Provide ability to multiplex subscription groups (Pro)
 - **[Feature]** Provide `Karafka::Admin::Acl` for Kafka ACL management via the Admin APIs.
 - **[Feature]** Periodic Jobs (Pro)
