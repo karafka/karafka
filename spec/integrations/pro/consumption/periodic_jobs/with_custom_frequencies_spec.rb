@@ -55,7 +55,7 @@ end
       next
     end
 
-    delta = (time - previous) * 1_000
+    delta = ((time - previous) * 1_000).ceil
 
     assert delta >= min, [delta, min]
     assert delta <= max, [delta, max]
