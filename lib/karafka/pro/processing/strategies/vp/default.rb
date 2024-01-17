@@ -33,7 +33,7 @@ module Karafka
             # @note This virtual offset management uses a regular default marking API underneath.
             #   We do not alter the "real" marking API, as VPs are just one of many cases we want
             #   to support and we do not want to impact them with collective offsets management
-            def mark_as_consumed(message, offset_metadata = nil)
+            def mark_as_consumed(message, offset_metadata = @_current_offset_metadata)
               if @_in_transaction && !collapsed?
                 mark_in_transaction(message, offset_metadata, true)
               elsif collapsed?
@@ -55,11 +55,13 @@ module Karafka
                   manager.markable? ? super(*manager.markable) : revoked?
                 end
               end
+            ensure
+              @_current_offset_metadata = nil
             end
 
             # @param message [Karafka::Messages::Message] blocking marks message as consumed
             # @param offset_metadata [String, nil]
-            def mark_as_consumed!(message, offset_metadata = nil)
+            def mark_as_consumed!(message, offset_metadata = @_current_offset_metadata)
               if @_in_transaction && !collapsed?
                 mark_in_transaction(message, offset_metadata, false)
               elsif collapsed?
@@ -73,6 +75,8 @@ module Karafka
                   manager.markable? ? super(*manager.markable) : revoked?
                 end
               end
+            ensure
+              @_current_offset_metadata = nil
             end
 
             # Stores the next offset for processing inside of the transaction when collapsed and

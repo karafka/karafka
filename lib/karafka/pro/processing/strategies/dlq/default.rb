@@ -35,7 +35,7 @@ module Karafka
             # @see `Strategies::Default#mark_as_consumed` for more details
             # @param message [Messages::Message]
             # @param offset_metadata [String, nil]
-            def mark_as_consumed(message, offset_metadata = nil)
+            def mark_as_consumed(message, offset_metadata = @_current_offset_metadata)
               return super unless retrying?
               return super unless topic.dead_letter_queue.independent?
               return false unless super
@@ -43,6 +43,8 @@ module Karafka
               coordinator.pause_tracker.reset
 
               true
+            ensure
+              @_current_offset_metadata = nil
             end
 
             # Override of the standard `#mark_as_consumed!`. Resets the pause tracker count in case
@@ -51,7 +53,7 @@ module Karafka
             # @see `Strategies::Default#mark_as_consumed!` for more details
             # @param message [Messages::Message]
             # @param offset_metadata [String, nil]
-            def mark_as_consumed!(message, offset_metadata = nil)
+            def mark_as_consumed!(message, offset_metadata = @_current_offset_metadata)
               return super unless retrying?
               return super unless topic.dead_letter_queue.independent?
               return false unless super
@@ -59,6 +61,8 @@ module Karafka
               coordinator.pause_tracker.reset
 
               true
+            ensure
+              @_current_offset_metadata = nil
             end
 
             # When we encounter non-recoverable message, we skip it and go on with our lives

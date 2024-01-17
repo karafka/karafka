@@ -27,6 +27,21 @@ module Karafka
           # Apply strategy for a non-feature based flow
           FEATURES = %i[].freeze
 
+          # Allows to set offset metadata that will be used with the upcoming marking as consumed
+          # as long as a different offset metadata was not used. After it was used either via
+          # `#mark_as_consumed` or `#mark_as_consumed!` it will be set back to `nil`. It is done
+          # that way to provide the end user with ability to influence metadata on the non-user
+          # initiated markings in complex flows.
+          #
+          # @param offset_metadata [String, nil] metadata we want to store with the upcoming
+          #   marking as consumed
+          #
+          # @note Please be aware, that offset metadata set this way will be passed to any marking
+          #   as consumed even if it was not user initiated. For example in the DLQ flow.
+          def store_offset_metadata(offset_metadata)
+            @_current_offset_metadata = offset_metadata
+          end
+
           # Marks message as consumed in an async way.
           #
           # @param message [Messages::Message] last successfully processed message.
@@ -38,7 +53,7 @@ module Karafka
           #   processing another message. In case like this we do not pause on the message we've
           #   already processed but rather at the next one. This applies to both sync and async
           #   versions of this method.
-          def mark_as_consumed(message, offset_metadata = nil)
+          def mark_as_consumed(message, offset_metadata = @_current_offset_metadata)
             if @_in_transaction
               mark_in_transaction(message, offset_metadata, true)
             else
@@ -54,6 +69,8 @@ module Karafka
             end
 
             true
+          ensure
+            @_current_offset_metadata = nil
           end
 
           # Marks message as consumed in a sync way.
@@ -62,7 +79,7 @@ module Karafka
           # @param offset_metadata [String, nil] offset metadata string or nil if nothing
           # @return [Boolean] true if we were able to mark the offset, false otherwise.
           #   False indicates that we were not able and that we have lost the partition.
-          def mark_as_consumed!(message, offset_metadata = nil)
+          def mark_as_consumed!(message, offset_metadata = @_current_offset_metadata)
             if @_in_transaction
               mark_in_transaction(message, offset_metadata, false)
             else
@@ -79,6 +96,8 @@ module Karafka
             end
 
             true
+          ensure
+            @_current_offset_metadata = nil
           end
 
           # Starts producer transaction, saves the transaction context for transactional marking
