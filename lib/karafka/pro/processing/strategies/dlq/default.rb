@@ -84,9 +84,7 @@ module Karafka
                 else
                   # We reset the pause to indicate we will now consider it as "ok".
                   coordinator.pause_tracker.reset
-                  skippable_message, = find_skippable_message
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-                  mark_as_consumed(skippable_message)
+                  dispatch_if_needed_and_mark_as_consumed
                   pause(coordinator.seek_offset, nil, false)
                 end
               end
@@ -133,6 +131,25 @@ module Karafka
               )
             end
 
+            # Dispatches the message to the DLQ (when needed and when applicable based on settings)
+            #   and marks this message as consumed for non MOM flows.
+            #
+            # If producer is transactional and config allows, uses transaction to do that
+            def dispatch_if_needed_and_mark_as_consumed
+              skippable_message, = find_skippable_message
+
+              dispatch = lambda do
+                dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                mark_as_consumed(skippable_message)
+              end
+
+              if dispatch_in_a_transaction?
+                transaction { dispatch.call }
+              else
+                dispatch.call
+              end
+            end
+
             # @param skippable_message [Array<Karafka::Messages::Message>]
             # @return [Hash] dispatch DLQ message
             def build_dlq_message(skippable_message)
@@ -167,6 +184,13 @@ module Karafka
             #   message without taking any action.
             def dispatch_to_dlq?
               topic.dead_letter_queue.topic
+            end
+
+            # @return [Boolean] should we use a transaction to move the data to the DLQ.
+            #   We can do it only when producer is transactional and configuration for DLQ
+            #   transactional dispatches is not set to false.
+            def dispatch_in_a_transaction?
+              producer.transactional? && topic.dead_letter_queue.transactional?
             end
           end
         end

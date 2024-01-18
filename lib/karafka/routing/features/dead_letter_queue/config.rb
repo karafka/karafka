@@ -13,10 +13,13 @@ module Karafka
           :topic,
           # Should retries be handled collectively on a batch or independently per message
           :independent,
+          # Move to DLQ and mark as consumed in transactional mode (if applicable)
+          :transactional,
           keyword_init: true
         ) do
           alias_method :active?, :active
           alias_method :independent?, :independent
+          alias_method :transactional?, :transactional
         end
       end
     end

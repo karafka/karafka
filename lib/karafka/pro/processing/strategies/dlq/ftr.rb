@@ -46,9 +46,9 @@ module Karafka
                   retry_after_pause
                 else
                   coordinator.pause_tracker.reset
-                  skippable_message, = find_skippable_message
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-                  mark_as_consumed(skippable_message)
+
+                  dispatch_if_needed_and_mark_as_consumed
+
                   pause(coordinator.seek_offset, nil, false)
                 end
               end

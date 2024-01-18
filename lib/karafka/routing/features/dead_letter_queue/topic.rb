@@ -16,17 +16,21 @@ module Karafka
           #   if we do not want to move it anywhere and just skip
           # @param independent [Boolean] needs to be true in order for each marking as consumed
           #   in a retry flow to reset the errors counter
+          # @param transactional [Boolean] if applicable, should transaction be used to move
+          #   given message to the dead-letter topic and mark it as consumed.
           # @return [Config] defined config
           def dead_letter_queue(
             max_retries: DEFAULT_MAX_RETRIES,
             topic: nil,
-            independent: false
+            independent: false,
+            transactional: true
           )
             @dead_letter_queue ||= Config.new(
               active: !topic.nil?,
               max_retries: max_retries,
               topic: topic,
-              independent: independent
+              independent: independent,
+              transactional: transactional
             )
           end
 

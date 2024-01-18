@@ -20,6 +20,7 @@ module Karafka
               required(:active) { |val| [true, false].include?(val) }
               required(:independent) { |val| [true, false].include?(val) }
               required(:max_retries) { |val| val.is_a?(Integer) && val >= 0 }
+              required(:transactional) { |val| [true, false].include?(val) }
             end
 
             # Validate topic name only if dlq is active
