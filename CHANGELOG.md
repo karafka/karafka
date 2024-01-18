@@ -14,6 +14,7 @@
 - [Enhancement] Provide an `:independent` configuration to DLQ allowing to reset pause count track on each marking as consumed when retrying.
 - [Enhancement] Remove no longer needed shutdown patches for `librdkafka` improving multi-sg shutdown times for `cooperative-sticky`.
 - [Enhancement] Allow for parallel closing of connections from independent consumer groups.
+- [Enhancement] Provide recovery flow for cases where DLQ dispatch would fail.
 - [Change] Make `Kubernetes::LivenessListener` not start until Karafka app starts running.
 - [Change] Remove the legacy "inside of topics" way of defining subscription groups names
 - [Change] Update supported instrumentation to report on `#tick`.
