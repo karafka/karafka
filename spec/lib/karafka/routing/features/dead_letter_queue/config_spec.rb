@@ -1,10 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:config) { described_class.new(active: active, independent: independent) }
+  subject(:config) do
+    described_class.new(
+      active: active,
+      independent: independent,
+      transactional: transactional
+    )
+  end
 
   let(:independent) { false }
   let(:active) { true }
+  let(:transactional) { true }
 
   describe '#active?' do
     context 'when active' do
@@ -31,6 +38,20 @@ RSpec.describe_current do
       let(:independent) { false }
 
       it { expect(config.independent?).to eq(false) }
+    end
+  end
+
+  describe '#transactional?' do
+    context 'when independent' do
+      let(:transactional) { true }
+
+      it { expect(config.transactional?).to eq(true) }
+    end
+
+    context 'when not transactional' do
+      let(:transactional) { false }
+
+      it { expect(config.transactional?).to eq(false) }
     end
   end
 end
