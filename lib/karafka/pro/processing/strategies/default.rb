@@ -107,8 +107,23 @@ module Karafka
           # allow to mark offsets inside of the transaction. If the transaction is initialized
           # only from the consumer, the offset will be stored in a regular fashion.
           #
+          # @param active_producer [WaterDrop::Producer] alternative producer instance we may want
+          #   to use. It is useful when we have connection pool or any other selective engine for
+          #   managing multiple producers. If not provided, default producer taken from `#producer`
+          #   will be used.
+          #
           # @param block [Proc] code that we want to run in a transaction
-          def transaction(&block)
+          #
+          # @note Please note, that if you provide the producer, it will reassign the producer of
+          #   the consumer for the transaction time. This means, that in case you would even
+          #   accidentally refer to `Consumer#producer` from other threads, it will contain the
+          #   reassigned producer and not the initially used/assigned producer. It is done that
+          #   way, so the message producing aliases operate from within transactions and since the
+          #   producer in transaction is locked, it will prevent other threads from using it.
+          def transaction(active_producer = producer, &block)
+            default_producer = producer
+            self.producer = active_producer
+
             transaction_started = false
 
             # Prevent from nested transactions. It would not make any sense
@@ -138,6 +153,8 @@ module Karafka
               marking.pop ? mark_as_consumed(*marking) : mark_as_consumed!(*marking)
             end
           ensure
+            self.producer = default_producer
+
             if transaction_started
               @_transaction_marked.clear
               @_in_transaction = false
