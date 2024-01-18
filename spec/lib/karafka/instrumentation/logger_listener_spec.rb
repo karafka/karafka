@@ -319,7 +319,7 @@ RSpec.describe_current do
 
     context 'when it is a consumer.tick.error' do
       let(:type) { 'consumer.tick.error' }
-      let(:message) { "Consumer tick failed due to an error: #{error}" }
+      let(:message) { "Consumer on tick failed due to an error: #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end

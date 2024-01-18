@@ -9,7 +9,8 @@ RSpec.describe_current do
         active: true,
         topic: 'deads',
         max_retries: 5,
-        independent: false
+        independent: false,
+        transactional: true
       }
     }
   end
@@ -26,6 +27,12 @@ RSpec.describe_current do
 
   context 'when independent flag is not boolean' do
     before { config[:dead_letter_queue][:independent] = rand }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when transactional flag is not boolean' do
+    before { config[:dead_letter_queue][:transactional] = rand }
 
     it { expect(check).not_to be_success }
   end

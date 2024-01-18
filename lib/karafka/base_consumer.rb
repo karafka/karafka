@@ -79,10 +79,25 @@ module Karafka
     end
 
     # @private
+    #
     # @note This should not be used by the end users as it is part of the lifecycle of things but
     #   not as part of the public api.
+    #
+    # @note We handle and report errors here because of flows that could fail. For example a DLQ
+    #   flow could fail if it was not able to dispatch the DLQ message. Other "non-user" based
+    #   flows do not interact with external systems and their errors are expected to bubble up
     def on_after_consume
       handle_after_consume
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        seek_offset: coordinator.seek_offset,
+        type: 'consumer.after_consume.error'
+      )
+
+      retry_after_pause
     end
 
     # Can be used to run code prior to scheduling of idle execution
