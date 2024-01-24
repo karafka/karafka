@@ -14,7 +14,10 @@ RSpec.describe_current do
       client.send(:kafka)
     end
 
-    after { client.stop }
+    after do
+      client.stop
+      client.send(:kafka).close
+    end
 
     # Kafka counts all the consumers one after another, that is why we need to check it in one
     # spec
