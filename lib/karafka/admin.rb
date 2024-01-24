@@ -195,7 +195,7 @@ module Karafka
         # was changing in the cluster. We should be able to safely restart our seeking request
         # when this happens without any issues
         #
-        # We wrap the consumer creation so we retry with a new consumer instance
+        # We wrap the consumer creation, so we retry with a new consumer instance
         with_rdkafka_retry(codes: %i[not_coordinator]) do
           with_consumer(settings) do |consumer|
             # If we have any time based stuff to resolve, we need to do it prior to commits
