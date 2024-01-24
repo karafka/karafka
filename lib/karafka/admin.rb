@@ -191,34 +191,41 @@ module Karafka
         mapped_consumer_group_id = app_config.consumer_mapper.call(consumer_group_id)
         settings = { 'group.id': mapped_consumer_group_id }
 
-        with_consumer(settings) do |consumer|
-          # If we have any time based stuff to resolve, we need to do it prior to commits
-          unless time_tpl.empty?
-            real_offsets = consumer.offsets_for_times(time_tpl)
+        # This error can occur when we query a broker that is not a coordinator because something
+        # was changing in the cluster. We should be able to safely restart our seeking request
+        # when this happens without any issues
+        #
+        # We wrap the consumer creation so we retry with a new consumer instance
+        with_rdkafka_retry(codes: %i[not_coordinator]) do
+          with_consumer(settings) do |consumer|
+            # If we have any time based stuff to resolve, we need to do it prior to commits
+            unless time_tpl.empty?
+              real_offsets = consumer.offsets_for_times(time_tpl)
 
-            real_offsets.to_h.each do |name, results|
-              results.each do |result|
-                raise(Errors::InvalidTimeBasedOffsetError) unless result
+              real_offsets.to_h.each do |name, results|
+                results.each do |result|
+                  raise(Errors::InvalidTimeBasedOffsetError) unless result
 
-                partition = result.partition
+                  partition = result.partition
 
-                # Negative offset means we're beyond last message and we need to query for the
-                # high watermark offset to get the most recent offset and move there
-                if result.offset.negative?
-                  _, offset = consumer.query_watermark_offsets(name, result.partition)
-                else
-                  # If we get an offset, it means there existed a message close to this time
-                  # location
-                  offset = result.offset
+                  # Negative offset means we're beyond last message and we need to query for the
+                  # high watermark offset to get the most recent offset and move there
+                  if result.offset.negative?
+                    _, offset = consumer.query_watermark_offsets(name, result.partition)
+                  else
+                    # If we get an offset, it means there existed a message close to this time
+                    # location
+                    offset = result.offset
+                  end
+
+                  # Since now we have proper offsets, we can add this to the final tpl for commit
+                  tpl.add_topic_and_partitions_with_offsets(name, [[partition, offset]])
                 end
-
-                # Since now we have proper offsets, we can add this to the final tpl for commit
-                tpl.add_topic_and_partitions_with_offsets(name, [[partition, offset]])
               end
             end
-          end
 
-          consumer.commit(tpl, false)
+            consumer.commit(tpl, false)
+          end
         end
       end
 
