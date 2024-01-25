@@ -10,7 +10,7 @@ gemspec
 # They are added here because they are part of the integration suite
 group :integrations do
   gem 'activejob'
-  gem 'karafka-web'
+  gem 'karafka-web', '>= 0.8.0.rc1'
 end
 
 group :test do

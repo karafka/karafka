@@ -80,5 +80,12 @@ module Karafka
     # Raised in transactions when we attempt to store offset for a partition that we have lost
     # This does not affect producer only transactions, hence we raise it only on offset storage
     AssignmentLostError = Class.new(BaseError)
+
+    # Raised if optional dependencies like karafka-web are required in a version that is not
+    # supported by the current framework version.
+    #
+    # Because we do not want to require web out of the box and we do not want to lock web with
+    # karafka 1:1, we do such a sanity check
+    DependencyConstraintsError = Class.new(BaseError)
   end
 end
