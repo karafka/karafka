@@ -143,3 +143,5 @@ end
 
 # Load railtie after everything else is ready so we know we can rely on it.
 require 'karafka/railtie'
+
+Karafka::Constraints.verify!
