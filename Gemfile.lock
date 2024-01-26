@@ -45,10 +45,10 @@ GEM
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-web (0.8.0.rc1)
+    karafka-web (0.8.0)
       erubi (~> 1.4)
-      karafka (>= 2.3.0.rc1, < 2.4.0)
-      karafka-core (>= 2.3.0.rc1, < 2.4.0)
+      karafka (>= 2.3.0, < 2.4.0)
+      karafka-core (>= 2.3.0, < 2.4.0)
       roda (~> 3.68, >= 3.69)
       tilt (~> 2.0)
     mini_portile2 (2.8.5)
@@ -95,7 +95,7 @@ DEPENDENCIES
   byebug
   factory_bot
   karafka!
-  karafka-web (>= 0.8.0.rc1)
+  karafka-web (>= 0.8.0)
   rspec
   simplecov
 
