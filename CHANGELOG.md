@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.3.0 (Unreleased)
+## 2.3.0 (2024-01-26)
 - **[Feature]** Introduce Exactly-Once Semantics within consumers `#transaction` block (Pro)
 - **[Feature]** Provide ability to multiplex subscription groups (Pro)
 - **[Feature]** Provide `Karafka::Admin::Acl` for Kafka ACL management via the Admin APIs.
@@ -25,6 +25,10 @@
 - [Fix] Fix invalid action label for consumers in DataDog logger instrumentation.
 - [Fix] Fix a scenario where `Karafka::Admin#seek_consumer_group` would fail because reaching not the coordinator.
 - [Ignore] option --include-consumer-groups not working as intended after removal of "thor"
+
+### Upgrade Notes
+
+Available [here](https://karafka.io/docs/Upgrades-2.3/).
 
 ## 2.2.14 (2023-12-07)
 - **[Feature]** Provide `Karafka::Admin#delete_consumer_group` and `Karafka::Admin#seek_consumer_group`.
