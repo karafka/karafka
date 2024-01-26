@@ -57,8 +57,8 @@ We also maintain many [integration specs](https://github.com/karafka/karafka/tre
 1. Add and install Karafka:
 
 ```bash
-# Make sure to install Karafka 2.2
-bundle add karafka --version ">= 2.2.10"
+# Make sure to install Karafka 2.3
+bundle add karafka --version ">= 2.3.0"
 
 bundle exec karafka install
 ```
