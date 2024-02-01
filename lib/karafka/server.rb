@@ -40,7 +40,7 @@ module Karafka
         process.on_sigquit { stop }
         process.on_sigterm { stop }
         process.on_sigtstp { quiet }
-        process.supervise
+        #process.supervise
 
         # Start is blocking until stop is called and when we stop, it will wait until
         # all of the things are ready to stop
