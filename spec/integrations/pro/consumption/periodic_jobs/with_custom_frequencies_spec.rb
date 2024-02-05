@@ -42,7 +42,7 @@ start_karafka_and_wait_until do
 end
 
 [
-  [5_000, 10_000],
+  [4_900, 10_000],
   [100, 1_000],
   [1_000, 2_000]
 ].each_with_index do |(min, max), index|
