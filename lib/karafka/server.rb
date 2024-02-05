@@ -61,10 +61,9 @@ module Karafka
       end
 
       # Starts Karafka with a supervision
-      # @note We don't need to sleep because Karafka::Fetcher is locking and waiting to
-      # finish loop (and it won't happen until we explicitly want to stop)
+      # @note We don't need to sleep because Karafka::Runner is locking and waiting to finish loop
+      # (and it won't happen until we explicitly want to stop)
       def start
-        Karafka::App.run!
         Karafka::Runner.new.call
       end
 
