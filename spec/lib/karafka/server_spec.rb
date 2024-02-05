@@ -105,14 +105,12 @@ RSpec.describe_current do
 
   describe '#start' do
     before do
-      allow(Karafka::App).to receive(:run!)
       allow(runner).to receive(:call)
 
       server_class.start
     end
 
     it 'expect to run' do
-      expect(Karafka::App).to have_received(:run!)
       expect(runner).to have_received(:call)
     end
   end
