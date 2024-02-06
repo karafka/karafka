@@ -3,8 +3,6 @@
 module Karafka
   # Class used to run the Karafka listeners in separate threads
   class Runner
-    Worker = Struct.new(:pid, :parent_reader)
-
     def initialize
       @manager = App.config.internal.connection.manager
       @conductor = App.config.internal.connection.conductor
@@ -18,7 +16,7 @@ module Karafka
       process = Karafka::App.config.internal.process
 
       if workers_c > 0
-        workers = workers_c.times.map do
+        workers_c.times.map do
           parent_reader, child_writer = IO.pipe
 
           pid = fork do
@@ -41,7 +39,7 @@ module Karafka
 
           child_writer.close
 
-          Worker.new(pid, parent_reader)
+          Server.forks << Cluster::Fork.new(pid, parent_reader)
         end
 
         process.supervise
@@ -51,13 +49,13 @@ module Karafka
         ::Karafka::Process.tags.add(:type, "supervisor")
 
         begin
-          ready_readers = IO.select(workers.map(&:parent_reader)).first
+          ready_readers = IO.select(Server.forks.map(&:parent_reader)).first
           first_read = ready_readers.first.read
         rescue Interrupt
           first_read = ''
         end
 
-        workers.map(&:pid).each do |pid|
+        Server.forks.map(&:pid).each do |pid|
           Karafka.logger.debug "=> Waiting for worker with pid #{pid} to exit"
           ::Process.waitpid(pid)
           Karafka.logger.debug "=> Worker with pid #{pid} shutdown"
@@ -65,13 +63,8 @@ module Karafka
 
         exception_found = !first_read.empty?
         raise Marshal.load(first_read) if exception_found
-
-        sleep(10)
-
       else
-
         process.supervise
-
 
         run_one
       end
@@ -127,6 +120,11 @@ module Karafka
         @conductor.wait
 
         @manager.control
+
+        if ::Process.ppid == 1 && !@sent
+          ::Process.kill('SIGTERM', ::Process.pid)
+          @sent = true
+        end
       end
 
       # We close the jobs queue only when no listener threads are working.

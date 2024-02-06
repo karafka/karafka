@@ -14,6 +14,7 @@ module Karafka
       SIGTERM
       SIGTTIN
       SIGTSTP
+      SIGCHLD
     ].freeze
 
     HANDLED_SIGNALS.each do |signal|
