@@ -13,11 +13,9 @@ module Karafka
     # Starts listening on all the listeners asynchronously and handles the jobs queue closing
     # after listeners are done with their work.
     def call
-      workers_c =1
+      workers_c = 1
 
       process = Karafka::App.config.internal.process
-
-        process.supervise
 
       if workers_c > 0
         workers = workers_c.times.map do
@@ -28,7 +26,8 @@ module Karafka
               parent_reader.close
 
               process.supervise
-              Karafka::Web.config.tracking.scheduler.async_call
+
+              Karafka::Process.tags.add(:type, "fork:#{::Process.ppid}")
 
               run_one
             rescue Exception => e
@@ -44,6 +43,12 @@ module Karafka
 
           Worker.new(pid, parent_reader)
         end
+
+        process.supervise
+
+        Karafka::App.run!
+
+        ::Karafka::Process.tags.add(:type, "supervisor")
 
         begin
           ready_readers = IO.select(workers.map(&:parent_reader)).first
@@ -64,6 +69,10 @@ module Karafka
         sleep(10)
 
       else
+
+        process.supervise
+
+
         run_one
       end
     # If anything crashes here, we need to raise the error and crush the runner because it means
