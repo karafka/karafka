@@ -8,6 +8,12 @@ module Karafka
     # @note Thread running code needs to manage it's own exceptions. If they leak out, they will
     #   abort thread on exception.
     module Async
+      # Mutex used to ensure we do not create multiple threads if we decide to run this
+      # in parallel on multiple threads
+      MUTEX = Mutex.new
+
+      private_constant :MUTEX
+
       class << self
         # Adds forwardable to redirect thread-based control methods to the underlying thread that
         # runs the async operations
@@ -22,10 +28,14 @@ module Karafka
 
       # Runs the `#call` method in a new thread
       def async_call
-        @thread = Thread.new do
-          Thread.current.abort_on_exception = true
+        MUTEX.synchronize do
+          return if @thread&.alive?
 
-          call
+          @thread = Thread.new do
+            Thread.current.abort_on_exception = true
+
+            call
+          end
         end
       end
     end

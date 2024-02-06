@@ -5,6 +5,7 @@
 require 'open3'
 
 InvalidExitCode = Class.new(StandardError)
+InvalidState = Class.new(StandardError)
 
 def system!(cmd, raise_error: true)
   stdout, stderr, status = Open3.capture3(cmd)
@@ -25,7 +26,7 @@ Bundler.with_unbundled_env do
       --skip-active-storage \
       --skip-active-job \
       --skip-action-cable \
-      --api \
+      --skip-asset-pipeline \
       --skip-action-mailer \
       --skip-active-record \
       app
@@ -33,9 +34,6 @@ Bundler.with_unbundled_env do
 
   system!('cp Gemfile ./app/')
   system!('cd app && bundle install')
-  msg = system!('cd app && bundle exec karafka install', raise_error: false)
-
-  exit if msg.include?('karafka-web < 0.8.0 is not compatible with this karafka version')
-
-  raise InvalidExitCode
+  system!('cd app && bundle exec karafka install')
+  system!('cd app && bundle exec karafka-web install')
 end

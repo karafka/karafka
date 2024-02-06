@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.3.1 (Unreleased)
+- [Refactor] Ensure that `Karafka::Helpers::Async#async_call` can run from multiple threads.
+
 ## 2.3.0 (2024-01-26)
 - **[Feature]** Introduce Exactly-Once Semantics within consumers `#transaction` block (Pro)
 - **[Feature]** Provide ability to multiplex subscription groups (Pro)

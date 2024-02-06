@@ -100,6 +100,10 @@ module Karafka
       workers = Processing::WorkersBatch.new(jobs_queue)
       listeners = Connection::ListenersBatch.new(jobs_queue)
 
+      # We mark it prior to delegating to the manager as manager will have to start at least one
+      # connection to Kafka, hence running
+      Karafka::App.run!
+
       # Register all the listeners so they can be started and managed
       @manager.register(listeners)
 
