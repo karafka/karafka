@@ -5,6 +5,8 @@ module Karafka
     # Base class for all the command that we want to define
     # This base class provides an interface to easier separate single independent commands
     class Base
+      include Helpers::Colorize
+
       # @return [Hash] given command cli options
       attr_reader :options
 
@@ -17,6 +19,23 @@ module Karafka
       # This method should implement proper cli action
       def call
         raise NotImplementedError, 'Implement this in a subclass'
+      end
+
+      private
+
+      # Prints marketing info
+      def print_marketing_info
+        Karafka.logger.info Info::BANNER
+
+        if Karafka.pro?
+          Karafka.logger.info(
+            green('Thank you for using Karafka Pro!')
+          )
+        else
+          Karafka.logger.info(
+            red('Upgrade to Karafka Pro for more features and support: https://karafka.io')
+          )
+        end
       end
 
       class << self

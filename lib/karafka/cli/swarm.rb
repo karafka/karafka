@@ -1,0 +1,26 @@
+# frozen_string_literal: true
+
+module Karafka
+  # Karafka framework Cli
+  class Cli
+    class Swarm < Base
+      desc 'Starts swarm of Karafka consumers with a supervisor'
+
+      aliases :swarm
+
+      instance_exec &Server::OPTIONS_BUILDER
+
+      def call
+        # Print our banner and info in the dev mode
+        print_marketing_info if Karafka::App.env.development?
+
+        # This will register inclusions and exclusions in the routing, so all forks will use it
+        server = Server.new
+        server.register_inclusions
+        server.register_exclusions
+
+        Karafka::Swarm::Supervisor.new.run
+      end
+    end
+  end
+end

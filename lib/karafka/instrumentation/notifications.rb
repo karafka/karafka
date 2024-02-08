@@ -22,6 +22,7 @@ module Karafka
 
         app.initializing
         app.initialized
+        app.supervising
         app.running
         app.quieting
         app.quiet
@@ -72,6 +73,13 @@ module Karafka
         rebalance.partitions_revoked
 
         statistics.emitted
+
+        swarm.node.after_fork
+        swarm.supervisor.before_fork
+        swarm.supervisor.after_fork
+        swarm.supervisor.control
+        swarm.supervisor.stopping
+        swarm.supervisor.terminating
 
         worker.process
         worker.processed

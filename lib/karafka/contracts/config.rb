@@ -49,6 +49,12 @@ module Karafka
         # In theory this could be less than a second, however this would impact the maximum time
         # of a single consumer queue poll, hence we prevent it
         required(:tick_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
+        required(:supervision_sleep) { |val| val.is_a?(Numeric) && val > 0 }
+        required(:forceful_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
+
+        nested(:swarm) do
+          required(:node) { |val| val == false || val.nil? || val.is_a?(Karafka::Swarm::Node) }
+        end
 
         nested(:connection) do
           required(:manager) { |val| !val.nil? }

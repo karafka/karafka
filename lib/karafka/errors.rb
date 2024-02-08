@@ -87,5 +87,13 @@ module Karafka
     # Because we do not want to require web out of the box and we do not want to lock web with
     # karafka 1:1, we do such a sanity check
     DependencyConstraintsError = Class.new(BaseError)
+
+    # Raised when we were not able to open pidfd for given pid
+    # This should not happen. If you see it, please report.
+    PidfdOpenFailedError = Class.new(BaseError)
+
+    # Failed to send signal to a process via pidfd
+    # This should not happen. If you see it, please report.
+    PidfdSignalFailedError = Class.new(BaseError)
   end
 end
