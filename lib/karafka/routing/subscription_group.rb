@@ -8,6 +8,12 @@ module Karafka
     # @note One subscription group will always belong to one consumer group, but one consumer
     #   group can have multiple subscription groups.
     class SubscriptionGroup
+      include Helpers::Imports::Config.new(
+        activity_manager: %i[internal routing activity_manager],
+        client_id: %i[client_id],
+        node: %i[internal swarm node]
+      )
+
       attr_reader :id, :name, :topics, :kafka, :consumer_group
 
       # Lock for generating new ids safely
@@ -67,7 +73,7 @@ module Karafka
 
       # @return [Boolean] is this subscription group one of active once
       def active?
-        config.internal.routing.activity_manager.active?(:subscription_groups, name)
+        activity_manager.active?(:subscription_groups, name)
       end
 
       # @return [Array<String>] names of topics to which we should subscribe.
@@ -95,7 +101,7 @@ module Karafka
 
         inject_group_instance_id(kafka)
 
-        kafka[:'client.id'] ||= config.client_id
+        kafka[:'client.id'] ||= client_id
         kafka[:'group.id'] ||= @consumer_group.id
         kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
@@ -120,18 +126,11 @@ module Karafka
         # If group instance id was not even configured, do nothing
         return unless group_instance_prefix
 
-        node = config.internal.swarm.node
-
         # If there is a node, we need to take its id and inject it as well so multiple forks can
         # have different instances ids but they are reproducible
         components = [group_instance_prefix, node ? node.id : nil, @position]
 
         kafka[:'group.instance.id'] = group_instance_id.compact.join('_')
-      end
-
-      # @return [Karafka::Core::Configurable::Node] app config
-      def config
-        Karafka::App.config
       end
     end
   end
