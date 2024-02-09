@@ -114,10 +114,15 @@ module Karafka
           once(:quiet!) { active_listeners.each(&:quiet!) }
 
           # If we are in the process of moving to quiet state, we need to check it.
-          if Karafka::App.quieting? && active_listeners.all?(&:quiet?)
+          if Karafka::App.quieting?
+            # If we are quieting but not all active listeners are quiet we need to wait for all of
+            # them to reach the quiet state
+            return unless active_listeners.all?(&:quiet?)
+
             once(:quieted!) { Karafka::App.quieted! }
           end
 
+          # Do nothing if we moved to quiet state and want to be in it
           return if Karafka::App.quiet?
 
           # Since separate subscription groups are subscribed to different topics, there is no risk
