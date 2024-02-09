@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.3.2 (Unreleased)
+- [Fix] Quieting mode causes too early unsubscribe.
+
 ## 2.3.1 (2024-02-08)
 - [Refactor] Ensure that `Karafka::Helpers::Async#async_call` can run from multiple threads.
 

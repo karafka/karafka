@@ -116,8 +116,13 @@ module Karafka
           # If we are in the process of moving to quiet state, we need to check it.
           if Karafka::App.quieting? && active_listeners.all?(&:quiet?)
             once(:quieted!) { Karafka::App.quieted! }
+          # If we are quieting but not all active listeners are quiet we need to wait for all of
+          # them to reach the quiet state
+          elsif Karafka::App.quieting?
+            return
           end
 
+          # Do nothing if we moved to quiet state and want to be in it
           return if Karafka::App.quiet?
 
           # Since separate subscription groups are subscribed to different topics, there is no risk
