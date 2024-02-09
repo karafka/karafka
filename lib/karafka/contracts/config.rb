@@ -34,6 +34,10 @@ module Karafka
       required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
 
+      nested(:swarm) do
+        required(:nodes) { |val| val.is_a?(Integer) && val.positive? }
+      end
+
       nested(:admin) do
         # Can be empty because inherits values from the root kafka
         required(:kafka) { |val| val.is_a?(Hash) }
@@ -53,7 +57,16 @@ module Karafka
         required(:forceful_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
 
         nested(:swarm) do
+          # nil is the default state, false indicates we're in the supervisor
           required(:node) { |val| val == false || val.nil? || val.is_a?(Karafka::Swarm::Node) }
+          required(:orphaned_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
+          required(:pidfd_open_syscall) { |val| val.is_a?(Integer) && val >= 0 }
+          required(:pidfd_signal_syscall) { |val| val.is_a?(Integer) && val >= 0 }
+          required(:supervision_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
+          required(:liveness_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
+          required(:liveness_listener) { |val| !val.nil? }
+          required(:node_report_timeout) { |val| val.is_a?(Integer) && val >= 1_000 }
+          required(:node_restart_timeout) { |val| val.is_a?(Integer) && val >= 1_000 }
         end
 
         nested(:connection) do
