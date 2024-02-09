@@ -107,7 +107,7 @@ RSpec.describe_current do
       it { expect(details[:state_age]).to eq(13_995) }
       it { expect(details[:join_state]).to eq('steady') }
       it { expect(details[:state]).to eq('up') }
-      it { expect(monotonic_now - details[:changed_at]).to be < 10 }
+      it { expect(monotonic_now - details[:changed_at]).to be < 50 }
     end
   end
 

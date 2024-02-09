@@ -17,7 +17,8 @@ module Karafka
         config: %i[itself],
         kafka: %i[kafka],
         swarm: %i[internal swarm],
-        process: %i[process]
+        process: %i[process],
+        liveness_listener: %i[internal swarm liveness_listener]
       )
 
       # @param id [Integer] number of the fork. Used for uniqueness setup for group client ids and
@@ -48,10 +49,11 @@ module Karafka
           @pid = ::Process.pid
           @reader.close
 
+          # Indicate we are alive right after start
           write 1
 
           swarm.node = self
-          monitor.subscribe(LivenessListener.new)
+          monitor.subscribe(liveness_listener)
           monitor.instrument('swarm.node.after_fork', caller: self)
 
           Server.run

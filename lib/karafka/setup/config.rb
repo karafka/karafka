@@ -105,6 +105,13 @@ module Karafka
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
 
+      # Public configuration for swarm operations
+      setting :swarm do
+        # option [Integer] how many processes do we want to run in a swarm mode
+        # Keep in mind this is only applicable when running in a swarm mode
+        setting :nodes, default: 3
+      end
+
       # Admin specific settings.
       #
       # Since admin operations are often specific, they may require specific librdkafka settings
@@ -171,16 +178,23 @@ module Karafka
           # for static group membership, supervision and more. If set to `false`, it means this
           # process is not a fork
           setting :node, default: false
-
+          # Exit code we exit an orphaned child with to indicate something went wrong
           setting :orphaned_exit_code, default: 3
           # syscall number for https://man7.org/linux/man-pages/man2/pidfd_open.2.html
           setting :pidfd_open_syscall, default: 434
           # syscall number for https://man7.org/linux/man-pages/man2/pidfd_send_signal.2.html
           setting :pidfd_signal_syscall, default: 424
           # How often (in ms) should we control our nodes
+          # This is maximum time after which we will check. This can happen more often in case of
+          # system events.
           setting :supervision_interval, default: 30_000
           # How often should each node report its status
-          setting :liveness_interval, default: 5_000
+          setting :liveness_interval, default: 10_000
+          # Listener used to report nodes state to the supervisor
+          setting :liveness_listener, default: Swarm::LivenessListener.new
+          # How long should we wait for any info from the node before we consider it hanging at
+          # stop it
+          setting :node_report_timeout, default: 30_000
         end
 
         # Namespace for CLI related settings
