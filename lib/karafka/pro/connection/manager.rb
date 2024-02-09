@@ -122,7 +122,8 @@ module Karafka
             once(:quieted!) { Karafka::App.quieted! }
           end
 
-          return if Karafka::App.quiet? || Karafka::App.quieting?
+          # Do nothing if we moved to quiet state and want to be in it
+          return if Karafka::App.quiet?
 
           # Since separate subscription groups are subscribed to different topics, there is no risk
           # in shutting them down independently even if they operate in the same subscription group
