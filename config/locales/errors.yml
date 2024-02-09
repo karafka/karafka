@@ -53,10 +53,10 @@ en:
       internal.connection.proxy.committed.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.committed.wait_time_format: needs to be an integer bigger than 0
 
-      internal.swarm.node_format: needs to be nil, false or node instance
+      internal.swarm.node_format: needs to be false or node instance
       internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0
       internal.swarm.pidfd_open_syscall_format: needs to be an integer bigger or equal to 0
-      internal.swarm.pidfd_open_syscall_format: needs to be an integer bigger or equal to 0
+      internal.swarm.pidfd_signal_syscall_format: needs to be an integer bigger or equal to 0
       internal.swarm.supervision_interval_format: needs to be an integer bigger or equal to 1000
       internal.swarm.liveness_interval_format: needs to be an integer bigger or equal to 1000
       internal.swarm.liveness_listener_format: cannot be nil

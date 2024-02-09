@@ -17,7 +17,13 @@ RSpec.describe_current do
   end
 
   describe '#supervise' do
-    before { allow(process).to receive(:trap_signal) }
+    before do
+      allow(process).to receive(:trap_signal)
+
+      described_class::HANDLED_SIGNALS.each do |signal|
+        process.public_send(:"on_#{signal.to_s.downcase}", &-> {})
+      end
+    end
 
     it 'traps signals and yield' do
       process.supervise

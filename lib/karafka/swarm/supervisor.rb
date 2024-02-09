@@ -41,13 +41,11 @@ module Karafka
         # theoretical case since librdkafka is not thread-safe.
         Karafka.producer.close
 
-        # Indicate this is not a swarm node
-        swarm.node = false
-
         process.on_sigint { stop }
         process.on_sigquit { stop }
         process.on_sigterm { stop }
         process.on_sigtstp { quiet }
+        process.on_sigttin { signal('TTIN') }
         process.on_any_active { unlock }
         process.supervise
 
@@ -147,6 +145,14 @@ module Karafka
           return if @stopping
 
           @manager.control
+        end
+      end
+
+      # Sends desired signal to each node
+      # @param signal [String]
+      def signal(signal)
+        @mutex.synchronize do
+          @manager.signal(signal)
         end
       end
     end

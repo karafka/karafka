@@ -58,7 +58,7 @@ module Karafka
 
         nested(:swarm) do
           # nil is the default state, false indicates we're in the supervisor
-          required(:node) { |val| val == false || val.nil? || val.is_a?(Karafka::Swarm::Node) }
+          required(:node) { |val| val == false || val.is_a?(Karafka::Swarm::Node) }
           required(:orphaned_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
           required(:pidfd_open_syscall) { |val| val.is_a?(Integer) && val >= 0 }
           required(:pidfd_signal_syscall) { |val| val.is_a?(Integer) && val >= 0 }

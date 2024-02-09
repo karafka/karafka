@@ -96,19 +96,25 @@ module Karafka
       # Sends sigterm to the node
       # @note Parent API
       def stop
-        @pidfd.signal('TERM')
+        signal('TERM')
       end
 
       # Sends sigtstp to the node
       # @note Parent API
       def quiet
-        @pidfd.signal('TSTP')
+        signal('TSTP')
       end
 
       # Terminates node
       # @note Parent API
       def terminate
-        @pidfd.signal('KILL')
+        signal('KILL')
+      end
+
+      # Sends provided signal to the node
+      # @param signal [String]
+      def signal(signal)
+        @pidfd.signal(signal)
       end
 
       # Removes the dead process from the processes table

@@ -32,6 +32,7 @@ module Karafka
         process.on_sigquit { stop }
         process.on_sigterm { stop }
         process.on_sigtstp { quiet }
+        # Needed for instrumentation
         process.on_sigttin {}
         process.supervise
 

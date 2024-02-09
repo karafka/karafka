@@ -48,6 +48,12 @@ module Karafka
         @nodes.each(&:terminate)
       end
 
+      # Sends given signal to all nodes
+      # @param signal [String] signal name
+      def signal(signal)
+        @nodes.each { |node| node.signal(signal) }
+      end
+
       # @return [Boolean] true if none of the nodes is running
       def stopped?
         @nodes.none?(&:alive?)
