@@ -11,6 +11,7 @@ module Karafka
 
       instance_exec(&Server::OPTIONS_BUILDER)
 
+      # Starts the swarm
       def call
         # Print our banner and info in the dev mode
         print_marketing_info if Karafka::App.env.development?

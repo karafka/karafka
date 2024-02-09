@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
 module Karafka
+  # Namespace for the Swarm capabilities.
+  #
+  # Karafka in the swarm mode will fork additional processes and use the parent process as a
+  # supervisor. This capability allows to run multiple processes alongside but saves some memory
+  # due to CoW.
   module Swarm
-    # Supervisor that starts forks and monitors them to check if they are ok.
+    # Supervisor that starts forks and uses monitor to monitor them. Also handles shutdown of
+    # all the processes including itself.
     #
     # In case any node dies, it will be restarted.
     #
@@ -13,36 +19,23 @@ module Karafka
       include Karafka::Core::Helpers::Time
       include Helpers::ConfigImporter.new(
         monitor: %i[monitor],
-        nodes_count: %i[swarm nodes],
         swarm: %i[internal swarm],
         supervision_interval: %i[internal swarm supervision_interval],
         shutdown_timeout: %i[shutdown_timeout],
         supervision_sleep: %i[internal supervision_sleep],
         forceful_exit_code: %i[internal forceful_exit_code],
-        process: %i[internal process],
-        node_report_timeout: %i[internal swarm node_report_timeout]
+        process: %i[internal process]
       )
 
       def initialize
         @mutex = Mutex.new
-        @nodes = []
         @queue = Processing::TimedQueue.new
-        @nodes_statuses = Hash.new { |h, k| h[k] = {} }
+        @manager = Manager.new
       end
 
       # Creates needed number of forks, installs signals and starts supervision
       def run
-        pidfd = Pidfd.new(::Process.pid)
-
-        monitor.instrument('swarm.supervisor.before_fork', caller: self, nodes: @nodes)
-
-        @nodes = Array.new(nodes_count) do |i|
-          Node.new(i, pidfd).tap(&:start)
-        end
-
-        monitor.instrument('swarm.supervisor.after_fork', caller: self, nodes: @nodes)
-
-        @nodes.each { |node| @nodes_statuses[node][:control] = monotonic_now }
+        @manager.start
 
         # Close producer just in case. While it should not be used, we do not want even a
         # theoretical case since librdkafka is not thread-safe.
@@ -64,7 +57,7 @@ module Karafka
           return if Karafka::App.terminated?
 
           lock
-          control
+          @manager.control
         end
       end
 
@@ -95,13 +88,13 @@ module Karafka
         initialized = true
         Karafka::App.stop!
 
-        @nodes.each(&:stop)
+        @manager.stop
 
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
         ((shutdown_timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
-          return if @nodes.none?(&:alive?)
+          return if @manager.stopped?
 
           sleep(supervision_sleep)
         end
@@ -112,11 +105,11 @@ module Karafka
           'error.occurred',
           caller: self,
           error: e,
-          nodes: @nodes,
+          manager: @manager,
           type: 'app.stopping.error'
         )
 
-        @nodes.each(&:terminate)
+        @manager.terminate
 
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)
@@ -135,7 +128,7 @@ module Karafka
           @quieting = true
 
           Karafka::App.quiet!
-          @nodes.each(&:quiet)
+          @manager.quiet
           Karafka::App.quieted!
         end
       end
@@ -146,7 +139,6 @@ module Karafka
       # - If node does not want to close itself gracefully, will kill it
       # - If node was dead, new node will be started as a recovery means
       def control
-        # tutaj backoff zeby to nie lecialo czesciej niz raz na 10 sekund niezaleznie od tickow
         @mutex.synchronize do
           # If we are in quieting or stopping we should no longer control children
           # Those states aim to finally shutdown nodes and we should not forcefully do anything
@@ -154,49 +146,7 @@ module Karafka
           return if @quieting
           return if @stopping
 
-          monitor.instrument('swarm.supervisor.control', caller: self, nodes: @nodes)
-
-          @nodes.each do |node|
-            if node.alive?
-              statuses = @nodes_statuses[node]
-
-              if statuses.key?(:stop)
-                next unless monotonic_now - statuses[:stop] >= shutdown_timeout
-
-                monitor.instrument('swarm.supervisor.terminating', caller: self, nodes: @nodes, node: node) do
-                  node.terminate
-                end
-              end
-
-              report = node.read
-
-              if report
-                statuses[:control] = monotonic_now
-
-                if report.include?('0')
-                  monitor.instrument('swarm.supervisor.stopping', caller: self, nodes: @nodes, node: node) do
-                    node.stop
-                    statuses[:stop] = monotonic_now
-                  end
-                end
-              end
-
-              if monotonic_now - statuses[:control] >= node_report_timeout
-                monitor.instrument('swarm.supervisor.stopping', caller: self, nodes: @nodes, node: node) do
-                  node.stop
-                  statuses[:stop] = monotonic_now
-                end
-              end
-            else
-              node.cleanup
-              @nodes_statuses[node] = {}
-              @nodes_statuses[node][:control] = monotonic_now
-
-              monitor.instrument('swarm.supervisor.before_fork', caller: self, nodes: @nodes, node: node)
-              node.start
-              monitor.instrument('swarm.supervisor.after_fork', caller: self, nodes: @nodes, node: node)
-            end
-          end
+          @manager.control
         end
       end
     end

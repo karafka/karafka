@@ -75,11 +75,11 @@ module Karafka
         statistics.emitted
 
         swarm.node.after_fork
-        swarm.supervisor.before_fork
-        swarm.supervisor.after_fork
-        swarm.supervisor.control
-        swarm.supervisor.stopping
-        swarm.supervisor.terminating
+        swarm.manager.before_fork
+        swarm.manager.after_fork
+        swarm.manager.control
+        swarm.manager.stopping
+        swarm.manager.terminating
 
         worker.process
         worker.processed

@@ -52,6 +52,8 @@ module Karafka
       @supervised = false
     end
 
+    # Clears all the defined callbacks. Useful for post-fork cleanup when parent already defined
+    # some signals
     def clear
       @callbacks.clear
     end

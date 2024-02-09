@@ -68,7 +68,7 @@ module Karafka
       # @note Child API
       def write(content)
         @writer.write_nonblock content.to_s
-      rescue IO::EAGAINWaitWritable, IO::WaitWritable, Errno::EPIPE
+      rescue IO::WaitWritable, Errno::EPIPE
         false
       end
 
@@ -77,7 +77,7 @@ module Karafka
       # @note Parent API
       def read
         @reader.read_nonblock(1024)
-      rescue IO::EAGAINWaitReadable, EOFError, IO::WaitReadable, Errno::EPIPE
+      rescue IO::WaitReadable, EOFError, Errno::EPIPE
         false
       end
 

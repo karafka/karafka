@@ -53,7 +53,7 @@ RSpec.describe_current do
   %w[
     production test development
   ].each do |env|
-    context "environment: #{env}" do
+    context "when environment: #{env}" do
       before { karafka_env.replace(env) }
 
       it { expect(karafka_env.public_send(:"#{env}?")).to eq true }
@@ -65,7 +65,7 @@ RSpec.describe_current do
     unset
     invalid
   ].each do |env|
-    context "environment: #{env}" do
+    context "when environment: #{env}" do
       it { expect(karafka_env.public_send(:"#{env}?")).to eq false }
     end
   end

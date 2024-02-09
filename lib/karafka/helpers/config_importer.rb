@@ -9,6 +9,7 @@ module Karafka
       #   The key is the name under which attribute will be visible and the value is the full
       #   path to the attribute
       def initialize(attributes = { config: %i[itself] })
+        super()
         @attributes = attributes
       end
 
