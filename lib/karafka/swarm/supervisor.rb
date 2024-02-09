@@ -10,13 +10,13 @@ module Karafka
     #   to have any sockets or anything else on it that could break under forking
     class Supervisor
       include Karafka::Core::Helpers::Time
-      include Helpers::Imports::Monitor
-      include Helpers::Imports::Config.new(
-        swarm_config: %i[internal swarm],
+      include Helpers::ConfigImporter.new(
+        monitor: %i[monitor],
+        swarm: %i[internal swarm],
         supervision_interval: %i[internal swarm supervision_interval],
         shutdown_timeout: %i[shutdown_timeout],
         supervision_sleep: %i[internal supervision_sleep],
-        forceful_exit_code: %i[forceful_exit_code],
+        forceful_exit_code: %i[internal forceful_exit_code],
         process: %i[internal process]
       )
 
@@ -32,14 +32,14 @@ module Karafka
 
         @pidfd = Pidfd.new(::Process.pid)
 
-        @nodes = Array.new(3) do |i|
+        @nodes = Array.new(1) do |i|
           Node.new(i, @pidfd).tap(&:start)
         end
 
         @nodes.each { |node| @nodes_statuses[node][:control] = monotonic_now }
 
         Karafka.producer.close
-        swarm_config.node = false
+        swarm.node = false
 
         process.on_sigint { stop }
         process.on_sigquit { stop }
@@ -50,7 +50,7 @@ module Karafka
 
         Karafka::App.supervise!
 
-        while true
+        loop do
           return if Karafka::App.terminated?
 
           lock
@@ -69,7 +69,7 @@ module Karafka
       end
 
       def stop
-        return if swarm_config.node
+        return if swarm.node
 
         # Initialize the stopping process only if Karafka was running
         return if Karafka::App.stopping?
@@ -113,7 +113,7 @@ module Karafka
       end
 
       def quiet
-        return if swarm_config.node
+        return if swarm.node
 
         Karafka::App.quiet!
         @nodes.each(&:quiet)
@@ -122,7 +122,7 @@ module Karafka
 
       def control
         # tutaj backoff zeby to nie lecialo czesciej niz raz na 10 sekund niezaleznie od tickow
-        return if swarm_config.node
+        return if swarm.node
 
         @mutex.synchronize do
           return if Karafka::App.done?

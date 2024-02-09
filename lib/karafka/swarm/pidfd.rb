@@ -5,7 +5,7 @@ module Karafka
     # Pidfd Linux representation wrapped with Ruby for communication within Swarm
     # It is more stable than using `#pid` and `#ppid` + signals and cheaper
     class Pidfd
-      include Helpers::Imports::Config.new(
+      include Helpers::ConfigImporter.new(
         pidfd_open_syscall: %i[internal swarm pidfd_open_syscall],
         pidfd_signal_syscall: %i[internal swarm pidfd_signal_syscall]
       )

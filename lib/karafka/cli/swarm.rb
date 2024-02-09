@@ -3,12 +3,13 @@
 module Karafka
   # Karafka framework Cli
   class Cli
+    # Starts swarm of consumers forked from the supervisor
     class Swarm < Base
       desc 'Starts swarm of Karafka consumers with a supervisor'
 
       aliases :swarm
 
-      instance_exec &Server::OPTIONS_BUILDER
+      instance_exec(&Server::OPTIONS_BUILDER)
 
       def call
         # Print our banner and info in the dev mode

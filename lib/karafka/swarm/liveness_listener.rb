@@ -7,7 +7,7 @@ module Karafka
     #   - makes sure we did not become an orphan and if so, exits
     class LivenessListener
       include Karafka::Core::Helpers::Time
-      include Helpers::Imports::Config.new(
+      include Helpers::ConfigImporter.new(
         node: %i[internal swarm node],
         liveness_interval: %i[internal swarm liveness_interval],
         orphaned_exit_code: %i[internal swarm orphaned_exit_code]

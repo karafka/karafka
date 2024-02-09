@@ -75,7 +75,7 @@ module Karafka
         )
       end
 
-      instance_exec &OPTIONS_BUILDER
+      instance_exec(&OPTIONS_BUILDER)
 
       # Start the Karafka server
       def call

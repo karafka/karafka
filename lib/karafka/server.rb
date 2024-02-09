@@ -26,6 +26,8 @@ module Karafka
           config.internal.routing.activity_manager.to_h
         )
 
+        # We clear as we do not want parent handlers in case of working from fork
+        process.clear
         process.on_sigint { stop }
         process.on_sigquit { stop }
         process.on_sigterm { stop }

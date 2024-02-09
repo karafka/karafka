@@ -36,6 +36,8 @@ module Karafka
 
     # Assigns a callback that will run on any supported signal that has at least one callback
     # registered already.
+    # @param block [Proc] code we want to run
+    # @note This will only bind to signals that already have at least one callback defined
     def on_any_active(&block)
       HANDLED_SIGNALS.each do |signal|
         next unless @callbacks.include?(:"#{signal}")
@@ -48,6 +50,10 @@ module Karafka
     def initialize
       @callbacks = Hash.new { |hsh, key| hsh[key] = [] }
       @supervised = false
+    end
+
+    def clear
+      @callbacks.clear
     end
 
     # Method catches all HANDLED_SIGNALS and performs appropriate callbacks (if defined)

@@ -8,7 +8,7 @@ module Karafka
     # @note One subscription group will always belong to one consumer group, but one consumer
     #   group can have multiple subscription groups.
     class SubscriptionGroup
-      include Helpers::Imports::Config.new(
+      include Helpers::ConfigImporter.new(
         activity_manager: %i[internal routing activity_manager],
         client_id: %i[client_id],
         node: %i[internal swarm node]
@@ -130,7 +130,7 @@ module Karafka
         # have different instances ids but they are reproducible
         components = [group_instance_prefix, node ? node.id : nil, @position]
 
-        kafka[:'group.instance.id'] = group_instance_id.compact.join('_')
+        kafka[:'group.instance.id'] = components.compact.join('_')
       end
     end
   end

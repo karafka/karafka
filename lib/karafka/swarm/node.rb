@@ -12,11 +12,12 @@ module Karafka
     #   make certain requests to it. In case of child, it is used to provide zombie-fencing and
     #   report liveness
     class Node
-      include Helpers::Imports::Monitor
-      include Helpers::Imports::Config.new(
-        root_config: %i[itself],
-        kafka_config: %i[kafka],
-        swarm_config: %i[internal swarm]
+      include Helpers::ConfigImporter.new(
+        monitor: %i[monitor],
+        config: %i[itself],
+        kafka: %i[kafka],
+        swarm: %i[internal swarm],
+        process: %i[process]
       )
 
       # @param id [Integer] number of the fork. Used for uniqueness setup for group client ids and
@@ -39,9 +40,9 @@ module Karafka
 
         @pid = fork do
           # Supervisor producer is closed, hence we need a new one here
-          root_config.producer = ::WaterDrop::Producer.new do |p_config|
-            p_config.kafka = Setup::AttributesMap.producer(kafka_config.dup)
-            p_config.logger = root_config.logger
+          config.producer = ::WaterDrop::Producer.new do |p_config|
+            p_config.kafka = Setup::AttributesMap.producer(kafka.dup)
+            p_config.logger = config.logger
           end
 
           @pid = ::Process.pid
@@ -49,7 +50,7 @@ module Karafka
 
           write 1
 
-          swarm_config.node = self
+          swarm.node = self
           monitor.subscribe(LivenessListener.new)
           monitor.instrument('swarm.node.after_fork', caller: self)
 
@@ -65,7 +66,7 @@ module Karafka
       # @note Child API
       def write(content)
         @writer.write_nonblock content.to_s
-      rescue IO::EAGAINWaitWritable, IO::WaitWritable
+      rescue IO::EAGAINWaitWritable, IO::WaitWritable, Errno::EPIPE
         false
       end
 
@@ -74,7 +75,7 @@ module Karafka
       # @note Parent API
       def read
         @reader.read_nonblock(1024)
-      rescue IO::EAGAINWaitReadable, EOFError, IO::WaitReadable
+      rescue IO::EAGAINWaitReadable, EOFError, IO::WaitReadable, Errno::EPIPE
         false
       end
 
@@ -84,7 +85,7 @@ module Karafka
         @pidfd.alive?
       end
 
-      # @return [Boolean] true if node is orphaned or false otherwise. Used for orphanes detection.
+      # @return [Boolean] true if node is orphaned or false otherwise. Used for orphans detection.
       # @note Child API
       def orphaned?
         !@parent_pidfd.alive?
