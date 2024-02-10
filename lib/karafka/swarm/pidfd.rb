@@ -44,11 +44,13 @@ module Karafka
 
       # Sends given signal to the process using its pidfd
       # @param sig_name [String] signal name
+      # @return [Boolean] true if signal was sent, otherwise false or error raised. `false`
+      #   returned when we attempt to send a signal to a dead process
       # @note It will not send signals to dead processes
       def signal(sig_name)
         @mutex.synchronize do
           # Never signal processes that are dead
-          return unless alive?
+          return false unless alive?
 
           result = fdpid_signal(
             pidfd_signal_syscall,
@@ -58,9 +60,9 @@ module Karafka
             0
           )
 
-          return if result.zero?
+          return true if result.zero?
 
-          raise Errors::PidfdOpenFailedError, result
+          raise Errors::PidfdSignalFailedError, result
         end
       end
 
@@ -78,7 +80,7 @@ module Karafka
 
         return pidfd if pidfd != -1
 
-        raise Errors::PidfdSignalFailedError, pidfd
+        raise Errors::PidfdOpenFailedError, pidfd
       end
     end
   end
