@@ -92,7 +92,10 @@ module Karafka
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
         ((shutdown_timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
-          return if @manager.stopped?
+          if @manager.stopped?
+            @manager.cleanup
+            return
+          end
 
           sleep(supervision_sleep)
         end
