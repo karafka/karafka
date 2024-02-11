@@ -16,7 +16,7 @@ module Karafka
         monitor: %i[monitor],
         config: %i[itself],
         kafka: %i[kafka],
-        swarm: %i[internal swarm],
+        swarm: %i[swarm],
         process: %i[process],
         liveness_listener: %i[internal swarm liveness_listener]
       )
@@ -61,7 +61,7 @@ module Karafka
           @reader.close
 
           # Indicate we are alive right after start
-          write 1
+          healthy
 
           swarm.node = self
           monitor.subscribe(liveness_listener)
@@ -76,29 +76,33 @@ module Karafka
         @pidfd = Pidfd.new(@pid)
       end
 
-      # Writes in a non-blocking way provided content into the pipe
-      # @param content [Integer, String] anything we want to write to the parent
-      # @return [Boolean] true if ok, otherwise false
+      # Indicates that this node is doing well
       # @note Child API
-      def write(content)
-        @writer.write_nonblock content.to_s
-
-        true
-      rescue IO::WaitWritable, Errno::EPIPE, IOError
-        false
+      def healthy
+        write(1)
       end
 
-      # Reads in a non-blocking way provided content
-      # @return [String, false] Content from the pipe or false if nothing or something went wrong
+      # Indicates, that this node has failed
+      # @note Child API
+      def unhealthy
+        write(0)
+      end
+
+      # @return [Boolean, nil] true if all good, false if node reported issues and nil if no new
+      #   report was available.
       # @note Parent API
-      def read
-        @reader.read_nonblock(1024)
-      rescue IO::WaitReadable, Errno::EPIPE, IOError
-        false
+      def healthy?
+        result = read
+
+        return nil if result.nil?
+        return nil if result == false
+
+        !result.include?('0')
       end
 
       # @return [Boolean] true if node is alive or false if died
       # @note Parent API
+      # @note Keep in mind that the fact that process is alive does not mean it is healthy
       def alive?
         @pidfd.alive?
       end
@@ -136,6 +140,29 @@ module Karafka
       # Removes the dead process from the processes table
       def cleanup
         @pidfd.cleanup
+      end
+
+      private
+
+      # Reads in a non-blocking way provided content
+      # @return [String, false] Content from the pipe or false if nothing or something went wrong
+      # @note Parent API
+      def read
+        @reader.read_nonblock(1024)
+      rescue IO::WaitReadable, Errno::EPIPE, IOError
+        false
+      end
+
+      # Writes in a non-blocking way provided content into the pipe
+      # @param content [Integer, String] anything we want to write to the parent
+      # @return [Boolean] true if ok, otherwise false
+      # @note Child API
+      def write(content)
+        @writer.write_nonblock content.to_s
+
+        true
+      rescue IO::WaitWritable, Errno::EPIPE, IOError
+        false
       end
     end
   end

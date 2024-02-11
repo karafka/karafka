@@ -110,6 +110,10 @@ module Karafka
         # option [Integer] how many processes do we want to run in a swarm mode
         # Keep in mind this is only applicable when running in a swarm mode
         setting :nodes, default: 3
+        # This is set automatically when we fork. Used to hold reference that may be needed
+        # for static group membership, supervision and more. If set to `false`, it means this
+        # process is not a fork
+        setting :node, default: false
       end
 
       # Admin specific settings.
@@ -174,10 +178,6 @@ module Karafka
         setting :forceful_exit_code, default: 2
 
         setting :swarm do
-          # This is set automatically when we fork. Used to hold reference that may be needed
-          # for static group membership, supervision and more. If set to `false`, it means this
-          # process is not a fork
-          setting :node, default: false
           # Manager for swarm nodes control
           setting :manager, default: Swarm::Manager.new
           # Exit code we exit an orphaned child with to indicate something went wrong

@@ -36,6 +36,7 @@ module Karafka
 
       nested(:swarm) do
         required(:nodes) { |val| val.is_a?(Integer) && val.positive? }
+        required(:node) { |val| val == false || val.is_a?(Karafka::Swarm::Node) }
       end
 
       nested(:admin) do
@@ -57,8 +58,6 @@ module Karafka
         required(:forceful_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
 
         nested(:swarm) do
-          # nil is the default state, false indicates we're in the supervisor
-          required(:node) { |val| val == false || val.is_a?(Karafka::Swarm::Node) }
           required(:manager) { |val| !val.nil? }
           required(:orphaned_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
           required(:pidfd_open_syscall) { |val| val.is_a?(Integer) && val >= 0 }

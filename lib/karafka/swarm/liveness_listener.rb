@@ -8,7 +8,7 @@ module Karafka
     class LivenessListener
       include Karafka::Core::Helpers::Time
       include Helpers::ConfigImporter.new(
-        node: %i[internal swarm node],
+        node: %i[swarm node],
         liveness_interval: %i[internal swarm liveness_interval],
         orphaned_exit_code: %i[internal swarm orphaned_exit_code]
       )
@@ -28,8 +28,7 @@ module Karafka
         periodically do
           Kernel.exit!(orphaned_exit_code) if node.orphaned?
 
-          # 1 indicates all good, 0 would cause supervisor to stop this process
-          node.write 1
+          node.healthy
         end
       end
 

@@ -19,7 +19,8 @@ RSpec.describe_current do
         entity: ''
       },
       swarm: {
-        nodes: 2
+        nodes: 2,
+        node: false
       },
       admin: {
         kafka: {},
@@ -34,7 +35,6 @@ RSpec.describe_current do
         process: Karafka::Process.new,
         tick_interval: 5_000,
         swarm: {
-          node: false,
           manager: Karafka::Swarm::Manager.new,
           orphaned_exit_code: 2,
           pidfd_open_syscall: 434,
@@ -178,6 +178,14 @@ RSpec.describe_current do
 
     context 'when nodes is less than 1' do
       before { swarm_config[:nodes] = 0 }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when node is missing' do
+      before { swarm_config.delete(:node) }
 
       it 'expects to not be successful' do
         expect(contract.call(config)).not_to be_success
@@ -644,14 +652,6 @@ RSpec.describe_current do
   context 'when validating internal swarm settings' do
     let(:internal_swarm_config) do
       config[:internal][:swarm]
-    end
-
-    context 'when node is missing' do
-      before { internal_swarm_config.delete(:node) }
-
-      it 'expects to not be successful' do
-        expect(contract.call(config)).not_to be_success
-      end
     end
 
     context 'when manager is nil' do

@@ -53,7 +53,6 @@ en:
       internal.connection.proxy.committed.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.committed.wait_time_format: needs to be an integer bigger than 0
 
-      internal.swarm.node_format: needs to be false or node instance
       internal.swarm.manager_format: cannot be nil
       internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0
       internal.swarm.pidfd_open_syscall_format: needs to be an integer bigger or equal to 0
@@ -70,6 +69,7 @@ en:
       admin.max_attempts_format: 'needs to be an integer bigger than 0'
 
       swarm.nodes_format: 'needs to be an integer bigger than 0'
+      swarm.node_format: needs to be false or node instance
 
     server_cli_options:
       missing: needs to be present

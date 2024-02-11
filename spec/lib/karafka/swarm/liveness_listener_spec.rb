@@ -8,11 +8,11 @@ RSpec.describe_current do
   let(:orphaned) { [false] }
 
   before do
-    Karafka::App.config.internal.swarm.node = node
+    Karafka::App.config.swarm.node = node
     allow(node).to receive(:orphaned?).and_return(*orphaned)
   end
 
-  after { Karafka::App.config.internal.swarm.node = false }
+  after { Karafka::App.config.swarm.node = false }
 
   context 'when statistics are emitted too often' do
     context 'when node becomes orphaned' do

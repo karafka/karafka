@@ -11,7 +11,7 @@ module Karafka
       include Helpers::ConfigImporter.new(
         activity_manager: %i[internal routing activity_manager],
         client_id: %i[client_id],
-        node: %i[internal swarm node]
+        node: %i[swarm node]
       )
 
       attr_reader :id, :name, :topics, :kafka, :consumer_group

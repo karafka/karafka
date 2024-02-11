@@ -75,9 +75,9 @@ RSpec.describe_current do
       end
 
       context 'when operating in a swarm node' do
-        before { Karafka::App.config.internal.swarm.node = build(:swarm_node, id: 3) }
+        before { Karafka::App.config.swarm.node = build(:swarm_node, id: 3) }
 
-        after { Karafka::App.config.internal.swarm.node = false }
+        after { Karafka::App.config.swarm.node = false }
 
         it 'expect group.instance.id to use node.id' do
           expect(group.kafka[:'group.instance.id']).to eq('test_3_0')

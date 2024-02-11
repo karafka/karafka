@@ -3,37 +3,32 @@
 RSpec.describe Karafka::Swarm::Node, mode: :fork do
   subject(:node) { build(:swarm_node_with_reader_and_writer) }
 
-  describe '#write' do
-    it 'expect not to fail' do
-    end
-  end
-
-  describe '#read and #write' do
+  describe '#healthy? and #healthy' do
     context 'when nothing to read' do
-      it { expect(node.read).to eq(false) }
-      it { expect(node.write('1')).to eq(true) }
+      it { expect(node.healthy?).to eq(nil) }
+      it { expect(node.healthy).to eq(true) }
     end
 
-    context 'when something to read' do
+    context 'when healthy reported' do
       before do
-        node.write('1')
+        node.healthy
         # Wait as its async
         sleep(0.1)
       end
 
-      it { expect(node.read).to eq('1') }
+      it { expect(node.healthy?).to eq(true) }
     end
 
     context 'when pipe for writing is closed' do
       before { node.instance_variable_get('@writer').close }
 
-      it { expect(node.write('1')).to eq(false) }
+      it { expect(node.healthy).to eq(false) }
     end
 
     context 'when pipe for reading is closed' do
       before { node.instance_variable_get('@reader').close }
 
-      it { expect(node.read).to eq(false) }
+      it { expect(node.healthy?).to eq(nil) }
     end
   end
 
