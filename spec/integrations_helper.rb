@@ -264,7 +264,7 @@ end
 
 # Waits until block yields true
 # @param mode [Symbol] mode in which we are operating
-def wait_until(mode:)
+def wait_until(mode: :server)
   started_at = Time.now
   stop = false
 
