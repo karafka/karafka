@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe_current do
+RSpec.describe Karafka::Swarm::Pidfd, type: :fork do
   let(:pidfd) { nil }
 
   after { pidfd&.cleanup }
