@@ -56,6 +56,34 @@ RSpec.describe_current do
     it { expect(group.kafka[:'auto.offset.reset']).to eq('earliest') }
     it { expect(group.kafka[:'enable.auto.offset.store']).to eq(false) }
     it { expect(group.kafka[:'bootstrap.servers']).to eq(topic.kafka[:'bootstrap.servers']) }
+
+    context 'when with group.instance.id' do
+      let(:topic) do
+        build(
+          :routing_topic,
+          kafka: {
+            'bootstrap.servers': 'kafka://kafka:9092',
+            'group.instance.id': 'test'
+          }
+        )
+      end
+
+      context 'when not operating in a swarm node' do
+        it 'expect group.instance.id not to use node.id' do
+          expect(group.kafka[:'group.instance.id']).to eq('test_0')
+        end
+      end
+
+      context 'when operating in a swarm node' do
+        before { Karafka::App.config.internal.swarm.node = Karafka::Swarm::Node.new(3, nil) }
+
+        after { Karafka::App.config.internal.swarm.node = false }
+
+        it 'expect group.instance.id to use node.id' do
+          expect(group.kafka[:'group.instance.id']).to eq('test_3_0')
+        end
+      end
+    end
   end
 
   describe '#active?' do

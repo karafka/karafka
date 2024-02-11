@@ -21,6 +21,9 @@ module Karafka
         liveness_listener: %i[internal swarm liveness_listener]
       )
 
+      # @return [Integer] id of the node. Useful for client.group.id assignment
+      attr_reader :id
+
       # @param id [Integer] number of the fork. Used for uniqueness setup for group client ids and
       #   other stuff where we need to know a unique reference of the fork in regards to the rest
       #   of them.
