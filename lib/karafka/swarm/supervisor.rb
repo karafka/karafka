@@ -107,7 +107,15 @@ module Karafka
           type: 'app.stopping.error'
         )
 
+        # Run forceful kill
         @manager.terminate
+        # And wait until linux kills them
+        # This prevents us from existing forcefully with any dead child process still existing
+        # Since we have sent the `KILL` signal, it must die, so we can wait until all dead
+        sleep(supervision_sleep) until @manager.stopped?
+
+        # Cleanup the process table
+        @manager.cleanup
 
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)

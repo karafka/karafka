@@ -43,6 +43,11 @@ module Karafka
         @reader, @writer = IO.pipe
 
         @pid = fork do
+          # Close the old producer so it is not a subject to GC
+          # While it was not opened in the parent, without explicit closing, there still could be
+          # an attempt to close it when finalized, meaning it would be kept in memory.
+          config.producer.close
+
           # Supervisor producer is closed, hence we need a new one here
           config.producer = ::WaterDrop::Producer.new do |p_config|
             p_config.kafka = Setup::AttributesMap.producer(kafka.dup)
@@ -60,6 +65,8 @@ module Karafka
           monitor.instrument('swarm.node.after_fork', caller: self)
 
           Server.run
+
+          @writer.close
         end
 
         @writer.close

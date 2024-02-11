@@ -48,6 +48,11 @@ module Karafka
         @nodes.each(&:terminate)
       end
 
+      # Collects all processes statuses
+      def cleanup
+        @nodes.each(&:cleanup)
+      end
+
       # Sends given signal to all nodes
       # @param signal [String] signal name
       def signal(signal)
