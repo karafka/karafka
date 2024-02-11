@@ -34,6 +34,30 @@ RSpec.describe_current do
     end
   end
 
+  describe '#on_any_active' do
+    before { allow(process).to receive(:trap_signal) }
+
+    context 'when no callbacks registered' do
+      it 'expect not to bind to anything' do
+        process.on_any_active {}
+        process.supervise
+        expect(process).not_to have_received(:trap_signal)
+      end
+    end
+
+    context 'when callbacks were registered' do
+      before do
+        process.on_sigint {}
+      end
+
+      it 'expect to bind' do
+        process.on_any_active {}
+        process.supervise
+        expect(process).to have_received(:trap_signal).once
+      end
+    end
+  end
+
   describe '#supervised?' do
     context 'when we did not install the trap hooks yet' do
       it { expect(process.supervised?).to eq(false) }
