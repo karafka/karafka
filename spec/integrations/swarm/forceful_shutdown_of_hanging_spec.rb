@@ -13,8 +13,12 @@ Karafka::App.monitor.subscribe('swarm.node.after_fork') do
   Karafka::App.config.shutdown_timeout = 60_000
 end
 
-terminations = []
+stoppings = []
+Karafka::App.monitor.subscribe('swarm.manager.stopping') do
+  stoppings << true
+end
 
+terminations = []
 Karafka::App.monitor.subscribe('swarm.manager.terminating') do
   terminations << true
 end
@@ -41,6 +45,7 @@ rescue Errno::ESRCH
   false
 end
 
+assert_equal 2, stoppings.size
 assert_equal 2, terminations.size
 
 # All should be dead
