@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-# RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
-
-RSpec.describe_current do
+RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
   subject(:node) { build(:swarm_node_with_reader_and_writer) }
 
   describe '#write' do
