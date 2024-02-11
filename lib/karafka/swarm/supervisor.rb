@@ -20,6 +20,7 @@ module Karafka
       include Helpers::ConfigImporter.new(
         monitor: %i[monitor],
         swarm: %i[internal swarm],
+        manager: %i[internal swarm manager],
         supervision_interval: %i[internal swarm supervision_interval],
         shutdown_timeout: %i[shutdown_timeout],
         supervision_sleep: %i[internal supervision_sleep],
@@ -30,12 +31,11 @@ module Karafka
       def initialize
         @mutex = Mutex.new
         @queue = Processing::TimedQueue.new
-        @manager = Manager.new
       end
 
       # Creates needed number of forks, installs signals and starts supervision
       def run
-        @manager.start
+        manager.start
 
         # Close producer just in case. While it should not be used, we do not want even a
         # theoretical case since librdkafka is not thread-safe.
@@ -55,7 +55,7 @@ module Karafka
           return if Karafka::App.terminated?
 
           lock
-          @manager.control
+          manager.control
         end
       end
 
@@ -86,14 +86,14 @@ module Karafka
         initialized = true
         Karafka::App.stop!
 
-        @manager.stop
+        manager.stop
 
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
         ((shutdown_timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
-          if @manager.stopped?
-            @manager.cleanup
+          if manager.stopped?
+            manager.cleanup
             return
           end
 
@@ -106,19 +106,19 @@ module Karafka
           'error.occurred',
           caller: self,
           error: e,
-          manager: @manager,
+          manager: manager,
           type: 'app.stopping.error'
         )
 
         # Run forceful kill
-        @manager.terminate
+        manager.terminate
         # And wait until linux kills them
         # This prevents us from existing forcefully with any dead child process still existing
         # Since we have sent the `KILL` signal, it must die, so we can wait until all dead
-        sleep(supervision_sleep) until @manager.stopped?
+        sleep(supervision_sleep) until manager.stopped?
 
         # Cleanup the process table
-        @manager.cleanup
+        manager.cleanup
 
         # exit! is not within the instrumentation as it would not trigger due to exit
         Kernel.exit!(forceful_exit_code)
@@ -137,7 +137,7 @@ module Karafka
           @quieting = true
 
           Karafka::App.quiet!
-          @manager.quiet
+          manager.quiet
           Karafka::App.quieted!
         end
       end
@@ -155,7 +155,7 @@ module Karafka
           return if @quieting
           return if @stopping
 
-          @manager.control
+          manager.control
         end
       end
 
@@ -163,7 +163,7 @@ module Karafka
       # @param signal [String]
       def signal(signal)
         @mutex.synchronize do
-          @manager.signal(signal)
+          manager.signal(signal)
         end
       end
     end

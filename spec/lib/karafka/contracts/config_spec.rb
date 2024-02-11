@@ -35,6 +35,7 @@ RSpec.describe_current do
         tick_interval: 5_000,
         swarm: {
           node: false,
+          manager: Karafka::Swarm::Manager.new,
           orphaned_exit_code: 2,
           pidfd_open_syscall: 434,
           pidfd_signal_syscall: 424,
@@ -647,6 +648,14 @@ RSpec.describe_current do
 
     context 'when node is missing' do
       before { internal_swarm_config.delete(:node) }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when manager is nil' do
+      before { internal_swarm_config[:manager] = nil }
 
       it 'expects to not be successful' do
         expect(contract.call(config)).not_to be_success

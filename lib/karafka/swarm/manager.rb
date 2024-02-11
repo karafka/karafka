@@ -19,6 +19,8 @@ module Karafka
         node_restart_timeout: %i[internal swarm node_restart_timeout]
       )
 
+      attr_reader :nodes
+
       def initialize
         @nodes = []
         @statuses = Hash.new { |h, k| h[k] = {} }

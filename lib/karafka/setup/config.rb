@@ -178,6 +178,8 @@ module Karafka
           # for static group membership, supervision and more. If set to `false`, it means this
           # process is not a fork
           setting :node, default: false
+          # Manager for swarm nodes control
+          setting :manager, default: Swarm::Manager.new
           # Exit code we exit an orphaned child with to indicate something went wrong
           setting :orphaned_exit_code, default: 3
           # syscall number for https://man7.org/linux/man-pages/man2/pidfd_open.2.html
