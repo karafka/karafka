@@ -26,7 +26,7 @@ module Karafka
       # @param _event [Karafka::Core::Monitoring::Event]
       def on_statistics_emitted(_event)
         periodically do
-          exit!(orphaned_exit_code) if node.orphaned?
+          Kernel.exit!(orphaned_exit_code) if node.orphaned?
 
           # 1 indicates all good, 0 would cause supervisor to stop this process
           node.write 1

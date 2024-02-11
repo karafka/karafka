@@ -75,7 +75,7 @@ RSpec.describe_current do
       end
 
       context 'when operating in a swarm node' do
-        before { Karafka::App.config.internal.swarm.node = Karafka::Swarm::Node.new(3, nil) }
+        before { Karafka::App.config.internal.swarm.node = build(:swarm_node, id: 3) }
 
         after { Karafka::App.config.internal.swarm.node = false }
 
