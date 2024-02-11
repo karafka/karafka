@@ -26,4 +26,16 @@ FactoryBot.define do
       instance
     end
   end
+
+  factory :swarm_node_with_reader_and_writer, parent: :swarm_node do
+    initialize_with do
+      reader, writer = IO.pipe
+
+      instance = new(id, parent_pidfd)
+
+      instance.instance_variable_set('@writer', writer)
+      instance.instance_variable_set('@reader', reader)
+      instance
+    end
+  end
 end

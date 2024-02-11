@@ -68,19 +68,22 @@ module Karafka
 
       # Writes in a non-blocking way provided content into the pipe
       # @param content [Integer, String] anything we want to write to the parent
+      # @return [Boolean] true if ok, otherwise false
       # @note Child API
       def write(content)
         @writer.write_nonblock content.to_s
-      rescue IO::WaitWritable, Errno::EPIPE
+
+        true
+      rescue IO::WaitWritable, Errno::EPIPE, IOError
         false
       end
 
       # Reads in a non-blocking way provided content
-      # @return [String, false] Content from the pipe or false if nothing
+      # @return [String, false] Content from the pipe or false if nothing or something went wrong
       # @note Parent API
       def read
         @reader.read_nonblock(1024)
-      rescue IO::WaitReadable, EOFError, Errno::EPIPE
+      rescue IO::WaitReadable, Errno::EPIPE, IOError
         false
       end
 

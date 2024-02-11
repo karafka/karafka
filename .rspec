@@ -4,4 +4,4 @@
 # Do not run pro at the same time as default specs as it would cause state conflicts
 --tag ~type:pro
 # Do not run fork because they need to run in isolation
---tag ~type:fork
+--tag ~mode:fork
