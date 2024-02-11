@@ -19,6 +19,16 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
       it { expect(node.healthy?).to eq(true) }
     end
 
+    context 'when unhealthy reported' do
+      before do
+        node.unhealthy
+        # Wait as its async
+        sleep(0.1)
+      end
+
+      it { expect(node.healthy?).to eq(false) }
+    end
+
     context 'when pipe for writing is closed' do
       before { node.instance_variable_get('@writer').close }
 
@@ -29,6 +39,49 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
       before { node.instance_variable_get('@reader').close }
 
       it { expect(node.healthy?).to eq(nil) }
+    end
+  end
+
+  describe '#orphaned?' do
+    it { expect(node.orphaned?).to eq(false) }
+  end
+
+  describe '#stop' do
+    before { allow(node).to receive(:signal) }
+
+    it 'expect to TERM for stop' do
+      node.stop
+      expect(node).to have_received(:signal).with('TERM')
+    end
+  end
+
+  describe '#terminate' do
+    before { allow(node).to receive(:signal) }
+
+    it 'expect to KILL for terminate' do
+      node.terminate
+      expect(node).to have_received(:signal).with('KILL')
+    end
+  end
+
+  describe '#quiet' do
+    before { allow(node).to receive(:signal) }
+
+    it 'expect to TSTP for quiet' do
+      node.quiet
+      expect(node).to have_received(:signal).with('TSTP')
+    end
+  end
+
+  describe '#signal' do
+    let(:signal_string) { rand.to_s }
+    let(:pidfd) { node.instance_variable_get('@pidfd') }
+
+    before { allow(pidfd).to receive(:signal) }
+
+    it 'expect to pass through expected signal' do
+      node.signal(signal_string)
+      expect(pidfd).to have_received(:signal).with(signal_string)
     end
   end
 
