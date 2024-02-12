@@ -19,6 +19,7 @@ module Karafka
         node_restart_timeout: %i[internal swarm node_restart_timeout]
       )
 
+      # @return [Array<Node>] All nodes that manager manages
       attr_reader :nodes
 
       def initialize
@@ -68,7 +69,7 @@ module Karafka
 
       # Checks on nodes if they are ok one after another
       def control
-        monitor.instrument('swarm.manager.control', caller: self, nodes: @nodes) do
+        monitor.instrument('swarm.manager.control', caller: self) do
           @nodes.each do |node|
             statuses = @statuses[node]
 
@@ -93,11 +94,14 @@ module Karafka
       # @return [Boolean] should it be the last action taken on this node in this run
       def terminate_if_hanging(statuses, node)
         return false unless statuses.key?(:stop)
+        # If we already sent the termination request, we should not do it again
+        return true if statuses.key?(:terminate)
         # Do not run any other checks on this node if it is during stopping but still has time
         return true unless over?(statuses[:stop], shutdown_timeout)
 
-        monitor.instrument('swarm.manager.terminating', caller: self, nodes: @nodes, node: node) do
+        monitor.instrument('swarm.manager.terminating', caller: self, node: node) do
           node.terminate
+          statuses[:terminate] = monotonic_now
         end
 
         true
@@ -122,7 +126,7 @@ module Karafka
         # that would recover. Such states should be implemented in the listener.
         return true if healthy
 
-        monitor.instrument('swarm.manager.stopping', caller: self, nodes: @nodes, node: node) do
+        monitor.instrument('swarm.manager.stopping', caller: self, node: node) do
           node.stop
           statuses[:stop] = monotonic_now
         end
@@ -142,7 +146,7 @@ module Karafka
         return true unless over?(statuses[:control], node_report_timeout)
 
         # Start the stopping procedure if the node stopped reporting frequently enough
-        monitor.instrument('swarm.manager.stopping', caller: self, nodes: @nodes, node: node) do
+        monitor.instrument('swarm.manager.stopping', caller: self, node: node) do
           node.stop
           statuses[:stop] = monotonic_now
         end
@@ -184,7 +188,7 @@ module Karafka
       #
       # @param [Swarm::Node] node we're starting
       def start_one(node)
-        instr_args = { caller: self, nodes: @nodes, node: node }
+        instr_args = { caller: self, node: node }
 
         statuses = @statuses[node]
 

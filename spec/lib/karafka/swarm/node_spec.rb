@@ -88,7 +88,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
   describe '#alive?' do
     # Fake fork with parent pid reference
     before do
-      allow(node).to receive(:fork).and_return(fork_pid)
+      allow(Kernel).to receive(:fork).and_return(fork_pid)
       node.start
     end
 
@@ -111,7 +111,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
 
   describe '#start and #cleanup' do
     context 'when we could not open given pidfd' do
-      before { allow(node).to receive(:fork).and_return(0) }
+      before { allow(Kernel).to receive(:fork).and_return(0) }
 
       it { expect { node.start }.to raise_error(Karafka::Errors::PidfdOpenFailedError) }
     end

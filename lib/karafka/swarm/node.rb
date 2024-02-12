@@ -45,7 +45,7 @@ module Karafka
       def start
         @reader, @writer = IO.pipe
 
-        @pid = fork do
+        @pid = Kernel.fork do
           # Close the old producer so it is not a subject to GC
           # While it was not opened in the parent, without explicit closing, there still could be
           # an attempt to close it when finalized, meaning it would be kept in memory.
