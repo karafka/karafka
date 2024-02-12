@@ -129,6 +129,8 @@ module Karafka
               fatal "Runner crashed due to an error: #{error}"
             when 'app.stopping.error'
               error 'Forceful Karafka server stop'
+            when 'swarm.supervisor.error'
+              fatal "Swarm supervisor crashed due to an error: #{error}"
             when 'librdkafka.error'
               error "librdkafka internal error occurred: #{error}"
               # Those will only occur when retries in the client fail and when they did not stop

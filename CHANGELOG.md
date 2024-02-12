@@ -2,6 +2,7 @@
 
 ## 2.3.2 (Unreleased)
 - **[Feature]** Provide swarm capabilities
+- [Enhancement] Expand Logger listener with swarm notifications.
 - [Enhancement] Introduce K8s swarm liveness listener.
 - [Fix] Quieting mode causes too early unsubscribe.
 

@@ -55,8 +55,21 @@ module Karafka
           return if Karafka::App.terminated?
 
           lock
-          manager.control
+          control
         end
+      # If anything went wrong, signal this and die
+      # Supervisor is meant to be thin and not cause any issues. If you encounter this case
+      # please report it as it should be considered critical
+      rescue StandardError => e
+        monitor.instrument(
+          'error.occurred',
+          caller: self,
+          error: e,
+          manager: manager,
+          type: 'swarm.supervisor.error'
+        )
+
+        @nodes.terminate
       end
 
       private
@@ -151,7 +164,8 @@ module Karafka
         @mutex.synchronize do
           # If we are in quieting or stopping we should no longer control children
           # Those states aim to finally shutdown nodes and we should not forcefully do anything
-          # to them.
+          # to them. This especially applies to the quieting mode where any complex lifecycle
+          # reporting listeners may no longer report correctly
           return if @quieting
           return if @stopping
 

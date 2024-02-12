@@ -226,6 +226,34 @@ module Karafka
         MSG
       end
 
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_swarm_manager_stopping(event)
+        node = event[:node]
+        error "Swarm manager detected unhealthy node #{node.pid}. Sending TERM signal..."
+      end
+
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_swarm_manager_terminating(event)
+        node = event[:node]
+        error "Swarm manager detected unresponsive node #{node.pid}. Sending KILL signal..."
+      end
+
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_swarm_manager_before_fork(event)
+        debug "Swarm manager starting node with id: #{event[:node].id}"
+      end
+
+      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_swarm_node_after_fork(_event)
+        info "Swarm node #{::Process.pid} forked from #{::Process.ppid}"
+      end
+
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_swarm_manager_control(event)
+        pids = event[:caller].nodes.map(&:pid).join(', ')
+        debug "Swarm manager checking nodes: #{pids}"
+      end
+
       # There are many types of errors that can occur in many places, but we provide a single
       # handler for all of them to simplify error instrumentation.
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
@@ -259,6 +287,9 @@ module Karafka
         when 'connection.listener.fetch_loop.error'
           error "Listener fetch loop error: #{error}"
           error details
+        when 'swarm.supervisor.error'
+          fatal "Swarm supervisor crashed due to an error: #{error}"
+          fatal details
         when 'runner.call.error'
           fatal "Runner crashed due to an error: #{error}"
           fatal details
