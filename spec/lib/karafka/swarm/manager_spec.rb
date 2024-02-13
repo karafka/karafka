@@ -86,7 +86,7 @@ RSpec.describe_current do
 
     context 'when node is alive but reported that is unhealthy' do
       before do
-        allow(target_node).to receive(:healthy?).and_return(false)
+        allow(target_node).to receive(:status).and_return(1)
 
         manager.nodes.each do |node|
           allow(node).to receive(:stop)
@@ -121,7 +121,7 @@ RSpec.describe_current do
 
     context 'when node is not reporting any health for a short period of time' do
       before do
-        allow(target_node).to receive(:healthy?).and_return(nil)
+        allow(target_node).to receive(:status).and_return(-1)
 
         manager.nodes.each do |node|
           allow(node).to receive(:stop)
@@ -147,10 +147,10 @@ RSpec.describe_current do
         manager.nodes.each do |node|
           allow(node).to receive(:stop)
           allow(node).to receive(:terminate)
-          allow(node).to receive(:healthy?).and_return(true)
+          allow(node).to receive(:status).and_return(0)
         end
 
-        allow(target_node).to receive(:healthy?).and_return(nil)
+        allow(target_node).to receive(:status).and_return(-1)
 
         10.times do
           manager.control
@@ -193,10 +193,10 @@ RSpec.describe_current do
         manager.nodes.each do |node|
           allow(node).to receive(:stop)
           allow(node).to receive(:terminate)
-          allow(node).to receive(:healthy?).and_return(true)
+          allow(node).to receive(:status).and_return(0)
         end
 
-        allow(target_node).to receive(:healthy?).and_return(nil)
+        allow(target_node).to receive(:status).and_return(-1)
 
         10.times do
           manager.control
@@ -239,10 +239,10 @@ RSpec.describe_current do
         manager.nodes.each do |node|
           allow(node).to receive(:stop)
           allow(node).to receive(:terminate)
-          allow(node).to receive(:healthy?).and_return(true)
+          allow(node).to receive(:status).and_return(0)
         end
 
-        allow(target_node).to receive(:healthy?).and_return(nil)
+        allow(target_node).to receive(:status).and_return(-1)
 
         10.times do
           manager.control
@@ -287,7 +287,7 @@ RSpec.describe_current do
           allow(node).to receive(:stop)
           allow(node).to receive(:terminate)
           allow(node).to receive(:cleanup)
-          allow(node).to receive(:healthy?).and_return(true)
+          allow(node).to receive(:status).and_return(0)
         end
 
         allow(target_node).to receive(:alive?).and_return(false)
@@ -322,7 +322,7 @@ RSpec.describe_current do
           allow(node).to receive(:stop)
           allow(node).to receive(:terminate)
           allow(node).to receive(:cleanup)
-          allow(node).to receive(:healthy?).and_return(true)
+          allow(node).to receive(:status).and_return(0)
         end
 
         allow(target_node).to receive(:alive?).and_return(false)

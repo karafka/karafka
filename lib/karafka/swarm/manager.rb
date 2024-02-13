@@ -114,24 +114,26 @@ module Karafka
       # @param [Swarm::Node] node we're checking
       # @return [Boolean] should it be the last action taken on this node in this run
       def stop_if_not_healthy(statuses, node)
-        healthy = node.healthy?
+        status = node.status
 
+        case status
         # If no new state reported, we should just move with other checks
-        return false if healthy.nil?
+        when -1
+          false
+        when 0
+          # Exists and reports as healthy, so no other checks should happen on it in this go
+          statuses[:control] = monotonic_now
+          true
+        else
+          # A single invalid report will cause it to stop. We do not support intermediate failures
+          # that would recover. Such states should be implemented in the listener.
+          monitor.instrument('swarm.manager.stopping', caller: self, node: node, status: status) do
+            node.stop
+            statuses[:stop] = monotonic_now
+          end
 
-        statuses[:control] = monotonic_now
-
-        # Exists and reports as healthy, so no other checks should happen on it in this go
-        # A single invalid report will cause it to stop. We do not support intermediate failures
-        # that would recover. Such states should be implemented in the listener.
-        return true if healthy
-
-        monitor.instrument('swarm.manager.stopping', caller: self, node: node) do
-          node.stop
-          statuses[:stop] = monotonic_now
+          true
         end
-
-        true
       end
 
       # If node stopped responding, starts the stopping procedure.

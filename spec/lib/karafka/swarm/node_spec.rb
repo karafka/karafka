@@ -3,9 +3,9 @@
 RSpec.describe Karafka::Swarm::Node, mode: :fork do
   subject(:node) { build(:swarm_node_with_reader_and_writer) }
 
-  describe '#healthy? and #healthy' do
+  describe '#status and #healthy' do
     context 'when nothing to read' do
-      it { expect(node.healthy?).to eq(nil) }
+      it { expect(node.status).to eq(-1) }
       it { expect(node.healthy).to eq(true) }
     end
 
@@ -16,7 +16,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
         sleep(0.1)
       end
 
-      it { expect(node.healthy?).to eq(true) }
+      it { expect(node.status).to eq(0) }
     end
 
     context 'when unhealthy reported' do
@@ -26,7 +26,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
         sleep(0.1)
       end
 
-      it { expect(node.healthy?).to eq(false) }
+      it { expect(node.status).to eq(1) }
     end
 
     context 'when pipe for writing is closed' do
@@ -38,7 +38,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
     context 'when pipe for reading is closed' do
       before { node.instance_variable_get('@reader').close }
 
-      it { expect(node.healthy?).to eq(nil) }
+      it { expect(node.status).to eq(-1) }
     end
   end
 
