@@ -68,4 +68,9 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
   context 'when we could not open a pid' do
     it { expect { described_class.new(0) }.to raise_error(Karafka::Errors::PidfdOpenFailedError) }
   end
+
+  context 'when checking if supported' do
+    # Keep in mind, this will fail on other OSes than linux
+    it { expect(described_class.supported?).to eq(true) }
+  end
 end

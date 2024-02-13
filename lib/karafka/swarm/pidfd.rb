@@ -31,7 +31,21 @@ module Karafka
       class << self
         # @return [Boolean] true if syscall is supported via FFI
         def supported?
-          API_SUPPORTED
+          # If we were not even able to load the FFI C lib, it won't be supported
+          return false unless API_SUPPORTED
+          # Won't work on macOS because it does not support pidfd
+          return false if RUBY_DESCRIPTION.include?('darwin')
+          # Won't work on Windows for the same reason as on macOS
+          return false if RUBY_DESCRIPTION.match?(/mswin|ming|cygwin/)
+
+          # There are some OSes like BSD that will have C lib for FFI bindings but will not support
+          # the needed syscalls. In such cases, we can just try and fail, which will indicate it
+          # won't work.
+          new(::Process.pid)
+
+          true
+        rescue Errors::PidfdOpenFailedError
+          false
         end
       end
 
