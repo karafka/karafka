@@ -31,6 +31,9 @@ module Karafka
       def start
         pidfd = Pidfd.new(::Process.pid)
 
+        # Compact objects in Ruby heap to lower fragmentation prior to forking
+        GC.compact
+
         @nodes = Array.new(nodes_count) do |i|
           start_one Node.new(i, pidfd)
         end
