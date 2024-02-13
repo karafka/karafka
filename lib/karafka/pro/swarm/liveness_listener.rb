@@ -24,8 +24,20 @@ module Karafka
       #   - monitor RSS to make sure that we do not use too much memory
       #
       # By default it does **not** monitor memory and consuming and polling is configured in such
-      # a way to align with `max.poll.interval.ms` and oter defaults.
+      # a way to align with `max.poll.interval.ms` and other defaults.
+      #
+      # Failure statuses reported are as follows:
+      #   - 1 - polling ttl exceeded
+      #   - 2 - consuming ttl exceeded
+      #   - 3 - memory limit exceeded
       class LivenessListener < Karafka::Swarm::LivenessListener
+        # @param memory_limit [Integer] max memory in MB for this process to be considered healthy
+        # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
+        #   It allows us to define max consumption time after which supervisor should consider
+        #   given process as hanging
+        # @param polling_ttl [Integer] max time in ms for polling. If polling (any) does not
+        #   happen that often, process should be considered dead.
+        # @note The default TTL matches the default `max.poll.interval.ms`
         def initialize(
           memory_limit: Float::INFINITY,
           consuming_ttl: 5 * 60 * 1_000,
@@ -33,8 +45,8 @@ module Karafka
         )
           @polling_ttl = polling_ttl
           @consuming_ttl = consuming_ttl
-          @memory_limit = memory_limit
-          @mutex = Mutex.new
+          # We cast it just in case someone would provide '10MB' or something similar
+          @memory_limit = memory_limit.to_i
           @pollings = {}
           @consumptions = {}
 
@@ -42,6 +54,7 @@ module Karafka
         end
 
         # Tick on each fetch
+        #
         # @param _event [Karafka::Core::Monitoring::Event]
         def on_connection_listener_fetch_loop(_event)
           mark_polling_tick
@@ -74,32 +87,18 @@ module Karafka
           clear_polling_tick
         end
 
+        # Reports the current status once in a while
+        #
+        # @param _event [Karafka::Core::Monitoring::Event]
         def on_statistics_emitted(_event)
           periodically do
-            healthy? ? node.healthy : node.unhealthy
+            current_status = status
+
+            current_status.positive? ? node.unhealthy(current_status) : node.healthy
           end
         end
 
         private
-
-        def rss_mb
-          kb_rss = 0
-
-          IO.readlines("/proc/#{node.pid}/status").each do |line|
-            next unless line.start_with?('VmRSS:')
-
-            kb_rss = line.split[1].to_i
-            break
-          end
-
-          (kb_rss / 1_024.to_i).round
-        end
-
-        # Wraps the logic with a mutex
-        # @param block [Proc] code we want to run in mutex
-        def synchronize(&block)
-          @mutex.synchronize(&block)
-        end
 
         # @return [Integer] object id of the current thread
         def thread_id
@@ -136,14 +135,29 @@ module Karafka
 
         # Did we exceed any of the ttls
         # @return [String] 204 string if ok, 500 otherwise
-        def healthy?
+        def status
           time = monotonic_now
 
-          return false if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
-          return false if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
-          return false if rss_mb > @memory_limit
+          return 1 if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
+          return 2 if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
+          return 3 if rss_mb > @memory_limit
 
-          true
+          0
+        end
+
+        # @return [Integer] RSS in MB for the current process
+        def rss_mb
+          kb_rss = 0
+
+          IO.readlines("/proc/#{node.pid}/status").each do |line|
+            next unless line.start_with?('VmRSS:')
+
+            kb_rss = line.split[1].to_i
+
+            break
+          end
+
+          (kb_rss / 1_024.to_i).round
         end
       end
     end

@@ -34,11 +34,17 @@ module Karafka
 
       private
 
+      # Wraps the logic with a mutex
+      # @param block [Proc] code we want to run in mutex
+      def synchronize(&block)
+        @mutex.synchronize(&block)
+      end
+
       # Runs requested code once in a while
       def periodically
         return if monotonic_now - @last_checked_at < liveness_interval
 
-        @mutex.synchronize do
+        synchronize do
           @last_checked_at = monotonic_now
 
           yield
