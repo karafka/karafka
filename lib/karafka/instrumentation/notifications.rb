@@ -22,6 +22,7 @@ module Karafka
 
         app.initializing
         app.initialized
+        app.before_warmup
         app.supervising
         app.running
         app.quieting
