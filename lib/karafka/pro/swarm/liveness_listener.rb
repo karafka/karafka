@@ -30,6 +30,9 @@ module Karafka
       #   - 1 - polling ttl exceeded
       #   - 2 - consuming ttl exceeded
       #   - 3 - memory limit exceeded
+      #
+      # @note This listener should not break anything if subscribed in the supervisor prior to
+      #   forking as it relies on server events for operations.
       class LivenessListener < Karafka::Swarm::LivenessListener
         # @param memory_limit [Integer] max memory in MB for this process to be considered healthy
         # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
@@ -46,7 +49,7 @@ module Karafka
           @polling_ttl = polling_ttl
           @consuming_ttl = consuming_ttl
           # We cast it just in case someone would provide '10MB' or something similar
-          @memory_limit = memory_limit.to_i
+          @memory_limit = memory_limit.is_a?(String) ? memory_limit.to_i : memory_limit
           @pollings = {}
           @consumptions = {}
 
@@ -92,6 +95,8 @@ module Karafka
         # @param _event [Karafka::Core::Monitoring::Event]
         def on_statistics_emitted(_event)
           periodically do
+            return unless node
+
             current_status = status
 
             current_status.positive? ? node.unhealthy(current_status) : node.healthy
@@ -146,6 +151,7 @@ module Karafka
         end
 
         # @return [Integer] RSS in MB for the current process
+        # @note Since swarm is linux only, we do not have to worry about getting RSS on other OSes
         def rss_mb
           kb_rss = 0
 
