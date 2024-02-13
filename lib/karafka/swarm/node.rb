@@ -81,25 +81,32 @@ module Karafka
       # Indicates that this node is doing well
       # @note Child API
       def healthy
-        write(1)
-      end
-
-      # Indicates, that this node has failed
-      # @note Child API
-      def unhealthy
         write(0)
       end
 
-      # @return [Boolean, nil] true if all good, false if node reported issues and nil if no new
-      #   report was available.
+      # Indicates, that this node has failed
+      # @param reason_code [Integer] code we want to use to indicate that we are not healthy.
+      #   Anything bigger than 0 will be considered not healthy. Useful it we want to have complex
+      #   health-checking with reporting.
+      # @note Child API
+      def unhealthy(reason_code = 1)
+        write(reason_code)
+      end
+
+      # @return [Integer] This returns following status code depending on the data:
+      #   - -1 if node did not report anything new
+      #   - 0 if all good,
+      #   - positive number if there was a problem (indicates error code)
+      #
       # @note Parent API
-      def healthy?
+      # @note If there were few issues reported, it will pick the one with highest number
+      def status
         result = read
 
-        return nil if result.nil?
-        return nil if result == false
+        return -1 if result.nil?
+        return -1 if result == false
 
-        !result.include?('0')
+        result.split("\n").map(&:to_i).max
       end
 
       # @return [Boolean] true if node is alive or false if died
@@ -160,7 +167,7 @@ module Karafka
       # @return [Boolean] true if ok, otherwise false
       # @note Child API
       def write(content)
-        @writer.write_nonblock content.to_s
+        @writer.write_nonblock "#{content}\n"
 
         true
       rescue IO::WaitWritable, Errno::EPIPE, IOError
