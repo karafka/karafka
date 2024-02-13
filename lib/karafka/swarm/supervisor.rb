@@ -30,6 +30,8 @@ module Karafka
 
       # Creates needed number of forks, installs signals and starts supervision
       def run
+        Karafka::App.warmup
+
         manager.start
 
         # Close producer just in case. While it should not be used, we do not want even a

@@ -36,6 +36,10 @@ module Karafka
         process.on_sigttin {}
         process.supervise
 
+        # This will only run when not in a swarm mode. In swarm mode the server runs post-fork, so
+        # warmup will do nothing
+        Karafka::App.warmup
+
         # Start is blocking until stop is called and when we stop, it will wait until
         # all of the things are ready to stop
         start

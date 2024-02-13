@@ -6,6 +6,18 @@ module Karafka
     extend Setup::Dsl
 
     class << self
+      # Notifies the Ruby virtual machine that the boot sequence is finished, and that now is a
+      # good time to optimize the application. In case of older Ruby versions, runs compacting,
+      # which is part of the full warmup introduced in Ruby 3.3.
+      def warmup
+        # Per recommendation, this should not run in children nodes
+        return if Karafka::App.config.swarm.node
+
+        return GC.compact unless ::Process.respond_to?(:warmup)
+
+        ::Process.warmup
+      end
+
       # @return [Karafka::Routing::Builder] consumers builder instance alias
       def consumer_groups
         config
