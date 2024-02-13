@@ -45,6 +45,7 @@ module Karafka
       def start
         @reader, @writer = IO.pipe
 
+        # :nocov:
         @pid = ::Process.fork do
           # Close the old producer so it is not a subject to GC
           # While it was not opened in the parent, without explicit closing, there still could be
@@ -71,6 +72,7 @@ module Karafka
 
           @writer.close
         end
+        # :nocov:
 
         @writer.close
         @pidfd = Pidfd.new(@pid)

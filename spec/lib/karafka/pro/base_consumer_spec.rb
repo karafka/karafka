@@ -75,7 +75,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     let(:strategy) { Karafka::Pro::Processing::Strategies::Default }
 
     it 'expect to run handle_before_schedule_tick' do
-      expect { consumer.handle_before_schedule_tick }.not_to raise_error
+      expect { consumer.on_before_schedule_tick }.not_to raise_error
     end
   end
 
