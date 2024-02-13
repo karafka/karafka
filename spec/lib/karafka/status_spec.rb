@@ -55,6 +55,24 @@ RSpec.describe_current do
     end
   end
 
+  describe 'supervise!' do
+    context 'when we set it to supervise' do
+      before { status_manager.supervise! }
+
+      it { expect(status_manager.supervising?).to eq true }
+      it { expect(status_manager.to_s).to eq 'supervising' }
+      it { expect(status_manager.initializing?).to eq false }
+      it { expect(status_manager.initialized?).to eq false }
+      it { expect(status_manager.running?).to eq false }
+      it { expect(status_manager.stopping?).to eq false }
+      it { expect(status_manager.stopped?).to eq false }
+      it { expect(status_manager.terminated?).to eq false }
+      it { expect(status_manager.quieting?).to eq false }
+      it { expect(status_manager.quiet?).to eq false }
+      it { expect(status_manager.done?).to eq false }
+    end
+  end
+
   describe 'stopping?' do
     context 'when status is not set to stopping' do
       before do
