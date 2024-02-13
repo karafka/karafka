@@ -1,9 +1,11 @@
 # Karafka framework changelog
 
 ## 2.3.2 (Unreleased)
-- **[Feature]** Provide swarm capabilities
+- **[Feature]** Provide swarm capabilities to OSS and Pro.
 - [Enhancement] Expand Logger listener with swarm notifications.
 - [Enhancement] Introduce K8s swarm liveness listener.
+- [Enhancement] Use `Process.warmup` in Ruby 3.3+ prior to forks (in swarm) and prior to app start.
+- [Enhancement] Provide `app.before_warmup` event to allow hooking code loading tools prior to final warmup.
 - [Fix] Quieting mode causes too early unsubscribe.
 
 ## 2.3.1 (2024-02-08)
