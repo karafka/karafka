@@ -29,6 +29,14 @@ RSpec.describe_current do
         expect(supervisor).to have_received(:run)
       end
     end
+
+    context 'when forking is not supported' do
+      before { allow(::Karafka::Swarm).to receive(:supported?).and_return(false) }
+
+      it 'expect to raise not supported error' do
+        expect { swarm_cli.call }.to raise_error(Karafka::Errors::UnsupportedOptionError)
+      end
+    end
   end
 
   describe '#print_marketing_info' do

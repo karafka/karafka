@@ -14,7 +14,7 @@ RSpec.describe_current do
     original_node_restart_timeout
     original_shutdown_timeout
 
-    allow(Kernel).to receive(:fork).and_return(Process.pid)
+    allow(Process).to receive(:fork).and_return(Process.pid)
     manager.start
   end
 

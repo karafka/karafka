@@ -95,5 +95,9 @@ module Karafka
     # Failed to send signal to a process via pidfd
     # This should not happen. If you see it, please report.
     PidfdSignalFailedError = Class.new(BaseError)
+
+    # Raised when given option/feature is not supported on a given platform or when given option
+    # is not supported in a given configuration
+    UnsupportedOptionError = Class.new(BaseError)
   end
 end

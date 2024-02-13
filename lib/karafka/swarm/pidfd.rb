@@ -11,12 +11,29 @@ module Karafka
       )
 
       extend FFI::Library
-      ffi_lib 'c'
 
-      # direct usage of this is only available since glibc 2.36, hence we use bindings and call it
-      # directly via syscalls
-      attach_function :fdpid_open, :syscall, %i[long int uint], :int
-      attach_function :fdpid_signal, :syscall, %i[long int int pointer uint], :int
+      begin
+        ffi_lib 'c'
+
+        # direct usage of this is only available since glibc 2.36, hence we use bindings and call
+        # it directly via syscalls
+        attach_function :fdpid_open, :syscall, %i[long int uint], :int
+        attach_function :fdpid_signal, :syscall, %i[long int int pointer uint], :int
+
+        API_SUPPORTED = true
+      # LoadError is a parent to FFI::NotFoundError
+      rescue LoadError
+        API_SUPPORTED = false
+      ensure
+        private_constant :API_SUPPORTED
+      end
+
+      class << self
+        # @return [Boolean] true if syscall is supported via FFI
+        def supported?
+          API_SUPPORTED
+        end
+      end
 
       # @param pid [Integer] pid of the node we want to work with
       def initialize(pid)

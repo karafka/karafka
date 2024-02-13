@@ -1,11 +1,6 @@
 # frozen_string_literal: true
 
 module Karafka
-  # Namespace for the Swarm capabilities.
-  #
-  # Karafka in the swarm mode will fork additional processes and use the parent process as a
-  # supervisor. This capability allows to run multiple processes alongside but saves some memory
-  # due to CoW.
   module Swarm
     # Supervisor that starts forks and uses monitor to monitor them. Also handles shutdown of
     # all the processes including itself.
