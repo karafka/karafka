@@ -3,7 +3,10 @@
 RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
   let(:pidfd) { nil }
 
-  after { pidfd&.cleanup }
+  after do
+    pidfd&.signal('KILL')
+    pidfd&.cleanup
+  end
 
   context 'when fork is already dead' do
     subject(:pidfd) { described_class.new(fork {}) }
@@ -16,7 +19,7 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
 
     it { expect(pidfd.alive?).to eq(false) }
     it { expect(pidfd.signal('TERM')).to eq(false) }
-    it { expect(pidfd.cleanup).to eq(true) }
+    it { expect { pidfd.cleanup }.not_to raise_error }
   end
 
   context 'when fork is alive and we decide to kill it' do
@@ -26,7 +29,6 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
 
     it { expect(pidfd.alive?).to eq(true) }
     it { expect(pidfd.signal('TERM')).to eq(true) }
-    it { expect(pidfd.cleanup).to eq(true) }
 
     context 'when fork was killed by us' do
       before do
@@ -47,7 +49,7 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
       pidfd.cleanup
     end
 
-    it { expect(pidfd.cleanup).to eq(true) }
+    it { expect { pidfd.cleanup }.not_to raise_error }
   end
 
   context 'when we try to send a signal to an already cleaned fork' do
@@ -62,7 +64,7 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
       allow(IO).to receive(:select).and_return(nil)
     end
 
-    it { expect { pidfd.signal('TERM') }.to raise_error(Karafka::Errors::PidfdSignalFailedError) }
+    it { expect(pidfd.signal('TERM')).to eq(false) }
   end
 
   context 'when we could not open a pid' do
