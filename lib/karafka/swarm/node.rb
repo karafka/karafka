@@ -81,16 +81,17 @@ module Karafka
       # Indicates that this node is doing well
       # @note Child API
       def healthy
-        write(0)
+        write('0')
       end
 
       # Indicates, that this node has failed
-      # @param reason_code [Integer] code we want to use to indicate that we are not healthy.
-      #   Anything bigger than 0 will be considered not healthy. Useful it we want to have complex
-      #   health-checking with reporting.
+      # @param reason_code [Integer, String] numeric code we want to use to indicate that we are
+      #   not healthy. Anything bigger than 0 will be considered not healthy. Useful it we want to
+      #   have complex health-checking with reporting.
       # @note Child API
-      def unhealthy(reason_code = 1)
-        write(reason_code)
+      # @note We convert this to string to normalize the API
+      def unhealthy(reason_code = '1')
+        write(reason_code.to_s)
       end
 
       # @return [Integer] This returns following status code depending on the data:

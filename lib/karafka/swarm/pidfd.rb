@@ -7,18 +7,20 @@ module Karafka
     class Pidfd
       include Helpers::ConfigImporter.new(
         pidfd_open_syscall: %i[internal swarm pidfd_open_syscall],
-        pidfd_signal_syscall: %i[internal swarm pidfd_signal_syscall]
+        pidfd_signal_syscall: %i[internal swarm pidfd_signal_syscall],
+        waitid_syscall: %i[internal swarm waitid_syscall]
       )
 
       extend FFI::Library
 
       begin
-        ffi_lib 'c'
+        ffi_lib FFI::Library::LIBC
 
         # direct usage of this is only available since glibc 2.36, hence we use bindings and call
         # it directly via syscalls
         attach_function :fdpid_open, :syscall, %i[long int uint], :int
         attach_function :fdpid_signal, :syscall, %i[long int int pointer uint], :int
+        attach_function :waitid, %i[int int pointer uint], :int
 
         API_SUPPORTED = true
       # LoadError is a parent to FFI::NotFoundError
@@ -27,6 +29,14 @@ module Karafka
       ensure
         private_constant :API_SUPPORTED
       end
+
+      # https://github.com/torvalds/linux/blob/7e90b5c295/include/uapi/linux/wait.h#L20
+      P_PIDFD = 3
+
+      # Wait for child processes that have exited
+      WEXITED = 4
+
+      private_constant :P_PIDFD, :WEXITED
 
       class << self
         # @return [Boolean] true if syscall is supported via FFI
@@ -66,11 +76,9 @@ module Karafka
       end
 
       # Cleans the zombie process
-      # @return [Boolean] true if collected, false if process is still alive
+      # @note This should run **only** on processes that exited, otherwise will wait
       def cleanup
-        !::Process.waitpid(@pid, ::Process::WNOHANG).nil?
-      rescue Errno::ECHILD
-        true
+        waitid(P_PIDFD, @pidfd, nil, WEXITED)
       end
 
       # Sends given signal to the process using its pidfd

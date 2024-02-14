@@ -43,6 +43,8 @@ module Karafka
         process.on_sigterm { stop }
         process.on_sigtstp { quiet }
         process.on_sigttin { signal('TTIN') }
+        # Needed to be registered as we want to unlock on child changes
+        process.on_sigchld {}
         process.on_any_active { unlock }
         process.supervise
 
