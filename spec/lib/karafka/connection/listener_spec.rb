@@ -95,4 +95,38 @@ RSpec.describe_current do
       expect(client).to have_received(:reset)
     end
   end
+
+  describe '#start!' do
+    before do
+      allow(listener).to receive(:stopped?).and_return(stopped)
+      allow(client).to receive(:reset)
+      allow(status).to receive(:reset!)
+      allow(status).to receive(:start!)
+      allow(listener).to receive(:async_call)
+
+      listener.start!
+    end
+
+    context 'when listener was stopped' do
+      let(:stopped) { true }
+
+      it 'expect to reset client and status before running in async again' do
+        expect(client).to have_received(:reset)
+        expect(status).to have_received(:reset!)
+        expect(status).to have_received(:start!)
+        expect(listener).to have_received(:async_call)
+      end
+    end
+
+    context 'when listener was not stopped' do
+      let(:stopped) { false }
+
+      it 'expect not to reset and run async' do
+        expect(client).not_to have_received(:reset)
+        expect(status).not_to have_received(:reset!)
+        expect(status).to have_received(:start!)
+        expect(listener).to have_received(:async_call)
+      end
+    end
+  end
 end
