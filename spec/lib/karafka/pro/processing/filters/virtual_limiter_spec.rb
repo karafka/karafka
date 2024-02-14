@@ -6,8 +6,10 @@ RSpec.describe_current do
   4.times { |i| let(:"message#{i + 1}") { build(:messages_message) } }
 
   let(:messages) { [message1, message2, message3, message4] }
-  let(:manager) { Karafka::Pro::Processing::VirtualOffsetManager.new('topic', 0, :exact) }
   let(:collapser) { Karafka::Pro::Processing::Collapser.new }
+  let(:manager) do
+    Karafka::Pro::Processing::Coordinators::VirtualOffsetManager.new('topic', 0, :exact)
+  end
 
   before { manager.register(messages.map(&:offset)) }
 

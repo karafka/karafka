@@ -21,13 +21,14 @@ module Karafka
 
         def_delegators :@collapser, :collapsed?, :collapse_until!
 
-        attr_reader :filter, :virtual_offset_manager, :shared_mutex
+        attr_reader :filter, :virtual_offset_manager, :shared_mutex, :errors_tracker
 
         # @param args [Object] anything the base coordinator accepts
         def initialize(*args)
           super
 
           @executed = []
+          @errors_tracker = Coordinators::ErrorsTracker.new
           @flow_mutex = Mutex.new
           # Lock for user code synchronization
           # We do not want to mix coordinator lock with the user lock not to create cases where
@@ -36,11 +37,11 @@ module Karafka
           # framework and can be used for user-facing locking
           @shared_mutex = Mutex.new
           @collapser = Collapser.new
-          @filter = FiltersApplier.new(self)
+          @filter = Coordinators::FiltersApplier.new(self)
 
           return unless topic.virtual_partitions?
 
-          @virtual_offset_manager = VirtualOffsetManager.new(
+          @virtual_offset_manager = Coordinators::VirtualOffsetManager.new(
             topic.name,
             partition,
             topic.virtual_partitions.offset_metadata_strategy
@@ -64,6 +65,14 @@ module Karafka
 
           @filter.apply!(messages)
 
+          # Do not clear coordinator errors storage when we are retrying, so we can reference the
+          # errors that have happened during recovery. This can be useful for implementing custom
+          # flows. There can be more errors than one when running with virtual partitions so we
+          # need to make sure we collect them all. Under collapse when we reference a given
+          # consumer we should be able to get all the errors and not just first/last.
+          #
+          # @note We use zero as the attempt mark because we are not "yet" in the attempt 1
+          @errors_tracker.clear if attempt.zero?
           @executed.clear
 
           # We keep the old processed offsets until the collapsing is done and regular processing
@@ -79,6 +88,7 @@ module Karafka
         # @param error [StandardError] error from the failure
         def failure!(consumer, error)
           super
+          @errors_tracker << error
           collapse_until!(@last_message.offset + 1)
         end
 
