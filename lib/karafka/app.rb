@@ -80,10 +80,6 @@ module Karafka
         App.config.internal.status.done?
       end
 
-      def inactive?
-        App.config.internal.status.inactive?
-      end
-
       # Methods that should be delegated to Karafka module
       %i[
         root

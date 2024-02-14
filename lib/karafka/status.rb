@@ -83,9 +83,5 @@ module Karafka
 
       stopping? || stopped? || quieting? || quiet? || terminated?
     end
-
-    def inactive?
-      stopped? || terminated?
-    end
   end
 end
