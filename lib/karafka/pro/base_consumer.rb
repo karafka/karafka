@@ -42,6 +42,22 @@ module Karafka
 
       # By default we do nothing when ticking
       def tick; end
+
+      # @return [Karafka::Pro::Processing::Coordinators::ErrorsTracker] tracker for errors that
+      #   occurred during processing until another successful processing
+      #
+      # @note This will always contain **only** details of errors that occurred during `#consume`
+      #   because only those are retryable.
+      #
+      # @note This may contain more than one error because:
+      #   - this can collect various errors that might have happened during virtual partitions
+      #     execution
+      #   - errors can pile up during retries and until a clean run, they will be collected with
+      #     a limit of last 100. We do not store more because a consumer with an endless error loop
+      #     would cause memory leaks without such a limit.
+      def errors_tracker
+        coordinator.errors_tracker
+      end
     end
   end
 end
