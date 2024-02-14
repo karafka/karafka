@@ -11,90 +11,6 @@ module Karafka
     # Starts listening on all the listeners asynchronously and handles the jobs queue closing
     # after listeners are done with their work.
     def call
-      workers_c = 1
-
-      process = Karafka::App.config.internal.process
-
-      if workers_c > 0
-        workers_c.times.map do
-          parent_reader, child_writer = IO.pipe
-
-          pid = fork do
-            begin
-              parent_reader.close
-
-              process.supervise
-
-              Karafka::Process.tags.add(:type, "fork:#{::Process.ppid}")
-
-              run_one
-            rescue Exception => e
-              # Allow the parent process to re-raise the exception after shutdown
-              child_writer.binmode
-              child_writer.write(Marshal.dump(e))
-            ensure
-              child_writer.close
-            end
-          end
-
-          child_writer.close
-
-          Server.forks << Cluster::Fork.new(pid, parent_reader)
-        end
-
-        process.supervise
-
-        Karafka::App.run!
-
-        ::Karafka::Process.tags.add(:type, "supervisor")
-
-        begin
-          ready_readers = IO.select(Server.forks.map(&:parent_reader)).first
-          first_read = ready_readers.first.read
-        rescue Interrupt
-          first_read = ''
-        end
-
-        Server.forks.map(&:pid).each do |pid|
-          Karafka.logger.debug "=> Waiting for worker with pid #{pid} to exit"
-          ::Process.waitpid(pid)
-          Karafka.logger.debug "=> Worker with pid #{pid} shutdown"
-        end
-
-        exception_found = !first_read.empty?
-        raise Marshal.load(first_read) if exception_found
-      else
-        process.supervise
-
-        run_one
-      end
-    # If anything crashes here, we need to raise the error and crush the runner because it means
-    # that something terrible happened
-    rescue StandardError => e
-      Karafka.monitor.instrument(
-        'error.occurred',
-        caller: self,
-        error: e,
-        type: 'runner.call.error'
-      )
-      Karafka::App.stop!
-
-      raise e
-    end
-
-    private
-
-
-    def terminate_workers(workers)
-      return if @terminating
-
-      @terminating = true
-      $stderr.puts "=> Terminating workers"
-
-      ::Process.kill("TERM", *workers.map(&:pid))
-    end
-
-    def run_one
       # Despite possibility of having several independent listeners, we aim to have one queue for
       # jobs across and one workers poll for that
       jobs_queue = App.config.internal.processing.jobs_queue_class.new
@@ -120,11 +36,6 @@ module Karafka
         @conductor.wait
 
         @manager.control
-
-        if ::Process.ppid == 1 && !@sent
-          ::Process.kill('SIGTERM', ::Process.pid)
-          @sent = true
-        end
       end
 
       # We close the jobs queue only when no listener threads are working.
@@ -139,6 +50,17 @@ module Karafka
       # to handle the shutdown detection in their long-running processes. Otherwise if timeout
       # is exceeded, there will be a forced shutdown.
       workers.each(&:join)
+    # If anything crashes here, we need to raise the error and crush the runner because it means
+    # that something terrible happened
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        caller: self,
+        error: e,
+        type: 'runner.call.error'
+      )
+      Karafka::App.stop!
+      raise e
     end
   end
 end

@@ -66,8 +66,6 @@ module Karafka
         filtering.throttled
         filtering.seek
 
-        process.before_fork
-        process.after_fork
         process.notice_signal
 
         rebalance.partitions_assign

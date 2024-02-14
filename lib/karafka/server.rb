@@ -13,14 +13,10 @@ module Karafka
       # Jobs queue
       attr_accessor :jobs_queue
 
-      # List of forks we're maintaining (empty for childless children)
-      attr_accessor :forks
-
       # Method which runs app
       def run
         self.listeners = []
         self.workers = []
-        self.forks = []
 
         # We need to validate this prior to running because it may be executed also from the
         # embedded
@@ -85,17 +81,14 @@ module Karafka
 
         timeout = config.shutdown_timeout
 
-        forks.each(&:stop)
-
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
         ((timeout / 1_000) * (1 / config.internal.supervision_sleep)).to_i.times do
           all_listeners_stopped = listeners.all?(&:stopped?)
           all_workers_stopped = workers.none?(&:alive?)
-          all_forks_stopped = forks.none?(&:alive?)
 
-          return if all_listeners_stopped && all_workers_stopped && all_forks_stopped
+          return if all_listeners_stopped && all_workers_stopped
 
           sleep(config.internal.supervision_sleep)
         end
@@ -110,7 +103,6 @@ module Karafka
         )
 
         # We're done waiting, lets kill them!
-        forks.each(&:terminate)
         workers.each(&:terminate)
         listeners.active.each(&:terminate)
         # We always need to shutdown clients to make sure we do not force the GC to close consumer.
@@ -145,17 +137,6 @@ module Karafka
         # We don't have to safe-guard it with check states as the state transitions work only
         # in one direction
         Karafka::App.quiet!
-
-        return if forks.empty?
-
-        Karafka::App.quieted!
-
-        forks.each do |pid|
-          begin
-            ::Process.kill("TSTP", pid)
-          rescue Errno::ESRCH
-          end
-        end
       end
 
       private
