@@ -35,7 +35,7 @@ RSpec.describe_current do
 
     it 'expect to write ok status to the node' do
       listener.on_statistics_emitted(nil)
-      expect(node).to have_received(:write).with(0)
+      expect(node).to have_received(:write).with('0')
     end
 
     context 'when node becomes orphaned' do

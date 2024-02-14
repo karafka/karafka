@@ -26,7 +26,7 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
 
     it { expect(pidfd.alive?).to eq(true) }
     it { expect(pidfd.signal('TERM')).to eq(true) }
-    it { expect(pidfd.cleanup).to eq(false) }
+    it { expect(pidfd.cleanup).to eq(true) }
 
     context 'when fork was killed by us' do
       before do
