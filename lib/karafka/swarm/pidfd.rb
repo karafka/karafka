@@ -78,7 +78,11 @@ module Karafka
       # Cleans the zombie process
       # @note This should run **only** on processes that exited, otherwise will wait
       def cleanup
+        return if @cleaned
+
         waitid(P_PIDFD, @pidfd, nil, WEXITED)
+
+        @cleaned = true
       end
 
       # Sends given signal to the process using its pidfd
@@ -88,6 +92,7 @@ module Karafka
       # @note It will not send signals to dead processes
       def signal(sig_name)
         @mutex.synchronize do
+          return false if @cleaned
           # Never signal processes that are dead
           return false unless alive?
 
