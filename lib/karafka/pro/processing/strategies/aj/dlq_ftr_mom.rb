@@ -50,17 +50,17 @@ module Karafka
                 #
                 # For a Mom setup, this means, that user has to manage the checkpointing by
                 # himself. If no checkpointing is ever done, we end up with an endless loop.
-                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
-                  coordinator.pause_tracker.reset
-                  skippable_message, = find_skippable_message
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-                  # We can commit the offset here because we know that we skip it "forever" and
-                  # since AJ consumer commits the offset after each job, we also know that the
-                  # previous job was successful
-                  mark_as_consumed(skippable_message)
-                  pause(coordinator.seek_offset, nil, false)
                 else
-                  retry_after_pause
+                  apply_dlq_flow do
+                    coordinator.pause_tracker.reset
+                    skippable_message, = find_skippable_message
+                    dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                    # We can commit the offset here because we know that we skip it "forever" and
+                    # since AJ consumer commits the offset after each job, we also know that the
+                    # previous job was successful
+                    mark_as_consumed(skippable_message)
+                    pause(coordinator.seek_offset, nil, false)
+                  end
                 end
               end
             end

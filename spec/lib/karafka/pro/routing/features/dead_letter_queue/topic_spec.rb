@@ -65,11 +65,11 @@ RSpec.describe_current do
     let(:strategy) { topic.dead_letter_queue.strategy }
 
     context 'when we are beyond number of attempts' do
-      it { expect(strategy.call([], 4)).to eq(true) }
+      it { expect(strategy.call([], 4)).to eq(:dispatch) }
     end
 
     context 'when we are below number of attempts' do
-      it { expect(strategy.call([], 3)).to eq(false) }
+      it { expect(strategy.call([], 3)).to eq(:retry) }
     end
   end
 

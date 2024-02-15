@@ -47,14 +47,14 @@ module Karafka
                   seek(coordinator.seek_offset, false) unless revoked?
 
                   resume
-                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
-                  coordinator.pause_tracker.reset
-                  skippable_message, = find_skippable_message
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-                  mark_as_consumed(skippable_message)
-                  pause(coordinator.seek_offset, nil, false)
                 else
-                  retry_after_pause
+                  apply_dlq_flow do
+                    coordinator.pause_tracker.reset
+                    skippable_message, = find_skippable_message
+                    dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                    mark_as_consumed(skippable_message)
+                    pause(coordinator.seek_offset, nil, false)
+                  end
                 end
               end
             end

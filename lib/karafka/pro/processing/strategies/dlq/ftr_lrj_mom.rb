@@ -48,18 +48,18 @@ module Karafka
                   else
                     resume
                   end
-                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
-                  coordinator.pause_tracker.reset
-
-                  return resume if revoked?
-
-                  skippable_message, _marked = find_skippable_message
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-
-                  coordinator.seek_offset = skippable_message.offset + 1
-                  pause(coordinator.seek_offset, nil, false)
                 else
-                  retry_after_pause
+                  apply_dlq_flow do
+                    coordinator.pause_tracker.reset
+
+                    return resume if revoked?
+
+                    skippable_message, _marked = find_skippable_message
+                    dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+
+                    coordinator.seek_offset = skippable_message.offset + 1
+                    pause(coordinator.seek_offset, nil, false)
+                  end
                 end
               end
             end

@@ -41,17 +41,17 @@ module Karafka
                   return if coordinator.manual_pause?
 
                   handle_post_filtering
-                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
-                  # We reset the pause to indicate we will now consider it as "ok".
-                  coordinator.pause_tracker.reset
-
-                  skippable_message, _marked = find_skippable_message
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-
-                  coordinator.seek_offset = skippable_message.offset + 1
-                  pause(coordinator.seek_offset, nil, false)
                 else
-                  retry_after_pause
+                  apply_dlq_flow do
+                    # We reset the pause to indicate we will now consider it as "ok".
+                    coordinator.pause_tracker.reset
+
+                    skippable_message, _marked = find_skippable_message
+                    dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+
+                    coordinator.seek_offset = skippable_message.offset + 1
+                    pause(coordinator.seek_offset, nil, false)
+                  end
                 end
               end
             end

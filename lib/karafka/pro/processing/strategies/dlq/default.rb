@@ -76,13 +76,13 @@ module Karafka
                   return if coordinator.manual_pause?
 
                   mark_as_consumed(last_group_message)
-                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
-                  # We reset the pause to indicate we will now consider it as "ok".
-                  coordinator.pause_tracker.reset
-                  dispatch_if_needed_and_mark_as_consumed
-                  pause(coordinator.seek_offset, nil, false)
                 else
-                  retry_after_pause
+                  apply_dlq_flow do
+                    # We reset the pause to indicate we will now consider it as "ok".
+                    coordinator.pause_tracker.reset
+                    dispatch_if_needed_and_mark_as_consumed
+                    pause(coordinator.seek_offset, nil, false)
+                  end
                 end
               end
             end
@@ -180,7 +180,10 @@ module Karafka
             #   topic is set to false, we will skip the dispatch, effectively ignoring the broken
             #   message without taking any action.
             def dispatch_to_dlq?
-              topic.dead_letter_queue.topic
+              return false if topic.dead_letter_queue.topic
+              return false unless @_dispatch_to_dlq
+
+              true
             end
 
             # @return [Boolean] should we use a transaction to move the data to the DLQ.
@@ -188,6 +191,29 @@ module Karafka
             #   transactional dispatches is not set to false.
             def dispatch_in_a_transaction?
               producer.transactional? && topic.dead_letter_queue.transactional?
+            end
+
+            # Runs the DLQ strategy and based on it it performs certain operations
+            #
+            # In case of `:skip` and `:dispatch` will run the exact flow provided in a block
+            # In case of `:retry` always `#retry_after_pause` is applied
+            def apply_dlq_flow
+              flow = topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
+
+              case flow
+              when :retry
+                retry_after_pause
+
+                return
+              when :skip
+                @_dispatch_to_dlq = false
+              when :dispatch
+                @_dispatch_to_dlq = true
+              else
+                raise Karafka::UnsupportedCaseError, flow
+              end
+
+              yield
             end
           end
         end

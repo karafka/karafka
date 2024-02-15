@@ -48,16 +48,16 @@ module Karafka
                   return if revoked?
 
                   mark_as_consumed(last_group_message)
-                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
-                  # Here we are in a collapsed state, hence we can apply the same logic as
-                  # Aj::DlqMom
-                  coordinator.pause_tracker.reset
-                  skippable_message, = find_skippable_message
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-                  mark_as_consumed(skippable_message)
-                  pause(coordinator.seek_offset, nil, false)
                 else
-                  retry_after_pause
+                  apply_dlq_flow do
+                    # Here we are in a collapsed state, hence we can apply the same logic as
+                    # Aj::DlqMom
+                    coordinator.pause_tracker.reset
+                    skippable_message, = find_skippable_message
+                    dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                    mark_as_consumed(skippable_message)
+                    pause(coordinator.seek_offset, nil, false)
+                  end
                 end
               end
             end

@@ -27,7 +27,7 @@ module Karafka
               super(**args).tap do |config|
                 # If explicit strategy is not provided, use the default approach from OSS
                 config.strategy = strategy || lambda do |_errors_tracker, attempt|
-                  attempt > config.max_retries
+                  attempt > config.max_retries ? :dispatch : :retry
                 end
               end
             end
