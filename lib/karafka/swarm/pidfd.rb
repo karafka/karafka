@@ -50,7 +50,7 @@ module Karafka
 
           # There are some OSes like BSD that will have C lib for FFI bindings but will not support
           # the needed syscalls. In such cases, we can just try and fail, which will indicate it
-          # won't work.
+          # won't work. The same applies to using new glibc on an old kernel.
           new(::Process.pid)
 
           true
