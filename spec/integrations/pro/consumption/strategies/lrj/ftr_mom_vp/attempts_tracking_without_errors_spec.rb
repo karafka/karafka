@@ -16,16 +16,14 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      long_running_job true
-      manual_offset_management true
-      throttling(limit: 5, interval: 2_000)
-      virtual_partitions(
-        partitioner: ->(_msg) { rand(9) }
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    long_running_job true
+    manual_offset_management true
+    throttling(limit: 5, interval: 2_000)
+    virtual_partitions(
+      partitioner: ->(_msg) { rand(9) }
+    )
   end
 end
 

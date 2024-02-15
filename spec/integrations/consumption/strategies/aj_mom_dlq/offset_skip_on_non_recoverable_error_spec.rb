@@ -7,10 +7,8 @@ setup_karafka(allow_errors: true)
 setup_active_job
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topics[0] do
-      dead_letter_queue topic: DT.topics[1], max_retries: 1
-    end
+  active_job_topic DT.topics[0] do
+    dead_letter_queue topic: DT.topics[1], max_retries: 1
   end
 end
 

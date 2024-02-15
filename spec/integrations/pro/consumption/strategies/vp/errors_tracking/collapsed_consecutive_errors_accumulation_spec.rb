@@ -18,13 +18,11 @@ end
 DT[:iterator] = (0..9).cycle
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      virtual_partitions(
-        partitioner: ->(_msg) { DT[:iterator].next }
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    virtual_partitions(
+      partitioner: ->(_msg) { DT[:iterator].next }
+    )
   end
 end
 

@@ -17,13 +17,11 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      virtual_partitions(
-        partitioner: ->(msg) { msg.raw_payload }
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    virtual_partitions(
+      partitioner: ->(msg) { msg.raw_payload }
+    )
   end
 end
 

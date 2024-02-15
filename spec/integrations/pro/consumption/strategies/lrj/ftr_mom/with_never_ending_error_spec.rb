@@ -16,13 +16,11 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      long_running_job true
-      manual_offset_management true
-      throttling(limit: 1_000_000, interval: 100_000)
-    end
+  topic DT.topic do
+    consumer Consumer
+    long_running_job true
+    manual_offset_management true
+    throttling(limit: 1_000_000, interval: 100_000)
   end
 end
 

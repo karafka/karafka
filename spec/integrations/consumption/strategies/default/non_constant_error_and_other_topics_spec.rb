@@ -47,14 +47,12 @@ class Consumer2 < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topics.first do
-      consumer Consumer1
-    end
+  topic DT.topics.first do
+    consumer Consumer1
+  end
 
-    topic DT.topics.last do
-      consumer Consumer2
-    end
+  topic DT.topics.last do
+    consumer Consumer2
   end
 end
 

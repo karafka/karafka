@@ -15,11 +15,9 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      config(partitions: 2)
-      long_running_job true
-    end
+  active_job_topic DT.topic do
+    config(partitions: 2)
+    long_running_job true
   end
 end
 

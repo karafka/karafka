@@ -16,16 +16,14 @@ class Job < ActiveJob::Base
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      max_messages 1
-      long_running_job true
-      dead_letter_queue topic: DT.topics[1], max_retries: 4
-      throttling(limit: 3, interval: 2_000)
-      virtual_partitions(
-        partitioner: ->(_) { rand(10) }
-      )
-    end
+  active_job_topic DT.topic do
+    max_messages 1
+    long_running_job true
+    dead_letter_queue topic: DT.topics[1], max_retries: 4
+    throttling(limit: 3, interval: 2_000)
+    virtual_partitions(
+      partitioner: ->(_) { rand(10) }
+    )
   end
 end
 

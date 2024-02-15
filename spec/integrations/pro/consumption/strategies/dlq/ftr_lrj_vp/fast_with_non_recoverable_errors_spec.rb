@@ -28,24 +28,22 @@ class DlqConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      long_running_job true
-      dead_letter_queue topic: DT.topics[1]
-      throttling(limit: 5, interval: 5_000)
-      virtual_partitions(
-        partitioner: ->(message) { message.raw_payload }
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    long_running_job true
+    dead_letter_queue topic: DT.topics[1]
+    throttling(limit: 5, interval: 5_000)
+    virtual_partitions(
+      partitioner: ->(message) { message.raw_payload }
+    )
+  end
 
-    topic DT.topics[1] do
-      consumer DlqConsumer
-      throttling(limit: 5, interval: 5_000)
-      virtual_partitions(
-        partitioner: ->(message) { message.raw_payload }
-      )
-    end
+  topic DT.topics[1] do
+    consumer DlqConsumer
+    throttling(limit: 5, interval: 5_000)
+    virtual_partitions(
+      partitioner: ->(message) { message.raw_payload }
+    )
   end
 end
 

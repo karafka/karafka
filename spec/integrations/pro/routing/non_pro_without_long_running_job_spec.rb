@@ -8,11 +8,9 @@ not_found = false
 
 begin
   draw_routes do
-    consumer_group DT.consumer_group do
-      topic DT.topics[0] do
-        consumer Class.new
-        long_running_job true
-      end
+    topic DT.topics[0] do
+      consumer Class.new
+      long_running_job true
     end
   end
 rescue NoMethodError

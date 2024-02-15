@@ -13,12 +13,10 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      virtual_partitions(
-        partitioner: ->(_) { [true, false].sample }
-      )
-    end
+  active_job_topic DT.topic do
+    virtual_partitions(
+      partitioner: ->(_) { [true, false].sample }
+    )
   end
 end
 
