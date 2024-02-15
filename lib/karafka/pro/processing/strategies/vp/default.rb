@@ -155,6 +155,13 @@ module Karafka
             def handle_before_schedule_consume
               super
 
+              # We should not register offsets in virtual manager when in collapse as virtual
+              # manager is not used then for offsets materialization.
+              #
+              # If we would do so, it would cause increased storage in cases of endless errors
+              # that are being retried in collapse without a DLQ.
+              return if collapsed?
+
               coordinator.virtual_offset_manager.register(
                 messages.map(&:offset)
               )
