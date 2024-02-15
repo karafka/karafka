@@ -11,6 +11,7 @@ RSpec.describe_current do
     context 'when we use dead_letter_queue without any arguments' do
       it 'expect to initialize with defaults' do
         expect(topic.dead_letter_queue.active?).to eq(false)
+        expect(topic.dead_letter_queue.strategy).to be_a(Proc)
       end
     end
 
@@ -36,6 +37,14 @@ RSpec.describe_current do
         expect(topic.dead_letter_queue.max_retries).to eq(max_retries)
       end
     end
+
+    context 'when we assign custom strategy' do
+      it 'expect to use it' do
+        strategy = -> {}
+        topic.dead_letter_queue(strategy: strategy)
+        expect(topic.dead_letter_queue.strategy).to eq(strategy)
+      end
+    end
   end
 
   describe '#dead_letter_queue?' do
@@ -49,6 +58,18 @@ RSpec.describe_current do
       before { topic.dead_letter_queue(topic: 'test') }
 
       it { expect(topic.dead_letter_queue?).to eq(true) }
+    end
+  end
+
+  describe '#strategy (default)' do
+    let(:strategy) { topic.dead_letter_queue.strategy }
+
+    context 'when we are beyond number of attempts' do
+      it { expect(strategy.call([], 4)).to eq(true) }
+    end
+
+    context 'when we are below number of attempts' do
+      it { expect(strategy.call([], 3)).to eq(false) }
     end
   end
 

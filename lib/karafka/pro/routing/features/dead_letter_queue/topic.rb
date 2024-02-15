@@ -24,7 +24,7 @@ module Karafka
             def dead_letter_queue(strategy: nil, **args)
               return @dead_letter_queue if @dead_letter_queue
 
-              super(*args).tap do |config|
+              super(**args).tap do |config|
                 # If explicit strategy is not provided, use the default approach from OSS
                 config.strategy = strategy || lambda do |_errors_tracker, attempt|
                   attempt > config.max_retries
