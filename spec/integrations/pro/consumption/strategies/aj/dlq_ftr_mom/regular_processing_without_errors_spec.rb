@@ -16,11 +16,9 @@ class Job < ActiveJob::Base
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      dead_letter_queue topic: DT.topics[1], max_retries: 4
-      throttling(limit: 10, interval: 2_000)
-    end
+  active_job_topic DT.topic do
+    dead_letter_queue topic: DT.topics[1], max_retries: 4
+    throttling(limit: 10, interval: 2_000)
   end
 end
 

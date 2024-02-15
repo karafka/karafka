@@ -6,9 +6,7 @@ setup_karafka
 setup_active_job
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic
-  end
+  active_job_topic DT.topic
 end
 
 Karafka.monitor.subscribe('consumer.consumed') do |event|

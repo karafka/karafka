@@ -16,12 +16,10 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      # `#long_running` is an alias of `#long_running_job`
-      long_running true
-    end
+  topic DT.topic do
+    consumer Consumer
+    # `#long_running` is an alias of `#long_running_job`
+    long_running true
   end
 end
 

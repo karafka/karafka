@@ -17,15 +17,13 @@ class Job < ActiveJob::Base
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      max_messages 20
-      long_running_job true
-      throttling(limit: 10, interval: 2_000)
-      virtual_partitions(
-        partitioner: ->(_) { rand(10) }
-      )
-    end
+  active_job_topic DT.topic do
+    max_messages 20
+    long_running_job true
+    throttling(limit: 10, interval: 2_000)
+    virtual_partitions(
+      partitioner: ->(_) { rand(10) }
+    )
   end
 end
 

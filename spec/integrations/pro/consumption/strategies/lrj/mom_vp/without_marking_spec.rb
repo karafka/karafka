@@ -20,15 +20,13 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      long_running_job true
-      manual_offset_management true
-      virtual_partitions(
-        partitioner: ->(msg) { msg.raw_payload }
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    long_running_job true
+    manual_offset_management true
+    virtual_partitions(
+      partitioner: ->(msg) { msg.raw_payload }
+    )
   end
 end
 

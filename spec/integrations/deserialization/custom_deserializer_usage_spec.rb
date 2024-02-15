@@ -21,11 +21,9 @@ class CustomDeserializer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      deserializer CustomDeserializer.new
-    end
+  topic DT.topic do
+    consumer Consumer
+    deserializer CustomDeserializer.new
   end
 end
 

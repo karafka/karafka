@@ -29,19 +29,17 @@ class Job < ActiveJob::Base
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      # We set it to 100k so it never reaches it and always recovers
-      dead_letter_queue topic: DT.topics[1], max_retries: 100_000
-      long_running_job true
-      virtual_partitions(
-        partitioner: ->(_) { rand(10) }
-      )
-    end
+  active_job_topic DT.topic do
+    # We set it to 100k so it never reaches it and always recovers
+    dead_letter_queue topic: DT.topics[1], max_retries: 100_000
+    long_running_job true
+    virtual_partitions(
+      partitioner: ->(_) { rand(10) }
+    )
+  end
 
-    topic DT.topics[1] do
-      consumer DlqConsumer
-    end
+  topic DT.topics[1] do
+    consumer DlqConsumer
   end
 end
 

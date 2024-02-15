@@ -24,12 +24,10 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      long_running_job true
-      throttling(limit: 1, interval: 11_100)
-    end
+  topic DT.topic do
+    consumer Consumer
+    long_running_job true
+    throttling(limit: 1, interval: 11_100)
   end
 end
 

@@ -19,14 +19,12 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    DT.topics.first(10).each do |topic_name|
-      topic topic_name do
-        consumer Consumer
-      end
-
-      produce_many(topic_name, DT.uuids(10))
+  DT.topics.first(10).each do |topic_name|
+    topic topic_name do
+      consumer Consumer
     end
+
+    produce_many(topic_name, DT.uuids(10))
   end
 end
 

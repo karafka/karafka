@@ -30,14 +30,12 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topics[0] do
-      consumer Consumer
-      long_running_job true
-      dead_letter_queue topic: DT.topics[1], max_retries: 0
-      manual_offset_management true
-      throttling(limit: 5, interval: 5_000)
-    end
+  topic DT.topics[0] do
+    consumer Consumer
+    long_running_job true
+    dead_letter_queue topic: DT.topics[1], max_retries: 0
+    manual_offset_management true
+    throttling(limit: 5, interval: 5_000)
   end
 end
 

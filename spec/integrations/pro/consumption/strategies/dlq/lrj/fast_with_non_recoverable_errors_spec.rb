@@ -28,16 +28,14 @@ class DlqConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      long_running_job true
-      dead_letter_queue topic: DT.topics[1]
-    end
+  topic DT.topic do
+    consumer Consumer
+    long_running_job true
+    dead_letter_queue topic: DT.topics[1]
+  end
 
-    topic DT.topics[1] do
-      consumer DlqConsumer
-    end
+  topic DT.topics[1] do
+    consumer DlqConsumer
   end
 end
 

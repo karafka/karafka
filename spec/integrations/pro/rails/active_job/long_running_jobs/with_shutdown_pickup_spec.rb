@@ -13,11 +13,9 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      long_running_job true
-      manual_offset_management true
-    end
+  active_job_topic DT.topic do
+    long_running_job true
+    manual_offset_management true
   end
 end
 

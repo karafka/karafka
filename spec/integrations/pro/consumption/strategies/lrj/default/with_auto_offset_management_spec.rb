@@ -17,11 +17,9 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      long_running_job true
-    end
+  topic DT.topic do
+    consumer Consumer
+    long_running_job true
   end
 end
 
