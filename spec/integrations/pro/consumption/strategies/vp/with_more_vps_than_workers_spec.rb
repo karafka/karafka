@@ -18,17 +18,15 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topics[0] do
-      consumer Consumer
+  topic DT.topics[0] do
+    consumer Consumer
 
-      # This combination will make a virtual partition per message. You probably don't want that
-      # in a regular setup.
-      virtual_partitions(
-        max_partitions: 200,
-        partitioner: ->(msg) { msg.raw_payload }
-      )
-    end
+    # This combination will make a virtual partition per message. You probably don't want that
+    # in a regular setup.
+    virtual_partitions(
+      max_partitions: 200,
+      partitioner: ->(msg) { msg.raw_payload }
+    )
   end
 end
 

@@ -61,21 +61,19 @@ class DlqConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      virtual_partitions(
-        partitioner: ->(message) { message.raw_payload }
-      )
-      dead_letter_queue(
-        topic: DT.topics[1],
-        max_retries: 5
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    virtual_partitions(
+      partitioner: ->(message) { message.raw_payload }
+    )
+    dead_letter_queue(
+      topic: DT.topics[1],
+      max_retries: 5
+    )
+  end
 
-    topic DT.topics[1] do
-      consumer DlqConsumer
-    end
+  topic DT.topics[1] do
+    consumer DlqConsumer
   end
 end
 

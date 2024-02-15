@@ -13,12 +13,10 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      max_messages 5
-      max_wait_time 10_000
-      consumer Consumer
-    end
+  topic DT.topic do
+    max_messages 5
+    max_wait_time 10_000
+    consumer Consumer
   end
 end
 

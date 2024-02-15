@@ -49,11 +49,9 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      config(partitions: 3)
-      consumer Consumer
-    end
+  topic DT.topic do
+    config(partitions: 3)
+    consumer Consumer
   end
 end
 

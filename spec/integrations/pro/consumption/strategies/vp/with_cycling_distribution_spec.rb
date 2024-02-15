@@ -28,13 +28,11 @@ CYCLE = (0..9).cycle
 # This means, that you end up with exactly 10 VPs on a a cycle
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      virtual_partitions(
-        partitioner: ->(_) { CYCLE.next }
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    virtual_partitions(
+      partitioner: ->(_) { CYCLE.next }
+    )
   end
 end
 

@@ -11,13 +11,11 @@ end
 setup_active_job
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      # We do not publish any details with this job, thus we do a random work distribution
-      virtual_partitions(
-        partitioner: ->(_) { (0..4).to_a.sample }
-      )
-    end
+  active_job_topic DT.topic do
+    # We do not publish any details with this job, thus we do a random work distribution
+    virtual_partitions(
+      partitioner: ->(_) { (0..4).to_a.sample }
+    )
   end
 end
 

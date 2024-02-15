@@ -32,17 +32,15 @@ class Job < ActiveJob::Base
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      dead_letter_queue topic: DT.topics[1], max_retries: 4
-      # mom is enabled automatically
-      throttling(limit: 3, interval: 1_000)
-      long_running_job true
-    end
+  active_job_topic DT.topic do
+    dead_letter_queue topic: DT.topics[1], max_retries: 4
+    # mom is enabled automatically
+    throttling(limit: 3, interval: 1_000)
+    long_running_job true
+  end
 
-    topic DT.topics[1] do
-      consumer DlqConsumer
-    end
+  topic DT.topics[1] do
+    consumer DlqConsumer
   end
 end
 

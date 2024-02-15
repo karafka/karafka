@@ -40,13 +40,11 @@ end
 ITER = Iterator.new
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      virtual_partitions(
-        partitioner: ->(_) { ITER.step }
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    virtual_partitions(
+      partitioner: ->(_) { ITER.step }
+    )
   end
 end
 

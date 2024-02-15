@@ -21,14 +21,12 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      manual_offset_management(true)
-      consumer Consumer
-      virtual_partitions(
-        partitioner: ->(message) { message.offset < 20 || message.offset == 49 ? 0 : 1 }
-      )
-    end
+  topic DT.topic do
+    manual_offset_management(true)
+    consumer Consumer
+    virtual_partitions(
+      partitioner: ->(message) { message.offset < 20 || message.offset == 49 ? 0 : 1 }
+    )
   end
 end
 

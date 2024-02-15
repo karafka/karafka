@@ -20,14 +20,12 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      throttling(limit: 20, interval: 5_000)
-      virtual_partitions(
-        partitioner: ->(msg) { msg.raw_payload }
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    throttling(limit: 20, interval: 5_000)
+    virtual_partitions(
+      partitioner: ->(msg) { msg.raw_payload }
+    )
   end
 end
 

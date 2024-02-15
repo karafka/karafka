@@ -33,14 +33,12 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      config(partitions: 2)
-      consumer Consumer
-      virtual_partitions(
-        partitioner: VirtualPartitioner.new
-      )
-    end
+  topic DT.topic do
+    config(partitions: 2)
+    consumer Consumer
+    virtual_partitions(
+      partitioner: VirtualPartitioner.new
+    )
   end
 end
 

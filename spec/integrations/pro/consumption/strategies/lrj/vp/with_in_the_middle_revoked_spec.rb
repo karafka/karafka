@@ -26,15 +26,13 @@ end
 ITERATOR = (1..1_000_000).each
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      long_running_job true
-      virtual_partitions(
-        partitioner: ->(_) { ITERATOR.next % 50 },
-        max_partitions: 100
-      )
-    end
+  topic DT.topic do
+    consumer Consumer
+    long_running_job true
+    virtual_partitions(
+      partitioner: ->(_) { ITERATOR.next % 50 },
+      max_partitions: 100
+    )
   end
 end
 

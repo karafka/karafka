@@ -37,16 +37,14 @@ Karafka.monitor.subscribe('error.occurred') do |event|
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    active_job_topic DT.topic do
-      dead_letter_queue topic: false, max_retries: 4
-      long_running_job true
-      # mom is enabled automatically
-    end
+  active_job_topic DT.topic do
+    dead_letter_queue topic: false, max_retries: 4
+    long_running_job true
+    # mom is enabled automatically
+  end
 
-    topic DT.topics[1] do
-      consumer DlqConsumer
-    end
+  topic DT.topics[1] do
+    consumer DlqConsumer
   end
 end
 

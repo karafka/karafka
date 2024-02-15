@@ -28,11 +28,9 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic DT.topic do
-      consumer Consumer
-      manual_offset_management true
-    end
+  topic DT.topic do
+    consumer Consumer
+    manual_offset_management true
   end
 end
 

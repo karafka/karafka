@@ -24,19 +24,17 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group DT.consumer_group do
-    topic topic1 do
-      consumer Consumer
-    end
+  topic topic1 do
+    consumer Consumer
+  end
 
-    topic topic2 do
-      consumer Consumer
-    end
+  topic topic2 do
+    consumer Consumer
+  end
 
-    # This one will do nothing
-    topic topic3 do
-      consumer Consumer
-    end
+  # This one will do nothing
+  topic topic3 do
+    consumer Consumer
   end
 end
 
