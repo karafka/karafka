@@ -49,7 +49,7 @@ module Karafka
 
                   handle_post_filtering
                 else
-                  retry_after_pause do
+                  apply_dlq_flow do
                     skippable_message, = find_skippable_message
                     dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
                     # We can commit the offset here because we know that we skip it "forever" and
