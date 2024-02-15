@@ -105,6 +105,17 @@ module Karafka
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
 
+      # Public configuration for swarm operations
+      setting :swarm do
+        # option [Integer] how many processes do we want to run in a swarm mode
+        # Keep in mind this is only applicable when running in a swarm mode
+        setting :nodes, default: 3
+        # This is set automatically when we fork. Used to hold reference that may be needed
+        # for static group membership, supervision and more. If set to `false`, it means this
+        # process is not a fork
+        setting :node, default: false
+      end
+
       # Admin specific settings.
       #
       # Since admin operations are often specific, they may require specific librdkafka settings
@@ -151,7 +162,6 @@ module Karafka
         # @note In the future, we need to have a single process representation for all the karafka
         #   instances
         setting :process, default: Process.new
-
         # Interval of "ticking". This is used to define the maximum time between consecutive
         # polling of the main rdkafka queue. It should match also the `statistics.interval.ms`
         # smallest value defined in any of the per-kafka settings, so metrics are published with
@@ -162,6 +172,36 @@ module Karafka
         # not to have enough time to run. This (not directly) defines also a single poll
         # max timeout as to allow for frequent enough events polling
         setting :tick_interval, default: 5_000
+        # How long should we sleep between checks on shutting down consumers
+        setting :supervision_sleep, default: 0.1
+        # What system exit code should we use when we terminated forcefully
+        setting :forceful_exit_code, default: 2
+
+        setting :swarm do
+          # Manager for swarm nodes control
+          setting :manager, default: Swarm::Manager.new
+          # Exit code we exit an orphaned child with to indicate something went wrong
+          setting :orphaned_exit_code, default: 3
+          # syscall number for https://man7.org/linux/man-pages/man2/pidfd_open.2.html
+          setting :pidfd_open_syscall, default: 434
+          # syscall number for https://man7.org/linux/man-pages/man2/pidfd_send_signal.2.html
+          setting :pidfd_signal_syscall, default: 424
+          # How often (in ms) should we control our nodes
+          # This is maximum time after which we will check. This can happen more often in case of
+          # system events.
+          setting :supervision_interval, default: 30_000
+          # How often should each node report its status
+          setting :liveness_interval, default: 10_000
+          # Listener used to report nodes state to the supervisor
+          setting :liveness_listener, default: Swarm::LivenessListener.new
+          # How long should we wait for any info from the node before we consider it hanging at
+          # stop it
+          setting :node_report_timeout, default: 30_000
+          # How long should we wait before restarting a node. This can prevent us from having a
+          # case where for some external reason our spawned process would die immediately and we
+          # would immediately try to start it back in an endless loop
+          setting :node_restart_timeout, default: 5_000
+        end
 
         # Namespace for CLI related settings
         setting :cli do
@@ -176,7 +216,6 @@ module Karafka
           # option subscription_groups_builder [Routing::SubscriptionGroupsBuilder] subscription
           #   group builder
           setting :subscription_groups_builder, default: Routing::SubscriptionGroupsBuilder.new
-
           # Internally assigned list of limits on routings active for the current process
           # This can be altered by the CLI command
           setting :activity_manager, default: Routing::ActivityManager.new

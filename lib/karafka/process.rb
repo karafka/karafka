@@ -14,6 +14,8 @@ module Karafka
       SIGTERM
       SIGTTIN
       SIGTSTP
+      SIGCHLD
+      SIGUSER1
     ].freeze
 
     HANDLED_SIGNALS.each do |signal|
@@ -32,16 +34,40 @@ module Karafka
       RUBY
     end
 
+    # Assigns a callback that will run on any supported signal that has at least one callback
+    # registered already.
+    # @param block [Proc] code we want to run
+    # @note This will only bind to signals that already have at least one callback defined
+    def on_any_active(&block)
+      HANDLED_SIGNALS.each do |signal|
+        next unless @callbacks.key?(signal)
+
+        public_send(:"on_#{signal.to_s.downcase}", &block)
+      end
+    end
+
     # Creates an instance of process and creates empty hash for callbacks
     def initialize
       @callbacks = Hash.new { |hsh, key| hsh[key] = [] }
       @supervised = false
     end
 
+    # Clears all the defined callbacks. Useful for post-fork cleanup when parent already defined
+    # some signals
+    def clear
+      @callbacks.clear
+    end
+
     # Method catches all HANDLED_SIGNALS and performs appropriate callbacks (if defined)
     # @note If there are no callbacks, this method will just ignore a given signal that was sent
     def supervise
-      HANDLED_SIGNALS.each { |signal| trap_signal(signal) }
+      HANDLED_SIGNALS.each do |signal|
+        # Supervise only signals for which we have defined callbacks
+        next unless @callbacks.key?(signal)
+
+        trap_signal(signal)
+      end
+
       @supervised = true
     end
 

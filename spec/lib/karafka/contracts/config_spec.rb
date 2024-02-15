@@ -18,6 +18,10 @@ RSpec.describe_current do
         token: false,
         entity: ''
       },
+      swarm: {
+        nodes: 2,
+        node: false
+      },
       admin: {
         kafka: {},
         group_id: 'karafka_admin',
@@ -25,9 +29,22 @@ RSpec.describe_current do
         max_attempts: 10
       },
       internal: {
+        supervision_sleep: 0.1,
+        forceful_exit_code: 2,
         status: Karafka::Status.new,
         process: Karafka::Process.new,
         tick_interval: 5_000,
+        swarm: {
+          manager: Karafka::Swarm::Manager.new,
+          orphaned_exit_code: 2,
+          pidfd_open_syscall: 434,
+          pidfd_signal_syscall: 424,
+          supervision_interval: 30_000,
+          liveness_interval: 10_000,
+          liveness_listener: Class.new,
+          node_report_timeout: 30_000,
+          node_restart_timeout: 5_000
+        },
         connection: {
           manager: 1,
           conductor: 1,
@@ -86,6 +103,94 @@ RSpec.describe_current do
 
   context 'when config is valid' do
     it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when validating supervision_sleep' do
+    context 'when supervision_sleep is missing' do
+      before { config[:internal].delete(:supervision_sleep) }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when supervision_sleep is not a numeric value' do
+      before { config[:internal][:supervision_sleep] = 'not_numeric' }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when supervision_sleep is less than or equal to 0' do
+      before { config[:internal][:supervision_sleep] = 0 }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+  end
+
+  context 'when validating forceful_exit_code' do
+    context 'when forceful_exit_code is missing' do
+      before { config[:internal].delete(:forceful_exit_code) }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when forceful_exit_code is not an integer' do
+      before { config[:internal][:forceful_exit_code] = 'not_integer' }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when forceful_exit_code is less than 0' do
+      before { config[:internal][:forceful_exit_code] = -1 }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+  end
+
+  context 'when validating swarm settings' do
+    let(:swarm_config) { config[:swarm] }
+
+    context 'when nodes setting is missing' do
+      before { swarm_config.delete(:nodes) }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when nodes is not an integer' do
+      before { swarm_config[:nodes] = 'invalid' }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when nodes is less than 1' do
+      before { swarm_config[:nodes] = 0 }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when node is missing' do
+      before { swarm_config.delete(:node) }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
   end
 
   context 'when validating kafka details' do
@@ -541,6 +646,84 @@ RSpec.describe_current do
       before { config[:internal][:active_job].delete(:consumer_class) }
 
       it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when validating internal swarm settings' do
+    let(:internal_swarm_config) do
+      config[:internal][:swarm]
+    end
+
+    context 'when manager is nil' do
+      before { internal_swarm_config[:manager] = nil }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when orphaned_exit_code is not an integer' do
+      before { internal_swarm_config[:orphaned_exit_code] = 'invalid' }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when pidfd_open_syscall is below 0' do
+      before { internal_swarm_config[:pidfd_open_syscall] = -1 }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when pidfd_signal_syscall is not an integer' do
+      before { internal_swarm_config[:pidfd_signal_syscall] = 'invalid' }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when supervision_interval is less than 1000' do
+      before { internal_swarm_config[:supervision_interval] = 999 }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when liveness_interval is missing' do
+      before { internal_swarm_config.delete(:liveness_interval) }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when liveness_listener is nil' do
+      before { internal_swarm_config[:liveness_listener] = nil }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when node_report_timeout is less than 1000' do
+      before { internal_swarm_config[:node_report_timeout] = 500 }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when node_restart_timeout is not an integer' do
+      before { internal_swarm_config[:node_restart_timeout] = 'invalid' }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
     end
   end
 end

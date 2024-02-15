@@ -17,13 +17,43 @@ RSpec.describe_current do
   end
 
   describe '#supervise' do
-    before { allow(process).to receive(:trap_signal) }
+    before do
+      allow(process).to receive(:trap_signal)
+
+      described_class::HANDLED_SIGNALS.each do |signal|
+        process.public_send(:"on_#{signal.to_s.downcase}", &-> {})
+      end
+    end
 
     it 'traps signals and yield' do
       process.supervise
 
       described_class::HANDLED_SIGNALS.each do |signal|
         expect(process).to have_received(:trap_signal).with(signal)
+      end
+    end
+  end
+
+  describe '#on_any_active' do
+    before { allow(process).to receive(:trap_signal) }
+
+    context 'when no callbacks registered' do
+      it 'expect not to bind to anything' do
+        process.on_any_active {}
+        process.supervise
+        expect(process).not_to have_received(:trap_signal)
+      end
+    end
+
+    context 'when callbacks were registered' do
+      before do
+        process.on_sigint {}
+      end
+
+      it 'expect to bind' do
+        process.on_any_active {}
+        process.supervise
+        expect(process).to have_received(:trap_signal).once
       end
     end
   end

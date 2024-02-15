@@ -34,7 +34,7 @@ SimpleCov.start do
   add_filter '/vendors/'
 
   # enable_coverage :branch
-  command_name SPECS_TYPE
+  command_name [SPECS_TYPE, ARGV].flatten.join('-')
   merge_timeout 3600
 end
 

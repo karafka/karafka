@@ -3,8 +3,6 @@
 RSpec.describe_current do
   subject(:server_cli) { described_class.new }
 
-  let(:pid) { rand.to_s }
-
   specify { expect(described_class).to be < Karafka::Cli::Base }
 
   describe '#call' do

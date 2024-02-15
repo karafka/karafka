@@ -7,6 +7,7 @@ module Karafka
     STATES = {
       initializing: :initialize!,
       initialized: :initialized!,
+      supervising: :supervise!,
       running: :run!,
       # will no longer pickup any work, but current work will be finished
       quieting: :quiet!,
@@ -49,8 +50,8 @@ module Karafka
 
         def #{transition}
           MUTEX.synchronize do
-            # Do not allow reverse state transitions (we always go one way) or transition to the same
-            # state as currently
+            # Do not allow reverse state transitions (we always go one way) or transition to the
+            # same state as currently
             return if @status && STATES.keys.index(:#{state}) <= STATES.keys.index(@status)
 
             @status = :#{state}
@@ -78,6 +79,7 @@ module Karafka
     def done?
       # Short-track for the most common case not to invoke all others on normal execution
       return false if running?
+      return false if supervising?
 
       stopping? || stopped? || quieting? || quiet? || terminated?
     end

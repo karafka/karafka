@@ -2,5 +2,9 @@
 
 set -e
 
-SPECS_TYPE=regular bundle exec rspec --tag ~type:pro
-SPECS_TYPE=pro bundle exec rspec --tag type:pro
+# Run only regular non-forking specs first
+SPECS_TYPE=regular bundle exec rspec --tag ~type:pro --tag ~mode:fork
+# Run forking specs, they need to run in isolation not to crash because of librdkafka
+SPECS_TYPE=regular bundle exec rspec --tag mode:fork
+# Run pro specs at the end
+SPECS_TYPE=pro bundle exec rspec --tag type:pro --tag ~mode:fork

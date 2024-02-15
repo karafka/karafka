@@ -8,6 +8,12 @@ module Karafka
     # @note One subscription group will always belong to one consumer group, but one consumer
     #   group can have multiple subscription groups.
     class SubscriptionGroup
+      include Helpers::ConfigImporter.new(
+        activity_manager: %i[internal routing activity_manager],
+        client_id: %i[client_id],
+        node: %i[swarm node]
+      )
+
       attr_reader :id, :name, :topics, :kafka, :consumer_group
 
       # Lock for generating new ids safely
@@ -67,7 +73,7 @@ module Karafka
 
       # @return [Boolean] is this subscription group one of active once
       def active?
-        Karafka::App.config.internal.routing.activity_manager.active?(:subscription_groups, name)
+        activity_manager.active?(:subscription_groups, name)
       end
 
       # @return [Array<String>] names of topics to which we should subscribe.
@@ -93,15 +99,9 @@ module Karafka
       def build_kafka
         kafka = Setup::AttributesMap.consumer(@topics.first.kafka.dup)
 
-        # If we use static group memberships, there can be a case, where same instance id would
-        # be set on many subscription groups as the group instance id from Karafka perspective is
-        # set per config. Each instance even if they are subscribed to different topics needs to
-        # have it fully unique. To make sure of that, we just add extra postfix at the end that
-        # increments.
-        group_instance_id = kafka.fetch(:'group.instance.id', false)
+        inject_group_instance_id(kafka)
 
-        kafka[:'group.instance.id'] = "#{group_instance_id}_#{@position}" if group_instance_id
-        kafka[:'client.id'] ||= Karafka::App.config.client_id
+        kafka[:'client.id'] ||= client_id
         kafka[:'group.id'] ||= @consumer_group.id
         kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
@@ -109,6 +109,28 @@ module Karafka
         kafka[:'enable.auto.offset.store'] = false
         kafka.freeze
         kafka
+      end
+
+      # If we use static group memberships, there can be a case, where same instance id would
+      # be set on many subscription groups as the group instance id from Karafka perspective is
+      # set per config. Each instance even if they are subscribed to different topics needs to
+      # have it fully unique. To make sure of that, we just add extra postfix at the end that
+      # increments.
+      #
+      # We also handle a swarm case, where the same setup would run from many forked nodes, hence
+      # affecting the instance id and causing conflicts
+      # @param kafka [Hash] kafka level config
+      def inject_group_instance_id(kafka)
+        group_instance_prefix = kafka.fetch(:'group.instance.id', false)
+
+        # If group instance id was not even configured, do nothing
+        return unless group_instance_prefix
+
+        # If there is a node, we need to take its id and inject it as well so multiple forks can
+        # have different instances ids but they are reproducible
+        components = [group_instance_prefix, node ? node.id : nil, @position]
+
+        kafka[:'group.instance.id'] = components.compact.join('_')
       end
     end
   end

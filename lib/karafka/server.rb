@@ -3,16 +3,6 @@
 module Karafka
   # Karafka consuming server class
   class Server
-    # How long should we sleep between checks on shutting down consumers
-    SUPERVISION_SLEEP = 0.1
-    # What system exit code should we use when we terminated forcefully
-    FORCEFUL_EXIT_CODE = 2
-    # This factor allows us to calculate how many times we have to sleep before
-    # a forceful shutdown
-    SUPERVISION_CHECK_FACTOR = (1 / SUPERVISION_SLEEP)
-
-    private_constant :SUPERVISION_SLEEP, :FORCEFUL_EXIT_CODE, :SUPERVISION_CHECK_FACTOR
-
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
       attr_accessor :listeners
@@ -36,11 +26,19 @@ module Karafka
           config.internal.routing.activity_manager.to_h
         )
 
+        # We clear as we do not want parent handlers in case of working from fork
+        process.clear
         process.on_sigint { stop }
         process.on_sigquit { stop }
         process.on_sigterm { stop }
         process.on_sigtstp { quiet }
+        # Needed for instrumentation
+        process.on_sigttin {}
         process.supervise
+
+        # This will only run when not in a swarm mode. In swarm mode the server runs post-fork, so
+        # warmup will do nothing
+        Karafka::App.warmup
 
         # Start is blocking until stop is called and when we stop, it will wait until
         # all of the things are ready to stop
@@ -86,13 +84,13 @@ module Karafka
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
-        ((timeout / 1_000) * SUPERVISION_CHECK_FACTOR).to_i.times do
+        ((timeout / 1_000) * (1 / config.internal.supervision_sleep)).to_i.times do
           all_listeners_stopped = listeners.all?(&:stopped?)
           all_workers_stopped = workers.none?(&:alive?)
 
           return if all_listeners_stopped && all_workers_stopped
 
-          sleep SUPERVISION_SLEEP
+          sleep(config.internal.supervision_sleep)
         end
 
         raise Errors::ForcefulShutdownError
@@ -116,7 +114,7 @@ module Karafka
         return unless process.supervised?
 
         # exit! is not within the instrumentation as it would not trigger due to exit
-        Kernel.exit!(FORCEFUL_EXIT_CODE)
+        Kernel.exit!(config.internal.forceful_exit_code)
       ensure
         # We need to check if it wasn't an early exit to make sure that only on stop invocation
         # can change the status after everything is closed

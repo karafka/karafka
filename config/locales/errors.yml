@@ -1,11 +1,12 @@
 en:
   validations:
     config:
-      missing: needs to be present
-      client_id_format: 'needs to be a string with a Kafka accepted format'
       license.entity_format: needs to be a string
       license.token_format: needs to be either false or a string
       license.expires_on_format: needs to be a valid date
+
+      missing: needs to be present
+      client_id_format: 'needs to be a string with a Kafka accepted format'
       concurrency_format: needs to be an integer bigger than 0
       consumer_mapper_format: needs to be present
       consumer_persistence_format: needs to be either true or false
@@ -15,6 +16,10 @@ en:
       shutdown_timeout_format: needs to be an integer bigger than 0
       max_wait_time_format: needs to be an integer bigger than 0
       kafka_format: needs to be a filled hash
+      key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+      max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
+      shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
+
       internal.processing.jobs_builder_format: cannot be nil
       internal.processing.jobs_queue_class_format: cannot be nil
       internal.processing.scheduler_class_format: cannot be nil
@@ -22,14 +27,20 @@ en:
       internal.processing.partitioner_class_format: cannot be nil
       internal.processing.strategy_selector_format: cannot be nil
       internal.processing.expansions_selector_format: cannot be nil
-      internal.active_job.dispatcher: cannot be nil
-      internal.active_job.job_options_contract: cannot be nil
-      internal.active_job.consumer_class: cannot be nil
+
+      internal.active_job.dispatcher_format: cannot be nil
+      internal.active_job.job_options_contract_format: cannot be nil
+      internal.active_job.consumer_class_format: cannot be nil
+
       internal.status_format: needs to be present
       internal.process_format: needs to be present
       internal.tick_interval_format: needs to be an integer bigger or equal to 1000
+      internal.supervision_sleep_format: needs to be an integer bigger than 0
+      internal.forceful_exit_code_format: needs to be an integer bigger or equal to 0
+
       internal.routing.builder_format: needs to be present
       internal.routing.subscription_groups_builder_format: needs to be present
+
       internal.connection.manager_format: needs to be present
       internal.connection.conductor_format: needs to be present
       internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
@@ -41,13 +52,24 @@ en:
       internal.connection.proxy.committed.timeout_format: needs to be an integer bigger than 0
       internal.connection.proxy.committed.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.committed.wait_time_format: needs to be an integer bigger than 0
-      key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
-      max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
-      shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
+
+      internal.swarm.manager_format: cannot be nil
+      internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0
+      internal.swarm.pidfd_open_syscall_format: needs to be an integer bigger or equal to 0
+      internal.swarm.pidfd_signal_syscall_format: needs to be an integer bigger or equal to 0
+      internal.swarm.supervision_interval_format: needs to be an integer bigger or equal to 1000
+      internal.swarm.liveness_interval_format: needs to be an integer bigger or equal to 1000
+      internal.swarm.liveness_listener_format: cannot be nil
+      internal.swarm.node_report_timeout_format: needs to be an integer bigger or equal to 1000
+      internal.swarm.node_restart_timeout_format: needs to be an integer bigger or equal to 1000
+
       admin.kafka_format: needs to be a hash
       admin.group_id_format: 'needs to be a string with a Kafka accepted format'
       admin.max_wait_time_format: 'needs to be an integer bigger than 0'
       admin.max_attempts_format: 'needs to be an integer bigger than 0'
+
+      swarm.nodes_format: 'needs to be an integer bigger than 0'
+      swarm.node_format: needs to be false or node instance
 
     server_cli_options:
       missing: needs to be present

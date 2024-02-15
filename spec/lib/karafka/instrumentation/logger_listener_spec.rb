@@ -283,6 +283,68 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
+  describe '#on_swarm_manager_stopping' do
+    subject(:trigger) { listener.on_swarm_manager_stopping(event) }
+
+    let(:node) { build(:swarm_node) }
+    let(:payload) { { node: node } }
+    let(:message) { "Swarm manager detected unhealthy node #{node.pid}. Sending TERM signal..." }
+
+    it 'expect logger to log on error' do
+      expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
+    end
+  end
+
+  describe '#on_swarm_manager_terminating' do
+    subject(:trigger) { listener.on_swarm_manager_terminating(event) }
+
+    let(:node) { build(:swarm_node) }
+    let(:payload) { { node: node } }
+    let(:message) do
+      "Swarm manager detected unresponsive node #{node.pid}. Sending KILL signal..."
+    end
+
+    it 'expect logger to log on error' do
+      expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
+    end
+  end
+
+  describe '#on_swarm_manager_before_fork' do
+    subject(:trigger) { listener.on_swarm_manager_before_fork(event) }
+
+    let(:node) { build(:swarm_node) }
+    let(:payload) { { node: node } }
+    let(:message) { "Swarm manager starting node with id: #{node.id}" }
+
+    it 'expect logger to log on error' do
+      expect(Karafka.logger).to have_received(:debug).with(message).at_least(:once)
+    end
+  end
+
+  describe '#on_swarm_node_after_fork' do
+    subject(:trigger) { listener.on_swarm_node_after_fork(event) }
+
+    let(:node) { build(:swarm_node) }
+    let(:payload) { { node: node } }
+    let(:message) { "Swarm node #{::Process.pid} forked from #{::Process.ppid}" }
+
+    it 'expect logger to log on error' do
+      expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
+    end
+  end
+
+  describe '#on_swarm_manager_control' do
+    subject(:trigger) { listener.on_swarm_manager_control(event) }
+
+    let(:manager) { Karafka::App.config.internal.swarm.manager }
+    let(:payload) { { caller: manager } }
+    let(:message) { "Swarm manager checking nodes: #{manager.nodes.map(&:pid).join(', ')}" }
+
+    it 'expect logger to log on error' do
+      expect(Karafka.logger).to have_received(:debug).with(message).at_least(:once)
+    end
+  end
+
   describe '#on_error_occurred' do
     subject(:trigger) { listener.on_error_occurred(event) }
 
@@ -324,6 +386,13 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context 'when it is a consumer.after_consume.error' do
+      let(:type) { 'consumer.after_consume.error' }
+      let(:message) { "Consumer on after_consume failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context 'when it is a consumer.shutdown.error' do
       let(:type) { 'consumer.shutdown.error' }
       let(:message) { "Consumer on shutdown failed due to an error: #{error}" }
@@ -334,6 +403,13 @@ RSpec.describe_current do
     context 'when it is a runner.call.error' do
       let(:type) { 'runner.call.error' }
       let(:message) { "Runner crashed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:fatal).with(message) }
+    end
+
+    context 'when it is a swarm.supervisor.error' do
+      let(:type) { 'swarm.supervisor.error' }
+      let(:message) { "Swarm supervisor crashed due to an error: #{error}" }
 
       it { expect(Karafka.logger).to have_received(:fatal).with(message) }
     end

@@ -41,7 +41,7 @@ module Karafka
 
     # @return [WaterDrop::Producer] waterdrop messages producer
     def producer
-      @producer ||= App.config.producer
+      App.config.producer
     end
 
     # @return [::Karafka::Monitor] monitor that we want to use

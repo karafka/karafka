@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'socket'
+require 'karafka/instrumentation/vendors/kubernetes/base_listener'
 
 module Karafka
   module Instrumentation
@@ -23,17 +23,9 @@ module Karafka
         #
         # @note In case of usage within an embedding with Puma, you need to select different port
         #   then the one used by Puma itself.
-        class LivenessListener
-          include ::Karafka::Core::Helpers::Time
-
-          # All good with Karafka
-          OK_CODE = '204 No Content'
-
-          # Some timeouts, fail
-          FAIL_CODE = '500 Internal Server Error'
-
-          private_constant :OK_CODE, :FAIL_CODE
-
+        #
+        # @note Please use `Kubernetes::SwarmLivenessListener` when operating in the swarm mode
+        class LivenessListener < BaseListener
           # @param hostname [String, nil] hostname or nil to bind on all
           # @param port [Integer] TCP port on which we want to run our HTTP status server
           # @param consuming_ttl [Integer] time in ms after which we consider consumption hanging.
@@ -48,30 +40,23 @@ module Karafka
             consuming_ttl: 5 * 60 * 1_000,
             polling_ttl: 5 * 60 * 1_000
           )
-            @hostname = hostname
-            @port = port
             @polling_ttl = polling_ttl
             @consuming_ttl = consuming_ttl
             @mutex = Mutex.new
             @pollings = {}
             @consumptions = {}
+            super(hostname: hostname, port: port)
           end
 
           # @param _event [Karafka::Core::Monitoring::Event]
           def on_app_running(_event)
-            @server = TCPServer.new(*[@hostname, @port].compact)
-
-            Thread.new do
-              loop do
-                break unless respond
-              end
-            end
+            start
           end
 
           # Stop the http server when we stop the process
           # @param _event [Karafka::Core::Monitoring::Event]
           def on_app_stopped(_event)
-            @server.close
+            stop
           end
 
           # Tick on each fetch
@@ -148,29 +133,15 @@ module Karafka
             end
           end
 
-          # Responds to a HTTP request with the process liveness status
-          def respond
-            client = @server.accept
-            client.gets
-            client.print "HTTP/1.1 #{status}\r\n"
-            client.print "Content-Type: text/plain\r\n"
-            client.print "\r\n"
-            client.close
-
-            true
-          rescue Errno::ECONNRESET, Errno::EPIPE, IOError
-            !@server.closed?
-          end
-
           # Did we exceed any of the ttls
           # @return [String] 204 string if ok, 500 otherwise
-          def status
+          def healthy?
             time = monotonic_now
 
-            return FAIL_CODE if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
-            return FAIL_CODE if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
+            return false if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
+            return false if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
 
-            OK_CODE
+            true
           end
         end
       end

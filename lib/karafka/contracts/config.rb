@@ -34,6 +34,11 @@ module Karafka
       required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
 
+      nested(:swarm) do
+        required(:nodes) { |val| val.is_a?(Integer) && val.positive? }
+        required(:node) { |val| val == false || val.is_a?(Karafka::Swarm::Node) }
+      end
+
       nested(:admin) do
         # Can be empty because inherits values from the root kafka
         required(:kafka) { |val| val.is_a?(Hash) }
@@ -49,6 +54,20 @@ module Karafka
         # In theory this could be less than a second, however this would impact the maximum time
         # of a single consumer queue poll, hence we prevent it
         required(:tick_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
+        required(:supervision_sleep) { |val| val.is_a?(Numeric) && val.positive? }
+        required(:forceful_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
+
+        nested(:swarm) do
+          required(:manager) { |val| !val.nil? }
+          required(:orphaned_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
+          required(:pidfd_open_syscall) { |val| val.is_a?(Integer) && val >= 0 }
+          required(:pidfd_signal_syscall) { |val| val.is_a?(Integer) && val >= 0 }
+          required(:supervision_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
+          required(:liveness_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
+          required(:liveness_listener) { |val| !val.nil? }
+          required(:node_report_timeout) { |val| val.is_a?(Integer) && val >= 1_000 }
+          required(:node_restart_timeout) { |val| val.is_a?(Integer) && val >= 1_000 }
+        end
 
         nested(:connection) do
           required(:manager) { |val| !val.nil? }

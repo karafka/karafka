@@ -20,7 +20,7 @@ end
 
 listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
   hostname: '127.0.0.1',
-  port: 9003,
+  port: 9006,
   consuming_ttl: 1_000
 )
 
@@ -36,7 +36,7 @@ Thread.new do
     sleep(0.1)
 
     req = Net::HTTP::Get.new('/')
-    client = Net::HTTP.new('127.0.0.1', 9003)
+    client = Net::HTTP.new('127.0.0.1', 9006)
     client.set_debug_output(raw_flows)
     response = client.request(req)
 

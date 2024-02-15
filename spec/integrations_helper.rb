@@ -54,6 +54,7 @@ def setup_karafka(
     config.pause_with_exponential_backoff = false
     config.max_wait_time = 500
     config.shutdown_timeout = 30_000
+    config.swarm.nodes = 2
 
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?
@@ -262,7 +263,8 @@ ensure
 end
 
 # Waits until block yields true
-def wait_until
+# @param mode [Symbol] mode in which we are operating
+def wait_until(mode: :server)
   started_at = Time.now
   stop = false
 
@@ -279,7 +281,14 @@ def wait_until
     sleep(0.01)
   end
 
-  Karafka::Server.stop
+  case mode
+  when :server
+    Karafka::Server.stop
+  when :swarm
+    Process.kill('TERM', Process.pid)
+  else
+    raise Karafka::Errors::UnsupportedCaseError, mode
+  end
 
   # Give it enough time to start the stopping process before everything stops
   # For some tasks where this code does not run in a background thread we might stop whole process
@@ -288,13 +297,21 @@ def wait_until
 end
 
 # Starts Karafka and waits until the block evaluates to true. Then it stops Karafka.
+# @param mode [Symbol] `:server` or `:swarm` depending on how we want to run
 # @param reset_status [Boolean] should we reset the server status to initializing after the
 #   shutdown. This allows us to run server multiple times in the same process, making some
 #   integration specs much easier to run
-def start_karafka_and_wait_until(reset_status: false, &block)
-  Thread.new { wait_until(&block) }
+def start_karafka_and_wait_until(mode: :server, reset_status: false, &block)
+  Thread.new { wait_until(mode: mode, &block) }
 
-  Karafka::Server.run
+  case mode
+  when :server
+    Karafka::Server.run
+  when :swarm
+    Karafka::Swarm::Supervisor.new.run
+  else
+    raise Karafka::Errors::UnsupportedCaseError, mode
+  end
 
   return unless reset_status
 

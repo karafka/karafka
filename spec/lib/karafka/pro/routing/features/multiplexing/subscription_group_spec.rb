@@ -14,12 +14,14 @@ RSpec.describe_current do
       )
     end
 
+    it { expect(sg.multiplexing?).to eq(true) }
     it { expect(sg.multiplexing.active?).to eq(true) }
     it { expect(sg.multiplexing.dynamic?).to eq(true) }
 
     context 'when max is 1' do
       let(:max) { 1 }
 
+      it { expect(sg.multiplexing?).to eq(false) }
       it { expect(sg.multiplexing.active?).to eq(false) }
       it { expect(sg.multiplexing.dynamic?).to eq(false) }
     end
@@ -28,6 +30,7 @@ RSpec.describe_current do
       let(:min) { 3 }
       let(:max) { 3 }
 
+      it { expect(sg.multiplexing?).to eq(true) }
       it { expect(sg.multiplexing.active?).to eq(true) }
       it { expect(sg.multiplexing.dynamic?).to eq(false) }
     end
