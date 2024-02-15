@@ -4,7 +4,7 @@
 # in terms of size
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
-  config.concurrency = 10
+  config.concurrency = 2
 end
 
 class Consumer < Karafka::BaseConsumer
@@ -15,13 +15,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-DT[:iterator] = (0..9).cycle
-
 draw_routes do
   topic DT.topic do
     consumer Consumer
+    filter VpStabilizer
     virtual_partitions(
-      partitioner: ->(_msg) { DT[:iterator].next }
+      partitioner: ->(_msg) { rand(2) }
     )
   end
 end
@@ -32,4 +31,16 @@ start_karafka_and_wait_until do
   DT[:errors_collapsed].include?(5)
 end
 
-assert_equal DT[:errors_collapsed][0..4], (1..5).to_a
+def contains_subsequence?(main_array, sub_array)
+  return true if sub_array.empty?
+
+  sub_index = 0
+  main_array.each do |element|
+    sub_index += 1 if element == sub_array[sub_index]
+    return true if sub_index == sub_array.length
+  end
+
+  false
+end
+
+assert contains_subsequence?(DT[:errors_collapsed], (2..5).to_a)

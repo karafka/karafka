@@ -2,6 +2,7 @@
 
 ## 2.3.2 (Unreleased)
 - [Enhancement] Provide `Consumer#errors_tracker` to be able to get errors that occurred while doing complex recovery.
+- [Fix] Infinite consecutive error flow with VPs and without DLQ can cause endless offsets accumulation.
 - [Fix] Quieting mode causes too early unsubscribe.
 
 ## 2.3.1 (2024-02-08)
