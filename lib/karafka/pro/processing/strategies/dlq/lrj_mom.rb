@@ -42,9 +42,7 @@ module Karafka
                   end
 
                   resume
-                elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-                  retry_after_pause
-                else
+                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
                   coordinator.pause_tracker.reset
 
                   return resume if revoked?
@@ -54,6 +52,8 @@ module Karafka
 
                   coordinator.seek_offset = skippable_message.offset + 1
                   pause(coordinator.seek_offset, nil, false)
+                else
+                  retry_after_pause
                 end
               end
             end

@@ -28,6 +28,12 @@ module Karafka
                 ).fetch('en').fetch('validations').fetch('topic')
               end
 
+              nested(:dead_letter_queue) do
+                # We use strategy based DLQ for every case in Pro
+                # For default (when no strategy) a default `max_retries` based strategy is used
+                required(:strategy) { |val| val.respond_to?(:call) }
+              end
+
               # Make sure that when we use virtual partitions with DLQ, at least one retry is set
               # We cannot use VP with DLQ without retries as we in order to provide ordering
               # warranties on errors with VP, we need to collapse the VPs concurrency and retry

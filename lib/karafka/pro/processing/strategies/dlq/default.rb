@@ -76,16 +76,13 @@ module Karafka
                   return if coordinator.manual_pause?
 
                   mark_as_consumed(last_group_message)
-                elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-                  retry_after_pause
-                # If we've reached number of retries that we could, we need to skip the first
-                # message that was not marked as consumed, pause and continue, while also moving
-                # this message to the dead topic
-                else
+                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
                   # We reset the pause to indicate we will now consider it as "ok".
                   coordinator.pause_tracker.reset
                   dispatch_if_needed_and_mark_as_consumed
                   pause(coordinator.seek_offset, nil, false)
+                else
+                  retry_after_pause
                 end
               end
             end

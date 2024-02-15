@@ -15,6 +15,8 @@ module Karafka
           :independent,
           # Move to DLQ and mark as consumed in transactional mode (if applicable)
           :transactional,
+          # Strategy to apply (if strategies supported)
+          :strategy,
           keyword_init: true
         ) do
           alias_method :active?, :active

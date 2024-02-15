@@ -41,15 +41,7 @@ module Karafka
                   return if coordinator.manual_pause?
 
                   handle_post_filtering
-                elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-                  retry_after_pause
-                # If we've reached number of retries that we could, we need to skip the first
-                # message that was not marked as consumed, pause and continue, while also moving
-                # this message to the dead topic.
-                #
-                # For a Mom setup, this means, that user has to manage the checkpointing by
-                # himself. If no checkpointing is ever done, we end up with an endless loop.
-                else
+                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
                   # We reset the pause to indicate we will now consider it as "ok".
                   coordinator.pause_tracker.reset
 
@@ -58,6 +50,8 @@ module Karafka
 
                   coordinator.seek_offset = skippable_message.offset + 1
                   pause(coordinator.seek_offset, nil, false)
+                else
+                  retry_after_pause
                 end
               end
             end

@@ -42,9 +42,7 @@ module Karafka
                   seek(coordinator.seek_offset, false) unless revoked? || coordinator.manual_seek?
 
                   resume
-                elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-                  retry_after_pause
-                else
+                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
                   coordinator.pause_tracker.reset
 
                   return resume if revoked?
@@ -52,6 +50,8 @@ module Karafka
                   dispatch_if_needed_and_mark_as_consumed
 
                   pause(coordinator.seek_offset, nil, false)
+                else
+                  retry_after_pause
                 end
               end
             end

@@ -42,14 +42,14 @@ module Karafka
                   mark_as_consumed(last_group_message)
 
                   handle_post_filtering
-                elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-                  retry_after_pause
-                else
+                elsif topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
                   coordinator.pause_tracker.reset
 
                   dispatch_if_needed_and_mark_as_consumed
 
                   pause(coordinator.seek_offset, nil, false)
+                else
+                  retry_after_pause
                 end
               end
             end
