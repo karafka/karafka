@@ -37,9 +37,6 @@ module Karafka
                   coordinator.pause_tracker.reset
                 else
                   apply_dlq_flow do
-                    # We reset the pause to indicate we will now consider it as "ok".
-                    coordinator.pause_tracker.reset
-
                     skippable_message, = find_skippable_message
                     dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
 
@@ -49,7 +46,6 @@ module Karafka
                     # processed. Of course, since it's a MoM a rebalance or kill, will move it back
                     # as no offsets are being committed
                     coordinator.seek_offset = skippable_message.offset + 1
-                    pause(coordinator.seek_offset, nil, false)
                   end
                 end
               end

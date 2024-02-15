@@ -52,11 +52,9 @@ module Karafka
                   apply_dlq_flow do
                     # Here we are in a collapsed state, hence we can apply the same logic as
                     # Aj::DlqMom
-                    coordinator.pause_tracker.reset
                     skippable_message, = find_skippable_message
                     dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
                     mark_as_consumed(skippable_message)
-                    pause(coordinator.seek_offset, nil, false)
                   end
                 end
               end

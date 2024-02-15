@@ -44,13 +44,9 @@ module Karafka
                   resume
                 else
                   apply_dlq_flow do
-                    coordinator.pause_tracker.reset
-
                     return resume if revoked?
 
                     dispatch_if_needed_and_mark_as_consumed
-
-                    pause(coordinator.seek_offset, nil, false)
                   end
                 end
               end

@@ -59,11 +59,9 @@ module Karafka
                   end
                 else
                   apply_dlq_flow do
-                    coordinator.pause_tracker.reset
                     skippable_message, = find_skippable_message
                     dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
                     mark_as_consumed(skippable_message)
-                    pause(coordinator.seek_offset, nil, false)
                   end
                 end
               end

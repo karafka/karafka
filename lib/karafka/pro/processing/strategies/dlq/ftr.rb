@@ -44,11 +44,7 @@ module Karafka
                   handle_post_filtering
                 else
                   apply_dlq_flow do
-                    coordinator.pause_tracker.reset
-
                     dispatch_if_needed_and_mark_as_consumed
-
-                    pause(coordinator.seek_offset, nil, false)
                   end
                 end
               end

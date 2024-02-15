@@ -78,10 +78,7 @@ module Karafka
                   mark_as_consumed(last_group_message)
                 else
                   apply_dlq_flow do
-                    # We reset the pause to indicate we will now consider it as "ok".
-                    coordinator.pause_tracker.reset
                     dispatch_if_needed_and_mark_as_consumed
-                    pause(coordinator.seek_offset, nil, false)
                   end
                 end
               end
@@ -180,7 +177,7 @@ module Karafka
             #   topic is set to false, we will skip the dispatch, effectively ignoring the broken
             #   message without taking any action.
             def dispatch_to_dlq?
-              return false if topic.dead_letter_queue.topic
+              return false unless topic.dead_letter_queue.topic
               return false unless @_dispatch_to_dlq
 
               true
@@ -213,7 +210,13 @@ module Karafka
                 raise Karafka::UnsupportedCaseError, flow
               end
 
+              # We reset the pause to indicate we will now consider it as "ok".
+              coordinator.pause_tracker.reset
+
               yield
+
+              # Always backoff after DLQ dispatch even on skip to prevent overloads on errors
+              pause(coordinator.seek_offset, nil, false)
             end
           end
         end
