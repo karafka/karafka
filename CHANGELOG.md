@@ -7,6 +7,7 @@
 - [Enhancement] Use `Process.warmup` in Ruby 3.3+ prior to forks (in swarm) and prior to app start.
 - [Enhancement] Provide `app.before_warmup` event to allow hooking code loading tools prior to final warmup.
 - [Enhancement] Provide `Consumer#errors_tracker` to be able to get errors that occurred while doing complex recovery.
+- [Fix] Infinite consecutive error flow with VPs and without DLQ can cause endless offsets accumulation.
 - [Fix] Quieting mode causes too early unsubscribe.
 
 ## 2.3.1 (2024-02-08)
