@@ -40,7 +40,7 @@ module Karafka
     # @note This will only bind to signals that already have at least one callback defined
     def on_any_active(&block)
       HANDLED_SIGNALS.each do |signal|
-        next unless @callbacks.key?(:"#{signal}")
+        next unless @callbacks.key?(signal)
 
         public_send(:"on_#{signal.to_s.downcase}", &block)
       end
