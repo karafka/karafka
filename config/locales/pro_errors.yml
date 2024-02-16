@@ -8,6 +8,8 @@ en:
       long_running_job.active_format: needs to be either true or false
 
       dead_letter_queue_with_virtual_partitions: when using Dead Letter Queue with Virtual Partitions, at least one retry is required.
+      dead_letter_queue.strategy_format: 'needs to respond to #call'
+      dead_letter_queue.strategy_missing: needs to be present
 
       throttling.active_format: needs to be either true or false
       throttling.limit_format: needs to be equal or more than 1

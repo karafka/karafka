@@ -2,6 +2,8 @@
 
 ## 2.3.2 (Unreleased)
 - **[Feature]** Provide swarm capabilities to OSS and Pro.
+- **[Feature]** Provide ability to use complex strategies in DLQ (Pro).
+- [Enhancement] Support using `:partition` as the partition key for ActiveJob assignments.
 - [Enhancement] Expand Logger listener with swarm notifications.
 - [Enhancement] Introduce K8s swarm liveness listener.
 - [Enhancement] Use `Process.warmup` in Ruby 3.3+ prior to forks (in swarm) and prior to app start.

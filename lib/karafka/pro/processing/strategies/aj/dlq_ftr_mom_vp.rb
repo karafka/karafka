@@ -48,23 +48,15 @@ module Karafka
                   mark_as_consumed(last_group_message)
 
                   handle_post_filtering
-                elsif coordinator.pause_tracker.attempt <= topic.dead_letter_queue.max_retries
-                  retry_after_pause
-                # If we've reached number of retries that we could, we need to skip the first
-                # message that was not marked as consumed, pause and continue, while also moving
-                # this message to the dead topic.
-                #
-                # For a Mom setup, this means, that user has to manage the checkpointing by
-                # himself. If no checkpointing is ever done, we end up with an endless loop.
                 else
-                  coordinator.pause_tracker.reset
-                  skippable_message, = find_skippable_message
-                  dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-                  # We can commit the offset here because we know that we skip it "forever" and
-                  # since AJ consumer commits the offset after each job, we also know that the
-                  # previous job was successful
-                  mark_as_consumed(skippable_message)
-                  pause(coordinator.seek_offset, nil, false)
+                  apply_dlq_flow do
+                    skippable_message, = find_skippable_message
+                    dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
+                    # We can commit the offset here because we know that we skip it "forever" and
+                    # since AJ consumer commits the offset after each job, we also know that the
+                    # previous job was successful
+                    mark_as_consumed(skippable_message)
+                  end
                 end
               end
             end
