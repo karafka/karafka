@@ -26,6 +26,12 @@ RSpec.describe_current do
     it { expect(contract.call(config)).to be_success }
   end
 
+  context 'when partition key type is :partition itself' do
+    before { config[:partition_key_type] = :partition }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
   context 'when partition key type is something unexpected' do
     before { config[:partition_key_type] = rand.to_s }
 

@@ -1,0 +1,92 @@
+# frozen_string_literal: true
+
+# When using a complex dispatch strategy based on error type, it should operate as expected.
+# Please keep in mind, this spec does not care about the fact, that during recovery different
+# errors occur. It uses notion of last error only.
+
+setup_karafka(allow_errors: %w[consumer.consume.error])
+
+# This should be retried always
+DbError = Class.new(StandardError)
+
+# This should be always skipped asap
+NonRecoverableError = Class.new(StandardError)
+
+# This should be retried 1 time
+RecoverableError = Class.new(StandardError)
+
+# A different error with default of 5 attempts
+OtherError = Class.new(StandardError)
+
+ERRORS = [
+  DbError,
+  NonRecoverableError,
+  RecoverableError,
+  OtherError
+].freeze
+
+class DqlErrorStrategy
+  def call(errors_tracker, attempt)
+    case errors_tracker.last
+    # Always retry on any DB related errors
+    when DbError
+      :retry
+    # Never retry on non-recoverable errors
+    when NonRecoverableError
+      :skip
+    # On this specific recoverable retry at most 2 times
+    when RecoverableError
+      attempt > 2 ? :dispatch : :retry
+    else
+      # And for any other errors, retry 5 times
+      attempt > 5 ? :dispatch : :retry
+    end
+  end
+end
+
+class Consumer < Karafka::BaseConsumer
+  def consume
+    error = errors_tracker.last
+
+    DT[:errors] << [error&.class, attempt]
+
+    raise ERRORS[partition]
+  end
+end
+
+draw_routes do
+  topic DT.topics[0] do
+    config(partitions: ERRORS.size)
+    consumer Consumer
+    dead_letter_queue(
+      topic: DT.topics[1],
+      strategy: DqlErrorStrategy.new
+    )
+  end
+end
+
+start_karafka_and_wait_until do
+  4.times do |i|
+    produce(DT.topic, '', partition: i)
+  end
+
+  sleep(0.1)
+
+  DT[:errors].size >= 50
+end
+
+# Non recoverable will always skip, so only one attempt
+non_recoverable = DT[:errors].select { |error| error.first.nil? }
+assert_equal [1], non_recoverable.map(&:last).uniq
+
+# DB error should be retried many times without limit
+db = DT[:errors].select { |error| error.first == DbError }
+assert db.map(&:last).max >= 6
+
+# Recoverable should give up after 3 attempts as it either recovers or fails (we emulate failure)
+recoverable = DT[:errors].select { |error| error.first == RecoverableError }
+assert recoverable.map(&:last).max <= 3
+
+# Other errors should have 6 attempts at most
+other = DT[:errors].select { |error| error.first == OtherError }
+assert other.map(&:last).max <= 6

@@ -26,7 +26,7 @@ module Karafka
         end
 
         optional(:partitioner) { |val| val.respond_to?(:call) }
-        optional(:partition_key_type) { |val| %i[key partition_key].include?(val) }
+        optional(:partition_key_type) { |val| %i[key partition_key partition].include?(val) }
         optional(:dispatch_method) do |val|
           %i[
             produce_async
