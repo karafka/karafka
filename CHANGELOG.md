@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.3.2 (Unreleased)
+## 2.3.2 (2024-02-16)
 - **[Feature]** Provide swarm capabilities to OSS and Pro.
 - **[Feature]** Provide ability to use complex strategies in DLQ (Pro).
 - [Enhancement] Support using `:partition` as the partition key for ActiveJob assignments.
