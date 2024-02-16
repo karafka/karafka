@@ -45,7 +45,7 @@ GEM
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-web (0.8.1)
+    karafka-web (0.8.2)
       erubi (~> 1.4)
       karafka (>= 2.3.0, < 2.4.0)
       karafka-core (>= 2.3.0, < 2.4.0)
@@ -56,7 +56,7 @@ GEM
     mutex_m (0.2.0)
     rack (3.0.9)
     rake (13.1.0)
-    roda (3.76.0)
+    roda (3.77.0)
       rack
     rspec (3.13.0)
       rspec-core (~> 3.13.0)

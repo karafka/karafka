@@ -15,13 +15,13 @@ module Karafka
         # Skip verification if web is not used at all
         return unless require_version('karafka/web')
 
-        # All good if version higher than 0.7.x because we expect 0.8.0 or higher
-        return if version(Karafka::Web::VERSION) >= version('0.7.100')
+        # All good if version higher than 0.8.1 because we expect 0.8.2 or higher
+        return if version(Karafka::Web::VERSION) >= version('0.8.2')
 
         # If older web-ui used, we cannot allow it
         raise(
           Errors::DependencyConstraintsError,
-          'karafka-web < 0.8.0 is not compatible with this karafka version'
+          'karafka-web < 0.8.2 is not compatible with this karafka version'
         )
       end
 
