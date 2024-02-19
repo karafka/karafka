@@ -196,7 +196,7 @@ module Karafka
           setting :liveness_listener, default: Swarm::LivenessListener.new
           # How long should we wait for any info from the node before we consider it hanging at
           # stop it
-          setting :node_report_timeout, default: 30_000
+          setting :node_report_timeout, default: 60_000
           # How long should we wait before restarting a node. This can prevent us from having a
           # case where for some external reason our spawned process would die immediately and we
           # would immediately try to start it back in an endless loop
