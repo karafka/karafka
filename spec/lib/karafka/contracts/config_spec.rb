@@ -6,13 +6,13 @@ RSpec.describe_current do
   let(:config) do
     {
       client_id: 'name',
-      shutdown_timeout: 10,
+      shutdown_timeout: 2_000,
       consumer_mapper: Karafka::Routing::ConsumerMapper.new,
       consumer_persistence: true,
       pause_max_timeout: 1_000,
       pause_timeout: 1_000,
       pause_with_exponential_backoff: false,
-      max_wait_time: 5,
+      max_wait_time: 1_000,
       concurrency: 5,
       license: {
         token: false,
@@ -284,6 +284,12 @@ RSpec.describe_current do
 
     context 'when max_wait_time is float' do
       before { admin_cfg[:max_wait_time] = 1.1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_wait_time is more than swarm node_report_timeout' do
+      before { config[:internal][:swarm][:node_report_timeout] = 1_000 }
 
       it { expect(contract.call(config)).not_to be_success }
     end

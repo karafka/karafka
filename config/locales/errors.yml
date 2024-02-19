@@ -15,6 +15,9 @@ en:
       pause_with_exponential_backoff_format: needs to be either true or false
       shutdown_timeout_format: needs to be an integer bigger than 0
       max_wait_time_format: needs to be an integer bigger than 0
+      max_wait_time_max_wait_time_vs_swarm_node_report_timeout: >
+        cannot be more than 80% of internal.swarm.node_report_timeout.
+        Decrease max_wait_time or increase node_report_timeout
       kafka_format: needs to be a filled hash
       key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
       max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
