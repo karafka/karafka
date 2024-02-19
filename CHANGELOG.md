@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.3.3 (Unreleased)
+- [Change] Change `internal.swarm.node_report_timeout` to 60 seconds from 30 seconds to compensate for long pollings.
+
 ## 2.3.2 (2024-02-16)
 - **[Feature]** Provide swarm capabilities to OSS and Pro.
 - **[Feature]** Provide ability to use complex strategies in DLQ (Pro).

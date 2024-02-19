@@ -162,6 +162,28 @@ module Karafka
 
         [[%i[shutdown_timeout], :shutdown_timeout_vs_max_wait_time]]
       end
+
+      # `internal.swarm.node_report_timeout` should not be close to `max_wait_time` otherwise
+      # there may be a case where node cannot report often enough because it is clogged by waiting
+      # on more data.
+      #
+      # We handle that at a config level to make sure that this is correctly configured.
+      #
+      # We do not validate this in the context of swarm usage (validate only if...) because it is
+      # often that swarm only runs on prod and we do not want to crash it surprisingly.
+      virtual do |data, errors|
+        next unless errors.empty?
+
+        max_wait_time = data.fetch(:max_wait_time)
+        node_report_timeout = data.fetch(:internal)[:swarm][:node_report_timeout] || false
+
+        next unless node_report_timeout
+        # max wait time should be at least 20% smaller than the reporting time to have enough
+        # time for reporting
+        next if max_wait_time < node_report_timeout * 0.8
+
+        [[%i[max_wait_time], :max_wait_time_vs_swarm_node_report_timeout]]
+      end
     end
   end
 end
