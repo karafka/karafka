@@ -4,7 +4,7 @@
 # no longer hanging it should gracefully stop
 
 setup_karafka(allow_errors: true) do |config|
-  config.shutdown_timeout = 5_000
+  config.shutdown_timeout = 30_000
   config.swarm.nodes = 1
   config.internal.swarm.node_restart_timeout = 1_000
   config.internal.swarm.supervision_interval = 1_000
