@@ -117,4 +117,36 @@ RSpec.describe_current do
       it { expect(group.active?).to eq false }
     end
   end
+
+  describe '#refresh' do
+    context 'when node reference is changed' do
+      let(:node) { build(:swarm_node, id: 2) }
+      let(:pre_id) { group.kafka[:'group.instance.id'] }
+      let(:post_id) { group.kafka[:'group.instance.id'] }
+
+      let(:topic) do
+        build(
+          :routing_topic,
+          kafka: {
+            'bootstrap.servers': 'kafka://kafka:9092',
+            'group.instance.id': 'test'
+          }
+        )
+      end
+
+      before do
+        pre_id
+        Karafka::App.config.swarm.node = node
+        group.refresh
+        post_id
+      end
+
+      after { Karafka::App.config.swarm.node = false }
+
+      it 'expect to refresh the group.instance.id' do
+        expect(pre_id).to eq('test_0')
+        expect(post_id).to eq('test_2_0')
+      end
+    end
+  end
 end
