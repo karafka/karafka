@@ -4,7 +4,7 @@
 # no longer hanging it should gracefully stop
 
 setup_karafka(allow_errors: true) do |config|
-  config.shutdown_timeout = 30_000
+  config.shutdown_timeout = 5_000
   config.swarm.nodes = 1
   config.internal.swarm.node_restart_timeout = 1_000
   config.internal.swarm.supervision_interval = 1_000
@@ -13,6 +13,11 @@ end
 
 Karafka::App.monitor.subscribe('swarm.manager.before_fork') do
   DT[:forks] << true
+
+  # Give them a bit more time if they are suppose to be legit
+  if DT[:forks].size >= 3
+    Karafka::App.config.shutdown_timeout = 30_000
+  end
 end
 
 # Make it do nothing so we simulate hanging process
