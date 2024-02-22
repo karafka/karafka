@@ -34,7 +34,7 @@ draw_routes do
   end
 end
 
-Thread.new do
+thread = Thread.new do
   sleep(0.1) until Karafka::App.running?
 
   until DT[:revoked].uniq.size >= 2
@@ -68,3 +68,5 @@ end
 
 # Many partitions should be revoked
 assert_equal [0, 1], DT[:revoked].uniq.sort.to_a
+
+thread.join
