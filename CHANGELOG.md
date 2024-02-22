@@ -3,6 +3,7 @@
 ## 2.3.3 (Unreleased)
 - [Enhancement] Publish the `-1` shutdown reason status for a non-responding node in swarm.
 - [Change] Change `internal.swarm.node_report_timeout` to 60 seconds from 30 seconds to compensate for long pollings.
+- [Fix] Static membership routing evaluation happens too early in swarm.
 
 ## 2.3.2 (2024-02-16)
 - **[Feature]** Provide swarm capabilities to OSS and Pro.

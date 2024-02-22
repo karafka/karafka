@@ -600,6 +600,13 @@ module Karafka
       # @return [Rdkafka::Consumer]
       def build_consumer
         ::Rdkafka::Config.logger = ::Karafka::App.config.logger
+
+        # We need to refresh the setup of this subscription group in case we started running in a
+        # swarm. The initial configuration for validation comes from the parent node, but it needs
+        # to be altered in case of a static group membership usage for correct mapping of the
+        # group instance id.
+        @subscription_group.refresh
+
         config = ::Rdkafka::Config.new(@subscription_group.kafka)
         config.consumer_rebalance_listener = @rebalance_callback
         # We want to manage the events queue independently from the messages queue. Thanks to that

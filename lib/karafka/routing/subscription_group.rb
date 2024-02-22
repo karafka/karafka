@@ -91,6 +91,19 @@ module Karafka
         id
       end
 
+      # Refreshes the configuration of this subscription group if needed based on the execution
+      # context.
+      #
+      # Since the initial routing setup happens in the supervisor, it is inherited by the children.
+      # This causes incomplete assignment of `group.instance.id` which is not expanded with proper
+      # node identifier. This refreshes this if needed when in swarm.
+      def refresh
+        return unless node
+        return unless kafka.key?(:'group.instance.id')
+
+        @kafka = build_kafka
+      end
+
       private
 
       # @return [Hash] kafka settings are a bit special. They are exactly the same for all of the
