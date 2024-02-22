@@ -15,9 +15,7 @@ Karafka::App.monitor.subscribe('swarm.manager.before_fork') do
   DT[:forks] << true
 
   # Give them a bit more time if they are suppose to be legit
-  if DT[:forks].size >= 3
-    Karafka::App.config.shutdown_timeout = 30_000
-  end
+  Karafka::App.config.shutdown_timeout = 30_000 if DT[:forks].size >= 3
 end
 
 # Make it do nothing so we simulate hanging process
