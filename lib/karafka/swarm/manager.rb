@@ -19,6 +19,13 @@ module Karafka
         node_restart_timeout: %i[internal swarm node_restart_timeout]
       )
 
+      # Status we issue when we decide to shutdown unresponsive node
+      # We use -1 because nodes are expected to report 0+ statuses and we can use negative numbers
+      # for non-node based statuses
+      NOT_RESPONDING_SHUTDOWN_STATUS = -1
+
+      private_constant :NOT_RESPONDING_SHUTDOWN_STATUS
+
       # @return [Array<Node>] All nodes that manager manages
       attr_reader :nodes
 
@@ -148,7 +155,12 @@ module Karafka
         return true unless over?(statuses[:control], node_report_timeout)
 
         # Start the stopping procedure if the node stopped reporting frequently enough
-        monitor.instrument('swarm.manager.stopping', caller: self, node: node) do
+        monitor.instrument(
+          'swarm.manager.stopping',
+          caller: self,
+          node: node,
+          status: NOT_RESPONDING_SHUTDOWN_STATUS
+        ) do
           node.stop
           statuses[:stop] = monotonic_now
         end
