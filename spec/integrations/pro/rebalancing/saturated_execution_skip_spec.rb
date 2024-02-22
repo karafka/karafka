@@ -33,9 +33,9 @@ draw_routes do
   end
 end
 
-Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
-  partitions = 0
+partitions = 0
 
+Karafka.monitor.subscribe('connection.listener.fetch_loop.received') do |event|
   event.payload[:messages_buffer].each do
     partitions += 1
   end
