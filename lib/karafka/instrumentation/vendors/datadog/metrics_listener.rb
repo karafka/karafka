@@ -14,7 +14,8 @@ module Karafka
           include ::Karafka::Core::Configurable
           extend Forwardable
 
-          def_delegators :config, :client, :rd_kafka_metrics, :namespace, :default_tags, :use_distributions
+          def_delegators :config, :client, :rd_kafka_metrics, :namespace,
+                         :default_tags, :use_distributions
 
           # Value object for storing a single rdkafka metric publishing details
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
@@ -113,8 +114,18 @@ module Karafka
             extra_tags = ["consumer_group:#{consumer_group_id}"]
 
             bucket_metric_type = use_distributions ? 'distribution' : 'histogram'
-            public_send(bucket_metric_type, 'listener.polling.time_taken', time_taken, tags: default_tags + extra_tags)
-            public_send(bucket_metric_type, 'listener.polling.messages', messages_count, tags: default_tags + extra_tags)
+            public_send(
+              bucket_metric_type,
+              'listener.polling.time_taken',
+              time_taken,
+              tags: default_tags + extra_tags
+            )
+            public_send(
+              bucket_metric_type,
+              'listener.polling.messages',
+              messages_count,
+              tags: default_tags + extra_tags
+            )
           end
 
           # Here we report majority of things related to processing as we have access to the
@@ -131,10 +142,30 @@ module Karafka
             count('consumer.batches', 1, tags: tags)
             gauge('consumer.offset', metadata.last_offset, tags: tags)
             bucket_metric_type = use_distributions ? 'distribution' : 'histogram'
-            public_send(bucket_metric_type, 'consumer.consumed.time_taken', event[:time], tags: tags)
-            public_send(bucket_metric_type, 'consumer.batch_size', messages.count, tags: tags)
-            public_send(bucket_metric_type, 'consumer.processing_lag', metadata.processing_lag, tags: tags)
-            public_send(bucket_metric_type, 'consumer.consumption_lag', metadata.consumption_lag, tags: tags)
+            public_send(
+              bucket_metric_type,
+              'consumer.consumed.time_taken',
+              event[:time],
+              tags: tags
+            )
+            public_send(
+              bucket_metric_type,
+              'consumer.batch_size',
+              messages.count,
+              tags: tags
+            )
+            public_send(
+              bucket_metric_type,
+              'consumer.processing_lag',
+              metadata.processing_lag,
+              tags: tags
+            )
+            public_send(
+              bucket_metric_type,
+              'consumer.consumption_lag',
+              metadata.consumption_lag,
+              tags: tags
+            )
           end
 
           {
@@ -161,8 +192,18 @@ module Karafka
 
             gauge('worker.total_threads', Karafka::App.config.concurrency, tags: default_tags)
             bucket_metric_type = use_distributions ? 'distribution' : 'histogram'
-            public_send(bucket_metric_type, 'worker.processing', jq_stats[:busy], tags: default_tags)
-            public_send(bucket_metric_type, 'worker.enqueued_jobs', jq_stats[:enqueued], tags: default_tags)
+            public_send(
+              bucket_metric_type,
+              'worker.processing',
+              jq_stats[:busy],
+              tags: default_tags
+            )
+            public_send(
+              bucket_metric_type,
+              'worker.enqueued_jobs',
+              jq_stats[:enqueued],
+              tags: default_tags
+            )
           end
 
           # We report this metric before and after processing for higher accuracy
@@ -172,7 +213,12 @@ module Karafka
             jq_stats = event[:jobs_queue].statistics
 
             bucket_metric_type = use_distributions ? 'distribution' : 'histogram'
-            public_send(bucket_metric_type, 'worker.processing', jq_stats[:busy], tags: default_tags)
+            public_send(
+              bucket_metric_type,
+              'worker.processing',
+              jq_stats[:busy],
+              tags: default_tags
+            )
           end
 
           private
