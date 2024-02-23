@@ -58,6 +58,10 @@ en:
       subscription_group_details.multiplexing_boot_format: 'needs to be an integer equal or more than 1'
       subscription_group_details.multiplexing_boot_not_dynamic: 'needs to be equal to max when not in dynamic mode'
 
+      swarm.active_format: needs to be true
+      swarm.nodes_format: needs to be a range or an array of nodes ids
+      swarm_nodes_with_non_existent_nodes: includes unreachable nodes ids
+
     consumer_group:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present

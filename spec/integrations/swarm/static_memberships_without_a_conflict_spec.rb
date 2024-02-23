@@ -26,7 +26,9 @@ draw_routes do
   end
 end
 
-produce_many(DT.topic, DT.uuids(100))
+10.times do |partition|
+  produce_many(DT.topic, DT.uuids(10), partition: partition)
+end
 
 results = {}
 
