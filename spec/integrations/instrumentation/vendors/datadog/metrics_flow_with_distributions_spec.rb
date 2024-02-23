@@ -31,7 +31,7 @@ listener = ::Karafka::Instrumentation::Vendors::Datadog::MetricsListener.new do 
   # Publish host as a tag alongside the rest of tags
   config.default_tags = ["host:#{Socket.gethostname}"]
   # Use distributions instead of histograms
-  config.use_distributions = true
+  config.distribution_mode = :distribution
 end
 
 Karafka.monitor.subscribe(listener)

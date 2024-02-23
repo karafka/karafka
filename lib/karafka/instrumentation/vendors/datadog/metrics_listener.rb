@@ -15,7 +15,7 @@ module Karafka
           extend Forwardable
 
           def_delegators :config, :client, :rd_kafka_metrics, :namespace,
-                         :default_tags, :use_distributions
+                         :default_tags, :distribution_mode
 
           # Value object for storing a single rdkafka metric publishing details
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
@@ -54,12 +54,12 @@ module Karafka
             RdKafkaMetric.new(:gauge, :topics, 'consumer.lags_delta', 'consumer_lag_stored_d')
           ].freeze
 
-          # Whether histogram metrics should be sent as distributions.
+          # Whether histogram metrics should be sent as distributions or histograms.
           # Distribution metrics are aggregated globally and not agent-side,
           # providing more accurate percentiles whenever consumers are running on multiple hosts.
           #
           # Learn more at https://docs.datadoghq.com/metrics/types/?tab=distribution#metric-types
-          setting :use_distributions, default: false
+          setting :distribution_mode, default: :histogram
 
           configure
 
@@ -113,19 +113,16 @@ module Karafka
 
             extra_tags = ["consumer_group:#{consumer_group_id}"]
 
-            bucket_metric_type = use_distributions ? 'distribution' : 'histogram'
-            public_send(
-              bucket_metric_type,
-              'listener.polling.time_taken',
-              time_taken,
-              tags: default_tags + extra_tags
-            )
-            public_send(
-              bucket_metric_type,
-              'listener.polling.messages',
-              messages_count,
-              tags: default_tags + extra_tags
-            )
+            case distribution_mode
+            when :histogram
+              histogram('listener.polling.time_taken', time_taken, tags: default_tags + extra_tags)
+              histogram('listener.polling.messages', messages_count, tags: default_tags + extra_tags)
+            when :distribution
+              distribution('listener.polling.time_taken', time_taken, tags: default_tags + extra_tags)
+              distribution('listener.polling.messages', messages_count, tags: default_tags + extra_tags)
+            else
+              raise(::ArgumentError, 'distribution_mode setting value must be either :histogram or :distribution')
+            end
           end
 
           # Here we report majority of things related to processing as we have access to the
@@ -141,31 +138,20 @@ module Karafka
             count('consumer.messages', messages.count, tags: tags)
             count('consumer.batches', 1, tags: tags)
             gauge('consumer.offset', metadata.last_offset, tags: tags)
-            bucket_metric_type = use_distributions ? 'distribution' : 'histogram'
-            public_send(
-              bucket_metric_type,
-              'consumer.consumed.time_taken',
-              event[:time],
-              tags: tags
-            )
-            public_send(
-              bucket_metric_type,
-              'consumer.batch_size',
-              messages.count,
-              tags: tags
-            )
-            public_send(
-              bucket_metric_type,
-              'consumer.processing_lag',
-              metadata.processing_lag,
-              tags: tags
-            )
-            public_send(
-              bucket_metric_type,
-              'consumer.consumption_lag',
-              metadata.consumption_lag,
-              tags: tags
-            )
+            case distribution_mode
+            when :histogram
+              histogram('consumer.consumed.time_taken', event[:time], tags: tags)
+              histogram('consumer.batch_size', messages.count, tags: tags)
+              histogram('consumer.processing_lag', metadata.processing_lag, tags: tags)
+              histogram('consumer.consumption_lag', metadata.consumption_lag, tags: tags)
+            when :distribution
+              distribution('consumer.consumed.time_taken', event[:time], tags: tags)
+              distribution('consumer.batch_size', messages.count, tags: tags)
+              distribution('consumer.processing_lag', metadata.processing_lag, tags: tags)
+              distribution('consumer.consumption_lag', metadata.consumption_lag, tags: tags)
+            else
+              raise(::ArgumentError, 'distribution_mode setting value must be either :histogram or :distribution')
+            end
           end
 
           {
@@ -191,19 +177,16 @@ module Karafka
             jq_stats = event[:jobs_queue].statistics
 
             gauge('worker.total_threads', Karafka::App.config.concurrency, tags: default_tags)
-            bucket_metric_type = use_distributions ? 'distribution' : 'histogram'
-            public_send(
-              bucket_metric_type,
-              'worker.processing',
-              jq_stats[:busy],
-              tags: default_tags
-            )
-            public_send(
-              bucket_metric_type,
-              'worker.enqueued_jobs',
-              jq_stats[:enqueued],
-              tags: default_tags
-            )
+            case distribution_mode
+            when :histogram
+              histogram('worker.processing', jq_stats[:busy], tags: default_tags)
+              histogram('worker.enqueued_jobs', jq_stats[:enqueued], tags: default_tags)
+            when :distribution
+              distribution('worker.processing', jq_stats[:busy], tags: default_tags)
+              distribution('worker.enqueued_jobs', jq_stats[:enqueued], tags: default_tags)
+            else
+              raise(::ArgumentError, 'distribution_mode setting value must be either :histogram or :distribution')
+            end
           end
 
           # We report this metric before and after processing for higher accuracy
@@ -212,13 +195,14 @@ module Karafka
           def on_worker_processed(event)
             jq_stats = event[:jobs_queue].statistics
 
-            bucket_metric_type = use_distributions ? 'distribution' : 'histogram'
-            public_send(
-              bucket_metric_type,
-              'worker.processing',
-              jq_stats[:busy],
-              tags: default_tags
-            )
+            case distribution_mode
+            when :histogram
+              histogram('worker.processing', jq_stats[:busy], tags: default_tags)
+            when :distribution
+              distribution('worker.processing', jq_stats[:busy], tags: default_tags)
+            else
+              raise(::ArgumentError, 'distribution_mode setting value must be either :histogram or :distribution')
+            end
           end
 
           private
