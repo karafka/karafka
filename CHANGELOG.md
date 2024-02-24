@@ -3,6 +3,7 @@
 ## 2.3.3 (Unreleased)
 - [Enhancement] Routing based topics allocation for swarm (Pro)
 - [Enhancement] Publish the `-1` shutdown reason status for a non-responding node in swarm.
+- [Enhancement] Allow for using the `distribution` mode for DataDog listener histogram reporting (Aerdayne).
 - [Change] Change `internal.swarm.node_report_timeout` to 60 seconds from 30 seconds to compensate for long pollings.
 - [Fix] Static membership routing evaluation happens too early in swarm.
 
