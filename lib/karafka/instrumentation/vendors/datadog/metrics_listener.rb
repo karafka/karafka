@@ -159,7 +159,6 @@ module Karafka
             jq_stats = event[:jobs_queue].statistics
 
             gauge('worker.total_threads', Karafka::App.config.concurrency, tags: default_tags)
-
             histogram('worker.processing', jq_stats[:busy], tags: default_tags)
             histogram('worker.enqueued_jobs', jq_stats[:enqueued], tags: default_tags)
           end
