@@ -14,7 +14,8 @@ module Karafka
           include ::Karafka::Core::Configurable
           extend Forwardable
 
-          def_delegators :config, :client, :rd_kafka_metrics, :namespace, :default_tags
+          def_delegators :config, :client, :rd_kafka_metrics, :namespace,
+                         :default_tags, :distribution_mode
 
           # Value object for storing a single rdkafka metric publishing details
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
@@ -52,6 +53,13 @@ module Karafka
             RdKafkaMetric.new(:gauge, :topics, 'consumer.lags', 'consumer_lag_stored'),
             RdKafkaMetric.new(:gauge, :topics, 'consumer.lags_delta', 'consumer_lag_stored_d')
           ].freeze
+
+          # Whether histogram metrics should be sent as distributions or histograms.
+          # Distribution metrics are aggregated globally and not agent-side,
+          # providing more accurate percentiles whenever consumers are running on multiple hosts.
+          #
+          # Learn more at https://docs.datadoghq.com/metrics/types/?tab=distribution#metric-types
+          setting :distribution_mode, default: :histogram
 
           configure
 
@@ -169,18 +177,40 @@ module Karafka
           %i[
             count
             gauge
-            histogram
             increment
             decrement
           ].each do |metric_type|
-            class_eval <<~METHODS, __FILE__, __LINE__ + 1
+            class_eval <<~RUBY, __FILE__, __LINE__ + 1
               def #{metric_type}(key, *args)
                 client.#{metric_type}(
                   namespaced_metric(key),
                   *args
                 )
               end
-            METHODS
+            RUBY
+          end
+
+          # Selects the histogram mode configured and uses it to report to DD client
+          # @param key [String] non-namespaced key
+          # @param args [Array] extra arguments to pass to the client
+          def histogram(key, *args)
+            case distribution_mode
+            when :histogram
+              client.histogram(
+                namespaced_metric(key),
+                *args
+              )
+            when :distribution
+              client.distribution(
+                namespaced_metric(key),
+                *args
+              )
+            else
+              raise(
+                ::ArgumentError,
+                'distribution_mode setting value must be either :histogram or :distribution'
+              )
+            end
           end
 
           # Wraps metric name in listener's namespace
