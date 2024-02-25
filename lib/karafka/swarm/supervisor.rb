@@ -132,8 +132,9 @@ module Karafka
         # Cleanup the process table
         manager.cleanup
 
-        # exit! is not within the instrumentation as it would not trigger due to exit
-        Kernel.exit!(forceful_exit_code)
+        # We do not use `exit!` here similar to regular server because we do not have to worry
+        # about any librdkafka related hanging connections, etc
+        Kernel.exit(forceful_exit_code)
       ensure
         if initialized
           Karafka::App.stopped!

@@ -36,10 +36,10 @@ module Karafka
 
       # Starts all the expected nodes for the first time
       def start
-        pidfd = Pidfd.new(::Process.pid)
+        parent_pid = ::Process.pid
 
         @nodes = Array.new(nodes_count) do |i|
-          start_one Node.new(i, pidfd)
+          start_one Node.new(i, parent_pid)
         end
       end
 

@@ -72,17 +72,33 @@ module Karafka
       def alive?
         @pidfd_select ||= [@pidfd_io]
 
-        IO.select(@pidfd_select, nil, nil, 0).nil?
+        if @mutex.owned?
+          return false if @cleaned
+
+          IO.select(@pidfd_select, nil, nil, 0).nil?
+        else
+          @mutex.synchronize do
+            return false if @cleaned
+
+            IO.select(@pidfd_select, nil, nil, 0).nil?
+          end
+        end
       end
 
       # Cleans the zombie process
       # @note This should run **only** on processes that exited, otherwise will wait
       def cleanup
-        return if @cleaned
+        @mutex.synchronize do
+          return if @cleaned
 
-        waitid(P_PIDFD, @pidfd, nil, WEXITED)
+          waitid(P_PIDFD, @pidfd, nil, WEXITED)
 
-        @cleaned = true
+          @pidfd_io.close
+          @pidfd_select = nil
+          @pidfd_io = nil
+          @pidfd = nil
+          @cleaned = true
+        end
       end
 
       # Sends given signal to the process using its pidfd
