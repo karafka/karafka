@@ -70,9 +70,13 @@ module Karafka
 
       # @return [Boolean] true if given process is alive, false if no longer
       def alive?
-        @pidfd_select ||= [@pidfd_io]
+        @mutex.synchronize do
+          return false if @cleaned
 
-        IO.select(@pidfd_select, nil, nil, 0).nil?
+          @pidfd_select ||= [@pidfd_io]
+
+          IO.select(@pidfd_select, nil, nil, 0).nil?
+        end
       end
 
       # Cleans the zombie process
@@ -81,14 +85,13 @@ module Karafka
         @mutex.synchronize do
           return if @cleaned
 
-          @cleaned = true
-
           waitid(P_PIDFD, @pidfd, nil, WEXITED)
 
           @pidfd_io.close
           @pidfd_select = nil
           @pidfd_io = nil
           @pidfd = nil
+          @cleaned = true
         end
       end
 
