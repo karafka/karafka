@@ -30,10 +30,10 @@ module Karafka
       # @param id [Integer] number of the fork. Used for uniqueness setup for group client ids and
       #   other stuff where we need to know a unique reference of the fork in regards to the rest
       #   of them.
-      # @param parent_pidfd [Pidfd] parent pidfd for zombie fencing
-      def initialize(id, parent_pidfd)
+      # @param parent_pid [Integer] parent pid for zombie fencing
+      def initialize(id, parent_pid)
         @id = id
-        @parent_pidfd = parent_pidfd
+        @parent_pidfd = Pidfd.new(parent_pid)
       end
 
       # Starts a new fork and:
