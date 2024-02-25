@@ -70,12 +70,18 @@ module Karafka
 
       # @return [Boolean] true if given process is alive, false if no longer
       def alive?
-        @mutex.synchronize do
+        @pidfd_select ||= [@pidfd_io]
+
+        if @mutex.owned?
           return false if @cleaned
 
-          @pidfd_select ||= [@pidfd_io]
-
           IO.select(@pidfd_select, nil, nil, 0).nil?
+        else
+          @mutex.synchronize do
+            return false if @cleaned
+
+            IO.select(@pidfd_select, nil, nil, 0).nil?
+          end
         end
       end
 
