@@ -6,6 +6,7 @@
 - [Enhancement] Allow for using the `distribution` mode for DataDog listener histogram reporting (Aerdayne).
 - [Change] Change `internal.swarm.node_report_timeout` to 60 seconds from 30 seconds to compensate for long pollings.
 - [Fix] Static membership routing evaluation happens too early in swarm.
+- [Fix] Close producer in supervisor prior to forking and warmup to prevent invalid memory states.
 
 ## 2.3.2 (2024-02-16)
 - **[Feature]** Provide swarm capabilities to OSS and Pro.
