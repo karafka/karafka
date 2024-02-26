@@ -30,13 +30,15 @@ module Karafka
 
       # Creates needed number of forks, installs signals and starts supervision
       def run
+        # Close producer just in case. While it should not be used, we do not want even a
+        # theoretical case since librdkafka is not thread-safe.
+        # We close it prior to forking just to make sure, there is no issue with initialized
+        # producer (should not be initialized but just in case)
+        Karafka.producer.close
+
         Karafka::App.warmup
 
         manager.start
-
-        # Close producer just in case. While it should not be used, we do not want even a
-        # theoretical case since librdkafka is not thread-safe.
-        Karafka.producer.close
 
         process.on_sigint { stop }
         process.on_sigquit { stop }
