@@ -7,7 +7,7 @@ setup_karafka
 failed = false
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     subscription_group :group1 do
       topic :topic1 do
         consumer Class.new
@@ -21,7 +21,7 @@ end
 assert !failed
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     subscription_group do
       topic :topic2 do
         consumer Class.new

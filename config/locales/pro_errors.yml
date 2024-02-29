@@ -85,3 +85,6 @@ en:
 
       patterns.ttl_format: needs to be an integer bigger than 0
       patterns.ttl_missing: needs to be present
+
+    routing:
+      swarm_nodes_not_used: 'At least one of the nodes has no assignments'

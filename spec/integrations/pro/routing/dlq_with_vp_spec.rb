@@ -9,7 +9,7 @@ end
 guarded = []
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     consumer_group DT.consumer_group do
       topic DT.topic do
         consumer Class.new(Karafka::BaseConsumer)

@@ -48,7 +48,7 @@ module Karafka
                 nodes = data[:swarm][:nodes]
 
                 # Defaults
-                next if nodes.first.zero? && nodes.last == Float::INFINITY
+                next if nodes.first.zero? && nodes.include?(Float::INFINITY)
 
                 # If our expectation towards which node should run things matches at least one
                 # node, then it's ok

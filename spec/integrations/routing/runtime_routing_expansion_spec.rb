@@ -35,7 +35,7 @@ start_karafka_and_wait_until do
     end
 
     begin
-      draw_routes do
+      draw_routes(create_topics: false) do
         consumer_group 'regular' do
           topic 'test-me' do
             consumer Consumer

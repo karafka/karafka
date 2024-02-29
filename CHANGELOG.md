@@ -2,6 +2,9 @@
 
 ## 2.3.4 (Unreleased)
 - [Enhancement] Add a buffer to the supervisor supervision on shutdown to prevent a potential race condition when signal pass lags.
+- [Fix] Fix a case where critically crashed supervisor would raise incorrect error.
+- [Fix] Re-raise critical supervisor errors before shutdown.
+- [Fix] Fix a case when right-open (infinite) swarm matching would not pass validations.
 
 ## 2.3.3 (2024-02-26)
 - [Enhancement] Routing based topics allocation for swarm (Pro)

@@ -4,7 +4,7 @@
 
 setup_karafka
 
-draw_routes do
+draw_routes(create_topics: false) do
   subscription_group 'group1' do
     topic 'topic1' do
       consumer Class.new

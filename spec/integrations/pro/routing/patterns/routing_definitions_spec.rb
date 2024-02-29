@@ -8,7 +8,7 @@ setup_karafka
 Consumer1 = Class.new
 Consumer2 = Class.new
 
-draw_routes do
+draw_routes(create_topics: false) do
   topic 'test' do
     consumer Consumer1
   end

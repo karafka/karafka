@@ -5,7 +5,7 @@
 
 setup_karafka
 
-draw_routes do
+draw_routes(create_topics: false) do
   # Use default setup settings for Kafka, etc
   consumer_group :test1 do
     topic 'topic1' do

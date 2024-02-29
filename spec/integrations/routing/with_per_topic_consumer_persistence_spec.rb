@@ -12,7 +12,7 @@ setup_karafka do |config|
   config.consumer_persistence = false
 end
 
-draw_routes do
+draw_routes(create_topics: false) do
   consumer_group :test1 do
     topic 'topic1' do
       consumer Class.new

@@ -8,7 +8,7 @@ setup_karafka
 guarded = []
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     consumer_group 'regular' do
       topic '#$%^&*(' do
         consumer Class.new
@@ -22,7 +22,7 @@ end
 Karafka::App.routes.clear
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     consumer_group '#$%^&*(' do
       topic 'regular' do
         consumer Class.new

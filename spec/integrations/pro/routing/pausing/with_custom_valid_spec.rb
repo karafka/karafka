@@ -4,7 +4,7 @@
 
 setup_karafka
 
-draw_routes do
+draw_routes(create_topics: false) do
   topic :a do
     consumer Class.new(Karafka::BaseConsumer)
     pause(
