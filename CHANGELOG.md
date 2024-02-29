@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.3.4 (Unreleased)
+- [Enhancement] Add a buffer to the supervisor supervision on shutdown to prevent a potential race condition when signal pass lags.
+
 ## 2.3.3 (2024-02-26)
 - [Enhancement] Routing based topics allocation for swarm (Pro)
 - [Enhancement] Publish the `-1` shutdown reason status for a non-responding node in swarm.

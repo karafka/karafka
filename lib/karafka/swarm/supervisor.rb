@@ -23,6 +23,15 @@ module Karafka
         process: %i[internal process]
       )
 
+      # How long extra should we wait on shutdown before forceful termination
+      # We add this time because we send signals and it always can take a bit of time for them
+      # to reach out nodes and be processed to start the shutdown flow. Because of that and
+      # because we always want to give all nodes all the time of `shutdown_timeout` they are
+      # expected to have, we add this just to compensate.
+      SHUTDOWN_GRACE_PERIOD = 1_000
+
+      private_constant :SHUTDOWN_GRACE_PERIOD
+
       def initialize
         @mutex = Mutex.new
         @queue = Processing::TimedQueue.new
@@ -102,10 +111,12 @@ module Karafka
 
         manager.stop
 
+        total_shutdown_timeout = shutdown_timeout + SHUTDOWN_GRACE_PERIOD
+
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
-        ((shutdown_timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
+        ((total_shutdown_timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
           if manager.stopped?
             manager.cleanup
             return
