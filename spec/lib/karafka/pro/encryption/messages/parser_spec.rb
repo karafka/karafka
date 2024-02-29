@@ -110,7 +110,7 @@ RSpec.describe_current do
       end
 
       let(:expected_error) do
-        Karafka::Pro::Encryption::Errors::IntegrityVerificationError
+        Karafka::Pro::Encryption::Errors::FingerprintVerificationError
       end
 
       before do
@@ -145,7 +145,7 @@ RSpec.describe_current do
       end
 
       let(:expected_error) do
-        Karafka::Pro::Encryption::Errors::IntegrityVerificationError
+        Karafka::Pro::Encryption::Errors::FingerprintVerificationError
       end
 
       before do

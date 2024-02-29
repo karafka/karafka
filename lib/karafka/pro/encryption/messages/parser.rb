@@ -49,7 +49,7 @@ module Karafka
 
             return super(message) if message_fingerprint == fingerprint
 
-            raise(Errors::IntegrityVerificationError, message.to_s)
+            raise(Errors::FingerprintVerificationError, message.to_s)
           end
         end
       end

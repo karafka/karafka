@@ -23,7 +23,7 @@ module Karafka
         PrivateKeyNotFoundError = Class.new(BaseError)
 
         # Raised when fingerprinting was enabled and payload after encryption did not match it
-        IntegrityVerificationError = Class.new(BaseError)
+        FingerprintVerificationError = Class.new(BaseError)
       end
     end
   end
