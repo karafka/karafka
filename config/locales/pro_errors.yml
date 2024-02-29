@@ -83,6 +83,7 @@ en:
       encryption.public_key_format: 'is not a valid public RSA key'
       encryption.private_keys_invalid: 'contains an invalid private RSA key string'
       encryption.fingerprinter_missing: 'needs to be false or respond to #hexdigest method'
+      encryption.fingerprinter_format: 'needs to be false or respond to #hexdigest method'
 
       patterns.ttl_format: needs to be an integer bigger than 0
       patterns.ttl_missing: needs to be present

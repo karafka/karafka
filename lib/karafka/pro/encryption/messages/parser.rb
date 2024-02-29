@@ -43,7 +43,7 @@ module Karafka
 
             message.raw_payload = decrypted_payload
 
-            return super(message) unless fingerprint
+            return super(message) unless fingerprint && fingerprinter
 
             message_fingerprint = fingerprinter.hexdigest(decrypted_payload)
 

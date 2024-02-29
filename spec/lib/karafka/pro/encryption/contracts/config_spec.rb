@@ -52,6 +52,20 @@ RSpec.describe_current do
     it { expect(contract.call(config)).to be_success }
   end
 
+  context 'when fingerprinter is provided' do
+    context 'when it does not respond to #hexdigest' do
+      before { encryption[:fingerprinter] = Object }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when it does respond to #hexdigest' do
+      before { encryption[:fingerprinter] = Digest::MD5 }
+
+      it { expect(contract.call(config)).to be_success }
+    end
+  end
+
   context 'when encryption is enabled' do
     before { encryption[:active] = true }
 
