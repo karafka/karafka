@@ -5,7 +5,7 @@
 
 setup_karafka
 
-draw_routes do
+draw_routes(create_topics: false) do
   topic 'topic1' do
     consumer Class.new
   end
@@ -29,7 +29,7 @@ assert_equal 'topic3', Karafka::App.consumer_groups.first.topics[2].name
 
 # Re-running simple routing should just add more topics
 
-draw_routes do
+draw_routes(create_topics: false) do
   topic 'topic4' do
     consumer Class.new
   end

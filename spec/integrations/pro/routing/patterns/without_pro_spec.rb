@@ -7,7 +7,7 @@ setup_karafka(pro: false)
 not_found = false
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     pattern(/.*/) do
       consumer Class.new
     end

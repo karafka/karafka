@@ -6,7 +6,7 @@
 
 setup_karafka
 
-draw_routes do
+draw_routes(create_topics: false) do
   defaults do
     config(partitions: 5)
     active false

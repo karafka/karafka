@@ -7,7 +7,7 @@ setup_karafka(pro: false)
 not_found = false
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     topic DT.topics[0] do
       consumer Class.new
       long_running_job true

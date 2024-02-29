@@ -8,7 +8,7 @@ setup_karafka
 guarded = []
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     topic DT.topic do
       consumer Class.new(Karafka::BaseConsumer)
       pause(
@@ -23,7 +23,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     topic DT.topic do
       consumer Class.new(Karafka::BaseConsumer)
       pause(
@@ -38,7 +38,7 @@ rescue Karafka::Errors::InvalidConfigurationError
 end
 
 begin
-  draw_routes do
+  draw_routes(create_topics: false) do
     topic DT.topic do
       consumer Class.new(Karafka::BaseConsumer)
       pause(

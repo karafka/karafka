@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When using public key to publish and a key that is not matching on version, we should get OpenSSL
-# error
+# error or (depending on time and libs versions) random data
 
 PUBLIC_KEY = fixture_file('rsa/public_key_1.pem')
 
@@ -39,7 +39,12 @@ elements = DT.uuids(10)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  !DT[:errors].empty?
+  !DT[:errors].empty? || DT[0].size >= 10
 end
 
-assert DT[:errors].first.payload[:error].is_a?(OpenSSL::PKey::PKeyError)
+if DT[:errors].empty?
+  assert (DT[0] & elements).empty?
+else
+  assert DT[:errors].first.payload[:error].is_a?(OpenSSL::PKey::PKeyError)
+end
+

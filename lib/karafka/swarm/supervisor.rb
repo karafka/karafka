@@ -79,7 +79,10 @@ module Karafka
           type: 'swarm.supervisor.error'
         )
 
-        @nodes.terminate
+        manager.terminate
+        manager.cleanup
+
+        raise e
       end
 
       private
