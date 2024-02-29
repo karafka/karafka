@@ -20,34 +20,36 @@ module Karafka
         #   unencrypted payloads. That is why we always rely on message headers for encryption
         #   indication.
         class Parser < ::Karafka::Messages::Parser
+          include Helpers::ConfigImporter.new(
+            cipher: %i[encryption cipher],
+            active: %i[encryption active],
+            fingerprinter: %i[encryption fingerprinter]
+          )
+
           # @param message [::Karafka::Messages::Message]
           # @return [Object] deserialized payload
           def call(message)
-            if active? && message.headers.key?('encryption')
-              # Decrypt raw payload so it can be handled by the default parser logic
-              message.raw_payload = cipher.decrypt(
-                message.headers['encryption'],
-                message.raw_payload
-              )
-            end
+            headers = message.headers
+            encryption = headers['encryption']
+            fingerprint = headers['encryption_fingerprint']
 
-            super(message)
-          end
+            return super(message) unless active && encryption
 
-          private
+            # Decrypt raw payload so it can be handled by the default parser logic
+            decrypted_payload = cipher.decrypt(
+              encryption,
+              message.raw_payload
+            )
 
-          # @return [::Karafka::Pro::Encryption::Cipher]
-          def cipher
-            @cipher ||= ::Karafka::App.config.encryption.cipher
-          end
+            message.raw_payload = decrypted_payload
 
-          # @return [Boolean] is encryption active
-          def active?
-            return @active unless @active.nil?
+            return super(message) unless fingerprint
 
-            @active = ::Karafka::App.config.encryption.active
+            message_fingerprint = fingerprinter.hexdigest(decrypted_payload)
 
-            @active
+            return super(message) if message_fingerprint == fingerprint
+
+            raise(Errors::IntegrityVerificationError, message.to_s)
           end
         end
       end

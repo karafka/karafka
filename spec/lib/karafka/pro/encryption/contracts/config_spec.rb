@@ -10,7 +10,8 @@ RSpec.describe_current do
         version: '1',
         public_key: '',
         private_keys: {},
-        cipher: Karafka::Pro::Encryption::Cipher.new
+        cipher: Karafka::Pro::Encryption::Cipher.new,
+        fingerprinter: false
       }
     }
   end

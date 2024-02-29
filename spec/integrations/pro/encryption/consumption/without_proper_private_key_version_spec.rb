@@ -41,5 +41,5 @@ start_karafka_and_wait_until do
   !DT[:errors].empty?
 end
 
-expected_error = Karafka::Pro::Encryption::Errors::PrivateKeyNotFound
+expected_error = Karafka::Pro::Encryption::Errors::PrivateKeyNotFoundError
 assert DT[:errors].first.payload[:error].is_a?(expected_error)

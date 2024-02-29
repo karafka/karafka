@@ -30,6 +30,7 @@ module Karafka
             required(:active) { |val| [true, false].include?(val) }
             required(:version) { |val| val.is_a?(String) && !val.empty? }
             required(:public_key) { |val| val.is_a?(String) }
+            required(:fingerprinter) { |val| val == false || val.respond_to?(:hexdigest) }
 
             required(:private_keys) do |val|
               val.is_a?(Hash) &&

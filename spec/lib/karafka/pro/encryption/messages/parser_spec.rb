@@ -47,9 +47,10 @@ RSpec.describe_current do
 
     context 'when encryption is active but message with not matching encryption version' do
       let(:headers) { { 'encryption' => 'na' } }
+      let(:expected_error) { Karafka::Pro::Encryption::Errors::PrivateKeyNotFoundError }
 
       it 'expect to raise an error' do
-        expect { parsing }.to raise_error(Karafka::Pro::Encryption::Errors::PrivateKeyNotFound)
+        expect { parsing }.to raise_error(expected_error)
       end
     end
   end

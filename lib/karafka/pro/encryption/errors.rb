@@ -20,7 +20,10 @@ module Karafka
         BaseError = Class.new(::Karafka::Errors::BaseError)
 
         # Raised when we have encountered encryption key with version we do not have
-        PrivateKeyNotFound = Class.new(BaseError)
+        PrivateKeyNotFoundError = Class.new(BaseError)
+
+        # Raised when fingerprinting was enabled and payload after encryption did not match it
+        IntegrityVerificationError = Class.new(BaseError)
       end
     end
   end

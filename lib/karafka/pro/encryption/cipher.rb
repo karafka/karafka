@@ -48,7 +48,7 @@ module Karafka
           return @private_pems[version] if @private_pems.key?(version)
 
           key_string = ::Karafka::App.config.encryption.private_keys[version]
-          key_string || raise(Errors::PrivateKeyNotFound, version)
+          key_string || raise(Errors::PrivateKeyNotFoundError, version)
 
           @private_pems[version] = ::OpenSSL::PKey::RSA.new(key_string)
         end

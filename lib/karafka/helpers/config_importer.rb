@@ -20,7 +20,9 @@ module Karafka
         @attributes.each do |name, path|
           model.class_eval <<~RUBY, __FILE__, __LINE__ + 1
             def #{name}
-              @#{name} ||= ::Karafka::App.config.#{path.join('.')}
+              return @#{name} if instance_variable_defined?(:"@#{name}")
+
+              @#{name} = ::Karafka::App.config.#{path.join('.')}
             end
           RUBY
         end
