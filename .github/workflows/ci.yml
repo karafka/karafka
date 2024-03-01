@@ -193,9 +193,6 @@ jobs:
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
-      - name: Update libssl-dev for stable encryption specs
-        run: "sudo apt-get install -y libssl-dev"
-
       - name: Start Kafka with docker-compose
         run: |
           docker-compose up -d || (sleep 5 && docker-compose up -d)

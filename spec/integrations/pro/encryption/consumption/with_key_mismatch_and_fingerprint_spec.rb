@@ -20,6 +20,20 @@ Karafka.monitor.subscribe('error.occurred') do |event|
   DT[:errors] << event
 end
 
+module Karafka
+  module Pro
+    module Encryption
+      class Cipher
+        # Fake invalid description.
+        # We mock it because depending on the libssl version it may or may not raise and error
+        def decrypt(_version, _content)
+          rand.to_s
+        end
+      end
+    end
+  end
+end
+
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
