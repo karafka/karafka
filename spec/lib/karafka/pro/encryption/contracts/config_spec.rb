@@ -10,7 +10,8 @@ RSpec.describe_current do
         version: '1',
         public_key: '',
         private_keys: {},
-        cipher: Karafka::Pro::Encryption::Cipher.new
+        cipher: Karafka::Pro::Encryption::Cipher.new,
+        fingerprinter: false
       }
     }
   end
@@ -49,6 +50,20 @@ RSpec.describe_current do
     before { encryption[:public_key] = 'not a key' }
 
     it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when fingerprinter is provided' do
+    context 'when it does not respond to #hexdigest' do
+      before { encryption[:fingerprinter] = Object }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when it does respond to #hexdigest' do
+      before { encryption[:fingerprinter] = Digest::MD5 }
+
+      it { expect(contract.call(config)).to be_success }
+    end
   end
 
   context 'when encryption is enabled' do

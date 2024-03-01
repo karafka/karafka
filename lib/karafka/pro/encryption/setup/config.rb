@@ -40,6 +40,11 @@ module Karafka
           # Cipher used to encrypt and decrypt data
           setting(:cipher, default: Encryption::Cipher.new)
 
+          # When set to any digest that responds to `#hexdigest` will compute checksum of the
+          # message payload for post-description integrity verification. It will include a
+          # fingerprint in headers
+          setting(:fingerprinter, default: false)
+
           configure
         end
       end

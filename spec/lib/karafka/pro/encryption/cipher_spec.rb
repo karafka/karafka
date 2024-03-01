@@ -23,7 +23,7 @@ RSpec.describe_current do
     end
 
     context 'when trying to use non-existing key' do
-      let(:expected_error) { ::Karafka::Pro::Encryption::Errors::PrivateKeyNotFound }
+      let(:expected_error) { ::Karafka::Pro::Encryption::Errors::PrivateKeyNotFoundError }
 
       it 'expect to raise error' do
         expect { cipher.decrypt('2', content) }.to raise_error(expected_error)

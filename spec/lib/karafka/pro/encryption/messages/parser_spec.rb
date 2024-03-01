@@ -47,9 +47,123 @@ RSpec.describe_current do
 
     context 'when encryption is active but message with not matching encryption version' do
       let(:headers) { { 'encryption' => 'na' } }
+      let(:expected_error) { Karafka::Pro::Encryption::Errors::PrivateKeyNotFoundError }
 
       it 'expect to raise an error' do
-        expect { parsing }.to raise_error(Karafka::Pro::Encryption::Errors::PrivateKeyNotFound)
+        expect { parsing }.to raise_error(expected_error)
+      end
+    end
+
+    context 'when encrypted message does not match fingerprint but fingerprinting is off' do
+      let(:headers) { { 'encryption' => '1', 'encryption_fingerprint' => rand.to_s } }
+
+      let(:raw_payload) do
+        ::Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
+      end
+
+      before do
+        allow(::Karafka::App.config.encryption)
+          .to receive(:public_key)
+          .and_return(fixture_file('rsa/public_key_1.pem'))
+
+        allow(::Karafka::App.config.encryption)
+          .to receive(:private_keys)
+          .and_return('1' => fixture_file('rsa/private_key_1.pem'))
+      end
+
+      it 'expect to decrypt it and then run deserializer' do
+        expect(parsing).to eq('test' => 1)
+      end
+    end
+
+    context 'when encrypted message has no fingerprint but fingerprinting is on' do
+      let(:headers) { { 'encryption' => '1' } }
+
+      let(:raw_payload) do
+        ::Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
+      end
+
+      before do
+        allow(::Karafka::App.config.encryption)
+          .to receive(:public_key)
+          .and_return(fixture_file('rsa/public_key_1.pem'))
+
+        allow(::Karafka::App.config.encryption)
+          .to receive(:fingerprinter)
+          .and_return(Digest::MD5)
+
+        allow(::Karafka::App.config.encryption)
+          .to receive(:private_keys)
+          .and_return('1' => fixture_file('rsa/private_key_1.pem'))
+      end
+
+      it 'expect to decrypt it and then run deserializer' do
+        expect(parsing).to eq('test' => 1)
+      end
+    end
+
+    context 'when encrypted message has fingerprint, fingerprinting is on and invalid' do
+      let(:headers) { { 'encryption' => '1', 'encryption_fingerprint' => rand.to_s } }
+
+      let(:raw_payload) do
+        ::Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
+      end
+
+      let(:expected_error) do
+        Karafka::Pro::Encryption::Errors::FingerprintVerificationError
+      end
+
+      before do
+        allow(::Karafka::App.config.encryption)
+          .to receive(:public_key)
+          .and_return(fixture_file('rsa/public_key_1.pem'))
+
+        allow(::Karafka::App.config.encryption)
+          .to receive(:fingerprinter)
+          .and_return(Digest::MD5)
+
+        allow(::Karafka::App.config.encryption)
+          .to receive(:private_keys)
+          .and_return('1' => fixture_file('rsa/private_key_1.pem'))
+      end
+
+      it 'expect to decrypt and fail verification' do
+        expect { parsing }.to raise_error(expected_error)
+      end
+    end
+
+    context 'when encrypted message has fingerprint, fingerprinting is on and valid' do
+      let(:headers) do
+        {
+          'encryption' => '1',
+          'encryption_fingerprint' => Digest::MD5.hexdigest({ 'test' => 1 }.to_json)
+        }
+      end
+
+      let(:raw_payload) do
+        ::Karafka::App.config.encryption.cipher.encrypt({ 'test' => 1 }.to_json)
+      end
+
+      let(:expected_error) do
+        Karafka::Pro::Encryption::Errors::FingerprintVerificationError
+      end
+
+      before do
+        allow(::Karafka::App.config.encryption)
+          .to receive(:public_key)
+          .and_return(fixture_file('rsa/public_key_1.pem'))
+
+        allow(::Karafka::App.config.encryption)
+          .to receive(:fingerprinter)
+          .and_return(Digest::MD5)
+
+        allow(::Karafka::App.config.encryption)
+          .to receive(:private_keys)
+          .and_return('1' => fixture_file('rsa/private_key_1.pem'))
+      end
+
+      it 'expect to decrypt it and then run deserializer' do
+        expect(parsing).to eq('test' => 1)
       end
     end
   end
