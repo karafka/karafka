@@ -449,7 +449,6 @@ module Karafka
         ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
         ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
 
-        commit_offsets!
         kafka.close
         @kafka = nil
         @buffer.clear
