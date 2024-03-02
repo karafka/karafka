@@ -15,6 +15,8 @@ module Karafka
   module Pro
     module Routing
       module Features
+        # Alterations to the direct assigments that allow us to do stable direct assignments
+        # without working with consumer groups dynamic assignments
         class DirectAssignments < Base
           module SubscriptionGroup
             # @return [false, Array<String>] false if we do not have any subscriptions or array

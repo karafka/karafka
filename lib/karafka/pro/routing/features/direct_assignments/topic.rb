@@ -16,26 +16,29 @@ module Karafka
     module Routing
       module Features
         class DirectAssignments < Base
+          # Topic extensions for direct assignments
           module Topic
             # Allows for direct assignment of
-            def assign(*partitions_or_all)
-              @direct_assignments ||= if partitions_or_all == [true]
-                Config.new(
-                  active: true,
-                  partitions: true
-                )
-              else
-                Config.new(
-                  active: !partitions_or_all.empty?,
-                  partitions: partitions_or_all.map { |partition| [partition, true] }.to_h
-                )
+            # @param partitions_or_all [true, Array<Integer>, Range] informs Karafka that we want
+            #   to use direct assignments instead of automatic for this topic. It also allows us
+            #   to specify which partitions we're interested in or `true` if in all
+            def direct_assignments(*partitions_or_all)
+              @direct_assignments ||= begin
+                if partitions_or_all == [true]
+                  Config.new(
+                    active: true,
+                    partitions: true
+                  )
+                else
+                  Config.new(
+                    active: !partitions_or_all.empty?,
+                    partitions: partitions_or_all.map { |partition| [partition, true] }.to_h
+                  )
+                end
               end
             end
 
-            # @return [DirectAssignments::Config]
-            def direct_assignments
-              assign
-            end
+            alias assign direct_assignments
 
             # @return [Hash] topic with all its native configuration options plus direct
             #   assignments
