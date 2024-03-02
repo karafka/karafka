@@ -23,18 +23,16 @@ module Karafka
             #   to use direct assignments instead of automatic for this topic. It also allows us
             #   to specify which partitions we're interested in or `true` if in all
             def direct_assignments(*partitions_or_all)
-              @direct_assignments ||= begin
-                if partitions_or_all == [true]
-                  Config.new(
-                    active: true,
-                    partitions: true
-                  )
-                else
-                  Config.new(
-                    active: !partitions_or_all.empty?,
-                    partitions: partitions_or_all.map { |partition| [partition, true] }.to_h
-                  )
-                end
+              @direct_assignments ||= if partitions_or_all == [true]
+                Config.new(
+                  active: true,
+                  partitions: true
+                )
+              else
+                Config.new(
+                  active: !partitions_or_all.empty?,
+                  partitions: partitions_or_all.map { |partition| [partition, true] }.to_h
+                )
               end
             end
 

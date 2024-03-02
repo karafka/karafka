@@ -62,6 +62,11 @@ en:
       swarm.nodes_format: needs to be a range or an array of nodes ids
       swarm_nodes_with_non_existent_nodes: includes unreachable nodes ids
 
+      direct_assignments.active_missing: needs to be present
+      direct_assignments.active_format: 'needs to be boolean'
+      direct_assignments.partitions_missing: 'needs to be present'
+      direct_assignments.partitions_format: 'needs to be true or list of partitions'
+
     consumer_group:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present
