@@ -15,9 +15,11 @@ module Karafka
   module Pro
     module Routing
       module Features
-        # Alterations to the direct assigments that allow us to do stable direct assignments
+        # Alterations to the direct assignments that allow us to do stable direct assignments
         # without working with consumer groups dynamic assignments
         class DirectAssignments < Base
+          # Extension allowing us to select correct subscriptions and assignments based on the
+          # expanded routing setup
           module SubscriptionGroup
             # @return [false, Array<String>] false if we do not have any subscriptions or array
             #   with all the subscriptions for given subscription group
@@ -29,6 +31,9 @@ module Karafka
                 .then { |subscriptions| subscriptions.empty? ? false : subscriptions }
             end
 
+            # @param consumer [Karafka::Connection::Proxy] consumer for expanding  the partition
+            #   knowledge in case of certain topics assignments
+            # @return [Rdkafka::Consumer::TopicPartitionList] final tpl for assignments
             def assignments(consumer)
               topics
                 .select(&:active?)
