@@ -71,6 +71,7 @@ en:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present
       patterns_regexps_not_unique: 'must be unique within consumer group'
+      direct_assignments_homogenous: 'single consumer group cannot mix regular and direct assignments'
 
     pattern:
       regexp_format: must be a regular expression

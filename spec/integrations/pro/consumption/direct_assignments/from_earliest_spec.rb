@@ -5,9 +5,11 @@
 
 setup_karafka
 
+DT[:partitions] = Set.new
+
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[:done] = true
+    DT[:partitions] << partition
   end
 end
 
@@ -19,9 +21,9 @@ draw_routes do
   end
 end
 
-elements = DT.uuids(10)
+elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT.key?(:done)
+  DT[:partitions].size >= 2
 end
