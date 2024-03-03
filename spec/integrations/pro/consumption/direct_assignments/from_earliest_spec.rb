@@ -24,8 +24,11 @@ draw_routes do
   end
 end
 
-elements = DT.uuids(100)
-produce_many(DT.topic, elements)
+
+2.times do |i|
+  elements = DT.uuids(10)
+  produce_many(DT.topic, elements, partition: i)
+end
 
 start_karafka_and_wait_until do
   DT[:partitions].size >= 2
