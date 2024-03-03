@@ -86,9 +86,10 @@ module Karafka
         topics.select(&:active?).map(&:subscription_name)
       end
 
+      # @param _consumer [Karafka::Connection::Proxy]
       # @return [false, Rdkafka::Consumer::TopicPartitionList] List of tpls for direct assignments
       #   or false for the normal mode
-      def assignments
+      def assignments(_consumer)
         false
       end
 
