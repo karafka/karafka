@@ -12,9 +12,12 @@ DT[:partitions] = Set.new
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if DT[:goes].size >= 4
+    seen = DT[:partitions].include?(partition)
 
-    sleep(15)
+    return if DT[:goes].size >= 4 && seen
+
+    sleep(15) unless seen
+
     DT[:goes] << true
     DT[:partitions] << partition
   end
@@ -28,8 +31,10 @@ draw_routes do
   end
 end
 
-elements = DT.uuids(200)
-produce_many(DT.topic, elements)
+2.times do |i|
+  elements = DT.uuids(200)
+  produce_many(DT.topic, elements, partition: i)
+end
 
 start_karafka_and_wait_until do
   DT[:partitions].size >= 2 && DT[:goes].size >= 4
