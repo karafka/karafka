@@ -10,6 +10,10 @@ class Consumer < Karafka::BaseConsumer
   def consume
     DT[:partitions] << partition
   end
+
+  def shutdown
+    DT[:shutdowns] << true
+  end
 end
 
 draw_routes do
@@ -26,3 +30,5 @@ produce_many(DT.topic, elements)
 start_karafka_and_wait_until do
   DT[:partitions].size >= 2
 end
+
+assert_equal 2, DT[:shutdowns].count
