@@ -19,7 +19,7 @@ module Karafka
           # Topic extensions for direct assignments
           module Topic
             # Allows for direct assignment of
-            # @param partitions_or_all [true, Array<Integer>, Range] informs Karafka that we want
+            # @param partitions_or_all [true, Array<Integer>] informs Karafka that we want
             #   to use direct assignments instead of automatic for this topic. It also allows us
             #   to specify which partitions we're interested in or `true` if in all
             def direct_assignments(*partitions_or_all)

@@ -66,6 +66,7 @@ en:
       direct_assignments.active_format: 'needs to be boolean'
       direct_assignments.partitions_missing: 'needs to be present'
       direct_assignments.partitions_format: 'needs to be true or list of partitions'
+      direct_assignments_active_but_empty: 'cannot be empty and active at the same time'
 
     consumer_group:
       patterns_format: must be an array with hashes

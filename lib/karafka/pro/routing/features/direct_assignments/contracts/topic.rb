@@ -40,6 +40,19 @@ module Karafka
                   true
                 end
               end
+
+              virtual do |data, errors|
+                next unless errors.empty?
+
+                direct_assignments = data[:direct_assignments]
+                partitions = direct_assignments[:partitions]
+
+                next unless direct_assignments[:active]
+                next unless partitions.is_a?(Hash)
+                next unless partitions.empty?
+
+                [[%i[direct_assignments], :active_but_empty]]
+              end
             end
           end
         end
