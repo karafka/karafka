@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# We should be able to get the insights and use them via the API when they are defined
-# In Pro despite extra option, should behave same as in OSS when no forced required
+# We should be able to assign to ourselves direct ownership of partitions we are interested in
 
 setup_karafka
 

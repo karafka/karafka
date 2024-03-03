@@ -49,7 +49,7 @@ RSpec.describe_current do
   end
 
   context 'with a single topic' do
-    context 'using direct assignments' do
+    context 'when using direct assignments' do
       let(:config) do
         {
           topics: [
@@ -63,7 +63,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'not using direct assignments' do
+    context 'when not using direct assignments' do
       let(:config) do
         {
           topics: [
