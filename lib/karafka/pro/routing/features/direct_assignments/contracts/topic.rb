@@ -69,12 +69,14 @@ module Karafka
                 nodes = swarm[:nodes]
 
                 next unless nodes.is_a?(Hash)
+                # Can be true for all partitions assignment and in this case we do not check
+                next unless direct_assignments[:partitions].is_a?(Hash)
 
                 direct_partitions = direct_assignments[:partitions].keys
                 swarm_partitions = nodes.values.flatten
 
                 next unless swarm_partitions.all? { |partition| partition.is_a?(Integer) }
-                next if direct_assignments.sort == swarm_partitions.sort
+                next if direct_partitions.sort == swarm_partitions.sort
 
                 # If we assigned more partitions than we distributed in swarm
                 if (direct_partitions - swarm_partitions).size.positive?

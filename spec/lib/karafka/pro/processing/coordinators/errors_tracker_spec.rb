@@ -22,6 +22,8 @@ RSpec.describe_current do
       expect(tracker).to include(101)
     end
 
+    it { expect(tracker.all).to be_a(Array) }
+
     it 'expect to have the newest as last' do
       expect(tracker.last).to eq(101)
     end
