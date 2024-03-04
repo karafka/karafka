@@ -571,6 +571,12 @@ module Karafka
 
           # No sense in retrying when no topic/partition and we're no longer running
           retryable = false unless Karafka::App.running?
+        # If we detect the end of partition which can happen if `enable.partition.eof` is set to
+        # true, we can just return nil fast. This will fast yield whatever set of messages we
+        # already have instead of waiting. This can be used for better latency control when we do
+        # not expect a lof of lag and want to quickly move to processing.
+        when :partition_eof
+          return nil
         end
 
         if early_report || !retryable
