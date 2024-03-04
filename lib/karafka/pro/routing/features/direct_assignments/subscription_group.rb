@@ -38,11 +38,36 @@ module Karafka
               topics
                 .select(&:active?)
                 .select { |topic| topic.direct_assignments.active? }
-                .map { |topic| [topic.subscription_name, topic.direct_assignments.partitions] }
+                .map { |topic| build_assignments(topic) }
                 .to_h
                 .tap { |topics| return false if topics.empty? }
                 .then { |topics| Iterator::Expander.new.call(topics) }
                 .then { |topics| Iterator::TplBuilder.new(consumer, topics).call }
+            end
+
+            private
+
+            # Builds assignments based on all the routing stuff. Takes swarm into consideration.
+            #
+            # @param topic [Karafka::Routing::Topic]
+            # @return [Array<String, Hash>]
+            def build_assignments(topic)
+              node = Karafka::App.config.swarm.node
+
+              standard_setup = [
+                topic.subscription_name,
+                topic.direct_assignments.partitions
+              ]
+
+              return standard_setup unless node
+              # Unless user explicitly assigned particular partitions to particular nodes, we just
+              # go with full regular assignments
+              return standard_setup unless topic.swarm.nodes.is_a?(Hash)
+
+              [
+                topic.subscription_name,
+                topic.swarm.nodes.fetch(node.id).map { |partition| [partition, true] }.to_h
+              ]
             end
           end
         end

@@ -20,7 +20,30 @@ module Karafka
           module Topic
             # Allows defining swarm routing topic settings
             # @param nodes [Range, Array, Hash] range of nodes ids or array with nodes ids for
-            #   which we should run given topic
+            #   which we should run given topic or hash with nodes expected partition assignments
+            #   for the direct assignments API.
+            #
+            # @example Assign given topic only to node 1
+            #   swarm(nodes: [1])
+            #
+            # @example Assign given topic to nodes from 1 to 3
+            #   swarm(nodes: 1..3)
+            #
+            # @example Assign partitions 2 and 3 to node 0 and partitions 0, 1 to node 1
+            #   swarm(
+            #     nodes: {
+            #       0 => [2, 3],
+            #       1 => [0, 1]
+            #     }
+            #   )
+            #
+            # @example Assign partitions in ranges to nodes
+            #   swarm(
+            #     nodes: {
+            #       0 => (0..2),
+            #       1 => (3..5)
+            #     }
+            #   )
             def swarm(nodes: (0...Karafka::App.config.swarm.nodes))
               @swarm ||= Config.new(active: true, nodes: nodes)
             end

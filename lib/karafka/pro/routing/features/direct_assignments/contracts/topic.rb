@@ -53,6 +53,36 @@ module Karafka
 
                 [[%i[direct_assignments], :active_but_empty]]
               end
+
+              # Make sure that when we use swarm, all requested partitions have allocation
+              # We cannot assign partitions and then not allocate them in swarm mode
+              # If this is the case, they should not be assigned in the first place
+              virtual do |data, errors|
+                next unless errors.empty?
+
+                direct_assignments = data[:direct_assignments]
+                swarm = data[:swarm]
+
+                next unless direct_assignments[:active]
+                next unless swarm[:active]
+
+                nodes = swarm[:nodes]
+
+                next unless nodes.is_a?(Hash)
+
+                direct_partitions = direct_assignments[:partitions].keys
+                swarm_partitions = nodes.values.flatten
+
+                next unless swarm_partitions.all? { |partition| partition.is_a?(Integer) }
+                next if direct_assignments.sort == swarm_partitions.sort
+
+                # If we assigned more partitions than we distributed in swarm
+                if (direct_partitions - swarm_partitions).size.positive?
+                  [[%i[direct_assignments], :swarm_not_complete]]
+                else
+                  [[%i[direct_assignments], :swarm_overbooked]]
+                end
+              end
             end
           end
         end
