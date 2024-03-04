@@ -9,6 +9,9 @@ RSpec.describe_current do
         direct_assignments: {
           active: true,
           partitions: { 1 => true, 2 => true }
+        },
+        swarm: {
+          active: false
         }
       }
     end
@@ -24,6 +27,9 @@ RSpec.describe_current do
         direct_assignments: {
           active: 'true', # Invalid type
           partitions: { 1 => true }
+        },
+        swarm: {
+          active: false
         }
       }
     end
@@ -39,6 +45,9 @@ RSpec.describe_current do
         direct_assignments: {
           active: true,
           partitions: { '1' => true, 2 => false } # Invalid key type and value
+        },
+        swarm: {
+          active: false
         }
       }
     end
@@ -54,6 +63,9 @@ RSpec.describe_current do
         direct_assignments: {
           active: true,
           partitions: true
+        },
+        swarm: {
+          active: false
         }
       }
     end
@@ -69,6 +81,9 @@ RSpec.describe_current do
         direct_assignments: {
           active: true,
           partitions: {} # Empty hash is not valid
+        },
+        swarm: {
+          active: false
         }
       }
     end
@@ -76,5 +91,39 @@ RSpec.describe_current do
     it 'is expected to fail' do
       expect(validation_result).not_to be_success
     end
+  end
+
+  context 'when we assigned more partitions than allocated in swarm' do
+    let(:config) do
+      {
+        direct_assignments: {
+          active: true,
+          partitions: { 0 => true, 1 => true, 2 => true, 3 => true }
+        },
+        swarm: {
+          active: true,
+          nodes: { 0 => [0], 1 => [1] }
+        }
+      }
+    end
+
+    it { expect(validation_result).not_to be_success }
+  end
+
+  context 'when we allocated more partitions than assigned' do
+    let(:config) do
+      {
+        direct_assignments: {
+          active: true,
+          partitions: { 0 => true, 1 => true, 2 => true }
+        },
+        swarm: {
+          active: true,
+          nodes: { 0 => [0], 1 => [1, 2, 3] }
+        }
+      }
+    end
+
+    it { expect(validation_result).not_to be_success }
   end
 end

@@ -46,6 +46,48 @@ RSpec.describe_current do
     end
   end
 
+  context 'when nodes hash contains non-integer nodes' do
+    let(:nodes) { { 'test' => [1] } }
+
+    it 'fails validation' do
+      expect(validation).not_to be_success
+    end
+  end
+
+  context 'when nodes hash contains non array partitions' do
+    let(:nodes) { { 0 => 'test' } }
+
+    it 'fails validation' do
+      expect(validation).not_to be_success
+    end
+  end
+
+  context 'when nodes hash contains array partitions with invalid partitions' do
+    let(:nodes) { { 0 => ['test'] } }
+
+    it 'fails validation' do
+      expect(validation).not_to be_success
+    end
+  end
+
+  context 'when nodes hash contains array partitions with valid partitions' do
+    let(:nodes) { { 0 => [0, 1] } }
+
+    it { expect(validation).to be_success }
+  end
+
+  context 'when nodes hash contains array partitions with valid partitions range' do
+    let(:nodes) { { 0 => 0..2 } }
+
+    it { expect(validation).to be_success }
+  end
+
+  context 'when nodes hash contains unreachable node' do
+    let(:nodes) { { 1_000 => [0, 1] } }
+
+    it { expect(validation).not_to be_success }
+  end
+
   context 'when range of nodes does not match any existing node' do
     let(:nodes) { 100...200 }
 

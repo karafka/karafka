@@ -27,6 +27,16 @@ RSpec.describe_current do
         expect(topic.direct_assignments.partitions).to eq(true)
       end
     end
+
+    context 'when initialized with range of partitions' do
+      let(:partitions) { (1..3) }
+
+      it 'expect to mark as active and use given partitions' do
+        topic.direct_assignments(partitions)
+        expect(topic.direct_assignments.active).to eq(true)
+        expect(topic.direct_assignments.partitions).to eq(partitions.map { |p| [p, true] }.to_h)
+      end
+    end
   end
 
   describe '#to_h' do

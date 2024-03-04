@@ -2,6 +2,7 @@
 
 ## 2.3.4 (Unreleased)
 - **[Feature]** Introduce ability to use direct assignments (Pro).
+- [Enhancement] Allow direct assignments granular distribution in the Swarm (Pro).
 - [Enhancement] Add a buffer to the supervisor supervision on shutdown to prevent a potential race condition when signal pass lags.
 - [Enhancement] Provide ability to automatically generate and validate fingerprints of encrypted payload.
 - [Fix] Fix a case where critically crashed supervisor would raise incorrect error.
