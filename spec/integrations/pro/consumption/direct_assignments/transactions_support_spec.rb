@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# We should be able to assign what we want and mark offsets in a transation
+# We should be able to assign what we want and mark offsets in a transaction
 
 setup_karafka do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid

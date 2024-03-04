@@ -24,7 +24,6 @@ draw_routes do
   end
 end
 
-
 2.times do |i|
   elements = DT.uuids(10)
   produce_many(DT.topic, elements, partition: i)
