@@ -76,13 +76,21 @@ module Karafka
         activity_manager.active?(:subscription_groups, name)
       end
 
-      # @return [Array<String>] names of topics to which we should subscribe.
+      # @return [false, Array<String>] names of topics to which we should subscribe or false when
+      #   operating only on direct assignments
       #
       # @note Most of the time it should not include inactive topics but in case of pattern
       #   matching the matcher topics become inactive down the road, hence we filter out so
       #   they are later removed.
       def subscriptions
         topics.select(&:active?).map(&:subscription_name)
+      end
+
+      # @param _consumer [Karafka::Connection::Proxy]
+      # @return [false, Rdkafka::Consumer::TopicPartitionList] List of tpls for direct assignments
+      #   or false for the normal mode
+      def assignments(_consumer)
+        false
       end
 
       # @return [String] id of the subscription group

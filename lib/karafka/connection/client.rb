@@ -639,7 +639,12 @@ module Karafka
 
         # Subscription needs to happen after we assigned the rebalance callbacks just in case of
         # a race condition
-        consumer.subscribe(*@subscription_group.subscriptions)
+        subscriptions = @subscription_group.subscriptions
+        assignments = @subscription_group.assignments(consumer)
+
+        consumer.subscribe(*subscriptions) if subscriptions
+        consumer.assign(assignments) if assignments
+
         consumer
       end
 

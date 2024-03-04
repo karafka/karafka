@@ -47,4 +47,3 @@ if DT[:errors].empty?
 else
   assert DT[:errors].first.payload[:error].is_a?(OpenSSL::PKey::PKeyError)
 end
-

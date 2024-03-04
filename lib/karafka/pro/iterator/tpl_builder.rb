@@ -36,6 +36,7 @@ module Karafka
           resolve_partitions_with_exact_offsets
           resolve_partitions_with_negative_offsets
           resolve_partitions_with_time_offsets
+          resolve_partitions_with_cg_expectations
 
           # Final tpl with all the data
           tpl = Rdkafka::Consumer::TopicPartitionList.new
@@ -146,6 +147,43 @@ module Karafka
               raise(Errors::InvalidTimeBasedOffsetError) unless result
 
               @mapped_topics[name][result.partition] = result.offset
+            end
+          end
+        end
+
+        # Fetches last used offsets for those partitions for which we want to consume from last
+        # moment where given consumer group has finished
+        # This is indicated by given partition value being set to `true`.
+        def resolve_partitions_with_cg_expectations
+          tpl = Rdkafka::Consumer::TopicPartitionList.new
+
+          # First iterate over all topics that we want to expand
+          @expanded_topics.each do |name, partitions|
+            partitions_base = {}
+
+            partitions.each do |partition, offset|
+              # Pick only partitions where offset is set to true to indicate that we are interested
+              # in committed offset resolution
+              next unless offset == true
+
+              # This can be set to nil because we do not use this offset value when querying
+              partitions_base[partition] = nil
+            end
+
+            # If there is nothing to work with, just skip
+            next if partitions_base.empty?
+
+            tpl.add_topic_and_partitions_with_offsets(name, partitions_base)
+          end
+
+          # If nothing to resolve, do not resolve
+          return if tpl.empty?
+
+          # Fetch all committed offsets for all the topics partitions of our interest and use
+          # those offsets for the mapped topics data
+          @consumer.committed(tpl).to_h.each do |name, partitions|
+            partitions.each do |partition|
+              @mapped_topics[name][partition.partition] = partition.offset
             end
           end
         end

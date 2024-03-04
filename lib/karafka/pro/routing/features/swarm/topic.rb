@@ -19,8 +19,8 @@ module Karafka
           # Topic swarm API extensions
           module Topic
             # Allows defining swarm routing topic settings
-            # @param nodes [Range, Array] range of nodes ids or array with nodes ids for which we
-            #   should run given topic
+            # @param nodes [Range, Array, Hash] range of nodes ids or array with nodes ids for
+            #   which we should run given topic
             def swarm(nodes: (0...Karafka::App.config.swarm.nodes))
               @swarm ||= Config.new(active: true, nodes: nodes)
             end
