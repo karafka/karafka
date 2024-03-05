@@ -85,6 +85,49 @@ module Karafka
         end
       end
 
+      # When we cannot store an offset, it means we no longer own the partition
+      #
+      # Non thread-safe offset storing method
+      # @param message [Karafka::Messages::Message]
+      # @param metadata [String, nil] offset storage metadata or nil if none
+      # @return [Boolean] true if we could store the offset (if we still own the partition)
+      def store_offset(message, metadata = nil)
+        @wrapped.store_offset(message, metadata)
+
+        true
+      rescue Rdkafka::RdkafkaError => e
+        return false if e.code == :assignment_lost
+        return false if e.code == :state
+
+        raise e
+      end
+
+      # Non thread-safe message committing method
+      # @param async [Boolean] should the commit happen async or sync (async by default)
+      # @return [Boolean] true if offset commit worked, false if we've lost the assignment
+      # @note We do **not** consider `no_offset` as any problem and we allow to commit offsets
+      #   even when no stored, because with sync commit, it refreshes the ownership state of the
+      #   consumer in a sync way.
+      def commit_offsets(async: true)
+        @wrapped.commit(nil, async)
+
+        true
+      rescue Rdkafka::RdkafkaError => e
+        case e.code
+        when :assignment_lost
+          return false
+        when :unknown_member_id
+          return false
+        when :no_offset
+          return true
+        when :coordinator_load_in_progress
+          sleep(1)
+          retry
+        end
+
+        raise e
+      end
+
       private
 
       # Runs expected block of code with few retries on all_brokers_down

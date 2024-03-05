@@ -344,7 +344,7 @@ module Karafka
       # @note It is recommended to use this only on rebalances to get positions with metadata
       #   when working with metadata as this is synchronous
       def committed(tpl = nil)
-        Proxy.new(kafka).committed(tpl)
+        @wrapped_kafka.committed(tpl)
       end
 
       private
@@ -356,13 +356,7 @@ module Karafka
       # @param metadata [String, nil] offset storage metadata or nil if none
       # @return [Boolean] true if we could store the offset (if we still own the partition)
       def internal_store_offset(message, metadata)
-        kafka.store_offset(message, metadata)
-        true
-      rescue Rdkafka::RdkafkaError => e
-        return false if e.code == :assignment_lost
-        return false if e.code == :state
-
-        raise e
+        @wrapped_kafka.store_offset(message, metadata)
       end
 
       # Non thread-safe message committing method
@@ -372,23 +366,7 @@ module Karafka
       #   even when no stored, because with sync commit, it refreshes the ownership state of the
       #   consumer in a sync way.
       def internal_commit_offsets(async: true)
-        kafka.commit(nil, async)
-
-        true
-      rescue Rdkafka::RdkafkaError => e
-        case e.code
-        when :assignment_lost
-          return false
-        when :unknown_member_id
-          return false
-        when :no_offset
-          return true
-        when :coordinator_load_in_progress
-          sleep(1)
-          retry
-        end
-
-        raise e
+        @wrapped_kafka.commit_offsets(async: async)
       end
 
       # Non-mutexed seek that should be used only internally. Outside we expose `#seek` that is
@@ -409,12 +387,10 @@ module Karafka
             message.partition => message.offset
           )
 
-          proxy = Proxy.new(kafka)
-
           # Now we can overwrite the seek message offset with our resolved offset and we can
           # then seek to the appropriate message
           # We set the timeout to 2_000 to make sure that remote clusters handle this well
-          real_offsets = proxy.offsets_for_times(tpl)
+          real_offsets = @wrapped_kafka.offsets_for_times(tpl)
           detected_partition = real_offsets.to_h.dig(message.topic, message.partition)
 
           # There always needs to be an offset. In case we seek into the future, where there
@@ -451,6 +427,7 @@ module Karafka
 
         kafka.close
         @kafka = nil
+        @wrapped_kafka = nil
         @buffer.clear
         # @note We do not clear rebalance manager here as we may still have revocation info
         # here that we want to consider valid prior to running another reconnection
@@ -670,7 +647,11 @@ module Karafka
 
       # @return [Rdkafka::Consumer] librdkafka consumer instance
       def kafka
-        @kafka ||= build_consumer
+        return @kafka if @kafka
+
+        @kafka = build_consumer
+        @wrapped_kafka = Proxy.new(@kafka)
+        @kafka
       end
     end
   end

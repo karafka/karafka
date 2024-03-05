@@ -20,7 +20,9 @@ module Karafka
     # the end. It also allows for signaling, when a given message should be last out of certain
     # partition, but we still want to continue iterating in other messages.
     #
-    # It does **not** create a consumer group and does not have any offset management.
+    # It does **not** create a consumer group and does not have any offset management until first
+    # consumer offset marking happens. So can be use for quick seeks as well as iterative,
+    # repetitive data fetching from rake, etc.
     class Iterator
       # A simple API allowing to iterate over topic/partition data, without having to subscribe
       # and deal with rebalances. This API allows for multi-partition streaming and is optimized
@@ -92,6 +94,7 @@ module Karafka
             end
           end
 
+          @current_consumer.commit_offsets(async: false) if @stored_offsets
           @current_message = nil
           @current_consumer = nil
         end
@@ -127,6 +130,29 @@ module Karafka
         )
       end
 
+      # Stops all the iterating
+      # @note `break` can also be used but in such cases commits stored async will not be flushed
+      #   to Kafka. This is why `#stop` is the recommended method.
+      def stop
+        @stopped = true
+      end
+
+      # Marks given message as consumed.
+      #
+      # @param message [Karafka::Messages::Message] message that we want to mark as processed
+      def mark_as_consumed(message)
+        @current_consumer.store_offset(message, nil)
+        @stored_offsets = true
+      end
+
+      # Marks given message as consumed and commits offsets
+      #
+      # @param message [Karafka::Messages::Message] message that we want to mark as processed
+      def mark_as_consumed!(message)
+        mark_as_consumed(message)
+        @current_consumer.commit_offsets(async: false)
+      end
+
       private
 
       # @return [Rdkafka::Consumer::Message, nil] message or nil if nothing to do
@@ -158,7 +184,7 @@ module Karafka
       # Do we have all the data we wanted or did every topic partition has reached eof.
       # @return [Boolean]
       def done?
-        @stopped_partitions >= @total_partitions
+        (@stopped_partitions >= @total_partitions) || @stopped
       end
     end
   end
