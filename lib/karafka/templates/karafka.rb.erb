@@ -52,6 +52,26 @@ class KarafkaApp < Karafka::App
     )
   )
 
+  # You can subscribe to all consumer related errors and record/track then that way
+  #
+  # Karafka.monitor.subscribe 'error.occurred' do |event|
+  #   type = event[:type]
+  #   error = event[:error]
+  #   details = (error.backtrace || []).join("\n")
+  #   ErrorTracker.send_error(error, type, details)
+  # end
+
+  # You can subscribe to all producer related errors and record/track then that way
+  # Please note, that producer and consumer have their own notifications pipeline so you need to
+  # setup error tracking independently for each of them
+  #
+  # Karafka.producer.monitor.subscribe('error.occurred') do |event|
+  #   type = event[:type]
+  #   error = event[:error]
+  #   details = (error.backtrace || []).join("\n")
+  #   ErrorTracker.send_error(error, type, details)
+  # end
+
   routes.draw do
 <% if rails? -%>
     # Uncomment this if you use Karafka with ActiveJob
