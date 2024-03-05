@@ -151,7 +151,6 @@ module Karafka
       def mark_as_consumed!(message)
         mark_as_consumed(message)
         @current_consumer.commit_offsets(async: false)
-        @stored_offsets = true
       end
 
       private
