@@ -9,10 +9,13 @@ module Karafka
     # @note This buffer operates only from the listener loop, thus we do not have to make it
     #   thread-safe.
     class CoordinatorsBuffer
+      include Helpers::ConfigImporter.new(
+        coordinator_class: %i[internal processing coordinator_class]
+      )
+
       # @param topics [Karafka::Routing::Topics]
       def initialize(topics)
         @pauses_manager = Connection::PausesManager.new
-        @coordinator_class = ::Karafka::App.config.internal.processing.coordinator_class
         @coordinators = Hash.new { |h, k| h[k] = {} }
         @topics = topics
       end
@@ -23,7 +26,7 @@ module Karafka
         @coordinators[topic_name][partition] ||= begin
           routing_topic = @topics.find(topic_name)
 
-          @coordinator_class.new(
+          coordinator_class.new(
             routing_topic,
             partition,
             @pauses_manager.fetch(routing_topic, partition)

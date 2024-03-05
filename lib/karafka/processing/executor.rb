@@ -22,6 +22,10 @@ module Karafka
     #   - shutdown - runs when process is going to shutdown
     class Executor
       extend Forwardable
+      include Helpers::ConfigImporter.new(
+        strategy_selector: %i[internal processing strategy_selector],
+        expansions_selector: %i[internal processing expansions_selector]
+      )
 
       def_delegators :@coordinator, :topic, :partition
 
@@ -144,8 +148,8 @@ module Karafka
         @consumer ||= begin
           topic = @coordinator.topic
 
-          strategy = ::Karafka::App.config.internal.processing.strategy_selector.find(topic)
-          expansions = ::Karafka::App.config.internal.processing.expansions_selector.find(topic)
+          strategy = strategy_selector.find(topic)
+          expansions = expansions_selector.find(topic)
 
           consumer = topic.consumer_class.new
           # We use singleton class as the same consumer class may be used to process different

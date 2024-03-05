@@ -5,6 +5,12 @@ module Karafka
   class Cli
     # Info Karafka Cli action
     class Info < Base
+      include Helpers::ConfigImporter.new(
+        concurrency: %i[concurrency],
+        license: %i[license],
+        client_id: %i[client_id]
+      )
+
       desc 'Prints configuration details and other options of your application'
 
       # Nice karafka banner
@@ -29,8 +35,6 @@ module Karafka
 
       # @return [Array<String>] core framework related info
       def core_info
-        config = Karafka::App.config
-
         postfix = Karafka.pro? ? ' + Pro' : ''
 
         [
@@ -39,8 +43,8 @@ module Karafka
           "Rdkafka version: #{::Rdkafka::VERSION}",
           "Consumer groups count: #{Karafka::App.consumer_groups.size}",
           "Subscription groups count: #{Karafka::App.subscription_groups.values.flatten.size}",
-          "Workers count: #{Karafka::App.config.concurrency}",
-          "Application client id: #{config.client_id}",
+          "Workers count: #{concurrency}",
+          "Application client id: #{client_id}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}"
         ]
@@ -48,12 +52,10 @@ module Karafka
 
       # @return [Array<String>] license related info
       def license_info
-        config = Karafka::App.config
-
         if Karafka.pro?
           [
             'License: Commercial',
-            "License entity: #{config.license.entity}"
+            "License entity: #{license.entity}"
           ]
         else
           [
