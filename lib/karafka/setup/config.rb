@@ -64,10 +64,6 @@ module Karafka
       setting :logger, default: ::Karafka::Instrumentation::Logger.new
       # option monitor [Instance] monitor that we will to use (defaults to Karafka::Monitor)
       setting :monitor, default: ::Karafka::Instrumentation::Monitor.new
-      # Mapper used to remap consumer groups ids, so in case users migrate from other tools
-      # or they need to maintain their own internal consumer group naming conventions, they
-      # can easily do it, replacing the default client_id + consumer name pattern concept
-      setting :consumer_mapper, default: Routing::ConsumerMapper.new
       # option [Boolean] should we reload consumers with each incoming batch thus effectively
       # supporting code reload (if someone reloads code) or should we keep the persistence
       setting :consumer_persistence, default: true
@@ -100,6 +96,8 @@ module Karafka
       # Disabling this may be needed in scenarios where we do not have control over topics names
       # and/or we work with existing systems where we cannot change topics names.
       setting :strict_topics_namespacing, default: true
+      # option [String] default consumer group name for implicit routing
+      setting :group_id, default: 'app'
 
       # rdkafka default options
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
@@ -142,8 +140,7 @@ module Karafka
           'enable.auto.offset.store': false
         }
 
-        # option [String] default name for the admin consumer group. Please note, that this is a
-        # subject to be remapped by the consumer mapper as any other consumer group in the routes
+        # option [String] default name for the admin consumer group.
         setting :group_id, default: 'karafka_admin'
 
         # option max_wait_time [Integer] We wait only for this amount of time before raising error
@@ -256,6 +253,16 @@ module Karafka
             setting :offsets_for_times do
               # timeout for this request. For busy or remote clusters, this should be high enough
               setting :timeout, default: 5_000
+              # How many times should we try to run this call before raising an error
+              setting :max_attempts, default: 3
+              # How long should we wait before next attempt in case of a failure
+              setting :wait_time, default: 1_000
+            end
+
+            # Settings for lag request
+            setting :lag do
+              # timeout for this request. For busy or remote clusters, this should be high enough
+              setting :timeout, default: 10_000
               # How many times should we try to run this call before raising an error
               setting :max_attempts, default: 3
               # How long should we wait before next attempt in case of a failure

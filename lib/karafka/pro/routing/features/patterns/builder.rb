@@ -26,7 +26,7 @@ module Karafka
             #   the regexp if we used named patterns
             # @param block [Proc]
             def pattern(regexp_or_name, regexp = nil, &block)
-              consumer_group('app') do
+              consumer_group(default_group_id) do
                 pattern(regexp_or_name, regexp, &block)
               end
             end

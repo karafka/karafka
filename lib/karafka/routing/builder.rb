@@ -14,6 +14,10 @@ module Karafka
     #     end
     #   end
     class Builder < Array
+      include Helpers::ConfigImporter.new(
+        default_group_id: %i[group_id]
+      )
+
       # Empty default per-topic config
       EMPTY_DEFAULTS = ->(_) {}.freeze
 
@@ -116,7 +120,7 @@ module Karafka
         **args,
         &block
       )
-        consumer_group('app') do
+        consumer_group(default_group_id) do
           target.public_send(
             :subscription_group=,
             subscription_group_name.to_s,
@@ -132,7 +136,7 @@ module Karafka
       # @param topic_name [String, Symbol] name of a topic from which we want to consumer
       # @param block [Proc] proc we want to evaluate in the topic context
       def topic(topic_name, &block)
-        consumer_group('app') do
+        consumer_group(default_group_id) do
           topic(topic_name, &block)
         end
       end

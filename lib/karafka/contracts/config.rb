@@ -25,13 +25,14 @@ module Karafka
 
       required(:client_id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
       required(:concurrency) { |val| val.is_a?(Integer) && val.positive? }
-      required(:consumer_mapper) { |val| !val.nil? }
       required(:consumer_persistence) { |val| [true, false].include?(val) }
       required(:pause_timeout) { |val| val.is_a?(Integer) && val.positive? }
       required(:pause_max_timeout) { |val| val.is_a?(Integer) && val.positive? }
       required(:pause_with_exponential_backoff) { |val| [true, false].include?(val) }
+      required(:strict_topics_namespacing) { |val| [true, false].include?(val) }
       required(:shutdown_timeout) { |val| val.is_a?(Integer) && val.positive? }
       required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
+      required(:group_id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
 
       nested(:swarm) do

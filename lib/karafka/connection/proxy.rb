@@ -128,6 +128,21 @@ module Karafka
         raise e
       end
 
+      # @param tpl [Rdkafka::Consumer::TopicPartitionList] list of topics and partitions for which
+      #   we want to get the lag on the defined CG
+      # @return [Hash<String, Hash>] hash with topics and their partitions lags
+      def lag(tpl)
+        l_config = @config.committed
+
+        with_broker_errors_retry(
+          # required to be in seconds, not ms
+          wait_time: l_config.wait_time / 1_000.to_f,
+          max_attempts: l_config.max_attempts
+        ) do
+          @wrapped.lag(tpl, l_config.timeout)
+        end
+      end
+
       private
 
       # Runs expected block of code with few retries on all_brokers_down

@@ -1,7 +1,12 @@
 # Karafka framework changelog
 
-## 2.3.4 (Unreleased)
+## 2.4.0 (Unreleased)
+
+This release contains a **BREAKING** change. Make sure to read and apply upgrade notes.
+
+- **[Breaking]** Drop the concept of consumer group mapping.
 - **[Feature]** Introduce ability to use direct assignments (Pro).
+- [Enhancement] Provide `Karafka::Admin#read_lags` for ability to query lags of a given CG.
 - [Enhancement] Allow direct assignments granular distribution in the Swarm (Pro).
 - [Enhancement] Add a buffer to the supervisor supervision on shutdown to prevent a potential race condition when signal pass lags.
 - [Enhancement] Provide ability to automatically generate and validate fingerprints of encrypted payload.
@@ -13,6 +18,12 @@
 - [Fix] Fix a case where critically crashed supervisor would raise incorrect error.
 - [Fix] Re-raise critical supervisor errors before shutdown.
 - [Fix] Fix a case when right-open (infinite) swarm matching would not pass validations.
+
+### Upgrade Notes
+
+**PLEASE MAKE SURE TO READ AND APPLY THEM!**
+
+Available [here](https://karafka.io/docs/Upgrades-2.4/).
 
 ## 2.3.3 (2024-02-26)
 - [Enhancement] Routing based topics allocation for swarm (Pro)

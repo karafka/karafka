@@ -187,9 +187,7 @@ module Karafka
           end
         end
 
-        # We set this that way so we can impersonate this consumer group and seek where we want
-        mapped_consumer_group_id = app_config.consumer_mapper.call(consumer_group_id)
-        settings = { 'group.id': mapped_consumer_group_id }
+        settings = { 'group.id': consumer_group_id }
 
         # This error can occur when we query a broker that is not a coordinator because something
         # was changing in the cluster. We should be able to safely restart our seeking request
@@ -231,18 +229,13 @@ module Karafka
 
       # Removes given consumer group (if exists)
       #
-      # @param consumer_group_id [String] consumer group name without the mapper name (if any used)
-      #
-      # @note Please note, Karafka will apply the consumer group mapper on the provided consumer
-      #   group.
+      # @param consumer_group_id [String] consumer group name
       #
       # @note This method should not be used on a running consumer group as it will not yield any
       #   results.
       def delete_consumer_group(consumer_group_id)
-        mapped_consumer_group_id = app_config.consumer_mapper.call(consumer_group_id)
-
         with_admin do |admin|
-          handler = admin.delete_group(mapped_consumer_group_id)
+          handler = admin.delete_group(consumer_group_id)
           handler.wait(max_wait_timeout: app_config.admin.max_wait_time)
         end
       end
@@ -261,6 +254,83 @@ module Karafka
             consumer.query_watermark_offsets(name, partition)
           end
         end
+      end
+
+      # Reads lags for given topics in the context of consumer groups defined in the routing
+      # @param consumer_groups_with_topics [Hash<String, Array<String>>] hash with consumer groups
+      #   names with array of topics to query per consumer group inside
+      # @return [Hash<String, Hash<Integer, Integer>>] hash where the top level keys are the
+      #   consumer groups and values are hashes with topics and inside partitions with lags
+      #
+      # @note For topics that do not exist, topic details will be set to an empty hash
+      #
+      # @note For topics that exist but were never consumed by a given CG we set `-1` but
+      #   on each of the partitions that were not consumed.
+      #
+      # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
+      #   represents lags from Kafka perspective and not the consumer. They may differ.
+      def read_lags(consumer_groups_with_topics = {})
+        # We first fetch all the topics with partitions count that exist in the cluster so we
+        # do not query for topics that do not exist and so we can get partitions count for all
+        # the topics we may need. The non-existent and not consumed will be filled at the end
+        existing_topics = cluster_info.topics.map do |topic|
+          [topic[:topic_name], topic[:partition_count]]
+        end.to_h.freeze
+
+        # If no expected CGs, we use all from routing that have active topics
+        if consumer_groups_with_topics.empty?
+          consumer_groups_with_topics = Karafka::App.routes.map do |cg|
+            cg_topics = cg.topics.select(&:active?).map(&:name)
+
+            [cg.id, cg_topics]
+          end.to_h
+        end
+
+        # We make a copy because we will remove once with non-existing topics
+        # We keep original requested consumer groups with topics for later backfilling
+        cgs_with_topics = consumer_groups_with_topics.dup
+        cgs_with_topics.transform_values!(&:dup)
+
+        # We can query only topics that do exist, this is why we are cleaning those that do not
+        # exist
+        cgs_with_topics.each_value do |requested_topics|
+          requested_topics.delete_if { |topic| !existing_topics.include?(topic) }
+        end
+
+        groups_lags = Hash.new { |h, k| h[k] = {} }
+
+        cgs_with_topics.each do |cg, topics|
+          # Do not add to tpl topics that do not exist
+          next if topics.empty?
+
+          tpl = Rdkafka::Consumer::TopicPartitionList.new
+
+          with_consumer('group.id': cg) do |consumer|
+            topics.each { |topic| tpl.add_topic(topic, existing_topics[topic]) }
+
+            consumer.lag(consumer.committed(tpl)).each do |topic, partitions_lags|
+              groups_lags[cg][topic] = partitions_lags
+            end
+          end
+        end
+
+        consumer_groups_with_topics.each do |cg, topics|
+          groups_lags[cg]
+
+          topics.each do |topic|
+            groups_lags[cg][topic] ||= {}
+
+            next unless existing_topics.key?(topic)
+
+            # We backfill because there is a case where our consumer group would consume for
+            # example only one partition out of 20, rest needs to get -1
+            existing_topics[topic].times do |partition_id|
+              groups_lags[cg][topic][partition_id] ||= -1
+            end
+          end
+        end
+
+        groups_lags
       end
 
       # @return [Rdkafka::Metadata] cluster metadata info
@@ -370,15 +440,11 @@ module Karafka
       # @param settings [Hash] extra settings for config (if needed)
       # @return [::Rdkafka::Config] rdkafka config
       def config(type, settings)
-        mapped_admin_group_id = app_config.consumer_mapper.call(
-          app_config.admin.group_id
-        )
-
         app_config
           .kafka
           .then(&:dup)
           .merge(app_config.admin.kafka)
-          .tap { |config| config[:'group.id'] = mapped_admin_group_id }
+          .tap { |config| config[:'group.id'] = app_config.admin.group_id }
           # We merge after setting the group id so it can be altered if needed
           # In general in admin we only should alter it when we need to impersonate a given
           # consumer group or do something similar

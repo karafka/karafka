@@ -475,4 +475,23 @@ RSpec.describe_current do
     # The case where given consumer group exists we check in the integrations, because it is
     # much easier to test with integrations on created consumer group
   end
+
+  # More coverage of this feature is in integration suite
+  describe '#read_lag' do
+    subject(:lags) { Karafka::Admin.read_lags(cgs_t) }
+
+    context 'when we query for a non-existent topic with a non-existing CG' do
+      let(:cgs_t) { { 'doesnotexist' => ['doesnotexisttopic'] } }
+
+      it { expect(lags).to eq('doesnotexist' => { 'doesnotexisttopic' => {} }) }
+    end
+
+    context 'when querying existing topic with a CG that never consumed it' do
+      before { PRODUCERS.regular.produce_sync(topic: name, payload: '1') }
+
+      let(:cgs_t) { { 'doesnotexist' => [name] } }
+
+      it { expect(lags).to eq('doesnotexist' => { name => { 0 => -1 } }) }
+    end
+  end
 end

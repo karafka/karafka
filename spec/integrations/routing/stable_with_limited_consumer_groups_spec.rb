@@ -30,15 +30,20 @@ draw_routes(create_topics: false) do
 end
 
 # We skip the middle one and check the positions later
-Karafka::App.config.internal.routing.activity_manager.include(:consumer_groups, 'test1')
-Karafka::App.config.internal.routing.activity_manager.include(:consumer_groups, 'app')
+Karafka::App.config.internal.routing.activity_manager.include(
+  :consumer_groups, 'test1'
+)
+
+Karafka::App.config.internal.routing.activity_manager.include(
+  :consumer_groups, Karafka::App.config.group_id
+)
 
 # Two consumer groups
 assert_equal 2, Karafka::App.subscription_groups.keys.size
 
 # Correct once
 assert_equal 'test1', Karafka::App.subscription_groups.keys[0].name
-assert_equal 'app', Karafka::App.subscription_groups.keys[1].name
+assert_equal Karafka::App.config.group_id, Karafka::App.subscription_groups.keys[1].name
 
 g00 = Karafka::App.subscription_groups.values[0][0].kafka[:'group.instance.id']
 g10 = Karafka::App.subscription_groups.values[1][0].kafka[:'group.instance.id']
