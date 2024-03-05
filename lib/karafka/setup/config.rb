@@ -137,7 +137,9 @@ module Karafka
           # involving a consumer instance
           'enable.auto.commit': false,
           # Make sure that topic metadata lookups do not create topics accidentally
-          'allow.auto.create.topics': false
+          'allow.auto.create.topics': false,
+          # Do not store offsets automatically in admin in any way
+          'enable.auto.offset.store': false
         }
 
         # option [String] default name for the admin consumer group. Please note, that this is a
