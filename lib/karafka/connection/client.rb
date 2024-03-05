@@ -366,7 +366,7 @@ module Karafka
       #   even when no stored, because with sync commit, it refreshes the ownership state of the
       #   consumer in a sync way.
       def internal_commit_offsets(async: true)
-        @wrapped_kafka.commit(nil, async)
+        @wrapped_kafka.commit_offsets(async: async)
       end
 
       # Non-mutexed seek that should be used only internally. Outside we expose `#seek` that is
