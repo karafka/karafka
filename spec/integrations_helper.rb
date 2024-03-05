@@ -49,6 +49,8 @@ def setup_karafka(
       'partition.assignment.strategy': 'range,roundrobin'
     }
     config.client_id = caller_id
+    # Prevents conflicts when running in parallel
+    config.group_id = caller_id
     config.pause_timeout = 1
     config.pause_max_timeout = 1
     config.pause_with_exponential_backoff = false

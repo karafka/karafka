@@ -22,7 +22,8 @@ module Karafka
       #   kafka and don't understand the concept of consumer groups.
       def initialize(name)
         @name = name.to_s
-        @id = config.consumer_mapper.call(name)
+        # This used to be different when consumer mappers existed but now it is the same
+        @id = @name
         @topics = Topics.new([])
         # Initialize the subscription group so there's always a value for it, since even if not
         # defined directly, a subscription group will be created

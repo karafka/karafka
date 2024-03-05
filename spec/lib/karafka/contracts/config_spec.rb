@@ -6,13 +6,14 @@ RSpec.describe_current do
   let(:config) do
     {
       client_id: 'name',
+      group_id: 'name',
       shutdown_timeout: 2_000,
-      consumer_mapper: Karafka::Routing::ConsumerMapper.new,
       consumer_persistence: true,
       pause_max_timeout: 1_000,
       pause_timeout: 1_000,
       pause_with_exponential_backoff: false,
       max_wait_time: 1_000,
+      strict_topics_namespacing: false,
       concurrency: 5,
       license: {
         token: false,
@@ -347,6 +348,20 @@ RSpec.describe_current do
     end
   end
 
+  context 'when we validate group_id' do
+    context 'when group_id is nil' do
+      before { config[:group_id] = nil }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when group_id is not a string' do
+      before { config[:group_id] = 2 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
   context 'when we validate shutdown_timeout' do
     context 'when shutdown_timeout is nil' do
       before { config[:shutdown_timeout] = nil }
@@ -400,14 +415,6 @@ RSpec.describe_current do
         config[:max_wait_time] = 15
         config[:shutdown_timeout] = 5
       end
-
-      it { expect(contract.call(config)).not_to be_success }
-    end
-  end
-
-  context 'when we validate consumer_mapper' do
-    context 'when consumer_mapper is nil' do
-      before { config[:consumer_mapper] = nil }
 
       it { expect(contract.call(config)).not_to be_success }
     end

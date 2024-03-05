@@ -7,12 +7,13 @@ en:
 
       missing: needs to be present
       client_id_format: 'needs to be a string with a Kafka accepted format'
+      group_id_format: 'needs to be a string with a Kafka accepted format'
       concurrency_format: needs to be an integer bigger than 0
-      consumer_mapper_format: needs to be present
       consumer_persistence_format: needs to be either true or false
       pause_timeout_format: needs to be an integer bigger than 0
       pause_max_timeout_format: needs to be an integer bigger than 0
       pause_with_exponential_backoff_format: needs to be either true or false
+      strict_topics_namespacing_format: needs to be either true or false
       shutdown_timeout_format: needs to be an integer bigger than 0
       max_wait_time_format: needs to be an integer bigger than 0
       max_wait_time_max_wait_time_vs_swarm_node_report_timeout: >

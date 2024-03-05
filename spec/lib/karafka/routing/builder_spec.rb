@@ -39,14 +39,14 @@ RSpec.describe_current do
       # This needs to have twice same name as for a non grouped in consumer group topics,
       # we build id based on the consumer group id, here it is virtual and built with 'app' as a
       # group name
-      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_app_topic_name1" }
-      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_app_topic_name2" }
+      it { expect(topic1.id).to eq 'app_topic_name1' }
+      it { expect(topic2.id).to eq 'app_topic_name2' }
       it { expect(builder.size).to eq 1 }
       it { expect(topic1.subscription_group_details).not_to eq(nil) }
       it { expect(topic1.name).to eq 'topic_name1' }
       it { expect(topic2.name).to eq 'topic_name2' }
       it { expect(topic2.subscription_group_details).not_to eq(nil) }
-      it { expect(builder.first.id).to eq "#{Karafka::App.config.client_id}_app" }
+      it { expect(builder.first.id).to eq 'app' }
     end
 
     context 'when we use simple topic style with one subscription group and one topic' do
@@ -175,9 +175,9 @@ RSpec.describe_current do
         consumer_group2
       end
 
-      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
+      it { expect(topic1.id).to eq 'group_name1_topic_name1' }
       it { expect(topic1.subscription_group_details).not_to eq(nil) }
-      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
+      it { expect(topic2.id).to eq 'group_name2_topic_name2' }
       it { expect(topic2.subscription_group_details).not_to eq(nil) }
       it { expect(builder.size).to eq 2 }
     end
@@ -204,8 +204,8 @@ RSpec.describe_current do
         end
       end
 
-      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
-      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name2" }
+      it { expect(topic1.id).to eq 'group_name1_topic_name1' }
+      it { expect(topic2.id).to eq 'group_name1_topic_name2' }
       it { expect(builder.size).to eq 1 }
     end
 
@@ -237,8 +237,8 @@ RSpec.describe_current do
         end
       end
 
-      it { expect(topic1.id).to eq "#{Karafka::App.config.client_id}_group_name1_topic_name1" }
-      it { expect(topic2.id).to eq "#{Karafka::App.config.client_id}_group_name2_topic_name2" }
+      it { expect(topic1.id).to eq 'group_name1_topic_name1' }
+      it { expect(topic2.id).to eq 'group_name2_topic_name2' }
       it { expect(builder.size).to eq 2 }
     end
 

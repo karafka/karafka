@@ -37,7 +37,7 @@ assert_equal 2, Karafka::App.subscription_groups.keys.size
 
 # Correct once
 assert_equal 'test1', Karafka::App.subscription_groups.keys[0].name
-assert_equal 'app', Karafka::App.subscription_groups.keys[1].name
+assert_equal Karafka::App.config.group_id, Karafka::App.subscription_groups.keys[1].name
 
 g00 = Karafka::App.subscription_groups.values[0][0].kafka[:'group.instance.id']
 g10 = Karafka::App.subscription_groups.values[1][0].kafka[:'group.instance.id']
