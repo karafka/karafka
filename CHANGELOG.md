@@ -6,6 +6,7 @@
 - [Enhancement] Add a buffer to the supervisor supervision on shutdown to prevent a potential race condition when signal pass lags.
 - [Enhancement] Provide ability to automatically generate and validate fingerprints of encrypted payload.
 - [Enhancement] Support `enable.partition.eof` fast yielding.
+- [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
 - [Fix] Fix a case where critically crashed supervisor would raise incorrect error.
 - [Fix] Re-raise critical supervisor errors before shutdown.
 - [Fix] Fix a case when right-open (infinite) swarm matching would not pass validations.
