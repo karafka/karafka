@@ -34,7 +34,7 @@ end
 
 produce_many(DT.topic, DT.uuids(10))
 
-draw_routes do
+draw_routes(create_topics: false) do
   topic DT.topic do
     consumer Consumer
   end

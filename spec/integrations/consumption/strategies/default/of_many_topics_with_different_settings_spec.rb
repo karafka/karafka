@@ -19,7 +19,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
+draw_routes(create_topics: false) do
   DT.topics.first(10).each_with_index do |topic_name, index|
     topic topic_name do
       # This will force us to have many subscription groups

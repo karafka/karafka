@@ -243,22 +243,25 @@ def create_routes_topics
   lock = File.open(File.join(Dir.tmpdir, 'create_routes_topics.lock'), File::CREAT | File::RDWR)
   lock.flock(File::LOCK_EX)
 
-  fetch_declarative_routes_topics_configs.each do |name, config|
-    args = if config
-             [config.partitions, config.replication_factor, config.details]
-           else
-             [1, 1, {}]
-           end
+  # Create 3 topics in parallel to make specs bootstrapping faster
+  fetch_declarative_routes_topics_configs.each_slice(3).to_a.each do |slice|
+    slice.map do |name, config|
+      args = if config
+               [config.partitions, config.replication_factor, config.details]
+             else
+               [1, 1, {}]
+             end
 
-    begin
-      Karafka::Admin.create_topic(
-        name,
-        *args
-      )
-    # Ignore if exists, some specs may try to create few times
-    rescue Rdkafka::RdkafkaError => e
-      e.code == :topic_already_exists ? return : raise
-    end
+      Thread.new do
+        Karafka::Admin.create_topic(
+          name,
+          *args
+        )
+      # Ignore if exists, some specs may try to create few times
+      rescue Rdkafka::RdkafkaError => e
+        e.code == :topic_already_exists ? nil : raise
+      end
+    end.each(&:join)
   end
 ensure
   lock.close

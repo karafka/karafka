@@ -13,7 +13,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
+draw_routes(create_topics: false) do
   5.times do |i|
     consumer_group "gr#{i}" do
       topic DT.topic do

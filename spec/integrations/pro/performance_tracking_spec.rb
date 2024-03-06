@@ -25,7 +25,8 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
+# They will be auto-created when producing
+draw_routes(create_topics: false) do
   TOPICS.each do |topic_name|
     topic topic_name do
       consumer Consumer

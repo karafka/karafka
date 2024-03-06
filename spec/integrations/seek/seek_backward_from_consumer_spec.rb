@@ -31,7 +31,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes(Consumer, create_topics: false)
 
 start_karafka_and_wait_until do
   DT[0].size >= 10
