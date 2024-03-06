@@ -11,19 +11,16 @@ module Karafka
     # it would be needed
     class Proxy < SimpleDelegator
       # Errors on which we want to retry
+      # Includes temporary errors related to node not being (or not yet being) coordinator or a
+      # leader to a given set of partitions. Usually goes away after a retry
       RETRYABLE_DEFAULT_ERRORS = %i[
         all_brokers_down
         timed_out
-      ].freeze
-
-      # Temporary errors related to node not being (or not yet being) coordinator or a leader to
-      # a given set of partitions. Usually goes away after a retry
-      BROKER_NOT_ERRORS = %i[
         not_coordinator
         not_leader_for_partition
       ].freeze
 
-      private_constant :RETRYABLE_DEFAULT_ERRORS, :BROKER_NOT_ERRORS
+      private_constant :RETRYABLE_DEFAULT_ERRORS
 
       attr_accessor :wrapped
 
@@ -55,8 +52,7 @@ module Karafka
         with_broker_errors_retry(
           # required to be in seconds, not ms
           wait_time: l_config.wait_time / 1_000.to_f,
-          max_attempts: l_config.max_attempts,
-          errors: RETRYABLE_DEFAULT_ERRORS + BROKER_NOT_ERRORS
+          max_attempts: l_config.max_attempts
         ) do
           @wrapped.query_watermark_offsets(topic, partition, l_config.timeout)
         end
@@ -73,8 +69,7 @@ module Karafka
         with_broker_errors_retry(
           # required to be in seconds, not ms
           wait_time: l_config.wait_time / 1_000.to_f,
-          max_attempts: l_config.max_attempts,
-          errors: RETRYABLE_DEFAULT_ERRORS + BROKER_NOT_ERRORS
+          max_attempts: l_config.max_attempts
         ) do
           @wrapped.offsets_for_times(tpl, l_config.timeout)
         end
@@ -149,8 +144,7 @@ module Karafka
         with_broker_errors_retry(
           # required to be in seconds, not ms
           wait_time: l_config.wait_time / 1_000.to_f,
-          max_attempts: l_config.max_attempts,
-          errors: RETRYABLE_DEFAULT_ERRORS + BROKER_NOT_ERRORS
+          max_attempts: l_config.max_attempts
         ) do
           @wrapped.lag(tpl, l_config.timeout)
         end
