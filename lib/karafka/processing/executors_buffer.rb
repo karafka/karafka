@@ -5,6 +5,10 @@ module Karafka
     # Buffer for executors of a given subscription group. It wraps around the concept of building
     # and caching them, so we can re-use them instead of creating new each time.
     class ExecutorsBuffer
+      include Helpers::ConfigImporter.new(
+        executor_class: %i[internal processing executor_class]
+      )
+
       # @param client [Connection::Client]
       # @param subscription_group [Routing::SubscriptionGroup]
       # @return [ExecutorsBuffer]
@@ -13,7 +17,6 @@ module Karafka
         @client = client
         # We need two layers here to keep track of topics, partitions and processing groups
         @buffer = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = {} } }
-        @executor_class = Karafka::App.config.internal.processing.executor_class
       end
 
       # Finds or creates an executor based on the provided details
@@ -24,7 +27,7 @@ module Karafka
       # @param coordinator [Karafka::Processing::Coordinator]
       # @return [Executor, Pro::Processing::Executor] consumer executor
       def find_or_create(topic, partition, parallel_key, coordinator)
-        @buffer[topic][partition][parallel_key] ||= @executor_class.new(
+        @buffer[topic][partition][parallel_key] ||= executor_class.new(
           @subscription_group.id,
           @client,
           coordinator

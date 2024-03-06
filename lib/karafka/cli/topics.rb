@@ -5,6 +5,9 @@ module Karafka
     # CLI actions related to Kafka cluster topics management
     class Topics < Base
       include Helpers::Colorize
+      include Helpers::ConfigImporter.new(
+        kafka_config: %i[kafka]
+      )
 
       desc 'Allows for the topics management (create, delete, reset, repartition)'
       # @param action [String] action we want to take
@@ -116,7 +119,7 @@ module Karafka
         return @declaratives_routing_topics if @declaratives_routing_topics
 
         collected_topics = {}
-        default_servers = Karafka::App.config.kafka[:'bootstrap.servers']
+        default_servers = kafka_config[:'bootstrap.servers']
 
         App.consumer_groups.each do |consumer_group|
           consumer_group.topics.each do |topic|

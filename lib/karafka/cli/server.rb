@@ -5,6 +5,10 @@ module Karafka
   class Cli
     # Server Karafka Cli action
     class Server < Base
+      include Helpers::ConfigImporter.new(
+        activity_manager: %i[internal routing activity_manager]
+      )
+
       # Types of things we can include / exclude from the routing via the CLI options
       SUPPORTED_TYPES = ::Karafka::Routing::ActivityManager::SUPPORTED_TYPES
 
@@ -90,23 +94,19 @@ module Karafka
 
       # Registers things we want to include (if defined)
       def register_inclusions
-        activities = ::Karafka::App.config.internal.routing.activity_manager
-
         SUPPORTED_TYPES.each do |type|
           names = options[type] || []
 
-          names.each { |name| activities.include(type, name) }
+          names.each { |name| activity_manager.include(type, name) }
         end
       end
 
       # Registers things we want to exclude (if defined)
       def register_exclusions
-        activities = ::Karafka::App.config.internal.routing.activity_manager
-
-        activities.class::SUPPORTED_TYPES.each do |type|
+        activity_manager.class::SUPPORTED_TYPES.each do |type|
           names = options[:"exclude_#{type}"] || []
 
-          names.each { |name| activities.exclude(type, name) }
+          names.each { |name| activity_manager.exclude(type, name) }
         end
       end
     end

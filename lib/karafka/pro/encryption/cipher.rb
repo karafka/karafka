@@ -16,6 +16,10 @@ module Karafka
     module Encryption
       # Cipher for encrypting and decrypting data
       class Cipher
+        include Helpers::ConfigImporter.new(
+          encryption: %i[encryption]
+        )
+
         def initialize
           @private_pems = {}
         end
@@ -39,7 +43,7 @@ module Karafka
 
         # @return [::OpenSSL::PKey::RSA] rsa public key
         def public_pem
-          @public_pem ||= ::OpenSSL::PKey::RSA.new(::Karafka::App.config.encryption.public_key)
+          @public_pem ||= ::OpenSSL::PKey::RSA.new(encryption.public_key)
         end
 
         # @param version [String] version for which we want to get the rsa key
@@ -47,7 +51,7 @@ module Karafka
         def private_pem(version)
           return @private_pems[version] if @private_pems.key?(version)
 
-          key_string = ::Karafka::App.config.encryption.private_keys[version]
+          key_string = encryption.private_keys[version]
           key_string || raise(Errors::PrivateKeyNotFoundError, version)
 
           @private_pems[version] = ::OpenSSL::PKey::RSA.new(key_string)

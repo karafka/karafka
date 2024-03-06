@@ -13,6 +13,11 @@ module Karafka
     # @note This job queue also keeps track / understands number of busy workers. This is because
     #   we use a single workers poll that can have granular scheduling.
     class JobsQueue
+      include Helpers::ConfigImporter.new(
+        concurrency: %i[concurrency],
+        tick_interval: %i[internal tick_interval]
+      )
+
       # @return [Karafka::Processing::JobsQueue]
       def initialize
         @queue = Queue.new
@@ -24,8 +29,6 @@ module Karafka
         # We cannot use a single semaphore as it could potentially block in listeners that should
         # process with their data and also could unlock when a given group needs to remain locked
         @semaphores = {}
-        @concurrency = Karafka::App.config.concurrency
-        @tick_interval = ::Karafka::App.config.internal.tick_interval
         @in_processing = Hash.new { |h, k| h[k] = [] }
         @statistics = { busy: 0, enqueued: 0 }
 
@@ -67,7 +70,7 @@ module Karafka
           # Assume that moving to queue means being picked up immediately not to create stats
           # race conditions because of pop overhead. If there are workers available, we assume
           # work is going to be handled as we never reject enqueued jobs
-          if @statistics[:busy] < @concurrency
+          if @statistics[:busy] < concurrency
             @statistics[:busy] += 1
           else
             # If system is fully loaded, it means this job is indeed enqueued
@@ -160,7 +163,7 @@ module Karafka
         while wait?(group_id)
           yield if block_given?
 
-          @semaphores.fetch(group_id).pop(timeout: @tick_interval / 1_000.0)
+          @semaphores.fetch(group_id).pop(timeout: tick_interval / 1_000.0)
         end
       end
 

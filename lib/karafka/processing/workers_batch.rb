@@ -5,11 +5,14 @@ module Karafka
     # Abstraction layer around workers batch.
     class WorkersBatch
       include Enumerable
+      include Helpers::ConfigImporter.new(
+        concurrency: %i[concurrency]
+      )
 
       # @param jobs_queue [JobsQueue]
       # @return [WorkersBatch]
       def initialize(jobs_queue)
-        @batch = Array.new(App.config.concurrency) { Processing::Worker.new(jobs_queue) }
+        @batch = Array.new(concurrency) { Processing::Worker.new(jobs_queue) }
       end
 
       # Iterates over available workers and yields each worker
