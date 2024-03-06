@@ -189,41 +189,34 @@ module Karafka
 
         settings = { 'group.id': consumer_group_id }
 
-        # This error can occur when we query a broker that is not a coordinator because something
-        # was changing in the cluster. We should be able to safely restart our seeking request
-        # when this happens without any issues
-        #
-        # We wrap the consumer creation, so we retry with a new consumer instance
-        with_rdkafka_retry(codes: %i[not_coordinator]) do
-          with_consumer(settings) do |consumer|
-            # If we have any time based stuff to resolve, we need to do it prior to commits
-            unless time_tpl.empty?
-              real_offsets = consumer.offsets_for_times(time_tpl)
+        with_consumer(settings) do |consumer|
+          # If we have any time based stuff to resolve, we need to do it prior to commits
+          unless time_tpl.empty?
+            real_offsets = consumer.offsets_for_times(time_tpl)
 
-              real_offsets.to_h.each do |name, results|
-                results.each do |result|
-                  raise(Errors::InvalidTimeBasedOffsetError) unless result
+            real_offsets.to_h.each do |name, results|
+              results.each do |result|
+                raise(Errors::InvalidTimeBasedOffsetError) unless result
 
-                  partition = result.partition
+                partition = result.partition
 
-                  # Negative offset means we're beyond last message and we need to query for the
-                  # high watermark offset to get the most recent offset and move there
-                  if result.offset.negative?
-                    _, offset = consumer.query_watermark_offsets(name, result.partition)
-                  else
-                    # If we get an offset, it means there existed a message close to this time
-                    # location
-                    offset = result.offset
-                  end
-
-                  # Since now we have proper offsets, we can add this to the final tpl for commit
-                  tpl.add_topic_and_partitions_with_offsets(name, [[partition, offset]])
+                # Negative offset means we're beyond last message and we need to query for the
+                # high watermark offset to get the most recent offset and move there
+                if result.offset.negative?
+                  _, offset = consumer.query_watermark_offsets(name, result.partition)
+                else
+                  # If we get an offset, it means there existed a message close to this time
+                  # location
+                  offset = result.offset
                 end
+
+                # Since now we have proper offsets, we can add this to the final tpl for commit
+                tpl.add_topic_and_partitions_with_offsets(name, [[partition, offset]])
               end
             end
-
-            consumer.commit(tpl, false)
           end
+
+          consumer.commit(tpl, false)
         end
       end
 
@@ -247,12 +240,7 @@ module Karafka
       # @return [Array<Integer, Integer>] low watermark offset and high watermark offset
       def read_watermark_offsets(name, partition)
         with_consumer do |consumer|
-          # For newly created topics or in cases where we're trying to get them but there is no
-          # leader, this can fail. It happens more often for new topics under KRaft, however we
-          # still want to make sure things operate as expected even then
-          with_rdkafka_retry(codes: %i[not_leader_for_partition]) do
-            consumer.query_watermark_offsets(name, partition)
-          end
+          consumer.query_watermark_offsets(name, partition)
         end
       end
 
@@ -409,31 +397,6 @@ module Karafka
         retry if attempt <= app_config.admin.max_attempts
 
         raise
-      end
-
-      # Handles retries for rdkafka related errors that we specify in `:codes`.
-      #
-      # Some operations temporarily fail, especially for cases where we changed something fast
-      # like topic creation or repartitioning. In cases like this it is ok to retry operations that
-      # do not change the state as it will usually recover.
-      #
-      # @param codes [Array<Symbol>] librdkafka error codes on which we want to retry
-      # @param max_attempts [Integer] number of attempts (including initial) after which we should
-      #   give up
-      #
-      # @note This code implements a simple backoff that increases with each attempt.
-      def with_rdkafka_retry(codes:, max_attempts: 5)
-        attempt ||= 0
-        attempt += 1
-
-        yield
-      rescue Rdkafka::RdkafkaError => e
-        raise unless codes.include?(e.code)
-        raise if attempt >= max_attempts
-
-        sleep(max_attempts)
-
-        retry
       end
 
       # @param type [Symbol] type of config we want
