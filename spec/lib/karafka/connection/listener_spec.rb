@@ -12,7 +12,7 @@ RSpec.describe_current do
   let(:subscription_group) { build(:routing_subscription_group, topics: [routing_topic]) }
   let(:jobs_queue) { Karafka::Processing::JobsQueue.new }
   let(:scheduler) { Karafka::Processing::Schedulers::Default.new(jobs_queue) }
-  let(:client) { Karafka::Connection::Client.new(subscription_group) }
+  let(:client) { Karafka::Connection::Client.new(subscription_group, -> { true }) }
   let(:routing_topic) { build(:routing_topic) }
   let(:status) { Karafka::Connection::Status.new }
 

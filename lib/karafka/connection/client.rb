@@ -30,8 +30,11 @@ module Karafka
       #
       # @param subscription_group [Karafka::Routing::SubscriptionGroup] subscription group
       #   with all the configuration details needed for us to create a client
+      # @param batch_poll_breaker [Proc] proc that when evaluated to false will cause the batch
+      #   poll loop to finish early. This improves the shutdown and dynamic multiplication as it
+      #   allows us to early break on long polls.
       # @return [Karafka::Connection::Client]
-      def initialize(subscription_group)
+      def initialize(subscription_group, batch_poll_breaker)
         @id = SecureRandom.hex(6)
         # Name is set when we build consumer
         @name = ''
@@ -41,7 +44,14 @@ module Karafka
         @tick_interval = ::Karafka::App.config.internal.tick_interval
         @rebalance_manager = RebalanceManager.new(@subscription_group.id)
         @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group)
-        @events_poller = Helpers::IntervalRunner.new { events_poll }
+
+        @events_poller = Helpers::IntervalRunner.new do
+          events_poll
+          # events poller returns nil when not running often enough, hence we don't use the
+          # boolean to be explicit
+          batch_poll_breaker.call ? :run : :stop
+        end
+
         # There are few operations that can happen in parallel from the listener threads as well
         # as from the workers. They are not fully thread-safe because they may be composed out of
         # few calls to Kafka or out of few internal state changes. That is why we mutex them.
@@ -98,7 +108,8 @@ module Karafka
             break
           end
 
-          @events_poller.call
+          # If we were signaled from the outside to break the loop, we should
+          break if @events_poller.call == :stop
 
           # Track time spent on all of the processing and polling
           time_poll.checkpoint

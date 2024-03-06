@@ -36,7 +36,7 @@ module Karafka
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
         @coordinators = Processing::CoordinatorsBuffer.new(subscription_group.topics)
-        @client = Client.new(@subscription_group)
+        @client = Client.new(@subscription_group, -> { running? })
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
         @jobs_builder = proc_config.jobs_builder
         @partitioner = proc_config.partitioner_class.new(subscription_group)
