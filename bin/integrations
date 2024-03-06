@@ -28,7 +28,7 @@ ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../
 CONCURRENCY = ENV.key?('CI') ? 5 : Etc.nprocessors * 3
 
 # How may bytes do we want to keep from the stdout in the buffer for when we need to print it
-MAX_BUFFER_OUTPUT = 102_400
+MAX_BUFFER_OUTPUT = 307_200
 
 # Abstraction around a single test scenario execution process
 class Scenario
