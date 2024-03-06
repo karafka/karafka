@@ -18,12 +18,12 @@ module Karafka
 
       # Temporary errors related to node not being (or not yet being) coordinator or a leader to
       # a given set of partitions. Usually goes away after a retry
-      NOT_ERRORS = %i[
+      BROKER_NOT_ERRORS = %i[
         not_coordinator
         not_leader_for_partition
       ].freeze
 
-      private_constant :RETRYABLE_DEFAULT_ERRORS, :NOT_ERRORS
+      private_constant :RETRYABLE_DEFAULT_ERRORS, :BROKER_NOT_ERRORS
 
       attr_accessor :wrapped
 
@@ -56,7 +56,7 @@ module Karafka
           # required to be in seconds, not ms
           wait_time: l_config.wait_time / 1_000.to_f,
           max_attempts: l_config.max_attempts,
-          errors: RETRYABLE_DEFAULT_ERRORS + NOT_ERRORS
+          errors: RETRYABLE_DEFAULT_ERRORS + BROKER_NOT_ERRORS
         ) do
           @wrapped.query_watermark_offsets(topic, partition, l_config.timeout)
         end
@@ -74,7 +74,7 @@ module Karafka
           # required to be in seconds, not ms
           wait_time: l_config.wait_time / 1_000.to_f,
           max_attempts: l_config.max_attempts,
-          errors: RETRYABLE_DEFAULT_ERRORS + NOT_ERRORS
+          errors: RETRYABLE_DEFAULT_ERRORS + BROKER_NOT_ERRORS
         ) do
           @wrapped.offsets_for_times(tpl, l_config.timeout)
         end
@@ -150,7 +150,7 @@ module Karafka
           # required to be in seconds, not ms
           wait_time: l_config.wait_time / 1_000.to_f,
           max_attempts: l_config.max_attempts,
-          errors: RETRYABLE_DEFAULT_ERRORS + NOT_ERRORS
+          errors: RETRYABLE_DEFAULT_ERRORS + BROKER_NOT_ERRORS
         ) do
           @wrapped.lag(tpl, l_config.timeout)
         end
