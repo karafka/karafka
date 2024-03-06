@@ -11,12 +11,19 @@ module Karafka
     # it would be needed
     class Proxy < SimpleDelegator
       # Errors on which we want to retry
-      RETRYABLE_ERRORS = %i[
+      RETRYABLE_DEFAULT_ERRORS = %i[
         all_brokers_down
         timed_out
       ].freeze
 
-      private_constant :RETRYABLE_ERRORS
+      # Temporary errors related to node not being (or not yet being) coordinator or a leader to
+      # a given set of partitions. Usually goes away after a retry
+      NOT_ERRORS = %i[
+        not_coordinator
+        not_leader_for_partition
+      ].freeze
+
+      private_constant :RETRYABLE_DEFAULT_ERRORS, :NOT_ERRORS
 
       attr_accessor :wrapped
 
@@ -42,10 +49,14 @@ module Karafka
       def query_watermark_offsets(topic, partition)
         l_config = @config.query_watermark_offsets
 
+        # For newly created topics or in cases where we're trying to get them but there is no
+        # leader, this can fail. It happens more often for new topics under KRaft, however we
+        # still want to make sure things operate as expected even then
         with_broker_errors_retry(
           # required to be in seconds, not ms
           wait_time: l_config.wait_time / 1_000.to_f,
-          max_attempts: l_config.max_attempts
+          max_attempts: l_config.max_attempts,
+          errors: RETRYABLE_DEFAULT_ERRORS + NOT_ERRORS
         ) do
           @wrapped.query_watermark_offsets(topic, partition, l_config.timeout)
         end
@@ -62,7 +73,8 @@ module Karafka
         with_broker_errors_retry(
           # required to be in seconds, not ms
           wait_time: l_config.wait_time / 1_000.to_f,
-          max_attempts: l_config.max_attempts
+          max_attempts: l_config.max_attempts,
+          errors: RETRYABLE_DEFAULT_ERRORS + NOT_ERRORS
         ) do
           @wrapped.offsets_for_times(tpl, l_config.timeout)
         end
@@ -137,7 +149,8 @@ module Karafka
         with_broker_errors_retry(
           # required to be in seconds, not ms
           wait_time: l_config.wait_time / 1_000.to_f,
-          max_attempts: l_config.max_attempts
+          max_attempts: l_config.max_attempts,
+          errors: RETRYABLE_DEFAULT_ERRORS + NOT_ERRORS
         ) do
           @wrapped.lag(tpl, l_config.timeout)
         end
@@ -152,13 +165,14 @@ module Karafka
       #   completely.
       # @param wait_time [Integer, Float] how many seconds should we wait. It uses `#sleep` of Ruby
       #   so it needs time in seconds.
-      def with_broker_errors_retry(max_attempts:, wait_time: 1)
+      # @param errors [Array<Symbol>] rdkafka errors we want to retry on
+      def with_broker_errors_retry(max_attempts:, wait_time: 1, errors: RETRYABLE_DEFAULT_ERRORS)
         attempt ||= 0
         attempt += 1
 
         yield
       rescue Rdkafka::RdkafkaError => e
-        raise unless RETRYABLE_ERRORS.include?(e.code)
+        raise unless errors.include?(e.code)
 
         if attempt <= max_attempts
           sleep(wait_time)
