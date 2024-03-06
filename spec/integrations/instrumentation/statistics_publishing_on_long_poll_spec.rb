@@ -34,7 +34,7 @@ Karafka::App.monitor.subscribe('connection.listener.fetch_loop.received') do |ev
 end
 
 start_karafka_and_wait_until do
-  sleep(10)
+  sleep(30)
   true
 end
 
