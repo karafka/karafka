@@ -13,7 +13,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
+draw_routes(create_topics: false) do
   topic DT.topic do
     max_messages 1
     consumer Consumer

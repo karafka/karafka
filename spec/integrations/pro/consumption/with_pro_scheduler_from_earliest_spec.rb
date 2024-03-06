@@ -19,7 +19,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
+draw_routes(create_topics: false) do
   DT.topics.first(10).each do |topic_name|
     topic topic_name do
       consumer Consumer

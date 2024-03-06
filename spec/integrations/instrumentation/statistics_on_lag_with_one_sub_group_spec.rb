@@ -42,7 +42,7 @@ Karafka::App.monitor.subscribe('statistics.emitted') do |event|
   end
 end
 
-draw_routes do
+draw_routes(create_topics: false) do
   subscription_group '1' do
     topic DT.topics[0] do
       consumer Consumer

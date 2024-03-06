@@ -22,7 +22,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
+draw_routes(create_topics: false) do
   topic DT.topic do
     consumer Consumer
     # Not really needed as we seek back, but still just in case of a crash

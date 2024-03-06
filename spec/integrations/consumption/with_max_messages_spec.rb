@@ -12,7 +12,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes do
+draw_routes(create_topics: false) do
   topic DT.topic do
     max_messages 5
     max_wait_time 10_000

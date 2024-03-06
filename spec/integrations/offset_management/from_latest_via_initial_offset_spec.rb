@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes(Consumer, create_topics: false)
 
 # Start Karafka
 Thread.new { Karafka::Server.run }

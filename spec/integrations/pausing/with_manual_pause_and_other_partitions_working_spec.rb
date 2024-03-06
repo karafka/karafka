@@ -38,7 +38,7 @@ draw_routes do
   end
 end
 
-draw_routes(Consumer)
+draw_routes(Consumer, create_topics: false)
 
 Thread.new do
   sleep(10)
