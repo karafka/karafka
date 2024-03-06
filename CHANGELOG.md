@@ -6,6 +6,7 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 
 - **[Breaking]** Drop the concept of consumer group mapping.
 - **[Feature]** Introduce ability to use direct assignments (Pro).
+- [Enhancement] Improve shutdown when using long polling setup (high `max_wait_time`).
 - [Enhancement] Provide `Karafka::Admin#read_lags` for ability to query lags of a given CG.
 - [Enhancement] Allow direct assignments granular distribution in the Swarm (Pro).
 - [Enhancement] Add a buffer to the supervisor supervision on shutdown to prevent a potential race condition when signal pass lags.

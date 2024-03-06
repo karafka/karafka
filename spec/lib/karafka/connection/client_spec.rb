@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:client) { described_class.new(subscription_group) }
+  subject(:client) { described_class.new(subscription_group, -> { true }) }
 
   let(:subscription_group) { build(:routing_subscription_group) }
 
