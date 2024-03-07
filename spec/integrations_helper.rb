@@ -120,6 +120,9 @@ def setup_web
   Karafka::Web::Installer.new.migrate
 end
 
+# Configures the testing framework in a given spec and allows to run it inline (in the same file)
+#
+# @param framework [Symbol] framework we want to configure
 def setup_testing(framework)
   if framework == :rspec
     require 'rspec'
