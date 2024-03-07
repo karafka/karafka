@@ -87,37 +87,37 @@ module Karafka
         # This can be used for cross-topic synchronization.
         #
         # @param group_id [String] id of the group we want to lock
-        # @param id [Object] unique id we want to use to identify our lock
+        # @param lock_id [Object] unique id we want to use to identify our lock
         # @param timeout [Integer] number of ms how long this lock should be valid. Useful for
         #   auto-expiring locks used to delay further processing without explicit pausing on
         #   the consumer
         #
         # @note We do not raise `Errors::JobsQueueSynchronizationError` similar to `#lock` here
         #   because we want to have ability to prolong time limited locks
-        def lock_async(group_id, id, timeout: WAIT_TIMEOUT)
+        def lock_async(group_id, lock_id, timeout: WAIT_TIMEOUT)
           return if @queue.closed?
 
           @mutex.synchronize do
             group = @locks[group_id]
 
-            group[id] = monotonic_now + timeout
+            group[lock_id] = monotonic_now + timeout
           end
         end
 
         # Allows for explicit unlocking of locked queue of a group
         #
         # @param group_id [String] id of the group we want to unlock
-        # @param id [Object] unique id we want to use to identify our lock
+        # @param lock_id [Object] unique id we want to use to identify our lock
         #
-        def unlock_async(group_id, id)
+        def unlock_async(group_id, lock_id)
           @mutex.synchronize do
-            if @locks[group_id].delete(id)
+            if @locks[group_id].delete(lock_id)
               tick(group_id)
 
               return
             end
 
-            raise(Errors::JobsQueueSynchronizationError, [group_id, id])
+            raise(Errors::JobsQueueSynchronizationError, [group_id, lock_id])
           end
         end
 

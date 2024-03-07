@@ -16,9 +16,11 @@ class Consumer < Karafka::BaseConsumer
     unless DT[1].size >= 10
       DT[:locks] << true
 
-      group_id = topic.subscription_group.id
-      Karafka::Server.jobs_queue.lock_async(group_id, 1)
-      DT[:group] = group_id
+      subscription_groups_coordinator.pause(
+        topic.subscription_group
+      )
+
+      DT[:group] = topic.subscription_group
     end
 
     DT[0] << Time.now.to_f
@@ -35,7 +37,7 @@ class Consumer2 < Karafka::BaseConsumer
     return unless DT.key?(:group)
     return if @unlocked
 
-    Karafka::Server.jobs_queue.unlock_async(DT[:group], 1)
+    subscription_groups_coordinator.resume(DT[:group])
     @unlocked = true
   end
 end
@@ -64,5 +66,5 @@ end
 
 # All events except the first one should come after all events from the second topic
 DT[1..].each do |time|
- assert time > DT[1].last
+  assert time > DT[1].last
 end

@@ -38,10 +38,10 @@ end
 
 client_id = Karafka::App.config.client_id
 
-names = [
-  "#{client_id}#consumer-1",
-  "#{client_id}#consumer-2",
-  "#{client_id}#consumer-3"
-]
-
-assert_equal names, names(DT[:stats_events])[0..2], names(DT[:stats_events])
+previous_index = 0
+names(DT[:stats_events]).each do |name|
+  current_index = name.split('-').last.to_i
+  assert previous_index < current_index
+  assert name.start_with?(client_id)
+  previous_index = current_index
+end
