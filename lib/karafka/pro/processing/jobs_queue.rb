@@ -98,9 +98,7 @@ module Karafka
           return if @queue.closed?
 
           @mutex.synchronize do
-            group = @locks[group_id]
-
-            group[lock_id] = monotonic_now + timeout
+            @locks[group_id][lock_id] = monotonic_now + timeout
           end
         end
 
