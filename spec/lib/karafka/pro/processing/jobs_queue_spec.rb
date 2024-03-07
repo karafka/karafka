@@ -127,6 +127,54 @@ RSpec.describe_current do
     end
   end
 
+  describe '#lock_async' do
+    let(:subscription_group_id) { SecureRandom.uuid }
+    let(:id) { SecureRandom.uuid }
+
+    context 'when we lock' do
+      before { queue.lock_async(subscription_group_id, id) }
+
+      it { expect(queue.empty?(subscription_group_id)).to eq(false) }
+
+      it 'expect not to impact statistics' do
+        expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 0)
+      end
+
+      context 'when we try to lock the same job twice' do
+        it { expect { queue.lock_async(subscription_group_id, id) }.not_to raise_error }
+      end
+    end
+
+    context 'when we lock with a timeout and it passes' do
+      before do
+        queue.register(subscription_group_id)
+        queue.lock_async(subscription_group_id, id, timeout: 100)
+      end
+
+      it 'expect to finish after a timeout tick and wait time' do
+        queue.wait(subscription_group_id)
+      end
+    end
+  end
+
+  describe '#unlock_async' do
+    context 'when we unlock a group' do
+      before do
+        queue.register(1)
+        queue.lock_async(1, 1)
+        queue.unlock_async(1, 1)
+      end
+
+      it { expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 0) }
+
+      context 'when we try to unlock the same job twice' do
+        let(:expected_error) { Karafka::Errors::JobsQueueSynchronizationError }
+
+        it { expect { queue.unlock_async(1, 1) }.to raise_error(expected_error) }
+      end
+    end
+  end
+
   describe '#close' do
     context 'when queues are closed already' do
       before { internal_queue.close }
@@ -177,6 +225,28 @@ RSpec.describe_current do
 
       it 'expect to pass until no longer needing to wait' do
         queue.wait(job1.group_id)
+      end
+    end
+
+    context 'when we have to wait for an async lock' do
+      let(:thread) do
+        Thread.new do
+          sleep(0.01)
+          queue.unlock_async(1, 1)
+        end
+      end
+
+      before do
+        queue.register(1)
+
+        thread
+        queue.lock_async(1, 1)
+      end
+
+      after { thread.join }
+
+      it 'expect to pass until no longer needing to wait' do
+        queue.wait(1)
       end
     end
 
@@ -305,6 +375,12 @@ RSpec.describe_current do
       it { expect(queue.empty?(1)).to eq(true) }
     end
 
+    context 'when there are no jobs but async lock has been added' do
+      before { queue.lock_async(1, 1) }
+
+      it { expect(queue.empty?(1)).to eq(false) }
+    end
+
     context 'when there are jobs from a different subscription group' do
       before { queue << job }
 
@@ -313,6 +389,15 @@ RSpec.describe_current do
 
     context 'when there are jobs from our subscription group' do
       before { queue << job }
+
+      it { expect(queue.empty?(job.group_id)).to eq(false) }
+    end
+
+    context 'when there are jobs from our subscription group and locks' do
+      before do
+        queue << job
+        queue.lock_async(1, 1)
+      end
 
       it { expect(queue.empty?(job.group_id)).to eq(false) }
     end
