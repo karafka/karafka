@@ -58,6 +58,18 @@ module Karafka
       def errors_tracker
         coordinator.errors_tracker
       end
+
+      # @return [Karafka::Pro::Processing::SubscriptionGroupsCoordinator] Coordinator allowing to
+      #   pause and resume polling of the given subscription group jobs queue for postponing
+      #   further work.
+      #
+      # @note Since this stops polling, it can cause reaching `max.poll.interval.ms` limitations.
+      #
+      # @note This is a low-level API used for cross-topic coordination and some advanced features.
+      #   Use it at own risk.
+      def subscription_groups_coordinator
+        Processing::SubscriptionGroupsCoordinator.instance
+      end
     end
   end
 end

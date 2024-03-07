@@ -120,7 +120,7 @@ module Karafka
           raise e
         ensure
           # We need to decrease number of jobs that this coordinator coordinates as it has finished
-          coordinator.decrement
+          coordinator.decrement(:consume)
         end
 
         # Standard flow marks work as consumed and moves on if everything went ok.
@@ -147,6 +147,8 @@ module Karafka
         # Code that should run on idle runs without messages available
         def handle_idle
           nil
+        ensure
+          coordinator.decrement(:idle)
         end
 
         # We need to always un-pause the processing in case we have lost a given partition.
@@ -161,6 +163,8 @@ module Karafka
           Karafka.monitor.instrument('consumer.revoked', caller: self) do
             revoked
           end
+        ensure
+          coordinator.decrement(:revoked)
         end
 
         # Runs the shutdown code
@@ -169,6 +173,8 @@ module Karafka
           Karafka.monitor.instrument('consumer.shutdown', caller: self) do
             shutdown
           end
+        ensure
+          coordinator.decrement(:shutdown)
         end
       end
     end

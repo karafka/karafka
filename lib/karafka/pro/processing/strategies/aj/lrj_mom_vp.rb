@@ -73,6 +73,8 @@ module Karafka
               Karafka.monitor.instrument('consumer.revoked', caller: self) do
                 revoked
               end
+            ensure
+              coordinator.decrement(:revoked)
             end
           end
         end

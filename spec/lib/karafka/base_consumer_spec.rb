@@ -161,6 +161,8 @@ RSpec.describe_current do
   end
 
   describe '#on_revoked' do
+    before { consumer.coordinator.increment(:revoked) }
+
     context 'when everything went ok on revoked' do
       before { consumer.singleton_class.include(Karafka::Processing::Strategies::Default) }
 
@@ -209,7 +211,10 @@ RSpec.describe_current do
   end
 
   describe '#on_shutdown' do
-    before { consumer.singleton_class.include(Karafka::Processing::Strategies::Default) }
+    before do
+      consumer.coordinator.increment(:shutdown)
+      consumer.singleton_class.include(Karafka::Processing::Strategies::Default)
+    end
 
     context 'when everything went ok on shutdown' do
       it { expect { consumer.on_shutdown }.not_to raise_error }

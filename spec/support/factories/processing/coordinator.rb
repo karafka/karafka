@@ -8,10 +8,11 @@ FactoryBot.define do
     partition { 0 }
     pause_tracker { build(:time_trackers_pause) }
     seek_offset { nil }
+    job_type { :consume }
 
     initialize_with do
       coordinator = new(topic, partition, pause_tracker)
-      coordinator.increment
+      coordinator.increment(job_type)
       coordinator.seek_offset = seek_offset
       coordinator
     end
@@ -24,10 +25,11 @@ FactoryBot.define do
     partition { 0 }
     pause_tracker { build(:time_trackers_pause) }
     seek_offset { nil }
+    job_type { :consume }
 
     initialize_with do
       coordinator = new(topic, partition, pause_tracker)
-      coordinator.increment
+      coordinator.increment(job_type)
       coordinator.seek_offset = seek_offset
       coordinator
     end

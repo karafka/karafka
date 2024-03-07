@@ -6,6 +6,9 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 
 - **[Breaking]** Drop the concept of consumer group mapping.
 - **[Feature]** Introduce ability to use direct assignments (Pro).
+- [Enhancement] Do not run periodic jobs when LRJ job is running despite polling (LRJ can still start when Periodic runs).
+- [Enhancement] Improve accuracy of periodic jobs and make sure they do not run too early after saturated work.
+- [Enhancement] Introduce ability to async lock other subscription groups polling.
 - [Enhancement] Improve shutdown when using long polling setup (high `max_wait_time`).
 - [Enhancement] Provide `Karafka::Admin#read_lags` for ability to query lags of a given CG.
 - [Enhancement] Allow direct assignments granular distribution in the Swarm (Pro).
@@ -16,6 +19,7 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - [Enhancement] Introduce graceful `#stop` to the iterator instead of recommending of usage of `break`.
 - [Change] Do not create new proxy object to Rdkafka with certain low-level operations and re-use existing.
 - [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
+- [Fix] Fix an issue where coordinator running jobs would not count periodic jobs and revocations.
 - [Fix] Fix a case where critically crashed supervisor would raise incorrect error.
 - [Fix] Re-raise critical supervisor errors before shutdown.
 - [Fix] Fix a case when right-open (infinite) swarm matching would not pass validations.

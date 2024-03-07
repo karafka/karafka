@@ -46,7 +46,6 @@ module Karafka
         # We can do this that way because we always first schedule jobs using messages before we
         # fetch another batch.
         @messages_buffer = MessagesBuffer.new(subscription_group)
-        @usage_tracker = TimeTrackers::PartitionUsage.new
         @mutex = Mutex.new
         @status = Status.new
 
@@ -277,15 +276,14 @@ module Karafka
 
         revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
-            @usage_tracker.revoke(topic, partition)
             @coordinators.revoke(topic, partition)
 
             # There may be a case where we have lost partition of which data we have never
             # processed (if it was assigned and revoked really fast), thus we may not have it
             # here. In cases like this, we do not run a revocation job
             @executors.find_all(topic, partition).each do |executor|
-              job = @jobs_builder.revoked(executor)
-              jobs << job
+              executor.coordinator.increment(:revoked)
+              jobs << @jobs_builder.revoked(executor)
             end
 
             # We need to remove all the executors of a given topic partition that we have lost, so
@@ -308,6 +306,7 @@ module Karafka
         jobs = []
 
         @executors.each do |executor|
+          executor.coordinator.increment(:shutdown)
           job = @jobs_builder.shutdown(executor)
           jobs << job
         end
@@ -328,8 +327,6 @@ module Karafka
         idle_jobs = []
 
         @messages_buffer.each do |topic, partition, messages|
-          @usage_tracker.track(topic, partition)
-
           coordinator = @coordinators.find_or_create(topic, partition)
           # Start work coordination for this topic partition
           coordinator.start(messages)
@@ -337,12 +334,13 @@ module Karafka
           # We do not increment coordinator for idle job because it's not a user related one
           # and it will not go through a standard lifecycle. Same applies to revoked and shutdown
           if messages.empty?
+            coordinator.increment(:idle)
             executor = @executors.find_or_create(topic, partition, 0, coordinator)
             idle_jobs << @jobs_builder.idle(executor)
           else
             @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
+              coordinator.increment(:consume)
               executor = @executors.find_or_create(topic, partition, group_id, coordinator)
-              coordinator.increment
               consume_jobs << @jobs_builder.consume(executor, partition_messages)
             end
           end
@@ -391,10 +389,10 @@ module Karafka
           interval = topic.periodic_job.interval
 
           partitions.each do |partition|
-            # Skip if we were operating on a given topic partition recently
-            next if @usage_tracker.active?(topic_name, partition, interval)
-
             coordinator = @coordinators.find_or_create(topic_name, partition)
+
+            # Skip if we were operating on a given topic partition recently
+            next if coordinator.active_within?(interval)
 
             # Do not tick if we do not want to tick during pauses
             next if coordinator.paused? && !topic.periodic_job.during_pause?
@@ -405,10 +403,8 @@ module Karafka
             # run (ok) but attempt 1 means, there was an error and we will retry
             next if coordinator.attempt.positive? && !topic.periodic_job.during_retry?
 
-            # Track so we do not run periodic job again too soon
-            @usage_tracker.track(topic_name, partition)
-
             @executors.find_all_or_create(topic_name, partition, coordinator).each do |executor|
+              coordinator.increment(:periodic)
               jobs << @jobs_builder.periodic(executor)
             end
           end

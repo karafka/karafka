@@ -63,6 +63,9 @@ module Karafka
         # @param config [Karafka::Core::Configurable::Node]
         def post_setup_all(config)
           features.each { |feature| feature.post_setup(config) }
+
+          # We initialize it here so we don't initialize it during multi-threading work
+          Processing::SubscriptionGroupsCoordinator.instance
         end
 
         private
