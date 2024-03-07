@@ -44,6 +44,9 @@ GEM
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
+    karafka-testing (2.3.1)
+      karafka (>= 2.3.0, < 2.4.0)
+      waterdrop (>= 2.6.12)
     karafka-web (0.8.2)
       erubi (~> 1.4)
       karafka (>= 2.3.0, < 2.4.0)
@@ -93,7 +96,8 @@ DEPENDENCIES
   byebug
   factory_bot
   karafka!
-  karafka-web (>= 0.8.0)
+  karafka-testing
+  karafka-web
   rspec
   simplecov
 
