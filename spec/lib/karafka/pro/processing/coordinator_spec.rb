@@ -46,10 +46,16 @@ RSpec.describe_current do
       it { expect(coordinator.finished?).to eq(true) }
     end
 
-    context 'when there are running jobs' do
-      before { coordinator.increment }
+    context 'when there are running consume jobs' do
+      before { coordinator.increment(:consume) }
 
       it { expect(coordinator.finished?).to eq(false) }
+    end
+
+    context 'when there are running non-consume jobs' do
+      before { coordinator.increment(:revoked) }
+
+      it { expect(coordinator.finished?).to eq(true) }
     end
   end
 

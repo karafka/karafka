@@ -21,7 +21,7 @@ RSpec.describe_current do
 
   before do
     coordinator.start(messages)
-    coordinator.increment
+    coordinator.increment(:consume)
 
     allow(client).to receive(:assignment_lost?).and_return(false)
   end
@@ -118,7 +118,7 @@ RSpec.describe_current do
     context 'when messages are available but partition got revoked prior to processing' do
       before do
         consumer.messages = messages
-        consumer.coordinator.decrement
+        consumer.coordinator.decrement(:consume)
         consumer.on_revoked
 
         allow(client).to receive(:mark_as_consumed).with(messages.first, nil).and_return(true)

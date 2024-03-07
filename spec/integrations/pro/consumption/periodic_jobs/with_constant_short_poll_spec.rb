@@ -49,5 +49,5 @@ DT[1].each do |time|
   # on an unused but assigned partition
   assert time - previous >= 5
 
-  previous = nil
+  previous = time
 end

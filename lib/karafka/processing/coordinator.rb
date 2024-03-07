@@ -11,6 +11,7 @@ module Karafka
     #   future mistakes.
     class Coordinator
       extend Forwardable
+      include Core::Helpers::Time
 
       attr_reader :pause_tracker, :seek_offset, :topic, :partition
 
@@ -25,12 +26,13 @@ module Karafka
         @pause_tracker = pause_tracker
         @revoked = false
         @consumptions = {}
-        @running_jobs = 0
+        @running_jobs = Hash.new { |h, k| h[k] = 0 }
         @manual_pause = false
         @manual_seek = false
         @mutex = Mutex.new
         @marked = false
         @failure = false
+        @changed_at = monotonic_now
       end
 
       # Starts the coordinator for given consumption jobs
@@ -38,7 +40,7 @@ module Karafka
       #   going to coordinate work. Not used with regular coordinator.
       def start(messages)
         @failure = false
-        @running_jobs = 0
+        @running_jobs[:consume] = 0
         # We need to clear the consumption results hash here, otherwise we could end up storing
         # consumption results of consumer instances we no longer control
         @consumptions.clear
@@ -70,16 +72,22 @@ module Karafka
       end
 
       # Increases number of jobs that we handle with this coordinator
-      def increment
-        synchronize { @running_jobs += 1 }
+      # @param job_type [Symbol] type of job that we want to increment
+      def increment(job_type)
+        synchronize do
+          @running_jobs[job_type] += 1
+          @changed_at = monotonic_now
+        end
       end
 
       # Decrements number of jobs we handle at the moment
-      def decrement
+      # @param job_type [Symbol] type of job that we want to decrement
+      def decrement(job_type)
         synchronize do
-          @running_jobs -= 1
+          @running_jobs[job_type] -= 1
+          @changed_at = monotonic_now
 
-          return @running_jobs unless @running_jobs.negative?
+          return @running_jobs[job_type] unless @running_jobs[job_type].negative?
 
           # This should never happen. If it does, something is heavily out of sync. Please reach
           # out to us if you encounter this
@@ -90,9 +98,10 @@ module Karafka
       # Is all the consumption done and finished successfully for this coordinator
       # We do not say we're successful until all work is done, because running work may still
       # crash.
+      # @note This is only used for consume synchronization
       def success?
         synchronize do
-          @running_jobs.zero? && @consumptions.values.all?(&:success?)
+          @running_jobs[:consume].zero? && @consumptions.values.all?(&:success?)
         end
       end
 

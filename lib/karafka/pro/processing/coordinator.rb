@@ -99,8 +99,9 @@ module Karafka
         end
 
         # @return [Boolean] is the coordinated work finished or not
+        # @note Used only in the consume operation context
         def finished?
-          @running_jobs.zero?
+          @running_jobs[:consume].zero?
         end
 
         # Runs synchronized code once for a collective of virtual partitions prior to work being
@@ -122,7 +123,7 @@ module Karafka
           end
         end
 
-        # Runs once when all the work that is suppose to be coordinated is finished
+        # Runs given code once when all the work that is suppose to be coordinated is finished
         # It runs once per all the coordinated jobs and should be used to run any type of post
         # jobs coordination processing execution
         def on_finished
@@ -141,6 +142,18 @@ module Karafka
 
             yield(@last_message)
           end
+        end
+
+        # @param interval [Integer] milliseconds of activity
+        # @return [Boolean] was this partition in activity within last `interval` milliseconds
+        # @note Will return true also if currently active
+        def active_within?(interval)
+          # its always active if there's any job related to this coordinator that is still
+          # enqueued or running
+          return true if @running_jobs.values.any?(:positive?)
+
+          # Otherwise we check last time any job of this coordinator was active
+          @changed_at + interval > monotonic_now
         end
 
         private

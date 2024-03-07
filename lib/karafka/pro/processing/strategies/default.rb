@@ -220,7 +220,7 @@ module Karafka
           ensure
             # We need to decrease number of jobs that this coordinator coordinates as it has
             # finished
-            coordinator.decrement
+            coordinator.decrement(:consume)
           end
 
           # Standard flow without any features
@@ -254,6 +254,8 @@ module Karafka
             Karafka.monitor.instrument('consumer.revoked', caller: self) do
               revoked
             end
+          ensure
+            coordinator.decrement(:revoked)
           end
 
           # No action needed for the tick standard flow
@@ -269,6 +271,8 @@ module Karafka
             Karafka.monitor.instrument('consumer.ticked', caller: self) do
               tick
             end
+          ensure
+            coordinator.decrement(:periodic)
           end
         end
       end

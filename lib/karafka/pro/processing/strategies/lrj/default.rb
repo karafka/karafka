@@ -76,6 +76,8 @@ module Karafka
               Karafka.monitor.instrument('consumer.revoked', caller: self) do
                 revoked
               end
+            ensure
+              coordinator.decrement(:revoked)
             end
 
             # Allows for LRJ to synchronize its work. It may be needed because LRJ can run

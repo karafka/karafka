@@ -45,7 +45,7 @@ RSpec.describe_current do
   end
 
   describe '#increment' do
-    before { coordinator.increment }
+    before { coordinator.increment(:consume) }
 
     it { expect(coordinator.success?).to eq(false) }
     it { expect(coordinator.revoked?).to eq(false) }
@@ -55,14 +55,14 @@ RSpec.describe_current do
     context 'when we would go below zero jobs' do
       it 'expect to raise error' do
         expected_error = Karafka::Errors::InvalidCoordinatorStateError
-        expect { coordinator.decrement }.to raise_error(expected_error)
+        expect { coordinator.decrement(:consume) }.to raise_error(expected_error)
       end
     end
 
     context 'when decrementing from regular jobs count to zero' do
       before do
-        coordinator.increment
-        coordinator.decrement
+        coordinator.increment(:consume)
+        coordinator.decrement(:consume)
       end
 
       it { expect(coordinator.success?).to eq(true) }
@@ -71,9 +71,9 @@ RSpec.describe_current do
 
     context 'when decrementing from regular jobs count not to zero' do
       before do
-        coordinator.increment
-        coordinator.increment
-        coordinator.decrement
+        coordinator.increment(:consume)
+        coordinator.increment(:consume)
+        coordinator.decrement(:consume)
       end
 
       it { expect(coordinator.success?).to eq(false) }
@@ -103,7 +103,7 @@ RSpec.describe_current do
     end
 
     context 'when there is a job running' do
-      before { coordinator.increment }
+      before { coordinator.increment(:consume) }
 
       it { expect(coordinator.success?).to eq(false) }
     end
@@ -117,7 +117,7 @@ RSpec.describe_current do
     context 'when there are jobs running and all the finished are success' do
       before do
         coordinator.success!(0)
-        coordinator.increment
+        coordinator.increment(:consume)
       end
 
       it { expect(coordinator.success?).to eq(false) }

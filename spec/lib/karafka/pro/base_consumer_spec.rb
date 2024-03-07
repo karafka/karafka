@@ -55,7 +55,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
   before do
     coordinator.start(messages)
-    coordinator.increment
+    coordinator.increment(:consume)
 
     allow(client).to receive(:assignment_lost?).and_return(false)
   end
@@ -402,7 +402,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
   end
 
   context 'when revocation happens' do
-    before { consumer.coordinator.decrement }
+    before { consumer.coordinator.decrement(:consume) }
 
     it 'expect to run user code' do
       consumer.on_revoked
@@ -506,6 +506,8 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
   end
 
   describe '#on_tick' do
+    before { coordinator.increment(:periodic) }
+
     context 'when everything went ok on tick' do
       before { consumer.singleton_class.include(Karafka::Processing::Strategies::Default) }
 
