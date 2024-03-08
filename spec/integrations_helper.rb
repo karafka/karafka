@@ -120,6 +120,38 @@ def setup_web
   Karafka::Web::Installer.new.migrate
 end
 
+# Configures the testing framework in a given spec and allows to run it inline (in the same file)
+#
+# @param framework [Symbol] framework we want to configure
+def setup_testing(framework)
+  if framework == :rspec
+    require 'rspec'
+    require 'rspec/autorun'
+    require 'karafka/testing'
+    require 'karafka/testing/rspec/helpers'
+
+    RSpec.configure do |config|
+      config.include Karafka::Testing::RSpec::Helpers
+
+      config.disable_monkey_patching!
+      config.order = :random
+
+      config.expect_with :rspec do |expectations|
+        expectations.include_chain_clauses_in_custom_matcher_descriptions = true
+      end
+
+      config.after do
+        Karafka::App.routes.clear
+        Karafka.monitor.notifications_bus.clear
+        Karafka::App.config.internal.routing.activity_manager.clear
+        Karafka::Processing::InlineInsights::Tracker.clear
+      end
+    end
+  else
+    raise
+  end
+end
+
 # Switches specs into a Pro mode
 def become_pro!
   mod = Module.new do

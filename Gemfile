@@ -6,11 +6,18 @@ plugin 'diffend'
 
 gemspec
 
-# Karafka gem does not require activejob nor karafka-web  to work
+# Karafka gem does not require activejob nor karafka-web to work
 # They are added here because they are part of the integration suite
+# Since some of those are only needed for some specs, they should never be required automatically
 group :integrations do
-  gem 'activejob'
-  gem 'karafka-web', '>= 0.8.0'
+  %w[
+    activejob
+    karafka-testing
+    karafka-web
+    rspec
+  ].each do |gem_name|
+    gem gem_name, require: false
+  end
 end
 
 group :test do
