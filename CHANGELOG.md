@@ -4,6 +4,7 @@
 
 This release contains a **BREAKING** change. Make sure to read and apply upgrade notes.
 
+- **[Breaking]** Drop Ruby `2.7` support.
 - **[Breaking]** Drop the concept of consumer group mapping.
 - **[Feature]** Introduce ability to use direct assignments (Pro).
 - [Enhancement] Do not run periodic jobs when LRJ job is running despite polling (LRJ can still start when Periodic runs).
