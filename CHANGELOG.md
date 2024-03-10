@@ -18,6 +18,7 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - [Enhancement] Support `enable.partition.eof` fast yielding.
 - [Enhancement] Provide `#mark_as_consumed` and `#mark_as_consumed!` to the iterator.
 - [Enhancement] Introduce graceful `#stop` to the iterator instead of recommending of usage of `break`.
+- [Enhancement] Do not run jobs schedulers and other interval based operations on each job queue unlock.
 - [Change] Do not create new proxy object to Rdkafka with certain low-level operations and re-use existing.
 - [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
 - [Fix] Fix an issue where coordinator running jobs would not count periodic jobs and revocations.

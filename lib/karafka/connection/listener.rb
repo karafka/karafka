@@ -50,6 +50,14 @@ module Karafka
         @status = Status.new
 
         @jobs_queue.register(@subscription_group.id)
+
+        # This makes sure that even if we tick more often than the interval time due to frequent
+        # unlocks from short-lived jobs or async queues synchronization, events handling and jobs
+        # scheduling still happens with the expected frequency
+        @interval_runner = Helpers::IntervalRunner.new do
+          @events_poller.call
+          @scheduler.on_manage
+        end
       end
 
       # Runs the main listener fetch loop.
@@ -419,8 +427,7 @@ module Karafka
       # Waits for all the jobs from a given subscription group to finish before moving forward
       def wait
         @jobs_queue.wait(@subscription_group.id) do
-          @events_poller.call
-          @scheduler.on_manage
+          @interval_runner.call
         end
       end
 
@@ -458,6 +465,7 @@ module Karafka
         @events_poller.reset
         @client.reset
         @coordinators.reset
+        @interval_runner.reset
         @executors = Processing::ExecutorsBuffer.new(@client, @subscription_group)
       end
     end

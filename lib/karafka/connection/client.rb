@@ -45,7 +45,7 @@ module Karafka
         @rebalance_manager = RebalanceManager.new(@subscription_group.id)
         @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group)
 
-        @events_poller = Helpers::IntervalRunner.new do
+        @interval_runner = Helpers::IntervalRunner.new do
           events_poll
           # events poller returns nil when not running often enough, hence we don't use the
           # boolean to be explicit
@@ -109,7 +109,7 @@ module Karafka
           end
 
           # If we were signaled from the outside to break the loop, we should
-          break if @events_poller.call == :stop
+          break if @interval_runner.call == :stop
 
           # Track time spent on all of the processing and polling
           time_poll.checkpoint
@@ -306,7 +306,7 @@ module Karafka
         ) do
           close
 
-          @events_poller.reset
+          @interval_runner.reset
           @closed = false
           @paused_tpls.clear
         end

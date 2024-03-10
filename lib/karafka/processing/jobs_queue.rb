@@ -158,12 +158,14 @@ module Karafka
       #   the work to be finished.
       # @note This method is blocking.
       def wait(group_id)
+        interval_in_seconds = tick_interval / 1_000.0
+
         # Go doing other things while we cannot process and wait for anyone to finish their work
         # and re-check the wait status
         while wait?(group_id)
           yield if block_given?
 
-          @semaphores.fetch(group_id).pop(timeout: tick_interval / 1_000.0)
+          @semaphores.fetch(group_id).pop(timeout: interval_in_seconds)
         end
       end
 
