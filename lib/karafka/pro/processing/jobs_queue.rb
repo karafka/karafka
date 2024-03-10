@@ -34,6 +34,7 @@ module Karafka
 
           @in_waiting = Hash.new { |h, k| h[k] = [] }
           @locks = Hash.new { |h, k| h[k] = {} }
+          @async_locking = false
 
           @statistics[:waiting] = 0
         end
@@ -97,8 +98,13 @@ module Karafka
         def lock_async(group_id, lock_id, timeout: WAIT_TIMEOUT)
           return if @queue.closed?
 
+          @async_locking = true
+
           @mutex.synchronize do
             @locks[group_id][lock_id] = monotonic_now + timeout
+
+            # We need to tick so our new time sensitive lock can reload time constraints on sleep
+            tick(group_id)
           end
         end
 
@@ -130,6 +136,7 @@ module Karafka
             @statistics[:waiting] -= @in_waiting[group_id].size
             @in_waiting[group_id].clear
             @locks[group_id].clear
+            @async_locking = false
 
             # We unlock it just in case it was blocked when clearing started
             tick(group_id)
@@ -148,6 +155,41 @@ module Karafka
           end
         end
 
+        # Blocks when there are things in the queue in a given group and waits until all the
+        #   blocking jobs from a given group are completed or any of the locks times out
+        # @param group_id [String] id of the group in which jobs we're interested.
+        # @see `Karafka::Processing::JobsQueue`
+        #
+        # @note Because checking that async locking is on happens on regular ticking, first lock
+        #   on a group can take up to one tick. That is expected.
+        #
+        # @note This implementation takes into consideration temporary async locks that can happen.
+        #   Thanks to the fact that we use the minimum lock time as a timeout, we do not have to
+        #   wait a whole ticking period to unlock async locks.
+        def wait(group_id)
+          return super unless @async_locking
+
+          # We do not generalize this flow because this one is more expensive as it has to allocate
+          # extra objects. That's why we only use it when locks are actually in use
+          base_interval = tick_interval / 1_000.0
+
+          while wait?(group_id)
+            yield if block_given?
+
+            now = monotonic_now
+
+            wait_times = @locks[group_id].values.map! do |lock_time|
+              # Convert ms to seconds, seconds are required by Ruby queue engine
+              (lock_time - now) / 1_000
+            end
+
+            wait_times.delete_if(&:negative?)
+            wait_times << base_interval
+
+            @semaphores.fetch(group_id).pop(timeout: wait_times.min)
+          end
+        end
+
         private
 
         # Tells us if given group is locked
@@ -155,11 +197,17 @@ module Karafka
         # @param group_id [String] id of the group in which we're interested.
         # @return [Boolean] true if there are any active locks on the group, otherwise false
         def locked_async?(group_id)
-          return false if @locks[group_id].empty?
+          return false unless @async_locking
 
-          @locks[group_id].delete_if { |_, wait_timeout| wait_timeout < monotonic_now }
+          group = @locks[group_id]
 
-          !@locks.empty?
+          return false if group.empty?
+
+          now = monotonic_now
+
+          group.delete_if { |_, wait_timeout| wait_timeout < now }
+
+          !group.empty?
         end
 
         # @param group_id [String] id of the group in which jobs we're interested.
