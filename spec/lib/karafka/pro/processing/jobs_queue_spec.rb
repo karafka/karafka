@@ -131,6 +131,8 @@ RSpec.describe_current do
     let(:subscription_group_id) { SecureRandom.uuid }
     let(:id) { SecureRandom.uuid }
 
+    before { queue.register(subscription_group_id) }
+
     context 'when we lock' do
       before { queue.lock_async(subscription_group_id, id) }
 
@@ -370,6 +372,8 @@ RSpec.describe_current do
 
   describe '#empty?' do
     let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true) }
+
+    before { queue.register(1) }
 
     context 'when there are no jobs at all' do
       it { expect(queue.empty?(1)).to eq(true) }
