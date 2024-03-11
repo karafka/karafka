@@ -99,8 +99,30 @@ module Karafka
 
             current_status = status
 
+            p current_status
+
             current_status.positive? ? node.unhealthy(current_status) : node.healthy
           end
+        end
+
+        # Deregister the polling tracker for given listener
+        # @param _event [Karafka::Core::Monitoring::Event]
+        def on_connection_listener_stopping(_event)
+          # We are interested in disabling tracking for given listener only if it was requested
+          # when karafka was running. If we would always clear, it would not catch the shutdown
+          # polling requirements. The "running" listener shutdown operations happen only when
+          # the manager requests it for downscaling.
+          return if Karafka::App.done?
+
+          clear_polling_tick
+        end
+
+        # Deregister the polling tracker for given listener
+        # @param _event [Karafka::Core::Monitoring::Event]
+        def on_connection_listener_stopped(_event)
+          return if Karafka::App.done?
+
+          clear_polling_tick
         end
 
         private
