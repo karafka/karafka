@@ -6,6 +6,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     instance.coordinator = coordinator
     instance.client = client
     instance.singleton_class.include Karafka::Pro::BaseConsumer
+    instance.singleton_class.include Karafka::Pro::Processing::PeriodicJob::Consumer
     instance.singleton_class.include(strategy)
     instance
   end
@@ -509,7 +510,10 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     before { coordinator.increment(:periodic) }
 
     context 'when everything went ok on tick' do
-      before { consumer.singleton_class.include(Karafka::Processing::Strategies::Default) }
+      before do
+        consumer.singleton_class.include(Karafka::Processing::Strategies::Default)
+        consumer.singleton_class.include(Karafka::Pro::Processing::PeriodicJob::Consumer)
+      end
 
       it { expect { consumer.on_tick }.not_to raise_error }
 
