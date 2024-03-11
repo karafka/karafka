@@ -19,8 +19,10 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - [Enhancement] Provide `#mark_as_consumed` and `#mark_as_consumed!` to the iterator.
 - [Enhancement] Introduce graceful `#stop` to the iterator instead of recommending of usage of `break`.
 - [Enhancement] Do not run jobs schedulers and other interval based operations on each job queue unlock.
+- [Enhancement] Publish listeners status lifecycle events.
 - [Change] Do not create new proxy object to Rdkafka with certain low-level operations and re-use existing.
 - [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
+- [Fix] Fix a case where connection conductor would not be released during manager state changes.
 - [Fix] Make sure, that all `Admin` operations go through stabilization proxy.
 - [Fix] Fix an issue where coordinator running jobs would not count periodic jobs and revocations.
 - [Fix] Fix a case where critically crashed supervisor would raise incorrect error.

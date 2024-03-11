@@ -5,6 +5,11 @@ module Karafka
   module Connection
     # Listener connection status representation
     class Status
+      include Helpers::ConfigImporter.new(
+        monitor: %i[monitor],
+        conductor: %i[internal connection conductor],
+      )
+
       # Available states and their transitions.
       STATES = {
         pending: :pending!,
@@ -26,7 +31,8 @@ module Karafka
               return if @status && STATES.keys.index(:#{state}) <= STATES.keys.index(@status)
 
               @status = :#{state}
-              @conductor.signal
+              conductor.signal
+              monitor.instrument("connection.listener.#{state}", caller: self)
             end
           end
 
@@ -39,7 +45,6 @@ module Karafka
 
       def initialize
         @mutex = Mutex.new
-        @conductor = Karafka::App.config.internal.connection.conductor
         pending!
       end
 
@@ -49,11 +54,16 @@ module Karafka
       def stop!
         if pending?
           @status = :stopping
+          conductor.signal
+          monitor.instrument('connection.listener.stopping', caller: self)
+
           stopped!
         elsif stopped?
           nil
         else
           @status = :stopping
+          conductor.signal
+          monitor.instrument('connection.listener.stopping', caller: self)
         end
       end
 
