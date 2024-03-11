@@ -60,6 +60,8 @@ module Karafka
           stopped!
         elsif stopped?
           nil
+        elsif stopping?
+          nil
         else
           @status = :stopping
           conductor.signal
