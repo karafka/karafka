@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should publish listener lifecyclce events
+# Karafka should publish listener lifecycle events
 
 PUBLISHED_STATES = %w[
   connection.listener.pending
@@ -10,7 +10,7 @@ PUBLISHED_STATES = %w[
   connection.listener.quiet
   connection.listener.stopping
   connection.listener.stopped
-]
+].freeze
 
 PUBLISHED_STATES.each do |state|
   Karafka::App.monitor.subscribe(state) do

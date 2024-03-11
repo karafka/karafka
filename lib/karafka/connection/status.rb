@@ -7,7 +7,7 @@ module Karafka
     class Status
       include Helpers::ConfigImporter.new(
         monitor: %i[monitor],
-        conductor: %i[internal connection conductor],
+        conductor: %i[internal connection conductor]
       )
 
       # Available states and their transitions.
