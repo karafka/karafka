@@ -229,6 +229,14 @@ module Karafka
 
           # Settings that are altered by our client proxy layer
           setting :proxy do
+            # commit offsets request
+            setting :commit do
+              # How many times should we try to run this call before raising an error
+              setting :max_attempts, default: 3
+              # How long should we wait before next attempt in case of a failure
+              setting :wait_time, default: 1_000
+            end
+
             # Committed offsets for given CG query
             setting :committed do
               # timeout for this request. For busy or remote clusters, this should be high enough

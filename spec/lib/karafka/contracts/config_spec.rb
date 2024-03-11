@@ -64,6 +64,10 @@ RSpec.describe_current do
               timeout: 100,
               max_attempts: 5,
               wait_time: 1_000
+            },
+            commit: {
+              max_attempts: 5,
+              wait_time: 1_000
             }
           }
         },
@@ -545,6 +549,7 @@ RSpec.describe_current do
       query_watermark_offsets
       offsets_for_times
       committed
+      commit
     ].each do |scope|
       context "when proxy #{scope} is missing" do
         before { config[:internal][:connection][:proxy].delete(scope) }
@@ -557,6 +562,9 @@ RSpec.describe_current do
         max_attempts
         wait_time
       ].each do |field|
+        # commit does not have a timeout
+        next if scope == :commit && field == :timeout
+
         context "when proxy #{scope} #{field} is 0" do
           before { config[:internal][:connection][:proxy][scope][field] = 0 }
 

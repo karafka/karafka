@@ -216,7 +216,7 @@ module Karafka
             end
           end
 
-          consumer.commit(tpl, false)
+          consumer.commit_offsets(tpl, async: false)
         end
       end
 
