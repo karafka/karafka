@@ -110,13 +110,21 @@ module Karafka
       end
 
       # Non thread-safe message committing method
+      # @param tpl [Rdkafka::Consumer::TopicPartitionList, nil] tpl or nil
       # @param async [Boolean] should the commit happen async or sync (async by default)
       # @return [Boolean] true if offset commit worked, false if we've lost the assignment
       # @note We do **not** consider `no_offset` as any problem and we allow to commit offsets
       #   even when no stored, because with sync commit, it refreshes the ownership state of the
       #   consumer in a sync way.
-      def commit_offsets(async: true)
-        @wrapped.commit(nil, async)
+      def commit_offsets(tpl = nil, async: true)
+        c_config = @config.commit
+
+        with_broker_errors_retry(
+          wait_time: c_config.wait_time / 1_000.to_f,
+          max_attempts: c_config.max_attempts
+        ) do
+          @wrapped.commit(tpl, async)
+        end
 
         true
       rescue Rdkafka::RdkafkaError => e

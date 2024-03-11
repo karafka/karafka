@@ -21,6 +21,7 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - [Enhancement] Do not run jobs schedulers and other interval based operations on each job queue unlock.
 - [Change] Do not create new proxy object to Rdkafka with certain low-level operations and re-use existing.
 - [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
+- [Fix] Make sure, that all `Admin` operations go through stabilization proxy.
 - [Fix] Fix an issue where coordinator running jobs would not count periodic jobs and revocations.
 - [Fix] Fix a case where critically crashed supervisor would raise incorrect error.
 - [Fix] Re-raise critical supervisor errors before shutdown.

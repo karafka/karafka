@@ -75,6 +75,11 @@ module Karafka
           required(:conductor) { |val| !val.nil? }
 
           nested(:proxy) do
+            nested(:commit) do
+              required(:max_attempts) { |val| val.is_a?(Integer) && val.positive? }
+              required(:wait_time) { |val| val.is_a?(Integer) && val.positive? }
+            end
+
             # All of them have the same requirements
             %i[
               query_watermark_offsets
