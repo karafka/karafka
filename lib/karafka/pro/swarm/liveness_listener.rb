@@ -99,8 +99,6 @@ module Karafka
 
             current_status = status
 
-            p current_status
-
             current_status.positive? ? node.unhealthy(current_status) : node.healthy
           end
         end
