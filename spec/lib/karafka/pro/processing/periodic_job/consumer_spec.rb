@@ -16,13 +16,15 @@ RSpec.describe_current do
 
   context 'when the consumer class already defines a #tick method' do
     let(:consumer_class_with_tick) do
-      Class.new(Karafka::BaseConsumer) do
+      klass = Class.new(Karafka::BaseConsumer) do
         def tick
           :existing_tick
         end
-      end.tap do |klass|
-        klass.include(Karafka::Pro::Processing::PeriodicJob::Consumer)
       end
+
+      klass.include(Karafka::Pro::Processing::PeriodicJob::Consumer)
+
+      klass
     end
 
     it 'does not override the existing #tick method' do
