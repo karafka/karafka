@@ -40,6 +40,14 @@ module Karafka
         connection.listener.fetch_loop.received
         connection.listener.after_fetch_loop
 
+        connection.listener.pending
+        connection.listener.starting
+        connection.listener.running
+        connection.listener.quieting
+        connection.listener.quiet
+        connection.listener.stopping
+        connection.listener.stopped
+
         consumer.before_schedule_consume
         consumer.consume
         consumer.consumed
