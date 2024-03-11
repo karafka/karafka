@@ -24,6 +24,7 @@ module Karafka
           # Start with the non-pro expansions
           expansions = super
           expansions << Pro::Processing::OffsetMetadata::Consumer if topic.offset_metadata?
+          expansions << Pro::Processing::PeriodicJob::Consumer if topic.periodic_job?
           expansions
         end
       end

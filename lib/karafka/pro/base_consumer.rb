@@ -20,29 +20,6 @@ module Karafka
     #
     # Methods here are suppose to be always available or are expected to be redefined
     module BaseConsumer
-      # Runs the on-schedule tick periodic operations
-      # This method is an alias but is part of the naming convention used for other flows, this
-      # is why we do not reference the `handle_before_schedule_tick` directly
-      def on_before_schedule_tick
-        handle_before_schedule_tick
-      end
-
-      # Used by the executor to trigger consumer tick
-      # @private
-      def on_tick
-        handle_tick
-      rescue StandardError => e
-        Karafka.monitor.instrument(
-          'error.occurred',
-          error: e,
-          caller: self,
-          type: 'consumer.tick.error'
-        )
-      end
-
-      # By default we do nothing when ticking
-      def tick; end
-
       # @return [Karafka::Pro::Processing::Coordinators::ErrorsTracker] tracker for errors that
       #   occurred during processing until another successful processing
       #
