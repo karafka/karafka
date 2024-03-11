@@ -22,6 +22,8 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - [Enhancement] Publish listeners status lifecycle events.
 - [Change] Do not create new proxy object to Rdkafka with certain low-level operations and re-use existing.
 - [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
+- [Fix] Pro Swarm liveness listener can report incorrect failure when dynamic multiplexing scales down.
+- [Fix] K8s liveness listener can report incorrect failure when dynamic multiplexing scales down.
 - [Fix] Fix a case where connection conductor would not be released during manager state changes.
 - [Fix] Make sure, that all `Admin` operations go through stabilization proxy.
 - [Fix] Fix an issue where coordinator running jobs would not count periodic jobs and revocations.
