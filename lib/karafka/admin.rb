@@ -247,6 +247,8 @@ module Karafka
       # Reads lags for given topics in the context of consumer groups defined in the routing
       # @param consumer_groups_with_topics [Hash<String, Array<String>>] hash with consumer groups
       #   names with array of topics to query per consumer group inside
+      # @param active_topics_only [Boolean] if set to false, when we use routing topics, will
+      #   select also topics that are marked as inactive in routing
       # @return [Hash<String, Hash<Integer, Integer>>] hash where the top level keys are the
       #   consumer groups and values are hashes with topics and inside partitions with lags
       #
@@ -257,7 +259,7 @@ module Karafka
       #
       # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
       #   represents lags from Kafka perspective and not the consumer. They may differ.
-      def read_lags(consumer_groups_with_topics = {})
+      def read_lags(consumer_groups_with_topics = {}, active_topics_only: true)
         # We first fetch all the topics with partitions count that exist in the cluster so we
         # do not query for topics that do not exist and so we can get partitions count for all
         # the topics we may need. The non-existent and not consumed will be filled at the end
@@ -268,9 +270,11 @@ module Karafka
         # If no expected CGs, we use all from routing that have active topics
         if consumer_groups_with_topics.empty?
           consumer_groups_with_topics = Karafka::App.routes.map do |cg|
-            cg_topics = cg.topics.select(&:active?).map(&:name)
+            cg_topics = cg.topics.select do |cg_topic|
+              active_topics_only ? cg_topic.active? : true
+            end
 
-            [cg.id, cg_topics]
+            [cg.id, cg_topics.map(&:name)]
           end.to_h
         end
 
