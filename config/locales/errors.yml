@@ -58,6 +58,9 @@ en:
       internal.connection.proxy.committed.wait_time_format: needs to be an integer bigger than 0
       internal.connection.proxy.commit.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.commit.wait_time_format: needs to be an integer bigger than 0
+      internal.connection.proxy.metadata.timeout_format: needs to be an integer bigger than 0
+      internal.connection.proxy.metadata.max_attempts_format: needs to be an integer bigger than 0
+      internal.connection.proxy.metadata.wait_time_format: needs to be an integer bigger than 0
 
       internal.swarm.manager_format: cannot be nil
       internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0

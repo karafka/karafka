@@ -21,6 +21,8 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - [Enhancement] Introduce graceful `#stop` to the iterator instead of recommending of usage of `break`.
 - [Enhancement] Do not run jobs schedulers and other interval based operations on each job queue unlock.
 - [Enhancement] Publish listeners status lifecycle events.
+- [Enhancement] Use proxy wrapper for Admin metadata requests.
+- [Enhancement] Use limited scope topic info data when operating on direct topics instead of full cluster queries.
 - [Change] Do not create new proxy object to Rdkafka with certain low-level operations and re-use existing.
 - [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
 - [Fix] Pro Swarm liveness listener can report incorrect failure when dynamic multiplexing scales down.

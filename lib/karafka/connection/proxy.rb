@@ -158,6 +158,21 @@ module Karafka
         end
       end
 
+      # @param topic_name [String, nil] Name of the topic we're interested in or nil if we want to
+      #   get info on all topics
+      # @return [Rdkafka::Metadata] rdkafka metadata object with the requested details
+      def metadata(topic_name = nil)
+        m_config = @config.metadata
+
+        with_broker_errors_retry(
+          # required to be in seconds, not ms
+          wait_time: m_config.wait_time / 1_000.to_f,
+          max_attempts: m_config.max_attempts
+        ) do
+          @wrapped.metadata(topic_name, m_config.timeout)
+        end
+      end
+
       private
 
       # Runs expected block of code with few retries on all_brokers_down
