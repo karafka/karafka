@@ -387,6 +387,24 @@ RSpec.describe_current do
     end
   end
 
+  describe '#topic_info' do
+    let(:name) { SecureRandom.uuid }
+
+    context 'when given topic does not exist' do
+      it { expect { described_class.topic_info(name) }.to raise_error(Rdkafka::RdkafkaError) }
+    end
+
+    context 'when given topic exists' do
+      before { described_class.create_topic(name, 2, 1) }
+
+      it do
+        info = described_class.topic_info(name)
+        expect(info[:partition_count]).to eq(2)
+        expect(info[:topic_name]).to eq(name)
+      end
+    end
+  end
+
   describe '#read_watermark_offsets' do
     subject(:offsets) { described_class.read_watermark_offsets(name, partition) }
 

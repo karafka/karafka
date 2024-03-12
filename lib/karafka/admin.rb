@@ -132,7 +132,7 @@ module Karafka
 
           with_re_wait(
             -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
-            -> { topic(name).fetch(:partition_count) >= partitions }
+            -> { topic_info(name).fetch(:partition_count) >= partitions }
           )
         end
       end
@@ -168,7 +168,7 @@ module Karafka
           if partitions_with_offsets.is_a?(Hash)
             tpl_base[topic] = partitions_with_offsets
           else
-            topic(topic)[:partition_count].times do |partition|
+            topic_info(topic)[:partition_count].times do |partition|
               tpl_base[topic][partition] = partitions_with_offsets
             end
           end
@@ -326,6 +326,24 @@ module Karafka
         with_admin(&:metadata)
       end
 
+      # Returns basic topic metadata
+      #
+      # @param topic_name [String] name of the topic we're interested in
+      # @return [Hash] topic metadata info hash
+      # @raise [Rdkafka::RdkafkaError] `unknown_topic_or_part` if requested topic is not found
+      #
+      # @note This query is much more efficient than doing a full `#cluster_info` + topic lookup
+      #   because it does not have to query for all the topics data but just the topic we're
+      #   interested in
+      def topic_info(topic_name)
+        with_admin do |admin|
+          admin
+            .metadata(topic_name)
+            .topics
+            .find { |topic| topic[:topic_name] == topic_name }
+        end
+      end
+
       # Creates consumer instance and yields it. After usage it closes the consumer instance
       # This API can be used in other pieces of code and allows for low-level consumer usage
       #
@@ -354,7 +372,8 @@ module Karafka
       # Creates admin instance and yields it. After usage it closes the admin instance
       def with_admin
         admin = config(:producer, {}).admin
-        yield(admin)
+        proxy = ::Karafka::Connection::Proxy.new(admin)
+        yield(proxy)
       ensure
         admin&.close
       end
@@ -364,13 +383,6 @@ module Karafka
       # @return [Array<String>] topics names
       def topics_names
         cluster_info.topics.map { |topic| topic.fetch(:topic_name) }
-      end
-
-      # Finds details about given topic
-      # @param name [String] topic name
-      # @return [Hash] topic details
-      def topic(name)
-        cluster_info.topics.find { |topic| topic[:topic_name] == name }
       end
 
       # There are some cases where rdkafka admin operations finish successfully but without the
