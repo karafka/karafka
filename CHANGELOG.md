@@ -7,6 +7,7 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - **[Breaking]** Drop Ruby `2.7` support.
 - **[Breaking]** Drop the concept of consumer group mapping.
 - **[Feature]** Introduce ability to use direct assignments (Pro).
+- **[Feature]** Provide consumer piping API (Pro).
 - [Enhancement] Do not run periodic jobs when LRJ job is running despite polling (LRJ can still start when Periodic runs).
 - [Enhancement] Improve accuracy of periodic jobs and make sure they do not run too early after saturated work.
 - [Enhancement] Introduce ability to async lock other subscription groups polling.
