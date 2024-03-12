@@ -68,6 +68,11 @@ RSpec.describe_current do
             commit: {
               max_attempts: 5,
               wait_time: 1_000
+            },
+            metadata: {
+              timeout: 100,
+              max_attempts: 5,
+              wait_time: 1_000
             }
           }
         },
@@ -550,6 +555,7 @@ RSpec.describe_current do
       offsets_for_times
       committed
       commit
+      metadata
     ].each do |scope|
       context "when proxy #{scope} is missing" do
         before { config[:internal][:connection][:proxy].delete(scope) }

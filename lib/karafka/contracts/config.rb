@@ -85,6 +85,7 @@ module Karafka
               query_watermark_offsets
               offsets_for_times
               committed
+              metadata
             ].each do |scope|
               nested(scope) do
                 required(:timeout) { |val| val.is_a?(Integer) && val.positive? }
