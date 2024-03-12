@@ -60,6 +60,9 @@ module Karafka
           #
           # @param topic [String, Symbol] where we want to send the message
           # @param messages [Array<Karafka::Messages::Message>] original messages to pipe
+          #
+          # @note If transactional producer in use and dispatch is not wrapped with a transaction,
+          #   it will automatically wrap the dispatch with a transaction
           def pipe_many_async(topic:, messages:)
             messages = messages.map do |message|
               build_pipe_message(topic: topic, message: message)
@@ -72,6 +75,9 @@ module Karafka
           #
           # @param topic [String, Symbol] where we want to send the message
           # @param messages [Array<Karafka::Messages::Message>] original messages to pipe
+          #
+          # @note If transactional producer in use and dispatch is not wrapped with a transaction,
+          #   it will automatically wrap the dispatch with a transaction
           def pipe_many_sync(topic:, messages:)
             messages = messages.map do |message|
               build_pipe_message(topic: topic, message: message)
