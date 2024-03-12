@@ -8,6 +8,8 @@ FactoryBot.define do
       sequence(:topic) { |nr| "topic#{nr}" }
       partition { 0 }
       timestamp { Time.now.utc }
+      key { nil }
+      headers { {} }
     end
 
     raw_payload { '{}' }
@@ -17,7 +19,9 @@ FactoryBot.define do
         :messages_metadata,
         topic: topic,
         partition: partition,
-        timestamp: timestamp
+        timestamp: timestamp,
+        key: key,
+        headers: headers
       )
     end
 
