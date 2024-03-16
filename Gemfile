@@ -4,6 +4,9 @@ source 'https://rubygems.org'
 
 plugin 'diffend'
 
+gem 'karafka-rdkafka', path: '/home/mencio/Software/Karafka/karafka-rdkafka'
+gem 'karafka-core', path: '/home/mencio/Software/Karafka/karafka-core'
+
 gemspec
 
 # Karafka gem does not require activejob nor karafka-web to work
@@ -13,11 +16,12 @@ group :integrations do
   %w[
     activejob
     karafka-testing
-    karafka-web
     rspec
   ].each do |gem_name|
     gem gem_name, require: false
   end
+
+  gem 'karafka-web', path: '/home/mencio/Software/Karafka/karafka-web'
 end
 
 group :test do
