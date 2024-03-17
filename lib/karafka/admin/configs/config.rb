@@ -27,7 +27,8 @@ module Karafka
           end
         end
 
-        # Creates new config instance
+        # Creates new config instance either for reading or as part of altering operation
+        #
         # @param name [String] config name
         # @param value [String] config value
         # @param default [Integer] 1 if default
@@ -35,14 +36,16 @@ module Karafka
         # @param sensitive [Integer] 1 if sensitive
         # @param synonym [Integer] 1 if synonym
         # @param synonyms [Array] given config synonyms (if any)
+        #
+        # @note For alter operations only `name` and `value` are needed
         def initialize(
           name:,
           value:,
-          default:,
-          read_only:,
-          sensitive:,
-          synonym:,
-          synonyms:
+          default: -1,
+          read_only: -1,
+          sensitive: -1,
+          synonym: -1,
+          synonyms: []
         )
           @name = name
           @value = value
@@ -55,25 +58,23 @@ module Karafka
         end
 
         # @return [Boolean] Is the config property is set to its default value on the broker
-        def default?
-          @default.positive?
-        end
+        def default? = @default.positive?
 
         # @return [Boolean] Is the config property is read-only on the broker
-        def read_only?
-          @read_only.positive?
-        end
+        def read_only? = @read_only.positive?
 
         # @return [Boolean] if the config property contains sensitive information (such as
         #   security configuration
-        def sensitive?
-          @sensitive.positive?
-        end
+        def sensitive? = @sensitive.positive?
 
         # @return [Boolean] is this entry is a synonym
-        def synonym?
-          @synonym.positive?
-        end
+        def synonym? = @synonym.positive?
+
+        # @return [Hash] hash that we can use to operate with rdkafka
+        def to_native_hash = {
+          name: name,
+          value: value
+        }.freeze
       end
     end
   end

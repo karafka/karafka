@@ -67,7 +67,7 @@ def setup_karafka(
       producer_config.logger = config.logger
       # We need to wait a lot sometimes because we create a lot of new topics and this can take
       # time
-      producer_config.max_wait_timeout = 120 # 2 minutes
+      producer_config.max_wait_timeout = 120_000 # 2 minutes
     end
   end
 

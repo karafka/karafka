@@ -1,34 +1,10 @@
 PATH
-  remote: ../karafka-core
-  specs:
-    karafka-core (2.4.0)
-      karafka-rdkafka (>= 0.15.0, < 0.16.0)
-
-PATH
-  remote: ../karafka-rdkafka
-  specs:
-    karafka-rdkafka (0.15.0)
-      ffi (~> 1.15)
-      mini_portile2 (~> 2.6)
-      rake (> 12)
-
-PATH
   remote: .
   specs:
     karafka (2.3.4)
-      karafka-core (>= 2.4.0, < 2.5.0)
-      waterdrop (>= 2.6.12, < 3.0.0)
+      karafka-core (>= 2.4.0.alpha1, < 2.5.0)
+      waterdrop (>= 2.7.0.alpha3, < 3.0.0)
       zeitwerk (~> 2.3)
-
-PATH
-  remote: ../karafka-web
-  specs:
-    karafka-web (0.9.0)
-      erubi (~> 1.4)
-      karafka (>= 2.4.0, < 2.5.0)
-      karafka-core (>= 2.3.0, < 2.5.0)
-      roda (~> 3.68, >= 3.69)
-      tilt (~> 2.0)
 
 GEM
   remote: https://rubygems.org/
@@ -62,9 +38,21 @@ GEM
       activesupport (>= 6.1)
     i18n (1.14.4)
       concurrent-ruby (~> 1.0)
+    karafka-core (2.4.0.alpha1)
+      karafka-rdkafka (>= 0.15.0.alpha1, < 0.16.0)
+    karafka-rdkafka (0.15.0.alpha1)
+      ffi (~> 1.15)
+      mini_portile2 (~> 2.6)
+      rake (> 12)
     karafka-testing (2.3.1)
       karafka (>= 2.3.0, < 2.4.0)
       waterdrop (>= 2.6.12)
+    karafka-web (0.8.2)
+      erubi (~> 1.4)
+      karafka (>= 2.3.0, < 2.4.0)
+      karafka-core (>= 2.3.0, < 2.4.0)
+      roda (~> 3.68, >= 3.69)
+      tilt (~> 2.0)
     mini_portile2 (2.8.5)
     minitest (5.22.3)
     mutex_m (0.2.0)
@@ -94,8 +82,8 @@ GEM
     tilt (2.3.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    waterdrop (2.6.14)
-      karafka-core (>= 2.2.3, < 3.0.0)
+    waterdrop (2.7.0.alpha3)
+      karafka-core (>= 2.4.0.alpha1, < 3.0.0)
       zeitwerk (~> 2.3)
     zeitwerk (2.6.13)
 
@@ -108,10 +96,8 @@ DEPENDENCIES
   byebug
   factory_bot
   karafka!
-  karafka-core!
-  karafka-rdkafka!
   karafka-testing
-  karafka-web!
+  karafka-web
   rspec
   simplecov
 

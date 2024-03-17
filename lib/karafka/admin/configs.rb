@@ -11,6 +11,8 @@ module Karafka
     # Altering is done in the incremental way.
     module Configs
       class << self
+        # Fetches given resources configurations from Kafka
+        #
         # @param resources [Resource, Array<Resource>] single resource we want to describe or
         #   list of resources we are interested in. It is useful to provide multiple resources
         #   when you need data from multiple topics, etc. Karafka will make one query for all the
@@ -27,10 +29,45 @@ module Karafka
         #     puts "#{config.name} - #{config.value}"
         #   end
         def describe(*resources)
-          resources = Array(resources)
+          operate_on_resources(
+            :describe_configs,
+            resources
+          )
+        end
+
+        # Alters given resources based on the alteration operations accumulated in the provided
+        # resources
+        #
+        # @param resources [Resource, Array<Resource>] single resource we want to alter or
+        #   list of resources.
+        #
+        # @note This operation is not transactional and can work only partially if some config
+        #   options are not valid. Always make sure, your alterations are correct.
+        #
+        # @note We call it `#alter` despite using the Kafka incremental alter API because the
+        #   regular alter is deprecated.
+        #
+        # @example Alter the `delete.retention.ms` and set it to 8640001
+        #   resource = Karafka::Admin::Configs::Resource.new(type: :topic, name: 'example')
+        #   resource.set('delete.retention.ms', '8640001')
+        #   Karafka::Admin::Configs.alter(resource)
+        def alter(*resources)
+          operate_on_resources(
+            :incremental_alter_configs,
+            resources
+          )
+        end
+
+        private
+
+        # @param action [Symbol] runs given action via Rdkafka Admin
+        # @param resources [Array<Resource>] resources on which we want to operate
+        def operate_on_resources(action, resources)
+          resources = Array(resources).flatten
 
           result = with_admin_wait do |admin|
-            admin.describe_configs(
+            admin.public_send(
+              action,
               resources.map(&:to_native_hash)
             )
           end
@@ -52,8 +89,6 @@ module Karafka
             resource
           end
         end
-
-        private
 
         # Yields admin instance, allows to run Acl operations and awaits on the final result
         # Makes sure that admin is closed afterwards.
