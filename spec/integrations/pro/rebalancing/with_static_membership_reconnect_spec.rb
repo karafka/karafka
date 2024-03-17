@@ -35,7 +35,7 @@ end
 PRODUCER = ::WaterDrop::Producer.new do |producer_config|
   producer_config.kafka = Karafka::Setup::AttributesMap.producer(Karafka::App.config.kafka.dup)
   producer_config.logger = Karafka::App.config.logger
-  producer_config.max_wait_timeout = 120
+  producer_config.max_wait_timeout = 120_000
 end
 
 Thread.new do
