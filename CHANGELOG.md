@@ -6,6 +6,8 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 
 - **[Breaking]** Drop Ruby `2.7` support.
 - **[Breaking]** Drop the concept of consumer group mapping.
+- **[Breaking]** `karafka topics migrate` will now perform declarative topics configuration alignment.
+- **[Feature]** Provide `karafka topics alter` for declarative topics alignment.
 - **[Feature]** Introduce ability to use direct assignments (Pro).
 - **[Feature]** Provide consumer piping API (Pro).
 - [Enhancement] Do not run periodic jobs when LRJ job is running despite polling (LRJ can still start when Periodic runs).
