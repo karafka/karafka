@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Declaratives should work when multiple thigs are changing
+# Declaratives should work when multiple things are changing
 
 setup_karafka
 
