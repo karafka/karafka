@@ -14,7 +14,7 @@ RSpec.describe_current do
           info       # Prints configuration details and other options of your application
           install    # Installs all required things for Karafka application in current directory
           server     # Starts the Karafka server (short-cut aliases: "s", "consumer")
-          topics     # Allows for the topics management (create, delete, reset, repartition)
+          topics     # Allows for the topics management
       HELP
     end
 
