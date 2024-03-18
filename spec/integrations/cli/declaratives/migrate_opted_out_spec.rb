@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # karafka topics migrate should not create topics when defined in routing and not existing but
-# also not active
+# also not active. Should also not run alignments when there are no declarative topics
 
 Consumer = Class.new(Karafka::BaseConsumer)
 

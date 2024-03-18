@@ -162,6 +162,12 @@ module Karafka
 
         resources_to_migrate = Set.new
 
+        if resources.empty?
+          puts "#{yellow('Skipping')} because no declarative topics exist."
+
+          return false
+        end
+
         # We fetch all the configurations for all the topics
         Admin::Configs.describe(resources).each do |topic_with_configs|
           t_candidate = candidates.find { |candidate| candidate.name == topic_with_configs.name }
