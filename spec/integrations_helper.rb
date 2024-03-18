@@ -452,3 +452,13 @@ def const_visible?(const_name)
 rescue NameError
   false
 end
+
+# Captures stdout. Useful for specs that print out stuff that we want to check
+def capture_stdout
+  original_stdout = $stdout
+  $stdout = StringIO.new
+  yield
+  $stdout.string
+ensure
+  $stdout = original_stdout
+end

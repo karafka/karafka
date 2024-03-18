@@ -25,6 +25,8 @@ module Karafka
           Topics::Migrate.new.call
         when 'align'
           Topics::Align.new.call
+        when 'plan'
+          Topics::Plan.new.call
         else
           raise ::ArgumentError, "Invalid topics action: #{action}"
         end

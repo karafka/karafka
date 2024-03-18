@@ -32,4 +32,12 @@ RSpec.describe_current do
       expect(colorized.yellow(string)).to eq("\033[1;33m#{string}\033[0m")
     end
   end
+
+  describe '#grey' do
+    let(:string) { rand.to_s }
+
+    it 'expect to colorize given string' do
+      expect(colorized.grey(string)).to eq("\e[38;5;244m#{string}\e[0m")
+    end
+  end
 end
