@@ -41,7 +41,7 @@ Thread.new do
     sleep(0.1)
 
     req = Net::HTTP::Get.new('/')
-    client = Net::HTTP.new('127.0.0.1', 9006)
+    client = Net::HTTP.new('127.0.0.1', 9011)
     client.set_debug_output(raw_flows)
     response = client.request(req)
 
