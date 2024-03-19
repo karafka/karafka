@@ -11,6 +11,12 @@ module Karafka
         #
         # @note This client is abstract, it has no notion of Karafka whatsoever
         class Client
+          # @param namespace_name [String] Name of the AppSignal namespace we want to use.
+          #   Defaults to `Appsignal::Transaction::BACKGROUND_JOB`.
+          def initialize(namespace_name: ::Appsignal::Transaction::BACKGROUND_JOB)
+            @namespace_name = namespace_name
+          end
+
           # Starts an appsignal transaction with a given action name
           #
           # @param action_name [String] action name. For processing this should be equal to
@@ -18,7 +24,7 @@ module Karafka
           def start_transaction(action_name)
             transaction = ::Appsignal::Transaction.create(
               SecureRandom.uuid,
-              ::Appsignal::Transaction::BACKGROUND_JOB,
+              @namespace_name,
               ::Appsignal::Transaction::GenericRequest.new({})
             )
 
@@ -83,7 +89,7 @@ module Karafka
               transaction.set_error(error)
             else
               ::Appsignal.send_error(error) do |transaction|
-                transaction.set_namespace(::Appsignal::Transaction::BACKGROUND_JOB)
+                transaction.set_namespace(@namespace_name)
               end
             end
           end
