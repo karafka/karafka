@@ -11,9 +11,10 @@ module Karafka
         #
         # @note This client is abstract, it has no notion of Karafka whatsoever
         class Client
-          # @param namespace_name [String] Name of the AppSignal namespace we want to use.
-          #   Defaults to `Appsignal::Transaction::BACKGROUND_JOB`.
-          def initialize(namespace_name: ::Appsignal::Transaction::BACKGROUND_JOB)
+          # @param namespace_name [String, nil] Name of the AppSignal namespace we want to use or
+          #   nil if it is to remain default.
+          #   Defaults to `Appsignal::Transaction::BACKGROUND_JOB` in the execution flow.
+          def initialize(namespace_name: nil)
             @namespace_name = namespace_name
           end
 
@@ -24,7 +25,7 @@ module Karafka
           def start_transaction(action_name)
             transaction = ::Appsignal::Transaction.create(
               SecureRandom.uuid,
-              @namespace_name,
+              namespace_name,
               ::Appsignal::Transaction::GenericRequest.new({})
             )
 
@@ -89,7 +90,7 @@ module Karafka
               transaction.set_error(error)
             else
               ::Appsignal.send_error(error) do |transaction|
-                transaction.set_namespace(@namespace_name)
+                transaction.set_namespace(namespace_name)
               end
             end
           end
@@ -120,6 +121,13 @@ module Karafka
             hash
               .transform_values(&:to_s)
               .transform_keys!(&:to_s)
+          end
+
+          # @return [String] transaction namespace. We lazy evaluate it and resolve if needed to
+          #   the default `BACKGROUND_JOB` during the execution, to ensure we can initialize the
+          #   instrumentation even before appsignal gem is loaded.
+          def namespace_name
+            @namespace_name ||= ::Appsignal::Transaction::BACKGROUND_JOB
           end
         end
       end
