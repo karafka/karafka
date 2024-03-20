@@ -125,8 +125,6 @@ end
 
 class ValidationConsumer < Karafka::BaseConsumer
   def consume
-    p 'xxxxxxxxxxxxxxxxxxxxxxxxxxx'
-    p DT[:merged].size
     messages.payloads.each do |event|
       DT[:merged] << event
     end
