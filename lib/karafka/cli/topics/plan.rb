@@ -54,9 +54,11 @@ module Karafka
               puts "  #{yellow('~')} #{topic.name}:"
 
               configs.each do |name, changes|
-                from = changes[:from]
-                to = changes[:to]
-                puts "    #{yellow('~')} #{name}: \"#{red(from)}\" #{grey('=>')} \"#{green(to)}\""
+                from = changes.fetch(:from)
+                to = changes.fetch(:to)
+                action = changes.fetch(:action)
+                type = action == :change ? yellow('~') : green('+')
+                puts "    #{type} #{name}: \"#{red(from)}\" #{grey('=>')} \"#{green(to)}\""
               end
 
               puts
@@ -130,14 +132,23 @@ module Karafka
             declarative_config.transform_keys!(&:to_s)
             declarative_config.transform_values!(&:to_s)
 
-            topic_c.configs.each do |config|
-              next unless declarative_config.key?(config.name)
-              next if declarative_config[config.name] == config.value
+            # We only apply additive/in-place changes so we start from our config
+            declarative_config.each do |declarative_name, declarative_value|
+              topic_c.configs.each do |config|
+                next unless declarative_name == config.name
 
-              @topics_to_alter[declarative] ||= {}
-              @topics_to_alter[declarative][config.name] = {
-                from: config.value,
-                to: declarative_config[config.name]
+                @topics_to_alter[declarative] ||= {}
+                @topics_to_alter[declarative][declarative_name] = {
+                  from: config.value,
+                  to: declarative_value,
+                  action: :change
+                }
+              end
+
+              @topics_to_alter[declarative][declarative_name] ||= {
+                from: '',
+                to: declarative_value,
+                action: :add
               }
             end
           end
