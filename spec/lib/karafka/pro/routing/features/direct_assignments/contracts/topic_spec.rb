@@ -12,6 +12,9 @@ RSpec.describe_current do
         },
         swarm: {
           active: false
+        },
+        patterns: {
+          active: false
         }
       }
     end
@@ -29,6 +32,9 @@ RSpec.describe_current do
           partitions: { 1 => true }
         },
         swarm: {
+          active: false
+        },
+        patterns: {
           active: false
         }
       }
@@ -48,6 +54,9 @@ RSpec.describe_current do
         },
         swarm: {
           active: false
+        },
+        patterns: {
+          active: false
         }
       }
     end
@@ -66,6 +75,9 @@ RSpec.describe_current do
         },
         swarm: {
           active: false
+        },
+        patterns: {
+          active: false
         }
       }
     end
@@ -83,6 +95,9 @@ RSpec.describe_current do
           partitions: {} # Empty hash is not valid
         },
         swarm: {
+          active: false
+        },
+        patterns: {
           active: false
         }
       }
@@ -103,6 +118,9 @@ RSpec.describe_current do
         swarm: {
           active: true,
           nodes: { 0 => [0], 1 => [1] }
+        },
+        patterns: {
+          active: false
         }
       }
     end
@@ -120,10 +138,34 @@ RSpec.describe_current do
         swarm: {
           active: true,
           nodes: { 0 => [0], 1 => [1, 2, 3] }
+        },
+        patterns: {
+          active: false
         }
       }
     end
 
     it { expect(validation_result).not_to be_success }
+  end
+
+  context 'when direct assignments are used with patterns' do
+    let(:config) do
+      {
+        direct_assignments: {
+          active: true,
+          partitions: true
+        },
+        swarm: {
+          active: false
+        },
+        patterns: {
+          active: true
+        }
+      }
+    end
+
+    it 'is expected to fail' do
+      expect(validation_result).not_to be_success
+    end
   end
 end
