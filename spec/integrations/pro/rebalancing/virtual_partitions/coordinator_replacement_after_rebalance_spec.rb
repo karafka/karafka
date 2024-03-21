@@ -54,6 +54,8 @@ other = Thread.new do
   consumer.commit(nil, false)
 
   consumer.close
+
+  DT[:done] = true
 end
 
 start_karafka_and_wait_until do
@@ -61,6 +63,10 @@ start_karafka_and_wait_until do
     (
       DT[0].uniq.size >= 3 ||
         DT[1].uniq.size >= 3
+    ) && (
+      DT[0].uniq.size >= 2 && DT[1].uniq.size >= 2
+    ) && (
+      DT.key?(:done) && sleep(1)
     )
 end
 
