@@ -156,7 +156,7 @@ RSpec.describe_current do
           partitions: true
         },
         swarm: {
-          active: false,
+          active: false
         },
         patterns: {
           active: true
