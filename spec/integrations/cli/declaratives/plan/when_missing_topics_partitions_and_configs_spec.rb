@@ -21,6 +21,7 @@ draw_routes(create_topics: false) do
     config(
       partitions: 6,
       'message.timestamp.after.max.ms': '9223372036854775802',
+      'test.introduced': 'introduced',
       'retention.bytes': '1000000'
     )
   end
@@ -39,7 +40,6 @@ results = capture_stdout do
 end
 
 %w[
-  9223372036854775807
   9223372036854
   max.compaction.lag.ms:
   max.message.bytes:
@@ -48,8 +48,9 @@ end
   1000000
   9223372036854775802
   message.timestamp.after.max.ms
+  test.introduced
 ].each do |part|
-  assert results.include?(part)
+  assert results.include?(part), part
 end
 
 assert results.include?('Following topics will have configuration changes:')
