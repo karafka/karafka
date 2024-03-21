@@ -69,6 +69,7 @@ en:
       direct_assignments_active_but_empty: 'cannot be empty and active at the same time'
       direct_assignments_swarm_not_complete: 'cannot have partitions that are assigned but not allocated'
       direct_assignments_swarm_overbooked: 'cannot allocate partitions in swarm that were not assigned'
+      direct_assignments_patterns_active: 'patterns cannot be used with direct assignments'
 
     consumer_group:
       patterns_format: must be an array with hashes

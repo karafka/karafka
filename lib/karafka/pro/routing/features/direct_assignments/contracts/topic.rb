@@ -85,6 +85,20 @@ module Karafka
                   [[%i[direct_assignments], :swarm_overbooked]]
                 end
               end
+
+              # Make sure that direct assignments are not used together with patterns as we
+              # cannot apply patterns on direct assignments
+              virtual do |data, errors|
+                next unless errors.empty?
+
+                direct_assignments = data[:direct_assignments]
+                patterns = data[:patterns]
+
+                next unless direct_assignments[:active]
+                next unless patterns[:active]
+
+                [[%i[direct_assignments], :patterns_active]]
+              end
             end
           end
         end
