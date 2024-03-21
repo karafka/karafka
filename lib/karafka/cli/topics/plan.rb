@@ -134,22 +134,22 @@ module Karafka
 
             # We only apply additive/in-place changes so we start from our config
             declarative_config.each do |declarative_name, declarative_value|
-              topic_c.configs.each do |config|
-                next unless declarative_name == config.name
-
-                @topics_to_alter[declarative] ||= {}
-                @topics_to_alter[declarative][declarative_name] = {
-                  from: config.value,
-                  to: declarative_value,
-                  action: :change
-                }
-              end
+              @topics_to_alter[declarative] ||= {}
 
               @topics_to_alter[declarative][declarative_name] ||= {
                 from: '',
                 to: declarative_value,
                 action: :add
               }
+
+              topic_c.configs.each do |config|
+                next unless declarative_name == config.name
+
+                scoped = @topics_to_alter[declarative][declarative_name]
+
+                scoped[:action] = :change
+                scoped[:from] = config.value
+              end
             end
           end
 
