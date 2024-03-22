@@ -34,5 +34,9 @@ RSpec.describe_current do
       adapter.enqueue_all(jobs)
       expect(dispatcher).to have_received(:dispatch_many).with(jobs)
     end
+
+    it 'expect to return total count of enqueued jobs' do
+      expect(adapter.enqueue_all(jobs)).to eql jobs.size
+    end
   end
 end
