@@ -16,6 +16,7 @@ module ActiveJob
 
       # Enqueues multiple jobs in one go
       # @param jobs [Array<Object>] jobs that we want to enqueue
+      # @return [Integer] number of jobs enqueued (required by Rails)
       def enqueue_all(jobs)
         ::Karafka::App.config.internal.active_job.dispatcher.dispatch_many(jobs)
         jobs.size
