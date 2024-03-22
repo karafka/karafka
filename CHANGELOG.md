@@ -37,6 +37,7 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - [Fix] Fix a case where critically crashed supervisor would raise incorrect error.
 - [Fix] Re-raise critical supervisor errors before shutdown.
 - [Fix] Fix a case when right-open (infinite) swarm matching would not pass validations.
+- [Fix] Make `#enqueue_all` output compatible with `ActiveJob.perform_all_later` (oozzal)
 
 ### Upgrade Notes
 
