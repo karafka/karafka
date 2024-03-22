@@ -18,6 +18,7 @@ module ActiveJob
       # @param jobs [Array<Object>] jobs that we want to enqueue
       def enqueue_all(jobs)
         ::Karafka::App.config.internal.active_job.dispatcher.dispatch_many(jobs)
+        jobs.size
       end
 
       # Raises info, that Karafka backend does not support scheduling jobs
