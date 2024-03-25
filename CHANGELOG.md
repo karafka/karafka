@@ -2,7 +2,7 @@
 
 ## 2.4.0 (Unreleased)
 
-This release contains a **BREAKING** change. Make sure to read and apply upgrade notes.
+This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
 - **[Breaking]** Drop Ruby `2.7` support.
 - **[Breaking]** Drop the concept of consumer group mapping.
