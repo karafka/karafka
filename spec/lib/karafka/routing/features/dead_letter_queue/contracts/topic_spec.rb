@@ -10,7 +10,9 @@ RSpec.describe_current do
         topic: 'deads',
         max_retries: 5,
         independent: false,
-        transactional: true
+        transactional: true,
+        dispatch_method: :produce_async,
+        marking_method: :mark_as_consumed
       }
     }
   end
@@ -53,6 +55,18 @@ RSpec.describe_current do
     before { config[:dead_letter_queue][:topic] = false }
 
     it { expect(check).to be_success }
+  end
+
+  context 'when dispatch_method is not any of methods' do
+    before { config[:dead_letter_queue][:dispatch_method] = false }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when marking_method is not any of methods' do
+    before { config[:dead_letter_queue][:marking_method] = false }
+
+    it { expect(check).not_to be_success }
   end
 
   context 'when max_retries is not an integer' do

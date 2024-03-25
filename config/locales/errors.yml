@@ -107,6 +107,8 @@ en:
       dead_letter_queue.active_format: needs to be either true or false
       dead_letter_queue.independent_format: needs to be either true or false
       dead_letter_queue.transactional_format: needs to be either true or false
+      dead_letter_queue.dispatch_method_format: 'needs to be either #produce_sync or #produce_async'
+      dead_letter_queue.marking_method_format: 'needs to be either #mark_as_consumed or #mark_as_consumed!'
       active_format: needs to be either true or false
       declaratives.partitions_format: needs to be more or equal to 1
       declaratives.active_format: needs to be true

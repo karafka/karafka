@@ -21,6 +21,14 @@ module Karafka
               required(:independent) { |val| [true, false].include?(val) }
               required(:max_retries) { |val| val.is_a?(Integer) && val >= 0 }
               required(:transactional) { |val| [true, false].include?(val) }
+
+              required(:dispatch_method) do |val|
+                %i[produce_async produce_sync].include?(val)
+              end
+
+              required(:marking_method) do |val|
+                %i[mark_as_consumed mark_as_consumed!].include?(val)
+              end
             end
 
             # Validate topic name only if dlq is active
