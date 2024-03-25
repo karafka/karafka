@@ -55,7 +55,7 @@ module Karafka
                   apply_dlq_flow do
                     skippable_message, = find_skippable_message
                     dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-                    mark_as_consumed(skippable_message)
+                    mark_dispatched_to_dlq(skippable_message)
                   end
                 end
               end

@@ -50,5 +50,6 @@ end
   assert_equal dlq_message.headers.fetch('original_topic'), DT.topic
   assert_equal dlq_message.headers.fetch('original_partition'), 0.to_s
   assert_equal dlq_message.headers.fetch('original_offset'), i.to_s
+  assert_equal dlq_message.headers.fetch('original_attempts'), '1'
   assert_equal dlq_message.headers.fetch('original_consumer_group'), cg
 end

@@ -18,19 +18,27 @@ module Karafka
           #   in a retry flow to reset the errors counter
           # @param transactional [Boolean] if applicable, should transaction be used to move
           #   given message to the dead-letter topic and mark it as consumed.
+          # @param dispatch_method [Symbol] `:produce_async` or `:produce_sync`. Describes
+          #   whether dispatch on dlq should be sync or async (async by default)
+          # @param marking_method [Symbol] `:mark_as_consumed` or `:mark_as_consumed!`. Describes
+          #   whether marking on DLQ should be async or sync (async by default)
           # @return [Config] defined config
           def dead_letter_queue(
             max_retries: DEFAULT_MAX_RETRIES,
             topic: nil,
             independent: false,
-            transactional: true
+            transactional: true,
+            dispatch_method: :produce_async,
+            marking_method: :mark_as_consumed
           )
             @dead_letter_queue ||= Config.new(
               active: !topic.nil?,
               max_retries: max_retries,
               topic: topic,
               independent: independent,
-              transactional: transactional
+              transactional: transactional,
+              dispatch_method: dispatch_method,
+              marking_method: marking_method
             )
           end
 

@@ -11,6 +11,9 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - **[Feature]** Introduce ability to use direct assignments (Pro).
 - **[Feature]** Provide consumer piping API (Pro).
 - **[Feature]** Introduce `karafka topics plan` to describe changes that will be applied when migrating.
+- [Enhancement] Include number of attempts prior to DLQ message being dispatched including the dispatch one (Pro).
+- [Enhancement] Provide ability to decide how to dispatch from DLQ (sync / async).
+- [Enhancement] Provide ability to decide how to mark as consumed from DLQ (sync / async).
 - [Enhancement] Allow for usage of a custom Appsignal namespace when logging.
 - [Enhancement] Do not run periodic jobs when LRJ job is running despite polling (LRJ can still start when Periodic runs).
 - [Enhancement] Improve accuracy of periodic jobs and make sure they do not run too early after saturated work.
