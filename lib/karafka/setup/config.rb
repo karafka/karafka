@@ -99,6 +99,13 @@ module Karafka
       # option [String] default consumer group name for implicit routing
       setting :group_id, default: 'app'
 
+      setting :oauth do
+        # option [false, #call] Listener for using oauth bearer. This listener will be able to
+        #   get the client name to decide whether to use a single multi-client token refreshing
+        #   or have separate tokens per instance.
+        setting :token_provider_listener, default: false
+      end
+
       # rdkafka default options
       # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
       setting :kafka, default: {}
@@ -395,10 +402,19 @@ module Karafka
         # Sets up all the components that are based on the user configuration
         # @note At the moment it is only WaterDrop
         def configure_components
+          oauth_listener = config.oauth.token_provider_listener
+          # We need to subscribe the oauth listener here because we want it to be ready before
+          # any consumer/admin runs
+          Karafka::App.monitor.subscribe(oauth_listener) if oauth_listener
+
           config.producer ||= ::WaterDrop::Producer.new do |producer_config|
             # In some cases WaterDrop updates the config and we don't want our consumer config to
             # be polluted by those updates, that's why we copy
             producer_config.kafka = AttributesMap.producer(config.kafka.dup)
+            # We also propagate same listener to the default producer to make sure, that the
+            # listener for oauth is also automatically used by the producer. That way we don't
+            # have to configure it manually for the default producer
+            #producer_config.oauth.token_provider_listener = oauth_listener
             producer_config.logger = config.logger
           end
         end

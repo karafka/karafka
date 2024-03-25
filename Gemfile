@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 
 plugin 'diffend'
 
+gem 'karafka-rdkafka', github: 'karafka/karafka-rdkafka'
+
 gemspec
 
 # Karafka gem does not require activejob nor karafka-web to work
