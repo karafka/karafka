@@ -1,12 +1,3 @@
-GIT
-  remote: https://github.com/karafka/karafka-rdkafka.git
-  revision: 8516bcbe069298154b209faa701bca136bcdeb85
-  specs:
-    karafka-rdkafka (0.15.0.beta2)
-      ffi (~> 1.15)
-      mini_portile2 (~> 2.6)
-      rake (> 12)
-
 PATH
   remote: .
   specs:
@@ -47,8 +38,12 @@ GEM
       activesupport (>= 6.1)
     i18n (1.14.4)
       concurrent-ruby (~> 1.0)
-    karafka-core (2.4.0.beta1)
-      karafka-rdkafka (>= 0.15.0.beta1, < 0.16.0)
+    karafka-core (2.4.0.beta2)
+      karafka-rdkafka (>= 0.15.0.beta3, < 0.16.0)
+    karafka-rdkafka (0.15.0.beta3)
+      ffi (~> 1.15)
+      mini_portile2 (~> 2.6)
+      rake (> 12)
     karafka-testing (2.3.1)
       karafka (>= 2.3.0, < 2.4.0)
       waterdrop (>= 2.6.12)
@@ -101,7 +96,6 @@ DEPENDENCIES
   byebug
   factory_bot
   karafka!
-  karafka-rdkafka!
   karafka-testing
   karafka-web
   rspec
