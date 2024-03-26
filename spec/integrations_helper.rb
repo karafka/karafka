@@ -215,29 +215,15 @@ def draw_routes(consumer_class = nil, create_topics: true, &block)
   create_routes_topics
 end
 
-# @param topic [String] topic to which we want to subscribe
-# @return [Integer, false] first offset from which consumption will (re)start or false if we could
-#   not establish because all messages are consumed from the topic
-# @note If no data available, this will hang!
-def fetch_first_offset(topic = DT.topic)
-  consumer = setup_rdkafka_consumer
-  consumer.subscribe(topic)
-
-  first = false
-
-  10.times do
-    message = consumer.poll(1_000)
-
-    next unless message
-
-    first = message.offset
-
-    break
-  end
-
-  consumer.close
-
-  first
+# Returns the next offset that we would consume if we would subscribe again
+# @param topic [String] topic we are interested in
+# @return [Integer] next offset we would consume
+def fetch_next_offset(topic = DT.topic)
+  results = Karafka::Admin.read_lags_with_offsets
+  cg = Karafka::App.consumer_groups.first.id
+  part_results = results.fetch(cg).fetch(topic)[0]
+  offset = part_results.fetch(:offset)
+  offset.negative? ? 0 : offset
 end
 
 # @return [Array<Karafka::Routing::Topic>] all topics (declaratives and non-declaratives)

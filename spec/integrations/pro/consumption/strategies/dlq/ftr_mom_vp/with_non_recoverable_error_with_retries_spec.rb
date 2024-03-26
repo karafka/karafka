@@ -64,4 +64,4 @@ assert_equal (0..99).to_a.sort - [3], DT[:offsets].sort.uniq
 
 assert_equal DT[:broken].last.last, elements[3]
 
-assert fetch_first_offset.zero?
+assert fetch_next_offset.zero?

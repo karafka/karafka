@@ -495,13 +495,13 @@ RSpec.describe_current do
   end
 
   # More coverage of this feature is in integration suite
-  describe '#read_lag' do
-    subject(:lags) { Karafka::Admin.read_lags(cgs_t) }
+  describe '#read_lags_with_offsets' do
+    subject(:results) { Karafka::Admin.read_lags_with_offsets(cgs_t) }
 
     context 'when we query for a non-existent topic with a non-existing CG' do
       let(:cgs_t) { { 'doesnotexist' => ['doesnotexisttopic'] } }
 
-      it { expect(lags).to eq('doesnotexist' => { 'doesnotexisttopic' => {} }) }
+      it { expect(results).to eq('doesnotexist' => { 'doesnotexisttopic' => {} }) }
     end
 
     context 'when querying existing topic with a CG that never consumed it' do
@@ -509,7 +509,7 @@ RSpec.describe_current do
 
       let(:cgs_t) { { 'doesnotexist' => [name] } }
 
-      it { expect(lags).to eq('doesnotexist' => { name => { 0 => -1 } }) }
+      it { expect(results).to eq('doesnotexist' => { name => { 0 => { lag: -1, offset: -1 } } }) }
     end
   end
 end

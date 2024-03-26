@@ -38,4 +38,4 @@ end
 assert_equal elements[0..1].sort, DT[0].sort
 
 # Offset after first batch should be committed
-assert fetch_first_offset.positive?
+assert fetch_next_offset.positive?

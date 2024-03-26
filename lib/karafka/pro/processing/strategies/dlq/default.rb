@@ -111,7 +111,8 @@ module Karafka
               # should not be cleaned as it should go to the DLQ
               raise(Cleaner::Errors::MessageCleanedError) if skippable_message.cleaned?
 
-              producer.produce_async(
+              producer.public_send(
+                topic.dead_letter_queue.dispatch_method,
                 build_dlq_message(
                   skippable_message
                 )
@@ -134,7 +135,7 @@ module Karafka
 
               dispatch = lambda do
                 dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-                mark_as_consumed(skippable_message)
+                mark_dispatched_to_dlq(skippable_message)
               end
 
               if dispatch_in_a_transaction?
@@ -157,7 +158,8 @@ module Karafka
                   'original_topic' => topic.name,
                   'original_partition' => original_partition,
                   'original_offset' => skippable_message.offset.to_s,
-                  'original_consumer_group' => topic.consumer_group.id
+                  'original_consumer_group' => topic.consumer_group.id,
+                  'original_attempts' => attempt.to_s
                 )
               }
 
@@ -210,13 +212,27 @@ module Karafka
                 raise Karafka::UnsupportedCaseError, flow
               end
 
+              yield
+
               # We reset the pause to indicate we will now consider it as "ok".
               coordinator.pause_tracker.reset
 
-              yield
-
               # Always backoff after DLQ dispatch even on skip to prevent overloads on errors
               pause(coordinator.seek_offset, nil, false)
+            end
+
+            # Marks message that went to DLQ (if applicable) based on the requested method
+            # @param skippable_message [Karafka::Messages::Message]
+            def mark_dispatched_to_dlq(skippable_message)
+              case topic.dead_letter_queue.marking_method
+              when :mark_as_consumed
+                mark_as_consumed(skippable_message)
+              when :mark_as_consumed!
+                mark_as_consumed!(skippable_message)
+              else
+                # This should never happen. Bug if encountered. Please report
+                raise Karafka::Errors::UnsupportedCaseError
+              end
             end
           end
         end

@@ -58,4 +58,4 @@ end
 
 assert_equal [0, 1], DT[1].uniq
 assert DT[1].size >= 1
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_next_offset

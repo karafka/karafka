@@ -41,4 +41,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal 1, DT[:paused].uniq.count
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_next_offset

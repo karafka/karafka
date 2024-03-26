@@ -33,4 +33,4 @@ end
 
 DT[:attempts].each { |attempt| assert_equal 1, attempt, DT[:attempts] }
 
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_next_offset

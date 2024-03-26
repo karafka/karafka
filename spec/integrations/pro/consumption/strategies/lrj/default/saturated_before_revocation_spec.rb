@@ -40,10 +40,31 @@ end
 produce(DT.topic, '1', partition: 0)
 produce(DT.topic, '1', partition: 1)
 
+def trigger_rebalance
+  consumer = setup_rdkafka_consumer
+  consumer.subscribe(DT.topic)
+
+  first = false
+
+  10.times do
+    message = consumer.poll(1_000)
+
+    next unless message
+
+    first = message.offset
+
+    break
+  end
+
+  consumer.close
+
+  first
+end
+
 start_karafka_and_wait_until do
   sleep(0.1) while DT[:any].uniq.size < 2
 
-  fetch_first_offset
+  trigger_rebalance
 
   DT[:done] << true
 

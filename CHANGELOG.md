@@ -2,7 +2,7 @@
 
 ## 2.4.0 (Unreleased)
 
-This release contains a **BREAKING** change. Make sure to read and apply upgrade notes.
+This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
 - **[Breaking]** Drop Ruby `2.7` support.
 - **[Breaking]** Drop the concept of consumer group mapping.
@@ -11,12 +11,15 @@ This release contains a **BREAKING** change. Make sure to read and apply upgrade
 - **[Feature]** Introduce ability to use direct assignments (Pro).
 - **[Feature]** Provide consumer piping API (Pro).
 - **[Feature]** Introduce `karafka topics plan` to describe changes that will be applied when migrating.
+- [Enhancement] Include number of attempts prior to DLQ message being dispatched including the dispatch one (Pro).
+- [Enhancement] Provide ability to decide how to dispatch from DLQ (sync / async).
+- [Enhancement] Provide ability to decide how to mark as consumed from DLQ (sync / async).
 - [Enhancement] Allow for usage of a custom Appsignal namespace when logging.
 - [Enhancement] Do not run periodic jobs when LRJ job is running despite polling (LRJ can still start when Periodic runs).
 - [Enhancement] Improve accuracy of periodic jobs and make sure they do not run too early after saturated work.
 - [Enhancement] Introduce ability to async lock other subscription groups polling.
 - [Enhancement] Improve shutdown when using long polling setup (high `max_wait_time`).
-- [Enhancement] Provide `Karafka::Admin#read_lags` for ability to query lags of a given CG.
+- [Enhancement] Provide `Karafka::Admin#read_lags_with_offsets` for ability to query lags and offsets of a given CG.
 - [Enhancement] Allow direct assignments granular distribution in the Swarm (Pro).
 - [Enhancement] Add a buffer to the supervisor supervision on shutdown to prevent a potential race condition when signal pass lags.
 - [Enhancement] Provide ability to automatically generate and validate fingerprints of encrypted payload.

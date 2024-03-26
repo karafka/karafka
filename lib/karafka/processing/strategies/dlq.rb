@@ -76,7 +76,7 @@ module Karafka
             dispatch_to_dlq(skippable_message)
 
             # We mark the broken message as consumed and move on
-            mark_as_consumed(skippable_message)
+            mark_dispatched_to_dlq(skippable_message)
 
             return if revoked?
 
@@ -106,7 +106,8 @@ module Karafka
         # @param skippable_message [Karafka::Messages::Message] message we are skipping that also
         #   should go to the dlq topic
         def dispatch_to_dlq(skippable_message)
-          producer.produce_async(
+          producer.public_send(
+            topic.dead_letter_queue.dispatch_method,
             topic: topic.dead_letter_queue.topic,
             payload: skippable_message.raw_payload
           )
@@ -117,6 +118,20 @@ module Karafka
             caller: self,
             message: skippable_message
           )
+        end
+
+        # Marks message that went to DLQ (if applicable) based on the requested method
+        # @param skippable_message [Karafka::Messages::Message]
+        def mark_dispatched_to_dlq(skippable_message)
+          case topic.dead_letter_queue.marking_method
+          when :mark_as_consumed
+            mark_as_consumed(skippable_message)
+          when :mark_as_consumed!
+            mark_as_consumed!(skippable_message)
+          else
+            # This should never happen. Bug if encountered. Please report
+            raise Karafka::Errors::UnsupportedCaseError
+          end
         end
       end
     end

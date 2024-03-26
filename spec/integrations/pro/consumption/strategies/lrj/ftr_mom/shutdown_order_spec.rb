@@ -38,4 +38,4 @@ start_karafka_and_wait_until do
 end
 
 assert DT[0].last < DT[1].last
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_next_offset

@@ -52,4 +52,4 @@ DT[0].each do |offset|
 end
 
 # We should start from the only offset marked as consumed + 1
-assert_equal DT[:marked].last + 1, fetch_first_offset
+assert_equal DT[:marked].last + 1, fetch_next_offset

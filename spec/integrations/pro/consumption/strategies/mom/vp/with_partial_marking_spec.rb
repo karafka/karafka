@@ -35,4 +35,4 @@ start_karafka_and_wait_until do
 end
 
 # Since we do middle offset marking, this should never have the last from max batch
-assert fetch_first_offset < DT[:lasts].max
+assert fetch_next_offset < DT[:lasts].max

@@ -24,4 +24,4 @@ end
 
 assert_equal elements, DT[0]
 assert_equal 1, DT.data.size
-assert !fetch_first_offset
+assert_equal 100, fetch_next_offset

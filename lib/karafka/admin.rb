@@ -244,22 +244,24 @@ module Karafka
         end
       end
 
-      # Reads lags for given topics in the context of consumer groups defined in the routing
+      # Reads lags and offsets for given topics in the context of consumer groups defined in the
+      #   routing
       # @param consumer_groups_with_topics [Hash<String, Array<String>>] hash with consumer groups
       #   names with array of topics to query per consumer group inside
       # @param active_topics_only [Boolean] if set to false, when we use routing topics, will
       #   select also topics that are marked as inactive in routing
-      # @return [Hash<String, Hash<Integer, Integer>>] hash where the top level keys are the
-      #   consumer groups and values are hashes with topics and inside partitions with lags
+      # @return [Hash<String, Hash<Integer, <Hash<Integer>>>>] hash where the top level keys are
+      #   the consumer groups and values are hashes with topics and inside partitions with lags
+      #   and offsets
       #
       # @note For topics that do not exist, topic details will be set to an empty hash
       #
-      # @note For topics that exist but were never consumed by a given CG we set `-1` but
-      #   on each of the partitions that were not consumed.
+      # @note For topics that exist but were never consumed by a given CG we set `-1` as lag and
+      #   the offset on each of the partitions that were not consumed.
       #
       # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
       #   represents lags from Kafka perspective and not the consumer. They may differ.
-      def read_lags(consumer_groups_with_topics = {}, active_topics_only: true)
+      def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
         # We first fetch all the topics with partitions count that exist in the cluster so we
         # do not query for topics that do not exist and so we can get partitions count for all
         # the topics we may need. The non-existent and not consumed will be filled at the end
@@ -290,6 +292,7 @@ module Karafka
         end
 
         groups_lags = Hash.new { |h, k| h[k] = {} }
+        groups_offs = Hash.new { |h, k| h[k] = {} }
 
         cgs_with_topics.each do |cg, topics|
           # Do not add to tpl topics that do not exist
@@ -300,7 +303,18 @@ module Karafka
           with_consumer('group.id': cg) do |consumer|
             topics.each { |topic| tpl.add_topic(topic, existing_topics[topic]) }
 
-            consumer.lag(consumer.committed(tpl)).each do |topic, partitions_lags|
+            commit_offsets = consumer.committed(tpl)
+
+            commit_offsets.to_h.each do |topic, partitions|
+              groups_offs[cg][topic] = {}
+
+              partitions.each do |partition|
+                # -1 when no offset is stored
+                groups_offs[cg][topic][partition.partition] = partition.offset || -1
+              end
+            end
+
+            consumer.lag(commit_offsets).each do |topic, partitions_lags|
               groups_lags[cg][topic] = partitions_lags
             end
           end
@@ -322,7 +336,22 @@ module Karafka
           end
         end
 
-        groups_lags
+        merged = Hash.new { |h, k| h[k] = {} }
+
+        groups_lags.each do |cg, topics|
+          topics.each do |topic, partitions|
+            merged[cg][topic] = {}
+
+            partitions.each do |partition, lag|
+              merged[cg][topic][partition] = {
+                offset: groups_offs.fetch(cg).fetch(topic).fetch(partition),
+                lag: lag
+              }
+            end
+          end
+        end
+
+        merged
       end
 
       # @return [Rdkafka::Metadata] cluster metadata info

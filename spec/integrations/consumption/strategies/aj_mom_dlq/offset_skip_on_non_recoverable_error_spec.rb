@@ -36,6 +36,6 @@ end
 
 producer.produce_async(topic: DT.topics[0], payload: '{}')
 
-assert_equal 1, fetch_first_offset
+assert_equal 1, fetch_next_offset
 
 producer.close

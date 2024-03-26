@@ -217,7 +217,7 @@ module Karafka
         subscription_group: topic.subscription_group,
         offset: offset,
         timeout: coordinator.pause_tracker.current_timeout,
-        attempt: coordinator.pause_tracker.attempt
+        attempt: attempt
       )
     end
 
@@ -297,7 +297,7 @@ module Karafka
         partition: partition,
         offset: coordinator.seek_offset,
         timeout: coordinator.pause_tracker.current_timeout,
-        attempt: coordinator.pause_tracker.attempt
+        attempt: attempt
       )
     end
   end

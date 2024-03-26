@@ -36,4 +36,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal DT[0], (202..301).to_a
-assert !fetch_first_offset
+assert_equal 302, fetch_next_offset

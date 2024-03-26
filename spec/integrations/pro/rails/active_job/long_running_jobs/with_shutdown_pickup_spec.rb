@@ -46,4 +46,4 @@ end
 # Give Karafka time to finalize everything
 sleep(2)
 
-assert_equal DT[0][0] + 1, fetch_first_offset
+assert_equal DT[0][0] + 1, fetch_next_offset

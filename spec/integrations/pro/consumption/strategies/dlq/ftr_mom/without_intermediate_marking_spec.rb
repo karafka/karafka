@@ -54,4 +54,4 @@ start_karafka_and_wait_until do
 end
 
 # None of the offsets should have been committed
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_next_offset

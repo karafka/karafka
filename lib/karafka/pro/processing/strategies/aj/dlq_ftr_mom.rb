@@ -57,7 +57,7 @@ module Karafka
                     # We can commit the offset here because we know that we skip it "forever" and
                     # since AJ consumer commits the offset after each job, we also know that the
                     # previous job was successful
-                    mark_as_consumed(skippable_message)
+                    mark_dispatched_to_dlq(skippable_message)
                   end
                 end
               end
