@@ -23,6 +23,9 @@ RSpec.describe_current do
         nodes: 2,
         node: false
       },
+      oauth: {
+        token_provider_listener: false
+      },
       admin: {
         kafka: {},
         group_id: 'karafka_admin',
@@ -752,5 +755,23 @@ RSpec.describe_current do
         expect(contract.call(config)).not_to be_success
       end
     end
+  end
+
+  context 'when oauth token_provider_listener does not respond to on_oauthbearer_token_refresh' do
+    before { config[:oauth][:token_provider_listener] = true }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context 'when oauth token_provider_listener responds to on_oauthbearer_token_refresh' do
+    let(:listener) do
+      Class.new do
+        def on_oauthbearer_token_refresh(_); end
+      end
+    end
+
+    before { config[:oauth][:token_provider_listener] = listener.new }
+
+    it { expect(contract.call(config)).to be_success }
   end
 end

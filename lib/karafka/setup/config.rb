@@ -414,7 +414,7 @@ module Karafka
             # We also propagate same listener to the default producer to make sure, that the
             # listener for oauth is also automatically used by the producer. That way we don't
             # have to configure it manually for the default producer
-            #producer_config.oauth.token_provider_listener = oauth_listener
+            producer_config.oauth.token_provider_listener = oauth_listener
             producer_config.logger = config.logger
           end
         end

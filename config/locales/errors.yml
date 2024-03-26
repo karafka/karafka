@@ -24,6 +24,8 @@ en:
       max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
       shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
 
+      oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
+
       internal.processing.jobs_builder_format: cannot be nil
       internal.processing.jobs_queue_class_format: cannot be nil
       internal.processing.scheduler_class_format: cannot be nil
