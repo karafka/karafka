@@ -17,8 +17,8 @@ draw_routes do
   end
 end
 
-def read_lags(details)
-  Karafka::Admin.read_lags(details, active_topics_only: false)
+def read_lags_with_offsets(details)
+  Karafka::Admin.read_lags_with_offsets(details, active_topics_only: false)
 end
 
 CG1 = Karafka::App.config.group_id
@@ -26,10 +26,12 @@ CG1 = Karafka::App.config.group_id
 produce_many(DT.topics[0], DT.uuids(10))
 2.times { |i| produce_many(DT.topics[1], DT.uuids(10), partition: i) }
 
+NA = { lag: -1, offset: -1 }.freeze
+
 # Case 1 - CG that never run on existing routing setup with inactive topics
 assert_equal(
-  { CG1 => { DT.topics[0] => { 0 => -1 }, DT.topics[1] => { 0 => -1, 1 => -1 } } },
-  read_lags({})
+  { CG1 => { DT.topics[0] => { 0 => NA }, DT.topics[1] => { 0 => NA, 1 => NA } } },
+  read_lags_with_offsets({})
 )
 
 # Case 2 - CG that run on existing routing setup and consumed some data from one topic partition
@@ -39,6 +41,11 @@ Karafka::Admin.seek_consumer_group(
 )
 
 assert_equal(
-  { CG1 => { DT.topics[0] => { 0 => -1 }, DT.topics[1] => { 0 => -1, 1 => 7 } } },
-  read_lags({})
+  {
+    CG1 => {
+      DT.topics[0] => { 0 => NA },
+      DT.topics[1] => { 0 => NA, 1 => { offset: 3, lag: 7 } }
+    }
+  },
+  read_lags_with_offsets({})
 )
