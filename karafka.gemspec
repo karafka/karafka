@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
     without having to focus on things that are not your business domain.
   DESC
 
-  spec.add_dependency 'karafka-core', '>= 2.4.0.beta1', '< 2.5.0'
+  spec.add_dependency 'karafka-core', '>= 2.4.0.beta2', '< 2.5.0'
   spec.add_dependency 'waterdrop', '>= 2.7.0.beta1', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
