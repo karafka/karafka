@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  let(:bearer) { double(Rdkafka::Consumer, name: 'TestBearer') }
-  let(:rd_config) { double(Rdkafka::Config) }
+  let(:bearer) { instance_double(Rdkafka::Consumer, name: 'TestBearer') }
+  let(:rd_config) { instance_double(Rdkafka::Config) }
   let(:token_refresh) { described_class.new(bearer) }
 
   describe '#call' do
