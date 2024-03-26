@@ -256,8 +256,8 @@ module Karafka
       #
       # @note For topics that do not exist, topic details will be set to an empty hash
       #
-      # @note For topics that exist but were never consumed by a given CG we set `-1` but
-      #   on each of the partitions that were not consumed.
+      # @note For topics that exist but were never consumed by a given CG we set `-1` as lag and
+      #   the offset on each of the partitions that were not consumed.
       #
       # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
       #   represents lags from Kafka perspective and not the consumer. They may differ.
