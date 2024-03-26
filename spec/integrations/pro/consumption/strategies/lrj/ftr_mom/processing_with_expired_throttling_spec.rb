@@ -40,4 +40,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal payloads, DT[0]
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_next_offset

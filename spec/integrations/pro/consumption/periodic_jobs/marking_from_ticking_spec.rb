@@ -32,4 +32,4 @@ start_karafka_and_wait_until do
   DT[:ticks].count >= 2
 end
 
-assert_equal fetch_first_offset - 1, DT[:marked].last
+assert_equal fetch_next_offset - 1, DT[:marked].last

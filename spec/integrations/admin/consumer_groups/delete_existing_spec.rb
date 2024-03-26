@@ -32,9 +32,9 @@ end
 # Produce one more so we can get the new offset for checking
 produce_many(DT.topic, DT.uuids(1))
 
-assert_equal 10, fetch_first_offset
+assert_equal 10, fetch_next_offset
 
 Karafka::Admin.delete_consumer_group(DT.consumer_group)
 
 # Should start from beginning as it was removed
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_next_offset

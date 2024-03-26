@@ -29,4 +29,4 @@ start_karafka_and_wait_until do
   DT.key?(0)
 end
 
-assert_equal DT[0].last + 1, fetch_first_offset
+assert_equal DT[0].last + 1, fetch_next_offset

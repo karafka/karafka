@@ -33,4 +33,4 @@ end
 assert_equal elements[0..1], DT[0]
 
 # None of the offsets should have been committed
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_next_offset

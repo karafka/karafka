@@ -33,4 +33,4 @@ start_karafka_and_wait_until do
   DT[:paused].size >= 3
 end
 
-assert_equal fetch_first_offset, DT[:paused].last
+assert_equal fetch_next_offset, DT[:paused].last

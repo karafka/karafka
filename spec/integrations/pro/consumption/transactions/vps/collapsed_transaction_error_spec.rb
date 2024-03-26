@@ -45,4 +45,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal DT[:metadata].last, ''
-assert_equal fetch_first_offset, 0
+assert_equal fetch_next_offset, 0

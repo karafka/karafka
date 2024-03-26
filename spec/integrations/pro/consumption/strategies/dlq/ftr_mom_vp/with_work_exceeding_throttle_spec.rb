@@ -46,4 +46,4 @@ end
 # All messages should be received and seek should work correctly
 # Order may be not as expected due to random VPs
 assert_equal DT[0].sort, (0...DT[0].size).to_a.sort
-assert fetch_first_offset.zero?
+assert fetch_next_offset.zero?

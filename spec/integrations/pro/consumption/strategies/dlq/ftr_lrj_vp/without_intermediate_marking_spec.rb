@@ -35,6 +35,4 @@ start_karafka_and_wait_until do
   DT[0].size >= 1000
 end
 
-# All should be consumed.
-# If anything with message marking would be off, it would return an offset value
-assert !fetch_first_offset
+assert_equal 1000, fetch_next_offset

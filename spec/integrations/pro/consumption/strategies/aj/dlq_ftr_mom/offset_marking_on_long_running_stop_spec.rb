@@ -33,5 +33,4 @@ start_karafka_and_wait_until do
   DT[0].size >= 2
 end
 
-# No test needed, if it commits last offset, this will hang forever
-fetch_first_offset
+assert_equal 2, fetch_next_offset

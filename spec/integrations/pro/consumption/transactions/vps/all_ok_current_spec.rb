@@ -54,4 +54,4 @@ end
 last = DT[:last].last
 
 assert_equal DT[:metadata].last, last
-assert_equal fetch_first_offset, false
+assert_equal fetch_next_offset, 100

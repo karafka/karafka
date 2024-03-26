@@ -38,4 +38,4 @@ end
 sleep(1)
 
 # Intermediate jobs should be processed
-assert fetch_first_offset > 0
+assert fetch_next_offset > 0

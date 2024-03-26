@@ -59,4 +59,4 @@ start_karafka_and_wait_until do
 end
 
 assert DT[0].size < 3
-assert fetch_first_offset.zero?
+assert fetch_next_offset.zero?

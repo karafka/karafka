@@ -37,4 +37,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal elements[0..1].sort, DT[0].sort
-assert fetch_first_offset.zero?
+assert fetch_next_offset.zero?

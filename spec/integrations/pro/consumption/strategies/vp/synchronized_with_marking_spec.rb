@@ -36,5 +36,4 @@ start_karafka_and_wait_until do
   DT[0].size >= 100
 end
 
-# False here will mean there was nothing more to consume aside from the 100 we already did
-assert_equal false, fetch_first_offset
+assert_equal 100, fetch_next_offset

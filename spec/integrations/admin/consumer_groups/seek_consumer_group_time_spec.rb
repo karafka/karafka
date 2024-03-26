@@ -28,4 +28,4 @@ Karafka::Admin.seek_consumer_group(
   { DT.topic => { 0 => time_ref } }
 )
 
-assert_equal 4, fetch_first_offset
+assert_equal 4, fetch_next_offset

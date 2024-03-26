@@ -43,4 +43,4 @@ end
 # VPed, so not in order
 assert_equal elements.sort, DT[0].sort
 assert_equal 1, DT.data.size
-assert fetch_first_offset.zero?
+assert fetch_next_offset.zero?

@@ -42,4 +42,4 @@ start_karafka_and_wait_until do
   DT[0].sum >= 50
 end
 
-assert fetch_first_offset < 49
+assert fetch_next_offset < 49

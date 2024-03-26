@@ -29,6 +29,4 @@ Karafka::Admin.seek_consumer_group(
   { DT.topic => { 0 => Time.now + 60 * 60 } }
 )
 
-# false will be returned when we cannot fetch message because offset is in the future and we do
-# not have more messages. This is expected here.
-assert_equal false, fetch_first_offset
+assert_equal 10, fetch_next_offset
