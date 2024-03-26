@@ -38,4 +38,4 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert_equal 1, fetch_first_offset
+assert_equal 1, fetch_next_offset

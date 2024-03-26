@@ -56,4 +56,4 @@ end
 
 assert DT[:dlqed].empty?
 assert((DT[0].count { |offset| offset == 7 }) >= 2)
-assert fetch_first_offset.zero?
+assert fetch_next_offset.zero?

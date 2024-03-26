@@ -41,4 +41,4 @@ produce_many(DT.topic, DT.uuids(1))
 assert_equal '99', DT[:metadata].first
 
 # +1 from 99 because of the transaction marker
-assert_equal 101, fetch_first_offset
+assert_equal 100, fetch_next_offset

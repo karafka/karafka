@@ -40,4 +40,4 @@ end
 
 # Not deterministic due to VPs
 assert_equal payloads.sort, DT[0].sort
-assert_equal 0, fetch_first_offset
+assert_equal 0, fetch_next_offset

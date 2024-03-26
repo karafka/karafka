@@ -52,4 +52,4 @@ DT[:times].each_with_index do |slot, index|
   assert_equal(5 * (index + 1), DT[:messages_times].count { |time| time < slot })
 end
 
-assert fetch_first_offset.zero?
+assert fetch_next_offset.zero?
