@@ -42,13 +42,15 @@ draw_routes do
   end
 end
 
-def read_lags(*args)
-  Karafka::Admin.read_lags(*args)
+def read_lags_with_offsets(*args)
+  Karafka::Admin.read_lags_with_offsets(*args)
 end
 
 produce_many(DT.topics[0], DT.uuids(10))
 2.times { |i| produce_many(DT.topics[2], DT.uuids(10), partition: i) }
 2.times { |i| produce_many(DT.topics[4], DT.uuids(10), partition: i) }
+
+NA = { lag: -1, offset: -1 }.freeze
 
 Karafka::Admin.seek_consumer_group(
   CG1,
@@ -61,11 +63,11 @@ Karafka::Admin.seek_consumer_group(
 )
 
 assert_equal(
-  Karafka::Admin.read_lags[CG1],
-  { DT.topics[0] => { 0 => -1 }, DT.topics[2] => { 0 => 7, 1 => -1 } }
+  Karafka::Admin.read_lags_with_offsets[CG1],
+  { DT.topics[0] => { 0 => NA }, DT.topics[2] => { 0 => { offset: 3, lag: 7 }, 1 => NA } }
 )
 
 assert_equal(
-  Karafka::Admin.read_lags[CG2],
-  { DT.topics[0] => { 0 => -1 }, DT.topics[4] => { 0 => -1, 1 => 6 } }
+  Karafka::Admin.read_lags_with_offsets[CG2],
+  { DT.topics[0] => { 0 => NA }, DT.topics[4] => { 0 => NA, 1 => { offset: 4, lag: 6 } } }
 )

@@ -19,7 +19,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - [Enhancement] Improve accuracy of periodic jobs and make sure they do not run too early after saturated work.
 - [Enhancement] Introduce ability to async lock other subscription groups polling.
 - [Enhancement] Improve shutdown when using long polling setup (high `max_wait_time`).
-- [Enhancement] Provide `Karafka::Admin#read_lags` for ability to query lags of a given CG.
+- [Enhancement] Provide `Karafka::Admin#read_lags_with_offsets` for ability to query lags and offsets of a given CG.
 - [Enhancement] Allow direct assignments granular distribution in the Swarm (Pro).
 - [Enhancement] Add a buffer to the supervisor supervision on shutdown to prevent a potential race condition when signal pass lags.
 - [Enhancement] Provide ability to automatically generate and validate fingerprints of encrypted payload.
