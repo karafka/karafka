@@ -30,7 +30,9 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    deserializer ->(message) { message.raw_payload.to_s }
+    deserializers(
+      payload: ->(message) { message.raw_payload.to_s }
+    )
   end
 end
 

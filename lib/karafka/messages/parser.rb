@@ -7,7 +7,7 @@ module Karafka
       # @param message [::Karafka::Messages::Message]
       # @return [Object] deserialized payload
       def call(message)
-        message.metadata.deserializer.call(message)
+        message.metadata.deserializers.payload.call(message)
       end
     end
   end

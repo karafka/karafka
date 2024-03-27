@@ -12,7 +12,7 @@ module Karafka
         ).fetch('en').fetch('validations').fetch('topic')
       end
 
-      required(:deserializer) { |val| !val.nil? }
+      required(:deserializers) { |val| !val.nil? }
       required(:id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
       required(:max_messages) { |val| val.is_a?(Integer) && val >= 1 }

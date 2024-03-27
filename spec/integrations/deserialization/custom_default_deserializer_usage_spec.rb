@@ -8,9 +8,7 @@ class CustomDeserializer
   end
 end
 
-setup_karafka do |config|
-  config.deserializer = CustomDeserializer.new
-end
+setup_karafka
 
 messages = Array.new(100) { |i| "message#{i}" }
 
@@ -23,6 +21,10 @@ class Consumer < Karafka::BaseConsumer
 end
 
 draw_routes do
+  defaults do
+    deserializer CustomDeserializer.new
+  end
+
   topic DT.topic do
     consumer Consumer
   end

@@ -23,7 +23,7 @@ module Karafka
       end
 
       # Finds the topic by name (in any consumer group) and if not present, will built a new
-      # representation of the topic with the defaults and default deserializer.
+      # representation of the topic with the defaults and default deserializers.
       #
       # This is used in places where we may operate on topics that are not part of the routing
       # but we want to do something on them (display data, iterate over, etc)

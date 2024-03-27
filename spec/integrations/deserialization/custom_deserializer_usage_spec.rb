@@ -23,7 +23,9 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    deserializer CustomDeserializer.new
+    deserializers(
+      payload: CustomDeserializer.new
+    )
   end
 end
 

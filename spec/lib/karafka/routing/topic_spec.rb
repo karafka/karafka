@@ -49,31 +49,7 @@ RSpec.describe_current do
     end
   end
 
-  describe '#deserializer=' do
-    let(:deserializer) { double }
-
-    it { expect { topic.deserializer = deserializer }.not_to raise_error }
-  end
-
-  describe '#deserializer' do
-    before { topic.deserializer = deserializer }
-
-    context 'when deserializer is not set' do
-      let(:deserializer) { nil }
-
-      it 'expect to use default one' do
-        expect(topic.deserializer).to be_a Karafka::Serialization::Json::Deserializer
-      end
-    end
-
-    context 'when deserializer is set' do
-      let(:deserializer) { double }
-
-      it { expect(topic.deserializer).to eq deserializer }
-    end
-  end
-
-  %w[kafka manual_offset_management deserializer max_messages max_wait_time].each do |attribute|
+  %w[kafka manual_offset_management max_messages max_wait_time].each do |attribute|
     it { expect(topic).to respond_to(attribute) }
   end
 
@@ -124,7 +100,7 @@ RSpec.describe_current do
   describe '#to_h' do
     let(:expected_keys) do
       %i[
-        kafka deserializer max_messages max_wait_time initial_offset id name active consumer
+        kafka deserializers max_messages max_wait_time initial_offset id name active consumer
         consumer_group_id pause_max_timeout pause_timeout pause_with_exponential_backoff
         subscription_group_details active_job consumer_persistence dead_letter_queue declaratives
         inline_insights manual_offset_management
