@@ -18,7 +18,7 @@ RSpec.describe_current do
             # shitload of time to setup instance evaluation from instance variables,
             # so instead we check against constant names
             consumer Class.new(Karafka::BaseConsumer)
-            deserializer :deserializer1
+            deserializer ->(data) { data }
           end
         end
       end
@@ -26,7 +26,7 @@ RSpec.describe_current do
         builder.draw do
           topic :topic_name2 do
             consumer Class.new(Karafka::BaseConsumer)
-            deserializer :deserializer2
+            deserializer ->(data) { data }
           end
         end
       end
@@ -56,7 +56,7 @@ RSpec.describe_current do
           subscription_group 'test' do
             topic :topic_name1 do
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer1
+              deserializer ->(data) { data }
             end
           end
         end
@@ -75,12 +75,12 @@ RSpec.describe_current do
           subscription_group 'test' do
             topic :topic_name1 do
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer1
+              deserializer ->(data) { data }
             end
 
             topic :topic_name2 do
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer1
+              deserializer ->(data) { data }
             end
           end
         end
@@ -100,14 +100,14 @@ RSpec.describe_current do
           subscription_group 'test1' do
             topic :topic_name1 do
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer1
+              deserializer ->(data) { data }
             end
           end
 
           subscription_group 'test2' do
             topic :topic_name2 do
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer1
+              deserializer ->(data) { data }
             end
           end
         end
@@ -127,13 +127,13 @@ RSpec.describe_current do
           subscription_group 'test1' do
             topic :topic_name1 do
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer1
+              deserializer ->(data) { data }
             end
           end
 
           topic :topic_name2 do
             consumer Class.new(Karafka::BaseConsumer)
-            deserializer :deserializer1
+            deserializer ->(data) { data }
           end
         end
       end
@@ -153,7 +153,7 @@ RSpec.describe_current do
             topic :topic_name1 do
               kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer1
+              deserializer ->(data) { data }
             end
           end
         end
@@ -164,7 +164,7 @@ RSpec.describe_current do
             topic :topic_name2 do
               kafka('bootstrap.servers' => 'localhost:9093')
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer2
+              deserializer ->(data) { data }
             end
           end
         end
@@ -192,13 +192,13 @@ RSpec.describe_current do
             topic :topic_name1 do
               kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer1
+              deserializer ->(data) { data }
             end
 
             topic :topic_name2 do
               kafka('bootstrap.servers' => 'localhost:9092')
               consumer Class.new(Karafka::BaseConsumer)
-              deserializer :deserializer2
+              deserializer ->(data) { data }
             end
           end
         end
@@ -220,7 +220,7 @@ RSpec.describe_current do
               topic :topic_name1 do
                 kafka('bootstrap.servers' => 'localhost:9092')
                 consumer Class.new(Karafka::BaseConsumer)
-                deserializer :deserializer1
+                deserializer ->(data) { data }
               end
             end
           end
@@ -230,7 +230,7 @@ RSpec.describe_current do
               topic :topic_name2 do
                 kafka('bootstrap.servers' => 'localhost:9092')
                 consumer Class.new(Karafka::BaseConsumer)
-                deserializer :deserializer2
+                deserializer ->(data) { data }
               end
             end
           end
@@ -247,7 +247,7 @@ RSpec.describe_current do
         builder.draw do
           consumer_group '$%^&*(' do
             topic :topic_name1 do
-              deserializer :deserializer1
+              deserializer ->(data) { data }
             end
           end
         end

@@ -7,10 +7,13 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Breaking]** Drop Ruby `2.7` support.
 - **[Breaking]** Drop the concept of consumer group mapping.
 - **[Breaking]** `karafka topics migrate` will now perform declarative topics configuration alignment.
+- **[Breaking]** Replace `deserializer` config with `#deserializers` in routing to support key and lazy header deserializers.
 - **[Feature]** Provide `karafka topics alter` for declarative topics alignment.
 - **[Feature]** Introduce ability to use direct assignments (Pro).
 - **[Feature]** Provide consumer piping API (Pro).
 - **[Feature]** Introduce `karafka topics plan` to describe changes that will be applied when migrating.
+- **[Feature]** Introduce ability to use custom message key deserializers.
+- **[Feature]** Introduce ability to use custom message headers deserializers.
 - [Enhancement] Include number of attempts prior to DLQ message being dispatched including the dispatch one (Pro).
 - [Enhancement] Provide ability to decide how to dispatch from DLQ (sync / async).
 - [Enhancement] Provide ability to decide how to mark as consumed from DLQ (sync / async).

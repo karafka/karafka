@@ -14,14 +14,14 @@ module Karafka
           def call(kafka_message, topic, received_at)
             metadata = Karafka::Messages::Metadata.new(
               timestamp: kafka_message.timestamp,
-              headers: kafka_message.headers,
-              key: kafka_message.key,
               offset: kafka_message.offset,
-              deserializer: topic.deserializer,
+              deserializers: topic.deserializers,
               partition: kafka_message.partition,
               topic: topic.name,
-              received_at: received_at
-            ).freeze
+              received_at: received_at,
+              raw_headers: kafka_message.headers,
+              raw_key: kafka_message.key
+            )
 
             # Get the raw payload
             payload = kafka_message.payload

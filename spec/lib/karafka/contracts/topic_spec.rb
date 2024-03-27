@@ -9,7 +9,7 @@ RSpec.describe_current do
       name: 'name',
       active: true,
       consumer: Class.new,
-      deserializer: Class.new,
+      deserializers: {},
       kafka: { 'bootstrap.servers' => 'localhost:9092' },
       max_messages: 10,
       max_wait_time: 10_000,
@@ -200,9 +200,9 @@ RSpec.describe_current do
     end
   end
 
-  context 'when we validate deserializer' do
+  context 'when we validate deserializers' do
     context 'when it is not present' do
-      before { config[:deserializer] = nil }
+      before { config[:deserializers] = nil }
 
       it { expect(check).not_to be_success }
     end

@@ -29,10 +29,10 @@ RSpec.describe_current do
     it { expect(metadata.last_offset).to eq rand_value }
   end
 
-  describe '#deserializer' do
-    before { metadata['deserializer'] = rand_value }
+  describe '#deserializers' do
+    before { metadata['deserializers'] = rand_value }
 
-    it { expect(metadata.deserializer).to eq rand_value }
+    it { expect(metadata.deserializers).to eq rand_value }
   end
 
   describe '#first_offset' do

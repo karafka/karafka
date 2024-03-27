@@ -5,14 +5,29 @@ module Karafka
     # Single message metadata details that can be accessed without the need of deserialization.
     Metadata = Struct.new(
       :timestamp,
-      :headers,
-      :key,
       :offset,
-      :deserializer,
+      :deserializers,
       :partition,
       :received_at,
       :topic,
+      :raw_headers,
+      :raw_key,
       keyword_init: true
-    )
+    ) do
+      # @return [Object] deserialized key. By default in the raw string format.
+      def key
+        return @key if @key
+
+        @key = deserializers.key.call(raw_key)
+      end
+
+      # @return [Object] deserialized headers. By default its a hash with keys and payload being
+      #   strings
+      def headers
+        return @headers if @headers
+
+        @headers = deserializers.headers.call(raw_headers)
+      end
+    end
   end
 end

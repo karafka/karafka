@@ -23,7 +23,7 @@ module Karafka
       # prior to the final deserialization
       attr_accessor :raw_payload
 
-      def_delegators :metadata, *Metadata.members
+      def_delegators :metadata, *(Metadata.members + %i[key headers])
 
       # @param raw_payload [Object] incoming payload before deserialization
       # @param metadata [Karafka::Messages::Metadata] message metadata object

@@ -5,7 +5,9 @@ RSpec.describe_current do
 
   let(:params) do
     metadata = ::Karafka::Messages::Metadata.new
-    metadata['deserializer'] = deserializer
+    metadata['deserializers'] = Karafka::Routing::Features::Deserializers::Config.new(
+      payload: deserializer
+    )
 
     ::Karafka::Messages::Message.new(
       raw_payload,

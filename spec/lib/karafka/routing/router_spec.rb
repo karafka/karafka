@@ -42,10 +42,6 @@ RSpec.describe_current do
       it 'expect to match the name' do
         expect(found_topic.name).to eq(name)
       end
-
-      it 'expect to have default deserializer' do
-        expect(found_topic.deserializer).to eq(Karafka::App.config.deserializer)
-      end
     end
 
     context 'when we look for existing topic' do

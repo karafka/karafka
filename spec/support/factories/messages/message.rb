@@ -8,8 +8,8 @@ FactoryBot.define do
       sequence(:topic) { |nr| "topic#{nr}" }
       partition { 0 }
       timestamp { Time.now.utc }
-      key { nil }
-      headers { {} }
+      raw_key { nil }
+      raw_headers { {} }
     end
 
     raw_payload { '{}' }
@@ -20,8 +20,8 @@ FactoryBot.define do
         topic: topic,
         partition: partition,
         timestamp: timestamp,
-        key: key,
-        headers: headers
+        raw_key: raw_key,
+        raw_headers: raw_headers
       )
     end
 

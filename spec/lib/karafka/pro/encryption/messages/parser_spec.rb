@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   let(:message) { build(:messages_message, raw_payload: raw_payload, metadata: metadata) }
   let(:raw_payload) { { test: 1 }.to_json }
-  let(:metadata) { build(:messages_metadata, headers: headers) }
+  let(:metadata) { build(:messages_metadata, raw_headers: headers) }
   let(:headers) { {} }
 
   context 'when encryption is not active' do
