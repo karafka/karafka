@@ -15,9 +15,9 @@ end
 draw_routes do
   defaults do
     deserializers(
-      payload: ->(_payload) { 0 },
-      key: ->(_payload) { 1 },
-      headers: ->(_payload) { 2 }
+      payload: ->(_message) { 0 },
+      key: ->(_headers) { 1 },
+      headers: ->(_headers) { 2 }
     )
   end
 

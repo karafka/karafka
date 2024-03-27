@@ -12,8 +12,8 @@ FactoryBot.define do
       Karafka::Routing::Features::Deserializers::Config.new(
         active: true,
         payload: ->(message) { JSON.parse(message.raw_payload) },
-        key: Karafka::Serialization::Passthrough::Deserializer.new,
-        headers: Karafka::Serialization::Passthrough::Deserializer.new
+        key: Karafka::Deserializers::Key.new,
+        headers: Karafka::Deserializers::Headers.new
       )
     end
 

@@ -14,6 +14,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Feature]** Introduce `karafka topics plan` to describe changes that will be applied when migrating.
 - **[Feature]** Introduce ability to use custom message key deserializers.
 - **[Feature]** Introduce ability to use custom message headers deserializers.
+- [Enhancement] Provide `metadata#message` to be able to retrieve message from metadata.
 - [Enhancement] Include number of attempts prior to DLQ message being dispatched including the dispatch one (Pro).
 - [Enhancement] Provide ability to decide how to dispatch from DLQ (sync / async).
 - [Enhancement] Provide ability to decide how to mark as consumed from DLQ (sync / async).

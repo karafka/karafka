@@ -7,9 +7,9 @@ RSpec.describe_current do
     end
   end
 
-  let(:default_payload_deserializer) { Karafka::Serialization::Json::Deserializer }
-  let(:default_key_deserializer) { Karafka::Serialization::Passthrough::Deserializer }
-  let(:default_headers_deserializer) { Karafka::Serialization::Passthrough::Deserializer }
+  let(:default_payload_deserializer) { Karafka::Deserializers::Payload }
+  let(:default_key_deserializer) { Karafka::Deserializers::Key }
+  let(:default_headers_deserializer) { Karafka::Deserializers::Headers }
 
   describe '#deserializers' do
     context 'when using default deserializers' do

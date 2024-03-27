@@ -31,7 +31,11 @@ module Karafka
             kafka_message.instance_variable_set('@payload', nil)
 
             # Karafka messages cannot be frozen because of the lazy deserialization feature
-            Karafka::Messages::Message.new(payload, metadata)
+            message = Karafka::Messages::Message.new(payload, metadata)
+            # Assign message to metadata so we can reverse its relationship if needed
+            metadata[:message] = message
+
+            message
           end
         end
       end

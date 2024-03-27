@@ -31,12 +31,12 @@ RSpec.describe_current do
       )
     end
 
-    let(:key_deserializer_proc) { ->(key) { "deserialized_#{key}" } }
+    let(:key_deserializer_proc) { ->(metadata) { "deserialized_#{metadata.raw_key}" } }
     let(:raw_key) { 'test_key' }
     let(:raw_headers) { { 'content-type' => 'text/plain' } }
 
     let(:headers_deserializer_proc) do
-      ->(headers) { headers.transform_keys(&:to_sym).transform_values(&:upcase) }
+      ->(metadata) { metadata.raw_headers.transform_keys(&:to_sym).transform_values(&:upcase) }
     end
 
     let(:deserializers) do
