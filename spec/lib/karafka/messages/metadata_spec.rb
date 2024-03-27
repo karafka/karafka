@@ -22,7 +22,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'deserialization' do
+  context 'when deserializing raw components' do
     subject(:metadata) do
       described_class.new(
         deserializers: deserializers,
@@ -40,7 +40,7 @@ RSpec.describe_current do
     end
 
     let(:deserializers) do
-      double(
+      Karafka::Routing::Features::Deserializers::Config.new(
         key: key_deserializer_proc,
         headers: headers_deserializer_proc
       )

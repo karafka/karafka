@@ -29,19 +29,19 @@ RSpec.describe_current do
   end
 
   context 'when payload deserializer does not respond to call' do
-    before { config[:deserializers][:payload] = "not_a_proc" }
+    before { config[:deserializers][:payload] = 'not_a_proc' }
 
     it { expect(validation).not_to be_success }
   end
 
   context 'when headers deserializer does not respond to call' do
-    before { config[:deserializers][:headers] = "not_a_proc" }
+    before { config[:deserializers][:headers] = 'not_a_proc' }
 
     it { expect(validation).not_to be_success }
   end
 
   context 'when key deserializer does not respond to call' do
-    before { config[:deserializers][:key] = "not_a_proc" }
+    before { config[:deserializers][:key] = 'not_a_proc' }
 
     it { expect(validation).not_to be_success }
   end
