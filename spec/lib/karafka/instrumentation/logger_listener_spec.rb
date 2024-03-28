@@ -27,6 +27,14 @@ RSpec.describe_current do
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to have_received(:debug).with(message)
     end
+
+    context 'when log_polling is off' do
+      subject(:listener) { described_class.new(log_polling: false) }
+
+      it 'expect logger not to log' do
+        expect(Karafka.logger).not_to have_received(:debug).with(message)
+      end
+    end
   end
 
   describe '#on_connection_listener_fetch_loop_received' do
@@ -49,6 +57,17 @@ RSpec.describe_current do
 
       it 'expect logger to log proper message via info level' do
         expect(Karafka.logger).to have_received(:info).with(message)
+      end
+    end
+
+    context 'when log_polling is off' do
+      subject(:listener) { described_class.new(log_polling: false) }
+
+      let(:payload) { { caller: connection_listener, messages_buffer: [], time: 2 } }
+      let(:message) { '[id] Polled 0 messages in 2ms' }
+
+      it 'expect logger not to log' do
+        expect(Karafka.logger).not_to have_received(:debug).with(message)
       end
     end
   end
