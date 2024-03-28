@@ -16,10 +16,20 @@ module Karafka
 
       private_constant :USED_LOG_LEVELS
 
+      # @param log_polling [Boolean] should we log the fact that messages are being polled. This is
+      #   usually noisy and not useful in production but can be useful in dev. While users can
+      #   do this themselves this has been requested and asked for often, thus similar to how
+      #   extensive logging can be disabled in WaterDrop, we do it here as well.
+      def initialize(log_polling: true)
+        @log_polling = log_polling
+      end
+
       # Logs each messages fetching attempt
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_connection_listener_fetch_loop(event)
+        return unless log_polling?
+
         listener = event[:caller]
         debug "[#{listener.id}] Polling messages..."
       end
@@ -28,6 +38,8 @@ module Karafka
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_connection_listener_fetch_loop_received(event)
+        return unless log_polling?
+
         listener = event[:caller]
         time = event[:time]
         messages_count = event[:messages_buffer].size
@@ -325,6 +337,13 @@ module Karafka
         define_method log_level do |*args|
           Karafka.logger.send(log_level, *args)
         end
+      end
+
+      private
+
+      # @return [Boolean] should we log polling
+      def log_polling?
+        @log_polling
       end
     end
   end
