@@ -385,7 +385,12 @@ module Karafka
       # @note We always ship and yield a proxied consumer because admin API performance is not
       #   that relevant. That is, there are no high frequency calls that would have to be delegated
       def with_consumer(settings = {})
-        consumer = config(:consumer, settings).consumer
+        bind_id = SecureRandom.uuid
+
+        consumer = config(:consumer, settings).consumer(native_kafka_auto_start: false)
+        bind_oauth(bind_id, consumer)
+
+        consumer.start
         proxy = ::Karafka::Connection::Proxy.new(consumer)
         yield(proxy)
       ensure
@@ -400,18 +405,50 @@ module Karafka
         end
 
         consumer&.close
+
+        unbind_oauth(bind_id)
       end
 
       # Creates admin instance and yields it. After usage it closes the admin instance
       def with_admin
-        admin = config(:producer, {}).admin
+        bind_id = SecureRandom.uuid
+
+        admin = config(:producer, {}).admin(native_kafka_auto_start: false)
+        bind_oauth(bind_id, admin)
+
+        admin.start
         proxy = ::Karafka::Connection::Proxy.new(admin)
         yield(proxy)
       ensure
         admin&.close
+
+        unbind_oauth(bind_id)
       end
 
       private
+
+      # Adds a new callback for given rdkafka instance for oauth token refresh (if needed)
+      #
+      # @param id [String, Symbol] unique (for the lifetime of instance) id that we use for
+      #   callback referencing
+      # @param instance [Rdkafka::Consumer, Rdkafka::Admin] rdkafka instance to be used to set
+      #   appropriate oauth token when needed
+      def bind_oauth(id, instance)
+        ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
+          id,
+          Instrumentation::Callbacks::OauthbearerTokenRefresh.new(
+            instance
+          )
+        )
+      end
+
+      # Removes the callback from no longer used instance
+      #
+      # @param id [String, Symbol] unique (for the lifetime of instance) id that we use for
+      #   callback referencing
+      def unbind_oauth(id)
+        ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(id)
+      end
 
       # @return [Array<String>] topics names
       def topics_names

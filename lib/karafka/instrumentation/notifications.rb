@@ -74,6 +74,8 @@ module Karafka
         filtering.throttled
         filtering.seek
 
+        oauthbearer.token_refresh
+
         process.notice_signal
 
         rebalance.partitions_assign

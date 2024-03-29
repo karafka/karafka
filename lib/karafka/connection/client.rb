@@ -432,9 +432,12 @@ module Karafka
 
         return unless @kafka
 
+        sg_id = @subscription_group.id
+
         # Remove callbacks runners that were registered
-        ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@subscription_group.id)
-        ::Karafka::Core::Instrumentation.error_callbacks.delete(@subscription_group.id)
+        ::Karafka::Core::Instrumentation.statistics_callbacks.delete(sg_id)
+        ::Karafka::Core::Instrumentation.error_callbacks.delete(sg_id)
+        ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(sg_id)
 
         kafka.close
         @kafka = nil
@@ -608,7 +611,8 @@ module Karafka
         # new messages. This allows us to report statistics while data is still being processed
         config.consumer_poll_set = false
 
-        consumer = config.consumer
+        # Do not start native kafka so we can inject the oauth bearer callbacks if needed
+        consumer = config.consumer(native_kafka_auto_start: false)
         @name = consumer.name
 
         # Register statistics runner for this particular type of callbacks
@@ -628,6 +632,13 @@ module Karafka
             @subscription_group.id,
             @subscription_group.consumer_group.id,
             @name
+          )
+        )
+
+        ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
+          @subscription_group.id,
+          Instrumentation::Callbacks::OauthbearerTokenRefresh.new(
+            consumer
           )
         )
 
@@ -662,6 +673,10 @@ module Karafka
 
         @kafka = build_consumer
         @wrapped_kafka = Proxy.new(@kafka)
+        # We start it only after everything is configured so oauth or any other early-run client
+        # related operations can occur. Otherwise, if all kafka referencing setup would not be
+        # done, we could not intercept the invocations to kafka via client methods.
+        @kafka.start
         @kafka
       end
     end

@@ -40,6 +40,12 @@ module Karafka
         required(:node) { |val| val == false || val.is_a?(Karafka::Swarm::Node) }
       end
 
+      nested(:oauth) do
+        required(:token_provider_listener) do |val|
+          val == false || val.respond_to?(:on_oauthbearer_token_refresh)
+        end
+      end
+
       nested(:admin) do
         # Can be empty because inherits values from the root kafka
         required(:kafka) { |val| val.is_a?(Hash) }

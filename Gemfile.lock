@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     karafka (2.3.4)
-      karafka-core (>= 2.4.0.alpha1, < 2.5.0)
-      waterdrop (>= 2.7.0.alpha3, < 3.0.0)
+      karafka-core (>= 2.4.0.beta2, < 2.5.0)
+      waterdrop (>= 2.7.0.beta1, < 3.0.0)
       zeitwerk (~> 2.3)
 
 GEM
@@ -56,7 +56,7 @@ GEM
     mini_portile2 (2.8.5)
     minitest (5.22.3)
     mutex_m (0.2.0)
-    rack (3.0.9.1)
+    rack (3.0.10)
     rake (13.1.0)
     roda (3.78.0)
       rack
