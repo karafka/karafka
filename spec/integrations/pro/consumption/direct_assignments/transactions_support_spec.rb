@@ -23,6 +23,8 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
+    # Not a VP case but we ant to stabilize number of messages to prevent randomness
+    filter ->(*_args) { VpStabilizer.new(10) }
     assign(true)
   end
 end
@@ -34,4 +36,4 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-assert fetch_next_offset >= 10
+assert fetch_next_offset >= 10, fetch_next_offset

@@ -9,6 +9,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Breaking]** `karafka topics migrate` will now perform declarative topics configuration alignment.
 - **[Breaking]** Replace `deserializer` config with `#deserializers` in routing to support key and lazy header deserializers.
 - **[Breaking]** Rename `Karafka::Serializers::JSON::Deserializer` to `Karafka::Deserializers::Payload` to reflect its role.
+- **[Feature]** Support custom OAuth providers (with a lot of help from bruce-szalwinski-he).
 - **[Feature]** Provide `karafka topics alter` for declarative topics alignment.
 - **[Feature]** Introduce ability to use direct assignments (Pro).
 - **[Feature]** Provide consumer piping API (Pro).
