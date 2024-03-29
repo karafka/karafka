@@ -10,14 +10,10 @@ gemspec
 # They are added here because they are part of the integration suite
 # Since some of those are only needed for some specs, they should never be required automatically
 group :integrations do
-  %w[
-    activejob
-    karafka-testing
-    karafka-web
-    rspec
-  ].each do |gem_name|
-    gem gem_name, require: false
-  end
+  gem 'activejob', require: false
+  gem 'karafka-testing', '>= 2.4.0.beta1', require: false
+  gem 'karafka-web', require: false
+  gem 'rspec', require: false
 end
 
 group :test do

@@ -21,7 +21,7 @@ RSpec.describe_current do
       :messages_message,
       topic: topic,
       partition: 1,
-      key: 'key',
+      raw_key: 'key',
       raw_payload: 'message_payload'
     )
   end

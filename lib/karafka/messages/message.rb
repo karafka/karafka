@@ -23,7 +23,8 @@ module Karafka
       # prior to the final deserialization
       attr_accessor :raw_payload
 
-      def_delegators :metadata, *Metadata.members
+      # We remove message as we do not want to do self-reference via `message.message`
+      def_delegators :metadata, *((Metadata.members + %i[key headers]) - %i[message])
 
       # @param raw_payload [Object] incoming payload before deserialization
       # @param metadata [Karafka::Messages::Metadata] message metadata object

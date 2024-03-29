@@ -192,7 +192,7 @@ RSpec.describe_current do
     end
 
     context 'when trying to read from topic that is part of the routing' do
-      let(:created_custom_deserializer) { rand }
+      let(:created_custom_deserializer) { ->(msg) { msg } }
       let(:count) { 1 }
 
       before do
@@ -215,7 +215,7 @@ RSpec.describe_current do
       end
 
       it 'expect to assign proper deserializer to messages' do
-        expect(reading.first.deserializer).to eq(created_custom_deserializer)
+        expect(reading.first.deserializers.payload).to eq(created_custom_deserializer)
       end
 
       it 'expect to user proper routes topic assigned to messages' do

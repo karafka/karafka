@@ -10,7 +10,7 @@ module Karafka
       :size,
       :first_offset,
       :last_offset,
-      :deserializer,
+      :deserializers,
       :partition,
       :topic,
       :created_at,

@@ -21,7 +21,7 @@ module Karafka
               size: messages.count,
               first_offset: messages.first&.offset || -1001,
               last_offset: messages.last&.offset || -1001,
-              deserializer: topic.deserializer,
+              deserializers: topic.deserializers,
               partition: partition,
               topic: topic.name,
               # We go with the assumption that the creation of the whole batch is the last message

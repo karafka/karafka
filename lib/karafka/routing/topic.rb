@@ -18,7 +18,6 @@ module Karafka
       # Attributes we can inherit from the root unless they were defined on this level
       INHERITABLE_ATTRIBUTES = %i[
         kafka
-        deserializer
         max_messages
         max_wait_time
         initial_offset

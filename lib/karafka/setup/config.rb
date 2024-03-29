@@ -67,8 +67,6 @@ module Karafka
       # option [Boolean] should we reload consumers with each incoming batch thus effectively
       # supporting code reload (if someone reloads code) or should we keep the persistence
       setting :consumer_persistence, default: true
-      # Default deserializer for converting incoming data into ruby objects
-      setting :deserializer, default: Karafka::Serialization::Json::Deserializer.new
       # option [String] should we start with the earliest possible offset or latest
       # This will set the `auto.offset.reset` value unless present in the kafka scope
       setting :initial_offset, default: 'earliest'
