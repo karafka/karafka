@@ -19,6 +19,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
+    filter ->(*_args) { VpStabilizer.new(10) }
     assign(true)
   end
 end
