@@ -23,7 +23,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    # Not a VP case but we ant to stabilize number of messages to prevent randomness
+    # Not a VP case but we want to stabilize number of messages to prevent randomness
     filter ->(*_args) { VpStabilizer.new(10) }
     assign(true)
   end
