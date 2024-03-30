@@ -33,7 +33,16 @@ module Karafka
       # @note Please note, that in case of a new topic, it will have a newly built consumer group
       #   as well, that is not part of the routing.
       def find_or_initialize_by_name(name)
-        find_by(name: name) || Topic.new(name, ConsumerGroup.new(name))
+        existing_topic = find_by(name: name)
+
+        return existing_topic if existing_topic
+
+        virtual_topic = Topic.new(name, ConsumerGroup.new(name))
+
+        Karafka::Routing::Proxy.new(
+          virtual_topic,
+          Karafka::App.config.internal.routing.builder.defaults
+        ).target
       end
 
       module_function :find_by
