@@ -142,15 +142,23 @@ module Karafka
                 action: :add
               }
 
+              scoped = @topics_to_alter[declarative][declarative_name]
+
               topic_c.configs.each do |config|
                 next unless declarative_name == config.name
-
-                scoped = @topics_to_alter[declarative][declarative_name]
 
                 scoped[:action] = :change
                 scoped[:from] = config.value
               end
+
+              # Remove change definitions that would migrate to the same value as present
+              @topics_to_alter[declarative].delete_if do |_name, details|
+                details[:from] == details[:to]
+              end
             end
+
+            # Remove topics without any changes
+            @topics_to_alter.delete_if { |_name, configs| configs.empty? }
           end
 
           @topics_to_alter
