@@ -37,6 +37,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - [Enhancement] Publish listeners status lifecycle events.
 - [Enhancement] Use proxy wrapper for Admin metadata requests.
 - [Enhancement] Use limited scope topic info data when operating on direct topics instead of full cluster queries.
+- [Enhancement] No longer raise `Karafka::UnsupportedCaseError` for not recognized error types to support dynamic errors reporting.
 - [Change] Do not create new proxy object to Rdkafka with certain low-level operations and re-use existing.
 - [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
 - [Fix] Pro Swarm liveness listener can report incorrect failure when dynamic multiplexing scales down.

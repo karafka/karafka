@@ -485,15 +485,11 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
-    context 'when it is an unsupported error type' do
-      subject(:error_trigger) { listener.on_error_occurred(event) }
+    context 'when it is a different error type' do
+      let(:type) { 'different.error' }
+      let(:message) { "different.error error occurred: #{error}" }
 
-      # We use the before { trigger } for all other cases and not worth duplicating, that's why
-      # we overwrite it here
-      let(:trigger) { nil }
-      let(:type) { 'unsupported.error' }
-
-      it { expect { error_trigger }.to raise_error(Karafka::Errors::UnsupportedCaseError) }
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
   end
 end
