@@ -327,9 +327,10 @@ module Karafka
         when 'connection.client.unsubscribe.error'
           error "Client unsubscribe error occurred: #{error}"
           error details
+        # This handles any custom errors coming from places like Web-UI, etc
         else
-          # This should never happen. Please contact the maintainers
-          raise Errors::UnsupportedCaseError, event
+          error "#{type} error occurred: #{error}"
+          error details
         end
       end
 
