@@ -25,7 +25,7 @@ module Karafka
       # Register all the listeners so they can be started and managed
       @manager.register(listeners)
 
-      workers.each(&:async_call)
+      workers.each_with_index { |worker, i| worker.async_call("karafka.worker##{i}") }
 
       # We aggregate threads here for a supervised shutdown process
       Karafka::Server.workers = workers

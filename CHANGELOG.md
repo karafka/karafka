@@ -16,6 +16,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Feature]** Introduce `karafka topics plan` to describe changes that will be applied when migrating.
 - **[Feature]** Introduce ability to use custom message key deserializers.
 - **[Feature]** Introduce ability to use custom message headers deserializers.
+- [Enhancement] Assign names to internal threads for better debuggability when on `TTIN`.
 - [Enhancement] Provide `log_polling` setting to the `Karafka::Instrumentation::LoggerListener` to silence polling in any non-debug mode.
 - [Enhancement] Provide `metadata#message` to be able to retrieve message from metadata.
 - [Enhancement] Include number of attempts prior to DLQ message being dispatched including the dispatch one (Pro).

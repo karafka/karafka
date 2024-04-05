@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:worker) { described_class.new(queue).tap(&:async_call) }
+  subject(:worker) do
+    described_class.new(queue).tap do |worker|
+      worker.async_call('spec.worker')
+    end
+  end
 
   let(:queue) { Karafka::Processing::JobsQueue.new }
 

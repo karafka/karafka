@@ -141,7 +141,7 @@ module Karafka
         Thread.list.each do |thread|
           tid = (thread.object_id ^ ::Process.pid).to_s(36)
 
-          warn "Thread TID-#{tid} #{thread['label']}"
+          warn "Thread TID-#{tid} #{thread.name}"
 
           if thread.backtrace
             warn thread.backtrace.join("\n")

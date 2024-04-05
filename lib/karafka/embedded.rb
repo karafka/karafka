@@ -8,6 +8,8 @@ module Karafka
       # so it won't interrupt other things running
       def start
         Thread.new do
+          Thread.current.name = 'karafka.embedded'
+
           Karafka::Process.tags.add(:execution_mode, 'embedded')
           Karafka::Server.start
         end
