@@ -110,7 +110,8 @@ module Karafka
         end
 
         @status.start!
-        async_call
+
+        async_call("karafka.listener##{@subscription_group.id}")
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and

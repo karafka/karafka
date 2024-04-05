@@ -22,16 +22,19 @@ module Karafka
         def included(base)
           base.extend ::Forwardable
 
-          base.def_delegators :@thread, :join, :terminate, :alive?
+          base.def_delegators :@thread, :join, :terminate, :alive?, :name
         end
       end
 
       # Runs the `#call` method in a new thread
-      def async_call
+      # @param thread_name [String] name that we want to assign to the thread when we start it
+      def async_call(thread_name = '')
         MUTEX.synchronize do
           return if @thread&.alive?
 
           @thread = Thread.new do
+            Thread.current.name = thread_name
+
             Thread.current.abort_on_exception = true
 
             call
