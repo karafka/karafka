@@ -35,7 +35,7 @@ end
 # None of them should be older than 1 second
 # Messages here can be slightly older than 1 second because there may be a distance in between the
 # moment we filtered and the moment we're processing. That is why we're adding 500 ms
-# We add 500ms because 200ms was not enough for slow CI with hickups
+# We add 500ms because 200ms was not enough for slow CI with hiccups
 assert(DT[0].map(&:last).all? { |age| age < 1.5 })
 
 previous = nil
