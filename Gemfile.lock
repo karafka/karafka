@@ -57,7 +57,7 @@ GEM
     minitest (5.22.3)
     mutex_m (0.2.0)
     rack (3.0.10)
-    rake (13.1.0)
+    rake (13.2.1)
     roda (3.78.0)
       rack
     rspec (3.13.0)
@@ -102,4 +102,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   2.5.6
+   2.5.7
