@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka 2.3.2+ should not work with Web UI version 0.8.2 or higher
+# Karafka 2.4.0+ should not work with Web UI version 0.9.0 lower than 0.9.0
 
 require 'open3'
 
@@ -35,7 +35,7 @@ Bundler.with_unbundled_env do
   system!('cd app && bundle install')
   msg = system!('cd app && bundle exec karafka install', raise_error: false)
 
-  exit if msg.include?('karafka-web < 0.8.2 is not compatible with this karafka version')
+  exit if msg.include?('karafka-web < 0.9.0 is not compatible with this karafka version')
 
   raise InvalidExitCode
 end
