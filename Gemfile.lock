@@ -47,17 +47,17 @@ GEM
     karafka-testing (2.4.0.rc1)
       karafka (>= 2.4.0.beta1, < 2.5.0)
       waterdrop (>= 2.7.0.rc1)
-    karafka-web (0.8.2)
+    karafka-web (0.9.0.rc1)
       erubi (~> 1.4)
-      karafka (>= 2.3.0, < 2.4.0)
-      karafka-core (>= 2.3.0, < 2.4.0)
+      karafka (>= 2.4.0.beta1, < 2.5.0)
+      karafka-core (>= 2.4.0.rc1, < 2.5.0)
       roda (~> 3.68, >= 3.69)
       tilt (~> 2.0)
     mini_portile2 (2.8.5)
     minitest (5.22.3)
     mutex_m (0.2.0)
     rack (3.0.10)
-    rake (13.1.0)
+    rake (13.2.1)
     roda (3.78.0)
       rack
     rspec (3.13.0)
@@ -96,10 +96,10 @@ DEPENDENCIES
   byebug
   factory_bot
   karafka!
-  karafka-testing (>= 2.4.0.beta1)
-  karafka-web
+  karafka-testing (>= 2.4.0.rc1)
+  karafka-web (>= 0.9.0.rc1)
   rspec
   simplecov
 
 BUNDLED WITH
-   2.5.6
+   2.5.7

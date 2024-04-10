@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-# Karafka 2.4+ should work ok with 0.9.0+
+# Karafka 2.4.0+ should not work with Web UI version 0.9.0 lower than 0.9.0
 
 require 'open3'
 
 InvalidExitCode = Class.new(StandardError)
-InvalidState = Class.new(StandardError)
 
 def system!(cmd, raise_error: true)
   stdout, stderr, status = Open3.capture3(cmd)
@@ -26,7 +25,7 @@ Bundler.with_unbundled_env do
       --skip-active-storage \
       --skip-active-job \
       --skip-action-cable \
-      --skip-asset-pipeline \
+      --api \
       --skip-action-mailer \
       --skip-active-record \
       app
@@ -34,6 +33,9 @@ Bundler.with_unbundled_env do
 
   system!('cp Gemfile ./app/')
   system!('cd app && bundle install')
-  system!('cd app && bundle exec karafka install')
-  system!('cd app && bundle exec karafka-web install')
+  msg = system!('cd app && bundle exec karafka install', raise_error: false)
+
+  exit if msg.include?('karafka-web < 0.9.0 is not compatible with this karafka version')
+
+  raise InvalidExitCode
 end
