@@ -42,10 +42,4 @@ Karafka::Admin.seek_consumer_group(
   }
 )
 
-results = Karafka::Admin.read_lags_with_offsets
-cg = DT.consumer_group
-part_results = results.fetch(cg).fetch(DT.topic)
-
-assert_equal 0, part_results[0][:offset]
-assert_equal 0, part_results[1][:offset]
-assert_equal 0, part_results[2][:offset]
+assert_equal fetch_first_offset, 0
