@@ -51,6 +51,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - [Fix] Re-raise critical supervisor errors before shutdown.
 - [Fix] Fix a case when right-open (infinite) swarm matching would not pass validations.
 - [Fix] Make `#enqueue_all` output compatible with `ActiveJob.perform_all_later` (oozzal)
+- [Fix] Seek consumer group on a topic level is updating only recent partition.
 
 ### Upgrade Notes
 

@@ -183,7 +183,13 @@ module Karafka
         tpl_base.each do |topic, partitions_with_offsets|
           partitions_with_offsets.each do |partition, offset|
             target = offset.is_a?(Time) ? time_tpl : tpl
-            target.add_topic_and_partitions_with_offsets(topic, [[partition, offset]])
+            # We reverse and uniq to make sure that potentially duplicated references are removed
+            # in such a way that the newest stays
+            target.to_h[topic] ||= []
+            target.to_h[topic] << Rdkafka::Consumer::Partition.new(partition, offset)
+            target.to_h[topic].reverse!
+            target.to_h[topic].uniq!(&:partition)
+            target.to_h[topic].reverse!
           end
         end
 
@@ -211,7 +217,11 @@ module Karafka
                 end
 
                 # Since now we have proper offsets, we can add this to the final tpl for commit
-                tpl.add_topic_and_partitions_with_offsets(name, [[partition, offset]])
+                tpl.to_h[name] ||= []
+                tpl.to_h[name] << Rdkafka::Consumer::Partition.new(partition, offset)
+                tpl.to_h[name].reverse!
+                tpl.to_h[name].uniq!(&:partition)
+                tpl.to_h[name].reverse!
               end
             end
           end
