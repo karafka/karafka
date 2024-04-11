@@ -36,9 +36,6 @@ def setup_karafka(
   become_pro! if pro
 
   Karafka::App.setup do |config|
-    # Use some decent defaults
-    caller_id = [caller_locations(1..1).first.path.split('/').last, SecureRandom.hex(6)].join('-')
-
     config.kafka = {
       'bootstrap.servers': '127.0.0.1:9092',
       'statistics.interval.ms': 100,
@@ -48,9 +45,9 @@ def setup_karafka(
       'queue.buffering.max.ms': 5,
       'partition.assignment.strategy': 'range,roundrobin'
     }
-    config.client_id = caller_id
+    config.client_id = DT.consumer_group
     # Prevents conflicts when running in parallel
-    config.group_id = caller_id
+    config.group_id = DT.consumer_group
     config.pause_timeout = 1
     config.pause_max_timeout = 1
     config.pause_with_exponential_backoff = false
