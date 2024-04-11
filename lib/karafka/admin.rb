@@ -263,6 +263,115 @@ module Karafka
         end
       end
 
+      # Reads lags and offsets for given topics in the context of consumer groups defined in the
+      #   routing
+      # @param consumer_groups_with_topics [Hash<String, Array<String>>] hash with consumer groups
+      #   names with array of topics to query per consumer group inside
+      # @param active_topics_only [Boolean] if set to false, when we use routing topics, will
+      #   select also topics that are marked as inactive in routing
+      # @return [Hash<String, Hash<Integer, <Hash<Integer>>>>] hash where the top level keys are
+      #   the consumer groups and values are hashes with topics and inside partitions with lags
+      #   and offsets
+      #
+      # @note For topics that do not exist, topic details will be set to an empty hash
+      #
+      # @note For topics that exist but were never consumed by a given CG we set `-1` as lag and
+      #   the offset on each of the partitions that were not consumed.
+      #
+      # @note This lag reporting is for committed lags and is "Kafka-centric", meaning that this
+      #   represents lags from Kafka perspective and not the consumer. They may differ.
+      def read_lags_with_offsets(consumer_groups_with_topics = {}, active_topics_only: true)
+        # We first fetch all the topics with partitions count that exist in the cluster so we
+        # do not query for topics that do not exist and so we can get partitions count for all
+        # the topics we may need. The non-existent and not consumed will be filled at the end
+        existing_topics = cluster_info.topics.map do |topic|
+          [topic[:topic_name], topic[:partition_count]]
+        end.to_h.freeze
+
+        # If no expected CGs, we use all from routing that have active topics
+        if consumer_groups_with_topics.empty?
+          consumer_groups_with_topics = Karafka::App.routes.map do |cg|
+            cg_topics = cg.topics.select do |cg_topic|
+              active_topics_only ? cg_topic.active? : true
+            end
+
+            [cg.id, cg_topics.map(&:name)]
+          end.to_h
+        end
+
+        # We make a copy because we will remove once with non-existing topics
+        # We keep original requested consumer groups with topics for later backfilling
+        cgs_with_topics = consumer_groups_with_topics.dup
+        cgs_with_topics.transform_values!(&:dup)
+
+        # We can query only topics that do exist, this is why we are cleaning those that do not
+        # exist
+        cgs_with_topics.each_value do |requested_topics|
+          requested_topics.delete_if { |topic| !existing_topics.include?(topic) }
+        end
+
+        groups_lags = Hash.new { |h, k| h[k] = {} }
+        groups_offs = Hash.new { |h, k| h[k] = {} }
+
+        cgs_with_topics.each do |cg, topics|
+          # Do not add to tpl topics that do not exist
+          next if topics.empty?
+
+          tpl = Rdkafka::Consumer::TopicPartitionList.new
+
+          with_consumer('group.id': cg) do |consumer|
+            topics.each { |topic| tpl.add_topic(topic, existing_topics[topic]) }
+
+            commit_offsets = consumer.committed(tpl)
+
+            commit_offsets.to_h.each do |topic, partitions|
+              groups_offs[cg][topic] = {}
+
+              partitions.each do |partition|
+                # -1 when no offset is stored
+                groups_offs[cg][topic][partition.partition] = partition.offset || -1
+              end
+            end
+
+            consumer.lag(commit_offsets).each do |topic, partitions_lags|
+              groups_lags[cg][topic] = partitions_lags
+            end
+          end
+        end
+
+        consumer_groups_with_topics.each do |cg, topics|
+          groups_lags[cg]
+
+          topics.each do |topic|
+            groups_lags[cg][topic] ||= {}
+
+            next unless existing_topics.key?(topic)
+
+            # We backfill because there is a case where our consumer group would consume for
+            # example only one partition out of 20, rest needs to get -1
+            existing_topics[topic].times do |partition_id|
+              groups_lags[cg][topic][partition_id] ||= -1
+            end
+          end
+        end
+
+        merged = Hash.new { |h, k| h[k] = {} }
+
+        groups_lags.each do |cg, topics|
+          topics.each do |topic, partitions|
+            merged[cg][topic] = {}
+
+            partitions.each do |partition, lag|
+              merged[cg][topic][partition] = {
+                offset: groups_offs.fetch(cg).fetch(topic).fetch(partition),
+                lag: lag
+              }
+            end
+          end
+        end
+
+        merged
+      end
       # @return [Rdkafka::Metadata] cluster metadata info
       def cluster_info
         with_admin(&:metadata)

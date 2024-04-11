@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.3.4 (2024-04-11)
+- [Enhancement] Provide `Karafka::Admin#read_lags_with_offsets` for ability to query lags and offsets of a given CG.
+
 ## 2.3.3 (2024-02-26)
 - [Enhancement] Routing based topics allocation for swarm (Pro)
 - [Enhancement] Publish the `-1` shutdown reason status for a non-responding node in swarm.
