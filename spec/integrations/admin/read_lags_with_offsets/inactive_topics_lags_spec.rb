@@ -21,7 +21,7 @@ def read_lags_with_offsets(details)
   Karafka::Admin.read_lags_with_offsets(details, active_topics_only: false)
 end
 
-CG1 = Karafka::App.config.group_id
+CG1 = 'app'
 
 produce_many(DT.topics[0], DT.uuids(10))
 2.times { |i| produce_many(DT.topics[1], DT.uuids(10), partition: i) }
