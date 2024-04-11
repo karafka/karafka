@@ -183,6 +183,8 @@ module Karafka
         tpl_base.each do |topic, partitions_with_offsets|
           partitions_with_offsets.each do |partition, offset|
             target = offset.is_a?(Time) ? time_tpl : tpl
+            # We reverse and uniq to make sure that potentially duplicated references are removed
+            # in such a way that the newest stays
             target.to_h[topic] ||= []
             target.to_h[topic] << Rdkafka::Consumer::Partition.new(partition, offset)
             target.to_h[topic].reverse!
