@@ -36,6 +36,10 @@ ARGV[1] = 'align'
 
 Karafka::Cli.start
 
+# Give a bit of time to cluster to sync up settings.
+# This is needed on slow CIs
+sleep(2)
+
 resources = [
   Karafka::Admin::Configs::Resource.new(type: :topic, name: DT.topics[0]),
   Karafka::Admin::Configs::Resource.new(type: :topic, name: DT.topics[1])
