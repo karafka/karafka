@@ -5,15 +5,7 @@
 
 setup_karafka
 
-class Consumer < Karafka::BaseConsumer
-  def consume
-    messages.each do |message|
-      DT[0] << message.offset
-    end
-  end
-end
-
-draw_routes(Consumer)
+draw_routes(Karafka::BaseConsumer)
 
 time_ref = nil
 
