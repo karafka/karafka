@@ -104,7 +104,7 @@ def setup_web
 
   # Use new groups and topics for each spec, so we don't end up with conflicts
   Karafka::Web.setup do |config|
-    config.processing.consumer_group = SecureRandom.hex(6)
+    config.group_id = SecureRandom.hex(6)
     config.topics.consumers.reports = SecureRandom.hex(6)
     config.topics.consumers.states = SecureRandom.hex(6)
     config.topics.consumers.metrics = SecureRandom.hex(6)
