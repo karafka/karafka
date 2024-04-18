@@ -12,7 +12,7 @@ gemspec
 group :integrations do
   gem 'activejob', require: false
   gem 'karafka-testing', '>= 2.4.0.rc1', require: false
-  gem 'karafka-web', '>= 0.9.0.rc1', require: false
+  gem 'karafka-web', '>= 0.9.0.rc3', require: false
   gem 'rspec', require: false
 end
 
