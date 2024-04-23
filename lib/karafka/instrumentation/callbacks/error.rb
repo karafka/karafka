@@ -6,6 +6,10 @@ module Karafka
     module Callbacks
       # Callback that kicks in when consumer error occurs and is published in a background thread
       class Error
+        include Helpers::ConfigImporter.new(
+          monitor: %i[monitor]
+        )
+
         # @param subscription_group_id [String] id of the current subscription group instance
         # @param consumer_group_id [String] id of the current consumer group
         # @param client_name [String] rdkafka client name
@@ -24,13 +28,22 @@ module Karafka
           # Same as with statistics (mor explanation there)
           return unless @client_name == client_name
 
-          ::Karafka.monitor.instrument(
+          monitor.instrument(
             'error.occurred',
             caller: self,
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
             type: 'librdkafka.error',
             error: error
+          )
+        rescue StandardError => e
+          monitor.instrument(
+            'error.occurred',
+            caller: self,
+            subscription_group_id: @subscription_group_id,
+            consumer_group_id: @consumer_group_id,
+            type: 'callbacks.error.error',
+            error: e
           )
         end
       end

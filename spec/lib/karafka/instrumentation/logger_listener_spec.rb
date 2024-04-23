@@ -464,9 +464,16 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
-    context 'when it is a statistics.emitted.error' do
-      let(:type) { 'statistics.emitted.error' }
-      let(:message) { "statistics.emitted processing failed due to an error: #{error}" }
+    context 'when it is a callbacks.statistics.error' do
+      let(:type) { 'callbacks.statistics.error' }
+      let(:message) { "callbacks.statistics processing failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a callbacks.error.error' do
+      let(:type) { 'callbacks.error.error' }
+      let(:message) { "callbacks.error processing failed due to an error: #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
