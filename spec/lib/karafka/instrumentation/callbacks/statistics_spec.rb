@@ -93,6 +93,7 @@ RSpec.describe_current do
       it 'expect to catch it and pipe to the instrumentation errors' do
         callback.call(statistics)
         expect(events).not_to be_empty
+        expect(events.last[:type]).to eq('callbacks.statistics.error')
       end
     end
   end

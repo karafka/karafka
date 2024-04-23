@@ -17,6 +17,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Feature]** Introduce ability to use custom message key deserializers.
 - **[Feature]** Introduce ability to use custom message headers deserializers.
 - **[Feature]** Provide `Karafka::Admin::Configs` API for cluster and topics configuration management.
+- [Enhancement] Protect critical `rdkafka` thread executable code sections.
 - [Enhancement] Assign names to internal threads for better debuggability when on `TTIN`.
 - [Enhancement] Provide `log_polling` setting to the `Karafka::Instrumentation::LoggerListener` to silence polling in any non-debug mode.
 - [Enhancement] Provide `metadata#message` to be able to retrieve message from metadata.
@@ -42,6 +43,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - [Enhancement] No longer raise `Karafka::UnsupportedCaseError` for not recognized error types to support dynamic errors reporting.
 - [Change] Do not create new proxy object to Rdkafka with certain low-level operations and re-use existing.
 - [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
+- [Change] Replace `statistics.emitted.error` error type with `callbacks.statistics.error` to align naming conventions.
 - [Fix] Pro Swarm liveness listener can report incorrect failure when dynamic multiplexing scales down.
 - [Fix] K8s liveness listener can report incorrect failure when dynamic multiplexing scales down.
 - [Fix] Fix a case where connection conductor would not be released during manager state changes.
