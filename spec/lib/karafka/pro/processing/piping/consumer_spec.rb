@@ -36,7 +36,7 @@ RSpec.describe_current do
 
       expect(consumer_instance)
         .to have_received(:produce_async)
-        .with(hash_including(topic: topic, key: '1', payload: 'message_payload'))
+        .with(hash_including(topic: topic, key: 'key', payload: 'message_payload'))
     end
   end
 
@@ -48,7 +48,7 @@ RSpec.describe_current do
 
       expect(consumer_instance)
         .to have_received(:produce_sync)
-        .with(hash_including(topic: topic, key: '1', payload: 'message_payload'))
+        .with(hash_including(topic: topic, key: 'key', payload: 'message_payload'))
     end
   end
 
