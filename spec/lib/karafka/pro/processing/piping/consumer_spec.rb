@@ -38,6 +38,25 @@ RSpec.describe_current do
         .to have_received(:produce_async)
         .with(hash_including(topic: topic, key: 'key', payload: 'message_payload'))
     end
+
+    context 'when there is no key' do
+      let(:message) do
+        build(
+          :messages_message,
+          topic: topic,
+          partition: 1,
+          raw_payload: 'message_payload'
+        )
+      end
+
+      it 'calls produce_sync with the partition as a key' do
+        consumer_instance.pipe_async(topic: topic, message: message)
+
+        expect(consumer_instance)
+          .to have_received(:produce_async)
+          .with(hash_including(topic: topic, key: '1', payload: 'message_payload'))
+      end
+    end
   end
 
   describe '#pipe_sync' do
@@ -49,6 +68,25 @@ RSpec.describe_current do
       expect(consumer_instance)
         .to have_received(:produce_sync)
         .with(hash_including(topic: topic, key: 'key', payload: 'message_payload'))
+    end
+
+    context 'when there is no key' do
+      let(:message) do
+        build(
+          :messages_message,
+          topic: topic,
+          partition: 1,
+          raw_payload: 'message_payload'
+        )
+      end
+
+      it 'calls produce_sync with the partition as a key' do
+        consumer_instance.pipe_sync(topic: topic, message: message)
+
+        expect(consumer_instance)
+          .to have_received(:produce_sync)
+          .with(hash_including(topic: topic, key: '1', payload: 'message_payload'))
+      end
     end
   end
 
