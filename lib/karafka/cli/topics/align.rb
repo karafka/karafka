@@ -89,9 +89,19 @@ module Karafka
             desired_configs.transform_keys!(&:to_s)
 
             topic_with_configs.configs.each do |config|
-              next unless desired_configs.key?(config.name)
+              names = config.synonyms.map(&:name) << config.name
 
-              desired_config = desired_configs.fetch(config.name)
+              # We move forward only if given topic config is for altering
+              next if (desired_configs.keys & names).empty?
+
+              desired_config = nil
+
+              # We then find last defined value in our configs for a given attribute
+              # Since attributes can have synonyms, we select last one, which will represent the
+              # last defined value in case someone defined same multiple times
+              desired_configs.each do |name, value|
+                desired_config = value if names.include?(name)
+              end
 
               # Do not migrate if existing and desired values are the same
               next if desired_config == config.value

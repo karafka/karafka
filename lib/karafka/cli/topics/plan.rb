@@ -143,13 +143,24 @@ module Karafka
               }
 
               scoped = @topics_to_alter[declarative][declarative_name]
+              # declarative name can be a synonym. In such cases we remap it during the discovery
+              # below
+              final_name = declarative_name
 
               topic_c.configs.each do |config|
-                next unless declarative_name == config.name
+                names = config.synonyms.map(&:name) << config.name
 
+                next unless names.include?(declarative_name)
+
+                # Always use a non-synonym name if differs
+                final_name = config.name
                 scoped[:action] = :change
                 scoped[:from] = config.value
               end
+
+              # Aligns the name in case synonym was used
+              target = @topics_to_alter[declarative].delete(declarative_name)
+              @topics_to_alter[declarative][final_name] = target
 
               # Remove change definitions that would migrate to the same value as present
               @topics_to_alter[declarative].delete_if do |_name, details|
