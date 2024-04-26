@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.4.0 (Unreleased)
+## 2.4.0 (2024-04-26)
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
