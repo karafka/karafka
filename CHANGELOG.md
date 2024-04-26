@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.4.1 (Unreleased)
+- [Fix] Support migrating via aliases and plan with aliases usage.
+
 ## 2.4.0 (2024-04-26)
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
