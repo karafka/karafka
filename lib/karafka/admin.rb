@@ -162,6 +162,18 @@ module Karafka
       #
       # @example Move offset to 5 seconds ago on partition 2
       #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 2 => 5.seconds.ago } })
+      #
+      # @example Move to the earliest offset on all the partitions of a topic
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => :earliest })
+      #
+      # @example Move to the latest (high-watermark) offset on all the partitions of a topic
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => :latest })
+      #
+      # @example Move offset of a single partition to earliest
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 1 => :earliest } })
+      #
+      # @example Move offset of a single partition to latest
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 1 => :latest } })
       def seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
         tpl_base = {}
 

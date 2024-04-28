@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.4.1 (Unreleased)
+- [Enhancement] Support `:earliest` and `:latest` in `Karafka::Admin#seek_consumer_group`.
 - [Fix] Support migrating via aliases and plan with aliases usage.
 
 ## 2.4.0 (2024-04-26)
