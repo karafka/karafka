@@ -11,6 +11,7 @@ ALLOWED_NAMES = %w[
   Gemfile.lock
   app.rb
   puma.rb
+  assertions.rb
 ].freeze
 
 not_prefixed = []
