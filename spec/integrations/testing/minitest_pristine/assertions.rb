@@ -15,6 +15,10 @@ Karafka::App.setup
 class ExampleConsumer < ApplicationConsumer
   def consume
     messages.each do |message|
+      message.payload
+      message.key
+      message.metadata
+
       mark_as_consumed(message)
     end
   end
