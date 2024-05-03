@@ -164,16 +164,16 @@ module Karafka
       #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 2 => 5.seconds.ago } })
       #
       # @example Move to the earliest offset on all the partitions of a topic
-      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => :earliest })
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => 'earliest' })
       #
       # @example Move to the latest (high-watermark) offset on all the partitions of a topic
-      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => :latest })
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => 'latest' })
       #
       # @example Move offset of a single partition to earliest
-      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 1 => :earliest } })
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 1 => 'earliest' } })
       #
       # @example Move offset of a single partition to latest
-      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 1 => :latest } })
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 1 => 'latest' } })
       def seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
         tpl_base = {}
 
@@ -194,18 +194,21 @@ module Karafka
 
         tpl_base.each_value do |partitions|
           partitions.transform_values! do |position|
+            # Support both symbol and string based references
+            casted_position = position.is_a?(Symbol) ? position.to_s : position
+
             # This remap allows us to transform some special cases in a reference that can be
             # understood by Kafka
-            case position
+            case casted_position
             # Earliest is not always 0. When compacting/deleting it can be much later, that's why
             # we fetch the oldest possible offset
-            when :earliest
+            when 'earliest'
               Time.now - HUNDRED_YEARS
             # Latest will always be the high-watermark offset and we can get it just by getting
             # a future position
-            when :latest
+            when 'latest'
               Time.now + HUNDRED_YEARS
-            # Same as `:earliest`
+            # Same as `'latest'`
             when false
               Time.now - HUNDRED_YEARS
             # Regular offset case
