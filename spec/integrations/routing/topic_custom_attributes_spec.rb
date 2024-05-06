@@ -9,7 +9,6 @@ class CustomAttributes < Karafka::Routing::Features::Base
   module Topic
     def custom_attributes(mine: -100, yours: -200)
       @custom_attributes ||= Config.new(
-        active: true,
         mine: mine,
         yours: yours
       )
@@ -17,11 +16,10 @@ class CustomAttributes < Karafka::Routing::Features::Base
   end
 
   Config = Struct.new(
-    :active,
     :mine,
     :yours,
     keyword_init: true
-  ) { alias_method :active?, :active }
+  )
 end
 
 CustomAttributes.activate
