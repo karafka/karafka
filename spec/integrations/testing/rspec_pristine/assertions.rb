@@ -2,13 +2,11 @@
 
 # This code is suppose to run the spec correctly and should not crash
 
-require 'active_support'
-require 'active_support/test_case'
-require 'minitest'
-require 'minitest/autorun'
-require 'mocha/minitest'
 require_relative 'karafka'
-require 'karafka/testing/minitest/helpers'
+require 'rspec'
+require 'rspec/autorun'
+require 'karafka/testing'
+require 'karafka/testing/rspec/helpers'
 
 Karafka::App.setup
 
@@ -26,14 +24,14 @@ class ExampleConsumer < ApplicationConsumer
   end
 end
 
-class Test < ActiveSupport::TestCase
-  include Karafka::Testing::Minitest::Helpers
+RSpec.configure do |config|
+  config.include Karafka::Testing::RSpec::Helpers
+end
 
-  def setup
-    @consumer = @karafka.consumer_for(:example)
-  end
+RSpec.describe ExampleConsumer do
+  subject(:consumer) { karafka.consumer_for(:example) }
 
-  test 'consume' do
+  it 'expect not to fail' do
     Karafka.producer.produce_async(
       topic: :example,
       payload: { foo: 'bar' }.to_json,
@@ -41,8 +39,6 @@ class Test < ActiveSupport::TestCase
       headers: { 'test' => 'me' }
     )
 
-    @consumer.consume
+    consumer.consume
   end
 end
-
-Minitest.run
