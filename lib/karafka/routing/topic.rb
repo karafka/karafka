@@ -81,7 +81,16 @@ module Karafka
       # Allows to disable topic by invoking this method and setting it to `false`.
       # @param active [Boolean] should this topic be consumed or not
       def active(active)
-        @active = active
+        # Do not allow for active overrides. Basically if this is set on the topic level, defaults
+        # will not overwrite it and this is desired. Otherwise because of the fact that this is
+        # not a full feature config but just a flag, default value would always overwrite the
+        # per-topic config since defaults application happens after the topic config block
+        unless @active_assigned
+          @active = active
+          @active_assigned = true
+        end
+
+        @active
       end
 
       # @return [Class] consumer class that we should use
