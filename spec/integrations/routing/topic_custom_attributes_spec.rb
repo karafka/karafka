@@ -13,16 +13,6 @@ class CustomAttributes < Karafka::Routing::Features::Base
         yours: yours
       )
     end
-
-    def custom_attributes?
-      custom_attributes.active?
-    end
-
-    def to_h
-      super.merge(
-        custom_attributes: custom_attributes.to_h
-      ).freeze
-    end
   end
 
   Config = Struct.new(
