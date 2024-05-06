@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# When by default all topics are active, we should be able to explicitely set it to inactive
+
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
