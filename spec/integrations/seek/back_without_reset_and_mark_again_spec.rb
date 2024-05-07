@@ -5,10 +5,6 @@
 setup_karafka
 
 class Consumer < Karafka::BaseConsumer
-  def initialize
-    super
-  end
-
   def consume
     if @seeked && !@marked
       mark_as_consumed!(messages.first)
@@ -21,12 +17,12 @@ class Consumer < Karafka::BaseConsumer
     messages.each do |message|
       mark_as_consumed!(message)
 
-      if message.offset == 9
-        @seeked = true
-        seek(1, reset_offset: false)
+      next until message.offset == 9
 
-        return
-      end
+      @seeked = true
+      seek(1, reset_offset: false)
+
+      return
     end
   end
 end
