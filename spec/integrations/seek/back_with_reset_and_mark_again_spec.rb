@@ -18,7 +18,7 @@ class Consumer < Karafka::BaseConsumer
     messages.each do |message|
       mark_as_consumed!(message)
 
-      next until message.offset == 9
+      next unless message.offset == 9
 
       @seeked = true
       seek(1, reset_offset: true)
