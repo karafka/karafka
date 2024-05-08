@@ -151,6 +151,7 @@ module Karafka
       # List of rdkafka producer accepted attributes
       PRODUCER = %i[
         acks
+        allow.auto.create.topics
         api.version.fallback.ms
         api.version.request
         api.version.request.timeout.ms
@@ -339,9 +340,6 @@ module Karafka
               next
             end
           end
-
-          # This can be removed when 0.13 librdkafka is released
-          attributes[:producer].delete_if { |val| val == 'allow.auto.create.topics' }
 
           attributes.transform_values!(&:sort)
           attributes.each_value { |vals| vals.map!(&:to_sym) }
