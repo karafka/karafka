@@ -2,6 +2,7 @@
 
 ## 2.4.1 (Unreleased)
 - [Enhancement] Support `:earliest` and `:latest` in `Karafka::Admin#seek_consumer_group`.
+- [Enhancement] Align configuration attributes mapper with exact librdkafka version used and not master.
 - [Maintenance] Use `base64` from RubyGems as it will no longer be part of standard library in Ruby 3.4.
 - [Fix] Support migrating via aliases and plan with aliases usage.
 - [Fix] Active with default set to `false` cannot be overwritten

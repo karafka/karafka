@@ -52,9 +52,7 @@ module Karafka
         fetch.wait.max.ms
         group.id
         group.instance.id
-        group.protocol
         group.protocol.type
-        group.remote.assignor
         heartbeat.interval.ms
         interceptors
         internal.termination.signal
@@ -89,8 +87,6 @@ module Karafka
         reconnect.backoff.max.ms
         reconnect.backoff.ms
         resolve_cb
-        retry.backoff.ms
-        retry.backoff.ms
         sasl.kerberos.keytab
         sasl.kerberos.kinit.cmd
         sasl.kerberos.min.time.before.relogin
@@ -291,7 +287,12 @@ module Karafka
       ].freeze
 
       # Location of the file with rdkafka settings list
-      SOURCE = 'https://raw.githubusercontent.com/edenhill/librdkafka/master/CONFIGURATION.md'
+      SOURCE = <<~SOURCE.delete("\n").gsub(/\s+/, '/')
+        https://raw.githubusercontent.com
+          confluentinc/librdkafka
+          v#{Rdkafka::LIBRDKAFKA_VERSION}
+          CONFIGURATION.md
+      SOURCE
 
       private_constant :SOURCE
 
