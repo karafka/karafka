@@ -89,6 +89,8 @@ module Karafka
         reconnect.backoff.max.ms
         reconnect.backoff.ms
         resolve_cb
+        retry.backoff.ms
+        retry.backoff.ms
         sasl.kerberos.keytab
         sasl.kerberos.kinit.cmd
         sasl.kerberos.min.time.before.relogin
