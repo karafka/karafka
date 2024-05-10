@@ -60,4 +60,4 @@ fast = Bench.new.bench { 1000.times { JobB.perform_later } }
 # It should take at least 1 second more (probably way more) to send via slow variant
 assert slow - fast > 1_000
 
-assert DT[:jobs].all? { |job_class| job_class == JobA }
+assert(DT[:jobs].all? { |job_class| job_class == JobA })
