@@ -6,6 +6,7 @@
 - [Maintenance] Use `base64` from RubyGems as it will no longer be part of standard library in Ruby 3.4.
 - [Fix] Support migrating via aliases and plan with aliases usage.
 - [Fix] Active with default set to `false` cannot be overwritten
+- [Fix] Fix inheritance of ActiveJob adapter `karafka_options` partitioner and dispatch method.
 
 ## 2.4.0 (2024-04-26)
 

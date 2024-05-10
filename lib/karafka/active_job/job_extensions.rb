@@ -23,6 +23,9 @@ module Karafka
         # them
         App.config.internal.active_job.job_options_contract.validate!(new_options)
 
+        # We need to modify this hash because otherwise we would modify parent hash.
+        self._karafka_options = _karafka_options.dup
+
         new_options.each do |name, value|
           _karafka_options[name] = value
         end
