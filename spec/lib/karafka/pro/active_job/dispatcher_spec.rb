@@ -40,6 +40,30 @@ RSpec.describe_current do
       end
     end
 
+    context 'when we dispatch with a custom producer' do
+      let(:variant) { ::Karafka.producer.with(max_wait_timeout: 100) }
+
+      before do
+        allow(variant).to receive(:produce_async)
+        allow(::Karafka.producer).to receive(:produce_async)
+
+        job_class.karafka_options(producer: ->(_) { variant })
+
+        dispatcher.dispatch(job)
+      end
+
+      it 'expect to use proper producer to dispatch the job' do
+        expect(variant).to have_received(:produce_async).with(
+          topic: job.queue_name,
+          payload: serialized_payload
+        )
+      end
+
+      it 'expect not to use the default producer' do
+        expect(::Karafka.producer).not_to have_received(:produce_async)
+      end
+    end
+
     context 'when we want to dispatch sync' do
       before do
         job_class.karafka_options(dispatch_method: :produce_sync)
@@ -135,6 +159,25 @@ RSpec.describe_current do
         dispatcher.dispatch_many(jobs)
 
         expect(::Karafka.producer).to have_received(:produce_many_sync).with(jobs_messages)
+      end
+    end
+
+    context 'when we want to dispatch with custom producer' do
+      let(:variant) { ::Karafka.producer.with(max_wait_timeout: 100) }
+
+      before do
+        job_class.karafka_options(producer: ->(_) { variant })
+        allow(::Karafka.producer).to receive(:produce_many_async)
+        allow(variant).to receive(:produce_many_async)
+        dispatcher.dispatch_many(jobs)
+      end
+
+      it 'expect to use proper producer to dispatch the jobs' do
+        expect(variant).to have_received(:produce_many_async).with(jobs_messages)
+      end
+
+      it 'expect not to use the default producer' do
+        expect(::Karafka.producer).not_to have_received(:produce_many_async)
       end
     end
 

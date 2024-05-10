@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.4.1 (Unreleased)
+- [Enhancement] Allow for usage of producer variants and alternative producers with ActiveJob Jobs (Pro).
 - [Enhancement] Support `:earliest` and `:latest` in `Karafka::Admin#seek_consumer_group`.
 - [Enhancement] Align configuration attributes mapper with exact librdkafka version used and not master.
 - [Maintenance] Use `base64` from RubyGems as it will no longer be part of standard library in Ruby 3.4.
