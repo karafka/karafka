@@ -25,6 +25,7 @@ module Karafka
           ).fetch('en').fetch('validations').fetch('job_options')
         end
 
+        optional(:producer) { |val| val.nil? || val.respond_to?(:call) }
         optional(:partitioner) { |val| val.respond_to?(:call) }
         optional(:partition_key_type) { |val| %i[key partition_key partition].include?(val) }
         optional(:dispatch_method) do |val|

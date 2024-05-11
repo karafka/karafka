@@ -6,7 +6,8 @@ RSpec.describe_current do
   let(:config) do
     {
       dispatch_method: :produce_sync,
-      partition_key_type: :key
+      partition_key_type: :key,
+      producer: nil
     }
   end
 
@@ -18,6 +19,18 @@ RSpec.describe_current do
     before { config.delete(:dispatch_method) }
 
     it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when there is no producer' do
+    before { config.delete(:producer) }
+
+    it { expect(contract.call(config)).to be_success }
+  end
+
+  context 'when producer does not respond to callable' do
+    before { config[:producer] = 1 }
+
+    it { expect(contract.call(config)).not_to be_success }
   end
 
   context 'when there is no partition key type' do

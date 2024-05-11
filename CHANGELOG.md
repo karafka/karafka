@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.4.2 (Unreleased)
+- [Enhancement] Validate ActiveJob adapter custom producer format.
+
 ## 2.4.1 (2024-05-10)
 - [Enhancement] Allow for usage of producer variants and alternative producers with ActiveJob Jobs (Pro).
 - [Enhancement] Support `:earliest` and `:latest` in `Karafka::Admin#seek_consumer_group`.
