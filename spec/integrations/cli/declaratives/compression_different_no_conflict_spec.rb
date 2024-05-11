@@ -17,7 +17,7 @@ end
 
 variant1 = Karafka.producer.with(
   topic_config: {
-    'compression.codec': 'zstd'
+    'compression.codec': 'lz4'
   }
 )
 
