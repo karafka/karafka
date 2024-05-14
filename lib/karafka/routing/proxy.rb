@@ -14,8 +14,8 @@ module Karafka
       #   proxy block context for example because whole context is taken from defaults
       def initialize(target, defaults = ->(_) {}, &block)
         @target = target
-        instance_eval(&block) if block
         instance_eval(&defaults) if defaults
+        instance_eval(&block) if block
       end
 
       # Translates the no "=" DSL of routing into elements assignments on target

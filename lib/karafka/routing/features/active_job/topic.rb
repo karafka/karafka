@@ -10,8 +10,10 @@ module Karafka
           #
           # @note Since this feature supports only one setting (active), we can use the old API
           # where the boolean would be an argument
-          def active_job(active = false)
-            @active_job ||= Config.new(active: active)
+          def active_job(active = :not_given)
+            @active_job ||= Config.new(active: false)
+            @active_job.active = active unless active == :not_given
+            @active_job
           end
 
           # @return [Boolean] is this an ActiveJob topic

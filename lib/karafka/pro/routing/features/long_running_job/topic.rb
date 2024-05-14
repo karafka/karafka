@@ -19,8 +19,10 @@ module Karafka
           # Long-Running Jobs topic API extensions
           module Topic
             # @param active [Boolean] do we want to enable long-running job feature for this topic
-            def long_running_job(active = false)
-              @long_running_job ||= Config.new(active: active)
+            def long_running_job(active = :not_given)
+              @long_running_job ||= Config.new(active: false)
+              @long_running_job.active = active unless active == :not_given
+              @long_running_job
             end
 
             alias long_running long_running_job

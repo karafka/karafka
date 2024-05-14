@@ -20,20 +20,19 @@ module Karafka
           module Topic
             # @param active [Boolean] should inline insights be activated
             # @param required [Boolean] are the insights required to operate
-            def inline_insights(active = -1, required: -1)
+            def inline_insights(active = :not_given, required: :not_given)
               # This weird style of checking allows us to activate inline insights in few ways:
               #   - inline_insights(true)
               #   - inline_insights(required: true)
               #   - inline_insights(required: false)
               #
               # In each of those cases inline insights will become active
-              @inline_insights ||= begin
-                config = Config.new(
-                  active: active == true || (active == -1 && required != -1),
-                  required: required == true
-                )
+              @inline_insights ||= Config.new(active: false, required: false)
+              begin
+                @inline_insights.active = active == true || active == :not_given && required != :not_given
+                @inline_insights.required = required == true
 
-                if config.active? && config.required?
+                if @inline_insights.active? && @inline_insights.required?
                   factory = lambda do |topic, partition|
                     Pro::Processing::Filters::InlineInsightsDelayer.new(topic, partition)
                   end
@@ -41,7 +40,7 @@ module Karafka
                   filter(factory)
                 end
 
-                config
+                @inline_insights
               end
             end
           end

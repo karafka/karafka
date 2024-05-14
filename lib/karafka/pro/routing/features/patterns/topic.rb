@@ -27,8 +27,14 @@ module Karafka
             # @param active [Boolean] is this topic active member of patterns
             # @param type [Symbol] type of topic taking part in pattern matching
             # @param pattern [Regexp] regular expression for matching
-            def patterns(active: false, type: :regular, pattern: nil)
-              @patterns ||= Config.new(active: active, type: type, pattern: pattern)
+            def patterns(active: :not_given, type: :not_given, pattern: :not_given)
+              @patterns ||= Config.new(active: false, type: :regular, pattern: nil)
+              if active != :not_given || type != :not_given || pattern != :not_given
+                @patterns.active = active unless active == :not_given
+                @patterns.type = type unless type == :not_given
+                @patterns.pattern = pattern unless pattern == :not_given
+              end
+              @patterns
             end
 
             # @return [Boolean] is this topic a member of patterns

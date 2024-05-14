@@ -30,6 +30,14 @@ module Karafka
         super
       end
 
+      def redraw(&block)
+        @mutex.synchronize do
+          @draws.clear
+          array_clear
+        end
+        draw(&block)
+      end
+
       # Used to draw routes for Karafka
       # @param block [Proc] block we will evaluate within the builder context
       # @yield Evaluates provided block in a builder context so we can describe routes
@@ -70,12 +78,14 @@ module Karafka
         select(&:active?)
       end
 
+      alias_method :array_clear, :clear
+
       # Clears the builder and the draws memory
       def clear
         @mutex.synchronize do
           @defaults = EMPTY_DEFAULTS
           @draws.clear
-          super
+          array_clear
         end
       end
 

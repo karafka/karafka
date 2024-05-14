@@ -19,17 +19,20 @@ module Karafka
           # Topic delaying API extensions
           module Topic
             # @param delay [Integer, nil] minimum age of a message we want to process
-            def delaying(delay = nil)
+            def delaying(delay = :not_given)
               # Those settings are used for validation
-              @delaying ||= begin
-                config = Config.new(active: !delay.nil?, delay: delay)
-
-                if config.active?
+              @delaying ||= Config.new(active: false, delay: nil)
+              unless delay == :not_given
+                @delaying.active = !delay.nil?
+                @delaying.delay = delay
+              end
+              begin
+                if @delaying.active?
                   factory = ->(*) { Pro::Processing::Filters::Delayer.new(delay) }
                   filter(factory)
                 end
 
-                config
+                @delaying
               end
             end
 

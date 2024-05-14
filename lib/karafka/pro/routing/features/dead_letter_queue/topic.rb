@@ -21,10 +21,11 @@ module Karafka
             # @param strategy [#call, nil] Strategy we want to use or nil if a default strategy
             # (same as in OSS) should be applied
             # @param args [Hash] OSS DLQ arguments
-            def dead_letter_queue(strategy: nil, **args)
-              return @dead_letter_queue if @dead_letter_queue
+            def dead_letter_queue(strategy: :not_given, **args)
+              orig = super(**args)
+              return orig if strategy == :not_given
 
-              super(**args).tap do |config|
+              orig.tap do |config|
                 # If explicit strategy is not provided, use the default approach from OSS
                 config.strategy = strategy || lambda do |_errors_tracker, attempt|
                   attempt > config.max_retries ? :dispatch : :retry

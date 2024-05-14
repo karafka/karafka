@@ -37,12 +37,14 @@ module Karafka
             # @param deserializer [#call] deserializer that will get raw data and should return
             #   deserialized metadata
             # @return [Config] this feature config
-            def offset_metadata(cache: true, deserializer: STRING_DESERIALIZER)
-              @offset_metadata ||= Config.new(
-                active: true,
-                cache: cache,
-                deserializer: deserializer
-              )
+            def offset_metadata(cache: :not_given, deserializer: :not_given)
+              @offset_metadata ||= Config.new(active: false, cache: true, deserializer: STRING_DESERIALIZER)
+              if cache != :not_given && deserializer != :not_given
+                @offset_metadata.active = true
+                @offset_metadata.cache = cache unless cache == :not_given
+                @offset_metadata.deserializer = deserializer unless deserializer == :not_given
+              end
+              @offset_metadata
             end
 
             # @return [true] is offset metadata active (it always is)

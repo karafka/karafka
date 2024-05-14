@@ -12,8 +12,10 @@ module Karafka
           #
           # @note Since this feature supports only one setting (active), we can use the old API
           # where the boolean would be an argument
-          def manual_offset_management(active = false)
-            @manual_offset_management ||= Config.new(active: active)
+          def manual_offset_management(active = :not_given)
+            @manual_offset_management ||= Config.new(active: false)
+            @manual_offset_management.active = active unless active == :not_given
+            @manual_offset_management
           end
 
           # @return [Boolean] is manual offset management enabled for a given topic

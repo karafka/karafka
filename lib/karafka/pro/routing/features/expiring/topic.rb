@@ -19,17 +19,19 @@ module Karafka
           # Topic expiring API extensions
           module Topic
             # @param ttl [Integer, nil] maximum time in ms a message is considered alive
-            def expiring(ttl = nil)
+            def expiring(ttl = :not_given)
               # Those settings are used for validation
-              @expiring ||= begin
-                config = Config.new(active: !ttl.nil?, ttl: ttl)
+              @expiring ||= Config.new(active: false, ttl: nil)
+              begin
+                @expiring.active = !ttl.nil?
+                @expiring.ttl = ttl
 
-                if config.active?
+                if @expiring.active?
                   factory = ->(*) { Pro::Processing::Filters::Expirer.new(ttl) }
                   filter(factory)
                 end
 
-                config
+                @expiring
               end
             end
 

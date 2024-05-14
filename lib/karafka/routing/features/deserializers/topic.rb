@@ -13,16 +13,18 @@ module Karafka
           # @param key [Object] deserializer for the message key
           # @param headers [Object] deserializer for the message headers
           def deserializers(
-            payload: ::Karafka::Deserializers::Payload.new,
-            key: ::Karafka::Deserializers::Key.new,
-            headers: ::Karafka::Deserializers::Headers.new
+            payload: :not_given,
+            key: :not_given,
+            headers: :not_given
           )
-            @deserializers ||= Config.new(
-              active: true,
-              payload: payload,
-              key: key,
-              headers: headers
-            )
+            @deserializers ||= Config.new(active: true,
+                                          payload: ::Karafka::Deserializers::Payload.new,
+                                          key: ::Karafka::Deserializers::Key.new,
+                                          headers: ::Karafka::Deserializers::Headers.new)
+            @deserializers.payload = payload unless payload == :not_given
+            @deserializers.key = key unless key == :not_given
+            @deserializers.headers = headers unless headers == :not_given
+            @deserializers
           end
 
           # Supports pre 2.4 format where only payload deserializer could be defined. We do not
