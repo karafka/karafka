@@ -402,7 +402,9 @@ module Karafka
           # then seek to the appropriate message
           # We set the timeout to 2_000 to make sure that remote clusters handle this well
           real_offsets = @wrapped_kafka.offsets_for_times(tpl)
-          detected_partition = real_offsets.to_h.dig(message.topic, message.partition)
+          # We always ask for one partition, so result will contain array with only one element
+          # that is the partition we were interested it regardless its number
+          detected_partition = real_offsets.to_h.dig(message.topic, 0)
 
           # There always needs to be an offset. In case we seek into the future, where there
           # are no offsets yet, we get -1 which indicates the most recent offset
