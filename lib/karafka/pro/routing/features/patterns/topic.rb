@@ -29,11 +29,11 @@ module Karafka
             # @param pattern [Regexp] regular expression for matching
             def patterns(active: :not_given, type: :not_given, pattern: :not_given)
               @patterns ||= Config.new(active: false, type: :regular, pattern: nil)
-              if active != :not_given || type != :not_given || pattern != :not_given
-                @patterns.active = active unless active == :not_given
-                @patterns.type = type unless type == :not_given
-                @patterns.pattern = pattern unless pattern == :not_given
-              end
+              return @patterns if [active, type, pattern].uniq == [:not_given]
+
+              @patterns.active = active unless active == :not_given
+              @patterns.type = type unless type == :not_given
+              @patterns.pattern = pattern unless pattern == :not_given
               @patterns
             end
 

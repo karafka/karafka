@@ -17,6 +17,8 @@ module Karafka
               partitions: 1,
               replication_factor: 1
             )
+            return @declaratives if [active, partitions, replication_factor].uniq == [:not_given]
+
             @declaratives.active = active unless active == :not_given
             @declaratives.partitions = partitions unless partitions == :not_given
             @declaratives.replication_factor = replication_factor unless replication_factor == :not_given

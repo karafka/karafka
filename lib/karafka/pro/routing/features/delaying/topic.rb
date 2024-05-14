@@ -22,10 +22,11 @@ module Karafka
             def delaying(delay = :not_given)
               # Those settings are used for validation
               @delaying ||= Config.new(active: false, delay: nil)
-              unless delay == :not_given
-                @delaying.active = !delay.nil?
-                @delaying.delay = delay
-              end
+              return @delaying if delay == :not_given
+
+              @delaying.active = !delay.nil?
+              @delaying.delay = delay
+
               begin
                 if @delaying.active?
                   factory = ->(*) { Pro::Processing::Filters::Delayer.new(delay) }

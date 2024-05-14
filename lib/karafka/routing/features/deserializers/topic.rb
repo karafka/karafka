@@ -21,6 +21,8 @@ module Karafka
                                           payload: ::Karafka::Deserializers::Payload.new,
                                           key: ::Karafka::Deserializers::Key.new,
                                           headers: ::Karafka::Deserializers::Headers.new)
+            return @deserializers if [payload, key, headers].uniq == [:not_given]
+
             @deserializers.payload = payload unless payload == :not_given
             @deserializers.key = key unless key == :not_given
             @deserializers.headers = headers unless headers == :not_given

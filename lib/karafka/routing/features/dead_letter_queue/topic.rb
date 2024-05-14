@@ -38,6 +38,10 @@ module Karafka
               dispatch_method: :produce_async,
               marking_method: :mark_as_consumed
             )
+            if [topic, max_retries, independent, transactional, dispatch_method, marking_method].uniq == [:not_given]
+              return @dead_letter_queue
+            end
+
             @dead_letter_queue.active = topic != :not_given
             @dead_letter_queue.max_retries = max_retries unless max_retries == :not_given
             @dead_letter_queue.independent = independent unless independent == :not_given

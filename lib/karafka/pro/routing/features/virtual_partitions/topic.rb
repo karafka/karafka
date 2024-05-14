@@ -33,12 +33,19 @@ module Karafka
               partitioner: nil,
               offset_metadata_strategy: :current
             )
-              @virtual_partitions ||= Config.new(
-                active: !partitioner.nil?,
-                max_partitions: max_partitions,
-                partitioner: partitioner,
-                offset_metadata_strategy: offset_metadata_strategy
+              @virtual_partitions ||= Config.new( max_partitions: Karafka::App.config.concurrency,
+                                                  partitioner: nil,
+                                                  offset_metadata_strategy: :current
               )
+              if [max_partitions, partitioner, offset_metadata_strategy].uniq == [:not_given]
+                return @virtual_partitions
+              end
+
+              @virtual_partitions.max_partitions = max_partitions
+              @virtual_partitions.partitioner = partitioner
+              @virtual_partitions.offset_metadata_strategy = offset_metadata_strategy
+              @virtual_partitions.active = !@virtual_partitions.partitioner.nil?
+              @virtual_partitions
             end
 
             # @return [Boolean] are virtual partitions enabled for given topic

@@ -39,11 +39,11 @@ module Karafka
             # @return [Config] this feature config
             def offset_metadata(cache: :not_given, deserializer: :not_given)
               @offset_metadata ||= Config.new(active: false, cache: true, deserializer: STRING_DESERIALIZER)
-              if cache != :not_given && deserializer != :not_given
-                @offset_metadata.active = true
-                @offset_metadata.cache = cache unless cache == :not_given
-                @offset_metadata.deserializer = deserializer unless deserializer == :not_given
-              end
+              return @offset_metadata if cache != :not_given && deserializer != :not_given
+
+              @offset_metadata.active = true
+              @offset_metadata.cache = cache unless cache == :not_given
+              @offset_metadata.deserializer = deserializer unless deserializer == :not_given
               @offset_metadata
             end
 

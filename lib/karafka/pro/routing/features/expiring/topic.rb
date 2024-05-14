@@ -23,8 +23,8 @@ module Karafka
               # Those settings are used for validation
               @expiring ||= Config.new(active: false, ttl: nil)
               begin
-                @expiring.active = !ttl.nil?
                 @expiring.ttl = ttl
+                @expiring.active = !@expiring.ttl.nil?
 
                 if @expiring.active?
                   factory = ->(*) { Pro::Processing::Filters::Expirer.new(ttl) }

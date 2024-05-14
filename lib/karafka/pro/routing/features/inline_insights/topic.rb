@@ -28,6 +28,8 @@ module Karafka
               #
               # In each of those cases inline insights will become active
               @inline_insights ||= Config.new(active: false, required: false)
+              return @inline_insights if [active, required].uniq == [:not_given]
+
               begin
                 @inline_insights.active = active == true || active == :not_given && required != :not_given
                 @inline_insights.required = required == true

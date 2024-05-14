@@ -44,8 +44,12 @@ module Karafka
             #       1 => (3..5)
             #     }
             #   )
-            def swarm(nodes: (0...Karafka::App.config.swarm.nodes))
-              @swarm ||= Config.new(active: true, nodes: nodes)
+            def swarm(nodes: :not_given)
+              @swarm ||= Config.new(active: true, nodes: (0...Karafka::App.config.swarm.nodes))
+              return @swarm if nodes == :not_given
+
+              @swarm.nodes = nodes
+              @swarm
             end
 
             # @return [true] swarm setup is always true. May not be in use but is active
