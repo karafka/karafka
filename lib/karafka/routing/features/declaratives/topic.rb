@@ -15,7 +15,8 @@ module Karafka
             @declaratives ||= Config.new(
               active: true,
               partitions: 1,
-              replication_factor: 1
+              replication_factor: 1,
+              details: {}
             )
             return @declaratives if [active, partitions, replication_factor].uniq == [Undefined]
 

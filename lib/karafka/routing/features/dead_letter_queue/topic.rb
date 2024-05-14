@@ -33,6 +33,7 @@ module Karafka
           )
             @dead_letter_queue ||= Config.new(
               max_retries: DEFAULT_MAX_RETRIES,
+              active: false,
               independent: false,
               transactional: true,
               dispatch_method: :produce_async,
