@@ -23,7 +23,7 @@ module Karafka
             @declaratives.active = active unless active == Undefined
             @declaratives.partitions = partitions unless partitions == Undefined
             @declaratives.replication_factor = replication_factor unless replication_factor == Undefined
-            @declaratives.details = details
+            @declaratives.details.merge!(details)
             @declaratives
           end
 
