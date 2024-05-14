@@ -27,13 +27,13 @@ module Karafka
             # @param active [Boolean] is this topic active member of patterns
             # @param type [Symbol] type of topic taking part in pattern matching
             # @param pattern [Regexp] regular expression for matching
-            def patterns(active: :not_given, type: :not_given, pattern: :not_given)
+            def patterns(active: Undefined, type: Undefined, pattern: Undefined)
               @patterns ||= Config.new(active: false, type: :regular, pattern: nil)
-              return @patterns if [active, type, pattern].uniq == [:not_given]
+              return @patterns if [active, type, pattern].uniq == [Undefined]
 
-              @patterns.active = active unless active == :not_given
-              @patterns.type = type unless type == :not_given
-              @patterns.pattern = pattern unless pattern == :not_given
+              @patterns.active = active unless active == Undefined
+              @patterns.type = type unless type == Undefined
+              @patterns.pattern = pattern unless pattern == Undefined
               @patterns
             end
 

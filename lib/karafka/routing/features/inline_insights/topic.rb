@@ -7,9 +7,9 @@ module Karafka
         # Routing topic inline insights API
         module Topic
           # @param active [Boolean] should inline insights be activated
-          def inline_insights(active = :not_given)
+          def inline_insights(active = Undefined)
             @inline_insights ||= Config.new(active: false)
-            @inline_insights.active = active unless active == :not_given
+            @inline_insights.active = active unless active == Undefined
             @inline_insights
           end
 

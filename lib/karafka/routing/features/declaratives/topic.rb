@@ -11,17 +11,17 @@ module Karafka
           # @param replication_factor [Integer]
           # @param details [Hash] extra configuration for the topic
           # @return [Config] defined structure
-          def config(active: :not_given, partitions: :not_given, replication_factor: :not_given, **details)
+          def config(active: Undefined, partitions: Undefined, replication_factor: Undefined, **details)
             @declaratives ||= Config.new(
               active: true,
               partitions: 1,
               replication_factor: 1
             )
-            return @declaratives if [active, partitions, replication_factor].uniq == [:not_given]
+            return @declaratives if [active, partitions, replication_factor].uniq == [Undefined]
 
-            @declaratives.active = active unless active == :not_given
-            @declaratives.partitions = partitions unless partitions == :not_given
-            @declaratives.replication_factor = replication_factor unless replication_factor == :not_given
+            @declaratives.active = active unless active == Undefined
+            @declaratives.partitions = partitions unless partitions == Undefined
+            @declaratives.replication_factor = replication_factor unless replication_factor == Undefined
             @declaratives.details = details
             @declaratives
           end

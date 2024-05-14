@@ -20,9 +20,9 @@ module Karafka
           module Topic
             # @param factory [#call, nil] Callable that can produce new filters instances per
             #   assigned topic partition. nil as default so this feature is disabled
-            def filter(factory = :not_given)
+            def filter(factory = Undefined)
               @filtering ||= Config.new(factories: [])
-              @filtering.factories << factory if factory && factory != :not_given
+              @filtering.factories << factory if factory && factory != Undefined
               @filtering
             end
 

@@ -13,19 +13,19 @@ module Karafka
           # @param key [Object] deserializer for the message key
           # @param headers [Object] deserializer for the message headers
           def deserializers(
-            payload: :not_given,
-            key: :not_given,
-            headers: :not_given
+            payload: Undefined,
+            key: Undefined,
+            headers: Undefined
           )
             @deserializers ||= Config.new(active: true,
                                           payload: ::Karafka::Deserializers::Payload.new,
                                           key: ::Karafka::Deserializers::Key.new,
                                           headers: ::Karafka::Deserializers::Headers.new)
-            return @deserializers if [payload, key, headers].uniq == [:not_given]
+            return @deserializers if [payload, key, headers].uniq == [Undefined]
 
-            @deserializers.payload = payload unless payload == :not_given
-            @deserializers.key = key unless key == :not_given
-            @deserializers.headers = headers unless headers == :not_given
+            @deserializers.payload = payload unless payload == Undefined
+            @deserializers.key = key unless key == Undefined
+            @deserializers.headers = headers unless headers == Undefined
             @deserializers
           end
 

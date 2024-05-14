@@ -37,7 +37,7 @@ module Karafka
                                                   partitioner: nil,
                                                   offset_metadata_strategy: :current
               )
-              if [max_partitions, partitioner, offset_metadata_strategy].uniq == [:not_given]
+              if [max_partitions, partitioner, offset_metadata_strategy].uniq == [Undefined]
                 return @virtual_partitions
               end
 

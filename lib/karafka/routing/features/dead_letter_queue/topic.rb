@@ -24,12 +24,12 @@ module Karafka
           #   whether marking on DLQ should be async or sync (async by default)
           # @return [Config] defined config
           def dead_letter_queue(
-            max_retries: :not_given,
-            topic: :not_given,
-            independent: :not_given,
-            transactional: :not_given,
-            dispatch_method: :not_given,
-            marking_method: :not_given
+            max_retries: Undefined,
+            topic: Undefined,
+            independent: Undefined,
+            transactional: Undefined,
+            dispatch_method: Undefined,
+            marking_method: Undefined
           )
             @dead_letter_queue ||= Config.new(
               max_retries: DEFAULT_MAX_RETRIES,
@@ -38,16 +38,16 @@ module Karafka
               dispatch_method: :produce_async,
               marking_method: :mark_as_consumed
             )
-            if [topic, max_retries, independent, transactional, dispatch_method, marking_method].uniq == [:not_given]
+            if [topic, max_retries, independent, transactional, dispatch_method, marking_method].uniq == [Undefined]
               return @dead_letter_queue
             end
 
-            @dead_letter_queue.active = topic != :not_given
-            @dead_letter_queue.max_retries = max_retries unless max_retries == :not_given
-            @dead_letter_queue.independent = independent unless independent == :not_given
-            @dead_letter_queue.transactional = transactional unless transactional == :not_given
-            @dead_letter_queue.dispatch_method = dispatch_method unless dispatch_method == :not_given
-            @dead_letter_queue.marking_method = marking_method unless marking_method == :not_given
+            @dead_letter_queue.active = topic != Undefined
+            @dead_letter_queue.max_retries = max_retries unless max_retries == Undefined
+            @dead_letter_queue.independent = independent unless independent == Undefined
+            @dead_letter_queue.transactional = transactional unless transactional == Undefined
+            @dead_letter_queue.dispatch_method = dispatch_method unless dispatch_method == Undefined
+            @dead_letter_queue.marking_method = marking_method unless marking_method == Undefined
             @dead_letter_queue
           end
 
