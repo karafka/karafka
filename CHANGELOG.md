@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.4.2 (Unreleased)
+## 2.4.2 (2024-05-14)
 - [Enhancement] Validate ActiveJob adapter custom producer format.
 - [Fix] Internal seek does not resolve the offset correctly for time based lookup.
 
