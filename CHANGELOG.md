@@ -2,6 +2,7 @@
 
 ## 2.4.2 (Unreleased)
 - [Enhancement] Validate ActiveJob adapter custom producer format.
+- [Fix] Internal seek does not resolve the offset correctly for time based lookup.
 
 ## 2.4.1 (2024-05-10)
 - [Enhancement] Allow for usage of producer variants and alternative producers with ActiveJob Jobs (Pro).
