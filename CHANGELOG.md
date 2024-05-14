@@ -73,6 +73,10 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 
 Available [here](https://karafka.io/docs/Upgrades-2.4/).
 
+## 2.3.4 (2024-04-11)
+
+- [Fix] Seek consumer group on a topic level is updating only recent partition.
+
 ## 2.3.3 (2024-02-26)
 - [Enhancement] Routing based topics allocation for swarm (Pro)
 - [Enhancement] Publish the `-1` shutdown reason status for a non-responding node in swarm.
