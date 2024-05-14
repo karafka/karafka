@@ -44,6 +44,7 @@ module Karafka
             end
 
             @dead_letter_queue.active = topic != Undefined
+            @dead_letter_queue.topic = topic unless topic == Undefined
             @dead_letter_queue.max_retries = max_retries unless max_retries == Undefined
             @dead_letter_queue.independent = independent unless independent == Undefined
             @dead_letter_queue.transactional = transactional unless transactional == Undefined

@@ -16,7 +16,7 @@ module Karafka
               active: true,
               partitions: 1,
               replication_factor: 1,
-              details: {}
+              details: details
             )
             return @declaratives if [active, partitions, replication_factor].uniq == [Undefined]
 
