@@ -553,6 +553,12 @@ module Karafka
           early_report = true
         when :transport # -195
           early_report = true
+        when :topic_authorization_failed # 29
+          early_report = true
+        when :group_authorization_failed # 30
+          early_report = true
+        when :cluster_authorization_failed # 31
+          early_report = true
         # @see
         # https://github.com/confluentinc/confluent-kafka-dotnet/issues/1366#issuecomment-821842990
         # This will be raised each time poll detects a non-existing topic. When auto creation is
