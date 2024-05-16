@@ -15,16 +15,10 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-Karafka.monitor.subscribe('statistics.emitted') do |event|
-  next if event[:statistics]['topics'].empty?
-
-  DT[:topic] = true
-end
-
 draw_routes(Consumer)
 
 start_karafka_and_wait_until do
-  sleep(0.1) until DT.key?(:topic)
+  wait_for_assignments
 
   unless @sent
     @sent = true

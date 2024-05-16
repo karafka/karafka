@@ -350,6 +350,22 @@ def start_karafka_and_wait_until(mode: :server, reset_status: false, &block)
   Karafka::App.config.internal.connection.manager = manager_class.new
 end
 
+# Sleeps until Karafka has an assignment on requested topics
+# @param topics [Array<String>] list of topics for which assignments we wait
+def wait_for_assignments(*topics)
+  topics << DT.topic if topics.empty?
+
+  Karafka.monitor.subscribe('statistics.emitted') do |event|
+    next unless topics.all? do |topic|
+      event[:statistics]['topics'].key?(topic)
+    end
+
+    DT[:topics_assignments_ready] = true
+  end
+
+  sleep(0.1) until DT.key?(:topics_assignments_ready)
+end
+
 # Sends data to Kafka in a sync way
 # @param topic [String] topic name
 # @param payload [String, nil] data we want to send
