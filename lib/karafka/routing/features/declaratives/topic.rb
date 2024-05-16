@@ -11,18 +11,18 @@ module Karafka
           # @param replication_factor [Integer]
           # @param details [Hash] extra configuration for the topic
           # @return [Config] defined structure
-          def config(active: Undefined, partitions: Undefined, replication_factor: Undefined, **details)
+          def config(active: Default.new(true), partitions: Default.new(1), replication_factor: Default.new(1), **details)
             @declaratives ||= Config.new(
-              active: true,
-              partitions: 1,
-              replication_factor: 1,
-              details: {}
+              active: active,
+              partitions: partitions,
+              replication_factor: replication_factor,
+              details: details
             )
-            return @declaratives if [active, partitions, replication_factor].uniq == [Undefined] && details.empty?
+            return @declaratives if Config.all_defaults?(active, partitions, replication_factor)
 
-            @declaratives.active = active unless active == Undefined
-            @declaratives.partitions = partitions unless partitions == Undefined
-            @declaratives.replication_factor = replication_factor unless replication_factor == Undefined
+            @declaratives.active = active
+            @declaratives.partitions = partitions
+            @declaratives.replication_factor = replication_factor
             @declaratives.details.merge!(details)
             @declaratives
           end

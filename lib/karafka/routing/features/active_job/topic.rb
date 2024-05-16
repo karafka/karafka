@@ -10,9 +10,9 @@ module Karafka
           #
           # @note Since this feature supports only one setting (active), we can use the old API
           # where the boolean would be an argument
-          def active_job(active = Undefined)
-            @active_job ||= Config.new(active: false)
-            @active_job.active = active unless active == Undefined
+          def active_job(active = Default.new(false))
+            @active_job ||= Config.new(active: active)
+            @active_job.active = active
             @active_job
           end
 

@@ -17,7 +17,7 @@ module Karafka
       module Features
         class Expiring < Base
           # Expiring feature configuration
-          Config = Struct.new(:active, :ttl, keyword_init: true) do
+          Config = Karafka::Routing::BaseConfig.define(:active, :ttl) do
             alias_method :active?, :active
           end
         end

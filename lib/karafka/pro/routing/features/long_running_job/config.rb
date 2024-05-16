@@ -17,10 +17,7 @@ module Karafka
       module Features
         class LongRunningJob < Base
           # Long-Running Jobs configuration
-          Config = Struct.new(
-            :active,
-            keyword_init: true
-          ) { alias_method :active?, :active }
+          Config = Karafka::Routing::BaseConfig.define(:active) { alias_method :active?, :active }
         end
       end
     end

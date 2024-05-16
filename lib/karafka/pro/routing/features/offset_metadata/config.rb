@@ -17,12 +17,10 @@ module Karafka
       module Features
         class OffsetMetadata < Base
           # Config for commit metadata feature
-          Config = Struct.new(
+          Config = Karafka::Routing::BaseConfig.define(
             :active,
             :deserializer,
-            :cache,
-            keyword_init: true
-          ) do
+            :cache) do
             alias_method :active?, :active
             alias_method :cache?, :cache
           end

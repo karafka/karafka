@@ -44,9 +44,9 @@ module Karafka
             #       1 => (3..5)
             #     }
             #   )
-            def swarm(nodes: Undefined)
-              @swarm ||= Config.new(active: true, nodes: (0...Karafka::App.config.swarm.nodes))
-              return @swarm if nodes == Undefined
+            def swarm(nodes: Default.new((0...Karafka::App.config.swarm.nodes)))
+              @swarm ||= Config.new(active: true, nodes: nodes)
+              return @swarm if Config.all_defaults?(nodes)
 
               @swarm.nodes = nodes
               @swarm

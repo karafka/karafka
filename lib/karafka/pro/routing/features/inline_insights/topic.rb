@@ -20,18 +20,18 @@ module Karafka
           module Topic
             # @param active [Boolean] should inline insights be activated
             # @param required [Boolean] are the insights required to operate
-            def inline_insights(active = Undefined, required: Undefined)
+            def inline_insights(active = Default.new(false), required: Default.new(false))
               # This weird style of checking allows us to activate inline insights in few ways:
               #   - inline_insights(true)
               #   - inline_insights(required: true)
               #   - inline_insights(required: false)
               #
               # In each of those cases inline insights will become active
-              @inline_insights ||= Config.new(active: false, required: false)
-              return @inline_insights if [active, required].uniq == [Undefined]
+              @inline_insights ||= Config.new(active: active, required: required)
+              return @inline_insights if Config.all_defaults?(active, required)
 
               begin
-                @inline_insights.active = active == true || active == Undefined && required != Undefined
+                @inline_insights.active = active == true || (active.is_a?(Default) && !required.is_a?(Default))
                 @inline_insights.required = required == true
 
                 if @inline_insights.active? && @inline_insights.required?

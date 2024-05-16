@@ -17,12 +17,10 @@ module Karafka
       module Features
         class Throttling < Base
           # Throttling feature configuration
-          Config = Struct.new(
+          Config = Karafka::Routing::BaseConfig.define(
             :active,
             :limit,
-            :interval,
-            keyword_init: true
-          ) do
+            :interval) do
             alias_method :active?, :active
           end
         end

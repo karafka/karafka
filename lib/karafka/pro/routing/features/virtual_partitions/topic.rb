@@ -29,15 +29,15 @@ module Karafka
             # @return [VirtualPartitions] method that allows to set the virtual partitions details
             #   during the routing configuration and then allows to retrieve it
             def virtual_partitions(
-              max_partitions: Karafka::App.config.concurrency,
-              partitioner: nil,
-              offset_metadata_strategy: :current
+              max_partitions: Default.new(Karafka::App.config.concurrency),
+              partitioner: Default.new,
+              offset_metadata_strategy: Default.new(:current)
             )
-              @virtual_partitions ||= Config.new( max_partitions: Karafka::App.config.concurrency,
-                                                  partitioner: nil,
-                                                  offset_metadata_strategy: :current
+              @virtual_partitions ||= Config.new( max_partitions: max_partitions,
+                                                  partitioner: partitioner,
+                                                  offset_metadata_strategy: offset_metadata_strategy
               )
-              if [max_partitions, partitioner, offset_metadata_strategy].uniq == [Undefined]
+              if Config.all_defaults?(max_partitions, partitioner, offset_metadata_strategy)
                 return @virtual_partitions
               end
 

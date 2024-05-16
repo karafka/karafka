@@ -5,12 +5,11 @@ module Karafka
     module Features
       class Declaratives < Base
         # Config for declarative topics feature
-        Config = Struct.new(
+        Config = BaseConfig.define(
           :active,
           :partitions,
           :replication_factor,
-          :details,
-          keyword_init: true
+          :details
         ) { alias_method :active?, :active }
       end
     end

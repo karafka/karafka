@@ -5,7 +5,7 @@ module Karafka
     module Features
       class DeadLetterQueue < Base
         # Config for dead letter queue feature
-        Config = Struct.new(
+        Config = BaseConfig.define(
           :active,
           # We add skip variants but in regular we support only `:one`
           :max_retries,
@@ -21,8 +21,6 @@ module Karafka
           :dispatch_method,
           # Should we use `#mark_as_consumed` or `#mark_as_consumed!` (in flows that mark)
           :marking_method,
-          # Initialize with kwargs
-          keyword_init: true
         ) do
           alias_method :active?, :active
           alias_method :independent?, :independent

@@ -17,12 +17,11 @@ module Karafka
       module Features
         class VirtualPartitions < Base
           # Config for virtual partitions
-          Config = Struct.new(
+          Config = Karafka::Routing::BaseConfig.define(
             :active,
             :partitioner,
             :max_partitions,
-            :offset_metadata_strategy,
-            keyword_init: true
+            :offset_metadata_strategy
           ) { alias_method :active?, :active }
         end
       end

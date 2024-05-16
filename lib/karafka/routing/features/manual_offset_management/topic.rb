@@ -12,9 +12,9 @@ module Karafka
           #
           # @note Since this feature supports only one setting (active), we can use the old API
           # where the boolean would be an argument
-          def manual_offset_management(active = Undefined)
-            @manual_offset_management ||= Config.new(active: false)
-            @manual_offset_management.active = active unless active == Undefined
+          def manual_offset_management(active = Default.new(false))
+            @manual_offset_management ||= Config.new(active: active)
+            @manual_offset_management.active = active
             @manual_offset_management
           end
 

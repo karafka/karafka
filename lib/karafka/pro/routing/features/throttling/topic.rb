@@ -21,12 +21,12 @@ module Karafka
             # @param limit [Integer] max messages to process in an time interval
             # @param interval [Integer] time interval for processing
             def throttling(
-              limit: Undefined,
-              interval: Undefined
+              limit: Default.new(Float::INFINITY),
+              interval: Default.new(60_000)
             )
-              @throttling ||= Config.new(limit: Float::INFINITY,
-                                         interval: 60_000)
-              return @throttling if limit == Undefined && interval == Undefined
+              @throttling ||= Config.new(limit: limit,
+                                         interval: interval)
+              return @throttling if Config.all_defaults?(limit, interval)
 
               @throttling.active = limit != Float::INFINITY
               @throttling.limit = limit

@@ -17,7 +17,7 @@ module Karafka
       module Features
         class Delaying < Base
           # Delaying feature configuration
-          Config = Struct.new(:active, :delay, keyword_init: true) do
+          Config = Karafka::Routing::BaseConfig.define(:active, :delay) do
             alias_method :active?, :active
           end
         end
