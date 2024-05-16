@@ -34,7 +34,7 @@ draw_routes(Consumer)
 produce(DT.topic, '')
 
 start_karafka_and_wait_until do
-  sleep(5)
+  wait_for_assignments
 
   unless @sent
     @sent = true
