@@ -28,7 +28,7 @@ module Karafka
 
       # Runs the `#call` method in a new thread
       # @param thread_name [String] name that we want to assign to the thread when we start it
-      def async_call(thread_name = '')
+      def async_call(thread_name)
         MUTEX.synchronize do
           return if @thread&.alive?
 
