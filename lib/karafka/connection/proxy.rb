@@ -17,8 +17,10 @@ module Karafka
         all_brokers_down
         timed_out
         transport
+        network_exception
         not_coordinator
         not_leader_for_partition
+        coordinator_load_in_progress
       ].freeze
 
       private_constant :RETRYABLE_DEFAULT_ERRORS
