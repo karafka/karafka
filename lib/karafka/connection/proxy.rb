@@ -16,6 +16,7 @@ module Karafka
       RETRYABLE_DEFAULT_ERRORS = %i[
         all_brokers_down
         timed_out
+        transport
         not_coordinator
         not_leader_for_partition
       ].freeze
