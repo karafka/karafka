@@ -3,6 +3,7 @@
 ## 2.4.3 (Unreleased)
 - [Enhancement] Add more error codes to early report on polling issues (kidlab)
 - [Enhancement] Add `transport`, `network_exception` and `coordinator_load_in_progress` alongside `timed_out` to retryable errors for the proxy.
+- [Enhancement] Improve `strict_topics_namespacing` validation message.
 - [Change] Remove default empty thread name from `Async` since Web has been upgraded.
 
 ## 2.4.2 (2024-05-14)
