@@ -8,6 +8,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   byebug
   factory_bot
   fiddle
+  ostruct
   simplecov
   tempfile
 ].each do |lib|
