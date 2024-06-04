@@ -95,6 +95,7 @@ module Karafka
       boot_file = Pathname.new(ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'karafka.rb'))
 
       return boot_file if boot_file.absolute?
+      return boot_file if boot_file.to_s == 'false'
 
       Pathname.new(
         File.expand_path(
