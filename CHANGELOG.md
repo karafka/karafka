@@ -5,6 +5,9 @@
 - [Enhancement] Add `transport`, `network_exception` and `coordinator_load_in_progress` alongside `timed_out` to retryable errors for the proxy.
 - [Enhancement] Improve `strict_topics_namespacing` validation message.
 - [Change] Remove default empty thread name from `Async` since Web has been upgraded.
+- [Fix] Installer doesn't respect directories in `KARAFKA_BOOT_FILE`.
+- [Fix] Fix case where non absolute boot file path would not work as expected.
+- [Fix] Allow for installing Karafka in a non-existing (yet) directory
 
 ## 2.4.2 (2024-05-14)
 - [Enhancement] Validate ActiveJob adapter custom producer format.
