@@ -51,17 +51,17 @@ module Karafka
 
     # @return [String] root path of this gem
     def gem_root
-      @gem_root ||= Pathname.new(File.expand_path('..', __dir__))
+      Pathname.new(File.expand_path('..', __dir__))
     end
 
     # @return [String] Karafka app root path (user application path)
     def root
-      @root ||= Pathname.new(ENV['KARAFKA_ROOT_DIR'] || File.dirname(ENV['BUNDLE_GEMFILE']))
+      Pathname.new(ENV['KARAFKA_ROOT_DIR'] || File.dirname(ENV['BUNDLE_GEMFILE']))
     end
 
     # @return [String] path to Karafka gem root core
     def core_root
-      @core_root ||= Pathname.new(File.expand_path('karafka', __dir__))
+      Pathname.new(File.expand_path('karafka', __dir__))
     end
 
     # @return [Boolean] true if there is a valid pro token present
@@ -92,15 +92,13 @@ module Karafka
     #   KARAFKA_BOOT_FILE='/home/app_path/app.rb'
     #   Karafka.boot_file #=> '/home/app_path/app.rb'
     def boot_file
-      return @boot_file if @boot_file
+      boot_file = Pathname.new(ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'karafka.rb'))
 
-      @boot_file = Pathname.new(ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'karafka.rb'))
+      return boot_file if boot_file.absolute?
 
-      return @boot_file if @boot_file.absolute?
-
-      @boot_file = Pathname.new(
+      Pathname.new(
         File.expand_path(
-          @boot_file,
+          boot_file,
           Karafka.root
         )
       )

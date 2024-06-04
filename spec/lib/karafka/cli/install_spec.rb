@@ -14,6 +14,12 @@ RSpec.describe_current do
       end
 
       described_class::INSTALL_FILES_MAP.each_value do |target|
+        allow(FileUtils)
+          .to receive(:mkdir_p)
+          .with(File.dirname(Karafka.root.join(target)))
+      end
+
+      described_class::INSTALL_FILES_MAP.each_value do |target|
         allow(Bundler)
           .to receive(:read_file)
           .and_return('')
