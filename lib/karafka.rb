@@ -92,7 +92,17 @@ module Karafka
     #   KARAFKA_BOOT_FILE='/home/app_path/app.rb'
     #   Karafka.boot_file #=> '/home/app_path/app.rb'
     def boot_file
-      Pathname.new(ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'karafka.rb'))
+      boot_file = Pathname.new(ENV['KARAFKA_BOOT_FILE'] || File.join(Karafka.root, 'karafka.rb'))
+
+      return boot_file if boot_file.absolute?
+      return boot_file if boot_file.to_s == 'false'
+
+      Pathname.new(
+        File.expand_path(
+          boot_file,
+          Karafka.root
+        )
+      )
     end
 
     # We need to be able to overwrite both monitor and logger after the configuration in case they
