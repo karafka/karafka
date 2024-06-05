@@ -2,7 +2,12 @@
 
 source 'https://rubygems.org'
 
+# bigdecimal, drb and mutex_m are needed by Rails to work with Ruby 3.4+
+
 gem 'activerecord', '7.0.8'
 gem 'activesupport', '7.0.8'
+gem 'bigdecimal'
+gem 'drb'
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
+gem 'mutex_m'
 gem 'railties', '7.0.8'

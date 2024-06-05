@@ -57,6 +57,7 @@ GEM
     mini_portile2 (2.8.6)
     minitest (5.22.3)
     mutex_m (0.2.0)
+    ostruct (0.6.0)
     rack (3.0.11)
     rake (13.2.1)
     roda (3.79.0)
@@ -100,8 +101,9 @@ DEPENDENCIES
   karafka!
   karafka-testing (>= 2.4.0)
   karafka-web (>= 0.9.0)
+  ostruct
   rspec
   simplecov
 
 BUNDLED WITH
-   2.5.9
+   2.4.22
