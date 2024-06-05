@@ -31,6 +31,7 @@ module Karafka
               nested(:virtual_partitions) do
                 required(:active) { |val| [true, false].include?(val) }
                 required(:partitioner) { |val| val.nil? || val.respond_to?(:call) }
+                required(:reducer) { |val| val.respond_to?(:call) }
                 required(:max_partitions) { |val| val.is_a?(Integer) && val >= 1 }
                 required(:offset_metadata_strategy) { |val| %i[exact current].include?(val) }
               end
