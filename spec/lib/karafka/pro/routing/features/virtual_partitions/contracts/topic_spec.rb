@@ -8,6 +8,7 @@ RSpec.describe_current do
       virtual_partitions: {
         active: true,
         partitioner: ->(_) { 1 },
+        reducer: ->(_) { 1 },
         max_partitions: 2,
         offset_metadata_strategy: :exact
       },
@@ -42,6 +43,12 @@ RSpec.describe_current do
 
   context 'when virtual partitions are active but no partitioner' do
     before { config[:virtual_partitions][:partitioner] = nil }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when there is no reducer' do
+    before { config[:virtual_partitions][:reducer] = nil }
 
     it { expect(check).not_to be_success }
   end

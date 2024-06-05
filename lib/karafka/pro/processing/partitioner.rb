@@ -25,6 +25,8 @@ module Karafka
         def call(topic, messages, coordinator)
           ktopic = @subscription_group.topics.find(topic)
 
+          vps = ktopic.virtual_partitions
+
           # We only partition work if we have:
           # - a virtual partitioner
           # - more than one thread to process the data
@@ -38,21 +40,19 @@ module Karafka
           #
           # This is great because it allows us to run things without the parallelization that adds
           # a bit of uncertainty and allows us to use DLQ and safely skip messages if needed.
-          if ktopic.virtual_partitions? &&
-             ktopic.virtual_partitions.max_partitions > 1 &&
-             !coordinator.collapsed?
-            # We need to reduce it to the max concurrency, so the group_id is not a direct effect
-            # of the end user action. Otherwise the persistence layer for consumers would cache
-            # it forever and it would cause memory leaks
-            #
-            # This also needs to be consistent because the aggregation here needs to warrant, that
-            # the same partitioned message will always be assigned to the same virtual partition.
-            # Otherwise in case of a window aggregation with VP spanning across several polls, the
-            # data could not be complete.
+          if vps.active? && vps.max_partitions > 1 && !coordinator.collapsed?
             groupings = messages.group_by do |msg|
-              key = ktopic.virtual_partitions.partitioner.call(msg).to_s.sum
-
-              key % ktopic.virtual_partitions.max_partitions
+              # We need to reduce it to the max concurrency, so the group_id is not a direct effect
+              # of the end user action. Otherwise the persistence layer for consumers would cache
+              # it forever and it would cause memory leaks
+              #
+              # This also needs to be consistent because the aggregation here needs to warrant,
+              # that the same partitioned message will always be assigned to the same virtual
+              # partition. Otherwise in case of a window aggregation with VP spanning across
+              # several polls, the data could not be complete.
+              vps.reducer.call(
+                vps.partitioner.call(msg)
+              )
             end
 
             groupings.each do |key, messages_group|
