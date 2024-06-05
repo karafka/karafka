@@ -19,6 +19,7 @@ end
 group :test do
   gem 'byebug'
   gem 'factory_bot'
+  gem 'ostruct'
   gem 'rspec'
   gem 'simplecov'
 end
