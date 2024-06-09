@@ -9,6 +9,7 @@
 - [Fix] Installer doesn't respect directories in `KARAFKA_BOOT_FILE`.
 - [Fix] Fix case where non absolute boot file path would not work as expected.
 - [Fix] Allow for installing Karafka in a non-existing (yet) directory
+- [Maintenance] Require `waterdrop` `>=` `2.7.3` to support idempotent producer detection.
 
 ## 2.4.2 (2024-05-14)
 - [Enhancement] Validate ActiveJob adapter custom producer format.
