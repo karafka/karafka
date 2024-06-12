@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.4.3 (Unreleased)
+## 2.4.3 (2024-06-12)
 - [Enhancement] Allow for customization of Virtual Partitions reducer for enhanced parallelization.
 - [Enhancement] Add more error codes to early report on polling issues (kidlab)
 - [Enhancement] Add `transport`, `network_exception` and `coordinator_load_in_progress` alongside `timed_out` to retryable errors for the proxy.
