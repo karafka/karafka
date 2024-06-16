@@ -1,5 +1,8 @@
 # Karafka framework changelog
 
+## 2.4.4 (Unreleased)
+- [Fix] Static membership fencing error is not propagated explicitely enough.
+
 ## 2.4.3 (2024-06-12)
 - [Enhancement] Allow for customization of Virtual Partitions reducer for enhanced parallelization.
 - [Enhancement] Add more error codes to early report on polling issues (kidlab)
