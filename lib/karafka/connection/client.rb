@@ -560,8 +560,8 @@ module Karafka
         when :cluster_authorization_failed # 31
           early_report = true
         # This can happen for many reasons, including issues with static membership being fenced
-        when :fatal
-          early_report = true # -150
+        when :fatal # -150
+          early_report = true
         # @see
         # https://github.com/confluentinc/confluent-kafka-dotnet/issues/1366#issuecomment-821842990
         # This will be raised each time poll detects a non-existing topic. When auto creation is
