@@ -13,8 +13,8 @@ class Consumer < Karafka::BaseConsumer
       .select { |message| message.headers['iteration'].to_i > 5 }
       .each do |message|
         1_000.times do
-          message.headers.to_h.transform_keys!(&:to_s)
-          message.headers.to_h.transform_keys!(&:to_sym)
+          message.headers.to_h.dup.transform_keys!(&:to_s)
+          message.headers.to_h.dup.transform_keys!(&:to_sym)
         end
 
         DT[:selected] << message.offset
