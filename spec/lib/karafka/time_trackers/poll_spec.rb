@@ -5,7 +5,9 @@ RSpec.describe_current do
 
   context 'when we still have time after 2 ms and it is first attempt' do
     before do
-      allow(::Process).to receive(:clock_gettime).and_return(1, 1.002)
+      allow(::Process)
+        .to receive(:clock_gettime)
+        .and_return(1_000, 1_002)
 
       tracker.start
       tracker.checkpoint
@@ -29,7 +31,9 @@ RSpec.describe_current do
 
   context 'when we no longer have time after first attempt' do
     before do
-      allow(::Process).to receive(:clock_gettime).and_return(1, 2)
+      allow(::Process)
+        .to receive(:clock_gettime)
+        .and_return(1_000, 2_000)
 
       tracker.start
       tracker.checkpoint
@@ -52,7 +56,9 @@ RSpec.describe_current do
 
   context 'when we have several attempts each within time range but exceeding retry' do
     before do
-      allow(::Process).to receive(:clock_gettime).and_return(1, 1.25, 1.5, 1.75, 2.0, 2.25)
+      allow(::Process)
+        .to receive(:clock_gettime)
+        .and_return(1_000, 1_250, 1_500, 1_750, 2_000, 2_250)
 
       3.times do
         tracker.start
@@ -77,7 +83,9 @@ RSpec.describe_current do
 
   context 'when we do not have enough time to backoff' do
     before do
-      allow(::Process).to receive(:clock_gettime).and_return(1, 1.995)
+      allow(::Process)
+        .to receive(:clock_gettime)
+        .and_return(1_000, 1_995)
 
       tracker.start
       tracker.checkpoint
