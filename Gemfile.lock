@@ -3,7 +3,7 @@ PATH
   specs:
     karafka (2.4.4)
       base64 (~> 0.2)
-      karafka-core (>= 2.4.0, < 2.5.0)
+      karafka-core (>= 2.4.1.rc1, < 2.5.0)
       waterdrop (>= 2.7.3, < 3.0.0)
       zeitwerk (~> 2.3)
 
@@ -39,7 +39,7 @@ GEM
       activesupport (>= 6.1)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
-    karafka-core (2.4.0)
+    karafka-core (2.4.1.rc1)
       karafka-rdkafka (>= 0.15.0, < 0.16.0)
     karafka-rdkafka (0.15.1)
       ffi (~> 1.15)
