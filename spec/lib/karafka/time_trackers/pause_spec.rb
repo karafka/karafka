@@ -9,7 +9,13 @@ RSpec.describe_current do
     )
   end
 
-  before { allow(::Process).to receive(:clock_gettime).and_return(*times) }
+  before do
+    # We use different clock in 3.2 that does not require multiplication
+    # @see `::Karafka::Core::Helpers::Time` for more details
+    normalized = RUBY_VERSION >= '3.2' ? times.map { |time| time * 1_000 } : times
+
+    allow(::Process).to receive(:clock_gettime).and_return(*normalized)
+  end
 
   let(:times) { [0, 0] }
 
@@ -36,7 +42,7 @@ RSpec.describe_current do
     end
 
     context 'when not paused over timeout' do
-      let(:times) { [763, 764] }
+      let(:times) { [0.763, 0.764] }
 
       before do
         tracker.pause
@@ -49,7 +55,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout' do
-      let(:times) { [763, 1_764] }
+      let(:times) { [0.763, 1.764] }
 
       before do
         tracker.pause
@@ -76,7 +82,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout and resumed' do
-      let(:times) { [763, 1_764] }
+      let(:times) { [0.763, 1.764] }
 
       before do
         tracker.pause
@@ -90,7 +96,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout, resumed and reset' do
-      let(:times) { [763, 1_764] }
+      let(:times) { [0.763, 1.764] }
 
       before do
         tracker.pause
@@ -129,7 +135,7 @@ RSpec.describe_current do
 
     context 'when not paused over timeout nor max timeout' do
       # 1 ms of a difference
-      let(:times) { [763, 764] }
+      let(:times) { [0.763, 0.764] }
 
       before do
         tracker.pause
@@ -142,7 +148,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over max timeout' do
-      let(:times) { [763, 769] }
+      let(:times) { [0.763, 0.769] }
 
       before do
         tracker.pause
@@ -155,7 +161,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout and resumed' do
-      let(:times) { [763, 769] }
+      let(:times) { [0.763, 0.769] }
 
       before do
         tracker.pause
@@ -169,7 +175,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout, resumed and reset' do
-      let(:times) { [763, 769] }
+      let(:times) { [0.763, 0.769] }
 
       before do
         tracker.pause
@@ -207,7 +213,7 @@ RSpec.describe_current do
     end
 
     context 'when not paused over timeout nor max timeout' do
-      let(:times) { [763, 764] }
+      let(:times) { [0.763, 0.764] }
 
       before do
         tracker.pause
@@ -220,7 +226,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over max timeout' do
-      let(:times) { [763, 1_764] }
+      let(:times) { [0.763, 1.764] }
 
       before do
         tracker.pause
@@ -233,7 +239,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout and resumed' do
-      let(:times) { [763, 1_764] }
+      let(:times) { [0.763, 1.764] }
 
       before do
         tracker.pause
@@ -247,7 +253,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout, resumed and reset' do
-      let(:times) { [763, 1_764] }
+      let(:times) { [0.763, 1.764] }
 
       before do
         tracker.pause
@@ -263,8 +269,8 @@ RSpec.describe_current do
   end
 
   context 'when we define a custom manual pause time' do
-    let(:timeout) { 5_000 }
-    let(:max_timeout) { 5_000 }
+    let(:timeout) { 5000 }
+    let(:max_timeout) { 5000 }
     let(:exponential_backoff) { false }
 
     context 'when pause tracker is created' do
@@ -297,7 +303,7 @@ RSpec.describe_current do
     end
 
     context 'when not paused over timeout nor max timeout' do
-      let(:times) { [763, 764] }
+      let(:times) { [0.763, 0.764] }
 
       before do
         tracker.pause(2)
@@ -310,7 +316,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over max timeout' do
-      let(:times) { [763, 1_764] }
+      let(:times) { [0.763, 1.764] }
 
       before do
         tracker.pause(1)
@@ -323,7 +329,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout and resumed' do
-      let(:times) { [763, 1_764] }
+      let(:times) { [0.763, 1.764] }
 
       before do
         tracker.pause(1)
@@ -337,7 +343,7 @@ RSpec.describe_current do
     end
 
     context 'when paused over timeout, resumed and reset' do
-      let(:times) { [763, 1_764] }
+      let(:times) { [0.763, 1.764] }
 
       before do
         tracker.pause(1)
