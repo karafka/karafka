@@ -2,7 +2,8 @@
 
 ## 2.4.4 (Unreleased)
 - [Fix] Static membership fencing error is not propagated explicitly enough.
-- [Maintenance] Require `karafka-core` `>=` `2.4.1`.
+- [Maintenance] Require `karafka-core` `>=` `2.4.2`.
+- [Maintenance] Allow for usage of `karafka-rdkafka` `~` `0.16` to support librdkafka `2.4.0`.
 
 ## 2.4.3 (2024-06-12)
 - [Enhancement] Allow for customization of Virtual Partitions reducer for enhanced parallelization.

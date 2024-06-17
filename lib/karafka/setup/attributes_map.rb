@@ -52,7 +52,9 @@ module Karafka
         fetch.wait.max.ms
         group.id
         group.instance.id
+        group.protocol
         group.protocol.type
+        group.remote.assignor
         heartbeat.interval.ms
         interceptors
         internal.termination.signal
