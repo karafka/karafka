@@ -15,10 +15,14 @@ RSpec.describe_current do
   end
 
   describe '#stop' do
-    before { allow(Karafka::Server).to receive(:stop) }
+    before do
+      allow(Karafka::Server).to receive(:stop)
+      allow(Karafka::App).to receive(:terminated?).and_return(true)
+    end
 
     it 'expect to invoke server stop' do
       embedded.stop
+      sleep(0.1)
       expect(Karafka::Server).to have_received(:stop)
     end
   end

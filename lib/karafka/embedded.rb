@@ -42,17 +42,21 @@ module Karafka
         # Prevent from double stopping
         unless @stopping
           Thread.new do
+            Thread.current.name = 'karafka.embedded.stopping'
+
+            stop = false
+
             # We spawn a new thread because `#stop` may be called from a trap context
             MUTEX.synchronize do
-              Thread.current.name = 'karafka.embedded.stopping'
-
               break if @stopping
 
               @stopping = true
-
-              # Stop needs to be blocking to wait for all the things to finalize
-              Karafka::Server.stop
+              stop = true
             end
+
+            next unless stop
+
+            Karafka::Server.stop
           end
         end
 
