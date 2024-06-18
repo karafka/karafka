@@ -216,6 +216,10 @@ module Karafka
               next unless multi_part_sgs_families.include?(sg_listener.subscription_group.name)
               # Skip already active connections
               next unless sg_listener.pending? || sg_listener.stopped?
+              # Ensure that the listener thread under which we operate is already stopped and
+              # is not dangling. While not likely to happen, this may protect against a
+              # case where a shutdown critical crash would case a restart of the same listener
+              next if sg_listener.alive?
 
               touch(sg_listener.subscription_group.id)
               sg_listener.start!

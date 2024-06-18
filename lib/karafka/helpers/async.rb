@@ -22,7 +22,16 @@ module Karafka
         def included(base)
           base.extend ::Forwardable
 
-          base.def_delegators :@thread, :join, :terminate, :alive?, :name
+          base.def_delegators :@thread, :join, :terminate, :name
+        end
+      end
+
+      # @return [Boolean] true if thread is present and is running, false otherwise
+      def alive?
+        MUTEX.synchronize do
+          return false unless @thread
+
+          @thread.alive?
         end
       end
 
