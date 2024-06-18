@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.4.4 (Unreleased)
+- [Enhancement] Make sure, that the listener thread is stopped before restarting.
 - [Fix] Static membership fencing error is not propagated explicitly enough.
 - [Maintenance] Require `karafka-core` `>=` `2.4.2`.
 - [Maintenance] Allow for usage of `karafka-rdkafka` `~` `0.16` to support librdkafka `2.4.0`.
