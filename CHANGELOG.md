@@ -1,6 +1,7 @@
 # Karafka framework changelog
 
 ## 2.4.4 (Unreleased)
+- [Enhancement] Support embedding mode control management from the trap context.
 - [Enhancement] Make sure, that the listener thread is stopped before restarting.
 - [Fix] Static membership fencing error is not propagated explicitly enough.
 - [Maintenance] Require `karafka-core` `>=` `2.4.2`.
