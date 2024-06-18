@@ -154,11 +154,12 @@ module Karafka
                 topic: topic.dead_letter_queue.topic,
                 key: original_partition,
                 payload: skippable_message.raw_payload,
-                headers: skippable_message.headers.merge(
+                headers: skippable_message.raw_headers.merge(
                   'original_topic' => topic.name,
                   'original_partition' => original_partition,
                   'original_offset' => skippable_message.offset.to_s,
                   'original_consumer_group' => topic.consumer_group.id,
+                  'original_key' => skippable_message.raw_key.to_s,
                   'original_attempts' => attempt.to_s
                 )
               }
