@@ -73,6 +73,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.4.0-preview1'
           - '3.3'
           - '3.2'
           - '3.1'
@@ -113,6 +114,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.4.0-preview1'
           - '3.3'
           - '3.2'
           - '3.1'
@@ -146,6 +148,11 @@ jobs:
 
           bundle config set without 'tools benchmarks docs'
 
+      - name: Fix directory permissions for Bundler
+        run: |
+          chmod -R o-w /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
+          chmod +t /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
+
       - name: Bundle install
         run: |
           bundle config set without development
@@ -166,6 +173,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.4.0-preview1'
           - '3.3'
           - '3.2'
           - '3.1'

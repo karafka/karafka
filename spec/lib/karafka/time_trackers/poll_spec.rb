@@ -3,10 +3,18 @@
 RSpec.describe_current do
   subject(:tracker) { described_class.new(1_000) }
 
+  let(:times) { [1, 1.002] }
+
+  before do
+    # We use different clock in 3.2 that does not require multiplication
+    # @see `::Karafka::Core::Helpers::Time` for more details
+    normalized = RUBY_VERSION >= '3.2' ? times.map { |time| time * 1_000 } : times
+
+    allow(::Process).to receive(:clock_gettime).and_return(*normalized)
+  end
+
   context 'when we still have time after 2 ms and it is first attempt' do
     before do
-      allow(::Process).to receive(:clock_gettime).and_return(1, 1.002)
-
       tracker.start
       tracker.checkpoint
     end
@@ -28,9 +36,9 @@ RSpec.describe_current do
   end
 
   context 'when we no longer have time after first attempt' do
-    before do
-      allow(::Process).to receive(:clock_gettime).and_return(1, 2)
+    let(:times) { [1, 2] }
 
+    before do
       tracker.start
       tracker.checkpoint
     end
@@ -51,9 +59,9 @@ RSpec.describe_current do
   end
 
   context 'when we have several attempts each within time range but exceeding retry' do
-    before do
-      allow(::Process).to receive(:clock_gettime).and_return(1, 1.25, 1.5, 1.75, 2.0, 2.25)
+    let(:times) { [1, 1.25, 1.5, 1.75, 2.0, 2.25] }
 
+    before do
       3.times do
         tracker.start
         tracker.checkpoint
@@ -76,9 +84,9 @@ RSpec.describe_current do
   end
 
   context 'when we do not have enough time to backoff' do
-    before do
-      allow(::Process).to receive(:clock_gettime).and_return(1, 1.995)
+    let(:times) { [1, 1.995] }
 
+    before do
       tracker.start
       tracker.checkpoint
     end

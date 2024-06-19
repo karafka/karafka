@@ -22,8 +22,8 @@ Gem::Specification.new do |spec|
   DESC
 
   spec.add_dependency 'base64', '~> 0.2'
-  spec.add_dependency 'karafka-core', '>= 2.4.0', '< 2.5.0'
-  spec.add_dependency 'waterdrop', '>= 2.7.0', '< 3.0.0'
+  spec.add_dependency 'karafka-core', '>= 2.4.3', '< 2.5.0'
+  spec.add_dependency 'waterdrop', '>= 2.7.3', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   spec.required_ruby_version = '>= 3.0.0'

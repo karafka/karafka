@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# When DLQ transfer occurs, payload and many other things should be transferred to the DLQ topic.
+# DLQ dispatch should use raw headers and not deserialized headers similar to how payload is
+# dispatched
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.max_messages = 1
@@ -23,6 +24,10 @@ end
 draw_routes do
   topic DT.topics[0] do
     consumer Consumer
+    deserializers(
+      headers: ->(_) { { 'a' => '100' } },
+      key: ->(_) { '100' }
+    )
     dead_letter_queue(topic: DT.topics[1], max_retries: 0)
   end
 

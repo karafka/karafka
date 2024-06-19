@@ -1,10 +1,24 @@
 # Karafka framework changelog
 
-## 2.4.3 (Unreleased)
+## 2.4.4 (Unreleased)
+- [Enhancement] Include `original_key` in the DLQ dispatch headers.
+- [Enhancement] Support embedding mode control management from the trap context.
+- [Enhancement] Make sure, that the listener thread is stopped before restarting.
+- [Fix] Static membership fencing error is not propagated explicitly enough.
+- [Fix] Make sure DLQ dispatches raw headers and not deserialized headers (same as payload).
+- [Maintenance] Require `karafka-core` `>=` `2.4.3`.
+- [Maintenance] Allow for usage of `karafka-rdkafka` `~` `0.16` to support librdkafka `2.4.0`.
+
+## 2.4.3 (2024-06-12)
+- [Enhancement] Allow for customization of Virtual Partitions reducer for enhanced parallelization.
 - [Enhancement] Add more error codes to early report on polling issues (kidlab)
 - [Enhancement] Add `transport`, `network_exception` and `coordinator_load_in_progress` alongside `timed_out` to retryable errors for the proxy.
 - [Enhancement] Improve `strict_topics_namespacing` validation message.
 - [Change] Remove default empty thread name from `Async` since Web has been upgraded.
+- [Fix] Installer doesn't respect directories in `KARAFKA_BOOT_FILE`.
+- [Fix] Fix case where non absolute boot file path would not work as expected.
+- [Fix] Allow for installing Karafka in a non-existing (yet) directory
+- [Maintenance] Require `waterdrop` `>=` `2.7.3` to support idempotent producer detection.
 
 ## 2.4.2 (2024-05-14)
 - [Enhancement] Validate ActiveJob adapter custom producer format.

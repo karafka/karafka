@@ -26,18 +26,24 @@ module Karafka
             # @param offset_metadata_strategy [Symbol] how we should match the metadata for the
             #   offset. `:exact` will match the offset matching metadata and `:current` will select
             #   the most recently reported metadata
+            # @param reducer [nil, #call] reducer for VPs key. It allows for using a custom
+            #   reducer to achieve enhanced parallelization when the default reducer is not enough.
             # @return [VirtualPartitions] method that allows to set the virtual partitions details
             #   during the routing configuration and then allows to retrieve it
             def virtual_partitions(
               max_partitions: Default.new(Karafka::App.config.concurrency),
               partitioner: Default.new,
-              offset_metadata_strategy: Default.new(:current)
+              offset_metadata_strategy: Default.new(:current),
+              # If no reducer provided, we use this one. It just runs a modulo on the sum of
+              # a stringified version, providing fairly good distribution.
+              reducer: Default.new(->(virtual_key) { virtual_key.to_s.sum % max_partitions })
             )
               @virtual_partitions ||= Config.new( max_partitions: max_partitions,
                                                   partitioner: partitioner,
-                                                  offset_metadata_strategy: offset_metadata_strategy
+                                                  offset_metadata_strategy: offset_metadata_strategy,
+                                                  reducer: reducer
               )
-              if Config.all_defaults?(max_partitions, partitioner, offset_metadata_strategy)
+              if Config.all_defaults?(max_partitions, partitioner, offset_metadata_strategy, reducer)
                 return @virtual_partitions
               end
 
@@ -45,6 +51,7 @@ module Karafka
               @virtual_partitions.partitioner = partitioner
               @virtual_partitions.offset_metadata_strategy = offset_metadata_strategy
               @virtual_partitions.active = !@virtual_partitions.partitioner.nil?
+              @virtual_partitions.reducer = reducer
               @virtual_partitions
             end
 

@@ -82,11 +82,19 @@ RSpec.describe_current do
       end
     end
 
-    context 'when KARAFKA_BOOT_FILE is defined' do
+    context 'when KARAFKA_BOOT_FILE is defined as absolute' do
+      let(:boot_file) { "/#{rand}" }
+
+      it 'expect to use one from env as absolute' do
+        expect(karafka.boot_file).to eq Pathname.new(boot_file)
+      end
+    end
+
+    context 'when KARAFKA_BOOT_FILE is defined as local' do
       let(:boot_file) { rand.to_s }
 
-      it 'expect to use one from env' do
-        expect(karafka.boot_file).to eq Pathname.new(boot_file)
+      it 'expect to use one from env as absolute expanded' do
+        expect(karafka.boot_file).to eq Pathname.new(Karafka.root.join(boot_file))
       end
     end
   end
