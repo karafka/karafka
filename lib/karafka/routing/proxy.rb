@@ -8,13 +8,15 @@ module Karafka
       attr_reader :target
 
       # @param target [Object] target object to which we proxy any DSL call
-      # @param defaults [Proc] defaults for target that should be applicable after the proper
+      # @param defaults [Array<Proc>] defaults for target that should be applicable after the proper
       #   proxy context (if needed)
       # @param block [Proc, nil] block that we want to evaluate in the proxy context or nil if no
       #   proxy block context for example because whole context is taken from defaults
-      def initialize(target, defaults = ->(_) {}, &block)
+      def initialize(target, defaults = [->(_) {}], &block)
         @target = target
-        instance_eval(&defaults) if defaults
+        defaults.each do |default|
+          instance_eval(&default)
+        end
         instance_eval(&block) if block
       end
 

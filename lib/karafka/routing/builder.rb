@@ -26,7 +26,7 @@ module Karafka
       def initialize
         @mutex = Mutex.new
         @draws = []
-        @defaults = EMPTY_DEFAULTS
+        @defaults = [EMPTY_DEFAULTS]
         super
       end
 
@@ -83,22 +83,22 @@ module Karafka
       # Clears the builder and the draws memory
       def clear
         @mutex.synchronize do
-          @defaults = EMPTY_DEFAULTS
+          @defaults = [EMPTY_DEFAULTS]
           @draws.clear
           array_clear
         end
       end
 
       # @param block [Proc] block with per-topic evaluated defaults
-      # @return [Proc] defaults that should be evaluated per topic
+      # @return [Array<Proc>] defaults that should be evaluated per topic
       def defaults(&block)
         return @defaults unless block
 
         if @mutex.owned?
-          @defaults = block
+          @defaults.push(block)
         else
           @mutex.synchronize do
-            @defaults = block
+            @defaults.push(block)
           end
         end
       end
