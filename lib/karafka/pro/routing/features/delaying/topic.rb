@@ -19,7 +19,7 @@ module Karafka
           # Topic delaying API extensions
           module Topic
             # @param delay [Integer, nil] minimum age of a message we want to process
-            def delaying(delay = Default.new)
+            def delaying(delay = Karafka::Routing::Default.new)
               # Those settings are used for validation
               @delaying ||= Config.new(active: false, delay: nil)
               return @delaying if Config.all_defaults?(delay)

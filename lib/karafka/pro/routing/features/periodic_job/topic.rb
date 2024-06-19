@@ -34,13 +34,14 @@ module Karafka
               during_pause: Karafka::Routing::Default.new(nil),
               during_retry: Karafka::Routing::Default.new(nil)
             )
+              has_val = ->(v){ !v.is_a?(Karafka::Routing::Default) && !v.nil? }
               unless @periodic_job
                 # Set to active if any of the values was configured
-                active = true unless interval.nil?
-                active = true unless during_pause.nil?
-                active = true unless during_retry.nil?
+                active = true if has_val.call(interval)
+                active = true if has_val.call(during_pause)
+                active = true if has_val.call(during_retry)
                 # Default is not to retry during retry flow
-                during_retry = false if during_retry.nil?
+                during_retry = false unless has_val.call(during_retry)
 
                 # If not configured in any way, we want not to process during pause for LRJ.
                 # LRJ pauses by default when processing and during this time we do not want to
@@ -73,6 +74,7 @@ module Karafka
               @periodic_job.during_pause = during_pause
               @periodic_job.during_retry = during_retry
               @periodic_job.materialized = !@periodic_job.during_pause.nil?
+              @periodic_job
             end
 
             alias periodic periodic_job

@@ -29,6 +29,79 @@ RSpec.describe_current do
       end
     end
 
+    context "with long running job unset" do
+      it "should default to false if during_pause unset" do
+        topic.periodic(true)
+        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.materialized).to eq(false)
+        expect(topic.periodic_job.during_pause).to eq(nil)
+      end
+
+      it "should default to true if during_pause is false" do
+        topic.periodic(true, during_pause: false)
+        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.materialized).to eq(true)
+        expect(topic.periodic_job.during_pause).to eq(false)
+      end
+
+      it "should be true if during_pause is true" do
+        topic.periodic(true, during_pause: true)
+        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.materialized).to eq(true)
+        expect(topic.periodic_job.during_pause).to eq(true)
+      end
+    end
+
+    context "with long running job inactive" do
+      before(:each) { topic.long_running_job(false) }
+
+      it "should default to false if during_pause unset" do
+        topic.periodic(true)
+        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.materialized).to eq(true)
+        expect(topic.periodic_job.during_pause).to eq(true)
+      end
+
+      it "should default to true if during_pause is false" do
+        topic.periodic(true, during_pause: false)
+        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.materialized).to eq(true)
+        expect(topic.periodic_job.during_pause).to eq(false)
+      end
+
+      it "should be true if during_pause is true" do
+        topic.periodic(true, during_pause: true)
+        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.materialized).to eq(true)
+        expect(topic.periodic_job.during_pause).to eq(true)
+      end
+    end
+
+    context "with long running job active" do
+      before(:each) { topic.long_running_job(true) }
+
+      it "should default to false if during_pause unset" do
+        topic.periodic(true)
+        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.materialized).to eq(true)
+        expect(topic.periodic_job.during_pause).to eq(false)
+      end
+
+      it "should default to true if during_pause is false" do
+        topic.periodic(true, during_pause: false)
+        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.materialized).to eq(true)
+        expect(topic.periodic_job.during_pause).to eq(false)
+      end
+
+      it "should be true if during_pause is true" do
+        topic.periodic(true, during_pause: true)
+        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.materialized).to eq(true)
+        expect(topic.periodic_job.during_pause).to eq(true)
+      end
+    end
+
     context 'when we use periodic_job multiple times with different values' do
       it 'expect to use proper active status' do
         topic.periodic(true)

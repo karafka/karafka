@@ -44,7 +44,7 @@ module Karafka
             #       1 => (3..5)
             #     }
             #   )
-            def swarm(nodes: Default.new((0...Karafka::App.config.swarm.nodes)))
+            def swarm(nodes: Karafka::Routing::Default.new((0...Karafka::App.config.swarm.nodes)))
               @swarm ||= Config.new(active: true, nodes: nodes)
               return @swarm if Config.all_defaults?(nodes)
 

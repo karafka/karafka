@@ -31,12 +31,12 @@ module Karafka
             # @return [VirtualPartitions] method that allows to set the virtual partitions details
             #   during the routing configuration and then allows to retrieve it
             def virtual_partitions(
-              max_partitions: Default.new(Karafka::App.config.concurrency),
-              partitioner: Default.new,
-              offset_metadata_strategy: Default.new(:current),
+              max_partitions: Karafka::Routing::Default.new(Karafka::App.config.concurrency),
+              partitioner: Karafka::Routing::Default.new,
+              offset_metadata_strategy: Karafka::Routing::Default.new(:current),
               # If no reducer provided, we use this one. It just runs a modulo on the sum of
               # a stringified version, providing fairly good distribution.
-              reducer: Default.new(->(virtual_key) { virtual_key.to_s.sum % max_partitions })
+              reducer: Karafka::Routing::Default.new(->(virtual_key) { virtual_key.to_s.sum % max_partitions })
             )
               @virtual_partitions ||= Config.new( max_partitions: max_partitions,
                                                   partitioner: partitioner,

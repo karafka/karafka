@@ -21,9 +21,9 @@ module Karafka
             # @param strategy [#call, nil] Strategy we want to use or nil if a default strategy
             # (same as in OSS) should be applied
             # @param args [Hash] OSS DLQ arguments
-            def dead_letter_queue(strategy: Default.new, **args)
+            def dead_letter_queue(strategy: Karafka::Routing::Default.new, **args)
               orig = super(**args)
-              return orig if Config.all_defaults?(strategy)
+              return orig if Karafka::Routing::BaseConfig.all_defaults?(strategy)
 
               orig.tap do |config|
                 # If explicit strategy is not provided, use the default approach from OSS
