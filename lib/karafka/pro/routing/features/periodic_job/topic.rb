@@ -29,12 +29,12 @@ module Karafka
             #   in a retry flow. Please note that for this to work, `during_pause` also needs to be
             #   set to true as errors retry happens after pause.
             def periodic_job(
-              active = false,
-              interval: nil,
-              during_pause: nil,
-              during_retry: nil
+              active = Karafka::Routing::Default.new(false),
+              interval: Karafka::Routing::Default.new(::Karafka::App.config.internal.tick_interval),
+              during_pause: Karafka::Routing::Default.new(nil),
+              during_retry: Karafka::Routing::Default.new(nil)
             )
-              @periodic_job ||= begin
+              unless @periodic_job
                 # Set to active if any of the values was configured
                 active = true unless interval.nil?
                 active = true unless during_pause.nil?
@@ -42,10 +42,16 @@ module Karafka
                 # Default is not to retry during retry flow
                 during_retry = false if during_retry.nil?
 
-                # If no interval, use default
-                interval ||= ::Karafka::App.config.internal.tick_interval
+                # If not configured in any way, we want not to process during pause for LRJ.
+                # LRJ pauses by default when processing and during this time we do not want to
+                # tick at all. This prevents us from running periodic jobs while LRJ jobs are
+                # running. This of course has a side effect of not running when paused for any
+                # other reason but it is a compromise in the default settings
+                if @long_running_job && (during_pause.is_a?(Karafka::Routing::Default) || during_pause.nil?)
+                  during_pause = !long_running_job?
+                end
 
-                Config.new(
+                @periodic_job = Config.new(
                   active: active,
                   interval: interval,
                   during_pause: during_pause,
@@ -58,18 +64,15 @@ module Karafka
                 )
               end
 
-              return @periodic_job if @periodic_job.materialized?
-              return @periodic_job unless @long_running_job
+              if Config.all_defaults?(active, interval, during_pause, during_retry)
+                return @periodic_job
+              end
 
-              # If not configured in any way, we want not to process during pause for LRJ.
-              # LRJ pauses by default when processing and during this time we do not want to
-              # tick at all. This prevents us from running periodic jobs while LRJ jobs are
-              # running. This of course has a side effect of not running when paused for any
-              # other reason but it is a compromise in the default settings
-              @periodic_job.during_pause = !long_running_job?
-              @periodic_job.materialized = true
-
-              @periodic_job
+              @periodic_job.active = active
+              @periodic_job.interval = interval
+              @periodic_job.during_pause = during_pause
+              @periodic_job.during_retry = during_retry
+              @periodic_job.materialized = !@periodic_job.during_pause.nil?
             end
 
             alias periodic periodic_job

@@ -24,23 +24,21 @@ module Karafka
       end
 
       def self.define(*args, &block)
-        Class.new(BaseConfig) do
-          args.each do |field|
-            define_method(field) do
-              @configs[field]
-            end
-            # Defaults only get used in the constructor. Assigning a default indicates that no
-            # value was passed into the method in question, meaning we actually should do nothing
-            # in this case.
-            define_method("#{field}=") do |v|
-              unless v.is_a?(Default)
-                @configs[field] = v
-              end
-            end
-          end
-          module_exec(&block) if block
-        end
+        klass = Class.new(BaseConfig)
+        args.each do |field|
 
+          # Defaults only get used in the constructor. Assigning a default indicates that no
+          # value was passed into the method in question, meaning we actually should do nothing
+          # in this case.
+          klass.class_eval <<~METHODS, __FILE__, __LINE__ + 1
+            def #{field} = @configs[:#{field}]
+            def #{field}=(v)
+              @configs[:#{field}] = v unless v.is_a?(Default)
+            end
+          METHODS
+        end
+        klass.class_exec(&block) if block
+        klass
       end
     end
 

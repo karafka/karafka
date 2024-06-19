@@ -33,7 +33,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.periodic(true)
         topic.periodic(false)
-        expect(topic.periodic_job.active?).to eq(true)
+        expect(topic.periodic_job.active?).to eq(false)
         expect(topic.periodic_job.interval).to eq(5_000)
       end
     end
