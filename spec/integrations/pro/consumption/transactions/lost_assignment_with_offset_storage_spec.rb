@@ -38,3 +38,8 @@ start_karafka_and_wait_until do
 end
 
 assert DT.key?(:error)
+assert_equal [], Karafka::Admin.read_topic(DT.topic, 0, 1)
+# We will have one message but this is read uncommitted so it will not appear in the above, plus
+# the failed transaction control one
+assert_equal 2, Karafka::Admin.read_watermark_offsets(DT.topic, 0).last
+assert_equal 0, fetch_next_offset
