@@ -26,8 +26,16 @@ module Karafka
       def initialize
         @mutex = Mutex.new
         @draws = []
-        @defaults = EMPTY_DEFAULTS
+        @defaults = [EMPTY_DEFAULTS]
         super
+      end
+
+      def redraw(&block)
+        @mutex.synchronize do
+          @draws.clear
+          array_clear
+        end
+        draw(&block)
       end
 
       # Used to draw routes for Karafka
@@ -70,25 +78,27 @@ module Karafka
         select(&:active?)
       end
 
+      alias_method :array_clear, :clear
+
       # Clears the builder and the draws memory
       def clear
         @mutex.synchronize do
-          @defaults = EMPTY_DEFAULTS
+          @defaults = [EMPTY_DEFAULTS]
           @draws.clear
-          super
+          array_clear
         end
       end
 
       # @param block [Proc] block with per-topic evaluated defaults
-      # @return [Proc] defaults that should be evaluated per topic
+      # @return [Array<Proc>] defaults that should be evaluated per topic
       def defaults(&block)
         return @defaults unless block
 
         if @mutex.owned?
-          @defaults = block
+          @defaults.push(block)
         else
           @mutex.synchronize do
-            @defaults = block
+            @defaults.push(block)
           end
         end
       end

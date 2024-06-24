@@ -5,10 +5,7 @@ module Karafka
     module Features
       class ManualOffsetManagement < Base
         # Config for manual offset management feature
-        Config = Struct.new(
-          :active,
-          keyword_init: true
-        ) { alias_method :active?, :active }
+        Config = BaseConfig.define(:active) { alias_method :active?, :active }
       end
     end
   end

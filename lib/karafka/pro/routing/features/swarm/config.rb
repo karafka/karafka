@@ -17,11 +17,7 @@ module Karafka
       module Features
         class Swarm < Base
           # Swarm feature configuration
-          Config = Struct.new(
-            :active,
-            :nodes,
-            keyword_init: true
-          ) do
+          Config = Karafka::Routing::BaseConfig.define(:active, :nodes) do
             alias_method :active?, :active
           end
         end

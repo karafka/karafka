@@ -5,9 +5,8 @@ module Karafka
     module Features
       class InlineInsights < Base
         # Config of this feature
-        Config = Struct.new(
-          :active,
-          keyword_init: true
+        Config = BaseConfig.define(
+          :active
         ) { alias_method :active?, :active }
       end
     end

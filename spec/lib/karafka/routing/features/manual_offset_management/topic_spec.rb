@@ -25,7 +25,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.manual_offset_management(true)
         topic.manual_offset_management(false)
-        expect(topic.manual_offset_management.active?).to eq(true)
+        expect(topic.manual_offset_management.active?).to eq(false)
       end
     end
   end
