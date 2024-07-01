@@ -9,6 +9,9 @@ RSpec.describe_current do
   let(:topic_name) { rand.to_s }
 
   before do
+    Karafka::Server.listeners = []
+    Karafka::Server.workers = []
+
     allow(Karafka.logger).to receive(:debug)
     allow(Karafka.logger).to receive(:info)
     allow(Karafka.logger).to receive(:error)
@@ -439,11 +442,6 @@ RSpec.describe_current do
 
       let(:message) do
         'Forceful Karafka server stop with: 0 active workers and 0 active listeners'
-      end
-
-      before do
-        Karafka::Server.listeners = []
-        Karafka::Server.workers = []
       end
 
       it 'expect logger to log server stop' do
