@@ -441,6 +441,11 @@ RSpec.describe_current do
         'Forceful Karafka server stop with: 0 active workers and 0 active listeners'
       end
 
+      before do
+        Karafka::Server.listeners = []
+        Karafka::Server.workers = []
+      end
+
       it 'expect logger to log server stop' do
         expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)
       end
