@@ -1,13 +1,17 @@
 # Karafka framework changelog
 
 ## 2.4.4 (Unreleased)
+- [Enhancement] Print more extensive error info on forceful shutdown.
 - [Enhancement] Include `original_key` in the DLQ dispatch headers.
 - [Enhancement] Support embedding mode control management from the trap context.
 - [Enhancement] Make sure, that the listener thread is stopped before restarting.
+- [Fix] Do not block on hanging listener shutdown when invoking forceful shutdown.
 - [Fix] Static membership fencing error is not propagated explicitly enough.
 - [Fix] Make sure DLQ dispatches raw headers and not deserialized headers (same as payload).
+- [Fix] Fix a typo where `ms` in logger listener would not have space before it.
 - [Maintenance] Require `karafka-core` `>=` `2.4.3`.
 - [Maintenance] Allow for usage of `karafka-rdkafka` `~` `0.16` to support librdkafka `2.4.0`.
+- [Maintenance] Lower the precision reporting to 100 microseconds in the logger listener.
 
 ## 2.4.3 (2024-06-12)
 - [Enhancement] Allow for customization of Virtual Partitions reducer for enhanced parallelization.
