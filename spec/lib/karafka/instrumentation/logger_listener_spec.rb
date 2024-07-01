@@ -9,6 +9,9 @@ RSpec.describe_current do
   let(:topic_name) { rand.to_s }
 
   before do
+    Karafka::Server.listeners = []
+    Karafka::Server.workers = []
+
     allow(Karafka.logger).to receive(:debug)
     allow(Karafka.logger).to receive(:info)
     allow(Karafka.logger).to receive(:error)
@@ -436,7 +439,10 @@ RSpec.describe_current do
     context 'when it is an app.stopping.error' do
       let(:type) { 'app.stopping.error' }
       let(:payload) { { type: type, error: Karafka::Errors::ForcefulShutdownError.new } }
-      let(:message) { 'Forceful Karafka server stop' }
+
+      let(:message) do
+        'Forceful Karafka server stop with: 0 active workers and 0 active listeners'
+      end
 
       it 'expect logger to log server stop' do
         expect(Karafka.logger).to have_received(:error).with(message).at_least(:once)

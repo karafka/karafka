@@ -3,6 +3,12 @@
 module Karafka
   # Karafka consuming server class
   class Server
+    # How long should we wait on the listeners forceful shutdown when they are stuck beyond the
+    # shutdown timeout before forcing a bypass
+    FORCEFUL_SHUTDOWN_WAIT = 5
+
+    private_constant :FORCEFUL_SHUTDOWN_WAIT
+
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
       attr_accessor :listeners
@@ -105,9 +111,23 @@ module Karafka
         # We're done waiting, lets kill them!
         workers.each(&:terminate)
         listeners.active.each(&:terminate)
+
         # We always need to shutdown clients to make sure we do not force the GC to close consumer.
         # This can cause memory leaks and crashes.
-        listeners.each(&:shutdown)
+        # We run it in a separate thread in case this would hang and we ignore it after the time
+        # we assigned to it and force shutdown as we prefer to stop the process rather than wait
+        # indefinitely even with risk of VM crash as this is a last resort.
+        Thread.new do
+          listeners.each(&:shutdown)
+        rescue StandardError => e
+          # If anything wrong happened during shutdown, we also want to record it
+          Karafka.monitor.instrument(
+            'error.occurred',
+            caller: self,
+            error: e,
+            type: 'app.forceful_stopping.error'
+          )
+        end.join(FORCEFUL_SHUTDOWN_WAIT)
 
         # We also do not forcefully terminate everything when running in the embedded mode,
         # otherwise we would overwrite the shutdown process of the process that started Karafka
