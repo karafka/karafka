@@ -24,7 +24,7 @@ class Consumer < Karafka::BaseConsumer
   def consume; end
 end
 
-class FullRemoval
+class FullRemoval < Karafka::Pro::Processing::Filters::Base
   attr_reader :cursor
 
   def apply!(messages)

@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class Filter
+class Filter < Karafka::Pro::Processing::Filters::Base
   def apply!(messages)
     @applied = true
 
