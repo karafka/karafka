@@ -12,12 +12,13 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class DelayThrottler
+class DelayThrottler < Karafka::Pro::Processing::Filters::Base
   include Karafka::Core::Helpers::Time
 
   attr_reader :cursor
 
   def initialize
+    super
     # 5 seconds
     @min_delay = 5
   end
