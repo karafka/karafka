@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.4.4 (Unreleased)
+## 2.4.4 (2024-07-04)
 - [Enhancement] Allow for offset storing from the Filtering API.
 - [Enhancement] Print more extensive error info on forceful shutdown.
 - [Enhancement] Include `original_key` in the DLQ dispatch headers.
