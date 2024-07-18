@@ -385,9 +385,6 @@ module Karafka
             config.kafka[key] = value
           end
 
-          # Use Karafka client_id as kafka client id if not set
-          config.kafka[:'client.id'] ||= config.client_id
-
           return if Karafka::App.env.production?
 
           KAFKA_DEV_DEFAULTS.each do |key, value|

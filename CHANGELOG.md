@@ -1,5 +1,13 @@
 # Karafka framework changelog
 
+## 2.4.5 (Unreleased)
+- [Change] Inject `client.id` when building subscription group and not during the initial setup.
+- [Fix] Mitigate `confluentinc/librdkafka/issues/4783` by injecting dynamic client id when using `cooperative-sticky` strategy.
+
+### Change Note
+
+`client.id` is technically a low-importance value that should not (aside from this error) impact operations. This is why it is not considered a breaking change. This change may be reverted when the original issue is fixed in librdkafka.
+
 ## 2.4.4 (2024-07-04)
 - [Enhancement] Allow for offset storing from the Filtering API.
 - [Enhancement] Print more extensive error info on forceful shutdown.

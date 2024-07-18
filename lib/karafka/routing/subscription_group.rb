@@ -122,7 +122,21 @@ module Karafka
 
         inject_group_instance_id(kafka)
 
-        kafka[:'client.id'] ||= client_id
+        # If client id is set directly on librdkafka level, we do nothing and just go with what
+        # end user has configured
+        unless kafka.key?(:'client.id')
+          # This mitigates an issue for multiplexing and potentially other cases when running
+          # multiple karafka processes on one machine, where librdkafka goes into an infinite
+          # loop when using cooperative-sticky and upscaling.
+          #
+          # @see https://github.com/confluentinc/librdkafka/issues/4783
+          kafka[:'client.id'] = if kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
+                                  "#{client_id}/#{Time.now.to_f}/#{SecureRandom.hex[0..9]}"
+                                else
+                                  client_id
+                                end
+        end
+
         kafka[:'group.id'] ||= @consumer_group.id
         kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
         # Karafka manages the offsets based on the processing state, thus we do not rely on the
