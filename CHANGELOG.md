@@ -1,6 +1,6 @@
 # Karafka framework changelog
 
-## 2.4.5 (Unreleased)
+## 2.4.5 (2024-07-18)
 - [Change] Inject `client.id` when building subscription group and not during the initial setup.
 - [Fix] Mitigate `confluentinc/librdkafka/issues/4783` by injecting dynamic client id when using `cooperative-sticky` strategy.
 
