@@ -121,21 +121,7 @@ module Karafka
         kafka = Setup::AttributesMap.consumer(@topics.first.kafka.dup)
 
         inject_group_instance_id(kafka)
-
-        # If client id is set directly on librdkafka level, we do nothing and just go with what
-        # end user has configured
-        unless kafka.key?(:'client.id')
-          # This mitigates an issue for multiplexing and potentially other cases when running
-          # multiple karafka processes on one machine, where librdkafka goes into an infinite
-          # loop when using cooperative-sticky and upscaling.
-          #
-          # @see https://github.com/confluentinc/librdkafka/issues/4783
-          kafka[:'client.id'] = if kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
-                                  "#{client_id}/#{Time.now.to_f}/#{SecureRandom.hex[0..9]}"
-                                else
-                                  client_id
-                                end
-        end
+        inject_client_id(kafka)
 
         kafka[:'group.id'] ||= @consumer_group.id
         kafka[:'auto.offset.reset'] ||= @topics.first.initial_offset
@@ -144,6 +130,26 @@ module Karafka
         kafka[:'enable.auto.offset.store'] = false
         kafka.freeze
         kafka
+      end
+
+      # Sets (if needed) the client.id attribute
+      #
+      # @param kafka [Hash] kafka level config
+      def inject_client_id(kafka)
+        # If client id is set directly on librdkafka level, we do nothing and just go with what
+        # end user has configured
+        return if kafka.key?(:'client.id')
+
+        # This mitigates an issue for multiplexing and potentially other cases when running
+        # multiple karafka processes on one machine, where librdkafka goes into an infinite
+        # loop when using cooperative-sticky and upscaling.
+        #
+        # @see https://github.com/confluentinc/librdkafka/issues/4783
+        kafka[:'client.id'] = if kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
+                                "#{client_id}/#{Time.now.to_f}/#{SecureRandom.hex[0..9]}"
+                              else
+                                client_id
+                              end
       end
 
       # If we use static group memberships, there can be a case, where same instance id would
