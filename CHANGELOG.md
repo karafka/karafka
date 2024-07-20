@@ -1,4 +1,4 @@
-# Karafka framework changelog
+# Karafka Framework Changelog
 
 ## 2.4.5 (2024-07-18)
 - [Change] Inject `client.id` when building subscription group and not during the initial setup.
