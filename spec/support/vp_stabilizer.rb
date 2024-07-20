@@ -49,4 +49,9 @@ class VpStabilizer
   def action
     applied? ? :seek : :skip
   end
+
+  # @return [Boolean]
+  def mark_as_consumed?
+    false
+  end
 end

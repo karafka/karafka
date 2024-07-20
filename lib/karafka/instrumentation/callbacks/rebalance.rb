@@ -6,6 +6,10 @@ module Karafka
       # Callback that connects to the librdkafka rebalance callback and converts those events into
       # our internal events
       class Rebalance
+        include Helpers::ConfigImporter.new(
+          monitor: %i[monitor]
+        )
+
         # @param subscription_group [Karafka::Routes::SubscriptionGroup] subscription group for
         #   which we want to manage rebalances
         def initialize(subscription_group)
@@ -49,7 +53,7 @@ module Karafka
         # @param name [String] name of the event
         # @param tpl [Rdkafka::Consumer::TopicPartitionList]
         def instrument(name, tpl)
-          ::Karafka.monitor.instrument(
+          monitor.instrument(
             "rebalance.#{name}",
             caller: self,
             # We keep the id references here for backwards compatibility as some of the monitors
@@ -59,6 +63,15 @@ module Karafka
             consumer_group_id: @subscription_group.consumer_group.id,
             consumer_group: @subscription_group.consumer_group,
             tpl: tpl
+          )
+        rescue StandardError => e
+          monitor.instrument(
+            'error.occurred',
+            caller: self,
+            subscription_group_id: @subscription_group.id,
+            consumer_group_id: @subscription_group.consumer_group.id,
+            type: "callbacks.rebalance.#{name}.error",
+            error: e
           )
         end
       end

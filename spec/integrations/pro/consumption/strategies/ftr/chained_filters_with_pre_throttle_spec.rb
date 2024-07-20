@@ -19,7 +19,7 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class OddRemoval
+class OddRemoval < Karafka::Pro::Processing::Filters::Base
   attr_reader :cursor
 
   def apply!(messages)

@@ -52,7 +52,9 @@ module Karafka
         fetch.wait.max.ms
         group.id
         group.instance.id
+        group.protocol
         group.protocol.type
+        group.remote.assignor
         heartbeat.interval.ms
         interceptors
         internal.termination.signal
@@ -151,6 +153,7 @@ module Karafka
       # List of rdkafka producer accepted attributes
       PRODUCER = %i[
         acks
+        allow.auto.create.topics
         api.version.fallback.ms
         api.version.request
         api.version.request.timeout.ms
@@ -287,7 +290,12 @@ module Karafka
       ].freeze
 
       # Location of the file with rdkafka settings list
-      SOURCE = 'https://raw.githubusercontent.com/edenhill/librdkafka/master/CONFIGURATION.md'
+      SOURCE = <<~SOURCE.delete("\n").gsub(/\s+/, '/')
+        https://raw.githubusercontent.com
+          confluentinc/librdkafka
+          v#{Rdkafka::LIBRDKAFKA_VERSION}
+          CONFIGURATION.md
+      SOURCE
 
       private_constant :SOURCE
 
@@ -334,9 +342,6 @@ module Karafka
               next
             end
           end
-
-          # This can be removed when 0.13 librdkafka is released
-          attributes[:producer].delete_if { |val| val == 'allow.auto.create.topics' }
 
           attributes.transform_values!(&:sort)
           attributes.each_value { |vals| vals.map!(&:to_sym) }

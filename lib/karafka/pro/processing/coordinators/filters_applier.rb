@@ -89,6 +89,23 @@ module Karafka
             applied.map(&:cursor).compact.min_by(&:offset)
           end
 
+          # @return [Boolean] did any of the filters requested offset storage during filter
+          #   application
+          def mark_as_consumed?
+            # We can manage filtering offset only when user wanted that and there is a cursor
+            # to use
+            applied.any?(&:mark_as_consumed?) && cursor
+          end
+
+          # @return [Symbol] `:mark_as_consumed` or `:mark_as_consumed!`
+          def marking_method
+            candidates = applied.map(&:marking_method)
+
+            return :mark_as_consumed! if candidates.include?(:mark_as_consumed!)
+
+            :mark_as_consumed
+          end
+
           private
 
           # @return [Boolean] is filtering active

@@ -39,8 +39,8 @@ class KarafkaApp < Karafka::App
   # listen to only what you really need for given environment.
   Karafka.monitor.subscribe(
     Karafka::Instrumentation::LoggerListener.new(
-      # Karafka, when the logger is set to info producers logs each time it polls data from an
-      # internal messages wueue. This can be extensive, so you can turn it off by setting below
+      # Karafka, when the logger is set to info, produces logs each time it polls data from an
+      # internal messages queue. This can be extensive, so you can turn it off by setting below
       # to false.
       log_polling: true
     )
@@ -59,7 +59,7 @@ class KarafkaApp < Karafka::App
     )
   )
 
-  # You can subscribe to all consumer related errors and record/track then that way
+  # You can subscribe to all consumer related errors and record/track them that way
   #
   # Karafka.monitor.subscribe 'error.occurred' do |event|
   #   type = event[:type]
@@ -68,7 +68,7 @@ class KarafkaApp < Karafka::App
   #   ErrorTracker.send_error(error, type, details)
   # end
 
-  # You can subscribe to all producer related errors and record/track then that way
+  # You can subscribe to all producer related errors and record/track them that way
   # Please note, that producer and consumer have their own notifications pipeline so you need to
   # setup error tracking independently for each of them
   #

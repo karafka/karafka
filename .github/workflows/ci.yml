@@ -73,12 +73,10 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.4.0-preview1'
           - '3.3'
           - '3.2'
-          # We run it against the oldest and the newest of a given major to make sure, that there
-          # are no syntax-sugars that we would use that were introduced down the road
           - '3.1'
-          - '3.1.0'
           - '3.0'
         include:
           - ruby: '3.3'
@@ -116,6 +114,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.4.0-preview1'
           - '3.3'
           - '3.2'
           - '3.1'
@@ -149,6 +148,11 @@ jobs:
 
           bundle config set without 'tools benchmarks docs'
 
+      - name: Fix directory permissions for Bundler
+        run: |
+          chmod -R o-w /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
+          chmod +t /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
+
       - name: Bundle install
         run: |
           bundle config set without development
@@ -169,6 +173,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.4.0-preview1'
           - '3.3'
           - '3.2'
           - '3.1'

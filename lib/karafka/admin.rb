@@ -10,6 +10,12 @@ module Karafka
   #   Cluster on which operations are performed can be changed via `admin.kafka` config, however
   #   there is no multi-cluster runtime support.
   module Admin
+    # More or less number of seconds of 1 hundred years
+    # Used for time referencing that does not have to be accurate but needs to be big
+    HUNDRED_YEARS = 100 * 365.25 * 24 * 60 * 60
+
+    private_constant :HUNDRED_YEARS
+
     class << self
       # Allows us to read messages from the topic
       #
@@ -156,6 +162,18 @@ module Karafka
       #
       # @example Move offset to 5 seconds ago on partition 2
       #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 2 => 5.seconds.ago } })
+      #
+      # @example Move to the earliest offset on all the partitions of a topic
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => 'earliest' })
+      #
+      # @example Move to the latest (high-watermark) offset on all the partitions of a topic
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => 'latest' })
+      #
+      # @example Move offset of a single partition to earliest
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 1 => 'earliest' } })
+      #
+      # @example Move offset of a single partition to latest
+      #   Karafka::Admin.seek_consumer_group('group-id', { 'topic' => { 1 => 'latest' } })
       def seek_consumer_group(consumer_group_id, topics_with_partitions_and_offsets)
         tpl_base = {}
 
@@ -170,6 +188,32 @@ module Karafka
           else
             topic_info(topic)[:partition_count].times do |partition|
               tpl_base[topic][partition] = partitions_with_offsets
+            end
+          end
+        end
+
+        tpl_base.each_value do |partitions|
+          partitions.transform_values! do |position|
+            # Support both symbol and string based references
+            casted_position = position.is_a?(Symbol) ? position.to_s : position
+
+            # This remap allows us to transform some special cases in a reference that can be
+            # understood by Kafka
+            case casted_position
+            # Earliest is not always 0. When compacting/deleting it can be much later, that's why
+            # we fetch the oldest possible offset
+            when 'earliest'
+              Time.now - HUNDRED_YEARS
+            # Latest will always be the high-watermark offset and we can get it just by getting
+            # a future position
+            when 'latest'
+              Time.now + HUNDRED_YEARS
+            # Same as `'latest'`
+            when false
+              Time.now - HUNDRED_YEARS
+            # Regular offset case
+            else
+              position
             end
           end
         end

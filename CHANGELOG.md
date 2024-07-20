@@ -1,6 +1,52 @@
 # Karafka framework changelog
 
-## 2.4.0 (Unreleased)
+## 2.4.5 (2024-07-18)
+- [Change] Inject `client.id` when building subscription group and not during the initial setup.
+- [Fix] Mitigate `confluentinc/librdkafka/issues/4783` by injecting dynamic client id when using `cooperative-sticky` strategy.
+
+### Change Note
+
+`client.id` is technically a low-importance value that should not (aside from this error) impact operations. This is why it is not considered a breaking change. This change may be reverted when the original issue is fixed in librdkafka.
+
+## 2.4.4 (2024-07-04)
+- [Enhancement] Allow for offset storing from the Filtering API.
+- [Enhancement] Print more extensive error info on forceful shutdown.
+- [Enhancement] Include `original_key` in the DLQ dispatch headers.
+- [Enhancement] Support embedding mode control management from the trap context.
+- [Enhancement] Make sure, that the listener thread is stopped before restarting.
+- [Fix] Do not block on hanging listener shutdown when invoking forceful shutdown.
+- [Fix] Static membership fencing error is not propagated explicitly enough.
+- [Fix] Make sure DLQ dispatches raw headers and not deserialized headers (same as payload).
+- [Fix] Fix a typo where `ms` in logger listener would not have space before it.
+- [Maintenance] Require `karafka-core` `>=` `2.4.3`.
+- [Maintenance] Allow for usage of `karafka-rdkafka` `~` `0.16` to support librdkafka `2.4.0`.
+- [Maintenance] Lower the precision reporting to 100 microseconds in the logger listener.
+
+## 2.4.3 (2024-06-12)
+- [Enhancement] Allow for customization of Virtual Partitions reducer for enhanced parallelization.
+- [Enhancement] Add more error codes to early report on polling issues (kidlab)
+- [Enhancement] Add `transport`, `network_exception` and `coordinator_load_in_progress` alongside `timed_out` to retryable errors for the proxy.
+- [Enhancement] Improve `strict_topics_namespacing` validation message.
+- [Change] Remove default empty thread name from `Async` since Web has been upgraded.
+- [Fix] Installer doesn't respect directories in `KARAFKA_BOOT_FILE`.
+- [Fix] Fix case where non absolute boot file path would not work as expected.
+- [Fix] Allow for installing Karafka in a non-existing (yet) directory
+- [Maintenance] Require `waterdrop` `>=` `2.7.3` to support idempotent producer detection.
+
+## 2.4.2 (2024-05-14)
+- [Enhancement] Validate ActiveJob adapter custom producer format.
+- [Fix] Internal seek does not resolve the offset correctly for time based lookup.
+
+## 2.4.1 (2024-05-10)
+- [Enhancement] Allow for usage of producer variants and alternative producers with ActiveJob Jobs (Pro).
+- [Enhancement] Support `:earliest` and `:latest` in `Karafka::Admin#seek_consumer_group`.
+- [Enhancement] Align configuration attributes mapper with exact librdkafka version used and not master.
+- [Maintenance] Use `base64` from RubyGems as it will no longer be part of standard library in Ruby 3.4.
+- [Fix] Support migrating via aliases and plan with aliases usage.
+- [Fix] Active with default set to `false` cannot be overwritten
+- [Fix] Fix inheritance of ActiveJob adapter `karafka_options` partitioner and dispatch method.
+
+## 2.4.0 (2024-04-26)
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
@@ -17,6 +63,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Feature]** Introduce ability to use custom message key deserializers.
 - **[Feature]** Introduce ability to use custom message headers deserializers.
 - **[Feature]** Provide `Karafka::Admin::Configs` API for cluster and topics configuration management.
+- [Enhancement] Protect critical `rdkafka` thread executable code sections.
 - [Enhancement] Assign names to internal threads for better debuggability when on `TTIN`.
 - [Enhancement] Provide `log_polling` setting to the `Karafka::Instrumentation::LoggerListener` to silence polling in any non-debug mode.
 - [Enhancement] Provide `metadata#message` to be able to retrieve message from metadata.
@@ -42,6 +89,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - [Enhancement] No longer raise `Karafka::UnsupportedCaseError` for not recognized error types to support dynamic errors reporting.
 - [Change] Do not create new proxy object to Rdkafka with certain low-level operations and re-use existing.
 - [Change] Update `karafka.erb` template with a placeholder for waterdrop and karafka error instrumentation.
+- [Change] Replace `statistics.emitted.error` error type with `callbacks.statistics.error` to align naming conventions.
 - [Fix] Pro Swarm liveness listener can report incorrect failure when dynamic multiplexing scales down.
 - [Fix] K8s liveness listener can report incorrect failure when dynamic multiplexing scales down.
 - [Fix] Fix a case where connection conductor would not be released during manager state changes.
@@ -58,6 +106,10 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 **PLEASE MAKE SURE TO READ AND APPLY THEM!**
 
 Available [here](https://karafka.io/docs/Upgrades-2.4/).
+
+## 2.3.4 (2024-04-11)
+
+- [Fix] Seek consumer group on a topic level is updating only recent partition.
 
 ## 2.3.3 (2024-02-26)
 - [Enhancement] Routing based topics allocation for swarm (Pro)

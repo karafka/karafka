@@ -7,6 +7,10 @@ module Karafka
       # @see `WaterDrop::Instrumentation::Callbacks::Statistics` for details on why we decorate
       #   those statistics
       class Statistics
+        include Helpers::ConfigImporter.new(
+          monitor: %i[monitor]
+        )
+
         # @param subscription_group_id [String] id of the current subscription group
         # @param consumer_group_id [String] id of the current consumer group
         # @param client_name [String] rdkafka client name
@@ -26,7 +30,7 @@ module Karafka
           # all the time.
           return unless @client_name == statistics['name']
 
-          ::Karafka.monitor.instrument(
+          monitor.instrument(
             'statistics.emitted',
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
@@ -36,12 +40,12 @@ module Karafka
         # as otherwise, in case of statistics which run in the main librdkafka thread, any crash
         # will hang the whole process.
         rescue StandardError => e
-          ::Karafka.monitor.instrument(
+          monitor.instrument(
             'error.occurred',
             caller: self,
             subscription_group_id: @subscription_group_id,
             consumer_group_id: @consumer_group_id,
-            type: 'statistics.emitted.error',
+            type: 'callbacks.statistics.error',
             error: e
           )
         end

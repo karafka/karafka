@@ -43,6 +43,62 @@ RSpec.describe_current do
     end
   end
 
+  describe '#reducer' do
+    subject(:reducer) { topic.virtual_partitions.reducer }
+
+    before { allow(Karafka::App.config).to receive(:concurrency).and_return(concurrency) }
+
+    context 'when using default reducer' do
+      context 'when concurrency is set to 1' do
+        let(:concurrency) { 1 }
+
+        it 'expect to reduce all to one value' do
+          reduced = Array.new(100) { |i| reducer.call(i) }
+
+          expect(reduced.uniq.size).to eq(1)
+        end
+
+        it 'expect to also reduce and other random stuff to 1' do
+          reduced = Array.new(100) { reducer.call(rand.to_s) }
+
+          expect(reduced.uniq.size).to eq(1)
+        end
+      end
+
+      context 'when concurrency is set to 5' do
+        let(:concurrency) { 5 }
+
+        it 'expect to reduce all to 5' do
+          reduced = Array.new(5) { |i| reducer.call(i) }
+
+          expect(reduced.uniq.size).to eq(5)
+        end
+      end
+
+      # yes 10, not 11 because this is fast but not perfect, this is why we give an option to use
+      # custom reducers
+      context 'when concurrency is set to 11' do
+        let(:concurrency) { 11 }
+
+        it 'expect to reduce all numericals to 10' do
+          reduced = Array.new(11) { |i| reducer.call(i) }
+
+          expect(reduced.uniq.size).to eq(10)
+        end
+      end
+
+      context 'when concurrency is set to 21' do
+        let(:concurrency) { 21 }
+
+        it 'expect to reduce all numericals to 17' do
+          reduced = Array.new(21) { |i| reducer.call(i) }
+
+          expect(reduced.uniq.size).to eq(17)
+        end
+      end
+    end
+  end
+
   describe '#to_h' do
     it { expect(topic.to_h[:virtual_partitions]).to eq(topic.virtual_partitions.to_h) }
   end

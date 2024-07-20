@@ -121,8 +121,9 @@ en:
       declaratives.details_format: needs to be a hash with only symbol keys
 
       inconsistent_namespacing: |
-        needs to be consistent namespacing style
-        disable this validation by setting config.strict_topics_namespacing to false
+        needs to follow a consistent namespacing style using either dots (.) or underscores (_), but not both.
+        This ensures proper Kafka metrics reporting and avoids name collisions.
+        To disable this validation, set config.strict_topics_namespacing to false.
 
       deserializers.active_format: 'needs to be true'
       deserializers.payload_format: 'needs to respond to #call'
@@ -144,6 +145,7 @@ en:
       dispatch_many_method_format: needs to be either :produce_many_async or :produce_many_sync
       partitioner_format: 'needs to respond to #call'
       partition_key_type_format: 'needs to be either :key or :partition_key'
+      producer_format: 'needs to respond to #call'
 
     test:
       missing: needs to be present

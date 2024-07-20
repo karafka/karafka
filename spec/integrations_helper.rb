@@ -104,7 +104,7 @@ def setup_web
 
   # Use new groups and topics for each spec, so we don't end up with conflicts
   Karafka::Web.setup do |config|
-    config.processing.consumer_group = SecureRandom.hex(6)
+    config.group_id = SecureRandom.hex(6)
     config.topics.consumers.reports = SecureRandom.hex(6)
     config.topics.consumers.states = SecureRandom.hex(6)
     config.topics.consumers.metrics = SecureRandom.hex(6)
@@ -216,11 +216,17 @@ end
 # Returns the next offset that we would consume if we would subscribe again
 # @param topic [String] topic we are interested in
 # @return [Integer] next offset we would consume
-def fetch_next_offset(topic = DT.topic)
+#
+# @note Please note, that for `latest` seek offset, -1 means from high-watermark. We simplify it
+#   in our specs but it is worth keeping in mind.
+def fetch_next_offset(topic = DT.topic, normalize: true)
   results = Karafka::Admin.read_lags_with_offsets
   cg = Karafka::App.consumer_groups.first.id
   part_results = results.fetch(cg).fetch(topic)[0]
   offset = part_results.fetch(:offset)
+
+  return offset unless normalize
+
   offset.negative? ? 0 : offset
 end
 
@@ -342,6 +348,22 @@ def start_karafka_and_wait_until(mode: :server, reset_status: false, &block)
   # Since manager is for the whole lifecycle of the process, it needs to be re-created
   manager_class = Karafka::App.config.internal.connection.manager.class
   Karafka::App.config.internal.connection.manager = manager_class.new
+end
+
+# Sleeps until Karafka has an assignment on requested topics
+# @param topics [Array<String>] list of topics for which assignments we wait
+def wait_for_assignments(*topics)
+  topics << DT.topic if topics.empty?
+
+  Karafka.monitor.subscribe('statistics.emitted') do |event|
+    next unless topics.all? do |topic|
+      event[:statistics]['topics'].key?(topic)
+    end
+
+    DT[:topics_assignments_ready] = true
+  end
+
+  sleep(0.1) until DT.key?(:topics_assignments_ready)
 end
 
 # Sends data to Kafka in a sync way

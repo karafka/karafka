@@ -34,7 +34,7 @@ end
 elements = DT.uuids(2)
 
 2.times do |i|
-  produce(DT.topic, elements[i], headers: { "test#{i}" => (i + 1).to_s })
+  produce(DT.topic, elements[i], headers: { "test#{i}" => (i + 1).to_s }, key: i.to_s)
 end
 
 start_karafka_and_wait_until do
@@ -52,4 +52,5 @@ end
   assert_equal dlq_message.headers.fetch('original_offset'), i.to_s
   assert_equal dlq_message.headers.fetch('original_attempts'), '1'
   assert_equal dlq_message.headers.fetch('original_consumer_group'), cg
+  assert_equal dlq_message.headers.fetch('original_key'), i.to_s
 end

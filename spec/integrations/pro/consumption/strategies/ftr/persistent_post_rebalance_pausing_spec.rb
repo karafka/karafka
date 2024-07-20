@@ -44,8 +44,9 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-class PauseManager
+class PauseManager < Karafka::Pro::Processing::Filters::Base
   def initialize(topic, partition)
+    super()
     @topics = topic
     @partition = partition
   end

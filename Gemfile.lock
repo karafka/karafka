@@ -1,18 +1,19 @@
 PATH
   remote: .
   specs:
-    karafka (2.4.0.beta2)
-      karafka-core (>= 2.4.0.rc1, < 2.5.0)
-      waterdrop (>= 2.7.0.rc1, < 3.0.0)
+    karafka (2.4.5)
+      base64 (~> 0.2)
+      karafka-core (>= 2.4.3, < 2.5.0)
+      waterdrop (>= 2.7.3, < 3.0.0)
       zeitwerk (~> 2.3)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (7.1.3.2)
-      activesupport (= 7.1.3.2)
+    activejob (7.1.3.4)
+      activesupport (= 7.1.3.4)
       globalid (>= 0.3.6)
-    activesupport (7.1.3.2)
+    activesupport (7.1.3.4)
       base64
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
@@ -23,42 +24,43 @@ GEM
       mutex_m
       tzinfo (~> 2.0)
     base64 (0.2.0)
-    bigdecimal (3.1.7)
+    bigdecimal (3.1.8)
     byebug (11.1.3)
-    concurrent-ruby (1.2.3)
+    concurrent-ruby (1.3.3)
     connection_pool (2.4.1)
     diff-lcs (1.5.1)
     docile (1.4.0)
     drb (2.2.1)
-    erubi (1.12.0)
+    erubi (1.13.0)
     factory_bot (6.4.6)
       activesupport (>= 5.0.0)
-    ffi (1.16.3)
+    ffi (1.17.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
-    i18n (1.14.4)
+    i18n (1.14.5)
       concurrent-ruby (~> 1.0)
-    karafka-core (2.4.0.rc1)
-      karafka-rdkafka (>= 0.15.0.rc1, < 0.16.0)
-    karafka-rdkafka (0.15.0.rc1)
+    karafka-core (2.4.3)
+      karafka-rdkafka (>= 0.15.0, < 0.17.0)
+    karafka-rdkafka (0.16.0)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-testing (2.4.0.rc1)
-      karafka (>= 2.4.0.beta1, < 2.5.0)
-      waterdrop (>= 2.7.0.rc1)
-    karafka-web (0.9.0.rc1)
+    karafka-testing (2.4.4)
+      karafka (>= 2.4.0, < 2.5.0)
+      waterdrop (>= 2.7.0)
+    karafka-web (0.9.1)
       erubi (~> 1.4)
-      karafka (>= 2.4.0.beta1, < 2.5.0)
-      karafka-core (>= 2.4.0.rc1, < 2.5.0)
+      karafka (>= 2.4.0, < 2.5.0)
+      karafka-core (>= 2.4.0, < 2.5.0)
       roda (~> 3.68, >= 3.69)
       tilt (~> 2.0)
-    mini_portile2 (2.8.5)
-    minitest (5.22.3)
+    mini_portile2 (2.8.7)
+    minitest (5.24.0)
     mutex_m (0.2.0)
-    rack (3.0.10)
+    ostruct (0.6.0)
+    rack (3.1.4)
     rake (13.2.1)
-    roda (3.78.0)
+    roda (3.81.0)
       rack
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
@@ -66,10 +68,10 @@ GEM
       rspec-mocks (~> 3.13.0)
     rspec-core (3.13.0)
       rspec-support (~> 3.13.0)
-    rspec-expectations (3.13.0)
+    rspec-expectations (3.13.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-mocks (3.13.0)
+    rspec-mocks (3.13.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.1)
@@ -79,13 +81,14 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
-    tilt (2.3.0)
+    tilt (2.4.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    waterdrop (2.7.0.rc1)
-      karafka-core (>= 2.4.0.rc1, < 3.0.0)
+    waterdrop (2.7.3)
+      karafka-core (>= 2.4.0, < 3.0.0)
+      karafka-rdkafka (>= 0.15.1)
       zeitwerk (~> 2.3)
-    zeitwerk (2.6.13)
+    zeitwerk (2.6.16)
 
 PLATFORMS
   ruby
@@ -96,10 +99,11 @@ DEPENDENCIES
   byebug
   factory_bot
   karafka!
-  karafka-testing (>= 2.4.0.rc1)
-  karafka-web (>= 0.9.0.rc1)
+  karafka-testing (>= 2.4.0)
+  karafka-web (>= 0.9.0)
+  ostruct
   rspec
   simplecov
 
 BUNDLED WITH
-   2.5.7
+   2.5.14
