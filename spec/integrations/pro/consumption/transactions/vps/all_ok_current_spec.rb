@@ -25,7 +25,7 @@ class Consumer < Karafka::BaseConsumer
   end
 
   def shutdown
-    sleep(1)
+    sleep(5)
     DT[:metadata] << offset_metadata(cache: false)
   end
 end
