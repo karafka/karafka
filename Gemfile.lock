@@ -39,13 +39,13 @@ GEM
       activesupport (>= 6.1)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
-    karafka-core (2.4.3)
-      karafka-rdkafka (>= 0.15.0, < 0.17.0)
-    karafka-rdkafka (0.16.0)
+    karafka-core (2.4.4)
+      karafka-rdkafka (>= 0.15.0, < 0.18.0)
+    karafka-rdkafka (0.17.0)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-testing (2.4.4)
+    karafka-testing (2.4.5)
       karafka (>= 2.4.0, < 2.5.0)
       waterdrop (>= 2.7.0)
     karafka-web (0.9.1)
@@ -84,8 +84,8 @@ GEM
     tilt (2.4.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    waterdrop (2.7.3)
-      karafka-core (>= 2.4.0, < 3.0.0)
+    waterdrop (2.7.4)
+      karafka-core (>= 2.4.3, < 3.0.0)
       karafka-rdkafka (>= 0.15.1)
       zeitwerk (~> 2.3)
     zeitwerk (2.6.16)
@@ -106,4 +106,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   2.5.14
+   2.5.11

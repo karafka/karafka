@@ -38,6 +38,7 @@ module Karafka
         default_topic_conf
         enable.auto.commit
         enable.auto.offset.store
+        enable.metrics.push
         enable.partition.eof
         enable.random.seed
         enable.sasl.oauthbearer.unsecure.jwt
@@ -89,6 +90,8 @@ module Karafka
         reconnect.backoff.max.ms
         reconnect.backoff.ms
         resolve_cb
+        retry.backoff.max.ms
+        retry.backoff.ms
         sasl.kerberos.keytab
         sasl.kerberos.kinit.cmd
         sasl.kerberos.min.time.before.relogin
@@ -182,6 +185,7 @@ module Karafka
         dr_msg_cb
         enable.gapless.guarantee
         enable.idempotence
+        enable.metrics.push
         enable.random.seed
         enable.sasl.oauthbearer.unsecure.jwt
         enable.ssl.certificate.verification
