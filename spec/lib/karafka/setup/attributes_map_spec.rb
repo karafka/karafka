@@ -6,7 +6,7 @@ RSpec.describe_current do
   let(:settings) do
     {
       # Producer only
-      'retry.backoff.ms': 1_000,
+      'message.send.max.retries': 1_000,
       # Consumer only
       'max.poll.interval.ms': 2_000,
       # Both
@@ -18,7 +18,7 @@ RSpec.describe_current do
     subject(:stripped) { described_class.consumer(settings) }
 
     it 'expect to keep consumer and shared settings' do
-      expect(stripped.key?(:'retry.backoff.ms')).to eq(false)
+      expect(stripped.key?(:'message.send.max.retries')).to eq(false)
       expect(stripped[:'max.poll.interval.ms']).to eq(2_000)
       expect(stripped[:'ssl.crl.location']).to eq('')
     end
@@ -29,7 +29,7 @@ RSpec.describe_current do
 
     it 'expect to keep producer and shared settings' do
       expect(stripped.key?(:'max.poll.interval.ms')).to eq(false)
-      expect(stripped[:'retry.backoff.ms']).to eq(1_000)
+      expect(stripped[:'message.send.max.retries']).to eq(1_000)
       expect(stripped[:'ssl.crl.location']).to eq('')
     end
   end
