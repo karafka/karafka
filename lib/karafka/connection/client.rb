@@ -257,11 +257,15 @@ module Karafka
 
       # Gracefully stops topic consumption.
       def stop
-        # In case of cooperative-sticky, there is a bug in librdkafka that may hang it.
-        # To mitigate it we first need to unsubscribe so we will not receive any assignments and
-        # only then we should be good to go.
+        # librdkafka has several constant issues when shutting down during rebalance. This is
+        # an issue that gets back every few versions of librdkafka in a limited scope, for example
+        # for cooperative-sticky or in a general scope. This is why we unsubscribe and wait until
+        # we no longer have any assignments. That way librdkafka consumer shutdown should never
+        # happen with rebalance associated with the given consumer instance
+        #
+        # @see https://github.com/confluentinc/librdkafka/issues/4792
         # @see https://github.com/confluentinc/librdkafka/issues/4527
-        if @subscription_group.kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
+        if unsubscribe?
           unsubscribe
 
           until assignment.empty?
@@ -658,8 +662,13 @@ module Karafka
         subscriptions = @subscription_group.subscriptions
         assignments = @subscription_group.assignments(consumer)
 
-        consumer.subscribe(*subscriptions) if subscriptions
-        consumer.assign(assignments) if assignments
+        if subscriptions
+          consumer.subscribe(*subscriptions)
+          @mode = :subscribe
+        elsif assignments
+          consumer.assign(assignments)
+          @mode = :assign
+        end
 
         consumer
       end
@@ -689,6 +698,22 @@ module Karafka
         # done, we could not intercept the invocations to kafka via client methods.
         @kafka.start
         @kafka
+      end
+
+      # Decides whether or not we should unsubscribe prior to closing.
+      #
+      # We cannot do it when there is a static group membership assignment as it would be
+      # reassigned.
+      # We cannot do it also for assign mode because then there are no subscriptions
+      # We also do not do it if there are no assignments at all as it does not make sense
+      #
+      # @return [Boolean] should we unsubscribe prior to shutdown
+      def unsubscribe?
+        return false if @subscription_group.kafka.key?(:'group.instance.id')
+        return false if @mode != :subscribe
+        return false if assignment.empty?
+
+        true
       end
     end
   end
