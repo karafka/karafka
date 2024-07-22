@@ -265,10 +265,7 @@ module Karafka
         #
         # @see https://github.com/confluentinc/librdkafka/issues/4792
         # @see https://github.com/confluentinc/librdkafka/issues/4527
-        #
-        # We cannot do it when there is a static group membership assignment as it would be
-        # reassigned
-        unless @subscription_group.kafka.key?(:'group.instance.id')
+        if unsubscribe?
           unsubscribe
 
           until assignment.empty?
@@ -665,8 +662,13 @@ module Karafka
         subscriptions = @subscription_group.subscriptions
         assignments = @subscription_group.assignments(consumer)
 
-        consumer.subscribe(*subscriptions) if subscriptions
-        consumer.assign(assignments) if assignments
+        if subscriptions
+          consumer.subscribe(*subscriptions)
+          @mode = :subscribe
+        elsif assignments
+          consumer.assign(assignments)
+          @mode = :assign
+        end
 
         consumer
       end
@@ -696,6 +698,22 @@ module Karafka
         # done, we could not intercept the invocations to kafka via client methods.
         @kafka.start
         @kafka
+      end
+
+      # Decides whether or not we should unsubscribe prior to closing.
+      #
+      # We cannot do it when there is a static group membership assignment as it would be
+      # reassigned.
+      # We cannot do it also for assign mode because then there are no subscriptions
+      # We also do not do it if there are no assignments at all as it does not make sense
+      #
+      # @return [Boolean] should we unsubscribe prior to shutdown
+      def unsubscribe?
+        return false if @subscription_group.kafka.key?(:'group.instance.id')
+        return false if @mode != :subscribe
+        return false if assignment.empty?
+
+        true
       end
     end
   end
