@@ -265,12 +265,17 @@ module Karafka
         #
         # @see https://github.com/confluentinc/librdkafka/issues/4792
         # @see https://github.com/confluentinc/librdkafka/issues/4527
-        unsubscribe
+        #
+        # We cannot do it when there is a static group membership assignment as it would be
+        # reassigned
+        unless @subscription_group.kafka.key?(:'group.instance.id')
+          unsubscribe
 
-        until assignment.empty?
-          sleep(0.1)
+          until assignment.empty?
+            sleep(0.1)
 
-          ping
+            ping
+          end
         end
 
         close
