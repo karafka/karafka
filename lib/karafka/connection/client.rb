@@ -257,18 +257,20 @@ module Karafka
 
       # Gracefully stops topic consumption.
       def stop
-        # In case of cooperative-sticky, there is a bug in librdkafka that may hang it.
-        # To mitigate it we first need to unsubscribe so we will not receive any assignments and
-        # only then we should be good to go.
+        # librdkafka has several constant issues when shutting down during rebalance. This is
+        # an issue that gets back every few versions of librdkafka in a limited scope, for example
+        # for cooperative-sticky or in a general scope. This is why we unsubscribe and wait until
+        # we no longer have any assignments. That way librdkafka consumer shutdown should never
+        # happen with rebalance associated with the given consumer instance
+        #
+        # @see https://github.com/confluentinc/librdkafka/issues/4792
         # @see https://github.com/confluentinc/librdkafka/issues/4527
-        if @subscription_group.kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
-          unsubscribe
+        unsubscribe
 
-          until assignment.empty?
-            sleep(0.1)
+        until assignment.empty?
+          sleep(0.1)
 
-            ping
-          end
+          ping
         end
 
         close
