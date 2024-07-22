@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.4.6 (Unreleased)
+## 2.4.6 (2024-07-22)
 - [Fix] Mitigate `rd_kafka_cgrp_terminated` and other `librdkafka` shutdown issues by unsubscribing fully prior to shutdown.
 
 ## 2.4.5 (2024-07-18)
