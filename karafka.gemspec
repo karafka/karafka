@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.authors     = ['Maciej Mensfeld']
   spec.email       = %w[contact@karafka.io]
   spec.homepage    = 'https://karafka.io'
-  spec.licenses    = %w[LGPL-3.0 Commercial]
+  spec.licenses    = %w[LGPL-3.0-only Commercial]
   spec.summary     = 'Karafka is Ruby and Rails efficient Kafka processing framework.'
   spec.description = <<-DESC
     Karafka is Ruby and Rails efficient Kafka processing framework.
