@@ -8,6 +8,8 @@ module Karafka
     # It is threadsafe and provides some security measures so we won't end up operating on a
     # closed consumer instance as it causes Ruby VM process to crash.
     class Client
+      include ::Karafka::Core::Helpers::Time
+
       attr_reader :rebalance_manager
 
       # @return [Karafka::Routing::SubscriptionGroup] subscription group to which this client
@@ -261,14 +263,32 @@ module Karafka
         # an issue that gets back every few versions of librdkafka in a limited scope, for example
         # for cooperative-sticky or in a general scope. This is why we unsubscribe and wait until
         # we no longer have any assignments. That way librdkafka consumer shutdown should never
-        # happen with rebalance associated with the given consumer instance
+        # happen with rebalance associated with the given consumer instance. Since we do not want
+        # to wait forever, we also impose a limit on how long should we wait. This prioritizes
+        # shutdown stability over endless wait.
+        #
+        # The `@unsubscribing` ensures that when there would be a direct close attempt, it
+        # won't get into this loop again. This can happen when supervision decides it should close
+        # things faster
         #
         # @see https://github.com/confluentinc/librdkafka/issues/4792
         # @see https://github.com/confluentinc/librdkafka/issues/4527
         if unsubscribe?
+          @unsubscribing = true
+
+          # Give 50% of time for the final close before we reach the forceful
+          max_wait = ::Karafka::App.config.shutdown_timeout * 0.5
+          used = 0
+          stopped_at = monotonic_now
+
           unsubscribe
 
           until assignment.empty?
+            used += monotonic_now - stopped_at
+            stopped_at = monotonic_now
+
+            break if used >= max_wait
+
             sleep(0.1)
 
             ping
@@ -709,6 +729,7 @@ module Karafka
       #
       # @return [Boolean] should we unsubscribe prior to shutdown
       def unsubscribe?
+        return false if @unsubscribing
         return false if @subscription_group.kafka.key?(:'group.instance.id')
         return false if @mode != :subscribe
         return false if assignment.empty?
