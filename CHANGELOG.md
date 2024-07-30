@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.7 (Unreleased)
+- [Enhancement] Introduce a shutdown time limit for unsubscription wait.
 - [Fix] License identifier `LGPL-3.0` is deprecated for SPDX (#2177).
 
 ## 2.4.6 (2024-07-22)
