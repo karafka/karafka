@@ -56,6 +56,7 @@ RSpec.describe_current do
         'bootstrap.servers': '127.0.0.1:9092',
         'statistics.interval.ms': 5_000,
         'topic.metadata.refresh.interval.ms': 5_000,
+        'max.poll.interval.ms': 300_000,
         'client.software.name': 'karafka',
         'client.software.version': [
           "v#{Karafka::VERSION}",
@@ -65,6 +66,10 @@ RSpec.describe_current do
       }
     end
 
-    it { is_expected.to eq(expected_defaults) }
+    it 'expect to have correct values after enrichment' do
+      Karafka::Setup::DefaultsInjector.consumer(defaults)
+
+      expect(defaults).to eq(expected_defaults)
+    end
   end
 end

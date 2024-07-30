@@ -120,6 +120,7 @@ module Karafka
       def build_kafka
         kafka = Setup::AttributesMap.consumer(@topics.first.kafka.dup)
 
+        inject_defaults(kafka)
         inject_group_instance_id(kafka)
         inject_client_id(kafka)
 
@@ -130,6 +131,13 @@ module Karafka
         kafka[:'enable.auto.offset.store'] = false
         kafka.freeze
         kafka
+      end
+
+      # Injects (if needed) defaults
+      #
+      # @param kafka [Hash] kafka level config
+      def inject_defaults(kafka)
+        Setup::DefaultsInjector.consumer(kafka)
       end
 
       # Sets (if needed) the client.id attribute
