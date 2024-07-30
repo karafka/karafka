@@ -89,7 +89,9 @@ high_usage = 0
 90.times do
   high_usage += 1 if cpu_usage_high?
 
-  break if high_usage >= 3
+  # We exit that way because only that way it will fully crash and not hang the process for too
+  # long
+  exit!(1) if high_usage >= 3
 
   sleep(1)
 end
