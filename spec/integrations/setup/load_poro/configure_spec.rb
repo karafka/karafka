@@ -5,7 +5,9 @@
 require 'karafka'
 
 class KarafkaApp < Karafka::App
-  setup
+  setup do |config|
+    config.kafka = { 'bootstrap.servers': 'host:9092' }
+  end
 
   routes.draw do
     topic :visits do
