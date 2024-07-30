@@ -26,7 +26,12 @@ module Karafka
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
-      private_constant :MAX_POLL_RETRIES
+      # How much time of the total shutdown time can we wait for our manual unsubscribe before
+      # attempting to close without unsubscribe. We try to wait for 50% of the shutdown time
+      # before we move to a regular unsubscribe.
+      COOP_UNSUBSCRIBE_FACTOR = 0.5
+
+      private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR
 
       # Creates a new consumer instance.
       #
@@ -277,7 +282,7 @@ module Karafka
           @unsubscribing = true
 
           # Give 50% of time for the final close before we reach the forceful
-          max_wait = ::Karafka::App.config.shutdown_timeout * 0.5
+          max_wait = ::Karafka::App.config.shutdown_timeout * COOP_UNSUBSCRIBE_FACTOR
           used = 0
           stopped_at = monotonic_now
 
