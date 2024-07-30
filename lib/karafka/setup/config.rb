@@ -14,34 +14,6 @@ module Karafka
     class Config
       extend ::Karafka::Core::Configurable
 
-      # Defaults for kafka settings, that will be overwritten only if not present already
-      KAFKA_DEFAULTS = {
-        # We emit the statistics by default, so all the instrumentation and web-ui work out of
-        # the box, without requiring users to take any extra actions aside from enabling.
-        'statistics.interval.ms': 5_000,
-        'client.software.name': 'karafka',
-        'client.software.version': [
-          "v#{Karafka::VERSION}",
-          "rdkafka-ruby-v#{Rdkafka::VERSION}",
-          "librdkafka-v#{Rdkafka::LIBRDKAFKA_VERSION}"
-        ].join('-')
-      }.freeze
-
-      # Contains settings that should not be used in production but make life easier in dev
-      KAFKA_DEV_DEFAULTS = {
-        # Will create non-existing topics automatically.
-        # Note that the broker needs to be configured with `auto.create.topics.enable=true`
-        # While it is not recommended in prod, it simplifies work in dev
-        'allow.auto.create.topics': 'true',
-        # We refresh the cluster state often as newly created topics in dev may not be detected
-        # fast enough. Fast enough means within reasonable time to provide decent user experience
-        # While it's only a one time thing for new topics, it can still be irritating to have to
-        # restart the process.
-        'topic.metadata.refresh.interval.ms': 5_000
-      }.freeze
-
-      private_constant :KAFKA_DEFAULTS, :KAFKA_DEV_DEFAULTS
-
       # Available settings
 
       # Namespace for Pro version related license management. If you use LGPL, no need to worry
@@ -350,7 +322,6 @@ module Karafka
           Pro::Loader.pre_setup_all(config) if Karafka.pro?
 
           configure(&block)
-          merge_kafka_defaults!(config)
 
           Contracts::Config.new.validate!(config.to_h)
 
@@ -373,26 +344,6 @@ module Karafka
         end
 
         private
-
-        # Propagates the kafka setting defaults unless they are already present
-        # This makes it easier to set some values that users usually don't change but still allows
-        # them to overwrite the whole hash if they want to
-        # @param config [Karafka::Core::Configurable::Node] config of this producer
-        def merge_kafka_defaults!(config)
-          KAFKA_DEFAULTS.each do |key, value|
-            next if config.kafka.key?(key)
-
-            config.kafka[key] = value
-          end
-
-          return if Karafka::App.env.production?
-
-          KAFKA_DEV_DEFAULTS.each do |key, value|
-            next if config.kafka.key?(key)
-
-            config.kafka[key] = value
-          end
-        end
 
         # Sets up all the components that are based on the user configuration
         # @note At the moment it is only WaterDrop

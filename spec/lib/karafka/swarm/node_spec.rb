@@ -77,7 +77,10 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
     let(:signal_string) { rand.to_s }
     let(:pidfd) { node.instance_variable_get('@pidfd') }
 
-    before { allow(pidfd).to receive(:signal) }
+    before do
+      node.instance_variable_set('@pidfd', Karafka::Swarm::Pidfd.new(Process.pid))
+      allow(pidfd).to receive(:signal)
+    end
 
     it 'expect to pass through expected signal' do
       node.signal(signal_string)
