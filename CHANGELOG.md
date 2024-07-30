@@ -3,6 +3,7 @@
 ## 2.4.7 (Unreleased)
 - [Enhancement] Introduce a shutdown time limit for unsubscription wait.
 - [Fix] License identifier `LGPL-3.0` is deprecated for SPDX (#2177).
+- [Maintenance] Cover `cooperative-sticky` librdkafka issues with integration spec.
 
 ## 2.4.6 (2024-07-22)
 - [Fix] Mitigate `rd_kafka_cgrp_terminated` and other `librdkafka` shutdown issues by unsubscribing fully prior to shutdown.
