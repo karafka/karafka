@@ -8,6 +8,12 @@ module Karafka
     # @note A single consumer group represents Kafka consumer group, but it may not match 1:1 with
     #   subscription groups. There can be more subscription groups than consumer groups
     class ConsumerGroup
+      include Helpers::ConfigImporter.new(
+        activity_manager: %i[internal routing activity_manager],
+        builder: %i[internal routing builder],
+        subscription_groups_builder: %i[internal routing subscription_groups_builder]
+      )
+
       attr_reader :id, :topics, :name
 
       # This is a "virtual" attribute that is not building subscription groups.
@@ -32,7 +38,7 @@ module Karafka
 
       # @return [Boolean] true if this consumer group should be active in our current process
       def active?
-        config.internal.routing.activity_manager.active?(:consumer_groups, name)
+        activity_manager.active?(:consumer_groups, name)
       end
 
       # Builds a topic representation inside of a current consumer group route
@@ -43,7 +49,7 @@ module Karafka
         topic = Topic.new(name, self)
         @topics << Proxy.new(
           topic,
-          config.internal.routing.builder.defaults,
+          builder.defaults,
           &block
         ).target
         built_topic = @topics.last
@@ -72,11 +78,7 @@ module Karafka
       # @return [Array<Routing::SubscriptionGroup>] all the subscription groups build based on
       #   the consumer group topics
       def subscription_groups
-        @subscription_groups ||= config
-                                 .internal
-                                 .routing
-                                 .subscription_groups_builder
-                                 .call(topics)
+        @subscription_groups ||= subscription_groups_builder.call(topics)
       end
 
       # Hashed version of consumer group that can be used for validation purposes
@@ -87,13 +89,6 @@ module Karafka
           topics: topics.map(&:to_h),
           id: id
         }.freeze
-      end
-
-      private
-
-      # @return [Karafka::Core::Configurable::Node] root node config
-      def config
-        ::Karafka::App.config
       end
     end
   end
