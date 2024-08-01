@@ -1,8 +1,14 @@
 # Karafka Framework Changelog
 
 ## 2.4.7 (Unreleased)
+- [Enhancement] Introduce `Karafka::Server.mode` to check in what mode Karafka process operates (`standalone`, `swarm`, `supervisor`, `embedded`).
+- [Enhancement] Ensure `max.poll.interval.ms` is always present and populate it with librdkafka default.
 - [Enhancement] Introduce a shutdown time limit for unsubscription wait.
+- [Enhancement] Tag with `mode:swarm` each of the running swarm consumers.
+- [Change] Tag with `mode:embedded` instead of `embedded` the embedded consumers.
 - [Fix] License identifier `LGPL-3.0` is deprecated for SPDX (#2177).
+- [Fix] Fix an issue where custom clusters would not have default settings populated same as the primary cluster.
+- [Fix] Fix Rspec warnings of nil mocks.
 - [Maintenance] Cover `cooperative-sticky` librdkafka issues with integration spec.
 
 ## 2.4.6 (2024-07-22)

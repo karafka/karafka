@@ -13,6 +13,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    DT[:execution_mode] = Karafka::Server.execution_mode
     DT[0] << true
   end
 end
@@ -31,3 +32,5 @@ end
 start_karafka_and_wait_until do
   DT[0].size >= 10
 end
+
+assert_equal :standalone, DT[:execution_mode]
