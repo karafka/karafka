@@ -182,5 +182,10 @@ module Karafka
         config.internal.process
       end
     end
+
+    # Always start with standalone so there always is a value for the execution mode.
+    # This is overwritten quickly during boot, but just in case someone would reach it prior to
+    # booting, we want to have the default value.
+    self.execution_mode = :standalone
   end
 end
