@@ -333,8 +333,10 @@ def start_karafka_and_wait_until(mode: :server, reset_status: false, &block)
 
   case mode
   when :server
+    Karafka::Server.execution_mode = :standalone
     Karafka::Server.run
   when :swarm
+    Karafka::Server.execution_mode = :supervisor
     Karafka::Swarm::Supervisor.new.run
   else
     raise Karafka::Errors::UnsupportedCaseError, mode

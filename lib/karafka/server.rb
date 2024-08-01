@@ -19,6 +19,17 @@ module Karafka
       # Jobs queue
       attr_accessor :jobs_queue
 
+      # Mode in which the Karafka server is executed. It can be:
+      #
+      # - :standalone - regular karafka consumer process
+      # - :embedded - embedded in a different process and not supervised
+      # - :supervisor - swarm supervisor process
+      # - :swarm - one of swarm processes
+      #
+      # Sometimes it is important to know in what mode we operate, especially from UI perspective
+      # as not everything is possible when operating in non-standalone mode, etc.
+      attr_accessor :execution_mode
+
       # Method which runs app
       def run
         self.listeners = []
@@ -171,5 +182,10 @@ module Karafka
         config.internal.process
       end
     end
+
+    # Always start with standalone so there always is a value for the execution mode.
+    # This is overwritten quickly during boot, but just in case someone would reach it prior to
+    # booting, we want to have the default value.
+    self.execution_mode = :standalone
   end
 end

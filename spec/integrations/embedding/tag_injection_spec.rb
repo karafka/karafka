@@ -25,4 +25,4 @@ sleep(0.1) until DT.key?(0)
 
 Karafka::Embedded.stop
 
-assert_equal Karafka::Process.tags.to_a, %w[embedded]
+assert_equal Karafka::Process.tags.to_a, %w[mode:embedded]
