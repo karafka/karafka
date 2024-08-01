@@ -89,6 +89,7 @@ module Karafka
         register_inclusions
         register_exclusions
 
+        Karafka::Server.execution_mode = :standalone
         Karafka::Server.run
       end
 
