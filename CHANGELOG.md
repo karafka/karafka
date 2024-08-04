@@ -1,7 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.7 (2024-08-01)
-- [Enhancement] Introduce `Karafka::Server.mode` to check in what mode Karafka process operates (`standalone`, `swarm`, `supervisor`, `embedded`).
+- [Enhancement] Introduce `Karafka::Server.execution_mode` to check in what mode Karafka process operates (`standalone`, `swarm`, `supervisor`, `embedded`).
 - [Enhancement] Ensure `max.poll.interval.ms` is always present and populate it with librdkafka default.
 - [Enhancement] Introduce a shutdown time limit for unsubscription wait.
 - [Enhancement] Tag with `mode:swarm` each of the running swarm consumers.
