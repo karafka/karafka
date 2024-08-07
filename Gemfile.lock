@@ -36,7 +36,6 @@ GEM
     factory_bot (6.4.6)
       activesupport (>= 5.0.0)
     ffi (1.17.0)
-    ffi (1.17.0-x86_64-linux-gnu)
     globalid (1.2.1)
       activesupport (>= 6.1)
     i18n (1.14.5)
