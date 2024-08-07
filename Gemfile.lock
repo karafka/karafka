@@ -4,6 +4,7 @@ PATH
     karafka (2.4.8)
       base64 (~> 0.2)
       karafka-core (>= 2.4.3, < 2.5.0)
+      karafka-rdkafka (>= 0.17.2)
       waterdrop (>= 2.7.3, < 3.0.0)
       zeitwerk (~> 2.3)
 
@@ -35,22 +36,23 @@ GEM
     factory_bot (6.4.6)
       activesupport (>= 5.0.0)
     ffi (1.17.0)
+    ffi (1.17.0-x86_64-linux-gnu)
     globalid (1.2.1)
       activesupport (>= 6.1)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
     karafka-core (2.4.4)
       karafka-rdkafka (>= 0.15.0, < 0.18.0)
-    karafka-rdkafka (0.17.1)
+    karafka-rdkafka (0.17.2)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
     karafka-testing (2.4.6)
       karafka (>= 2.4.0, < 2.5.0)
       waterdrop (>= 2.7.0)
-    karafka-web (0.9.1)
+    karafka-web (0.10.0.beta1)
       erubi (~> 1.4)
-      karafka (>= 2.4.0, < 2.5.0)
+      karafka (>= 2.4.7, < 2.5.0)
       karafka-core (>= 2.4.0, < 2.5.0)
       roda (~> 3.68, >= 3.69)
       tilt (~> 2.0)
@@ -58,9 +60,9 @@ GEM
     minitest (5.24.0)
     mutex_m (0.2.0)
     ostruct (0.6.0)
-    rack (3.1.5)
+    rack (3.1.7)
     rake (13.2.1)
-    roda (3.81.0)
+    roda (3.82.0)
       rack
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
@@ -100,7 +102,7 @@ DEPENDENCIES
   factory_bot
   karafka!
   karafka-testing (>= 2.4.0)
-  karafka-web (>= 0.9.0)
+  karafka-web (>= 0.10.0.beta1)
   ostruct
   rspec
   simplecov

@@ -346,14 +346,15 @@ module Karafka
           # If we did not receive any messages and we did receive eof signal, we run the eofed
           # jobs so user can take actions on reaching eof
           if messages.empty? && eof
-            @partitioner.call(topic, messages, coordinator) do |group_id|
+            @executors.find_all_or_create(topic, partition, coordinator).each do |executor|
               coordinator.increment(:eofed)
-              executor = @executors.find_or_create(topic, partition, group_id, coordinator)
               eofed_jobs << @jobs_builder.eofed(executor)
             end
 
             next
           end
+
+          coordinator.start(messages)
 
           # If it is not an eof and there are no ne messages, we just run house-keeping
           #
@@ -361,7 +362,6 @@ module Karafka
           # and it will not go through a standard lifecycle. Same applies to revoked and shutdown
           if messages.empty?
             # Start work coordination for this topic partition
-            coordinator.start(messages)
             coordinator.increment(:idle)
             executor = @executors.find_or_create(topic, partition, 0, coordinator)
             idle_jobs << @jobs_builder.idle(executor)
@@ -372,8 +372,6 @@ module Karafka
           # If there are messages, it is irrelevant if eof or not as consumption needs to happen
           #
           # Start work coordination for this topic partition
-          coordinator.start(messages)
-
           @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
             coordinator.increment(:consume)
             executor = @executors.find_or_create(topic, partition, group_id, coordinator)

@@ -9,7 +9,7 @@ module Karafka
 
     extend Forwardable
 
-    def_delegators :@coordinator, :topic, :partition
+    def_delegators :@coordinator, :topic, :partition, :eofed?
 
     def_delegators :producer, :produce_async, :produce_sync, :produce_many_async,
                    :produce_many_sync

@@ -145,10 +145,11 @@ module Karafka
           time_poll.checkpoint
 
           # Finally once we've (potentially) removed revoked, etc, if no messages were returned
-          # and it was not an early poll exist, we can break.
+          # and it was not an early poll exist, we can break. We also break if we got the eof
+          # signaling to propagate it asap
           # Worth keeping in mind, that the rebalance manager might have been updated despite no
           # messages being returned during a poll
-          break unless response
+          break if response.nil? || response.is_a?(Hash)
         end
 
         @buffer
