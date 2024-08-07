@@ -408,6 +408,13 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context 'when it is a consumer.eofed.error' do
+      let(:type) { 'consumer.eofed.error' }
+      let(:message) { "Consumer on eofed failed due to an error: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context 'when it is a consumer.after_consume.error' do
       let(:type) { 'consumer.after_consume.error' }
       let(:message) { "Consumer on after_consume failed due to an error: #{error}" }

@@ -19,7 +19,7 @@ module Karafka
         # We use this version for LRJ topics for cases where saturated resources would not allow
         # to run this job for extended period of time. Under such scenarios, if we would not use
         # a non-blocking one, we would reach max.poll.interval.ms.
-        class EofedNonBlocking < Periodic
+        class EofedNonBlocking < ::Karafka::Processing::Jobs::Eofed
           # @param args [Array] any arguments accepted by `::Karafka::Processing::Jobs::Eofed`
           def initialize(*args)
             super

@@ -83,8 +83,8 @@ module Karafka
       # again and we do want to ensure as few duplications as possible
       def uniq!
         @groups.each_value do |partitions|
-          partitions.each_value do |messages|
-            messages.uniq!(&:offset)
+          partitions.each_value do |details|
+            details[:messages].uniq!(&:offset)
           end
         end
 
@@ -111,8 +111,12 @@ module Karafka
 
       # Updates the messages count if we performed any operations that could change the state
       def recount!
-        @size = @groups.each_value.sum do |partitions|
-          partitions.each_value.map(&:count).sum
+        @size = 0
+
+        @groups.each_value do |partitions|
+          partitions.each_value do |details|
+            @size += details[:messages].size
+          end
         end
       end
     end

@@ -12,6 +12,13 @@ RSpec.describe_current do
     end
   end
 
+  describe '#eofed' do
+    it do
+      job = builder.eofed(executor)
+      expect(job).to be_a(Karafka::Processing::Jobs::Eofed)
+    end
+  end
+
   describe '#revoked' do
     it do
       job = builder.revoked(executor)
