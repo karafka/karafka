@@ -100,6 +100,24 @@ module Karafka
       retry_after_pause
     end
 
+    # Can be used to run code prior to scheduling of eofed execution
+    def on_before_schedule_eofed
+      handle_before_schedule_eofed
+    end
+
+    # Trigger method for running on eof without messages
+    def on_eofed
+      handle_eofed
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        seek_offset: coordinator.seek_offset,
+        type: 'consumer.eofed.error'
+      )
+    end
+
     # Can be used to run code prior to scheduling of idle execution
     #
     # @private
@@ -165,6 +183,10 @@ module Karafka
     def consume
       raise NotImplementedError, 'Implement this in a subclass'
     end
+
+    # Method that will be executed when a given topic partition reaches eof without any new
+    # incoming messages alongside
+    def eofed; end
 
     # Method that will be executed when a given topic partition is revoked. You can use it for
     # some teardown procedures (closing file handler, etc).

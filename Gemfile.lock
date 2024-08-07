@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.4.7)
+    karafka (2.4.8)
       base64 (~> 0.2)
       karafka-core (>= 2.4.3, < 2.5.0)
       waterdrop (>= 2.7.3, < 3.0.0)

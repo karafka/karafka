@@ -2,7 +2,7 @@
 
 module Karafka
   module Connection
-    # Buffer for raw librdkafka messages.
+    # Buffer for raw librdkafka messages and eof status.
     #
     # When message is added to this buffer, it gets assigned to an array with other messages from
     # the same topic and partition.
@@ -17,9 +17,13 @@ module Karafka
       # @return [Karafka::Connection::MessagesBuffer] buffer instance
       def initialize
         @size = 0
+
         @groups = Hash.new do |topic_groups, topic|
           topic_groups[topic] = Hash.new do |partition_groups, partition|
-            partition_groups[partition] = []
+            partition_groups[partition] = {
+              eof: false,
+              messages: []
+            }
           end
         end
       end
@@ -30,7 +34,16 @@ module Karafka
       # @return [Array<Rdkafka::Consumer::Message>] given partition topic sub-buffer array
       def <<(message)
         @size += 1
-        @groups[message.topic][message.partition] << message
+        partition_state = @groups[message.topic][message.partition]
+        partition_state[:messages] << message
+        partition_state[:eof] = false
+      end
+
+      # Marks given topic partition as one that reached eof
+      # @param topic [String] topic that reached eof
+      # @param partition [Integer] partition that reached eof
+      def eof(topic, partition)
+        @groups[topic][partition][:eof] = true
       end
 
       # Allows to iterate over all the topics and partitions messages
@@ -38,10 +51,11 @@ module Karafka
       # @yieldparam [String] topic name
       # @yieldparam [Integer] partition number
       # @yieldparam [Array<Rdkafka::Consumer::Message>] topic partition aggregated results
+      # @yieldparam [Boolean] has polling of this partition reach eof
       def each
         @groups.each do |topic, partitions|
-          partitions.each do |partition, messages|
-            yield(topic, partition, messages)
+          partitions.each do |partition, details|
+            yield(topic, partition, details[:messages], details[:eof])
           end
         end
       end
@@ -83,6 +97,11 @@ module Karafka
       #   we save ourselves some objects allocations. We cannot clear the underlying arrays as they
       #   may be used in other threads for data processing, thus if we would clear it, we could
       #   potentially clear a raw messages array for a job that is in the jobs queue.
+      #
+      # @note We do not clear the eof assignments because they can span across batch pollings.
+      #   Since eof is not raised non-stop and is silenced after an eof poll, if we would clean it
+      #   here we would loose the notion of it. The reset state for it should happen when we do
+      #   discover new messages for given topic partition.
       def clear
         @size = 0
         @groups.each_value(&:clear)

@@ -23,6 +23,12 @@ module Karafka
       def shutdown(executor)
         Jobs::Shutdown.new(executor)
       end
+
+      # @param executor [Karafka::Processing::Executor]
+      # @return [Karafka::Processing::Jobs::Eofed] eofed job
+      def eofed(executor)
+        Jobs::Eofed.new(executor)
+      end
     end
   end
 end

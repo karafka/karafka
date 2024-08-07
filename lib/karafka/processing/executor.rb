@@ -104,6 +104,18 @@ module Karafka
         consumer.on_idle
       end
 
+      # Runs the code needed before eofed work is scheduled
+      def before_schedule_eofed
+        consumer.on_before_schedule_eofed
+      end
+
+      # Runs consumed eofed operation.
+      # This may run even when there were no messages received prior. This will however not
+      # run when eof is received together with messages as in such case `#consume` will run
+      def eofed
+        consumer.on_eofed
+      end
+
       # Runs code needed before revoked job is scheduled
       def before_schedule_revoked
         consumer.on_before_schedule_revoked if @consumer
