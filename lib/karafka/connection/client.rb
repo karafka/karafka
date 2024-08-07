@@ -31,7 +31,21 @@ module Karafka
       # before we move to a regular unsubscribe.
       COOP_UNSUBSCRIBE_FACTOR = 0.5
 
-      private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR
+      # Errors upon which we early report that something is off without retrying prior to the
+      # report
+      EARLY_REPORT_ERRORS = [
+        :inconsistent_group_protocol, # 23
+        :max_poll_exceeded, # -147
+        :network_exception, # 13
+        :transport, # -195
+        :topic_authorization_failed, # 29
+        :group_authorization_failed, # 30
+        :cluster_authorization_failed, # 31
+        # This can happen for many reasons, including issues with static membership being fenced
+        :fatal # -150
+      ].freeze
+
+      private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR, :EARLY_REPORT_ERRORS
 
       # Creates a new consumer instance.
       #
@@ -98,8 +112,17 @@ module Karafka
           # Fetch message within our time boundaries
           response = poll(time_poll.remaining)
 
-          # Put a message to the buffer if there is one
-          @buffer << response if response && response != :tick_time
+          case response
+          when :tick_time
+            nil
+          # We get a hash only in case of eof error
+          when Hash
+            @buffer.eof(response[:topic], response[:partition])
+          when nil
+            nil
+          else
+            @buffer << response
+          end
 
           # Upon polling rebalance manager might have been updated.
           # If partition revocation happens, we need to remove messages from revoked partitions
@@ -122,10 +145,11 @@ module Karafka
           time_poll.checkpoint
 
           # Finally once we've (potentially) removed revoked, etc, if no messages were returned
-          # and it was not an early poll exist, we can break.
+          # and it was not an early poll exist, we can break. We also break if we got the eof
+          # signaling to propagate it asap
           # Worth keeping in mind, that the rebalance manager might have been updated despite no
           # messages being returned during a poll
-          break unless response
+          break if response.nil? || response.is_a?(Hash)
         end
 
         @buffer
@@ -576,20 +600,7 @@ module Karafka
         # We want to report early on max poll interval exceeding because it may mean that the
         # underlying processing is taking too much time and it is not LRJ
         case e.code
-        when :max_poll_exceeded # -147
-          early_report = true
-        when :network_exception # 13
-          early_report = true
-        when :transport # -195
-          early_report = true
-        when :topic_authorization_failed # 29
-          early_report = true
-        when :group_authorization_failed # 30
-          early_report = true
-        when :cluster_authorization_failed # 31
-          early_report = true
-        # This can happen for many reasons, including issues with static membership being fenced
-        when :fatal # -150
+        when *EARLY_REPORT_ERRORS
           early_report = true
         # @see
         # https://github.com/confluentinc/confluent-kafka-dotnet/issues/1366#issuecomment-821842990
@@ -603,11 +614,12 @@ module Karafka
           # No sense in retrying when no topic/partition and we're no longer running
           retryable = false unless Karafka::App.running?
         # If we detect the end of partition which can happen if `enable.partition.eof` is set to
-        # true, we can just return nil fast. This will fast yield whatever set of messages we
+        # true, we can just return fast. This will fast yield whatever set of messages we
         # already have instead of waiting. This can be used for better latency control when we do
         # not expect a lof of lag and want to quickly move to processing.
+        # We can also pass the eof notion to the consumers for improved decision making.
         when :partition_eof
-          return nil
+          return e.details
         end
 
         if early_report || !retryable

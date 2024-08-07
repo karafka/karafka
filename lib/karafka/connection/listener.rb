@@ -330,28 +330,52 @@ module Karafka
       # given scheduler. It also handles the idle jobs when filtering API removed all messages
       # and we need to run house-keeping
       def build_and_schedule_flow_jobs
-        return if @messages_buffer.empty?
-
         consume_jobs = []
         idle_jobs = []
+        eofed_jobs = []
 
-        @messages_buffer.each do |topic, partition, messages|
+        @messages_buffer.each do |topic, partition, messages, eof|
+          # In case we did not receive any new messages without eof we skip.
+          # We may yield empty array here in case we have reached eof without new messages but in
+          # such cases, we can run an eof job
+          next if messages.empty? && !eof
+
           coordinator = @coordinators.find_or_create(topic, partition)
-          # Start work coordination for this topic partition
+          coordinator.eofed = eof
+
+          # If we did not receive any messages and we did receive eof signal, we run the eofed
+          # jobs so user can take actions on reaching eof
+          if messages.empty? && eof
+            @executors.find_all_or_create(topic, partition, coordinator).each do |executor|
+              coordinator.increment(:eofed)
+              eofed_jobs << @jobs_builder.eofed(executor)
+            end
+
+            next
+          end
+
           coordinator.start(messages)
 
+          # If it is not an eof and there are no ne messages, we just run house-keeping
+          #
           # We do not increment coordinator for idle job because it's not a user related one
           # and it will not go through a standard lifecycle. Same applies to revoked and shutdown
           if messages.empty?
+            # Start work coordination for this topic partition
             coordinator.increment(:idle)
             executor = @executors.find_or_create(topic, partition, 0, coordinator)
             idle_jobs << @jobs_builder.idle(executor)
-          else
-            @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
-              coordinator.increment(:consume)
-              executor = @executors.find_or_create(topic, partition, group_id, coordinator)
-              consume_jobs << @jobs_builder.consume(executor, partition_messages)
-            end
+
+            next
+          end
+
+          # If there are messages, it is irrelevant if eof or not as consumption needs to happen
+          #
+          # Start work coordination for this topic partition
+          @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
+            coordinator.increment(:consume)
+            executor = @executors.find_or_create(topic, partition, group_id, coordinator)
+            consume_jobs << @jobs_builder.consume(executor, partition_messages)
           end
         end
 
@@ -366,6 +390,11 @@ module Karafka
         unless consume_jobs.empty?
           consume_jobs.each(&:before_schedule)
           @scheduler.on_schedule_consumption(consume_jobs)
+        end
+
+        unless eofed_jobs.empty?
+          eofed_jobs.each(&:before_schedule)
+          @scheduler.on_schedule_eofed(eofed_jobs)
         end
       end
 

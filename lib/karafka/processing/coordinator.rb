@@ -15,6 +15,10 @@ module Karafka
 
       attr_reader :pause_tracker, :seek_offset, :topic, :partition
 
+      # This can be set directly on the listener because it can be triggered on first run without
+      # any messages
+      attr_accessor :eofed
+
       def_delegators :@pause_tracker, :attempt, :paused?
 
       # @param topic [Karafka::Routing::Topic]
@@ -32,6 +36,7 @@ module Karafka
         @mutex = Mutex.new
         @marked = false
         @failure = false
+        @eofed = false
         @changed_at = monotonic_now
       end
 
@@ -144,6 +149,11 @@ module Karafka
       # @return [Boolean] is the partition we are processing revoked or not
       def revoked?
         @revoked
+      end
+
+      # @return [Boolean] did we reach end of partition when polling data
+      def eofed?
+        @eofed
       end
 
       # @return [Boolean] was the new seek offset assigned at least once. This is needed because

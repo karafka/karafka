@@ -290,6 +290,9 @@ module Karafka
         when 'consumer.tick.error'
           error "Consumer on tick failed due to an error: #{error}"
           error details
+        when 'consumer.eofed.error'
+          error "Consumer on eofed failed due to an error: #{error}"
+          error details
         when 'consumer.after_consume.error'
           error "Consumer on after_consume failed due to an error: #{error}"
           error details

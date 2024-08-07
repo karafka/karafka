@@ -1,5 +1,10 @@
 # Karafka Framework Changelog
 
+## 2.4.8 (Unreleased)
+- [Feature] Introduce ability to react to `#eof` either from `#consume` or from `#eofed` when EOF without new messages.
+- [Enhancement] Provide `Consumer#eof?` to indicate reaching EOF.
+- [Enhancement] Always immediately report on `inconsistent_group_protocol` error.
+
 ## 2.4.7 (2024-08-01)
 - [Enhancement] Introduce `Karafka::Server.execution_mode` to check in what mode Karafka process operates (`standalone`, `swarm`, `supervisor`, `embedded`).
 - [Enhancement] Ensure `max.poll.interval.ms` is always present and populate it with librdkafka default.
