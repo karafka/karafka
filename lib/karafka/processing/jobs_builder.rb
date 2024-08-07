@@ -13,6 +13,12 @@ module Karafka
       end
 
       # @param executor [Karafka::Processing::Executor]
+      # @return [Karafka::Processing::Jobs::Eofed] eofed job
+      def eofed(executor)
+        Jobs::Eofed.new(executor)
+      end
+
+      # @param executor [Karafka::Processing::Executor]
       # @return [Karafka::Processing::Jobs::Revoked] revocation job
       def revoked(executor)
         Jobs::Revoked.new(executor)
@@ -22,12 +28,6 @@ module Karafka
       # @return [Karafka::Processing::Jobs::Shutdown] shutdown job
       def shutdown(executor)
         Jobs::Shutdown.new(executor)
-      end
-
-      # @param executor [Karafka::Processing::Executor]
-      # @return [Karafka::Processing::Jobs::Eofed] eofed job
-      def eofed(executor)
-        Jobs::Eofed.new(executor)
       end
     end
   end
