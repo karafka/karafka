@@ -1,7 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.8 (Unreleased)
-- [Feature] Introduce ability to react to `#eof` either from `#consume` or from `#eofed` when EOF without new messages.
+- **[Feature]** Introduce ability to react to `#eof` either from `#consume` or from `#eofed` when EOF without new messages.
 - [Enhancement] Provide `Consumer#eof?` to indicate reaching EOF.
 - [Enhancement] Always immediately report on `inconsistent_group_protocol` error.
 
