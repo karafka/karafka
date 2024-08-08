@@ -25,7 +25,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.active_job(true)
         topic.active_job(false)
-        expect(topic.active_job.active?).to eq(true)
+        expect(topic.active_job.active?).to eq(false)
       end
     end
   end

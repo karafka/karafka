@@ -24,11 +24,10 @@ module Karafka
         class Patterns < Base
           # Config for pattern based topic
           # Only pattern related topics are active in this context
-          Config = Struct.new(
+          Config = Karafka::Routing::BaseConfig.define(
             :active,
             :type,
-            :pattern,
-            keyword_init: true
+            :pattern
           ) do
             alias_method :active?, :active
 

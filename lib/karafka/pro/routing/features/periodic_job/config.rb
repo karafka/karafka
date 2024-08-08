@@ -16,20 +16,18 @@ module Karafka
     module Routing
       module Features
         class PeriodicJob < Base
-          # Config for periodics topics feature
-          Config = Struct.new(
+          # Config for manual offset management feature
+          Config = Karafka::Routing::BaseConfig.define(
             :active,
             :during_pause,
             :during_retry,
             :interval,
-            :materialized,
-            keyword_init: true
-          ) do
-            alias_method :active?, :active
-            alias_method :during_pause?, :during_pause
-            alias_method :during_retry?, :during_retry
-            alias_method :materialized?, :materialized
-          end
+            :materialized) do
+              alias_method :active?, :active
+              alias_method :during_pause?, :during_pause
+              alias_method :during_retry?, :during_retry
+              alias_method :materialized?, :materialized
+            end
         end
       end
     end

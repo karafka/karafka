@@ -32,24 +32,20 @@ module Karafka
             # @example Assign partitions from 0 to 3
             #   direct_assignments(0..3)
             def direct_assignments(*partitions_or_all)
-              @direct_assignments ||= if partitions_or_all == [true]
-                Config.new(
-                  active: true,
-                  partitions: true
-                )
+              @direct_assignments ||= Config.new(active: true, partitions: nil)
+              return @direct_assignments if partitions_or_all.empty?
+
+              if partitions_or_all == [true]
+                @direct_assignments.partitions = true
               elsif partitions_or_all.size == 1 && partitions_or_all.first.is_a?(Range)
                 partitions_or_all = partitions_or_all.first.to_a
 
-                Config.new(
-                  active: true,
-                  partitions: partitions_or_all.map { |partition| [partition, true] }.to_h
-                )
+                @direct_assignments.partitions = partitions_or_all.map { |partition| [partition, true] }.to_h
               else
-                Config.new(
-                  active: !partitions_or_all.empty?,
-                  partitions: partitions_or_all.map { |partition| [partition, true] }.to_h
-                )
+                @direct_assignments.active = !partitions_or_all.empty?
+                @direct_assignments.partitions = partitions_or_all.map { |partition| [partition, true] }.to_h
               end
+              @direct_assignments
             end
 
             alias assign direct_assignments

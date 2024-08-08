@@ -17,10 +17,9 @@ module Karafka
       module Features
         class InlineInsights < Base
           # Config of this feature
-          Config = Struct.new(
+          Config = Karafka::Routing::BaseConfig.define(
             :active,
-            :required,
-            keyword_init: true
+            :required
           ) do
             alias_method :active?, :active
             alias_method :required?, :required

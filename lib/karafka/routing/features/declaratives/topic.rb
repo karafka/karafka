@@ -11,13 +11,20 @@ module Karafka
           # @param replication_factor [Integer]
           # @param details [Hash] extra configuration for the topic
           # @return [Config] defined structure
-          def config(active: true, partitions: 1, replication_factor: 1, **details)
+          def config(active: Default.new(true), partitions: Default.new(1), replication_factor: Default.new(1), **details)
             @declaratives ||= Config.new(
               active: active,
               partitions: partitions,
               replication_factor: replication_factor,
               details: details
             )
+            return @declaratives if Config.all_defaults?(active, partitions, replication_factor)
+
+            @declaratives.active = active
+            @declaratives.partitions = partitions
+            @declaratives.replication_factor = replication_factor
+            @declaratives.details.merge!(details)
+            @declaratives
           end
 
           # @return [Config] config details

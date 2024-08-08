@@ -5,12 +5,11 @@ module Karafka
     module Features
       class Deserializers < Base
         # Config of this feature
-        Config = Struct.new(
+        Config = BaseConfig.define(
           :active,
           :payload,
           :key,
-          :headers,
-          keyword_init: true
+          :headers
         ) { alias_method :active?, :active }
       end
     end

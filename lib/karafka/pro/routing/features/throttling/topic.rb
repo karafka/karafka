@@ -21,26 +21,25 @@ module Karafka
             # @param limit [Integer] max messages to process in an time interval
             # @param interval [Integer] time interval for processing
             def throttling(
-              limit: Float::INFINITY,
-              interval: 60_000
+              limit: Karafka::Routing::Default.new(Float::INFINITY),
+              interval: Karafka::Routing::Default.new(60_000)
             )
-              # Those settings are used for validation
-              @throttling ||= begin
-                config = Config.new(
-                  active: limit != Float::INFINITY,
-                  limit: limit,
-                  interval: interval
-                )
+              @throttling ||= Config.new(limit: limit,
+                                         interval: interval)
+              return @throttling if Config.all_defaults?(limit, interval)
 
-                # If someone defined throttling setup, we need to create appropriate filter for it
-                # and inject it via filtering feature
-                if config.active?
-                  factory = ->(*) { Pro::Processing::Filters::Throttler.new(limit, interval) }
-                  filter(factory)
-                end
+              @throttling.active = limit != Float::INFINITY
+              @throttling.limit = limit
+              @throttling.interval = interval
 
-                config
+              # If someone defined throttling setup, we need to create appropriate filter for it
+              # and inject it via filtering feature
+              if @throttling.active?
+                factory = ->(*) { Pro::Processing::Filters::Throttler.new(limit, interval) }
+                filter(factory)
               end
+
+              @throttling
             end
 
             # Just an alias for nice API

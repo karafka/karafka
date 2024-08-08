@@ -24,22 +24,33 @@ module Karafka
           #   whether marking on DLQ should be async or sync (async by default)
           # @return [Config] defined config
           def dead_letter_queue(
-            max_retries: DEFAULT_MAX_RETRIES,
-            topic: nil,
-            independent: false,
-            transactional: true,
-            dispatch_method: :produce_async,
-            marking_method: :mark_as_consumed
+            max_retries: Default.new(DEFAULT_MAX_RETRIES),
+            topic: Default.new(nil),
+            independent: Default.new(false),
+            transactional: Default.new(true),
+            dispatch_method: Default.new(:produce_async),
+            marking_method: Default.new(:mark_as_consumed)
           )
             @dead_letter_queue ||= Config.new(
-              active: !topic.nil?,
               max_retries: max_retries,
-              topic: topic,
+              active: false,
               independent: independent,
               transactional: transactional,
               dispatch_method: dispatch_method,
               marking_method: marking_method
             )
+            if Config.all_defaults?(topic, max_retries, independent, transactional, dispatch_method, marking_method)
+              return @dead_letter_queue
+            end
+
+            @dead_letter_queue.active = !topic.is_a?(Default)
+            @dead_letter_queue.topic = topic
+            @dead_letter_queue.max_retries = max_retries
+            @dead_letter_queue.independent = independent
+            @dead_letter_queue.transactional = transactional
+            @dead_letter_queue.dispatch_method = dispatch_method
+            @dead_letter_queue.marking_method = marking_method
+            @dead_letter_queue
           end
 
           # @return [Boolean] is the dlq active or not
