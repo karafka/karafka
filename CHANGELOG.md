@@ -2,7 +2,7 @@
 
 ## 2.4.8 (Unreleased)
 - **[Feature]** Introduce ability to react to `#eof` either from `#consume` or from `#eofed` when EOF without new messages.
-- [Enhancement] Provide `Consumer#eof?` to indicate reaching EOF.
+- [Enhancement] Provide `Consumer#eofed?` to indicate reaching EOF.
 - [Enhancement] Always immediately report on `inconsistent_group_protocol` error.
 - [Enhancement] Reduce virtual partitioning to 1 partition when any partitioner execution in a partitioned batch crashes.
 
