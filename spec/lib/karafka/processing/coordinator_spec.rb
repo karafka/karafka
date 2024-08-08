@@ -152,6 +152,18 @@ RSpec.describe_current do
     end
   end
 
+  describe '#eofed?' do
+    context 'when having newly created coordinator' do
+      it { expect(coordinator.eofed?).to eq(false) }
+    end
+
+    context 'when was eofed' do
+      before { coordinator.eofed = true }
+
+      it { expect(coordinator.eofed?).to eq(true) }
+    end
+  end
+
   describe '#manual_pause and manual_pause?' do
     context 'when there is no pause' do
       it { expect(coordinator.manual_pause?).to eq(false) }

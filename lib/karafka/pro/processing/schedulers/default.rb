@@ -68,6 +68,7 @@ module Karafka
           alias on_schedule_shutdown schedule_fifo
           alias on_schedule_idle schedule_fifo
           alias on_schedule_periodic schedule_fifo
+          alias on_schedule_eofed schedule_fifo
 
           # This scheduler does not have anything to manage as it is a pass through and has no
           # state

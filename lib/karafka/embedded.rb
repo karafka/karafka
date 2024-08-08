@@ -27,7 +27,8 @@ module Karafka
         Thread.new do
           Thread.current.name = 'karafka.embedded'
 
-          Karafka::Process.tags.add(:execution_mode, 'embedded')
+          Karafka::Process.tags.add(:execution_mode, 'mode:embedded')
+          Karafka::Server.execution_mode = :embedded
           Karafka::Server.start
         end
       end

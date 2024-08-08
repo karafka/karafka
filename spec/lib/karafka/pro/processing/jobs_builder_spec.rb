@@ -25,6 +25,24 @@ RSpec.describe_current do
     end
   end
 
+  describe '#eofed' do
+    context 'when it is a lrj topic' do
+      before { coordinator.topic.long_running_job true }
+
+      it 'expect to use the non blocking pro revocation job' do
+        job = builder.eofed(executor)
+        expect(job).to be_a(Karafka::Pro::Processing::Jobs::EofedNonBlocking)
+      end
+    end
+
+    context 'when it is not a lrj topic' do
+      it do
+        job = builder.eofed(executor)
+        expect(job).to be_a(Karafka::Processing::Jobs::Eofed)
+      end
+    end
+  end
+
   describe '#revoked' do
     context 'when it is a lrj topic' do
       before { coordinator.topic.long_running_job true }

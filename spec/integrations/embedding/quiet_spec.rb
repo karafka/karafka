@@ -6,6 +6,8 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    DT[:execution_mode] = Karafka::Server.execution_mode
+
     messages.each do |message|
       DT[message.metadata.partition] << message.raw_payload
     end
@@ -38,6 +40,7 @@ sleep(5)
 10.times { Karafka::Embedded.stop }
 
 assert_equal elements, DT[0]
-assert_equal 2, DT.data.size
+assert_equal 3, DT.data.size
 assert_equal [1], DT[:shutdown]
 assert_equal [], DT[:revoked]
+assert_equal :embedded, DT[:execution_mode]

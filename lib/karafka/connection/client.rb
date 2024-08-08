@@ -8,6 +8,8 @@ module Karafka
     # It is threadsafe and provides some security measures so we won't end up operating on a
     # closed consumer instance as it causes Ruby VM process to crash.
     class Client
+      include ::Karafka::Core::Helpers::Time
+
       attr_reader :rebalance_manager
 
       # @return [Karafka::Routing::SubscriptionGroup] subscription group to which this client
@@ -24,7 +26,26 @@ module Karafka
       # How many times should we retry polling in case of a failure
       MAX_POLL_RETRIES = 20
 
-      private_constant :MAX_POLL_RETRIES
+      # How much time of the total shutdown time can we wait for our manual unsubscribe before
+      # attempting to close without unsubscribe. We try to wait for 50% of the shutdown time
+      # before we move to a regular unsubscribe.
+      COOP_UNSUBSCRIBE_FACTOR = 0.5
+
+      # Errors upon which we early report that something is off without retrying prior to the
+      # report
+      EARLY_REPORT_ERRORS = [
+        :inconsistent_group_protocol, # 23
+        :max_poll_exceeded, # -147
+        :network_exception, # 13
+        :transport, # -195
+        :topic_authorization_failed, # 29
+        :group_authorization_failed, # 30
+        :cluster_authorization_failed, # 31
+        # This can happen for many reasons, including issues with static membership being fenced
+        :fatal # -150
+      ].freeze
+
+      private_constant :MAX_POLL_RETRIES, :COOP_UNSUBSCRIBE_FACTOR, :EARLY_REPORT_ERRORS
 
       # Creates a new consumer instance.
       #
@@ -91,8 +112,17 @@ module Karafka
           # Fetch message within our time boundaries
           response = poll(time_poll.remaining)
 
-          # Put a message to the buffer if there is one
-          @buffer << response if response && response != :tick_time
+          case response
+          when :tick_time
+            nil
+          # We get a hash only in case of eof error
+          when Hash
+            @buffer.eof(response[:topic], response[:partition])
+          when nil
+            nil
+          else
+            @buffer << response
+          end
 
           # Upon polling rebalance manager might have been updated.
           # If partition revocation happens, we need to remove messages from revoked partitions
@@ -115,10 +145,11 @@ module Karafka
           time_poll.checkpoint
 
           # Finally once we've (potentially) removed revoked, etc, if no messages were returned
-          # and it was not an early poll exist, we can break.
+          # and it was not an early poll exist, we can break. We also break if we got the eof
+          # signaling to propagate it asap
           # Worth keeping in mind, that the rebalance manager might have been updated despite no
           # messages being returned during a poll
-          break unless response
+          break if response.nil? || response.is_a?(Hash)
         end
 
         @buffer
@@ -257,14 +288,36 @@ module Karafka
 
       # Gracefully stops topic consumption.
       def stop
-        # In case of cooperative-sticky, there is a bug in librdkafka that may hang it.
-        # To mitigate it we first need to unsubscribe so we will not receive any assignments and
-        # only then we should be good to go.
+        # librdkafka has several constant issues when shutting down during rebalance. This is
+        # an issue that gets back every few versions of librdkafka in a limited scope, for example
+        # for cooperative-sticky or in a general scope. This is why we unsubscribe and wait until
+        # we no longer have any assignments. That way librdkafka consumer shutdown should never
+        # happen with rebalance associated with the given consumer instance. Since we do not want
+        # to wait forever, we also impose a limit on how long should we wait. This prioritizes
+        # shutdown stability over endless wait.
+        #
+        # The `@unsubscribing` ensures that when there would be a direct close attempt, it
+        # won't get into this loop again. This can happen when supervision decides it should close
+        # things faster
+        #
+        # @see https://github.com/confluentinc/librdkafka/issues/4792
         # @see https://github.com/confluentinc/librdkafka/issues/4527
-        if @subscription_group.kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
+        if unsubscribe?
+          @unsubscribing = true
+
+          # Give 50% of time for the final close before we reach the forceful
+          max_wait = ::Karafka::App.config.shutdown_timeout * COOP_UNSUBSCRIBE_FACTOR
+          used = 0
+          stopped_at = monotonic_now
+
           unsubscribe
 
           until assignment.empty?
+            used += monotonic_now - stopped_at
+            stopped_at = monotonic_now
+
+            break if used >= max_wait
+
             sleep(0.1)
 
             ping
@@ -547,20 +600,7 @@ module Karafka
         # We want to report early on max poll interval exceeding because it may mean that the
         # underlying processing is taking too much time and it is not LRJ
         case e.code
-        when :max_poll_exceeded # -147
-          early_report = true
-        when :network_exception # 13
-          early_report = true
-        when :transport # -195
-          early_report = true
-        when :topic_authorization_failed # 29
-          early_report = true
-        when :group_authorization_failed # 30
-          early_report = true
-        when :cluster_authorization_failed # 31
-          early_report = true
-        # This can happen for many reasons, including issues with static membership being fenced
-        when :fatal # -150
+        when *EARLY_REPORT_ERRORS
           early_report = true
         # @see
         # https://github.com/confluentinc/confluent-kafka-dotnet/issues/1366#issuecomment-821842990
@@ -574,11 +614,12 @@ module Karafka
           # No sense in retrying when no topic/partition and we're no longer running
           retryable = false unless Karafka::App.running?
         # If we detect the end of partition which can happen if `enable.partition.eof` is set to
-        # true, we can just return nil fast. This will fast yield whatever set of messages we
+        # true, we can just return fast. This will fast yield whatever set of messages we
         # already have instead of waiting. This can be used for better latency control when we do
         # not expect a lof of lag and want to quickly move to processing.
+        # We can also pass the eof notion to the consumers for improved decision making.
         when :partition_eof
-          return nil
+          return e.details
         end
 
         if early_report || !retryable
@@ -658,8 +699,13 @@ module Karafka
         subscriptions = @subscription_group.subscriptions
         assignments = @subscription_group.assignments(consumer)
 
-        consumer.subscribe(*subscriptions) if subscriptions
-        consumer.assign(assignments) if assignments
+        if subscriptions
+          consumer.subscribe(*subscriptions)
+          @mode = :subscribe
+        elsif assignments
+          consumer.assign(assignments)
+          @mode = :assign
+        end
 
         consumer
       end
@@ -689,6 +735,23 @@ module Karafka
         # done, we could not intercept the invocations to kafka via client methods.
         @kafka.start
         @kafka
+      end
+
+      # Decides whether or not we should unsubscribe prior to closing.
+      #
+      # We cannot do it when there is a static group membership assignment as it would be
+      # reassigned.
+      # We cannot do it also for assign mode because then there are no subscriptions
+      # We also do not do it if there are no assignments at all as it does not make sense
+      #
+      # @return [Boolean] should we unsubscribe prior to shutdown
+      def unsubscribe?
+        return false if @unsubscribing
+        return false if @subscription_group.kafka.key?(:'group.instance.id')
+        return false if @mode != :subscribe
+        return false if assignment.empty?
+
+        true
       end
     end
   end

@@ -14,6 +14,7 @@ pids = []
 
 Karafka::App.monitor.subscribe('swarm.manager.after_fork') do |event|
   pids << event[:node].pid
+  DT[:execution_mode] = Karafka::Server.execution_mode
 end
 
 READER, WRITER = IO.pipe
@@ -47,3 +48,5 @@ end
 pids.each do |pid|
   assert !zombie_process?(pid)
 end
+
+assert_equal :supervisor, DT[:execution_mode]

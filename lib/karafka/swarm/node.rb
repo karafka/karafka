@@ -68,6 +68,8 @@ module Karafka
           monitor.subscribe(liveness_listener)
           monitor.instrument('swarm.node.after_fork', caller: self)
 
+          Karafka::Process.tags.add(:execution_mode, 'mode:swarm')
+          Server.execution_mode = :swarm
           Server.run
 
           @writer.close

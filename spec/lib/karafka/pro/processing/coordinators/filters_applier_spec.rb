@@ -46,6 +46,15 @@ RSpec.describe_current do
       applier.apply!(messages)
       expect(applier.timeout).to eq(0)
     end
+
+    it 'expect not to mark' do
+      applier.apply!(messages)
+      expect(applier.mark_as_consumed?).to eq(false)
+    end
+
+    it 'expect to default to marking non-blockig' do
+      expect(applier.marking_method).to eq(:mark_as_consumed)
+    end
   end
 
   context 'when there are no messages' do
@@ -73,6 +82,15 @@ RSpec.describe_current do
       applier.apply!(messages)
       expect(applier.timeout).to eq(0)
     end
+
+    it 'expect not to mark' do
+      applier.apply!(messages)
+      expect(applier.mark_as_consumed?).to eq(false)
+    end
+
+    it 'expect to default to marking non-blockig' do
+      expect(applier.marking_method).to eq(:mark_as_consumed)
+    end
   end
 
   context 'when there are messages but no filtering happened' do
@@ -99,6 +117,15 @@ RSpec.describe_current do
       applier.apply!(messages)
       expect(applier.timeout).to eq(0)
     end
+
+    it 'expect not to mark' do
+      applier.apply!(messages)
+      expect(applier.mark_as_consumed?).to eq(false)
+    end
+
+    it 'expect to default to marking non-blockig' do
+      expect(applier.marking_method).to eq(:mark_as_consumed)
+    end
   end
 
   context 'when there are messages and filtering happened' do
@@ -124,6 +151,15 @@ RSpec.describe_current do
     it 'expect to have timeout' do
       applier.apply!(messages)
       expect(applier.timeout).not_to eq(0)
+    end
+
+    it 'expect not to mark unless explicitly requested' do
+      applier.apply!(messages)
+      expect(applier.mark_as_consumed?).to eq(false)
+    end
+
+    it 'expect to default to marking non-blockig' do
+      expect(applier.marking_method).to eq(:mark_as_consumed)
     end
   end
 
@@ -156,6 +192,15 @@ RSpec.describe_current do
       applier.apply!(messages)
       expect(applier.timeout).not_to eq(0)
     end
+
+    it 'expect not to mark unless explicitly requested' do
+      applier.apply!(messages)
+      expect(applier.mark_as_consumed?).to eq(false)
+    end
+
+    it 'expect to default to marking non-blockig' do
+      expect(applier.marking_method).to eq(:mark_as_consumed)
+    end
   end
 
   context 'when there are messages and multiple filters applied but none pauses' do
@@ -187,6 +232,15 @@ RSpec.describe_current do
     it 'expect to have timeout' do
       expect(applier.timeout).to eq(0)
     end
+
+    it 'expect not to mark unless explicitly requested' do
+      applier.apply!(messages)
+      expect(applier.mark_as_consumed?).to eq(false)
+    end
+
+    it 'expect to default to marking non-blockig' do
+      expect(applier.marking_method).to eq(:mark_as_consumed)
+    end
   end
 
   context 'when none of the filters has seek or pause' do
@@ -215,6 +269,15 @@ RSpec.describe_current do
 
     it 'expect to have seek as an action as the highest importance action' do
       expect(applier.action).to eq(:skip)
+    end
+
+    it 'expect not to mark unless explicitly requested' do
+      applier.apply!(messages)
+      expect(applier.mark_as_consumed?).to eq(false)
+    end
+
+    it 'expect to default to marking non-blockig' do
+      expect(applier.marking_method).to eq(:mark_as_consumed)
     end
   end
 end

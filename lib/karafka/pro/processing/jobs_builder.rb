@@ -34,6 +34,18 @@ module Karafka
         end
 
         # @param executor [Karafka::Pro::Processing::Executor]
+        # @return [Karafka::Processing::Jobs::Eofed] eofed job for non LRJ
+        # @return [Karafka::Processing::Jobs::EofedBlocking] eofed job that is
+        #   non-blocking, so when revocation job is scheduled for LRJ it also will not block
+        def eofed(executor)
+          if executor.topic.long_running_job?
+            Jobs::EofedNonBlocking.new(executor)
+          else
+            super
+          end
+        end
+
+        # @param executor [Karafka::Pro::Processing::Executor]
         # @return [Karafka::Processing::Jobs::Revoked] revocation job for non LRJ
         # @return [Karafka::Processing::Jobs::RevokedNonBlocking] revocation job that is
         #   non-blocking, so when revocation job is scheduled for LRJ it also will not block

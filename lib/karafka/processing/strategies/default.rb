@@ -17,6 +17,7 @@ module Karafka
         %i[
           consume
           idle
+          eofed
           revoked
           shutdown
         ].each do |action|
@@ -149,6 +150,16 @@ module Karafka
           nil
         ensure
           coordinator.decrement(:idle)
+        end
+
+        # Runs the consumer `#eofed` method with reporting
+        def handle_eofed
+          Karafka.monitor.instrument('consumer.eof', caller: self)
+          Karafka.monitor.instrument('consumer.eofed', caller: self) do
+            eofed
+          end
+        ensure
+          coordinator.decrement(:eofed)
         end
 
         # We need to always un-pause the processing in case we have lost a given partition.

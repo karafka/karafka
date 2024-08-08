@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.authors     = ['Maciej Mensfeld']
   spec.email       = %w[contact@karafka.io]
   spec.homepage    = 'https://karafka.io'
-  spec.licenses    = %w[LGPL-3.0 Commercial]
+  spec.licenses    = %w[LGPL-3.0-only Commercial]
   spec.summary     = 'Karafka is Ruby and Rails efficient Kafka processing framework.'
   spec.description = <<-DESC
     Karafka is Ruby and Rails efficient Kafka processing framework.
@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'base64', '~> 0.2'
   spec.add_dependency 'karafka-core', '>= 2.4.3', '< 2.5.0'
+  spec.add_dependency 'karafka-rdkafka', '>= 0.17.2'
   spec.add_dependency 'waterdrop', '>= 2.7.3', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 

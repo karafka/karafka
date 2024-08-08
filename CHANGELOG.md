@@ -1,13 +1,45 @@
-# Karafka framework changelog
+# Karafka Framework Changelog
 
-## 2.4.4 (Unreleased)
+## 2.4.8 (Unreleased)
+- **[Feature]** Introduce ability to react to `#eof` either from `#consume` or from `#eofed` when EOF without new messages.
+- [Enhancement] Provide `Consumer#eof?` to indicate reaching EOF.
+- [Enhancement] Always immediately report on `inconsistent_group_protocol` error.
+
+## 2.4.7 (2024-08-01)
+- [Enhancement] Introduce `Karafka::Server.execution_mode` to check in what mode Karafka process operates (`standalone`, `swarm`, `supervisor`, `embedded`).
+- [Enhancement] Ensure `max.poll.interval.ms` is always present and populate it with librdkafka default.
+- [Enhancement] Introduce a shutdown time limit for unsubscription wait.
+- [Enhancement] Tag with `mode:swarm` each of the running swarm consumers.
+- [Change] Tag with `mode:embedded` instead of `embedded` the embedded consumers.
+- [Fix] License identifier `LGPL-3.0` is deprecated for SPDX (#2177).
+- [Fix] Fix an issue where custom clusters would not have default settings populated same as the primary cluster.
+- [Fix] Fix Rspec warnings of nil mocks.
+- [Maintenance] Cover `cooperative-sticky` librdkafka issues with integration spec.
+
+## 2.4.6 (2024-07-22)
+- [Fix] Mitigate `rd_kafka_cgrp_terminated` and other `librdkafka` shutdown issues by unsubscribing fully prior to shutdown.
+
+## 2.4.5 (2024-07-18)
+- [Change] Inject `client.id` when building subscription group and not during the initial setup.
+- [Fix] Mitigate `confluentinc/librdkafka/issues/4783` by injecting dynamic client id when using `cooperative-sticky` strategy.
+
+### Change Note
+
+`client.id` is technically a low-importance value that should not (aside from this error) impact operations. This is why it is not considered a breaking change. This change may be reverted when the original issue is fixed in librdkafka.
+
+## 2.4.4 (2024-07-04)
+- [Enhancement] Allow for offset storing from the Filtering API.
+- [Enhancement] Print more extensive error info on forceful shutdown.
 - [Enhancement] Include `original_key` in the DLQ dispatch headers.
 - [Enhancement] Support embedding mode control management from the trap context.
 - [Enhancement] Make sure, that the listener thread is stopped before restarting.
+- [Fix] Do not block on hanging listener shutdown when invoking forceful shutdown.
 - [Fix] Static membership fencing error is not propagated explicitly enough.
 - [Fix] Make sure DLQ dispatches raw headers and not deserialized headers (same as payload).
+- [Fix] Fix a typo where `ms` in logger listener would not have space before it.
 - [Maintenance] Require `karafka-core` `>=` `2.4.3`.
 - [Maintenance] Allow for usage of `karafka-rdkafka` `~` `0.16` to support librdkafka `2.4.0`.
+- [Maintenance] Lower the precision reporting to 100 microseconds in the logger listener.
 
 ## 2.4.3 (2024-06-12)
 - [Enhancement] Allow for customization of Virtual Partitions reducer for enhanced parallelization.

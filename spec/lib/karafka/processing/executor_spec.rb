@@ -81,6 +81,58 @@ RSpec.describe_current do
     end
   end
 
+  describe '#before_schedule_eofed' do
+    before { allow(consumer).to receive(:on_before_schedule_eofed) }
+
+    context 'when consumer is defined as it was in use' do
+      before { executor.send(:consumer) }
+
+      it do
+        expect { executor.before_schedule_eofed }.not_to raise_error
+      end
+
+      it 'expect to run consumer on_before_schedule' do
+        executor.before_schedule_eofed
+        expect(consumer).to have_received(:on_before_schedule_eofed).with(no_args)
+      end
+    end
+
+    context 'when consumer is not defined as it was not in use' do
+      it do
+        expect { executor.before_schedule_eofed }.not_to raise_error
+      end
+
+      it 'expect to run consumer on_before_schedule' do
+        executor.before_schedule_eofed
+        expect(consumer).to have_received(:on_before_schedule_eofed).with(no_args)
+      end
+    end
+  end
+
+  describe '#eofed' do
+    before { allow(consumer).to receive(:on_eofed) }
+
+    context 'when the consumer was not yet used' do
+      before { executor.eofed }
+
+      it 'expect to run consumer as it reached eof without any data' do
+        expect(consumer).to have_received(:on_eofed)
+      end
+    end
+
+    context 'when the consumer was in use and exists' do
+      before do
+        allow(consumer).to receive(:on_consume)
+        executor.consume
+        executor.eofed
+      end
+
+      it 'expect to run consumer' do
+        expect(consumer).to have_received(:on_eofed).with(no_args)
+      end
+    end
+  end
+
   describe '#before_schedule_revoked' do
     before { allow(consumer).to receive(:on_before_schedule_revoked) }
 

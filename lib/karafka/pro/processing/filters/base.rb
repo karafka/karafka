@@ -54,6 +54,18 @@ module Karafka
           def timeout
             0
           end
+
+          # @return [Boolean] should we use the cursor value to mark as consumed. If any of the
+          #   filters returns true, we return lowers applicable cursor value (if any)
+          def mark_as_consumed?
+            false
+          end
+
+          # @return [Symbol] `:mark_as_consumed` or `:mark_as_consumed!`. Applicable only if
+          #   marking is requested
+          def marking_method
+            :mark_as_consumed
+          end
         end
       end
     end

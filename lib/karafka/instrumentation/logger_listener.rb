@@ -41,7 +41,7 @@ module Karafka
         return unless log_polling?
 
         listener = event[:caller]
-        time = event[:time]
+        time = event[:time].round(2)
         messages_count = event[:messages_buffer].size
 
         message = "[#{listener.id}] Polled #{messages_count} messages in #{time}ms"
@@ -69,14 +69,14 @@ module Karafka
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_worker_processed(event)
         job = event[:job]
-        time = event[:time]
+        time = event[:time].round(2)
         job_type = job.class.to_s.split('::').last
         consumer = job.executor.topic.consumer
         topic = job.executor.topic.name
         partition = job.executor.partition
         info <<~MSG.tr("\n", ' ').strip!
           [#{job.id}] #{job_type} job for #{consumer}
-          on #{topic}/#{partition} finished in #{time}ms
+          on #{topic}/#{partition} finished in #{time} ms
         MSG
       end
 
@@ -290,6 +290,9 @@ module Karafka
         when 'consumer.tick.error'
           error "Consumer on tick failed due to an error: #{error}"
           error details
+        when 'consumer.eofed.error'
+          error "Consumer on eofed failed due to an error: #{error}"
+          error details
         when 'consumer.after_consume.error'
           error "Consumer on after_consume failed due to an error: #{error}"
           error details
@@ -306,7 +309,24 @@ module Karafka
           fatal "Runner crashed due to an error: #{error}"
           fatal details
         when 'app.stopping.error'
-          error 'Forceful Karafka server stop'
+          # Counts number of workers and listeners that were still active when forcing the
+          # shutdown. Please note, that unless all listeners are closed, workers will not finalize
+          # their operations as well.
+          # We need to check if listeners and workers are assigned as during super early stages of
+          # boot they are not.
+          listeners = Server.listeners ? Server.listeners.count(&:active?) : 0
+          workers = Server.workers ? Server.workers.count(&:alive?) : 0
+
+          message = <<~MSG.tr("\n", ' ').strip!
+            Forceful Karafka server stop with:
+            #{workers} active workers and
+            #{listeners} active listeners
+          MSG
+
+          error message
+        when 'app.forceful_stopping.error'
+          error "Forceful shutdown error occurred: #{error}"
+          error details
         when 'librdkafka.error'
           error "librdkafka internal error occurred: #{error}"
           error details

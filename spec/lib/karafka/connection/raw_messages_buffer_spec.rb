@@ -21,7 +21,39 @@ RSpec.describe_current do
 
       it 'expect to yield with messages from this topic partition' do
         expect { |block| buffer.each(&block) }
-          .to yield_with_args(message.topic, message.partition, [message])
+          .to yield_with_args(message.topic, message.partition, [message], false)
+      end
+    end
+
+    context 'when there is a message and eof after' do
+      let(:message) { build(:messages_message) }
+
+      before do
+        buffer << message
+        buffer.eof(message.topic, message.partition)
+      end
+
+      it { expect(buffer.size).to eq(1) }
+
+      it 'expect to yield with messages from this topic partition and eof' do
+        expect { |block| buffer.each(&block) }
+          .to yield_with_args(message.topic, message.partition, [message], true)
+      end
+    end
+
+    context 'when there is a message and eof before' do
+      let(:message) { build(:messages_message) }
+
+      before do
+        buffer.eof(message.topic, message.partition)
+        buffer << message
+      end
+
+      it { expect(buffer.size).to eq(1) }
+
+      it 'expect to yield with messages from this topic partition without eof' do
+        expect { |block| buffer.each(&block) }
+          .to yield_with_args(message.topic, message.partition, [message], false)
       end
     end
 
@@ -34,7 +66,7 @@ RSpec.describe_current do
 
       it 'expect to yield with messages from this topic partition' do
         expect { |block| buffer.each(&block) }
-          .to yield_with_args(message.topic, message.partition, [message, message, message])
+          .to yield_with_args(message.topic, message.partition, [message, message, message], false)
       end
     end
 
@@ -56,8 +88,8 @@ RSpec.describe_current do
       it 'expect to yield with messages from given partitions separately' do
         expect { |block| buffer.each(&block) }
           .to yield_successive_args(
-            [message1.topic, message1.partition, [message1]],
-            [message2.topic, message2.partition, [message2]]
+            [message1.topic, message1.partition, [message1], false],
+            [message2.topic, message2.partition, [message2], false]
           )
       end
     end
@@ -80,8 +112,8 @@ RSpec.describe_current do
       it 'expect to yield with messages from given topics partitions separately' do
         expect { |block| buffer.each(&block) }
           .to yield_successive_args(
-            [message1.topic, message1.partition, [message1]],
-            [message2.topic, message2.partition, [message2]]
+            [message1.topic, message1.partition, [message1], false],
+            [message2.topic, message2.partition, [message2], false]
           )
       end
     end
@@ -189,7 +221,7 @@ RSpec.describe_current do
       it 'expect to maintain messages order' do
         buffer.uniq!
 
-        buffer.each do |_, _, messages|
+        buffer.each do |_, _, messages, _|
           expect(messages).to eq([message1, message2, message3, message4])
         end
       end

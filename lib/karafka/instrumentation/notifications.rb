@@ -65,6 +65,10 @@ module Karafka
         consumer.tick
         consumer.ticked
 
+        consumer.before_schedule_eofed
+        consumer.eof
+        consumer.eofed
+
         consumer.before_schedule_shutdown
         consumer.shutting_down
         consumer.shutdown

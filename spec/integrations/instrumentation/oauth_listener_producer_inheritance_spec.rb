@@ -9,6 +9,7 @@ end
 LISTENER = Listener.new
 
 Karafka::App.setup do |config|
+  config.kafka = { 'bootstrap.servers': 'host:9092' }
   config.oauth.token_provider_listener = LISTENER
 end
 

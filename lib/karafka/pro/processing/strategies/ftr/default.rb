@@ -66,6 +66,19 @@ module Karafka
               # and this should not happen
               throttle_timeout = filter.timeout
 
+              # If user requested marking when applying filter, we mark. We may be in the user
+              # flow but even then this is not a problem. Older offsets will be ignored since
+              # we do not force the offset update (expected) and newer are on the user to control.
+              # This can be primarily used when filtering large quantities of data to mark on the
+              # idle runs, so lag reporting is aware that those messages were not consumed but also
+              # are no longer relevant
+              if filter.mark_as_consumed?
+                send(
+                  filter.marking_method,
+                  filter.cursor
+                )
+              end
+
               case filter.action
               when :skip
                 nil
