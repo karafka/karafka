@@ -62,6 +62,33 @@ RSpec.describe_current do
     end
   end
 
+  context 'when we use virtual partitions and partitioner fails' do
+    let(:concurrency) { 5 }
+    let(:yielded) do
+      yielded = []
+      partitioner.call(topic.name, messages, coordinator) { |*args| yielded << args }
+      yielded
+    end
+
+    before { topic.virtual_partitions(partitioner: ->(_) { raise }) }
+
+    it 'expect to use one thread' do
+      expect(yielded.map(&:first).sort).to eq([0])
+    end
+
+    it 'expect to maintain the order based on the offsets' do
+      yielded.each do |_, messages|
+        messages.each_slice(2) do |m1, m2|
+          expect(m1.offset).to be < m2.offset if m2
+        end
+      end
+    end
+
+    it 'expect to have unique groups' do
+      expect(yielded.map(&:first)).to eq(yielded.map(&:first).uniq)
+    end
+  end
+
   context 'when partitioner would create more partitions than threads' do
     let(:concurrency) { 5 }
     let(:yielded) do

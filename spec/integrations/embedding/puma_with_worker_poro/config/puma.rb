@@ -22,8 +22,6 @@ end
   config.client_id = SecureRandom.hex(6)
 end
 
-::Karafka.producer.produce_sync(topic: TOPIC, payload: 'bye bye')
-
 ::Karafka::App.routes.draw do
   topic TOPIC do
     consumer ShutdownConsumer
@@ -31,6 +29,8 @@ end
 end
 
 on_worker_boot do
+  ::Karafka.producer.produce_sync(topic: TOPIC, payload: 'bye bye')
+
   ::Karafka::Embedded.start
 end
 

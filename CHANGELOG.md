@@ -4,6 +4,7 @@
 - **[Feature]** Introduce ability to react to `#eof` either from `#consume` or from `#eofed` when EOF without new messages.
 - [Enhancement] Provide `Consumer#eof?` to indicate reaching EOF.
 - [Enhancement] Always immediately report on `inconsistent_group_protocol` error.
+- [Enhancement] Reduce virtual partitioning to 1 partition when any partitioner execution in a partitioned batch crashes.
 
 ## 2.4.7 (2024-08-01)
 - [Enhancement] Introduce `Karafka::Server.execution_mode` to check in what mode Karafka process operates (`standalone`, `swarm`, `supervisor`, `embedded`).

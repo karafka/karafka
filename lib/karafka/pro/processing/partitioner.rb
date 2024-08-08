@@ -31,6 +31,7 @@ module Karafka
           # - a virtual partitioner
           # - more than one thread to process the data
           # - collective is not collapsed via coordinator
+          # - none of the partitioner executions raised an error
           #
           # With one thread it is not worth partitioning the work as the work itself will be
           # assigned to one thread (pointless work)
@@ -41,18 +42,36 @@ module Karafka
           # This is great because it allows us to run things without the parallelization that adds
           # a bit of uncertainty and allows us to use DLQ and safely skip messages if needed.
           if vps.active? && vps.max_partitions > 1 && !coordinator.collapsed?
-            groupings = messages.group_by do |msg|
-              # We need to reduce it to the max concurrency, so the group_id is not a direct effect
-              # of the end user action. Otherwise the persistence layer for consumers would cache
-              # it forever and it would cause memory leaks
-              #
-              # This also needs to be consistent because the aggregation here needs to warrant,
-              # that the same partitioned message will always be assigned to the same virtual
-              # partition. Otherwise in case of a window aggregation with VP spanning across
-              # several polls, the data could not be complete.
-              vps.reducer.call(
-                vps.partitioner.call(msg)
+            # If we cannot virtualize even one message from a given batch due to user errors, we
+            # reduce the whole set into one partition and emit error. This should still allow for
+            # user flow but should mitigate damages by not virtualizing
+            begin
+              groupings = messages.group_by do |msg|
+                # We need to reduce it to the max concurrency, so the group_id is not a direct
+                # effect of the end user action. Otherwise the persistence layer for consumers
+                # would cache it forever and it would cause memory leaks
+                #
+                # This also needs to be consistent because the aggregation here needs to warrant,
+                # that the same partitioned message will always be assigned to the same virtual
+                # partition. Otherwise in case of a window aggregation with VP spanning across
+                # several polls, the data could not be complete.
+                vps.reducer.call(
+                  vps.partitioner.call(msg)
+                )
+              end
+            rescue StandardError => e
+              # This should not happen. If you are seeing this it means your partitioner code
+              # failed and raised an error. We highly recommend mitigating partitioner level errors
+              # on the user side because this type of collapse should be considered a last resort
+              Karafka.monitor.instrument(
+                'error.occurred',
+                caller: self,
+                error: e,
+                messages: messages,
+                type: 'virtual_partitions.partitioner.error'
               )
+
+              groupings = { 0 => messages }
             end
 
             groupings.each do |key, messages_group|
