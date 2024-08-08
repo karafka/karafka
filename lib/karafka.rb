@@ -71,11 +71,23 @@ module Karafka
 
     # @return [Boolean] Do we run within/with Rails. We use this to initialize Railtie and proxy
     #   the console invocation to Rails
+    #
+    # @note We allow users to disable Rails require because having Rails in the Gemfile does not
+    #   always mean user wants to have it required. User may want to run Karafka without Rails
+    #   even when having both in the same Gemfile.
     def rails?
       return @rails if instance_variable_defined?('@rails')
 
-      # Do not load Rails again if already loaded
-      Object.const_defined?('Rails::Railtie') || require('rails')
+      @rails = Object.const_defined?('Rails::Railtie')
+
+      # If Rails exists we set it immediately based on its presence and return
+      return @rails if @rails
+
+      # If rails is not present and user wants us not to force-load it, we return
+      return @rails if ENV['KARAFKA_REQUIRE_RAILS'] == 'false'
+
+      # If we should try to require it, we try and if no error, it means its there
+      require('rails')
 
       @rails = true
     rescue LoadError
