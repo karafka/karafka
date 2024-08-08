@@ -30,3 +30,4 @@ rescue Karafka::Errors::MissingBootFileError
 end
 
 assert disabled
+assert Karafka.rails?
