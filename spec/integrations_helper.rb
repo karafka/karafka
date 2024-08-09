@@ -54,6 +54,7 @@ def setup_karafka(
     config.max_wait_time = 500
     config.shutdown_timeout = 30_000
     config.swarm.nodes = 2
+    config.internal.connection.reset_backoff = 1_000
 
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?

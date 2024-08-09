@@ -203,6 +203,9 @@ module Karafka
           setting :manager, default: Connection::Manager.new
           # Controls frequency of connections management checks
           setting :conductor, default: Connection::Conductor.new
+          # How long should we wait before a critical listener recovery
+          # Too short may cause endless rebalance loops
+          setting :reset_backoff, default: 60_000
 
           # Settings that are altered by our client proxy layer
           setting :proxy do

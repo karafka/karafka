@@ -79,6 +79,7 @@ module Karafka
         nested(:connection) do
           required(:manager) { |val| !val.nil? }
           required(:conductor) { |val| !val.nil? }
+          required(:reset_backoff) { |val| val.is_a?(Integer) && val >= 1_000 }
 
           nested(:proxy) do
             nested(:commit) do
