@@ -23,7 +23,11 @@ module Karafka
       # immediately available
       INITIAL_EVENTS_POLL_TIMEOUT = 100
 
-      private_constant :INITIAL_EVENTS_POLL_TIMEOUT
+      # How long should we wait during a critical recovery. It set too low, may trigger endless
+      # rebalancing loops
+      RECOVERY_SLEEP_TIME = 60
+
+      private_constant :INITIAL_EVENTS_POLL_TIMEOUT, :RECOVERY_SLEEP_TIME
 
       # @param subscription_group [Karafka::Routing::SubscriptionGroup]
       # @param jobs_queue [Karafka::Processing::JobsQueue] queue where we should push work
@@ -253,7 +257,7 @@ module Karafka
 
         reset
 
-        sleep(1) && retry
+        sleep(RECOVERY_SLEEP_TIME) && retry
       end
 
       # Resumes processing of partitions that were paused due to an error.
