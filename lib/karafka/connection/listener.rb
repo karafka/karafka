@@ -253,7 +253,9 @@ module Karafka
 
         reset
 
-        sleep(1) && retry
+        # Ruby sleep is in seconds
+        sleep_time = ::Karafka::App.config.internal.connection.reset_backoff / 10_000.0
+        sleep(sleep_time) && retry
       end
 
       # Resumes processing of partitions that were paused due to an error.

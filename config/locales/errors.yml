@@ -49,6 +49,7 @@ en:
 
       internal.connection.manager_format: needs to be present
       internal.connection.conductor_format: needs to be present
+      internal.connection.reset_backoff_format: needs to be an integer bigger or equal to 1000
       internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
       internal.connection.proxy.query_watermark_offsets.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.query_watermark_offsets.wait_time_format: needs to be an integer bigger than 0
