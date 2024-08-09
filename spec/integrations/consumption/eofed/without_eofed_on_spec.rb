@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
-# When eof is in use we may not get it as it may go with messages polling via `#consume`
-# It may happen that eof goes via `#eofed` because of polling but we will correct this spec only
-# when this would happen as it should not be frequent
+# When enable.partition.eof is on but topic eofed is false, we should not run eofed
 
 setup_karafka do |config|
   config.kafka[:'enable.partition.eof'] = true
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume
-    DT[:eofed] = eofed?
-  end
+  def consume; end
 
+  # This should never run because topic has `#eofed` set to false (default).
   def eofed
     raise
   end
@@ -25,15 +22,16 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    eofed true
+    eofed false
   end
 end
 
-produce_many(DT.topic, DT.uuids(100))
-
 start_karafka_and_wait_until do
+  produce_many(DT.topic, DT.uuids(1))
+
+  sleep(5)
+
   DT.key?(:eofed)
 end
 
-assert DT[:eofed]
 assert DT[:shutdown]
