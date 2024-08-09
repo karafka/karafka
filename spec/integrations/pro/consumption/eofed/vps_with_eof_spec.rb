@@ -18,6 +18,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
+    eofed true
     virtual_partitions(
       partitioner: lambda(&:raw_payload)
     )
