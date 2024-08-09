@@ -25,7 +25,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    eofed true
+  end
+end
 
 start_karafka_and_wait_until do
   produce_many(DT.topic, DT.uuids(1)) if DT.key?(:errors)

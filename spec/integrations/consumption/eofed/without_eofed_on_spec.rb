@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# When eof is in use and we get it on an empty topic, we should not use consume and start with
-# `#eofed`. Shutdown should also work and respond to `#eofed?`
+# When enable.partition.eof is on but topic eofed is false, we should not run eofed
 
 setup_karafka do |config|
   config.kafka[:'enable.partition.eof'] = true
@@ -9,11 +8,12 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    raise
+    DT[:consumed] = true
   end
 
+  # This should never run because topic has `#eofed` set to false (default).
   def eofed
-    DT[:eofed] = eofed?
+    raise
   end
 
   def shutdown
@@ -24,13 +24,16 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    eofed true
+    eofed false
   end
 end
 
 start_karafka_and_wait_until do
-  DT.key?(:eofed)
+  produce_many(DT.topic, DT.uuids(1))
+
+  sleep(5)
+
+  DT.key?(:consumed)
 end
 
-assert DT[:eofed]
 assert DT[:shutdown]

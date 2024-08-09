@@ -116,6 +116,8 @@ en:
 
       active_format: needs to be either true or false
 
+      eofed.active_format: needs to be either true or false
+
       declaratives.partitions_format: needs to be more or equal to 1
       declaratives.active_format: needs to be true
       declaratives.replication_factor_format: needs to be more or equal to 1
