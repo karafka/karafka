@@ -7,7 +7,9 @@ setup_karafka do |config|
 end
 
 class Consumer < Karafka::BaseConsumer
-  def consume; end
+  def consume
+    DT[:consumed] = true
+  end
 
   # This should never run because topic has `#eofed` set to false (default).
   def eofed
@@ -31,7 +33,7 @@ start_karafka_and_wait_until do
 
   sleep(5)
 
-  DT.key?(:eofed)
+  DT.key?(:consumed)
 end
 
 assert DT[:shutdown]
