@@ -52,6 +52,7 @@ RSpec.describe_current do
         connection: {
           manager: 1,
           conductor: 1,
+          reset_backoff: 1_000,
           proxy: {
             query_watermark_offsets: {
               timeout: 100,
@@ -537,6 +538,18 @@ RSpec.describe_current do
 
     context  'when manager is missing' do
       before { config[:internal][:connection].delete(:manager) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context  'when reset_backoff is missing' do
+      before { config[:internal][:connection].delete(:reset_backoff) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when reset_backoff is too small' do
+      before { config[:internal][:connection][:reset_backoff] = 999 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
