@@ -19,6 +19,18 @@ module Karafka
             nested :eofed do
               required(:active) { |val| [true, false].include?(val) }
             end
+
+            virtual do |data, errors|
+              next unless errors.empty?
+
+              eofed = data[:eofed]
+
+              next unless eofed[:active]
+
+              next if data[:kafka][:'enable.partition.eof']
+
+              [[%i[eofed kafka], :enable]]
+            end
           end
         end
       end
