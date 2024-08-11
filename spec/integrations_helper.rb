@@ -364,7 +364,10 @@ def wait_for_assignments(*topics)
     end
 
     DT[:topics_assignments_ready] = true
-  end
+  end unless @topics_assignments_subscribed
+
+  # prevent re-subscribe in a loop
+  @topics_assignments_subscribed = true
 
   sleep(0.1) until DT.key?(:topics_assignments_ready)
 end
