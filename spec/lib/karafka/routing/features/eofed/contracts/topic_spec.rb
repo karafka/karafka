@@ -7,6 +7,9 @@ RSpec.describe_current do
     {
       eofed: {
         active: true
+      },
+      kafka: {
+        'enable.partition.eof': true
       }
     }
   end

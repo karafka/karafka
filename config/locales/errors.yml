@@ -117,6 +117,7 @@ en:
       active_format: needs to be either true or false
 
       eofed.active_format: needs to be either true or false
+      eofed.kafka_enable: 'cannot be enabled without enable.partition.eof set to true'
 
       declaratives.partitions_format: needs to be more or equal to 1
       declaratives.active_format: needs to be true
