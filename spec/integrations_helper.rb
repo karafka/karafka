@@ -358,13 +358,15 @@ end
 def wait_for_assignments(*topics)
   topics << DT.topic if topics.empty?
 
-  Karafka.monitor.subscribe('statistics.emitted') do |event|
-    next unless topics.all? do |topic|
-      event[:statistics]['topics'].key?(topic)
-    end
+  unless @topics_assignments_subscribed
+    Karafka.monitor.subscribe('statistics.emitted') do |event|
+      next unless topics.all? do |topic|
+        event[:statistics]['topics'].key?(topic)
+      end
 
-    DT[:topics_assignments_ready] = true
-  end unless @topics_assignments_subscribed
+      DT[:topics_assignments_ready] = true
+    end
+  end
 
   # prevent re-subscribe in a loop
   @topics_assignments_subscribed = true
