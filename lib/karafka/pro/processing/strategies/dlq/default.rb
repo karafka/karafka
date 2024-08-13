@@ -135,7 +135,12 @@ module Karafka
 
               dispatch = lambda do
                 dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
-                mark_dispatched_to_dlq(skippable_message)
+
+                if mark_after_dispatch?
+                  mark_dispatched_to_dlq(skippable_message)
+                else
+                  coordinator.seek_offset = skippable_message.offset + 1
+                end
               end
 
               if dispatch_in_a_transaction?
@@ -191,6 +196,16 @@ module Karafka
             #   transactional dispatches is not set to false.
             def dispatch_in_a_transaction?
               producer.transactional? && topic.dead_letter_queue.transactional?
+            end
+
+            # @return [Boolean] should we mark given message as consumed after dispatch.
+            #  For default non MOM strategies if user did not explicitly tell us not to, we mark
+            #  it. Default is `nil`, which means `true` in this case. If user provided alternative
+            #  value, we go with it.
+            def mark_after_dispatch?
+              return true if topic.dead_letter_queue.mark_after_dispatch.nil?
+
+              topic.dead_letter_queue.mark_after_dispatch
             end
 
             # Runs the DLQ strategy and based on it it performs certain operations

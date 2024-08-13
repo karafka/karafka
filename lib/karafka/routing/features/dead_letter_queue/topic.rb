@@ -22,6 +22,9 @@ module Karafka
           #   whether dispatch on dlq should be sync or async (async by default)
           # @param marking_method [Symbol] `:mark_as_consumed` or `:mark_as_consumed!`. Describes
           #   whether marking on DLQ should be async or sync (async by default)
+          # @param mark_after_dispatch [Boolean, nil] Should we mark after dispatch. `nil` means
+          #   that the default strategy approach to marking will be used. `true` or `false`
+          #   overwrites the default
           # @return [Config] defined config
           def dead_letter_queue(
             max_retries: DEFAULT_MAX_RETRIES,
@@ -29,7 +32,8 @@ module Karafka
             independent: false,
             transactional: true,
             dispatch_method: :produce_async,
-            marking_method: :mark_as_consumed
+            marking_method: :mark_as_consumed,
+            mark_after_dispatch: nil
           )
             @dead_letter_queue ||= Config.new(
               active: !topic.nil?,
@@ -38,7 +42,8 @@ module Karafka
               independent: independent,
               transactional: transactional,
               dispatch_method: dispatch_method,
-              marking_method: marking_method
+              marking_method: marking_method,
+              mark_after_dispatch: mark_after_dispatch
             )
           end
 

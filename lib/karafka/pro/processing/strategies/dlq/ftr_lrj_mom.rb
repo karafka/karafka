@@ -55,7 +55,11 @@ module Karafka
                     skippable_message, _marked = find_skippable_message
                     dispatch_to_dlq(skippable_message) if dispatch_to_dlq?
 
-                    coordinator.seek_offset = skippable_message.offset + 1
+                    if mark_after_dispatch?
+                      mark_dispatched_to_dlq(skippable_message)
+                    else
+                      coordinator.seek_offset = skippable_message.offset + 1
+                    end
                   end
                 end
               end
