@@ -56,9 +56,9 @@ module Karafka
             end
 
             # @return [Boolean] should we mark given message as consumed after dispatch. For
-            #  MOM strategies if user did not explicitly tell us to mark, we do not mark. Default is
-            #  `nil`, which means `false` in this case. If user provided alternative value, we go
-            #  with it.
+            #  MOM strategies if user did not explicitly tell us to mark, we do not mark. Default
+            #  is `nil`, which means `false` in this case. If user provided alternative value, we
+            #  go with it.
             #
             # @note Please note, this is the opposite behavior than in case of AOM strategies.
             def mark_after_dispatch?
