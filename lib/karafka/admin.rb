@@ -274,6 +274,48 @@ module Karafka
         end
       end
 
+      # Takes consumer group and its topics and migrates all the offsets to a new named group
+      #
+      # @param previous_name [String] old consumer group name
+      # @param new_name [String] new consumer group name
+      # @param topics [Array<String>] topics for which we want to migrate offsets during rename
+      # @param delete_previous [Boolean] should we delete previous consumer group after rename.
+      #   Defaults to true.
+      #
+      # @note This method should **not** be executed on a running consumer group as it creates a
+      #   "fake" consumer and uses it to move offsets.
+      #
+      # @note After migration unless `delete_previous` is set to `false`, old group will be
+      #   removed.
+      #
+      # @note If new consumer group exists, old offsets will be added to it.
+      def rename_consumer_group(previous_name, new_name, topics, delete_previous: true)
+        remap = Hash.new { |h, k| h[k] = {} }
+
+        old_lags = read_lags_with_offsets({ previous_name => topics })
+
+        return if old_lags.empty?
+
+        read_lags_with_offsets({ previous_name => topics })
+          .fetch(previous_name)
+          .each do |topic, partitions|
+            partitions.each do |partition_id, details|
+              offset = details[:offset]
+
+              # No offset on this partition
+              next if offset.negative?
+
+              remap[topic][partition_id] = offset
+            end
+          end
+
+        seek_consumer_group(new_name, remap)
+
+        return unless delete_previous
+
+        delete_consumer_group(previous_name)
+      end
+
       # Removes given consumer group (if exists)
       #
       # @param consumer_group_id [String] consumer group name

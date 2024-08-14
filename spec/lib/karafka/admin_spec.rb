@@ -479,6 +479,34 @@ RSpec.describe_current do
     end
   end
 
+  # More specs in the integrations
+  describe '#rename_consumer_group' do
+    subject(:rename) { described_class.rename_consumer_group(previous_name, new_name, topics) }
+
+    let(:previous_name) { rand.to_s }
+    let(:new_name) { rand.to_s }
+    let(:topics) { [rand.to_s] }
+
+    context 'when old name does not exist' do
+      it { expect { rename }.to raise_error(Rdkafka::RdkafkaError, /group_id_not_found/) }
+    end
+
+    context 'when old name exists but no topics to migrate are given' do
+      let(:topics) { [] }
+
+      it { expect { rename }.not_to raise_error }
+    end
+
+    context 'when requested topics do not exist but CG does' do
+      before do
+        described_class.create_topic(name, 1, 1)
+        described_class.seek_consumer_group(previous_name, name => { 0 => 10 })
+      end
+
+      it { expect { rename }.not_to raise_error }
+    end
+  end
+
   describe '#delete_consumer_group' do
     subject(:removal) { described_class.delete_consumer_group(cg_id) }
 
