@@ -242,7 +242,7 @@ end
 
 # Remove Rails 7.2 specs from Ruby 3.0 because it requires 3.1
 specs.delete_if do |spec|
-  RUBY_VERSION <= '3.0' && spec.include?('rails72')
+  RUBY_VERSION < '3.1' && spec.include?('rails72')
 end
 
 raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
