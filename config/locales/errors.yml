@@ -113,6 +113,7 @@ en:
       dead_letter_queue.transactional_format: needs to be either true or false
       dead_letter_queue.dispatch_method_format: 'needs to be either #produce_sync or #produce_async'
       dead_letter_queue.marking_method_format: 'needs to be either #mark_as_consumed or #mark_as_consumed!'
+      dead_letter_queue.mark_after_dispatch_format: 'needs to be true, false or nil'
 
       active_format: needs to be either true or false
 

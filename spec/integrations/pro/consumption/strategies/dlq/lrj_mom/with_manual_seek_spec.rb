@@ -20,7 +20,7 @@ draw_routes do
   topic DT.topics[0] do
     consumer Consumer
     long_running_job true
-    manual_offset_management
+    manual_offset_management(true)
     dead_letter_queue topic: DT.topics[1]
   end
 end

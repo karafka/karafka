@@ -12,7 +12,8 @@ RSpec.describe_current do
         independent: false,
         transactional: true,
         dispatch_method: :produce_async,
-        marking_method: :mark_as_consumed
+        marking_method: :mark_as_consumed,
+        mark_after_dispatch: nil
       }
     }
   end
@@ -65,6 +66,12 @@ RSpec.describe_current do
 
   context 'when marking_method is not any of methods' do
     before { config[:dead_letter_queue][:marking_method] = false }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when mark_after_dispatch is not any of expected' do
+    before { config[:dead_letter_queue][:mark_after_dispatch] = rand }
 
     it { expect(check).not_to be_success }
   end
