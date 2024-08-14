@@ -23,14 +23,14 @@ draw_routes do
     topic DT.topics[i] do
       consumer Consumer
       dead_letter_queue(topic: DT.topics[i + 1], max_retries: 1)
-      manual_offset_management
+      manual_offset_management(true)
       throttling(limit: 50, interval: 5_000)
     end
   end
 
   topic DT.topics[4] do
     consumer LastConsumer
-    manual_offset_management
+    manual_offset_management(true)
     throttling(limit: 50, interval: 5_000)
   end
 end
