@@ -3,6 +3,7 @@
 ## 2.4.9 (Unreleased)
 - [Enhancement] Validate `eof` kafka scope flag when `eofed` in routing enabled.
 - [Enhancement] Provide `mark_after_dispatch` setting for granular DLQ marking control.
+- [Enhancement] Provide `Karafka::Admin.rename_consumer_group`.
 
 ## 2.4.8 (2024-08-09)
 - **[Feature]** Introduce ability to react to `#eof` either from `#consume` or from `#eofed` when EOF without new messages.
