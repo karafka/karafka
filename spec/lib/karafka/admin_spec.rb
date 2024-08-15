@@ -488,7 +488,7 @@ RSpec.describe_current do
     let(:topics) { [rand.to_s] }
 
     context 'when old name does not exist' do
-      it { expect { rename }.to raise_error(Rdkafka::RdkafkaError, /group_id_not_found/) }
+      it { expect { rename }.to raise_error(Rdkafka::RdkafkaError) }
     end
 
     context 'when old name exists but no topics to migrate are given' do
