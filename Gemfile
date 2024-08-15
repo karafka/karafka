@@ -11,8 +11,8 @@ gemspec
 # Since some of those are only needed for some specs, they should never be required automatically
 group :integrations do
   gem 'activejob', require: false
-  gem 'karafka-testing', '>= 2.4.0', require: false
-  gem 'karafka-web', '>= 0.10.0.beta1', require: false
+  gem 'karafka-testing', '>= 2.4.6', require: false
+  gem 'karafka-web', '>= 0.10.0.rc2', require: false
   gem 'rspec', require: false
 end
 
