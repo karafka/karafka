@@ -106,6 +106,7 @@ en:
       recurring_tasks.topics.schedules_format: 'needs to be a string with a Kafka accepted format'
       recurring_tasks.topics.logs_format: 'needs to be a string with a Kafka accepted format'
       recurring_tasks.interval_format: 'needs to be equal or more than 5000 and an integer'
+      recurring_tasks.deserializer_format: 'needs to be configured'
 
     routing:
       swarm_nodes_not_used: 'At least one of the nodes has no assignments'

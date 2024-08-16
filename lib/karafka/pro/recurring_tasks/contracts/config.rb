@@ -28,6 +28,7 @@ module Karafka
 
           nested(:recurring_tasks) do
             required(:consumer_class) { |val| val < ::Karafka::BaseConsumer }
+            required(:deserializer) { |val| !val.nil? }
             # Do not allow to run more often than every 5 seconds
             required(:interval) { |val| val.is_a?(Integer) && val >= 5_000 }
             required(:group_id) do |val|

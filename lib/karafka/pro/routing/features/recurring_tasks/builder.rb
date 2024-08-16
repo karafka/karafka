@@ -32,6 +32,7 @@ module Karafka
                 # the one that we use to trigger recurring tasks.
                 topic(topics_cfg.schedules) do
                   consumer tasks_cfg.consumer_class
+                  deserializer tasks_cfg.deserializer
                   # Because the topic method name as well as builder proxy method name is the same
                   # we need to reference it via target directly
                   target.recurring_tasks(true)
@@ -67,6 +68,7 @@ module Karafka
                 # the Web UI
                 topic(topics_cfg.logs) do
                   active(false)
+                  deserializer tasks_cfg.deserializer
                   target.recurring_tasks(true)
 
                   # Keep cron logs of executions for a week and after that remove. Week should be

@@ -7,6 +7,7 @@ RSpec.describe_current do
     {
       recurring_tasks: {
         consumer_class: consumer_class,
+        deserializer: Class.new,
         group_id: 'valid_group_id',
         interval: 5_000,
         topics: {
@@ -44,6 +45,12 @@ RSpec.describe_current do
 
   context 'when interval is not an integer' do
     before { recurring_tasks[:interval] = 'not an integer' }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context 'when deserializer is nil' do
+    before { recurring_tasks[:deserializer] = nil }
 
     it { expect(contract.call(config)).not_to be_success }
   end
