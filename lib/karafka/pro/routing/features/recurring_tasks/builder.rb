@@ -18,20 +18,64 @@ module Karafka
         class RecurringTasks < Base
           # Routing extensions for recurring tasks
           module Builder
-            def recurring_tasks_topic(name, &block)
-              topic(name) do
-                consumer App.config.internal.active_job.consumer_class
-                recurring_tasks true
+            # Enabled recurring tasks operations and adds needed topics and other stuff.
+            #
+            # @param block [Proc] optional reconfiguration of the tasks topic definitions.
+            # @note Since we cannot provide two blocks, reconfiguration of logs topic can be only
+            #   done if user explicitly redefines it in the routing.
+            def recurring_tasks(&block)
+              tasks_cfg = App.config.recurring_tasks
+              topics_cfg = tasks_cfg.topics
 
-                # We manage offsets directly because messages can have both schedules and commands
-                # and we need to apply them only when we need to
-                manual_offset_management(true)
-                eofed(true)
-                kafka('enable.partition.eof': true)
+              consumer_group tasks_cfg.group_id do
+                # Registers the primary topic that we use to control schedules execution. This is
+                # the one that we use to trigger recurring tasks.
+                topic(topics_cfg.schedules) do
+                  consumer tasks_cfg.consumer_class
+                  # Because the topic method name as well as builder proxy method name is the same
+                  # we need to reference it via target directly
+                  target.recurring_tasks(true)
 
-                next unless block
+                  # We manage offsets directly because messages can have both schedules and
+                  # commands and we need to apply them only when we need to
+                  manual_offset_management(true)
 
-                instance_eval(&block)
+                  # This needs to be enabled for the eof to work correctly
+                  kafka('enable.partition.eof': true, inherit: true)
+                  eofed(true)
+
+                  # Keep older data for a day and compact to the last state available
+                  config(
+                    'cleanup.policy': 'compact,delete',
+                    'retention.ms': 86_400_000
+                  )
+
+                  # This is the core of execution. Since we're producers of states, we need a way
+                  # to tick without having new data
+                  periodic(
+                    interval: App.config.recurring_tasks.interval,
+                    during_pause: false,
+                    during_retry: false
+                  )
+
+                  next unless block
+
+                  instance_eval(&block)
+                end
+
+                # This topic is to store logs that we can then inspect either from the admin or via
+                # the Web UI
+                topic(topics_cfg.logs) do
+                  active(false)
+                  target.recurring_tasks(true)
+
+                  # Keep cron logs of executions for a week and after that remove. Week should be
+                  # enough and should not produce too much data.
+                  config(
+                    'cleanup.policy': 'delete',
+                    'retention.ms': 604_800_000
+                  )
+                end
               end
             end
           end
