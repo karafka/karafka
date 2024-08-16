@@ -16,6 +16,8 @@
   singleton
   digest
   zeitwerk
+  set
+  date
 ].each(&method(:require))
 
 # Karafka framework main namespace

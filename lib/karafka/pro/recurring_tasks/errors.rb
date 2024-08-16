@@ -18,6 +18,10 @@ module Karafka
       module Errors
         # Base for all the recurring tasks errors
         BaseError = Class.new(::Karafka::Errors::BaseError)
+
+        # Raised when given cron expression does not match our regexp
+        # We use a limited cron parser, thus some valid cron expressions may not be supported
+        InvalidCronExpressionError = Class.new(BaseError)
       end
     end
   end
