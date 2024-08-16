@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.9 (Unreleased)
+- [Enhancement] Allow for partial topic level kafka scope settings reconfiguration via `inherit` flag.
 - [Enhancement] Validate `eof` kafka scope flag when `eofed` in routing enabled.
 - [Enhancement] Provide `mark_after_dispatch` setting for granular DLQ marking control.
 - [Enhancement] Provide `Karafka::Admin.rename_consumer_group`.
