@@ -54,6 +54,20 @@ module Karafka
         RUBY
       end
 
+      # Often users want to have the same basic cluster setup with small setting alterations
+      # This method allows us to do so by setting `inherit` to `true`. Whe inherit is enabled,
+      # settings will be merged with defaults.
+      #
+      # @param settings [Hash] kafka scope settings. If `:inherit` key is provided, it will
+      #   instruct the assignment to merge with root level defaults
+      #
+      # @note It is set to `false` by default to preserve backwards compatibility
+      def kafka=(settings = {})
+        inherit = settings.delete(:inherit)
+
+        @kafka = inherit ? Karafka::App.config.kafka.merge(settings) : settings
+      end
+
       # @return [String] name of subscription that will go to librdkafka
       def subscription_name
         name
