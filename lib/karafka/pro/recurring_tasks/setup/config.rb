@@ -22,8 +22,6 @@ module Karafka
 
           setting(:consumer_class, default: Consumer)
           setting(:deserializer, default: Deserializer.new)
-          # Our cron is a simple one. You can use fugit with a simple adapter if you want
-          setting(:cron_parser_class, default: Vendor::CronParser)
           setting(:group_id, default: 'karafka_recurring_tasks')
           # By default we will run the scheduling every 15 seconds since we provide a minute-based
           # precision

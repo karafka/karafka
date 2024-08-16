@@ -8,7 +8,6 @@ RSpec.describe_current do
       recurring_tasks: {
         consumer_class: consumer_class,
         deserializer: Class.new,
-        cron_parser_class: Class.new,
         group_id: 'valid_group_id',
         interval: 5_000,
         topics: {
@@ -52,12 +51,6 @@ RSpec.describe_current do
 
   context 'when deserializer is nil' do
     before { recurring_tasks[:deserializer] = nil }
-
-    it { expect(contract.call(config)).not_to be_success }
-  end
-
-  context 'when cron_parser_class is nil' do
-    before { recurring_tasks[:cron_parser_class] = nil }
 
     it { expect(contract.call(config)).not_to be_success }
   end
