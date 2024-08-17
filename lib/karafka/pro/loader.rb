@@ -39,7 +39,6 @@ module Karafka
       class << self
         # Requires all the components without using them anywhere
         def require_all
-          require 'zlib'
           FORCE_LOADED.each { |file| require_relative(file) }
 
           PRO_LOADER.push_dir(Karafka.core_root.join('pro'), namespace: Karafka::Pro)

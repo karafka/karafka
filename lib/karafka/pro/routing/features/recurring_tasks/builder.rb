@@ -24,6 +24,9 @@ module Karafka
             # @note Since we cannot provide two blocks, reconfiguration of logs topic can be only
             #   done if user explicitly redefines it in the routing.
             def recurring_tasks(&block)
+              # We only require zlib when we decide to run recurring tasks because it is not needed
+              # otherwise.
+              require 'zlib'
               ensure_fugit_availability!
 
               tasks_cfg = App.config.recurring_tasks
