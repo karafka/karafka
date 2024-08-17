@@ -24,6 +24,8 @@ module Karafka
             # @note Since we cannot provide two blocks, reconfiguration of logs topic can be only
             #   done if user explicitly redefines it in the routing.
             def recurring_tasks(&block)
+              ensure_fugit_availability!
+
               tasks_cfg = App.config.recurring_tasks
               topics_cfg = tasks_cfg.topics
 
@@ -79,6 +81,22 @@ module Karafka
                   )
                 end
               end
+            end
+
+            # Checks if fugit is present. If not, will try to require it as it might not have
+            # been required but is available. If fails, will crash.
+            def ensure_fugit_availability!
+              return if Object.const_defined?(:Fugit)
+
+              require 'fugit'
+            rescue LoadError
+              raise(
+                ::Karafka::Errors::DependencyConstraintsError,
+                <<~ERROR_MSG
+                  Failed to require fugit gem.
+                  Add it to your Gemfile, as it is required for the recurring tasks to work.
+                ERROR_MSG
+              )
             end
           end
         end
