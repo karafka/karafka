@@ -13,6 +13,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   ostruct
   simplecov
   tempfile
+  zlib
 ].each do |lib|
   require lib
 end
