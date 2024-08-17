@@ -54,4 +54,34 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#schedule' do
+    let(:task_id) { 'task_1' }
+    let(:cron_expression) { '* * * * *' } # Every minute
+
+    it 'creates and adds a task to the schedule' do
+      expect { schedule.schedule(id: task_id, cron: cron_expression) }
+        .to change { schedule.find(task_id) }
+        .from(nil)
+        .to be_a(Karafka::Pro::RecurringTasks::Task)
+    end
+
+    it 'adds a task with the correct attributes' do
+      schedule.schedule(id: task_id, cron: cron_expression)
+      task = schedule.find(task_id)
+
+      expect(task.id).to eq(task_id)
+      expect(task.send(:instance_variable_get, :@cron).original).to eq(cron_expression)
+    end
+
+    it 'overwrites a task with the same id if scheduled again' do
+      schedule.schedule(id: task_id, cron: cron_expression)
+      new_cron_expression = '0 * * * *' # Every hour
+
+      expect { schedule.schedule(id: task_id, cron: new_cron_expression) }
+        .to change { schedule.find(task_id).send(:instance_variable_get, :@cron).original }
+        .from(cron_expression)
+        .to(new_cron_expression)
+    end
+  end
 end

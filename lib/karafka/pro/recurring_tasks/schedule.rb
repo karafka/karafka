@@ -24,7 +24,7 @@ module Karafka
         # @param version [String] schedule version. In case of usage of versioning it is used to
         #   ensure, that older still active processes do not intercept the assignment to run older
         #   version of the scheduler. It is important to make sure, that this string is comparable.
-        def initialize(version: '1.0.0')
+        def initialize(version:)
           @version = version
           @tasks = {}
         end
@@ -46,6 +46,12 @@ module Karafka
         # @return [Task, nil] task with a given id or nil if not found
         def find(id)
           @tasks[id]
+        end
+
+        # Allows us to have a nice DSL for defining schedules
+        # @param args [Array] attributes accepted by the task initializer
+        def schedule(**args)
+          self << Task.new(**args)
         end
       end
     end

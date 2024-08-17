@@ -17,7 +17,23 @@ module Karafka
       # Consumer responsible for management of the recurring tasks and their execution
       class Consumer < ::Karafka::BaseConsumer
         # Loads the schedules and manages the commands
-        def consume; end
+        def consume
+          # Since we can have eofed alongside messages during recovery we call it if needed
+          eofed if eofed?
+        end
+
+        # Finalizes the schedule recovery (if needed)
+        def eofed; end
+
+        # Runs schedules in the fixed intervals
+        def tick; end
+
+        private
+
+        # Use our producer that could be redefined only for the recurring tasks
+        def producer
+          ::Karafka::App.config.recurring_tasks.producer
+        end
       end
     end
   end

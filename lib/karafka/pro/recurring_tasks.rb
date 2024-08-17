@@ -16,6 +16,16 @@ module Karafka
     # Recurring tasks functionality
     module RecurringTasks
       class << self
+        # Simplified API for schedules definitions
+        #
+        # @param version [String]
+        # @param block [Proc]
+        def define(version = '1.0.0', &block)
+          Schedule
+            .new(version: version)
+            .instance_exec(&block)
+        end
+
         # Sets up additional config scope, validations and other things
         #
         # @param config [Karafka::Core::Configurable::Node] root node config
