@@ -14,6 +14,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   simplecov
   tempfile
   zlib
+  fugit
 ].each do |lib|
   require lib
 end

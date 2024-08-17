@@ -27,6 +27,15 @@ module Karafka
           # precision
           setting(:interval, default: 15_000)
 
+          # Producer to be used by the recurring tasks.
+          # By default it is a `Karafka.producer`, however it may be overwritten if we want to use
+          # a separate instance in case of heavy usage of the  transactional producer, etc.
+          setting(
+            :producer,
+            constructor: -> { ::Karafka.producer },
+            lazy: true
+          )
+
           setting(:topics) do
             setting(:schedules, default: 'karafka_recurring_tasks_schedules')
             setting(:logs, default: 'karafka_recurring_tasks_logs')

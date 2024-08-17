@@ -56,6 +56,12 @@ def setup_karafka(
     config.swarm.nodes = 2
     config.internal.connection.reset_backoff = 1_000
 
+    # This will ensure, that the recurring tasks data does not leak in between tests (if needed)
+    if Karafka.pro?
+      config.recurring_tasks.topics.schedules = SecureRandom.hex(6)
+      config.recurring_tasks.topics.logs = SecureRandom.hex(6)
+    end
+
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?
 
