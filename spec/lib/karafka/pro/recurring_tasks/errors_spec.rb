@@ -6,4 +6,16 @@ RSpec.describe_current do
 
     specify { expect(error).to be < ::Karafka::Errors::BaseError }
   end
+
+  describe 'IncompatibleSchemaError' do
+    subject(:error) { described_class::IncompatibleSchemaError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe 'IncompatibleScheduleError' do
+    subject(:error) { described_class::IncompatibleScheduleError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
 end

@@ -19,9 +19,15 @@ module Karafka
         # Base for all the recurring tasks errors
         BaseError = Class.new(::Karafka::Errors::BaseError)
 
-        # Raised when given cron expression does not match our regexp
-        # We use a limited cron parser, thus some valid cron expressions may not be supported
-        InvalidCronExpressionError = Class.new(BaseError)
+        # Raised when older cron manager version is trying to work with newer schema
+        IncompatibleSchemaError = Class.new(BaseError)
+
+        # Raised if you use versioned schedule and an existing schedule from Kafka was picked up
+        # by a process with older schedule version.
+        # This is a safe-guard to protect against a cases where there would be a temporary
+        # reassignment of newer schedule data into older process during deployment. It should go
+        # away once all processes are rolled.
+        IncompatibleScheduleError = Class.new(BaseError)
       end
     end
   end
