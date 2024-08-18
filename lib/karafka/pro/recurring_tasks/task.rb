@@ -21,6 +21,10 @@ module Karafka
         # @return [String]
         attr_reader :id
 
+        attr_accessor :previous_time
+
+        attr_reader :cron
+
         # @param id [String] unique id. If re-used between versions, will replace older occurrence.
         # @param cron [String] cron expression matching this task expected execution times.
         # @param previous_time [Integer, Time] previous time this task was executed. 0 if never.
@@ -31,6 +35,7 @@ module Karafka
           @id = id
           @cron = ::Fugit::Cron.do_parse(cron)
           @previous_time = previous_time
+          @start_time = Time.now
           @executable = block
           @enabled = enabled
           @trigger = false
@@ -58,7 +63,7 @@ module Karafka
 
         # @return [EtOrbi::EoTime] next execution time
         def next_time
-          @cron.next_time(@previous_time)
+          @cron.next_time(@previous_time.to_i.zero? ? @start_time : @previous_time)
         end
 
         # @return [Boolean] should we execute this task at this moment in time
@@ -67,12 +72,13 @@ module Karafka
           return false unless enabled?
 
           # Ensure the job is only due if current_time is strictly after the next_time
-          Time.now >= next_time
+          # Please note that we can only compare eorbi against time and not the other way around
+          next_time <= Time.now
         end
 
         # Executes the given task and stores the execution time.
         def execute
-          @executable.call
+          @executable.call if @executable
         ensure
           @trigger = false
           @previous_time = Time.now

@@ -46,9 +46,15 @@ module Karafka
                   # commands and we need to apply them only when we need to
                   manual_offset_management(true)
 
+                  # We use multi-batch operations and in-memory state for schedules. This needs to
+                  # always operate without re-creation.
+                  consumer_persistence(true)
+
                   # This needs to be enabled for the eof to work correctly
                   kafka('enable.partition.eof': true, inherit: true)
                   eofed(true)
+
+                  pause_max_timeout(5 * 60 * 1_000)
 
                   # Keep older data for a day and compact to the last state available
                   config(

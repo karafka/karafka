@@ -17,3 +17,6 @@ Karafka::Pro::RecurringTasks.define('1.0.0') do
     puts 'Email'
   end
 end
+
+# It should be stored as the current schedule
+assert !Karafka::Pro::RecurringTasks.current_schedule.nil?

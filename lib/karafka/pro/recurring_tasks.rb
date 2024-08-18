@@ -16,14 +16,23 @@ module Karafka
     # Recurring tasks functionality
     module RecurringTasks
       class << self
+        # @return [Schedule, nil] current defined schedule or nil if not defined
+        attr_reader :current_schedule
+
         # Simplified API for schedules definitions
         #
         # @param version [String]
         # @param block [Proc]
+        #
+        # @example
+        #   Karafka::Pro::RecurringTasks.define('1.0.1') do
+        #     schedule(id: 'mailer', cron: '* * * * *') do
+        #       MailingJob.perform_async
+        #     end
+        #   end
         def define(version = '1.0.0', &block)
-          Schedule
-            .new(version: version)
-            .instance_exec(&block)
+          @current_schedule = Schedule.new(version: version)
+          @current_schedule.instance_exec(&block)
         end
 
         # Sets up additional config scope, validations and other things
