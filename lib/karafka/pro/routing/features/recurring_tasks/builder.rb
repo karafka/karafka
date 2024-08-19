@@ -54,7 +54,18 @@ module Karafka
                   kafka('enable.partition.eof': true, inherit: true)
                   eofed(true)
 
-                  pause_max_timeout(5 * 60 * 1_000)
+                  # Favour latency. This is a low traffic topic that only accepts user initiated
+                  # low-frequency commands
+                  max_messages(1)
+                  # Since we always react on the received message, we can block for longer periods
+                  # of time
+                  max_wait_time(10_000)
+
+                  # Since the execution of particular tasks is isolated and guarded, it should not
+                  # leak. This means, that this is to handle errors like schedule version
+                  # incompatibility and other errors that will not go away without a redeployment
+                  pause_timeout(60 * 1_000)
+                  pause_max_timeout(60 * 1_000)
 
                   # Keep older data for a day and compact to the last state available
                   config(

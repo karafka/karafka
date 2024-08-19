@@ -17,7 +17,9 @@ module Karafka
     module RecurringTasks
       class << self
         # @return [Schedule, nil] current defined schedule or nil if not defined
-        attr_reader :current_schedule
+        def schedule
+          @schedule || define('0.0.0') {}
+        end
 
         # Simplified API for schedules definitions
         #
@@ -31,8 +33,8 @@ module Karafka
         #     end
         #   end
         def define(version = '1.0.0', &block)
-          @current_schedule = Schedule.new(version: version)
-          @current_schedule.instance_exec(&block)
+          @schedule = Schedule.new(version: version)
+          @schedule.instance_exec(&block)
         end
 
         # Sets up additional config scope, validations and other things
@@ -48,6 +50,15 @@ module Karafka
         # @param config [Karafka::Core::Configurable::Node] root node config
         def post_setup(config)
           RecurringTasks::Contracts::Config.new.validate!(config.to_h)
+
+          # Published after task is successfully executed
+          Karafka.monitor.notifications_bus.register_event('recurring_tasks.task.executed')
+
+          # Initialize empty dummy schedule, so we always have one and so we do not have to
+          # deal with a case where there is no schedule
+          RecurringTasks.schedule
+
+          Karafka.monitor.subscribe(Listener.new)
         end
       end
     end

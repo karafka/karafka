@@ -18,12 +18,18 @@ module Karafka
       # Tasks should be lightweight. Anything heavy should be executed by scheduling appropriate
       # jobs here.
       class Task
-        # @return [String]
+        include Helpers::ConfigImporter.new(
+          monitor: %i[monitor]
+        )
+
+        # @return [String] this task id
         attr_reader :id
 
-        attr_accessor :previous_time
-
+        # @return [Fugit::Cron] cron from parsing the raw cron expression
         attr_reader :cron
+
+        # Allows for update of previous time when restoring the materialized state
+        attr_accessor :previous_time
 
         # @param id [String] unique id. If re-used between versions, will replace older occurrence.
         # @param cron [String] cron expression matching this task expected execution times.
@@ -39,15 +45,22 @@ module Karafka
           @executable = block
           @enabled = enabled
           @trigger = false
+          @changed = false
+        end
+
+        def changed?
+          @changed
         end
 
         # Disables this task execution indefinitely
         def disable
+          touch
           @enabled = false
         end
 
         # Enables back this task
         def enable
+          touch
           @enabled = true
         end
 
@@ -58,6 +71,7 @@ module Karafka
 
         # Triggers the execution of this task at the earliest opportunity
         def trigger
+          touch
           @trigger = true
         end
 
@@ -76,12 +90,41 @@ module Karafka
           next_time <= Time.now
         end
 
-        # Executes the given task and stores the execution time.
+        # Executes the given task and publishes appropriate notification bus events.
         def execute
-          @executable.call if @executable
+          monitor.instrument(
+            'recurring_tasks.task.executed',
+            task: self
+          ) do
+            # We check for presence of the `@executable` because user can define cron schedule
+            # without the code block
+            return unless @executable
+
+            @executable.call
+          end
+        rescue StandardError => e
+          monitor.instrument(
+            'error.occurred',
+            caller: self,
+            error: e,
+            task: self,
+            type: 'recurring_tasks.task.execute.error'
+          )
         ensure
           @trigger = false
           @previous_time = Time.now
+        end
+
+        # Removes the changes indicator flag
+        def clear
+          @changed = false
+        end
+
+        private
+
+        # Marks the task as changed
+        def touch
+          @changed = true
         end
       end
     end
