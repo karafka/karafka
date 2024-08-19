@@ -19,6 +19,7 @@ module Karafka
         # Current recurring tasks related schema structure
         SCHEMA_VERSION = '1.0'
 
+        # @param schedule [Karafka::Pro::RecurringTasks::Schedule] schedule to serialize
         # @return [String] serialized and compressed current schedule data with its tasks and their
         #   current state.
         def schedule(schedule)
@@ -47,7 +48,7 @@ module Karafka
           )
         end
 
-        # @param name [String] command name
+        # @param command_name [String] command name
         # @param task_id [String] task id or '*' to match all.
         # @return [String] serialized and compressed command data
         def command(command_name, task_id)
@@ -69,7 +70,7 @@ module Karafka
           )
         end
 
-        # @param [Karafka::Core::Monitoring::Event] recurring task dispatch event
+        # @param event [Karafka::Core::Monitoring::Event] recurring task dispatch event
         # @return [String] serialized and compressed event log data
         def log(event)
           task = event[:task]

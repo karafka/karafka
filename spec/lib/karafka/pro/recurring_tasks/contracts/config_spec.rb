@@ -9,6 +9,7 @@ RSpec.describe_current do
         consumer_class: consumer_class,
         deserializer: Class.new,
         group_id: 'valid_group_id',
+        log: true,
         interval: 5_000,
         topics: {
           schedules: 'valid_schedule_topic',
@@ -51,6 +52,12 @@ RSpec.describe_current do
 
   context 'when deserializer is nil' do
     before { recurring_tasks[:deserializer] = nil }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context 'when logging is nil' do
+    before { recurring_tasks[:logging] = nil }
 
     it { expect(contract.call(config)).not_to be_success }
   end

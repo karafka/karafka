@@ -1,5 +1,16 @@
 # frozen_string_literal: true
 
+# This Karafka component is a Pro component under a commercial license.
+# This Karafka component is NOT licensed under LGPL.
+#
+# All of the commercial components are present in the lib/karafka/pro directory of this
+# repository and their usage requires commercial license agreement.
+#
+# Karafka has also commercial-friendly license, commercial support and commercial components.
+#
+# By sending a pull request to the pro components, you are agreeing to transfer the copyright of
+# your code to Maciej Mensfeld.
+
 module Karafka
   module Pro
     module RecurringTasks
@@ -9,6 +20,7 @@ module Karafka
       #   - we always mark as consumed in such a way, that the first message received after
       #     assignment (if any) is a state
       class Consumer < ::Karafka::BaseConsumer
+        # @param args [Array] all arguments accepted by the consumer
         def initialize(*args)
           super
           @executor = Executor.new
@@ -57,6 +69,7 @@ module Karafka
           eofed if eofed?
         end
 
+        # Starts the final replay process if we reached eof during replaying
         def eofed
           # We only mark as replayed if we were replaying in the first place
           # If already replayed, nothing to do
@@ -65,6 +78,7 @@ module Karafka
           @executor.replay
         end
 
+        # Runs the cron execution if all good.
         def tick
           # Do nothing until we fully recover the correct state
           return if @executor.replaying?

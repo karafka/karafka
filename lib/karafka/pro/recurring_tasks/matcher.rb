@@ -16,7 +16,8 @@ module Karafka
     module RecurringTasks
       # Matcher used to check if given command can be applied to a given task.
       class Matcher
-        # @param message [Karafka::Messages::Message] message with command
+        # @param task [Karafka::Pro::RecurringTasks::Task]
+        # @param payload [Hash] command message payload
         # @return [Boolean] is this message dedicated to current process and is actionable
         def matches?(task, payload)
           # We only match commands

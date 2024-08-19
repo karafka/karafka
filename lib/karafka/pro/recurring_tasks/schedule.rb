@@ -50,6 +50,7 @@ module Karafka
 
         # Allows us to have a nice DSL for defining schedules
         # @param args [Array] attributes accepted by the task initializer
+        # @param block [Proc] block to execute
         def schedule(**args, &block)
           self << Task.new(**args, &block)
         end

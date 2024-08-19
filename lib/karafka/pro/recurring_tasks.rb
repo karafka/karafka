@@ -58,6 +58,9 @@ module Karafka
           # deal with a case where there is no schedule
           RecurringTasks.schedule
 
+          # User can disable logging of executions, in which case we don't track them
+          return unless Karafka::App.config.recurring_tasks.logging
+
           Karafka.monitor.subscribe(Listener.new)
         end
       end

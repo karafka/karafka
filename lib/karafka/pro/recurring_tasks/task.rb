@@ -48,6 +48,7 @@ module Karafka
           @changed = false
         end
 
+        # @return [Boolean] true if anything in the task has changed and we should persist it
         def changed?
           @changed
         end

@@ -14,6 +14,7 @@
 module Karafka
   module Pro
     module RecurringTasks
+      # Dispatches appropriate recurring tasks related messages to expected topics
       class Dispatcher
         class << self
           # Snapshots to Kafka current schedule state
@@ -67,8 +68,9 @@ module Karafka
 
           # Converts payload to json, compresses it and dispatches to Kafka
           #
+          # @param topic [String] target topic
+          # @param key [String]
           # @param payload [Hash] hash with payload
-          # @param task_id [String]
           def produce(topic, key, payload)
             producer.produce_async(
               topic: topic,
