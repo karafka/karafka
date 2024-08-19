@@ -9,7 +9,7 @@ RSpec.describe_current do
         consumer_class: consumer_class,
         deserializer: Class.new,
         group_id: 'valid_group_id',
-        log: true,
+        logging: true,
         interval: 5_000,
         topics: {
           schedules: 'valid_schedule_topic',

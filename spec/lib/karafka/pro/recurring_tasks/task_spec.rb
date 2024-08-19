@@ -94,18 +94,72 @@ RSpec.describe_current do
     end
   end
 
+  describe '#changed?' do
+    context 'when the task has not been modified' do
+      it 'returns false' do
+        expect(task.changed?).to eq(false)
+      end
+    end
+
+    context 'when the task has been modified' do
+      before { task.disable }
+
+      it 'returns true' do
+        expect(task.changed?).to eq(true)
+      end
+    end
+  end
+
+  describe '#clear' do
+    before do
+      task.disable
+      task.clear
+    end
+
+    it 'clears the changed flag' do
+      expect(task.changed?).to eq(false)
+    end
+  end
+
   describe '#execute' do
-    it 'executes the task and updates the previous_time' do
-      expect(task.execute)
-        .to eq('executed')
-      expect(task.send(:instance_variable_get, :@previous_time))
-        .to be_within(1.second).of(Time.now)
+    before { allow(Karafka.monitor).to receive(:instrument) }
+
+    context 'when the task is executable' do
+      it 'executes the block and updates previous_time' do
+        task.execute
+
+        expect(task.send(:instance_variable_get, :@previous_time))
+          .to be_within(1.second).of(Time.now)
+      end
+
+      it 'instruments the execution' do
+        task.execute
+
+        expect(Karafka.monitor).to have_received(:instrument)
+      end
+    end
+
+    context 'when an error occurs during execution' do
+      let(:executable) { -> { raise StandardError, 'Execution error' } }
+
+      it 'instruments the error occurrence' do
+        task.execute
+
+        expect(Karafka.monitor).to have_received(:instrument)
+      end
     end
 
     it 'resets the trigger after execution' do
       task.trigger
       task.execute
       expect(task.send(:instance_variable_get, :@trigger)).to eq(false)
+    end
+  end
+
+  describe '#touch' do
+    it 'marks the task as changed' do
+      task.send(:touch)
+      expect(task.changed?).to eq(true)
     end
   end
 end
