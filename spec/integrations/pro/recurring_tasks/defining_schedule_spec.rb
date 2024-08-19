@@ -19,4 +19,4 @@ Karafka::Pro::RecurringTasks.define('1.0.0') do
 end
 
 # It should be stored as the current schedule
-assert !Karafka::Pro::RecurringTasks.current_schedule.nil?
+assert !Karafka::Pro::RecurringTasks.schedule.nil?

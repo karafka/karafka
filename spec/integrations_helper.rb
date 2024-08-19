@@ -60,6 +60,8 @@ def setup_karafka(
     if Karafka.pro?
       config.recurring_tasks.topics.schedules = SecureRandom.hex(6)
       config.recurring_tasks.topics.logs = SecureRandom.hex(6)
+      # Run often so we do not wait on the first run
+      config.recurring_tasks.interval = 1_000
     end
 
     # Allows to overwrite any option we're interested in
