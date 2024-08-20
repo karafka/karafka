@@ -11,7 +11,7 @@ RSpec.describe_current do
 
   describe '#recurring_tasks' do
     context 'when defining recurring tasks without any extra settings' do
-      before { builder.recurring_tasks }
+      before { builder.recurring_tasks(true) }
 
       it { expect(topic.consumer).to eq(Karafka::Pro::RecurringTasks::Consumer) }
       it { expect(topic.recurring_tasks?).to eq(true) }
@@ -19,7 +19,7 @@ RSpec.describe_current do
 
     context 'when defining recurring tasks with extra settings' do
       before do
-        builder.recurring_tasks do
+        builder.recurring_tasks(true) do
           max_messages 5
         end
       end

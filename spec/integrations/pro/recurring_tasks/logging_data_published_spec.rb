@@ -14,7 +14,7 @@ class CountConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  recurring_tasks do
+  recurring_tasks(true) do
     max_wait_time 500
   end
 

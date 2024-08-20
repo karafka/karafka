@@ -36,7 +36,7 @@ failed = false
 
 begin
   draw_routes do
-    recurring_tasks
+    recurring_tasks(true)
   end
 rescue Karafka::Errors::DependencyConstraintsError
   failed = true

@@ -5,7 +5,7 @@
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
 draw_routes do
-  recurring_tasks do
+  recurring_tasks(true) do
     max_wait_time 500
   end
 end
