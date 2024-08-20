@@ -25,7 +25,7 @@ end
 
 start_karafka_and_wait_until(reset_status: true) do
   if DT.key?(:run)
-    Karafka::Pro::RecurringTasks::Dispatcher.command('disable', 'crash')
+    Karafka::Pro::RecurringTasks.disable('crash')
     sleep(1)
     DT[:done] = true
   end

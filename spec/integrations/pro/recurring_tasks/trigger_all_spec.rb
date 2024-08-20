@@ -26,7 +26,7 @@ end
 
 start_karafka_and_wait_until do
   unless @dispatched
-    Karafka::Pro::RecurringTasks::Dispatcher.command('trigger', '*')
+    Karafka::Pro::RecurringTasks.trigger('*')
     @dispatched = true
   end
 

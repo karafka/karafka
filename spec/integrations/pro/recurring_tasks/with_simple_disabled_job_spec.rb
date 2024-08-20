@@ -30,7 +30,7 @@ end
 
 start_karafka_and_wait_until do
   if DT.key?(:active_done) && !@dispatched
-    Karafka::Pro::RecurringTasks::Dispatcher.command('trigger', 'stop')
+    Karafka::Pro::RecurringTasks.trigger('stop')
     @dispatched = true
 
     true

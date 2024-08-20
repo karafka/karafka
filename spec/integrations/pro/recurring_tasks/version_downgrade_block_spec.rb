@@ -18,7 +18,7 @@ end
 
 start_karafka_and_wait_until(reset_status: true) do
   unless @dispatched
-    Karafka::Pro::RecurringTasks::Dispatcher.command('trigger', 'run')
+    Karafka::Pro::RecurringTasks.trigger('run')
     @dispatched = true
   end
 
