@@ -82,10 +82,11 @@ module Karafka
     AssignmentLostError = Class.new(BaseError)
 
     # Raised if optional dependencies like karafka-web are required in a version that is not
-    # supported by the current framework version.
+    # supported by the current framework version or when an optional dependency is missing.
     #
     # Because we do not want to require web out of the box and we do not want to lock web with
-    # karafka 1:1, we do such a sanity check
+    # karafka 1:1, we do such a sanity check. This also applies to cases where some external
+    # optional dependencies are needed but not available.
     DependencyConstraintsError = Class.new(BaseError)
 
     # Raised when we were not able to open pidfd for given pid

@@ -75,7 +75,8 @@ module Karafka
         def features
           [
             Encryption,
-            Cleaner
+            Cleaner,
+            RecurringTasks
           ]
         end
 

@@ -10,7 +10,13 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    Karafka::Admin.delete_topic(DT.topic)
+    Thread.new do
+      Karafka::Admin.delete_topic(DT.topic)
+    rescue StandardError
+      nil
+    end
+
+    sleep(1)
   end
 end
 

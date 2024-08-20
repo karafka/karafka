@@ -63,6 +63,8 @@ en:
       swarm.nodes_format: needs to be a range, array of nodes ids or a hash with direct assignments
       swarm_nodes_with_non_existent_nodes: includes unreachable nodes ids
 
+      recurring_tasks.active_format: 'needs to be boolean'
+
       direct_assignments.active_missing: needs to be present
       direct_assignments.active_format: 'needs to be boolean'
       direct_assignments.partitions_missing: 'needs to be present'
@@ -98,6 +100,14 @@ en:
 
       patterns.ttl_format: needs to be an integer bigger than 0
       patterns.ttl_missing: needs to be present
+
+      recurring_tasks.consumer_class_format: 'needs to inherit from Karafka::BaseConsumer'
+      recurring_tasks.group_id_format: 'needs to be a string with a Kafka accepted format'
+      recurring_tasks.topics.schedules_format: 'needs to be a string with a Kafka accepted format'
+      recurring_tasks.topics.logs_format: 'needs to be a string with a Kafka accepted format'
+      recurring_tasks.interval_format: 'needs to be equal or more than 1000 and an integer'
+      recurring_tasks.deserializer_format: 'needs to be configured'
+      recurring_tasks.logging_format: needs to be a boolean
 
     routing:
       swarm_nodes_not_used: 'At least one of the nodes has no assignments'
