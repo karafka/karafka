@@ -7,8 +7,8 @@ setup_karafka
 
 class CountConsumer < Karafka::BaseConsumer
   def consume
-    messages.each do
-      DT[:messages] << true
+    messages.each do |message|
+      DT[:messages] << message.payload
     end
   end
 end
@@ -20,6 +20,7 @@ draw_routes do
 
   topic Karafka::App.config.recurring_tasks.topics.logs do
     consumer CountConsumer
+    deserializer Karafka::App.config.recurring_tasks.deserializer
   end
 end
 
@@ -44,4 +45,20 @@ start_karafka_and_wait_until do
   end
 
   DT[:messages].count >= 3
+end
+
+DT[:messages].each_with_index do |payload, i|
+  assert_equal payload[:schema_version], '1.0'
+  assert_equal payload[:schedule_version], '1.0.0'
+  assert_equal payload[:type], 'log'
+  assert payload[:dispatched_at].is_a?(Float)
+
+  task = payload[:task]
+
+  # Assertions for the task
+  assert_equal task[:id], %w[a b c][i]
+  assert task[:time_taken].is_a?(Float)
+  assert task[:previous_time].is_a?(Integer)
+  assert task[:next_time].is_a?(Integer)
+  assert_equal task[:result], 'success'
 end
