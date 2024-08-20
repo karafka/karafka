@@ -4,7 +4,7 @@
 setup_karafka
 
 draw_routes do
-  recurring_tasks
+  recurring_tasks(true)
 end
 
 assert !Karafka::Pro::RecurringTasks.schedule.nil?

@@ -5,7 +5,7 @@
 setup_karafka
 
 draw_routes(create_topics: false) do
-  recurring_tasks
+  recurring_tasks(true)
 end
 
 Karafka::Pro::RecurringTasks.define('1.0.0') do

@@ -5,7 +5,7 @@
 setup_karafka
 
 draw_routes do
-  recurring_tasks
+  recurring_tasks(true)
 end
 
 # Should not fail as the topic should exist
