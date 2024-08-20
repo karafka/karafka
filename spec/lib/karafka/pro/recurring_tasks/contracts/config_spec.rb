@@ -38,8 +38,8 @@ RSpec.describe_current do
     it { expect(contract.call(config)).not_to be_success }
   end
 
-  context 'when interval is less than 5000 milliseconds' do
-    before { recurring_tasks[:interval] = 4_999 }
+  context 'when interval is less than 1000 milliseconds' do
+    before { recurring_tasks[:interval] = 999 }
 
     it { expect(contract.call(config)).not_to be_success }
   end

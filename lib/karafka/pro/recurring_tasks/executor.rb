@@ -25,8 +25,6 @@ module Karafka
           trigger
         ].freeze
 
-        private_constant :COMMANDS
-
         def initialize
           @replaying = true
           @incompatible = false

@@ -37,6 +37,18 @@ module Karafka
           @schedule.instance_exec(&block)
         end
 
+        # Defines nice command methods to dispatch cron requests
+        Executor::COMMANDS.each do |command_name|
+          class_eval <<~RUBY, __FILE__, __LINE__ + 1
+            # @param task_id [String] task to which we want to dispatch command or '*' if to all
+            def #{command_name}(task_id)
+              Dispatcher.command('#{command_name}', task_id)
+            end
+          RUBY
+        end
+
+        # Below are private APIs
+
         # Sets up additional config scope, validations and other things
         #
         # @param config [Karafka::Core::Configurable::Node] root node config

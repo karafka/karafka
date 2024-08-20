@@ -56,14 +56,6 @@ def setup_karafka(
     config.swarm.nodes = 2
     config.internal.connection.reset_backoff = 1_000
 
-    # This will ensure, that the recurring tasks data does not leak in between tests (if needed)
-    if Karafka.pro?
-      config.recurring_tasks.topics.schedules = SecureRandom.hex(6)
-      config.recurring_tasks.topics.logs = SecureRandom.hex(6)
-      # Run often so we do not wait on the first run
-      config.recurring_tasks.interval = 1_000
-    end
-
     # Allows to overwrite any option we're interested in
     yield(config) if block_given?
 
@@ -75,16 +67,32 @@ def setup_karafka(
       # time
       producer_config.max_wait_timeout = 120_000 # 2 minutes
     end
+
+    # This will ensure, that the recurring tasks data does not leak in between tests (if needed)
+    if Karafka.pro?
+      # Do not redefine topics locations if re-configured
+      unless @setup_karafka_first_run
+        config.recurring_tasks.topics.schedules = SecureRandom.hex(6)
+        config.recurring_tasks.topics.logs = SecureRandom.hex(6)
+        # Run often so we do not wait on the first run
+        config.recurring_tasks.interval = 1_000
+      end
+
+      config.recurring_tasks.producer = Karafka.producer
+    end
   end
 
   Karafka.logger.level = 'debug'
 
-  # We turn on all the instrumentation just to make sure it works also in the integration specs
-  Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
-  Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
+  unless @setup_karafka_first_run
+    # We turn on all the instrumentation just to make sure it works also in the integration specs
+    Karafka.monitor.subscribe(Karafka::Instrumentation::LoggerListener.new)
+    Karafka.monitor.subscribe(Karafka::Instrumentation::ProctitleListener.new)
+  end
 
   # We turn on also WaterDrop instrumentation the same way and for the same reasons as above
   listener = ::WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
+
   Karafka.producer.monitor.subscribe(listener)
 
   return if allow_errors == true
@@ -105,6 +113,8 @@ def setup_karafka(
 
     exit! 8
   end
+ensure
+  @setup_karafka_first_run = true
 end
 
 # Loads the web UI for integration specs of tracking
@@ -161,6 +171,9 @@ end
 
 # Switches specs into a Pro mode
 def become_pro!
+  # Do not become pro if already pro
+  return if Karafka.pro?
+
   mod = Module.new do
     def self.token
       ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
