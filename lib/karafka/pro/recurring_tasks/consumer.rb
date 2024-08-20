@@ -48,9 +48,9 @@ module Karafka
               # We always mark as consumed in such a way, that when replaying, we start from a
               # schedule state message. This makes it easier to recover.
               mark_as_consumed Karafka::Messages::Seek.new(
-                topic: topic.name,
-                partition: partition,
-                offset: message.offset - 1
+                topic.name,
+                partition,
+                message.offset - 1
               )
             when 'command'
               @executor.apply_command(payload)
