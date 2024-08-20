@@ -74,7 +74,6 @@ module Karafka
         # @return [String] serialized and compressed event log data
         def log(event)
           task = event[:task]
-          time = event[:time]
 
           data = {
             schema_version: SCHEMA_VERSION,
@@ -83,9 +82,10 @@ module Karafka
             type: 'log',
             task: {
               id: task.id,
-              time_taken: time,
+              time_taken: event.payload[:time] || -1,
               previous_time: task.previous_time.to_i,
-              next_time: task.next_time.to_i
+              next_time: task.next_time.to_i,
+              result: event.payload.key?(:error) ? 'failure' : 'success'
             }
           }
 

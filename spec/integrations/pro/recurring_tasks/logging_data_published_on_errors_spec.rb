@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# When tasks are triggered, by default it should publish events to the logs topic
-# This spec will hang if logs are not published
+# When tasks are triggered, by default it should publish events to the logs topic even if those
+# executions fail
 
-setup_karafka
+setup_karafka(allow_errors: %w[recurring_tasks.task.execute.error])
 
 class CountConsumer < Karafka::BaseConsumer
   def consume
@@ -27,14 +27,20 @@ end
 Karafka::Pro::RecurringTasks.define('1.0.0') do
   schedule(id: 'a', cron: '0 12 31 12 *', enabled: false) do
     DT[:a] = true
+
+    raise
   end
 
   schedule(id: 'b', cron: '0 12 31 12 *', enabled: false) do
     DT[:b] = true
+
+    raise
   end
 
   schedule(id: 'c', cron: '0 12 31 12 *', previous_time: Time.now - 120_000) do
     DT[:c] = true
+
+    raise
   end
 end
 
@@ -57,8 +63,8 @@ DT[:messages].each_with_index do |payload, i|
 
   # Assertions for the task
   assert_equal task[:id], %w[a b c][i]
-  assert task[:time_taken].is_a?(Float)
+  assert_equal task[:time_taken], -1
   assert task[:previous_time].is_a?(Integer)
   assert task[:next_time].is_a?(Integer)
-  assert_equal task[:result], 'success'
+  assert_equal task[:result], 'failure'
 end

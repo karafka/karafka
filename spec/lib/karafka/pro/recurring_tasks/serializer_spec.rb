@@ -18,10 +18,13 @@ RSpec.describe_current do
   end
 
   let(:event) do
-    {
-      task: task,
-      time: 100
-    }
+    Karafka::Core::Monitoring::Event.new(
+      :event,
+      {
+        task: task,
+        time: 100
+      }
+    )
   end
 
   describe '#schedule' do
@@ -80,8 +83,59 @@ RSpec.describe_current do
         'id' => task.id,
         'time_taken' => event[:time],
         'previous_time' => task.previous_time.to_i,
-        'next_time' => task.next_time.to_i
+        'next_time' => task.next_time.to_i,
+        'result' => 'success'
       )
+    end
+
+    context 'when the event contains an error' do
+      let(:event) do
+        Karafka::Core::Monitoring::Event.new(
+          :event,
+          {
+            task: task,
+            time: 120,
+            error: StandardError.new
+          }
+        )
+      end
+
+      it 'serializes and compresses the log event data with failure result' do
+        compressed_data = serializer.log(event)
+        decompressed_data = Zlib::Inflate.inflate(compressed_data)
+        parsed_data = JSON.parse(decompressed_data)
+
+        expect(parsed_data['schema_version']).to eq('1.0')
+        expect(parsed_data['schedule_version']).to eq(schedule.version)
+        expect(parsed_data['type']).to eq('log')
+        expect(parsed_data['task']).to include(
+          'id' => task.id,
+          'time_taken' => event.payload[:time],
+          'previous_time' => task.previous_time.to_i,
+          'next_time' => task.next_time.to_i,
+          'result' => 'failure'
+        )
+      end
+    end
+
+    context 'when the event does not contain a time' do
+      let(:event) do
+        Karafka::Core::Monitoring::Event.new(
+          :event,
+          {
+            task: task,
+            error: StandardError.new
+          }
+        )
+      end
+
+      it 'sets time_taken to -1 in the serialized data' do
+        compressed_data = serializer.log(event)
+        decompressed_data = Zlib::Inflate.inflate(compressed_data)
+        parsed_data = JSON.parse(decompressed_data)
+
+        expect(parsed_data['task']['time_taken']).to eq(-1)
+      end
     end
   end
 
