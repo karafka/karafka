@@ -83,8 +83,6 @@ module Karafka
             task: {
               id: task.id,
               time_taken: event.payload[:time] || -1,
-              previous_time: task.previous_time.to_i,
-              next_time: task.next_time.to_i,
               result: event.payload.key?(:error) ? 'failure' : 'success'
             }
           }
