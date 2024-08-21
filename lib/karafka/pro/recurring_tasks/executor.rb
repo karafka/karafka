@@ -116,20 +116,20 @@ module Karafka
 
         # Run all tasks that should run at a given time and if any tasks were changed in any way
         # or executed, stores the most recent state back to Kafka
-        def execute
+        def call
           changed = false
 
           schedule.each do |task|
             changed = true if task.changed?
 
-            unless task.execute?
+            unless task.call?
               task.clear
 
               next
             end
 
             changed = true
-            task.execute
+            task.call
           end
 
           snapshot if changed

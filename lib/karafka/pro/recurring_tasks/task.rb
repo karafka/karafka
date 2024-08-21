@@ -82,7 +82,7 @@ module Karafka
         end
 
         # @return [Boolean] should we execute this task at this moment in time
-        def execute?
+        def call?
           return true if @trigger
           return false unless enabled?
 
@@ -92,7 +92,7 @@ module Karafka
         end
 
         # Executes the given task and publishes appropriate notification bus events.
-        def execute
+        def call
           monitor.instrument(
             'recurring_tasks.task.executed',
             task: self
@@ -101,7 +101,7 @@ module Karafka
             # without the code block
             return unless @executable
 
-            @executable.call
+            execute
           end
         rescue StandardError => e
           monitor.instrument(
@@ -114,6 +114,12 @@ module Karafka
         ensure
           @trigger = false
           @previous_time = Time.now
+        end
+
+        # Runs the executable block without any instrumentation or error handling. Useful for
+        # debugging and testing
+        def execute
+          @executable.call
         end
 
         # Removes the changes indicator flag

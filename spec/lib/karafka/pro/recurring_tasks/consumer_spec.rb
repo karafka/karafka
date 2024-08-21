@@ -21,7 +21,7 @@ RSpec.describe_current do
     allow(executor).to receive(:replaying?).and_return(false)
     allow(executor).to receive(:update_state)
     allow(executor).to receive(:apply_command)
-    allow(executor).to receive(:execute)
+    allow(executor).to receive(:call)
     allow(executor).to receive(:replay)
     allow(consumer).to receive(:eofed?).and_return(false)
   end
@@ -81,7 +81,7 @@ RSpec.describe_current do
       context 'when executor is not replaying' do
         it 'executes the executor' do
           consumer.consume
-          expect(executor).to have_received(:execute)
+          expect(executor).to have_received(:call)
         end
       end
     end
@@ -129,7 +129,7 @@ RSpec.describe_current do
 
       it 'does not execute the executor' do
         consumer.tick
-        expect(executor).not_to have_received(:execute)
+        expect(executor).not_to have_received(:call)
       end
     end
 
@@ -155,7 +155,7 @@ RSpec.describe_current do
     context 'when executor is not replaying and the schedule is compatible' do
       it 'executes the executor' do
         consumer.tick
-        expect(executor).to have_received(:execute)
+        expect(executor).to have_received(:call)
       end
     end
   end

@@ -27,7 +27,7 @@ RSpec.describe_current do
     allow(schedule).to receive(:each).and_yield(task)
     allow(executor).to receive(:snapshot)
     allow(matcher).to receive(:matches?).and_return(true)
-    allow(task).to receive(:execute)
+    allow(task).to receive(:call)
     allow(task).to receive(:disable)
     allow(task).to receive(:changed?).and_return(false)
     executor.instance_variable_set(:@matcher, matcher)
@@ -140,10 +140,10 @@ RSpec.describe_current do
     end
   end
 
-  describe '#execute' do
+  describe '#call' do
     context 'when no tasks are changed or executable' do
       it 'does not snapshot' do
-        executor.execute
+        executor.call
         expect(executor).not_to have_received(:snapshot)
       end
     end
@@ -154,20 +154,20 @@ RSpec.describe_current do
       end
 
       it 'snapshots after execution' do
-        executor.execute
+        executor.call
         expect(executor).to have_received(:snapshot)
       end
     end
 
     context 'when a task is executable' do
       before do
-        allow(task).to receive(:execute?).and_return(true)
+        allow(task).to receive(:call?).and_return(true)
         allow(task).to receive(:snapshot)
       end
 
       it 'executes the task and snapshots' do
-        executor.execute
-        expect(task).to have_received(:execute)
+        executor.call
+        expect(task).to have_received(:call)
         expect(executor).to have_received(:snapshot)
       end
     end

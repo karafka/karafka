@@ -21,6 +21,9 @@ module Karafka
         # @return [String]
         attr_reader :version
 
+        # @return [Hash<String, Task>]
+        attr_reader :tasks
+
         # @param version [String] schedule version. In case of usage of versioning it is used to
         #   ensure, that older still active processes do not intercept the assignment to run older
         #   version of the scheduler. It is important to make sure, that this string is comparable.
