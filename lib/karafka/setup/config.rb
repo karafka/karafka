@@ -285,6 +285,8 @@ module Karafka
           setting :expansions_selector, default: Processing::ExpansionsSelector.new
           # option [Class] executor class
           setting :executor_class, default: Processing::Executor
+          # option external_worker_executor [proc] callable object that will be used to wrap execution of a job
+          setting :external_worker_executor, default: proc { |&block| block.call }
         end
 
         # Things related to operating on messages

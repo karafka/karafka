@@ -65,26 +65,14 @@ if Karafka.rails?
         app.config.autoload_paths += %w[app/consumers]
       end
 
-      initializer 'karafka.configure_rails_code_reloader' do
-        # There are components that won't work with older Rails version, so we check it and
-        # provide a failover
-        rails6plus = Rails.gem_version >= Gem::Version.new('6.0.0')
-
-        next unless Rails.env.development?
-        next unless ENV.key?('KARAFKA_CLI')
-        next unless rails6plus
-
-        # We can have many listeners, but it does not matter in which we will reload the code
-        # as long as all the consumers will be re-created as Rails reload is thread-safe
-        ::Karafka::App.monitor.subscribe('connection.listener.fetch_loop') do
-          # If consumer persistence is enabled, no reason to reload because we will still keep
-          # old consumer instances in memory.
-          next if Karafka::App.config.consumer_persistence
-          # Reload code each time there is a change in the code
-          next unless Rails.application.reloaders.any?(&:updated?)
-
-          Rails.application.reloader.reload!
+      initializer 'karafka.configure_worker_external_executor' do |app|
+        external_worker_executor = if Karafka::App.config.consumer_persistence
+          proc { |&block| app.executor.wrap(&block) }
+        else
+          proc { |&block| app.reloader.wrap(&block) }
         end
+
+        Karafka::App.config.internal.processing.external_worker_executor = external_worker_executor
       end
 
       initializer 'karafka.release_active_record_connections' do
