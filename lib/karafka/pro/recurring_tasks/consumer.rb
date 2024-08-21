@@ -60,7 +60,7 @@ module Karafka
               # Execute on each incoming command to have nice latency but only after replaying
               # During replaying we should not execute because there may be more state changes
               # that collectively have a different outcome
-              @executor.execute
+              @executor.call
             else
               raise ::Karafka::Errors::UnsupportedCaseError, type
             end
@@ -97,7 +97,7 @@ module Karafka
           end
 
           # If all good and compatible we can execute the recurring tasks
-          @executor.execute
+          @executor.call
         end
       end
     end

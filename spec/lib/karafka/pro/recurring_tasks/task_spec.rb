@@ -15,7 +15,7 @@ RSpec.describe_current do
   let(:cron) { '* * * * *' }
   let(:previous_time) { Time.now - 3_600 }
   let(:enabled) { true }
-  let(:executable) { -> { 'executed' } }
+  let(:executable) { -> { 'calld' } }
 
   describe '#initialize' do
     it 'initializes with given parameters' do
@@ -62,12 +62,12 @@ RSpec.describe_current do
     end
   end
 
-  describe '#execute?' do
+  describe '#call?' do
     context 'when the task is triggered' do
       before { task.trigger }
 
       it 'returns true' do
-        expect(task.execute?).to eq(true)
+        expect(task.call?).to eq(true)
       end
     end
 
@@ -75,21 +75,21 @@ RSpec.describe_current do
       let(:enabled) { false }
 
       it 'returns false' do
-        expect(task.execute?).to eq(false)
+        expect(task.call?).to eq(false)
       end
     end
 
     context 'when the task is enabled and due' do
       it 'returns true' do
         allow(Time).to receive(:now).and_return(task.next_time + 1)
-        expect(task.execute?).to eq(true)
+        expect(task.call?).to eq(true)
       end
     end
 
     context 'when the task is enabled but not due' do
       it 'returns false' do
         allow(Time).to receive(:now).and_return(task.next_time - 1)
-        expect(task.execute?).to eq(false)
+        expect(task.call?).to eq(false)
       end
     end
   end
@@ -121,19 +121,19 @@ RSpec.describe_current do
     end
   end
 
-  describe '#execute' do
+  describe '#call' do
     before { allow(Karafka.monitor).to receive(:instrument) }
 
     context 'when the task is executable' do
-      it 'executes the block and updates previous_time' do
-        task.execute
+      it 'calls the block and updates previous_time' do
+        task.call
 
         expect(task.send(:instance_variable_get, :@previous_time))
           .to be_within(1.second).of(Time.now)
       end
 
       it 'instruments the execution' do
-        task.execute
+        task.call
 
         expect(Karafka.monitor).to have_received(:instrument)
       end
@@ -143,7 +143,7 @@ RSpec.describe_current do
       let(:executable) { -> { raise StandardError, 'Execution error' } }
 
       it 'instruments the error occurrence' do
-        task.execute
+        task.call
 
         expect(Karafka.monitor).to have_received(:instrument)
       end
@@ -151,7 +151,7 @@ RSpec.describe_current do
 
     it 'resets the trigger after execution' do
       task.trigger
-      task.execute
+      task.call
       expect(task.send(:instance_variable_get, :@trigger)).to eq(false)
     end
   end
