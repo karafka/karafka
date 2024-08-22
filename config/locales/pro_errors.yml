@@ -111,3 +111,11 @@ en:
 
     routing:
       swarm_nodes_not_used: 'At least one of the nodes has no assignments'
+
+    recurring_tasks:
+      id_format: 'can include only alphanumeric characters (a-z, A-Z, 0-9), hyphens (-), and underscores (_)'
+      cron_format: must be a non-empty string
+      enabled_format: needs to be a boolean
+      changed_format: needs to be a boolean
+      previous_time_format: needs to be an integer
+      next_time_format: needs to be an integer

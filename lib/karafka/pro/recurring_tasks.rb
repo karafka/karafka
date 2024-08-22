@@ -21,7 +21,7 @@ module Karafka
           @schedule || define('0.0.0') {}
         end
 
-        # Simplified API for schedules definitions
+        # Simplified API for schedules definitions and validates the tasks data
         #
         # @param version [String]
         # @param block [Proc]
@@ -35,6 +35,12 @@ module Karafka
         def define(version = '1.0.0', &block)
           @schedule = Schedule.new(version: version)
           @schedule.instance_exec(&block)
+
+          @schedule.each do |task|
+            Contracts::Task.new.validate!(task.to_h)
+          end
+
+          @schedule
         end
 
         # Defines nice command methods to dispatch cron requests
