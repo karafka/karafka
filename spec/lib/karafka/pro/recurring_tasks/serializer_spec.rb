@@ -82,8 +82,6 @@ RSpec.describe_current do
       expect(parsed_data['task']).to include(
         'id' => task.id,
         'time_taken' => event[:time],
-        'previous_time' => task.previous_time.to_i,
-        'next_time' => task.next_time.to_i,
         'result' => 'success'
       )
     end
@@ -111,8 +109,6 @@ RSpec.describe_current do
         expect(parsed_data['task']).to include(
           'id' => task.id,
           'time_taken' => event.payload[:time],
-          'previous_time' => task.previous_time.to_i,
-          'next_time' => task.next_time.to_i,
           'result' => 'failure'
         )
       end

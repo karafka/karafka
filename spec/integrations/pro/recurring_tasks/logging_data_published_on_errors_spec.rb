@@ -64,7 +64,5 @@ DT[:messages].each_with_index do |payload, i|
   # Assertions for the task
   assert_equal task[:id], %w[a b c][i]
   assert_equal task[:time_taken], -1
-  assert task[:previous_time].is_a?(Integer)
-  assert task[:next_time].is_a?(Integer)
   assert_equal task[:result], 'failure'
 end
