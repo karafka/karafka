@@ -116,6 +116,8 @@ module Karafka
           required(:partitioner_class) { |val| !val.nil? }
           required(:strategy_selector) { |val| !val.nil? }
           required(:expansions_selector) { |val| !val.nil? }
+          required(:executor_class) { |val| !val.nil? }
+          required(:worker_job_call_wrapper) { |val| val == false || val.respond_to?(:wrap) }
         end
 
         nested(:active_job) do

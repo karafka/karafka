@@ -2,6 +2,7 @@
 
 ## 2.4.9 (Unreleased)
 - **[Feature]** Provide Kafka based Recurring (Cron) Tasks.
+- [Enhancement] Wrap worker work with Rails Reloader/Executor (fusion2004)
 - [Enhancement] Allow for partial topic level kafka scope settings reconfiguration via `inherit` flag.
 - [Enhancement] Validate `eof` kafka scope flag when `eofed` in routing enabled.
 - [Enhancement] Provide `mark_after_dispatch` setting for granular DLQ marking control.

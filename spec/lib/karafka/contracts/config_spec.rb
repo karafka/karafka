@@ -91,7 +91,9 @@ RSpec.describe_current do
           coordinator_class: Karafka::Processing::Coordinator,
           partitioner_class: Karafka::Processing::Partitioner,
           strategy_selector: Karafka::Processing::StrategySelector.new,
-          expansions_selector: Karafka::Processing::ExpansionsSelector.new
+          expansions_selector: Karafka::Processing::ExpansionsSelector.new,
+          executor_class: Karafka::Processing::Executor,
+          worker_job_call_wrapper: false
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
@@ -621,6 +623,8 @@ RSpec.describe_current do
       partitioner_class
       strategy_selector
       expansions_selector
+      executor_class
+      worker_job_call_wrapper
     ].each do |key|
       context "when processing #{key} is missing" do
         before { config[:internal][:processing].delete(key) }
