@@ -21,7 +21,7 @@ module Karafka
           def schedule
             produce(
               topics.schedules,
-              'schedule',
+              'state:schedule',
               serializer.schedule(::Karafka::Pro::RecurringTasks.schedule)
             )
           end
@@ -34,7 +34,7 @@ module Karafka
           def command(name, task_id)
             produce(
               topics.schedules,
-              task_id,
+              "command:#{name}:#{task_id}",
               serializer.command(name, task_id)
             )
           end

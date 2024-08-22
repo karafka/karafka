@@ -31,7 +31,7 @@ RSpec.describe_current do
 
       expect(producer).to have_received(:produce_async).with(
         topic: schedules_topic,
-        key: 'schedule',
+        key: 'state:schedule',
         partition: 0,
         payload: schedule_payload,
         headers: { 'zlib' => 'true' }
@@ -45,7 +45,7 @@ RSpec.describe_current do
 
       expect(producer).to have_received(:produce_async).with(
         topic: schedules_topic,
-        key: task_id,
+        key: "command:#{command_name}:#{task_id}",
         partition: 0,
         payload: command_payload,
         headers: { 'zlib' => 'true' }

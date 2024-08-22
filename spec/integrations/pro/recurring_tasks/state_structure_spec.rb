@@ -32,7 +32,7 @@ topic_name = Karafka::App.config.recurring_tasks.topics.schedules
 state_message = Karafka::Admin.read_topic(topic_name, 0, 1).last
 payload = state_message.payload
 
-assert_equal state_message.key, 'schedule'
+assert_equal state_message.key, 'state:schedule'
 assert_equal payload[:schema_version], '1.0'
 assert_equal payload[:schedule_version], '1.0.1'
 assert_equal payload[:type], 'schedule'
