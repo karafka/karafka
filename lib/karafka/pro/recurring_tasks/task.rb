@@ -127,6 +127,18 @@ module Karafka
           @changed = false
         end
 
+        # @return [Hash] hash version of the task. Used for contract validation.
+        def to_h
+          {
+            id: id,
+            cron: @cron.original,
+            previous_time: previous_time,
+            next_time: next_time,
+            changed: changed?,
+            enabled: enabled?
+          }
+        end
+
         private
 
         # Marks the task as changed

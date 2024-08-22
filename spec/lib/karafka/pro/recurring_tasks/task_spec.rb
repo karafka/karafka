@@ -162,4 +162,15 @@ RSpec.describe_current do
       expect(task.changed?).to eq(true)
     end
   end
+
+  describe '#to_h' do
+    subject(:casted) { task.to_h }
+
+    it { expect(casted[:id]).to eq(task.id) }
+    it { expect(casted[:cron]).to eq(task.cron.original) }
+    it { expect(casted[:previous_time]).to eq(task.previous_time) }
+    it { expect(casted[:next_time]).to eq(task.next_time) }
+    it { expect(casted[:changed]).to eq(task.changed?) }
+    it { expect(casted[:enabled]).to eq(task.enabled?) }
+  end
 end
