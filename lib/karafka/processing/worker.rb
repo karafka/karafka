@@ -17,6 +17,9 @@ module Karafka
     #                code. This can be used to unlock certain resources or do other things that are
     #                not user code but need to run after user code base is executed.
     class Worker
+      include Helpers::ConfigImporter.new(
+        external_worker_executor: %i[internal processing external_worker_executor]
+      )
       include Helpers::Async
 
       # @return [String] id of this worker
@@ -52,19 +55,21 @@ module Karafka
           Karafka.monitor.instrument('worker.process', instrument_details)
 
           Karafka.monitor.instrument('worker.processed', instrument_details) do
-            job.before_call
+            external_worker_executor.call do
+              job.before_call
 
-            # If a job is marked as non blocking, we can run a tick in the job queue and if there
-            # are no other blocking factors, the job queue will be unlocked.
-            # If this does not run, all the things will be blocking and job queue won't allow to
-            # pass it until done.
-            @jobs_queue.tick(job.group_id) if job.non_blocking?
+              # If a job is marked as non blocking, we can run a tick in the job queue and if there
+              # are no other blocking factors, the job queue will be unlocked.
+              # If this does not run, all the things will be blocking and job queue won't allow to
+              # pass it until done.
+              @jobs_queue.tick(job.group_id) if job.non_blocking?
 
-            job.call
+              job.call
 
-            job.after_call
+              job.after_call
 
-            true
+              true
+            end
           end
         else
           false
