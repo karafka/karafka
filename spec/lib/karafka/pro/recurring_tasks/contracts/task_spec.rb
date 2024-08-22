@@ -25,7 +25,7 @@ RSpec.describe_current do
   end
 
   context 'when id is not a string' do
-    before { task[:id] = 12345 }
+    before { task[:id] = 12_345 }
 
     it { expect(contract.call(task)).not_to be_success }
   end
@@ -37,7 +37,7 @@ RSpec.describe_current do
   end
 
   context 'when cron is not a string' do
-    before { task[:cron] = 12345 }
+    before { task[:cron] = 12_345 }
 
     it { expect(contract.call(task)).not_to be_success }
   end
