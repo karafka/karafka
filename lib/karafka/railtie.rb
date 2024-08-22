@@ -117,13 +117,12 @@ if Karafka.rails?
 
       initializer 'karafka.configure_worker_external_executor' do |app|
         app.config.after_initialize do
-          external_worker_executor = if Karafka::App.config.consumer_persistence
-            proc { |&block| app.executor.wrap(&block) }
-          else
-            proc { |&block| app.reloader.wrap(&block) }
-          end
+          app_config = Karafka::App.config
 
-          Karafka::App.config.internal.processing.external_worker_executor = external_worker_executor
+          # We need to wrap execution of the core user code with a wrapper in case of Rails, so
+          # the auto-reload works as expected
+          worker_execution_wrapper = app_config.consumer_persistence ? app.executor : app.reloader
+          app_config.internal.processing.worker_execution_wrapper = worker_execution_wrapper
         end
       end
     end

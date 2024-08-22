@@ -17,10 +17,10 @@ module Karafka
     #                code. This can be used to unlock certain resources or do other things that are
     #                not user code but need to run after user code base is executed.
     class Worker
-      include Helpers::ConfigImporter.new(
-        external_worker_executor: %i[internal processing external_worker_executor]
-      )
       include Helpers::Async
+      include Helpers::ConfigImporter.new(
+        worker_execution_wrapper: %i[internal processing worker_execution_wrapper]
+      )
 
       # @return [String] id of this worker
       attr_reader :id
@@ -30,6 +30,7 @@ module Karafka
       def initialize(jobs_queue)
         @id = SecureRandom.hex(6)
         @jobs_queue = jobs_queue
+        @non_wrapped_flow = worker_execution_wrapper == false
       end
 
       private
@@ -55,7 +56,7 @@ module Karafka
           Karafka.monitor.instrument('worker.process', instrument_details)
 
           Karafka.monitor.instrument('worker.processed', instrument_details) do
-            external_worker_executor.call do
+            if @non_wrapped_flow
               job.before_call
 
               # If a job is marked as non blocking, we can run a tick in the job queue and if there
@@ -67,9 +68,19 @@ module Karafka
               job.call
 
               job.after_call
+            else
+              worker_execution_wrapper.wrap do
+                job.before_call
 
-              true
+                @jobs_queue.tick(job.group_id) if job.non_blocking?
+
+                job.call
+
+                job.after_call
+              end
             end
+
+            true
           end
         else
           false
