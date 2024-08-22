@@ -121,8 +121,8 @@ if Karafka.rails?
 
           # We need to wrap execution of the core user code with a wrapper in case of Rails, so
           # the auto-reload works as expected
-          worker_execution_wrapper = app_config.consumer_persistence ? app.executor : app.reloader
-          app_config.internal.processing.worker_execution_wrapper = worker_execution_wrapper
+          worker_job_call_wrapper = app_config.consumer_persistence ? app.executor : app.reloader
+          app_config.internal.processing.worker_job_call_wrapper = worker_job_call_wrapper
         end
       end
     end

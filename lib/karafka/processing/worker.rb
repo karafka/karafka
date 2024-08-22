@@ -19,7 +19,7 @@ module Karafka
     class Worker
       include Helpers::Async
       include Helpers::ConfigImporter.new(
-        worker_execution_wrapper: %i[internal processing worker_execution_wrapper]
+        worker_job_call_wrapper: %i[internal processing worker_job_call_wrapper]
       )
 
       # @return [String] id of this worker
@@ -30,7 +30,7 @@ module Karafka
       def initialize(jobs_queue)
         @id = SecureRandom.hex(6)
         @jobs_queue = jobs_queue
-        @non_wrapped_flow = worker_execution_wrapper == false
+        @non_wrapped_flow = worker_job_call_wrapper == false
       end
 
       private
@@ -67,7 +67,7 @@ module Karafka
             if @non_wrapped_flow
               job.call
             else
-              worker_execution_wrapper.wrap do
+              worker_job_call_wrapper.wrap do
                 job.call
               end
             end
