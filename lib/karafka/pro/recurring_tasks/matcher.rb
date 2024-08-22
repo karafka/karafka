@@ -30,12 +30,6 @@ module Karafka
           # upgrades of the framework. We ignore this not to risk compatibility issues
           return false unless payload[:schema_version] == Serializer::SCHEMA_VERSION
 
-          schedule = ::Karafka::Pro::RecurringTasks.schedule
-
-          # If the command was issued to a different version of the schedule than the one we
-          # operate on, we ignore such commands to avoid compatibility issues.
-          return false if payload[:schedule_version] != schedule.version
-
           true
         end
       end
