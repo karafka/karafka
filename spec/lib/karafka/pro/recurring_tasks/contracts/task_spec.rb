@@ -9,8 +9,7 @@ RSpec.describe_current do
       cron: '* * * * *',
       enabled: true,
       changed: false,
-      previous_time: 1_679_334_800,
-      next_time: 1_679_338_400
+      previous_time: 1_679_334_800
     }
   end
 
@@ -68,12 +67,6 @@ RSpec.describe_current do
 
   context 'when previous_time is not numeric' do
     before { task[:previous_time] = 'not numeric' }
-
-    it { expect(contract.call(task)).not_to be_success }
-  end
-
-  context 'when next_time is not numeric' do
-    before { task[:next_time] = 'not numeric' }
 
     it { expect(contract.call(task)).not_to be_success }
   end

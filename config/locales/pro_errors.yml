@@ -117,5 +117,4 @@ en:
       cron_format: must be a non-empty string
       enabled_format: needs to be a boolean
       changed_format: needs to be a boolean
-      previous_time_format: needs to be an integer
-      next_time_format: needs to be an integer
+      previous_time_format: needs to be a numerical or time

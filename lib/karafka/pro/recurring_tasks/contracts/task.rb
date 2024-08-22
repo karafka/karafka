@@ -33,8 +33,7 @@ module Karafka
           required(:cron) { |val| val.is_a?(String) && val.length.positive? }
           required(:enabled) { |val| [true, false].include?(val) }
           required(:changed) { |val| [true, false].include?(val) }
-          required(:previous_time) { |val| val.is_a?(Numeric) }
-          required(:next_time) { |val| val.is_a?(Numeric) }
+          required(:previous_time) { |val| val.is_a?(Numeric) || val.is_a?(Time) }
         end
       end
     end
