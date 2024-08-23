@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.4.9 (Unreleased)
+## 2.4.9 (2024-08-23)
 - **[Feature]** Provide Kafka based Recurring (Cron) Tasks.
 - [Enhancement] Wrap worker work with Rails Reloader/Executor (fusion2004)
 - [Enhancement] Allow for partial topic level kafka scope settings reconfiguration via `inherit` flag.
