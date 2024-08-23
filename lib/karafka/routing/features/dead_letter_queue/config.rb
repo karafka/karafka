@@ -23,9 +23,7 @@ module Karafka
           :marking_method,
           # Should we mark as consumed after dispatch or not. True for most cases, except MOM where
           # it is on user to decide (false by default)
-          :mark_after_dispatch,
-          # Initialize with kwargs
-          keyword_init: true
+          :mark_after_dispatch
         ) do
           alias_method :active?, :active
           alias_method :independent?, :independent
