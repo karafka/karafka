@@ -7,10 +7,10 @@ module Karafka
         # Routing topic inline insights API
         module Topic
           # @param active [Boolean] should inline insights be activated
-          def inline_insights(active = false)
-            @inline_insights ||= Config.new(
-              active: active
-            )
+          def inline_insights(active = Default.new(false))
+            @inline_insights ||= Config.new(active: active)
+            @inline_insights.active = active
+            @inline_insights
           end
 
           # @return [Boolean] Are inline insights active

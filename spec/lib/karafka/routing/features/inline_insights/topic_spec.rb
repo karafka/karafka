@@ -25,7 +25,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.inline_insights(true)
         topic.inline_insights(false)
-        expect(topic.inline_insights.active?).to eq(true)
+        expect(topic.inline_insights.active?).to eq(false)
       end
     end
   end

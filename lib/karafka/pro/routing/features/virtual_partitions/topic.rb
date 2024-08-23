@@ -31,20 +31,28 @@ module Karafka
             # @return [VirtualPartitions] method that allows to set the virtual partitions details
             #   during the routing configuration and then allows to retrieve it
             def virtual_partitions(
-              max_partitions: Karafka::App.config.concurrency,
-              partitioner: nil,
-              offset_metadata_strategy: :current,
-              reducer: nil
+              max_partitions: Karafka::Routing::Default.new(Karafka::App.config.concurrency),
+              partitioner: Karafka::Routing::Default.new,
+              offset_metadata_strategy: Karafka::Routing::Default.new(:current),
+              # If no reducer provided, we use this one. It just runs a modulo on the sum of
+              # a stringified version, providing fairly good distribution.
+              reducer: Karafka::Routing::Default.new(->(virtual_key) { virtual_key.to_s.sum % max_partitions })
             )
-              @virtual_partitions ||= Config.new(
-                active: !partitioner.nil?,
-                max_partitions: max_partitions,
-                partitioner: partitioner,
-                offset_metadata_strategy: offset_metadata_strategy,
-                # If no reducer provided, we use this one. It just runs a modulo on the sum of
-                # a stringified version, providing fairly good distribution.
-                reducer: reducer || ->(virtual_key) { virtual_key.to_s.sum % max_partitions }
+              @virtual_partitions ||= Config.new( max_partitions: max_partitions,
+                                                  partitioner: partitioner,
+                                                  offset_metadata_strategy: offset_metadata_strategy,
+                                                  reducer: reducer
               )
+              if Config.all_defaults?(max_partitions, partitioner, offset_metadata_strategy, reducer)
+                return @virtual_partitions
+              end
+
+              @virtual_partitions.max_partitions = max_partitions
+              @virtual_partitions.partitioner = partitioner
+              @virtual_partitions.offset_metadata_strategy = offset_metadata_strategy
+              @virtual_partitions.active = !@virtual_partitions.partitioner.nil?
+              @virtual_partitions.reducer = reducer
+              @virtual_partitions
             end
 
             # @return [Boolean] are virtual partitions enabled for given topic

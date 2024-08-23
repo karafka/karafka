@@ -17,7 +17,7 @@ module Karafka
       module Features
         class Filtering < Base
           # Filtering feature configuration
-          Config = Struct.new(:factories, keyword_init: true) do
+          Config = Karafka::Routing::BaseConfig.define(:factories) do
             # @return [Boolean] is this feature in use. Are any filters defined
             def active?
               !factories.empty?

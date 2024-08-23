@@ -5,7 +5,7 @@ module Karafka
     module Features
       class DeadLetterQueue < Base
         # Config for dead letter queue feature
-        Config = Struct.new(
+        Config = BaseConfig.define(
           :active,
           # We add skip variants but in regular we support only `:one`
           :max_retries,
