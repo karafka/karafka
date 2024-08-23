@@ -11,6 +11,11 @@ end
 RSpec.describe_current do
   before { described_class.persist('Karafka::CurrentAttrTest') }
 
+  after do
+    Karafka::ActiveJob::Dispatcher._cattr_klasses.clear
+    Karafka::ActiveJob::Consumer._cattr_klasses.clear
+  end
+
   context 'when dispatching jobs' do
     subject(:dispatcher) { Karafka::ActiveJob::Dispatcher.new }
 

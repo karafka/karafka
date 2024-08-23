@@ -73,6 +73,7 @@ RSpec.describe_current do
       allow(jobs_queue).to receive(:wait)
       allow(jobs_queue).to receive(:clear)
       allow(client).to receive(:reset)
+      allow(listener).to receive(:sleep)
       listener.call
     end
 

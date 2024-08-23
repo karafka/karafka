@@ -21,6 +21,11 @@ module Karafka
           :dispatch_method,
           # Should we use `#mark_as_consumed` or `#mark_as_consumed!` (in flows that mark)
           :marking_method,
+          # Should we mark as consumed after dispatch or not. True for most cases, except MOM where
+          # it is on user to decide (false by default)
+          :mark_after_dispatch,
+          # Initialize with kwargs
+          keyword_init: true
         ) do
           alias_method :active?, :active
           alias_method :independent?, :independent

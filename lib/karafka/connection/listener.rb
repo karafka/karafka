@@ -253,7 +253,9 @@ module Karafka
 
         reset
 
-        sleep(1) && retry
+        # Ruby sleep is in seconds
+        sleep_time = ::Karafka::App.config.internal.connection.reset_backoff / 10_000.0
+        sleep(sleep_time) && retry
       end
 
       # Resumes processing of partitions that were paused due to an error.
@@ -346,9 +348,14 @@ module Karafka
           # If we did not receive any messages and we did receive eof signal, we run the eofed
           # jobs so user can take actions on reaching eof
           if messages.empty? && eof
-            @executors.find_all_or_create(topic, partition, coordinator).each do |executor|
-              coordinator.increment(:eofed)
-              eofed_jobs << @jobs_builder.eofed(executor)
+            # If user wants to run the eofed jobs on eof we do it. Otherwise we just allow it to
+            # pass through. This allows to configure if user actually wants to have `#eofed`
+            # logic or if he wants to only use fast eof work yield
+            if coordinator.topic.eofed?
+              @executors.find_all_or_create(topic, partition, coordinator).each do |executor|
+                coordinator.increment(:eofed)
+                eofed_jobs << @jobs_builder.eofed(executor)
+              end
             end
 
             next
@@ -356,7 +363,7 @@ module Karafka
 
           coordinator.start(messages)
 
-          # If it is not an eof and there are no ne messages, we just run house-keeping
+          # If it is not an eof and there are no new messages, we just run house-keeping
           #
           # We do not increment coordinator for idle job because it's not a user related one
           # and it will not go through a standard lifecycle. Same applies to revoked and shutdown

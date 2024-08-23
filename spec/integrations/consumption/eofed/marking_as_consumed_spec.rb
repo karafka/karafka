@@ -22,6 +22,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     manual_offset_management true
+    eofed true
   end
 end
 

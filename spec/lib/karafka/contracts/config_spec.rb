@@ -52,6 +52,7 @@ RSpec.describe_current do
         connection: {
           manager: 1,
           conductor: 1,
+          reset_backoff: 1_000,
           proxy: {
             query_watermark_offsets: {
               timeout: 100,
@@ -90,7 +91,9 @@ RSpec.describe_current do
           coordinator_class: Karafka::Processing::Coordinator,
           partitioner_class: Karafka::Processing::Partitioner,
           strategy_selector: Karafka::Processing::StrategySelector.new,
-          expansions_selector: Karafka::Processing::ExpansionsSelector.new
+          expansions_selector: Karafka::Processing::ExpansionsSelector.new,
+          executor_class: Karafka::Processing::Executor,
+          worker_job_call_wrapper: false
         },
         active_job: {
           dispatcher: Karafka::ActiveJob::Dispatcher.new,
@@ -541,6 +544,18 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
+    context  'when reset_backoff is missing' do
+      before { config[:internal][:connection].delete(:reset_backoff) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when reset_backoff is too small' do
+      before { config[:internal][:connection][:reset_backoff] = 999 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
     context 'when connection is missing' do
       before { config[:internal].delete(:connection) }
 
@@ -608,6 +623,8 @@ RSpec.describe_current do
       partitioner_class
       strategy_selector
       expansions_selector
+      executor_class
+      worker_job_call_wrapper
     ].each do |key|
       context "when processing #{key} is missing" do
         before { config[:internal][:processing].delete(key) }

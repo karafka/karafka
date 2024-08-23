@@ -33,6 +33,8 @@ en:
       internal.processing.partitioner_class_format: cannot be nil
       internal.processing.strategy_selector_format: cannot be nil
       internal.processing.expansions_selector_format: cannot be nil
+      internal.processing.executor_class_format: cannot be nil
+      internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
 
       internal.active_job.dispatcher_format: cannot be nil
       internal.active_job.job_options_contract_format: cannot be nil
@@ -49,6 +51,7 @@ en:
 
       internal.connection.manager_format: needs to be present
       internal.connection.conductor_format: needs to be present
+      internal.connection.reset_backoff_format: needs to be an integer bigger or equal to 1000
       internal.connection.proxy.query_watermark_offsets.timeout_format: needs to be an integer bigger than 0
       internal.connection.proxy.query_watermark_offsets.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.query_watermark_offsets.wait_time_format: needs to be an integer bigger than 0
@@ -112,8 +115,12 @@ en:
       dead_letter_queue.transactional_format: needs to be either true or false
       dead_letter_queue.dispatch_method_format: 'needs to be either #produce_sync or #produce_async'
       dead_letter_queue.marking_method_format: 'needs to be either #mark_as_consumed or #mark_as_consumed!'
+      dead_letter_queue.mark_after_dispatch_format: 'needs to be true, false or nil'
 
       active_format: needs to be either true or false
+
+      eofed.active_format: needs to be either true or false
+      eofed.kafka_enable: 'cannot be enabled without enable.partition.eof set to true'
 
       declaratives.partitions_format: needs to be more or equal to 1
       declaratives.active_format: needs to be true

@@ -1,9 +1,20 @@
 # Karafka Framework Changelog
 
-## 2.4.8 (Unreleased)
+## 2.4.9 (2024-08-23)
+- **[Feature]** Provide Kafka based Recurring (Cron) Tasks.
+- [Enhancement] Wrap worker work with Rails Reloader/Executor (fusion2004)
+- [Enhancement] Allow for partial topic level kafka scope settings reconfiguration via `inherit` flag.
+- [Enhancement] Validate `eof` kafka scope flag when `eofed` in routing enabled.
+- [Enhancement] Provide `mark_after_dispatch` setting for granular DLQ marking control.
+- [Enhancement] Provide `Karafka::Admin.rename_consumer_group`.
+
+## 2.4.8 (2024-08-09)
 - **[Feature]** Introduce ability to react to `#eof` either from `#consume` or from `#eofed` when EOF without new messages.
-- [Enhancement] Provide `Consumer#eof?` to indicate reaching EOF.
+- [Enhancement] Provide `Consumer#eofed?` to indicate reaching EOF.
 - [Enhancement] Always immediately report on `inconsistent_group_protocol` error.
+- [Enhancement] Reduce virtual partitioning to 1 partition when any partitioner execution in a partitioned batch crashes.
+- [Enhancement] Provide `KARAFKA_REQUIRE_RAILS` to disable default Rails `require` to run Karafka without Rails despite having Rails in the Gemfile.
+- [Enhancement] Increase final listener recovery from 1 to 60 seconds to prevent constant rebalancing. This is the last resort recovery and should never happen unless critical errors occur.
 
 ## 2.4.7 (2024-08-01)
 - [Enhancement] Introduce `Karafka::Server.execution_mode` to check in what mode Karafka process operates (`standalone`, `swarm`, `supervisor`, `embedded`).

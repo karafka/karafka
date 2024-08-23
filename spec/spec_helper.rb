@@ -6,11 +6,15 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 %w[
   byebug
+  active_support
+  singleton
   factory_bot
   fiddle
   ostruct
   simplecov
   tempfile
+  zlib
+  fugit
 ].each do |lib|
   require lib
 end

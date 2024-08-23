@@ -21,6 +21,7 @@ module Karafka
               required(:independent) { |val| [true, false].include?(val) }
               required(:max_retries) { |val| val.is_a?(Integer) && val >= 0 }
               required(:transactional) { |val| [true, false].include?(val) }
+              required(:mark_after_dispatch) { |val| [true, false, nil].include?(val) }
 
               required(:dispatch_method) do |val|
                 %i[produce_async produce_sync].include?(val)

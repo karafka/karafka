@@ -76,9 +76,13 @@ module Karafka
             dispatch_to_dlq(skippable_message)
 
             # We mark the broken message as consumed and move on
-            mark_dispatched_to_dlq(skippable_message)
+            if mark_after_dispatch?
+              mark_dispatched_to_dlq(skippable_message)
 
-            return if revoked?
+              return if revoked?
+            else
+              coordinator.seek_offset = skippable_message.offset + 1
+            end
 
             # We pause to backoff once just in case.
             pause(coordinator.seek_offset, nil, false)
@@ -118,6 +122,16 @@ module Karafka
             caller: self,
             message: skippable_message
           )
+        end
+
+        # @return [Boolean] should we mark given message as consumed after dispatch. For default
+        #  non MOM strategies if user did not explicitly tell us not to, we mark it. Default is
+        #  `nil`, which means `true` in this case. If user provided alternative value, we go
+        #  with it.
+        def mark_after_dispatch?
+          return true if topic.dead_letter_queue.mark_after_dispatch.nil?
+
+          topic.dead_letter_queue.mark_after_dispatch
         end
 
         # Marks message that went to DLQ (if applicable) based on the requested method

@@ -18,6 +18,9 @@ module Karafka
     #                not user code but need to run after user code base is executed.
     class Worker
       include Helpers::Async
+      include Helpers::ConfigImporter.new(
+        worker_job_call_wrapper: %i[internal processing worker_job_call_wrapper]
+      )
 
       # @return [String] id of this worker
       attr_reader :id
@@ -27,6 +30,7 @@ module Karafka
       def initialize(jobs_queue)
         @id = SecureRandom.hex(6)
         @jobs_queue = jobs_queue
+        @non_wrapped_flow = worker_job_call_wrapper == false
       end
 
       private
@@ -60,7 +64,13 @@ module Karafka
             # pass it until done.
             @jobs_queue.tick(job.group_id) if job.non_blocking?
 
-            job.call
+            if @non_wrapped_flow
+              job.call
+            else
+              worker_job_call_wrapper.wrap do
+                job.call
+              end
+            end
 
             job.after_call
 

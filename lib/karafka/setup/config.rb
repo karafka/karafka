@@ -203,6 +203,9 @@ module Karafka
           setting :manager, default: Connection::Manager.new
           # Controls frequency of connections management checks
           setting :conductor, default: Connection::Conductor.new
+          # How long should we wait before a critical listener recovery
+          # Too short may cause endless rebalance loops
+          setting :reset_backoff, default: 60_000
 
           # Settings that are altered by our client proxy layer
           setting :proxy do
@@ -282,6 +285,9 @@ module Karafka
           setting :expansions_selector, default: Processing::ExpansionsSelector.new
           # option [Class] executor class
           setting :executor_class, default: Processing::Executor
+          # option worker_job_call_wrapper [Proc, false] callable object that will be used to wrap
+          #   the worker execution of a job or false if no wrapper needed
+          setting :worker_job_call_wrapper, default: false
         end
 
         # Things related to operating on messages

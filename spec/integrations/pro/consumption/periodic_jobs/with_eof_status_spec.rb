@@ -21,6 +21,7 @@ draw_routes do
   topic DT.topic do
     consumer Consumer
     periodic true
+    eofed true
   end
 end
 

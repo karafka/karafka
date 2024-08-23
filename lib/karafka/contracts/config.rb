@@ -79,6 +79,7 @@ module Karafka
         nested(:connection) do
           required(:manager) { |val| !val.nil? }
           required(:conductor) { |val| !val.nil? }
+          required(:reset_backoff) { |val| val.is_a?(Integer) && val >= 1_000 }
 
           nested(:proxy) do
             nested(:commit) do
@@ -115,6 +116,8 @@ module Karafka
           required(:partitioner_class) { |val| !val.nil? }
           required(:strategy_selector) { |val| !val.nil? }
           required(:expansions_selector) { |val| !val.nil? }
+          required(:executor_class) { |val| !val.nil? }
+          required(:worker_job_call_wrapper) { |val| val == false || val.respond_to?(:wrap) }
         end
 
         nested(:active_job) do
