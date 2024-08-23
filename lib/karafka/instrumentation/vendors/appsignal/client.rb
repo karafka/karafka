@@ -23,11 +23,7 @@ module Karafka
           # @param action_name [String] action name. For processing this should be equal to
           #   consumer class + method name
           def start_transaction(action_name)
-            transaction = ::Appsignal::Transaction.create(
-              SecureRandom.uuid,
-              namespace_name,
-              ::Appsignal::Transaction::GenericRequest.new({})
-            )
+            transaction = ::Appsignal::Transaction.create(namespace_name)
 
             transaction.set_action_if_nil(action_name)
           end
@@ -99,7 +95,7 @@ module Karafka
           # @param name [Symbol] probe name
           # @param probe [Proc] code to run every minute
           def register_probe(name, probe)
-            ::Appsignal::Minutely.probes.register(name, probe)
+            ::Appsignal::Probes.register(name, probe)
           end
 
           private
