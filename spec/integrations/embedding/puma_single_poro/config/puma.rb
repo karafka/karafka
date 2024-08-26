@@ -28,6 +28,7 @@ end
 
 @config.options[:events].on_booted do
   ::Karafka::Embedded.start
+  sleep(1)
   ::Process.kill('TERM', PID)
 end
 
