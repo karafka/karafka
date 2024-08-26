@@ -3,6 +3,7 @@
 RSpec.describe_current do
   let(:base_params_class) { described_class }
   let(:headers) { { message_type: 'test' } }
+  let(:raw_key) { rand.to_s }
 
   describe 'instance methods' do
     subject(:message) { base_params_class.new(raw_payload, metadata) }
@@ -10,6 +11,7 @@ RSpec.describe_current do
     let(:deserializer) { ->(_) { 1 } }
     let(:metadata) do
       ::Karafka::Messages::Metadata.new.tap do |metadata|
+        metadata['raw_key'] = raw_key
         metadata['deserializers'] = Karafka::Routing::Features::Deserializers::Config.new(
           payload: deserializer
         )
@@ -89,6 +91,44 @@ RSpec.describe_current do
 
         it 'expect to return payload in a message key' do
           expect(message.send(:deserialize)).to eq deserialized_payload
+        end
+      end
+    end
+
+    describe '#tombstone?' do
+      context 'when the raw_key is present and raw_payload is nil' do
+        let(:raw_key) { 'some_key' }
+        let(:raw_payload) { nil }
+
+        it 'returns true' do
+          expect(message.tombstone?).to be true
+        end
+      end
+
+      context 'when the raw_key is present and raw_payload is not nil' do
+        let(:raw_key) { 'some_key' }
+        let(:raw_payload) { 'some_payload' }
+
+        it 'returns false' do
+          expect(message.tombstone?).to eq false
+        end
+      end
+
+      context 'when the raw_key is nil and raw_payload is nil' do
+        let(:raw_key) { nil }
+        let(:raw_payload) { nil }
+
+        it 'returns false' do
+          expect(message.tombstone?).to eq false
+        end
+      end
+
+      context 'when the raw_key is nil and raw_payload is not nil' do
+        let(:raw_key) { nil }
+        let(:raw_payload) { 'some_payload' }
+
+        it 'returns false' do
+          expect(message.tombstone?).to eq false
         end
       end
     end
