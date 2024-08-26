@@ -40,6 +40,8 @@ module Karafka
                 # Registers the primary topic that we use to control schedules execution. This is
                 # the one that we use to trigger recurring tasks.
                 topic(topics_cfg.schedules) do
+                  instance_eval(&block) if block
+
                   consumer tasks_cfg.consumer_class
                   deserializer tasks_cfg.deserializer
                   # Because the topic method name as well as builder proxy method name is the same
@@ -84,10 +86,6 @@ module Karafka
                     during_pause: false,
                     during_retry: false
                   )
-
-                  next unless block
-
-                  instance_eval(&block)
                 end
 
                 # This topic is to store logs that we can then inspect either from the admin or via

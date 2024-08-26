@@ -2,6 +2,7 @@
 
 ## 2.4.10 (Unreleased)
 - [Enhancement] Provide `Karafka::Messages::Message#tombstone?` to be able to quickly check if a message is a tombstone message.
+- [Fix] Fix lack of ability to reconfigure Recurring Tasks topic configuration.
 
 ## 2.4.9 (2024-08-23)
 - **[Feature]** Provide Kafka based Recurring (Cron) Tasks.
