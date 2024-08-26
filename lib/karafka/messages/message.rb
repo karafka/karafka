@@ -51,6 +51,12 @@ module Karafka
         @deserialized
       end
 
+      # @return [Boolean] true if the message has a key and raw payload is nil, it is a tombstone
+      #   event. Otherwise it is not.
+      def tombstone?
+        !raw_key.nil? && @raw_payload.nil?
+      end
+
       private
 
       # @return [Object] deserialized data
