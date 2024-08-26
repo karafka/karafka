@@ -39,9 +39,7 @@ module Karafka
               consumer_group tasks_cfg.group_id do
                 # Registers the primary topic that we use to control schedules execution. This is
                 # the one that we use to trigger recurring tasks.
-                topic(topics_cfg.schedules) do
-                  instance_eval(&block) if block
-
+                schedules_topic = topic(topics_cfg.schedules) do
                   consumer tasks_cfg.consumer_class
                   deserializer tasks_cfg.deserializer
                   # Because the topic method name as well as builder proxy method name is the same
@@ -86,11 +84,16 @@ module Karafka
                     during_pause: false,
                     during_retry: false
                   )
+
+                  # If this is the direct schedules redefinition style, we run it
+                  # The second one (see end of this method) allows for linear reconfiguration of
+                  # both the topics
+                  instance_eval(&block) if block && block.arity.zero?
                 end
 
                 # This topic is to store logs that we can then inspect either from the admin or via
                 # the Web UI
-                topic(topics_cfg.logs) do
+                logs_topic = topic(topics_cfg.logs) do
                   active(false)
                   deserializer tasks_cfg.deserializer
                   target.recurring_tasks(true)
@@ -102,6 +105,8 @@ module Karafka
                     'retention.ms': 604_800_000
                   )
                 end
+
+                yield(schedules_topic, logs_topic) if block && block.arity.positive?
               end
             end
 
