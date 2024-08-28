@@ -42,7 +42,7 @@ module Karafka
 
         # @return [Boolean] are we in a loaded state
         def loaded?
-          @loaded
+          @loaded == true
         end
 
         # @return [String] current state string representation
