@@ -29,7 +29,11 @@ module Karafka
             def scheduled_messages(topics_namespace: false, &block)
               return unless topics_namespace
 
-              default_partitions = 10
+              # We set it to 5 so we have enough space to handle more events. All related topics
+              # should have same partition count because we expect similar amount of events in
+              # messages and logs topics and we need to have per-partition reporting in the
+              # states topic.
+              default_partitions = 5
               msg_cfg = App.config.scheduled_messages
 
               consumer_group msg_cfg.group_id do
