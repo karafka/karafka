@@ -27,7 +27,7 @@ module Karafka
             # @note Namespace for topics should include the divider as it is not automatically
             #   added.
             def scheduled_messages(topics_namespace: false, &block)
-              return unless active
+              return unless topics_namespace
 
               default_partitions = 10
               msg_cfg = App.config.scheduled_messages
