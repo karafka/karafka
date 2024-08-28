@@ -77,7 +77,7 @@ module Karafka
             Encryption,
             Cleaner,
             RecurringTasks,
-            ScheduledMessages,
+            ScheduledMessages
           ]
         end
 

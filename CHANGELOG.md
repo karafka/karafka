@@ -1,12 +1,9 @@
 # Karafka Framework Changelog
 
 ## 2.4.10 (Unreleased)
+- **[Feature]** Provide Kafka based Scheduled Messages to be able to send messages in the future via a proxy topic.
 - [Enhancement] Provide `Karafka::Messages::Message#tombstone?` to be able to quickly check if a message is a tombstone message.
-<<<<<<< HEAD
-- [Fix] Fix lack of ability to reconfigure Recurring Tasks topic configuration.
-=======
 - [Enhancement] Provide more flexible API for Recurring Tasks topics reconfiguration.
->>>>>>> better-reconfiguration
 
 ## 2.4.9 (2024-08-23)
 - **[Feature]** Provide Kafka based Recurring (Cron) Tasks.

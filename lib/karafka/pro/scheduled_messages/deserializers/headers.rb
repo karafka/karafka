@@ -14,26 +14,30 @@
 module Karafka
   module Pro
     module ScheduledMessages
+      # Namespace for schedules data related deserializers.
       module Deserializers
+        # Converts certain pieces of headers into their integer form for messages
         class Headers
+          # @param metadata [Karafka::aMessages::Metadata]
+          # @return [Hash] headers
           def call(metadata)
             raw_headers = metadata.raw_headers
 
-            type = raw_headers.fetch('future_type')
+            type = raw_headers.fetch('schedule_source_type')
 
-            case type
-            when 'recovery'
-              raw_headers
-            when 'tombstone'
-              raw_headers
-            when 'message'
-              headers = raw_headers.dup
-              headers['future_target_epoch'] = headers['future_target_epoch'].to_i
-              headers['future_target_partition'] = headers['future_target_partition'].to_i if headers.key?('future_target_partition')
-              headers
-            else
-              raise Karafka::Errors::UnsupportedCaseError, type
+            # tombstone events are not operable, thus we do not have to cast any of the headers
+            # pieces
+            return raw_headers if type == 'tombstone'
+
+            headers = raw_headers.dup
+            headers['schedule_target_epoch'] = headers['schedule_target_epoch'].to_i
+
+            # This attribute is optional, this is why we have to check for its existence
+            if headers.key?('schedule_target_partition')
+              headers['schedule_target_partition'] = headers['schedule_target_partition'].to_i
             end
+
+            headers
           end
         end
       end

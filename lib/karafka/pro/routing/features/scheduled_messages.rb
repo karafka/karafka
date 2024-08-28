@@ -15,9 +15,7 @@ module Karafka
   module Pro
     module Routing
       module Features
-        # This feature allows for proxying messages via a special topic that can dispatch them
-        # at a later time, hence scheduled messages. Such messages need to have a special format
-        # but aside from that they are regular Kafka messages.
+        # Scheduled messages functionality routing namespace
         class ScheduledMessages < Base
         end
       end

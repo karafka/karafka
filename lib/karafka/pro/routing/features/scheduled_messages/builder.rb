@@ -20,21 +20,22 @@ module Karafka
           module Builder
             # Enabled scheduled messages operations and adds needed topics and other stuff.
             #
-            # @param active [Boolean] should scheduled messages be active. We use a boolean flag to
-            #   have API consistency in the system, so it matches other routing related APIs.
-            # @param block [Proc] optional reconfiguration of the messages topic definitions.
-            # @note Since we cannot provide two blocks, reconfiguration of logs topic can be only
-            #   done if user explicitly redefines it in the routing.
-            def scheduled_messages(active = false, &block)
+            # @param topics_namespace [String, false] namespace for scheduled messages topics.
+            #   Customers can have multiple schedule topics flows to prevent key collisions,
+            #   prioritize and do other stuff. `false` if not active.
+            # @param block [Proc] optional reconfiguration of the topics definitions.
+            # @note Namespace for topics should include the divider as it is not automatically
+            #   added.
+            def scheduled_messages(topics_namespace: false, &block)
               return unless active
 
+              default_partitions = 10
               msg_cfg = App.config.scheduled_messages
-              topics_cfg = msg_cfg.topics
 
               consumer_group msg_cfg.group_id do
                 # Registers the primary topic that we use to control schedules execution. This is
                 # the one that we use to trigger scheduled messages.
-                topic(topics_cfg.messages) do
+                messages_topic = topic("#{topics_namespace}messages") do
                   instance_eval(&block) if block
 
                   consumer msg_cfg.consumer_class
@@ -65,21 +66,16 @@ module Karafka
 
                   max_wait_time(1_000)
 
-                  # This is a setup that shoulda allow messages to be compacted fairly fast. Since
+                  # This is a setup that should allow messages to be compacted fairly fast. Since
                   # each dispatched message should be removed via tombstone, they do not have to
                   # be present in the topic for too long.
                   config(
-                    partitions: 10,
+                    partitions: default_partitions,
                     'cleanup.policy': 'compact',
                     'min.cleanable.dirty.ratio': 0.1,
                     'segment.ms': 3_600_000,
                     'delete.retention.ms': 3_600_000,
                     'segment.bytes': 52_428_800
-                  )
-
-                  # Used for tracking some special metadata
-                  offset_metadata(
-                    deserializer: msg_cfg.deserializers.offset_metadata
                   )
 
                   # This is the core of execution. Since we dispatch data in time intervals, we
@@ -89,22 +85,48 @@ module Karafka
                     during_pause: false,
                     during_retry: false
                   )
+
+                  # If this is the direct schedules redefinition style, we run it
+                  # The second one (see end of this method) allows for linear reconfiguration of
+                  # both the topics
+                  instance_eval(&block) if block && block.arity.zero?
                 end
 
                 # This topic is to store logs that we can then inspect either from the admin or via
                 # the Web UI
-                topic(topics_cfg.logs) do
+                logs_topic = topic("#{topics_namespace}logs") do
                   active(false)
                   target.scheduled_messages(true)
 
                   # Keep logs of executions for a week and after that remove. Week should be
                   # enough and should not produce too much data.
                   config(
-                    partitions: 10,
+                    partitions: default_partitions,
                     'cleanup.policy': 'delete',
                     'retention.ms': 604_800_000
                   )
                 end
+
+                # Holds states of scheduler per each of the partitions since they tick
+                # independently. We only hold future statistics not to have to deal with
+                # any type of state restoration
+                states_topic = topic("#{topics_namespace}states") do
+                  active(false)
+                  target.scheduled_messages(true)
+                  config(
+                    partitions: default_partitions,
+                    'cleanup.policy': 'compact',
+                    'min.cleanable.dirty.ratio': 0.1,
+                    'segment.ms': 3_600_000,
+                    'delete.retention.ms': 3_600_000,
+                    'segment.bytes': 52_428_800
+                  )
+                  deserializers(
+                    payload: msg_cfg.deserializers.payload
+                  )
+                end
+
+                yield(messages_topic, logs_topic, states_topic) if block && block.arity.positive?
               end
             end
           end

@@ -64,6 +64,8 @@ en:
       swarm_nodes_with_non_existent_nodes: includes unreachable nodes ids
 
       recurring_tasks.active_format: 'needs to be boolean'
+      scheduled_messages.active_format: 'needs to be boolean'
+      scheduled_messages.active_missing: 'needs to be boolean'
 
       direct_assignments.active_missing: needs to be present
       direct_assignments.active_format: 'needs to be boolean'
@@ -109,6 +111,15 @@ en:
       recurring_tasks.deserializer_format: 'needs to be configured'
       recurring_tasks.logging_format: needs to be a boolean
 
+      scheduled_messages.consumer_class_format: 'must be a class'
+      scheduled_messages.dispatcher_class_format: 'must be a class'
+      scheduled_messages.logging_format: needs to be a boolean
+      scheduled_messages.flush_batch_size_format: needs to be an integer bigger than 0
+      scheduled_messages.interval_format: needs to be an integer bigger or equal to 1000
+      scheduled_messages.deserializers.headers_format: cannot be nil
+      scheduled_messages.deserializers.payload_format: cannot be nil
+      scheduled_messages.group_id_format: 'needs to be a string with a Kafka accepted format'
+
     routing:
       swarm_nodes_not_used: 'At least one of the nodes has no assignments'
 
@@ -118,3 +129,9 @@ en:
       enabled_format: needs to be a boolean
       changed_format: needs to be a boolean
       previous_time_format: needs to be a numerical or time
+
+    scheduled_messages_message:
+      key_missing: must be present and should be unique within the partition
+      key_format: needs to be a non-empty string unique within the partition
+      headers_schedule_target_epoch_in_the_past: 'scheduling cannot happen in the past'
+      headers_format: are not correct

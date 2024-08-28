@@ -26,12 +26,17 @@ module Karafka
             ).fetch('en').fetch('validations').fetch('config')
           end
 
-          nested(:recurring_tasks) do
+          nested(:scheduled_messages) do
             required(:consumer_class) { |val| val < ::Karafka::BaseConsumer }
 
             required(:logging) { |val| [true, false].include?(val) }
-            # Do not allow to run more often than every 5 seconds
+
+            # Do not allow to run more often than every second
             required(:interval) { |val| val.is_a?(Integer) && val >= 1_000 }
+
+            required(:flush_batch_size) { |val| val.is_a?(Integer) && val.positive? }
+
+            required(:dispatcher_class) { |val| !val.nil? }
 
             required(:group_id) do |val|
               val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
@@ -39,17 +44,7 @@ module Karafka
 
             nested(:deserializers) do
               required(:headers) { |val| !val.nil? }
-              required(:offset_metadata) { |val| !val.nil? }
-            end
-
-            nested(:topics) do
-              required(:schedules) do |val|
-                val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
-              end
-
-              required(:logs) do |val|
-                val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
-              end
+              required(:payload) { |val| !val.nil? }
             end
           end
         end

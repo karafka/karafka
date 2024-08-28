@@ -14,20 +14,19 @@
 module Karafka
   module Pro
     module ScheduledMessages
-      # Namespace for deserializers needed when working with scheduled messages
       module Deserializers
-        # Extracts the offset metadata details
-        # We store in the offset metadata the last timestamp that we dispatched. Used for recovery.
-        # We store it as JSON so we can expand it when needed in the future with other attributes.
-        class OffsetMetadata
-          DEFAULTS = {
-            last_dispatched_time: -1
-          }.freeze
-
-          private_constant :DEFAULTS
-
-          def call(raw_metadata)
-            raw_metadata ? JSON.parse(raw_metadata, symbolize_names: true) : DEFAULTS
+        # States payload deserializer
+        # We only deserialize states data and never anything else. Other payloads are the payloads
+        # we are expected to proxy, thus there is no need to deserialize them in any context.
+        # Their appropriate target topics should have expected deserializers
+        class Payload
+          # @param message [::Karafka::Messages::Message]
+          # @return [Hash] deserialized data
+          def call(message)
+            ::JSON.parse(
+              Zlib::Inflate.inflate(message.raw_payload),
+              symbolize_names: true
+            )
           end
         end
       end
