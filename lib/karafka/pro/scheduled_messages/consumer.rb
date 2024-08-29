@@ -164,10 +164,12 @@ module Karafka
         def clear!
           tags.add(:state, @state.to_s)
           @daily_buffer = DailyBuffer.new
-          @dispatcher = config.dispatcher_class.new
           @today = Day.new
           @tracker = Tracker.new
           @state = State.new(false)
+          # We cannot initialize dispatcher here because it is only available when topic and
+          # partition are assigned to the consumer
+          @dispatcher = nil
           @states_reporter = Helpers::IntervalRunner.new do
             # This check is needed because we do not want to report until the consumer is
             # fully initialized and assigned
@@ -175,7 +177,9 @@ module Karafka
 
             @tracker.today = @daily_buffer.size
             @tracker.state = @state.to_s
-            @dispatcher.state(topic.name, partition, @tracker)
+
+            @dispatcher ||= config.dispatcher_class.new(topic.name, partition)
+            @dispatcher.state(@tracker)
           end
         end
 

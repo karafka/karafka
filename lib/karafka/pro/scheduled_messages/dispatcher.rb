@@ -20,7 +20,11 @@ module Karafka
       #
       # Messages are buffered and dispatched in batches to improve dispatch performance.
       class Dispatcher
-        def initialize
+        # @param topic [String] consumed topic name
+        # @param partition [Integer] consumed partition
+        def initialize(topic, partition)
+          @topic = topic
+          @partition = partition
           @buffer = []
         end
 
@@ -33,8 +37,8 @@ module Karafka
         # @note It also produces needed tombstone event as well as an audit log message
         def <<(message)
           target_headers = message.raw_headers.merge(
-            'schedule_source_topic' => message.topic,
-            'schedule_source_partition' => message.partition.to_s,
+            'schedule_source_topic' => @topic,
+            'schedule_source_partition' => @partition.to_s,
             'schedule_source_offset' => message.offset.to_s,
             'schedule_source_key' => message.key
           ).compact
@@ -52,8 +56,8 @@ module Karafka
           @buffer << target
 
           @buffer << {
-            topic: message.topic,
-            partition: message.partition,
+            topic: @topic,
+            partition: @partition,
             key: message.key,
             payload: nil,
             headers: {
@@ -68,7 +72,7 @@ module Karafka
           log = target.dup
           # We use a _messages and _logs, this is why we can replace it because those two topics
           # are always created alongside
-          log[:topic] = "#{message.topic[0..-9]}logs"
+          log[:topic] = "#{@topic[0..-9]}logs"
           # Since target topic and logs topic may have different number of partitions, we do need
           # to remove direct partition reference.
           log.delete(:partition)
@@ -78,15 +82,15 @@ module Karafka
 
         # Builds and dispatches the state report message with schedules details
         #
-        # @param topic [String] topic name
-        # @param partition [Integer]
         # @param tracker [Tracker]
-        def state(topic, partition, tracker)
+        #
+        # @note This is dispatched async because it's just a statistical metric.
+        def state(tracker)
           config.producer.produce_async(
-            topic: "#{topic[0..-9]}states",
+            topic: "#{@topic[0..-9]}states",
             payload: Serializer.new.state(tracker),
             key: 'state',
-            partition: partition,
+            partition: @partition,
             headers: { 'zlib' => 'true' }
           )
         end
