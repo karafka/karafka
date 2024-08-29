@@ -31,6 +31,20 @@ module Karafka
       @used = false
     end
 
+    # Trigger method running after consumer is fully initialized.
+    #
+    # @private
+    def on_initialized
+      handle_initialized
+    rescue StandardError => e
+      Karafka.monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.initialized.error'
+      )
+    end
+
     # Can be used to run preparation code prior to the job being enqueued
     #
     # @private
@@ -175,6 +189,15 @@ module Karafka
     end
 
     private
+
+    # Method called post-initialization of a consumer when all basic things are assigned.
+    # Since initialization via `#initialize` is complex and some states are set a bit later, this
+    # hook allows to initialize resources once at a time when topic, partition and other things
+    # are assigned to the consumer
+    #
+    # @note Please keep in mind that it will run many times when persistence is off. Basically once
+    #   each batch.
+    def initialized; end
 
     # Method that will perform business logic and on data received from Kafka (it will consume
     #   the data)

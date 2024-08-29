@@ -31,6 +31,16 @@ module Karafka
           RUBY
         end
 
+        # Runs the post-creation, post-assignment code
+        # @note It runs in the listener loop. Should **not** be used for anything heavy or
+        #   with any potential errors. Mostly for initialization of states, etc.
+        def handle_initialized
+          Karafka.monitor.instrument('consumer.initialize', caller: self)
+          Karafka.monitor.instrument('consumer.initialized', caller: self) do
+            initialized
+          end
+        end
+
         # Marks message as consumed in an async way.
         #
         # @param message [Messages::Message] last successfully processed message.
