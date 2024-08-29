@@ -181,6 +181,12 @@ module Karafka
           # overhead as this will happen only once per consumer lifetime
           consumer.messages = empty_messages
 
+          # Run the post-initialization hook for users that need to run some actions when consumer
+          # is built and ready (all basic state and info).
+          # Users should **not** overwrite the `#initialize` because it won't have all the needed
+          # data assigned yet.
+          consumer.on_initialized
+
           consumer
         end
       end

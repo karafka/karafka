@@ -2,6 +2,7 @@
 
 ## 2.4.10 (Unreleased)
 - **[Feature]** Provide Kafka based Scheduled Messages to be able to send messages in the future via a proxy topic.
+- [Enhancement] Introduce a `#assigned` hook for consumers to be able to trigger actions when consumer is built and assigned but before first consume/ticking, etc.
 - [Enhancement] Provide `Karafka::Messages::Message#tombstone?` to be able to quickly check if a message is a tombstone message.
 - [Enhancement] Provide more flexible API for Recurring Tasks topics reconfiguration.
 

@@ -275,6 +275,9 @@ module Karafka
         details = (error.backtrace || []).join("\n")
 
         case type
+        when 'consumer.initialized.error'
+          error "Consumer initialized error: #{error}"
+          error details
         when 'consumer.consume.error'
           error "Consumer consuming error: #{error}"
           error details
