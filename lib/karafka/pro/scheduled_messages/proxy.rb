@@ -29,7 +29,7 @@ module Karafka
       module Proxy
         # General WaterDrop message contract. Before we envelop a message, we need to be certain
         # it is correct, hence we use this contract.
-        PRE_CONTRACT = ::WaterDrop::Contracts::Message.new(
+        MSG_CONTRACT = ::WaterDrop::Contracts::Message.new(
           # Payload size is a subject to the target producer dispatch validation, so we set it
           # to 100MB basically to ignore it here.
           max_payload_size: 104_857_600
@@ -47,7 +47,7 @@ module Karafka
           partition
         ].freeze
 
-        private_constant :PRE_CONTRACT, :POST_CONTRACT, :PARTITION_KEY_BASE_ATTRIBUTES
+        private_constant :MSG_CONTRACT, :POST_CONTRACT, :PARTITION_KEY_BASE_ATTRIBUTES
 
         class << self
           # @param message [Hash] message hash of a message that would originally go to WaterDrop
@@ -67,10 +67,7 @@ module Karafka
             # We need to ensure that the message we want to proxy is fully legit. Otherwise, since
             # we envelope details like target topic, we could end up having incorrect data to
             # schedule
-            PRE_CONTRACT.validate!(
-              message,
-              WaterDrop::Errors::MessageInvalidError
-            )
+            MSG_CONTRACT.validate!(message, WaterDrop::Errors::MessageInvalidError)
 
             headers = (message[:headers] || {}).merge(
               'schedule_schema_version' => ScheduledMessages::SCHEMA_VERSION,
@@ -93,6 +90,8 @@ module Karafka
             # Final validation to make sure all user provided extra data and what we have built
             # complies with our requirements
             POST_CONTRACT.validate!(proxy_message)
+            # After proxy specific validations we also ensure, that the final form is correct
+            MSG_CONTRACT.validate!(proxy_message, WaterDrop::Errors::MessageInvalidError)
 
             proxy_message
           end

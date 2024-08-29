@@ -16,16 +16,13 @@ module Karafka
     module ScheduledMessages
       # Consumer that coordinates scheduling of messages when the time comes
       class Consumer < ::Karafka::BaseConsumer
-        # @param args [Array] arguments from the base consumer
-        def initialize(*args)
-          super
-
+        # Prepares the initial state of all stateful components
+        def initialized
+          clear!
           # Max epoch is always moving forward with the time. Never backwards, hence we do not
           # reset it at all.
           @max_epoch = MaxEpoch.new
-
-          clear!
-          @state = State.new
+          @state = State.new(nil)
         end
 
         # Processes messages and runs dispatch (via tick) if needed
@@ -162,25 +159,19 @@ module Karafka
         # We can fully recreate the dispatcher because any undispatched messages will be dispatched
         # with the new day dispatcher after it is reloaded.
         def clear!
-          tags.add(:state, @state.to_s)
           @daily_buffer = DailyBuffer.new
           @today = Day.new
           @tracker = Tracker.new
           @state = State.new(false)
-          # We cannot initialize dispatcher here because it is only available when topic and
-          # partition are assigned to the consumer
-          @dispatcher = nil
+          @dispatcher = config.dispatcher_class.new(topic.name, partition)
           @states_reporter = Helpers::IntervalRunner.new do
-            # This check is needed because we do not want to report until the consumer is
-            # fully initialized and assigned
-            next unless topic
-
             @tracker.today = @daily_buffer.size
             @tracker.state = @state.to_s
 
-            @dispatcher ||= config.dispatcher_class.new(topic.name, partition)
             @dispatcher.state(@tracker)
           end
+
+          tags.add(:state, @state.to_s)
         end
 
         # @return [Karafka::Core::Configurable::Node] Schedules config node

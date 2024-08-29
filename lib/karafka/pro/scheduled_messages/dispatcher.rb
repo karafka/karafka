@@ -20,17 +20,25 @@ module Karafka
       #
       # Messages are buffered and dispatched in batches to improve dispatch performance.
       class Dispatcher
+        # @return [Array<Hash>] buffer with message hashes for dispatch
+        attr_reader :buffer
+
         # @param topic [String] consumed topic name
         # @param partition [Integer] consumed partition
         def initialize(topic, partition)
           @topic = topic
           @partition = partition
           @buffer = []
+          @serializer = Serializer.new
         end
 
         # Prepares the scheduled message to the dispatch to the target topic. Extracts all the
         # "schedule_" details and prepares it, so the dispatched message goes with the expected
-        # attributes to the desired location.
+        # attributes to the desired location. Alongside of that it actually builds 2
+        # (1 if logs off) messages: tombstone event matching the schedule so it is no longer valid
+        # and the log message that has the same data as the dispatched message. Helpful when
+        # debugging.
+        #
         # @param message [Karafka::Messages::Message] message from the schedules topic.
         #
         # @note This method adds the message to the buffer, does **not** dispatch it.
@@ -55,6 +63,8 @@ module Karafka
 
           @buffer << target
 
+          # Tombstone message so this schedule is no longer in use and gets removed from Kafka by
+          # Kafka itself during compacting.
           @buffer << {
             topic: @topic,
             partition: @partition,
@@ -88,7 +98,7 @@ module Karafka
         def state(tracker)
           config.producer.produce_async(
             topic: "#{@topic[0..-9]}states",
-            payload: Serializer.new.state(tracker),
+            payload: @serializer.state(tracker),
             key: 'state',
             partition: @partition,
             headers: { 'zlib' => 'true' }
