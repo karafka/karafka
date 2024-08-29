@@ -48,6 +48,9 @@ module Karafka
         connection.listener.stopping
         connection.listener.stopped
 
+        consumer.initialize
+        consumer.initialized
+
         consumer.before_schedule_consume
         consumer.consume
         consumer.consumed

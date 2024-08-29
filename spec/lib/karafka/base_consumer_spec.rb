@@ -471,4 +471,27 @@ RSpec.describe_current do
       expect(consumer.send(:attempt)).to eq(1)
     end
   end
+
+  # Complex notification tracking is in the integrations
+  describe '#on_initialized' do
+    it { expect { consumer.on_initialized }.not_to raise_error }
+
+    context 'when handle_initialized raises error' do
+      let(:working_class) do
+        ClassBuilder.inherit(described_class) do
+          attr_reader :consumed
+
+          def consume
+            self
+          end
+
+          def handle_initialized
+            raise
+          end
+        end
+      end
+
+      it { expect { consumer.on_initialized }.not_to raise_error }
+    end
+  end
 end
