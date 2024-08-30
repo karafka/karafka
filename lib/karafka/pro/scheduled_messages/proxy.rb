@@ -49,6 +49,8 @@ module Karafka
         private_constant :MSG_CONTRACT, :POST_CONTRACT, :PARTITION_KEY_BASE_ATTRIBUTES
 
         class << self
+          # Generates a schedule message envelope wrapping the original dispatch
+          #
           # @param message [Hash] message hash of a message that would originally go to WaterDrop
           #   producer directly.
           # @param epoch [Integer] time in the future (or now) when dispatch this message in the
@@ -62,7 +64,7 @@ module Karafka
           # @note This proxy does **not** inject the dispatched messages topic unless provided in
           #   the envelope. That's because user can have multiple scheduled messages topics to
           #   group outgoing messages, etc.
-          def call(message:, epoch:, envelope: {})
+          def schedule(message:, epoch:, envelope: {})
             # We need to ensure that the message we want to proxy is fully legit. Otherwise, since
             # we envelope details like target topic, we could end up having incorrect data to
             # schedule
@@ -93,6 +95,40 @@ module Karafka
             MSG_CONTRACT.validate!(proxy_message, WaterDrop::Errors::MessageInvalidError)
 
             proxy_message
+          end
+
+          # Generates a tombstone message to cancel already scheduled message dispatch
+          # @param key [String] key used by the original message as a unique identifier
+          # @param envelope [Hash] Special details that can identify the message location like
+          #   topic and partition (if used) so the cancellation goes to the correct location.
+          # @return [Hash] cancellation message
+          #
+          # @note Technically it is a tombstone but we differentiate just for the sake of ability
+          #   to debug stuff if needed
+          def cancel(key:, envelope: {})
+            cancel = Proxy.tombstone(
+              key: key,
+              envelope: envelope
+            )
+
+            cancel[:headers]['schedule_source_type'] = 'cancel'
+
+            cancel
+          end
+
+          # @param key [String] key used by the original message as a unique identifier
+          # @param envelope [Hash] Special details that can identify the message location like
+          #   topic and partition (if used) so the cancellation goes to the correct location.
+          # @return [Hash] tombstone message
+          def tombstone(key:, envelope: {})
+            {
+              key: key,
+              payload: nil,
+              headers: {
+                'schedule_schema_version' => ScheduledMessages::SCHEMA_VERSION,
+                'schedule_source_type' => 'tombstone'
+              }
+            }.merge(envelope)
           end
 
           private

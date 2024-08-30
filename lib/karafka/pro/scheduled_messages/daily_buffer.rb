@@ -38,15 +38,16 @@ module Karafka
         #
         # @note Only messages for a given day should be added here.
         def <<(message)
-          tombstone = message.headers['schedule_source_type'] == 'tombstone'
+          # Non schedule are only tombstones and cancellations
+          schedule = message.headers['schedule_source_type'] == 'schedule'
 
           key = message.key
 
-          if tombstone
-            @accu.delete(key)
-          else
+          if schedule
             epoch = message.headers['schedule_target_epoch']
             @accu[key] = [epoch, message]
+          else
+            @accu.delete(key)
           end
         end
 

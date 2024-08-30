@@ -22,7 +22,7 @@ distant_future = Array.new(50) do |i|
     payload: "payload#{i}"
   }
 
-  Karafka::Pro::ScheduledMessages.proxy(
+  Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i + 60 + (3_600 * i),
     envelope: { topic: "#{DT.topic}messages" }
@@ -37,7 +37,7 @@ close_future = Array.new(2) do |i|
     payload: "payload#{i + 100}"
   }
 
-  Karafka::Pro::ScheduledMessages.proxy(
+  Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i + 1,
     envelope: { topic: "#{DT.topic}messages" }
@@ -50,15 +50,11 @@ Karafka.producer.produce_many_sync(close_future)
 dispatched = nil
 state = nil
 
-start_karafka_and_wait_until do
+start_karafka_and_wait_until(sleep: 1) do
   dispatched = Karafka::Admin.read_topic(DT.topic, 0, 100)
   state = Karafka::Admin.read_topic("#{DT.topic}states", 0, 1).first
 
-  if dispatched.size < 2 || state.nil?
-    sleep(1)
-    next false
-  end
-
+  next if dispatched.size < 2 || state.nil?
   next false unless state.payload[:daily].size >= 2
 
   true

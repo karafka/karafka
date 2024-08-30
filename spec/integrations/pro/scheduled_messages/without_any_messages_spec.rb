@@ -10,20 +10,15 @@ end
 
 state = nil
 
-start_karafka_and_wait_until do
-  message = Karafka::Admin.read_topic("#{DT.topic}states", 0, 1).first
-
-  unless message
-    sleep(1)
-    next false
-  end
-
-  state = message
+start_karafka_and_wait_until(sleep: 1) do
+  state = Karafka::Admin.read_topic("#{DT.topic}states", 0, 1).first
 end
+
+today = Date.today.strftime('%Y-%m-%d')
 
 assert_equal state.headers, { 'zlib' => 'true' }
 assert_equal state.payload, {
   schema_version: '1.0.0',
   state: 'loaded',
-  daily: { '2024-08-29': 0 }
+  daily: { today.to_sym => 0 }
 }

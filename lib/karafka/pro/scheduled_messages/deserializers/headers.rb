@@ -25,9 +25,9 @@ module Karafka
 
             type = raw_headers.fetch('schedule_source_type')
 
-            # tombstone events are not operable, thus we do not have to cast any of the headers
-            # pieces
-            return raw_headers if type == 'tombstone'
+            # tombstone and cancellation events are not operable, thus we do not have to cast any
+            # of the headers pieces
+            return raw_headers unless type == 'schedule'
 
             headers = raw_headers.dup
             headers['schedule_target_epoch'] = headers['schedule_target_epoch'].to_i

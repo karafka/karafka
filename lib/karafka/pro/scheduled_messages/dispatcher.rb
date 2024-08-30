@@ -64,17 +64,15 @@ module Karafka
           @buffer << target
 
           # Tombstone message so this schedule is no longer in use and gets removed from Kafka by
-          # Kafka itself during compacting.
-          @buffer << {
-            topic: @topic,
-            partition: @partition,
+          # Kafka itself during compacting. It will not cancel it because already dispatched but
+          # will cause it not to be sent again and will be marked as dispatched.
+          @buffer << Proxy.tombstone(
             key: message.key,
-            payload: nil,
-            headers: {
-              'schedule_schema_version' => ScheduledMessages::SCHEMA_VERSION,
-              'schedule_source_type' => 'tombstone'
+            envelope: {
+              topic: @topic,
+              partition: @partition
             }
-          }
+          )
 
           return unless config.logging
 

@@ -21,7 +21,7 @@ schedules = Array.new(50) do |i|
     payload: "payload#{i}"
   }
 
-  Karafka::Pro::ScheduledMessages.proxy(
+  Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i + 1,
     envelope: { topic: "#{DT.topic}messages", partition: 0 }
@@ -32,15 +32,10 @@ Karafka.producer.produce_many_sync(schedules)
 
 dispatched = nil
 
-start_karafka_and_wait_until do
+start_karafka_and_wait_until(sleep: 1) do
   dispatched = Karafka::Admin.read_topic(DT.topic, 0, 100)
 
-  if dispatched.size < 50
-    sleep(1)
-    next false
-  end
-
-  true
+  dispatched.size >= 50
 end
 
 assert_equal dispatched.map(&:key), (0..49).map(&:to_s)

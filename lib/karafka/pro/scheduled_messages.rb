@@ -34,10 +34,15 @@ module Karafka
         # Runs the `Proxy.call`
         # @param kwargs [Hash] things requested by the proxy
         # @return [Hash] message wrapped with the scheduled message envelope
-        # @note Keep in mind returned message lacks the topic attribute because of multi-topic
-        #   scheduled messages support.
-        def proxy(**kwargs)
-          Proxy.call(**kwargs)
+        def schedule(**kwargs)
+          Proxy.schedule(**kwargs)
+        end
+
+        # Generates a tombstone message to cancel given dispatch (if not yet happened)
+        # @param kwargs [Hash] things requested by the proxy
+        # @return [Hash] tombstone cancelling message
+        def cancel(**kwargs)
+          Proxy.cancel(**kwargs)
         end
 
         # Below are private APIs

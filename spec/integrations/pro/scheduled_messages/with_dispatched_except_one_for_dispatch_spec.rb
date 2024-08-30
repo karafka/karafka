@@ -46,7 +46,7 @@ tombstones = Array.new(10) do |i|
 end
 
 old_proxies = old_messages.map do |message|
-  Karafka::Pro::ScheduledMessages.proxy(
+  Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i,
     envelope: {
@@ -57,7 +57,7 @@ old_proxies = old_messages.map do |message|
 end
 
 new_proxies = new_messages.map.with_index do |message, i|
-  Karafka::Pro::ScheduledMessages.proxy(
+  Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i + i + 2,
     envelope: {
@@ -78,15 +78,8 @@ Karafka.producer.produce_many_sync(tombstones)
 
 dispatched = nil
 
-start_karafka_and_wait_until do
+start_karafka_and_wait_until(sleep: 1) do
   dispatched = Karafka::Admin.read_topic(DT.topic, 0, 100).first
-
-  unless dispatched
-    sleep(1)
-    next false
-  end
-
-  dispatched
 end
 
 # Only this message should be available
