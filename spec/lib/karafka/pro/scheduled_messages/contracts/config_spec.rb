@@ -7,7 +7,6 @@ RSpec.describe_current do
     {
       scheduled_messages: {
         consumer_class: consumer_class,
-        logging: true,
         interval: 5_000,
         flush_batch_size: 10,
         dispatcher_class: Class.new,
@@ -65,12 +64,6 @@ RSpec.describe_current do
 
   context 'when dispatcher_class is nil' do
     before { scheduled_messages[:dispatcher_class] = nil }
-
-    it { expect(contract.call(config)).not_to be_success }
-  end
-
-  context 'when logging is nil' do
-    before { scheduled_messages[:logging] = nil }
 
     it { expect(contract.call(config)).not_to be_success }
   end

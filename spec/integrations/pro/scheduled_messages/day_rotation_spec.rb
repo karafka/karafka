@@ -22,10 +22,9 @@ class MonitoringConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  scheduled_messages(topics_namespace: DT.topic) do |t1, t2, t3|
+  scheduled_messages(topics_namespace: DT.topic) do |t1, t2|
     t1.config.partitions = 1
     t2.config.partitions = 1
-    t3.config.partitions = 1
   end
 
   topic DT.topic do
@@ -45,7 +44,9 @@ module Karafka
           @created_at = DT[:created_at]
 
           time = Time.at(@created_at)
-          @ends_at = Time.utc(time.year, time.month, time.day).to_i + 86_399
+
+          @starts_at = Time.utc(time.year, time.month, time.day).to_i
+          @ends_at = @starts_at + 86_399
         end
 
         def ended?

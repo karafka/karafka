@@ -33,9 +33,7 @@ module Karafka
               require 'zlib'
 
               # We set it to 5 so we have enough space to handle more events. All related topics
-              # should have same partition count because we expect similar amount of events in
-              # messages and logs topics and we need to have per-partition reporting in the
-              # states topic.
+              # should have same partition count.
               default_partitions = 5
               msg_cfg = App.config.scheduled_messages
 
@@ -103,21 +101,6 @@ module Karafka
                   instance_eval(&block) if block && block.arity.zero?
                 end
 
-                # This topic is to store logs that we can then inspect either from the admin or via
-                # the Web UI
-                logs_topic = topic("#{topics_namespace}logs") do
-                  active(false)
-                  target.scheduled_messages(true)
-
-                  # Keep logs of executions for a week and after that remove. Week should be
-                  # enough and should not produce too much data.
-                  config(
-                    partitions: default_partitions,
-                    'cleanup.policy': 'delete',
-                    'retention.ms': 604_800_000
-                  )
-                end
-
                 # Holds states of scheduler per each of the partitions since they tick
                 # independently. We only hold future statistics not to have to deal with
                 # any type of state restoration
@@ -137,7 +120,7 @@ module Karafka
                   )
                 end
 
-                yield(messages_topic, logs_topic, states_topic) if block && block.arity.positive?
+                yield(messages_topic, states_topic) if block && block.arity.positive?
               end
             end
           end

@@ -27,7 +27,7 @@ RSpec.describe_current do
       it { expect(topic.consumer).to eq(Karafka::Pro::ScheduledMessages::Consumer) }
       it { expect(topic.scheduled_messages?).to eq(true) }
       it { expect(topic.max_messages).to eq(5) }
-      it { expect(builder.first.topics.size).to eq(3) }
+      it { expect(builder.first.topics.size).to eq(2) }
       it { expect(builder.size).to eq(1) }
     end
 
@@ -40,7 +40,7 @@ RSpec.describe_current do
         builder.scheduled_messages(topics_namespace: 'test_namespace2')
       end
 
-      it { expect(builder.first.topics.size).to eq(6) }
+      it { expect(builder.first.topics.size).to eq(4) }
       it { expect(builder.size).to eq(1) }
     end
   end

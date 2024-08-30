@@ -106,29 +106,32 @@ module Karafka
           # @note Technically it is a tombstone but we differentiate just for the sake of ability
           #   to debug stuff if needed
           def cancel(key:, envelope: {})
-            cancel = Proxy.tombstone(
-              key: key,
-              envelope: envelope
-            )
-
-            cancel[:headers]['schedule_source_type'] = 'cancel'
-
-            cancel
-          end
-
-          # @param key [String] key used by the original message as a unique identifier
-          # @param envelope [Hash] Special details that can identify the message location like
-          #   topic and partition (if used) so the cancellation goes to the correct location.
-          # @return [Hash] tombstone message
-          def tombstone(key:, envelope: {})
             {
               key: key,
               payload: nil,
               headers: {
                 'schedule_schema_version' => ScheduledMessages::SCHEMA_VERSION,
-                'schedule_source_type' => 'tombstone'
+                'schedule_source_type' => 'cancel'
               }
             }.merge(envelope)
+          end
+
+          # Builds tombstone with the dispatched message details. Those details can be used
+          #   in Web UI, etc when analyzing dispatches.
+          # @param message [Karafka::Messages::Message] message we want to tombstone
+          #   topic and partition (if used) so the cancellation goes to the correct location.
+          def tombstone(message:)
+            {
+              key: message.key,
+              payload: nil,
+              topic: message.topic,
+              partition: message.partition,
+              headers: message.raw_headers.merge(
+                'schedule_schema_version' => ScheduledMessages::SCHEMA_VERSION,
+                'schedule_source_type' => 'tombstone',
+                'schedule_source_offset' => message.offset.to_s
+              )
+            }
           end
 
           private

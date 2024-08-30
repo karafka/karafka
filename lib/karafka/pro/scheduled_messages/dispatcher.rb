@@ -66,26 +66,7 @@ module Karafka
           # Tombstone message so this schedule is no longer in use and gets removed from Kafka by
           # Kafka itself during compacting. It will not cancel it because already dispatched but
           # will cause it not to be sent again and will be marked as dispatched.
-          @buffer << Proxy.tombstone(
-            key: message.key,
-            envelope: {
-              topic: @topic,
-              partition: @partition
-            }
-          )
-
-          return unless config.logging
-
-          # Log message is needed for debugging, etc
-          log = target.dup
-          # We use a _messages and _logs, this is why we can replace it because those two topics
-          # are always created alongside
-          log[:topic] = "#{@topic[0..-9]}logs"
-          # Since target topic and logs topic may have different number of partitions, we do need
-          # to remove direct partition reference.
-          log.delete(:partition)
-
-          @buffer << log
+          @buffer << Proxy.tombstone(message: message)
         end
 
         # Builds and dispatches the state report message with schedules details

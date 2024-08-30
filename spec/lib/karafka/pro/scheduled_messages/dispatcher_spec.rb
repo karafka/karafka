@@ -42,11 +42,10 @@ RSpec.describe_current do
     let(:buffer) { dispatcher.buffer }
     let(:piped) { buffer[0] }
     let(:tombstone) { buffer[1] }
-    let(:log) { buffer[2] }
 
     before { dispatcher << message }
 
-    it { expect(buffer.size).to eq(3) }
+    it { expect(buffer.size).to eq(2) }
     it { expect(piped[:topic]).to eq('target_topic') }
     it { expect(piped[:partition]).to eq(2) }
     it { expect(piped[:partition_key]).to eq('pk') }
@@ -61,20 +60,6 @@ RSpec.describe_current do
     it { expect(tombstone[:key]).to eq(message.key) }
     it { expect(tombstone[:headers]['schedule_source_type']).to eq('tombstone') }
     it { expect(tombstone[:headers]['schedule_schema_version']).to eq(schema_version) }
-    it { expect(log[:topic]).to eq("#{prefix}logs") }
-    it { expect(log.key?(:partition)).to eq(false) }
-    it { expect(log[:payload]).to eq(message.raw_payload) }
-    it { expect(log[:headers]).to eq(piped[:headers]) }
-
-    context 'when logging is disabled' do
-      before do
-        buffer.clear
-        allow(Karafka::App.config.scheduled_messages).to receive(:logging).and_return(false)
-        dispatcher << message
-      end
-
-      it { expect(buffer.size).to eq(2) }
-    end
 
     context 'when key is not available' do
       let(:raw_headers) do

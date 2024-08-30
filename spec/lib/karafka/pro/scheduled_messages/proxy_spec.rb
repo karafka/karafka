@@ -101,28 +101,46 @@ RSpec.describe_current do
   end
 
   describe '.tombstone' do
-    let(:key) { 'unique-key' }
-    let(:envelope) do
-      {
+    let(:message) do
+      instance_double(
+        'Karafka::Messages::Message',
+        key: 'unique-key',
         topic: 'tombstone_topic',
-        partition: 2
-      }
+        partition: 2,
+        offset: 123,
+        raw_headers: {
+          'existing-header' => 'value'
+        }
+      )
     end
 
-    subject(:tombstone_message) { described_class.tombstone(key: key, envelope: envelope) }
+    subject(:tombstone_message) { described_class.tombstone(message: message) }
 
     it 'creates a message with the correct headers' do
       version = Karafka::Pro::ScheduledMessages::SCHEMA_VERSION
       expect(tombstone_message[:headers]['schedule_source_type']).to eq('tombstone')
       expect(tombstone_message[:headers]['schedule_schema_version']).to eq(version)
+      expect(tombstone_message[:headers]['schedule_source_offset']).to eq('123')
     end
 
     it 'includes the correct key' do
-      expect(tombstone_message[:key]).to eq(key)
+      expect(tombstone_message[:key]).to eq('unique-key')
     end
 
     it 'has a nil payload' do
       expect(tombstone_message[:payload]).to be_nil
+    end
+
+    it 'includes the correct topic' do
+      expect(tombstone_message[:topic]).to eq('tombstone_topic')
+    end
+
+    it 'includes the correct partition' do
+      expect(tombstone_message[:partition]).to eq(2)
+    end
+
+    it 'includes existing headers' do
+      expect(tombstone_message[:headers]['existing-header']).to eq('value')
     end
   end
 end

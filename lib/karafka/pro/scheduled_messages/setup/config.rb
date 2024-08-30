@@ -28,10 +28,6 @@ module Karafka
           # mean more frequent execution on low-throughput topics meaning higher precision.
           setting(:interval, default: 15_000)
 
-          # Should we log the dispatches. If true (default) with each cron execution, there will
-          # be a special message published. Useful for debugging.
-          setting(:logging, default: true)
-
           # How many messages should be flush in one go from the dispatcher at most. If we have
           # more messages to dispatch, they will be chunked.
           setting(:flush_batch_size, default: 1_000)

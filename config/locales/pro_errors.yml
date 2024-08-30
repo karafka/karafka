@@ -113,7 +113,6 @@ en:
 
       scheduled_messages.consumer_class_format: 'must be a class'
       scheduled_messages.dispatcher_class_format: 'must be a class'
-      scheduled_messages.logging_format: needs to be a boolean
       scheduled_messages.flush_batch_size_format: needs to be an integer bigger than 0
       scheduled_messages.interval_format: needs to be an integer bigger or equal to 1000
       scheduled_messages.deserializers.headers_format: cannot be nil

@@ -29,8 +29,6 @@ module Karafka
           nested(:scheduled_messages) do
             required(:consumer_class) { |val| val < ::Karafka::BaseConsumer }
 
-            required(:logging) { |val| [true, false].include?(val) }
-
             # Do not allow to run more often than every second
             required(:interval) { |val| val.is_a?(Integer) && val >= 1_000 }
 
