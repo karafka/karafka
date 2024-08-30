@@ -78,8 +78,12 @@ module Karafka
                   # be present in the topic for too long.
                   config(
                     partitions: default_partitions,
+                    # Will ensure, that after tombstone is present, given scheduled message, that
+                    # has been dispatched is removed by Kafka
                     'cleanup.policy': 'compact',
+                    # When 10% or more dispatches are done, compact data
                     'min.cleanable.dirty.ratio': 0.1,
+                    # Frequent segment rotation to support intense compaction
                     'segment.ms': 3_600_000,
                     'delete.retention.ms': 3_600_000,
                     'segment.bytes': 52_428_800
