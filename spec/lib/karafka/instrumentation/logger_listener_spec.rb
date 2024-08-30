@@ -470,6 +470,13 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:fatal).with(message) }
     end
 
+    context 'when it is a app.forceful_stopping.error' do
+      let(:type) { 'app.forceful_stopping.error' }
+      let(:message) { "Forceful shutdown error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context 'when it is a librdkafka.error' do
       let(:type) { 'librdkafka.error' }
       let(:message) { "librdkafka internal error occurred: #{error}" }

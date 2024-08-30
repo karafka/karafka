@@ -76,6 +76,8 @@ def setup_karafka(
         config.recurring_tasks.topics.logs = SecureRandom.hex(6)
         # Run often so we do not wait on the first run
         config.recurring_tasks.interval = 1_000
+
+        config.scheduled_messages.interval = 1_000
       end
 
       config.recurring_tasks.producer = Karafka.producer
@@ -313,7 +315,8 @@ end
 
 # Waits until block yields true
 # @param mode [Symbol] mode in which we are operating
-def wait_until(mode: :server)
+# @param sleep [Float] how long to sleep between re-checks
+def wait_until(mode: :server, sleep: 0.01)
   started_at = Time.now
   stop = false
 
@@ -327,7 +330,7 @@ def wait_until(mode: :server)
       raise StandardError, 'Execution expired'
     end
 
-    sleep(0.01)
+    sleep(sleep)
   end
 
   case mode
@@ -350,8 +353,10 @@ end
 # @param reset_status [Boolean] should we reset the server status to initializing after the
 #   shutdown. This allows us to run server multiple times in the same process, making some
 #   integration specs much easier to run
-def start_karafka_and_wait_until(mode: :server, reset_status: false, &block)
-  Thread.new { wait_until(mode: mode, &block) }
+# @param sleep [Float] how long to sleep between re-checks. Useful when wanting to perform heavy
+#   operations on checks but not to overload with them the process.
+def start_karafka_and_wait_until(mode: :server, reset_status: false, sleep: 0.01, &block)
+  Thread.new { wait_until(mode: mode, sleep: sleep, &block) }
 
   case mode
   when :server

@@ -22,9 +22,7 @@ module Karafka
             #
             # @param active [Boolean] should recurring tasks be active. We use a boolean flag to
             #   have API consistency in the system, so it matches other routing related APIs.
-            # @param block [Proc] optional reconfiguration of the tasks topic definitions.
-            # @note Since we cannot provide two blocks, reconfiguration of logs topic can be only
-            #   done if user explicitly redefines it in the routing.
+            # @param block [Proc] optional reconfiguration of the topics definitions.
             def recurring_tasks(active = false, &block)
               return unless active
 

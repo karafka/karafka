@@ -37,6 +37,8 @@ SimpleCov.start do
   add_filter '/lib/karafka/cli/topics/base'
   add_filter '/lib/karafka/cli/topics/plan'
   add_filter '/processing/strategies'
+  # Consumers are tested in integrations
+  add_filter '/consumer'
   # CLI commands are also checked via integrations
   add_filter '/cli/topics.rb'
   add_filter '/vendors/'

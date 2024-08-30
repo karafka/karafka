@@ -121,7 +121,7 @@ start_karafka_and_wait_until do
   DT[:merged].size >= 10
 end
 
-sleep(1)
+sleep(2)
 
 committed = DT[:merged].last.split(',').map(&:to_i).sort
 lags = Karafka::Admin.read_lags_with_offsets['merger']

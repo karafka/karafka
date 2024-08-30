@@ -131,4 +131,47 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#active_within?' do
+    before do
+      coordinator.start(messages)
+      sleep(0.1)
+    end
+
+    context 'when the coordinator is active within the specified interval' do
+      it 'returns true' do
+        expect(coordinator.active_within?(200)).to eq(true)
+      end
+    end
+
+    context 'when the coordinator was active just before the specified interval' do
+      before { sleep(0.1) }
+
+      it 'returns true for the edge of the time frame' do
+        expect(coordinator.active_within?(205)).to eq(true)
+      end
+    end
+
+    context 'when the coordinator was not active within the specified interval' do
+      before { sleep(0.5) }
+
+      it 'returns false' do
+        expect(coordinator.active_within?(200)).to eq(false)
+      end
+    end
+
+    context 'when there has been no recent activity' do
+      it 'returns false' do
+        expect(coordinator.active_within?(100)).to eq(false)
+      end
+    end
+
+    context 'when the coordinator is active at the time of checking' do
+      before { coordinator.start(messages) }
+
+      it 'returns true' do
+        expect(coordinator.active_within?(105)).to eq(true)
+      end
+    end
+  end
 end
