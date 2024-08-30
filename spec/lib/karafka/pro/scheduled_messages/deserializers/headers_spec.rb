@@ -8,7 +8,7 @@ RSpec.describe_current do
   context 'when headers are valid' do
     let(:raw_headers) do
       {
-        'schedule_source_type' => 'event',
+        'schedule_source_type' => 'schedule',
         'schedule_target_epoch' => '1679330400',
         'schedule_target_partition' => '3'
       }
@@ -42,7 +42,7 @@ RSpec.describe_current do
   context 'when schedule_target_partition is missing' do
     let(:raw_headers) do
       {
-        'schedule_source_type' => 'event',
+        'schedule_source_type' => 'schedule',
         'schedule_target_epoch' => '1679330400'
       }
     end
@@ -55,7 +55,7 @@ RSpec.describe_current do
   context 'when schedule_target_epoch is not a string' do
     let(:raw_headers) do
       {
-        'schedule_source_type' => 'event',
+        'schedule_source_type' => 'schedule',
         'schedule_target_epoch' => 1_679_330_400
       }
     end
