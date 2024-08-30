@@ -114,9 +114,10 @@ module Karafka
           # was already dispatched or that user decided not to dispatch and cancelled the dispatch
           # via tombstone publishing.
           if message.headers['schedule_source_type'] == 'schedule'
-            @tracker.track(message)
-
             time = message.headers['schedule_target_epoch']
+
+            # Do not track historical below today as those will be reflected in the daily buffer
+            @tracker.track(message) if time >= @today.starts_at
 
             if time > @today.ends_at || time < @max_epoch.to_i
               # Clean the message immediately when not needed (won't be scheduled) to preserve
