@@ -3,4 +3,79 @@
 # When day ends, we should rotate it and move on
 # Moving on should not trigger a second dispatch of already dispatched or cancelled events
 
-tba
+setup_karafka
+
+class MonitoringConsumer < Karafka::BaseConsumer
+  def consume
+    DT[:received_at] = Time.now
+  end
+
+  def tick
+    return if @pinged
+
+    @pinged = true
+    sleep(5)
+    DT[:created_at] = Time.now.to_i
+    DT[:fence_time] = Time.now
+    DT[:ended] = true
+  end
+end
+
+draw_routes do
+  scheduled_messages(topics_namespace: DT.topic) do |t1, t2, t3|
+    t1.config.partitions = 1
+    t2.config.partitions = 1
+    t3.config.partitions = 1
+  end
+
+  topic DT.topic do
+    consumer MonitoringConsumer
+    periodic(interval: 1_000)
+  end
+end
+
+DT[:created_at] = (Time.now - 24 * 60 * 60).to_i
+
+# We patch it so we can simulate end of day
+module Karafka
+  module Pro
+    module ScheduledMessages
+      class Day
+        def initialize
+          @created_at = DT[:created_at]
+
+          time = Time.at(@created_at)
+          @ends_at = Time.utc(time.year, time.month, time.day).to_i + 86_399
+        end
+
+        def ended?
+          ended = DT.key?(:ended) && !DT.key?(:switched)
+
+          DT[:switched] = true if ended
+
+          ended
+        end
+      end
+    end
+  end
+end
+
+# Produce message that should be sent the "next" day (today)
+message = {
+  topic: DT.topic,
+  key: '0',
+  payload: 'payload'
+}
+
+Karafka.producer.produce_sync Karafka::Pro::ScheduledMessages.schedule(
+  message: message,
+  epoch: Time.now.to_i,
+  envelope: { topic: "#{DT.topic}messages", partition: 0 }
+)
+
+start_karafka_and_wait_until do
+  DT.key?(:received_at)
+end
+
+# Dispatch should not happen until we "replay" and load new day
+assert DT[:received_at] > DT[:fence_time]
