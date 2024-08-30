@@ -29,6 +29,9 @@ module Karafka
             def scheduled_messages(topics_namespace: false, &block)
               return unless topics_namespace
 
+              # Load zlib only if user enables scheduled messages
+              require 'zlib'
+
               # We set it to 5 so we have enough space to handle more events. All related topics
               # should have same partition count because we expect similar amount of events in
               # messages and logs topics and we need to have per-partition reporting in the
@@ -40,7 +43,7 @@ module Karafka
                 # Registers the primary topic that we use to control schedules execution. This is
                 # the one that we use to trigger scheduled messages.
                 messages_topic = topic("#{topics_namespace}messages") do
-                  instance_eval(&block) if block
+                  instance_eval(&block) if block && block.arity.zero?
 
                   consumer msg_cfg.consumer_class
 

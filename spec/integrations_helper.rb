@@ -76,6 +76,8 @@ def setup_karafka(
         config.recurring_tasks.topics.logs = SecureRandom.hex(6)
         # Run often so we do not wait on the first run
         config.recurring_tasks.interval = 1_000
+
+        config.scheduled_messages.interval = 1_000
       end
 
       config.recurring_tasks.producer = Karafka.producer

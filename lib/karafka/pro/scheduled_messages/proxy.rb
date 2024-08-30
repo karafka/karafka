@@ -42,9 +42,8 @@ module Karafka
         # Attributes used to build a partition key for the schedules topic dispatch of a given
         # message. We use this order as this order describes the priority of usage.
         PARTITION_KEY_BASE_ATTRIBUTES = %i[
-          key
-          partition_key
           partition
+          partition_key
         ].freeze
 
         private_constant :MSG_CONTRACT, :POST_CONTRACT, :PARTITION_KEY_BASE_ATTRIBUTES
@@ -125,6 +124,8 @@ module Karafka
 
             PARTITION_KEY_BASE_ATTRIBUTES.each do |attribute|
               next unless message.key?(attribute)
+              # Do not overwrite if explicitely set by the user
+              next if proxy_message.key?(attribute)
 
               proxy_message[:partition_key] = message.fetch(attribute).to_s
             end
