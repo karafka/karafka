@@ -5,13 +5,13 @@
 setup_karafka
 
 draw_routes do
-  scheduled_messages(topics_namespace: DT.topic)
+  scheduled_messages(DT.topics[0])
 end
 
 state = nil
 
 start_karafka_and_wait_until(sleep: 1) do
-  state = Karafka::Admin.read_topic("#{DT.topic}states", 0, 1).first
+  state = Karafka::Admin.read_topic("#{DT.topics[0]}_states", 0, 1).first
 end
 
 today = Date.today.strftime('%Y-%m-%d')

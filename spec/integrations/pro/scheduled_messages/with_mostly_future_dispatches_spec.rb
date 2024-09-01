@@ -7,16 +7,16 @@
 setup_karafka
 
 draw_routes do
-  scheduled_messages(topics_namespace: DT.topic)
+  scheduled_messages(DT.topics[0])
 
-  topic DT.topic do
+  topic DT.topics[1] do
     active(false)
   end
 end
 
 distant_future = Array.new(50) do |i|
   message = {
-    topic: DT.topic,
+    topic: DT.topics[1],
     key: "key#{i}",
     headers: { 'b' => i.to_s },
     payload: "payload#{i}"
@@ -25,13 +25,13 @@ distant_future = Array.new(50) do |i|
   Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i + 60 + (3_600 * i),
-    envelope: { topic: "#{DT.topic}messages" }
+    envelope: { topic: DT.topics[0] }
   )
 end
 
 close_future = Array.new(2) do |i|
   message = {
-    topic: DT.topic,
+    topic: DT.topics[1],
     key: "key#{i + 100}",
     headers: { 'b' => (i + 100).to_s },
     payload: "payload#{i + 100}"
@@ -40,7 +40,7 @@ close_future = Array.new(2) do |i|
   Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i + 1,
-    envelope: { topic: "#{DT.topic}messages" }
+    envelope: { topic: DT.topics[0] }
   )
 end
 
@@ -51,8 +51,8 @@ dispatched = nil
 state = nil
 
 start_karafka_and_wait_until(sleep: 1) do
-  dispatched = Karafka::Admin.read_topic(DT.topic, 0, 100)
-  state = Karafka::Admin.read_topic("#{DT.topic}states", 0, 1).first
+  dispatched = Karafka::Admin.read_topic(DT.topics[1], 0, 100)
+  state = Karafka::Admin.read_topic("#{DT.topics[0]}_states", 0, 1).first
 
   next if dispatched.size < 2 || state.nil?
   next false unless state.payload[:daily].size >= 2

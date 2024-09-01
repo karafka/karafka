@@ -97,7 +97,7 @@ RSpec.describe_current do
     let(:serializer_result) { rand.to_s }
     let(:expected) do
       {
-        topic: "#{topic[0..-9]}states",
+        topic: "#{topic}_states",
         payload: serializer_result,
         key: 'state',
         partition: partition,

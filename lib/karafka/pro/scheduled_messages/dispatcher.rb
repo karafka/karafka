@@ -76,7 +76,7 @@ module Karafka
         # @note This is dispatched async because it's just a statistical metric.
         def state(tracker)
           config.producer.produce_async(
-            topic: "#{@topic[0..-9]}states",
+            topic: "#{@topic}#{config.states_postfix}",
             payload: @serializer.state(tracker),
             key: 'state',
             partition: @partition,

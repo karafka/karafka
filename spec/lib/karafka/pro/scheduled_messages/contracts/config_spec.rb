@@ -11,6 +11,7 @@ RSpec.describe_current do
         flush_batch_size: 10,
         dispatcher_class: Class.new,
         group_id: 'valid_group_id',
+        states_postfix: '_states',
         deserializers: {
           headers: Class.new,
           payload: Class.new
@@ -76,6 +77,12 @@ RSpec.describe_current do
 
   context 'when payload deserializer is nil' do
     before { scheduled_messages[:deserializers][:payload] = nil }
+
+    it { expect(contract.call(config)).not_to be_success }
+  end
+
+  context 'when states postfix is nil' do
+    before { scheduled_messages[:states_postfix] = nil }
 
     it { expect(contract.call(config)).not_to be_success }
   end

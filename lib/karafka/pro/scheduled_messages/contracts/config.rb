@@ -40,6 +40,10 @@ module Karafka
               val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
             end
 
+            required(:states_postfix) do |val|
+              val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
+            end
+
             nested(:deserializers) do
               required(:headers) { |val| !val.nil? }
               required(:payload) { |val| !val.nil? }

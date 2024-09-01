@@ -118,6 +118,7 @@ en:
       scheduled_messages.deserializers.headers_format: cannot be nil
       scheduled_messages.deserializers.payload_format: cannot be nil
       scheduled_messages.group_id_format: 'needs to be a string with a Kafka accepted format'
+      scheduled_messages.states_postfix_format: 'needs to be a string with a Kafka accepted format'
 
     routing:
       swarm_nodes_not_used: 'At least one of the nodes has no assignments'

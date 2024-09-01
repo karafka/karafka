@@ -15,16 +15,16 @@ class TrackConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  scheduled_messages(topics_namespace: DT.topic)
+  scheduled_messages(DT.topics[0])
 
-  topic DT.topic do
+  topic DT.topics[1] do
     consumer TrackConsumer
   end
 end
 
 proxies = Array.new(10) do |i|
   message = {
-    topic: DT.topic,
+    topic: DT.topics[1],
     key: i.to_s,
     payload: 'payload'
   }
@@ -33,7 +33,7 @@ proxies = Array.new(10) do |i|
     message: message,
     # We give the consumer enough time to start working
     epoch: Time.now.to_i + (i * 5),
-    envelope: { topic: "#{DT.topic}messages", partition: 0 }
+    envelope: { topic: DT.topics[0], partition: 0 }
   )
 end
 
