@@ -42,6 +42,9 @@ module Karafka
           # Class we use to dispatch messages
           setting(:dispatcher_class, default: Dispatcher)
 
+          # Postfix for the states topic to build the states based on the group name + postfix
+          setting(:states_postfix, default: '_states')
+
           setting(:deserializers) do
             # Deserializer for schedules messages to convert epochs
             setting(:headers, default: Deserializers::Headers.new)

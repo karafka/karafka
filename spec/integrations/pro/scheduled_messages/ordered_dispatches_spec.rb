@@ -6,16 +6,16 @@
 setup_karafka
 
 draw_routes do
-  scheduled_messages(topics_namespace: DT.topic)
+  scheduled_messages(DT.topics[0])
 
-  topic DT.topic do
+  topic DT.topics[1] do
     active(false)
   end
 end
 
 schedules = Array.new(50) do |i|
   message = {
-    topic: DT.topic,
+    topic: DT.topics[1],
     key: i.to_s,
     headers: { 'b' => i.to_s },
     payload: "payload#{i}"
@@ -24,7 +24,7 @@ schedules = Array.new(50) do |i|
   Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i + 1,
-    envelope: { topic: "#{DT.topic}messages", partition: 0 }
+    envelope: { topic: DT.topics[0], partition: 0 }
   )
 end
 
@@ -33,7 +33,7 @@ Karafka.producer.produce_many_sync(schedules)
 dispatched = nil
 
 start_karafka_and_wait_until(sleep: 1) do
-  dispatched = Karafka::Admin.read_topic(DT.topic, 0, 100)
+  dispatched = Karafka::Admin.read_topic(DT.topics[1], 0, 100)
 
   dispatched.size >= 50
 end

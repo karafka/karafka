@@ -6,16 +6,16 @@
 setup_karafka
 
 draw_routes do
-  scheduled_messages(topics_namespace: DT.topic)
+  scheduled_messages(DT.topics[0])
 
-  topic DT.topic do
+  topic DT.topics[1] do
     active(false)
   end
 end
 
 def build_message(id)
   {
-    topic: DT.topic,
+    topic: DT.topics[1],
     key: "key-#{id}",
     headers: { 'id' => id },
     payload: "payload-#{id}",
@@ -25,7 +25,7 @@ end
 
 def build_tombstone(id)
   {
-    topic: "#{DT.topic}messages",
+    topic: DT.topics[0],
     key: "key-#{id}",
     payload: nil,
     headers: {
@@ -50,7 +50,7 @@ old_proxies = old_messages.map do |message|
     message: message,
     epoch: Time.now.to_i,
     envelope: {
-      topic: "#{DT.topic}messages",
+      topic: DT.topics[0],
       key: message[:key]
     }
   )
@@ -61,7 +61,7 @@ new_proxies = new_messages.map.with_index do |message, i|
     message: message,
     epoch: Time.now.to_i + i + 2,
     envelope: {
-      topic: "#{DT.topic}messages",
+      topic: DT.topics[0],
       key: message[:key]
     }
   )
@@ -79,7 +79,7 @@ Karafka.producer.produce_many_sync(tombstones)
 dispatched = nil
 
 start_karafka_and_wait_until(sleep: 1) do
-  dispatched = Karafka::Admin.read_topic(DT.topic, 0, 100).first
+  dispatched = Karafka::Admin.read_topic(DT.topics[1], 0, 100).first
 end
 
 # Only this message should be available
@@ -93,7 +93,7 @@ assert_equal headers['id'], '101'
 assert_equal headers['schedule_schema_version'], '1.0.0'
 assert headers.key?('schedule_target_epoch')
 assert_equal headers['schedule_source_type'], 'schedule'
-assert_equal headers['schedule_target_topic'], DT.topic
+assert_equal headers['schedule_target_topic'], DT.topics[1]
 assert_equal headers['schedule_target_partition'], '0'
 assert_equal headers['schedule_target_key'], 'key-101'
-assert_equal headers['schedule_source_topic'], "#{DT.topic}messages"
+assert_equal headers['schedule_source_topic'], DT.topic

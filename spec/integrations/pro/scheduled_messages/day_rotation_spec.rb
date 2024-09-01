@@ -22,12 +22,12 @@ class MonitoringConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  scheduled_messages(topics_namespace: DT.topic) do |t1, t2|
+  scheduled_messages(DT.topics[0]) do |t1, t2|
     t1.config.partitions = 1
     t2.config.partitions = 1
   end
 
-  topic DT.topic do
+  topic DT.topics[1] do
     consumer MonitoringConsumer
     periodic(interval: 1_000)
   end
@@ -63,7 +63,7 @@ end
 
 # Produce message that should be sent the "next" day (today)
 message = {
-  topic: DT.topic,
+  topic: DT.topics[1],
   key: '0',
   payload: 'payload'
 }
@@ -71,7 +71,7 @@ message = {
 Karafka.producer.produce_sync Karafka::Pro::ScheduledMessages.schedule(
   message: message,
   epoch: Time.now.to_i,
-  envelope: { topic: "#{DT.topic}messages", partition: 0 }
+  envelope: { topic: DT.topics[0], partition: 0 }
 )
 
 start_karafka_and_wait_until do
