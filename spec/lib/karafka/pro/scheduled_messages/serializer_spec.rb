@@ -10,11 +10,20 @@ RSpec.describe_current do
   end
 
   let(:serializer) { described_class.new }
+  let(:float_now) { rand }
+
+  before do
+    allow(Process)
+      .to receive(:clock_gettime)
+      .with(Process::CLOCK_REALTIME)
+      .and_return(float_now)
+  end
 
   describe '#state' do
     it 'serializes and compresses the state data' do
       expected_data = {
         schema_version: Karafka::Pro::ScheduledMessages::STATES_SCHEMA_VERSION,
+        dispatched_at: float_now,
         state: tracker.state,
         daily: tracker.daily
       }.to_json
@@ -28,6 +37,7 @@ RSpec.describe_current do
       let(:tracker) do
         instance_double(
           'Tracker',
+          dispatched_at: float_now,
           state: nil,
           daily: nil
         )
@@ -36,6 +46,7 @@ RSpec.describe_current do
       it 'still serializes and compresses the data correctly' do
         expected_data = {
           schema_version: Karafka::Pro::ScheduledMessages::STATES_SCHEMA_VERSION,
+          dispatched_at: float_now,
           state: nil,
           daily: nil
         }.to_json

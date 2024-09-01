@@ -17,11 +17,14 @@ module Karafka
       # Serializers used to build payloads (if applicable) for dispatch
       # @note We only deal with states payload. Other payloads are not ours but end users.
       class Serializer
+        include ::Karafka::Core::Helpers::Time
+
         # @param tracker [Tracker] tracker based on which we build the state
         # @return [String] compressed payload with the state details
         def state(tracker)
           data = {
             schema_version: ScheduledMessages::STATES_SCHEMA_VERSION,
+            dispatched_at: float_now,
             state: tracker.state,
             daily: tracker.daily
           }
