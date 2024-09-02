@@ -77,7 +77,7 @@ if Karafka.rails?
             # The change technically happens in 7.1 but 7.0 already supports this so we can make
             # a proper change for 7.0+
             if rails7plus
-              ActiveRecord::Base.connection_handler.clear_active_connections!
+              ActiveRecord::Base.connection_handler.clear_active_connections!(:all)
             else
               ActiveRecord::Base.clear_active_connections!
             end
