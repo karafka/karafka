@@ -65,26 +65,6 @@ if Karafka.rails?
         app.config.autoload_paths += %w[app/consumers]
       end
 
-      initializer 'karafka.release_active_record_connections' do
-        rails7plus = Rails.gem_version >= Gem::Version.new('7.0.0')
-
-        ActiveSupport.on_load(:active_record) do
-          ::Karafka::App.monitor.subscribe('worker.completed') do
-            # Always release the connection after processing is done. Otherwise thread may hang
-            # blocking the reload and further processing
-            # @see https://github.com/rails/rails/issues/44183
-            #
-            # The change technically happens in 7.1 but 7.0 already supports this so we can make
-            # a proper change for 7.0+
-            if rails7plus
-              ActiveRecord::Base.connection_handler.clear_active_connections!
-            else
-              ActiveRecord::Base.clear_active_connections!
-            end
-          end
-        end
-      end
-
       initializer 'karafka.require_karafka_boot_file' do |app|
         rails6plus = Rails.gem_version >= Gem::Version.new('6.0.0')
 

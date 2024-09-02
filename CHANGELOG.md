@@ -5,6 +5,7 @@
 - [Enhancement] Introduce a `#assigned` hook for consumers to be able to trigger actions when consumer is built and assigned but before first consume/ticking, etc.
 - [Enhancement] Provide `Karafka::Messages::Message#tombstone?` to be able to quickly check if a message is a tombstone message.
 - [Enhancement] Provide more flexible API for Recurring Tasks topics reconfiguration.
+- [Enhancement] Remove no longer needed Rails connection releaser.
 
 ## 2.4.9 (2024-08-23)
 - **[Feature]** Provide Kafka based Recurring (Cron) Tasks.
