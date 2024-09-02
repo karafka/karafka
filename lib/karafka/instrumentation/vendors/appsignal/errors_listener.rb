@@ -21,7 +21,7 @@ module Karafka
           #
           # @param event [Karafka::Core::Monitoring::Event]
           def on_error_occurred(event)
-            client.send_error(event[:error])
+            client.report_error(event[:error])
           end
         end
       end

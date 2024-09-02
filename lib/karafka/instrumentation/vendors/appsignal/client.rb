@@ -23,11 +23,16 @@ module Karafka
           # @param action_name [String] action name. For processing this should be equal to
           #   consumer class + method name
           def start_transaction(action_name)
-            transaction = ::Appsignal::Transaction.create(
-              SecureRandom.uuid,
-              namespace_name,
-              ::Appsignal::Transaction::GenericRequest.new({})
-            )
+            transaction =
+              if version_4_or_newer?
+                ::Appsignal::Transaction.create(namespace_name)
+              else
+                ::Appsignal::Transaction.create(
+                  SecureRandom.uuid,
+                  namespace_name,
+                  ::Appsignal::Transaction::GenericRequest.new({})
+                )
+              end
 
             transaction.set_action_if_nil(action_name)
           end
@@ -45,10 +50,10 @@ module Karafka
           def metadata=(metadata_hash)
             return unless transaction?
 
-            transaction = ::Appsignal::Transaction.current
+            current_transaction = transaction
 
             stringify_hash(metadata_hash).each do |key, value|
-              transaction.set_metadata(key, value)
+              current_transaction.set_metadata(key, value)
             end
           end
 
@@ -78,19 +83,26 @@ module Karafka
             )
           end
 
-          # Sends the error that occurred to Appsignal
+          # Report the error that occurred to Appsignal
           #
           # @param error [Object] error we want to ship to Appsignal
-          def send_error(error)
-            # If we have an active transaction we should use it instead of creating a generic one
-            # That way proper namespace and other data may be transferred
-            #
-            # In case there is no transaction, a new generic background job one will be used
-            if transaction?
-              transaction.set_error(error)
-            else
-              ::Appsignal.send_error(error) do |transaction|
+          def report_error(error)
+            if ::Appsignal.respond_to?(:report_error)
+              # This helper will always report the error
+              ::Appsignal.report_error(error) do |transaction|
                 transaction.set_namespace(namespace_name)
+              end
+            else
+              # If we have an active transaction we should use it instead of creating a generic one
+              # That way proper namespace and other data may be transferred
+              #
+              # In case there is no transaction, a new generic background job one will be used
+              if transaction?
+                transaction.set_error(error)
+              else
+                ::Appsignal.send_error(error) do |transaction|
+                  transaction.set_namespace(namespace_name)
+                end
               end
             end
           end
@@ -99,7 +111,11 @@ module Karafka
           # @param name [Symbol] probe name
           # @param probe [Proc] code to run every minute
           def register_probe(name, probe)
-            ::Appsignal::Minutely.probes.register(name, probe)
+            if ::Appsignal::Probes.respond_to?(:register)
+              ::Appsignal::Probes.register(name, probe)
+            else
+              ::Appsignal::Minutely.probes.register(name, probe)
+            end
           end
 
           private
@@ -128,6 +144,11 @@ module Karafka
           #   instrumentation even before appsignal gem is loaded.
           def namespace_name
             @namespace_name ||= ::Appsignal::Transaction::BACKGROUND_JOB
+          end
+
+          def version_4_or_newer?
+            @version_4_or_newer ||=
+              Gem::Version.new(Appsignal::VERSION) >= Gem::Version.new("4.0.0")
           end
         end
       end
