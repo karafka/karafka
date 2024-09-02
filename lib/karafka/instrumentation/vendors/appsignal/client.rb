@@ -15,6 +15,8 @@ module Karafka
           #   nil if it is to remain default.
           #   Defaults to `Appsignal::Transaction::BACKGROUND_JOB` in the execution flow.
           def initialize(namespace_name: nil)
+            @version_4_or_newer =
+              Gem::Version.new(Appsignal::VERSION) >= Gem::Version.new("4.0.0")
             @namespace_name = namespace_name
           end
 
@@ -23,11 +25,16 @@ module Karafka
           # @param action_name [String] action name. For processing this should be equal to
           #   consumer class + method name
           def start_transaction(action_name)
-            transaction = ::Appsignal::Transaction.create(
-              SecureRandom.uuid,
-              namespace_name,
-              ::Appsignal::Transaction::GenericRequest.new({})
-            )
+            transaction =
+              if @version_4_or_newer
+                ::Appsignal::Transaction.create(namespace_name)
+              else
+                ::Appsignal::Transaction.create(
+                  SecureRandom.uuid,
+                  namespace_name,
+                  ::Appsignal::Transaction::GenericRequest.new({})
+                )
+              end
 
             transaction.set_action_if_nil(action_name)
           end
