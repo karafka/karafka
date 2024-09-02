@@ -140,6 +140,7 @@ en:
     consumer_group:
       missing: needs to be present
       topics_names_not_unique: all topic names within a single consumer group must be unique
+      topics_many_consumers_same_topic: 'topic within a single consumer group cannot have distinct consumers'
       id_format: 'needs to be a string with a Kafka accepted format'
       topics_format: needs to be a non-empty array
       topics_namespaced_names_not_unique: |
