@@ -99,7 +99,11 @@ module Karafka
           # @param name [Symbol] probe name
           # @param probe [Proc] code to run every minute
           def register_probe(name, probe)
-            ::Appsignal::Minutely.probes.register(name, probe)
+            if ::Appsignal::Probes.respond_to?(:register)
+              ::Appsignal::Probes.register(name, probe)
+            else
+              ::Appsignal::Minutely.probes.register(name, probe)
+            end
           end
 
           private
