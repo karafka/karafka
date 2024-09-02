@@ -52,10 +52,10 @@ module Karafka
           def metadata=(metadata_hash)
             return unless transaction?
 
-            transaction = ::Appsignal::Transaction.current
+            current_transaction = transaction
 
             stringify_hash(metadata_hash).each do |key, value|
-              transaction.set_metadata(key, value)
+              current_transaction.set_metadata(key, value)
             end
           end
 
