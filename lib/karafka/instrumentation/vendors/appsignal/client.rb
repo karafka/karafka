@@ -78,19 +78,26 @@ module Karafka
             )
           end
 
-          # Sends the error that occurred to Appsignal
+          # Report the error that occurred to Appsignal
           #
           # @param error [Object] error we want to ship to Appsignal
-          def send_error(error)
-            # If we have an active transaction we should use it instead of creating a generic one
-            # That way proper namespace and other data may be transferred
-            #
-            # In case there is no transaction, a new generic background job one will be used
-            if transaction?
-              transaction.set_error(error)
-            else
-              ::Appsignal.send_error(error) do |transaction|
+          def report_error(error)
+            if ::Appsignal.respond_to?(:report_error)
+              # This helper will always report the error
+              ::Appsignal.report_error(error) do |transaction|
                 transaction.set_namespace(namespace_name)
+              end
+            else
+              # If we have an active transaction we should use it instead of creating a generic one
+              # That way proper namespace and other data may be transferred
+              #
+              # In case there is no transaction, a new generic background job one will be used
+              if transaction?
+                transaction.set_error(error)
+              else
+                ::Appsignal.send_error(error) do |transaction|
+                  transaction.set_namespace(namespace_name)
+                end
               end
             end
           end

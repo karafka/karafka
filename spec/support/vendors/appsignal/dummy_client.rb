@@ -36,7 +36,7 @@ module Vendors
       # Buffers the error
       #
       # @param error [Object]
-      def send_error(error)
+      def report_error(error)
         @buffer[:errors][0] << error
       end
 
