@@ -92,17 +92,15 @@ module Karafka
               ::Appsignal.report_error(error) do |transaction|
                 transaction.set_namespace(namespace_name)
               end
+            # If we have an active transaction we should use it instead of creating a generic one
+            # That way proper namespace and other data may be transferred
+            #
+            # In case there is no transaction, a new generic background job one will be used
+            elsif transaction?
+              transaction.set_error(error)
             else
-              # If we have an active transaction we should use it instead of creating a generic one
-              # That way proper namespace and other data may be transferred
-              #
-              # In case there is no transaction, a new generic background job one will be used
-              if transaction?
-                transaction.set_error(error)
-              else
-                ::Appsignal.send_error(error) do |transaction|
-                  transaction.set_namespace(namespace_name)
-                end
+              ::Appsignal.send_error(error) do |transaction|
+                transaction.set_namespace(namespace_name)
               end
             end
           end
@@ -146,9 +144,11 @@ module Karafka
             @namespace_name ||= ::Appsignal::Transaction::BACKGROUND_JOB
           end
 
+          # @return [Boolean] is this v4+ version of Appsignal gem or older. Used for backwards
+          #   compatibility checks.
           def version_4_or_newer?
             @version_4_or_newer ||=
-              Gem::Version.new(Appsignal::VERSION) >= Gem::Version.new("4.0.0")
+              Gem::Version.new(Appsignal::VERSION) >= Gem::Version.new('4.0.0')
           end
         end
       end
