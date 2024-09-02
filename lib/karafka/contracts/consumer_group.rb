@@ -25,6 +25,23 @@ module Karafka
         [[%i[topics], :names_not_unique]]
       end
 
+      # Prevent same topics subscriptions in one CG with different consumer classes
+      # This should prevent users from accidentally creating multi-sg one CG setup with weird
+      # different consumer usage. If you need to consume same topic twice, use distinct CGs.
+      virtual do |data, errors|
+        next unless errors.empty?
+
+        topics_consumers = Hash.new { |h, k| h[k] = Set.new }
+
+        data.fetch(:topics).map do |topic|
+          topics_consumers[topic[:name]] << topic[:consumer]
+        end
+
+        next if topics_consumers.values.map(&:size).all? { |count| count == 1 }
+
+        [[%i[topics], :many_consumers_same_topic]]
+      end
+
       virtual do |data, errors|
         next unless errors.empty?
         next unless ::Karafka::App.config.strict_topics_namespacing
