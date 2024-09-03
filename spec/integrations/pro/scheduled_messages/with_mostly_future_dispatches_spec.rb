@@ -25,7 +25,7 @@ distant_future = Array.new(50) do |i|
   Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i + 60 + (3_600 * i),
-    envelope: { topic: DT.topics[0] }
+    envelope: { topic: DT.topics[0], partition: 0 }
   )
 end
 
@@ -40,7 +40,7 @@ close_future = Array.new(2) do |i|
   Karafka::Pro::ScheduledMessages.schedule(
     message: message,
     epoch: Time.now.to_i + 1,
-    envelope: { topic: DT.topics[0] }
+    envelope: { topic: DT.topics[0], partition: 0 }
   )
 end
 
@@ -65,8 +65,8 @@ tomorrow_date = Date.today + 1
 tomorrow_date_str = tomorrow_date.strftime('%Y-%m-%d')
 
 # This spec is time based, so we cannot check all direct references
-assert state.payload[:daily].key?(tomorrow_date_str.to_sym)
+assert state.payload[:daily].key?(tomorrow_date_str.to_sym), state.payload
 
-assert_equal 2, dispatched.size
+assert_equal 2, dispatched.size, state.payload
 
-assert_equal dispatched.map(&:key).sort, %w[key100 key101]
+assert_equal dispatched.map(&:key).sort, %w[key100 key101], state.payload

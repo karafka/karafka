@@ -12,6 +12,7 @@ ALLOWED_NAMES = %w[
   app.rb
   puma.rb
   assertions.rb
+  config.ru
 ].freeze
 
 not_prefixed = []
