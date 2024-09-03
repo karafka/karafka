@@ -12,12 +12,7 @@ RSpec.describe_current do
   let(:serializer) { described_class.new }
   let(:float_now) { rand }
 
-  before do
-    allow(Process)
-      .to receive(:clock_gettime)
-      .with(Process::CLOCK_REALTIME)
-      .and_return(float_now)
-  end
+  before { allow(serializer).to receive(:float_now).and_return(float_now) }
 
   describe '#state' do
     it 'serializes and compresses the state data' do
