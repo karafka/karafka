@@ -56,6 +56,7 @@ start_karafka_and_wait_until(sleep: 1) do
 
   next if dispatched.size < 2 || state.nil?
   next false unless state.payload[:daily].size >= 2
+  next false if state.payload[:state] == 'loading'
 
   true
 end
