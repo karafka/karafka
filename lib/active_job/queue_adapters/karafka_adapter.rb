@@ -29,6 +29,12 @@ module ActiveJob
       def enqueue_at(_job, _timestamp)
         raise NotImplementedError, 'This queueing backend does not support scheduling jobs.'
       end
+
+      # @return [true] should we by default enqueue after the transaction and not during.
+      #   Defaults to true to prevent weird issues during rollbacks, etc.
+      def enqueue_after_transaction_commit?
+        true
+      end
     end
   end
 end
