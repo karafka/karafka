@@ -12,4 +12,4 @@ gem 'activerecord', '6.1.7.6'
 gem 'activesupport', '6.1.7.6'
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
 gem 'railties', '6.1.7.6'
-gem 'rspec-rails'
+gem 'rspec-rails', '6.1.5'
