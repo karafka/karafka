@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.4.11 (Unreleased)
+- [Enhancement] Support for enqueue_after_transaction_commit in rails active job.
+
 ## 2.4.10 (2024-09-03)
 - **[Feature]** Provide Kafka based Scheduled Messages to be able to send messages in the future via a proxy topic.
 - [Enhancement] Introduce a `#assigned` hook for consumers to be able to trigger actions when consumer is built and assigned but before first consume/ticking, etc.

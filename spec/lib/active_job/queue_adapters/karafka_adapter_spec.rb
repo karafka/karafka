@@ -39,4 +39,8 @@ RSpec.describe_current do
       expect(adapter.enqueue_all(jobs)).to eql jobs.size
     end
   end
+
+  describe '.enqueue_after_transaction_commit?' do
+    it { expect(adapter.enqueue_after_transaction_commit?).to eq(true) }
+  end
 end
