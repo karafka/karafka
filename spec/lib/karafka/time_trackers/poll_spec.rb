@@ -5,12 +5,32 @@ RSpec.describe_current do
 
   let(:times) { [1, 1.002] }
 
-  before do
+  around do |example|
     # We use different clock in 3.2 that does not require multiplication
     # @see `::Karafka::Core::Helpers::Time` for more details
     normalized = RUBY_VERSION >= '3.2' ? times.map { |time| time * 1_000 } : times
 
-    allow(::Process).to receive(:clock_gettime).and_return(*normalized)
+    # Store the original method in the current thread to restore it later
+    original_method = Process.method(:clock_gettime)
+
+    # Stub only for the current thread
+    allow(Process).to receive(:clock_gettime) do |*args|
+      if Thread.current[:stub_process_clock_gettime]
+        normalized
+      else
+        original_method.call(*args)
+      end
+    end
+
+    # Activate the stub for this thread
+    Thread.current[:stub_process_clock_gettime] = true
+
+    begin
+      example.run
+    ensure
+      # Deactivate the stub and clean up
+      Thread.current[:stub_process_clock_gettime] = false
+    end
   end
 
   context 'when we still have time after 2 ms and it is first attempt' do
