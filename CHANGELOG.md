@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.4.11 (Unreleased)
+## 2.4.11 (2024-09-04)
 - [Enhancement] Validate envelope target topic type for Scheduled Messages.
 - [Enhancement] Support for enqueue_after_transaction_commit in rails active job.
 - [Fix] Fix invalid reference to AppSignal version.
