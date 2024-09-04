@@ -28,6 +28,12 @@ RSpec.describe_current do
       }
     end
 
+    before do
+      Karafka::App.config.internal.routing.builder.draw do
+        scheduled_messages(:proxy_topic)
+      end
+    end
+
     context 'when message is not valid' do
       before { message.delete(:topic) }
 
@@ -35,7 +41,7 @@ RSpec.describe_current do
     end
 
     context 'when message is valid but envelope lacks' do
-      let(:envelope) { {} }
+      let(:envelope) { { topic: 'proxy_topic', partition: nil } }
 
       it { expect { proxy }.to raise_error(WaterDrop::Errors::MessageInvalidError) }
     end

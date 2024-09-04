@@ -135,3 +135,4 @@ en:
       key_format: needs to be a non-empty string unique within the partition
       headers_schedule_target_epoch_in_the_past: 'scheduling cannot happen in the past'
       headers_format: are not correct
+      not_a_scheduled_messages_topic: 'the envelope topic is not a scheduled messages topic'
