@@ -2,6 +2,7 @@
 
 ## 2.4.11 (Unreleased)
 - [Enhancement] Support for enqueue_after_transaction_commit in rails active job.
+- [Fix] Fix invalid reference to AppSignal version.
 
 ## 2.4.10 (2024-09-03)
 - **[Feature]** Provide Kafka based Scheduled Messages to be able to send messages in the future via a proxy topic.
