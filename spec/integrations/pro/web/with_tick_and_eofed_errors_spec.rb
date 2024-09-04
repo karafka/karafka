@@ -2,7 +2,7 @@
 
 # When we use web-ui and error happens during eofed and tick when no offsets were marked as
 # consumed, web UI should not fail. It used to fail because it was trying to extract offsets
-# fron not (yet) existing marking
+# from not (yet) existing marking
 
 setup_karafka(allow_errors: %w[consumer.tick.error consumer.eofed.error]) do |config|
   config.kafka[:'enable.partition.eof'] = true
