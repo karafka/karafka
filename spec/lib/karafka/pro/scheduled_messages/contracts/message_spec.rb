@@ -6,6 +6,7 @@ RSpec.describe_current do
   let(:message) do
     {
       key: 'message_key',
+      topic: 'proxy_topic',
       headers: {
         'schedule_schema_version' => '1.0',
         'schedule_target_epoch' => (Time.now.to_i + 60).to_s,
@@ -13,6 +14,12 @@ RSpec.describe_current do
         'schedule_target_topic' => 'valid_topic'
       }
     }
+  end
+
+  before do
+    Karafka::App.config.internal.routing.builder.draw do
+      scheduled_messages(:proxy_topic)
+    end
   end
 
   context 'when message is valid' do
