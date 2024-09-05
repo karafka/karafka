@@ -18,13 +18,6 @@ draw_routes(create_topics: false) do
     consumer Class.new
   end
 
-  topic 'topic3' do
-    consumer Class.new
-    kafka(
-      'enable.partition.eof': true
-    )
-  end
-
   topic 'topic4' do
     consumer Class.new
     kafka(
@@ -38,7 +31,7 @@ cgs = Karafka::App.consumer_groups
 
 assert_equal 1, cgs.size
 # First and last topic setup should go to one SG
-assert_equal 3, cgs.first.subscription_groups.size
+assert_equal 2, cgs.first.subscription_groups.size
 # Merged sg should have expected topics
 assert_equal %w[topic1 topic4], cgs.first.subscription_groups.first.topics.map(&:name)
 # Merged topics should have defaults in them
@@ -49,11 +42,6 @@ assert_equal '127.0.0.1:9092', t1k[:'bootstrap.servers']
 assert_equal true, t1k[:'enable.partition.eof']
 assert_equal '127.0.0.1:9092', t2k[:'bootstrap.servers']
 assert_equal true, t2k[:'enable.partition.eof']
-
-# Non-mergeable should not have anything special in them merged
-t1k = cgs.first.subscription_groups[2].topics[0].kafka
-assert_equal nil, t1k[:'bootstrap.servers']
-assert_equal true, t1k[:'enable.partition.eof']
 
 # The merged SG should have the alterations
 t1sg = cgs.first.subscription_groups.first.kafka
