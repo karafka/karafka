@@ -10,7 +10,7 @@ RSpec.describe_current do
       active: true,
       consumer: Class.new,
       deserializers: {},
-      kafka: { 'bootstrap.servers' => 'localhost:9092' },
+      kafka: { 'bootstrap.servers': 'localhost:9092' },
       max_messages: 10,
       max_wait_time: 10_000,
       initial_offset: 'earliest',
@@ -210,6 +210,12 @@ RSpec.describe_current do
 
   context 'when kafka contains errors from rdkafka' do
     before { config[:kafka] = { 'message.max.bytes' => 0 } }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when kafka has some stuff but not bootstrap servers' do
+    before { config[:kafka] = { 'message.max.bytes' => 1_000 } }
 
     it { expect(check).not_to be_success }
   end

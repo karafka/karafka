@@ -51,6 +51,20 @@ module Karafka
         end
       end
 
+      # When users redefine kafka scope settings per topic, they often forget to define the
+      # basic stuff as they assume it is auto-inherited. It is not (unless inherit flag used),
+      # leaving them with things like bootstrap.servers undefined. This checks that bootstrap
+      # servers are defined so we can catch those issues before they cause more problems.
+      virtual do |data, errors|
+        next unless errors.empty?
+
+        kafka = data.fetch(:kafka)
+
+        next if kafka.key?(:'bootstrap.servers')
+
+        [[%w[kafka bootstrap.servers], :missing]]
+      end
+
       virtual do |data, errors|
         next unless errors.empty?
         next unless ::Karafka::App.config.strict_topics_namespacing
