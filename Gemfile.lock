@@ -36,7 +36,7 @@ GEM
     erubi (1.13.0)
     et-orbi (1.2.11)
       tzinfo
-    factory_bot (6.4.6)
+    factory_bot (6.5.0)
       activesupport (>= 5.0.0)
     ffi (1.17.0)
     fugit (1.11.1)
@@ -61,7 +61,7 @@ GEM
       karafka-core (>= 2.4.0, < 2.5.0)
       roda (~> 3.68, >= 3.69)
       tilt (~> 2.0)
-    logger (1.6.0)
+    logger (1.6.1)
     mini_portile2 (2.8.7)
     minitest (5.25.1)
     ostruct (0.6.0)
