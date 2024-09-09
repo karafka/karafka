@@ -209,4 +209,61 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#dispatch_at' do
+    let(:timestamp) { current_time + 3600 }
+    let(:proxy_topic) { 'scheduled_jobs' }
+    let(:proxy_message) do
+      {
+        topic: proxy_topic,
+        payload: serialized_payload,
+        epoch: timestamp.to_i,
+        envelope: {
+          topic: proxy_topic
+        }
+      }
+    end
+
+    before do
+      job_class.karafka_options(scheduled_messages_topic: proxy_topic)
+      allow(Karafka::Pro::ScheduledMessages).to receive(:schedule).and_return(proxy_message)
+      allow(::Karafka.producer).to receive(:produce_async)
+    end
+
+    it 'expects to use scheduled messages feature with correct parameters' do
+      dispatcher.dispatch_at(job, timestamp)
+
+      expect(Karafka::Pro::ScheduledMessages).to have_received(:schedule).with(
+        message: {
+          topic: job.queue_name,
+          payload: serialized_payload
+        },
+        epoch: timestamp.to_i,
+        envelope: {
+          topic: proxy_topic
+        }
+      )
+
+      expect(::Karafka.producer).to have_received(:produce_async).with(proxy_message)
+    end
+
+    context 'when scheduled_messages_topic is not defined' do
+      it 'raises an error' do
+        expect { job_class.karafka_options(scheduled_messages_topic: nil) }
+          .to raise_error(Karafka::Errors::InvalidConfigurationError)
+      end
+    end
+
+    context 'when scheduled_messages_topic is not scheduled messages topic' do
+      before do
+        allow(Karafka::Pro::ScheduledMessages).to receive(:schedule).and_call_original
+        job_class.karafka_options(scheduled_messages_topic: 'not-a-proper-proxy')
+      end
+
+      it 'raises an error' do
+        expect { dispatcher.dispatch_at(job, timestamp) }
+          .to raise_error(Karafka::Errors::InvalidConfigurationError)
+      end
+    end
+  end
 end

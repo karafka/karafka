@@ -122,4 +122,10 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#dispatch_at' do
+    it 'expect to raise an error as it is not supported in the OSS version' do
+      expect { dispatcher.dispatch_at(job, time_now) }.to raise_error(NotImplementedError)
+    end
+  end
 end

@@ -164,7 +164,7 @@ jobs:
         run: bin/integrations --exclude '/pro'
 
   integrations_pro:
-    timeout-minutes: 40
+    timeout-minutes: 45
     runs-on: ubuntu-latest
     needs: diffend
     strategy:
