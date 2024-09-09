@@ -95,6 +95,23 @@ module Karafka
           end
         RUBY
       end
+
+      # Forces the debug setup onto Karafka and default WaterDrop producer.
+      # This needs to run prior to any operations that would cache state, like consuming or
+      # producing messages.
+      #
+      # @param contexts [String] librdkafka low level debug contexts for granular debugging
+      def debug!(contexts = 'all')
+        logger.level = ::Logger::DEBUG
+        producer.config.logger.level = ::Logger::DEBUG
+
+        config.kafka[:debug] = contexts
+        producer.config.kafka[:debug] = contexts
+
+        consumer_groups.map(&:topics).flat_map(&:to_a).each do |topic|
+          topic.kafka[:debug] = contexts
+        end
+      end
     end
   end
 end

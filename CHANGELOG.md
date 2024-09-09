@@ -3,6 +3,7 @@
 ## 2.4.12 (Unreleased)
 - [Enhancement] Validate presence of `bootstrap.servers` to avoid incomplete partial reconfiguration.
 - [Enhancement] Support `ActiveJob#enqueue_at` via Scheduled Messages feature (Pro).
+- [Enhancement] Introduce `Karafka::App#debug!` that will switch Karafka and the default producer into extensive debug mode. Useful for CLI debugging.
 
 ## 2.4.11 (2024-09-04)
 - [Enhancement] Validate envelope target topic type for Scheduled Messages.
