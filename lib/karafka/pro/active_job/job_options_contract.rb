@@ -28,12 +28,21 @@ module Karafka
         optional(:producer) { |val| val.nil? || val.respond_to?(:call) }
         optional(:partitioner) { |val| val.respond_to?(:call) }
         optional(:partition_key_type) { |val| %i[key partition_key partition].include?(val) }
+
+        # Whether this is a legit scheduled messages topic will be validated during the first
+        # dispatch, so we do not repeat validations here
+        optional(:scheduled_messages_topic) do |val|
+          (val.is_a?(String) || val.is_a?(Symbol)) &&
+            ::Karafka::Contracts::TOPIC_REGEXP.match?(val.to_s)
+        end
+
         optional(:dispatch_method) do |val|
           %i[
             produce_async
             produce_sync
           ].include?(val)
         end
+
         optional(:dispatch_many_method) do |val|
           %i[
             produce_many_async

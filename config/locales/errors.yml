@@ -154,6 +154,7 @@ en:
       partitioner_format: 'needs to respond to #call'
       partition_key_type_format: 'needs to be either :key or :partition_key'
       producer_format: 'needs to respond to #call'
+      scheduled_messages_topic_format: 'needs to be a string with a Kafka accepted format'
 
     test:
       missing: needs to be present

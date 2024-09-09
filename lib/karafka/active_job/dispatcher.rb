@@ -46,6 +46,19 @@ module Karafka
         end
       end
 
+      # Raises info, that Karafka backend does not support scheduling jobs
+      #
+      # @param _job [Object] job we cannot enqueue
+      # @param _timestamp [Time] time when job should run
+      #
+      # @note Karafka Pro supports this feature
+      def dispatch_at(_job, _timestamp)
+        raise NotImplementedError, <<~ERROR_MESSAGE
+          This queueing backend does not support scheduling jobs.
+          Consider using Karafka Pro, which supports this via the Scheduled Messages feature.
+        ERROR_MESSAGE
+      end
+
       private
 
       # @param job [ActiveJob::Base] job

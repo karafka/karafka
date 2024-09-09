@@ -22,12 +22,13 @@ module ActiveJob
         jobs.size
       end
 
-      # Raises info, that Karafka backend does not support scheduling jobs
+      # Delegates time sensitive dispatch to the dispatcher. OSS will raise error, Pro will handle
+      # this as it supports scheduled messages.
       #
-      # @param _job [Object] job we cannot enqueue
-      # @param _timestamp [Time] time when job should run
-      def enqueue_at(_job, _timestamp)
-        raise NotImplementedError, 'This queueing backend does not support scheduling jobs.'
+      # @param job [Object] job we want to enqueue
+      # @param timestamp [Time] time when job should run
+      def enqueue_at(job, timestamp)
+        ::Karafka::App.config.internal.active_job.dispatcher.dispatch_at(job, timestamp)
       end
 
       # @return [true] should we by default enqueue after the transaction and not during.

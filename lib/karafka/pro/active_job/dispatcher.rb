@@ -29,6 +29,9 @@ module Karafka
           partitioner: nil,
           # Allows for usage of `:key` or `:partition_key`
           partition_key_type: :key,
+          # Topic to where this message should go when using scheduled messages. When defined,
+          # it will be used with `enqueue_at`. If not defined it will raise an error.
+          scheduled_messages_topic: nil,
           # Allows for setting a callable producer since at the moment of defining the class,
           # variants may not be available
           #
@@ -81,6 +84,31 @@ module Karafka
               )
             end
           end
+        end
+
+        # Will enqueue a job to run in the future
+        #
+        # @param job [Object] job we want to enqueue
+        # @param timestamp [Time] time when job should run
+        def dispatch_at(job, timestamp)
+          target_message = dispatch_details(job).merge!(
+            topic: job.queue_name,
+            payload: ::ActiveSupport::JSON.encode(serialize_job(job))
+          )
+
+          proxy_message = Pro::ScheduledMessages.schedule(
+            message: target_message,
+            epoch: timestamp.to_i,
+            envelope: {
+              # Select the scheduled messages proxy topic
+              topic: fetch_option(job, :scheduled_messages_topic, DEFAULTS)
+            }
+          )
+
+          producer(job).public_send(
+            fetch_option(job, :dispatch_method, DEFAULTS),
+            proxy_message
+          )
         end
 
         private
