@@ -8,15 +8,9 @@ module Karafka
     # heavy-deserialization data without slowing down the whole application.
     class Message
       extend Forwardable
-
-      class << self
-        # @return [Object] general parser
-        # @note We cache it here for performance reasons. It is 2.5x times faster than getting it
-        #   via the config chain.
-        def parser
-          @parser ||= App.config.internal.messages.parser
-        end
-      end
+      extend Helpers::ConfigImporter.new(
+        parser: %i[internal messages parser]
+      )
 
       attr_reader :metadata
       # raw payload needs to be mutable as we want to have option to change it in the parser
