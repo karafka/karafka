@@ -25,6 +25,19 @@ module Karafka
           RUBY
         end
       end
+
+      # @param model [Object] object to which we want to add the config fetcher on a class level
+      def extended(model)
+        super
+
+        @attributes.each do |name, path|
+          model.class_eval <<~RUBY, __FILE__, __LINE__ + 1
+            def self.#{name}
+              @#{name} ||= ::Karafka::App.config.#{path.join('.')}
+            end
+          RUBY
+        end
+      end
     end
   end
 end
