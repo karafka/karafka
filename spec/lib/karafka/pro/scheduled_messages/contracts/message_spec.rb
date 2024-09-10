@@ -10,7 +10,7 @@ RSpec.describe_current do
       headers: {
         'schedule_schema_version' => '1.0',
         'schedule_target_epoch' => (Time.now.to_i + 60).to_s,
-        'schedule_source_type' => 'type',
+        'schedule_source_type' => 'schedule',
         'schedule_target_topic' => 'valid_topic'
       }
     }

@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.12 (Unreleased)
+- [Enhancement] Verify cancellation request envelope topic similar to the schedule one.
 - [Enhancement] Validate presence of `bootstrap.servers` to avoid incomplete partial reconfiguration.
 - [Enhancement] Support `ActiveJob#enqueue_at` via Scheduled Messages feature (Pro).
 - [Enhancement] Introduce `Karafka::App#debug!` that will switch Karafka and the default producer into extensive debug mode. Useful for CLI debugging.
