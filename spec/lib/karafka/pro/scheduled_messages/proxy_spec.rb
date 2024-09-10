@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
+  before do
+    Karafka::App.config.internal.routing.builder.draw do
+      scheduled_messages(:proxy_topic)
+    end
+  end
+
   describe '.schedule' do
     subject(:proxy) do
       described_class.schedule(message: message, epoch: epoch, envelope: envelope)
@@ -26,12 +32,6 @@ RSpec.describe_current do
           'special' => 'header'
         }
       }
-    end
-
-    before do
-      Karafka::App.config.internal.routing.builder.draw do
-        scheduled_messages(:proxy_topic)
-      end
     end
 
     context 'when message is not valid' do
@@ -84,7 +84,7 @@ RSpec.describe_current do
     let(:key) { 'unique-key' }
     let(:envelope) do
       {
-        topic: 'cancel_topic',
+        topic: 'proxy_topic',
         partition: 1
       }
     end
@@ -103,6 +103,17 @@ RSpec.describe_current do
 
     it 'has a nil payload' do
       expect(cancel_message[:payload]).to be_nil
+    end
+
+    context 'when trying to cancel on a non-scheduled messages topic' do
+      let(:envelope) do
+        {
+          topic: 'random_topic',
+          partition: 1
+        }
+      end
+
+      it { expect { cancel_message }.to raise_error(Karafka::Errors::InvalidConfigurationError) }
     end
   end
 

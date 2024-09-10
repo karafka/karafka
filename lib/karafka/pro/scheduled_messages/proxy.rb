@@ -87,12 +87,7 @@ module Karafka
             }.merge(envelope)
 
             enrich(proxy_message, message)
-
-            # Final validation to make sure all user provided extra data and what we have built
-            # complies with our requirements
-            POST_CONTRACT.validate!(proxy_message)
-            # After proxy specific validations we also ensure, that the final form is correct
-            MSG_CONTRACT.validate!(proxy_message, WaterDrop::Errors::MessageInvalidError)
+            validate!(proxy_message)
 
             proxy_message
           end
@@ -106,7 +101,7 @@ module Karafka
           # @note Technically it is a tombstone but we differentiate just for the sake of ability
           #   to debug stuff if needed
           def cancel(key:, envelope: {})
-            {
+            proxy_message = {
               key: key,
               payload: nil,
               headers: {
@@ -114,6 +109,11 @@ module Karafka
                 'schedule_source_type' => 'cancel'
               }
             }.merge(envelope)
+
+            # Ensure user provided envelope is with all expected details
+            validate!(proxy_message)
+
+            proxy_message
           end
 
           # Builds tombstone with the dispatched message details. Those details can be used
@@ -168,6 +168,15 @@ module Karafka
 
               proxy_message[:partition_key] = message.fetch(attribute).to_s
             end
+          end
+
+          # Final validations to make sure all user provided extra data and what we have built
+          # complies with our requirements
+          # @param proxy_message [Hash] our message envelope
+          def validate!(proxy_message)
+            POST_CONTRACT.validate!(proxy_message)
+            # After proxy specific validations we also ensure, that the final form is correct
+            MSG_CONTRACT.validate!(proxy_message, WaterDrop::Errors::MessageInvalidError)
           end
         end
       end
