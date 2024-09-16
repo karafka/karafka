@@ -1,7 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.12 (Unreleased)
-- **[Feature]** Provide Poll Guarding feature as a fast alternative to Long-Running Jobs (Pro).
+- **[Feature]** Provide Adaptive Iterator feature as a fast alternative to Long-Running Jobs (Pro).
 - [Enhancement] Provide `Consumer#each` as a delegation to messages batch.
 - [Enhancement] Verify cancellation request envelope topic similar to the schedule one.
 - [Enhancement] Validate presence of `bootstrap.servers` to avoid incomplete partial reconfiguration.
