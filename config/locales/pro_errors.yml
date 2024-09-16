@@ -79,7 +79,6 @@ en:
       adaptive_iterator.active_missing: needs to be present
       adaptive_iterator.active_format: 'needs to be boolean'
       adaptive_iterator.marking_method_format: 'needs to be either #mark_as_consumed or #mark_as_consumed!'
-      adaptive_iterator.adaptive_margin_format: 'needs to be boolean'
       adaptive_iterator.clean_after_yielding_format: 'needs to be boolean'
       adaptive_iterator.safety_margin_format: 'needs to be between 1 and 99'
       adaptive_iterator_with_virtual_partitions: 'cannot be used with virtual partitions'

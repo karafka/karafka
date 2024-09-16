@@ -31,7 +31,6 @@ module Karafka
               nested(:adaptive_iterator) do
                 required(:active) { |val| [true, false].include?(val) }
                 required(:safety_margin) { |val| val.is_a?(Integer) && val.positive? && val < 100 }
-                required(:adaptive_margin) { |val| [true, false].include?(val) }
                 required(:clean_after_yielding) { |val| [true, false].include?(val) }
 
                 required(:marking_method) do |val|

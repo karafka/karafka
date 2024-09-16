@@ -12,7 +12,6 @@ RSpec.describe_current do
       it 'expects to initialize with defaults' do
         expect(topic.adaptive_iterator.active?).to eq(false)
         expect(topic.adaptive_iterator.safety_margin).to eq(10)
-        expect(topic.adaptive_iterator.adaptive_margin).to eq(true)
         expect(topic.adaptive_iterator.marking_method).to eq(:mark_as_consumed)
         expect(topic.adaptive_iterator.clean_after_yielding).to eq(true)
       end
@@ -23,13 +22,6 @@ RSpec.describe_current do
         safety_margin = 5
         topic.adaptive_iterator(safety_margin: safety_margin)
         expect(topic.adaptive_iterator.safety_margin).to eq(safety_margin)
-      end
-    end
-
-    context 'when we use adaptive_iterator with adaptive_margin set to false' do
-      it 'expects to use the provided adaptive_margin' do
-        topic.adaptive_iterator(adaptive_margin: false)
-        expect(topic.adaptive_iterator.adaptive_margin).to eq(false)
       end
     end
 

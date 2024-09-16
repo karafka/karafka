@@ -24,8 +24,7 @@ draw_routes do
     consumer Consumer
     adaptive_iterator(
       active: true,
-      safety_margin: 20,
-      adaptive_margin: false
+      safety_margin: 20
     )
   end
 end

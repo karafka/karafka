@@ -25,18 +25,14 @@ module Karafka
           # Initializes a new Tracker instance.
           #
           # @param safety_margin [Float] The safety margin percentage (0-100) to leave as a buffer.
-          # @param adaptive_margin [Boolean] Indicates if the tracker should use adaptive
-          #   processing cost monitoring.
           # @param last_polled_at [Float] The timestamp of the last polling in milliseconds.
           # @param max_poll_interval_ms [Integer] The maximum poll interval time in milliseconds.
           def initialize(
             safety_margin,
-            adaptive_margin,
             last_polled_at,
             max_poll_interval_ms
           )
             @safety_margin = safety_margin / 100.0 # Convert percentage to decimal
-            @adaptive_margin = adaptive_margin
             @last_polled_at = last_polled_at
             @max_processing_cost = 0
             @max_poll_interval_ms = max_poll_interval_ms
@@ -47,9 +43,6 @@ module Karafka
           #
           # @yield Executes the block, measuring the time taken for processing.
           def track
-            # No need to measure adaptivity if not used
-            return yield unless @adaptive_margin
-
             before = monotonic_now
 
             yield
@@ -72,7 +65,6 @@ module Karafka
             safety_margin_ms = @max_poll_interval_ms * @safety_margin
 
             return true if remaining_time_ms <= safety_margin_ms
-            return false unless @adaptive_margin
             return true if remaining_time_ms - @max_processing_cost <= safety_margin_ms
 
             false

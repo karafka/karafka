@@ -20,13 +20,11 @@ module Karafka
           Config = Struct.new(
             :active,
             :safety_margin,
-            :adaptive_margin,
             :marking_method,
             :clean_after_yielding,
             keyword_init: true
           ) do
             alias_method :active?, :active
-            alias_method :adaptive_margin?, :adaptive_margin
             alias_method :clean_after_yielding?, :clean_after_yielding
           end
         end

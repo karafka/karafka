@@ -8,7 +8,6 @@ RSpec.describe_current do
       adaptive_iterator: {
         active: true,
         safety_margin: 15,
-        adaptive_margin: true,
         clean_after_yielding: true,
         marking_method: :mark_as_consumed
       },
@@ -39,12 +38,6 @@ RSpec.describe_current do
 
   context 'when safety_margin is 100 or more' do
     before { config[:adaptive_iterator][:safety_margin] = 100 }
-
-    it { expect(check).not_to be_success }
-  end
-
-  context 'when adaptive_margin is not a boolean' do
-    before { config[:adaptive_iterator][:adaptive_margin] = nil }
 
     it { expect(check).not_to be_success }
   end

@@ -4,21 +4,19 @@ RSpec.describe_current do
   subject(:tracker) do
     described_class.new(
       safety_margin,
-      adaptive_margin,
       last_polled_at,
       max_poll_interval_ms
     )
   end
 
   let(:safety_margin) { 15 }
-  let(:adaptive_margin) { true }
   let(:last_polled_at) { described_class.new(1, 1, 1, 1).monotonic_now }
   let(:max_poll_interval_ms) { 10_000 }
 
   before { tracker }
 
   describe '#track' do
-    context 'when adaptive_margin is true' do
+    context 'when adaptive margin kicks in' do
       it 'yields the block and tracks processing time' do
         expect do |block|
           tracker.track(&block)
@@ -26,7 +24,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when adaptive_margin is false' do
+    context 'when adaptive margin does not kick in' do
       let(:adaptive_margin) { false }
 
       it 'yields the block without tracking processing time' do
@@ -54,7 +52,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when adaptive_margin is enabled and max processing cost is considered' do
+    context 'when adaptive margin kicks in and max processing cost is considered' do
       let(:max_poll_interval_ms) { 700 }
 
       it 'returns true if the remaining time is less than the max processing cost' do

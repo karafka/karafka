@@ -24,24 +24,18 @@ module Karafka
             #   Kafka, etc. We stop and seek back when we've burned 85% of the time by default.
             #   We leave 15% of time for post-processing operations so we have space before we
             #   hit max.poll.interval.ms.
-            # @param adaptive_margin [Boolean]
-            #   This computes the cost of processing based on first processed message. If the cost
-            #   of processing despite being below the safety margin would not allow us to process
-            #   the message, we will not
             # @param marking_method [Symbol] If we should, how should we mark
             # @param clean_after_yielding [Boolean]  Should we clean post-yielding via the
             #   cleaner API
             def adaptive_iterator(
               active: false,
               safety_margin: 10,
-              adaptive_margin: true,
               marking_method: :mark_as_consumed,
               clean_after_yielding: true
             )
               @adaptive_iterator ||= Config.new(
                 active: active,
                 safety_margin: safety_margin,
-                adaptive_margin: adaptive_margin,
                 marking_method: marking_method,
                 clean_after_yielding: clean_after_yielding
               )

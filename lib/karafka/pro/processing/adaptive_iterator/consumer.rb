@@ -26,7 +26,6 @@ module Karafka
 
             tracker = Tracker.new(
               adi_config.safety_margin,
-              adi_config.adaptive_margin?,
               coordinator.last_polled_at,
               topic.subscription_group.kafka.fetch(:'max.poll.interval.ms')
             )
