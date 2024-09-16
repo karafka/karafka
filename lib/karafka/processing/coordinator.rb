@@ -19,6 +19,9 @@ module Karafka
       # any messages
       attr_accessor :eofed
 
+      # Last polled at time set based on the incoming last poll time
+      attr_accessor :last_polled_at
+
       def_delegators :@pause_tracker, :attempt, :paused?
 
       # @param topic [Karafka::Routing::Topic]
@@ -38,6 +41,7 @@ module Karafka
         @failure = false
         @eofed = false
         @changed_at = monotonic_now
+        @last_polled_at = @changed_at
       end
 
       # Starts the coordinator for given consumption jobs

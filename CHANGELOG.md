@@ -1,11 +1,13 @@
 # Karafka Framework Changelog
 
 ## 2.4.12 (Unreleased)
+- **[Feature]** Provide Poll Guarding feature as a fast alternative to Long-Running Jobs (Pro).
 - [Enhancement] Verify cancellation request envelope topic similar to the schedule one.
 - [Enhancement] Validate presence of `bootstrap.servers` to avoid incomplete partial reconfiguration.
 - [Enhancement] Support `ActiveJob#enqueue_at` via Scheduled Messages feature (Pro).
 - [Enhancement] Introduce `Karafka::App#debug!` that will switch Karafka and the default producer into extensive debug mode. Useful for CLI debugging.
 - [Enhancement] Support full overwrite of the `BaseConsumer#producer`.
+- [Enhancement] Transfer the time of last poll back to the coordinator for more accurate metrics tracking.
 
 ## 2.4.11 (2024-09-04)
 - [Enhancement] Validate envelope target topic type for Scheduled Messages.

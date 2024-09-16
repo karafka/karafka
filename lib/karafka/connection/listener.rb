@@ -336,7 +336,7 @@ module Karafka
         idle_jobs = []
         eofed_jobs = []
 
-        @messages_buffer.each do |topic, partition, messages, eof|
+        @messages_buffer.each do |topic, partition, messages, eof, last_polled_at|
           # In case we did not receive any new messages without eof we skip.
           # We may yield empty array here in case we have reached eof without new messages but in
           # such cases, we can run an eof job
@@ -344,6 +344,7 @@ module Karafka
 
           coordinator = @coordinators.find_or_create(topic, partition)
           coordinator.eofed = eof
+          coordinator.last_polled_at = last_polled_at
 
           # If we did not receive any messages and we did receive eof signal, we run the eofed
           # jobs so user can take actions on reaching eof
