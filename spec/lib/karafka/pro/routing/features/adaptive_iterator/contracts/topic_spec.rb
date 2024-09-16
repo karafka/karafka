@@ -9,9 +9,14 @@ RSpec.describe_current do
         active: true,
         safety_margin: 15,
         adaptive_margin: true,
-        mark_after_yielding: true,
         clean_after_yielding: true,
         marking_method: :mark_as_consumed
+      },
+      virtual_partitions: {
+        active: false
+      },
+      long_running_job: {
+        active: false
       }
     }
   end
@@ -50,14 +55,20 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
-  context 'when mark_after_yielding is not a boolean' do
-    before { config[:adaptive_iterator][:mark_after_yielding] = nil }
+  context 'when clean_after_yielding is not a boolean' do
+    before { config[:adaptive_iterator][:clean_after_yielding] = nil }
 
     it { expect(check).not_to be_success }
   end
 
-  context 'when clean_after_yielding is not a boolean' do
-    before { config[:adaptive_iterator][:clean_after_yielding] = nil }
+  context 'when trying to use the adaptive iterator with virtual partitions' do
+    before { config[:virtual_partitions][:active] = true }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when trying to use the adaptive iterator with long running job' do
+    before { config[:long_running_job][:active] = true }
 
     it { expect(check).not_to be_success }
   end

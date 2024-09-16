@@ -21,14 +21,12 @@ module Karafka
             :active,
             :safety_margin,
             :adaptive_margin,
-            :mark_after_yielding,
             :marking_method,
             :clean_after_yielding,
             keyword_init: true
           ) do
             alias_method :active?, :active
             alias_method :adaptive_margin?, :adaptive_margin
-            alias_method :mark_after_yielding?, :mark_after_yielding
             alias_method :clean_after_yielding?, :clean_after_yielding
           end
         end

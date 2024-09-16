@@ -18,6 +18,7 @@ module Karafka
         class AdaptiveIterator < Base
           # Topic extension allowing us to enable and configure adaptive iterator
           module Topic
+            # @param active [Boolean] should we use the automatic adaptive iterator
             # @param safety_margin [Integer]
             #   How big of a margin we leave ourselves so we can safely communicate back with
             #   Kafka, etc. We stop and seek back when we've burned 85% of the time by default.
@@ -27,22 +28,20 @@ module Karafka
             #   This computes the cost of processing based on first processed message. If the cost
             #   of processing despite being below the safety margin would not allow us to process
             #   the message, we will not
-            # @param mark_after_yielding [Boolean] Should we mark after each message
             # @param marking_method [Symbol] If we should, how should we mark
             # @param clean_after_yielding [Boolean]  Should we clean post-yielding via the
             #   cleaner API
             def adaptive_iterator(
-              safety_margin: 15,
+              active: false,
+              safety_margin: 10,
               adaptive_margin: true,
-              mark_after_yielding: true,
               marking_method: :mark_as_consumed,
               clean_after_yielding: true
             )
               @adaptive_iterator ||= Config.new(
-                active: true,
+                active: active,
                 safety_margin: safety_margin,
                 adaptive_margin: adaptive_margin,
-                mark_after_yielding: mark_after_yielding,
                 marking_method: marking_method,
                 clean_after_yielding: clean_after_yielding
               )

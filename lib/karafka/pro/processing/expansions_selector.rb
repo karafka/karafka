@@ -25,6 +25,7 @@ module Karafka
           expansions = super
           expansions << Pro::Processing::Piping::Consumer
           expansions << Pro::Processing::OffsetMetadata::Consumer if topic.offset_metadata?
+          expansions << Pro::Processing::AdaptiveIterator::Consumer if topic.adaptive_iterator?
           expansions << Pro::Processing::PeriodicJob::Consumer if topic.periodic_job?
           expansions
         end

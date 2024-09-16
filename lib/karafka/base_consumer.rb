@@ -14,6 +14,8 @@ module Karafka
     def_delegators :producer, :produce_async, :produce_sync, :produce_many_async,
                    :produce_many_sync
 
+    def_delegators :messages, :each
+
     # @return [String] id of the current consumer
     attr_reader :id
     # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
@@ -291,13 +293,23 @@ module Karafka
       coordinator.manual_seek if manual_seek
       coordinator.seek_offset = nil if reset_offset
 
-      client.seek(
-        Karafka::Messages::Seek.new(
-          topic.name,
-          partition,
-          offset
-        )
+      message = Karafka::Messages::Seek.new(
+        topic.name,
+        partition,
+        offset
       )
+
+      Karafka.monitor.instrument(
+        'consumer.consuming.seek',
+        caller: self,
+        topic: topic.name,
+        partition: partition,
+        message: message,
+        manual_seek: manual_seek,
+        reset_offset: reset_offset
+      ) do
+        client.seek(message)
+      end
     end
 
     # @return [Boolean] true if partition was revoked from the current consumer
