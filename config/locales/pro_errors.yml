@@ -76,6 +76,14 @@ en:
       direct_assignments_swarm_overbooked: 'cannot allocate partitions in swarm that were not assigned'
       direct_assignments_patterns_active: 'patterns cannot be used with direct assignments'
 
+      adaptive_iterator.active_missing: needs to be present
+      adaptive_iterator.active_format: 'needs to be boolean'
+      adaptive_iterator.marking_method_format: 'needs to be either #mark_as_consumed or #mark_as_consumed!'
+      adaptive_iterator.clean_after_yielding_format: 'needs to be boolean'
+      adaptive_iterator.safety_margin_format: 'needs to be between 1 and 99'
+      adaptive_iterator_with_virtual_partitions: 'cannot be used with virtual partitions'
+      adaptive_iterator_with_long_running_job: 'cannot be used with long running jobs'
+
     consumer_group:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present

@@ -127,6 +127,21 @@ module Karafka
         MSG
       end
 
+      # Prints info about seeking to a particular location
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_consumer_consuming_seek(event)
+        topic = event[:topic]
+        partition = event[:partition]
+        seek_offset = event[:message].offset
+        consumer = event[:caller]
+
+        info <<~MSG.tr("\n", ' ').strip!
+          [#{consumer.id}] Seeking from #{consumer.class}
+          on topic #{topic}/#{partition} to offset #{seek_offset}
+        MSG
+      end
+
       # Logs info about system signals that Karafka received and prints backtrace for threads in
       # case of ttin
       #

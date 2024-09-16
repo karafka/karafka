@@ -112,6 +112,10 @@ module Karafka
           # Fetch message within our time boundaries
           response = poll(time_poll.remaining)
 
+          # We track when last polling happened so we can provide means to detect upcoming
+          # `max.poll.interval.ms` limit
+          @buffer.polled
+
           case response
           when :tick_time
             nil

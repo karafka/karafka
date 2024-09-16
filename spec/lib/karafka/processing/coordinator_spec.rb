@@ -8,6 +8,10 @@ RSpec.describe_current do
   let(:pause_tracker) { build(:time_trackers_pause) }
   let(:message) { build(:messages_message) }
 
+  describe '#last_polled_at' do
+    it { expect(coordinator.last_polled_at).to be > 0 }
+  end
+
   describe '#pause_tracker' do
     it { expect(coordinator.pause_tracker).to eq(pause_tracker) }
   end

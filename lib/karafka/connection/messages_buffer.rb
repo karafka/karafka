@@ -42,6 +42,7 @@ module Karafka
         # Since it happens "right after" we've received the messages, it is close enough it time
         # to be used as the moment we received messages.
         received_at = Time.now
+        last_polled_at = raw_messages_buffer.last_polled_at
 
         raw_messages_buffer.each do |topic, partition, messages, eof|
           @size += messages.count
@@ -58,7 +59,8 @@ module Karafka
 
           @groups[topic][partition] = {
             eof: eof,
-            messages: built_messages
+            messages: built_messages,
+            last_polled_at: last_polled_at
           }
         end
       end
@@ -69,10 +71,11 @@ module Karafka
       # @yieldparam [Integer] partition number
       # @yieldparam [Array<Karafka::Messages::Message>] messages from a given topic partition
       # @yieldparam [Boolean] true if eof, false otherwise
+      # @yieldparam [Float] last polled at monotonic clock time
       def each
         @groups.each do |topic, partitions|
           partitions.each do |partition, details|
-            yield(topic, partition, details[:messages], details[:eof])
+            yield(topic, partition, details[:messages], details[:eof], details[:last_polled_at])
           end
         end
       end

@@ -12,11 +12,17 @@ module Karafka
     # @note We store data here in groups per topic partition to handle the revocation case, where
     #    we may need to remove messages from a single topic partition.
     class RawMessagesBuffer
+      include Karafka::Core::Helpers::Time
+
       attr_reader :size
+
+      # @return [Float] last polling time in milliseconds (monotonic)
+      attr_reader :last_polled_at
 
       # @return [Karafka::Connection::MessagesBuffer] buffer instance
       def initialize
         @size = 0
+        @last_polled_at = monotonic_now
 
         @groups = Hash.new do |topic_groups, topic|
           topic_groups[topic] = Hash.new do |partition_groups, partition|
@@ -44,6 +50,11 @@ module Karafka
       # @param partition [Integer] partition that reached eof
       def eof(topic, partition)
         @groups[topic][partition][:eof] = true
+      end
+
+      # Marks the last polling time that can be accessed via `#last_polled_at`
+      def polled
+        @last_polled_at = monotonic_now
       end
 
       # Allows to iterate over all the topics and partitions messages

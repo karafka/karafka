@@ -175,6 +175,29 @@ RSpec.describe_current do
     it { expect(Karafka.logger).to have_received(:info).with(message) }
   end
 
+  describe '#on_consumer_consuming_seek' do
+    subject(:trigger) { listener.on_consumer_consuming_seek(event) }
+
+    let(:consumer) { Class.new(Karafka::BaseConsumer).new }
+    let(:kafka_message) { create(:messages_message) }
+    let(:message) do
+      <<~MSG.tr("\n", ' ').strip
+        [#{consumer.id}] Seeking from #{consumer.class}
+        on topic Topic/0 to offset #{kafka_message.offset}
+      MSG
+    end
+    let(:payload) do
+      {
+        caller: consumer,
+        topic: 'Topic',
+        partition: 0,
+        message: kafka_message
+      }
+    end
+
+    it { expect(Karafka.logger).to have_received(:info).with(message) }
+  end
+
   describe '#on_process_notice_signal' do
     subject(:trigger) { listener.on_process_notice_signal(event) }
 

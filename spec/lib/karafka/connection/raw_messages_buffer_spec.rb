@@ -3,6 +3,21 @@
 RSpec.describe_current do
   subject(:buffer) { described_class.new }
 
+  describe '#last_polled_at' do
+    it { expect(buffer.last_polled_at).to be > 0 }
+
+    context 'when polled' do
+      before { buffer }
+
+      it 'expect to be newer then moment ago' do
+        now = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) * 1_000
+        expect(buffer.last_polled_at).to be < now
+        buffer.polled
+        expect(buffer.last_polled_at).to be > now
+      end
+    end
+  end
+
   describe '#<<, #size and #each' do
     context 'when there are no messages' do
       it { expect(buffer.size).to eq(0) }
