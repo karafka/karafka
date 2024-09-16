@@ -24,7 +24,7 @@ elements = DT.uuids(100)
   Karafka::App.producer.transaction do
     Karafka::App.producer.produce_many_sync(messages)
 
-    throw(:abort)
+    raise(WaterDrop::AbortTransaction)
   end
 end
 
