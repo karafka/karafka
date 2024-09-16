@@ -83,7 +83,7 @@ RSpec.describe_current do
 
         PRODUCERS.transactional.transaction do
           PRODUCERS.transactional.produce_many_async(messages)
-          throw(:abort)
+          raise(WaterDrop::AbortTransaction)
         end
       end
 
@@ -119,7 +119,7 @@ RSpec.describe_current do
 
         PRODUCERS.transactional.transaction do
           PRODUCERS.transactional.produce_many_async(messages)
-          throw(:abort)
+          raise(WaterDrop::AbortTransaction)
         end
       end
 
