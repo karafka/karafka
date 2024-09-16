@@ -10,7 +10,7 @@ RSpec.describe_current do
   end
 
   let(:safety_margin) { 15 }
-  let(:last_polled_at) { described_class.new(1, 1, 1, 1).monotonic_now }
+  let(:last_polled_at) { described_class.new(1, 1, 1).monotonic_now }
   let(:max_poll_interval_ms) { 10_000 }
 
   before { tracker }
