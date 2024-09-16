@@ -33,7 +33,7 @@ RSpec.describe_current do
       PRODUCERS.transactional.transaction do
         PRODUCERS.transactional.produce_sync(topic: topic, payload: {}.to_json)
 
-        throw(:abort)
+        raise(WaterDrop::AbortTransaction)
       end
     end
 
@@ -87,7 +87,7 @@ RSpec.describe_current do
 
         wait_if_needed
 
-        throw(:abort)
+        raise(WaterDrop::AbortTransaction)
       end
 
       wait_if_needed
