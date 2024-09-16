@@ -39,7 +39,6 @@ module Karafka
           end
 
           # Tracks the processing time of a block and updates the maximum processing cost.
-          # If adaptive margin is not enabled, it simply yields to the block without tracking.
           #
           # @yield Executes the block, measuring the time taken for processing.
           def track
