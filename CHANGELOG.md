@@ -10,6 +10,7 @@
 - [Enhancement] Support full overwrite of the `BaseConsumer#producer`.
 - [Enhancement] Transfer the time of last poll back to the coordinator for more accurate metrics tracking.
 - [Enhancement] Instrument `Consumer#seek` via `consumer.consuming.seek`.
+- [Fix] Fix incorrect time reference reload in scheduled messages.
 
 ## 2.4.11 (2024-09-04)
 - [Enhancement] Validate envelope target topic type for Scheduled Messages.
