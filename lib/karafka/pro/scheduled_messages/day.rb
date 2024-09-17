@@ -29,7 +29,7 @@ module Karafka
         def initialize
           @created_at = Time.now.to_i
 
-          time = Time.at(@created_at)
+          time = Time.at(@created_at).utc
 
           @starts_at = Time.utc(time.year, time.month, time.day).to_i
           @ends_at = @starts_at + 86_399
