@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should react to probing and should create probe result in the commands topic
+# Karafka should react to probing and should create trace result in the commands topic
 
 setup_karafka
 setup_web
@@ -20,7 +20,7 @@ Thread.new do
   sleep(0.1) until DT.key?(:is)
 
   Karafka::Web::Pro::Commanding::Dispatcher.command(
-    :probe, ::Karafka::Web.config.tracking.consumers.sampler.process_id
+    :trace, ::Karafka::Web.config.tracking.consumers.sampler.process_id
   )
 
   loop do
