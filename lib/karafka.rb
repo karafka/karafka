@@ -59,7 +59,7 @@ module Karafka
       return @root if @root
 
       # If user points to a different root explicitly, use it
-      if ENV.key?('KARAFKA_ROOT_DIR')
+      if ENV['KARAFKA_ROOT_DIR']
         @root = Pathname.new(ENV['KARAFKA_ROOT_DIR'])
 
         return @root
