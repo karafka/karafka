@@ -39,9 +39,6 @@ RSpec.describe_current do
   end
 
   describe '.root' do
-    # Reset between specs as it is cached
-    before { Karafka.instance_variable_set('@root', nil) }
-
     context 'when we want to get app root path' do
       let(:root_dir_env) { nil }
 
