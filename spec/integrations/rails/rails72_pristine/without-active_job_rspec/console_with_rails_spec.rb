@@ -35,7 +35,6 @@ CMD
 system!('cp Gemfile ./app/')
 system!('cd app && bundle install')
 system!('cd app && bundle exec karafka install')
-system!('cd app && mv consumers app/')
 
 # Make sure Rails console can start
 timeout = 'timeout --preserve-status --verbose 10'

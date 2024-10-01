@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.4.13 (Unreleased)
+- [Fix] Fix `Karafka::Errors::MissingBootFileError` when debugging in VScode with ruby-lsp.
+
 ## 2.4.12 (2024-09-17)
 - **[Feature]** Provide Adaptive Iterator feature as a fast alternative to Long-Running Jobs (Pro).
 - [Enhancement] Provide `Consumer#each` as a delegation to messages batch.
