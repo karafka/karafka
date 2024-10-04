@@ -97,7 +97,7 @@ module Karafka
 
             existing_partitions = existing_topic.fetch(:partition_count)
 
-            next if declarative_topic.declaratives.partitions == existing_partitions
+            next if declarative_topic.declaratives.partitions <= existing_partitions
 
             @topics_to_repartition << [declarative_topic, existing_partitions]
           end
