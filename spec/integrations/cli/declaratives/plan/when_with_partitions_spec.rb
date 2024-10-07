@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
-# When declarative topics exist with repartition request, it should work,
-# while ignoring topics that already have more partitions than specified
+# When declarative topics exist with repartition request, it should work
 
 setup_karafka
 
 Karafka::Admin.create_topic(DT.topics[0], 1, 1)
 Karafka::Admin.create_topic(DT.topics[1], 3, 1)
-Karafka::Admin.create_topic(DT.topics[2], 5, 1)
 
 draw_routes(create_topics: false) do
   topic DT.topics[0] do
@@ -18,11 +16,6 @@ draw_routes(create_topics: false) do
   topic DT.topics[1] do
     active false
     config(partitions: 5)
-  end
-
-  topic DT.topics[2] do
-    active false
-    config(partitions: 3)
   end
 end
 

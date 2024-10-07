@@ -33,16 +33,48 @@ module Karafka
           end
 
           unless topics_to_repartition.empty?
-            puts 'Following topics will be repartitioned:'
-            puts
+            upscale = {}
+            downscale = {}
 
             topics_to_repartition.each do |topic, partitions|
               from = partitions
               to = topic.declaratives.partitions
 
-              puts "  #{yellow('~')} #{topic.name}:"
-              puts "    #{yellow('~')} partitions: \"#{red(from)}\" #{grey('=>')} \"#{green(to)}\""
+              if from < to
+                upscale[topic] = partitions
+              else
+                downscale[topic] = partitions
+              end
+            end
+
+            unless upscale.empty?
+              puts 'Following topics will be repartitioned:'
               puts
+
+              upscale.each do |topic, partitions|
+                from = partitions
+                to = topic.declaratives.partitions
+                y = yellow('~')
+                puts "  #{y} #{topic.name}:"
+                puts "    #{y} partitions: \"#{red(from)}\" #{grey('=>')} \"#{green(to)}\""
+                puts
+              end
+            end
+
+            unless downscale.empty?
+              puts(
+                'Following topics repartitioning will be ignored as downscaling is not supported:'
+              )
+              puts
+
+              downscale.each do |topic, partitions|
+                from = partitions
+                to = topic.declaratives.partitions
+
+                puts "  #{grey('~')} #{topic.name}:"
+                puts "    #{grey('~')} partitions: \"#{grey(from)}\" #{grey('=>')} \"#{grey(to)}\""
+                puts
+              end
             end
           end
 
@@ -97,7 +129,7 @@ module Karafka
 
             existing_partitions = existing_topic.fetch(:partition_count)
 
-            next if declarative_topic.declaratives.partitions <= existing_partitions
+            next if declarative_topic.declaratives.partitions == existing_partitions
 
             @topics_to_repartition << [declarative_topic, existing_partitions]
           end
