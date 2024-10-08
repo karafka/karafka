@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.13 (Unreleased)
+- [Enhancement] Report ignored repartitioning to lower number of partitions in declarative topics.
 - [Fix] Fix `Karafka::Errors::MissingBootFileError` when debugging in VScode with ruby-lsp.
 
 ## 2.4.12 (2024-09-17)
