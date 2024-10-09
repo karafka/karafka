@@ -3,7 +3,7 @@ PATH
   specs:
     karafka (2.4.13)
       base64 (~> 0.2)
-      karafka-core (>= 2.4.3, < 2.5.0)
+      karafka-core (>= 2.4.4, < 2.5.0)
       karafka-rdkafka (>= 0.17.2)
       waterdrop (>= 2.7.3, < 3.0.0)
       zeitwerk (~> 2.3)
