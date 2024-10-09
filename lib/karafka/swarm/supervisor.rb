@@ -20,7 +20,9 @@ module Karafka
         shutdown_timeout: %i[shutdown_timeout],
         supervision_sleep: %i[internal supervision_sleep],
         forceful_exit_code: %i[internal forceful_exit_code],
-        process: %i[internal process]
+        process: %i[internal process],
+        cli_contract: %i[internal cli contract],
+        activity_manager: %i[internal routing activity_manager]
       )
 
       # How long extra should we wait on shutdown before forceful termination
@@ -39,6 +41,9 @@ module Karafka
 
       # Creates needed number of forks, installs signals and starts supervision
       def run
+        # Validate the CLI provided options the same way as we do for the regular server
+        cli_contract.validate!(activity_manager.to_h)
+
         # Close producer just in case. While it should not be used, we do not want even a
         # theoretical case since librdkafka is not thread-safe.
         # We close it prior to forking just to make sure, there is no issue with initialized
@@ -67,7 +72,11 @@ module Karafka
           lock
           control
         end
-      # If anything went wrong, signal this and die
+
+      # If the cli contract validation failed reraise immediately and stop the process
+      rescue Karafka::Errors::InvalidConfigurationError => e
+        raise e
+      # If anything went wrong during supervision, signal this and die
       # Supervisor is meant to be thin and not cause any issues. If you encounter this case
       # please report it as it should be considered critical
       rescue StandardError => e

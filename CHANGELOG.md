@@ -4,6 +4,7 @@
 - [Enhancement] Report ignored repartitioning to lower number of partitions in declarative topics.
 - [Fix] Fix `Karafka::Errors::MissingBootFileError` when debugging in VScode with ruby-lsp.
 - [Fix] Require `karafka-core` `>=` `2.4.4` to prevent dependencies conflicts. 
+- [Fix] Validate swarm cli and always parse options from argv (roelbondoc)
 
 ## 2.4.12 (2024-09-17)
 - **[Feature]** Provide Adaptive Iterator feature as a fast alternative to Long-Running Jobs (Pro).
