@@ -16,7 +16,10 @@ module Karafka
             return false
           end
 
+          changes = false
+
           unless topics_to_create.empty?
+            changes = true
             puts 'Following topics will be created:'
             puts
 
@@ -48,6 +51,7 @@ module Karafka
             end
 
             unless upscale.empty?
+              changes = true
               puts 'Following topics will be repartitioned:'
               puts
 
@@ -79,6 +83,7 @@ module Karafka
           end
 
           unless topics_to_alter.empty?
+            changes = true
             puts 'Following topics will have configuration changes:'
             puts
 
@@ -97,7 +102,7 @@ module Karafka
             end
           end
 
-          true
+          changes
         end
 
         private
