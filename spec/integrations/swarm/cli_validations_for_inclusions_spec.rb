@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# Karafka should fail if we specify a consumer group that was not defined
+# Karafka should fail if we specify a consumer group that was not defined also when working in the
+# swarm mode.
 
 setup_karafka
 
