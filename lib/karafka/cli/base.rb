@@ -96,7 +96,7 @@ module Karafka
                 *[names, option[2], option[1]].flatten
               ) { |value| options[option[0]] = value }
             end
-          end.parse!
+          end.parse(ARGV)
 
           options
         end
