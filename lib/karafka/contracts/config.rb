@@ -34,6 +34,7 @@ module Karafka
       required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
       required(:group_id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
+      required(:strict_declarative_topics) { |val| [true, false].include?(val) }
 
       nested(:swarm) do
         required(:nodes) { |val| val.is_a?(Integer) && val.positive? }

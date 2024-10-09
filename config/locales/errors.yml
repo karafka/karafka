@@ -14,6 +14,7 @@ en:
       pause_max_timeout_format: needs to be an integer bigger than 0
       pause_with_exponential_backoff_format: needs to be either true or false
       strict_topics_namespacing_format: needs to be either true or false
+      strict_declarative_topics_format: needs to be either true or false
       shutdown_timeout_format: needs to be an integer bigger than 0
       max_wait_time_format: needs to be an integer bigger than 0
       max_wait_time_max_wait_time_vs_swarm_node_report_timeout: >
@@ -146,6 +147,9 @@ en:
       topics_namespaced_names_not_unique: |
         all topic names within a single consumer group must be unique considering namespacing styles
         disable this validation by setting config.strict_topics_namespacing to false
+
+    routing:
+      without_declarative_definition: lacks explicit declarative topics definition
 
     job_options:
       missing: needs to be present
