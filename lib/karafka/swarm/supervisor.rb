@@ -47,6 +47,10 @@ module Karafka
 
         Karafka::App.warmup
 
+        config.internal.cli.contract.validate!(
+          config.internal.routing.activity_manager.to_h
+        )
+
         manager.start
 
         process.on_sigint { stop }
@@ -67,6 +71,11 @@ module Karafka
           lock
           control
         end
+
+      # If the cli contract validation failed reraise immediately.
+      rescue Karafka::Errors::InvalidConfigurationError => e
+        raise e
+
       # If anything went wrong, signal this and die
       # Supervisor is meant to be thin and not cause any issues. If you encounter this case
       # please report it as it should be considered critical
@@ -86,6 +95,11 @@ module Karafka
       end
 
       private
+
+      # @return [Karafka::Core::Configurable::Node] root config node
+      def config
+        Karafka::App.config
+      end
 
       # Keeps the lock on the queue so we control nodes only when it is needed
       # @note We convert to seconds since the queue timeout requires seconds
