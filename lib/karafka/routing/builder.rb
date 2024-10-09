@@ -48,6 +48,10 @@ module Karafka
 
           instance_eval(&block)
 
+          # Ensures high-level routing details consistency
+          # Contains checks that require knowledge about all the consumer groups to operate
+          Contracts::Routing.new.validate!(map(&:to_h))
+
           each do |consumer_group|
             # Validate consumer group settings
             Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)

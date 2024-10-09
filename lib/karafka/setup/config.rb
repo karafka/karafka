@@ -68,6 +68,11 @@ module Karafka
       setting :strict_topics_namespacing, default: true
       # option [String] default consumer group name for implicit routing
       setting :group_id, default: 'app'
+      # option [Boolean] when set to true, it will validate as part of the routing validation, that
+      # all topics and DLQ topics (even not active) have the declarative topics definitions.
+      # Really useful when you want to ensure that all topics in routing are managed via
+      # declaratives.
+      setting :strict_declarative_topics, default: false
 
       setting :oauth do
         # option [false, #call] Listener for using oauth bearer. This listener will be able to
