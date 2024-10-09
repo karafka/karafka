@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.13 (Unreleased)
+- [Enhancement] Introduce `config.strict_declarative_topics` that should force declaratives on all non-pattern based topics and DLQ topics
 - [Enhancement] Report ignored repartitioning to lower number of partitions in declarative topics.
 - [Fix] Fix `Karafka::Errors::MissingBootFileError` when debugging in VScode with ruby-lsp.
 - [Fix] Require `karafka-core` `>=` `2.4.4` to prevent dependencies conflicts. 
