@@ -9,4 +9,8 @@ RSpec.describe_current do
   describe 'events mapping' do
     it { expect(NotificationsChecker.valid?(listener)).to eq(true) }
   end
+
+  describe '#healthy?' do
+    it { expect { listener.healthy? }.to raise_error(NotImplementedError) }
+  end
 end

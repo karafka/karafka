@@ -112,6 +112,17 @@ module Karafka
             clear_polling_tick
           end
 
+          # Did we exceed any of the ttls
+          # @return [String] 204 string if ok, 500 otherwise
+          def healthy?
+            time = monotonic_now
+
+            return false if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
+            return false if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
+
+            true
+          end
+
           private
 
           # Wraps the logic with a mutex
@@ -151,17 +162,6 @@ module Karafka
             synchronize do
               @consumptions.delete(thread_id)
             end
-          end
-
-          # Did we exceed any of the ttls
-          # @return [String] 204 string if ok, 500 otherwise
-          def healthy?
-            time = monotonic_now
-
-            return false if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
-            return false if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
-
-            true
           end
         end
       end

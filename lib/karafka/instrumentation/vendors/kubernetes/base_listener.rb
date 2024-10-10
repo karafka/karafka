@@ -29,12 +29,12 @@ module Karafka
             @port = port
           end
 
-          private
-
           # @return [Boolean] true if all good, false if we should tell k8s to kill this process
           def healthy?
             raise NotImplementedError, 'Implement in a subclass'
           end
+
+          private
 
           # Responds to a HTTP request with the process liveness status
           def respond
