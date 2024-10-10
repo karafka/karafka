@@ -4,6 +4,7 @@
 - [Enhancement] Make declarative topics return different exit codes on migrable/non-migrable states (0 - no changes, 2 - changes).
 - [Enhancement] Introduce `config.strict_declarative_topics` that should force declaratives on all non-pattern based topics and DLQ topics
 - [Enhancement] Report ignored repartitioning to lower number of partitions in declarative topics.
+- [Enhancement] Promote the `LivenessListener#healty?` to a public API.
 - [Fix] Fix `Karafka::Errors::MissingBootFileError` when debugging in VScode with ruby-lsp.
 - [Fix] Require `karafka-core` `>=` `2.4.4` to prevent dependencies conflicts. 
 - [Fix] Validate swarm cli and always parse options from argv (roelbondoc)
