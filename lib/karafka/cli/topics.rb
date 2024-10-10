@@ -33,28 +33,30 @@ module Karafka
       def call(action = 'missing')
         detailed_exit_code = options.fetch(:detailed_exitcode, false)
 
-        changes = case action
+        command = case action
                   when 'create'
-                    Topics::Create.new.call
+                    Topics::Create
                   when 'delete'
-                    Topics::Delete.new.call
+                    Topics::Delete
                   when 'reset'
-                    Topics::Reset.new.call
+                    Topics::Reset
                   when 'repartition'
-                    Topics::Repartition.new.call
+                    Topics::Repartition
                   when 'migrate'
-                    Topics::Migrate.new.call
+                    Topics::Migrate
                   when 'align'
-                    Topics::Align.new.call
+                    Topics::Align
                   when 'plan'
-                    Topics::Plan.new.call
+                    Topics::Plan
                   else
                     raise ::ArgumentError, "Invalid topics action: #{action}"
                   end
 
+        changes = command.new.call
+
         return unless detailed_exit_code
 
-        changes ? exit(NO_CHANGES_EXIT_CODE) : exit(CHANGES_EXIT_CODE)
+        changes ? exit(CHANGES_EXIT_CODE) : exit(NO_CHANGES_EXIT_CODE)
       end
     end
   end
