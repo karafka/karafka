@@ -10,26 +10,53 @@ module Karafka
       )
 
       desc 'Allows for the topics management'
+
+      option(
+        :detailed_exitcode,
+        'Exists with 0 when no changes, 1 when error and 2 when changes present or applied',
+        TrueClass,
+        %w[
+          --detailed_exitcode
+        ]
+      )
+
+      # We exit with 0 if no changes happened
+      NO_CHANGES_EXIT_CODE = 0
+
+      # When any changes happened (or could happen) we return 2 because 1 is default when Ruby
+      # crashes
+      CHANGES_EXIT_CODE = 2
+
+      private_constant :NO_CHANGES_EXIT_CODE, :CHANGES_EXIT_CODE
+
       # @param action [String] action we want to take
       def call(action = 'missing')
-        case action
-        when 'create'
-          Topics::Create.new.call
-        when 'delete'
-          Topics::Delete.new.call
-        when 'reset'
-          Topics::Reset.new.call
-        when 'repartition'
-          Topics::Repartition.new.call
-        when 'migrate'
-          Topics::Migrate.new.call
-        when 'align'
-          Topics::Align.new.call
-        when 'plan'
-          Topics::Plan.new.call
-        else
-          raise ::ArgumentError, "Invalid topics action: #{action}"
-        end
+        detailed_exit_code = options.fetch(:detailed_exitcode, false)
+
+        command = case action
+                  when 'create'
+                    Topics::Create
+                  when 'delete'
+                    Topics::Delete
+                  when 'reset'
+                    Topics::Reset
+                  when 'repartition'
+                    Topics::Repartition
+                  when 'migrate'
+                    Topics::Migrate
+                  when 'align'
+                    Topics::Align
+                  when 'plan'
+                    Topics::Plan
+                  else
+                    raise ::ArgumentError, "Invalid topics action: #{action}"
+                  end
+
+        changes = command.new.call
+
+        return unless detailed_exit_code
+
+        changes ? exit(CHANGES_EXIT_CODE) : exit(NO_CHANGES_EXIT_CODE)
       end
     end
   end
