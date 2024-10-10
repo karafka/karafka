@@ -14,6 +14,7 @@ RSpec.describe_current do
       pause_with_exponential_backoff: false,
       max_wait_time: 1_000,
       strict_topics_namespacing: false,
+      strict_declarative_topics: false,
       concurrency: 5,
       license: {
         token: false,
