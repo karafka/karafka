@@ -1,7 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.13 (2024-10-11)
-- [Enhancement] Make declarative topics return different exit codes on migrable/non-migrable states (0 - no changes, 2 - changes).
+- [Enhancement] Make declarative topics return different exit codes on migrable/non-migrable states (0 - no changes, 2 - changes) when used with `--detailed-exitcode` flag.
 - [Enhancement] Introduce `config.strict_declarative_topics` that should force declaratives on all non-pattern based topics and DLQ topics
 - [Enhancement] Report ignored repartitioning to lower number of partitions in declarative topics.
 - [Enhancement] Promote the `LivenessListener#healty?` to a public API.
