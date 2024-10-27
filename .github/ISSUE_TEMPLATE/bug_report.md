@@ -1,3 +1,8 @@
+---
+name: Bug Report
+about: Report an issue with Karafka you've discovered.
+---
+
 Thank you for reporting an issue with Karafka. To make this process smoother for everyone involved, please read the following information before filling out the template.
 
 > [!IMPORTANT]
