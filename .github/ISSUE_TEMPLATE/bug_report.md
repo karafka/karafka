@@ -17,8 +17,8 @@ If Karafka or its components are critical to your infrastructure, we encourage y
 Please take a moment to review the following resources before submitting your report:
 
 - [Issue Reporting Guide](https://karafka.io/docs/Support/#issue-reporting-guide) - A guide on what information is required for effective issue reporting.
-- [Karafka Support Policy](https://karafka.io/docs/Support/) - Details on the scope of support offered for different versions and tiers.
-- [Karafka Versions, Lifecycle, and EOL](https://karafka.io/docs/Versions-Lifecycle-and-EOL/) - Information about the current supported versions and End-Of-Life (EOL) policies.
+- [Support Policy](https://karafka.io/docs/Support/) - Details on the scope of support offered for different versions and tiers.
+- [Versions, Lifecycle, and EOL](https://karafka.io/docs/Versions-Lifecycle-and-EOL/) - Information about the current supported versions and End-Of-Life (EOL) policies.
 
 ## Bug Report Details
 
@@ -26,10 +26,6 @@ Please provide all the details per our [Issue Reporting Guide](https://karafka.i
 
 > [!IMPORTANT]
 > Failing to provide the required details may result in the issue being closed. Please include all necessary information to help us understand and resolve your issue effectively.
-
-### Screenshots/Logs
-
-If applicable, add screenshots or logs to help explain your problem.
 
 ## Additional Context
 
