@@ -10,8 +10,7 @@ Scope of the OSS Support
 
 We do not provide OSS support for outdated versions of Karafka and its components.
 
-Please ensure that you are using a version that is still actively supported.
-We cannot assist with any longer maintained versions unless you support us with our Pro offering (https://karafka.io/docs/Pro-Support/).
+Please ensure that you are using a version that is still actively supported. We cannot assist with any no longer maintained versions unless you support us with our Pro offering (https://karafka.io/docs/Pro-Support/).
 
 We acknowledge that understanding the specifics of your application and its configuration can be essential for resolving certain issues. However, due to the extensive time and resources such analysis can require, this may fall beyond our Open Source Support scope.
 
