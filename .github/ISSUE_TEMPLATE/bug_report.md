@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report an issue with Karafka you've discovered.
+about: Report an issue within the Karafka ecosystem you've discovered.
 ---
 
 To make this process smoother for everyone involved, please read the following information before filling out the template.
