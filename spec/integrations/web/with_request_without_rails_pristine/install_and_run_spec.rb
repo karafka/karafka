@@ -4,6 +4,7 @@
 
 require 'open3'
 require 'net/http'
+require 'webrick'
 
 InvalidExitCode = Class.new(StandardError)
 InvalidState = Class.new(StandardError)
