@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 6 and rspec/rails when it is required and should not crash
+# Karafka should work with Rails 7.2 and rspec/rails when it is required and should not crash
 #
 # @see https://github.com/karafka/karafka/issues/803
 
@@ -16,6 +16,7 @@ ENV['RAILS_ENV'] = 'test'
 require 'rails'
 require 'active_model/railtie'
 require 'active_record/railtie'
+require 'action_controller'
 require 'action_controller/railtie'
 require 'action_view/railtie'
 require 'rspec/rails'

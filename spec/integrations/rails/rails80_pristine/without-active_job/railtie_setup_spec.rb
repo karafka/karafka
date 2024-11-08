@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
-# Karafka+Pro should work with Rails 6 using the default setup
+# Karafka should work with Rails 7.2 that does not use ActiveJob using the default setup and should
+# just ignore the ActiveJob components
 
 # Load all the Railtie stuff like when `rails server`
 ENV['KARAFKA_CLI'] = 'true'
 
 Bundler.require(:default)
 
+require 'action_controller'
 require 'tempfile'
 
 class ExampleApp < Rails::Application
@@ -18,17 +20,6 @@ FileUtils.touch(dummy_boot_file)
 ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
 
 ExampleApp.initialize!
-
-mod = Module.new do
-  def self.token
-    ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
-  end
-end
-
-Karafka.const_set('License', mod)
-require 'karafka/pro/loader'
-
-Karafka::Pro::Loader.require_all
 
 setup_karafka
 
@@ -46,5 +37,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal 1, DT.data.size
-assert_equal '6.1.7.6', Rails.version
-assert Karafka.pro?
+assert_equal '8.0.0', Rails.version
