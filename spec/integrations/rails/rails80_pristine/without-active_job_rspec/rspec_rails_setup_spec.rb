@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 7.2 and rspec/rails when it is required and should not crash
+# Karafka should work with Rails 8 and rspec/rails when it is required and should not crash
 #
 # @see https://github.com/karafka/karafka/issues/803
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 7.2 and Karafka console should not crash
+# Karafka should work with Rails 8 and Karafka console should not crash
 # Additionally when we use the Kubernetes Liveness Probing, it should not activate itself as
 # Karafka does not start the liveness probing until it boots and it should NOT boot in the console
 

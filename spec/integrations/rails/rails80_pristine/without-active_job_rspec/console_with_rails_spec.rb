@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 7.2 and Karafka console should not crash
+# Karafka should work with Rails 8 and Karafka console should not crash
 # We should be able to create a small new Rails project and run the console and it should not crash
 
 require 'open3'

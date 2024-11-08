@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 7.2 that does not use ActiveJob using the default setup and should
+# Karafka should work with Rails 8 that does not use ActiveJob using the default setup and should
 # just ignore the ActiveJob components
 
 # Load all the Railtie stuff like when `rails server`

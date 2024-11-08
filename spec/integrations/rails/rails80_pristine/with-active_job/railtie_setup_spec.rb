@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 7.2 using the default setup
+# Karafka should work with Rails 8 using the default setup
 
 # Load all the Railtie stuff like when `rails server`
 ENV['KARAFKA_CLI'] = 'true'
