@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-# Karafka should not injected extended ActiveJob routing when ActiveJob is not available
+# Karafka should work with Rails 8 using the default setup
 
 # Load all the Railtie stuff like when `rails server`
 ENV['KARAFKA_CLI'] = 'true'
 
 Bundler.require(:default)
 
+require 'action_controller'
 require 'tempfile'
 
 class ExampleApp < Rails::Application
@@ -21,14 +22,18 @@ ExampleApp.initialize!
 
 setup_karafka
 
-extended_routing = true
-
-begin
-  draw_routes Class.new do
-    active_job_topic 'test'
+class Consumer < Karafka::BaseConsumer
+  def consume
+    DT[0] << true
   end
-rescue Karafka::Errors::InvalidConfigurationError
-  extended_routing = false
 end
 
-assert_equal false, extended_routing
+draw_routes(Consumer)
+produce(DT.topic, '1')
+
+start_karafka_and_wait_until do
+  DT.key?(0)
+end
+
+assert_equal 1, DT.data.size
+assert_equal '8.0.0', Rails.version
