@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka should work with Rails 6 using the default setup
+# Karafka+Pro should work with Rails 8 using the default setup
 
 # Load all the Railtie stuff like when `rails server`
 ENV['KARAFKA_CLI'] = 'true'
@@ -8,6 +8,7 @@ ENV['KARAFKA_CLI'] = 'true'
 Bundler.require(:default)
 
 require 'tempfile'
+require 'action_controller'
 
 class ExampleApp < Rails::Application
   config.eager_load = 'test'
@@ -18,6 +19,17 @@ FileUtils.touch(dummy_boot_file)
 ENV['KARAFKA_BOOT_FILE'] = dummy_boot_file
 
 ExampleApp.initialize!
+
+mod = Module.new do
+  def self.token
+    ENV.fetch('KARAFKA_PRO_LICENSE_TOKEN')
+  end
+end
+
+Karafka.const_set('License', mod)
+require 'karafka/pro/loader'
+
+Karafka::Pro::Loader.require_all
 
 setup_karafka
 
@@ -35,4 +47,5 @@ start_karafka_and_wait_until do
 end
 
 assert_equal 1, DT.data.size
-assert_equal '6.1.7.6', Rails.version
+assert_equal '8.0.0', Rails.version
+assert Karafka.pro?
