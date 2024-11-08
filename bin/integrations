@@ -243,9 +243,13 @@ ARGV.each do |filter|
   end
 end
 
-# Remove Rails 7.2 specs from Ruby 3.0 because it requires 3.1
+# Remove Rails 7.2 specs from Ruby < 3.1 because it requires 3.1
+# Remove Rails 8.0 specs from Ruby < 3.2 because it requires 3.2
 specs.delete_if do |spec|
-  RUBY_VERSION < '3.1' && spec.include?('rails72')
+  next true if RUBY_VERSION < '3.1' && spec.include?('rails72')
+  next true if RUBY_VERSION < '3.2' && spec.include?('rails8')
+
+  false
 end
 
 raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
