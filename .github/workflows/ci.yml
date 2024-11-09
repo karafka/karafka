@@ -89,6 +89,13 @@ jobs:
         run: |
           docker compose up -d || (sleep 5 && docker compose up -d)
 
+      # Newer versions of ActiveSupport and Rails do not work with Ruby 3.1 anymore.
+      # While we use newer by default we do want to resolve older and test, thus we remove
+      # Gemfile and let it resolve to the most compatible version possible
+      - name: Remove Gemfile.lock if Ruby 3.1
+        if: matrix.ruby == '3.1'
+        run: rm -f Gemfile.lock
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
