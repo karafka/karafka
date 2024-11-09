@@ -152,7 +152,13 @@ jobs:
           chmod +t /opt/hostedtoolcache/Ruby/3*/x64/lib/ruby/gems/3*/gems
 
       - name: Bundle install
+        # Newer versions of ActiveSupport and Rails do not work with Ruby 3.1 anymore.
+        # While we use newer by default we do want to resolve older and test, thus we remove
+        # Gemfile and let it resolve to the most compatible version possible
         run: |
+          if [[ "$(ruby -e 'puts RUBY_VERSION')" == "3.1"* ]]; then
+            rm -f Gemfile.lock
+          fi
           bundle config set without development
           bundle install --jobs 4 --retry 3
 
