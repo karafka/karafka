@@ -11,10 +11,10 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (7.2.2)
-      activesupport (= 7.2.2)
+    activejob (8.0.0)
+      activesupport (= 8.0.0)
       globalid (>= 0.3.6)
-    activesupport (7.2.2)
+    activesupport (8.0.0)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -26,6 +26,7 @@ GEM
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
     base64 (0.2.0)
     benchmark (0.3.0)
     bigdecimal (3.1.8)
@@ -95,6 +96,7 @@ GEM
     tilt (2.4.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
+    uri (1.0.0)
     waterdrop (2.8.0)
       karafka-core (>= 2.4.3, < 3.0.0)
       karafka-rdkafka (>= 0.17.5)
