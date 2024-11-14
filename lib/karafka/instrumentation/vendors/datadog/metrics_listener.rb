@@ -82,10 +82,11 @@ module Karafka
             statistics = event[:statistics]
             consumer_group_id = event[:consumer_group_id]
 
-            base_tags = default_tags + ["consumer_group:#{consumer_group_id}"]
+            tags = ["consumer_group:#{consumer_group_id}"]
+            tags.concat(default_tags)
 
             rd_kafka_metrics.each do |metric|
-              report_metric(metric, statistics, base_tags)
+              report_metric(metric, statistics, tags)
             end
           end
 
@@ -93,13 +94,14 @@ module Karafka
           #
           # @param event [Karafka::Core::Monitoring::Event]
           def on_error_occurred(event)
-            extra_tags = ["type:#{event[:type]}"]
+            tags = ["type:#{event[:type]}"]
+            tags.concat(default_tags)
 
             if event.payload[:caller].respond_to?(:messages)
-              extra_tags += consumer_tags(event.payload[:caller])
+              tags.concat(consumer_tags(event.payload[:caller]))
             end
 
-            count('error_occurred', 1, tags: default_tags + extra_tags)
+            count('error_occurred', 1, tags: tags)
           end
 
           # Reports how many messages we've polled and how much time did we spend on it
@@ -111,10 +113,11 @@ module Karafka
 
             consumer_group_id = event[:subscription_group].consumer_group.id
 
-            extra_tags = ["consumer_group:#{consumer_group_id}"]
+            tags = ["consumer_group:#{consumer_group_id}"]
+            tags.concat(default_tags)
 
-            histogram('listener.polling.time_taken', time_taken, tags: default_tags + extra_tags)
-            histogram('listener.polling.messages', messages_count, tags: default_tags + extra_tags)
+            histogram('listener.polling.time_taken', time_taken, tags: tags)
+            histogram('listener.polling.messages', messages_count, tags: tags)
           end
 
           # Here we report majority of things related to processing as we have access to the
@@ -125,7 +128,8 @@ module Karafka
             messages = consumer.messages
             metadata = messages.metadata
 
-            tags = default_tags + consumer_tags(consumer)
+            tags = consumer_tags(consumer)
+            tags.concat(default_tags)
 
             count('consumer.messages', messages.count, tags: tags)
             count('consumer.batches', 1, tags: tags)
@@ -146,7 +150,8 @@ module Karafka
               #
               # @param event [Karafka::Core::Monitoring::Event]
               def on_consumer_#{after}(event)
-                tags = default_tags + consumer_tags(event.payload[:caller])
+                tags = consumer_tags(event.payload[:caller])
+                tags.concat(default_tags)
 
                 count('consumer.#{name}', 1, tags: tags)
               end
@@ -158,9 +163,10 @@ module Karafka
           def on_worker_process(event)
             jq_stats = event[:jobs_queue].statistics
 
-            gauge('worker.total_threads', Karafka::App.config.concurrency, tags: default_tags)
-            histogram('worker.processing', jq_stats[:busy], tags: default_tags)
-            histogram('worker.enqueued_jobs', jq_stats[:enqueued], tags: default_tags)
+            tags = default_tags
+            gauge('worker.total_threads', Karafka::App.config.concurrency, tags: tags)
+            histogram('worker.processing', jq_stats[:busy], tags: tags)
+            histogram('worker.enqueued_jobs', jq_stats[:enqueued], tags: tags)
           end
 
           # We report this metric before and after processing for higher accuracy
@@ -240,11 +246,14 @@ module Karafka
                 # node ids
                 next if broker_statistics['nodeid'] == -1
 
+                tags = ["broker:#{broker_statistics['nodename']}"]
+                tags.concat(base_tags)
+
                 public_send(
                   metric.type,
                   metric.name,
                   broker_statistics.dig(*metric.key_location),
-                  tags: base_tags + ["broker:#{broker_statistics['nodename']}"]
+                  tags: tags
                 )
               end
             when :topics
@@ -259,14 +268,14 @@ module Karafka
                   next if partition_statistics['fetch_state'] == 'stopped'
                   next if partition_statistics['fetch_state'] == 'none'
 
+                  tags = ["topic:#{topic_name}", "partition:#{partition_name}"]
+                  tags.concat(base_tags)
+
                   public_send(
                     metric.type,
                     metric.name,
                     partition_statistics.dig(*metric.key_location),
-                    tags: base_tags + [
-                      "topic:#{topic_name}",
-                      "partition:#{partition_name}"
-                    ]
+                    tags: tags
                   )
                 end
               end
