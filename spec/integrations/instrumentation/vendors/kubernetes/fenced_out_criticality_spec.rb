@@ -36,6 +36,7 @@ pid = fork do
   end
 end
 
+require 'net/http'
 require 'karafka/instrumentation/vendors/kubernetes/liveness_listener'
 
 listener = ::Karafka::Instrumentation::Vendors::Kubernetes::LivenessListener.new(
