@@ -41,6 +41,9 @@ module Karafka
         :topic_authorization_failed, # 29
         :group_authorization_failed, # 30
         :cluster_authorization_failed, # 31
+        :illegal_generation,
+        # this will not recover as fencing is permanent
+        :fenced, # -144
         # This can happen for many reasons, including issues with static membership being fenced
         :fatal # -150
       ].freeze
