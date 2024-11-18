@@ -32,5 +32,3 @@ produce_many(DT.topic, DT.uuids(100))
 start_karafka_and_wait_until do
   DT[:statistics_events].size >= 5 && DT[:error_events].size >= 5
 end
-
-p DT[:error_events].count
