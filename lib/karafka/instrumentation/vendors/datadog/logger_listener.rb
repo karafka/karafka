@@ -35,6 +35,7 @@ module Karafka
           def initialize(&block)
             configure
             setup(&block) if block
+            @job_types_cache = {}
           end
 
           # @param block [Proc] configuration block
@@ -51,7 +52,7 @@ module Karafka
             push_tags
 
             job = event[:job]
-            job_type = job.class.to_s.split('::').last
+            job_type = fetch_job_type(job.class)
             consumer = job.executor.topic.consumer
             topic = job.executor.topic.name
 
@@ -68,8 +69,16 @@ module Karafka
                        'revoked'
                      when 'Idle'
                        'idle'
-                     else
+                     when 'Eofed'
+                       'eofed'
+                     when 'EofedNonBlocking'
+                       'eofed'
+                     when 'ConsumeNonBlocking'
                        'consume'
+                     when 'Consume'
+                       'consume'
+                     else
+                       raise Errors::UnsupportedCaseError, job_type
                      end
 
             current_span.resource = "#{consumer}##{action}"
@@ -121,6 +130,8 @@ module Karafka
               error "Consumer on shutdown failed due to an error: #{error}"
             when 'consumer.tick.error'
               error "Consumer tick failed due to an error: #{error}"
+            when 'consumer.eofed.error'
+              error "Consumer eofed failed due to an error: #{error}"
             when 'worker.process.error'
               fatal "Worker processing failed due to an error: #{error}"
             when 'connection.listener.fetch_loop.error'
@@ -168,6 +179,18 @@ module Karafka
             return unless Karafka.logger.respond_to?(:pop_tags)
 
             Karafka.logger.pop_tags
+          end
+
+          private
+
+          # Takes the job class and extracts the job type.
+          # @param job_class [Class] job class
+          # @return [String]
+          # @note It does not have to be thread-safe despite running in multiple threads because
+          #   the assignment race condition is irrelevant here since the same value will be
+          #   assigned.
+          def fetch_job_type(job_class)
+            @job_types_cache[job_class] ||= job_class.to_s.split('::').last
           end
         end
       end

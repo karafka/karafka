@@ -48,6 +48,7 @@ module Karafka
             consumer.revoked.error
             consumer.shutdown.error
             consumer.tick.error
+            consumer.eofed.error
           ].freeze
 
           private_constant :USER_CONSUMER_ERROR_TYPES
@@ -107,7 +108,8 @@ module Karafka
           [
             %i[revoke revoked revoked],
             %i[shutting_down shutdown shutdown],
-            %i[tick ticked tick]
+            %i[tick ticked tick],
+            %i[eof eofed eofed]
           ].each do |before, after, name|
             class_eval <<~RUBY, __FILE__, __LINE__ + 1
               # Keeps track of user code execution

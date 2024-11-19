@@ -3,6 +3,9 @@
 ## 2.4.14 (Unreleased)
 - [Enhancement] Improve low-level critical error reporting.
 - [Enhancement] Expand Kubernetes Liveness state reporting with critical errors detection.
+- [Enhancement] Save several string allocations and one array allocation on each job execution. when using Datadog instrumentation.
+- [Enhancement] Support `eofed` jobs in the AppSignal instrumentation.
+- [Fix] `Instrumentation::Vendors::Datadog::LoggerListener` treats eof jobs as consume jobs.
 
 ## 2.4.13 (2024-10-11)
 - [Enhancement] Make declarative topics return different exit codes on migrable/non-migrable states (0 - no changes, 2 - changes) when used with `--detailed-exitcode` flag.
