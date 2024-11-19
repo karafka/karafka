@@ -41,22 +41,38 @@ module Karafka
       class << self
         # Loads proper environment with what is needed to run the CLI
         def load
+          rails_env_rb = File.join(Dir.pwd, 'config/environment.rb')
+          is_rails = Kernel.const_defined?(:Rails) && File.exist?(rails_env_rb)
+
+          # If the boot file is disabled and this is a Rails app, we assume that user moved the
+          # karafka app configuration to initializers or other Rails loading related place.
+          # It is not recommended but some users tend to do this. In such cases we just try to load
+          # the Rails stuff hoping that it will also load Karafka stuff
+          if Karafka.boot_file.to_s == 'false' && is_rails
+            require rails_env_rb
+
+            return
+          end
+
           # If there is a boot file, we need to require it as we expect it to contain
           # Karafka app setup, routes, etc
           if File.exist?(::Karafka.boot_file)
-            rails_env_rb = File.join(Dir.pwd, 'config/environment.rb')
-
             # Load Rails environment file that starts Rails, so we can reference consumers and
             # other things from `karafka.rb` file. This will work only for Rails, for non-rails
             # a manual setup is needed
-            require rails_env_rb if Kernel.const_defined?(:Rails) && File.exist?(rails_env_rb)
-
+            require rails_env_rb if is_rails
             require Karafka.boot_file.to_s
+
+            return
+          end
+
           # However when it is unavailable, we still want to be able to run help command
           # and install command as they don't require configured app itself to run
-          elsif %w[-h install].none? { |cmd| cmd == ARGV[0] }
-            raise ::Karafka::Errors::MissingBootFileError, ::Karafka.boot_file
-          end
+          return if %w[-h install].any? { |cmd| cmd == ARGV[0] }
+
+          # All other commands except help and install do require an existing boot file if it was
+          # declared
+          raise ::Karafka::Errors::MissingBootFileError, ::Karafka.boot_file
         end
 
         # Allows to set options for Thor cli
