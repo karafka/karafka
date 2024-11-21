@@ -68,6 +68,7 @@ module Karafka
       end
 
       # Clear routes and draw them again with the given block. Helpful for testing purposes.
+      # @param block [Proc] block we will evaluate within the builder context
       def redraw(&block)
         @mutex.synchronize do
           @draws.clear
@@ -83,7 +84,8 @@ module Karafka
         select(&:active?)
       end
 
-      alias_method :array_clear, :clear
+      # Clear out the drawn routes.
+      alias :array_clear :clear
 
       # Clears the builder and the draws memory
       def clear
