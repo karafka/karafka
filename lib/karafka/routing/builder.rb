@@ -67,6 +67,15 @@ module Karafka
         end
       end
 
+      # Clear routes and draw them again with the given block. Helpful for testing purposes.
+      def redraw(&block)
+        @mutex.synchronize do
+          @draws.clear
+          array_clear
+        end
+        draw(&block)
+      end
+
       # @return [Array<Karafka::Routing::ConsumerGroup>] only active consumer groups that
       #   we want to use. Since Karafka supports multi-process setup, we need to be able
       #   to pick only those consumer groups that should be active in our given process context
@@ -74,12 +83,14 @@ module Karafka
         select(&:active?)
       end
 
+      alias_method :array_clear, :clear
+
       # Clears the builder and the draws memory
       def clear
         @mutex.synchronize do
           @defaults = EMPTY_DEFAULTS
           @draws.clear
-          super
+          array_clear
         end
       end
 
