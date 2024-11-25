@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.4.14 (Unreleased)
+## 2.4.14 (2024-11-25)
 - [Enhancement] Improve low-level critical error reporting.
 - [Enhancement] Expand Kubernetes Liveness state reporting with critical errors detection.
 - [Enhancement] Save several string allocations and one array allocation on each job execution when using Datadog instrumentation.
