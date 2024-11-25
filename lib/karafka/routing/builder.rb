@@ -69,6 +69,7 @@ module Karafka
 
       # Clear out the drawn routes.
       alias array_clear clear
+      private :array_clear
 
       # Clear routes and draw them again with the given block. Helpful for testing purposes.
       # @param block [Proc] block we will evaluate within the builder context
