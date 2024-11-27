@@ -271,6 +271,41 @@ RSpec.describe_current do
     end
   end
 
+  describe '#redraw' do
+    let(:topic1) { builder.first.topics.first }
+    let(:topic2) { builder.last.topics.last }
+    let(:draw1) do
+      builder.draw do
+        topic :topic_name1 do
+          # Here we should have instance doubles, etc but it takes
+          # shitload of time to setup instance evaluation from instance variables,
+          # so instead we check against constant names
+          consumer Class.new(Karafka::BaseConsumer)
+          deserializer ->(data) { data }
+        end
+      end
+    end
+    let(:draw2) do
+      builder.redraw do
+        topic :topic_name2 do
+          consumer Class.new(Karafka::BaseConsumer)
+          deserializer ->(data) { data }
+        end
+      end
+    end
+
+    before do
+      draw1
+      draw2
+    end
+
+    it { expect(topic1.id).to eq 'app_topic_name2' }
+    it { expect(builder.size).to eq 1 }
+    it { expect(topic1.name).to eq 'topic_name2' }
+    it { expect(topic1.subscription_group_details).not_to eq(nil) }
+    it { expect(builder.first.id).to eq 'app' }
+  end
+
   describe '#active' do
     let(:active_group) { instance_double(Karafka::Routing::ConsumerGroup, active?: true) }
     let(:inactive_group) { instance_double(Karafka::Routing::ConsumerGroup, active?: false) }
