@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Post transaction marking should not crash anything and should work with connections pool
+
 setup_karafka do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid
   config.concurrency = 10
