@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.4.14)
+    karafka (2.4.15)
       base64 (~> 0.2)
       karafka-core (>= 2.4.4, < 2.5.0)
       karafka-rdkafka (>= 0.17.2)

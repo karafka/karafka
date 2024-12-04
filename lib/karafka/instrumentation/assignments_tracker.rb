@@ -31,8 +31,13 @@ module Karafka
       def current
         assignments = {}
 
-        @assignments.each do |topic, partitions|
-          assignments[topic] = partitions.dup.freeze
+        # Since the `@assignments` state can change during a rebalance, if we would iterate over
+        # it exactly during state change, we would end up with the following error:
+        #   RuntimeError: can't add a new key into hash during iteration
+        @mutex.synchronize do
+          @assignments.each do |topic, partitions|
+            assignments[topic] = partitions.dup.freeze
+          end
         end
 
         assignments.freeze
