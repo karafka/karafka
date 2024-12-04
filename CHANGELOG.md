@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.4.15 (Unreleased)
+- [Fix] Assignment tracker current state fetch during a rebalance loop can cause an error on multi CG setup.
+
 ## 2.4.14 (2024-11-25)
 - [Enhancement] Improve low-level critical error reporting.
 - [Enhancement] Expand Kubernetes Liveness state reporting with critical errors detection.
