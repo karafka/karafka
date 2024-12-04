@@ -63,6 +63,16 @@ module Karafka
               # Ignore earlier offsets than the one we already committed
               return true if coordinator.seek_offset > message.offset
               return false if revoked?
+
+              # If we have already marked this successfully in a transaction that was running
+              # we should not mark it again with the client offset delegation but instead we should
+              # just align the in-memory state
+              if @_in_transaction_marked
+                coordinator.seek_offset = message.offset + 1
+
+                return true
+              end
+
               return revoked? unless client.mark_as_consumed(message, offset_metadata)
 
               coordinator.seek_offset = message.offset + 1
@@ -89,6 +99,12 @@ module Karafka
               # Ignore earlier offsets than the one we already committed
               return true if coordinator.seek_offset > message.offset
               return false if revoked?
+
+              if @_in_transaction_marked
+                coordinator.seek_offset = message.offset + 1
+
+                return true
+              end
 
               return revoked? unless client.mark_as_consumed!(message, offset_metadata)
 
@@ -132,6 +148,7 @@ module Karafka
             transaction_started = true
             @_transaction_marked = []
             @_in_transaction = true
+            @_in_transaction_marked = false
 
             producer.transaction(&block)
 
@@ -142,6 +159,11 @@ module Karafka
             #
             # @note We never need to use the blocking `#mark_as_consumed!` here because the offset
             #   anyhow was already stored during the transaction
+            #
+            # @note Since the offset could have been already stored in Kafka (could have because
+            #   you can have transactions without marking), we use the `@_in_transaction_marked`
+            #   state to decide if we need to dispatch the offset via client at all
+            #   (if post transaction, then we do not have to)
             #
             # @note In theory we could only keep reference to the most recent marking and reject
             #   others. We however do not do it for two reasons:
@@ -158,6 +180,7 @@ module Karafka
             if transaction_started
               @_transaction_marked.clear
               @_in_transaction = false
+              @_in_transaction_marked = false
             end
           end
 
@@ -178,6 +201,7 @@ module Karafka
               offset_metadata
             )
 
+            @_in_transaction_marked = true
             @_transaction_marked ||= []
             @_transaction_marked << [message, offset_metadata, async]
           end
