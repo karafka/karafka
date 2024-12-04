@@ -2,6 +2,7 @@
 
 ## 2.4.15 (Unreleased)
 - [Fix] Assignment tracker current state fetch during a rebalance loop can cause an error on multi CG setup.
+- [Fix] Prevent double post-transaction offset dispatch to Kafka.
 
 ## 2.4.14 (2024-11-25)
 - [Enhancement] Improve low-level critical error reporting.
