@@ -293,6 +293,9 @@ module Karafka
         when 'consumer.initialized.error'
           error "Consumer initialized error: #{error}"
           error details
+        when 'consumer.wrap.error'
+          error "Consumer wrap error: #{error}"
+          error details
         when 'consumer.consume.error'
           error "Consumer consuming error: #{error}"
           error details

@@ -5,6 +5,8 @@ RSpec.describe_current do
 
   let(:executor) { build(:processing_executor) }
 
+  specify { expect(described_class.action).to eq(:tick) }
+
   it { expect(job.non_blocking?).to eq(true) }
   it { expect(described_class).to be < ::Karafka::Pro::Processing::Jobs::Periodic }
 end

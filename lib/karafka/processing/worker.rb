@@ -53,28 +53,30 @@ module Karafka
         instrument_details = { caller: self, job: job, jobs_queue: @jobs_queue }
 
         if job
-          Karafka.monitor.instrument('worker.process', instrument_details)
+          job.wrap do
+            Karafka.monitor.instrument('worker.process', instrument_details)
 
-          Karafka.monitor.instrument('worker.processed', instrument_details) do
-            job.before_call
+            Karafka.monitor.instrument('worker.processed', instrument_details) do
+              job.before_call
 
-            # If a job is marked as non blocking, we can run a tick in the job queue and if there
-            # are no other blocking factors, the job queue will be unlocked.
-            # If this does not run, all the things will be blocking and job queue won't allow to
-            # pass it until done.
-            @jobs_queue.tick(job.group_id) if job.non_blocking?
+              # If a job is marked as non blocking, we can run a tick in the job queue and if there
+              # are no other blocking factors, the job queue will be unlocked.
+              # If this does not run, all the things will be blocking and job queue won't allow to
+              # pass it until done.
+              @jobs_queue.tick(job.group_id) if job.non_blocking?
 
-            if @non_wrapped_flow
-              job.call
-            else
-              worker_job_call_wrapper.wrap do
+              if @non_wrapped_flow
                 job.call
+              else
+                worker_job_call_wrapper.wrap do
+                  job.call
+                end
               end
+
+              job.after_call
+
+              true
             end
-
-            job.after_call
-
-            true
           end
         else
           false

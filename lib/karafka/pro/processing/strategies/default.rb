@@ -208,7 +208,7 @@ module Karafka
 
           # No actions needed for the standard flow here
           def handle_before_schedule_consume
-            Karafka.monitor.instrument('consumer.before_schedule_consume', caller: self)
+            monitor.instrument('consumer.before_schedule_consume', caller: self)
 
             nil
           end
@@ -227,8 +227,8 @@ module Karafka
             # This can happen primarily when an LRJ job gets to the internal worker queue and
             # this partition is revoked prior processing.
             unless revoked?
-              Karafka.monitor.instrument('consumer.consume', caller: self)
-              Karafka.monitor.instrument('consumer.consumed', caller: self) do
+              monitor.instrument('consumer.consume', caller: self)
+              monitor.instrument('consumer.consumed', caller: self) do
                 consume
               end
             end
@@ -274,8 +274,8 @@ module Karafka
               coordinator.revoke
             end
 
-            Karafka.monitor.instrument('consumer.revoke', caller: self)
-            Karafka.monitor.instrument('consumer.revoked', caller: self) do
+            monitor.instrument('consumer.revoke', caller: self)
+            monitor.instrument('consumer.revoked', caller: self) do
               revoked
             end
           ensure
@@ -284,15 +284,15 @@ module Karafka
 
           # No action needed for the tick standard flow
           def handle_before_schedule_tick
-            Karafka.monitor.instrument('consumer.before_schedule_tick', caller: self)
+            monitor.instrument('consumer.before_schedule_tick', caller: self)
 
             nil
           end
 
           # Runs the consumer `#tick` method with reporting
           def handle_tick
-            Karafka.monitor.instrument('consumer.tick', caller: self)
-            Karafka.monitor.instrument('consumer.ticked', caller: self) do
+            monitor.instrument('consumer.tick', caller: self)
+            monitor.instrument('consumer.ticked', caller: self) do
               tick
             end
           ensure

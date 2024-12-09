@@ -5,6 +5,8 @@ module Karafka
     module Jobs
       # Job that runs the eofed operation when we receive eof without messages alongside.
       class Eofed < Base
+        self.action = :eofed
+
         # @param executor [Karafka::Processing::Executor] executor that is suppose to run the job
         # @return [Eofed]
         def initialize(executor)

@@ -10,6 +10,8 @@ RSpec.describe_current do
     job.call
   end
 
+  specify { expect(described_class.action).to eq(:shutdown) }
+
   it { expect(job.id).to eq(executor.id) }
   it { expect(job.group_id).to eq(executor.group_id) }
   it { expect(job.non_blocking?).to eq(false) }

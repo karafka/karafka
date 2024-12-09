@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.4.15)
+    karafka (2.4.16)
       base64 (~> 0.2)
       karafka-core (>= 2.4.4, < 2.5.0)
       karafka-rdkafka (>= 0.17.2)
@@ -42,6 +42,7 @@ GEM
     factory_bot (6.5.0)
       activesupport (>= 5.0.0)
     ffi (1.17.0)
+    ffi (1.17.0-x86_64-linux-gnu)
     fugit (1.11.1)
       et-orbi (~> 1, >= 1.2.11)
       raabro (~> 1.4)
