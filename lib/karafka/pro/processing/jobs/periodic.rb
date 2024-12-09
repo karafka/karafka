@@ -18,6 +18,8 @@ module Karafka
         # Job that represents a "ticking" work. Work that we run periodically for the Periodics
         # enabled topics.
         class Periodic < ::Karafka::Processing::Jobs::Base
+          self.action = :tick
+
           # @param executor [Karafka::Pro::Processing::Executor] pro executor that is suppose to
           #   run a given job
           def initialize(executor)

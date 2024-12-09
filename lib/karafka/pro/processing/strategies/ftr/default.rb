@@ -89,7 +89,7 @@ module Karafka
 
                 throttle_message = filter.cursor
 
-                Karafka.monitor.instrument(
+                monitor.instrument(
                   'filtering.seek',
                   caller: self,
                   message: throttle_message
@@ -104,7 +104,7 @@ module Karafka
 
                 throttle_message = filter.cursor
 
-                Karafka.monitor.instrument(
+                monitor.instrument(
                   'filtering.throttled',
                   caller: self,
                   message: throttle_message,

@@ -56,32 +56,7 @@ module Karafka
             consumer = job.executor.topic.consumer
             topic = job.executor.topic.name
 
-            action = case job_type
-                     when 'Periodic'
-                       'tick'
-                     when 'PeriodicNonBlocking'
-                       'tick'
-                     when 'Shutdown'
-                       'shutdown'
-                     when 'Revoked'
-                       'revoked'
-                     when 'RevokedNonBlocking'
-                       'revoked'
-                     when 'Idle'
-                       'idle'
-                     when 'Eofed'
-                       'eofed'
-                     when 'EofedNonBlocking'
-                       'eofed'
-                     when 'ConsumeNonBlocking'
-                       'consume'
-                     when 'Consume'
-                       'consume'
-                     else
-                       raise Errors::UnsupportedCaseError, job_type
-                     end
-
-            current_span.resource = "#{consumer}##{action}"
+            current_span.resource = "#{consumer}##{job.class.action}"
             info "[#{job.id}] #{job_type} job for #{consumer} on #{topic} started"
 
             pop_tags

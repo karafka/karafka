@@ -117,7 +117,7 @@ module Karafka
           )
 
           # Notify about dispatch on the events bus
-          Karafka.monitor.instrument(
+          monitor.instrument(
             'dead_letter_queue.dispatched',
             caller: self,
             message: skippable_message

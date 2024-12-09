@@ -7,6 +7,8 @@ RSpec.describe_current do
   let(:messages) { [rand] }
   let(:time_now) { Time.now }
 
+  specify { expect(described_class.action).to eq(:consume) }
+
   it { expect(job.non_blocking?).to eq(true) }
   it { expect(described_class).to be < ::Karafka::Processing::Jobs::Consume }
 

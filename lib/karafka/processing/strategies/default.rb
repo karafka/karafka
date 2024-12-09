@@ -24,7 +24,7 @@ module Karafka
           class_eval <<~RUBY, __FILE__, __LINE__ + 1
             # No actions needed for the standard flow here
             def handle_before_schedule_#{action}
-              Karafka.monitor.instrument('consumer.before_schedule_#{action}', caller: self)
+              monitor.instrument('consumer.before_schedule_#{action}', caller: self)
 
               nil
             end
@@ -35,8 +35,8 @@ module Karafka
         # @note It runs in the listener loop. Should **not** be used for anything heavy or
         #   with any potential errors. Mostly for initialization of states, etc.
         def handle_initialized
-          Karafka.monitor.instrument('consumer.initialize', caller: self)
-          Karafka.monitor.instrument('consumer.initialized', caller: self) do
+          monitor.instrument('consumer.initialize', caller: self)
+          monitor.instrument('consumer.initialized', caller: self) do
             initialized
           end
         end
@@ -115,10 +115,21 @@ module Karafka
           coordinator.pause_tracker.increment
         end
 
+        # Runs the wrapping to execute appropriate action wrapped with the wrapper method code
+        #
+        # @param action [Symbol]
+        # @param block [Proc]
+        def handle_wrap(action, &block)
+          monitor.instrument('consumer.wrap', caller: self)
+          monitor.instrument('consumer.wrapped', caller: self) do
+            wrap(action, &block)
+          end
+        end
+
         # Run the user consumption code
         def handle_consume
-          Karafka.monitor.instrument('consumer.consume', caller: self)
-          Karafka.monitor.instrument('consumer.consumed', caller: self) do
+          monitor.instrument('consumer.consume', caller: self)
+          monitor.instrument('consumer.consumed', caller: self) do
             consume
           end
 
@@ -164,8 +175,8 @@ module Karafka
 
         # Runs the consumer `#eofed` method with reporting
         def handle_eofed
-          Karafka.monitor.instrument('consumer.eof', caller: self)
-          Karafka.monitor.instrument('consumer.eofed', caller: self) do
+          monitor.instrument('consumer.eof', caller: self)
+          monitor.instrument('consumer.eofed', caller: self) do
             eofed
           end
         ensure
@@ -180,8 +191,8 @@ module Karafka
 
           coordinator.revoke
 
-          Karafka.monitor.instrument('consumer.revoke', caller: self)
-          Karafka.monitor.instrument('consumer.revoked', caller: self) do
+          monitor.instrument('consumer.revoke', caller: self)
+          monitor.instrument('consumer.revoked', caller: self) do
             revoked
           end
         ensure
@@ -190,8 +201,8 @@ module Karafka
 
         # Runs the shutdown code
         def handle_shutdown
-          Karafka.monitor.instrument('consumer.shutting_down', caller: self)
-          Karafka.monitor.instrument('consumer.shutdown', caller: self) do
+          monitor.instrument('consumer.shutting_down', caller: self)
+          monitor.instrument('consumer.shutdown', caller: self) do
             shutdown
           end
         ensure

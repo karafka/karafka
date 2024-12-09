@@ -15,12 +15,25 @@ module Karafka
 
         attr_reader :executor
 
+        class << self
+          # @return [Symbol] Job matching appropriate action
+          attr_accessor :action
+        end
+
         # Creates a new job instance
         def initialize
           # All jobs are blocking by default and they can release the lock when blocking operations
           # are done (if needed)
           @non_blocking = false
           @status = :pending
+        end
+
+        # Runs the wrap/around job hook within which the rest of the flow happens
+        # @param block [Proc] whole user related processing flow
+        # @note We inject the action name so user can decide whether to run custom logic on a
+        #   given action or not.
+        def wrap(&block)
+          executor.wrap(self.class.action, &block)
         end
 
         # When redefined can run any code prior to the job being scheduled

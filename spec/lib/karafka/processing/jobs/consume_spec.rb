@@ -8,6 +8,8 @@ RSpec.describe_current do
 
   it { expect(job.non_blocking?).to eq(false) }
 
+  specify { expect(described_class.action).to eq(:consume) }
+
   describe '#before_schedule' do
     before do
       allow(executor).to receive(:before_schedule_consume)

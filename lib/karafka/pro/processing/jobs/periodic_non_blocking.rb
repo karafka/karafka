@@ -20,6 +20,8 @@ module Karafka
         # to run this job for extended period of time. Under such scenarios, if we would not use
         # a non-blocking one, we would reach max.poll.interval.ms.
         class PeriodicNonBlocking < Periodic
+          self.action = :tick
+
           # @param args [Array] any arguments accepted by `::Karafka::Processing::Jobs::Periodic`
           def initialize(*args)
             super

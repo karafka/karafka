@@ -24,6 +24,8 @@ module Karafka
         # in scenarios where there are more jobs than threads, without this being async we
         # would potentially stop polling
         class RevokedNonBlocking < ::Karafka::Processing::Jobs::Revoked
+          self.action = :revoked
+
           # Makes this job non-blocking from the start
           # @param args [Array] any arguments accepted by `::Karafka::Processing::Jobs::Revoked`
           def initialize(*args)

@@ -77,6 +77,9 @@ module Karafka
         consumer.shutting_down
         consumer.shutdown
 
+        consumer.wrap
+        consumer.wrapped
+
         dead_letter_queue.dispatched
 
         filtering.throttled

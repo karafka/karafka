@@ -3,6 +3,8 @@
 RSpec.describe_current do
   subject(:job) { described_class.new }
 
+  specify { expect(described_class.action).to eq(nil) }
+
   describe '#non_blocking?' do
     it 'expect all the newly created jobs to be blocking' do
       expect(job.non_blocking?).to eq(false)
