@@ -294,7 +294,7 @@ module Karafka
           error "Consumer initialized error: #{error}"
           error details
         when 'consumer.wrap.error'
-          error "Consumer wrap error: #{error}"
+          error "Consumer wrap failed due to an error: #{error}"
           error details
         when 'consumer.consume.error'
           error "Consumer consuming error: #{error}"
