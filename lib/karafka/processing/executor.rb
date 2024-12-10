@@ -81,6 +81,13 @@ module Karafka
         consumer.on_before_consume
       end
 
+      # Runs the wrap/around execution context appropriate for a given action
+      # @param action [Symbol] action execution wrapped with our block
+      # @param block [Proc] execution context
+      def wrap(action, &block)
+        consumer.on_wrap(action, &block)
+      end
+
       # Runs consumer data processing against given batch and handles failures and errors.
       def consume
         # We run the consumer client logic...

@@ -9,6 +9,8 @@ module Karafka
         # @return [Array<Rdkafka::Consumer::Message>] array with messages
         attr_reader :messages
 
+        self.action = :consume
+
         # @param executor [Karafka::Processing::Executor] executor that is suppose to run a given
         #   job
         # @param messages [Karafka::Messages::Messages] karafka messages batch

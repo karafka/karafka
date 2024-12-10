@@ -6,6 +6,9 @@ module Karafka
   class BaseConsumer
     # Allow for consumer instance tagging for instrumentation
     include ::Karafka::Core::Taggable
+    include Helpers::ConfigImporter.new(
+      monitor: %i[monitor]
+    )
 
     extend Forwardable
 
@@ -39,7 +42,7 @@ module Karafka
     def on_initialized
       handle_initialized
     rescue StandardError => e
-      Karafka.monitor.instrument(
+      monitor.instrument(
         'error.occurred',
         error: e,
         caller: self,
@@ -73,6 +76,23 @@ module Karafka
       handle_before_consume
     end
 
+    # Executes the default wrapping flow
+    #
+    # @private
+    #
+    # @param action [Symbol]
+    # @param block [Proc]
+    def on_wrap(action, &block)
+      handle_wrap(action, &block)
+    rescue StandardError => e
+      monitor.instrument(
+        'error.occurred',
+        error: e,
+        caller: self,
+        type: 'consumer.wrap.error'
+      )
+    end
+
     # Executes the default consumer flow.
     #
     # @private
@@ -85,7 +105,7 @@ module Karafka
     def on_consume
       handle_consume
     rescue StandardError => e
-      Karafka.monitor.instrument(
+      monitor.instrument(
         'error.occurred',
         error: e,
         caller: self,
@@ -105,7 +125,7 @@ module Karafka
     def on_after_consume
       handle_after_consume
     rescue StandardError => e
-      Karafka.monitor.instrument(
+      monitor.instrument(
         'error.occurred',
         error: e,
         caller: self,
@@ -125,7 +145,7 @@ module Karafka
     def on_eofed
       handle_eofed
     rescue StandardError => e
-      Karafka.monitor.instrument(
+      monitor.instrument(
         'error.occurred',
         error: e,
         caller: self,
@@ -161,7 +181,7 @@ module Karafka
     def on_revoked
       handle_revoked
     rescue StandardError => e
-      Karafka.monitor.instrument(
+      monitor.instrument(
         'error.occurred',
         error: e,
         caller: self,
@@ -182,7 +202,7 @@ module Karafka
     def on_shutdown
       handle_shutdown
     rescue StandardError => e
-      Karafka.monitor.instrument(
+      monitor.instrument(
         'error.occurred',
         error: e,
         caller: self,
@@ -207,6 +227,40 @@ module Karafka
     #   someone forgets about it or makes on with typo
     def consume
       raise NotImplementedError, 'Implement this in a subclass'
+    end
+
+    # This method can be redefined to build a wrapping API around user code + karafka flow control
+    # code starting from the user code (operations prior to that are not part of this).
+    # The wrapping relates to a single job flow.
+    #
+    # Karafka framework may require user configured "state" like for example a selected
+    # transactional producer that should be used not only by the user but also by the framework.
+    # By using this API user can checkout a producer and return it to the pool.
+    #
+    # @param _action [Symbol] what action are we wrapping. Useful if we want for example to only
+    #   wrap the `:consume` action.
+    # @yield Runs the execution block
+    #
+    # @note User related errors should not leak to this level of execution. This should not be used
+    #   for anything consumption related but only for setting up state that that Karafka code
+    #   may need outside of user code.
+    #
+    # @example Redefine to use a producer from a pool for consume
+    #   def wrap(action)
+    #     # Do not checkout producer for any other actions
+    #     return yield unless action == :consume
+    #
+    #     default_producer = self.producer
+    #
+    #     $producers.with do |producer|
+    #       self.producer = producer
+    #       yield
+    #     end
+    #
+    #     self.producer = default_producer
+    #   end
+    def wrap(_action)
+      yield
     end
 
     # Method that will be executed when a given topic partition reaches eof without any new
@@ -255,7 +309,7 @@ module Karafka
       # Indicate, that user took a manual action of pausing
       coordinator.manual_pause if manual_pause
 
-      Karafka.monitor.instrument(
+      monitor.instrument(
         'consumer.consuming.pause',
         caller: self,
         manual: manual_pause,
@@ -299,7 +353,7 @@ module Karafka
         offset
       )
 
-      Karafka.monitor.instrument(
+      monitor.instrument(
         'consumer.consuming.seek',
         caller: self,
         topic: topic.name,
@@ -347,7 +401,7 @@ module Karafka
 
       # Instrumentation needs to run **after** `#pause` invocation because we rely on the states
       # set by `#pause`
-      Karafka.monitor.instrument(
+      monitor.instrument(
         'consumer.consuming.retry',
         caller: self,
         topic: topic.name,

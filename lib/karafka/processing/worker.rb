@@ -19,7 +19,8 @@ module Karafka
     class Worker
       include Helpers::Async
       include Helpers::ConfigImporter.new(
-        worker_job_call_wrapper: %i[internal processing worker_job_call_wrapper]
+        worker_job_call_wrapper: %i[internal processing worker_job_call_wrapper],
+        monitor: %i[monitor]
       )
 
       # @return [String] id of this worker
@@ -53,28 +54,30 @@ module Karafka
         instrument_details = { caller: self, job: job, jobs_queue: @jobs_queue }
 
         if job
-          Karafka.monitor.instrument('worker.process', instrument_details)
+          job.wrap do
+            monitor.instrument('worker.process', instrument_details)
 
-          Karafka.monitor.instrument('worker.processed', instrument_details) do
-            job.before_call
+            monitor.instrument('worker.processed', instrument_details) do
+              job.before_call
 
-            # If a job is marked as non blocking, we can run a tick in the job queue and if there
-            # are no other blocking factors, the job queue will be unlocked.
-            # If this does not run, all the things will be blocking and job queue won't allow to
-            # pass it until done.
-            @jobs_queue.tick(job.group_id) if job.non_blocking?
+              # If a job is marked as non blocking, we can run a tick in the job queue and if there
+              # are no other blocking factors, the job queue will be unlocked.
+              # If this does not run, all the things will be blocking and job queue won't allow to
+              # pass it until done.
+              @jobs_queue.tick(job.group_id) if job.non_blocking?
 
-            if @non_wrapped_flow
-              job.call
-            else
-              worker_job_call_wrapper.wrap do
+              if @non_wrapped_flow
                 job.call
+              else
+                worker_job_call_wrapper.wrap do
+                  job.call
+                end
               end
+
+              job.after_call
+
+              true
             end
-
-            job.after_call
-
-            true
           end
         else
           false
@@ -83,7 +86,7 @@ module Karafka
       # rubocop:disable Lint/RescueException
       rescue Exception => e
         # rubocop:enable Lint/RescueException
-        Karafka.monitor.instrument(
+        monitor.instrument(
           'error.occurred',
           caller: self,
           job: job,
@@ -99,7 +102,7 @@ module Karafka
         end
 
         # Always publish info, that we completed all the work despite its result
-        Karafka.monitor.instrument('worker.completed', instrument_details)
+        monitor.instrument('worker.completed', instrument_details)
       end
     end
   end

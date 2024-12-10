@@ -40,9 +40,10 @@ RSpec.describe_current do
     end
 
     context 'when it is a non-closing, blocking job' do
-      let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true) }
+      let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true, wrap: true) }
 
       before do
+        allow(job).to receive(:wrap).and_yield
         allow(job).to receive(:before_call)
         allow(job).to receive(:call)
         allow(job).to receive(:after_call)
@@ -66,6 +67,7 @@ RSpec.describe_current do
       let(:job) { OpenStruct.new(group_id: 1, id: 1, call: true, non_blocking?: true) }
 
       before do
+        allow(job).to receive(:wrap).and_yield
         allow(job).to receive(:before_call)
         allow(job).to receive(:call)
         allow(job).to receive(:after_call)
@@ -101,6 +103,7 @@ RSpec.describe_current do
       end
 
       before do
+        allow(job).to receive(:wrap).and_yield
         allow(job).to receive(:before_call).and_raise(StandardError)
 
         detected_errors
