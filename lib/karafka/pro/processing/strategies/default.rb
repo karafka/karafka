@@ -54,6 +54,7 @@ module Karafka
           #   already processed but rather at the next one. This applies to both sync and async
           #   versions of this method.
           def mark_as_consumed(message, offset_metadata = @_current_offset_metadata)
+            # If we are inside a transaction than we can just mark as consumed within it
             if @_in_transaction
               mark_in_transaction(message, offset_metadata, true)
             else
@@ -73,7 +74,15 @@ module Karafka
                 return true
               end
 
-              return revoked? unless client.mark_as_consumed(message, offset_metadata)
+              # If we are not inside a transaction but this is a transactional topic, we mark with
+              # artificially created transaction
+              stored = if producer.transactional? # && @_transaction_marked.empty?
+                         mark_with_transaction(message, offset_metadata, true)
+                       else
+                         client.mark_as_consumed(message, offset_metadata)
+                       end
+
+              return revoked? unless stored
 
               coordinator.seek_offset = message.offset + 1
             end
@@ -106,7 +115,15 @@ module Karafka
                 return true
               end
 
-              return revoked? unless client.mark_as_consumed!(message, offset_metadata)
+              # If we are not inside a transaction but this is a transactional topic, we mark with
+              # artificially created transaction
+              stored = if producer.transactional? # && @_transaction_marked.empty?
+                         mark_with_transaction(message, offset_metadata, false)
+                       else
+                         client.mark_as_consumed!(message, offset_metadata)
+                       end
+
+              return revoked? unless stored
 
               coordinator.seek_offset = message.offset + 1
             end
@@ -204,6 +221,21 @@ module Karafka
             @_in_transaction_marked = true
             @_transaction_marked ||= []
             @_transaction_marked << [message, offset_metadata, async]
+          end
+
+          # @param message [Messages::Message] message we want to commit inside of a transaction
+          # @param offset_metadata [String, nil] offset metadata or nil if none
+          # @param async [Boolean] should we mark in async or sync way (applicable only to post
+          #   transaction state synchronization usage as within transaction it is always sync)
+          # @return [Boolean] false if marking failed otherwise true
+          def mark_with_transaction(message, offset_metadata, async)
+            transaction do
+              mark_in_transaction(message, offset_metadata, async)
+            end
+
+            true
+          rescue ::Rdkafka::RdkafkaError
+            false
           end
 
           # No actions needed for the standard flow here

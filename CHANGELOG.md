@@ -2,6 +2,7 @@
 
 ## 2.4.16 (Unreleased)
 - [Enhancement] Introduce `Consumer#wrap` for connection pooling management and other wrapped operations.
+- [Fix] Prevent transactions from being marked with a non-transactional default producer when automatic offset management and other advanced features are on.
 
 ## 2.4.15 (2024-12-04)
 - [Fix] Assignment tracker current state fetch during a rebalance loop can cause an error on multi CG setup.
