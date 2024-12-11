@@ -11,10 +11,10 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (8.0.0)
-      activesupport (= 8.0.0)
+    activejob (8.0.0.1)
+      activesupport (= 8.0.0.1)
       globalid (>= 0.3.6)
-    activesupport (8.0.0)
+    activesupport (8.0.0.1)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -42,6 +42,7 @@ GEM
     factory_bot (6.5.0)
       activesupport (>= 5.0.0)
     ffi (1.17.0)
+    ffi (1.17.0-x86_64-linux-gnu)
     fugit (1.11.1)
       et-orbi (~> 1, >= 1.2.11)
       raabro (~> 1.4)
@@ -64,9 +65,9 @@ GEM
       karafka-core (>= 2.4.0, < 2.5.0)
       roda (~> 3.68, >= 3.69)
       tilt (~> 2.0)
-    logger (1.6.1)
+    logger (1.6.2)
     mini_portile2 (2.8.8)
-    minitest (5.25.1)
+    minitest (5.25.4)
     ostruct (0.6.1)
     raabro (1.4.0)
     rack (3.1.8)
@@ -86,7 +87,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.1)
-    securerandom (0.3.1)
+    securerandom (0.3.2)
     simplecov (0.22.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -96,7 +97,7 @@ GEM
     tilt (2.4.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    uri (1.0.0)
+    uri (1.0.2)
     waterdrop (2.8.0)
       karafka-core (>= 2.4.3, < 3.0.0)
       karafka-rdkafka (>= 0.17.5)
