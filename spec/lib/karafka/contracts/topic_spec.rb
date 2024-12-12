@@ -220,6 +220,18 @@ RSpec.describe_current do
     it { expect(check).not_to be_success }
   end
 
+  context 'when kafka is missing totally' do
+    before { config.delete(:kafka) }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when kafka is not a hash' do
+    before { config[:kafka] = rand }
+
+    it { expect(check).not_to be_success }
+  end
+
   context 'when we validate initial_offset' do
     context 'when it is not present' do
       before { config[:initial_offset] = nil }

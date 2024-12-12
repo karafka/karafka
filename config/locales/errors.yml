@@ -95,6 +95,7 @@ en:
 
     topic:
       kafka: needs to be a hash with kafka scope settings details
+      kafka_format: needs to be a filled hash
       missing: needs to be present
       max_messages_format: 'needs to be an integer bigger than 0'
       max_wait_time_format: 'needs to be an integer bigger than 0'
