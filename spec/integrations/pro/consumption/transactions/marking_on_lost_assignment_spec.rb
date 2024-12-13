@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# When we mark as consumed outside of the transactional block but by using the transactional
+# producer, in a case where we were not able to finalize the transaction it should not raise an
+# error but instead should return false like the non-transactional one. This means we no longer
+# have ownership of this partition.
+
 setup_karafka(allow_errors: true) do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid
   config.kafka[:'max.poll.interval.ms'] = 10_000

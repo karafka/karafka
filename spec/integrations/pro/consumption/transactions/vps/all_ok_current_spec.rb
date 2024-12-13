@@ -22,6 +22,8 @@ class Consumer < Karafka::BaseConsumer
         end
       end
     end
+
+    DT[:seek_offset] = coordinator.seek_offset
   end
 
   def shutdown
@@ -53,5 +55,6 @@ end
 
 last = DT[:last].last
 
+assert_equal DT[:seek_offset], 100
 assert_equal DT[:metadata].last, last
 assert_equal fetch_next_offset, 100

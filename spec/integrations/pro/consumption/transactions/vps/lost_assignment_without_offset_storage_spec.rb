@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # We should be able to use producer-only transactions even after we have lost the assignment
+# as offset management may not be transactional
 
 setup_karafka(allow_errors: true) do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid

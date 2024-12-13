@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# When we mark with a transactional producer outside of the transactional block and we own the
+# assignment, marking should return true
+
 setup_karafka(allow_errors: true) do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid
   config.concurrency = 1

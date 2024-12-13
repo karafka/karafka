@@ -56,6 +56,7 @@ module Karafka
         if job
           job.wrap do
             monitor.instrument('worker.process', instrument_details)
+
             monitor.instrument('worker.processed', instrument_details) do
               job.before_call
 
