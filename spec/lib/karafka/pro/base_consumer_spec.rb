@@ -8,6 +8,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     instance.singleton_class.include Karafka::Pro::BaseConsumer
     instance.singleton_class.include Karafka::Pro::Processing::PeriodicJob::Consumer
     instance.singleton_class.include(strategy)
+    instance.producer = Karafka.producer
     instance
   end
 
