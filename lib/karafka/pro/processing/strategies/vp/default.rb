@@ -101,6 +101,9 @@ module Karafka
               raise Errors::AssignmentLostError if revoked?
 
               return super if collapsed?
+              # If this is user post-execution transaction (one initiated by the system) we should
+              # delegate to the original implementation that will store the offset via the producer
+              return super if @_transaction_internal
 
               @_transaction_marked << [message, offset_metadata, async]
             end

@@ -5,6 +5,7 @@ RSpec.describe_current do
     described_class.new.tap do |instance|
       instance.client = client
       instance.coordinator = coordinator
+      instance.producer = Karafka.producer
       instance.singleton_class.include(strategy)
     end
   end
