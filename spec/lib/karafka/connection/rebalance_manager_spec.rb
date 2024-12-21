@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:manager) { described_class.new(subscription_group_id) }
+  subject(:manager) { described_class.new(subscription_group_id, on_revoked: ->(_) {}) }
 
   let(:partition1) { Rdkafka::Consumer::Partition.new(1, 'topic_name') }
   let(:partition2) { Rdkafka::Consumer::Partition.new(4, 'topic_name') }
@@ -11,7 +11,7 @@ RSpec.describe_current do
   let(:event) { { subscription_group_id: subscription_group_id, tpl: partitions } }
 
   describe(
-    '#revoked_partitions, #on_rebalance_partitions_revoked, #lost_partitions and #changed?'
+    '#revoked_partitions, #on_rebalance_partitions_revoked and #changed?'
   ) do
     it { expect(manager.active?).to eq(false) }
 
@@ -60,10 +60,6 @@ RSpec.describe_current do
 
       it { expect(manager.active?).to eq(true) }
 
-      it 'expect not to include them in the lost partitions back' do
-        expect(manager.lost_partitions).to eq({ 'topic_name' => [partition2.partition] })
-      end
-
       it 'expect to include them in the revoked partitions back' do
         expected_partitions = [partition1.partition, partition2.partition]
         expect(manager.revoked_partitions).to eq({ 'topic_name' => expected_partitions })
@@ -89,10 +85,6 @@ RSpec.describe_current do
       end
 
       it { expect(manager.active?).to eq(false) }
-
-      it 'expect not to include them in the lost partitions back' do
-        expect(manager.lost_partitions).to eq({})
-      end
 
       it 'expect to include them in the revoked partitions back' do
         expect(manager.revoked_partitions).to eq({})

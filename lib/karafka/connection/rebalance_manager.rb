@@ -30,13 +30,16 @@ module Karafka
       private_constant :EMPTY_ARRAY
 
       # @param subscription_group_id [String] subscription group id
+      # @param on_revoked [Proc] Special callback that we execute right after revocation.
+      #   Used for data cleaning on lost partitions
       # @return [RebalanceManager]
-      def initialize(subscription_group_id)
+      def initialize(subscription_group_id, on_revoked:)
         @assigned_partitions = {}
         @revoked_partitions = {}
         @changed = false
         @active = false
         @subscription_group_id = subscription_group_id
+        @on_revoked = on_revoked
 
         # Connects itself to the instrumentation pipeline so rebalances can be tracked
         ::Karafka.monitor.subscribe(self)
@@ -64,17 +67,6 @@ module Karafka
         @active
       end
 
-      # We consider as lost only partitions that were taken away and not re-assigned back to us
-      def lost_partitions
-        lost_partitions = {}
-
-        revoked_partitions.each do |topic, partitions|
-          lost_partitions[topic] = partitions - assigned_partitions.fetch(topic, EMPTY_ARRAY)
-        end
-
-        lost_partitions
-      end
-
       # Callback that kicks in inside of rdkafka, when new partitions were assigned.
       #
       # @private
@@ -99,6 +91,8 @@ module Karafka
         @active = true
         @revoked_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
         @changed = true
+
+        @on_revoked.call(@revoked_partitions)
       end
     end
   end

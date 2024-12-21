@@ -1,12 +1,14 @@
 # Karafka Framework Changelog
 
 ## 2.4.16 (Unreleased)
+- [Enhancement] Improve post-rebalance revocation messages filtering.
 - [Enhancement] Introduce `Consumer#wrap` for connection pooling management and other wrapped operations.
 - [Enhancement] Guard transactional operations from marking beyond assignment ownership under some extreme edge-cases.
 - [Enhancement] Improve VPs work with transactional producers.
 - [Enhancement] Prevent non-transactional operations leakage into transactional managed offset management consumers.
 - [Fix] Prevent transactions from being marked with a non-transactional default producer when automatic offset management and other advanced features are on.
 - [Fix] Fix `kafka_format` `KeyError` that occurs when a non-hash is assigned to the kafka scope of the settings.
+- [Fix] Non cooperative-sticky transactional offset management can refetch reclaimed partitions.
 
 ## 2.4.15 (2024-12-04)
 - [Fix] Assignment tracker current state fetch during a rebalance loop can cause an error on multi CG setup.

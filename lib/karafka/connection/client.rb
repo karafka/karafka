@@ -66,7 +66,12 @@ module Karafka
         @subscription_group = subscription_group
         @buffer = RawMessagesBuffer.new
         @tick_interval = ::Karafka::App.config.internal.tick_interval
-        @rebalance_manager = RebalanceManager.new(@subscription_group.id)
+        @rebalance_manager = RebalanceManager.new(
+          @subscription_group.id,
+          # When some of the partitions are revoked from us, we need to make sure we do not let the
+          # revoked messages in
+          on_revoked: ->(rev_parts) { remove_revoked_and_duplicated_messages(rev_parts) }
+        )
         @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group)
 
         @interval_runner = Helpers::IntervalRunner.new do
@@ -141,7 +146,7 @@ module Karafka
             # Since rebalances do not occur often, we can run events polling as well without
             # any throttling
             events_poll
-            remove_revoked_and_duplicated_messages
+
             break
           end
 
@@ -721,8 +726,9 @@ module Karafka
       # In a case like this we should remove all the pre-buffered messages from list partitions as
       # we are no longer responsible in a given process for processing those messages and they
       # should have been picked up by a different process.
-      def remove_revoked_and_duplicated_messages
-        @rebalance_manager.lost_partitions.each do |topic, partitions|
+      # @param revoked_partitions [Hash<String, Array<Integer>>] partitions that were revoked
+      def remove_revoked_and_duplicated_messages(revoked_partitions)
+        revoked_partitions.each do |topic, partitions|
           partitions.each do |partition|
             @buffer.delete(topic, partition)
           end
