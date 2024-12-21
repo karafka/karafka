@@ -2,7 +2,9 @@
 
 module Karafka
   module Connection
-    # Manager for tracking changes in the partitions assignment after the assignment is done.
+    # Manager for tracking changes in the partitions assignment after the assignment is done and
+    # for ensuring, that proper buffer related operations that may be impacted by the rebalance
+    # state are applied.
     #
     # We need tracking of those to clean up consumers that will no longer process given partitions
     # as they were taken away.
@@ -30,13 +32,15 @@ module Karafka
       private_constant :EMPTY_ARRAY
 
       # @param subscription_group_id [String] subscription group id
+      # @param buffer [Karafka::Connection::RawMessagesBuffer]
       # @return [RebalanceManager]
-      def initialize(subscription_group_id)
+      def initialize(subscription_group_id, buffer)
         @assigned_partitions = {}
         @revoked_partitions = {}
         @changed = false
         @active = false
         @subscription_group_id = subscription_group_id
+        @buffer = buffer
 
         # Connects itself to the instrumentation pipeline so rebalances can be tracked
         ::Karafka.monitor.subscribe(self)
@@ -64,17 +68,6 @@ module Karafka
         @active
       end
 
-      # We consider as lost only partitions that were taken away and not re-assigned back to us
-      def lost_partitions
-        lost_partitions = {}
-
-        revoked_partitions.each do |topic, partitions|
-          lost_partitions[topic] = partitions - assigned_partitions.fetch(topic, EMPTY_ARRAY)
-        end
-
-        lost_partitions
-      end
-
       # Callback that kicks in inside of rdkafka, when new partitions were assigned.
       #
       # @private
@@ -99,6 +92,24 @@ module Karafka
         @active = true
         @revoked_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
         @changed = true
+
+        remove_revoked_and_duplicated_messages
+      end
+
+      private
+
+      # We may have a case where in the middle of data polling, we've lost a partition.
+      # In a case like this we should remove all the pre-buffered messages from list partitions as
+      # we are no longer responsible in a given process for processing those messages and they
+      # should have been picked up by a different process.
+      def remove_revoked_and_duplicated_messages
+        @revoked_partitions.each do |topic, partitions|
+          partitions.each do |partition|
+            @buffer.delete(topic, partition)
+          end
+        end
+
+        @buffer.uniq!
       end
     end
   end
