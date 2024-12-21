@@ -2,7 +2,9 @@
 
 module Karafka
   module Connection
-    # Manager for tracking changes in the partitions assignment after the assignment is done.
+    # Manager for tracking changes in the partitions assignment after the assignment is done and
+    # for ensuring, that proper buffer related operations that may be impacted by the rebalance
+    # state are applied.
     #
     # We need tracking of those to clean up consumers that will no longer process given partitions
     # as they were taken away.
@@ -30,16 +32,15 @@ module Karafka
       private_constant :EMPTY_ARRAY
 
       # @param subscription_group_id [String] subscription group id
-      # @param on_revoked [Proc] Special callback that we execute right after revocation.
-      #   Used for data cleaning on lost partitions
+      # @param buffer [Karafka::Connection::RawMessagesBuffer]
       # @return [RebalanceManager]
-      def initialize(subscription_group_id, on_revoked:)
+      def initialize(subscription_group_id, buffer)
         @assigned_partitions = {}
         @revoked_partitions = {}
         @changed = false
         @active = false
         @subscription_group_id = subscription_group_id
-        @on_revoked = on_revoked
+        @buffer = buffer
 
         # Connects itself to the instrumentation pipeline so rebalances can be tracked
         ::Karafka.monitor.subscribe(self)
@@ -92,7 +93,23 @@ module Karafka
         @revoked_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
         @changed = true
 
-        @on_revoked.call(@revoked_partitions)
+        remove_revoked_and_duplicated_messages
+      end
+
+      private
+
+      # We may have a case where in the middle of data polling, we've lost a partition.
+      # In a case like this we should remove all the pre-buffered messages from list partitions as
+      # we are no longer responsible in a given process for processing those messages and they
+      # should have been picked up by a different process.
+      def remove_revoked_and_duplicated_messages
+        @revoked_partitions.each do |topic, partitions|
+          partitions.each do |partition|
+            @buffer.delete(topic, partition)
+          end
+        end
+
+        @buffer.uniq!
       end
     end
   end

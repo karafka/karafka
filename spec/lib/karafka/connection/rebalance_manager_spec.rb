@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:manager) { described_class.new(subscription_group_id, on_revoked: ->(_) {}) }
+  subject(:manager) { described_class.new(subscription_group_id, buffer) }
 
   let(:partition1) { Rdkafka::Consumer::Partition.new(1, 'topic_name') }
   let(:partition2) { Rdkafka::Consumer::Partition.new(4, 'topic_name') }
@@ -9,10 +9,9 @@ RSpec.describe_current do
   let(:subscription_group) { build(:routing_subscription_group) }
   let(:subscription_group_id) { subscription_group.id }
   let(:event) { { subscription_group_id: subscription_group_id, tpl: partitions } }
+  let(:buffer) { Karafka::Connection::RawMessagesBuffer.new }
 
-  describe(
-    '#revoked_partitions, #on_rebalance_partitions_revoked and #changed?'
-  ) do
+  describe '#revoked_partitions, #on_rebalance_partitions_revoked and #changed?' do
     it { expect(manager.active?).to eq(false) }
 
     context 'when there are no revoked partitions' do
