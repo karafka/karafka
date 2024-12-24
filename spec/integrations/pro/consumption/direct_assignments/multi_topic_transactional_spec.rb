@@ -8,6 +8,7 @@
 # @note There is code for consumer marking commented out because we want to ensure, that we mark
 #   as consumed only in the transaction and that it works as expected but in a production-grade
 #   system you also want to always synchronize internal state of consumers instances.
+
 setup_karafka do |config|
   config.concurrency = 10
   config.kafka[:'transactional.id'] = SecureRandom.uuid
@@ -22,8 +23,6 @@ class Transactioner
 
   def call(consumer)
     producer = Karafka.producer
-
-    to_mark = {}
 
     # Will lock the producer as it has a mutex
     producer.transaction do
@@ -41,17 +40,10 @@ class Transactioner
           cur_consumer.client,
           message
         )
-
-        to_mark[cur_consumer] = message
       end
 
       @data.clear
     end
-
-    # In real world scenario you want this to run
-    # to_mark.each do |consumer, message|
-    #   consumer.mark_as_consumed(message)
-    # end
   end
 end
 
@@ -59,12 +51,16 @@ Transactioner.instance
 
 class Consumer1 < Karafka::BaseConsumer
   def consume
+    return if DT[:merged].size >= 10
+
     Transactioner.instance.call(self)
   end
 end
 
 class Consumer2 < Karafka::BaseConsumer
   def consume
+    return if DT[:merged].size >= 10
+
     Transactioner.instance.call(self)
   end
 end
@@ -118,7 +114,7 @@ rescue WaterDrop::Errors::ProducerClosedError
 end
 
 start_karafka_and_wait_until do
-  DT[:merged].size >= 10
+  DT[:merged].size >= 10 && sleep(5)
 end
 
 sleep(2)
