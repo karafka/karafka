@@ -27,10 +27,12 @@ end
 # Wait until anything is consumed so we are sure of the assignment
 sleep(0.1) until DT.key?(0)
 
+sleep(2)
+
 # Fork it so fencing will be triggered
 pid = fork do
   # Wait in fork before starting processing so the liveness listener can open a tcp connection
-  sleep(2)
+  sleep(5)
   start_karafka_and_wait_until do
     false
   end
