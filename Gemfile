@@ -12,6 +12,7 @@ gemspec
 group :integrations, :test do
   gem 'fugit', require: false
   gem 'rspec', require: false
+  gem 'stringio'
 end
 
 group :integrations do
