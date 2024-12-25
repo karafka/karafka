@@ -23,7 +23,9 @@ class Consumer < Karafka::BaseConsumer
       end
     end
 
-    DT[:seek_offset] = coordinator.seek_offset
+    synchronize do
+      DT[:seek_offset] = coordinator.seek_offset
+    end
   end
 
   def shutdown
