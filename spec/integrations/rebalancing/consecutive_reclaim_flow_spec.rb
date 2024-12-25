@@ -58,15 +58,16 @@ Thread.new do
   end
 end
 
+consumer = setup_rdkafka_consumer
+
 other = Thread.new do
   loop do
-    consumer = setup_rdkafka_consumer
     consumer.subscribe(DT.topic)
     consumer.each { break }
 
     2.times { consumer.poll(1_000) }
 
-    consumer.close
+    consumer.unsubscribe
 
     DT[:attempts] << true
 
@@ -78,7 +79,9 @@ start_karafka_and_wait_until do
   DT[:attempts].size >= 4
 end
 
-other.join
+other.join(10) || raise
+
+consumer.close
 
 # This ensures we do not skip over offsets
 DT[:all].each do |partition, offsets|

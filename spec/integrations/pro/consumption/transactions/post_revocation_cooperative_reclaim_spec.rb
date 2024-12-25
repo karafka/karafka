@@ -74,14 +74,15 @@ Thread.new do
   end
 end
 
+consumer = setup_rdkafka_consumer('partition.assignment.strategy': 'cooperative-sticky')
+
 other = Thread.new do
   loop do
-    consumer = setup_rdkafka_consumer('partition.assignment.strategy': 'cooperative-sticky')
     consumer.subscribe(DT.topic)
 
     2.times { consumer.poll(1_000) }
 
-    consumer.close
+    consumer.unsubscribe
 
     DT[:attempts] << true
 
@@ -93,7 +94,9 @@ start_karafka_and_wait_until do
   DT[:attempts].size >= 10
 end
 
-other.join
+other.join(10) || raise
+
+consumer.close
 
 # This ensures we do not skip over offsets
 DT[:all].each do |partition, offsets|
