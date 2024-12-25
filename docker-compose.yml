@@ -1,5 +1,3 @@
-version: '2'
-
 services:
   kafka:
     container_name: kafka
