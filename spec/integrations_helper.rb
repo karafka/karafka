@@ -13,6 +13,7 @@ end
 
 require 'singleton'
 require 'securerandom'
+require 'stringio'
 require 'tmpdir'
 require_relative './support/data_collector'
 
