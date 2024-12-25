@@ -83,6 +83,7 @@ other = Thread.new do
     10.times { break if consumer.poll(1_000) }
 
     consumer.unsubscribe
+    consumer.poll(1_000)
 
     DT[:attempts] << true
 
