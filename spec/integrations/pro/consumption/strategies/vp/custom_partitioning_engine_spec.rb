@@ -78,7 +78,6 @@ def median(array)
   (sorted[(len - 1) / 2] + sorted[len / 2]) / 2.0
 end
 
-
 special_median = median(DT[SPECIAL_TOPIC])
 regular_median = median(DT[REGULAR_TOPIC])
 
