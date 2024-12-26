@@ -31,11 +31,12 @@ end
 
 previous = nil
 
-Karafka::Admin
-  .read_topic(Karafka::App.config.recurring_tasks.topics.schedules, 0, 21)
-  .map(&:key)
-  .each do |event|
-    assert previous != event
+keys = Karafka::Admin
+       .read_topic(Karafka::App.config.recurring_tasks.topics.schedules, 0, 21)
+       .map(&:key)
 
-    previous = event
-  end
+keys.each do |event|
+  assert previous != event, keys
+
+  previous = event
+end
