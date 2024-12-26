@@ -81,5 +81,5 @@ end
 special_median = median(DT[SPECIAL_TOPIC])
 regular_median = median(DT[REGULAR_TOPIC])
 
-assert_equal 20, median(special_median)
+assert_equal 20, special_median
 assert (250..500).cover?(regular_median)
