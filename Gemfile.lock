@@ -49,9 +49,10 @@ GEM
       activesupport (>= 6.1)
     i18n (1.14.6)
       concurrent-ruby (~> 1.0)
-    karafka-core (2.4.5)
-      karafka-rdkafka (>= 0.17.6, < 0.18.0)
-    karafka-rdkafka (0.17.6)
+    karafka-core (2.4.8)
+      karafka-rdkafka (>= 0.17.6, < 0.19.0)
+      logger (>= 1.6.0)
+    karafka-rdkafka (0.18.1)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
@@ -98,11 +99,11 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     uri (1.0.2)
-    waterdrop (2.8.0)
+    waterdrop (2.8.1)
       karafka-core (>= 2.4.3, < 3.0.0)
       karafka-rdkafka (>= 0.17.5)
       zeitwerk (~> 2.3)
-    zeitwerk (2.6.18)
+    zeitwerk (2.7.1)
 
 PLATFORMS
   ruby

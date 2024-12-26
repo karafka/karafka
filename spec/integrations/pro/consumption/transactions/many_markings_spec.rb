@@ -36,8 +36,6 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-produce_many(DT.topic, DT.uuids(1))
-
 assert_equal '99', DT[:metadata].first
 
 # +1 from 99 because of the transaction marker
