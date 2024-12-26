@@ -3,6 +3,13 @@
 # This spec ensures, we do not use by accident ActiveSupport methods when working with listeners
 # @see https://github.com/karafka/karafka/pull/1624
 
+# To be removed when DD supports Ruby 3.4
+# @see https://github.com/karafka/karafka/issues/2387
+CURRENT_VERSION = Gem::Version.new(RUBY_VERSION)
+DD_MIN_NOT_SUPPORTED = Gem::Version.new('3.4.0')
+
+exit 0 if CURRENT_VERSION >= DD_MIN_NOT_SUPPORTED
+
 Bundler.require(:default)
 
 require 'tempfile'
