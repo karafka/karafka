@@ -80,9 +80,10 @@ other = Thread.new do
     consumer.subscribe(DT.topic)
     consumer.each { break }
 
-    2.times { consumer.poll(1_000) }
+    10.times { break if consumer.poll(1_000) }
 
     consumer.unsubscribe
+    consumer.poll(1_000)
 
     DT[:attempts] << true
 
