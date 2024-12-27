@@ -35,6 +35,12 @@ keys = Karafka::Admin
        .read_topic(Karafka::App.config.recurring_tasks.topics.schedules, 0, 21)
        .map(&:key)
 
+assert keys.count('state:schedule') >= 10
+
+# This is time sensitive and due to "every 500ms" and the other thread disable/enable it could
+# happen that it is published twice next to each other creating randomness
+keys.delete_if { |action| action == 'state:schedule' }
+
 keys.each do |event|
   assert previous != event, keys
 
