@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.4.16 (Unreleased)
+## 2.4.16 (2024-12-27)
 - [Enhancement] Improve post-rebalance revocation messages filtering.
 - [Enhancement] Introduce `Consumer#wrap` for connection pooling management and other wrapped operations.
 - [Enhancement] Guard transactional operations from marking beyond assignment ownership under some extreme edge-cases.
