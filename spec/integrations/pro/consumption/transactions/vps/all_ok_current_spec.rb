@@ -11,9 +11,9 @@ class Consumer < Karafka::BaseConsumer
   def consume
     DT[:done] << object_id
 
-    transaction do
-      sleep(5) if messages.map(&:offset).include?(90)
+    sleep(5) if messages.map(&:offset).include?(90)
 
+    transaction do
       messages.each do |message|
         # Synchronize here ensures that we record the offset reference with marking
         synchronize do
@@ -60,5 +60,3 @@ last = DT[:last].last
 assert_equal DT[:seek_offset], 100
 assert_equal DT[:metadata].last, last
 assert_equal fetch_next_offset, 100
-
-p DT
