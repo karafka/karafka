@@ -10,8 +10,8 @@ draw_routes do
   end
 end
 
-future_date = Time.now + (7 * 24 * 60 * 60)  # 7 days in seconds
-FUTURE_CRON = "0 12 #{future_date.day} #{future_date.month} *"
+future_date = Time.now + (7 * 24 * 60 * 60) # 7 days in seconds
+FUTURE_CRON = "0 12 #{future_date.day} #{future_date.month} *".freeze
 
 Karafka::Pro::RecurringTasks.define('1.0.0') do
   schedule(id: 'a', cron: FUTURE_CRON, enabled: false) do
