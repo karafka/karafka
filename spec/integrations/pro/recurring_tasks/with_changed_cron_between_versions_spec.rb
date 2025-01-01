@@ -11,7 +11,7 @@ draw_routes do
 end
 
 past_date = Time.now + (7 * 24 * 60 * 60)
-PAST_CRON = "0 0 #{past_date.day} #{past_date.month} *"
+PAST_CRON = "0 0 #{past_date.day} #{past_date.month} *".freeze
 
 Karafka::Pro::RecurringTasks.define('1.0.0') do
   schedule(id: 'run', cron: PAST_CRON, previous_time: Time.now - 60_000) do
