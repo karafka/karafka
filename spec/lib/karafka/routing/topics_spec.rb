@@ -7,19 +7,19 @@ RSpec.describe_current do
 
   describe '#empty?' do
     context 'when it is a new topics group' do
-      it { expect(topics.empty?).to eq(true) }
+      it { expect(topics.empty?).to be(true) }
     end
 
     context 'when there are some topics' do
       before { topics << topic }
 
-      it { expect(topics.empty?).to eq(false) }
+      it { expect(topics.empty?).to be(false) }
     end
   end
 
   describe '#last' do
     context 'when there are no topics' do
-      it { expect(topics.last).to eq(nil) }
+      it { expect(topics.last).to be_nil }
     end
 
     context 'when there are some topics' do

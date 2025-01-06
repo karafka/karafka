@@ -27,7 +27,7 @@ RSpec.describe_current do
   describe '#track' do
     let(:message) do
       instance_double(
-        'Karafka::Messages::Message',
+        Karafka::Messages::Message,
         headers: { 'schedule_target_epoch' => epoch }
       )
     end

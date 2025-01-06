@@ -4,13 +4,13 @@ RSpec.describe_current do
   subject(:collapser) { described_class.new }
 
   it 'expect not to be collapsed by default' do
-    expect(collapser.collapsed?).to eq(false)
+    expect(collapser.collapsed?).to be(false)
   end
 
   context 'when no changes to until by default and reset' do
     before { collapser.refresh!(100) }
 
-    it { expect(collapser.collapsed?).to eq(false) }
+    it { expect(collapser.collapsed?).to be(false) }
   end
 
   context 'when collapsed until previous offset' do
@@ -19,7 +19,7 @@ RSpec.describe_current do
       collapser.refresh!(100)
     end
 
-    it { expect(collapser.collapsed?).to eq(false) }
+    it { expect(collapser.collapsed?).to be(false) }
   end
 
   context 'when collapsed until future offset' do
@@ -28,7 +28,7 @@ RSpec.describe_current do
       collapser.refresh!(100)
     end
 
-    it { expect(collapser.collapsed?).to eq(true) }
+    it { expect(collapser.collapsed?).to be(true) }
   end
 
   context 'when collapsed until the offset' do
@@ -37,13 +37,13 @@ RSpec.describe_current do
       collapser.refresh!(100)
     end
 
-    it { expect(collapser.collapsed?).to eq(false) }
+    it { expect(collapser.collapsed?).to be(false) }
   end
 
   context 'when collapsed but not refreshed' do
     before { collapser.collapse_until!(100) }
 
-    it { expect(collapser.collapsed?).to eq(false) }
+    it { expect(collapser.collapsed?).to be(false) }
   end
 
   context 'when collapsed multiple times with earlier offsets' do
@@ -55,7 +55,7 @@ RSpec.describe_current do
       collapser.refresh!(99)
     end
 
-    it { expect(collapser.collapsed?).to eq(true) }
+    it { expect(collapser.collapsed?).to be(true) }
   end
 
   context 'when collapsed multiple times with earlier offsets and refresh with younger' do
@@ -67,6 +67,6 @@ RSpec.describe_current do
       collapser.refresh!(101)
     end
 
-    it { expect(collapser.collapsed?).to eq(false) }
+    it { expect(collapser.collapsed?).to be(false) }
   end
 end

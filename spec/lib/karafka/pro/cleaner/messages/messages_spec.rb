@@ -12,8 +12,8 @@ RSpec.describe_current do
       before { messages.each {} }
 
       it 'expect not to have all messages cleaned' do
-        expect(message1.cleaned?).to eq(false)
-        expect(message2.cleaned?).to eq(false)
+        expect(message1.cleaned?).to be(false)
+        expect(message2.cleaned?).to be(false)
       end
     end
 
@@ -21,8 +21,8 @@ RSpec.describe_current do
       before { messages.each(clean: true) {} }
 
       it 'expect to have all messages cleaned' do
-        expect(message1.cleaned?).to eq(true)
-        expect(message2.cleaned?).to eq(true)
+        expect(message1.cleaned?).to be(true)
+        expect(message2.cleaned?).to be(true)
       end
     end
   end

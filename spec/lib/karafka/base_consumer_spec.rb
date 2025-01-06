@@ -40,7 +40,7 @@ RSpec.describe_current do
 
   before { allow(client).to receive(:assignment_lost?).and_return(false) }
 
-  it { expect(consumer.send(:used?)).to eq(false) }
+  it { expect(consumer.send(:used?)).to be(false) }
 
   describe '#consume' do
     let(:working_class) { ClassBuilder.inherit(described_class) }

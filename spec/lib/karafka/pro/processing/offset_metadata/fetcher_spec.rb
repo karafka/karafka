@@ -15,24 +15,21 @@ RSpec.describe_current do
     context 'when looking for a topic that is no longer ours and not cached' do
       before { allow(client).to receive(:assignment).and_return({}) }
 
-      it { expect(fetcher.find(topic, 0)).to eq(false) }
+      it { expect(fetcher.find(topic, 0)).to be(false) }
     end
 
     context 'when looking for a topic partition that is no longer ours and not cached' do
       before { allow(client).to receive(:assignment).and_return({ topic.name => [] }) }
 
-      it { expect(fetcher.find(topic, 0)).to eq(false) }
+      it { expect(fetcher.find(topic, 0)).to be(false) }
     end
 
     context 'when looking for a topic partition that is ours' do
       before do
-        allow(client)
-          .to receive(:assignment)
-          .and_return(topic.name => [Rdkafka::Consumer::Partition.new(0, 0)])
-
-        allow(client)
-          .to receive(:committed)
-          .and_return(topic.name => [Rdkafka::Consumer::Partition.new(0, 0, 0, 'test')])
+        allow(client).to receive_messages(
+          assignment: { topic.name => [Rdkafka::Consumer::Partition.new(0, 0)] },
+          committed: { topic.name => [Rdkafka::Consumer::Partition.new(0, 0, 0, 'test')] }
+        )
       end
 
       it { expect(fetcher.find(topic, 0)).to eq('test') }
@@ -55,7 +52,7 @@ RSpec.describe_current do
       it do
         expect(fetcher.find(topic, 0)).to eq('test')
         fetcher.clear(topic.subscription_group)
-        expect(fetcher.find(topic, 0)).to eq(false)
+        expect(fetcher.find(topic, 0)).to be(false)
       end
     end
   end

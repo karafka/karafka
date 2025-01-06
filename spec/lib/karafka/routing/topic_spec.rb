@@ -55,7 +55,7 @@ RSpec.describe_current do
 
   describe '#active?' do
     context 'when there are no topics in the topics' do
-      it { expect(topic.active?).to eq true }
+      it { expect(topic.active?).to be(true) }
     end
 
     context 'when our topic name is in server topics' do
@@ -68,7 +68,7 @@ RSpec.describe_current do
           .include(:topics, name)
       end
 
-      it { expect(topic.active?).to eq true }
+      it { expect(topic.active?).to be(true) }
     end
 
     context 'when our topic name is not in server topics' do
@@ -81,19 +81,19 @@ RSpec.describe_current do
           .include(:topics, 'na')
       end
 
-      it { expect(topic.active?).to eq false }
+      it { expect(topic.active?).to be(false) }
     end
 
     context 'when we set the topic to active via #active' do
       before { topic.active(true) }
 
-      it { expect(topic.active?).to eq true }
+      it { expect(topic.active?).to be(true) }
     end
 
     context 'when we set the topic to inactive via #active' do
       before { topic.active(false) }
 
-      it { expect(topic.active?).to eq false }
+      it { expect(topic.active?).to be(false) }
     end
   end
 

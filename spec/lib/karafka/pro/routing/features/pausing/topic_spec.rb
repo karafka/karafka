@@ -10,7 +10,7 @@ RSpec.describe_current do
       it 'expect to change only timeout' do
         expect(topic.pause_timeout).to eq(100)
         expect(topic.pause_max_timeout).to eq(1)
-        expect(topic.pause_with_exponential_backoff).to eq(false)
+        expect(topic.pause_with_exponential_backoff).to be(false)
       end
     end
 
@@ -20,7 +20,7 @@ RSpec.describe_current do
       it 'expect to change only max_timeout' do
         expect(topic.pause_timeout).to eq(1)
         expect(topic.pause_max_timeout).to eq(100)
-        expect(topic.pause_with_exponential_backoff).to eq(false)
+        expect(topic.pause_with_exponential_backoff).to be(false)
       end
     end
 
@@ -30,7 +30,7 @@ RSpec.describe_current do
       it 'expect to change only with_exponential_backoff' do
         expect(topic.pause_timeout).to eq(1)
         expect(topic.pause_max_timeout).to eq(1)
-        expect(topic.pause_with_exponential_backoff).to eq(true)
+        expect(topic.pause_with_exponential_backoff).to be(true)
       end
     end
 
@@ -46,14 +46,14 @@ RSpec.describe_current do
       it 'expect to change all' do
         expect(topic.pause_timeout).to eq(100)
         expect(topic.pause_max_timeout).to eq(50)
-        expect(topic.pause_with_exponential_backoff).to eq(true)
+        expect(topic.pause_with_exponential_backoff).to be(true)
       end
     end
   end
 
   describe '#to_h' do
-    it { expect(topic.to_h.key?(:pause_timeout)).to eq(true) }
-    it { expect(topic.to_h.key?(:pause_max_timeout)).to eq(true) }
-    it { expect(topic.to_h.key?(:pause_with_exponential_backoff)).to eq(true) }
+    it { expect(topic.to_h.key?(:pause_timeout)).to be(true) }
+    it { expect(topic.to_h.key?(:pause_max_timeout)).to be(true) }
+    it { expect(topic.to_h.key?(:pause_with_exponential_backoff)).to be(true) }
   end
 end

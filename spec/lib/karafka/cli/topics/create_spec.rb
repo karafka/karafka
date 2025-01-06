@@ -8,21 +8,14 @@ RSpec.describe_current do
     let(:existing_topics_names) { ['existing_topic'] }
 
     before do
-      allow(create_topics)
-        .to receive(:declaratives_routing_topics)
-        .and_return(declaratives_routing_topics)
-
-      allow(create_topics)
-        .to receive(:existing_topics_names)
-        .and_return(existing_topics_names)
-
-      # Suppress console output
-      allow(create_topics)
-        .to receive(:puts)
+      allow(create_topics).to receive_messages(
+        declaratives_routing_topics: declaratives_routing_topics,
+        existing_topics_names: existing_topics_names,
+        # Suppress console output
+        puts: nil
+      )
 
       declaratives_routing_topics.each_with_index do |topic, index|
-        allow(topic).to receive(:name).and_return("topic_#{index}")
-
         declaratives = instance_double(
           Karafka::Routing::Features::Declaratives::Config,
           partitions: 1,
@@ -30,7 +23,10 @@ RSpec.describe_current do
           details: {}
         )
 
-        allow(topic).to receive(:declaratives).and_return(declaratives)
+        allow(topic).to receive_messages(
+          name: "topic_#{index}",
+          declaratives: declaratives
+        )
       end
 
       allow(Karafka::Admin).to receive(:create_topic)

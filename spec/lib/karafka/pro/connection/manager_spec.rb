@@ -143,15 +143,20 @@ RSpec.describe_current do
       listener_g21.running!
 
       manager.register(listeners)
-      allow(app).to receive(:done?).and_return(true)
-      allow(app).to receive(:quiet?).and_return(quiet)
+
+      allow(app).to receive_messages(
+        done?: true,
+        quiet?: quiet
+      )
     end
 
     context 'when under quiet' do
       before do
-        allow(app).to receive(:done?).and_return(true)
-        allow(app).to receive(:quieting?).and_return(true)
-        allow(app).to receive(:quieted!).and_return(true)
+        allow(app).to receive_messages(
+          done?: true,
+          quieting?: true,
+          quieted!: true
+        )
       end
 
       context 'when it just started' do
@@ -194,10 +199,12 @@ RSpec.describe_current do
 
     context 'when stopping' do
       before do
-        allow(app).to receive(:done?).and_return(true)
-        allow(app).to receive(:quieting?).and_return(true)
-        allow(app).to receive(:quieted!).and_return(true)
-        allow(app).to receive(:quiet?).and_return(false)
+        allow(app).to receive_messages(
+          done?: true,
+          quieting?: true,
+          quieted!: true,
+          quiet?: false
+        )
       end
 
       context 'when it just started' do

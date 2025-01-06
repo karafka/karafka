@@ -21,6 +21,18 @@ class Consumer < Karafka::BaseConsumer
         rescue Karafka::Pro::Cleaner::Errors::MessageCleanedError
           DT[1] = true
         end
+
+        begin
+          message.key
+        rescue Karafka::Pro::Cleaner::Errors::MessageCleanedError
+          DT[2] = true
+        end
+
+        begin
+          message.headers
+        rescue Karafka::Pro::Cleaner::Errors::MessageCleanedError
+          DT[3] = true
+        end
       end
 
       DT[0] << true
@@ -38,3 +50,5 @@ start_karafka_and_wait_until do
 end
 
 assert DT.key?(1)
+assert DT.key?(2)
+assert DT.key?(3)

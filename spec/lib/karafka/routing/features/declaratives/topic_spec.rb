@@ -9,7 +9,7 @@ RSpec.describe_current do
 
   describe '#declaratives' do
     context 'when we use declaratives without any arguments without config exec' do
-      it { expect(topic.declaratives.active?).to eq(true) }
+      it { expect(topic.declaratives.active?).to be(true) }
       it { expect(topic.declaratives.partitions).to eq(1) }
       it { expect(topic.declaratives.replication_factor).to eq(1) }
       it { expect(topic.declaratives.details).to eq({}) }
@@ -36,7 +36,7 @@ RSpec.describe_current do
 
   describe '#declaratives?' do
     it 'expect to always be active' do
-      expect(topic.declaratives?).to eq(true)
+      expect(topic.declaratives?).to be(true)
     end
   end
 

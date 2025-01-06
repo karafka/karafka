@@ -11,14 +11,14 @@ RSpec.describe_current do
     end
 
     context 'when nothing is included and nothing is excluded' do
-      it { expect(manager.active?(:subscription_groups, 'test')).to eq(true) }
+      it { expect(manager.active?(:subscription_groups, 'test')).to be(true) }
     end
 
     context 'when topic is in the included' do
       before { manager.include(:topics, 'topic1') }
 
-      it { expect(manager.active?(:topics, 'topic1')).to eq(true) }
-      it { expect(manager.active?(:topics, 'topic2')).to eq(false) }
+      it { expect(manager.active?(:topics, 'topic1')).to be(true) }
+      it { expect(manager.active?(:topics, 'topic2')).to be(false) }
     end
   end
 
@@ -32,8 +32,8 @@ RSpec.describe_current do
     context 'when topic is in the excluded only' do
       before { manager.exclude(:topics, 'topic1') }
 
-      it { expect(manager.active?(:topics, 'topic1')).to eq(false) }
-      it { expect(manager.active?(:topics, 'topic2')).to eq(true) }
+      it { expect(manager.active?(:topics, 'topic1')).to be(false) }
+      it { expect(manager.active?(:topics, 'topic2')).to be(true) }
     end
 
     context 'when topic is in the included and excluded at the same time' do
@@ -42,8 +42,8 @@ RSpec.describe_current do
         manager.exclude(:topics, 'topic1')
       end
 
-      it { expect(manager.active?(:topics, 'topic1')).to eq(true) }
-      it { expect(manager.active?(:topics, 'topic2')).to eq(false) }
+      it { expect(manager.active?(:topics, 'topic1')).to be(true) }
+      it { expect(manager.active?(:topics, 'topic2')).to be(false) }
     end
 
     context 'when different topics are both included and excluded' do
@@ -52,8 +52,8 @@ RSpec.describe_current do
         manager.exclude(:topics, 'topic2')
       end
 
-      it { expect(manager.active?(:topics, 'topic1')).to eq(true) }
-      it { expect(manager.active?(:topics, 'topic2')).to eq(false) }
+      it { expect(manager.active?(:topics, 'topic1')).to be(true) }
+      it { expect(manager.active?(:topics, 'topic2')).to be(false) }
     end
   end
 
@@ -84,6 +84,6 @@ RSpec.describe_current do
       manager.clear
     end
 
-    it { expect(manager.to_h.values.all?(&:empty?)).to eq(true) }
+    it { expect(manager.to_h.values.all?(&:empty?)).to be(true) }
   end
 end

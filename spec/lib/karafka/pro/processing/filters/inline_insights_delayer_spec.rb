@@ -10,7 +10,7 @@ RSpec.describe_current do
   context 'when there are no messages' do
     before { delayer.apply!([]) }
 
-    it { expect(delayer.applied?).to eq(false) }
+    it { expect(delayer.applied?).to be(false) }
     it { expect(delayer.timeout).to eq(0) }
     it { expect(delayer.action).to eq(:skip) }
   end
@@ -25,7 +25,7 @@ RSpec.describe_current do
       delayer.apply!([message])
     end
 
-    it { expect(delayer.applied?).to eq(false) }
+    it { expect(delayer.applied?).to be(false) }
     it { expect(delayer.timeout).to eq(0) }
     it { expect(delayer.action).to eq(:skip) }
   end
@@ -33,7 +33,7 @@ RSpec.describe_current do
   context 'when insights do not exist' do
     before { delayer.apply!([message]) }
 
-    it { expect(delayer.applied?).to eq(true) }
+    it { expect(delayer.applied?).to be(true) }
     it { expect(delayer.timeout).to eq(5_000) }
     it { expect(delayer.action).to eq(:pause) }
   end

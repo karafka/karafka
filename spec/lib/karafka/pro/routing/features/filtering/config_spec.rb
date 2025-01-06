@@ -7,13 +7,13 @@ RSpec.describe_current do
     context 'when there are factories' do
       let(:factories) { [1] }
 
-      it { expect(config.active?).to eq(true) }
+      it { expect(config.active?).to be(true) }
     end
 
     context 'when there are no factories' do
       let(:factories) { [] }
 
-      it { expect(config.active?).to eq(false) }
+      it { expect(config.active?).to be(false) }
     end
   end
 
@@ -42,6 +42,6 @@ RSpec.describe_current do
     let(:factories) { [1] }
 
     it { expect(config.to_h[:factories]).to eq(factories) }
-    it { expect(config.to_h[:active]).to eq(true) }
+    it { expect(config.to_h[:active]).to be(true) }
   end
 end

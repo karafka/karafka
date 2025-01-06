@@ -6,14 +6,14 @@ RSpec.describe_current do
   describe '#filter' do
     context 'when we use filter without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.filter.active?).to eq(false)
+        expect(topic.filter.active?).to be(false)
       end
     end
 
     context 'when we use filter with a factory status' do
       it 'expect to use proper active status' do
         topic.filter('filter1')
-        expect(topic.filter.active?).to eq(true)
+        expect(topic.filter.active?).to be(true)
       end
     end
 
@@ -24,7 +24,7 @@ RSpec.describe_current do
       end
 
       it 'expect to use proper active status' do
-        expect(topic.filter.active?).to eq(true)
+        expect(topic.filter.active?).to be(true)
       end
 
       it 'expect to accumulate all the filters' do
@@ -37,13 +37,13 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.filter(true) }
 
-      it { expect(topic.filtering?).to eq(true) }
+      it { expect(topic.filtering?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.filter }
 
-      it { expect(topic.filtering?).to eq(false) }
+      it { expect(topic.filtering?).to be(false) }
     end
   end
 

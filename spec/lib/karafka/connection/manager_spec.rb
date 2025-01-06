@@ -43,11 +43,11 @@ RSpec.describe_current do
     context 'when all listeners are done' do
       before { listeners.each(&:stopped!) }
 
-      it { expect(manager.done?).to eq(true) }
+      it { expect(manager.done?).to be(true) }
     end
 
     context 'when some listeners are not done' do
-      it { expect(manager.done?).to eq(false) }
+      it { expect(manager.done?).to be(false) }
     end
   end
 
@@ -56,16 +56,18 @@ RSpec.describe_current do
 
     context 'when under quiet' do
       before do
-        allow(app).to receive(:done?).and_return(true)
-        allow(app).to receive(:quieting?).and_return(true)
-        allow(app).to receive(:quieted!).and_return(true)
+        allow(app).to receive_messages(
+          done?: true,
+          quieting?: true,
+          quieted!: true
+        )
       end
 
       context 'when it just started' do
         it 'expect to switch listeners to quieting' do
           manager.control
 
-          expect(listeners.all?(&:quieting?)).to eq(true)
+          expect(listeners.all?(&:quieting?)).to be(true)
         end
       end
 
@@ -106,7 +108,7 @@ RSpec.describe_current do
           it 'expect to switch listeners to quieting' do
             manager.control
 
-            expect(listeners.all?(&:quieting?)).to eq(true)
+            expect(listeners.all?(&:quieting?)).to be(true)
           end
         end
 
@@ -114,7 +116,7 @@ RSpec.describe_current do
           before { 10.times { manager.control } }
 
           it 'expect not to change state from quieting' do
-            expect(listeners.all?(&:quieting?)).to eq(true)
+            expect(listeners.all?(&:quieting?)).to be(true)
           end
         end
 
@@ -126,7 +128,7 @@ RSpec.describe_current do
 
           it 'expect to request all of them to stop' do
             manager.control
-            expect(listeners.all?(&:stopping?)).to eq(true)
+            expect(listeners.all?(&:stopping?)).to be(true)
           end
         end
       end

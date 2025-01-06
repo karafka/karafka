@@ -14,7 +14,7 @@ RSpec.describe_current do
   describe '#active?' do
     context 'when active' do
       it 'returns true' do
-        expect(config.active?).to eq(true)
+        expect(config.active?).to be(true)
       end
     end
 
@@ -22,7 +22,7 @@ RSpec.describe_current do
       let(:active) { false }
 
       it 'returns false' do
-        expect(config.active?).to eq(false)
+        expect(config.active?).to be(false)
       end
     end
   end
@@ -30,7 +30,7 @@ RSpec.describe_current do
   describe '#nodes' do
     context 'with multiple nodes' do
       it 'returns all nodes' do
-        expect(config.nodes).to match_array([0, 1, 2])
+        expect(config.nodes).to contain_exactly(0, 1, 2)
       end
     end
 

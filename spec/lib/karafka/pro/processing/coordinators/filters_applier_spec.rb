@@ -29,7 +29,7 @@ RSpec.describe_current do
 
     it 'expect not to be applied' do
       applier.apply!(messages)
-      expect(applier.applied?).to eq(false)
+      expect(applier.applied?).to be(false)
     end
 
     it 'expect not to have a cursor' do
@@ -49,7 +49,7 @@ RSpec.describe_current do
 
     it 'expect not to mark' do
       applier.apply!(messages)
-      expect(applier.mark_as_consumed?).to eq(false)
+      expect(applier.mark_as_consumed?).to be(false)
     end
 
     it 'expect to default to marking non-blockig' do
@@ -65,7 +65,7 @@ RSpec.describe_current do
 
     it 'expect not to be applied' do
       applier.apply!(messages)
-      expect(applier.applied?).to eq(false)
+      expect(applier.applied?).to be(false)
     end
 
     it 'expect not to have a cursor' do
@@ -85,7 +85,7 @@ RSpec.describe_current do
 
     it 'expect not to mark' do
       applier.apply!(messages)
-      expect(applier.mark_as_consumed?).to eq(false)
+      expect(applier.mark_as_consumed?).to be(false)
     end
 
     it 'expect to default to marking non-blockig' do
@@ -100,7 +100,7 @@ RSpec.describe_current do
 
     it 'expect not to be applied' do
       applier.apply!(messages)
-      expect(applier.applied?).to eq(false)
+      expect(applier.applied?).to be(false)
     end
 
     it 'expect not to have a cursor' do
@@ -120,7 +120,7 @@ RSpec.describe_current do
 
     it 'expect not to mark' do
       applier.apply!(messages)
-      expect(applier.mark_as_consumed?).to eq(false)
+      expect(applier.mark_as_consumed?).to be(false)
     end
 
     it 'expect to default to marking non-blockig' do
@@ -135,7 +135,7 @@ RSpec.describe_current do
 
     it 'expect to be applied' do
       applier.apply!(messages)
-      expect(applier.applied?).to eq(true)
+      expect(applier.applied?).to be(true)
     end
 
     it 'expect to have a cursor' do
@@ -155,7 +155,7 @@ RSpec.describe_current do
 
     it 'expect not to mark unless explicitly requested' do
       applier.apply!(messages)
-      expect(applier.mark_as_consumed?).to eq(false)
+      expect(applier.mark_as_consumed?).to be(false)
     end
 
     it 'expect to default to marking non-blockig' do
@@ -175,7 +175,7 @@ RSpec.describe_current do
 
     it 'expect to be applied' do
       applier.apply!(messages)
-      expect(applier.applied?).to eq(true)
+      expect(applier.applied?).to be(true)
     end
 
     it 'expect to have a cursor' do
@@ -195,7 +195,7 @@ RSpec.describe_current do
 
     it 'expect not to mark unless explicitly requested' do
       applier.apply!(messages)
-      expect(applier.mark_as_consumed?).to eq(false)
+      expect(applier.mark_as_consumed?).to be(false)
     end
 
     it 'expect to default to marking non-blockig' do
@@ -218,7 +218,7 @@ RSpec.describe_current do
     end
 
     it 'expect to be applied' do
-      expect(applier.applied?).to eq(true)
+      expect(applier.applied?).to be(true)
     end
 
     it 'expect to have a cursor' do
@@ -235,7 +235,7 @@ RSpec.describe_current do
 
     it 'expect not to mark unless explicitly requested' do
       applier.apply!(messages)
-      expect(applier.mark_as_consumed?).to eq(false)
+      expect(applier.mark_as_consumed?).to be(false)
     end
 
     it 'expect to default to marking non-blockig' do
@@ -260,7 +260,7 @@ RSpec.describe_current do
     end
 
     it 'expect to be applied' do
-      expect(applier.applied?).to eq(true)
+      expect(applier.applied?).to be(true)
     end
 
     it 'expect to have a cursor' do
@@ -273,7 +273,7 @@ RSpec.describe_current do
 
     it 'expect not to mark unless explicitly requested' do
       applier.apply!(messages)
-      expect(applier.mark_as_consumed?).to eq(false)
+      expect(applier.mark_as_consumed?).to be(false)
     end
 
     it 'expect to default to marking non-blockig' do

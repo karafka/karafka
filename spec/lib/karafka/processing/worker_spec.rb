@@ -23,10 +23,10 @@ RSpec.describe_current do
 
   describe '#terminate' do
     it 'expect to kill the underlying thread' do
-      expect(worker.alive?).to eq(true)
+      expect(worker.alive?).to be(true)
       worker.terminate
       worker.join
-      expect(worker.alive?).to eq(false)
+      expect(worker.alive?).to be(false)
     end
   end
 

@@ -1,24 +1,31 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:subscription_group) { class_spy('SubscriptionGroup').extend(described_class) }
+  subject(:subscription_group) { build(:routing_subscription_group) }
 
   let(:active_topic) do
     instance_spy(
-      'Karafka::Routing::Topic',
+      Karafka::Routing::Topic,
       active?: true,
-      direct_assignments: instance_spy('DirectAssignments', active?: false),
+      direct_assignments: instance_spy(
+        Karafka::Pro::Routing::Features::DirectAssignments::Config,
+        active?: false
+      ),
       subscription_name: 'active_topic'
     )
   end
 
-  let(:inactive_topic) { instance_spy('Karafka::Routing::Topic', active?: false) }
+  let(:inactive_topic) { instance_spy(Karafka::Routing::Topic, active?: false) }
 
   let(:direct_assignment_active_topic) do
     instance_spy(
-      'Karafka::Routing::Topic',
+      Karafka::Routing::Topic,
       active?: true,
-      direct_assignments: instance_spy('DirectAssignments', active?: true, partitions: [1, 2, 3]),
+      direct_assignments: instance_spy(
+        Karafka::Pro::Routing::Features::DirectAssignments::Config,
+        active?: true,
+        partitions: [1, 2, 3]
+      ),
       subscription_name: 'direct_topic'
     )
   end
@@ -44,10 +51,10 @@ RSpec.describe_current do
   end
 
   describe '#assignments' do
-    let(:consumer) { instance_spy('Karafka::Connection::Proxy') }
-    let(:iterator_expander) { instance_spy('Karafka::Pro::Iterator::Expander') }
-    let(:tpl_builder) { instance_spy('Karafka::Pro::Iterator::TplBuilder') }
-    let(:topic_partition_list) { instance_spy('Rdkafka::Consumer::TopicPartitionList') }
+    let(:consumer) { instance_spy(Karafka::Connection::Proxy) }
+    let(:iterator_expander) { instance_spy(Karafka::Pro::Iterator::Expander) }
+    let(:tpl_builder) { instance_spy(Karafka::Pro::Iterator::TplBuilder) }
+    let(:topic_partition_list) { instance_spy(Rdkafka::Consumer::TopicPartitionList) }
 
     before do
       allow(Karafka::Pro::Iterator::Expander).to receive(:new).and_return(iterator_expander)

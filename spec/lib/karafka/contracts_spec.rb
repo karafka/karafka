@@ -7,13 +7,13 @@ RSpec.describe_current do
     context 'when topic name is valid' do
       let(:input) { 'name' }
 
-      it { is_expected.to eq true }
+      it { is_expected.to be(true) }
     end
 
     context 'when topic name is invalid' do
       let(:input) { '$%^&*' }
 
-      it { is_expected.to eq false }
+      it { is_expected.to be(false) }
     end
   end
 end

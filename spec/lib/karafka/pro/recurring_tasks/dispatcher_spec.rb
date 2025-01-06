@@ -19,10 +19,12 @@ RSpec.describe_current do
 
   before do
     allow(Karafka::Pro::RecurringTasks::Serializer).to receive(:new).and_return(serializer)
-    allow(serializer).to receive(:schedule).and_return(schedule_payload)
-    allow(serializer).to receive(:command).and_return(command_payload)
-    allow(serializer).to receive(:log).and_return(log_payload)
     allow(producer).to receive(:produce_async)
+    allow(serializer).to receive_messages(
+      schedule: schedule_payload,
+      command: command_payload,
+      log: log_payload
+    )
   end
 
   describe '.schedule' do

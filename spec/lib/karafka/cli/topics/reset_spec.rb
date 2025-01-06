@@ -15,7 +15,7 @@ RSpec.describe_current do
     end
 
     it 'calls the delete and create operations in sequence with a wait in between' do
-      expect(reset_topics.call).to eq(true)
+      expect(reset_topics.call).to be(true)
 
       expect(Karafka::Cli::Topics::Delete).to have_received(:new).once
       expect(topics_delete).to have_received(:call).once

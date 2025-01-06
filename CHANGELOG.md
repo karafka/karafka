@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.4.17 (Unreleased)
+- [Enhancement] Clean message key and headers when cleaning messages via the cleaner API.
+
 ## 2.4.16 (2024-12-27)
 - [Enhancement] Improve post-rebalance revocation messages filtering.
 - [Enhancement] Introduce `Consumer#wrap` for connection pooling management and other wrapped operations.

@@ -10,14 +10,14 @@ RSpec.describe_current do
   describe '#manual_offset_management' do
     context 'when we use manual_offset_management without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.manual_offset_management.active?).to eq(false)
+        expect(topic.manual_offset_management.active?).to be(false)
       end
     end
 
     context 'when we use manual_offset_management with active status' do
       it 'expect to use proper active status' do
         topic.manual_offset_management(true)
-        expect(topic.manual_offset_management.active?).to eq(true)
+        expect(topic.manual_offset_management.active?).to be(true)
       end
     end
 
@@ -25,7 +25,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.manual_offset_management(true)
         topic.manual_offset_management(false)
-        expect(topic.manual_offset_management.active?).to eq(true)
+        expect(topic.manual_offset_management.active?).to be(true)
       end
     end
   end
@@ -34,13 +34,13 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.manual_offset_management(true) }
 
-      it { expect(topic.manual_offset_management?).to eq(true) }
+      it { expect(topic.manual_offset_management?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.manual_offset_management(false) }
 
-      it { expect(topic.manual_offset_management?).to eq(false) }
+      it { expect(topic.manual_offset_management?).to be(false) }
     end
   end
 

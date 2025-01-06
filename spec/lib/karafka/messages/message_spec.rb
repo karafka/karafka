@@ -49,7 +49,7 @@ RSpec.describe_current do
 
         it 'expect to mark as deserialized' do
           message.payload
-          expect(message.deserialized?).to eq true
+          expect(message.deserialized?).to be(true)
         end
       end
 
@@ -70,7 +70,7 @@ RSpec.describe_current do
         end
 
         it 'expect not to mark raw payload as deserialized' do
-          expect(message.deserialized?).to eq false
+          expect(message.deserialized?).to be(false)
         end
       end
     end
@@ -110,7 +110,7 @@ RSpec.describe_current do
         let(:raw_payload) { 'some_payload' }
 
         it 'returns false' do
-          expect(message.tombstone?).to eq false
+          expect(message.tombstone?).to be(false)
         end
       end
 
@@ -119,7 +119,7 @@ RSpec.describe_current do
         let(:raw_payload) { nil }
 
         it 'returns false' do
-          expect(message.tombstone?).to eq false
+          expect(message.tombstone?).to be(false)
         end
       end
 
@@ -128,7 +128,7 @@ RSpec.describe_current do
         let(:raw_payload) { 'some_payload' }
 
         it 'returns false' do
-          expect(message.tombstone?).to eq false
+          expect(message.tombstone?).to be(false)
         end
       end
     end

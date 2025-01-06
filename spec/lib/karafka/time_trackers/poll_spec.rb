@@ -19,8 +19,8 @@ RSpec.describe_current do
       tracker.checkpoint
     end
 
-    it { expect(tracker.exceeded?).to eq(false) }
-    it { expect(tracker.retryable?).to eq(true) }
+    it { expect(tracker.exceeded?).to be(false) }
+    it { expect(tracker.retryable?).to be(true) }
     # Compensate for slow CI
     it { expect(tracker.remaining).to  be_within(50).of(997) }
     it { expect(tracker.attempts).to eq(1) }
@@ -43,8 +43,8 @@ RSpec.describe_current do
       tracker.checkpoint
     end
 
-    it { expect(tracker.exceeded?).to eq(true) }
-    it { expect(tracker.retryable?).to eq(false) }
+    it { expect(tracker.exceeded?).to be(true) }
+    it { expect(tracker.retryable?).to be(false) }
     it { expect(tracker.remaining).to be_within(1).of(-1) }
     it { expect(tracker.attempts).to eq(1) }
 
@@ -68,8 +68,8 @@ RSpec.describe_current do
       end
     end
 
-    it { expect(tracker.exceeded?).to eq(false) }
-    it { expect(tracker.retryable?).to eq(false) }
+    it { expect(tracker.exceeded?).to be(false) }
+    it { expect(tracker.retryable?).to be(false) }
     it { expect(tracker.remaining).to be_within(50).of(250) }
     it { expect(tracker.attempts).to eq(3) }
 
@@ -91,8 +91,8 @@ RSpec.describe_current do
       tracker.checkpoint
     end
 
-    it { expect(tracker.exceeded?).to eq(false) }
-    it { expect(tracker.retryable?).to eq(false) }
+    it { expect(tracker.exceeded?).to be(false) }
+    it { expect(tracker.retryable?).to be(false) }
     it { expect(tracker.remaining).to be_within(4).of(5) }
     it { expect(tracker.attempts).to eq(1) }
 

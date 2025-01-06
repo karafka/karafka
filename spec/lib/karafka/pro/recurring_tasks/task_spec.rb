@@ -32,7 +32,7 @@ RSpec.describe_current do
     before { task.disable }
 
     it 'disables the task' do
-      expect(task.enabled?).to eq(false)
+      expect(task.enabled?).to be(false)
     end
   end
 
@@ -43,14 +43,14 @@ RSpec.describe_current do
     end
 
     it 'enables the task' do
-      expect(task.enabled?).to eq(true)
+      expect(task.enabled?).to be(true)
     end
   end
 
   describe '#trigger' do
     it 'triggers the task execution' do
       task.trigger
-      expect(task.send(:instance_variable_get, :@trigger)).to eq(true)
+      expect(task.send(:instance_variable_get, :@trigger)).to be(true)
     end
   end
 
@@ -58,7 +58,7 @@ RSpec.describe_current do
     let(:previous_time) { Time.now }
 
     it 'calculates the next execution time correctly' do
-      expect(task.next_time > Time.now).to eq(true)
+      expect(task.next_time > Time.now).to be(true)
     end
   end
 
@@ -67,7 +67,7 @@ RSpec.describe_current do
       before { task.trigger }
 
       it 'returns true' do
-        expect(task.call?).to eq(true)
+        expect(task.call?).to be(true)
       end
     end
 
@@ -75,21 +75,21 @@ RSpec.describe_current do
       let(:enabled) { false }
 
       it 'returns false' do
-        expect(task.call?).to eq(false)
+        expect(task.call?).to be(false)
       end
     end
 
     context 'when the task is enabled and due' do
       it 'returns true' do
         allow(Time).to receive(:now).and_return(task.next_time + 1)
-        expect(task.call?).to eq(true)
+        expect(task.call?).to be(true)
       end
     end
 
     context 'when the task is enabled but not due' do
       it 'returns false' do
         allow(Time).to receive(:now).and_return(task.next_time - 1)
-        expect(task.call?).to eq(false)
+        expect(task.call?).to be(false)
       end
     end
   end
@@ -97,7 +97,7 @@ RSpec.describe_current do
   describe '#changed?' do
     context 'when the task has not been modified' do
       it 'returns false' do
-        expect(task.changed?).to eq(false)
+        expect(task.changed?).to be(false)
       end
     end
 
@@ -105,7 +105,7 @@ RSpec.describe_current do
       before { task.disable }
 
       it 'returns true' do
-        expect(task.changed?).to eq(true)
+        expect(task.changed?).to be(true)
       end
     end
   end
@@ -117,7 +117,7 @@ RSpec.describe_current do
     end
 
     it 'clears the changed flag' do
-      expect(task.changed?).to eq(false)
+      expect(task.changed?).to be(false)
     end
   end
 
@@ -152,14 +152,14 @@ RSpec.describe_current do
     it 'resets the trigger after execution' do
       task.trigger
       task.call
-      expect(task.send(:instance_variable_get, :@trigger)).to eq(false)
+      expect(task.send(:instance_variable_get, :@trigger)).to be(false)
     end
   end
 
   describe '#touch' do
     it 'marks the task as changed' do
       task.send(:touch)
-      expect(task.changed?).to eq(true)
+      expect(task.changed?).to be(true)
     end
   end
 

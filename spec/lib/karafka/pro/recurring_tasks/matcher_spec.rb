@@ -29,7 +29,7 @@ RSpec.describe_current do
       let(:task_id) { task.id }
 
       it 'returns false' do
-        expect(matcher.matches?(task, payload)).to eq(false)
+        expect(matcher.matches?(task, payload)).to be(false)
       end
     end
 
@@ -37,7 +37,7 @@ RSpec.describe_current do
       let(:task_id) { 'different_task_id' }
 
       it 'returns false' do
-        expect(matcher.matches?(task, payload)).to eq(false)
+        expect(matcher.matches?(task, payload)).to be(false)
       end
     end
 
@@ -45,7 +45,7 @@ RSpec.describe_current do
       let(:task_id) { '*' }
 
       it 'returns true' do
-        expect(matcher.matches?(task, payload)).to eq(true)
+        expect(matcher.matches?(task, payload)).to be(true)
       end
     end
 
@@ -54,7 +54,7 @@ RSpec.describe_current do
       let(:schema_version) { '0.9' }
 
       it 'returns false' do
-        expect(matcher.matches?(task, payload)).to eq(false)
+        expect(matcher.matches?(task, payload)).to be(false)
       end
     end
 
@@ -62,7 +62,7 @@ RSpec.describe_current do
       let(:task_id) { task.id }
 
       it 'returns true' do
-        expect(matcher.matches?(task, payload)).to eq(true)
+        expect(matcher.matches?(task, payload)).to be(true)
       end
     end
   end

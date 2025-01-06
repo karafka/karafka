@@ -136,7 +136,7 @@ RSpec.describe_current do
     context 'when we lock' do
       before { queue.lock_async(subscription_group_id, id) }
 
-      it { expect(queue.empty?(subscription_group_id)).to eq(false) }
+      it { expect(queue.empty?(subscription_group_id)).to be(false) }
 
       it 'expect not to impact statistics' do
         expect(queue.statistics).to eq(busy: 0, enqueued: 0, waiting: 0)
@@ -376,25 +376,25 @@ RSpec.describe_current do
     before { queue.register(1) }
 
     context 'when there are no jobs at all' do
-      it { expect(queue.empty?(1)).to eq(true) }
+      it { expect(queue.empty?(1)).to be(true) }
     end
 
     context 'when there are no jobs but async lock has been added' do
       before { queue.lock_async(1, 1) }
 
-      it { expect(queue.empty?(1)).to eq(false) }
+      it { expect(queue.empty?(1)).to be(false) }
     end
 
     context 'when there are jobs from a different subscription group' do
       before { queue << job }
 
-      it { expect(queue.empty?(2)).to eq(true) }
+      it { expect(queue.empty?(2)).to be(true) }
     end
 
     context 'when there are jobs from our subscription group' do
       before { queue << job }
 
-      it { expect(queue.empty?(job.group_id)).to eq(false) }
+      it { expect(queue.empty?(job.group_id)).to be(false) }
     end
 
     context 'when there are jobs from our subscription group and locks' do
@@ -403,7 +403,7 @@ RSpec.describe_current do
         queue.lock_async(1, 1)
       end
 
-      it { expect(queue.empty?(job.group_id)).to eq(false) }
+      it { expect(queue.empty?(job.group_id)).to be(false) }
     end
   end
 end

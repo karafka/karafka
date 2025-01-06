@@ -14,9 +14,9 @@ RSpec.describe_current do
       before { builder.active_job_pattern(/test/) }
 
       it { expect(topic.consumer).to eq(Karafka::Pro::ActiveJob::Consumer) }
-      it { expect(topic.active_job?).to eq(true) }
-      it { expect(topic.patterns.active?).to eq(true) }
-      it { expect(topic.patterns.matcher?).to eq(true) }
+      it { expect(topic.active_job?).to be(true) }
+      it { expect(topic.patterns.active?).to be(true) }
+      it { expect(topic.patterns.matcher?).to be(true) }
     end
 
     context 'when defining AJ pattern with extra settings' do
@@ -27,10 +27,10 @@ RSpec.describe_current do
       end
 
       it { expect(topic.consumer).to eq(Karafka::Pro::ActiveJob::Consumer) }
-      it { expect(topic.active_job?).to eq(true) }
+      it { expect(topic.active_job?).to be(true) }
       it { expect(topic.max_messages).to eq(5) }
-      it { expect(topic.patterns.active?).to eq(true) }
-      it { expect(topic.patterns.matcher?).to eq(true) }
+      it { expect(topic.patterns.active?).to be(true) }
+      it { expect(topic.patterns.matcher?).to be(true) }
     end
   end
 end

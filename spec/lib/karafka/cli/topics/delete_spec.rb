@@ -9,23 +9,21 @@ RSpec.describe_current do
 
     before do
       allow(delete_topics)
-        .to receive(:declaratives_routing_topics)
-        .and_return(declaratives_routing_topics)
-
-      allow(delete_topics)
-        .to receive(:existing_topics_names)
-        .and_return(existing_topics_names)
-
-      allow(delete_topics)
-        .to receive(:puts) # Suppress console output
+        .to receive_messages(
+          declaratives_routing_topics: declaratives_routing_topics,
+          existing_topics_names: existing_topics_names,
+          # Suppress console output
+          puts: nil
+        )
 
       declaratives_routing_topics.each_with_index do |topic, index|
-        allow(topic).to receive(:name).and_return("topic_#{index}")
-
-        # Assuming the class and namespace for declaratives setup as before
         declaratives = instance_double(Karafka::Routing::Features::Declaratives::Config)
 
-        allow(topic).to receive(:declaratives).and_return(declaratives)
+        allow(topic).to receive_messages(
+          name: "topic_#{index}",
+          # Assuming the class and namespace for declaratives setup as before
+          declaratives: declaratives
+        )
       end
 
       allow(Karafka::Admin).to receive(:delete_topic)

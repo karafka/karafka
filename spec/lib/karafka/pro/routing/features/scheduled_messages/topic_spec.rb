@@ -6,14 +6,14 @@ RSpec.describe_current do
   describe '#scheduled_messages' do
     context 'when we use scheduled_messages without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.scheduled_messages.active?).to eq(false)
+        expect(topic.scheduled_messages.active?).to be(false)
       end
     end
 
     context 'when we use scheduled_messages with active status' do
       it 'expect to use proper active status' do
         topic.scheduled_messages(true)
-        expect(topic.scheduled_messages.active?).to eq(true)
+        expect(topic.scheduled_messages.active?).to be(true)
       end
     end
 
@@ -21,7 +21,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.scheduled_messages(true)
         topic.scheduled_messages(false)
-        expect(topic.scheduled_messages.active?).to eq(true)
+        expect(topic.scheduled_messages.active?).to be(true)
       end
     end
   end
@@ -30,13 +30,13 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.scheduled_messages(true) }
 
-      it { expect(topic.scheduled_messages?).to eq(true) }
+      it { expect(topic.scheduled_messages?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.scheduled_messages(false) }
 
-      it { expect(topic.scheduled_messages?).to eq(false) }
+      it { expect(topic.scheduled_messages?).to be(false) }
     end
   end
 

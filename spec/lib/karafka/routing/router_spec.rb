@@ -18,7 +18,7 @@ RSpec.describe_current do
       let(:name) { rand.to_s }
       let(:expected_error) { Karafka::Errors::NonMatchingRouteError }
 
-      it { expect(router.find_by(name: name)).to eq(nil) }
+      it { expect(router.find_by(name: name)).to be_nil }
     end
 
     context 'when we look for existing topic' do
@@ -36,7 +36,7 @@ RSpec.describe_current do
       let(:name) { rand.to_s }
 
       it 'expect to create it with consumer group reference' do
-        expect(found_topic.consumer_group).not_to eq(nil)
+        expect(found_topic.consumer_group).not_to be_nil
       end
 
       it 'expect to match the name' do

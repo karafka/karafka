@@ -25,8 +25,8 @@ RSpec.describe_current do
     let(:exponential_backoff) { false }
 
     context 'when pause tracker is created' do
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
 
@@ -36,8 +36,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(false) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -49,8 +49,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(false) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -62,8 +62,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -76,8 +76,8 @@ RSpec.describe_current do
         end
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(5) }
     end
 
@@ -90,8 +90,8 @@ RSpec.describe_current do
         tracker.resume
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -105,8 +105,8 @@ RSpec.describe_current do
         tracker.reset
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
   end
@@ -117,8 +117,8 @@ RSpec.describe_current do
     let(:exponential_backoff) { false }
 
     context 'when pause tracker is created' do
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
 
@@ -128,8 +128,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(false) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -142,8 +142,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(false) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -155,8 +155,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -169,8 +169,8 @@ RSpec.describe_current do
         tracker.resume
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -184,8 +184,8 @@ RSpec.describe_current do
         tracker.reset
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
   end
@@ -196,8 +196,8 @@ RSpec.describe_current do
     let(:exponential_backoff) { true }
 
     context 'when pause tracker is created' do
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
 
@@ -207,8 +207,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(false) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -220,8 +220,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(false) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -233,8 +233,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -247,8 +247,8 @@ RSpec.describe_current do
         tracker.resume
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -262,8 +262,8 @@ RSpec.describe_current do
         tracker.reset
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
   end
@@ -274,8 +274,8 @@ RSpec.describe_current do
     let(:exponential_backoff) { false }
 
     context 'when pause tracker is created' do
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
 
@@ -285,8 +285,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(false) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -297,8 +297,8 @@ RSpec.describe_current do
         tracker.expire
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -310,8 +310,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(false) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(false) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -323,8 +323,8 @@ RSpec.describe_current do
         tracker.increment
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(true) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(true) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -337,8 +337,8 @@ RSpec.describe_current do
         tracker.resume
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(1) }
     end
 
@@ -352,8 +352,8 @@ RSpec.describe_current do
         tracker.reset
       end
 
-      it { expect(tracker.expired?).to eq(true) }
-      it { expect(tracker.paused?).to eq(false) }
+      it { expect(tracker.expired?).to be(true) }
+      it { expect(tracker.paused?).to be(false) }
       it { expect(tracker.attempt).to eq(0) }
     end
   end

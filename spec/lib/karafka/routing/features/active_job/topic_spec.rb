@@ -10,14 +10,14 @@ RSpec.describe_current do
   describe '#active_job' do
     context 'when we use active_job without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.active_job.active?).to eq(false)
+        expect(topic.active_job.active?).to be(false)
       end
     end
 
     context 'when we use active_job with active status' do
       it 'expect to use proper active status' do
         topic.active_job(true)
-        expect(topic.active_job.active?).to eq(true)
+        expect(topic.active_job.active?).to be(true)
       end
     end
 
@@ -25,7 +25,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.active_job(true)
         topic.active_job(false)
-        expect(topic.active_job.active?).to eq(true)
+        expect(topic.active_job.active?).to be(true)
       end
     end
   end
@@ -34,13 +34,13 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.active_job(true) }
 
-      it { expect(topic.active_job?).to eq(true) }
+      it { expect(topic.active_job?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.active_job(false) }
 
-      it { expect(topic.active_job?).to eq(false) }
+      it { expect(topic.active_job?).to be(false) }
     end
   end
 

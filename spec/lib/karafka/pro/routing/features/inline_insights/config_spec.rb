@@ -10,13 +10,13 @@ RSpec.describe_current do
     context 'when active' do
       let(:active) { true }
 
-      it { expect(config.active?).to eq(true) }
+      it { expect(config.active?).to be(true) }
     end
 
     context 'when not active' do
       let(:active) { false }
 
-      it { expect(config.active?).to eq(false) }
+      it { expect(config.active?).to be(false) }
     end
   end
 
@@ -24,13 +24,13 @@ RSpec.describe_current do
     context 'when required' do
       let(:required) { true }
 
-      it { expect(config.required?).to eq(true) }
+      it { expect(config.required?).to be(true) }
     end
 
     context 'when not required' do
       let(:required) { false }
 
-      it { expect(config.required?).to eq(false) }
+      it { expect(config.required?).to be(false) }
     end
   end
 end

@@ -10,10 +10,10 @@ RSpec.describe_current do
   describe '#adaptive_iterator' do
     context 'when we use adaptive_iterator without any arguments' do
       it 'expects to initialize with defaults' do
-        expect(topic.adaptive_iterator.active?).to eq(false)
+        expect(topic.adaptive_iterator.active?).to be(false)
         expect(topic.adaptive_iterator.safety_margin).to eq(10)
         expect(topic.adaptive_iterator.marking_method).to eq(:mark_as_consumed)
-        expect(topic.adaptive_iterator.clean_after_yielding).to eq(true)
+        expect(topic.adaptive_iterator.clean_after_yielding).to be(true)
       end
     end
 
@@ -36,7 +36,7 @@ RSpec.describe_current do
     context 'when we disable clean_after_yielding' do
       it 'expects clean_after_yielding to be false' do
         topic.adaptive_iterator(clean_after_yielding: false)
-        expect(topic.adaptive_iterator.clean_after_yielding).to eq(false)
+        expect(topic.adaptive_iterator.clean_after_yielding).to be(false)
       end
     end
   end
@@ -45,7 +45,7 @@ RSpec.describe_current do
     context 'when adaptive_iterator is not active' do
       before { topic.adaptive_iterator }
 
-      it { expect(topic.adaptive_iterator?).to eq(false) }
+      it { expect(topic.adaptive_iterator?).to be(false) }
     end
   end
 

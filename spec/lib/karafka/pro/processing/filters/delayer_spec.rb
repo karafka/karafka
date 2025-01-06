@@ -9,7 +9,7 @@ RSpec.describe_current do
   context 'when there are no messages' do
     before { delayer.apply!([]) }
 
-    it { expect(delayer.applied?).to eq(false) }
+    it { expect(delayer.applied?).to be(false) }
     it { expect(delayer.timeout).to eq(0) }
     it { expect(delayer.action).to eq(:skip) }
   end
@@ -19,7 +19,7 @@ RSpec.describe_current do
 
     before { delayer.apply!(messages) }
 
-    it { expect(delayer.applied?).to eq(true) }
+    it { expect(delayer.applied?).to be(true) }
     it { expect(delayer.timeout).to be > 4_000 }
     it { expect(delayer.cursor).to eq(young) }
     it { expect(delayer.action).to eq(:pause) }
@@ -31,10 +31,10 @@ RSpec.describe_current do
 
     before { delayer.apply!(messages) }
 
-    it { expect(delayer.applied?).to eq(false) }
+    it { expect(delayer.applied?).to be(false) }
     it { expect(delayer.timeout).to eq(0) }
     it { expect(delayer.action).to eq(:skip) }
-    it { expect(delayer.cursor).to eq(nil) }
+    it { expect(delayer.cursor).to be_nil }
     it { expect(messages.size).to eq(1) }
   end
 
@@ -43,7 +43,7 @@ RSpec.describe_current do
 
     before { delayer.apply!(messages) }
 
-    it { expect(delayer.applied?).to eq(true) }
+    it { expect(delayer.applied?).to be(true) }
     it { expect(delayer.timeout).to be > 4_000 }
     it { expect(delayer.action).to eq(:pause) }
     it { expect(delayer.cursor).to eq(young) }

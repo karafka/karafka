@@ -58,7 +58,7 @@ RSpec.describe_current do
 
   describe '#active?' do
     context 'when there are no topics in the consumer group' do
-      it { expect(consumer_group.active?).to eq true }
+      it { expect(consumer_group.active?).to be(true) }
     end
 
     context 'when our consumer group name is in server consumer groups' do
@@ -71,7 +71,7 @@ RSpec.describe_current do
           .include(:consumer_groups, name)
       end
 
-      it { expect(consumer_group.active?).to eq true }
+      it { expect(consumer_group.active?).to be(true) }
     end
 
     context 'when our consumer group name is not in server consumer groups' do
@@ -84,7 +84,7 @@ RSpec.describe_current do
           .include(:consumer_groups, 'na')
       end
 
-      it { expect(consumer_group.active?).to eq false }
+      it { expect(consumer_group.active?).to be(false) }
     end
   end
 

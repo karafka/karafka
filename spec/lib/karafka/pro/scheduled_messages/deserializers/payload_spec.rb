@@ -3,13 +3,15 @@
 RSpec.describe_current do
   subject(:parsing) { described_class.new.call(message) }
 
-  let(:message) { instance_double('Karafka::Messages::Message') }
+  let(:message) { instance_double(Karafka::Messages::Message) }
   let(:raw_payload) { '{"key":"value"}' }
   let(:headers) { {} }
 
   before do
-    allow(message).to receive(:raw_payload).and_return(raw_payload)
-    allow(message).to receive(:headers).and_return(headers)
+    allow(message).to receive_messages(
+      raw_payload: raw_payload,
+      headers: headers
+    )
   end
 
   let(:raw_payload) { Zlib::Deflate.deflate('{"key":"value"}') }

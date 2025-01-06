@@ -56,7 +56,7 @@ RSpec.describe_current do
     it { expect(piped[:headers]['schedule_source_key']).to eq(message.key) }
     it { expect(tombstone[:topic]).to eq(topic) }
     it { expect(tombstone[:partition]).to eq(partition) }
-    it { expect(tombstone[:payload]).to eq(nil) }
+    it { expect(tombstone[:payload]).to be_nil }
     it { expect(tombstone[:key]).to eq(message.key) }
     it { expect(tombstone[:headers]['schedule_source_type']).to eq('tombstone') }
     it { expect(tombstone[:headers]['schedule_schema_version']).to eq(schema_version) }
@@ -76,7 +76,7 @@ RSpec.describe_current do
         dispatcher << message
       end
 
-      it { expect(piped.key?(:key)).to eq(false) }
+      it { expect(piped.key?(:key)).to be(false) }
     end
   end
 

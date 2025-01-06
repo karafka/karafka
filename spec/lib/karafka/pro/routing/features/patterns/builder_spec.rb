@@ -42,7 +42,7 @@ RSpec.describe_current do
         end
       end
 
-      it { expect(cg.topics.first.manual_offset_management?).to eq(true) }
+      it { expect(cg.topics.first.manual_offset_management?).to be(true) }
     end
 
     context 'when defining named pattern with extra settings' do
@@ -53,7 +53,7 @@ RSpec.describe_current do
         end
       end
 
-      it { expect(cg.topics.first.manual_offset_management?).to eq(true) }
+      it { expect(cg.topics.first.manual_offset_management?).to be(true) }
       it { expect(cg.topics.first.name).to eq('my-name') }
     end
   end

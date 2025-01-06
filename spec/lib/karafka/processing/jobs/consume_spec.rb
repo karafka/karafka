@@ -6,7 +6,7 @@ RSpec.describe_current do
   let(:executor) { build(:processing_executor) }
   let(:messages) { [rand] }
 
-  it { expect(job.non_blocking?).to eq(false) }
+  it { expect(job.non_blocking?).to be(false) }
 
   specify { expect(described_class.action).to eq(:consume) }
 

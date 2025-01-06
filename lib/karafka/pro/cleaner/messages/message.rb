@@ -29,15 +29,18 @@ module Karafka
             @raw_payload == false
           end
 
-          # Cleans the message payload and removes the deserialized data references
+          # Cleans the message payload, headers, key and removes the deserialized data references
           # This is useful when working with big messages that take a lot of space.
           #
           # After the message content is no longer needed, it can be removed so it does not consume
           # space anymore.
+          #
+          # @note Cleaning of message means we also clean its metadata (headers and key)
           def clean!
             @deserialized = false
             @raw_payload = false
             @payload = nil
+            @metadata.clean!
           end
         end
       end

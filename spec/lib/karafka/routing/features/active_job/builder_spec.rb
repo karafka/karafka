@@ -14,7 +14,7 @@ RSpec.describe_current do
       before { builder.active_job_topic(:test) }
 
       it { expect(topic.consumer).to eq(Karafka::ActiveJob::Consumer) }
-      it { expect(topic.active_job?).to eq(true) }
+      it { expect(topic.active_job?).to be(true) }
     end
 
     context 'when defining AJ with extra settings' do
@@ -25,7 +25,7 @@ RSpec.describe_current do
       end
 
       it { expect(topic.consumer).to eq(Karafka::ActiveJob::Consumer) }
-      it { expect(topic.active_job?).to eq(true) }
+      it { expect(topic.active_job?).to be(true) }
       it { expect(topic.max_messages).to eq(5) }
     end
   end

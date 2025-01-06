@@ -6,14 +6,14 @@ RSpec.describe_current do
   let(:initial_status) { :pending }
 
   describe 'initial state' do
-    it { expect(status_manager.pending?).to eq true }
-    it { expect(status_manager.starting?).to eq false }
-    it { expect(status_manager.running?).to eq false }
-    it { expect(status_manager.quieting?).to eq false }
-    it { expect(status_manager.quiet?).to eq false }
-    it { expect(status_manager.stopping?).to eq false }
-    it { expect(status_manager.stopped?).to eq false }
-    it { expect(status_manager.active?).to eq false }
+    it { expect(status_manager.pending?).to be(true) }
+    it { expect(status_manager.starting?).to be(false) }
+    it { expect(status_manager.running?).to be(false) }
+    it { expect(status_manager.quieting?).to be(false) }
+    it { expect(status_manager.quiet?).to be(false) }
+    it { expect(status_manager.stopping?).to be(false) }
+    it { expect(status_manager.stopped?).to be(false) }
+    it { expect(status_manager.active?).to be(false) }
   end
 
   Karafka::Connection::Status::STATES.each do |state, transition|
@@ -24,7 +24,7 @@ RSpec.describe_current do
       context "when transitioning to #{state}" do
         before { status_manager.public_send(transition) }
 
-        it { expect(status_manager.public_send("#{state}?")).to eq true }
+        it { expect(status_manager.public_send("#{state}?")).to be(true) }
       end
     end
   end
@@ -36,8 +36,8 @@ RSpec.describe_current do
         status_manager.stop!
       end
 
-      it { expect(status_manager.stopped?).to eq true }
-      it { expect(status_manager.active?).to eq false }
+      it { expect(status_manager.stopped?).to be(true) }
+      it { expect(status_manager.active?).to be(false) }
     end
 
     context 'when in running state' do
@@ -46,8 +46,8 @@ RSpec.describe_current do
         status_manager.stop!
       end
 
-      it { expect(status_manager.stopping?).to eq true }
-      it { expect(status_manager.active?).to eq true }
+      it { expect(status_manager.stopping?).to be(true) }
+      it { expect(status_manager.active?).to be(true) }
     end
 
     context 'when already stopped' do
@@ -56,8 +56,8 @@ RSpec.describe_current do
         status_manager.stop!
       end
 
-      it { expect(status_manager.stopped?).to eq true }
-      it { expect(status_manager.active?).to eq false }
+      it { expect(status_manager.stopped?).to be(true) }
+      it { expect(status_manager.active?).to be(false) }
     end
   end
 
@@ -65,20 +65,20 @@ RSpec.describe_current do
     context 'when status is pending or stopped' do
       it 'returns false' do
         status_manager.pending!
-        expect(status_manager.active?).to eq false
+        expect(status_manager.active?).to be(false)
 
         status_manager.stopped!
-        expect(status_manager.active?).to eq false
+        expect(status_manager.active?).to be(false)
       end
     end
 
     context 'when status is neither pending nor stopped' do
       it 'returns true' do
         status_manager.start!
-        expect(status_manager.active?).to eq true
+        expect(status_manager.active?).to be(true)
 
         status_manager.running!
-        expect(status_manager.active?).to eq true
+        expect(status_manager.active?).to be(true)
       end
     end
   end

@@ -4,26 +4,32 @@ RSpec.describe_current do
   subject(:consumer) { described_class.new }
 
   let(:executor) { Karafka::Pro::RecurringTasks::Executor.new }
-  let(:messages) { [instance_double('Karafka::Messages::Message', payload: payload, offset: 1)] }
+  let(:messages) { [instance_double(Karafka::Messages::Message, payload: payload, offset: 1)] }
   let(:payload) { { type: 'schedule', schedule_version: '1.0.0' } }
-  let(:topic) { instance_double('Karafka::Routing::Topic', name: 'topic_name') }
+  let(:topic) { instance_double(Karafka::Routing::Topic, name: 'topic_name') }
   let(:partition) { 0 }
   let(:expected_error) { Karafka::Pro::RecurringTasks::Errors::IncompatibleScheduleError }
 
   before do
     allow(Karafka::Pro::RecurringTasks::Executor).to receive(:new).and_return(executor)
-    allow(consumer).to receive(:messages).and_return(messages)
-    allow(consumer).to receive(:topic).and_return(topic)
-    allow(consumer).to receive(:partition).and_return(partition)
-    allow(consumer).to receive(:mark_as_consumed)
-    allow(consumer).to receive(:seek)
-    allow(executor).to receive(:incompatible?).and_return(false)
-    allow(executor).to receive(:replaying?).and_return(false)
-    allow(executor).to receive(:update_state)
-    allow(executor).to receive(:apply_command)
-    allow(executor).to receive(:call)
-    allow(executor).to receive(:replay)
-    allow(consumer).to receive(:eofed?).and_return(false)
+
+    allow(consumer).to receive_messages(
+      messages: messages,
+      topic: topic,
+      partition: partition,
+      mark_as_consumed: nil,
+      seek: nil,
+      eofed?: false
+    )
+
+    allow(executor).to receive_messages(
+      incompatible?: false,
+      replaying?: false,
+      update_state: nil,
+      apply_command: nil,
+      call: nil,
+      replay: nil
+    )
   end
 
   describe '#initialize' do

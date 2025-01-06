@@ -20,7 +20,7 @@ RSpec.describe_current do
         upcase!
       ].each do |method_name|
         it 'expect not to respond to those' do
-          expect(karafka_env.respond_to?(method_name)).to eq true
+          expect(karafka_env.respond_to?(method_name)).to be(true)
         end
       end
     end
@@ -31,7 +31,7 @@ RSpec.describe_current do
         extra_other
       ].each do |method_name|
         it 'expect not to respond to those' do
-          expect(karafka_env.respond_to?(method_name)).to eq false
+          expect(karafka_env.respond_to?(method_name)).to be(false)
         end
       end
     end
@@ -44,7 +44,7 @@ RSpec.describe_current do
         unknown?
       ].each do |method_name|
         it 'expect not to respond to those' do
-          expect(karafka_env.respond_to?(method_name)).to eq true
+          expect(karafka_env.respond_to?(method_name)).to be(true)
         end
       end
     end
@@ -56,7 +56,7 @@ RSpec.describe_current do
     context "when environment: #{env}" do
       before { karafka_env.replace(env) }
 
-      it { expect(karafka_env.public_send(:"#{env}?")).to eq true }
+      it { expect(karafka_env.public_send(:"#{env}?")).to be(true) }
     end
   end
 
@@ -66,7 +66,7 @@ RSpec.describe_current do
     invalid
   ].each do |env|
     context "when environment: #{env}" do
-      it { expect(karafka_env.public_send(:"#{env}?")).to eq false }
+      it { expect(karafka_env.public_send(:"#{env}?")).to be(false) }
     end
   end
 end

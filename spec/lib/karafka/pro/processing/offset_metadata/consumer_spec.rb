@@ -7,15 +7,17 @@ RSpec.describe_current do
   let(:fetcher) { Karafka::Pro::Processing::OffsetMetadata::Fetcher }
 
   before do
-    allow(consumer).to receive(:topic).and_return(topic)
-    allow(consumer).to receive(:partition).and_return(partition)
+    allow(consumer).to receive_messages(
+      topic: topic,
+      partition: partition
+    )
   end
 
   describe '#offset_metadata' do
     context 'when assignment is revoked' do
       before { allow(consumer).to receive(:revoked?).and_return(true) }
 
-      it { expect(consumer.offset_metadata).to eq(false) }
+      it { expect(consumer.offset_metadata).to be(false) }
     end
 
     context 'when assignment is active' do

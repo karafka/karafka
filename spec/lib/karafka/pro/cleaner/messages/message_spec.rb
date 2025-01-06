@@ -19,17 +19,18 @@ RSpec.describe_current do
 
   describe '#cleaned? and #clean!' do
     context 'when message was not cleaned' do
-      it { expect(message.cleaned?).to eq(false) }
-      it { expect(message.raw_payload).not_to eq(false) }
-      it { expect(message.deserialized?).to eq(false) }
+      it { expect(message.cleaned?).to be(false) }
+      it { expect(message.raw_payload).not_to be(false) }
+      it { expect(message.deserialized?).to be(false) }
     end
 
     context 'when message was cleaned' do
       before { message.clean! }
 
-      it { expect(message.cleaned?).to eq(true) }
-      it { expect(message.deserialized?).to eq(false) }
-      it { expect(message.raw_payload).to eq(false) }
+      it { expect(message.cleaned?).to be(true) }
+      it { expect(message.deserialized?).to be(false) }
+      it { expect(message.raw_payload).to be(false) }
+      it { expect(message.metadata.cleaned?).to be(true) }
     end
 
     context 'when message was deserialized and cleaned' do
@@ -38,9 +39,9 @@ RSpec.describe_current do
         message.clean!
       end
 
-      it { expect(message.cleaned?).to eq(true) }
-      it { expect(message.deserialized?).to eq(false) }
-      it { expect(message.raw_payload).to eq(false) }
+      it { expect(message.cleaned?).to be(true) }
+      it { expect(message.deserialized?).to be(false) }
+      it { expect(message.raw_payload).to be(false) }
     end
   end
 end

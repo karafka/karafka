@@ -54,7 +54,7 @@ RSpec.describe_current do
   describe '#kafka' do
     it { expect(group.kafka[:'client.id']).to eq(Karafka::App.config.client_id) }
     it { expect(group.kafka[:'auto.offset.reset']).to eq('earliest') }
-    it { expect(group.kafka[:'enable.auto.offset.store']).to eq(false) }
+    it { expect(group.kafka[:'enable.auto.offset.store']).to be(false) }
     it { expect(group.kafka[:'bootstrap.servers']).to eq(topic.kafka[:'bootstrap.servers']) }
 
     context 'when with group.instance.id' do
@@ -157,7 +157,7 @@ RSpec.describe_current do
 
   describe '#active?' do
     context 'when there are no topics in the subscription group' do
-      it { expect(group.active?).to eq true }
+      it { expect(group.active?).to be(true) }
     end
 
     context 'when our subscription group name is in server subscription groups' do
@@ -170,7 +170,7 @@ RSpec.describe_current do
           .include(:subscription_groups, topic.subscription_group_details.fetch(:name))
       end
 
-      it { expect(group.active?).to eq true }
+      it { expect(group.active?).to be(true) }
     end
 
     context 'when our subscription group name is not in server subscription groups' do
@@ -183,7 +183,7 @@ RSpec.describe_current do
           .include(:subscription_groups, 'na')
       end
 
-      it { expect(group.active?).to eq false }
+      it { expect(group.active?).to be(false) }
     end
   end
 

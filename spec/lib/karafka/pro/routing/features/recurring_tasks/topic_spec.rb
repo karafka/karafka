@@ -6,14 +6,14 @@ RSpec.describe_current do
   describe '#recurring_tasks' do
     context 'when we use recurring_tasks without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.recurring_tasks.active?).to eq(false)
+        expect(topic.recurring_tasks.active?).to be(false)
       end
     end
 
     context 'when we use recurring_tasks with active status' do
       it 'expect to use proper active status' do
         topic.recurring_tasks(true)
-        expect(topic.recurring_tasks.active?).to eq(true)
+        expect(topic.recurring_tasks.active?).to be(true)
       end
     end
 
@@ -21,7 +21,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.recurring_tasks(true)
         topic.recurring_tasks(false)
-        expect(topic.recurring_tasks.active?).to eq(true)
+        expect(topic.recurring_tasks.active?).to be(true)
       end
     end
   end
@@ -30,13 +30,13 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.recurring_tasks(true) }
 
-      it { expect(topic.recurring_tasks?).to eq(true) }
+      it { expect(topic.recurring_tasks?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.recurring_tasks(false) }
 
-      it { expect(topic.recurring_tasks?).to eq(false) }
+      it { expect(topic.recurring_tasks?).to be(false) }
     end
   end
 

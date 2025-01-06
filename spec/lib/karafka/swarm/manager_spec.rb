@@ -53,13 +53,13 @@ RSpec.describe_current do
 
   describe '#stopped?' do
     context 'when even one is alive' do
-      it { expect(manager.stopped?).to eq(false) }
+      it { expect(manager.stopped?).to be(false) }
     end
 
     context 'when none alive' do
       before { manager.nodes.each { |node| allow(node).to receive(:alive?).and_return(false) } }
 
-      it { expect(manager.stopped?).to eq(true) }
+      it { expect(manager.stopped?).to be(true) }
     end
   end
 

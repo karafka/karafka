@@ -107,7 +107,7 @@ RSpec.describe_current do
   end
 
   describe '#store_offset' do
-    let(:message) { instance_double('Karafka::Messages::Message') }
+    let(:message) { instance_double(Karafka::Messages::Message) }
     let(:metadata) { 'metadata' }
 
     context 'when storing the offset is successful' do

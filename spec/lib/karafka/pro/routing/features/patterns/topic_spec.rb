@@ -6,14 +6,14 @@ RSpec.describe_current do
   describe '#patterns' do
     context 'when we use patterns without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.patterns.active?).to eq(false)
+        expect(topic.patterns.active?).to be(false)
       end
     end
 
     context 'when we use patterns with a active and a type' do
       it 'expect to use proper active status' do
         topic.patterns(active: true, type: 1)
-        expect(topic.patterns.active?).to eq(true)
+        expect(topic.patterns.active?).to be(true)
       end
     end
 
@@ -24,7 +24,7 @@ RSpec.describe_current do
       end
 
       it 'expect to use proper active status' do
-        expect(topic.patterns.active?).to eq(true)
+        expect(topic.patterns.active?).to be(true)
       end
     end
   end
@@ -33,19 +33,19 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.patterns(active: true) }
 
-      it { expect(topic.patterns?).to eq(true) }
+      it { expect(topic.patterns?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.patterns }
 
-      it { expect(topic.patterns?).to eq(false) }
+      it { expect(topic.patterns?).to be(false) }
     end
   end
 
   describe '#active?' do
     context 'when there are no topics in the topics' do
-      it { expect(topic.active?).to eq true }
+      it { expect(topic.active?).to be(true) }
     end
 
     context 'when our topic name is in server topics' do
@@ -58,7 +58,7 @@ RSpec.describe_current do
           .include(:topics, topic.name)
       end
 
-      it { expect(topic.active?).to eq true }
+      it { expect(topic.active?).to be(true) }
     end
 
     context 'when there is only a pattern matcher active topic and not in included' do
@@ -75,7 +75,7 @@ RSpec.describe_current do
       end
 
       it 'expect not to be active because there is an explicit include request' do
-        expect(topic.active?).to eq false
+        expect(topic.active?).to be(false)
       end
     end
 
@@ -94,7 +94,7 @@ RSpec.describe_current do
       end
 
       it 'expect to always be active despite not being included' do
-        expect(topic.active?).to eq false
+        expect(topic.active?).to be(false)
       end
     end
 
@@ -112,7 +112,7 @@ RSpec.describe_current do
       end
 
       it 'expect to always be active' do
-        expect(topic.active?).to eq true
+        expect(topic.active?).to be(true)
       end
     end
 
@@ -130,7 +130,7 @@ RSpec.describe_current do
       end
 
       it 'expect to not be active because it was explicitely excluded' do
-        expect(topic.active?).to eq false
+        expect(topic.active?).to be(false)
       end
     end
 
@@ -148,7 +148,7 @@ RSpec.describe_current do
       end
 
       it 'expect not to be active as it was switched to inactive' do
-        expect(topic.active?).to eq false
+        expect(topic.active?).to be(false)
       end
     end
 
@@ -162,19 +162,19 @@ RSpec.describe_current do
           .include(:topics, 'na')
       end
 
-      it { expect(topic.active?).to eq false }
+      it { expect(topic.active?).to be(false) }
     end
 
     context 'when we set the topic to active via #active' do
       before { topic.active(true) }
 
-      it { expect(topic.active?).to eq true }
+      it { expect(topic.active?).to be(true) }
     end
 
     context 'when we set the topic to inactive via #active' do
       before { topic.active(false) }
 
-      it { expect(topic.active?).to eq false }
+      it { expect(topic.active?).to be(false) }
     end
   end
 

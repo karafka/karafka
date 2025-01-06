@@ -41,13 +41,13 @@ RSpec.describe_current do
     context 'when rails is not in the gemfile' do
       let(:gemfile) { '' }
 
-      it { expect(is_rails).to eq false }
+      it { expect(is_rails).to be(false) }
     end
 
     context 'when rails is in the gemfile' do
       let(:gemfile) { "DEPENDENCIES\n  rails" }
 
-      it { expect(is_rails).to eq true }
+      it { expect(is_rails).to be(true) }
     end
   end
 

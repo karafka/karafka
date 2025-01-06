@@ -7,10 +7,13 @@ RSpec.describe_current do
   let(:runner) { Karafka::Runner.new }
 
   before do
-    allow(Karafka::App).to receive(:run!)
-    allow(Karafka::App).to receive(:stopped?).and_return(true)
-    allow(Karafka::App).to receive(:terminated?).and_return(true)
-    allow(Karafka::App).to receive(:subscription_groups).and_return({ 1 => [] })
+    allow(Karafka::App).to receive_messages(
+      run!: nil,
+      stopped?: true,
+      terminated?: true,
+      subscription_groups: { 1 => [] }
+    )
+
     # Do not close the real producer as we use it in specs
     allow(Karafka::App.producer).to receive(:close)
     allow(Karafka::Runner).to receive(:new).and_return(runner)
@@ -135,9 +138,11 @@ RSpec.describe_current do
       let(:timeout_ms) { timeout_s * 1_000 }
 
       before do
-        allow(Karafka::App).to receive(:stopped?).and_return(false)
-        allow(Karafka::App).to receive(:terminated?).and_return(false)
-        allow(Karafka::App).to receive(:stop!)
+        allow(Karafka::App).to receive_messages(
+          stopped?: false,
+          terminated?: false,
+          stop!: nil
+        )
         allow(described_class).to receive(:sleep)
         allow(Kernel).to receive(:exit!)
       end
@@ -259,9 +264,11 @@ RSpec.describe_current do
       let(:new_status) { :run! }
 
       before do
-        allow(Karafka::App).to receive(:quieting?).and_return(false)
-        allow(Karafka::App).to receive(:stopped?).and_return(false)
-        allow(Karafka::App).to receive(:stopping?).and_return(false)
+        allow(Karafka::App).to receive_messages(
+          quieting?: false,
+          stopped?: false,
+          stopping?: false
+        )
       end
 
       it do

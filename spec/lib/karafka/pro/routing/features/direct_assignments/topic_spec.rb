@@ -6,7 +6,7 @@ RSpec.describe_current do
   describe '#direct_assignments' do
     context 'when initialized without arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.direct_assignments.active).to eq(false)
+        expect(topic.direct_assignments.active).to be(false)
       end
     end
 
@@ -15,7 +15,7 @@ RSpec.describe_current do
 
       it 'expect to mark as active and use given partitions' do
         topic.direct_assignments(*partitions)
-        expect(topic.direct_assignments.active).to eq(true)
+        expect(topic.direct_assignments.active).to be(true)
         expect(topic.direct_assignments.partitions).to eq(partitions.map { |p| [p, true] }.to_h)
       end
     end
@@ -23,8 +23,8 @@ RSpec.describe_current do
     context 'when initialized with true' do
       it 'expect to use all partitions' do
         topic.direct_assignments(true)
-        expect(topic.direct_assignments.active).to eq(true)
-        expect(topic.direct_assignments.partitions).to eq(true)
+        expect(topic.direct_assignments.active).to be(true)
+        expect(topic.direct_assignments.partitions).to be(true)
       end
     end
 
@@ -33,7 +33,7 @@ RSpec.describe_current do
 
       it 'expect to mark as active and use given partitions' do
         topic.direct_assignments(partitions)
-        expect(topic.direct_assignments.active).to eq(true)
+        expect(topic.direct_assignments.active).to be(true)
         expect(topic.direct_assignments.partitions).to eq(partitions.map { |p| [p, true] }.to_h)
       end
     end
