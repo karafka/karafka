@@ -26,11 +26,11 @@ RSpec.describe_current do
         end
 
         it 'expect all of them to have #collapsed? method' do
-          expect(strategy.method_defined?(:collapsed?)).to eq(true)
+          expect(strategy.method_defined?(:collapsed?)).to be(true)
         end
 
         it 'expect all of them to have #failing? method' do
-          expect(strategy.method_defined?(:failing?)).to eq(true)
+          expect(strategy.method_defined?(:failing?)).to be(true)
         end
 
         context 'when using VPs and VPs virtual marking' do

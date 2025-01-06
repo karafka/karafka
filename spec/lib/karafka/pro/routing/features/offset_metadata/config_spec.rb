@@ -15,25 +15,25 @@ RSpec.describe_current do
 
   describe '#active?' do
     context 'when active' do
-      it { expect(config.active?).to eq(true) }
+      it { expect(config.active?).to be(true) }
     end
 
     context 'when not active' do
       let(:active) { false }
 
-      it { expect(config.active?).to eq(false) }
+      it { expect(config.active?).to be(false) }
     end
   end
 
   describe '#cache?' do
     context 'when cache' do
-      it { expect(config.cache?).to eq(true) }
+      it { expect(config.cache?).to be(true) }
     end
 
     context 'when not cache' do
       let(:cache) { false }
 
-      it { expect(config.cache?).to eq(false) }
+      it { expect(config.cache?).to be(false) }
     end
   end
 end

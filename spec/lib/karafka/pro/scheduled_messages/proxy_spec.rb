@@ -120,7 +120,7 @@ RSpec.describe_current do
   describe '.tombstone' do
     let(:message) do
       instance_double(
-        'Karafka::Messages::Message',
+        Karafka::Messages::Message,
         key: 'unique-key',
         topic: 'tombstone_topic',
         partition: 2,

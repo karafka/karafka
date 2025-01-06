@@ -59,6 +59,6 @@ RSpec.describe_current do
   end
 
   describe 'events mapping' do
-    it { expect(NotificationsChecker.valid?(tracker)).to eq(true) }
+    it { expect(NotificationsChecker.valid?(tracker)).to be(true) }
   end
 end

@@ -17,13 +17,13 @@ RSpec.describe_current do
     context 'when active' do
       let(:active) { true }
 
-      it { expect(config.active?).to eq(true) }
+      it { expect(config.active?).to be(true) }
     end
 
     context 'when not active' do
       let(:active) { false }
 
-      it { expect(config.active?).to eq(false) }
+      it { expect(config.active?).to be(false) }
     end
   end
 
@@ -31,13 +31,13 @@ RSpec.describe_current do
     context 'when independent' do
       let(:independent) { true }
 
-      it { expect(config.independent?).to eq(true) }
+      it { expect(config.independent?).to be(true) }
     end
 
     context 'when not independent' do
       let(:independent) { false }
 
-      it { expect(config.independent?).to eq(false) }
+      it { expect(config.independent?).to be(false) }
     end
   end
 
@@ -45,13 +45,13 @@ RSpec.describe_current do
     context 'when independent' do
       let(:transactional) { true }
 
-      it { expect(config.transactional?).to eq(true) }
+      it { expect(config.transactional?).to be(true) }
     end
 
     context 'when not transactional' do
       let(:transactional) { false }
 
-      it { expect(config.transactional?).to eq(false) }
+      it { expect(config.transactional?).to be(false) }
     end
   end
 end

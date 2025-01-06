@@ -6,22 +6,22 @@ RSpec.describe_current do
   describe '#inline_insights' do
     context 'when we use inline_insights without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.inline_insights.active?).to eq(false)
+        expect(topic.inline_insights.active?).to be(false)
       end
     end
 
     context 'when we use inline_insights with a true' do
       it 'expect to use proper active status' do
         topic.inline_insights(true)
-        expect(topic.inline_insights.active?).to eq(true)
+        expect(topic.inline_insights.active?).to be(true)
       end
     end
 
     context 'when we use inline_insights via setting only required' do
       it 'expect to use proper active status' do
         topic.inline_insights(required: true)
-        expect(topic.inline_insights.active?).to eq(true)
-        expect(topic.inline_insights.required?).to eq(true)
+        expect(topic.inline_insights.active?).to be(true)
+        expect(topic.inline_insights.required?).to be(true)
       end
     end
 
@@ -32,7 +32,7 @@ RSpec.describe_current do
       end
 
       it 'expect to use proper active status' do
-        expect(topic.inline_insights.active?).to eq(true)
+        expect(topic.inline_insights.active?).to be(true)
       end
 
       it 'expect not to add any filters' do

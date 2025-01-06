@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:listener) { described_class.new }
 
-  let(:event) { instance_double('Karafka::Core::Monitoring::Event') }
+  let(:event) { instance_double(Karafka::Core::Monitoring::Event) }
   let(:dispatcher) { Karafka::Pro::RecurringTasks::Dispatcher }
 
   describe '#on_recurring_tasks_task_executed' do

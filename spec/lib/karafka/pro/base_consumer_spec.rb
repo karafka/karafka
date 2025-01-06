@@ -89,7 +89,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
     it 'expect to assign time to messages metadata and freeze it' do
       consumer.on_before_consume
       expect(consumer.messages.metadata).to be_frozen
-      expect(consumer.messages.metadata.processed_at).not_to be(nil)
+      expect(consumer.messages.metadata.processed_at).not_to be_nil
     end
   end
 
@@ -408,8 +408,8 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
     it 'expect to run user code' do
       consumer.on_revoked
-      expect(consumer.handled_revoked).to eq(true)
-      expect(consumer.send(:revoked?)).to eq(true)
+      expect(consumer.handled_revoked).to be(true)
+      expect(consumer.send(:revoked?)).to be(true)
     end
 
     context 'when something goes wrong on revoked' do

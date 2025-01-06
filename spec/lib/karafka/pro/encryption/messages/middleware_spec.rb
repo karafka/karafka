@@ -4,13 +4,10 @@ RSpec.describe_current do
   subject(:middleware) { described_class.new.call(message) }
 
   before do
-    allow(::Karafka::App.config.encryption)
-      .to receive(:public_key)
-      .and_return(fixture_file('rsa/public_key_1.pem'))
-
-    allow(::Karafka::App.config.encryption)
-      .to receive(:private_keys)
-      .and_return('1' => fixture_file('rsa/private_key_1.pem'))
+    allow(::Karafka::App.config.encryption).to receive_messages(
+      public_key: fixture_file('rsa/public_key_1.pem'),
+      private_keys: { '1' => fixture_file('rsa/private_key_1.pem') }
+    )
   end
 
   let(:message) do

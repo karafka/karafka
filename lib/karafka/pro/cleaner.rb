@@ -28,6 +28,7 @@ module Karafka
         # @param _config [Karafka::Core::Configurable::Node] root node config
         def pre_setup(_config)
           ::Karafka::Messages::Message.prepend(Messages::Message)
+          ::Karafka::Messages::Metadata.prepend(Messages::Metadata)
           ::Karafka::Messages::Messages.prepend(Messages::Messages)
         end
 

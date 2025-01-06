@@ -6,7 +6,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
   describe '#status and #healthy' do
     context 'when nothing to read' do
       it { expect(node.status).to eq(-1) }
-      it { expect(node.healthy).to eq(true) }
+      it { expect(node.healthy).to be(true) }
     end
 
     context 'when healthy reported' do
@@ -32,7 +32,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
     context 'when pipe for writing is closed' do
       before { node.instance_variable_get('@writer').close }
 
-      it { expect(node.healthy).to eq(false) }
+      it { expect(node.healthy).to be(false) }
     end
 
     context 'when pipe for reading is closed' do
@@ -43,7 +43,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
   end
 
   describe '#orphaned?' do
-    it { expect(node.orphaned?).to eq(false) }
+    it { expect(node.orphaned?).to be(false) }
   end
 
   describe '#stop' do
@@ -98,7 +98,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
     context 'when node is alive' do
       let(:fork_pid) { Process.pid }
 
-      it { expect(node.alive?).to eq(true) }
+      it { expect(node.alive?).to be(true) }
     end
 
     context 'when node pidfd could not be used' do
@@ -108,7 +108,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
         pid
       end
 
-      it { expect(node.alive?).to eq(false) }
+      it { expect(node.alive?).to be(false) }
     end
   end
 
@@ -123,7 +123,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
       it 'expect to start it (it will fail as not configured)' do
         expect { node.start }.not_to raise_error
         sleep(0.5)
-        expect(node.alive?).to eq(false)
+        expect(node.alive?).to be(false)
       end
 
       it 'expect to be able to cleanup even if cleanup multiple times' do

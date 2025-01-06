@@ -17,8 +17,8 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
       sleep(0.5)
     end
 
-    it { expect(pidfd.alive?).to eq(false) }
-    it { expect(pidfd.signal('TERM')).to eq(false) }
+    it { expect(pidfd.alive?).to be(false) }
+    it { expect(pidfd.signal('TERM')).to be(false) }
     it { expect { pidfd.cleanup }.not_to raise_error }
   end
 
@@ -27,8 +27,8 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
 
     before { pidfd }
 
-    it { expect(pidfd.alive?).to eq(true) }
-    it { expect(pidfd.signal('TERM')).to eq(true) }
+    it { expect(pidfd.alive?).to be(true) }
+    it { expect(pidfd.signal('TERM')).to be(true) }
 
     context 'when fork was killed by us' do
       before do
@@ -36,7 +36,7 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
         sleep(0.5)
       end
 
-      it { expect(pidfd.alive?).to eq(false) }
+      it { expect(pidfd.alive?).to be(false) }
     end
   end
 
@@ -64,7 +64,7 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
       allow(IO).to receive(:select).and_return(nil)
     end
 
-    it { expect(pidfd.signal('TERM')).to eq(false) }
+    it { expect(pidfd.signal('TERM')).to be(false) }
   end
 
   context 'when we could not open a pid' do
@@ -73,6 +73,6 @@ RSpec.describe Karafka::Swarm::Pidfd, mode: :fork do
 
   context 'when checking if supported' do
     # Keep in mind, this will fail on other OSes than linux
-    it { expect(described_class.supported?).to eq(true) }
+    it { expect(described_class.supported?).to be(true) }
   end
 end

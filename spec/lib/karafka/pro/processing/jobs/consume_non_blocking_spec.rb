@@ -9,7 +9,7 @@ RSpec.describe_current do
 
   specify { expect(described_class.action).to eq(:consume) }
 
-  it { expect(job.non_blocking?).to eq(true) }
+  it { expect(job.non_blocking?).to be(true) }
   it { expect(described_class).to be < ::Karafka::Processing::Jobs::Consume }
 
   describe '#before_schedule_consume' do

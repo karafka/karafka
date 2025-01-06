@@ -15,7 +15,7 @@ RSpec.describe_current do
 
   describe '#to_a' do
     it 'expect not to deserialize data and return raw messages' do
-      expect(messages.to_a.first.deserialized?).to eq false
+      expect(messages.to_a.first.deserialized?).to be(false)
     end
 
     it 'expect to return copy of the underlying array' do
@@ -29,17 +29,17 @@ RSpec.describe_current do
   describe '#deserialize!' do
     it 'expect to deserialize all the messages and return deserialized' do
       messages.deserialize!
-      messages.to_a.each { |params| expect(params.deserialized?).to eq true }
+      messages.to_a.each { |params| expect(params.deserialized?).to be(true) }
     end
   end
 
   describe '#each' do
     it 'expect not to deserialize each at a time' do
       messages.each_with_index do |params, index|
-        expect(params.deserialized?).to eq false
+        expect(params.deserialized?).to be(false)
         next if index > 0
 
-        expect(messages.to_a[index + 1].deserialized?).to eq false
+        expect(messages.to_a[index + 1].deserialized?).to be(false)
       end
     end
   end
@@ -53,7 +53,7 @@ RSpec.describe_current do
       before { messages.payloads }
 
       it 'expect to mark as serialized all the messages inside the batch' do
-        expect(messages.to_a.all?(&:deserialized?)).to eq true
+        expect(messages.to_a.all?(&:deserialized?)).to be(true)
       end
     end
   end
@@ -75,14 +75,14 @@ RSpec.describe_current do
   describe '#first' do
     it 'expect to return first element without deserializing' do
       expect(messages.first).to eq messages.to_a[0]
-      expect(messages.first.deserialized?).to eq false
+      expect(messages.first.deserialized?).to be(false)
     end
   end
 
   describe '#last' do
     it 'expect to return last element without deserializing' do
       expect(messages.last).to eq messages.to_a[-1]
-      expect(messages.last.deserialized?).to eq false
+      expect(messages.last.deserialized?).to be(false)
     end
   end
 
@@ -91,6 +91,6 @@ RSpec.describe_current do
   end
 
   describe '#empty?' do
-    it { expect(messages.empty?).to eq(false) }
+    it { expect(messages.empty?).to be(false) }
   end
 end

@@ -6,14 +6,14 @@ RSpec.describe_current do
   describe '#expiring' do
     context 'when we use expiring without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.expiring.active?).to eq(false)
+        expect(topic.expiring.active?).to be(false)
       end
     end
 
     context 'when we use expiring with a ttl' do
       it 'expect to use proper active status' do
         topic.expiring(1)
-        expect(topic.expiring.active?).to eq(true)
+        expect(topic.expiring.active?).to be(true)
       end
     end
 
@@ -24,7 +24,7 @@ RSpec.describe_current do
       end
 
       it 'expect to use proper active status' do
-        expect(topic.expiring.active?).to eq(true)
+        expect(topic.expiring.active?).to be(true)
       end
 
       it 'expect not to add second expire' do
@@ -37,13 +37,13 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.expiring(1) }
 
-      it { expect(topic.expiring?).to eq(true) }
+      it { expect(topic.expiring?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.expiring }
 
-      it { expect(topic.expiring?).to eq(false) }
+      it { expect(topic.expiring?).to be(false) }
     end
   end
 

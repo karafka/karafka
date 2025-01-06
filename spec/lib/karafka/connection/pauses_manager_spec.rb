@@ -36,8 +36,8 @@ RSpec.describe_current do
 
       it 'expect to resume it' do
         manager.resume {}
-        expect(fetched_pause.paused?).to eq(false)
-        expect(fetched_pause.expired?).to eq(true)
+        expect(fetched_pause.paused?).to be(false)
+        expect(fetched_pause.expired?).to be(true)
       end
 
       it 'expect to yield upon it with pause ownership details' do

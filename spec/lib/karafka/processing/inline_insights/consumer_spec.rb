@@ -8,8 +8,10 @@ RSpec.describe_current do
   let(:insight_data) { { 'key' => 'value' } }
 
   before do
-    allow(consumer).to receive(:topic).and_return(topic)
-    allow(consumer).to receive(:partition).and_return(partition)
+    allow(consumer).to receive_messages(
+      topic: topic,
+      partition: partition
+    )
   end
 
   describe '#insights' do

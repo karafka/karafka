@@ -12,8 +12,8 @@ RSpec.describe_current do
   describe '#size, #empty?, #each and #present?' do
     context 'when there are no messages' do
       it { expect(buffer.size).to eq(0) }
-      it { expect(buffer.empty?).to eq(true) }
-      it { expect(buffer.present?(topic_name, 0)).to eq(false) }
+      it { expect(buffer.empty?).to be(true) }
+      it { expect(buffer.present?(topic_name, 0)).to be(false) }
 
       it 'expect not to yield anything' do
         expect { |block| buffer.each(&block) }.not_to yield_control
@@ -37,13 +37,13 @@ RSpec.describe_current do
       before { buffer_messages }
 
       it { expect(buffer.size).to eq(2) }
-      it { expect(buffer.empty?).to eq(false) }
+      it { expect(buffer.empty?).to be(false) }
       it { expect(buffer_messages[0][0]).to eq(topic_name) }
       it { expect(buffer_messages[0][1]).to eq(0) }
       it { expect(buffer_messages[0][2][0]).to be_a(Karafka::Messages::Message) }
       it { expect(buffer_messages[0][2][1]).to be_a(Karafka::Messages::Message) }
-      it { expect(buffer.present?(topic_name, 0)).to eq(true) }
-      it { expect(buffer.present?(topic_name, 10)).to eq(false) }
+      it { expect(buffer.present?(topic_name, 0)).to be(true) }
+      it { expect(buffer.present?(topic_name, 10)).to be(false) }
     end
   end
 
@@ -87,7 +87,7 @@ RSpec.describe_current do
       it { expect(buffer_messages[0][1]).to eq(0) }
       it { expect(buffer_messages[0][2][0]).to be_a(Karafka::Messages::Message) }
       it { expect(buffer_messages[0][2][0].raw_payload).to eq(raw_message2.payload) }
-      it { expect(buffer_messages[0][2][1]).to eq(nil) }
+      it { expect(buffer_messages[0][2][1]).to be_nil }
     end
   end
 end

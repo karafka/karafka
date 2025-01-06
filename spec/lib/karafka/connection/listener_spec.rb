@@ -19,9 +19,13 @@ RSpec.describe_current do
   before do
     allow(status.class).to receive(:new).and_return(status)
     allow(client.class).to receive(:new).and_return(client)
-    allow(client).to receive(:assignment).and_return([])
-    allow(client).to receive(:batch_poll).and_return([])
-    allow(client).to receive(:ping)
+
+    allow(client).to receive_messages(
+      assignment: [],
+      batch_poll: [],
+      ping: nil
+    )
+
     allow(status).to receive(:running?).and_return(true, false)
     allow(status).to receive(:quiet?).and_return(true, false)
   end

@@ -34,14 +34,12 @@ RSpec.describe Karafka::Cli::Topics::Repartition do
     end
 
     before do
-      allow(repartition_topics)
-        .to receive(:existing_topics)
-        .and_return(existing_topics)
-      allow(repartition_topics)
-        .to receive(:declaratives_routing_topics)
-        .and_return(declaratives_routing_topics)
-      allow(repartition_topics)
-        .to receive(:puts) # Suppress console output
+      allow(repartition_topics).to receive_messages(
+        existing_topics: existing_topics,
+        declaratives_routing_topics: declaratives_routing_topics,
+        # Suppress console output
+        puts: nil
+      )
 
       allow(Karafka::Admin).to receive(:create_partitions)
     end

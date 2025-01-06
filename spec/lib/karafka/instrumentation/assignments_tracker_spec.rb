@@ -24,7 +24,7 @@ RSpec.describe_current do
 
   describe 'events naming' do
     it 'expect to match correct methods' do
-      expect(NotificationsChecker.valid?(tracker)).to eq(true)
+      expect(NotificationsChecker.valid?(tracker)).to be(true)
     end
   end
 
@@ -48,8 +48,8 @@ RSpec.describe_current do
         tracker.on_client_reset(assign_event2)
       end
 
-      it { expect(tracker.current.key?(topic1)).to eq(true) }
-      it { expect(tracker.current.key?(topic2)).to eq(false) }
+      it { expect(tracker.current.key?(topic1)).to be(true) }
+      it { expect(tracker.current.key?(topic2)).to be(false) }
     end
   end
 

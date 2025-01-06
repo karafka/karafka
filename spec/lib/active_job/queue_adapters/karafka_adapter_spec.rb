@@ -41,6 +41,6 @@ RSpec.describe_current do
   end
 
   describe '.enqueue_after_transaction_commit?' do
-    it { expect(adapter.enqueue_after_transaction_commit?).to eq(true) }
+    it { expect(adapter.enqueue_after_transaction_commit?).to be(true) }
   end
 end

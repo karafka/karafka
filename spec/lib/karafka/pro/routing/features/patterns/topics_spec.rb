@@ -23,7 +23,7 @@ RSpec.describe_current do
 
       before { topics << pattern_topic }
 
-      it ' expect to raise an error as this should not happen' do
+      it 'expect to raise an error as this should not happen' do
         expect { topics.find('na') }.to raise_error(Karafka::Errors::TopicNotFoundError, 'na')
       end
     end
@@ -33,8 +33,8 @@ RSpec.describe_current do
 
       before { topics << pattern_topic }
 
-      it ' expect to raise an error as this should not happen' do
-        expect(topics.find('exists').patterns.discovered?).to eq(true)
+      it 'expect to raise an error as this should not happen' do
+        expect(topics.find('exists').patterns.discovered?).to be(true)
       end
     end
   end

@@ -11,7 +11,7 @@ RSpec.describe_current do
   let(:consumer) { instance_double(Karafka::BaseConsumer, messages: messages) }
 
   it { expect(described_class).to be < Karafka::Processing::Coordinator }
-  it { expect(coordinator.collapsed?).to eq(false) }
+  it { expect(coordinator.collapsed?).to be(false) }
 
   before { coordinator.start(messages) }
 
@@ -19,7 +19,7 @@ RSpec.describe_current do
     context 'when we start in a non-collapsed state' do
       before { coordinator.start(messages) }
 
-      it { expect(coordinator.collapsed?).to eq(false) }
+      it { expect(coordinator.collapsed?).to be(false) }
     end
 
     context 'when we start in a collapsed state that lapses' do
@@ -28,7 +28,7 @@ RSpec.describe_current do
         coordinator.start(messages)
       end
 
-      it { expect(coordinator.collapsed?).to eq(true) }
+      it { expect(coordinator.collapsed?).to be(true) }
     end
 
     context 'when we start in a collapsed state that does not lapse' do
@@ -37,31 +37,31 @@ RSpec.describe_current do
         coordinator.start([build(:messages_message)])
       end
 
-      it { expect(coordinator.collapsed?).to eq(false) }
+      it { expect(coordinator.collapsed?).to be(false) }
     end
   end
 
   describe '#finished?' do
     context 'when no jobs are running' do
-      it { expect(coordinator.finished?).to eq(true) }
+      it { expect(coordinator.finished?).to be(true) }
     end
 
     context 'when there are running consume jobs' do
       before { coordinator.increment(:consume) }
 
-      it { expect(coordinator.finished?).to eq(false) }
+      it { expect(coordinator.finished?).to be(false) }
     end
 
     context 'when there are running non-consume jobs' do
       before { coordinator.increment(:revoked) }
 
-      it { expect(coordinator.finished?).to eq(true) }
+      it { expect(coordinator.finished?).to be(true) }
     end
   end
 
   describe '#filtered?' do
     context 'when not filtered' do
-      it { expect(coordinator.filtered?).to eq(false) }
+      it { expect(coordinator.filtered?).to be(false) }
     end
   end
 
@@ -121,13 +121,13 @@ RSpec.describe_current do
       before { coordinator.failure!(consumer, StandardError.new) }
 
       it 'expect not to collapse immediately after it' do
-        expect(coordinator.collapsed?).to eq(false)
+        expect(coordinator.collapsed?).to be(false)
       end
 
       context 'when we start again after it' do
         before { coordinator.start(messages) }
 
-        it { expect(coordinator.collapsed?).to eq(true) }
+        it { expect(coordinator.collapsed?).to be(true) }
       end
     end
   end
@@ -140,7 +140,7 @@ RSpec.describe_current do
 
     context 'when the coordinator is active within the specified interval' do
       it 'returns true' do
-        expect(coordinator.active_within?(200)).to eq(true)
+        expect(coordinator.active_within?(200)).to be(true)
       end
     end
 
@@ -148,7 +148,7 @@ RSpec.describe_current do
       before { sleep(0.1) }
 
       it 'returns true for the edge of the time frame' do
-        expect(coordinator.active_within?(205)).to eq(true)
+        expect(coordinator.active_within?(205)).to be(true)
       end
     end
 
@@ -156,13 +156,13 @@ RSpec.describe_current do
       before { sleep(0.5) }
 
       it 'returns false' do
-        expect(coordinator.active_within?(200)).to eq(false)
+        expect(coordinator.active_within?(200)).to be(false)
       end
     end
 
     context 'when there has been no recent activity' do
       it 'returns false' do
-        expect(coordinator.active_within?(100)).to eq(false)
+        expect(coordinator.active_within?(100)).to be(false)
       end
     end
 
@@ -170,7 +170,7 @@ RSpec.describe_current do
       before { coordinator.start(messages) }
 
       it 'returns true' do
-        expect(coordinator.active_within?(105)).to eq(true)
+        expect(coordinator.active_within?(105)).to be(true)
       end
     end
   end

@@ -6,14 +6,14 @@ RSpec.describe_current do
   describe '#delaying' do
     context 'when we use delaying without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.delaying.active?).to eq(false)
+        expect(topic.delaying.active?).to be(false)
       end
     end
 
     context 'when we use delaying with a delay' do
       it 'expect to use proper active status' do
         topic.delaying(1)
-        expect(topic.delaying.active?).to eq(true)
+        expect(topic.delaying.active?).to be(true)
       end
     end
 
@@ -24,7 +24,7 @@ RSpec.describe_current do
       end
 
       it 'expect to use proper active status' do
-        expect(topic.delaying.active?).to eq(true)
+        expect(topic.delaying.active?).to be(true)
       end
 
       it 'expect not to add second expire' do
@@ -37,13 +37,13 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.delaying(1) }
 
-      it { expect(topic.delaying?).to eq(true) }
+      it { expect(topic.delaying?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.delaying }
 
-      it { expect(topic.delaying?).to eq(false) }
+      it { expect(topic.delaying?).to be(false) }
     end
   end
 

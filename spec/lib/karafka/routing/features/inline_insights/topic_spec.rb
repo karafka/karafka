@@ -10,14 +10,14 @@ RSpec.describe_current do
   describe '#inline_insights' do
     context 'when we use inline_insights without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.inline_insights.active?).to eq(false)
+        expect(topic.inline_insights.active?).to be(false)
       end
     end
 
     context 'when we use inline_insights with active status' do
       it 'expect to use proper active status' do
         topic.inline_insights(true)
-        expect(topic.inline_insights.active?).to eq(true)
+        expect(topic.inline_insights.active?).to be(true)
       end
     end
 
@@ -25,7 +25,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.inline_insights(true)
         topic.inline_insights(false)
-        expect(topic.inline_insights.active?).to eq(true)
+        expect(topic.inline_insights.active?).to be(true)
       end
     end
   end
@@ -34,13 +34,13 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.inline_insights(true) }
 
-      it { expect(topic.inline_insights?).to eq(true) }
+      it { expect(topic.inline_insights?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.inline_insights(false) }
 
-      it { expect(topic.inline_insights?).to eq(false) }
+      it { expect(topic.inline_insights?).to be(false) }
     end
   end
 

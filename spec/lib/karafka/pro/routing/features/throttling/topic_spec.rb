@@ -6,14 +6,14 @@ RSpec.describe_current do
   describe '#throttling' do
     context 'when we use throttling without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.throttling.active?).to eq(false)
+        expect(topic.throttling.active?).to be(false)
       end
     end
 
     context 'when we use throttling with good limit value' do
       it 'expect to use proper active status' do
         topic.throttling(limit: 100)
-        expect(topic.throttling.active?).to eq(true)
+        expect(topic.throttling.active?).to be(true)
       end
     end
 
@@ -21,7 +21,7 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.throttling(limit: 100)
         topic.throttle(limit: Float::INFINITY)
-        expect(topic.throttling.active?).to eq(true)
+        expect(topic.throttling.active?).to be(true)
       end
     end
   end
@@ -30,13 +30,13 @@ RSpec.describe_current do
     context 'when active' do
       before { topic.throttling(limit: 100) }
 
-      it { expect(topic.throttling?).to eq(true) }
+      it { expect(topic.throttling?).to be(true) }
     end
 
     context 'when not active' do
       before { topic.throttling }
 
-      it { expect(topic.throttling?).to eq(false) }
+      it { expect(topic.throttling?).to be(false) }
     end
   end
 

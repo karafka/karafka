@@ -6,7 +6,7 @@ RSpec.describe_current do
   context 'when there are no errors' do
     it { expect(tracker.to_a).to eq([]) }
     it { expect(tracker.size).to eq(0) }
-    it { expect(tracker.empty?).to eq(true) }
+    it { expect(tracker.empty?).to be(true) }
   end
 
   context 'when we have 100 elements and want to push another' do
@@ -30,7 +30,7 @@ RSpec.describe_current do
 
     it 'expect to be empty after clear' do
       tracker.clear
-      expect(tracker.empty?).to eq(true)
+      expect(tracker.empty?).to be(true)
     end
   end
 end

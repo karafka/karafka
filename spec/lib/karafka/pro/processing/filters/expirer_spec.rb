@@ -12,7 +12,7 @@ RSpec.describe_current do
 
     it 'expect not to apply' do
       expirer.apply!(messages)
-      expect(expirer.applied?).to eq(false)
+      expect(expirer.applied?).to be(false)
     end
 
     it 'expect to always skip' do
@@ -39,7 +39,7 @@ RSpec.describe_current do
 
     it 'expect to apply' do
       expirer.apply!(messages)
-      expect(expirer.applied?).to eq(true)
+      expect(expirer.applied?).to be(true)
     end
   end
 end

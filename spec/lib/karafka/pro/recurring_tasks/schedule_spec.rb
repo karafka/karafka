@@ -4,7 +4,7 @@ RSpec.describe_current do
   subject(:schedule) { described_class.new(version: version) }
 
   let(:version) { '1.0.0' }
-  let(:task) { instance_double('Task', id: 'task_1') }
+  let(:task) { instance_double(Karafka::Pro::RecurringTasks::Task, id: 'task_1') }
 
   describe '#initialize' do
     it 'initializes with a given version' do
@@ -23,7 +23,7 @@ RSpec.describe_current do
     end
 
     it 'overwrites a task with the same id' do
-      another_task = instance_double('Task', id: 'task_1')
+      another_task = instance_double(Karafka::Pro::RecurringTasks::Task, id: 'task_1')
       schedule << task
       schedule << another_task
       expect(schedule.find(task.id)).to eq(another_task)
@@ -32,7 +32,7 @@ RSpec.describe_current do
 
   describe '#each' do
     it 'iterates over all tasks' do
-      task2 = instance_double('Task', id: 'task_2')
+      task2 = instance_double(Karafka::Pro::RecurringTasks::Task, id: 'task_2')
       schedule << task
       schedule << task2
 

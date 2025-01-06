@@ -8,9 +8,12 @@ RSpec.describe_current do
   end
 
   let(:nodes) { [1, 2, 3] }
+
   before do
-    allow(Karafka::App.config.swarm).to receive(:nodes).and_return(5)
-    allow(Karafka::App.config.swarm).to receive(:node).and_return(OpenStruct.new(id: 2))
+    allow(Karafka::App.config.swarm).to receive_messages(
+      nodes: 5,
+      node: OpenStruct.new(id: 2)
+    )
   end
 
   describe '#swarm' do

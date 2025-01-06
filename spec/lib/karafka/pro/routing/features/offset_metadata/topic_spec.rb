@@ -10,7 +10,7 @@ RSpec.describe_current do
   describe '#offset_metadata' do
     context 'when we use offset_metadata without any arguments' do
       it 'expect to initialize with defaults' do
-        expect(topic.offset_metadata.active?).to eq(true)
+        expect(topic.offset_metadata.active?).to be(true)
         expect(topic.offset_metadata.deserializer).not_to be_nil
       end
     end
@@ -19,14 +19,14 @@ RSpec.describe_current do
       it 'expect to use proper active status' do
         topic.offset_metadata(deserializer: 1)
         topic.offset_metadata(deserializer: 2)
-        expect(topic.offset_metadata.active?).to eq(true)
+        expect(topic.offset_metadata.active?).to be(true)
         expect(topic.offset_metadata.deserializer).to eq(1)
       end
     end
   end
 
   describe '#offset_metadata?' do
-    it { expect(topic.offset_metadata?).to eq(true) }
+    it { expect(topic.offset_metadata?).to be(true) }
   end
 
   describe '#to_h' do

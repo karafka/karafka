@@ -3,7 +3,7 @@
 RSpec.describe_current do
   let(:tracker) do
     instance_double(
-      'Tracker',
+      Karafka::Pro::ScheduledMessages::Tracker,
       state: { key: 'value' },
       daily: { daily_key: 'daily_value' }
     )
@@ -31,8 +31,7 @@ RSpec.describe_current do
     context 'when tracker has no state or daily data' do
       let(:tracker) do
         instance_double(
-          'Tracker',
-          dispatched_at: float_now,
+          Karafka::Pro::ScheduledMessages::Tracker,
           state: nil,
           daily: nil
         )

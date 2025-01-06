@@ -9,7 +9,7 @@ RSpec.describe_current do
     context 'when the message schema version is compatible' do
       let(:message) do
         instance_double(
-          'Karafka::Messages::Message',
+          Karafka::Messages::Message,
           headers: { 'schedule_schema_version' => current_schema_version }
         )
       end
@@ -22,7 +22,7 @@ RSpec.describe_current do
     context 'when the message schema version is lower than current version' do
       let(:message) do
         instance_double(
-          'Karafka::Messages::Message',
+          Karafka::Messages::Message,
           headers: { 'schedule_schema_version' => '0.0.0' }
         )
       end
@@ -35,7 +35,7 @@ RSpec.describe_current do
     context 'when the message schema version is higher than current version' do
       let(:message) do
         instance_double(
-          'Karafka::Messages::Message',
+          Karafka::Messages::Message,
           headers: { 'schedule_schema_version' => '2.0.0' }
         )
       end
