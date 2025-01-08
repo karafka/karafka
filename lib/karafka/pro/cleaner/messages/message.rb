@@ -35,12 +35,19 @@ module Karafka
           # After the message content is no longer needed, it can be removed so it does not consume
           # space anymore.
           #
+          # @param metadata [Boolean] should we also clean metadata alongside the payload. This can
+          #   be useful when working with iterator and other things that may require only metadata
+          #   available, while not payload. `true` by default.
+          #
           # @note Cleaning of message means we also clean its metadata (headers and key)
-          def clean!
+          # @note Metadata cleaning (headers and key) can be disabled by setting the `metadata`
+          #   argument to `false`.
+          def clean!(metadata: true)
             @deserialized = false
             @raw_payload = false
             @payload = nil
-            @metadata.clean!
+
+            @metadata.clean! if metadata
           end
         end
       end
