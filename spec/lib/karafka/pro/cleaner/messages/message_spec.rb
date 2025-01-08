@@ -33,6 +33,17 @@ RSpec.describe_current do
       it { expect(message.metadata.cleaned?).to be(true) }
     end
 
+    context 'when message was cleaned with metadata cleaning disabled' do
+      before { message.clean!(metadata: false) }
+
+      it { expect(message.cleaned?).to be(true) }
+      it { expect(message.deserialized?).to be(false) }
+      it { expect(message.raw_payload).to be(false) }
+      it { expect(message.metadata.cleaned?).to be(false) }
+      it { expect(message.metadata.key).to be_nil }
+      it { expect(message.metadata.headers).to eq({}) }
+    end
+
     context 'when message was deserialized and cleaned' do
       before do
         message.payload
