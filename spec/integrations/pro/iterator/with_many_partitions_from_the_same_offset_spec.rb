@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When iterating over the topic from the same offset on all partitions, we should start from the
 # expected on all and finish accordingly

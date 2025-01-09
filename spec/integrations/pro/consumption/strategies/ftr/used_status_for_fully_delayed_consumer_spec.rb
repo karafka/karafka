@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we fully delay consumption and just run idle job, shutdown idle status should reflect that
 

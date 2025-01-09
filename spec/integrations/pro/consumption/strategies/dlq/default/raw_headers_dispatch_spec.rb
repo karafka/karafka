@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # DLQ dispatch should use raw headers and not deserialized headers similar to how payload is
 # dispatched

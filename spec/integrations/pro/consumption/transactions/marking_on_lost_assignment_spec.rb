@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we mark as consumed outside of the transactional block but by using the transactional
 # producer, in a case where we were not able to finalize the transaction it should not raise an

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Karafka should be able to recover from non-critical error when using lrj the same way as any
 # normal consumer even if throttled. Error flow should be the same as non-throttled.

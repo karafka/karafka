@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When iterating over the topic, we should be able to stop iteration of any partition we want
 # without impacting the others even if we're in the middle of this partition.

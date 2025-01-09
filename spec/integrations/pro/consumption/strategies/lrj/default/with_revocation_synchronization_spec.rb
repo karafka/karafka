@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When LRJ job uses a critical section, the revocation job should wait and not be able to
 # run its critical section alongside.

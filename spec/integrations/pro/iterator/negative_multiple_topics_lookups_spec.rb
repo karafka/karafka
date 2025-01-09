@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # We should be able to subscribe to multiple topics with custom per topic negative lookups
 # and they should work on all partitions

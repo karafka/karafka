@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When errors occur in partitioner, the partitioning should be reduced and the error should not
 # leak out to the listener. Leaking could cause the total crash and critical recovery flow.

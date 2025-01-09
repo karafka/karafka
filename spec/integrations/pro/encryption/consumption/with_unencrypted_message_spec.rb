@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When despite using encryption we get an unencrypted message, all should work.
 # This is expected as some producers may not yet be migrated, etc.

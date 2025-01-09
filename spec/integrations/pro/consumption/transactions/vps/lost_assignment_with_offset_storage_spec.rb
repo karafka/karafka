@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # We should NOT be able to mark as consumed within a transaction on a lost partition because the
 # transaction is expected to fail.

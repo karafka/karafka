@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Karafka should be able to run marking from a synchronization block and not crash despite using
 # the same lock. This ensures, that user can run synchronized code that will also mark and that

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When doing work that is exceeding timeouts, we should not throttle. Instead we need to seek
 # to the first throttled message and just move on. DLQ should not interact with this in any way.

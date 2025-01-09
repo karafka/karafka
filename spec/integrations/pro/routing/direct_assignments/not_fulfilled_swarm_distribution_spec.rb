@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we decide to assign certain set of partitions and run in swarm, this set of partitions
 # should match the nodes mapping

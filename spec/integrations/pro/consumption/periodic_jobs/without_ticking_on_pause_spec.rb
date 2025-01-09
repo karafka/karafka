@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When periodic jobs are configured not to tick when partition is paused we should not tick then
 # Keep in mind, LRJ always pauses so you won't have ticking on it if this is set like this

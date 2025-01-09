@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When Karafka downscales the connections as part of resources management, liveness should be as
 # the downscaled threads should deregister themselves.

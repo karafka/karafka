@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When a consumer goes into a non-cooperative-sticky rebalance and gets the partitions back,
 # it should not have duplicated data.

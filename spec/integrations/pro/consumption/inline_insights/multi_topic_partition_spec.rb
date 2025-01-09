@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Inline Insights should ship correct partition and topic details and not mix them
 # In Pro despite extra option, should behave same as in OSS when no forced required

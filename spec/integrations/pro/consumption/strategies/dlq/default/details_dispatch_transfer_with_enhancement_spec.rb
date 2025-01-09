@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When DLQ transfer occurs, we should be able to build our own payload and headers via
 # `#enhance_dlq_message`

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When dead letter queue is used and we encounter non-recoverable message, we should skip it after
 # retries and move the broken message to a separate topic

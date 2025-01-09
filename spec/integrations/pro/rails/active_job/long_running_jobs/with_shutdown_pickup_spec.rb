@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Karafka with lrj ActiveJob when finishing in the middle of jobs on shutdown, should pick up
 # where it stopped when started again

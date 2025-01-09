@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When using LRJ within a consumer group with other non-LRJ, the LRJ should be running while other
 # jobs are consumed and they should not wait (as long as enough workers) and throttling should

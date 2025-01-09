@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we have a filter that rejects all (or most of) the data all the time, since we do not mark
 # as consumed, the offset will not be stored. This means, that lag will grow unless we explicitly

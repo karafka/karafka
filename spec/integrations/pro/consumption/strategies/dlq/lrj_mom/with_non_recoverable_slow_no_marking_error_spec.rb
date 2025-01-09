@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Karafka should be able to recover from non-critical error when using lrj with mom but because
 # of no marking, we should move forward, however upon picking up work, we should start from zero

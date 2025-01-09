@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we start cron and publish several events, the state should always be published after
 # each command execution. This allows us to make assumptions about the topic data structure when

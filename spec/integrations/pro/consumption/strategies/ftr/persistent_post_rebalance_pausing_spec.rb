@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When using the filtering API, we can use a persistent storage to transfer the pause over the
 # rebalance to the same or other processes.

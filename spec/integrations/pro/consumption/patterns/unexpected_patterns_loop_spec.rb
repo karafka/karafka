@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When consumer uses patterns and same pattern matches the DLQ, messages may be self-consumed
 # creating endless loop. Not something you want.

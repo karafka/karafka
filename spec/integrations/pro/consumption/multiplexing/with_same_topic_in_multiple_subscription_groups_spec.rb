@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When using separate subscription groups, each should have it's own underlying client and should
 # operate independently for data fetching and consumption

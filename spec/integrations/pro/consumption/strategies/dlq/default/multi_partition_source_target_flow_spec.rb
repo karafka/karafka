@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When handling failing messages from a many partitions and there are many errors, DLQ will provide
 # strong ordering warranties inside DLQ.

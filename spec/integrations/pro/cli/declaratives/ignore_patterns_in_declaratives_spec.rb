@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # karafka declarative topics management should ignore pattern topics because they are dynamic
 # subscriptions for which we do not know the target name until the regexp match

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Because when we set time based locks that can bypass default ticking, we should be able to jump
 # over ticking faster that the ticking interval

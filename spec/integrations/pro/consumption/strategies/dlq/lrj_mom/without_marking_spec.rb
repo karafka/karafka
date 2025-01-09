@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When using manual offset management and not marking anything at all, we should not change
 # offsets but we should keep moving forward in the processing.

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # We should be able to replace the default producer with a transactional one
 # We set the default producer to a broken location so in case our wrapping would not work, it will

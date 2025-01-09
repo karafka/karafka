@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we use current matching strategy on the given offset that can be materialized, it should
 # use the most recently used offset metadata even if it was assigned to a different offset

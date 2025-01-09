@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When periodic ticking is on but other consumers have some partitions, we should not tick on them
 # as they are not assigned to us

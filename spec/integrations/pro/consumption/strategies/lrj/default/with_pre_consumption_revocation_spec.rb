@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When LRJ jobs are in the processing queue prior to being picked by the workers and those LRJ
 # jobs get revoked, the job should not run.

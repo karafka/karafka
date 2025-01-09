@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When using virtual partitions, we should easily consume data with the same instances on many
 # batches and until there is a rebalance or critical error, the consumer instances should

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Karafka should trigger a revoked action when a partition is being taken from us
 # Initially we should own all the partitions and then after they are taken away, we should get

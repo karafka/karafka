@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When a job is marked as vp and there is a rebalance, we should be aware that our current
 # instance had the partition revoked even if it is assigned back. The assignment back should again

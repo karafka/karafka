@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When Karafka consumes in the VP mode and many errors happen in many of the processing units,
 # we we should continue and we should restart the processing from the first offset on a batch in

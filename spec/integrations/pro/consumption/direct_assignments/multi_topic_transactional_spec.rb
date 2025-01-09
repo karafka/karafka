@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # We should be able to open a multi-topic transaction as long as we know which consumer is the
 # source of underlying messages so we can track their offsets

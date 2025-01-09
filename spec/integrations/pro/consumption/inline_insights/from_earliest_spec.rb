@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # We should be able to get the insights and use them via the API when they are defined
 # In Pro despite extra option, should behave same as in OSS when no forced required

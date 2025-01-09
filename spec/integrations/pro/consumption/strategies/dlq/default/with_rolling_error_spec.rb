@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Without the independent flag (default) Karafka will accumulate attempts on a batch in a rolling
 # fashion when recoverable errors appear over and over again on a set of messages.

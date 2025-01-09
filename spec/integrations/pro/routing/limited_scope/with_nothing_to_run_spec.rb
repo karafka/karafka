@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When combination of consumer groups, subscription groups and topics we want to run is such, that
 # they do not exist all together, we need to raise an error.

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Karafka when with VP upon error should collapse the whole collective batch and should continue
 # processing in the collapsed mode after a back-off until all the "infected" messages are done.

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Errors should be handled normally. There should be a backoff and retry and recovery should start
 # from the message on which we broke. Throttling should have nothing to do with this. The message

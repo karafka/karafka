@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 setup_karafka do |config|
   config.kafka[:'transactional.id'] = SecureRandom.uuid

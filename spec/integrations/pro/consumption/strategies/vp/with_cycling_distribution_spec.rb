@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Karafka should be able to evenly distribute work when using a cycling partitioner
 # Since we do not have multiple partitions/topics in this example, there are no locks around it,

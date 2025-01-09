@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When using VPs and marking, we should end up with the last materialized offset sent to Kafka
 # while the rest of things should be picked up until this offset

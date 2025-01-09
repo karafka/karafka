@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When running on LRJ, ticking should not happen alongside long processing when it is not turned
 # on (default is off).

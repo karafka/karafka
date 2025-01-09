@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When using the Filtering API, we can use persistent storage to transfer last offset that we
 # successfully operated on in case of rebalances, even if different process receives the partition

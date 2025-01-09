@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Parallel consumer should also work with ActiveJob, though it will be a bit nondeterministic
 # unless we use headers data to balance work.

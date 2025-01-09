@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # I should be able to define a topic consumption with long-running job indication
 # It should not impact other jobs and the default should not be lrj

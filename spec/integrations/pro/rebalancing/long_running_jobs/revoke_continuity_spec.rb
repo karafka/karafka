@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When Karafka looses a given partition but later gets it back, it should pick it up from the last
 # offset committed without any problems

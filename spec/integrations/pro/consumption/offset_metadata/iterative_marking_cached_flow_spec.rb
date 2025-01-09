@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Offset should move forward with metadata but because we cache result, it should not update
 # in memory as there is no rebalance.

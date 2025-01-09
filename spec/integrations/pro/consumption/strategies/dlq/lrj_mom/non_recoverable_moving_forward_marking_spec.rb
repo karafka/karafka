@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Upon non-recoverable errors, Karafka should move forward skipping given message even if no
 # marking happens for each batch.

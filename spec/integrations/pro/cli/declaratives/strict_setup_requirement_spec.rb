@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we have strict_declarative_topics set to true, we should ensure all non-pattern definitions
 # of topics have their declarative references

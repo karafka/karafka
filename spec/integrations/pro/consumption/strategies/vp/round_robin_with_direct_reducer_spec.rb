@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When using a round-robin partitioner, Karafka should assign messages correctly to utilize all
 # VPs. We test two instances to make sure that they operate independently

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When given partition is lost involuntary, we still should have last info
 # In Pro despite extra option, should behave same as in OSS when no forced required

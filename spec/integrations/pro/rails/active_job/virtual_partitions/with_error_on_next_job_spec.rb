@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we have an vp and not the first job fails, it should use regular Karafka retry policies
 # for parallel jobs. It should mark previously done work as consumed accordingly to the VPs

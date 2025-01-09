@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When periodic ticking is on but we have lost a partition, we should stop ticking on that
 # partition but we should continue on the one that we still have

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When insights are required, we should not proceed without them
 # Because initial metrics fetch is slightly unpredictable (different with KRaft) and can be

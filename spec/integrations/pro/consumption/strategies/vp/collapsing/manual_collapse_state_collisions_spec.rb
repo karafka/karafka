@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we collapse VPs manually, the `#collapse?` should NOT change for the currently running
 # operation and only should collapse later

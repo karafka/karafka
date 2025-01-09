@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # We should be able to mark as consumed when we own the assignment and produce messages but if
 # at the finalization moment we lost the assignment, we should fail the transaction with the

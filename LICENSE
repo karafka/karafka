@@ -6,8 +6,13 @@ for license text.
 
 Karafka has also commercial-friendly license, commercial support and commercial components.
 
-All of the commercial components are present in the lib/karafka/pro directory of this repository
-and their usage requires commercial license agreement.
+All of the commercial components are present in the:
+
+- `lib/karafka/pro`
+- `spec/lib/karafka/pro`
+- `spec/integrations/pro`
+
+directories of this repository and their usage requires commercial license agreement.
 
 By sending a pull request to the pro components, you are agreeing to transfer the copyright of your
 code to Maciej Mensfeld.

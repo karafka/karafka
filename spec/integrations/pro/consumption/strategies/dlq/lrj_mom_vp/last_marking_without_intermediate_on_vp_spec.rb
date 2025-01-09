@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When marking in VP mode, when we mark only last message, the offset should not be comitted
 # because we did not mark previous messages.

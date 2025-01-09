@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When using Virtual Partitions with limited max partitions, VP should not occupy all the threads
 # but it should use at most what was allowed. This allows for having some worker threads that are

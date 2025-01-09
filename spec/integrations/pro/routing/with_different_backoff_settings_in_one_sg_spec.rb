@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # Karafka should not build separate SGs when altering pause settings per topic in a SG/CG
 # We also should be able to use any of the pause declaration styles.

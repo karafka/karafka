@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When periodic gets an assignment it should tick in intervals despite never having any data
 # It should never indicate that it was used when it was not

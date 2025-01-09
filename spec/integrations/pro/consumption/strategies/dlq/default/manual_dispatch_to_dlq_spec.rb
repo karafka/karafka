@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When having the DLQ defined, we should be able to manually dispatch things to the DLQ and
 # continue processing whenever we want.

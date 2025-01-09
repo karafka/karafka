@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we use exact matching strategy on the given offset that can be materialized, it should
 # be used even if later we use a different higher that cannot be materialized

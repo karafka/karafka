@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # This example is a bit counter intuitive. Since we mark as consumed before we consume and raise
 # error, Karafka will skip this message and move on. On another it will again encounter error

@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we do not perform any markings as consumed we should nonetheless skip one after another
 # starting from the beginning of the batch on failed batches.

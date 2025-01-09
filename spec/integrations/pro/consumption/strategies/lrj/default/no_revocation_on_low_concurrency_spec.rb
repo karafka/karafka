@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When running LRJ with low concurrency and many LRJ topics, we should not be kicked out of the
 # consumer group after reaching the interval. Pausing should happen prior to processing and it

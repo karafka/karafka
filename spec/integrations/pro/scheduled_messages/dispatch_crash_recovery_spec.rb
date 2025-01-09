@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When dispatch of a given batch / message crashes, we should retry the same
 # This gives us at-least once in case of non-transactional consumer and exactly-once in case of

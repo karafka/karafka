@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When running a long running job, we should be able to detect that Karafka is stopping so we can
 # early exit the job.

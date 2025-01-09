@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+#
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
 
 # When we create a filter that just skips all the messages and does not return the cursor message,
 # we should never seek and just go on with incoming messages
