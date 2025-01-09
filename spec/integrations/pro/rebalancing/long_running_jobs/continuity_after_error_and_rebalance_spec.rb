@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using the Long Running Job feature, in case partition is lost during the processing, after
 # partition is reclaimed, process should pick it up and continue. It should not hang in the pause
 # state forever.

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When running lrj, on revocation Karafka should change the revocation state even when there are
 # no available slots for processing
 

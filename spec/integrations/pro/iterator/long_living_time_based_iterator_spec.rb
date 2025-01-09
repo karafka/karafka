@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should be able to exit from iterator even if no more messages are being shipped
 
 setup_karafka

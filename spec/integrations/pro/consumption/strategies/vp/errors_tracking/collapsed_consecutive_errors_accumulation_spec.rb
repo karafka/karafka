@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using virtual partitions and tracking errors, they under consecutive collapse should grow
 # in terms of size
 

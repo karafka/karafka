@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we consume data and several times we loose and regain partition, there should be
 # continuity in what messages we pick up even if rebalances happens multiple times. This should
 # apply to using LRJ as well.

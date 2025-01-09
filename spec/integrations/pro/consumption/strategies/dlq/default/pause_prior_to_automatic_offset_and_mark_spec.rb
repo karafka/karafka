@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When user pauses and marks by himself, we should not deal with this and let him do this.
 
 setup_karafka do |config|

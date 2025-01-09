@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should be able to assign to ourselves direct ownership of partitions we are interested in
 
 setup_karafka

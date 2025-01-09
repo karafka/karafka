@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we define a pattern that gets assigned a matcher topic and this matcher topic is part of
 # the topics we want to include (by given name) it should be ok
 

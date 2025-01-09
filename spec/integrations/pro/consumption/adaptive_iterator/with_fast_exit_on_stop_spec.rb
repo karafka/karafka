@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should stop fast and not process all in batch and offset position should be preserved
 
 setup_karafka do |config|

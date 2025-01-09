@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When running jobs with non-recoverable errors, we should have the attempts count increased
 # We should not commit any offsets
 

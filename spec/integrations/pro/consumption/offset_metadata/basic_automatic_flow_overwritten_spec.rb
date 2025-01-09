@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When offset metadata is stored but a custom forced value is used, the forced on should be used.
 
 setup_karafka do |config|

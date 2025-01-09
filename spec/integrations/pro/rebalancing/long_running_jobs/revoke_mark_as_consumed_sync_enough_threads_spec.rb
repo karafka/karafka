@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When Karafka tries to commit offset after the partition was revoked in a blocking way,
 # it should return false for partition that was lost. It should also indicate when lrj is running
 # that the revocation took place. It should indicate this before we mark as consumed as this state

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should be able to iterate over messages and run cleaning both with and without prior
 # deserialization in a manual mode
 #

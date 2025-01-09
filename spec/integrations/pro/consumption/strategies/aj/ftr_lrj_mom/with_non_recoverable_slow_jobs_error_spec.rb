@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should end up in a loop and not move forward. Throttling should not interrupt this
 
 setup_active_job

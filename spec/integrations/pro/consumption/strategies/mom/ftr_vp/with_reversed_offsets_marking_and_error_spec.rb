@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # If we mark virtual offsets that cannot be materialized to a state, we should start from beginning
 # on errors. Throttling should not impact it in any way
 

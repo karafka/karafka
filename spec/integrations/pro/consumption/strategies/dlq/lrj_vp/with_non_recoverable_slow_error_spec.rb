@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should be able to recover from non-critical error when using lrj with VP the same way
 # as any normal consumer and after few incidents it should move data to the DLQ and just continue
 # We collapse VP and retry in a collapsed mode, thus reducing this strategy to DlqLrj

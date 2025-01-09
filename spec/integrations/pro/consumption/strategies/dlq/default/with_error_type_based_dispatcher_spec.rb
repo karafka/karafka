@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using a complex dispatch strategy based on error type, it should operate as expected.
 # Please keep in mind, this spec does not care about the fact, that during recovery different
 # errors occur. It uses notion of last error only.

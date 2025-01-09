@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using the pro adapter, we should be able to use partitioner that will allow us to process
 # ActiveJob jobs in their scheduled order using multiple partitions. We should be able to get
 # proper results when using `:partition_key`.

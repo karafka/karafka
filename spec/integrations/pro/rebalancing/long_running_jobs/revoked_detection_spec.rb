@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When a job is marked as lrj and a partition is lost, we should be able to get info about this
 # by calling the `#revoked?` method.
 

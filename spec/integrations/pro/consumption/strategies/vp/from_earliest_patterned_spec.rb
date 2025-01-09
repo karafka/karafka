@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should be able to easily consume all the messages from earliest (default) using multiple
 # threads based on the used virtual partitioner. We should use more than one thread for processing
 # of all the messages.

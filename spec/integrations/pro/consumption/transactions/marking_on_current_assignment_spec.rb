@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we mark with a transactional producer outside of the transactional block and we own the
 # assignment, marking should return true
 

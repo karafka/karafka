@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Example scheduler that evenly distributes work coming from multiple topics. It allocates workers
 # evenly so each topic has resources. When rebalance occurs, the distribution ratio will change and
 # will be updated

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka+Pro should work with Rails 7 using the default setup
 
 # Load all the Railtie stuff like when `rails server`

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When overwriting the default pausing strategy on a per topic basis with something invalid,
 # validations should kick in and stop it
 

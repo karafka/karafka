@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should be able to trigger all tasks even if they are suppose to run once a year
 
 setup_karafka

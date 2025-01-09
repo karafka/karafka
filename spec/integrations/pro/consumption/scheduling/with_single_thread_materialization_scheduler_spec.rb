@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using a scheduler that would allow only a single thread, despite having more, we should
 # never use them in any way
 

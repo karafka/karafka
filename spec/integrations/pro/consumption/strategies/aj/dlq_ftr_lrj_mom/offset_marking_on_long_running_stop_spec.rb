@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka upon long running jobs shutdown in this scenario, should early stop but should not
 # mark the non-processed messages as consumed.
 

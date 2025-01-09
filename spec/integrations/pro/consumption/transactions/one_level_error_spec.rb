@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # If transaction fails, the offset marked internally should not propagate
 
 setup_karafka do |config|

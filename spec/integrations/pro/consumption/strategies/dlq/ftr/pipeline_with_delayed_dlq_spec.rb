@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # With delayed jobs with should be able to build a pipeline where we delay re-processing of
 # messages when their processing fails and they are moved to DLQ.
 

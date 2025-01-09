@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When given partition is revoked for LRJ, we should still have its last available statistics
 # In Pro despite extra option, should behave same as in OSS when no forced required
 

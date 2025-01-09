@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When the idle job kicks in before we had a chance to process any data, it should still have
 # access to empty messages batch with proper offset positions (-1001) and no messages.
 #

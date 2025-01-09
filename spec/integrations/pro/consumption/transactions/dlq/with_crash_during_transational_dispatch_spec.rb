@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # In case transactional offset dispatch on post-error happens, Karafka should retry processing
 # again and again.
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we have an vp AJ jobs in few batches, upon shutdown, not finished work should not be
 # committed, but the previous offset should. Only fully finished AJ VP batches should be considered
 # finished.

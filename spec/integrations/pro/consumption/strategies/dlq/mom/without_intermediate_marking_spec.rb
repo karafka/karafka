@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we do not mark and user does not mark, we will end up with an infinite loop.
 # This is expected and user should deal with this on his own.
 

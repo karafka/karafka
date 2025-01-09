@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we have a batch of ActiveJobs jobs and we loose our partition assignment, jobs that
 # did not start prior to the revocation should not start at all.
 

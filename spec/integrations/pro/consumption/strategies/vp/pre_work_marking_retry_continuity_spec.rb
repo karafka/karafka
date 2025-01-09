@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # After an error, in case we marked before the processing, we should just skip the broken and
 # move on as we should just filter out broken one.
 

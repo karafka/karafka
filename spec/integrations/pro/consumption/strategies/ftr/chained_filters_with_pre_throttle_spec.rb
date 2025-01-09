@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should be able to chain filters and to achieve expected processing flow
 # In this scenario we will filter all odd offsets and we will make sure, we process data with
 # a delay and with throttling used to make sure we do not process more than 5 messages per second

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When processing messages with iterator enabled and reaching max.poll.interval, we should never
 # get any errors and processing should be consecutive
 

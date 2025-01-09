@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Using manual offset management under rebalance and error happening, we should start from the
 # last place that we were, even when there were many batches down the road and no checkpointing
 

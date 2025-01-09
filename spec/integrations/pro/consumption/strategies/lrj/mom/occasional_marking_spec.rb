@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using manual offset management and not marking often, we should have a smooth processing
 # flow without extra messages or anything.
 

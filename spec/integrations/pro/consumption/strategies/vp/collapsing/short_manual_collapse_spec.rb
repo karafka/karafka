@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When Karafka collapses for a short time we should regain ability to process in VPs
 
 setup_karafka(allow_errors: true) do |config|

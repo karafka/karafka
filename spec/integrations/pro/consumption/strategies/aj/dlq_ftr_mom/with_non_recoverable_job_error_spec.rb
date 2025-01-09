@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # AJ is only partially mom, because we actually mark AJ jobs as consumed after each. For this
 # strategy it means, that applicability of DLQ will be regular.
 

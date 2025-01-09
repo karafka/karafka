@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When rebalance occurs, even if we had cache, it should be invalidated
 
 setup_karafka do |config|

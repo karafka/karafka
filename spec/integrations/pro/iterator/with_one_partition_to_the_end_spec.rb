@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When iterating over the topic and not providing partitions, it should stream all the messages
 # one after another and should use JSON.
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka when running VPs with AJ and being saturated, should run further jobs if the first
 # job in the queue failed because we use virtual offset management for handling this scenario.
 

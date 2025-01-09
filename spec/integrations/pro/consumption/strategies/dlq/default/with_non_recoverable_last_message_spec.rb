@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When dead letter queue is used and we last message out of all is broken, things should behave
 # like for any other broken message and we should pick up when more messages are present
 

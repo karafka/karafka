@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we idle all the time on incoming data, we should never tick
 # It is end user FTR makes this decision to skip
 

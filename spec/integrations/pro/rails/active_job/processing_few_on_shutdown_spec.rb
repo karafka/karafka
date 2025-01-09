@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka with PRO should finish processing AJ jobs as fast as possible even if more were received
 # in the batch. Since we are shutting down, those jobs will be picked up after Karafka is started
 # again, so not worth waiting

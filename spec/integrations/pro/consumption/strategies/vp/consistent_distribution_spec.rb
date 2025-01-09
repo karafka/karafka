@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should always assign same consumer instance to the same virtual partitioner result.
 # In case data from few virtual partitions is merged into one chunk, the partition should always
 # stay the same (consistent).

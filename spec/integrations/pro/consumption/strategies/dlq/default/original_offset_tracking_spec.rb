@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we move messages to the DLQ, their offset should be preserved in headers
 
 setup_karafka(allow_errors: %w[consumer.consume.error])

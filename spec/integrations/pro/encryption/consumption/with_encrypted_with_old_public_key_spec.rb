@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using old public key to produce messages but this key is one of the supported, despite
 # having new version, the message should be decrypted easily
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When running on LRJ, ticking should happen alongside long processing because it is non blocking
 # on proper periods when `during_pause` is set to true.
 

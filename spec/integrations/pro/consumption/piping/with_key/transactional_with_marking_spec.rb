@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should be able to pipe data to a different topic and it should be received
 # Operating in transactional mode with marking as consumed inside transaction.
 

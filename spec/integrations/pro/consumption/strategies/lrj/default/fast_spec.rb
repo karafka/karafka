@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Fast jobs should also not have any problems (though not recommended) when running as lrj
 
 setup_karafka do |config|

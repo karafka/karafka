@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using versioned schedules, we should be able to upgrade
 # There should be no exceptions or crashes and new schedule should work
 

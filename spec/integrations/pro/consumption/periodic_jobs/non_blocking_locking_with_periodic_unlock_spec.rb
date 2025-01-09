@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should be able to lock in a non-blocking fashion our subscription group (or any other)
 # and resume it from a periodic job on a different group
 #

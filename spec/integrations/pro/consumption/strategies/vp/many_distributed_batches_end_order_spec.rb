@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When consuming data with virtual partitions from many batches, the order of messages in between
 # the single partition batches should be preserved.
 

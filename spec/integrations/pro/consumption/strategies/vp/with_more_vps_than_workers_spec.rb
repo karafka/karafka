@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using Virtual Partitions, we can distribute work in a way that allows us to gain granular
 # control over what goes to a single virtual partition. We can create virtual partition based on
 # any of the resource details

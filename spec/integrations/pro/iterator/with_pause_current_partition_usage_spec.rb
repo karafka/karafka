@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When iterating over the topics, we should be able to use the pause current to stop only the
 # current topic partition processing
 

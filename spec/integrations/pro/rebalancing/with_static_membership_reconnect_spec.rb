@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka process when stopped and started and configured with static membership should pick up
 # the assigned work. It should not be reassigned to a different process.
 # Karafka should maintain all the ordering and should not have duplicated.

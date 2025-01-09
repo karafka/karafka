@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should be able to reconfigure recurring tasks topics also via the direct config API
 # This allows us to reconfigure things granularly.
 

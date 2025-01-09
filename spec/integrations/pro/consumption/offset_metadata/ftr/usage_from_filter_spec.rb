@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should allow for usage of the offset metadata from filters as well.
 # Since filters can accept routing topic and partition reference from the builder, they can store
 # them and use the fetcher to obtain needed offset metadata.

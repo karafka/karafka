@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When a job is marked as lrj, it should keep running longer than max poll interval and all
 # should be good. It should continue processing after resume and should pick up next messages
 

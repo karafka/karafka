@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When running LRJ jobs upon shutdown, those jobs will keep running until finished or until reached
 # max wait time. During this time, the rebalance changes should propagate and we should be able
 # to make decisions also based on the revocation status.

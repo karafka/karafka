@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should be able to easily consume all the messages from earliest (default) exactly
 # the same way with pro as it does without
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using Pro, we should be able to redefine and change the whole partitioner and use our own
 # custom one without any problems.
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When there is a rebalance and we get the partition back, we should start consuming with a new
 # consumer instance. We should use one before and one after we got the partition back.
 

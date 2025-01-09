@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using the DLQ with topic set to false, Karafka should not dispatch the message further but
 # should apply the DLQ skipping logic anyhow.
 

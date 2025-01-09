@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When dead letter queue is used and we don't encounter any errors, all should be regular.
 
 setup_karafka(allow_errors: %w[consumer.consume.error])

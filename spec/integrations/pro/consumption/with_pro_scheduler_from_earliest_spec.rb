@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should use more than one thread to consume independent topics with the pro scheduler
 # Here we just aim to ensure, that we schedule all the jobs and that things operate as expected
 

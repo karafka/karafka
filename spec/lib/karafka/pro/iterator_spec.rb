@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # More scenarios covered by the integrations - here just the basics
 RSpec.describe_current do
   subject(:iterator) { described_class.new(topic) }

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # After a successful dispatch to DLQ, next first attempt should not have errors in the tracker
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # This PR illustrates how partitioning based on constant payload content basically cancels the
 # potential of VPs by creating only single virtual partition.
 

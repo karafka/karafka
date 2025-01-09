@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # If transaction fails we should mark as consumed only to the consecutive offset that was reached
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we use web-ui and error happens during eofed and tick when no offsets were marked as
 # consumed, web UI should not fail. It used to fail because it was trying to extract offsets
 # from not (yet) existing marking

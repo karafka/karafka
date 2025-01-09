@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Liveness reporter should be totally ok with connections downscaling when using multiplexing
 # and should not see it as a problem
 

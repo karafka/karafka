@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # After we collapse, we should skip messages we marked as consumed, except those that were not
 # processed.
 

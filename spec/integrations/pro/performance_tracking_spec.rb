@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should track consumption rate metrics when pro
 # This metrics tracker is then used internally for optimization purposes
 

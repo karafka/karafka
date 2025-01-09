@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we have anonymous pattern with a non-regexp value, it should validate and fail
 
 setup_karafka

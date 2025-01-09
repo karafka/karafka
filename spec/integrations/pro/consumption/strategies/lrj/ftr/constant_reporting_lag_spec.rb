@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using running with a delay and producing in a loop, we should always have a lag not bigger
 # than the total of things that are in front of our marked offset
 #

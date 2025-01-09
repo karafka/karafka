@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should be able to use a license encrypted token as a setup source for Karafka and it
 # should work as described in the integration docs
 

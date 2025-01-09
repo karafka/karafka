@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should be able to use `#failing?` to detect, that part of our work has already failed and
 # that our current set of VPs will collapse.
 #

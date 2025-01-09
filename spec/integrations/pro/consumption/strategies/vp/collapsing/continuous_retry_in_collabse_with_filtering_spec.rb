@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we continue to have an error on the same event in the collapse mode, others should be
 # filtered for as long as the collapse lasts.
 

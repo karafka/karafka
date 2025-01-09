@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using a custom scheduler we should by no means use consume scheduling API for idle jobs
 
 become_pro!

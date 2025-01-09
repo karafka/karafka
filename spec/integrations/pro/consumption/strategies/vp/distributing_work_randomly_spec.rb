@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should support possibility of distributing work randomly when using virtual partitions
 # Note that even when using random distribution, messages from different partitions will never
 # mix within a batch.

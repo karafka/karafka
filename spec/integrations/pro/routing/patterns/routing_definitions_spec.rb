@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # We should have ability to define patterns in routes for dynamic topics subscriptions
 # It should assign virtual topics and patters to the appropriate consumer groups
 

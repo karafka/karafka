@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using DLQ, it should work when dispatch in sync
 
 setup_karafka(allow_errors: %w[consumer.consume.error])

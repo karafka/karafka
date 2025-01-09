@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Ruby had some header related bugs in 3.0.2. This PR checks that all works as expected
 
 setup_karafka do |config|

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Here we subscribe to our listener and make sure nothing breaks during the notifications
 # We use a dummy client that will intercept calls that should go to DataDog
 require 'karafka/instrumentation/vendors/datadog/logger_listener'

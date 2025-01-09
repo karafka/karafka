@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # In case we mark as consumed after a nested transactional error, it should not reset anything and
 # go as planned
 

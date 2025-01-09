@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we have an active schedule that got disabled, after a re-run we should be able to
 # recover its inactive state
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When stored metadata exists, it should be used in the DLQ flow.
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|

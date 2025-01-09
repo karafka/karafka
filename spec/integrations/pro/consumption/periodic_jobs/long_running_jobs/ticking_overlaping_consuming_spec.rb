@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When running LRJ and ticking, ticking is not synchronized with LRJ
 # (unless synchronized via mutex). This means, that it should be possible to have a long living
 # ticking that started when nothing was happening but meanwhile things started.

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # It should not be possible to use same named pattern twice in same consumer group with different
 # names. In case of same name, it will be considered equivalent of a multiplex
 

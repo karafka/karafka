@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When customizing the error pausing strategy, each topic should obey its own limitations
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|

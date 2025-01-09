@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When we decide to skip subscription group, it should skip all multiplexed sgs
 Consumer = Class.new(Karafka::BaseConsumer)
 

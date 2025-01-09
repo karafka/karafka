@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Running a transaction that does not publish data and does not store offsets should be ok
 
 setup_karafka do |config|

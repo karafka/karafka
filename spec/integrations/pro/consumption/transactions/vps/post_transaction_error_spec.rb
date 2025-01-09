@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # If there is error after the transaction, the offset should be recorded with current metadata
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|

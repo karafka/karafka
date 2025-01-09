@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When Karafka delays processing and we have only old messages, there should be no pausing or
 # seeking and we should just process
 

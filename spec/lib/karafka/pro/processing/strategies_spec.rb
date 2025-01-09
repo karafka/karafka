@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 RSpec.describe_current do
   let(:message) { build(:messages_message) }
   let(:coordinator) { build(:processing_coordinator_pro, seek_offset: 0, topic: topic) }

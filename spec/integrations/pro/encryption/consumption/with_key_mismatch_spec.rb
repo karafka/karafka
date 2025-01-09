@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using public key to publish and a key that is not matching on version, we should get OpenSSL
 # error or (depending on time and libs versions) random data
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # DLQ in the VP mode should collapse and skip when error occurs again in a collapsed mode
 # After that, we should move to processing in a non-collapsed mode again
 

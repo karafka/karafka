@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When iterating over partitions and starting from different offsets, we should reach the end
 # and data should be as expected.
 

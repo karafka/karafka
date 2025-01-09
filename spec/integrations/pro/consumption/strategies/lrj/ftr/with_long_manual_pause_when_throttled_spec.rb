@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should not resume when manual pause is in use for LRJ.
 # Karafka should not throttle (unless in idle which would indicate pause lift) when manually paused
 # After un-pause, Karafka may do a full throttle if the previous throttling time did not finish

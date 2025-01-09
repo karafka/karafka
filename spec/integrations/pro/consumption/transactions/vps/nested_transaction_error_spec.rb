@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # In VPs we should also be safeguarded when trying to start transaction inside of a transaction
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|

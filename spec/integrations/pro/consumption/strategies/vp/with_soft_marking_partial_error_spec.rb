@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using `mark_as_consumed` in virtual partitions, we should do virtual marking with correct
 # state location materialization on errors. This prevents us from excessive re-processing because
 # as much data as possible is marked as consumed

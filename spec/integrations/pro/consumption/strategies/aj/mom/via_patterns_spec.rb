@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should allow to define ActiveJob patterns via `#active_job_pattern` and those should
 # be picked up and operable even when topics are created after the subscription starts
 

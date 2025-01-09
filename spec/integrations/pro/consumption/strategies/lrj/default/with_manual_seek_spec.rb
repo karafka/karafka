@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Manual seek per user request should super-seed the automatic LRJ movement.
 
 setup_karafka(allow_errors: true) do |config|

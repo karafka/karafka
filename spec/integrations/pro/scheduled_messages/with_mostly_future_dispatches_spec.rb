@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When there are future dispatches, they should not be dispatched unless the time is right
 # Stats should be populated nicely though.
 # One message (newest in the topic) should be dispatched though

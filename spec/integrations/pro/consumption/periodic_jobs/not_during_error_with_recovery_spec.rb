@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Ticking should work before and after the recovery but not during in the default setup.
 
 setup_karafka(allow_errors: true) do |config|

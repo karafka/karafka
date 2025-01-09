@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using versioned schedules, we should not be able to downgrade
 
 setup_karafka(allow_errors: %w[consumer.consume.error])

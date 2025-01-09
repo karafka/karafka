@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using virtual partitions and having a partitioner that always provides the same key, we
 # should always use one thread despite having more available
 

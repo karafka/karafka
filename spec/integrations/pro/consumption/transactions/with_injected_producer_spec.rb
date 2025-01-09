@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # In case our main producer is not transactional or for any other reason, we should be able to
 # inject a transactional one and use it if we want.
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When marking ahead, where there is no current offset to materialize on first batch, no offset
 # should be marked and we should start from zero again
 # Throttling should not impact it in any way

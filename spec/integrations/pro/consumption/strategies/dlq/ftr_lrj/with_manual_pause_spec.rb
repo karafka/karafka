@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should favour a manual pause over throttling and take appropriate action when the
 # pause has expired. So if we've reached throttling threshold and paused, after the manual pause
 # is over, we should pause and not process

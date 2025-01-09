@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Karafka should run the same strategy for AJ DLQ MOM as for DLQ MOM.
 #
 # For AJ based workloads it means marking after each. This means, we will end up in a loop.

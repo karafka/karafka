@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When producing with version that is not supported in reading, it should raise an error
 
 PUBLIC_KEY = fixture_file('rsa/public_key_1.pem')

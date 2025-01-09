@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Offset should move forward with metadata and should be deserialized with a custom deserializer.
 # Because we disabled the cache completely, we should get linear auto-refreshed data
 

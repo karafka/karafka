@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When using automatic offset management, we should end up with offset committed after the last
 # message and we should "be" there upon returning to processing. Throttling should have nothing
 # to do with this.

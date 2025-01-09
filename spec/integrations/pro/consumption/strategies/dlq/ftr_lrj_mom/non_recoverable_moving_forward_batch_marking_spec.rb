@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Upon non-recoverable errors, Karafka should move forward retrying from last one that was
 # committed with duplicates in between comitted and crashed
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # A spec that illustrates usage of a filter that will ensure that when we start Karafka, we always
 # start from the latest message despite any previous assignments
 # It should move to latest and then move forward

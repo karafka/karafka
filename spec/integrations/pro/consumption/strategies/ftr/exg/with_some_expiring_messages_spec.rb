@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When Karafka encounters messages that are too old, it should skip them
 # We simulate this by having short ttl and delaying processing to build up a lag
 

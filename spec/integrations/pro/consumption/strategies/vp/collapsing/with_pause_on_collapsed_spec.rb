@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # While VPs do not support pausing in the regular flow, we can pause while running VP when
 # collapsed. This can be used to provide a manual back-off if we would want.
 

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # When there are messages for dispatch but they were already dispatched (tombstone exists),
 # we should not dispatch them again. We should only dispatch the once that were not
 
