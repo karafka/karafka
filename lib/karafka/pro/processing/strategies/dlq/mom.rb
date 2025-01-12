@@ -40,7 +40,7 @@ module Karafka
                       # in an infinite loop trying to un-pause from the message we've already
                       # processed. Of course, since it's a MoM a rebalance or kill, will move it
                       # back as no offsets are being committed
-                      coordinator.seek_offset = skippable_message.offset + 1
+                      self.seek_offset = skippable_message.offset + 1
                     end
                   end
                 end

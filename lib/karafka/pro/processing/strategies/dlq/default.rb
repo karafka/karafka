@@ -82,7 +82,7 @@ module Karafka
             #   information if this message was from marked offset or figured out via mom flow
             def find_skippable_message
               skippable_message = messages.find do |msg|
-                coordinator.marked? && msg.offset == coordinator.seek_offset
+                coordinator.marked? && msg.offset == seek_offset
               end
 
               # If we don't have the message matching the last comitted offset, it means that
@@ -131,7 +131,7 @@ module Karafka
                 if mark_after_dispatch?
                   mark_dispatched_to_dlq(skippable_message)
                 else
-                  coordinator.seek_offset = skippable_message.offset + 1
+                  self.seek_offset = skippable_message.offset + 1
                 end
               end
 
@@ -226,7 +226,7 @@ module Karafka
               coordinator.pause_tracker.reset
 
               # Always backoff after DLQ dispatch even on skip to prevent overloads on errors
-              pause(coordinator.seek_offset, nil, false)
+              pause(seek_offset, nil, false)
             end
 
             # Marks message that went to DLQ (if applicable) based on the requested method

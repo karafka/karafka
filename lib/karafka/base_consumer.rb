@@ -12,7 +12,7 @@ module Karafka
 
     extend Forwardable
 
-    def_delegators :@coordinator, :topic, :partition, :eofed?
+    def_delegators :@coordinator, :topic, :partition, :eofed?, :seek_offset, :seek_offset=
 
     def_delegators :producer, :produce_async, :produce_sync, :produce_many_async,
                    :produce_many_sync
@@ -109,7 +109,7 @@ module Karafka
         'error.occurred',
         error: e,
         caller: self,
-        seek_offset: coordinator.seek_offset,
+        seek_offset: seek_offset,
         type: 'consumer.consume.error'
       )
     end
@@ -129,7 +129,7 @@ module Karafka
         'error.occurred',
         error: e,
         caller: self,
-        seek_offset: coordinator.seek_offset,
+        seek_offset: seek_offset,
         type: 'consumer.after_consume.error'
       )
 
@@ -149,7 +149,7 @@ module Karafka
         'error.occurred',
         error: e,
         caller: self,
-        seek_offset: coordinator.seek_offset,
+        seek_offset: seek_offset,
         type: 'consumer.eofed.error'
       )
     end
@@ -345,7 +345,7 @@ module Karafka
     # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
     def seek(offset, manual_seek = true, reset_offset: false)
       coordinator.manual_seek if manual_seek
-      coordinator.seek_offset = nil if reset_offset
+      self.seek_offset = nil if reset_offset
 
       message = Karafka::Messages::Seek.new(
         topic.name,
@@ -397,7 +397,7 @@ module Karafka
     # Pauses the processing from the last offset to retry on given message
     # @private
     def retry_after_pause
-      pause(coordinator.seek_offset, nil, false)
+      pause(seek_offset, nil, false)
 
       # Instrumentation needs to run **after** `#pause` invocation because we rely on the states
       # set by `#pause`
@@ -406,7 +406,7 @@ module Karafka
         caller: self,
         topic: topic.name,
         partition: partition,
-        offset: coordinator.seek_offset,
+        offset: seek_offset,
         timeout: coordinator.pause_tracker.current_timeout,
         attempt: attempt
       )

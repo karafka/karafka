@@ -57,6 +57,7 @@ module Karafka
         consumer.consuming.pause
         consumer.consuming.retry
         consumer.consuming.seek
+        consumer.consuming.transaction
 
         consumer.before_schedule_idle
         consumer.idle
