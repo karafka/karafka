@@ -43,7 +43,7 @@ module Karafka
                   return if coordinator.manual_pause?
 
                   mark_as_consumed(last_group_message) unless revoked?
-                  seek(coordinator.seek_offset, false) unless revoked? || coordinator.manual_seek?
+                  seek(seek_offset, false) unless revoked? || coordinator.manual_seek?
 
                   resume
                 else

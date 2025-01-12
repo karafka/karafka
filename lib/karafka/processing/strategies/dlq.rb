@@ -81,11 +81,11 @@ module Karafka
 
               return if revoked?
             else
-              coordinator.seek_offset = skippable_message.offset + 1
+              self.seek_offset = skippable_message.offset + 1
             end
 
             # We pause to backoff once just in case.
-            pause(coordinator.seek_offset, nil, false)
+            pause(seek_offset, nil, false)
           end
         end
 
@@ -95,7 +95,7 @@ module Karafka
         #   information if this message was from marked offset or figured out via mom flow
         def find_skippable_message
           skippable_message = messages.find do |msg|
-            coordinator.marked? && msg.offset == coordinator.seek_offset
+            coordinator.marked? && msg.offset == seek_offset
           end
 
           # If we don't have the message matching the last comitted offset, it means that

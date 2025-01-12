@@ -3,6 +3,7 @@
 ## 2.4.17 (Unreleased)
 - [Enhancement] Clean message key and headers when cleaning messages via the cleaner API (Pro).
 - [Enhancement] Allow for setting `metadata: false` in the cleaner API for granular cleaning control (Pro)
+- [Enhancement] Instrument successful transaction via `consumer.consuming.transaction` event (Pro).
 
 ## 2.4.16 (2024-12-27)
 - [Enhancement] Improve post-rebalance revocation messages filtering.

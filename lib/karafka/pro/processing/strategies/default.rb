@@ -54,9 +54,9 @@ module Karafka
             else
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
               # In case like this we ignore marking
-              return true if coordinator.seek_offset.nil?
+              return true if seek_offset.nil?
               # Ignore earlier offsets than the one we already committed
-              return true if coordinator.seek_offset > message.offset
+              return true if seek_offset > message.offset
               return false if revoked?
 
               # If we are not inside a transaction but this is a transactional topic, we mark with
@@ -69,7 +69,7 @@ module Karafka
 
               return revoked? unless stored
 
-              coordinator.seek_offset = message.offset + 1
+              self.seek_offset = message.offset + 1
             end
 
             true
@@ -91,9 +91,9 @@ module Karafka
             else
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
               # In case like this we ignore marking
-              return true if coordinator.seek_offset.nil?
+              return true if seek_offset.nil?
               # Ignore earlier offsets than the one we already committed
-              return true if coordinator.seek_offset > message.offset
+              return true if seek_offset > message.offset
               return false if revoked?
 
               # If we are not inside a transaction but this is a transactional topic, we mark with
@@ -106,7 +106,7 @@ module Karafka
 
               return revoked? unless stored
 
-              coordinator.seek_offset = message.offset + 1
+              self.seek_offset = message.offset + 1
             end
 
             true
@@ -135,52 +135,57 @@ module Karafka
           #   way, so the message producing aliases operate from within transactions and since the
           #   producer in transaction is locked, it will prevent other threads from using it.
           def transaction(active_producer = producer)
-            default_producer = producer
-            self.producer = active_producer
+            default_producer = nil
+            transaction_started = nil
 
-            transaction_started = false
+            monitor.instrument('consumer.consuming.transaction', caller: self) do
+              default_producer = producer
+              self.producer = active_producer
 
-            # Prevent from nested transactions. It would not make any sense
-            raise Errors::TransactionAlreadyInitializedError if @_in_transaction
+              transaction_started = false
 
-            transaction_started = true
-            @_transaction_marked = []
-            @_in_transaction = true
-            @_in_transaction_marked = false
+              # Prevent from nested transactions. It would not make any sense
+              raise Errors::TransactionAlreadyInitializedError if @_in_transaction
 
-            producer.transaction do
-              yield
+              transaction_started = true
+              @_transaction_marked = []
+              @_in_transaction = true
+              @_in_transaction_marked = false
 
-              # Ensure this transaction is rolled back if we have lost the ownership of this
-              # transaction. We do it only for transactions that contain offset management as for
-              # producer only, this is not relevant.
-              raise Errors::AssignmentLostError if @_in_transaction_marked && revoked?
+              producer.transaction do
+                yield
+
+                # Ensure this transaction is rolled back if we have lost the ownership of this
+                # transaction. We do it only for transactions that contain offset management as for
+                # producer only, this is not relevant.
+                raise Errors::AssignmentLostError if @_in_transaction_marked && revoked?
+              end
+
+              @_in_transaction = false
+
+              # This offset is already stored in transaction but we set it here anyhow because we
+              # want to make sure our internal in-memory state is aligned with the transaction
+              #
+              # @note We never need to use the blocking `#mark_as_consumed!` here because the
+              #   offset anyhow was already stored during the transaction
+              #
+              # @note Since the offset could have been already stored in Kafka (could have because
+              #   you can have transactions without marking), we use the `@_in_transaction_marked`
+              #   state to decide if we need to dispatch the offset via client at all
+              #   (if post transaction, then we do not have to)
+              #
+              # @note In theory we could only keep reference to the most recent marking and reject
+              #   others. We however do not do it for two reasons:
+              #   - User may have non standard flow relying on some alternative order and we want
+              #     to mimic this
+              #   - Complex strategies like VPs can use this in VPs to mark in parallel without
+              #     having to redefine the transactional flow completely
+              @_transaction_marked.each do |marking|
+                marking.pop ? mark_as_consumed(*marking) : mark_as_consumed!(*marking)
+              end
+
+              true
             end
-
-            @_in_transaction = false
-
-            # This offset is already stored in transaction but we set it here anyhow because we
-            # want to make sure our internal in-memory state is aligned with the transaction
-            #
-            # @note We never need to use the blocking `#mark_as_consumed!` here because the offset
-            #   anyhow was already stored during the transaction
-            #
-            # @note Since the offset could have been already stored in Kafka (could have because
-            #   you can have transactions without marking), we use the `@_in_transaction_marked`
-            #   state to decide if we need to dispatch the offset via client at all
-            #   (if post transaction, then we do not have to)
-            #
-            # @note In theory we could only keep reference to the most recent marking and reject
-            #   others. We however do not do it for two reasons:
-            #   - User may have non standard flow relying on some alternative order and we want to
-            #     mimic this
-            #   - Complex strategies like VPs can use this in VPs to mark in parallel without
-            #     having to redefine the transactional flow completely
-            @_transaction_marked.each do |marking|
-              marking.pop ? mark_as_consumed(*marking) : mark_as_consumed!(*marking)
-            end
-
-            true
           ensure
             self.producer = default_producer
 
@@ -246,15 +251,15 @@ module Karafka
           def mark_in_memory(message)
             # seek offset can be nil only in case `#seek` was invoked with offset reset request
             # In case like this we ignore marking
-            return true if coordinator.seek_offset.nil?
+            return true if seek_offset.nil?
             # Ignore earlier offsets than the one we already committed
-            return true if coordinator.seek_offset > message.offset
+            return true if seek_offset > message.offset
             return false if revoked?
 
             # If we have already marked this successfully in a transaction that was running
             # we should not mark it again with the client offset delegation but instead we should
             # just align the in-memory state
-            coordinator.seek_offset = message.offset + 1
+            self.seek_offset = message.offset + 1
 
             true
           end

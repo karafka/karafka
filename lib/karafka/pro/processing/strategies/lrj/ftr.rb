@@ -40,7 +40,7 @@ module Karafka
                   elsif !revoked? && !coordinator.manual_seek?
                     # If not revoked and not throttled, we move to where we were suppose to and
                     # resume
-                    seek(coordinator.seek_offset, false)
+                    seek(seek_offset, false)
                     resume
                   else
                     resume

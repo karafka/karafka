@@ -35,7 +35,7 @@ module Karafka
             # since AJ consumer commits the offset after each job, we also know that the
             # previous job was successful
             mark_dispatched_to_dlq(skippable_message)
-            pause(coordinator.seek_offset, nil, false)
+            pause(seek_offset, nil, false)
           end
         end
       end

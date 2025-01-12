@@ -41,7 +41,7 @@ module Karafka
                     if mark_after_dispatch?
                       mark_dispatched_to_dlq(skippable_message)
                     else
-                      coordinator.seek_offset = skippable_message.offset + 1
+                      self.seek_offset = skippable_message.offset + 1
                     end
                   end
                 end

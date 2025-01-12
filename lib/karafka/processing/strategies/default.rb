@@ -54,13 +54,13 @@ module Karafka
         def mark_as_consumed(message)
           # seek offset can be nil only in case `#seek` was invoked with offset reset request
           # In case like this we ignore marking
-          return true if coordinator.seek_offset.nil?
+          return true if seek_offset.nil?
           # Ignore earlier offsets than the one we already committed
-          return true if coordinator.seek_offset > message.offset
+          return true if seek_offset > message.offset
           return false if revoked?
           return revoked? unless client.mark_as_consumed(message)
 
-          coordinator.seek_offset = message.offset + 1
+          self.seek_offset = message.offset + 1
 
           true
         end
@@ -73,14 +73,14 @@ module Karafka
         def mark_as_consumed!(message)
           # seek offset can be nil only in case `#seek` was invoked with offset reset request
           # In case like this we ignore marking
-          return true if coordinator.seek_offset.nil?
+          return true if seek_offset.nil?
           # Ignore earlier offsets than the one we already committed
-          return true if coordinator.seek_offset > message.offset
+          return true if seek_offset > message.offset
           return false if revoked?
 
           return revoked? unless client.mark_as_consumed!(message)
 
-          coordinator.seek_offset = message.offset + 1
+          self.seek_offset = message.offset + 1
 
           true
         end
