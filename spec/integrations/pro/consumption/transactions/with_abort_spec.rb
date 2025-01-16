@@ -22,10 +22,18 @@ class Consumer < Karafka::BaseConsumer
 
       raise(WaterDrop::AbortTransaction)
     end
+
+    DT[:seek_offset] = seek_offset
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    manual_offset_management true
+  end
+end
+
 produce_many(DT.topic, DT.uuids(1))
 
 start_karafka_and_wait_until do
@@ -34,3 +42,4 @@ end
 
 assert_equal 0, fetch_next_offset
 assert DT.key?(:occurred)
+assert_equal 0, DT[:seek_offset]

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.4.17)
+    karafka (2.4.18)
       base64 (~> 0.2)
       karafka-core (>= 2.4.4, < 2.5.0)
       karafka-rdkafka (>= 0.17.2)
@@ -123,4 +123,4 @@ DEPENDENCIES
   stringio
 
 BUNDLED WITH
-   2.6.2
+   2.4.22
