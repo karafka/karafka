@@ -11,5 +11,6 @@ end
 gem 'activerecord', '7.0.8'
 gem 'activesupport', '7.0.8'
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
+gem 'logger'
 gem 'railties', '7.0.8'
 gem 'rspec-rails'

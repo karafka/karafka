@@ -9,4 +9,5 @@ if RUBY_VERSION >= '3.4'
 end
 
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
+gem 'logger'
 gem 'rails', '7.0.8', require: true
