@@ -8,5 +8,8 @@ if RUBY_VERSION >= '3.4'
   gem 'mutex_m'
 end
 
+# Can be updated when the logger issue in Rails is fixed and released
+# @see https://github.com/rails/rails/issues/54260
+gem 'concurrent-ruby', '1.3.4'
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
 gem 'rails', '7.0.8', require: true
