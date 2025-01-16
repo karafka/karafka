@@ -16,6 +16,7 @@
   singleton
   digest
   zeitwerk
+  logger
 ].each(&method(:require))
 
 # Karafka framework main namespace
