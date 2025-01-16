@@ -8,9 +8,11 @@ if RUBY_VERSION >= '3.4'
   gem 'mutex_m'
 end
 
+# Needs to be required prior to activesupport due to visibility bug in AS
+gem 'logger', require: true
+
 gem 'activerecord', '7.0.8'
 gem 'activesupport', '7.0.8'
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
-gem 'logger'
 gem 'railties', '7.0.8'
 gem 'rspec-rails'
