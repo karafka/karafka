@@ -3,6 +3,7 @@
 source 'https://rubygems.org'
 
 gem 'bigdecimal'
+gem 'concurrent-ruby', '1.3.4'
 gem 'drb'
 gem 'karafka', path: ENV.fetch('KARAFKA_GEM_DIR'), require: true
 gem 'mutex_m'
