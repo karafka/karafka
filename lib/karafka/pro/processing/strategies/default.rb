@@ -143,7 +143,6 @@ module Karafka
               self.producer = active_producer
 
               transaction_started = false
-              transaction_completed = false
 
               # Prevent from nested transactions. It would not make any sense
               raise Errors::TransactionAlreadyInitializedError if @_in_transaction
@@ -160,12 +159,6 @@ module Karafka
                 # transaction. We do it only for transactions that contain offset management as for
                 # producer only, this is not relevant.
                 raise Errors::AssignmentLostError if @_in_transaction_marked && revoked?
-
-                # If we do not reach this, we should not move seek offsets because it means that
-                # either an error occured or transaction was aborted.
-                # In case of error, it will bubble up so no issue but in case of abort, while we
-                # do not reach this place, the code will continue
-                transaction_completed = true
               end
 
               @_in_transaction = false
@@ -187,13 +180,8 @@ module Karafka
               #     to mimic this
               #   - Complex strategies like VPs can use this in VPs to mark in parallel without
               #     having to redefine the transactional flow completely
-              #
-              # @note This should be applied only if transaction did not error and if it was not
-              #   aborted.
-              if transaction_completed
-                @_transaction_marked.each do |marking|
-                  marking.pop ? mark_as_consumed(*marking) : mark_as_consumed!(*marking)
-                end
+              @_transaction_marked.each do |marking|
+                marking.pop ? mark_as_consumed(*marking) : mark_as_consumed!(*marking)
               end
 
               true

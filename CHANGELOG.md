@@ -1,8 +1,5 @@
 # Karafka Framework Changelog
 
-## 2.4.18 (Unreleased)
-- [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
-
 ## 2.4.17 (2025-01-15)
 - [Enhancement] Clean message key and headers when cleaning messages via the cleaner API (Pro).
 - [Enhancement] Allow for setting `metadata: false` in the cleaner API for granular cleaning control (Pro)
