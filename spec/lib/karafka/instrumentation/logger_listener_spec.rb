@@ -556,4 +556,86 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
   end
+
+  describe '#on_rebalance_partitions_revoked' do
+    subject(:trigger) { listener.on_rebalance_partitions_revoked(event) }
+
+    let(:group_id) { 'group1' }
+    let(:group_prefix) { "Group #{group_id} rebalance" }
+
+    context 'when no partitions are revoked' do
+      let(:payload) do
+        {
+          tpl: {},
+          consumer_group_id: group_id
+        }
+      end
+
+      let(:message) { "#{group_prefix}: No partitions revoked" }
+
+      it 'expect logger to log that no partitions were revoked' do
+        expect(Karafka.logger).to have_received(:info).with(message)
+      end
+    end
+
+    context 'when partitions are revoked' do
+      let(:payload) do
+        {
+          tpl: {
+            'topic1' => [OpenStruct.new(partition: 0), OpenStruct.new(partition: 1)],
+            'topic2' => [OpenStruct.new(partition: 0)]
+          },
+          consumer_group_id: group_id
+        }
+      end
+
+      it 'expect logger to log revoked partitions for each topic' do
+        expect(Karafka.logger)
+          .to have_received(:info).with("#{group_prefix}: Partition(s) 0, 1 of topic1 revoked")
+        expect(Karafka.logger)
+          .to have_received(:info).with("#{group_prefix}: Partition(s) 0 of topic2 revoked")
+      end
+    end
+  end
+
+  describe '#on_rebalance_partitions_assigned' do
+    subject(:trigger) { listener.on_rebalance_partitions_assigned(event) }
+
+    let(:group_id) { 'group1' }
+    let(:group_prefix) { "Group #{group_id} rebalance" }
+
+    context 'when no partitions are assigned' do
+      let(:payload) do
+        {
+          tpl: {},
+          consumer_group_id: group_id
+        }
+      end
+
+      let(:message) { "#{group_prefix}: No partitions assigned" }
+
+      it 'expect logger to log that no partitions were assigned' do
+        expect(Karafka.logger).to have_received(:info).with(message)
+      end
+    end
+
+    context 'when partitions are assigned' do
+      let(:payload) do
+        {
+          tpl: {
+            'topic1' => [OpenStruct.new(partition: 0), OpenStruct.new(partition: 1)],
+            'topic2' => [OpenStruct.new(partition: 0)]
+          },
+          consumer_group_id: group_id
+        }
+      end
+
+      it 'expect logger to log assigned partitions for each topic' do
+        expect(Karafka.logger)
+          .to have_received(:info).with("#{group_prefix}: Partition(s) 0, 1 of topic1 assigned")
+        expect(Karafka.logger)
+          .to have_received(:info).with("#{group_prefix}: Partition(s) 0 of topic2 assigned")
+      end
+    end
+  end
 end

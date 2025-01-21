@@ -202,6 +202,40 @@ module Karafka
         info 'Stopped Karafka server'
       end
 
+      # Logs info about partitions we have lost
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details with revoked partitions
+      def on_rebalance_partitions_revoked(event)
+        revoked_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
+        group_id = event[:consumer_group_id]
+        group_prefix = "Group #{group_id} rebalance"
+
+        if revoked_partitions.empty?
+          info "#{group_prefix}: No partitions revoked"
+        else
+          revoked_partitions.each do |topic, partitions|
+            info "#{group_prefix}: Partition(s) #{partitions.join(', ')} of #{topic} revoked"
+          end
+        end
+      end
+
+      # Logs info about partitions that we've gained
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details with assigned partitions
+      def on_rebalance_partitions_assigned(event)
+        assigned_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
+        group_id = event[:consumer_group_id]
+        group_prefix = "Group #{group_id} rebalance"
+
+        if assigned_partitions.empty?
+          info "#{group_prefix}: No partitions assigned"
+        else
+          assigned_partitions.each do |topic, partitions|
+            info "#{group_prefix}: Partition(s) #{partitions.join(', ')} of #{topic} assigned"
+          end
+        end
+      end
+
       # Logs info when we have dispatched a message the the DLQ
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
