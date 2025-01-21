@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.18 (Unreleased)
+- [Enhancement] Include info level rebalance logger listener data.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
 
 ## 2.4.17 (2025-01-15)
