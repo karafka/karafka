@@ -29,7 +29,7 @@ begin
 
   # This should never be reached
   exit 10
-rescue
+rescue StandardError
   Karafka::Server.stop
 
   exit 1
