@@ -22,6 +22,17 @@ end
 
 produce_many(DT.topic, DT.uuids(1))
 
-start_karafka_and_wait_until do
-  false
+begin
+  start_karafka_and_wait_until do
+    false
+  end
+
+  # This should never be reached
+  exit 10
+rescue
+  Karafka::Server.stop
+
+  exit 1
 end
+
+exit 10
