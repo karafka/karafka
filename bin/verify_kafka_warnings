@@ -2,7 +2,6 @@
 
 # Checks Kafka logs for unsupported warning patterns
 # Only specified warnings are allowed, all others should trigger failure
-# Usage: ./check_kafka_warnings.sh
 
 allowed_patterns=(
    "Performing controller activation"
