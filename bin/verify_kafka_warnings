@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Checks Kafka logs for warning patterns that indicate incorrect Karafka usage
+# These warnings should never occur as Karafka should prevent such operations
+
+patterns=(
+   "as well as transactional"
+)
+
+found=0
+for pattern in "${patterns[@]}"; do
+   output=$(docker logs kafka | grep WARN | grep "$pattern")
+   if [ -n "$output" ]; then
+       echo "Found warning pattern: $pattern"
+       echo "$output"
+       found=1
+   fi
+done
+
+exit $found

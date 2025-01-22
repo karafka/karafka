@@ -112,6 +112,9 @@ jobs:
           GITHUB_COVERAGE: ${{matrix.coverage}}
         run: bin/rspecs
 
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings
+
   integrations_oss:
     timeout-minutes: 20
     runs-on: ubuntu-latest
@@ -170,6 +173,9 @@ jobs:
       - name: Run OSS integration tests
         run: bin/integrations --exclude '/pro'
 
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings
+
   integrations_pro:
     timeout-minutes: 45
     runs-on: ubuntu-latest
@@ -222,3 +228,6 @@ jobs:
           KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
 
         run: bin/integrations '/pro'
+
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings
