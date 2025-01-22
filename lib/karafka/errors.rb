@@ -71,6 +71,10 @@ module Karafka
     # Raised in case user would want to perform nested transactions.
     TransactionAlreadyInitializedError = Class.new(BaseError)
 
+    # Raised when user used transactional offset marking but after that tried to use
+    # non-transactional marking, effectively mixing both. This is not allowed.
+    NonTransactionalMarkingAttemptError = Class.new(BaseError)
+
     # Raised in case a listener that was paused is being resumed
     InvalidListenerResumeError = Class.new(BaseError)
 

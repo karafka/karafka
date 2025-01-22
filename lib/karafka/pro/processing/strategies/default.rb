@@ -63,6 +63,8 @@ module Karafka
               # artificially created transaction
               stored = if producer.transactional?
                          mark_with_transaction(message, offset_metadata, true)
+                       elsif @_transactional_marking
+                         raise Errors::NonTransactionalMarkingAttemptError
                        else
                          client.mark_as_consumed(message, offset_metadata)
                        end
@@ -100,6 +102,8 @@ module Karafka
               # artificially created transaction
               stored = if producer.transactional?
                          mark_with_transaction(message, offset_metadata, false)
+                       elsif @_transactional_marking
+                         raise Errors::NonTransactionalMarkingAttemptError
                        else
                          client.mark_as_consumed!(message, offset_metadata)
                        end
@@ -225,6 +229,9 @@ module Karafka
               offset_metadata
             )
 
+            # This one is long lived and used to make sure, that users do not mix transactional
+            # marking with non-transactional. When this happens we should raise error
+            @_transactional_marking = true
             @_in_transaction_marked = true
             @_transaction_marked ||= []
             @_transaction_marked << [message, offset_metadata, async]
