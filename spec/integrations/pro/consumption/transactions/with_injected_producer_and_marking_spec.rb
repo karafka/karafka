@@ -25,11 +25,8 @@ class Consumer < Karafka::BaseConsumer
       produce_async(topic: DT.topic, payload: rand.to_s)
       DT[:during_producer] = producer
       producer.produce_async(topic: DT.topic, payload: rand.to_s)
+      mark_as_consumed(messages.first, messages.first.offset.to_s)
     end
-
-    # Without mom we cannot mark in a transactional fashion because later on karafka would try to
-    # mark transactional without transactional producer (default)
-    mark_as_consumed!(messages.first, messages.first.offset.to_s)
 
     DT[:after_producer] = producer
     DT[:metadata] << offset_metadata
@@ -37,7 +34,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    manual_offset_management(true)
+  end
+end
 
 produce_many(DT.topic, DT.uuids(1))
 
