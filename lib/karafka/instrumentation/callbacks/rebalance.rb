@@ -12,8 +12,10 @@ module Karafka
 
         # @param subscription_group [Karafka::Routes::SubscriptionGroup] subscription group for
         #   which we want to manage rebalances
-        def initialize(subscription_group)
+        # @param client_id [String] id of the client managing this rebalance
+        def initialize(subscription_group, client_id)
           @subscription_group = subscription_group
+          @client_id = client_id
         end
 
         # Publishes an event that partitions are going to be revoked.
@@ -62,6 +64,7 @@ module Karafka
             subscription_group: @subscription_group,
             consumer_group_id: @subscription_group.consumer_group.id,
             consumer_group: @subscription_group.consumer_group,
+            client_id: @client_id,
             tpl: tpl
           )
         rescue StandardError => e
@@ -71,6 +74,7 @@ module Karafka
             subscription_group_id: @subscription_group.id,
             consumer_group_id: @subscription_group.consumer_group.id,
             type: "callbacks.rebalance.#{name}.error",
+            client_id: @client_id,
             error: e
           )
         end

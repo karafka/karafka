@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:callback) { described_class.new(subscription_group) }
+  subject(:callback) { described_class.new(subscription_group, client_id) }
 
   let(:subscription_group) { build(:routing_subscription_group) }
   let(:subscription_group_id) { subscription_group.id }
   let(:consumer_group_id) { consumer_group.id }
+  let(:client_id) { rand.to_s }
   let(:consumer_group) { subscription_group.consumer_group }
   let(:tpl) { rand }
   let(:monitor) { Karafka::Instrumentation::Monitor.new }
@@ -30,7 +31,8 @@ RSpec.describe_current do
         subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
         consumer_group: consumer_group,
-        tpl: tpl
+        tpl: tpl,
+        client_id: client_id
       )
     end
 
@@ -70,7 +72,8 @@ RSpec.describe_current do
         subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
         consumer_group: consumer_group,
-        tpl: tpl
+        tpl: tpl,
+        client_id: client_id
       )
     end
   end
@@ -86,7 +89,8 @@ RSpec.describe_current do
         subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
         consumer_group: consumer_group,
-        tpl: tpl
+        tpl: tpl,
+        client_id: client_id
       )
     end
   end
@@ -102,7 +106,8 @@ RSpec.describe_current do
         subscription_group: subscription_group,
         consumer_group_id: consumer_group_id,
         consumer_group: consumer_group,
-        tpl: tpl
+        tpl: tpl,
+        client_id: client_id
       )
     end
   end
