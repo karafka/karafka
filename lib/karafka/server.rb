@@ -30,6 +30,9 @@ module Karafka
       # as not everything is possible when operating in non-standalone mode, etc.
       attr_accessor :execution_mode
 
+      # id of the server. Useful for logging when we want to reference things issued by the server.
+      attr_accessor :id
+
       # Method which runs app
       def run
         self.listeners = []
@@ -187,5 +190,7 @@ module Karafka
     # This is overwritten quickly during boot, but just in case someone would reach it prior to
     # booting, we want to have the default value.
     self.execution_mode = :standalone
+
+    self.id = SecureRandom.hex(6)
   end
 end

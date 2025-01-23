@@ -67,7 +67,7 @@ module Karafka
         @buffer = RawMessagesBuffer.new
         @tick_interval = ::Karafka::App.config.internal.tick_interval
         @rebalance_manager = RebalanceManager.new(@subscription_group.id, @buffer)
-        @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group)
+        @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group, id)
 
         @interval_runner = Helpers::IntervalRunner.new do
           events_poll

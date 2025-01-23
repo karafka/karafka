@@ -4,7 +4,10 @@
 - [Enhancement] Support multiple DLQ target topics via context aware strategies (Pro).
 - [Enhancement] Raise error when post-transactional committing of offset is done outside of the transaction (Pro).
 - [Enhancement] Include info level rebalance logger listener data.
+- [Enhancement] Include info level subscription start info.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
+- [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.
+- [Fix] Fix inconsistency in the logs where OS signal originating logs would not have server id reference.
 
 ## 2.4.17 (2025-01-15)
 - [Enhancement] Clean message key and headers when cleaning messages via the cleaner API (Pro).
