@@ -4,6 +4,10 @@ module Karafka
   module Instrumentation
     # Listener that sets a proc title with a nice descriptive value
     class ProctitleListener
+      include Helpers::ConfigImporter.new(
+        client_id: %i[client_id]
+      )
+
       Status::STATES.each_key do |state|
         class_eval <<~RUBY, __FILE__, __LINE__ + 1
           # Updates proc title to an appropriate state
@@ -19,7 +23,7 @@ module Karafka
       # @param status [String] any status we want to set
       def setproctitle(status)
         ::Process.setproctitle(
-          "karafka #{Karafka::App.config.client_id} (#{status})"
+          "karafka #{client_id} (#{status})"
         )
       end
     end
