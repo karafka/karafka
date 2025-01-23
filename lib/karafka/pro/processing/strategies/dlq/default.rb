@@ -148,7 +148,7 @@ module Karafka
               original_partition = skippable_message.partition.to_s
 
               dlq_message = {
-                topic: topic.dead_letter_queue.topic,
+                topic: @_dispatch_to_dlq_topic || topic.dead_letter_queue.topic,
                 key: original_partition,
                 payload: skippable_message.raw_payload,
                 headers: skippable_message.raw_headers.merge(
@@ -205,7 +205,7 @@ module Karafka
             # In case of `:skip` and `:dispatch` will run the exact flow provided in a block
             # In case of `:retry` always `#retry_after_pause` is applied
             def apply_dlq_flow
-              flow = topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
+              flow, target_topic = topic.dead_letter_queue.strategy.call(errors_tracker, attempt)
 
               case flow
               when :retry
@@ -216,6 +216,8 @@ module Karafka
                 @_dispatch_to_dlq = false
               when :dispatch
                 @_dispatch_to_dlq = true
+                # Use custom topic if it was returned from the strategy
+                @_dispatch_to_dlq_topic = target_topic || topic.dead_letter_queue.topic
               else
                 raise Karafka::UnsupportedCaseError, flow
               end
@@ -227,6 +229,8 @@ module Karafka
 
               # Always backoff after DLQ dispatch even on skip to prevent overloads on errors
               pause(seek_offset, nil, false)
+            ensure
+              @_dispatch_to_dlq_topic = nil
             end
 
             # Marks message that went to DLQ (if applicable) based on the requested method

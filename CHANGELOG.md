@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.18 (Unreleased)
+- [Enhancement] Support multiple DLQ target topics via context aware strategies (Pro).
 - [Enhancement] Raise error when post-transactional committing of offset is done outside of the transaction (Pro).
 - [Enhancement] Include info level rebalance logger listener data.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).

@@ -12,7 +12,7 @@ module Karafka
           module Topic
             # @param strategy [#call, nil] Strategy we want to use or nil if a default strategy
             # (same as in OSS) should be applied
-            # @param args [Hash] OSS DLQ arguments
+            # @param args [Hash] Pro DLQ arguments
             def dead_letter_queue(strategy: nil, **args)
               return @dead_letter_queue if @dead_letter_queue
 
