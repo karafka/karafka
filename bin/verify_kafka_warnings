@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Checks Kafka logs for unsupported warning patterns
+# Only specified warnings are allowed, all others should trigger failure
+
+allowed_patterns=(
+   "Performing controller activation"
+   "registered with feature metadata.version"
+)
+
+# Get all warnings
+warnings=$(docker logs --since=0 kafka | grep WARN)
+exit_code=0
+
+while IFS= read -r line; do
+   allowed=0
+   for pattern in "${allowed_patterns[@]}"; do
+       if echo "$line" | grep -q "$pattern"; then
+           allowed=1
+           break
+       fi
+   done
+
+   if [ $allowed -eq 0 ]; then
+       echo "Unexpected warning found:"
+       echo "$line"
+       exit_code=1
+   fi
+done <<< "$warnings"
+
+exit $exit_code
