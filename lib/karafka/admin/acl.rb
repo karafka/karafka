@@ -11,6 +11,10 @@ module Karafka
     # This API works based on ability to create a `Karafka:Admin::Acl` object that can be then used
     # using `#create`, `#delete` and `#describe` class API.
     class Acl
+      extend Helpers::ConfigImporter.new(
+        max_wait_time: %i[admin max_wait_time]
+      )
+
       # Types of resources for which we can assign permissions.
       #
       # Resource refers to any entity within the Kafka ecosystem for which access control can be
@@ -162,7 +166,7 @@ module Karafka
         # Makes sure that admin is closed afterwards.
         def with_admin_wait
           Admin.with_admin do |admin|
-            yield(admin).wait(max_wait_timeout: Karafka::App.config.admin.max_wait_time)
+            yield(admin).wait(max_wait_timeout: max_wait_time)
           end
         end
 
