@@ -9,7 +9,7 @@ allowed_patterns=(
 )
 
 # Get all warnings
-warnings=$(docker logs kafka | grep WARN)
+warnings=$(docker logs --since=0 kafka | grep WARN)
 exit_code=0
 
 while IFS= read -r line; do
