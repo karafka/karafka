@@ -553,7 +553,7 @@ RSpec.describe_current do
 
     context 'when it is a different error type' do
       let(:type) { 'different.error' }
-      let(:message) { "different.error error occurred: #{error}" }
+      let(:message) { "different.error error occurred: #{error.class} - #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
