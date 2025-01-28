@@ -427,7 +427,7 @@ module Karafka
           error details
         # This handles any custom errors coming from places like Web-UI, etc
         else
-          error "#{type} error occurred: #{error}"
+          error "#{type} error occurred: #{error.class} - #{error}"
           error details
         end
       end

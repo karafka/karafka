@@ -5,6 +5,7 @@
 - [Enhancement] Raise error when post-transactional committing of offset is done outside of the transaction (Pro).
 - [Enhancement] Include info level rebalance logger listener data.
 - [Enhancement] Include info level subscription start info.
+- [Enhancement] Make the generic error handling in the `LoggerListener` more descriptive by logging also the error class.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
 - [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.
 - [Fix] Fix inconsistency in the logs where OS signal originating logs would not have server id reference.
