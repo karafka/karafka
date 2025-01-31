@@ -98,6 +98,17 @@ module Karafka
             :mark_as_consumed
           end
 
+          # The first (lowest) message we want to mark as consumed in marking. By default it uses
+          #   same position as cursor in case user wants to mark same message as consumed as the
+          #   one on which cursor action is applied.
+          # @return [Karafka::Messages::Message, nil] cursor marking message or nil if none
+          # @note It should not return position in time format, only numerical offset
+          def marking_cursor
+            return nil unless active?
+
+            applied.map(&:marking_cursor).compact.min_by(&:offset)
+          end
+
           private
 
           # @return [Boolean] is filtering active
