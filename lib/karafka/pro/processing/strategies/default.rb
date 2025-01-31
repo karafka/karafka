@@ -55,8 +55,11 @@ module Karafka
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
               # In case like this we ignore marking
               return true if seek_offset.nil?
-              # Ignore earlier offsets than the one we already committed
-              return true if seek_offset > message.offset
+              # Ignore if it is the same offset as the one that is marked currently
+              # We ignore second marking because it changes nothing and in case of people using
+              # metadata storage but with automatic offset marking, this would cause metadata to be
+              # erased by automatic marking
+              return true if (seek_offset - 1) == message.offset
               return false if revoked?
 
               # If we are not inside a transaction but this is a transactional topic, we mark with
@@ -94,8 +97,11 @@ module Karafka
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
               # In case like this we ignore marking
               return true if seek_offset.nil?
-              # Ignore earlier offsets than the one we already committed
-              return true if seek_offset > message.offset
+              # Ignore if it is the same offset as the one that is marked currently
+              # We ignore second marking because it changes nothing and in case of people using
+              # metadata storage but with automatic offset marking, this would cause metadata to be
+              # erased by automatic marking
+              return true if (seek_offset - 1) == message.offset
               return false if revoked?
 
               # If we are not inside a transaction but this is a transactional topic, we mark with
@@ -271,8 +277,11 @@ module Karafka
             # seek offset can be nil only in case `#seek` was invoked with offset reset request
             # In case like this we ignore marking
             return true if seek_offset.nil?
-            # Ignore earlier offsets than the one we already committed
-            return true if seek_offset > message.offset
+            # Ignore if it is the same offset as the one that is marked currently
+            # We ignore second marking because it changes nothing and in case of people using
+            # metadata storage but with automatic offset marking, this would cause metadata to be
+            # erased by automatic marking
+            return true if (seek_offset - 1) == message.offset
             return false if revoked?
 
             # If we have already marked this successfully in a transaction that was running

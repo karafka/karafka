@@ -7,7 +7,6 @@ setup_karafka
 class Consumer < Karafka::BaseConsumer
   def consume
     if @seeked && !@marked
-      mark_as_consumed!(messages.first)
       @marked = true
       DT[:done] = true
     end
@@ -15,7 +14,7 @@ class Consumer < Karafka::BaseConsumer
     return if @seeked
 
     messages.each do |message|
-      mark_as_consumed!(message)
+      mark_as_consumed!(message) unless @seeked
 
       next unless message.offset == 9
 

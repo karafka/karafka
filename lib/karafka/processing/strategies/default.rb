@@ -55,8 +55,8 @@ module Karafka
           # seek offset can be nil only in case `#seek` was invoked with offset reset request
           # In case like this we ignore marking
           return true if seek_offset.nil?
-          # Ignore earlier offsets than the one we already committed
-          return true if seek_offset > message.offset
+          # Ignore double markings of the same offset
+          return true if (seek_offset - 1) == message.offset
           return false if revoked?
           return revoked? unless client.mark_as_consumed(message)
 
@@ -74,8 +74,8 @@ module Karafka
           # seek offset can be nil only in case `#seek` was invoked with offset reset request
           # In case like this we ignore marking
           return true if seek_offset.nil?
-          # Ignore earlier offsets than the one we already committed
-          return true if seek_offset > message.offset
+          # Ignore double markings of the same offset
+          return true if (seek_offset - 1) == message.offset
           return false if revoked?
 
           return revoked? unless client.mark_as_consumed!(message)
