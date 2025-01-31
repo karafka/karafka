@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
 
         next unless message.offset == 19
 
-        seek(message.offset - partition, reset_offset: true)
+        seek(message.offset - partition)
         @seeked = true
       end
     end

@@ -23,7 +23,6 @@ module Karafka
           def initialize
             @applied = false
             @cursor = nil
-            @reset_offset = false
           end
 
           # @param messages [Array<Karafka::Messages::Message>] array with messages. Please keep

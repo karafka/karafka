@@ -338,12 +338,12 @@ module Karafka
     # @param manual_seek [Boolean] Flag to differentiate between user seek and system/strategy
     #   based seek. User seek operations should take precedence over system actions, hence we need
     #   to know who invoked it.
-    # @param reset_offset [Boolean] should we reset offset when seeking backwards. It is false by
-    #   default to prevent marking in the offset that was earlier than the highest marked offset
-    #   for given consumer group. It can be set to true if we want to reprocess data once again and
+    # @param reset_offset [Boolean] should we reset offset when seeking backwards. It is false
+    #   it prevents marking in the offset that was earlier than the highest marked offset
+    #   for given consumer group. It is set to true by default to reprocess data once again and
     #   want to make sure that the marking starts from where we moved to.
     # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
-    def seek(offset, manual_seek = true, reset_offset: false)
+    def seek(offset, manual_seek = true, reset_offset: true)
       coordinator.manual_seek if manual_seek
       self.seek_offset = nil if reset_offset
 

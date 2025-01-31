@@ -8,6 +8,7 @@
 - [Enhancement] Include info level subscription start info.
 - [Enhancement] Make the generic error handling in the `LoggerListener` more descriptive by logging also the error class.
 - [Enhancement] Allow marking older offsets to support advanced rewind capabilities.
+- [Enhancement] Change optional `#seek` reset offset flag default to `true` as `false` is almost never used and seek by default should move the internal consumer offset position as well.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
 - [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.
 - [Fix] Fix inconsistency in the logs where OS signal originating logs would not have server id reference.

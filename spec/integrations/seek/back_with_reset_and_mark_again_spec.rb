@@ -21,7 +21,7 @@ class Consumer < Karafka::BaseConsumer
       next unless message.offset == 9
 
       @seeked = true
-      seek(1, reset_offset: true)
+      seek(1)
 
       return
     end

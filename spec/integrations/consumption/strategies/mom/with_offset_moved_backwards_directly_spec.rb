@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# While default marking in Karafka prevents marking backwards it can still be done by setting
-# the `reset_offset` manually. This will allow us to mark in past.
+# Allow to mark in past.
 
 setup_karafka do |config|
   config.max_messages = 20
@@ -21,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
       next unless message.offset == 10 && !@moved
 
       @moved = true
-      seek(0, reset_offset: true)
+      seek(0)
 
       break
     end
