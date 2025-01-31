@@ -23,6 +23,7 @@ module Karafka
           def initialize
             @applied = false
             @cursor = nil
+            @reset_offset = false
           end
 
           # @param messages [Array<Karafka::Messages::Message>] array with messages. Please keep
@@ -57,6 +58,12 @@ module Karafka
           #   marking is requested
           def marking_method
             :mark_as_consumed
+          end
+
+          # @return [Karafka::Messages::Message, nil] cursor message for marking or nil if no
+          #   marking
+          def marking_cursor
+            cursor
           end
         end
       end

@@ -1,11 +1,13 @@
 # Karafka Framework Changelog
 
 ## 2.4.18 (Unreleased)
+- [Enhancement] Introduce `#marking_cursor` API (defaults to `#cursor`) in the filtering API (Pro).
 - [Enhancement] Support multiple DLQ target topics via context aware strategies (Pro).
 - [Enhancement] Raise error when post-transactional committing of offset is done outside of the transaction (Pro).
 - [Enhancement] Include info level rebalance logger listener data.
 - [Enhancement] Include info level subscription start info.
 - [Enhancement] Make the generic error handling in the `LoggerListener` more descriptive by logging also the error class.
+- [Enhancement] Allow marking older offsets to support advanced rewind capabilities.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
 - [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.
 - [Fix] Fix inconsistency in the logs where OS signal originating logs would not have server id reference.

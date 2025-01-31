@@ -67,7 +67,7 @@ module Karafka
               if filter.mark_as_consumed?
                 send(
                   filter.marking_method,
-                  filter.cursor
+                  filter.marking_cursor
                 )
               end
 

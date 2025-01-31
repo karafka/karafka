@@ -3,7 +3,8 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
-# When offset metadata is stored but a custom forced value is used, the forced on should be used.
+# When offset metadata is stored and we mark each, later marking as consumed on the same location
+# should not end up with us loosing metadata
 
 setup_karafka do |config|
   config.max_messages = 1
@@ -16,18 +17,13 @@ class Consumer < Karafka::BaseConsumer
 
     DT[:metadata] << offset_metadata(cache: false)
 
-    store_offset_metadata(messages.first.offset.to_s)
+    store_offset_metadata(messages.last.offset.to_s)
 
-    mark_as_consumed(messages.first, 'cs')
+    mark_as_consumed(messages.last, 'cs')
   end
 end
 
-draw_routes do
-  topic DT.topic do
-    consumer Consumer
-    manual_offset_management(true)
-  end
-end
+draw_routes(Consumer)
 
 produce_many(DT.topic, DT.uuids(10))
 
