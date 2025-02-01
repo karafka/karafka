@@ -34,7 +34,7 @@ module Karafka
               if tracker.enough? || Karafka::App.done?
                 # Enough means we no longer have time to process more data without polling as we
                 # risk reaching max poll interval. Instead we seek and we will poll again soon.
-                seek(message.offset, reset_offset: false)
+                seek(message.offset, reset_offset: true)
 
                 return
               end
