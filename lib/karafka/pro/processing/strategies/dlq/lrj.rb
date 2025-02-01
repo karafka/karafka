@@ -31,7 +31,9 @@ module Karafka
 
                   mark_as_consumed(last_group_message) unless revoked?
                   # We should not overwrite user manual seel request with our seek
-                  seek(seek_offset, false) unless revoked? || coordinator.manual_seek?
+                  unless revoked? || coordinator.manual_seek?
+                    seek(seek_offset, false, reset_offset: false)
+                  end
 
                   resume
                 else
