@@ -36,7 +36,7 @@ module Karafka
 
                   # no need to check for manual seek because AJ consumer is internal and
                   # fully controlled by us
-                  seek(seek_offset, false) unless revoked?
+                  seek(seek_offset, false, reset_offset: false) unless revoked?
 
                   resume
                 else

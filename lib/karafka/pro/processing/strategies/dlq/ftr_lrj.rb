@@ -40,7 +40,7 @@ module Karafka
                   if coordinator.filtered? && !revoked?
                     handle_post_filtering
                   elsif !revoked? && !coordinator.manual_seek?
-                    seek(seek_offset, false)
+                    seek(seek_offset, false, reset_offset: false)
                     resume
                   else
                     resume

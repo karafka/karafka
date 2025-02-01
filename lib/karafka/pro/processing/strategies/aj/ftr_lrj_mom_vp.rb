@@ -40,7 +40,7 @@ module Karafka
                   elsif !revoked?
                     # no need to check for manual seek because AJ consumer is internal and
                     # fully controlled by us
-                    seek(seek_offset, false)
+                    seek(seek_offset, false, reset_offset: false)
                     resume
                   else
                     resume
