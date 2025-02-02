@@ -22,6 +22,7 @@ module Karafka
 
       # @param topic_name [String] topic name
       # @param partition [Integer] partition number
+      # @return [Karafka::Processing::Coordinator] found or created coordinator
       def find_or_create(topic_name, partition)
         @coordinators[topic_name][partition] ||= begin
           routing_topic = @topics.find(topic_name)
