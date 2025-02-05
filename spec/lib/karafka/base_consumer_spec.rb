@@ -119,7 +119,10 @@ RSpec.describe_current do
 
       it 'expect to pause based on the first message ever received' do
         consume_with_after.call
-        expect(client).to have_received(:pause).with(topic.name, first_message.partition, offset)
+
+        expect(client)
+          .to have_received(:pause)
+          .with(topic.name, first_message.partition, offset, 500)
       end
 
       it 'expect to pause with time tracker' do
@@ -421,7 +424,8 @@ RSpec.describe_current do
         [
           messages.metadata.topic,
           messages.metadata.partition,
-          100
+          100,
+          500
         ]
       end
 
@@ -438,7 +442,8 @@ RSpec.describe_current do
         [
           messages.metadata.topic,
           messages.metadata.partition,
-          100
+          100,
+          500
         ]
       end
 
