@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.18 (Unreleased)
+- [Enhancement] Enhance low-level `client.pause` event with timeout value (if provided).
 - [Enhancement] Introduce `#marking_cursor` API (defaults to `#cursor`) in the filtering API (Pro).
 - [Enhancement] Support multiple DLQ target topics via context aware strategies (Pro).
 - [Enhancement] Raise error when post-transactional committing of offset is done outside of the transaction (Pro).

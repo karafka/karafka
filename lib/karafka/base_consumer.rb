@@ -304,7 +304,12 @@ module Karafka
 
       offset = nil if offset == :consecutive
 
-      client.pause(topic.name, partition, offset)
+      client.pause(
+        topic.name,
+        partition,
+        offset,
+        coordinator.pause_tracker.current_timeout
+      )
 
       # Indicate, that user took a manual action of pausing
       coordinator.manual_pause if manual_pause

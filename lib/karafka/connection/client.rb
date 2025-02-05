@@ -221,10 +221,14 @@ module Karafka
       # @param offset [Integer, nil] offset of the message on which we want to pause (this message
       #   will be reprocessed after getting back to processing) or nil if we want to pause and
       #   resume from the consecutive offset (+1 from the last message passed to us by librdkafka)
+      # @param timeout [Integer] number of ms timeout of pause. It is used only for
+      #   instrumentation and not in the pause itself as pausing on this level is infinite always.
       # @note This will pause indefinitely and requires manual `#resume`
       # @note When `#internal_seek` is not involved (when offset is `nil`) we will not purge the
       #   librdkafka buffers and continue from the last cursor offset
-      def pause(topic, partition, offset = nil)
+      # @note We accept the timeout value on this layer to have a cohesive pause/resume
+      #   instrumentation, where all the details are available. It is especially needed, when
+      def pause(topic, partition, offset = nil, timeout = 0)
         @mutex.synchronize do
           # Do not pause if the client got closed, would not change anything
           return if @closed
@@ -243,7 +247,8 @@ module Karafka
             subscription_group: @subscription_group,
             topic: topic,
             partition: partition,
-            offset: offset
+            offset: offset,
+            timeout: timeout
           )
 
           @paused_tpls[topic][partition] = tpl
