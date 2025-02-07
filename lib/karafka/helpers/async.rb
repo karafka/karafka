@@ -37,12 +37,14 @@ module Karafka
 
       # Runs the `#call` method in a new thread
       # @param thread_name [String] name that we want to assign to the thread when we start it
-      def async_call(thread_name)
+      # @param thread_priority [Integer] Ruby thread priority
+      def async_call(thread_name, thread_priority = 0)
         MUTEX.synchronize do
           return if @thread&.alive?
 
           @thread = Thread.new do
             Thread.current.name = thread_name
+            Thread.current.priority = thread_priority
 
             Thread.current.abort_on_exception = true
 

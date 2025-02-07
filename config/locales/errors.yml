@@ -24,6 +24,7 @@ en:
       key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
       max_timeout_vs_pause_max_timeout: pause_timeout must be less or equal to pause_max_timeout
       shutdown_timeout_vs_max_wait_time: shutdown_timeout must be more than max_wait_time
+      worker_thread_priority_format: must be between -3 and 3
 
       oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
 
@@ -67,6 +68,7 @@ en:
       internal.connection.proxy.metadata.timeout_format: needs to be an integer bigger than 0
       internal.connection.proxy.metadata.max_attempts_format: needs to be an integer bigger than 0
       internal.connection.proxy.metadata.wait_time_format: needs to be an integer bigger than 0
+      internal.connection.listener_thread_priority_format: must be between -3 and 3
 
       internal.swarm.manager_format: cannot be nil
       internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0

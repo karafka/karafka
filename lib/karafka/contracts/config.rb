@@ -35,6 +35,7 @@ module Karafka
       required(:group_id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
       required(:strict_declarative_topics) { |val| [true, false].include?(val) }
+      required(:worker_thread_priority) { |val| (-3..3).to_a.include?(val) }
 
       nested(:swarm) do
         required(:nodes) { |val| val.is_a?(Integer) && val.positive? }
@@ -81,6 +82,7 @@ module Karafka
           required(:manager) { |val| !val.nil? }
           required(:conductor) { |val| !val.nil? }
           required(:reset_backoff) { |val| val.is_a?(Integer) && val >= 1_000 }
+          required(:listener_thread_priority) { |val| (-3..3).to_a.include?(val) }
 
           nested(:proxy) do
             nested(:commit) do
