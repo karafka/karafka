@@ -73,6 +73,9 @@ module Karafka
       # Really useful when you want to ensure that all topics in routing are managed via
       # declaratives.
       setting :strict_declarative_topics, default: false
+      # Defaults to the CPU thread priority slice to -1 (50ms) to ensure that CPU intense
+      # processing does not affect other threads and prevents starvation
+      setting :worker_thread_priority, default: -1
 
       setting :oauth do
         # option [false, #call] Listener for using oauth bearer. This listener will be able to
@@ -211,6 +214,10 @@ module Karafka
           # How long should we wait before a critical listener recovery
           # Too short may cause endless rebalance loops
           setting :reset_backoff, default: 60_000
+          # Similar to the `#worker_thread_priority`. Listener threads do not operate for long
+          # time and release GVL on polling but we provide this for API consistency and some
+          # special edge cases.
+          setting :listener_thread_priority, default: 0
 
           # Settings that are altered by our client proxy layer
           setting :proxy do

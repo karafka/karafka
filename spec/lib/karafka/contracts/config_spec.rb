@@ -16,6 +16,7 @@ RSpec.describe_current do
       strict_topics_namespacing: false,
       strict_declarative_topics: false,
       concurrency: 5,
+      worker_thread_priority: 0,
       license: {
         token: false,
         entity: ''
@@ -54,6 +55,7 @@ RSpec.describe_current do
           manager: 1,
           conductor: 1,
           reset_backoff: 1_000,
+          listener_thread_priority: 0,
           proxy: {
             query_watermark_offsets: {
               timeout: 100,
@@ -514,6 +516,32 @@ RSpec.describe_current do
     end
   end
 
+  context 'when we validate worker_thread_priority' do
+    context 'when worker_thread_priority is nil' do
+      before { config[:worker_thread_priority] = nil }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when worker_thread_priority is not an integer' do
+      before { config[:worker_thread_priority] = 2.1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when worker_thread_priority is less than -3' do
+      before { config[:worker_thread_priority] = -4 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when worker_thread_priority is more than 3' do
+      before { config[:worker_thread_priority] = 4 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
   context 'when we validate internal components' do
     context 'when internals are missing' do
       before { config.delete(:internal) }
@@ -567,6 +595,32 @@ RSpec.describe_current do
       before { config[:internal][:connection].delete(:proxy) }
 
       it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when we validate listener_thread_priority' do
+      context 'when listener_thread_priority is nil' do
+        before { config[:internal][:connection][:listener_thread_priority] = nil }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
+
+      context 'when listener_thread_priority is not an integer' do
+        before { config[:internal][:connection][:listener_thread_priority] = 2.1 }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
+
+      context 'when listener_thread_priority is less than -3' do
+        before { config[:internal][:connection][:listener_thread_priority] = -4 }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
+
+      context 'when listener_thread_priority is more than 3' do
+        before { config[:internal][:connection][:listener_thread_priority] = 4 }
+
+        it { expect(contract.call(config)).not_to be_success }
+      end
     end
 
     %i[

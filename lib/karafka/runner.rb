@@ -4,6 +4,7 @@ module Karafka
   # Class used to run the Karafka listeners in separate threads
   class Runner
     include Helpers::ConfigImporter.new(
+      worker_thread_priority: %i[worker_thread_priority],
       manager: %i[internal connection manager],
       conductor: %i[internal connection conductor],
       jobs_queue_class: %i[internal processing jobs_queue_class]
@@ -26,7 +27,12 @@ module Karafka
       # Register all the listeners so they can be started and managed
       manager.register(listeners)
 
-      workers.each_with_index { |worker, i| worker.async_call("karafka.worker##{i}") }
+      workers.each_with_index do |worker, i|
+        worker.async_call(
+          "karafka.worker##{i}",
+          worker_thread_priority
+        )
+      end
 
       # We aggregate threads here for a supervised shutdown process
       Karafka::Server.workers = workers
