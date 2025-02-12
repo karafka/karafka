@@ -201,7 +201,7 @@ module Karafka
 
             next unless multiplexing.active?
             next unless multiplexing.dynamic?
-            # If we cannot downscale, do not
+            # If we cannot upscale, do not
             next if sg_listeners.count(&:active?) >= multiplexing.max
 
             sg_listeners.each do |sg_listener|
