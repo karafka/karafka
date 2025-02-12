@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Swarm should work with a single subscription group with many topics and many partitions.
+
 setup_karafka do |config|
   config.swarm.nodes = 5
   config.kafka[:'group.id'] = SecureRandom.uuid
