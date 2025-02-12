@@ -34,7 +34,7 @@ module Karafka
         id
         kafka
         logger
-      ]
+      ].freeze
 
       private_constant :SKIPPABLE_NEW_PRODUCER_ATTRIBUTES
 
