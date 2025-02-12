@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
 # Swarm should work with a single subscription group with many topics and many partitions.
 
 setup_karafka do |config|
