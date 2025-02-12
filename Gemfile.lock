@@ -70,7 +70,7 @@ GEM
     minitest (5.25.4)
     ostruct (0.6.1)
     raabro (1.4.0)
-    rack (3.1.8)
+    rack (3.1.10)
     rake (13.2.1)
     roda (3.84.0)
       rack
