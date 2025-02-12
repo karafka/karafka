@@ -27,6 +27,17 @@ module Karafka
       # @return [Integer] pid of the node
       attr_reader :pid
 
+      # When re-creating a producer in the fork, those are not attributes we want to inherit
+      # from the parent process because they are updated in the fork. If user wants to take those
+      # from the parent process, he should redefine them by overwriting the whole producer.
+      SKIPPABLE_NEW_PRODUCER_ATTRIBUTES = %i[
+        id
+        kafka
+        logger
+      ]
+
+      private_constant :SKIPPABLE_NEW_PRODUCER_ATTRIBUTES
+
       # @param id [Integer] number of the fork. Used for uniqueness setup for group client ids and
       #   other stuff where we need to know a unique reference of the fork in regards to the rest
       #   of them.
@@ -52,10 +63,18 @@ module Karafka
           # an attempt to close it when finalized, meaning it would be kept in memory.
           config.producer.close
 
+          old_producer_config = config.producer.config
+
           # Supervisor producer is closed, hence we need a new one here
           config.producer = ::WaterDrop::Producer.new do |p_config|
             p_config.kafka = Setup::AttributesMap.producer(kafka.dup)
             p_config.logger = config.logger
+
+            old_producer_config.to_h.each do |key, value|
+              next if SKIPPABLE_NEW_PRODUCER_ATTRIBUTES.include?(key)
+
+              p_config.public_send("#{key}=", value)
+            end
           end
 
           @pid = ::Process.pid

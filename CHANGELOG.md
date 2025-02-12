@@ -14,6 +14,7 @@
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
 - [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.
 - [Fix] Fix inconsistency in the logs where OS signal originating logs would not have server id reference.
+- [Fix] Post-fork WaterDrop instance looses some of the non-kafka settings.
 
 ## 2.4.17 (2025-01-15)
 - [Enhancement] Clean message key and headers when cleaning messages via the cleaner API (Pro).
