@@ -17,7 +17,7 @@ RSpec.describe_current do
   end
 
   let(:min) { 1 }
-  let(:max) { 1 }
+  let(:max) { 2 }
   let(:boot) { 1 }
 
   context 'when config is valid' do
@@ -69,6 +69,13 @@ RSpec.describe_current do
     let(:max) { 5 }
     let(:min) { 5 }
     let(:boot) { 2 }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when both min and max are set to 1, which does not make sense' do
+    let(:max) { 1 }
+    let(:min) { 1 }
 
     it { expect(check).not_to be_success }
   end

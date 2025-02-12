@@ -58,6 +58,7 @@ en:
       subscription_group_details_multiplexing_boot_mismatch: 'boot needs to be between min and max'
       subscription_group_details.multiplexing_boot_format: 'needs to be an integer equal or more than 1'
       subscription_group_details.multiplexing_boot_not_dynamic: 'needs to be equal to max when not in dynamic mode'
+      subscription_group_details_multiplexing_one_not_enough: 'min and max cannot equal 1'
 
       swarm.active_format: needs to be true
       swarm.nodes_format: needs to be a range, array of nodes ids or a hash with direct assignments

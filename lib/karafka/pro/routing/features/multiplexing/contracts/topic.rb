@@ -78,6 +78,22 @@ module Karafka
                 [[%w[subscription_group_details], :multiplexing_boot_not_dynamic]]
               end
 
+              # Makes sure we do not run multiplexing with 1 always which does not make much sense
+              # because then it behaves like without multiplexing and can create problems for
+              # users running multiplexed subscription groups with multiple topics
+              virtual do |data, errors|
+                next unless errors.empty?
+                next unless min(data)
+                next unless max(data)
+
+                min = min(data)
+                max = max(data)
+
+                next unless min == 1 && max == 1
+
+                [[%w[subscription_group_details], :multiplexing_one_not_enough]]
+              end
+
               class << self
                 # @param data [Hash] topic details
                 # @return [Integer, false] min or false if missing
