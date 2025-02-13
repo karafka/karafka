@@ -2,7 +2,7 @@
 
 RSpec.describe_current do
   let(:resource_type) { :topic }
-  let(:resource_name) { SecureRandom.uuid }
+  let(:resource_name) { "it-#{SecureRandom.uuid}" }
   let(:resource_pattern_type) { :literal }
   let(:principal) { 'User:*' }
   let(:host) { '*' }

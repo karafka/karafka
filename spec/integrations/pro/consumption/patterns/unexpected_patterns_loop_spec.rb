@@ -6,7 +6,7 @@
 # When consumer uses patterns and same pattern matches the DLQ, messages may be self-consumed
 # creating endless loop. Not something you want.
 
-TOPIC_NAME = "not-funny-at-all-#{SecureRandom.uuid}".freeze
+TOPIC_NAME = "it-not-funny-at-all-#{SecureRandom.uuid}".freeze
 
 setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.kafka[:'topic.metadata.refresh.interval.ms'] = 2_000

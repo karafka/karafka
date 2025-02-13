@@ -3,7 +3,7 @@
 require 'karafka'
 require 'securerandom'
 
-TOPIC = SecureRandom.hex(6)
+TOPIC = "it-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
 
 workers 1

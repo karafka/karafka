@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+# A script that removes most of the auto-generated Kafka topics with their data
+# Useful when having long-running Kafka instance that cannot be fully nuked after running specs
+
+# We use the same convention in other framework components (web, waterdrop), so it removes all of
+# them as well.
+
+require_relative '../spec/integrations_helper.rb'
+
+setup_karafka
+
+topics_for_removal = []
+
+Karafka::Admin.cluster_info.topics.each do |topic|
+  topic_name = topic[:topic_name]
+
+  next unless topic_name.start_with?('it-')
+
+  topics_for_removal << topic_name
+end
+
+THREADS_COUNT = 3
+QUEUE = SizedQueue.new(THREADS_COUNT)
+TOPICS_TO_REMOVAL_COUNT = topics_for_removal.size
+
+threads = Array.new(THREADS_COUNT) do
+  Thread.new do
+    while topic_name = QUEUE.pop
+      puts "Removing topic: #{topic_name} (#{topics_for_removal.count} left)"
+      Karafka::Admin.delete_topic(topic_name)
+    end
+  end
+end
+
+while topics_for_removal.size.positive?
+  topic_name = topics_for_removal.pop
+
+  QUEUE << topic_name
+end
+
+QUEUE.close
+threads.each(&:join)

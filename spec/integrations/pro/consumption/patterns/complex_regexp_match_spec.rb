@@ -21,7 +21,7 @@ end
 ENDING = SecureRandom.uuid
 
 draw_routes(create_topics: false) do
-  pattern(/(us([0-9]){2}\.)?production\.#{ENDING}/) do
+  pattern(/it-(us([0-9]){2}\.)?production\.#{ENDING}/) do
     consumer Consumer
   end
 end
@@ -30,9 +30,9 @@ end
 start_karafka_and_wait_until do
   unless @created
     sleep(5)
-    produce_many("production.#{ENDING}", DT.uuids(1))
-    produce_many("us01.production.#{ENDING}", DT.uuids(1))
-    produce_many("sandbox.production.#{ENDING}", DT.uuids(1))
+    produce_many("it-production.#{ENDING}", DT.uuids(1))
+    produce_many("it-us01.production.#{ENDING}", DT.uuids(1))
+    produce_many("it-sandbox.production.#{ENDING}", DT.uuids(1))
     @created = true
   end
 
