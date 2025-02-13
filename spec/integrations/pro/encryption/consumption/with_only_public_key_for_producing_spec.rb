@@ -28,7 +28,7 @@ draw_routes do
   end
 end
 
-elements = DT.uuids(10)
+elements = DT.uuids(10).map { |uuid| "non-random-#{uuid}" }
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
