@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  let(:name) { SecureRandom.hex(6) }
+  let(:name) { "it-#{SecureRandom.uuid}" }
   let(:topics) { described_class.cluster_info.topics.map { |tp| tp[:topic_name] } }
 
   describe '#create_topic and #cluster_info' do
@@ -37,7 +37,6 @@ RSpec.describe_current do
   describe '#read_topic' do
     subject(:reading) { described_class.read_topic(name, partition, count, offset) }
 
-    let(:name) { SecureRandom.hex(6) }
     let(:partition) { 0 }
     let(:count) { 1 }
     let(:offset) { -1 }
@@ -388,8 +387,6 @@ RSpec.describe_current do
   end
 
   describe '#topic_info' do
-    let(:name) { SecureRandom.uuid }
-
     context 'when given topic does not exist' do
       it { expect { described_class.topic_info(name) }.to raise_error(Rdkafka::RdkafkaError) }
     end
@@ -408,7 +405,6 @@ RSpec.describe_current do
   describe '#read_watermark_offsets' do
     subject(:offsets) { described_class.read_watermark_offsets(name, partition) }
 
-    let(:name) { SecureRandom.hex(6) }
     let(:partition) { 0 }
 
     context 'when trying to read non-existing topic' do
@@ -448,7 +444,7 @@ RSpec.describe_current do
     subject(:seeking) { described_class.seek_consumer_group(cg_id, map) }
 
     let(:cg_id) { SecureRandom.uuid }
-    let(:topic) { SecureRandom.uuid }
+    let(:topic) { name }
     let(:partition) { 0 }
     let(:offset) { 0 }
     let(:map) { { topic => { partition => offset } } }

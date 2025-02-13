@@ -12,7 +12,7 @@
 - [Enhancement] Allow marking older offsets to support advanced rewind capabilities.
 - [Enhancement] Change optional `#seek` reset offset flag default to `true` as `false` is almost never used and seek by default should move the internal consumer offset position as well.
 - [Refactor] Introduce a `bin/integrations_clean_kafka` script to clean Kafka from temporary test-suite topics.
-- [Refactor] Make sure all temporary topics have a `dt-` prefix in their name.
+- [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
 - [Fix] Prevent multiplexing of 1:1 from routing.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
 - [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.

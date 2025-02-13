@@ -7,13 +7,13 @@ RSpec.describe_current do
   subject(:expand) { described_class.new.call(topics) }
 
   context 'when trying to expand on a non-existing topic' do
-    let(:topics) { "topic-#{SecureRandom.uuid}" }
+    let(:topics) { "it-topic-#{SecureRandom.uuid}" }
 
     it { expect { expand }.to raise_error(Karafka::Errors::TopicNotFoundError) }
   end
 
   context 'when expanding on a full name' do
-    let(:topics) { SecureRandom.uuid }
+    let(:topics) { "it-#{SecureRandom.uuid}" }
 
     before { Karafka::Admin.create_topic(topics, 2, 1) }
 
@@ -21,7 +21,7 @@ RSpec.describe_current do
   end
 
   context 'when expanding on full names' do
-    let(:topics) { [SecureRandom.uuid, SecureRandom.uuid] }
+    let(:topics) { ["it-#{SecureRandom.uuid}", "it-#{SecureRandom.uuid}"] }
 
     before { topics.each { |topic| Karafka::Admin.create_topic(topic, 2, 1) } }
 
@@ -36,7 +36,7 @@ RSpec.describe_current do
   end
 
   context 'when expanding on a full topic with given offset' do
-    let(:topics) { { SecureRandom.uuid => 100 } }
+    let(:topics) { { "it-#{SecureRandom.uuid}" => 100 } }
 
     before { Karafka::Admin.create_topic(topics.keys.first, 2, 1) }
 
@@ -53,7 +53,7 @@ RSpec.describe_current do
 
   context 'when expanding on a full topic with a time' do
     let(:time) { Time.now }
-    let(:topics) { { SecureRandom.uuid => time } }
+    let(:topics) { { "it-#{SecureRandom.uuid}" => time } }
 
     before { Karafka::Admin.create_topic(topics.keys.first, 2, 1) }
 

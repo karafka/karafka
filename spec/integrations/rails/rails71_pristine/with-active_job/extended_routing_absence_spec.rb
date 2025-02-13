@@ -21,6 +21,6 @@ ExampleApp.initialize!
 
 setup_karafka
 
-draw_routes Class.new do
+draw_routes(Class.new, create_topics: false) do
   active_job_topic 'test'
 end

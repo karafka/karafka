@@ -15,8 +15,7 @@ topics_for_removal = []
 Karafka::Admin.cluster_info.topics.each do |topic|
   topic_name = topic[:topic_name]
 
-  next if topic_name.start_with?('__')
-  next unless topic_name.count('-') >= 3
+  next unless topic_name.start_with?('it-')
 
   topics_for_removal << topic_name
 end

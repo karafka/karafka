@@ -5,7 +5,7 @@
 
 setup_karafka
 
-uuid1 = SecureRandom.uuid
+uuid1 = "it-#{SecureRandom.uuid}"
 acl1 = Karafka::Admin::Acl.new(
   resource_type: :topic,
   resource_name: uuid1,
@@ -24,7 +24,7 @@ sleep(1)
 assert_equal [], Karafka::Admin::Acl.describe(acl1)
 assert !Karafka::Admin::Acl.all.map(&:resource_name).include?(uuid1)
 
-uuid2 = SecureRandom.uuid
+uuid2 = "it-#{SecureRandom.uuid}"
 acl2 = Karafka::Admin::Acl.new(
   resource_type: :topic,
   resource_name: uuid2,

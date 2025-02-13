@@ -101,7 +101,7 @@ class DataCollector
   # Creates a collector
   def initialize
     @mutex = Mutex.new
-    @topics = Array.new(100) { SecureRandom.hex(8) }
+    @topics = Array.new(100) { "it-#{SecureRandom.hex(8)}" }
     @consumer_groups = @topics
     @data = Hash.new do |hash, key|
       @mutex.synchronize do

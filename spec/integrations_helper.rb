@@ -73,8 +73,8 @@ def setup_karafka(
     if Karafka.pro?
       # Do not redefine topics locations if re-configured
       unless @setup_karafka_first_run
-        config.recurring_tasks.topics.schedules = SecureRandom.hex(6)
-        config.recurring_tasks.topics.logs = SecureRandom.hex(6)
+        config.recurring_tasks.topics.schedules = "it-#{SecureRandom.uuid}"
+        config.recurring_tasks.topics.logs = "it-#{SecureRandom.uuid}"
         # Run often so we do not wait on the first run
         config.recurring_tasks.interval = 1_000
 
@@ -126,12 +126,12 @@ def setup_web
 
   # Use new groups and topics for each spec, so we don't end up with conflicts
   Karafka::Web.setup do |config|
-    config.group_id = SecureRandom.hex(6)
-    config.topics.consumers.reports = SecureRandom.hex(6)
-    config.topics.consumers.states = SecureRandom.hex(6)
-    config.topics.consumers.metrics = SecureRandom.hex(6)
-    config.topics.consumers.commands = SecureRandom.hex(6)
-    config.topics.errors = SecureRandom.hex(6)
+    config.group_id = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.reports = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.states = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.metrics = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.commands = "it-#{SecureRandom.uuid}"
+    config.topics.errors = "it-#{SecureRandom.uuid}"
 
     yield(config) if block_given?
   end
@@ -298,6 +298,12 @@ def create_routes_topics
              else
                [1, 1, {}]
              end
+
+      # All integration tests topics names always have to start with it-
+      unless name.start_with?('it-')
+        puts 'All integration tests topics need to start with "it-"'
+        raise
+      end
 
       Thread.new do
         Karafka::Admin.create_topic(

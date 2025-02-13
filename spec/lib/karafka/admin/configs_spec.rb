@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  let(:topic_name) { SecureRandom.uuid }
+  let(:topic_name) { "it-#{SecureRandom.uuid}" }
 
   describe '#describe' do
     subject(:result) { described_class.describe(*resources) }
