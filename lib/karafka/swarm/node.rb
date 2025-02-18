@@ -34,6 +34,7 @@ module Karafka
         id
         kafka
         logger
+        oauth
       ].freeze
 
       private_constant :SKIPPABLE_NEW_PRODUCER_ATTRIBUTES
@@ -75,6 +76,11 @@ module Karafka
 
               p_config.public_send("#{key}=", value)
             end
+
+            # Namespaced attributes need to be migrated directly on their config node
+            old_producer_config.oauth.to_h.each do |key, value|
+              p_config.oauth.public_send("#{key}=", value)
+            end
           end
 
           @pid = ::Process.pid
@@ -88,6 +94,8 @@ module Karafka
           monitor.instrument('swarm.node.after_fork', caller: self)
 
           Karafka::Process.tags.add(:execution_mode, 'mode:swarm')
+          Karafka::Process.tags.add(:swarm_nodeid, "node:#{@id}")
+
           Server.execution_mode = :swarm
           Server.run
 

@@ -11,6 +11,7 @@
 - [Enhancement] Make the generic error handling in the `LoggerListener` more descriptive by logging also the error class.
 - [Enhancement] Allow marking older offsets to support advanced rewind capabilities.
 - [Enhancement] Change optional `#seek` reset offset flag default to `true` as `false` is almost never used and seek by default should move the internal consumer offset position as well.
+- [Enhancement] Include Swarm node ID in the swarm process tags.
 - [Refactor] Introduce a `bin/integrations_clean_kafka` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
 - [Fix] Prevent multiplexing of 1:1 from routing.
