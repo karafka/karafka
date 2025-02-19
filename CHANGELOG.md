@@ -14,6 +14,7 @@
 - [Enhancement] Include Swarm node ID in the swarm process tags.
 - [Refactor] Introduce a `bin/integrations_clean_kafka` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
+- [Fix] Use more sane value in `Admin#seek_consumer_group` for long ago.
 - [Fix] Prevent multiplexing of 1:1 from routing.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
 - [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.
