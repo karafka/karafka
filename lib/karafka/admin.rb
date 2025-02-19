@@ -14,7 +14,8 @@ module Karafka
     # this date
     LONG_TIME_AGO = Time.at(1_262_300_400)
 
-    DAY_IN_SECONDS = 60 * 60 *24
+    # one day in seconds for future time reference
+    DAY_IN_SECONDS = 60 * 60 * 24
 
     private_constant :LONG_TIME_AGO, :DAY_IN_SECONDS
 
