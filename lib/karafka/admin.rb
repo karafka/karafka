@@ -10,11 +10,11 @@ module Karafka
   #   Cluster on which operations are performed can be changed via `admin.kafka` config, however
   #   there is no multi-cluster runtime support.
   module Admin
-    # More or less number of seconds of 1 hundred years
+    # More or less number of seconds of 25 years
     # Used for time referencing that does not have to be accurate but needs to be big
-    HUNDRED_YEARS = 100 * 365.25 * 24 * 60 * 60
+    LONG_TIME_AGO = 25 * 365.25 * 24 * 60 * 60
 
-    private_constant :HUNDRED_YEARS
+    private_constant :LONG_TIME_AGO
 
     class << self
       # Allows us to read messages from the topic
@@ -203,14 +203,14 @@ module Karafka
             # Earliest is not always 0. When compacting/deleting it can be much later, that's why
             # we fetch the oldest possible offset
             when 'earliest'
-              Time.now - HUNDRED_YEARS
+              Time.now - LONG_TIME_AGO
             # Latest will always be the high-watermark offset and we can get it just by getting
             # a future position
             when 'latest'
-              Time.now + HUNDRED_YEARS
+              Time.now + LONG_TIME_AGO
             # Same as `'latest'`
             when false
-              Time.now - HUNDRED_YEARS
+              Time.now - LONG_TIME_AGO
             # Regular offset case
             else
               position
