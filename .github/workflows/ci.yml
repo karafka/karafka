@@ -115,6 +115,9 @@ jobs:
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
 
+      - name: Check test topics naming convention
+        run: bin/verify_topics_naming
+
   integrations_oss:
     timeout-minutes: 20
     runs-on: ubuntu-latest
@@ -176,6 +179,9 @@ jobs:
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
 
+      - name: Check test topics naming convention
+        run: bin/verify_topics_naming
+
   integrations_pro:
     timeout-minutes: 45
     runs-on: ubuntu-latest
@@ -231,3 +237,6 @@ jobs:
 
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
+
+      - name: Check test topics naming convention
+        run: bin/verify_topics_naming

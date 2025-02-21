@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+# This script verifies that we do not create (except few needed exceptions) test topics that do
+# not start with the "it-" prefix which is our standard.
+#
+# This ensures that we can clearly identify all test topics for removal in case of doing dev work
+# on a long-lived Kafka cluster without option to fully reset it.
+#
+# It also ensures we have one convention that we can follow.
+
+require_relative '../spec/integrations_helper.rb'
+
+setup_karafka
+
+# Please note that "__" starting topics are not here by default. It is expected.
+invalid = Karafka::Admin
+          .cluster_info
+          .topics
+          .map { |topic| topic[:topic_name] }
+          .select { |topic| !topic.start_with?('it-') }
+          .select { |topic| topic.length <= 6 }
+
+invalid.each do |invalid_name|
+  puts "#{invalid_name} does not start with the \"it-\" prefix"
+end
+
+exit invalid.empty? ? 0 : 1
