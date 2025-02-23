@@ -89,7 +89,12 @@ en:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present
       patterns_regexps_not_unique: 'must be unique within consumer group'
+
       direct_assignments_homogenous: 'single consumer group cannot mix regular and direct assignments'
+
+      parallel_segments.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
+      parallel_segments.count_format: needs to be equal or more than 1
+      parallel_segments.reducer_format: "needs to respond to `#call`"
 
     pattern:
       regexp_format: must be a regular expression
