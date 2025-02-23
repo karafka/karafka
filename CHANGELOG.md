@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.18 (Unreleased)
+- **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
 - [Enhancement] Allow setting the workers thread priority and set it to -1 (50ms) by default.
 - [Enhancement] Enhance low-level `client.pause` event with timeout value (if provided).
 - [Enhancement] Introduce `#marking_cursor` API (defaults to `#cursor`) in the filtering API (Pro).
