@@ -92,9 +92,12 @@ en:
 
       direct_assignments_homogenous: 'single consumer group cannot mix regular and direct assignments'
 
+      parallel_segments.partitioner_format: needs to be defined and needs to respond to `#call`
       parallel_segments.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
       parallel_segments.count_format: needs to be equal or more than 1
+      parallel_segments.active_format: needs to be boolean
       parallel_segments.reducer_format: "needs to respond to `#call`"
+      parallel_segments.merge_key_format: "needs to be a non-empty string"
 
     pattern:
       regexp_format: must be a regular expression
