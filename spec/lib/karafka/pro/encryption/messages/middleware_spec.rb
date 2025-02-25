@@ -37,7 +37,7 @@ RSpec.describe_current do
     before do
       allow(::Karafka::App.config.encryption)
         .to receive(:fingerprinter)
-        .and_return(Digest::MD5)
+        .and_return(Digest::SHA256)
     end
 
     it 'expect to use it and create fingerprint header' do

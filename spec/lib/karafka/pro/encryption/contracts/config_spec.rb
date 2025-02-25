@@ -63,7 +63,7 @@ RSpec.describe_current do
     end
 
     context 'when it does respond to #hexdigest' do
-      before { encryption[:fingerprinter] = Digest::MD5 }
+      before { encryption[:fingerprinter] = Digest::SHA256 }
 
       it { expect(contract.call(config)).to be_success }
     end

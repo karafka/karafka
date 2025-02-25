@@ -83,7 +83,7 @@ RSpec.describe_current do
       before do
         allow(::Karafka::App.config.encryption).to receive_messages(
           public_key: fixture_file('rsa/public_key_1.pem'),
-          fingerprinter: Digest::MD5,
+          fingerprinter: Digest::SHA256,
           private_keys: { '1' => fixture_file('rsa/private_key_1.pem') }
         )
       end
