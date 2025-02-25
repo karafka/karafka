@@ -33,18 +33,28 @@ RSpec.describe_current do
       .to('encryption' => '1')
   end
 
-  context 'when fingerprinter is defined' do
+  context 'when custom fingerprinter is defined' do
+    let(:expected) do
+      <<~DIGEST.delete("\n")
+        92bf445810db8cbd9802
+        cd585fb76e08801b8202
+        e923ee842be8179a97ee
+        c4078d4cf45a3b3d5201
+        1d0ca7bbfd9c2e2b
+      DIGEST
+    end
+
     before do
       allow(::Karafka::App.config.encryption)
         .to receive(:fingerprinter)
-        .and_return(Digest::SHA256)
+        .and_return(Digest::SHA384)
     end
 
     it 'expect to use it and create fingerprint header' do
       expect { middleware }
         .to change { message[:headers] }
         .from({})
-        .to('encryption' => '1', 'encryption_fingerprint' => 'c72b9698fa1927e1dd12d3cf26ed84b2')
+        .to('encryption' => '1', 'encryption_fingerprint' => expected)
     end
   end
 end
