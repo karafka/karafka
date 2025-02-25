@@ -16,7 +16,7 @@ setup_karafka(allow_errors: %w[consumer.consume.error]) do |config|
   config.encryption.version = '1'
   config.encryption.public_key = PUBLIC_KEY
   config.encryption.private_keys = PRIVATE_KEYS
-  config.encryption.fingerprinter = Digest::MD5
+  config.encryption.fingerprinter = Digest::SHA256
 end
 
 Karafka.monitor.subscribe('error.occurred') do |event|

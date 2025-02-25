@@ -12,6 +12,7 @@
 - [Enhancement] Allow marking older offsets to support advanced rewind capabilities.
 - [Enhancement] Change optional `#seek` reset offset flag default to `true` as `false` is almost never used and seek by default should move the internal consumer offset position as well.
 - [Enhancement] Include Swarm node ID in the swarm process tags.
+- [Enhancement] Replace internal usage of MD5 with SHA256 for FIPS.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
