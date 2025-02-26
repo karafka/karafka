@@ -11,7 +11,7 @@ RSpec.describe_current do
       prepend Karafka::Pro::Routing::Features::ParallelSegments::ConsumerGroup
 
       def name
-        "test-group-parallel-1"
+        'test-group-parallel-1'
       end
 
       def to_h

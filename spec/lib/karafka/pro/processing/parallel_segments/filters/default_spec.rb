@@ -30,7 +30,7 @@ RSpec.describe_current do
     it { expect(filter.applied?).to be(false) }
     it { expect(filter.mark_as_consumed?).to be(false) }
     it { expect(filter.action).to eq(:skip) }
-    it { expect(filter.timeout).to eq(nil) }
+    it { expect(filter.timeout).to be_nil }
   end
 
   context 'when all messages belong to our group' do
@@ -206,7 +206,7 @@ RSpec.describe_current do
       before { filter.apply!([]) }
 
       it { expect(filter.action).to eq(:skip) }
-      it { expect(filter.timeout).to eq(nil) }
+      it { expect(filter.timeout).to be_nil }
       it { expect(filter.marking_method).to eq(:mark_as_consumed) }
     end
 
@@ -214,7 +214,7 @@ RSpec.describe_current do
       before { filter.apply!([message2, message4]) }
 
       it { expect(filter.action).to eq(:skip) }
-      it { expect(filter.timeout).to eq(nil) }
+      it { expect(filter.timeout).to be_nil }
     end
   end
 
