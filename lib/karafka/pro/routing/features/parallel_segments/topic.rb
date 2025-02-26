@@ -21,15 +21,13 @@ module Karafka
 
               builder = lambda do |topic, _partition|
                 mom = topic.manual_offset_management?
-                merge_key = consumer_group.parallel_segments.merge_key
-                group_id = consumer_group.name.split(merge_key).last.to_i
 
                 # We have two filters for mom and non-mom scenario not to mix this logic
                 filter_scope = Karafka::Pro::Processing::ParallelSegments::Filters
                 filter_class = mom ? filter_scope::Mom : filter_scope::Default
 
                 filter_class.new(
-                  group_id: group_id,
+                  segment_id: consumer_group.segment_id,
                   partitioner: consumer_group.parallel_segments.partitioner,
                   reducer: consumer_group.parallel_segments.reducer
                 )

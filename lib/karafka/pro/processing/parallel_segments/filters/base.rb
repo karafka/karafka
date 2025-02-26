@@ -12,14 +12,14 @@ module Karafka
         module Filters
           # Base class for filters for parallel segments that deal with different feature scenarios
           class Base < Processing::Filters::Base
-            # @param group_id [Integer] numeric id of the parallel segment group to use with the
+            # @param segment_id [Integer] numeric id of the parallel segment group to use with the
             #   partitioner and reducer for segment matching comparison
             # @param partitioner [Proc]
             # @param reducer [Proc]
-            def initialize(group_id:, partitioner:, reducer:)
+            def initialize(segment_id:, partitioner:, reducer:)
               super()
 
-              @group_id = group_id
+              @segment_id = segment_id
               @partitioner = partitioner
               @reducer = reducer
             end

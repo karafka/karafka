@@ -50,10 +50,24 @@ module Karafka
               parallel_segments.active?
             end
 
+            # @return [Integer] id of the segment (0 or bigger) or -1 if parallel segments are not
+            #   active
+            def segment_id
+              return @segment_id if @segment_id
+
+              @segment_id = if parallel_segments?
+                              name.split(parallel_segments.merge_key).last.to_i
+                            else
+                              -1
+                            end
+            end
+
             # @return [Hash] consumer group setup with the parallel segments definition in it
             def to_h
               super.merge(
-                parallel_segments: parallel_segments.to_h
+                parallel_segments: parallel_segments.to_h.merge(
+                  segment_id: segment_id
+                )
               ).freeze
             end
           end
