@@ -8,7 +8,7 @@ RSpec.describe_current do
 
   it { expect { base.apply!([]) }.to raise_error(NotImplementedError) }
   it { expect(base.action).to eq(:skip) }
-  it { expect(base.timeout).to eq(0) }
+  it { expect(base.timeout).to eq(nil) }
   it { expect(base.cursor).to be_nil }
   it { expect(base.mark_as_consumed?).to be(false) }
   it { expect(base.marking_method).to eq(:mark_as_consumed) }
