@@ -6,19 +6,19 @@
 RSpec.describe_current do
   subject(:filter) do
     described_class.new(
-      group_id: group_id,
+      segment_id: segment_id,
       partitioner: partitioner,
       reducer: reducer
     )
   end
 
-  let(:group_id) { 1 }
+  let(:segment_id) { 1 }
   let(:partitioner) { ->(message) { message.key } }
   let(:reducer) { ->(parallel_key) { parallel_key.to_s.sum % 2 } }
 
   describe '#initialize' do
-    it 'sets the group_id' do
-      expect(filter.instance_variable_get(:@group_id)).to eq(group_id)
+    it 'sets the segment_id' do
+      expect(filter.instance_variable_get(:@segment_id)).to eq(segment_id)
     end
 
     it 'sets the partitioner' do
@@ -35,12 +35,12 @@ RSpec.describe_current do
     end
 
     context 'with different values' do
-      let(:group_id) { 5 }
+      let(:segment_id) { 5 }
       let(:partitioner) { ->(message) { message.headers['custom_key'] } }
       let(:reducer) { ->(parallel_key) { parallel_key.hash % 10 } }
 
-      it 'sets different group_id correctly' do
-        expect(filter.instance_variable_get(:@group_id)).to eq(5)
+      it 'sets different segment_id correctly' do
+        expect(filter.instance_variable_get(:@segment_id)).to eq(5)
       end
 
       it 'sets different partitioner correctly' do
@@ -71,7 +71,7 @@ RSpec.describe_current do
 
   describe 'argument validation' do
     context 'with missing required arguments' do
-      it 'raises an error when group_id is missing' do
+      it 'raises an error when segment_id is missing' do
         expect do
           described_class.new(
             partitioner: partitioner,
@@ -83,7 +83,7 @@ RSpec.describe_current do
       it 'raises an error when partitioner is missing' do
         expect do
           described_class.new(
-            group_id: group_id,
+            segment_id: segment_id,
             reducer: reducer
           )
         end.to raise_error(ArgumentError)
@@ -92,7 +92,7 @@ RSpec.describe_current do
       it 'raises an error when reducer is missing' do
         expect do
           described_class.new(
-            group_id: group_id,
+            segment_id: segment_id,
             partitioner: partitioner
           )
         end.to raise_error(ArgumentError)
@@ -100,10 +100,10 @@ RSpec.describe_current do
     end
 
     context 'with invalid argument types' do
-      it 'accepts any type for group_id' do
+      it 'accepts any type for segment_id' do
         expect do
           described_class.new(
-            group_id: 'string_id',
+            segment_id: 'string_id',
             partitioner: partitioner,
             reducer: reducer
           )
@@ -115,7 +115,7 @@ RSpec.describe_current do
         # callability
         expect do
           described_class.new(
-            group_id: group_id,
+            segment_id: segment_id,
             partitioner: 'not_callable',
             reducer: reducer
           )
@@ -127,7 +127,7 @@ RSpec.describe_current do
         # callability
         expect do
           described_class.new(
-            group_id: group_id,
+            segment_id: segment_id,
             partitioner: partitioner,
             reducer: 'not_callable'
           )

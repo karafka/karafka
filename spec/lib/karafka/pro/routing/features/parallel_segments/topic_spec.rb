@@ -103,7 +103,7 @@ RSpec.describe_current do
         filter = builder.call(topic, 0)
 
         # Verify group_id
-        expect(filter.instance_variable_get(:@group_id)).to eq(1)
+        expect(filter.instance_variable_get(:@segment_id)).to eq(1)
       end
 
       it 'configures filter with partitioner from config' do
@@ -163,7 +163,7 @@ RSpec.describe_current do
         filter = builder.call(topic, 0)
 
         # Verify group_id
-        expect(filter.instance_variable_get(:@group_id)).to eq(1)
+        expect(filter.instance_variable_get(:@segment_id)).to eq(1)
       end
     end
   end

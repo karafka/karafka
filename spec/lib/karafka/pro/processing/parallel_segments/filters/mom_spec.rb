@@ -6,13 +6,13 @@
 RSpec.describe_current do
   subject(:filter) do
     described_class.new(
-      group_id: group_id,
+      segment_id: segment_id,
       partitioner: partitioner,
       reducer: reducer
     )
   end
 
-  let(:group_id) { 1 }
+  let(:segment_id) { 1 }
   let(:count) { 2 }
   let(:partitioner) { ->(message) { message.key } }
   let(:reducer) { ->(parallel_key) { parallel_key.to_s.sum % count } }
@@ -31,7 +31,7 @@ RSpec.describe_current do
     it { expect(filter.applied?).to be(false) }
     it { expect(filter.mark_as_consumed?).to be(false) }
     it { expect(filter.action).to eq(:skip) }
-    it { expect(filter.timeout).to eq(0) }
+    it { expect(filter.timeout).to eq(nil) }
   end
 
   context 'when all messages belong to our group' do
@@ -69,8 +69,8 @@ RSpec.describe_current do
     it { expect(messages).to eq([message1, message3]) }
   end
 
-  context 'when using a different group_id' do
-    let(:group_id) { 0 }
+  context 'when using a different segment_id' do
+    let(:segment_id) { 0 }
     let(:messages) { [message1, message2, message3, message4] }
 
     before { filter.apply!(messages) }
@@ -105,7 +105,7 @@ RSpec.describe_current do
       build(:messages_message, raw_key: 'key4', raw_headers: { 'segment_count' => '4' })
     end
 
-    let(:group_id) { 2 }
+    let(:segment_id) { 2 }
     let(:messages) { [message1, message2, message3, message4] }
 
     before { filter.apply!(messages) }
@@ -113,59 +113,6 @@ RSpec.describe_current do
     it { expect(filter.applied?).to be(true) }
     it { expect(filter.mark_as_consumed?).to be(false) }
     it { expect(messages).to eq([message1, message3]) }
-  end
-
-  describe 'cursor management' do
-    context 'when some messages are filtered out' do
-      let(:messages) { [message1, message2, message4] }
-
-      before { filter.apply!(messages) }
-
-      it 'sets cursor to the message being removed' do
-        expect(filter.instance_variable_get(:@cursor)).to eq(message4)
-      end
-    end
-
-    context 'when all messages are filtered out' do
-      let(:messages) { [message2, message4] }
-
-      before { filter.apply!(messages) }
-
-      it 'sets cursor to the last filtered message' do
-        expect(filter.instance_variable_get(:@cursor)).to eq(message4)
-      end
-    end
-
-    context 'when no messages are filtered out' do
-      let(:messages) { [message1, message3] }
-
-      before { filter.apply!(messages) }
-
-      it 'cursor remains as first message' do
-        expect(filter.instance_variable_get(:@cursor)).to eq(message1)
-      end
-    end
-
-    context 'with reversed message order' do
-      let(:messages) { [message4, message2, message1] }
-
-      before { filter.apply!(messages) }
-
-      it 'cursor is set to the last filtered message' do
-        expect(filter.instance_variable_get(:@cursor)).to eq(message2)
-        expect(messages).to eq([message1])
-      end
-    end
-
-    context 'with empty messages array' do
-      let(:messages) { [] }
-
-      before { filter.apply!(messages) }
-
-      it 'cursor remains nil' do
-        expect(filter.instance_variable_get(:@cursor)).to be_nil
-      end
-    end
   end
 
   describe 'marking behavior' do
@@ -209,7 +156,7 @@ RSpec.describe_current do
       before { filter.apply!([]) }
 
       it { expect(filter.action).to eq(:skip) }
-      it { expect(filter.timeout).to eq(0) }
+      it { expect(filter.timeout).to eq(nil) }
       it { expect(filter.marking_method).to eq(:mark_as_consumed) }
     end
 
@@ -217,7 +164,7 @@ RSpec.describe_current do
       before { filter.apply!([message2, message4]) }
 
       it { expect(filter.action).to eq(:skip) }
-      it { expect(filter.timeout).to eq(0) }
+      it { expect(filter.timeout).to eq(nil) }
       # Key difference - Mom never marks as consumed
       it { expect(filter.mark_as_consumed?).to be(false) }
     end
@@ -272,7 +219,7 @@ RSpec.describe_current do
           it 'filters according to the distribution pattern' do
             # Calculate expected result based on our reducer formula
             expected = messages.select do |message|
-              message.key.to_s.sum % count == group_id
+              message.key.to_s.sum % count == segment_id
             end
 
             expect(messages).to match_array(expected)

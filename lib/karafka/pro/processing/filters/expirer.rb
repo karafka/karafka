@@ -36,6 +36,11 @@ module Karafka
               too_old
             end
           end
+
+          # @return [nil] this filter does not deal with timeouts
+          def timeout
+            nil
+          end
         end
       end
     end

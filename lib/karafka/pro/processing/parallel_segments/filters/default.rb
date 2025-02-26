@@ -29,7 +29,7 @@ module Karafka
             def apply!(messages)
               @applied = false
               @all_filtered = false
-              @cursor = messages.first unless messages.empty?
+              @cursor = messages.first
 
               # Keep track of how many messages we had initially
               initial_size = messages.size
@@ -66,19 +66,16 @@ module Karafka
               @all_filtered
             end
 
-            # @return [Symbol] the marking method to use
-            def marking_method
-              :mark_as_consumed
-            end
-
-            # @return [Symbol] the action to take (skip as we only mark)
-            def action
-              :skip
-            end
-
-            # @return [Integer] timeout duration (not used for skip)
+            # @return [nil] Since we do not timeout ever in this filter, we should not return
+            #   any value for it.
             def timeout
-              0
+              nil
+            end
+
+            # Only return cursor if we wanted to mark as consumed in case all was filtered.
+            # Otherwise it could interfere with other filters
+            def cursor
+              @all_filtered ? @cursor : nil
             end
           end
         end

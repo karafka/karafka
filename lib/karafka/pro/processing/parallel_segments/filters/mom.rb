@@ -28,7 +28,6 @@ module Karafka
             #   filter
             def apply!(messages)
               @applied = false
-              @cursor = messages.first unless messages.empty?
 
               # Filter out messages that don't match our segment group
               messages.delete_if do |message|
@@ -38,10 +37,7 @@ module Karafka
                 # Remove the message if it doesn't belong to our segment
                 remove = target_segment != @segment_id
 
-                if remove
-                  @cursor = message
-                  @applied = true
-                end
+                @applied = true if remove
 
                 remove
               end
@@ -57,19 +53,10 @@ module Karafka
               false
             end
 
-            # @return [Symbol] the marking method (never used in mom mode)
-            def marking_method
-              :mark_as_consumed
-            end
-
-            # @return [Symbol] the action to take (always skip for mom mode)
-            def action
-              :skip
-            end
-
-            # @return [Integer] timeout duration (not used for skip)
+            # @return [nil] Since we do not timeout ever in this filter, we should not return
+            #   any value for it.
             def timeout
-              0
+              nil
             end
           end
         end

@@ -14,7 +14,7 @@ RSpec.describe_current do
     before { delayer.apply!([]) }
 
     it { expect(delayer.applied?).to be(false) }
-    it { expect(delayer.timeout).to eq(0) }
+    it { expect(delayer.timeout).to eq(nil) }
     it { expect(delayer.action).to eq(:skip) }
   end
 
@@ -29,7 +29,7 @@ RSpec.describe_current do
     end
 
     it { expect(delayer.applied?).to be(false) }
-    it { expect(delayer.timeout).to eq(0) }
+    it { expect(delayer.timeout).to eq(nil) }
     it { expect(delayer.action).to eq(:skip) }
   end
 
