@@ -21,7 +21,7 @@ module Karafka
 
     # @return [String] id of the current consumer
     attr_reader :id
-    # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
+    # @return [Karafka::Messages::Messages] current messages batch
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
