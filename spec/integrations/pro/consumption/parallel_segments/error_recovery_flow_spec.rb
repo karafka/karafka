@@ -14,6 +14,8 @@ class Consumer < Karafka::BaseConsumer
   def consume
     segment_id = topic.consumer_group.segment_id
 
+    DT[:post_trigger] = true if DT[:error_triggered] && segment_id == 0
+
     messages.each do |message|
       DT[:processed] << [message.key, segment_id, message.raw_payload]
 
@@ -149,7 +151,11 @@ start_karafka_and_wait_until do
   end
 
   # Wait until both batches are processed or error occurred
-  @produced_second_batch && (DT[:errors].any? || DT[:processed].size >= 25)
+  next false unless @produced_second_batch
+  next false unless DT[:errors].any? || DT[:processed].size >= 25
+  next false unless DT.key?(:post_trigger)
+
+  true
 end
 
 # Verify error occurred
