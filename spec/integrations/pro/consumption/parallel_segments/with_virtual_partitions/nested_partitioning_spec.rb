@@ -24,6 +24,8 @@ class Consumer < Karafka::BaseConsumer
       vp_keys: messages.map { |m| extract_vp_key(m) }.uniq
     }
 
+    sleep(5)
+
     messages.each do |message|
       vp_key = extract_vp_key(message)
 
