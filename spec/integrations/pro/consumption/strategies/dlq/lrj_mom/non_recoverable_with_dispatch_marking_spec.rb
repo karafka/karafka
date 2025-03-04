@@ -22,7 +22,8 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      raise StandardError if message.offset == 1 || message.offset == 25
+      raise StandardError if message.offset == 1 || !DT.key?(:errors)
+      raise StandardError if message.offset == 25
 
       DT[0] << message.offset
     end
@@ -41,7 +42,7 @@ end
 produce_many(DT.topics[0], DT.uuids(50))
 
 start_karafka_and_wait_until do
-  DT[:errors].size >= 2 && DT[0].count >= 46
+  DT[:errors].size >= 2 && DT[0].count >= 46 && DT[0].include?(49)
 end
 
-assert_equal fetch_next_offset, 26
+assert_equal fetch_next_offset, 26, fetch_next_offset
