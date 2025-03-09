@@ -8,6 +8,7 @@
 
 setup_karafka do |config|
   config.concurrency = 5
+  config.max_messages = 10
   config.kafka[:'transactional.id'] = SecureRandom.uuid
 end
 
@@ -144,7 +145,14 @@ Karafka::App.producer.produce_many_sync(segment0_abort)
 
 # Start Karafka and wait for a fixed number of batches to be processed
 start_karafka_and_wait_until do
-  DT[:batches_processed].size >= 3 && DT[:normal_processed].size >= 1
+  # Wait for EITHER enough batches OR we've seen what we need
+  received_abort = DT[:aborted].size >= 1
+  processed_normal = DT[:normal_processed].size >= 1
+  enough_batches = DT[:batches_processed].size >= (
+    segment0_normal.size + segment1_normal.size + segment0_abort.size
+  )
+
+  (received_abort && processed_normal) || enough_batches
 end
 
 # 1. Verify we've received both normal and abort messages
