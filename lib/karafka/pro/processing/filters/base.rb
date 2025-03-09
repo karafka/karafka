@@ -42,9 +42,11 @@ module Karafka
             @applied
           end
 
-          # @return [Integer] default timeout for pausing (if applicable)
+          # @return [Integer, nil] default timeout for pausing (if applicable) or nil if not
+          # @note Please do not return `0` when your filter is not pausing as it may interact
+          #   with other filters that want to pause.
           def timeout
-            0
+            nil
           end
 
           # @return [Boolean] should we use the cursor value to mark as consumed. If any of the

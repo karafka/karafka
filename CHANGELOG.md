@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.4.18 (Unreleased)
+- **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
 - [Enhancement] Allow setting the workers thread priority and set it to -1 (50ms) by default.
 - [Enhancement] Enhance low-level `client.pause` event with timeout value (if provided).
 - [Enhancement] Introduce `#marking_cursor` API (defaults to `#cursor`) in the filtering API (Pro).
@@ -16,6 +17,7 @@
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
+- [Fix] Prevent applied system filters `#timeout` from potentially interacting with user filters.
 - [Fix] Use more sane value in `Admin#seek_consumer_group` for long ago.
 - [Fix] Prevent multiplexing of 1:1 from routing.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
