@@ -13,14 +13,24 @@ module Karafka
         class ErrorsTracker
           include Enumerable
 
+          # @return [Karafka::Routing::Topic] topic of this error tracker
+          attr_reader :topic
+
+          # @return [Integer] partition of this error tracker
+          attr_reader :partition
+
           # Max errors we keep in memory.
           # We do not want to keep more because for DLQ-less this would cause memory-leaks.
           STORAGE_LIMIT = 100
 
           private_constant :STORAGE_LIMIT
 
-          def initialize
+          # @param topic [Karafka::Routing::Topic]
+          # @param partition [Integer]
+          def initialize(topic, partition)
             @errors = []
+            @topic = topic
+            @partition = partition
           end
 
           # Clears all the errors

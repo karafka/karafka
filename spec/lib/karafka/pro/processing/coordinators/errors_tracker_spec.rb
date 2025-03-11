@@ -4,7 +4,9 @@
 # See LICENSE for details.
 
 RSpec.describe_current do
-  subject(:tracker) { described_class.new }
+  subject(:tracker) { described_class.new(topic, 0) }
+
+  let(:topic) { build(:routing_topic) }
 
   context 'when there are no errors' do
     it { expect(tracker.to_a).to eq([]) }

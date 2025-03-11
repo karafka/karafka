@@ -20,7 +20,7 @@ module Karafka
           super
 
           @executed = []
-          @errors_tracker = Coordinators::ErrorsTracker.new
+          @errors_tracker = Coordinators::ErrorsTracker.new(topic, partition)
           @flow_mutex = Mutex.new
           # Lock for user code synchronization
           # We do not want to mix coordinator lock with the user lock not to create cases where
