@@ -76,7 +76,7 @@ jobs:
           bash coditsu_script.sh
 
   specs:
-    timeout-minutes: 15 # Increased from 10 for safety margin
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     needs: diffend
     strategy:
