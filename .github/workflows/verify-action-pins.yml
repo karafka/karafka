@@ -1,0 +1,16 @@
+name: Verify Action Pins
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+      - name: Check SHA pins
+        run: |
+          if grep -E -r "uses: .*/.*@(v[0-9]+|main|master)" .github/workflows/; then
+            echo "::error::Actions should use SHA pins, not tags or branch names"
+            exit 1
+          fi
