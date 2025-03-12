@@ -582,7 +582,7 @@ module Karafka
         # We should not run a single poll longer than the tick frequency. Otherwise during a single
         # `#batch_poll` we would not be able to run `#events_poll` often enough effectively
         # blocking events from being handled.
-        poll_tick = timeout > @tick_interval ? @tick_interval : timeout
+        poll_tick = timeout > tick_interval ? tick_interval : timeout
 
         result = kafka.poll(poll_tick)
 
