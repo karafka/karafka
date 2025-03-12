@@ -551,6 +551,27 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
+    context 'when it is a parallel_segments.reducer.error' do
+      let(:type) { 'parallel_segments.reducer.error' }
+      let(:message) { "Parallel segments reducer error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a parallel_segments.partitioner.error' do
+      let(:type) { 'parallel_segments.partitioner.error' }
+      let(:message) { "Parallel segments partitioner error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a virtual_partitions.partitioner.error' do
+      let(:type) { 'virtual_partitions.partitioner.error' }
+      let(:message) { "Virtual partitions partitioner error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
     context 'when it is a different error type' do
       let(:type) { 'different.error' }
       let(:message) { "different.error error occurred: #{error.class} - #{error}" }

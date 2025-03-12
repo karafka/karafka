@@ -31,9 +31,9 @@ module Karafka
 
               # Filter out messages that don't match our segment group
               messages.delete_if do |message|
-                message_segment_key = @partitioner.call(message)
+                message_segment_key = partition(message)
                 # Use the reducer to get the target group for this message
-                target_segment = @reducer.call(message_segment_key)
+                target_segment = reduce(message_segment_key)
                 # Remove the message if it doesn't belong to our segment
                 remove = target_segment != @segment_id
 

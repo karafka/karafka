@@ -18,6 +18,7 @@
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
+- [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
 - [Fix] Prevent applied system filters `#timeout` from potentially interacting with user filters.
 - [Fix] Use more sane value in `Admin#seek_consumer_group` for long ago.
 - [Fix] Prevent multiplexing of 1:1 from routing.

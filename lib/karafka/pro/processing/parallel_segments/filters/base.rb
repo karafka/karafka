@@ -23,6 +23,48 @@ module Karafka
               @partitioner = partitioner
               @reducer = reducer
             end
+
+            private
+
+            # @param message [Karafka::Messages::Message] received message
+            # @return [String, Numeric] segment assignment key
+            def partition(message)
+              @partitioner.call(message)
+            rescue StandardError => e
+              # This should not happen. If you are seeing this it means your partitioner code
+              # failed and raised an error. We highly recommend mitigating partitioner level errors
+              # on the user side because this type of collapse should be considered a last resort
+              Karafka.monitor.instrument(
+                'error.occurred',
+                caller: self,
+                error: e,
+                message: message,
+                type: 'parallel_segments.partitioner.error'
+              )
+
+              :failure
+            end
+
+            # @param message_segment_key [String, Numeric] segment key to pass to the reducer
+            # @return [Integer] segment assignment of a given message
+            def reduce(message_segment_key)
+              # Assign to segment 0 always in case of failures in partitioner
+              # This is a fail-safe
+              return 0 if message_segment_key == :failure
+
+              @reducer.call(message_segment_key)
+            rescue StandardError
+              # @see `#partition` method error handling doc
+              Karafka.monitor.instrument(
+                'error.occurred',
+                caller: self,
+                error: e,
+                message: message,
+                type: 'parallel_segments.reducer.error'
+              )
+
+              0
+            end
           end
         end
       end
