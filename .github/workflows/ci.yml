@@ -26,12 +26,12 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce # v1
+        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce
         with:
           ruby-version: 3.4
           bundler-cache: true
@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
       - name: Run Karafka license checksum verification
@@ -65,7 +65,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
       - name: Run Coditsu
@@ -75,6 +75,8 @@ jobs:
           # Optional: Add checksum verification here
           bash coditsu_script.sh
 
+  # We do not split RSpec specs to OSS and Pro like integrations because they do not overload
+  # Kafka heavily, compute total coverage for specs and are fast enough
   specs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
@@ -91,7 +93,7 @@ jobs:
           - ruby: '3.4'
             coverage: 'true'
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -107,7 +109,7 @@ jobs:
         run: rm -f Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce # v1
+        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -141,7 +143,7 @@ jobs:
           - '3.2'
           - '3.1'
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -153,7 +155,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce # v1
+        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce
         with:
           # Do not use cache here as we run bundle install also later in some of the integration
           # tests and we need to be able to run it without cache
@@ -205,7 +207,7 @@ jobs:
           - '3.2'
           - '3.1'
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -214,7 +216,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce # v1
+        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce
         with:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
