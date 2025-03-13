@@ -10,7 +10,7 @@
   "packageRules": [
     {
       "matchManagers": ["github-actions"],
-      "schedule": ["after 1 week"]
+      "minimumReleaseAge": "7 days"
     }
   ]
 }
