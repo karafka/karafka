@@ -1,13 +1,16 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-      "config:base"
-  ],
-  "ignorePaths": [
-      "spec/integrations"
+    "spec/integrations"
   ],
   "github-actions": {
     "enabled": true,
     "pinDigests": true
-  }
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "minimumReleaseAge": "7 days"
+    }
+  ]
 }
