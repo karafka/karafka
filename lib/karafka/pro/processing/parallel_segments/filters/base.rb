@@ -53,13 +53,13 @@ module Karafka
               return 0 if message_segment_key == :failure
 
               @reducer.call(message_segment_key)
-            rescue StandardError
+            rescue StandardError => e
               # @see `#partition` method error handling doc
               Karafka.monitor.instrument(
                 'error.occurred',
                 caller: self,
                 error: e,
-                message: message,
+                message_segment_key: message_segment_key,
                 type: 'parallel_segments.reducer.error'
               )
 
