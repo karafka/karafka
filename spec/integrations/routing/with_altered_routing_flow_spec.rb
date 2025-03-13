@@ -50,15 +50,15 @@ class Matcher
     end
   end
 
-  def method_missing(meth, *args, **kwargs)
+  def method_missing(method_name, *args, **kwargs)
     @applications << if args.empty?
-                       [meth, kwargs]
+                       [method_name, kwargs]
                      else
-                       [meth, args]
+                       [method_name, args]
                      end
   end
 
-  def respond_to_missing?(method_name, include_private = false)
+  def respond_to_missing?(_method_name, _include_private = false)
     true
   end
 end
