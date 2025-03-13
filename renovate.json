@@ -1,7 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "spec/integrations"
+    "config:base"
+  ],
+  "ignorePaths": [
+      "spec/integrations"
   ],
   "github-actions": {
     "enabled": true,
