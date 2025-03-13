@@ -16,6 +16,7 @@
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
+- [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
 - [Fix] Use more sane value in `Admin#seek_consumer_group` for long ago.
 - [Fix] Prevent multiplexing of 1:1 from routing.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
