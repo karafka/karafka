@@ -46,6 +46,7 @@ module Karafka
               # When topic is set to false, it means we just want to skip dispatch on DLQ
               next if topic == false
               next if topic.is_a?(String) && topic_regexp.match?(topic)
+              next if topic == :strategy
 
               [[%i[dead_letter_queue topic], :format]]
             end

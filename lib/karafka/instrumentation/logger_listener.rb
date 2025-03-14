@@ -425,6 +425,15 @@ module Karafka
         when 'connection.client.unsubscribe.error'
           error "Client unsubscribe error occurred: #{error}"
           error details
+        when 'parallel_segments.reducer.error'
+          error "Parallel segments reducer error occurred: #{error}"
+          error details
+        when 'parallel_segments.partitioner.error'
+          error "Parallel segments partitioner error occurred: #{error}"
+          error details
+        when 'virtual_partitions.partitioner.error'
+          error "Virtual partitions partitioner error occurred: #{error}"
+          error details
         # This handles any custom errors coming from places like Web-UI, etc
         else
           error "#{type} error occurred: #{error.class} - #{error}"

@@ -9,6 +9,11 @@ module Karafka
     # closed consumer instance as it causes Ruby VM process to crash.
     class Client
       include ::Karafka::Core::Helpers::Time
+      include Helpers::ConfigImporter.new(
+        logger: %i[logger],
+        tick_interval: %i[internal tick_interval],
+        shutdown_timeout: %i[shutdown_timeout]
+      )
 
       attr_reader :rebalance_manager
 
@@ -65,7 +70,6 @@ module Karafka
         @closed = false
         @subscription_group = subscription_group
         @buffer = RawMessagesBuffer.new
-        @tick_interval = ::Karafka::App.config.internal.tick_interval
         @rebalance_manager = RebalanceManager.new(@subscription_group.id, @buffer)
         @rebalance_callback = Instrumentation::Callbacks::Rebalance.new(@subscription_group, id)
 
@@ -318,7 +322,7 @@ module Karafka
           @unsubscribing = true
 
           # Give 50% of time for the final close before we reach the forceful
-          max_wait = ::Karafka::App.config.shutdown_timeout * COOP_UNSUBSCRIBE_FACTOR
+          max_wait = shutdown_timeout * COOP_UNSUBSCRIBE_FACTOR
           used = 0
           stopped_at = monotonic_now
 
@@ -578,7 +582,7 @@ module Karafka
         # We should not run a single poll longer than the tick frequency. Otherwise during a single
         # `#batch_poll` we would not be able to run `#events_poll` often enough effectively
         # blocking events from being handled.
-        poll_tick = timeout > @tick_interval ? @tick_interval : timeout
+        poll_tick = timeout > tick_interval ? tick_interval : timeout
 
         result = kafka.poll(poll_tick)
 
@@ -660,7 +664,7 @@ module Karafka
       # Builds a new rdkafka consumer instance based on the subscription group configuration
       # @return [Rdkafka::Consumer]
       def build_consumer
-        ::Rdkafka::Config.logger = ::Karafka::App.config.logger
+        ::Rdkafka::Config.logger = logger
 
         # We need to refresh the setup of this subscription group in case we started running in a
         # swarm. The initial configuration for validation comes from the parent node, but it needs

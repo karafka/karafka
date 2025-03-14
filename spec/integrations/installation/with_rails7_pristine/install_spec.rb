@@ -5,6 +5,7 @@
 require 'tmpdir'
 require 'fileutils'
 require 'open3'
+require 'logger'
 
 spec_dir = File.expand_path(__dir__)
 

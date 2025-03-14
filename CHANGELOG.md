@@ -1,6 +1,8 @@
 # Karafka Framework Changelog
 
 ## 2.4.18 (Unreleased)
+- **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
+- [Enhancement] Make the error tracker for advanced DLQ strategies respond to `#topic` and `#partition` for context aware dispatches.
 - [Enhancement] Allow setting the workers thread priority and set it to -1 (50ms) by default.
 - [Enhancement] Enhance low-level `client.pause` event with timeout value (if provided).
 - [Enhancement] Introduce `#marking_cursor` API (defaults to `#cursor`) in the filtering API (Pro).
@@ -17,6 +19,8 @@
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
+- [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
+- [Fix] Prevent applied system filters `#timeout` from potentially interacting with user filters.
 - [Fix] Use more sane value in `Admin#seek_consumer_group` for long ago.
 - [Fix] Prevent multiplexing of 1:1 from routing.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
