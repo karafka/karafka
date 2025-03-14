@@ -62,6 +62,11 @@ module Karafka
                             end
             end
 
+            # @return [String] original segment consumer group name
+            def segment_origin
+              name.split(parallel_segments.merge_key).first
+            end
+
             # @return [Hash] consumer group setup with the parallel segments definition in it
             def to_h
               super.merge(

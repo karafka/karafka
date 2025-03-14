@@ -87,6 +87,78 @@ RSpec.describe_current do
     end
   end
 
+  describe '#segment_id' do
+    context 'when parallel segments are not active' do
+      before { consumer_group.public_send(:parallel_segments=, count: 1) }
+
+      it 'returns nil' do
+        expect(consumer_group.segment_id).to eq(-1)
+      end
+    end
+
+    context 'when parallel segments are active' do
+      before do
+        consumer_group.public_send(:parallel_segments=, count: 5)
+        allow(consumer_group).to receive(:name).and_return('test-group')
+      end
+
+      it 'returns consumer group name with segment index appended using merge_key' do
+        expect(consumer_group.segment_id).to eq(0)
+      end
+
+      it 'uses custom merge_key when specified' do
+        consumer_group.public_send(:parallel_segments=, count: 5, merge_key: '--seg--')
+        expect(consumer_group.segment_id).to eq(0)
+      end
+    end
+  end
+
+  describe '#segment_origin' do
+    context 'when group name does not contain merge_key' do
+      before do
+        allow(consumer_group).to receive(:name).and_return('original-group')
+        consumer_group.public_send(:parallel_segments=, count: 3)
+      end
+
+      it 'returns the original group name' do
+        expect(consumer_group.segment_origin).to eq('original-group')
+      end
+    end
+
+    context 'when group name contains default merge_key' do
+      before do
+        allow(consumer_group).to receive(:name).and_return('original-group-parallel-2')
+        consumer_group.public_send(:parallel_segments=, count: 3)
+      end
+
+      it 'returns the group name without segment part' do
+        expect(consumer_group.segment_origin).to eq('original-group')
+      end
+    end
+
+    context 'when group name contains custom merge_key' do
+      before do
+        allow(consumer_group).to receive(:name).and_return('original-group--custom--2')
+        consumer_group.public_send(:parallel_segments=, count: 3, merge_key: '--custom--')
+      end
+
+      it 'returns the group name without segment part' do
+        expect(consumer_group.segment_origin).to eq('original-group')
+      end
+    end
+
+    context 'when merge_key appears multiple times in the name' do
+      before do
+        allow(consumer_group).to receive(:name).and_return('original-parallel-group-parallel-2')
+        consumer_group.public_send(:parallel_segments=, count: 3)
+      end
+
+      it 'returns the group name without the last segment part' do
+        expect(consumer_group.segment_origin).to eq('original')
+      end
+    end
+  end
+
   describe '#to_h' do
     before do
       consumer_group.public_send(
