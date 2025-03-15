@@ -35,6 +35,9 @@ module Karafka
     # Raised when given topic is not found while expected
     TopicNotFoundError = Class.new(BaseError)
 
+    # Raised when given consumer group is not found while expected
+    ConsumerGroupNotFoundError = Class.new(BaseError)
+
     # This should never happen. Please open an issue if it does.
     UnsupportedCaseError = Class.new(BaseError)
 
@@ -63,6 +66,10 @@ module Karafka
 
     # Raised when there is an attempt to run an unrecognized CLI command
     UnrecognizedCommandError = Class.new(BaseError)
+
+    # Raised when you were executing a command and it could not finish successfully because of
+    # a setup state or parameters configuration
+    CommandValidationError = Class.new(BaseError)
 
     # Raised when we attempt to perform operation that is only allowed inside of a transaction and
     # there is no transaction around us
