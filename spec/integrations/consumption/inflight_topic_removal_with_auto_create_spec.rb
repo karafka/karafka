@@ -1,0 +1,34 @@
+# frozen_string_literal: true
+
+# When topic in use is removed, Karafka should not emit an error as it will reset and re-create the
+# topic
+
+setup_karafka do |config|
+  config.kafka[:'allow.auto.create.topics'] = true
+end
+
+Karafka.monitor.subscribe('error.occurred') do |event|
+  DT[:errors] << event[:error]
+end
+
+class Consumer < Karafka::BaseConsumer
+  def consume
+    Thread.new do
+      Karafka::Admin.delete_topic(DT.topic)
+    rescue StandardError
+      nil
+    end
+
+    sleep(1)
+
+    DT[:done] = true
+  end
+end
+
+draw_routes(Consumer)
+
+produce_many(DT.topic, DT.uuids(1))
+
+start_karafka_and_wait_until do
+  DT.key?(:done)
+end
