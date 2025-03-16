@@ -3,7 +3,9 @@
 # Karafka should emit an inline error if topic that was used was suddenly removed
 # In async, it should emit it via the error pipeline
 
-setup_karafka(allow_errors: true)
+setup_karafka(allow_errors: true) do |config|
+  config.kafka[:'allow.auto.create.topics'] = false
+end
 
 draw_routes do
   topic DT.topics[0] do

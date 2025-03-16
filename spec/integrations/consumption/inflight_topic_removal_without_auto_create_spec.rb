@@ -2,7 +2,9 @@
 
 # When topic in use is removed, Karafka should emit an error
 
-setup_karafka(allow_errors: true)
+setup_karafka(allow_errors: true) do |config|
+  config.kafka[:'allow.auto.create.topics'] = false
+end
 
 Karafka.monitor.subscribe('error.occurred') do |event|
   DT[:errors] << event[:error]
@@ -29,5 +31,5 @@ start_karafka_and_wait_until do
 end
 
 DT[:errors].each do |error|
-  assert error.code == :unknown_partition || error.code == :unknown_topic_or_part
+  assert %i[unknown_partition unknown_topic_or_part].include?(error.code)
 end
