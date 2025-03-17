@@ -7,8 +7,10 @@ module Karafka
   module Pro
     module Cli
       class ParallelSegments < Karafka::Cli::Base
-        # Takes the lowest possible offsets of each parallel segment for each topic and records
-        # them back onto the segment origin consumer group.
+        # Takes the committed offset of each parallel segment for each topic and records
+        # them back onto the segment origin consumer group. Without `--force` it will raise an
+        # error on conflicts. With `--force` it will take the lowest possible offset for each
+        # topic partition as the baseline.
         #
         # @note Running this can cause you some double processing if the parallel segments final
         #   offsets are not aligned.
@@ -39,6 +41,13 @@ module Karafka
               puts "Collecting group #{yellow(segment_origin)} details..."
               offsets = collect_offsets(segment_origin, segments)
 
+              unless options.key?(:force)
+                puts
+                puts "Validating offsets positions for #{yellow(segment_origin)} consumer group..."
+                validate!(offsets, segment_origin)
+              end
+
+              puts
               puts "Computing collapsed offsets for #{yellow(segment_origin)} consumer group..."
               collapses << collapse(offsets, segments)
             end
@@ -81,6 +90,51 @@ module Karafka
               collapse: collapse,
               segment_origin: segments.first.segment_origin
             }
+          end
+
+          # In order to collapse the offsets of parallel segments back to one, we need to know
+          # to what offsets to collapse. The issue (that we solve picking lowest when forced)
+          # arises when there are more offsets that are not even in parallel segments for one
+          # topic partition. We should let user know about this if this happens so he does not
+          # end up with double-processing.
+          #
+          # @param offsets [Hash]
+          # @param segment_origin [String]
+          def validate!(offsets, segment_origin)
+            collapse = Hash.new { |h, k| h[k] = {} }
+
+            offsets.each do |cg_name, topics|
+              next if cg_name == segment_origin
+
+              topics.each do |topic_name, partitions|
+                partitions.each do |partition_id, offset|
+                  collapse[topic_name][partition_id] ||= Set.new
+                  collapse[topic_name][partition_id] << offset
+                end
+              end
+            end
+
+            inconclusive = false
+
+            collapse.each do |topic_name, partitions|
+              partitions.each do |partition_id, parallel_offsets|
+                next if parallel_offsets.size == 1
+
+                inconclusive = true
+
+                puts(
+                  "  Inconclusive offsets for #{red(topic_name)}##{red(partition_id)}:" \
+                  " #{parallel_offsets.to_a.join(' ,')}"
+                )
+              end
+            end
+
+            return unless inconclusive
+
+            raise(
+              ::Karafka::Errors::CommandValidationError,
+              "Parallel segments for #{red(segment_origin)} have #{red('inconclusive')} offsets"
+            )
           end
 
           # Applies the collapsed lowest offsets onto the segment origin consumer group
