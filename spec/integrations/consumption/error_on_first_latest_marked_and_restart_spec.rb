@@ -45,5 +45,5 @@ start_karafka_and_wait_until do
 end
 
 # Since we force marked as consumed the latest - 1, it should start again from the latest,
-# whic is in our case first message dispatched after server started
+# which is in our case first message dispatched after server started
 assert_equal 1, fetch_next_offset

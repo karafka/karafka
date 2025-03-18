@@ -37,6 +37,18 @@ RSpec.describe_current do
     specify { expect(error).to be < described_class::BaseError }
   end
 
+  describe 'ConsumerGroupNotFoundError' do
+    subject(:error) { described_class::ConsumerGroupNotFoundError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe 'CommandValidationError' do
+    subject(:error) { described_class::CommandValidationError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
   describe 'InvalidLicenseTokenError' do
     subject(:error) { described_class::InvalidLicenseTokenError }
 
