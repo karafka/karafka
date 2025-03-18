@@ -26,8 +26,8 @@ module Karafka
           # @return [Hash<String, Array<Karafka::Routing::ConsumerGroup>>] hash with all parallel
           #   consumer groups as values and names of segments origin consumer group as the key.
           def applicable_groups
-            applicable_groups = {}
-            requested_groups = options[:groups] || []
+            requested_groups = options[:groups].dup || []
+
             workable_groups = ::Karafka::App
                               .routes
                               .select(&:parallel_segments?)
@@ -35,6 +35,8 @@ module Karafka
 
             # Use all if none provided
             return workable_groups if requested_groups.empty?
+
+            applicable_groups = {}
 
             requested_groups.each do |requested_group|
               workable_group = workable_groups[requested_group]

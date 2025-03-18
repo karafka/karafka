@@ -118,13 +118,13 @@ module Karafka
 
             collapse.each do |topic_name, partitions|
               partitions.each do |partition_id, parallel_offsets|
-                next if parallel_offsets.size == 1
+                next if parallel_offsets.size <= 1
 
                 inconclusive = true
 
                 puts(
                   "  Inconclusive offsets for #{red(topic_name)}##{red(partition_id)}:" \
-                  " #{parallel_offsets.to_a.join(' ,')}"
+                  " #{parallel_offsets.to_a.join(', ')}"
                 )
               end
             end
