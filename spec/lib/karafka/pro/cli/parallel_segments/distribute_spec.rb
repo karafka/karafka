@@ -7,104 +7,122 @@ RSpec.describe_current do
   subject(:command) { described_class.new(options) }
 
   let(:options) { {} }
-  let(:segment_origin) { 'test-origin-group' }
-  let(:segments) { [segment1, segment2] }
-  let(:applicable_groups) { { segment_origin => segments } }
-
-  let(:segment1) do
-    instance_double(Karafka::Routing::ConsumerGroup, name: 'test-origin-group-parallel-0')
-  end
-
-  let(:segment2) do
-    instance_double(Karafka::Routing::ConsumerGroup, name: 'test-origin-group-parallel-1')
-  end
-
-  # Setup test data for different scenarios
-  let(:origin_with_offsets) do
-    {
-      'test-origin-group' => {
-        'topic1' => { '0' => 100, '1' => 200 },
-        'topic2' => { '0' => 300, '1' => 400 }
-      },
-      'test-origin-group-parallel-0' => {
-        'topic1' => { '0' => 0, '1' => 0 },
-        'topic2' => { '0' => 0, '1' => 0 }
-      },
-      'test-origin-group-parallel-1' => {
-        'topic1' => { '0' => 0, '1' => 0 },
-        'topic2' => { '0' => 0, '1' => 0 }
-      }
-    }
-  end
-
-  let(:segments_with_offsets) do
-    {
-      'test-origin-group' => {
-        'topic1' => { '0' => 100, '1' => 200 },
-        'topic2' => { '0' => 300, '1' => 400 }
-      },
-      'test-origin-group-parallel-0' => {
-        'topic1' => { '0' => 50, '1' => 150 },
-        'topic2' => { '0' => 250, '1' => 350 }
-      },
-      'test-origin-group-parallel-1' => {
-        'topic1' => { '0' => 0, '1' => 0 },
-        'topic2' => { '0' => 0, '1' => 0 }
-      }
-    }
-  end
 
   describe '#call' do
     before do
-      allow(command).to receive_messages(
-        applicable_groups: applicable_groups,
-        collect_offsets: origin_with_offsets
-      )
+      allow(Karafka::App.routes).to receive(:select).and_return(parallel_routes)
+      allow(Karafka::App.routes).to receive(:clear)
 
-      allow(Karafka::Admin)
-        .to receive(:seek_consumer_group)
+      allow(Karafka::Admin).to receive(:read_lags_with_offsets).and_return(offsets_data)
+      allow(Karafka::Admin).to receive(:seek_consumer_group)
     end
 
-    context 'when applicable groups exist with offsets to distribute' do
-      it 'distributes offsets to all segment consumer groups' do
-        command.call
+    let(:parallel_routes) do
+      segment_origin = 'test-origin-group'
 
-        expect(Karafka::Admin)
-          .to have_received(:seek_consumer_group)
-          .with(
-            'test-origin-group-parallel-0',
-            hash_including(
-              'topic1' => { '0' => 100, '1' => 200 },
-              'topic2' => { '0' => 300, '1' => 400 }
-            )
+      [
+        instance_double(
+          Karafka::Routing::ConsumerGroup,
+          name: 'test-origin-group-parallel-0',
+          segment_origin: segment_origin,
+          parallel_segments?: true,
+          topics: [
+            instance_double(Karafka::Routing::Topic, name: 'topic1'),
+            instance_double(Karafka::Routing::Topic, name: 'topic2')
+          ]
+        ),
+        instance_double(
+          Karafka::Routing::ConsumerGroup,
+          name: 'test-origin-group-parallel-1',
+          segment_origin: segment_origin,
+          parallel_segments?: true,
+          topics: [
+            instance_double(Karafka::Routing::Topic, name: 'topic1'),
+            instance_double(Karafka::Routing::Topic, name: 'topic2')
+          ]
+        )
+      ]
+    end
+
+    let(:offsets_data) do
+      {
+        'test-origin-group' => {
+          'topic1' => {
+            '0' => { offset: 100, lag: 0 },
+            '1' => { offset: 200, lag: 0 }
+          },
+          'topic2' => {
+            '0' => { offset: 300, lag: 0 },
+            '1' => { offset: 400, lag: 0 }
+          }
+        },
+        'test-origin-group-parallel-0' => {
+          'topic1' => {
+            '0' => { offset: 0, lag: 0 },
+            '1' => { offset: 0, lag: 0 }
+          },
+          'topic2' => {
+            '0' => { offset: 0, lag: 0 },
+            '1' => { offset: 0, lag: 0 }
+          }
+        },
+        'test-origin-group-parallel-1' => {
+          'topic1' => {
+            '0' => { offset: 0, lag: 0 },
+            '1' => { offset: 0, lag: 0 }
+          },
+          'topic2' => {
+            '0' => { offset: 0, lag: 0 },
+            '1' => { offset: 0, lag: 0 }
+          }
+        }
+      }
+    end
+
+    it 'distributes offsets to all segment consumer groups' do
+      command.call
+
+      expect(Karafka::Admin).to have_received(:seek_consumer_group)
+        .with(
+          'test-origin-group-parallel-0',
+          hash_including(
+            'topic1' => hash_including('0' => 100, '1' => 200),
+            'topic2' => hash_including('0' => 300, '1' => 400)
           )
+        )
 
-        expect(Karafka::Admin)
-          .to have_received(:seek_consumer_group)
-          .with(
-            'test-origin-group-parallel-1',
-            hash_including(
-              'topic1' => { '0' => 100, '1' => 200 },
-              'topic2' => { '0' => 300, '1' => 400 }
-            )
+      expect(Karafka::Admin).to have_received(:seek_consumer_group)
+        .with(
+          'test-origin-group-parallel-1',
+          hash_including(
+            'topic1' => hash_including('0' => 100, '1' => 200),
+            'topic2' => hash_including('0' => 300, '1' => 400)
           )
-      end
+        )
     end
 
-    context 'when no applicable groups are found' do
-      let(:applicable_groups) { {} }
-
-      it 'completes without seeking any consumer groups' do
-        command.call
-        expect(Karafka::Admin).not_to have_received(:seek_consumer_group)
-      end
-    end
-
-    context 'when a segment already has offsets' do
-      before do
-        allow(command)
-          .to receive(:collect_offsets)
-          .and_return(segments_with_offsets)
+    context 'when segments already have offsets' do
+      let(:offsets_data) do
+        {
+          'test-origin-group' => {
+            'topic1' => {
+              '0' => { offset: 100, lag: 0 },
+              '1' => { offset: 200, lag: 0 }
+            }
+          },
+          'test-origin-group-parallel-0' => {
+            'topic1' => {
+              '0' => { offset: 50, lag: 0 },
+              '1' => { offset: 0, lag: 0 }
+            }
+          },
+          'test-origin-group-parallel-1' => {
+            'topic1' => {
+              '0' => { offset: 0, lag: 0 },
+              '1' => { offset: 0, lag: 0 }
+            }
+          }
+        }
       end
 
       context 'without force option' do
@@ -118,9 +136,7 @@ RSpec.describe_current do
 
         it 'distributes offsets despite existing segment offsets' do
           command.call
-          expect(Karafka::Admin)
-            .to have_received(:seek_consumer_group)
-            .twice
+          expect(Karafka::Admin).to have_received(:seek_consumer_group).twice
         end
       end
     end
