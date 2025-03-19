@@ -16,9 +16,11 @@
 - [Enhancement] Include Swarm node ID in the swarm process tags.
 - [Enhancement] Replace internal usage of MD5 with SHA256 for FIPS.
 - [Enhancement] Improve OSS vs. Pro specs execution isolation.
+- [Enhancement] Preload `librdkafka` code prior to forking in the Swarm mode to save memory.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
+- [Maintenance] Require `karafka-rdkafka` `>=` `0.19.0` due to usage of `#rd_kafka_global_init`.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
 - [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
 - [Fix] Prevent applied system filters `#timeout` from potentially interacting with user filters.
