@@ -154,6 +154,9 @@ start_karafka_and_wait_until do
   next false unless @produced_second_batch
   next false unless DT[:errors].any? || DT[:processed].size >= 25
   next false unless DT.key?(:post_trigger)
+  next false unless DT[:processed].any? do |_key, segment, payload|
+    segment == 0 && payload.start_with?('second-batch')
+  end
 
   true
 end
