@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Seeking beyond highwatermark should trigger reset back to earliest
+# Seeking beyond high watermark should trigger reset back to earliest
 
 setup_karafka
 
