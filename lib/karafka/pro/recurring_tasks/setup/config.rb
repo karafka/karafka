@@ -32,8 +32,13 @@ module Karafka
           )
 
           setting(:topics) do
-            setting(:schedules, default: 'karafka_recurring_tasks_schedules')
-            setting(:logs, default: 'karafka_recurring_tasks_logs')
+            setting(:schedules) do
+              setting(:name, default: 'karafka_recurring_tasks_schedules')
+            end
+
+            setting(:logs) do
+              setting(:name, default: 'karafka_recurring_tasks_logs')
+            end
           end
 
           configure
