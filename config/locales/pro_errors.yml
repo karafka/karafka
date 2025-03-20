@@ -122,8 +122,8 @@ en:
 
       recurring_tasks.consumer_class_format: 'needs to inherit from Karafka::BaseConsumer'
       recurring_tasks.group_id_format: 'needs to be a string with a Kafka accepted format'
-      recurring_tasks.topics.schedules_format: 'needs to be a string with a Kafka accepted format'
-      recurring_tasks.topics.logs_format: 'needs to be a string with a Kafka accepted format'
+      recurring_tasks.topics.schedules.name_format: 'needs to be a string with a Kafka accepted format'
+      recurring_tasks.topics.logs.name_format: 'needs to be a string with a Kafka accepted format'
       recurring_tasks.interval_format: 'needs to be equal or more than 1000 and an integer'
       recurring_tasks.deserializer_format: 'needs to be configured'
       recurring_tasks.logging_format: needs to be a boolean

@@ -35,7 +35,7 @@ end
 previous = nil
 
 keys = Karafka::Admin
-       .read_topic(Karafka::App.config.recurring_tasks.topics.schedules, 0, 21)
+       .read_topic(Karafka::App.config.recurring_tasks.topics.schedules.name, 0, 21)
        .map(&:key)
 
 assert keys.count('state:schedule') >= 10

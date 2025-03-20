@@ -29,7 +29,7 @@ module Karafka
               consumer_group tasks_cfg.group_id do
                 # Registers the primary topic that we use to control schedules execution. This is
                 # the one that we use to trigger recurring tasks.
-                schedules_topic = topic(topics_cfg.schedules) do
+                schedules_topic = topic(topics_cfg.schedules.name) do
                   consumer tasks_cfg.consumer_class
                   deserializer tasks_cfg.deserializer
                   # Because the topic method name as well as builder proxy method name is the same
@@ -83,7 +83,7 @@ module Karafka
 
                 # This topic is to store logs that we can then inspect either from the admin or via
                 # the Web UI
-                logs_topic = topic(topics_cfg.logs) do
+                logs_topic = topic(topics_cfg.logs.name) do
                   active(false)
                   deserializer tasks_cfg.deserializer
                   target.recurring_tasks(true)

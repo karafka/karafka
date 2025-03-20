@@ -15,8 +15,12 @@ RSpec.describe_current do
         logging: true,
         interval: 5_000,
         topics: {
-          schedules: 'valid_schedule_topic',
-          logs: 'valid_log_topic'
+          schedules: {
+            name: 'valid_schedule_topic'
+          },
+          logs: {
+            name: 'valid_log_topic'
+          }
         }
       }
     }
@@ -66,13 +70,13 @@ RSpec.describe_current do
   end
 
   context 'when schedules topic does not match the required format' do
-    before { recurring_tasks[:topics][:schedules] = 'invalid schedule topic' }
+    before { recurring_tasks[:topics][:schedules][:name] = 'invalid schedule topic' }
 
     it { expect(contract.call(config)).not_to be_success }
   end
 
   context 'when logs topic does not match the required format' do
-    before { recurring_tasks[:topics][:logs] = 'invalid log topic' }
+    before { recurring_tasks[:topics][:logs][:name] = 'invalid log topic' }
 
     it { expect(contract.call(config)).not_to be_success }
   end

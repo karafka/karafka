@@ -13,7 +13,7 @@ end
 
 # Should not fail as the topic should exist
 schedules = Karafka::Admin.read_topic(
-  Karafka::App.config.recurring_tasks.topics.schedules,
+  Karafka::App.config.recurring_tasks.topics.schedules.name,
   0,
   1
 )
@@ -22,7 +22,7 @@ assert_equal schedules, []
 
 # Should not fail as the topic should exist
 logs = Karafka::Admin.read_topic(
-  Karafka::App.config.recurring_tasks.topics.logs,
+  Karafka::App.config.recurring_tasks.topics.logs.name,
   0,
   1
 )
