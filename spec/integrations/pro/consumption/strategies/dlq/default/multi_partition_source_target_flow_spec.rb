@@ -21,7 +21,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT["broken-#{message.partition}"] << message.headers['original_partition']
+      DT["broken-#{message.partition}"] << message.headers['source_partition']
     end
   end
 end
@@ -55,9 +55,9 @@ samples = {}
 DT.data.each do |k, v|
   next if k == :partitions
 
-  v.each do |original_partition|
-    samples[original_partition] ||= []
-    samples[original_partition] << k
+  v.each do |source_partition|
+    samples[source_partition] ||= []
+    samples[source_partition] << k
   end
 end
 

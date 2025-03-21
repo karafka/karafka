@@ -150,12 +150,12 @@ DT[:dlq_received].each do |record|
   # We need to check if we have processing data for this key first
   next unless DT[:key_segment_map].key?(key)
 
-  original_segment_id = DT[:key_segment_map][key]
+  source_segment_id = DT[:key_segment_map][key]
 
   assert_equal(
-    original_segment_id,
+    source_segment_id,
     dlq_segment_id,
-    "Message with key #{key} from #{original_segment_id} was sent to DLQ for #{dlq_segment_id}"
+    "Message with key #{key} from #{source_segment_id} was sent to DLQ for #{dlq_segment_id}"
   )
 end
 
@@ -191,12 +191,12 @@ end
     # Check if we have data for this key
     next unless DT[:key_segment_map].key?(key)
 
-    original_segment = DT[:key_segment_map][key]
+    source_segment = DT[:key_segment_map][key]
 
     assert_equal(
       segment_id,
-      original_segment,
-      "Key #{key} in DLQ topic #{dlq_topic} was originally processed by #{original_segment}"
+      source_segment,
+      "Key #{key} in DLQ topic #{dlq_topic} was originally processed by #{source_segment}"
     )
   end
 end

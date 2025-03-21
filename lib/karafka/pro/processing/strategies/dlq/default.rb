@@ -145,19 +145,19 @@ module Karafka
             # @param skippable_message [Array<Karafka::Messages::Message>]
             # @return [Hash] dispatch DLQ message
             def build_dlq_message(skippable_message)
-              original_partition = skippable_message.partition.to_s
+              source_partition = skippable_message.partition.to_s
 
               dlq_message = {
                 topic: @_dispatch_to_dlq_topic || topic.dead_letter_queue.topic,
-                key: original_partition,
+                key: source_partition,
                 payload: skippable_message.raw_payload,
                 headers: skippable_message.raw_headers.merge(
-                  'original_topic' => topic.name,
-                  'original_partition' => original_partition,
-                  'original_offset' => skippable_message.offset.to_s,
-                  'original_consumer_group' => topic.consumer_group.id,
-                  'original_key' => skippable_message.raw_key.to_s,
-                  'original_attempts' => attempt.to_s
+                  'source_topic' => topic.name,
+                  'source_partition' => source_partition,
+                  'source_offset' => skippable_message.offset.to_s,
+                  'source_consumer_group' => topic.consumer_group.id,
+                  'source_key' => skippable_message.raw_key.to_s,
+                  'source_attempts' => attempt.to_s
                 )
               }
 

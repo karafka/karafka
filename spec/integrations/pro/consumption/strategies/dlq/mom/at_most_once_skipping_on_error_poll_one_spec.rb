@@ -25,7 +25,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[:broken] << message.headers['original_offset'].to_i
+      DT[:broken] << message.headers['source_offset'].to_i
     end
   end
 end
