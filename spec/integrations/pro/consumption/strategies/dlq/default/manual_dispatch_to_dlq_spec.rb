@@ -50,7 +50,7 @@ assert_equal DT[:broken].size, 1, DT.data
 broken = DT[:broken].first
 
 assert_equal elements[0], broken.raw_payload, DT.data
-assert_equal broken.headers['original_topic'], DT.topic
-assert_equal broken.headers['original_partition'], '0'
-assert_equal broken.headers['original_offset'], '0'
-assert_equal broken.headers['original_consumer_group'], Karafka::App.consumer_groups.first.id
+assert_equal broken.headers['source_topic'], DT.topic
+assert_equal broken.headers['source_partition'], '0'
+assert_equal broken.headers['source_offset'], '0'
+assert_equal broken.headers['source_consumer_group'], Karafka::App.consumer_groups.first.id

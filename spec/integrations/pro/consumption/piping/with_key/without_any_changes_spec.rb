@@ -56,11 +56,11 @@ end
 DT[:piped].each do |message|
   headers = message.headers
 
-  original_partition = headers['original_partition'].to_i
+  source_partition = headers['source_partition'].to_i
 
-  assert SETS[original_partition].include?(message.raw_payload)
-  assert [0, 1].include?(original_partition)
+  assert SETS[source_partition].include?(message.raw_payload)
+  assert [0, 1].include?(source_partition)
   assert %w[BBBBBBBBB AAAAAAAAA].include?(message.key)
-  assert_equal headers['original_topic'], DT.topics.first
-  assert_equal headers['original_consumer_group'], DT.consumer_group
+  assert_equal headers['source_topic'], DT.topics.first
+  assert_equal headers['source_consumer_group'], DT.consumer_group
 end

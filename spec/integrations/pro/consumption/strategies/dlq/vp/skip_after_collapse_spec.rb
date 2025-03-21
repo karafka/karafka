@@ -68,7 +68,7 @@ end
 assert(DT[:flow].none? { |row| row.first == 5 })
 
 # It should be moved to DLQ
-assert_equal 5, DT[:dlq].first.headers['original_offset'].to_i
+assert_equal 5, DT[:dlq].first.headers['source_offset'].to_i
 
 # One message should be moved
 assert_equal 1, DT[:dlq].size
