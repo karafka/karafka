@@ -66,9 +66,14 @@ module Karafka
               groupings = { 0 => messages }
             end
 
-            groupings.each do |key, messages_group|
-              yield(key, messages_group)
-            end
+            # Will apply the LJF ordering for scheduling. In case of multi-topic or multi-partition
+            # work, this can improve the resources utilization by executing the longest (measured
+            # by number of messages) jobs first.
+            groupings
+              .sort_by { |_key, messages_group| -messages_group.size }
+              .each do |key, messages_group|
+                yield(key, messages_group)
+              end
           else
             # When no virtual partitioner, works as regular one
             yield(0, messages)
