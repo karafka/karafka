@@ -29,5 +29,5 @@ end
 
 subscription_groups = Karafka::App.subscription_groups
 
-assert_equal 3, subscription_groups.values.first.count
-assert_equal 1, subscription_groups.values.last.count
+assert_equal 3, subscription_groups.values.first.size
+assert_equal 1, subscription_groups.values.last.size

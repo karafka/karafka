@@ -25,7 +25,7 @@ draw_routes(Consumer)
 produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
-  DT[:offsets].count >= 9
+  DT[:offsets].size >= 9
 end
 
 assert !DT[:offsets].include?(5)

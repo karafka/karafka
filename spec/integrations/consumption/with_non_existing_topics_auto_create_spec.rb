@@ -31,7 +31,7 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[0].count >= 100 && sleep(5)
+  DT[0].size >= 100 && sleep(5)
 end
 
 assert_equal elements, DT[0]

@@ -212,4 +212,4 @@ end
 payload_based_pattern.compact!
 
 # There should be evidence that distribution changed
-assert key_based_pattern.count > 0, 'No key-based distribution detected'
+assert !key_based_pattern.empty?, 'No key-based distribution detected'

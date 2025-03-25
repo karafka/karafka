@@ -40,7 +40,7 @@ elements = DT.uuids(5)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:offsets].uniq.count > 1
+  DT[:offsets].uniq.size > 1
 end
 
 assert_equal DT[:offsets], (1..4).to_a

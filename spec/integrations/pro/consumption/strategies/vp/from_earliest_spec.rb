@@ -40,7 +40,7 @@ assert DT.data.size >= 5
 
 # On average we should have similar number of messages
 sizes = DT.data.values.map(&:size)
-average = sizes.sum / sizes.count
+average = sizes.sum / sizes.size
 # Small deviations may be expected
 assert average >= 8
 assert average <= 12

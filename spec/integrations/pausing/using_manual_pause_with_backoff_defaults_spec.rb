@@ -32,7 +32,7 @@ end
 
 previous = nil
 
-assert_equal 5, DT[:pauses].count
+assert_equal 5, DT[:pauses].size
 
 previous = nil
 

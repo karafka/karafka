@@ -29,7 +29,7 @@ module Karafka
           def call
             puts 'Starting parallel segments distribution...'
 
-            segments_count = applicable_groups.count
+            segments_count = applicable_groups.size
 
             if segments_count.zero?
               puts "#{red('No')} consumer groups with parallel segments configuration found"

@@ -39,5 +39,5 @@ end
 end
 
 start_karafka_and_wait_until do
-  DT[:selected].count >= 40
+  DT[:selected].size >= 40
 end

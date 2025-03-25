@@ -38,7 +38,7 @@ end
 produce_many(DT.topic, DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT[:done].count.positive? && sleep(1)
+  DT[:done].size.positive? && sleep(1)
 end
 
 assert_equal 0, fetch_next_offset, nil

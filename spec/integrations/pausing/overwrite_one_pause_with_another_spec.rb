@@ -22,7 +22,7 @@ produce_many(DT.topic, DT.uuids(5))
 started_at = Time.now.to_f
 
 start_karafka_and_wait_until do
-  DT[:tick].count >= 2
+  DT[:tick].size >= 2
 end
 
 # Just a precaution. If the long pause would supersede the short, it would never finish and timeout

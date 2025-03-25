@@ -61,7 +61,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     Current.user = SecureRandom.uuid
     ContextAwareOperation.call
-    DT[:messages] << messages.count
+    DT[:messages] << messages.size
     DT[:partitions] << messages.metadata.partition
   end
 end
@@ -78,7 +78,7 @@ draw_routes do
 end
 
 def done?
-  DT[:messages].sum >= 1000 && DT[:partitions].uniq.count >= 10
+  DT[:messages].sum >= 1000 && DT[:partitions].uniq.size >= 10
 end
 
 Thread.new do

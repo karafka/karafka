@@ -50,7 +50,7 @@ module Karafka
           partition = messages.metadata.partition
 
           samples = @processing_times[topic][partition]
-          samples << event[:time] / messages.count
+          samples << event[:time] / messages.size
 
           return unless samples.size > SAMPLES_COUNT
 

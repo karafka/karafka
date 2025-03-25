@@ -30,5 +30,5 @@ produce_many(DT.topic, DT.uuids(1))
 
 # If seeking from ticking would not work, this would hang
 start_karafka_and_wait_until do
-  DT[:consume].count >= 5
+  DT[:consume].size >= 5
 end

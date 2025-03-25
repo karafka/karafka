@@ -46,8 +46,8 @@ end
 end
 
 start_karafka_and_wait_until do
-  DT[:partitions].uniq.count >= 2 &&
-    DT[:broken].uniq.count >= 5
+  DT[:partitions].uniq.size >= 2 &&
+    DT[:broken].uniq.size >= 5
 end
 
 # No need for any assertions as if it would pipe only to one, it would hang and crash via timeout

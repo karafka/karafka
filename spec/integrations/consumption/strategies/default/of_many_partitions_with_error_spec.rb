@@ -52,6 +52,6 @@ end
 # 10 partitions are expected
 assert_equal 10, DT.data.size
 # In 11 messages are expected as insert in one will be retried due to error
-assert_equal 11, DT.data.values.flatten.count
+assert_equal 11, DT.data.values.flatten.size
 # We sent 10, we expect 10
-assert_equal 10, DT.data.values.flatten.uniq.count
+assert_equal 10, DT.data.values.flatten.uniq.size

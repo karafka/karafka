@@ -42,4 +42,4 @@ start_karafka_and_wait_until do
   DT[:errors].size >= 4
 end
 
-assert DT[:errors].count >= 4
+assert DT[:errors].size >= 4

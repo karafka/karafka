@@ -49,7 +49,7 @@ end
 consumer = setup_rdkafka_consumer
 
 other = Thread.new do
-  sleep(1) while DT[:working].uniq.count < 2
+  sleep(1) while DT[:working].uniq.size < 2
 
   sleep(1)
 

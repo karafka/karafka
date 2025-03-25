@@ -46,7 +46,7 @@ assert_equal Karafka::App.config.internal.processing.partitioner_class, CustomPa
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[topic.name] << messages.count
+    DT[topic.name] << messages.size
   end
 end
 

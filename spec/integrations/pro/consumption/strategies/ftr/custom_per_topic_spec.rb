@@ -88,4 +88,4 @@ start_karafka_and_wait_until do
   sleep(20)
 end
 
-assert DT[1].count > DT[0].count * 2
+assert DT[1].size > DT[0].size * 2

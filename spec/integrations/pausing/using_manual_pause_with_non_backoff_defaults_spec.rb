@@ -26,7 +26,7 @@ start_karafka_and_wait_until do
   DT[:pauses].size >= 5
 end
 
-assert_equal 5, DT[:pauses].count
+assert_equal 5, DT[:pauses].size
 
 previous = nil
 

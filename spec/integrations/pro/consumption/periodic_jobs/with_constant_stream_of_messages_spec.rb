@@ -41,5 +41,5 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:consume].count >= 10
+  DT[:consume].size >= 10
 end

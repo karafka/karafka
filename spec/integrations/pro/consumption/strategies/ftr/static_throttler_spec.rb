@@ -62,7 +62,7 @@ thread = Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:offsets].count >= 10 && DT[:revoked].size.positive?
+  DT[:offsets].size >= 10 && DT[:revoked].size.positive?
 end
 
 assert (DT[:times].last - DT[:revoked].first) >= 5

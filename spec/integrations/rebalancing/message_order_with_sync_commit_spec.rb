@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
       # Wait until some amount of messages has been already processed to spice things up
       if condition_met?(message) &&
          !DT.key?(:contested_message) &&
-         DT[:consecutive_messages].count >= 60
+         DT[:consecutive_messages].size >= 60
         DT[:contested_message] << message
 
         sleep(0.1) until DT.key?(:second_closed)

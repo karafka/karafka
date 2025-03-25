@@ -34,7 +34,7 @@ limit = 100
 buffer = []
 
 iterator.each do |message|
-  break if buffer.count >= limit
+  break if buffer.size >= limit
 
   # Message may be a nil when `yield_nil` is set to true
   buffer << message if message

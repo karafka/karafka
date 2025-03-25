@@ -17,7 +17,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    if messages.count < 2 && @not_first.nil?
+    if messages.size < 2 && @not_first.nil?
       @not_first = true
       return
     end

@@ -16,9 +16,9 @@ MUTEX = Mutex.new
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if messages.count <= 1
+    return if messages.size <= 1
 
-    DT[0] << messages.count
+    DT[0] << messages.size
 
     sleep(5) while DT[:rebalanced].empty?
 

@@ -31,7 +31,7 @@ RSpec.describe_current do
       end
 
       it 'expect not to add second expire' do
-        expect(topic.filter.factories.count).to eq(1)
+        expect(topic.filter.factories.size).to eq(1)
       end
     end
   end

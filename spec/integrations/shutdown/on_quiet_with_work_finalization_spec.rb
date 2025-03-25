@@ -32,7 +32,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:states].count >= 2
+  DT[:states].size >= 2
 end
 
 assert_equal DT[:states], %w[quieting quiet]

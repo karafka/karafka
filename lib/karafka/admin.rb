@@ -58,7 +58,7 @@ module Karafka
           possible_range = requested_range.select { |offset| available_range.include?(offset) }
 
           start_offset = possible_range.first
-          count = possible_range.count
+          count = possible_range.size
 
           tpl.add_topic_and_partitions_with_offsets(name, partition => start_offset)
           consumer.assign(tpl)

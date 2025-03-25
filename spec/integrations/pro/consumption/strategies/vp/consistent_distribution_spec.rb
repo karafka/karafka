@@ -41,7 +41,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:combinations].count >= 20
+  DT[:combinations].size >= 20
 end
 
 assignments = {}
@@ -55,4 +55,4 @@ DT[:combinations].each do |elements|
   end
 end
 
-assert assignments.values.map(&:count).all? { _1 == 1 }
+assert(assignments.values.map(&:size).all? { _1 == 1 })

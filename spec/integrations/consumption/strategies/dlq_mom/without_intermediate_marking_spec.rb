@@ -48,7 +48,7 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:offsets].count >= 20
+  DT[:offsets].size >= 20
 end
 
 # None of the offsets should have been committed

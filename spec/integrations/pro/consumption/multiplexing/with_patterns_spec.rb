@@ -44,7 +44,7 @@ start_karafka_and_wait_until do
 
   sleep(1)
 
-  DT[:clients].uniq.count >= 5 && DT[:consumers].uniq.count >= 5
+  DT[:clients].uniq.size >= 5 && DT[:consumers].uniq.size >= 5
 end
 
 assert_equal 5, DT[:clients].uniq.size

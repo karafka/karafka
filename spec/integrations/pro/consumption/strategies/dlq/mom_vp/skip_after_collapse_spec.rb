@@ -82,4 +82,4 @@ uncollapsed = DT[:flow][(uncollapsed_index + 1)..100]
 assert uncollapsed.none?(&:last)
 
 # Post collapse should run in multiple threads
-assert uncollapsed.map { |row| row[1] }.uniq.count >= 2
+assert uncollapsed.map { |row| row[1] }.uniq.size >= 2

@@ -44,7 +44,7 @@ produce_many(DT.topic, DT.uuids(50))
 sleep(2)
 
 start_karafka_and_wait_until do
-  DT[0].count >= 50
+  DT[0].size >= 50
 end
 
 assert DT[:unexpected].empty?

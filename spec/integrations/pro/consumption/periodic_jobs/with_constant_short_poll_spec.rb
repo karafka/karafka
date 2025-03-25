@@ -36,7 +36,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[1].count >= 5
+  DT[1].size >= 5
 end
 
 previous = nil

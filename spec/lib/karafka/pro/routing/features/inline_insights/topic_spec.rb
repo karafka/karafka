@@ -39,7 +39,7 @@ RSpec.describe_current do
       end
 
       it 'expect not to add any filters' do
-        expect(topic.filter.factories.count).to eq(0)
+        expect(topic.filter.factories.size).to eq(0)
       end
     end
   end

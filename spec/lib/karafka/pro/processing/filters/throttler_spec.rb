@@ -63,7 +63,7 @@ RSpec.describe_current do
 
       it 'expect not to remove last message when we reached limit' do
         throttler.apply!(messages)
-        expect(messages.count).to eq(max_messages)
+        expect(messages.size).to eq(max_messages)
       end
     end
 
@@ -79,7 +79,7 @@ RSpec.describe_current do
 
       it 'expect not to remove last message when we reached limit' do
         throttler.apply!(messages)
-        expect(messages.count).to eq(max_messages)
+        expect(messages.size).to eq(max_messages)
       end
     end
   end

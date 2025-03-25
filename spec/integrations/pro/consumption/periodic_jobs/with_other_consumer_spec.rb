@@ -36,7 +36,7 @@ consumer.subscribe(DT.topic)
 end
 
 start_karafka_and_wait_until do
-  DT[:ticks].count >= 10
+  DT[:ticks].size >= 10
 end
 
 consumer.close

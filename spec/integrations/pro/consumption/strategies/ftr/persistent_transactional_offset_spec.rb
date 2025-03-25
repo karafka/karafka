@@ -127,7 +127,7 @@ other = Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:offsets].count >= 20
+  DT[:offsets].size >= 20
 end
 
 other.join

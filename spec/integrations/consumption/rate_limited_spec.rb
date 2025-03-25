@@ -73,4 +73,4 @@ end
 assert (Time.now.to_f - started_at) >= 9
 assert_equal elements, DT[0]
 # We should pause 10 times, once every 5 messages
-assert_equal 10, DT[:pauses].count
+assert_equal 10, DT[:pauses].size

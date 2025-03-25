@@ -36,7 +36,7 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:broken].uniq.count >= 5
+  DT[:broken].uniq.size >= 5
 end
 
 # No need for any assertions as if it would pipe only to one, it would hang and crash via timeout

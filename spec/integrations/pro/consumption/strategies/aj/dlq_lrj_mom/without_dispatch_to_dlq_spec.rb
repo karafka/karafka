@@ -58,5 +58,5 @@ start_karafka_and_wait_until do
 end
 
 assert DT[0].size >= 10
-assert DT[:errors].count >= 10
+assert DT[:errors].size >= 10
 assert DT[1].empty?

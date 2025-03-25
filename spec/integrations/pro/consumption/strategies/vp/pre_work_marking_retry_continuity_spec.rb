@@ -36,9 +36,9 @@ produce_many(DT.topic, DT.uuids(50))
 extra_produced = false
 
 start_karafka_and_wait_until do
-  if DT[:offsets].count > 50
+  if DT[:offsets].size > 50
     true
-  elsif DT[:offsets].count == 50 && !extra_produced
+  elsif DT[:offsets].size == 50 && !extra_produced
     extra_produced = true
     produce_many(DT.topic, DT.uuids(1))
     false

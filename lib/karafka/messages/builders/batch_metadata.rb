@@ -18,7 +18,7 @@ module Karafka
           #   picked up for processing.
           def call(messages, topic, partition, scheduled_at)
             Karafka::Messages::BatchMetadata.new(
-              size: messages.count,
+              size: messages.size,
               first_offset: messages.first&.offset || -1001,
               last_offset: messages.last&.offset || -1001,
               deserializers: topic.deserializers,

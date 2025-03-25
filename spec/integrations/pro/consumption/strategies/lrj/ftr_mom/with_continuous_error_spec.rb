@@ -47,7 +47,5 @@ start_karafka_and_wait_until do
   DT[0].size >= 25 && DT[:errors].size >= 5
 end
 
-p fetch_next_offset
-p DT
 assert DT[0].count(0) > 1
 assert_equal 0, fetch_next_offset
