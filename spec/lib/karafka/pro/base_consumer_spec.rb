@@ -28,7 +28,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
       Karafka::Messages::Messages,
       first: first_message,
       last: last_message,
-      count: 2,
+      size: 2,
       metadata: Karafka::Messages::BatchMetadata.new(
         topic: topic.name,
         partition: 0,

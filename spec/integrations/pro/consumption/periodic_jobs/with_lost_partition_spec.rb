@@ -49,7 +49,7 @@ Thread.new do
 end
 
 start_karafka_and_wait_until do
-  DT[:ticks].count >= 10 && DT.key?(:done)
+  DT[:ticks].size >= 10 && DT.key?(:done)
 end
 
 consumer.close

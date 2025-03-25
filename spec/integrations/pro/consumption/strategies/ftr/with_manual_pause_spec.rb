@@ -16,7 +16,7 @@ class Consumer < Karafka::BaseConsumer
     messages.each do |message|
       DT[0] << message.offset
 
-      pause(messages.last.offset + 1, 500) if DT[0].count == 5
+      pause(messages.last.offset + 1, 500) if DT[0].size == 5
     end
   end
 end

@@ -51,7 +51,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  if DT[0].count >= 20
+  if DT[0].size >= 20
     true
   else
     sleep(0.1)

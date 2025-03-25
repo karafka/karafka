@@ -42,7 +42,7 @@ RSpec.describe_current do
 
       4.times do |i|
         let("messages#{i}") do
-          OpenStruct.new(metadata: public_send("message#{i}").metadata, count: 1)
+          OpenStruct.new(metadata: public_send("message#{i}").metadata, size: 1)
         end
 
         let("payload#{i}") do
@@ -77,7 +77,7 @@ RSpec.describe_current do
 
       4.times do |i|
         let("messages#{i}") do
-          OpenStruct.new(metadata: public_send("message#{i}").metadata, count: 1)
+          OpenStruct.new(metadata: public_send("message#{i}").metadata, size: 1)
         end
 
         let("payload#{i}") do

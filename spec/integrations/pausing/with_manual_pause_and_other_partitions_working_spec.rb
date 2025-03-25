@@ -58,4 +58,4 @@ start_karafka_and_wait_until do
 end
 
 assert_equal [1], DT[:partitions].uniq
-assert DT[:ticks].count > 1
+assert DT[:ticks].size > 1

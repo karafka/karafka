@@ -60,4 +60,4 @@ assert_equal DT[:cleans].uniq, DT[:threads].uniq
 assert_equal 1, DT[:cleans].uniq.size
 assert_equal 1, DT[:threads].uniq.size
 # Two subscribers mean twice the cleaning
-assert_equal DT[:cleans].count, DT[:threads].count * 2
+assert_equal DT[:cleans].size, DT[:threads].size * 2

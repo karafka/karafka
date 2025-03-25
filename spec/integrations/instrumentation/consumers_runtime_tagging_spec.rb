@@ -43,4 +43,4 @@ start_karafka_and_wait_until do
   DT[:offsets].uniq.size >= 5
 end
 
-assert DT[:offsets].uniq.count > 0
+assert !DT[:offsets].uniq.empty?

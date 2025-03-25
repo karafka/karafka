@@ -27,7 +27,7 @@ end
 produce_many(DT.topic, DT.uuids(1))
 
 start_karafka_and_wait_until do
-  DT[:used].count >= 5
+  DT[:used].size >= 5
 end
 
 assert DT[:used].uniq.size >= 1

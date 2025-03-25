@@ -30,7 +30,7 @@ end
 produce_many(DT.topic, DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT[:messages].count >= 100
+  DT[:messages].size >= 100
 end
 
 assert_equal 1, DT[:coordinators_ids].uniq.size

@@ -105,11 +105,11 @@ start_karafka_and_wait_until do
   produce_many(DT.topic, DT.uuids(1))
   sleep(0.5)
 
-  DT[:times].count >= 2
+  DT[:times].size >= 2
 end
 
 other.join
 
-assert_equal 2, DT[:times].count
+assert_equal 2, DT[:times].size
 assert(DT[:times].last - DT[:times].first >= 10)
 assert_equal [0], DT[:firsts].uniq

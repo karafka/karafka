@@ -17,7 +17,7 @@ draw_routes(Consumer)
 produce_many(DT.topic, DT.uuids(10))
 
 start_karafka_and_wait_until do
-  DT[0].count >= 5
+  DT[0].size >= 5
 end
 
 DT[0].each_with_index do |aggro, index|

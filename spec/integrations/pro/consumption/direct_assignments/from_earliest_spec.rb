@@ -36,4 +36,4 @@ start_karafka_and_wait_until do
   DT[:partitions].size >= 2
 end
 
-assert_equal 2, DT[:shutdowns].count
+assert_equal 2, DT[:shutdowns].size

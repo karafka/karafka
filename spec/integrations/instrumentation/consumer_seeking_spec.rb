@@ -25,7 +25,7 @@ start_karafka_and_wait_until do
 end
 
 assert_equal DT[:messages].uniq, [0]
-assert DT[:seeks].count >= 4
+assert DT[:seeks].size >= 4
 
 assert DT[:seeks].first[:caller].is_a?(Consumer)
 assert_equal DT[:seeks].first[:topic], DT.topic

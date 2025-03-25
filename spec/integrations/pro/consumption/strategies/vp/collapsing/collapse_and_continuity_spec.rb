@@ -67,7 +67,7 @@ produce_many(DT.topic, (0..9).to_a.map(&:to_s))
 
 start_karafka_and_wait_until do
   # 20 messages + 2 control records
-  DT[:flow].any? { |row| row.first == 19 && row.last == false } && DT[:flow].count >= 22
+  DT[:flow].any? { |row| row.first == 19 && row.last == false } && DT[:flow].size >= 22
 end
 
 pre_collapse_index = DT[:flow].index(&:last) - 1
@@ -88,7 +88,7 @@ pre_collapse_offsets.sort.each do |offset|
 end
 
 # Pre collapse should run in multiple threads
-assert pre_collapse.map { |row| row[1] }.uniq.count >= 2
+assert pre_collapse.map { |row| row[1] }.uniq.size >= 2
 
 # None of pre-collapse should be marked as collapsed
 assert pre_collapse.none?(&:last)
@@ -116,7 +116,7 @@ assert !flipped
 assert_equal nil, flipped_index
 
 # Collapsed should run in a single thread
-assert_equal 1, collapsed.map { |row| row[1] }.uniq.count
+assert_equal 1, collapsed.map { |row| row[1] }.uniq.size
 
 # All collapsed need to be in the pre collapsed because of retry
 assert (collapsed.map(&:first) - pre_collapse_offsets).empty?
@@ -140,7 +140,7 @@ uncollapsed = DT[:flow][(uncollapsed_index + 1)..100]
 assert uncollapsed.none?(&:last)
 
 # Post collapse should run in multiple threads
-assert uncollapsed.map { |row| row[1] }.uniq.count >= 2
+assert uncollapsed.map { |row| row[1] }.uniq.size >= 2
 
 # None of those processed later in parallel should be in the previous sets
 assert (uncollapsed.map(&:first) & collapsed.map(&:first)).empty?

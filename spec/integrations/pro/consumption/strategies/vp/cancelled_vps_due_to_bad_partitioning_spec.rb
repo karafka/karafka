@@ -16,7 +16,7 @@ class Consumer < Karafka::BaseConsumer
   def consume
     start = Time.now.to_f
 
-    DT[0] << messages.count
+    DT[0] << messages.size
 
     sleep(rand / 10.to_f)
 

@@ -13,7 +13,7 @@ setup_karafka
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    DT[:counts] << messages.count
+    DT[:counts] << messages.size
     DT[:times] << Time.now
 
     messages.each do |message|
@@ -58,7 +58,7 @@ end
 start_karafka_and_wait_until do
   produce_many(DT.topic, DT.uuids(5))
 
-  DT[:offsets].count > 50
+  DT[:offsets].size > 50
 end
 
 # All offsets that we've processed should be even and in order
@@ -79,4 +79,4 @@ assert average >= 0.17, average
 
 # On average will will get 1,4,1,4,1,4 because of throttling, but since throttling is applied
 # after filtering, we should always be above 2 with the number
-assert (DT[:counts].sum / DT[:counts].count.to_f) > 2
+assert (DT[:counts].sum / DT[:counts].size.to_f) > 2

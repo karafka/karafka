@@ -43,8 +43,8 @@ iterator.each do |message|
   offsets[message.topic][message.partition] << message.offset
 end
 
-assert_equal 2, offsets[DT.topics[0]].count
-assert_equal 2, offsets[DT.topics[1]].count
+assert_equal 2, offsets[DT.topics[0]].size
+assert_equal 2, offsets[DT.topics[1]].size
 assert_equal (15..19).to_a, offsets[DT.topics[0]][0]
 assert_equal (15..19).to_a, offsets[DT.topics[0]][1]
 assert_equal (10..19).to_a, offsets[DT.topics[1]][0]

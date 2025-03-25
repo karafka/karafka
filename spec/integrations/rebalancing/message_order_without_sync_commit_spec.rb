@@ -19,7 +19,7 @@ class Consumer < Karafka::BaseConsumer
       # Wait until some amount of messages has been already processed to spice things up
       if condition_met?(message) &&
          DT.data[:contested_message].empty? &&
-         DT.data[:consecutive_messages].count >= 60
+         DT.data[:consecutive_messages].size >= 60
         DT[:contested_message_tuple] << [message, messages.metadata.first_offset]
         sleep(0.1) until DT.data.key?(:second_closed)
       end
@@ -104,7 +104,7 @@ end
 
 wait_until do
   # Wait until the second consumer gets to the contested message and processes it
-  other_consumer.join && DT.data[:second_closed] == true && DT.data[:revoked].count >= 1
+  other_consumer.join && DT.data[:second_closed] == true && DT.data[:revoked].size >= 1
 end
 
 contested_message, contested_batch_first_offset = DT[:contested_message_tuple].first
@@ -123,7 +123,7 @@ end
 duplicate_counts = messages_from_contested_batch
                    .group_by { |_, _, offset| offset }
                    .values
-                   .map { |group| group.uniq.count }
+                   .map { |group| group.uniq.size }
 
 assert(duplicate_counts.all? { |size| size == 2 })
 

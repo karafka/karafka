@@ -12,9 +12,9 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if messages.count < 5
+    return if messages.size < 5
 
-    mark_as_consumed(messages.to_a[messages.count / 2])
+    mark_as_consumed(messages.to_a[messages.size / 2])
 
     DT[:lasts] << messages.last.offset
     DT[:batch] << true
@@ -34,7 +34,7 @@ end
 produce_many(DT.topic, DT.uuids(1000))
 
 start_karafka_and_wait_until do
-  DT[:batch].count > 5
+  DT[:batch].size > 5
 end
 
 # Since we do middle offset marking, this should never have the last from max batch

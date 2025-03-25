@@ -27,7 +27,7 @@ draw_routes(Consumer)
 produce_many(DT.topic, DT.uuids(1))
 
 start_karafka_and_wait_until do
-  DT[:errors].count >= 1
+  DT[:errors].size >= 1
 end
 
 DT[:errors].each do |error|

@@ -58,7 +58,7 @@ produce_many(DT.topics[0], DT.uuids(1))
 produce_many(DT.topics[1], DT.uuids(1))
 
 start_karafka_and_wait_until do
-  DT[:probing].uniq.count >= 2
+  DT[:probing].uniq.size >= 2
 end
 
 assert DT[:probing].include?('204')

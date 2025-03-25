@@ -80,7 +80,7 @@ module Karafka
             .find { |topic| topic.fetch(:topic_name) == name }
             .tap { |topic| topic || raise(Errors::TopicNotFoundError, name) }
             .fetch(:partitions)
-            .count
+            .size
         end
       end
     end

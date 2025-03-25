@@ -83,5 +83,5 @@ assert(DT[:flow].none? { |row| row.first <= 9 })
 # A batch dispatched after the recovery should use VP back
 assert DT[:flow2].none?(&:last)
 
-threads = DT[:flow2].map { |row| row[1] }.uniq.count
+threads = DT[:flow2].map { |row| row[1] }.uniq.size
 assert threads >= 2

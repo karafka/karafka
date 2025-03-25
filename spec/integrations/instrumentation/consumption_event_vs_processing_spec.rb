@@ -9,16 +9,16 @@ class Consumer < Karafka::BaseConsumer
   def consume
     DT[:assignments] = Karafka::App.assignments
 
-    DT[0] << messages.count
+    DT[0] << messages.size
   end
 end
 
 Karafka::App.monitor.subscribe('consumer.consume') do |event|
-  DT[2] << event[:caller].messages.count
+  DT[2] << event[:caller].messages.size
 end
 
 Karafka::App.monitor.subscribe('consumer.consumed') do |event|
-  DT[1] << event[:caller].messages.count
+  DT[1] << event[:caller].messages.size
 end
 
 draw_routes do

@@ -45,7 +45,7 @@ module Karafka
         last_polled_at = raw_messages_buffer.last_polled_at
 
         raw_messages_buffer.each do |topic, partition, messages, eof|
-          @size += messages.count
+          @size += messages.size
 
           ktopic = @subscription_group.topics.find(topic)
 

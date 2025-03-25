@@ -14,7 +14,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return unless messages.count > 1
+    return unless messages.size > 1
 
     messages.each do |message|
       DT[:offsets] << message.offset

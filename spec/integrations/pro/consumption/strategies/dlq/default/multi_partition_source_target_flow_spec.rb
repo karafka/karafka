@@ -45,8 +45,8 @@ end
 end
 
 start_karafka_and_wait_until do
-  DT[:partitions].uniq.count >= 10 &&
-    DT.data.keys.uniq.count >= 5
+  DT[:partitions].uniq.size >= 10 &&
+    DT.data.keys.uniq.size >= 5
 end
 
 samples = {}
@@ -63,5 +63,5 @@ end
 
 # Each original partition data should always go to one and the same target partition
 samples.each_value do |sources|
-  assert_equal 1, sources.uniq.count, sources
+  assert_equal 1, sources.uniq.size, sources
 end

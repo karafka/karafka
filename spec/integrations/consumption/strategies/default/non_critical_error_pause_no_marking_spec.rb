@@ -14,7 +14,7 @@ class Consumer < Karafka::BaseConsumer
     end
 
     # We need more messages to check this and sometimes we get one and then more
-    return if messages.count <= 1
+    return if messages.size <= 1
 
     @count ||= 0
     @count += 1

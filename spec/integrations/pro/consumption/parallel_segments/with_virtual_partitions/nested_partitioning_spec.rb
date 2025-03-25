@@ -20,7 +20,7 @@ class Consumer < Karafka::BaseConsumer
       batch_id: batch_id,
       thread_id: processing_thread,
       time: Time.now.to_f,
-      messages: messages.count,
+      messages: messages.size,
       vp_keys: messages.map { |m| extract_vp_key(m) }.uniq
     }
 

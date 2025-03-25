@@ -39,6 +39,6 @@ start_karafka_and_wait_until do
   DT[0].size >= 200
 end
 
-assert_equal 5, DT[:threads_ids].uniq.count
+assert_equal 5, DT[:threads_ids].uniq.size
 assert_equal values, DT[0].sort
 assert_equal DT[0], DT[0].uniq

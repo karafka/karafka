@@ -18,12 +18,12 @@ class Consumer < Karafka::BaseConsumer
     times = []
 
     times << Time.now
-    sleep(10) unless messages.count == 1
+    sleep(10) unless messages.size == 1
     times << Time.now
 
     DT[:times] << times
 
-    DT[:messages] << messages.count
+    DT[:messages] << messages.size
   end
 end
 

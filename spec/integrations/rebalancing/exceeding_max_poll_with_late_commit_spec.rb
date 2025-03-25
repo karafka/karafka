@@ -24,7 +24,7 @@ class Consumer < Karafka::BaseConsumer
       mark_as_consumed message
     end
 
-    sleep(15) if messages.count > 1
+    sleep(15) if messages.size > 1
   end
 end
 

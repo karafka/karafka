@@ -56,7 +56,7 @@ SETS = [P1, P2].freeze
 end
 
 start_karafka_and_wait_until do
-  DT[:piped].count >= 100
+  DT[:piped].size >= 100
 end
 
 DT[:piped].each do |message|

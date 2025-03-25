@@ -33,7 +33,7 @@ start_karafka_and_wait_until do
   produce(DT.topic, '1', partition: 0)
   produce(DT.topic, '1', partition: 1)
 
-  DT[:messages].count >= 100
+  DT[:messages].size >= 100
 end
 
 assert_equal 2, DT[:coordinators_ids].uniq.size

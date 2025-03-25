@@ -52,14 +52,14 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:offsets].uniq.count >= 98 &&
+  DT[:offsets].uniq.size >= 98 &&
     !DT[:broken].empty? &&
     DT[:broken].any? { |broken| broken.last == elements[10] } &&
     DT[:broken].size >= 2
 end
 
 # first error, retry and same for more messages from batch previous to failing
-assert DT[:errors].count >= 3, DT[:errors]
+assert DT[:errors].size >= 3, DT[:errors]
 
 # we should not have the message that was failing
 assert_equal (0..99).to_a - [10, 99], DT[:offsets].uniq

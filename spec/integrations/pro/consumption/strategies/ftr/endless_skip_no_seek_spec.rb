@@ -61,7 +61,7 @@ end
 start_karafka_and_wait_until do
   produce_many(DT.topic, DT.uuids(1))
 
-  DT[:offsets].count >= 50
+  DT[:offsets].size >= 50
 end
 
 assert DT[0].empty?

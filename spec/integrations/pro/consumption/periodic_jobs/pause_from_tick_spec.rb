@@ -29,5 +29,5 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DT[:ticks].count >= 3
+  DT[:ticks].size >= 3
 end

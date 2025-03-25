@@ -70,7 +70,7 @@ class Consumer < Karafka::BaseConsumer
 
         # Track successful processing
         DT[:normal_processed] << {
-          count: messages.count,
+          count: messages.size,
           segment_id: segment_id
         }
       end

@@ -14,7 +14,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if messages.count < 2
+    return if messages.size < 2
 
     DT[:paused] << messages.first.offset
     DT[:last] << messages.last.offset

@@ -32,7 +32,7 @@ end
 produce_many(DT.topic, DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT[:ticks].count >= 2
+  DT[:ticks].size >= 2
 end
 
 assert_equal fetch_next_offset - 1, DT[:marked].last
