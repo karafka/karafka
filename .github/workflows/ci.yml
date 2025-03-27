@@ -259,7 +259,7 @@ jobs:
           SPECS_SEED: ${{ github.run_id }}
           SPECS_GROUP: ${{ matrix.parallel_group }}
         run: |
-          bin/integrations
+          bin/integrations '/pro'
 
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
