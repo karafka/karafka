@@ -6,6 +6,7 @@ FactoryBot.define do
 
     transient do
       sequence(:topic) { |nr| "topic#{nr}" }
+      sequence(:offset) { |nr| nr }
       partition { 0 }
       timestamp { Time.now.utc }
       raw_key { nil }
@@ -21,6 +22,7 @@ FactoryBot.define do
         partition: partition,
         timestamp: timestamp,
         raw_key: raw_key,
+        offset: offset,
         raw_headers: raw_headers
       )
     end

@@ -8,15 +8,33 @@ module Karafka
     module Routing
       module Features
         class VirtualPartitions < Base
-          # Config for virtual partitions
+          # Configuration for virtual partitions feature
           Config = Struct.new(
             :active,
             :partitioner,
             :max_partitions,
             :offset_metadata_strategy,
             :reducer,
+            :distribution,
             keyword_init: true
-          ) { alias_method :active?, :active }
+          ) do
+            # @return [Boolean] is this feature active
+            def active?
+              active
+            end
+
+            # @return [Object] distributor instance for the current distribution
+            def distributor
+              @distributor ||= case distribution
+                               when :balanced
+                                 Processing::VirtualPartitions::Distributors::Balanced.new(self)
+                               when :consistent
+                                 Processing::VirtualPartitions::Distributors::Consistent.new(self)
+                               else
+                                 raise Karafka::Errors::UnsupportedCaseError, distribution
+                               end
+            end
+          end
         end
       end
     end

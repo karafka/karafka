@@ -217,10 +217,10 @@ RSpec.describe_current do
   end
 
   describe 'uniq!' do
-    let(:message1) { build(:messages_message, topic: 'test', partition: 0) }
-    let(:message2) { build(:messages_message, topic: 'test', partition: 0) }
-    let(:message3) { build(:messages_message, topic: 'test', partition: 0) }
-    let(:message4) { build(:messages_message, topic: 'test', partition: 0) }
+    let(:message1) { build(:messages_message, topic: 'test', partition: 0, offset: 0) }
+    let(:message2) { build(:messages_message, topic: 'test', partition: 0, offset: 1) }
+    let(:message3) { build(:messages_message, topic: 'test', partition: 0, offset: 2) }
+    let(:message4) { build(:messages_message, topic: 'test', partition: 0, offset: 3) }
 
     context 'when we have same message twice for the same topic partition' do
       before do

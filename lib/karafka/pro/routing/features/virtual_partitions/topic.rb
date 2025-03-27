@@ -20,13 +20,17 @@ module Karafka
             #   the most recently reported metadata
             # @param reducer [nil, #call] reducer for VPs key. It allows for using a custom
             #   reducer to achieve enhanced parallelization when the default reducer is not enough.
+            # @param distribution [Symbol] the strategy to use for virtual partitioning. Can be
+            #   either `:consistent` or `:even`. The `:even` strategy ensures even distribution of
+            #   work across available workers while maintaining message order within groups.
             # @return [VirtualPartitions] method that allows to set the virtual partitions details
             #   during the routing configuration and then allows to retrieve it
             def virtual_partitions(
               max_partitions: Karafka::App.config.concurrency,
               partitioner: nil,
               offset_metadata_strategy: :current,
-              reducer: nil
+              reducer: nil,
+              distribution: :consistent
             )
               @virtual_partitions ||= Config.new(
                 active: !partitioner.nil?,
@@ -35,7 +39,8 @@ module Karafka
                 offset_metadata_strategy: offset_metadata_strategy,
                 # If no reducer provided, we use this one. It just runs a modulo on the sum of
                 # a stringified version, providing fairly good distribution.
-                reducer: reducer || ->(virtual_key) { virtual_key.to_s.sum % max_partitions }
+                reducer: reducer || ->(virtual_key) { virtual_key.to_s.sum % max_partitions },
+                distribution: distribution
               )
             end
 

@@ -5,6 +5,7 @@ en:
       virtual_partitions.max_partitions_format: needs to be equal or more than 1
       virtual_partitions.offset_metadata_strategy_format: needs to be either :exact or :current
       virtual_partitions.reducer_format: "needs to respond to `#call`"
+      virtual_partitions.distribution_format: "needs to be either :consistent or :balanced"
 
       long_running_job.active_format: needs to be either true or false
 
