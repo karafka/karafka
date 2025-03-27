@@ -21,8 +21,9 @@ module Karafka
             # @param reducer [nil, #call] reducer for VPs key. It allows for using a custom
             #   reducer to achieve enhanced parallelization when the default reducer is not enough.
             # @param distribution [Symbol] the strategy to use for virtual partitioning. Can be
-            #   either `:consistent` or `:even`. The `:even` strategy ensures even distribution of
-            #   work across available workers while maintaining message order within groups.
+            #   either `:consistent` or `:balanced`. The `:balanced` strategy ensures balanced
+            #   distribution of work across available workers while maintaining message order
+            #   within groups.
             # @return [VirtualPartitions] method that allows to set the virtual partitions details
             #   during the routing configuration and then allows to retrieve it
             def virtual_partitions(
