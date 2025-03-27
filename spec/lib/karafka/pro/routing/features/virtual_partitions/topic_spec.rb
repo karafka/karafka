@@ -12,6 +12,7 @@ RSpec.describe_current do
         expect(topic.virtual_partitions.active?).to be(false)
         expect(topic.virtual_partitions.partitioner).to be_nil
         expect(topic.virtual_partitions.max_partitions).to eq(Karafka::App.config.concurrency)
+        expect(topic.virtual_partitions.distribution).to eq(:consistent)
       end
     end
 
@@ -20,6 +21,7 @@ RSpec.describe_current do
         topic.virtual_partitions(partitioner: ->(_) { rand })
         expect(topic.virtual_partitions.active?).to be(true)
         expect(topic.virtual_partitions.max_partitions).to eq(Karafka::App.config.concurrency)
+        expect(topic.virtual_partitions.distribution).to eq(:consistent)
       end
     end
 
@@ -28,6 +30,74 @@ RSpec.describe_current do
         topic.virtual_partitions(partitioner: ->(_) { rand }, max_partitions: 7)
         expect(topic.virtual_partitions.active?).to be(true)
         expect(topic.virtual_partitions.max_partitions).to eq(7)
+        expect(topic.virtual_partitions.distribution).to eq(:consistent)
+      end
+    end
+
+    context 'when we define distribution' do
+      it 'expect to use balanced distribution' do
+        topic.virtual_partitions(partitioner: ->(_) { rand }, distribution: :balanced)
+        expect(topic.virtual_partitions.active?).to be(true)
+        expect(topic.virtual_partitions.distribution).to eq(:balanced)
+      end
+
+      it 'expect to use consistent distribution' do
+        topic.virtual_partitions(partitioner: ->(_) { rand }, distribution: :consistent)
+        expect(topic.virtual_partitions.active?).to be(true)
+        expect(topic.virtual_partitions.distribution).to eq(:consistent)
+      end
+    end
+
+    context 'when using consistent distribution' do
+      it 'uses Consistent distributor' do
+        topic.virtual_partitions(
+          max_partitions: 10,
+          partitioner: ->(_msg) { rand(10) },
+          distribution: :consistent
+        )
+
+        expect(topic.virtual_partitions.distributor).to be_a(
+          Karafka::Pro::Processing::VirtualPartitions::Distributors::Consistent
+        )
+      end
+    end
+
+    context 'when using balanced distribution' do
+      it 'uses Balanced distributor' do
+        topic.virtual_partitions(
+          max_partitions: 10,
+          partitioner: ->(_msg) { rand(10) },
+          distribution: :balanced
+        )
+
+        expect(topic.virtual_partitions.distributor).to be_a(
+          Karafka::Pro::Processing::VirtualPartitions::Distributors::Balanced
+        )
+      end
+    end
+
+    context 'when distribution is not specified' do
+      it 'uses Consistent distributor as default' do
+        topic.virtual_partitions(
+          max_partitions: 10,
+          partitioner: ->(_msg) { rand(10) }
+        )
+
+        expect(topic.virtual_partitions.distributor).to be_a(
+          Karafka::Pro::Processing::VirtualPartitions::Distributors::Consistent
+        )
+      end
+    end
+
+    context 'when distribution is invalid' do
+      it 'raises an error' do
+        expect do
+          topic.virtual_partitions(
+            max_partitions: 10,
+            partitioner: ->(_msg) { rand(10) },
+            distribution: :invalid
+          ).distributor
+        end.to raise_error(Karafka::Errors::UnsupportedCaseError)
       end
     end
   end

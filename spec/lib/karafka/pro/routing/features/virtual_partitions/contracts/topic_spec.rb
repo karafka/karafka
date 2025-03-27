@@ -13,7 +13,8 @@ RSpec.describe_current do
         partitioner: ->(_) { 1 },
         reducer: ->(_) { 1 },
         max_partitions: 2,
-        offset_metadata_strategy: :exact
+        offset_metadata_strategy: :exact,
+        distribution: :consistent
       },
       manual_offset_management: {
         active: mom_active
@@ -54,6 +55,24 @@ RSpec.describe_current do
     before { config[:virtual_partitions][:reducer] = nil }
 
     it { expect(check).not_to be_success }
+  end
+
+  context 'when distribution is not a valid value' do
+    before { config[:virtual_partitions][:distribution] = :invalid }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when distribution is consistent' do
+    before { config[:virtual_partitions][:distribution] = :consistent }
+
+    it { expect(check).to be_success }
+  end
+
+  context 'when distribution is balanced' do
+    before { config[:virtual_partitions][:distribution] = :balanced }
+
+    it { expect(check).to be_success }
   end
 
   context 'when manual offset management is on with virtual partitions for active job' do
