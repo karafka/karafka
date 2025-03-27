@@ -65,7 +65,7 @@ end
       { topic: DT.topic, payload: '9', key: 'c' },
       { topic: DT.topic, payload: '10', key: 'd' },
       { topic: DT.topic, payload: '11', key: 'e' },
-      { topic: DT.topic, payload: '12', key: 'a' } 
+      { topic: DT.topic, payload: '12', key: 'a' }
     ]
   )
 end
