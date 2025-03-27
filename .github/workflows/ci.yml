@@ -215,6 +215,9 @@ jobs:
           - '3.3'
           - '3.2'
           - '3.1'
+        parallel_group:
+          - '1'
+          - '2'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install package dependencies
@@ -253,8 +256,10 @@ jobs:
           KARAFKA_PRO_PASSWORD: ${{ secrets.KARAFKA_PRO_PASSWORD }}
           KARAFKA_PRO_VERSION: ${{ secrets.KARAFKA_PRO_VERSION }}
           KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
-
-        run: bin/integrations '/pro'
+          SPECS_SEED: ${{ github.run_id }}
+          SPECS_GROUP: ${{ matrix.parallel_group }}
+        run: |
+          bin/integrations
 
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings

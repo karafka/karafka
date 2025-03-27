@@ -53,15 +53,19 @@ class Scenario
 
   private_constant :MAX_RUN_TIME, :EXIT_CODES
 
+  attr_reader :index
+
   # Creates scenario instance and runs in the background process
   #
   # @param path [String] path to the scenarios file
-  def initialize(path)
+  def initialize(path, index)
     @path = path
     # First 1024 characters from stdout
     @stdout_head = ''
     # Last 1024 characters from stdout
     @stdout_tail = ''
+    # Assigns the index for parallel execution in the CI if requested
+    @index = index
   end
 
   # Starts running given scenario in a separate process
@@ -252,16 +256,24 @@ specs.delete_if do |spec|
   false
 end
 
-raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if specs.empty?
-
 # Randomize order
-seed = (ENV['SEED'] || rand(0..10_000)).to_i
+seed = (ENV['SPECS_SEED'] || rand(0..10_000)).to_i
+group = (ENV['SPECS_GROUP'] || -1).to_i
+groups = (ENV['SPECS_GROUPS'] || 2).to_i
 
 puts "Random seed: #{seed}"
+puts "Group: #{group}"
+puts "Groups: #{groups}"
 
 scenarios = specs
             .shuffle(random: Random.new(seed))
-            .map { |integration_test| Scenario.new(integration_test) }
+            .map
+            .with_index { |integration, index| Scenario.new(integration, index % groups) }
+            .delete_if { |scenario| scenario.index != group && group != -1 }
+
+raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if scenarios.empty?
+
+puts "Running #{scenarios.size} scenarios"
 
 regulars = scenarios.reject(&:linear?)
 linears = scenarios - regulars

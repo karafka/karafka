@@ -23,6 +23,7 @@
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
+- [Refactor] Improve CI specs parallelization.
 - [Maintenance] Require `karafka-rdkafka` `>=` `0.19.0` due to usage of `#rd_kafka_global_init`.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
 - [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
