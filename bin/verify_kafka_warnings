@@ -6,6 +6,9 @@
 allowed_patterns=(
    "Performing controller activation"
    "registered with feature metadata.version"
+   "Replayed TopicRecord for"
+   "Replayed PartitionRecord for"
+   "Previous leader None and previous leader epoch"
 )
 
 # Get all warnings
