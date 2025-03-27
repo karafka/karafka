@@ -45,7 +45,7 @@ draw_routes do
 end
 
 # Create messages with different keys and sizes
-# Key 'a' has 4 messages
+# Key 'a' has 5 messages
 # Key 'b' has 3 messages
 # Key 'c' has 2 messages
 # Key 'd' has 1 message
