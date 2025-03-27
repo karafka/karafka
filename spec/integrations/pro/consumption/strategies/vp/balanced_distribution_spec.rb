@@ -17,6 +17,8 @@ setup_karafka do |config|
   config.max_wait_time = 1_000
 end
 
+MUTEX = Mutex.new
+
 class Consumer < Karafka::BaseConsumer
   def consume
     # We skip on first batch because the cost computation is not accurate until
@@ -26,8 +28,12 @@ class Consumer < Karafka::BaseConsumer
       return
     end
 
-    messages.each do |message|
-      DT[object_id] << [message.raw_key, message.offset]
+    sleep(DT.data.size / 0.1)
+
+    MUTEX.synchronize do
+      messages.each do |message|
+        DT[object_id] << [message.raw_key, message.offset]
+      end
     end
   end
 end
