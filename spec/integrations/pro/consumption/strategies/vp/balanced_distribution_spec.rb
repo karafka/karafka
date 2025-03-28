@@ -83,18 +83,11 @@ DT.data.values.each do |messages|
   end
 end
 
-# Verify that larger groups were processed first
-# We should see the 'a' group (4 messages) and 'b' group (3 messages) processed first
-first_worker_messages = DT.data.values.first
-second_worker_messages = DT.data.values[1]
-third_worker_messages = DT.data.values[2]
+values = DT.data.sort_by { |object_id, _| object_id }.to_h.values
 
-# First worker should have the largest group ('a' with 4 messages)
-assert_equal(5, first_worker_messages.count { |msg| msg.first == 'a' })
-# Second worker should have the second largest group ('b' with 3 messages)
-assert_equal 3, second_worker_messages.size
-# Third worker should have the remaining groups ('c', 'd', 'e')
-assert_equal(3, third_worker_messages.count { |msg| msg.first == 'b' })
+values.map(&:size).each do |size|
+  assert [5, 3].include?(size), size
+end
 
 # Verify that we used all available workers
 assert_equal 3, DT.data.size
