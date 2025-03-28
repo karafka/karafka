@@ -43,7 +43,7 @@ Dir.mktmpdir do |dir|
     be_install = cmd(dir, 'bundle install')
     assert_equal 0, be_install[1], be_install[0]
 
-    re_new = cmd(dir, 'rails new rapp --api')
+    re_new = cmd(dir, 'bundle exec rails new rapp --api')
     assert_equal 0, re_new[1], re_new[0]
 
     mv_app = cmd(dir, 'mv ./rapp/** ./')
@@ -52,7 +52,16 @@ Dir.mktmpdir do |dir|
     # rails new has its own Gemfile to which we need to add karafka once more
     File.open("#{dir}/Gemfile", 'a') do |f|
       f.puts 'gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR"), require: true'
+      f.puts 'gem "bigdecimal"'
+      f.puts 'gem "logger"'
+      f.puts 'gem "mutex_m"'
     end
+
+    file_path = "#{dir}/config/application.rb"
+    existing_content = File.read(file_path)
+    new_first_line = "require 'logger'\n"
+    new_content = new_first_line + existing_content
+    File.write(file_path, new_content)
 
     remove_ruby_def("#{dir}/Gemfile")
 
