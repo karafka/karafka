@@ -57,6 +57,6 @@ old = Karafka::Admin.read_lags_with_offsets(
 assert old[PREVIOUS_NAME][DT.topics[0]][0][:offset] != -1
 
 5.times do |i|
-  # Should not be removed becase we copy only
+  # Should not be removed as we copy only
   assert old[PREVIOUS_NAME][DT.topics[1]][i][:offset] != -1
 end
