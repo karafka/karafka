@@ -33,7 +33,7 @@ Karafka::Admin.seek_consumer_group(
   }
 )
 
-assert Karafka::Admin.rename_consumer_group(
+assert Karafka::Admin.copy_consumer_group(
   PREVIOUS_NAME,
   NEW_NAME,
   [DT.topics[0], DT.topics[1]]
@@ -53,8 +53,10 @@ old = Karafka::Admin.read_lags_with_offsets(
   { PREVIOUS_NAME => [DT.topics[0], DT.topics[1]] }
 )
 
-assert_equal(-1, old[PREVIOUS_NAME][DT.topics[0]][0][:offset])
+# Should not be removed as we copy only
+assert old[PREVIOUS_NAME][DT.topics[0]][0][:offset] != -1
 
 5.times do |i|
-  assert_equal(-1, old[PREVIOUS_NAME][DT.topics[1]][i][:offset])
+  # Should not be removed becase we copy only
+  assert old[PREVIOUS_NAME][DT.topics[1]][i][:offset] != -1
 end
