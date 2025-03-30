@@ -277,27 +277,24 @@ module Karafka
         end
       end
 
-      # Takes consumer group and its topics and migrates all the offsets to a new named group
+      # Takes consumer group and its topics and copies all the offsets to a new named group
       #
       # @param previous_name [String] old consumer group name
       # @param new_name [String] new consumer group name
       # @param topics [Array<String>] topics for which we want to migrate offsets during rename
-      # @param delete_previous [Boolean] should we delete previous consumer group after rename.
-      #   Defaults to true.
+      # @return [Boolean] true if anything was migrated, otherwise false
       #
       # @note This method should **not** be executed on a running consumer group as it creates a
       #   "fake" consumer and uses it to move offsets.
       #
-      # @note After migration unless `delete_previous` is set to `false`, old group will be
-      #   removed.
-      #
       # @note If new consumer group exists, old offsets will be added to it.
-      def rename_consumer_group(previous_name, new_name, topics, delete_previous: true)
+      def copy_consumer_group(previous_name, new_name, topics)
         remap = Hash.new { |h, k| h[k] = {} }
 
         old_lags = read_lags_with_offsets({ previous_name => topics })
 
-        return if old_lags.empty?
+        return false if old_lags.empty?
+        return false if old_lags.values.all? { |topic_data| topic_data.values.all?(&:empty?) }
 
         read_lags_with_offsets({ previous_name => topics })
           .fetch(previous_name)
@@ -314,9 +311,35 @@ module Karafka
 
         seek_consumer_group(new_name, remap)
 
-        return unless delete_previous
+        true
+      end
+
+      # Takes consumer group and its topics and migrates all the offsets to a new named group
+      #
+      # @param previous_name [String] old consumer group name
+      # @param new_name [String] new consumer group name
+      # @param topics [Array<String>] topics for which we want to migrate offsets during rename
+      # @param delete_previous [Boolean] should we delete previous consumer group after rename.
+      #   Defaults to true.
+      # @return [Boolean] true if rename (and optionally removal) was ok or false if there was
+      #   nothing really to rename
+      #
+      # @note This method should **not** be executed on a running consumer group as it creates a
+      #   "fake" consumer and uses it to move offsets.
+      #
+      # @note After migration unless `delete_previous` is set to `false`, old group will be
+      #   removed.
+      #
+      # @note If new consumer group exists, old offsets will be added to it.
+      def rename_consumer_group(previous_name, new_name, topics, delete_previous: true)
+        copy_result = copy_consumer_group(previous_name, new_name, topics)
+
+        return false unless copy_result
+        return copy_result unless delete_previous
 
         delete_consumer_group(previous_name)
+
+        true
       end
 
       # Removes given consumer group (if exists)
