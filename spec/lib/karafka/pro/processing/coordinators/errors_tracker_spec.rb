@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
-# See LICENSE for details.
-
 RSpec.describe_current do
   subject(:tracker) { described_class.new(topic, 0) }
 
@@ -20,8 +17,8 @@ RSpec.describe_current do
       tracker << 101
     end
 
-    it 'expect to evict oldest element' do
-      expect(tracker.size).to eq(100)
+    it 'expect to evict oldest element from tracker errors' do
+      expect(tracker.size).to eq(101)
       expect(tracker).not_to include(0)
       expect(tracker).to include(1)
       expect(tracker).to include(101)
@@ -36,6 +33,33 @@ RSpec.describe_current do
     it 'expect to be empty after clear' do
       tracker.clear
       expect(tracker.empty?).to be(true)
+    end
+  end
+
+  context 'when using granular counts tracking' do
+    let(:error_class_a) { Class.new(StandardError) }
+    let(:error_class_b) { Class.new(StandardError) }
+
+    before do
+      3.times { tracker << error_class_a.new }
+      2.times { tracker << error_class_b.new }
+    end
+
+    it 'correctly counts occurrences of each error class' do
+      expect(tracker.counts[error_class_a]).to eq(3)
+      expect(tracker.counts[error_class_b]).to eq(2)
+    end
+
+    it 'maintains counts after clearing errors' do
+      tracker.clear
+      expect(tracker.counts).to be_empty
+      expect(tracker.empty?).to be(true)
+    end
+
+    it 'increments counts independently from errors storage limit' do
+      200.times { tracker << error_class_a.new }
+      expect(tracker.counts[error_class_a]).to eq(203)
+      expect(tracker.size).to eq(205)
     end
   end
 end
