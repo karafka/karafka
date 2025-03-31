@@ -51,7 +51,7 @@ module Karafka
 
           # @return [Integer] number of elements
           def size
-            count
+            @errors.size
           end
 
           # @return [StandardError, nil] last error that occurred or nil if no errors
