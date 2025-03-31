@@ -37,6 +37,7 @@ en:
       internal.processing.expansions_selector_format: cannot be nil
       internal.processing.executor_class_format: cannot be nil
       internal.processing.worker_job_call_wrapper_format: 'needs to be false or respond to #wrap'
+      internal.processing.errors_tracker_class_format: 'needs to be nil or a class'
 
       internal.active_job.dispatcher_format: cannot be nil
       internal.active_job.job_options_contract_format: cannot be nil

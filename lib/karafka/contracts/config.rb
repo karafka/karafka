@@ -116,6 +116,7 @@ module Karafka
           required(:jobs_queue_class) { |val| !val.nil? }
           required(:scheduler_class) { |val| !val.nil? }
           required(:coordinator_class) { |val| !val.nil? }
+          required(:errors_tracker_class) { |val| val.nil? || val.is_a?(Class) }
           required(:partitioner_class) { |val| !val.nil? }
           required(:strategy_selector) { |val| !val.nil? }
           required(:expansions_selector) { |val| !val.nil? }

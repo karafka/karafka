@@ -289,6 +289,9 @@ module Karafka
           setting :jobs_builder, default: Processing::JobsBuilder.new
           # option coordinator [Class] work coordinator we want to user for processing coordination
           setting :coordinator_class, default: Processing::Coordinator
+          # option errors_tracker_class [Class, nil] errors tracker that is used by the coordinator
+          #   for granular error tracking. `nil` for OSS as it is not in use.
+          setting :errors_tracker_class, default: nil
           # option partitioner_class [Class] partitioner we use against a batch of data
           setting :partitioner_class, default: Processing::Partitioner
           # option strategy_selector [Object] processing strategy selector to be used
