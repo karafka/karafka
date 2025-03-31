@@ -22,7 +22,7 @@
 - [Enhancement] Replace internal usage of MD5 with SHA256 for FIPS.
 - [Enhancement] Improve OSS vs. Pro specs execution isolation.
 - [Enhancement] Preload `librdkafka` code prior to forking in the Swarm mode to save memory.
-- [Enhancement] Extract erros tracker class reference into an internal `errors_tracker_class` config option (Pro).
+- [Enhancement] Extract errors tracker class reference into an internal `errors_tracker_class` config option (Pro).
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
