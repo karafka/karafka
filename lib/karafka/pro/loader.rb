@@ -84,6 +84,7 @@ module Karafka
           icfg.connection.manager = Connection::Manager.new
 
           icfg.processing.coordinator_class = Processing::Coordinator
+          icfg.processing.errors_tracker_class = Processing::Coordinators::ErrorsTracker
           icfg.processing.partitioner_class = Processing::Partitioner
           icfg.processing.scheduler_class = Processing::Schedulers::Default
           icfg.processing.jobs_queue_class = Processing::JobsQueue

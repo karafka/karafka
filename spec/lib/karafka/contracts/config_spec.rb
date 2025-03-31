@@ -92,6 +92,7 @@ RSpec.describe_current do
           jobs_builder: Karafka::Processing::JobsBuilder.new,
           jobs_queue_class: Karafka::Processing::JobsQueue,
           coordinator_class: Karafka::Processing::Coordinator,
+          errors_tracker_class: nil,
           partitioner_class: Karafka::Processing::Partitioner,
           strategy_selector: Karafka::Processing::StrategySelector.new,
           expansions_selector: Karafka::Processing::ExpansionsSelector.new,
@@ -692,6 +693,18 @@ RSpec.describe_current do
 
         it { expect(contract.call(config)).not_to be_success }
       end
+    end
+
+    context 'when processing errors_tracker_class is missing' do
+      before { config[:internal][:processing].delete(:errors_tracker_class) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when processing errors_tracker_class is not a class' do
+      before { config[:internal][:processing][:errors_tracker_class] = 'invalid' }
+
+      it { expect(contract.call(config)).not_to be_success }
     end
 
     context 'when status is missing' do
