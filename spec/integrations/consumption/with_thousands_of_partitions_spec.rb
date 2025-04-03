@@ -14,7 +14,7 @@ class Consumer < Karafka::BaseConsumer
     MUTEX.synchronize do
       messages.each do |message|
         DT[:data][partition] ||= []
-        DT[:data][partition] << message.offset
+        DT[:data][partition] << [message.partition, message.offset]
       end
     end
   end
@@ -41,5 +41,9 @@ start_karafka_and_wait_until do
 end
 
 DT[:data].each do |partition, offsets|
-  assert_equal offsets, [0, 1], "Partition: #{partition} offsets: #{offsets}"
+  assert_equal(
+    offsets,
+    [[partition, 0], [partition, 1]],
+    "Partition: #{partition} offsets: #{offsets}"
+  )
 end
