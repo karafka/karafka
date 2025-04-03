@@ -11,6 +11,8 @@ class DuplicationsDetector
   # @param spec_context [Object] main context
   def initialize(spec_context)
     @spec_context = spec_context
+    @consumers_assignments = {}
+    @mutex = Mutex.new
   end
 
   # @param event [Karafka::Core::Monitoring::Event]
@@ -64,6 +66,22 @@ class DuplicationsDetector
         message.partition,
         "#{topic_name}##{partition}: #{message.partition}"
       )
+    end
+
+    # Ensures that a single consumer instance always consumers one topic partition, even
+    # between batches
+    @mutex.synchronize do
+      set = [topic_name, partition]
+
+      if @consumers_assignments[consumer.id]
+        assert_equal(
+          @consumers_assignments[consumer.id],
+          set,
+          "#{topic_name}##{partition}: #{@consumers_assignments[consumer.id]} vs. #{set}"
+        )
+      else
+        @consumers_assignments[consumer.id] = set
+      end
     end
   end
 
