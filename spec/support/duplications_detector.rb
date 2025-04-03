@@ -39,6 +39,34 @@ class DuplicationsDetector
     end
   end
 
+  # Checks that things did not get messed up between polling and work distribution
+  # @param event [Karafka::Core::Monitoring::Event]
+  def on_consumer_consume(event)
+    consumer = event[:caller]
+    topic_name = consumer.topic.name
+    partition = consumer.partition
+
+    messages = consumer.messages
+    counts = messages.group_by(&:offset).transform_values(&:size).values.uniq
+
+    assert_equal([1], counts, "#{topic_name}##{partition}: #{counts}")
+    assert_equal(1, counts.size)
+
+    messages.each do |message|
+      assert_equal(
+        topic_name,
+        message.topic,
+        "#{topic_name}##{partition}: #{message.topic}"
+      )
+
+      assert_equal(
+        partition,
+        message.partition,
+        "#{topic_name}##{partition}: #{message.partition}"
+      )
+    end
+  end
+
   private
 
   # @param args [Array] anything the spec context assertion accepts
