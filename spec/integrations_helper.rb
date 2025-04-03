@@ -16,6 +16,7 @@ require 'securerandom'
 require 'stringio'
 require 'tmpdir'
 require_relative './support/data_collector'
+require_relative './support/duplications_detector'
 
 Thread.abort_on_exception = true
 
@@ -97,6 +98,9 @@ def setup_karafka(
   listener = ::WaterDrop::Instrumentation::LoggerListener.new(Karafka.logger)
 
   Karafka.producer.monitor.subscribe(listener)
+
+  # Ensure there are no duplicates in the fetched data
+  Karafka::App.monitor.subscribe(DuplicationsDetector.new(self))
 
   return if allow_errors == true
 
