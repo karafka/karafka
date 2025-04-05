@@ -11,6 +11,11 @@
 #
 # This spec runs 1.5 minute but it is expected to ensure stability of the multiplexing execution
 # If the issue persists, this process will fail.
+#
+# This spec needs to run alone because otherwise the `top` command result can be biased by other
+# specs running on the same machine alongside
+
+Bundler.require(:default)
 
 CONFIG = {
   'bootstrap.servers': '127.0.0.1:9092',
