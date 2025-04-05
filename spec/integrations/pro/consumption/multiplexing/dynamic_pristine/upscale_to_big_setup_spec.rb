@@ -15,6 +15,8 @@
 # This spec needs to run alone because otherwise the `top` command result can be biased by other
 # specs running on the same machine alongside
 
+Bundler.require(:default)
+
 CONFIG = {
   'bootstrap.servers': '127.0.0.1:9092',
   'partition.assignment.strategy': 'cooperative-sticky',
