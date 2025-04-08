@@ -4,6 +4,7 @@
 - **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.
 - **[Breaking]** Rename scheduled jobs topics names in their config (Pro).
 - **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
+- [Enhancement] Support KIP-82 (header values of arrays).
 - [Enhancement] Enhance errors tracker with `#counts` that contains per-error class specific counters for granular flow handling.
 - [Enhancement] Provide explicit `Karafka::Admin.copy_consumer_group` API.
 - [Enhancement] Return explicit value from `Karafka::Admin.copy_consumer_group` and `Karafka::Admin.rename_consumer_group` APIs.
@@ -28,7 +29,7 @@
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
 - [Refactor] Improve CI specs parallelization.
-- [Maintenance] Require `karafka-rdkafka` `>=` `0.19.0` due to usage of `#rd_kafka_global_init`.
+- [Maintenance] Require `karafka-rdkafka` `>=` `0.19.1` due to usage of `#rd_kafka_global_init` and KIP-82.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
 - [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
 - [Fix] Prevent applied system filters `#timeout` from potentially interacting with user filters.
