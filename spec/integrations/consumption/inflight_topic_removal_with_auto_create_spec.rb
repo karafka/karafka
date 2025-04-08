@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# When topic in use is removed, Karafka should not emit an error as it will reset and re-create the
-# topic
+# When topic in use is removed, Karafka may issue an `unknown_partition` error but even if, it
+# should re-create the topic and move on.
 
-setup_karafka do |config|
+setup_karafka(allow_errors: true) do |config|
   config.kafka[:'allow.auto.create.topics'] = true
 end
 
@@ -32,3 +32,11 @@ produce_many(DT.topic, DT.uuids(1))
 start_karafka_and_wait_until do
   DT.key?(:done)
 end
+
+error = DT[:errors].first
+
+exit unless error
+
+assert(
+  %i[unknown_partition unknown_topic_or_part].any? { |code| error.code == code }
+)
