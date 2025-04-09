@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.4.18 (2025-04-09)
+- [Fix] Make sure `Bundler.with_unbundled_env` is not called multiple times.
+
 ## 2.4.17 (2025-01-15)
 - [Enhancement] Clean message key and headers when cleaning messages via the cleaner API (Pro).
 - [Enhancement] Allow for setting `metadata: false` in the cleaner API for granular cleaning control (Pro)
