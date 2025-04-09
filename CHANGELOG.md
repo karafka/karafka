@@ -31,6 +31,7 @@
 - [Refactor] Improve CI specs parallelization.
 - [Maintenance] Require `karafka-rdkafka` `>=` `0.19.1` due to usage of `#rd_kafka_global_init` and KIP-82.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
+- [Fix] Make sure `Bundler.with_unbundled_env` is not called multiple times.
 - [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
 - [Fix] Prevent applied system filters `#timeout` from potentially interacting with user filters.
 - [Fix] Use more sane value in `Admin#seek_consumer_group` for long ago.

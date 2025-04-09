@@ -3,6 +3,8 @@
 RSpec.describe_current do
   subject(:karafka) { described_class }
 
+  before { karafka.instance_variable_set('@root', nil) }
+
   describe '.env' do
     it { expect(karafka.env).to eq('test') }
   end

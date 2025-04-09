@@ -57,15 +57,21 @@ module Karafka
 
     # @return [Pathname] Karafka app root path (user application path)
     def root
+      return @root if @root
+
       # If user points to a different root explicitly, use it
-      return Pathname.new(ENV['KARAFKA_ROOT_DIR']) if ENV['KARAFKA_ROOT_DIR']
+      if ENV['KARAFKA_ROOT_DIR']
+        @root = Pathname.new(ENV['KARAFKA_ROOT_DIR'])
+
+        return @root
+      end
 
       # By default we infer the project root from bundler.
       # We cannot use the BUNDLE_GEMFILE env directly because it may be altered by things like
       # ruby-lsp. Instead we always fallback to the most outer Gemfile. In most of the cases, it
       # won't matter but in case of some automatic setup alterations like ruby-lsp, the location
       # from which the project starts may not match the original Gemfile.
-      Pathname.new(
+      @root = Pathname.new(
         File.dirname(
           Bundler.with_unbundled_env { Bundler.default_gemfile }
         )
