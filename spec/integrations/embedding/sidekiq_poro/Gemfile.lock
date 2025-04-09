@@ -1,0 +1,67 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    base64 (0.2.0)
+    connection_pool (2.5.0)
+    ffi (1.17.1)
+    ffi (1.17.1-aarch64-linux-gnu)
+    ffi (1.17.1-aarch64-linux-musl)
+    ffi (1.17.1-arm-linux-gnu)
+    ffi (1.17.1-arm-linux-musl)
+    ffi (1.17.1-arm64-darwin)
+    ffi (1.17.1-x86-linux-gnu)
+    ffi (1.17.1-x86-linux-musl)
+    ffi (1.17.1-x86_64-darwin)
+    ffi (1.17.1-x86_64-linux-gnu)
+    ffi (1.17.1-x86_64-linux-musl)
+    json (2.10.2)
+    karafka (2.4.17)
+      base64 (~> 0.2)
+      karafka-core (>= 2.4.4, < 2.5.0)
+      karafka-rdkafka (>= 0.17.2)
+      waterdrop (>= 2.7.3, < 3.0.0)
+      zeitwerk (~> 2.3)
+    karafka-core (2.4.11)
+      karafka-rdkafka (>= 0.17.6, < 0.20.0)
+      logger (>= 1.6.0)
+    karafka-rdkafka (0.19.1)
+      ffi (~> 1.15)
+      mini_portile2 (~> 2.6)
+      rake (> 12)
+    logger (1.7.0)
+    mini_portile2 (2.8.8)
+    rack (3.1.12)
+    rake (13.2.1)
+    redis-client (0.24.0)
+      connection_pool
+    sidekiq (8.0.2)
+      connection_pool (>= 2.5.0)
+      json (>= 2.9.0)
+      logger (>= 1.6.2)
+      rack (>= 3.1.0)
+      redis-client (>= 0.23.2)
+    waterdrop (2.8.3)
+      karafka-core (>= 2.4.9, < 3.0.0)
+      karafka-rdkafka (>= 0.19.1)
+      zeitwerk (~> 2.3)
+    zeitwerk (2.7.2)
+
+PLATFORMS
+  aarch64-linux-gnu
+  aarch64-linux-musl
+  arm-linux-gnu
+  arm-linux-musl
+  arm64-darwin
+  ruby
+  x86-linux-gnu
+  x86-linux-musl
+  x86_64-darwin
+  x86_64-linux-gnu
+  x86_64-linux-musl
+
+DEPENDENCIES
+  karafka
+  sidekiq (~> 8.0)
+
+BUNDLED WITH
+   2.6.3
