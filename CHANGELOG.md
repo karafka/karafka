@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.4.18 (Unreleased)
+## 2.4.19 (Unreleased)
 - **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.
 - **[Breaking]** Rename scheduled jobs topics names in their config (Pro).
 - **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
@@ -31,7 +31,6 @@
 - [Refactor] Improve CI specs parallelization.
 - [Maintenance] Require `karafka-rdkafka` `>=` `0.19.1` due to usage of `#rd_kafka_global_init` and KIP-82.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
-- [Fix] Make sure `Bundler.with_unbundled_env` is not called multiple times.
 - [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
 - [Fix] Prevent applied system filters `#timeout` from potentially interacting with user filters.
 - [Fix] Use more sane value in `Admin#seek_consumer_group` for long ago.
@@ -40,6 +39,9 @@
 - [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.
 - [Fix] Fix inconsistency in the logs where OS signal originating logs would not have server id reference.
 - [Fix] Post-fork WaterDrop instance looses some of the non-kafka settings.
+
+## 2.4.18 (2025-04-09)
+- [Fix] Make sure `Bundler.with_unbundled_env` is not called multiple times.
 
 ## 2.4.17 (2025-01-15)
 - [Enhancement] Clean message key and headers when cleaning messages via the cleaner API (Pro).
