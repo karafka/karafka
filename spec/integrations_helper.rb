@@ -414,6 +414,9 @@ def wait_for_assignments(*topics)
   @topics_assignments_subscribed = true
 
   sleep(0.1) until DT.key?(:topics_assignments_ready)
+
+  # We wait after the assignment so we're sure polling have happened
+  sleep(1)
 end
 
 # Sends data to Kafka in a sync way
