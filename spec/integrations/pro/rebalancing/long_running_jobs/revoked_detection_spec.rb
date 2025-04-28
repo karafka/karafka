@@ -45,7 +45,7 @@ thread = Thread.new do
     # We need a second producer to trigger a rebalance
     consumer = setup_rdkafka_consumer
     consumer.subscribe(DT.topic)
-    consumer.poll(1_000)
+    5.times { consumer.poll(1_000) }
     consumer.close
   end
 end
