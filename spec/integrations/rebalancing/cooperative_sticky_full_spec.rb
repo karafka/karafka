@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
-# Karafka will run a full rebalance in case we use cooperative-sticky but force commit when
-# rebalance happens. This is how `librdkafka` works
+# When marking as consumed during rebalance on cooperative-sticky, it will reject this marking and
+# will work as expected (not revoking all). It was fixed in librdkafka 2.10
+
+# @note Prior to librdkafka 2.10 this is how it worked:
+#   Karafka will run a full rebalance in case we use cooperative-sticky but force commit when
+#   rebalance happens. This is how `librdkafka` works
 
 setup_karafka(allow_errors: true) do |config|
   config.kafka[:'partition.assignment.strategy'] = 'cooperative-sticky'
@@ -69,4 +73,4 @@ start_karafka_and_wait_until do
   true
 end
 
-assert_equal [0, 1, 2, 3, 4], DT.data[:revoked].sort.uniq
+assert_equal [0, 1], DT.data[:revoked].sort.uniq
