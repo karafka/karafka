@@ -22,6 +22,8 @@ class Consumer < Karafka::BaseConsumer
         offset: message.offset
       }
     end
+
+    sleep(1)
   end
 end
 
