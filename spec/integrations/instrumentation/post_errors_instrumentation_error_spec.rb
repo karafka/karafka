@@ -32,7 +32,11 @@ begin
 rescue StandardError
   Karafka::Server.stop
 
+  sleep(1)
+
   exit 1
 end
+
+sleep(1)
 
 exit 10
