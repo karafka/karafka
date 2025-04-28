@@ -32,7 +32,7 @@ end
 
 # Based on exact timing librdkafka may try to deliver message but will fail, in such cases
 # the timeout will happen. In case topic removal is faster, unknown partition
-EXPECTED_ERRORS = %i[msg_timed_out unknown_partition]
+EXPECTED_ERRORS = %i[msg_timed_out unknown_partition].freeze
 
 assert EXPECTED_ERRORS.include?(DT[:errors].last.cause.code)
 
