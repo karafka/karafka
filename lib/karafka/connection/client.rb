@@ -626,6 +626,9 @@ module Karafka
           return nil if @subscription_group.kafka[:'allow.auto.create.topics']
 
           early_report = true
+
+          # No sense in retrying when no topic/partition and we're no longer running
+          retryable = false unless Karafka::App.running?
         # If we detect the end of partition which can happen if `enable.partition.eof` is set to
         # true, we can just return fast. This will fast yield whatever set of messages we
         # already have instead of waiting. This can be used for better latency control when we do
