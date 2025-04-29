@@ -73,6 +73,7 @@ module Karafka
         message.max.bytes
         metadata.broker.list
         metadata.max.age.ms
+        metadata.recovery.strategy
         oauthbearer_token_refresh_cb
         offset.store.method
         offset.store.path
@@ -207,6 +208,7 @@ module Karafka
         message.timeout.ms
         metadata.broker.list
         metadata.max.age.ms
+        metadata.recovery.strategy
         msg_order_cmp
         oauthbearer_token_refresh_cb
         opaque

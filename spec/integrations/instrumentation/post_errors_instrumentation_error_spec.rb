@@ -16,8 +16,11 @@ end
 
 draw_routes(Consumer)
 
-Karafka::App.monitor.subscribe('error.occurred') do
-  raise
+# We do not crash on the forceful shutdown error as this layer needs to correctly close librdkafka
+# consumers, otherwise it may segfault
+Karafka::App.monitor.subscribe('error.occurred') do |event|
+  raise if event[:caller].is_a?(Karafka::BaseConsumer)
+  raise if event[:caller].is_a?(Karafka::Processing::Worker)
 end
 
 produce_many(DT.topic, DT.uuids(1))
@@ -34,5 +37,7 @@ rescue StandardError
 
   exit 1
 end
+
+sleep(1)
 
 exit 10

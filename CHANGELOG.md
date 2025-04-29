@@ -31,6 +31,8 @@
 - [Refactor] Improve CI specs parallelization.
 - [Maintenance] Require `karafka-rdkafka` `>=` `0.19.1` due to usage of `#rd_kafka_global_init` and KIP-82.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
+- [Maintenance] Remove Rails `7.0` specs due to upcoming EOL.
+- [Fix] Fix a case where `unknown_topic_or_part` error could leak out of the consumer on consumer shutdown.
 - [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
 - [Fix] Prevent applied system filters `#timeout` from potentially interacting with user filters.
 - [Fix] Use more sane value in `Admin#seek_consumer_group` for long ago.

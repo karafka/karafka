@@ -54,7 +54,7 @@ Thread.new do
 
   consumer = setup_rdkafka_consumer
   consumer.subscribe(DT.topic)
-  consumer.poll(500)
+  5.times { consumer.poll(500) }
   consumer.close
 end
 

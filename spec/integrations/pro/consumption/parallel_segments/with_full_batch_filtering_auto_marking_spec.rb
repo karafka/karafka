@@ -22,6 +22,8 @@ class Consumer < Karafka::BaseConsumer
         offset: message.offset
       }
     end
+
+    sleep(1)
   end
 end
 
@@ -67,7 +69,7 @@ Karafka::App.producer.produce_many_sync(segment0_messages)
 
 # Start Karafka and wait until we've processed some messages
 start_karafka_and_wait_until do
-  DT[:consumed_messages].size >= 5
+  DT[:consumed_messages].size >= segment0_messages.size
 end
 
 # Sleep a bit to ensure offset commits have time to complete
