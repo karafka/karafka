@@ -53,6 +53,19 @@ module Karafka
         def post_setup(config)
           RecurringTasks::Contracts::Config.new.validate!(config.to_h)
         end
+
+        # Basically since we may have custom producers configured that are not the same as the
+        # default one, we hold a reference to old pre-fork producer. This means, that when we
+        # initialize it again in post-fork, as long as user uses defaults we should re-inherit
+        # it from the default config.
+        #
+        # @param config [Karafka::Core::Configurable::Node]
+        # @param pre_fork_producer [WaterDrop::Producer]
+        def post_fork(config, pre_fork_producer)
+          return unless config.scheduled_messages.producer == pre_fork_producer
+
+          config.scheduled_messages.producer = config.producer
+        end
       end
     end
   end

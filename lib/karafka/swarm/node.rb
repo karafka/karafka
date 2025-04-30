@@ -64,7 +64,8 @@ module Karafka
           # an attempt to close it when finalized, meaning it would be kept in memory.
           config.producer.close
 
-          old_producer_config = config.producer.config
+          old_producer = config.producer
+          old_producer_config = old_producer.config
 
           # Supervisor producer is closed, hence we need a new one here
           config.producer = ::WaterDrop::Producer.new do |p_config|
@@ -85,6 +86,9 @@ module Karafka
 
           @pid = ::Process.pid
           @reader.close
+
+          # Certain features need to be reconfigured / reinitialized after fork in Pro
+          Pro::Loader.post_fork(config, old_producer) if Karafka.pro?
 
           # Indicate we are alive right after start
           healthy

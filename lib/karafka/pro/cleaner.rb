@@ -28,6 +28,14 @@ module Karafka
         def post_setup(_config)
           true
         end
+
+        # This feature does not need any changes post-fork
+        #
+        # @param _config [Karafka::Core::Configurable::Node]
+        # @param _pre_fork_producer [WaterDrop::Producer]
+        def post_fork(_config, _pre_fork_producer)
+          true
+        end
       end
     end
   end
