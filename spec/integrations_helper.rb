@@ -74,6 +74,7 @@ def setup_karafka(
     if Karafka.pro?
       # Do not redefine topics locations if re-configured
       unless @setup_karafka_first_run
+        config.recurring_tasks.group_id = "rt-#{SecureRandom.uuid}"
         config.recurring_tasks.topics.schedules.name = "it-#{SecureRandom.uuid}"
         config.recurring_tasks.topics.logs.name = "it-#{SecureRandom.uuid}"
         # Run often so we do not wait on the first run
