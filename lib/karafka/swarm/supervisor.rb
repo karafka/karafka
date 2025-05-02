@@ -79,8 +79,6 @@ module Karafka
           lock
           control
         end
-
-        Kernel.exit(config.internal.default_exit_code)
       # If the cli contract validation failed reraise immediately and stop the process
       rescue Karafka::Errors::InvalidConfigurationError => e
         raise e

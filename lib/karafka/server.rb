@@ -73,8 +73,6 @@ module Karafka
         # Since `#start` is blocking, we will get here only after the runner is done. This will
         # not add any performance degradation because of that.
         sleep(0.1) until Karafka::App.terminated?
-
-        Kernel.exit(config.internal.default_exit_code)
       # Try its best to shutdown underlying components before re-raising
       # rubocop:disable Lint/RescueException
       rescue Exception => e

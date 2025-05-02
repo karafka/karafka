@@ -25,6 +25,7 @@ module Karafka
 
         Karafka::Server.execution_mode = :supervisor
         Karafka::Swarm::Supervisor.new.run
+        Kernel.exit(config.internal.default_exit_code)
       end
     end
   end
