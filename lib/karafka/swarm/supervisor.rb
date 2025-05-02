@@ -104,6 +104,11 @@ module Karafka
 
       private
 
+      # @return [Karafka::Core::Configurable::Node] root config node
+      def config
+        Karafka::App.config
+      end
+
       # Keeps the lock on the queue so we control nodes only when it is needed
       # @note We convert to seconds since the queue timeout requires seconds
       def lock
