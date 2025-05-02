@@ -14,6 +14,8 @@ RSpec.describe_current do
       subscription_groups: { 1 => [] }
     )
 
+    allow(Kernel).to receive(:exit)
+
     # Do not close the real producer as we use it in specs
     allow(Karafka::App.producer).to receive(:close)
     allow(Karafka::Runner).to receive(:new).and_return(runner)

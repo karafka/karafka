@@ -54,6 +54,10 @@ module Karafka
         process.on_sigtstp { quiet }
         # Needed for instrumentation
         process.on_sigttin {}
+
+        # Sets the reload and starts the shutdown exit code
+        process.on_sigusr1 { stop(config.internal.restart_exit_code) }
+
         process.supervise
 
         # This will only run when not in a swarm mode. In swarm mode the server runs post-fork, so
@@ -69,6 +73,8 @@ module Karafka
         # Since `#start` is blocking, we will get here only after the runner is done. This will
         # not add any performance degradation because of that.
         sleep(0.1) until Karafka::App.terminated?
+
+        Kernel.exit(config.internal.default_exit_code)
       # Try its best to shutdown underlying components before re-raising
       # rubocop:disable Lint/RescueException
       rescue Exception => e
@@ -87,11 +93,15 @@ module Karafka
 
       # Stops Karafka with a supervision (as long as there is a shutdown timeout)
       # If consumers or workers won't stop in a given time frame, it will force them to exit
+      # @param exit_code [Integer] exit code to use in case all went well (on went wrong hardcoded)
+      #   We allow customizing this because of graceful restarts on SIGUSR1
       #
       # @note This method is not async. It should not be executed from the workers as it will
       #   lock them forever. If you need to run Karafka shutdown from within workers threads,
       #   please start a separate thread to do so.
-      def stop
+      def stop(exit_code = config.internal.graceful_exit_code)
+        config.internal.default_exit_code = exit_code
+
         # Initialize the stopping process only if Karafka was running
         return if Karafka::App.stopping?
         return if Karafka::App.stopped?

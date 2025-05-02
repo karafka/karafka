@@ -158,6 +158,12 @@ module Karafka
         setting :tick_interval, default: 5_000
         # How long should we sleep between checks on shutting down consumers
         setting :supervision_sleep, default: 0.1
+        # Default exit code to use
+        setting :default_exit_code, default: 0
+        # What exit code should Karafka use when shutting down gracefully
+        setting :graceful_exit_code, default: 0
+        # Exit code for restarts when SIGUSR1 is sent
+        setting :restart_exit_code, default: 4
         # What system exit code should we use when we terminated forcefully
         setting :forceful_exit_code, default: 2
 

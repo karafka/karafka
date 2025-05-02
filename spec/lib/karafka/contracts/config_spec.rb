@@ -36,6 +36,9 @@ RSpec.describe_current do
       },
       internal: {
         supervision_sleep: 0.1,
+        default_exit_code: 0,
+        graceful_exit_code: 0,
+        restart_exit_code: 4,
         forceful_exit_code: 2,
         status: Karafka::Status.new,
         process: Karafka::Process.new,
@@ -151,28 +154,35 @@ RSpec.describe_current do
     end
   end
 
-  context 'when validating forceful_exit_code' do
-    context 'when forceful_exit_code is missing' do
-      before { config[:internal].delete(:forceful_exit_code) }
+  %i[
+    graceful_exit_code
+    restart_exit_code
+    forceful_exit_code
+    default_exit_code
+  ].each do |exit_code_name|
+    context "when validating #{exit_code_name}" do
+      context "when #{exit_code_name} is missing" do
+        before { config[:internal].delete(exit_code_name) }
 
-      it 'expects to not be successful' do
-        expect(contract.call(config)).not_to be_success
+        it 'expects to not be successful' do
+          expect(contract.call(config)).not_to be_success
+        end
       end
-    end
 
-    context 'when forceful_exit_code is not an integer' do
-      before { config[:internal][:forceful_exit_code] = 'not_integer' }
+      context "when #{exit_code_name} is not an integer" do
+        before { config[:internal][exit_code_name] = 'not_integer' }
 
-      it 'expects to not be successful' do
-        expect(contract.call(config)).not_to be_success
+        it 'expects to not be successful' do
+          expect(contract.call(config)).not_to be_success
+        end
       end
-    end
 
-    context 'when forceful_exit_code is less than 0' do
-      before { config[:internal][:forceful_exit_code] = -1 }
+      context "when #{exit_code_name} is less than 0" do
+        before { config[:internal][exit_code_name] = -1 }
 
-      it 'expects to not be successful' do
-        expect(contract.call(config)).not_to be_success
+        it 'expects to not be successful' do
+          expect(contract.call(config)).not_to be_success
+        end
       end
     end
   end
