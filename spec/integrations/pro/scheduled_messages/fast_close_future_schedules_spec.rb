@@ -67,4 +67,4 @@ start_karafka_and_wait_until(sleep: 1) do
   dispatched.size >= 500
 end
 
-assert_equal dispatched.size, 500
+assert_equal 500, dispatched.size
