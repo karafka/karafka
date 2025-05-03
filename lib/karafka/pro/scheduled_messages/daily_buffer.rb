@@ -46,9 +46,6 @@ module Karafka
         # Yields messages that should be dispatched (sent) to Kafka
         #
         # @yieldparam [Karafka::Messages::Message] message to dispatch
-        #
-        # @note We yield epoch alongside of the message so we do not have to extract it several
-        #   times later on. This simplifies the API
         def for_dispatch
           dispatch = Time.now.to_i
 
