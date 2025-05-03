@@ -12,6 +12,11 @@ module Karafka
         # Our envelope always needs to comply with this format, otherwise we won't have enough
         # details to be able to dispatch the message
         class Message < ::Karafka::Contracts::Base
+          # How many seconds backwards we allow to schedule
+          # We do it (small past) because of time drift, etc. Users may not be aware that they
+          # scheduled in the past (super small).
+          GRACE_PERIOD = 10
+
           configure do |config|
             config.error_messages = YAML.safe_load(
               File.read(
@@ -61,7 +66,7 @@ module Karafka
 
             # We allow for small lag as those will be dispatched but we should prevent dispatching
             # in the past in general as often it is a source of errors
-            next if epoch_time >= Time.now.to_i - 10
+            next if epoch_time >= Time.now.to_i - GRACE_PERIOD
 
             [[[:headers], :schedule_target_epoch_in_the_past]]
           end

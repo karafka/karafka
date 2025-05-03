@@ -15,7 +15,7 @@ module Karafka
         end
 
         # Updates epoch if bigger than current max
-        # @param new_max [Integer] potential new max epoch
+        # @param new_max [Integer, nil] potential new max epoch
         def update(new_max)
           return unless new_max
           return unless new_max > @max
@@ -23,9 +23,9 @@ module Karafka
           @max = new_max
         end
 
-        # @return [Integer] max epoch recorded
+        # @return [Integer] max epoch recorded minus grace period
         def to_i
-          @max
+          @max - Contracts::Message::GRACE_PERIOD
         end
       end
     end
