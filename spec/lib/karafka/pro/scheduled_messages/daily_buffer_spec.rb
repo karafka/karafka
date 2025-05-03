@@ -84,7 +84,7 @@ RSpec.describe_current do
       it 'yields messages that should be dispatched' do
         expect do |b|
           buffer.for_dispatch(&b)
-        end.to yield_with_args(epoch, message)
+        end.to yield_with_args(message)
       end
     end
 

@@ -11,9 +11,6 @@ module Karafka
         # Prepares the initial state of all stateful components
         def initialized
           clear!
-          # Max epoch is always moving forward with the time. Never backwards, hence we do not
-          # reset it at all.
-          @max_epoch = MaxEpoch.new
           @state = State.new(nil)
         end
 
@@ -64,23 +61,18 @@ module Karafka
           return unless @state.loaded?
 
           keys = []
-          epochs = []
 
           # We first collect all the data for dispatch and then dispatch and **only** after
-          # dispatch that is sync is successful we remove those messages from the daily buffer
-          # and update the max epoch. Since only the dispatch itself is volatile and can crash
-          # with timeouts, etc, we need to be sure it wen through prior to deleting those messages
-          # from the daily buffer. That way we ensure the at least once delivery and in case of
-          # a transactional producer, exactly once delivery.
-          @daily_buffer.for_dispatch do |epoch, message|
-            epochs << epoch
-            keys << message.key
+          # dispatch that is sync is successful we remove those messages from the daily buffer.
+          # Since only the dispatch itself is volatile and can crash with timeouts, etc, we need
+          # to be sure it wen through prior to deleting those messages from the daily buffer.
+          # That way we ensure the at least once delivery and in case of a transactional producer,
+          # exactly once delivery.
+          @daily_buffer.for_dispatch do |message|
             @dispatcher << message
           end
 
           @dispatcher.flush
-
-          @max_epoch.update(epochs.max)
 
           keys.each { |key| @daily_buffer.delete(key) }
 
@@ -111,7 +103,7 @@ module Karafka
             # Do not track historical below today as those will be reflected in the daily buffer
             @tracker.track(message) if time >= @today.starts_at
 
-            if time > @today.ends_at || time < @max_epoch.to_i
+            if time > @today.ends_at
               # Clean the message immediately when not needed (won't be scheduled) to preserve
               # memory
               message.clean!

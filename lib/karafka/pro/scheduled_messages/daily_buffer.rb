@@ -45,8 +45,7 @@ module Karafka
 
         # Yields messages that should be dispatched (sent) to Kafka
         #
-        # @yieldparam [Integer, Karafka::Messages::Message] epoch of the message and the message
-        #   itself
+        # @yieldparam [Karafka::Messages::Message] message to dispatch
         #
         # @note We yield epoch alongside of the message so we do not have to extract it several
         #   times later on. This simplifies the API
@@ -56,7 +55,7 @@ module Karafka
           @accu.each_value do |epoch, message|
             next unless epoch <= dispatch
 
-            yield(epoch, message)
+            yield(message)
           end
         end
 
