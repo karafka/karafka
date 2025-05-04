@@ -42,6 +42,7 @@
 - [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.
 - [Fix] Fix inconsistency in the logs where OS signal originating logs would not have server id reference.
 - [Fix] Post-fork WaterDrop instance looses some of the non-kafka settings.
+- [Fix] Max epoch tracking for early cleanup causes messages to be skipped until reload.
 
 ## 2.4.18 (2025-04-09)
 - [Fix] Make sure `Bundler.with_unbundled_env` is not called multiple times.
