@@ -37,6 +37,26 @@ RSpec.describe_current do
       }
     end
 
+    it 'converts schedule_target_epoch to an integer' do
+      expect(deserializer.call(metadata)['schedule_target_epoch']).to be_a(Integer)
+      expect(deserializer.call(metadata)['schedule_target_epoch']).to eq(1_679_330_400)
+    end
+
+    it 'converts schedule_target_partition to an integer' do
+      expect(deserializer.call(metadata)['schedule_target_partition']).to be_a(Integer)
+      expect(deserializer.call(metadata)['schedule_target_partition']).to eq(3)
+    end
+  end
+
+  context 'when headers include cancel events' do
+    let(:raw_headers) do
+      {
+        'schedule_source_type' => 'cancel',
+        'schedule_target_epoch' => '1679330400',
+        'schedule_target_partition' => '3'
+      }
+    end
+
     it 'does not convert any header fields' do
       expect(deserializer.call(metadata)).to eq(raw_headers)
     end
