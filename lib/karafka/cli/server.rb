@@ -91,7 +91,7 @@ module Karafka
 
         Karafka::Server.execution_mode = :standalone
         Karafka::Server.run
-        Kernel.exit(config.internal.default_exit_code)
+        Kernel.exit(Karafka::App.config.internal.default_exit_code)
       end
 
       # Registers things we want to include (if defined)
