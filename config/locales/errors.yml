@@ -48,6 +48,9 @@ en:
       internal.tick_interval_format: needs to be an integer bigger or equal to 1000
       internal.supervision_sleep_format: needs to be an integer bigger than 0
       internal.forceful_exit_code_format: needs to be an integer bigger or equal to 0
+      internal.graceful_exit_code_format: needs to be an integer bigger or equal to 0
+      internal.restart_exit_code_format: needs to be an integer bigger or equal to 0
+      internal.default_exit_code_format: needs to be an integer bigger or equal to 0
 
       internal.routing.builder_format: needs to be present
       internal.routing.subscription_groups_builder_format: needs to be present

@@ -64,6 +64,9 @@ module Karafka
         # of a single consumer queue poll, hence we prevent it
         required(:tick_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
         required(:supervision_sleep) { |val| val.is_a?(Numeric) && val.positive? }
+        required(:default_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
+        required(:graceful_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
+        required(:restart_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
         required(:forceful_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
 
         nested(:swarm) do

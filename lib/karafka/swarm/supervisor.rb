@@ -66,6 +66,9 @@ module Karafka
         # Needed to be registered as we want to unlock on child changes
         process.on_sigchld {}
         process.on_any_active { unlock }
+        # Needed to stop with a restart exit code
+        process.on_sigusr1 { stop(config.internal.restart_exit_code) }
+
         process.supervise
 
         Karafka::App.supervise!
@@ -76,7 +79,6 @@ module Karafka
           lock
           control
         end
-
       # If the cli contract validation failed reraise immediately and stop the process
       rescue Karafka::Errors::InvalidConfigurationError => e
         raise e
@@ -100,6 +102,11 @@ module Karafka
 
       private
 
+      # @return [Karafka::Core::Configurable::Node] root config node
+      def config
+        Karafka::App.config
+      end
+
       # Keeps the lock on the queue so we control nodes only when it is needed
       # @note We convert to seconds since the queue timeout requires seconds
       def lock
@@ -114,7 +121,11 @@ module Karafka
       # Stops all the nodes and supervisor once all nodes are dead.
       # It will forcefully stop all nodes if they exit the shutdown timeout. While in theory each
       # of the nodes anyhow has its own supervisor, this is a last resort to stop everything.
-      def stop
+      # @param exit_code [Integer] exit code to use in case all went well (on went wrong hardcoded)
+      #   We allow customizing this because of graceful restarts on SIGUSR1
+      def stop(exit_code = config.internal.graceful_exit_code)
+        config.internal.default_exit_code = exit_code
+
         # Ensure that the stopping procedure is initialized only once
         @mutex.synchronize do
           return if @stopping
