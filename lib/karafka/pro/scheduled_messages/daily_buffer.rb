@@ -45,19 +45,22 @@ module Karafka
 
         # Yields messages that should be dispatched (sent) to Kafka
         #
-        # @yieldparam [Integer, Karafka::Messages::Message] epoch of the message and the message
-        #   itself
-        #
-        # @note We yield epoch alongside of the message so we do not have to extract it several
-        #   times later on. This simplifies the API
+        # @yieldparam [Karafka::Messages::Message] messages to be dispatched sorted from the once
+        #   that are the oldest (lowest epoch)
         def for_dispatch
           dispatch = Time.now.to_i
+
+          selected = []
 
           @accu.each_value do |epoch, message|
             next unless epoch <= dispatch
 
-            yield(epoch, message)
+            selected << [epoch, message]
           end
+
+          selected
+            .sort_by!(&:first)
+            .each { |_, message| yield(message) }
         end
 
         # Removes given key from the accumulator
