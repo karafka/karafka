@@ -28,6 +28,7 @@ module Karafka
                 optional(:multiplexing_min) { |val| val.is_a?(Integer) && val >= 1 }
                 optional(:multiplexing_max) { |val| val.is_a?(Integer) && val >= 1 }
                 optional(:multiplexing_boot) { |val| val.is_a?(Integer) && val >= 1 }
+                optional(:multiplexing_scale_delay) { |val| val.is_a?(Integer) && val >= 1_000 }
               end
 
               # Makes sure min is not more than max
