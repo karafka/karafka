@@ -9,9 +9,7 @@
 setup_karafka do |config|
   config.swarm.nodes = 1
   c_klass = config.internal.connection.conductor.class
-  m_klass = config.internal.connection.manager.class
   config.internal.connection.conductor = c_klass.new(1_000)
-  config.internal.connection.manager = m_klass.new(1_000)
   config.internal.swarm.node_restart_timeout = 1_000
   config.internal.swarm.supervision_interval = 1_000
   config.internal.swarm.liveness_interval = 1_000
@@ -48,7 +46,7 @@ end
 
 draw_routes do
   subscription_group do
-    multiplexing(min: 1, max: 2, boot: 2)
+    multiplexing(min: 1, max: 2, boot: 2, scale_delay: 1_000)
 
     topic DT.topic do
       consumer Consumer

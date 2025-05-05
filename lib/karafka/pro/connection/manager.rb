@@ -19,14 +19,9 @@ module Karafka
       class Manager < Karafka::Connection::Manager
         include Core::Helpers::Time
 
-        # How long should we wait after a rebalance before doing anything on a consumer group
-        #
-        # @param scale_delay [Integer] How long should we wait before making any changes. Any
-        #   change related to this consumer group will postpone the scaling operations. This is
-        #   done that way to prevent too many friction in the cluster. It is 1 minute by default
-        def initialize(scale_delay = 60 * 1_000)
+        # Creates new manager instance
+        def initialize
           super()
-          @scale_delay = scale_delay
           @mutex = Mutex.new
           @changes = Hash.new do |h, k|
             h[k] = {
@@ -234,6 +229,8 @@ module Karafka
         #   are also stable. This is a strong indicator that no rebalances or other operations are
         #   happening at a given moment.
         def stable?(sg_listeners)
+          @scale_delay ||= sg_listeners.first.subscription_group.multiplexing.scale_delay
+
           sg_listeners.all? do |sg_listener|
             # If a listener is not active, we do not take it into consideration when looking at
             # the stability data

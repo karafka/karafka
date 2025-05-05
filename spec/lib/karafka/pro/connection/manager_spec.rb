@@ -6,7 +6,7 @@
 RSpec.describe_current do
   include Karafka::Core::Helpers::Time
 
-  subject(:manager) { described_class.new(0) }
+  subject(:manager) { described_class.new }
 
   let(:statistics) { JSON.parse(fixture_file('statistics.json')) }
   let(:listener_class) { Karafka::Connection::Listener }
@@ -316,6 +316,7 @@ RSpec.describe_current do
 
       context 'when multiplexing is on and in a dynamic mode and we could downscale' do
         before do
+          subscription_group1.multiplexing.scale_delay = 0
           subscription_group1.multiplexing.active = true
           subscription_group1.multiplexing.min = 1
           subscription_group1.multiplexing.max = 5
@@ -392,6 +393,7 @@ RSpec.describe_current do
 
       context 'when multiplexing is on and in a dynamic mode and we could upscale' do
         before do
+          subscription_group1.multiplexing.scale_delay = 0
           subscription_group1.multiplexing.active = true
           subscription_group1.multiplexing.min = 1
           subscription_group1.multiplexing.max = 5
