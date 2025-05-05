@@ -16,9 +16,16 @@ module Karafka
                 max = @details.fetch(:multiplexing_max, 1)
                 min = @details.fetch(:multiplexing_min, max)
                 boot = @details.fetch(:multiplexing_boot, max / 2)
+                scale_delay = @details.fetch(:multiplexing_scale_delay, 60_000)
                 active = max > 1
 
-                Config.new(active: active, min: min, max: max, boot: boot)
+                Config.new(
+                  active: active,
+                  min: min,
+                  max: max,
+                  boot: boot,
+                  scale_delay: scale_delay
+                )
               end
             end
 
