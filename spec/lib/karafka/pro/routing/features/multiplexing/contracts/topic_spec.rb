@@ -11,7 +11,8 @@ RSpec.describe_current do
       subscription_group_details: {
         multiplexing_min: min,
         multiplexing_max: max,
-        multiplexing_boot: boot
+        multiplexing_boot: boot,
+        multiplexing_scale_delay: scale_delay
       }
     }
   end
@@ -19,6 +20,7 @@ RSpec.describe_current do
   let(:min) { 1 }
   let(:max) { 2 }
   let(:boot) { 1 }
+  let(:scale_delay) { 60_000 }
 
   context 'when config is valid' do
     it { expect(check).to be_success }
@@ -76,6 +78,18 @@ RSpec.describe_current do
   context 'when both min and max are set to 1, which does not make sense' do
     let(:max) { 1 }
     let(:min) { 1 }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when scale delay is below 1 second' do
+    let(:scale_delay) { 999 }
+
+    it { expect(check).not_to be_success }
+  end
+
+  context 'when scale delay is not a number' do
+    let(:scale_delay) { 'test' }
 
     it { expect(check).not_to be_success }
   end
