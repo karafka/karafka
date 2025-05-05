@@ -535,7 +535,11 @@ module Karafka
       def with_admin
         bind_id = SecureRandom.uuid
 
-        admin = config(:producer, {}).admin(native_kafka_auto_start: false)
+        admin = config(:producer, {}).admin(
+          native_kafka_auto_start: false,
+          native_kafka_poll_timeout_ms: app_config.admin.poll_timeout
+        )
+
         bind_oauth(bind_id, admin)
 
         admin.start

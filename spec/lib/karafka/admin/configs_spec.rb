@@ -86,7 +86,12 @@ RSpec.describe_current do
   end
 
   describe '#alter' do
-    subject(:result) { described_class.alter(*resources) }
+    subject(:result) do
+      result = described_class.alter(*resources)
+      # We add 100 ms to make sure that Kafka has time to apply change
+      sleep(0.1)
+      result
+    end
 
     let(:described_topic_config) do
       lambda do
