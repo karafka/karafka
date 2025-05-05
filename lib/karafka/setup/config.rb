@@ -142,7 +142,7 @@ module Karafka
         # Lower value can be especially useful when working with Web UI, because it allows for
         # increased responsiveness. Many admin operations do not take 100ms but they wait on poll
         # until then prior to finishing, blocking the execution. Lowering to 25 ms can
-        # improve responsiveness of the Web UI. 50ms is a good tradeoff for admin.
+        # improve responsiveness of the Web UI. 50ms is a good trade-off for admin.
         setting :poll_timeout, default: 50
       end
 
