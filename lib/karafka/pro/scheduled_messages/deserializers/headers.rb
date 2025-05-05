@@ -10,6 +10,12 @@ module Karafka
       module Deserializers
         # Converts certain pieces of headers into their integer form for messages
         class Headers
+          # We only directly operate on epoch and other details for schedules and tombstones.
+          # cancel requests don't have to be deserialized that way since they don't have epoch
+          WORKABLE_TYPES = %w[schedule tombstone].freeze
+
+          private_constant :WORKABLE_TYPES
+
           # @param metadata [Karafka::aMessages::Metadata]
           # @return [Hash] headers
           def call(metadata)
@@ -19,7 +25,7 @@ module Karafka
 
             # tombstone and cancellation events are not operable, thus we do not have to cast any
             # of the headers pieces
-            return raw_headers unless type == 'schedule'
+            return raw_headers unless WORKABLE_TYPES.include?(type)
 
             headers = raw_headers.dup
             headers['schedule_target_epoch'] = headers['schedule_target_epoch'].to_i
