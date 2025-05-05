@@ -136,6 +136,14 @@ module Karafka
         # How many times should be try. 1 000 ms x 60 => 60 seconds wait in total and then we give
         # up on pending operations
         setting :max_attempts, default: 60
+
+        # option poll_timeout [Integer] time in ms
+        # How long should a poll wait before yielding on no results (rdkafka-ruby setting)
+        # Lower value can be especially useful when working with Web UI, because it allows for
+        # increased responsiveness. Many admin operations do not take 100ms but they wait on poll
+        # until then prior to finishing, blocking the execution. Lowering to 25 ms can
+        # improve responsiveness of the Web UI. 50ms is a good tradeoff for admin.
+        setting :poll_timeout, default: 50
       end
 
       # Namespace for internal settings that should not be modified directly

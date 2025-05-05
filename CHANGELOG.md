@@ -25,10 +25,12 @@
 - [Enhancement] Improve OSS vs. Pro specs execution isolation.
 - [Enhancement] Preload `librdkafka` code prior to forking in the Swarm mode to save memory.
 - [Enhancement] Extract errors tracker class reference into an internal `errors_tracker_class` config option (Pro).
+- [Enhancement] Support rdkafka native kafka polling customization for admin.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
 - [Refactor] Improve CI specs parallelization.
+- [Maintenance] Lower the `Karafka::Admin` `poll_timeout` to 50 ms to improve responsiveness of admin operations.
 - [Maintenance] Require `karafka-rdkafka` `>=` `0.19.1` due to usage of `#rd_kafka_global_init` and KIP-82.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
 - [Maintenance] Remove Rails `7.0` specs due to upcoming EOL.
