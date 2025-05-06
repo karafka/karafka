@@ -1,0 +1,11 @@
+{
+  "data": {
+    "user_id": "686eeceb-c763-46fc-b946-17663bb827b4",
+    "tenant_id": "tenant_1",
+    "points_account_id": "95fa8ca3-f89e-4d9b-8aa7-a9ba3b460b49"
+  },
+  "metadata": {
+    "event": "service_1.user_activated",
+    "request_id": "ee3b35f4-68c0-42ab-aa8c-6ca146d3ca89"
+  }
+}
