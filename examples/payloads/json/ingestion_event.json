@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "request_id": "0bb22210-4a7b-4df3-a0a2-4fed464f4296",
+    "tenant_id": "tenant_2",
+    "event": "service_2.file_ingested",
+    "raw_tenant_file_id": "64eef122-39a4-4ba4-a0eb-2115bb3be545",
+    "row_number": 4,
+    "batch_item_run_id": "61eb1d69-88ad-421a-a57d-543b1d674a86"
+  },
+  "data": {
+    "user": {
+      "partner_user_id": "111111111166666666_555555522222222222",
+      "email": "email@example.com",
+      "status": "active",
+      "first_name": "first name",
+      "last_name": "last name",
+      "birthdate": "1999-09-22",
+      "country_code": "US"
+    },
+    "product": {
+      "custom_fields": {
+        "membership_id": "tttttttttt"
+      },
+      "reference_id": "yyyyyyyyyyy",
+      "code": "404",
+      "start_time": "2024-05-12 0:00:00",
+      "partner_status": "active"
+    }
+  }
+}

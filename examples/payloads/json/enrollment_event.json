@@ -1,0 +1,579 @@
+{
+  "event_type": "enrollment",
+  "data": {
+    "tenant_id": "tenant_5",
+    "tenant_dashed_id": "tenant_5",
+    "tenant_name": "Tenant 5",
+    "rc_base_url": "https://tenant-5.example.com",
+    "domain": "tenant-5.example.com",
+    "admin_domain": "tenant-5.admin.example.com",
+    "admin_email": "email@example.com",
+    "country_codes": [
+      "US"
+    ],
+    "cash_currency": "USD",
+    "locales": [
+      "en-US"
+    ],
+    "tenant_locales": [
+      {
+        "locale": "en-US",
+        "enabled": true,
+        "default_for_tenant": true
+      }
+    ],
+    "time_zone": "America/New_York",
+    "provider_config": {
+      "request_phase_url": "https://random.tenant-5.com/example"
+    },
+    "partner_name_for_te": "tenant_InternalId partner",
+    "tenant_code_for_tc": "CODE_FOR_TC",
+    "webhook_resource_app_name_for_tc": "service_4",
+    "tenant_status_for_tc": "live",
+    "nn_internal_domain": "service-4.internal.com",
+    "mc_internal_domain": "service-5.internal.com",
+    "nn_internal_webhook_url": "https://service-4.internal.com/int/webhooks",
+    "loyalty_programs_for_nn": [
+      {
+        "loyalty_program": {
+          "transfer_connect_identifier": "tenant_InternalId",
+          "active": true,
+          "tenant": true,
+          "manual_verification_required": false,
+          "tenant_id": "tenant_InternalId",
+          "name_required": false,
+          "category": "airline",
+          "name": "tenant_InternalId Rewards",
+          "short_name": "tenant_InternalId Rewards",
+          "description": "tenant_InternalId",
+          "translations": {
+            "en-US": {
+              "name": "tenant_InternalId Rewards",
+              "short_name": "tenant_InternalId Rewards"
+            }
+          }
+        },
+        "capability": {},
+        "loyalty_currency": {
+          "name": "Rewards Points",
+          "short_name": "Rewards Points",
+          "translations": {
+            "en-US": {
+              "name": "Rewards Points",
+              "short_name": "Rewards Points"
+            }
+          }
+        }
+      }
+    ],
+    "payment_tier_id": "paid_at_redemption",
+    "demo": true,
+    "feature_settings": {
+      "accrual_campaign": {
+        "enabled": true
+      },
+      "gift_card_campaign": {
+        "enabled": true
+      },
+      "comms_campaign": {
+        "enabled": true
+      }
+    },
+    "ui_settings": {
+      "application": {
+        "components": {
+          "buttons": {
+            "primary": {
+              "borderRadius": "4px",
+              "borderWidth": "1px",
+              "textColor": "#FFFFFF"
+            },
+            "secondary": {
+              "borderRadius": "4px",
+              "borderWidth": "1px",
+              "textColor": "#22285A"
+            }
+          },
+          "breadcrumbs": {
+            "enabled": true
+          },
+          "footer": {
+            "enabled": true,
+            "backgroundColor": "#22285A",
+            "color": "#E3E4EB",
+            "logo": "inverted",
+            "footerLogo": "https://some.random.url.com/logo.png",
+            "hideBranding": false,
+            "textAlign": "text-left",
+            "textDecoration": "no-underline",
+            "textTransform": "none",
+            "variant": "footer-2"
+          },
+          "header": {
+            "enabled": true,
+            "avatar": "primary",
+            "backgroundColor": "#22285A",
+            "color": "#FFFFFF",
+            "logo": "primary",
+            "showLogo": true,
+            "twoLayer": true
+          },
+          "heroBannerAndQuickLinks": {
+            "backgroundColor": "#22285A",
+            "textColor": "#FFFFFF"
+          },
+          "navigation": {
+            "descriptionColor": "#818181",
+            "hoverBackgroundColor": "#00000000"
+          },
+          "spinner": {}
+        },
+        "features": {
+          "cashback": {
+            "description": {
+              "color": "#FFFFFF",
+              "text": " Maximize Your Rewards: Cash in on Incredible Cashback Offers",
+              "transform": "none"
+            },
+            "enabled": false,
+            "listingImageUrl": "https://some-random-url.com/assets/image.jpg",
+            "productImageUrl": "https://some-random-url.com/assets/image.jpg",
+            "title": {
+              "color": "#FFFFFF",
+              "text": "Cashback",
+              "transform": "capitalize"
+            }
+          },
+          "crypto": {
+            "description": {
+              "color": "#FFFFFF",
+              "text": "Unlock the Future: Convert Your Events into Stream",
+              "transform": "none"
+            },
+            "enabled": false,
+            "listingImageUrl": "https://some-random-url.com/assets/crypto.jpg",
+            "productImageUrl": "https://some-random-url.com/assets/crypto.jpg",
+            "title": {
+              "color": "#FFFFFF",
+              "text": "Crypto",
+              "transform": "capitalize"
+            }
+          },
+          "giftCard": {
+            "description": {
+              "color": "#FFFFFF",
+              "text": "Unlock Endless Possibilities: Redeem Gift Cards for Your Favorite Events",
+              "transform": "none"
+            },
+            "enabled": false,
+            "listingImageUrl": "https://some-random-url.com/assets/gift_card.jpg",
+            "productImageUrl": "https://some-random-url.com/assets/gift_card.jpg",
+            "title": {
+              "color": "#FFFFFF",
+              "text": "Gift Card",
+              "transform": "capitalize"
+            }
+          },
+          "offer": {
+            "title": {
+              "text": "Offers",
+              "color": "#FFFFFF",
+              "transform": "capitalize"
+            },
+            "enabled": false,
+            "description": {
+              "text": "Save with free hand-picked coupons, promo codes, discounts & deals.",
+              "color": "#FFFFFF",
+              "transform": "uppercase"
+            },
+            "listingImageUrl": "https://some-random-url.com/assets/offers_banner.jpeg",
+            "productImageUrl": "https://some-random-url.com/assets/offers_banner.jpeg"
+          },
+          "dining": {
+            "enabled": false,
+            "title": {
+              "text": "Premium dining",
+              "color": "#FFFFFF",
+              "transform": "capitalize"
+            },
+            "description": {
+              "text": "Earn points on your purchases when you make payment using an eligible card.",
+              "color": "#FFFFFF",
+              "transform": "uppercase"
+            },
+            "listingImageUrl": "https://some-random-url.com/assets/dining-background.jpeg",
+            "productImageUrl": "https://some-random-url.com/assets/dining-background.jpeg"
+          },
+          "extraCredit": {
+            "title": {
+              "text": "Karafka Credit",
+              "color": "#FFFFFF",
+              "transform": "capitalize"
+            },
+            "enabled": false,
+            "description": {
+              "text": "Turn points into Karafka credit for convenient rides and food delivery",
+              "color": "#FFFFFF",
+              "transform": "uppercase"
+            },
+            "listingImageUrl": "https://some-random-url.com/assets/extra.png",
+            "productImageUrl": "https://some-random-url.com/assets/extra.png"
+          },
+          "pointsTransfer": {
+            "description": {
+              "color": "#FFFFFF",
+              "text": "Extend your Reach: Transfer Points to Unlock New Rewards",
+              "transform": "none"
+            },
+            "enabled": false,
+            "listingImageUrl": "https://some-random-url.com/assets/frequent_traveller_programs.jpg",
+            "productImageUrl": "https://some-random-url.com/assets/frequent_traveller_programs.jpg",
+            "title": {
+              "color": "#FFFFFF",
+              "text": "Transfer",
+              "transform": "capitalize"
+            }
+          },
+          "rewardsSummary": {
+            "listingImageUrl": "https://some-random-url.com/assets/reward_summary.jpg",
+            "title": {
+              "color": "#FFFFFF",
+              "text": "My Rewards Summary",
+              "transform": "capitalize"
+            },
+            "includeHeadlessRedemptions": true
+          },
+          "sustainability": {
+            "description": {
+              "color": "#FFFFFF",
+              "text": "Rewarding Sustainability: Make Every Point Count for a Better Planet",
+              "transform": "none"
+            },
+            "enabled": false,
+            "listingImageUrl": "https://some-random-url.com/assets/sustainability.jpg",
+            "productImageUrl": "https://some-random-url.com/assets/sustainability.jpg",
+            "title": {
+              "color": "#FFFFFF",
+              "text": "Carbon offset",
+              "transform": "capitalize"
+            }
+          },
+          "termsAndConditions": {
+            "enabled": true
+          },
+          "travel": {
+            "enabled": false,
+            "features": {
+              "cars": {
+                "title": {
+                  "text": "Travel",
+                  "color": "#FFFFFF",
+                  "transform": "none"
+                },
+                "enabled": false,
+                "listingImageUrl": "https://some-random-url.com/assets/banner.jpeg"
+              },
+              "experiences": {
+                "title": {
+                  "text": "Travel",
+                  "color": "#FFFFFF",
+                  "transform": "none"
+                },
+                "enabled": false,
+                "listingImageUrl": "https://some-random-url.com/assets/banner.jpeg"
+              },
+              "hotels": {
+                "title": {
+                  "text": "Travel",
+                  "color": "#FFFFFF",
+                  "transform": "none"
+                },
+                "enabled": false,
+                "listingImageUrl": "https://some-random-url.com/assets/banner.jpeg"
+              },
+              "flights": {
+                "title": {
+                  "text": "Travel",
+                  "color": "#FFFFFF",
+                  "transform": "none"
+                },
+                "enabled": false,
+                "listingImageUrl": "https://some-random-url.com/assets/banner.jpeg"
+              }
+            },
+            "description": {
+              "color": "#FFFFFF",
+              "text": "Book with points and choose from 200 events & 900,000 streams globally",
+              "transform": "none"
+            }
+          },
+          "travelEarn": {
+            "enabled": false
+          },
+          "pointsEarn": {
+            "enabled": false
+          },
+          "helpCenter": {
+            "contactUs": {
+              "externalContactUsEnabled": false,
+              "imageUrl": "https://some-random-url.com/assets/help_center.jpg",
+              "title": {
+                "color": "#FFFFFF",
+                "text": "Contact Us",
+                "transform": "none"
+              }
+            },
+            "customerService": {
+              "imageUrl": "https://some-random-url.com/assets/customer_service.jpg"
+            },
+            "email": {
+              "emailAddress": "cs@example.com",
+              "enabled": true
+            },
+            "listing": {
+              "imageUrl": "https://some-random-url.com/assets/help_center.jpg",
+              "title": {
+                "color": "#FFFFFF",
+                "text": "Help Centre",
+                "transform": "none"
+              }
+            },
+            "phone": {
+              "contactNumber": "0000 999 9999",
+              "enabled": true,
+              "hours": "Mon - Fri (9am-6pm)"
+            },
+            "privacyPolicy": {
+              "imageUrl": "https://some-random-url.com/assets/privacy_policy.jpg"
+            },
+            "termsAndConditions": {
+              "imageUrl": "https://some-random-url.com/assets/terms_of_use.jpg"
+            }
+          },
+          "personalization": {
+            "similarItems": {
+              "giftCardDetails": {
+                "enabled": false
+              },
+              "giftCardCheckout": {
+                "enabled": false
+              },
+              "pointsTransferDetails": {
+                "enabled": false
+              },
+              "pointsTransferCheckout": {
+                "enabled": false
+              },
+              "cashbackDetails": {
+                "enabled": false
+              },
+              "cashbackCheckout": {
+                "enabled": false
+              },
+              "sustainabilityDetails": {
+                "enabled": false
+              },
+              "sustainabilityCheckout": {
+                "enabled": false
+              },
+              "cryptoDetails": {
+                "enabled": false
+              },
+              "cryptoCheckout": {
+                "enabled": false
+              },
+              "voucherDetails": {
+                "enabled": false
+              },
+              "voucherCheckout": {
+                "enabled": false
+              }
+            },
+            "giftCardListing": {
+              "enabled": false
+            },
+            "pointsTransferListing": {
+              "enabled": false
+            }
+          },
+          "appleMerchandise": {
+            "enabled": false
+          },
+          "freeformPointsInput": {
+            "travel": {
+              "enabled": false,
+              "defaultMaxPoints": false
+            }
+          }
+        },
+        "homepage": [
+          {
+            "data": [
+              {
+                "body": {
+                  "content": "Earning loyalty points has never been more rewarding. Redeem them for exclusive events packages and stream the world in style. Start planning your dream cluster now.",
+                  "textTransform": "none"
+                },
+                "image": {
+                  "alt": "third carou image",
+                  "url": "https://some-random-url.com/assets/hero_banner.png"
+                },
+                "title": {
+                  "content": "A world of rewards awaits",
+                  "textTransform": "none"
+                },
+                "config": {
+                  "variant": "marketing-banner-1",
+                  "textAlign": "text-left"
+                }
+              }
+            ],
+            "type": "marketing-banner"
+          },
+          {
+            "type": "redeem-again"
+          },
+          {
+            "type": "spend-x-points"
+          },
+          {
+            "type": "save-up-to-your-points"
+          },
+          {
+            "data": [
+              {
+                "body": {
+                  "content": "Earning loyalty points has never been more rewarding. Redeem them for exclusive events packages and stream the world in style. Start streaming your dreams now.",
+                  "textTransform": "none"
+                },
+                "image": {
+                  "alt": "Earning loyalty points has never been more rewarding.",
+                  "url": "https://some-random-url.com/assets/carousel.png"
+                },
+                "title": {
+                  "content": "Escape to your next adventure with a click of a button.",
+                  "textTransform": "none"
+                },
+                "variant": "carousel-1"
+              }
+            ],
+            "type": "carousel"
+          },
+          {
+            "fallbackData": [],
+            "config": {
+              "title": "Recommended for you"
+            },
+            "type": "personalization"
+          },
+          {
+            "config": {
+              "title": "You'll love these ways to earn points faster",
+              "backgroundColor": "#f6f6f6",
+              "tileBackgroundColor": "#FFFFFF"
+            },
+            "data": [
+              {
+                "icon": null,
+                "id": "pt_0",
+                "image": {
+                  "url": "https://some-random-url.com/assets/frequent_traveller_programs_icon.jpg",
+                  "alt": "Frequent Streamer Program icon"
+                },
+                "productType": "points-transfer",
+                "title": "Frequent Streamer Program",
+                "type": "listing"
+              },
+              {
+                "icon": null,
+                "id": "gc_0",
+                "image": {
+                  "url": "https://some-random-url.com/assets/gift_card_icon.png",
+                  "alt": "Gift Card Icon"
+                },
+                "productType": "gift-card",
+                "title": "Gift Card",
+                "type": "listing"
+              },
+              {
+                "icon": null,
+                "id": "crypto_0",
+                "image": {
+                  "url": "https://some-random-url.com/assets/crypto_icon.jpg",
+                  "alt": "Crypto Icon"
+                },
+                "productType": "crypto",
+                "title": "Crypto",
+                "type": "listing"
+              },
+              {
+                "icon": null,
+                "id": "substain_0",
+                "image": {
+                  "url": "https://some-random-url.com/assets/sustainability_icon.jpg",
+                  "alt": "Sustainability Icon"
+                },
+                "productType": "carbon",
+                "title": "Sustainability",
+                "type": "listing"
+              },
+              {
+                "icon": null,
+                "id": "cashback_0",
+                "image": {
+                  "url": "https://some-random-url.com/assets/cashback_icon.png",
+                  "alt": "Cashback icon"
+                },
+                "productType": "cashback",
+                "title": "Cashback",
+                "type": "listing"
+              }
+            ],
+            "type": "quick-links"
+          },
+          {
+            "config": {
+              "title": "Campaigns for you"
+            },
+            "type": "campaign-banner"
+          }
+        ],
+        "theme": {
+          "bodyFont": "Poppins",
+          "brandLogo": "https://some-random-url.com/assets/alternative_logo.png",
+          "colors": {
+            "accent": "#05A0D1",
+            "primary": "#22285A",
+            "secondary": "#05A0D1"
+          },
+          "favicon": "https://some-random-url.com/assets/favicon.png",
+          "headingFont": "Poppins",
+          "iconStyle": "solid",
+          "invertedLogo": "https://some-random-url.com/assets/alternative_logo.png",
+          "overlayStyle": "#22285A"
+        },
+        "tenantLocales": [
+          {
+            "locale": "en-US",
+            "enabled": true,
+            "defaultForTenant": true
+          }
+        ]
+      },
+      "platform": {
+        "auth": {
+          "appId": "bf9f91ab-ccbd-4a45-a7c8-63893298b71e",
+          "connection": "magic_link",
+          "idleCheckConfig": {
+            "promptTimeout": 120,
+            "timeout": 36000
+          },
+          "scope": "openid,address,email,phone,profile,custom",
+          "sessionCheckPollInterval": 60
+        }
+      }
+    },
+    "is_corporate": false,
+    "configuration_change_id": "0727c699-212a-4c1f-b0d4-e975d44aecab"
+  }
+}
