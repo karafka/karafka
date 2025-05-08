@@ -47,6 +47,7 @@
 - [Fix] Post-fork WaterDrop instance looses some of the non-kafka settings.
 - [Fix] Max epoch tracking for early cleanup causes messages to be skipped until reload.
 - [Fix] optparse double parse loses ARGV.
+- [Fix] `karafka` cannot be required without Bundler.
 
 ## 2.4.18 (2025-04-09)
 - [Fix] Make sure `Bundler.with_unbundled_env` is not called multiple times.
