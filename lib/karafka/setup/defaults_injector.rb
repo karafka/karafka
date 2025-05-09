@@ -36,7 +36,17 @@ module Karafka
         'topic.metadata.refresh.interval.ms': 5_000
       }.freeze
 
-      private_constant :CONSUMER_KAFKA_DEFAULTS, :CONSUMER_KAFKA_DEV_DEFAULTS
+      # Contains settings that should not be used in production but make life easier in dev
+      # It is applied only to the default producer. If users setup their own producers, then
+      # they have to set this by themselves.
+      PRODUCER_KAFKA_DEV_DEFAULTS = {
+        # For all of those same reasoning as for the consumer
+        'allow.auto.create.topics': 'true',
+        'topic.metadata.refresh.interval.ms': 5_000
+      }.freeze
+
+      private_constant :CONSUMER_KAFKA_DEFAULTS, :CONSUMER_KAFKA_DEV_DEFAULTS,
+                       :PRODUCER_KAFKA_DEV_DEFAULTS
 
       class << self
         # Propagates the kafka setting defaults unless they are already present for consumer config
@@ -53,6 +63,21 @@ module Karafka
           return if Karafka::App.env.production?
 
           CONSUMER_KAFKA_DEV_DEFAULTS.each do |key, value|
+            next if kafka_config.key?(key)
+
+            kafka_config[key] = value
+          end
+        end
+
+        # Propagates the kafka settings defaults unless they are already present for producer
+        # config. This makes it easier to set some values that users usually don't change but still
+        # allows them to overwrite the whole hash.
+        #
+        # @param kafka_config [Hash] kafka scoped config
+        def producer(kafka_config)
+          return if Karafka::App.env.production?
+
+          PRODUCER_KAFKA_DEV_DEFAULTS.each do |key, value|
             next if kafka_config.key?(key)
 
             kafka_config[key] = value

@@ -27,6 +27,7 @@
 - [Enhancement] Extract errors tracker class reference into an internal `errors_tracker_class` config option (Pro).
 - [Enhancement] Support rdkafka native kafka polling customization for admin.
 - [Enhancement] Customize the multiplexing scale delay (Pro) per consumer group (Pro).
+- [Enhancement] Set `topic.metadata.refresh.interval.ms` for default producer in dev to 5s to align with consumer setup.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.

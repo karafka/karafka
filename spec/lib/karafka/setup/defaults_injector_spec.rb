@@ -84,4 +84,52 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe '#producer' do
+    context 'when in production environment' do
+      before do
+        allow(Karafka::App.env).to receive(:production?).and_return(true)
+        injector.producer(kafka_config)
+      end
+
+      it 'does not add any producer kafka defaults' do
+        expect(kafka_config).to be_empty
+      end
+    end
+
+    context 'when not in production environment' do
+      before do
+        allow(Karafka::App.env).to receive(:production?).and_return(false)
+        injector.producer(kafka_config)
+      end
+
+      it 'adds producer kafka dev defaults' do
+        expect(kafka_config).to include(
+          'allow.auto.create.topics': 'true',
+          'topic.metadata.refresh.interval.ms': 5_000
+        )
+      end
+    end
+
+    context 'when defaults are already present in kafka_config' do
+      let(:kafka_config) do
+        {
+          'allow.auto.create.topics': 'false',
+          'topic.metadata.refresh.interval.ms': 10_000
+        }
+      end
+
+      before do
+        allow(Karafka::App.env).to receive(:production?).and_return(false)
+        injector.producer(kafka_config)
+      end
+
+      it 'does not overwrite existing settings' do
+        expect(kafka_config).to eq(
+          'allow.auto.create.topics': 'false',
+          'topic.metadata.refresh.interval.ms': 10_000
+        )
+      end
+    end
+  end
 end
