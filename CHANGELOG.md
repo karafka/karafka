@@ -32,8 +32,8 @@
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
 - [Refactor] Improve CI specs parallelization.
+- [Maintenance] Require `karafka-rdkafka` `>=` `0.20.0` due to usage of `#rd_kafka_global_init` and KIP-82.
 - [Maintenance] Lower the `Karafka::Admin` `poll_timeout` to 50 ms to improve responsiveness of admin operations.
-- [Maintenance] Require `karafka-rdkafka` `>=` `0.19.1` due to usage of `#rd_kafka_global_init` and KIP-82.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
 - [Maintenance] Remove Rails `7.0` specs due to upcoming EOL.
 - [Fix] Fix Recurring Tasks and Scheduled Messages not working with Swarm (using closed producer).
