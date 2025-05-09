@@ -1,0 +1,17 @@
+{
+  "event_type": "points_transaction",
+  "source": "service_4",
+  "data": {
+    "points_transaction_id": "6d853550-86c0-4878-a234-32ad3b80e7d7",
+    "user_id": "435092f6-a1e3-4c3b-8f22-bc809d04d9f5",
+    "tenant_id": "tenant_1",
+    "category": "redemption",
+    "product_type": "shopping_cart",
+    "product_sub_type": "cashback",
+    "points": 1000,
+    "transaction_time": "2025-05-05T13:13:57Z",
+    "product_name": "Tenant 1 Cashback",
+    "order_item_type": "CashRedemptionOrderItem",
+    "reward_amount": 10.0
+  }
+}
