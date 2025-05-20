@@ -338,8 +338,12 @@ module Karafka
 
     # Seeks in the context of current topic and partition
     #
-    # @param offset [Integer, Time] offset where we want to seek or time of the offset where we
-    #   want to seek.
+    # @param offset [Integer, Time, Symbol, String] one of:
+    #   - offset where we want to seek
+    #   - time of the offset where we want to seek
+    #   - :earliest (or as a string) to move to earliest message
+    #   - :latest (or as a string) to move to latest (high-watermark)
+    #
     # @param manual_seek [Boolean] Flag to differentiate between user seek and system/strategy
     #   based seek. User seek operations should take precedence over system actions, hence we need
     #   to know who invoked it.
