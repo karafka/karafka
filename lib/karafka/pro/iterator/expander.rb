@@ -24,6 +24,7 @@ module Karafka
       # - { 'topic1' => { 1 => true } } - will pick first offset on this CG for partition 1
       # - { 'topic1' => true } - will pick first offset for all partitions
       # - { 'topic1' => :earliest } - will pick earliest offset for all partitions
+      # - { 'topic1' => :latest } - will pick latest (high-watermark) for all partitions
       class Expander
         # Expands topics to which we want to subscribe with partitions information in case this
         # info is not provided.
