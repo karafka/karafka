@@ -128,7 +128,7 @@ module Karafka
           # If this is a new assignment we always need to seek from beginning to load the data
           if @state.fresh?
             clear!
-            seek(0)
+            seek(-2)
 
             return true
           end
@@ -139,7 +139,7 @@ module Karafka
           # If day has ended we reload and start new day with new schedules
           if @today.ended?
             clear!
-            seek(0)
+            seek(-2)
 
             return true
           end
