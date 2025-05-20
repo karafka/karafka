@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# If we seek to a earliest, we should start from beginning
+# If we seek to the earliest, we should start from the beginning
 
 setup_karafka do |config|
   config.initial_offset = 'latest'
