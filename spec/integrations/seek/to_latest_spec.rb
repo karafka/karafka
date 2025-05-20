@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# If we seek to a latest, we should start from the high watermark
+# If we seek to the latest, we should start from the high watermark
 
 setup_karafka do |config|
   config.initial_offset = 'earliest'
