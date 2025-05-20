@@ -28,6 +28,8 @@
 - [Enhancement] Support rdkafka native kafka polling customization for admin.
 - [Enhancement] Customize the multiplexing scale delay (Pro) per consumer group (Pro).
 - [Enhancement] Set `topic.metadata.refresh.interval.ms` for default producer in dev to 5s to align with consumer setup.
+- [Enhancement] Alias `-2` and `-1` with `latest` and `earliest` for seeking.
+- [Enhancement] Allow for usage of `latest` and `earliest` in the `Karafka::Pro::Iterator`.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.

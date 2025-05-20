@@ -481,6 +481,10 @@ module Karafka
           message.offset = detected_partition&.offset || raise(Errors::InvalidTimeBasedOffsetError)
         end
 
+        # Those two are librdkafka hardcoded values
+        message.offset = -1 if message.offset.to_s == 'latest'
+        message.offset = -2 if message.offset.to_s == 'earliest'
+
         # Never seek if we would get the same location as we would get without seeking
         # This prevents us from the expensive buffer purges that can lead to increased network
         # traffic and can cost a lot of money

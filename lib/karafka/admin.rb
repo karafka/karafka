@@ -12,6 +12,8 @@ module Karafka
   module Admin
     # 2010-01-01 00:00:00 - way before Kafka was released so no messages should exist prior to
     # this date
+    # We do not use the explicit -2 librdkafka value here because we resolve this offset without
+    # consuming data
     LONG_TIME_AGO = Time.at(1_262_300_400)
 
     # one day in seconds for future time reference
