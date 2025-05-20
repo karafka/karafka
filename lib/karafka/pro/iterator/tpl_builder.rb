@@ -14,6 +14,11 @@ module Karafka
       # This builder resolves that and builds a tpl to which we can safely subscribe the way
       # we want it.
       class TplBuilder
+        # Supported named offset positions that we can reference via their name
+        SUPPORTED_NAMED_POSITIONS = %w[earliest latest].freeze
+
+        private_constant :SUPPORTED_NAMED_POSITIONS
+
         # @param consumer [::Rdkafka::Consumer] consumer instance needed to talk with Kafka
         # @param expanded_topics [Hash] hash with expanded and normalized topics data
         def initialize(consumer, expanded_topics)
@@ -28,6 +33,7 @@ module Karafka
           resolve_partitions_with_exact_offsets
           resolve_partitions_with_negative_offsets
           resolve_partitions_with_time_offsets
+          resolve_partitions_with_named_offsets
           resolve_partitions_with_cg_expectations
 
           # Final tpl with all the data
@@ -139,6 +145,23 @@ module Karafka
               raise(Errors::InvalidTimeBasedOffsetError) unless result
 
               @mapped_topics[name][result.partition] = result.offset
+            end
+          end
+        end
+
+        # If we get named offsets, we can just remap them to librdkafka special offset positions
+        def resolve_partitions_with_named_offsets
+          @expanded_topics.each do |name, partitions|
+            next unless partitions.is_a?(Hash)
+
+            partitions.each do |partition, offset|
+              # Skip offsets that do not match our named expectations
+              named_offset = offset.to_s
+
+              next unless SUPPORTED_NAMED_POSITIONS.include?(named_offset)
+
+              @mapped_topics[name][partition] = -1 if named_offset == 'latest'
+              @mapped_topics[name][partition] = -2 if named_offset == 'earliest'
             end
           end
         end
