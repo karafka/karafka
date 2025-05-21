@@ -3,6 +3,8 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
+# We should be able to use posix negative lookup regexps to match all except certain topics
+
 setup_karafka
 
 DT[0] = Set.new
