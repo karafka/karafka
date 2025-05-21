@@ -20,17 +20,20 @@ end
 ENDING = SecureRandom.uuid
 NEGATIVE_MATCHING = <<~PATTERN.gsub(/\s+/, '')
   ^(
-    [^a]|
-    a[^c]|
-    ac[^t]|
-    act[^i]|
-    acti[^v]|
-    activ[^i]|
-    activi[^t]|
-    activit[^i]|
-    activiti[^e]|
-    activitie[^s]|
-    activities[^.]
+    [^i]|
+    i[^t]|
+    it[^-]|
+    it-[^a]|
+    it-a[^c]|
+    it-ac[^t]|
+    it-act[^i]|
+    it-acti[^v]|
+    it-activ[^i]|
+    it-activi[^t]|
+    it-activit[^i]|
+    it-activiti[^e]|
+    it-activitie[^s]|
+    it-activities[^.]
   )
 PATTERN
 
@@ -42,9 +45,9 @@ draw_routes(create_topics: false) do
   end
 end
 
-produce_many("test.#{ENDING}", DT.uuids(1))
-produce_many("activities.#{ENDING}", DT.uuids(1))
-produce_many("active.#{ENDING}", DT.uuids(1))
+produce_many("it-test.#{ENDING}", DT.uuids(1))
+produce_many("it-activities.#{ENDING}", DT.uuids(1))
+produce_many("it-active.#{ENDING}", DT.uuids(1))
 
 start_karafka_and_wait_until do
   DT[0].uniq.size >= 2
