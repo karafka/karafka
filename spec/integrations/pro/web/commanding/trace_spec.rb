@@ -28,7 +28,7 @@ Thread.new do
 
   loop do
     result = Karafka::Admin.read_topic(
-      ::Karafka::Web.config.topics.consumers.commands,
+      ::Karafka::Web.config.topics.consumers.commands.name,
       0,
       1
     ).first
