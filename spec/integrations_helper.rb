@@ -132,11 +132,11 @@ def setup_web
   # Use new groups and topics for each spec, so we don't end up with conflicts
   Karafka::Web.setup do |config|
     config.group_id = "it-#{SecureRandom.uuid}"
-    config.topics.consumers.reports = "it-#{SecureRandom.uuid}"
-    config.topics.consumers.states = "it-#{SecureRandom.uuid}"
-    config.topics.consumers.metrics = "it-#{SecureRandom.uuid}"
-    config.topics.consumers.commands = "it-#{SecureRandom.uuid}"
-    config.topics.errors = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.reports.name = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.states.name = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.metrics.name = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.commands.name = "it-#{SecureRandom.uuid}"
+    config.topics.errors.name = "it-#{SecureRandom.uuid}"
 
     yield(config) if block_given?
   end
