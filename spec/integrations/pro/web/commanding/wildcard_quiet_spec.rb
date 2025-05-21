@@ -1,3 +1,4 @@
+
 # frozen_string_literal: true
 
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
@@ -30,7 +31,7 @@ produce_many(DT.topic, elements)
 Thread.new do
   sleep(0.1) until DT.key?(:is)
 
-  Karafka::Web::Pro::Commanding::Dispatcher.command(:quiet, '*')
+  Karafka::Web::Pro::Commanding::Dispatcher.request(:quiet, '*')
 end
 
 # Nothing needed. Won't stop unless commanding works
