@@ -51,6 +51,7 @@
 - [Fix] Max epoch tracking for early cleanup causes messages to be skipped until reload.
 - [Fix] optparse double parse loses ARGV.
 - [Fix] `karafka` cannot be required without Bundler.
+- [Fix] Scheduled Messages re-seek moves to `latest` on inheritance of initial offset when `0` offset is compacted.
 
 ## 2.4.18 (2025-04-09)
 - [Fix] Make sure `Bundler.with_unbundled_env` is not called multiple times.

@@ -114,7 +114,7 @@ def setup_karafka(
     next if allow_errors.is_a?(Array) && allow_errors.include?(event[:type])
 
     # Print error event details in case we are going to exit
-    Karafka.logger.fatal event
+    Karafka.logger.fatal event[:error]
 
     # This sleep buys us some time before exit so logs are flushed
     sleep(0.5)

@@ -54,7 +54,11 @@ module Karafka
                   consumer_persistence(true)
 
                   # This needs to be enabled for the eof to work correctly
-                  kafka('enable.partition.eof': true, inherit: true)
+                  kafka(
+                    'enable.partition.eof': true,
+                    'auto.offset.reset': 'earliest',
+                    inherit: true
+                  )
                   eofed(true)
 
                   # Since this is a topic that gets replayed because of schedule management, we do
