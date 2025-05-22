@@ -12,6 +12,23 @@ module Karafka
 
         private
 
+        # Used to run Karafka Admin commands that talk with Kafka and that can fail due to broker
+        # errors and other issues. We catch errors and provide nicer printed output prior to
+        # re-raising the mapped error for proper exit code status handling
+        #
+        # @param operation_message [String] message that we use to print that it is going to run
+        #   and if case if failed with a failure indication.
+        def supervised(operation_message)
+          puts "#{operation_message}..."
+
+          yield
+        rescue Rdkafka::RdkafkaError => e
+          puts "#{operation_message} #{red('failed')}:"
+          puts e
+
+          raise Errors::CommandValidationError, cause: e
+        end
+
         # @return [Array<Karafka::Routing::Topic>] all available topics that can be managed
         # @note If topic is defined in multiple consumer groups, first config will be used. This
         #   means, that this CLI will not work for simultaneous management of multiple clusters

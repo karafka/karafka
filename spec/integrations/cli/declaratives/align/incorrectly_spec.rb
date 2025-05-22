@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # karafka topics align should crash if we want to align something with incorrect changes
-# Please note this is NOT transactional
+# Please note this is NOT transactional. It will crash and exit 1.
 
 setup_karafka
 
@@ -24,12 +24,4 @@ end
 ARGV[0] = 'topics'
 ARGV[1] = 'align'
 
-raised = false
-
-begin
-  Karafka::Cli.start
-rescue Rdkafka::RdkafkaError
-  raised = true
-end
-
-assert raised
+Karafka::Cli.start

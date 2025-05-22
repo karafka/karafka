@@ -19,7 +19,7 @@ Karafka::Admin::Acl.create(acl1)
 Karafka::Admin::Acl.delete(acl1)
 
 # Give some time for acl to sync up
-sleep(1)
+sleep(5)
 
 assert_equal [], Karafka::Admin::Acl.describe(acl1)
 assert !Karafka::Admin::Acl.all.map(&:resource_name).include?(uuid1)
@@ -37,7 +37,7 @@ acl2 = Karafka::Admin::Acl.new(
 Karafka::Admin::Acl.create(acl2)
 
 # Give some time to create rule
-sleep(1)
+sleep(5)
 
 assert_equal 1, Karafka::Admin::Acl.describe(acl2).size
 assert Karafka::Admin::Acl.all.map(&:resource_name).include?(uuid2)

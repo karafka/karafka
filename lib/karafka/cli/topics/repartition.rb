@@ -21,8 +21,10 @@ module Karafka
             existing_count = existing_partitions.fetch(name, false)
 
             if existing_count && existing_count < desired_count
-              puts "Increasing number of partitions to #{desired_count} on topic #{name}..."
-              Admin.create_partitions(name, desired_count)
+              supervised("Increasing number of partitions to #{desired_count} on topic #{name}") do
+                Admin.create_partitions(name, desired_count)
+              end
+
               change = desired_count - existing_count
               puts "#{green('Created')} #{change} additional partitions on topic #{name}."
               any_repartitioned = true

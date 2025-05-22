@@ -92,7 +92,13 @@ module Karafka
     ResultNotVisibleError = Class.new(BaseError)
 
     # Raised when there is an attempt to run an unrecognized CLI command
-    UnrecognizedCommandError = Class.new(BaseError)
+    UnrecognizedCommandError = Class.new(BaseError) do
+      # Overwritten not to print backtrace for unknown CLI command
+      def initialize(*args)
+        super
+        set_backtrace([])
+      end
+    end
 
     # Raised when you were executing a command and it could not finish successfully because of
     # a setup state or parameters configuration

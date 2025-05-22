@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.4.19 (Unreleased)
+## 2.5.0 (Unreleased)
 - **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.
 - **[Breaking]** Rename scheduled jobs topics names in their config (Pro).
 - **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
@@ -30,6 +30,11 @@
 - [Enhancement] Set `topic.metadata.refresh.interval.ms` for default producer in dev to 5s to align with consumer setup.
 - [Enhancement] Alias `-2` and `-1` with `latest` and `earliest` for seeking.
 - [Enhancement] Allow for usage of `latest` and `earliest` in the `Karafka::Pro::Iterator`.
+- [Enhancement] Failures during `topics migrate` (and other subcommands) don't show what topic failed, and why it's invalid.
+- [Enhancement] Apply changes to topics configuration in atomic independent requests when using Declarative Topics.
+- [Enhancement] Execute the help CLI command when no command provided (similar to Rails) to improve DX.
+- [Enhancement] Remove backtrace from the CLI error for incorrect commands (similar to Rails) to improve DX.
+- [Enhancement] Provide `karafka topics help` sub-help due to nesting of Declarative Topics actions.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
