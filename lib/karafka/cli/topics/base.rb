@@ -26,7 +26,7 @@ module Karafka
           puts "#{operation_message} #{red('failed')}:"
           puts e
 
-          raise Errors::CommandValidationError
+          raise Errors::CommandValidationError, cause: e
         end
 
         # @return [Array<Karafka::Routing::Topic>] all available topics that can be managed
