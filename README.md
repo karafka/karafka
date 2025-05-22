@@ -84,7 +84,7 @@ bundle exec karafka server
 
 I also sell Karafka Pro subscriptions. It includes a commercial-friendly license, priority support, architecture consultations, enhanced Web UI and high throughput data processing-related features (virtual partitions, long-running jobs, and more).
 
-**10%** of the income will be distributed back to other OSS projects that Karafka uses under the hood.
+Part of the income is [distributed back](https://github.com/orgs/karafka/sponsoring) to other OSS projects that Karafka uses under the hood.
 
 Help me provide high-quality open-source software. Please see the Karafka [homepage](https://karafka.io/#become-pro) for more details.
 
