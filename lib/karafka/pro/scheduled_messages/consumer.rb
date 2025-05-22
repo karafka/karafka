@@ -8,6 +8,10 @@ module Karafka
     module ScheduledMessages
       # Consumer that coordinates scheduling of messages when the time comes
       class Consumer < ::Karafka::BaseConsumer
+        include Helpers::ConfigImporter.new(
+          dispatcher_class: %i[scheduled_messages dispatcher_class]
+        )
+
         # Prepares the initial state of all stateful components
         def initialized
           clear!
@@ -155,7 +159,7 @@ module Karafka
           @today = Day.new
           @tracker = Tracker.new
           @state = State.new(false)
-          @dispatcher = config.dispatcher_class.new(topic.name, partition)
+          @dispatcher = dispatcher_class.new(topic.name, partition)
           @states_reporter = Helpers::IntervalRunner.new do
             @tracker.today = @daily_buffer.size
             @tracker.state = @state.to_s
@@ -164,11 +168,6 @@ module Karafka
           end
 
           tags.add(:state, @state.to_s)
-        end
-
-        # @return [Karafka::Core::Configurable::Node] Schedules config node
-        def config
-          @config ||= Karafka::App.config.scheduled_messages
         end
       end
     end
