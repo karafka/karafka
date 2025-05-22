@@ -24,29 +24,24 @@ module Karafka
     # Raised when we try to use Karafka CLI commands (except install) without a boot file
     MissingBootFileError = Class.new(BaseError) do
       # @param boot_file_path [Pathname] path where the boot file should be
-      def initialize(boot_file_path = nil)
+      def initialize(boot_file_path)
         message = <<~MSG
 
-          Karafka Boot File Missing: #{boot_file_path}
+          \e[31mKarafka Boot File Missing:\e[0m #{boot_file_path}
 
-          The Karafka boot file (karafka.rb) is required to initialize the Karafka application
-          and configure Kafka consumers, producers, and routing.
+          Cannot find Karafka boot file - this file configures your Karafka application.
 
-          What's missing:
-            • Boot file: #{boot_file_path}
-            • This file should contain Karafka application configuration
-            • Consumer group definitions and topic routing
+          \e[33mQuick fixes:\e[0m
+            \e[32m1.\e[0m Navigate to your Karafka app directory
+            \e[32m2.\e[0m Check if following file exists: \e[36m#{boot_file_path}\e[0m
+            \e[32m3.\e[0m Install Karafka if needed: \e[36mkarafka install\e[0m
 
-          Common causes:
-            • Running Karafka commands outside of a Karafka application directory
-            • Boot file was moved or deleted
-            • Incorrect working directory
-            • Missing Karafka application initialization
+          \e[33mCommon causes:\e[0m
+            \e[31m•\e[0m Wrong directory (not in Karafka app root)
+            \e[31m•\e[0m File was accidentally moved or deleted
+            \e[31m•\e[0m New project needing initialization
 
-          Resolution steps:
-            1. Ensure you're in the root directory of your Karafka application
-            2. Check if karafka.rb exists in the current directory
-            3. If missing, follow the Getting Started guide to install Karafka in your project
+          For setup help: \e[34mhttps://karafka.io/docs/Getting-Started\e[0m
         MSG
 
         super(message)
