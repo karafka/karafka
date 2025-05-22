@@ -22,7 +22,39 @@ module Karafka
     InvalidConfigurationError = Class.new(BaseError)
 
     # Raised when we try to use Karafka CLI commands (except install) without a boot file
-    MissingBootFileError = Class.new(BaseError)
+    MissingBootFileError = Class.new(BaseError) do
+      # @param boot_file_path [Pathname] path where the boot file should be
+      def initialize(boot_file_path = nil)
+        message = <<~MSG
+
+          Karafka Boot File Missing: #{boot_file_path}
+
+          The Karafka boot file (karafka.rb) is required to initialize the Karafka application
+          and configure Kafka consumers, producers, and routing.
+
+          What's missing:
+            • Boot file: #{boot_file_path}
+            • This file should contain Karafka application configuration
+            • Consumer group definitions and topic routing
+
+          Common causes:
+            • Running Karafka commands outside of a Karafka application directory
+            • Boot file was moved or deleted
+            • Incorrect working directory
+            • Missing Karafka application initialization
+
+          Resolution steps:
+            1. Ensure you're in the root directory of your Karafka application
+            2. Check if karafka.rb exists in the current directory
+            3. If missing, follow the Getting Started guide to install Karafka in your project
+        MSG
+
+        super(message)
+        # In case of this error backtrace is irrelevant and we want to print comprehensive error
+        # message without backtrace, this is why nullified.
+        set_backtrace([])
+      end
+    end
 
     # Raised when we've waited enough for shutting down a non-responsive process
     ForcefulShutdownError = Class.new(BaseError)
