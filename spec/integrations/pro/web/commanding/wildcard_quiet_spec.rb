@@ -30,7 +30,7 @@ produce_many(DT.topic, elements)
 Thread.new do
   sleep(0.1) until DT.key?(:is)
 
-  Karafka::Web::Pro::Commanding::Dispatcher.command(:quiet, '*')
+  Karafka::Web::Pro::Commanding::Dispatcher.request('consumers.quiet', '*')
 end
 
 # Nothing needed. Won't stop unless commanding works
