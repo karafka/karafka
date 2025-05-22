@@ -21,6 +21,8 @@ module Karafka
           args = action ? [action] : []
 
           command.new.call(*args)
+        elsif command_name.nil?
+          Help.new.call
         else
           raise(
             Karafka::Errors::UnrecognizedCommandError,
