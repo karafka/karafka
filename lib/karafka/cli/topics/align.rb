@@ -30,10 +30,13 @@ module Karafka
             return false
           end
 
-          names = resources_to_migrate.map(&:name).join(', ')
-          puts "Updating configuration of the following topics: #{names}"
-          Karafka::Admin::Configs.alter(resources_to_migrate)
-          puts "#{green('Updated')} all requested topics configuration."
+          resources_to_migrate.each do |resource|
+            supervised("Updating topic: #{resource.name} configuration") do
+              Karafka::Admin::Configs.alter(resource)
+            end
+
+            puts "#{green('Updated')} topic #{resource.name} configuration."
+          end
 
           true
         end
