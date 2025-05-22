@@ -10,6 +10,15 @@ module Karafka
   #   Cluster on which operations are performed can be changed via `admin.kafka` config, however
   #   there is no multi-cluster runtime support.
   module Admin
+    extend Helpers::ConfigImporter.new(
+      max_wait_time: %i[admin max_wait_time],
+      poll_timeout: %i[admin poll_timeout],
+      max_attempts: %i[admin max_attempts],
+      group_id: %i[admin group_id],
+      app_kafka: %i[kafka],
+      admin_kafka: %i[admin kafka]
+    )
+
     # 2010-01-01 00:00:00 - way before Kafka was released so no messages should exist prior to
     # this date
     # We do not use the explicit -2 librdkafka value here because we resolve this offset without
@@ -113,7 +122,7 @@ module Karafka
           handler = admin.create_topic(name, partitions, replication_factor, topic_config)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
+            -> { handler.wait(max_wait_timeout: max_wait_time) },
             -> { topics_names.include?(name) }
           )
         end
@@ -127,7 +136,7 @@ module Karafka
           handler = admin.delete_topic(name)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
+            -> { handler.wait(max_wait_timeout: max_wait_time) },
             -> { !topics_names.include?(name) }
           )
         end
@@ -142,7 +151,7 @@ module Karafka
           handler = admin.create_partitions(name, partitions)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
+            -> { handler.wait(max_wait_timeout: max_wait_time) },
             -> { topic_info(name).fetch(:partition_count) >= partitions }
           )
         end
@@ -353,7 +362,7 @@ module Karafka
       def delete_consumer_group(consumer_group_id)
         with_admin do |admin|
           handler = admin.delete_group(consumer_group_id)
-          handler.wait(max_wait_timeout: app_config.admin.max_wait_time)
+          handler.wait(max_wait_timeout: max_wait_time)
         end
       end
 
@@ -539,7 +548,7 @@ module Karafka
 
         admin = config(:producer, {}).admin(
           native_kafka_auto_start: false,
-          native_kafka_poll_timeout_ms: app_config.admin.poll_timeout
+          native_kafka_poll_timeout_ms: poll_timeout
         )
 
         bind_oauth(bind_id, admin)
@@ -604,7 +613,7 @@ module Karafka
       rescue Rdkafka::AbstractHandle::WaitTimeoutError, Errors::ResultNotVisibleError
         return if breaker.call
 
-        retry if attempt <= app_config.admin.max_attempts
+        retry if attempt <= max_attempts
 
         raise
       end
@@ -613,11 +622,10 @@ module Karafka
       # @param settings [Hash] extra settings for config (if needed)
       # @return [::Rdkafka::Config] rdkafka config
       def config(type, settings)
-        app_config
-          .kafka
+        app_kafka
           .then(&:dup)
-          .merge(app_config.admin.kafka)
-          .tap { |config| config[:'group.id'] = app_config.admin.group_id }
+          .merge(admin_kafka)
+          .tap { |config| config[:'group.id'] = group_id }
           # We merge after setting the group id so it can be altered if needed
           # In general in admin we only should alter it when we need to impersonate a given
           # consumer group or do something similar
@@ -650,11 +658,6 @@ module Karafka
         else
           offset
         end
-      end
-
-      # @return [Karafka::Core::Configurable::Node] root node config
-      def app_config
-        ::Karafka::App.config
       end
     end
   end
