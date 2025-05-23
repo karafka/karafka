@@ -500,6 +500,8 @@ module Karafka
         # If offset is the same as the next position, we don't have to seek to get there, hence
         # only in such case we can do nothing.
         return kafka.seek(message) if message.offset != position
+
+        nil
       end
 
       # Commits the stored offsets in a sync way and closes the consumer.
