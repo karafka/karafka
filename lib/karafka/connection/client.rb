@@ -491,9 +491,17 @@ module Karafka
         #
         # This code adds around 0.01 ms per seek but saves from many user unexpected behaviours in
         # seeking and pausing
-        return if message.offset == topic_partition_position(message.topic, message.partition)
+        position = topic_partition_position(message.topic, message.partition)
 
-        kafka.seek(message)
+        # Always seek if current position cannot be fetched or is negative. Offset seek can also
+        # be negative (-1 or -2) and we should not compare it with the position because they are
+        # special (earliest or latest)
+        return kafka.seek(message) if position.negative?
+        # If offset is the same as the next position, we don't have to seek to get there, hence
+        # only in such case we can do nothing.
+        return kafka.seek(message) if message.offset != position
+
+        nil
       end
 
       # Commits the stored offsets in a sync way and closes the consumer.
