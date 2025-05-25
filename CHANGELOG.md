@@ -58,6 +58,7 @@
 - [Fix] `karafka` cannot be required without Bundler.
 - [Fix] Scheduled Messages re-seek moves to `latest` on inheritance of initial offset when `0` offset is compacted.
 - [Fix] Seek to `:latest` without `topic_partition_position` (-1) will not seek at all.
+- [Change] Move to trusted-publishers and remove signing since no longer needed.
 
 ## 2.4.18 (2025-04-09)
 - [Fix] Make sure `Bundler.with_unbundled_env` is not called multiple times.
