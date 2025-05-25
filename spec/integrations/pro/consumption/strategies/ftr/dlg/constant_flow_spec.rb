@@ -31,7 +31,7 @@ start_karafka_and_wait_until do
 
   sleep(0.1)
 
-  DT[0].count >= 100
+  DT[0].size >= 100
 end
 
 # All should be delivered and all should be old enough

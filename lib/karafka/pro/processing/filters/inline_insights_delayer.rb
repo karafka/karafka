@@ -54,9 +54,9 @@ module Karafka
             @applied = true
           end
 
-          # @return [Integer] ms timeout in case of pause
+          # @return [Integer, nil] ms timeout in case of pause or nil if not delaying
           def timeout
-            @cursor && applied? ? PAUSE_TIMEOUT : 0
+            @cursor && applied? ? PAUSE_TIMEOUT : nil
           end
 
           # Pause when we had to back-off or skip if delay is not needed

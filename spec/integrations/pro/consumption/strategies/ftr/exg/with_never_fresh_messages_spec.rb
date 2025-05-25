@@ -29,7 +29,7 @@ start_karafka_and_wait_until do
   produce_many(DT.topic, DT.uuids(1))
   dispatched << 1
 
-  dispatched.count >= 50
+  dispatched.size >= 50
 end
 
 assert DT[0].empty?

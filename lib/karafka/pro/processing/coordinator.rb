@@ -10,6 +10,9 @@ module Karafka
       # within the same partition
       class Coordinator < ::Karafka::Processing::Coordinator
         extend Forwardable
+        include Helpers::ConfigImporter.new(
+          errors_tracker_class: %i[internal processing errors_tracker_class]
+        )
 
         def_delegators :@collapser, :collapsed?, :collapse_until!
 
@@ -20,7 +23,7 @@ module Karafka
           super
 
           @executed = []
-          @errors_tracker = Coordinators::ErrorsTracker.new
+          @errors_tracker = errors_tracker_class.new(topic, partition)
           @flow_mutex = Mutex.new
           # Lock for user code synchronization
           # We do not want to mix coordinator lock with the user lock not to create cases where

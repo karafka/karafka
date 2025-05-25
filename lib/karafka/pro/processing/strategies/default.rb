@@ -55,14 +55,19 @@ module Karafka
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
               # In case like this we ignore marking
               return true if seek_offset.nil?
-              # Ignore earlier offsets than the one we already committed
-              return true if seek_offset > message.offset
+              # Ignore if it is the same offset as the one that is marked currently
+              # We ignore second marking because it changes nothing and in case of people using
+              # metadata storage but with automatic offset marking, this would cause metadata to be
+              # erased by automatic marking
+              return true if (seek_offset - 1) == message.offset
               return false if revoked?
 
               # If we are not inside a transaction but this is a transactional topic, we mark with
               # artificially created transaction
               stored = if producer.transactional?
                          mark_with_transaction(message, offset_metadata, true)
+                       elsif @_transactional_marking
+                         raise Errors::NonTransactionalMarkingAttemptError
                        else
                          client.mark_as_consumed(message, offset_metadata)
                        end
@@ -92,14 +97,19 @@ module Karafka
               # seek offset can be nil only in case `#seek` was invoked with offset reset request
               # In case like this we ignore marking
               return true if seek_offset.nil?
-              # Ignore earlier offsets than the one we already committed
-              return true if seek_offset > message.offset
+              # Ignore if it is the same offset as the one that is marked currently
+              # We ignore second marking because it changes nothing and in case of people using
+              # metadata storage but with automatic offset marking, this would cause metadata to be
+              # erased by automatic marking
+              return true if (seek_offset - 1) == message.offset
               return false if revoked?
 
               # If we are not inside a transaction but this is a transactional topic, we mark with
               # artificially created transaction
               stored = if producer.transactional?
                          mark_with_transaction(message, offset_metadata, false)
+                       elsif @_transactional_marking
+                         raise Errors::NonTransactionalMarkingAttemptError
                        else
                          client.mark_as_consumed!(message, offset_metadata)
                        end
@@ -225,6 +235,9 @@ module Karafka
               offset_metadata
             )
 
+            # This one is long lived and used to make sure, that users do not mix transactional
+            # marking with non-transactional. When this happens we should raise error
+            @_transactional_marking = true
             @_in_transaction_marked = true
             @_transaction_marked ||= []
             @_transaction_marked << [message, offset_metadata, async]
@@ -264,8 +277,11 @@ module Karafka
             # seek offset can be nil only in case `#seek` was invoked with offset reset request
             # In case like this we ignore marking
             return true if seek_offset.nil?
-            # Ignore earlier offsets than the one we already committed
-            return true if seek_offset > message.offset
+            # Ignore if it is the same offset as the one that is marked currently
+            # We ignore second marking because it changes nothing and in case of people using
+            # metadata storage but with automatic offset marking, this would cause metadata to be
+            # erased by automatic marking
+            return true if (seek_offset - 1) == message.offset
             return false if revoked?
 
             # If we have already marked this successfully in a transaction that was running

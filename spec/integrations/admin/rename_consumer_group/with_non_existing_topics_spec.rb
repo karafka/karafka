@@ -21,7 +21,7 @@ Karafka::Admin.seek_consumer_group(
 )
 
 # No error expected, just nothing to migrate
-Karafka::Admin.rename_consumer_group(
+assert !Karafka::Admin.rename_consumer_group(
   PREVIOUS_NAME,
   NEW_NAME,
   [DT.topics[1]]

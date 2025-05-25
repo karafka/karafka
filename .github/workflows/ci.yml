@@ -6,9 +6,14 @@ concurrency:
 
 on:
   pull_request:
+    branches: [ main, master ]
   push:
+    branches: [ main, master ]
   schedule:
     - cron:  '0 1 * * *'
+
+permissions:
+  contents: read
 
 env:
   BUNDLE_RETRY: 6
@@ -17,15 +22,16 @@ env:
 jobs:
   diffend:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@bb0f760b6c925183520ee0bcc9c4a432a7c8c3c6 # v1.241.0
         with:
           ruby-version: 3.4
           bundler-cache: true
@@ -38,10 +44,11 @@ jobs:
 
   karafka-checksum:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
       - name: Run Karafka license checksum verification
@@ -54,19 +61,33 @@ jobs:
 
   coditsu:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
+      - name: Download Coditsu script
+        run: |
+          curl -sSL https://api.coditsu.io/run/ci -o coditsu_script.sh
+          chmod +x coditsu_script.sh
+      - name: Verify Coditsu script checksum
+        run: |
+          EXPECTED_SHA256="0aecc5aa010f53fca264548a41467a2b0a1208d750ce1da3e98a217304cacbbc"
+
+          ACTUAL_SHA256=$(sha256sum coditsu_script.sh | awk '{ print $1 }')
+          if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
+            echo "::error::Checksum verification failed. Expected $EXPECTED_SHA256 but got $ACTUAL_SHA256."
+            exit 1
+          fi
       - name: Run Coditsu
-        run: \curl -sSL https://api.coditsu.io/run/ci | bash
+        run: ./coditsu_script.sh
 
   # We do not split RSpec specs to OSS and Pro like integrations because they do not overload
   # Kafka heavily, compute total coverage for specs and are fast enough
   specs:
-    timeout-minutes: 10
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     needs: diffend
     strategy:
@@ -81,7 +102,7 @@ jobs:
           - ruby: '3.4'
             coverage: 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -97,7 +118,7 @@ jobs:
         run: rm -f Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@bb0f760b6c925183520ee0bcc9c4a432a7c8c3c6 # v1.241.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -112,8 +133,14 @@ jobs:
           GITHUB_COVERAGE: ${{matrix.coverage}}
         run: bin/rspecs
 
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings
+
+      - name: Check test topics naming convention
+        run: bin/verify_topics_naming
+
   integrations_oss:
-    timeout-minutes: 20
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     needs: diffend
     strategy:
@@ -125,7 +152,7 @@ jobs:
           - '3.2'
           - '3.1'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -137,7 +164,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@bb0f760b6c925183520ee0bcc9c4a432a7c8c3c6 # v1.241.0
         with:
           # Do not use cache here as we run bundle install also later in some of the integration
           # tests and we need to be able to run it without cache
@@ -170,6 +197,12 @@ jobs:
       - name: Run OSS integration tests
         run: bin/integrations --exclude '/pro'
 
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings
+
+      - name: Check test topics naming convention
+        run: bin/verify_topics_naming
+
   integrations_pro:
     timeout-minutes: 45
     runs-on: ubuntu-latest
@@ -182,8 +215,11 @@ jobs:
           - '3.3'
           - '3.2'
           - '3.1'
+        parallel_group:
+          - '0'
+          - '1'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
@@ -192,7 +228,7 @@ jobs:
           docker compose up -d || (sleep 5 && docker compose up -d)
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@bb0f760b6c925183520ee0bcc9c4a432a7c8c3c6 # v1.241.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
@@ -220,5 +256,13 @@ jobs:
           KARAFKA_PRO_PASSWORD: ${{ secrets.KARAFKA_PRO_PASSWORD }}
           KARAFKA_PRO_VERSION: ${{ secrets.KARAFKA_PRO_VERSION }}
           KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
+          SPECS_SEED: ${{ github.run_id }}
+          SPECS_GROUP: ${{ matrix.parallel_group }}
+        run: |
+          bin/integrations '/pro'
 
-        run: bin/integrations '/pro'
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings
+
+      - name: Check test topics naming convention
+        run: bin/verify_topics_naming

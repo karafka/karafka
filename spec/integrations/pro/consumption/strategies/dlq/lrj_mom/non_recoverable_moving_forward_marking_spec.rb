@@ -55,7 +55,7 @@ end
 produce_many(DT.topics[0], DT.uuids(100))
 
 start_karafka_and_wait_until do
-  DT[:errors].size >= 2 && DT[0].count >= 60
+  DT[:errors].size >= 2 && DT[0].size >= 60
 end
 
 # We skip last errored because it will not have continuity

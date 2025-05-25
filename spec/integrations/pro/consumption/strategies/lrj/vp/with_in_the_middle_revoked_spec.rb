@@ -16,9 +16,9 @@ MUTEX = Mutex.new
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if messages.count <= 1
+    return if messages.size <= 1
 
-    DT[0] << messages.count
+    DT[0] << messages.size
 
     sleep(5) while DT[:rebalanced].empty?
 
@@ -45,7 +45,7 @@ start_karafka_and_wait_until do
   if DT.key?(0)
     consumer = setup_rdkafka_consumer
     consumer.subscribe(DT.topic)
-    consumer.poll(1_000)
+    5.times { consumer.poll(1_000) }
     consumer.close
 
     sleep(1)

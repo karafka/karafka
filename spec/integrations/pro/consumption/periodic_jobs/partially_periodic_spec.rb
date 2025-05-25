@@ -31,7 +31,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DT[:ticks].count >= 6
+  DT[:ticks].size >= 6
 end
 
 assert_equal 1, DT[:ticks].uniq.size

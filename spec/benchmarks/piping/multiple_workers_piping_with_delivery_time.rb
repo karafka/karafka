@@ -17,7 +17,7 @@ MAX_MESSAGES_PER_PARTITION = 100_000
 PARTITIONS_COUNT = 5
 
 # Topic where we want to pipe the data
-TARGET_TOPIC = SecureRandom.uuid
+TARGET_TOPIC = DT.topic
 
 ::Karafka::Admin.create_topic(TARGET_TOPIC, PARTITIONS_COUNT, 1)
 

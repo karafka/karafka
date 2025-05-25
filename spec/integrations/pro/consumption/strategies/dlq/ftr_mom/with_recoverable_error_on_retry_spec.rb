@@ -53,11 +53,11 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:offsets].uniq.count >= 100
+  DT[:offsets].uniq.size >= 100
 end
 
 # first error and two errors on retries prior to moving on
-assert_equal 1, DT[:errors].count
+assert_equal 1, DT[:errors].size
 
 # All should be present
 assert_equal (0..99).to_a, DT[:offsets]

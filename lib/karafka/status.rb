@@ -66,7 +66,12 @@ module Karafka
             return if initializing?
 
             conductor.signal
-            monitor.instrument("app.#{state}", caller: self)
+
+            monitor.instrument(
+              "app.#{state}",
+              caller: self,
+              server_id: Karafka::Server.id
+            )
           end
         end
       RUBY

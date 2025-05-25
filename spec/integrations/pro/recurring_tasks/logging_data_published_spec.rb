@@ -21,7 +21,7 @@ draw_routes do
     max_wait_time 500
   end
 
-  topic Karafka::App.config.recurring_tasks.topics.logs do
+  topic Karafka::App.config.recurring_tasks.topics.logs.name do
     consumer CountConsumer
     deserializer Karafka::App.config.recurring_tasks.deserializer
   end

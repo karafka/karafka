@@ -135,7 +135,7 @@ class ValidationConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group :merger do
+  consumer_group "#{DT.consumer_group}_merger" do
     subscription_group do
       topic DT.topics[0] do
         consumer UsersEventsConsumer
@@ -151,7 +151,7 @@ draw_routes do
     end
   end
 
-  consumer_group :verifications do
+  consumer_group "#{DT.consumer_group}_verifications" do
     topic DT.topics[2] do
       consumer ValidationConsumer
     end

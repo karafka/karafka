@@ -27,10 +27,13 @@ module Karafka
       # crashes
       CHANGES_EXIT_CODE = 2
 
-      private_constant :NO_CHANGES_EXIT_CODE, :CHANGES_EXIT_CODE
+      # Used when there was an error during execution.
+      ERROR_EXIT_CODE = 1
+
+      private_constant :NO_CHANGES_EXIT_CODE, :CHANGES_EXIT_CODE, :ERROR_EXIT_CODE
 
       # @param action [String] action we want to take
-      def call(action = 'missing')
+      def call(action = 'help')
         detailed_exit_code = options.fetch(:detailed_exitcode, false)
 
         command = case action
@@ -48,8 +51,10 @@ module Karafka
                     Topics::Align
                   when 'plan'
                     Topics::Plan
+                  when 'help'
+                    Topics::Help
                   else
-                    raise ::ArgumentError, "Invalid topics action: #{action}"
+                    raise Errors::UnrecognizedCommandError, "Unrecognized topics action: #{action}"
                   end
 
         changes = command.new.call
@@ -57,6 +62,8 @@ module Karafka
         return unless detailed_exit_code
 
         changes ? exit(CHANGES_EXIT_CODE) : exit(NO_CHANGES_EXIT_CODE)
+      rescue Errors::CommandValidationError
+        exit(ERROR_EXIT_CODE)
       end
     end
   end

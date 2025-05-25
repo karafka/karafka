@@ -36,7 +36,7 @@ end
 produce_many(DT.topic, DT.uuids(50))
 
 start_karafka_and_wait_until do
-  DT[0].count >= 50
+  DT[0].size >= 50
 end
 
-assert_equal DT[0].uniq.count, DT[0].count
+assert_equal DT[0].uniq.size, DT[0].size

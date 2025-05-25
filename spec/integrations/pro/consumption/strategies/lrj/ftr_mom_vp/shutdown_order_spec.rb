@@ -14,7 +14,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return if messages.count == 1
+    return if messages.size == 1
 
     sleep(15)
 

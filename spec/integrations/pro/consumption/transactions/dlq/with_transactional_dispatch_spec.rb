@@ -24,7 +24,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[:broken] << message.headers['original_offset']
+      DT[:broken] << message.headers['source_offset']
     end
   end
 end
@@ -54,7 +54,7 @@ elements = DT.uuids(100)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[:offsets].uniq.count >= 99 && DT.key?(:broken)
+  DT[:offsets].uniq.size >= 99 && DT.key?(:broken)
 end
 
 # The skipped should not be in the processed

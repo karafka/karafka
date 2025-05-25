@@ -70,7 +70,7 @@ module Karafka
         next unless ::Karafka::App.config.strict_topics_namespacing
 
         value = data.fetch(:name)
-        namespacing_chars_count = value.chars.find_all { |c| ['.', '_'].include?(c) }.uniq.count
+        namespacing_chars_count = value.chars.find_all { |c| ['.', '_'].include?(c) }.uniq.size
 
         next if namespacing_chars_count <= 1
 

@@ -60,6 +60,15 @@ module Karafka
           Processing::SubscriptionGroupsCoordinator.instance
         end
 
+        # Runs operations needed after fork in swarm for features that need it
+        #
+        # @param config [Karafka::Core::Configurable::Node]
+        # @param pre_fork_producer [WaterDrop::Producer] pre fork producer instance that may be
+        #   needed to be replaced with newly changed one post-fork.
+        def post_fork(config, pre_fork_producer)
+          features.each { |feature| feature.post_fork(config, pre_fork_producer) }
+        end
+
         private
 
         # @return [Array<Module>] extra non-routing related pro features and routing components
@@ -84,6 +93,7 @@ module Karafka
           icfg.connection.manager = Connection::Manager.new
 
           icfg.processing.coordinator_class = Processing::Coordinator
+          icfg.processing.errors_tracker_class = Processing::Coordinators::ErrorsTracker
           icfg.processing.partitioner_class = Processing::Partitioner
           icfg.processing.scheduler_class = Processing::Schedulers::Default
           icfg.processing.jobs_queue_class = Processing::JobsQueue

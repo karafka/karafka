@@ -21,7 +21,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    if !@raised && messages.count > 1
+    if !@raised && messages.size > 1
       @raised = true
       raise StandardError
     end

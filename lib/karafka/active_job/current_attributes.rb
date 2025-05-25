@@ -29,7 +29,7 @@ module Karafka
           # Prevent registering same klass multiple times
           next if Dispatcher._cattr_klasses.value?(stringified_klass)
 
-          key = "cattr_#{Dispatcher._cattr_klasses.count}"
+          key = "cattr_#{Dispatcher._cattr_klasses.size}"
 
           Dispatcher._cattr_klasses[key] = stringified_klass
           Consumer._cattr_klasses[key] = stringified_klass

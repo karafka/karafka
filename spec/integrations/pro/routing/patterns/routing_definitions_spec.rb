@@ -29,7 +29,7 @@ draw_routes(create_topics: false) do
   end
 end
 
-assert_equal 2, Karafka::App.routes.count
+assert_equal 2, Karafka::App.routes.size
 assert_equal 3, Karafka::App.routes.map(&:topics).flatten.map(&:to_a).flatten.size
 assert_equal 'test', Karafka::App.routes.first.topics.first.name
 assert !Karafka::App.routes.first.topics.first.patterns.active?

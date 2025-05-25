@@ -60,4 +60,4 @@ start_karafka_and_wait_until do
   DT[:offsets].size >= 60
 end
 
-assert_equal DT[:offsets].uniq.count, DT[:offsets].count
+assert_equal DT[:offsets].uniq.size, DT[:offsets].size

@@ -45,7 +45,7 @@ module Karafka
               # topic but this minimizes simple mistakes
               #
               # This sub-part of sh1 should be unique enough and short-enough to use it here
-              digest = Digest::SHA1.hexdigest(safe_regexp.source)[8..16]
+              digest = Digest::SHA256.hexdigest(safe_regexp.source)[8..16]
               @name = name ? name.to_s : "karafka-pattern-#{digest}"
               @config = config
             end

@@ -22,7 +22,34 @@ module Karafka
     InvalidConfigurationError = Class.new(BaseError)
 
     # Raised when we try to use Karafka CLI commands (except install) without a boot file
-    MissingBootFileError = Class.new(BaseError)
+    MissingBootFileError = Class.new(BaseError) do
+      # @param boot_file_path [Pathname] path where the boot file should be
+      def initialize(boot_file_path)
+        message = <<~MSG
+
+          \e[31mKarafka Boot File Missing:\e[0m #{boot_file_path}
+
+          Cannot find Karafka boot file - this file configures your Karafka application.
+
+          \e[33mQuick fixes:\e[0m
+            \e[32m1.\e[0m Navigate to your Karafka app directory
+            \e[32m2.\e[0m Check if following file exists: \e[36m#{boot_file_path}\e[0m
+            \e[32m3.\e[0m Install Karafka if needed: \e[36mkarafka install\e[0m
+
+          \e[33mCommon causes:\e[0m
+            \e[31m•\e[0m Wrong directory (not in Karafka app root)
+            \e[31m•\e[0m File was accidentally moved or deleted
+            \e[31m•\e[0m New project needing initialization
+
+          For setup help: \e[34mhttps://karafka.io/docs/Getting-Started\e[0m
+        MSG
+
+        super(message)
+        # In case of this error backtrace is irrelevant and we want to print comprehensive error
+        # message without backtrace, this is why nullified.
+        set_backtrace([])
+      end
+    end
 
     # Raised when we've waited enough for shutting down a non-responsive process
     ForcefulShutdownError = Class.new(BaseError)
@@ -34,6 +61,9 @@ module Karafka
 
     # Raised when given topic is not found while expected
     TopicNotFoundError = Class.new(BaseError)
+
+    # Raised when given consumer group is not found while expected
+    ConsumerGroupNotFoundError = Class.new(BaseError)
 
     # This should never happen. Please open an issue if it does.
     UnsupportedCaseError = Class.new(BaseError)
@@ -62,7 +92,17 @@ module Karafka
     ResultNotVisibleError = Class.new(BaseError)
 
     # Raised when there is an attempt to run an unrecognized CLI command
-    UnrecognizedCommandError = Class.new(BaseError)
+    UnrecognizedCommandError = Class.new(BaseError) do
+      # Overwritten not to print backtrace for unknown CLI command
+      def initialize(*args)
+        super
+        set_backtrace([])
+      end
+    end
+
+    # Raised when you were executing a command and it could not finish successfully because of
+    # a setup state or parameters configuration
+    CommandValidationError = Class.new(BaseError)
 
     # Raised when we attempt to perform operation that is only allowed inside of a transaction and
     # there is no transaction around us
@@ -70,6 +110,10 @@ module Karafka
 
     # Raised in case user would want to perform nested transactions.
     TransactionAlreadyInitializedError = Class.new(BaseError)
+
+    # Raised when user used transactional offset marking but after that tried to use
+    # non-transactional marking, effectively mixing both. This is not allowed.
+    NonTransactionalMarkingAttemptError = Class.new(BaseError)
 
     # Raised in case a listener that was paused is being resumed
     InvalidListenerResumeError = Class.new(BaseError)

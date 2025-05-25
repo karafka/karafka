@@ -50,6 +50,10 @@ module Karafka
         # producer (should not be initialized but just in case)
         Karafka.producer.close
 
+        # Ensure rdkafka stuff is loaded into memory pre-fork. This will ensure, that we save
+        # few MB on forking as this will be already in memory.
+        Rdkafka::Bindings.rd_kafka_global_init
+
         Karafka::App.warmup
 
         manager.start

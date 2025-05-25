@@ -37,6 +37,11 @@ module Karafka
 
             messages.delete_if { |message| marked.include?(message.offset) }
           end
+
+          # @return [nil] This filter does not deal with pausing, so timeout is always nil
+          def timeout
+            nil
+          end
         end
       end
     end

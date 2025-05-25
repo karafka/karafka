@@ -28,7 +28,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
       Karafka::Messages::Messages,
       first: first_message,
       last: last_message,
-      count: 2,
+      size: 2,
       metadata: Karafka::Messages::BatchMetadata.new(
         topic: topic.name,
         partition: 0,
@@ -155,7 +155,10 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
       it 'expect to pause based on the message offset' do
         consume_with_after.call
-        expect(client).to have_received(:pause).with(topic.name, first_message.partition, offset)
+
+        expect(client)
+          .to have_received(:pause)
+          .with(topic.name, first_message.partition, offset, 500)
       end
 
       it 'expect to pause with time tracker' do
@@ -218,7 +221,10 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
       it 'expect to pause based on the message offset' do
         consume_with_after.call
-        expect(client).to have_received(:pause).with(topic.name, first_message.partition, offset)
+
+        expect(client)
+          .to have_received(:pause)
+          .with(topic.name, first_message.partition, offset, 500)
       end
 
       it 'expect to pause with time tracker' do
@@ -247,7 +253,10 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
     it 'expect not to pause the partition' do
       consumer.on_before_schedule_consume
-      expect(client).to have_received(:pause).with(topic.name, 0, nil)
+
+      expect(client)
+        .to have_received(:pause)
+        .with(topic.name, 0, nil, 1_000_000_000_000)
     end
   end
 
@@ -324,7 +333,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, offset)
+          .with(topic.name, first_message.partition, offset, 500)
       end
 
       it 'expect to pause with time tracker' do
@@ -388,7 +397,7 @@ RSpec.describe Karafka::BaseConsumer, type: :pro do
 
         expect(client)
           .to have_received(:pause)
-          .with(topic.name, first_message.partition, nil)
+          .with(topic.name, first_message.partition, nil, 1_000_000_000_000)
       end
 
       it 'expect to pause with time tracker' do

@@ -16,6 +16,7 @@ require 'securerandom'
 require 'stringio'
 require 'tmpdir'
 require_relative './support/data_collector'
+require_relative './support/duplications_detector'
 
 Thread.abort_on_exception = true
 
@@ -73,8 +74,9 @@ def setup_karafka(
     if Karafka.pro?
       # Do not redefine topics locations if re-configured
       unless @setup_karafka_first_run
-        config.recurring_tasks.topics.schedules = SecureRandom.hex(6)
-        config.recurring_tasks.topics.logs = SecureRandom.hex(6)
+        config.recurring_tasks.group_id = "rt-#{SecureRandom.uuid}"
+        config.recurring_tasks.topics.schedules.name = "it-#{SecureRandom.uuid}"
+        config.recurring_tasks.topics.logs.name = "it-#{SecureRandom.uuid}"
         # Run often so we do not wait on the first run
         config.recurring_tasks.interval = 1_000
 
@@ -98,6 +100,9 @@ def setup_karafka(
 
   Karafka.producer.monitor.subscribe(listener)
 
+  # Ensure there are no duplicates in the fetched data
+  Karafka::App.monitor.subscribe(DuplicationsDetector.new(self))
+
   return if allow_errors == true
 
   # For integration specs where we do not expect any errors, we can set this and it will
@@ -109,7 +114,7 @@ def setup_karafka(
     next if allow_errors.is_a?(Array) && allow_errors.include?(event[:type])
 
     # Print error event details in case we are going to exit
-    Karafka.logger.fatal event
+    Karafka.logger.fatal event[:error]
 
     # This sleep buys us some time before exit so logs are flushed
     sleep(0.5)
@@ -126,12 +131,12 @@ def setup_web
 
   # Use new groups and topics for each spec, so we don't end up with conflicts
   Karafka::Web.setup do |config|
-    config.group_id = SecureRandom.hex(6)
-    config.topics.consumers.reports = SecureRandom.hex(6)
-    config.topics.consumers.states = SecureRandom.hex(6)
-    config.topics.consumers.metrics = SecureRandom.hex(6)
-    config.topics.consumers.commands = SecureRandom.hex(6)
-    config.topics.errors = SecureRandom.hex(6)
+    config.group_id = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.reports.name = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.states.name = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.metrics.name = "it-#{SecureRandom.uuid}"
+    config.topics.consumers.commands.name = "it-#{SecureRandom.uuid}"
+    config.topics.errors.name = "it-#{SecureRandom.uuid}"
 
     yield(config) if block_given?
   end
@@ -240,14 +245,19 @@ end
 
 # Returns the next offset that we would consume if we would subscribe again
 # @param topic [String] topic we are interested in
+# @param normalize [Boolean]
+# @param consumer_group_id [String]
 # @return [Integer] next offset we would consume
 #
 # @note Please note, that for `latest` seek offset, -1 means from high-watermark. We simplify it
 #   in our specs but it is worth keeping in mind.
-def fetch_next_offset(topic = DT.topic, normalize: true)
+def fetch_next_offset(
+  topic = DT.topic,
+  normalize: true,
+  consumer_group_id: Karafka::App.consumer_groups.first.id
+)
   results = Karafka::Admin.read_lags_with_offsets
-  cg = Karafka::App.consumer_groups.first.id
-  part_results = results.fetch(cg).fetch(topic)[0]
+  part_results = results.fetch(consumer_group_id).fetch(topic)[0]
   offset = part_results.fetch(:offset)
 
   return offset unless normalize
@@ -298,6 +308,12 @@ def create_routes_topics
              else
                [1, 1, {}]
              end
+
+      # All integration tests topics names always have to start with it-
+      unless name.start_with?('it-')
+        puts 'All integration tests topics need to start with "it-"'
+        raise
+      end
 
       Thread.new do
         Karafka::Admin.create_topic(
@@ -399,6 +415,9 @@ def wait_for_assignments(*topics)
   @topics_assignments_subscribed = true
 
   sleep(0.1) until DT.key?(:topics_assignments_ready)
+
+  # We wait after the assignment so we're sure polling have happened
+  sleep(1)
 end
 
 # Sends data to Kafka in a sync way

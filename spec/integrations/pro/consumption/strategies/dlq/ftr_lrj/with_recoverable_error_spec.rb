@@ -61,4 +61,4 @@ assert_equal(2, DT[0].count { |offset| offset == 7 })
 
 checks = DT[0].dup
 checks.delete_if { |offset| offset == 7 }
-assert_equal [1], checks.group_by(&:itself).values.map(&:count).uniq
+assert_equal [1], checks.group_by(&:itself).values.map(&:size).uniq

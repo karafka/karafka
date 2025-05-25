@@ -77,7 +77,7 @@ class ValidationConsumer < Karafka::BaseConsumer
 end
 
 draw_routes do
-  consumer_group :merger do
+  consumer_group "#{DT.consumer_group}_merger" do
     subscription_group do
       topic DT.topics[0] do
         consumer Consumer1
@@ -123,7 +123,7 @@ end
 sleep(2)
 
 committed = DT[:merged].last.split(',').map(&:to_i).sort
-lags = Karafka::Admin.read_lags_with_offsets['merger']
+lags = Karafka::Admin.read_lags_with_offsets["#{DT.consumer_group}_merger"]
 stored = lags.values.map { |parts| parts[0][:offset] - 1 }.sort
 
 assert_equal committed, stored

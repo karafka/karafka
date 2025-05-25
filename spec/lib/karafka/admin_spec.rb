@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  let(:name) { SecureRandom.hex(6) }
+  let(:name) { "it-#{SecureRandom.uuid}" }
   let(:topics) { described_class.cluster_info.topics.map { |tp| tp[:topic_name] } }
 
   describe '#create_topic and #cluster_info' do
@@ -37,7 +37,6 @@ RSpec.describe_current do
   describe '#read_topic' do
     subject(:reading) { described_class.read_topic(name, partition, count, offset) }
 
-    let(:name) { SecureRandom.hex(6) }
     let(:partition) { 0 }
     let(:count) { 1 }
     let(:offset) { -1 }
@@ -388,8 +387,6 @@ RSpec.describe_current do
   end
 
   describe '#topic_info' do
-    let(:name) { SecureRandom.uuid }
-
     context 'when given topic does not exist' do
       it { expect { described_class.topic_info(name) }.to raise_error(Rdkafka::RdkafkaError) }
     end
@@ -408,7 +405,6 @@ RSpec.describe_current do
   describe '#read_watermark_offsets' do
     subject(:offsets) { described_class.read_watermark_offsets(name, partition) }
 
-    let(:name) { SecureRandom.hex(6) }
     let(:partition) { 0 }
 
     context 'when trying to read non-existing topic' do
@@ -448,7 +444,7 @@ RSpec.describe_current do
     subject(:seeking) { described_class.seek_consumer_group(cg_id, map) }
 
     let(:cg_id) { SecureRandom.uuid }
-    let(:topic) { SecureRandom.uuid }
+    let(:topic) { name }
     let(:partition) { 0 }
     let(:offset) { 0 }
     let(:map) { { topic => { partition => offset } } }
@@ -480,6 +476,38 @@ RSpec.describe_current do
   end
 
   # More specs in the integrations
+  describe '#copy_consumer_group' do
+    subject(:rename) { described_class.copy_consumer_group(previous_name, new_name, topics) }
+
+    let(:previous_name) { rand.to_s }
+    let(:new_name) { rand.to_s }
+    let(:topics) { [rand.to_s] }
+
+    context 'when old name does not exist' do
+      it 'expect not to raise error because it will not have offsets for old cg' do
+        expect(rename).to be(false)
+      end
+    end
+
+    context 'when old name exists but no topics to migrate are given' do
+      let(:topics) { [] }
+
+      it { expect { rename }.not_to raise_error }
+      it { expect(rename).to be(false) }
+    end
+
+    context 'when requested topics do not exist but CG does' do
+      before do
+        described_class.create_topic(name, 1, 1)
+        described_class.seek_consumer_group(previous_name, name => { 0 => 10 })
+      end
+
+      it { expect { rename }.not_to raise_error }
+      it { expect(rename).to be(false) }
+    end
+  end
+
+  # More specs in the integrations
   describe '#rename_consumer_group' do
     subject(:rename) { described_class.rename_consumer_group(previous_name, new_name, topics) }
 
@@ -488,7 +516,7 @@ RSpec.describe_current do
     let(:topics) { [rand.to_s] }
 
     context 'when old name does not exist' do
-      it { expect { rename }.to raise_error(Rdkafka::RdkafkaError) }
+      it { expect(rename).to be(false) }
     end
 
     context 'when old name exists but no topics to migrate are given' do
@@ -504,6 +532,7 @@ RSpec.describe_current do
       end
 
       it { expect { rename }.not_to raise_error }
+      it { expect(rename).to be(false) }
     end
   end
 

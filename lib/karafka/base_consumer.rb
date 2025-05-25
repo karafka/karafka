@@ -21,7 +21,7 @@ module Karafka
 
     # @return [String] id of the current consumer
     attr_reader :id
-    # @return [Karafka::Routing::Topic] topic to which a given consumer is subscribed
+    # @return [Karafka::Messages::Messages] current messages batch
     attr_accessor :messages
     # @return [Karafka::Connection::Client] kafka connection client
     attr_accessor :client
@@ -304,7 +304,12 @@ module Karafka
 
       offset = nil if offset == :consecutive
 
-      client.pause(topic.name, partition, offset)
+      client.pause(
+        topic.name,
+        partition,
+        offset,
+        coordinator.pause_tracker.current_timeout
+      )
 
       # Indicate, that user took a manual action of pausing
       coordinator.manual_pause if manual_pause
@@ -333,17 +338,21 @@ module Karafka
 
     # Seeks in the context of current topic and partition
     #
-    # @param offset [Integer, Time] offset where we want to seek or time of the offset where we
-    #   want to seek.
+    # @param offset [Integer, Time, Symbol, String] one of:
+    #   - offset where we want to seek
+    #   - time of the offset where we want to seek
+    #   - :earliest (or as a string) to move to earliest message
+    #   - :latest (or as a string) to move to latest (high-watermark)
+    #
     # @param manual_seek [Boolean] Flag to differentiate between user seek and system/strategy
     #   based seek. User seek operations should take precedence over system actions, hence we need
     #   to know who invoked it.
-    # @param reset_offset [Boolean] should we reset offset when seeking backwards. It is false by
-    #   default to prevent marking in the offset that was earlier than the highest marked offset
-    #   for given consumer group. It can be set to true if we want to reprocess data once again and
+    # @param reset_offset [Boolean] should we reset offset when seeking backwards. It is false
+    #   it prevents marking in the offset that was earlier than the highest marked offset
+    #   for given consumer group. It is set to true by default to reprocess data once again and
     #   want to make sure that the marking starts from where we moved to.
     # @note Please note, that if you are seeking to a time offset, getting the offset is blocking
-    def seek(offset, manual_seek = true, reset_offset: false)
+    def seek(offset, manual_seek = true, reset_offset: true)
       coordinator.manual_seek if manual_seek
       self.seek_offset = nil if reset_offset
 

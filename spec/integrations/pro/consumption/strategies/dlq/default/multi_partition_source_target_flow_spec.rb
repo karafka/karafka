@@ -21,7 +21,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT["broken-#{message.partition}"] << message.headers['original_partition']
+      DT["broken-#{message.partition}"] << message.headers['source_partition']
     end
   end
 end
@@ -45,8 +45,8 @@ end
 end
 
 start_karafka_and_wait_until do
-  DT[:partitions].uniq.count >= 10 &&
-    DT.data.keys.uniq.count >= 5
+  DT[:partitions].uniq.size >= 10 &&
+    DT.data.keys.uniq.size >= 5
 end
 
 samples = {}
@@ -55,13 +55,13 @@ samples = {}
 DT.data.each do |k, v|
   next if k == :partitions
 
-  v.each do |original_partition|
-    samples[original_partition] ||= []
-    samples[original_partition] << k
+  v.each do |source_partition|
+    samples[source_partition] ||= []
+    samples[source_partition] << k
   end
 end
 
 # Each original partition data should always go to one and the same target partition
 samples.each_value do |sources|
-  assert_equal 1, sources.uniq.count, sources
+  assert_equal 1, sources.uniq.size, sources
 end

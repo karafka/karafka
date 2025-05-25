@@ -61,4 +61,4 @@ end
 # 10 partitions are expected
 assert_equal 10, DT.data.size
 # In 10 threads due to sleep
-assert_equal 10, DT.data.values.flatten.uniq.count
+assert_equal 10, DT.data.values.flatten.uniq.size

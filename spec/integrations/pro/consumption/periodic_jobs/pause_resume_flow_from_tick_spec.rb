@@ -35,7 +35,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DT[:consume].count >= 3
+  DT[:consume].size >= 3
 end
 
 assert_equal [0, 1, 2], DT[:consume][0..2]

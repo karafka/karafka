@@ -14,12 +14,15 @@ module Karafka
             #   disabling dynamic multiplexing
             # @param max [Integer] max multiplexing count
             # @param boot [Integer] how many listeners should we start during boot by default
-            def multiplexing(min: nil, max: 1, boot: nil)
+            # @param scale_delay [Integer] number of ms of delay before applying any scale
+            #   operation to a consumer group
+            def multiplexing(min: nil, max: 1, boot: nil, scale_delay: 60_000)
               @target.current_subscription_group_details.merge!(
                 multiplexing_min: min || max,
                 multiplexing_max: max,
                 # Picks half of max by default as long as possible. Otherwise goes with min
-                multiplexing_boot: boot || [min || max, (max / 2)].max
+                multiplexing_boot: boot || [min || max, (max / 2)].max,
+                multiplexing_scale_delay: scale_delay
               )
             end
           end

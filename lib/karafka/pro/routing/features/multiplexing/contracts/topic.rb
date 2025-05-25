@@ -28,6 +28,7 @@ module Karafka
                 optional(:multiplexing_min) { |val| val.is_a?(Integer) && val >= 1 }
                 optional(:multiplexing_max) { |val| val.is_a?(Integer) && val >= 1 }
                 optional(:multiplexing_boot) { |val| val.is_a?(Integer) && val >= 1 }
+                optional(:multiplexing_scale_delay) { |val| val.is_a?(Integer) && val >= 1_000 }
               end
 
               # Makes sure min is not more than max
@@ -76,6 +77,22 @@ module Karafka
                 next if boot == min
 
                 [[%w[subscription_group_details], :multiplexing_boot_not_dynamic]]
+              end
+
+              # Makes sure we do not run multiplexing with 1 always which does not make much sense
+              # because then it behaves like without multiplexing and can create problems for
+              # users running multiplexed subscription groups with multiple topics
+              virtual do |data, errors|
+                next unless errors.empty?
+                next unless min(data)
+                next unless max(data)
+
+                min = min(data)
+                max = max(data)
+
+                next unless min == 1 && max == 1
+
+                [[%w[subscription_group_details], :multiplexing_one_not_enough]]
               end
 
               class << self

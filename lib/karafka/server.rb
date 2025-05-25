@@ -9,6 +9,15 @@ module Karafka
 
     private_constant :FORCEFUL_SHUTDOWN_WAIT
 
+    extend Helpers::ConfigImporter.new(
+      cli_contract: %i[internal cli contract],
+      activity_manager: %i[internal routing activity_manager],
+      supervision_sleep: %i[internal supervision_sleep],
+      shutdown_timeout: %i[shutdown_timeout],
+      forceful_exit_code: %i[internal forceful_exit_code],
+      process: %i[internal process]
+    )
+
     class << self
       # Set of consuming threads. Each consumer thread contains a single consumer
       attr_accessor :listeners
@@ -30,6 +39,9 @@ module Karafka
       # as not everything is possible when operating in non-standalone mode, etc.
       attr_accessor :execution_mode
 
+      # id of the server. Useful for logging when we want to reference things issued by the server.
+      attr_accessor :id
+
       # Method which runs app
       def run
         self.listeners = []
@@ -39,9 +51,7 @@ module Karafka
         # embedded
         # We cannot validate this during the start because config needs to be populated and routes
         # need to be defined.
-        config.internal.cli.contract.validate!(
-          config.internal.routing.activity_manager.to_h
-        )
+        cli_contract.validate!(activity_manager.to_h)
 
         # We clear as we do not want parent handlers in case of working from fork
         process.clear
@@ -96,18 +106,18 @@ module Karafka
 
         Karafka::App.stop!
 
-        timeout = config.shutdown_timeout
+        timeout = shutdown_timeout
 
         # We check from time to time (for the timeout period) if all the threads finished
         # their work and if so, we can just return and normal shutdown process will take place
         # We divide it by 1000 because we use time in ms.
-        ((timeout / 1_000) * (1 / config.internal.supervision_sleep)).to_i.times do
+        ((timeout / 1_000) * (1 / supervision_sleep)).to_i.times do
           all_listeners_stopped = listeners.all?(&:stopped?)
           all_workers_stopped = workers.none?(&:alive?)
 
           return if all_listeners_stopped && all_workers_stopped
 
-          sleep(config.internal.supervision_sleep)
+          sleep(supervision_sleep)
         end
 
         raise Errors::ForcefulShutdownError
@@ -145,7 +155,7 @@ module Karafka
         return unless process.supervised?
 
         # exit! is not within the instrumentation as it would not trigger due to exit
-        Kernel.exit!(config.internal.forceful_exit_code)
+        Kernel.exit!(forceful_exit_code)
       ensure
         # We need to check if it wasn't an early exit to make sure that only on stop invocation
         # can change the status after everything is closed
@@ -169,23 +179,13 @@ module Karafka
         # in one direction
         Karafka::App.quiet!
       end
-
-      private
-
-      # @return [Karafka::Core::Configurable::Node] root config node
-      def config
-        Karafka::App.config
-      end
-
-      # @return [Karafka::Process] process wrapper instance used to catch system signal calls
-      def process
-        config.internal.process
-      end
     end
 
     # Always start with standalone so there always is a value for the execution mode.
     # This is overwritten quickly during boot, but just in case someone would reach it prior to
     # booting, we want to have the default value.
     self.execution_mode = :standalone
+
+    self.id = SecureRandom.hex(6)
   end
 end

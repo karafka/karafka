@@ -11,10 +11,8 @@ require 'karafka/instrumentation/vendors/kubernetes/liveness_listener'
 
 setup_karafka do |config|
   c_klass = config.internal.connection.conductor.class
-  m_klass = config.internal.connection.manager.class
 
   config.internal.connection.conductor = c_klass.new(1_000)
-  config.internal.connection.manager = m_klass.new(1_000)
   config.concurrency = 1
 end
 
@@ -54,7 +52,7 @@ end
 
 draw_routes do
   subscription_group do
-    multiplexing(min: 1, max: 2, boot: 2)
+    multiplexing(min: 1, max: 2, boot: 2, scale_delay: 1_000)
 
     topic DT.topic do
       consumer Consumer

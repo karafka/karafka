@@ -72,5 +72,3 @@ produce_many(DT.topic, elements)
 start_karafka_and_wait_until do
   sleep(15)
 end
-
-p DT[0]

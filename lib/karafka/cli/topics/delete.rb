@@ -13,8 +13,10 @@ module Karafka
             name = topic.name
 
             if existing_topics_names.include?(name)
-              puts "Deleting topic #{name}..."
-              Admin.delete_topic(name)
+              supervised("Deleting topic #{name}") do
+                Admin.delete_topic(name)
+              end
+
               puts "#{green('Deleted')} topic #{name}."
               any_deleted = true
             else

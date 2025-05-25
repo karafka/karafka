@@ -16,7 +16,7 @@ end
 class Consumer < Karafka::BaseConsumer
   def consume
     DT[:objects_ids] << object_id
-    DT[:messages] << messages.count
+    DT[:messages] << messages.size
   end
 end
 
@@ -41,4 +41,4 @@ end
 
 # The distribution is per batch and the first one is super small, so it won't be always 200, it
 # may be less due to how we reduce it and the data sample
-assert DT[:objects_ids].uniq.count > 100
+assert DT[:objects_ids].uniq.size > 100

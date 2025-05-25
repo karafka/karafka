@@ -22,8 +22,8 @@ RSpec.describe_current do
   end
 
   describe '.start' do
-    it 'expect to raise error when no command provided' do
-      expect { cli.start }.to raise_error(Karafka::Errors::UnrecognizedCommandError)
+    it 'expect to use help when no command provided' do
+      expect { cli.start }.not_to raise_error
     end
   end
 end

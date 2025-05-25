@@ -108,6 +108,7 @@ module Karafka
       rescue Rdkafka::RdkafkaError => e
         return false if e.code == :assignment_lost
         return false if e.code == :state
+        return false if e.code == :illegal_generation
 
         raise e
       end
@@ -135,6 +136,8 @@ module Karafka
         when :assignment_lost
           return false
         when :unknown_member_id
+          return false
+        when :illegal_generation
           return false
         when :no_offset
           return true

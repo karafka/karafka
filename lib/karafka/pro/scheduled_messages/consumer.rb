@@ -8,6 +8,10 @@ module Karafka
     module ScheduledMessages
       # Consumer that coordinates scheduling of messages when the time comes
       class Consumer < ::Karafka::BaseConsumer
+        include Helpers::ConfigImporter.new(
+          dispatcher_class: %i[scheduled_messages dispatcher_class]
+        )
+
         # Prepares the initial state of all stateful components
         def initialized
           clear!
@@ -52,6 +56,9 @@ module Karafka
 
           # If end of the partition is reached, it always means all data is loaded
           @state.loaded!
+
+          tags.add(:state, @state.to_s)
+
           @states_reporter.call
         end
 
@@ -64,7 +71,6 @@ module Karafka
           return unless @state.loaded?
 
           keys = []
-          epochs = []
 
           # We first collect all the data for dispatch and then dispatch and **only** after
           # dispatch that is sync is successful we remove those messages from the daily buffer
@@ -72,15 +78,12 @@ module Karafka
           # with timeouts, etc, we need to be sure it wen through prior to deleting those messages
           # from the daily buffer. That way we ensure the at least once delivery and in case of
           # a transactional producer, exactly once delivery.
-          @daily_buffer.for_dispatch do |epoch, message|
-            epochs << epoch
+          @daily_buffer.for_dispatch do |message|
             keys << message.key
             @dispatcher << message
           end
 
           @dispatcher.flush
-
-          @max_epoch.update(epochs.max)
 
           keys.each { |key| @daily_buffer.delete(key) }
 
@@ -93,14 +96,6 @@ module Karafka
         # accumulator and time related per-message operations.
         # @param message [Karafka::Messages::Message]
         def process_message(message)
-          # If we started to receive messages younger than the moment we created the consumer for
-          # the given day, it means we have loaded all the history and we are no longer in the
-          # loading phase.
-          if message.timestamp.to_i > @today.created_at
-            @state.loaded!
-            tags.add(:state, @state.to_s)
-          end
-
           # If this is a schedule message we need to check if this is for today. Tombstone events
           # are always considered immediate as they indicate, that a message with a given key
           # was already dispatched or that user decided not to dispatch and cancelled the dispatch
@@ -120,6 +115,14 @@ module Karafka
             end
           end
 
+          # Tombstone events are only published after we have dispatched given message. This means
+          # that we've got that far in the dispatching time. This allows us (with a certain buffer)
+          # to quickly reject older messages (older in sense of being scheduled for previous times)
+          # instead of loading them into memory until they are expired
+          if message.headers['schedule_source_type'] == 'tombstone'
+            @max_epoch.update(message.headers['schedule_target_epoch'])
+          end
+
           # Add to buffer all tombstones and messages for the same day
           @daily_buffer << message
         end
@@ -129,7 +132,7 @@ module Karafka
           # If this is a new assignment we always need to seek from beginning to load the data
           if @state.fresh?
             clear!
-            seek(0)
+            seek(:earliest)
 
             return true
           end
@@ -140,7 +143,7 @@ module Karafka
           # If day has ended we reload and start new day with new schedules
           if @today.ended?
             clear!
-            seek(0)
+            seek(:earliest)
 
             return true
           end
@@ -156,7 +159,7 @@ module Karafka
           @today = Day.new
           @tracker = Tracker.new
           @state = State.new(false)
-          @dispatcher = config.dispatcher_class.new(topic.name, partition)
+          @dispatcher = dispatcher_class.new(topic.name, partition)
           @states_reporter = Helpers::IntervalRunner.new do
             @tracker.today = @daily_buffer.size
             @tracker.state = @state.to_s
@@ -165,11 +168,6 @@ module Karafka
           end
 
           tags.add(:state, @state.to_s)
-        end
-
-        # @return [Karafka::Core::Configurable::Node] Schedules config node
-        def config
-          @config ||= Karafka::App.config.scheduled_messages
         end
       end
     end

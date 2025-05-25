@@ -24,14 +24,29 @@ module Karafka
         @log_polling = log_polling
       end
 
+      #
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_connection_listener_before_fetch_loop(event)
+        listener_id = event[:caller].id
+        subscription_group = event[:subscription_group]
+        consumer_group_id = subscription_group.consumer_group.id
+        topics = subscription_group.topics.select(&:active?).map(&:name).join(', ')
+        group_details = "#{consumer_group_id}/#{subscription_group.id}"
+
+        info(
+          "[#{listener_id}] Group #{group_details} subscribing to topics: #{topics}"
+        )
+      end
+
       # Logs each messages fetching attempt
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_connection_listener_fetch_loop(event)
         return unless log_polling?
 
-        listener = event[:caller]
-        debug "[#{listener.id}] Polling messages..."
+        listener_id = event[:caller].id
+        debug "[#{listener_id}] Polling messages..."
       end
 
       # Logs about messages that we've received from Kafka
@@ -40,11 +55,11 @@ module Karafka
       def on_connection_listener_fetch_loop_received(event)
         return unless log_polling?
 
-        listener = event[:caller]
+        listener_id = event[:caller].id
         time = event[:time].round(2)
         messages_count = event[:messages_buffer].size
 
-        message = "[#{listener.id}] Polled #{messages_count} messages in #{time}ms"
+        message = "[#{listener_id}] Polled #{messages_count} messages in #{time}ms"
 
         # We don't want the "polled 0" in dev as it would spam the log
         # Instead we publish only info when there was anything we could poll and fail over to the
@@ -147,7 +162,8 @@ module Karafka
       #
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
       def on_process_notice_signal(event)
-        info "Received #{event[:signal]} system signal"
+        server_id = Karafka::Server.id
+        info "[#{server_id}] Received #{event[:signal]} system signal"
 
         # We print backtrace only for ttin
         return unless event[:signal] == :SIGTTIN
@@ -168,38 +184,76 @@ module Karafka
 
       # Logs info that we're running Karafka app.
       #
-      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_app_running(_event)
-        info "Running in #{RUBY_DESCRIPTION}"
-        info "Running Karafka #{Karafka::VERSION} server"
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_app_running(event)
+        server_id = event[:server_id]
+
+        info "[#{server_id}] Running in #{RUBY_DESCRIPTION}"
+        info "[#{server_id}] Running Karafka #{Karafka::VERSION} server"
 
         return if Karafka.pro?
 
-        info 'See LICENSE and the LGPL-3.0 for licensing details'
+        info "[#{server_id}] See LICENSE and the LGPL-3.0 for licensing details"
       end
 
-      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_app_quieting(_event)
-        info 'Switching to quiet mode. New messages will not be processed'
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_app_quieting(event)
+        info "[#{event[:server_id]}] Switching to quiet mode. New messages will not be processed"
       end
 
-      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_app_quiet(_event)
-        info 'Reached quiet mode. No messages will be processed anymore'
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_app_quiet(event)
+        info "[#{event[:server_id]}] Reached quiet mode. No messages will be processed anymore"
       end
 
       # Logs info that we're going to stop the Karafka server.
       #
-      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_app_stopping(_event)
-        info 'Stopping Karafka server'
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_app_stopping(event)
+        info "[#{event[:server_id]}] Stopping Karafka server"
       end
 
       # Logs info that we stopped the Karafka server.
       #
-      # @param _event [Karafka::Core::Monitoring::Event] event details including payload
-      def on_app_stopped(_event)
-        info 'Stopped Karafka server'
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      def on_app_stopped(event)
+        info "[#{event[:server_id]}] Stopped Karafka server"
+      end
+
+      # Logs info about partitions we have lost
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details with revoked partitions
+      def on_rebalance_partitions_revoked(event)
+        revoked_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
+        group_id = event[:consumer_group_id]
+        client_id = event[:client_id]
+        group_prefix = "[#{client_id}] Group #{group_id} rebalance"
+
+        if revoked_partitions.empty?
+          info "#{group_prefix}: No partitions revoked"
+        else
+          revoked_partitions.each do |topic, partitions|
+            info "#{group_prefix}: Partition(s) #{partitions.join(', ')} of #{topic} revoked"
+          end
+        end
+      end
+
+      # Logs info about partitions that we've gained
+      #
+      # @param event [Karafka::Core::Monitoring::Event] event details with assigned partitions
+      def on_rebalance_partitions_assigned(event)
+        assigned_partitions = event[:tpl].to_h.transform_values { |part| part.map(&:partition) }
+        group_id = event[:consumer_group_id]
+        client_id = event[:client_id]
+        group_prefix = "[#{client_id}] Group #{group_id} rebalance"
+
+        if assigned_partitions.empty?
+          info "#{group_prefix}: No partitions assigned"
+        else
+          assigned_partitions.each do |topic, partitions|
+            info "#{group_prefix}: Partition(s) #{partitions.join(', ')} of #{topic} assigned"
+          end
+        end
       end
 
       # Logs info when we have dispatched a message the the DLQ
@@ -371,9 +425,18 @@ module Karafka
         when 'connection.client.unsubscribe.error'
           error "Client unsubscribe error occurred: #{error}"
           error details
+        when 'parallel_segments.reducer.error'
+          error "Parallel segments reducer error occurred: #{error}"
+          error details
+        when 'parallel_segments.partitioner.error'
+          error "Parallel segments partitioner error occurred: #{error}"
+          error details
+        when 'virtual_partitions.partitioner.error'
+          error "Virtual partitions partitioner error occurred: #{error}"
+          error details
         # This handles any custom errors coming from places like Web-UI, etc
         else
-          error "#{type} error occurred: #{error}"
+          error "#{type} error occurred: #{error.class} - #{error}"
           error details
         end
       end

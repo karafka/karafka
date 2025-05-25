@@ -25,7 +25,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[:broken] << message.headers['original_offset'].to_i
+      DT[:broken] << message.headers['source_offset'].to_i
     end
   end
 end
@@ -48,7 +48,7 @@ elements = DT.uuids(20)
 produce_many(DT.topic, elements)
 
 start_karafka_and_wait_until do
-  DT[0].count >= 20 && DT[:broken].size >= 10
+  DT[0].size >= 20 && DT[:broken].size >= 10
 end
 
 assert_equal (DT[0] + DT[:broken]).sort.uniq, (0..19).to_a

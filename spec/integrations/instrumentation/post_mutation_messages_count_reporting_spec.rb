@@ -13,7 +13,7 @@ class Consumer < Karafka::BaseConsumer
 end
 
 Karafka::App.monitor.subscribe('consumer.consume') do |event|
-  DT[0] << event[:caller].messages.count
+  DT[0] << event[:caller].messages.size
 end
 
 Karafka::App.monitor.subscribe('consumer.consumed') do |event|
@@ -28,7 +28,7 @@ end
 
 start_karafka_and_wait_until do
   produce(DT.topic, rand.to_s)
-  DT[0].count >= 10 && DT[1].count >= 10
+  DT[0].size >= 10 && DT[1].size >= 10
 end
 
 assert_equal DT[0].sum, DT[1].sum

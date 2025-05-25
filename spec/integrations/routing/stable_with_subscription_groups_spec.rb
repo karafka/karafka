@@ -31,7 +31,7 @@ g00 = Karafka::App.subscription_groups.values[0][0].kafka[:'group.instance.id']
 g01 = Karafka::App.subscription_groups.values[0][1].kafka[:'group.instance.id']
 g10 = Karafka::App.subscription_groups.values[1][0].kafka[:'group.instance.id']
 
-assert [g00, g01, g10].uniq.count == 3
+assert [g00, g01, g10].uniq.size == 3
 assert_equal g00, "#{UUID}_0"
 assert_equal g01, "#{UUID}_1"
 assert_equal g10, "#{UUID}_2"

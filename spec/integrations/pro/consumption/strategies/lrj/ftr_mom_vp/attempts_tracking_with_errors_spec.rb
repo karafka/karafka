@@ -17,7 +17,7 @@ class Consumer < Karafka::BaseConsumer
     DT[:attempts] << coordinator.pause_tracker.attempt
     DT[:raises] << true
 
-    return unless (DT[:raises].count % 2).positive?
+    return unless (DT[:raises].size % 2).positive?
 
     raise(StandardError)
   end

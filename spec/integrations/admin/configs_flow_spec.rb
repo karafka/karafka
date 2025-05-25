@@ -43,7 +43,7 @@ topic2.delete('delete.retention.ms')
 Karafka::Admin::Configs.alter(topic1, topic2)
 
 # Wait because it can take a bit of time for topic to update config setup in kafka
-sleep(1)
+sleep(5)
 
 # And lets now verify that those settings were indeed changed
 

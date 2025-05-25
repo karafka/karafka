@@ -1,7 +1,67 @@
 # Karafka Framework Changelog
 
-## 2.4.18 (Unreleased)
+## 2.5.0 (Unreleased)
+- **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.
+- **[Breaking]** Rename scheduled jobs topics names in their config (Pro).
+- **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
+- [Enhancement] Support KIP-82 (header values of arrays).
+- [Enhancement] Enhance errors tracker with `#counts` that contains per-error class specific counters for granular flow handling.
+- [Enhancement] Provide explicit `Karafka::Admin.copy_consumer_group` API.
+- [Enhancement] Return explicit value from `Karafka::Admin.copy_consumer_group` and `Karafka::Admin.rename_consumer_group` APIs.
+- [Enhancement] Introduce balanced non-consistent VP distributor improving the utilization up to 50% (Pro).
+- [Enhancement] Make the error tracker for advanced DLQ strategies respond to `#topic` and `#partition` for context aware dispatches.
+- [Enhancement] Allow setting the workers thread priority and set it to -1 (50ms) by default.
+- [Enhancement] Enhance low-level `client.pause` event with timeout value (if provided).
+- [Enhancement] Introduce `#marking_cursor` API (defaults to `#cursor`) in the filtering API (Pro).
+- [Enhancement] Support multiple DLQ target topics via context aware strategies (Pro).
+- [Enhancement] Raise error when post-transactional committing of offset is done outside of the transaction (Pro).
+- [Enhancement] Include info level rebalance logger listener data.
+- [Enhancement] Include info level subscription start info.
+- [Enhancement] Make the generic error handling in the `LoggerListener` more descriptive by logging also the error class.
+- [Enhancement] Allow marking older offsets to support advanced rewind capabilities.
+- [Enhancement] Change optional `#seek` reset offset flag default to `true` as `false` is almost never used and seek by default should move the internal consumer offset position as well.
+- [Enhancement] Include Swarm node ID in the swarm process tags.
+- [Enhancement] Replace internal usage of MD5 with SHA256 for FIPS.
+- [Enhancement] Improve OSS vs. Pro specs execution isolation.
+- [Enhancement] Preload `librdkafka` code prior to forking in the Swarm mode to save memory.
+- [Enhancement] Extract errors tracker class reference into an internal `errors_tracker_class` config option (Pro).
+- [Enhancement] Support rdkafka native kafka polling customization for admin.
+- [Enhancement] Customize the multiplexing scale delay (Pro) per consumer group (Pro).
+- [Enhancement] Set `topic.metadata.refresh.interval.ms` for default producer in dev to 5s to align with consumer setup.
+- [Enhancement] Alias `-2` and `-1` with `latest` and `earliest` for seeking.
+- [Enhancement] Allow for usage of `latest` and `earliest` in the `Karafka::Pro::Iterator`.
+- [Enhancement] Failures during `topics migrate` (and other subcommands) don't show what topic failed, and why it's invalid.
+- [Enhancement] Apply changes to topics configuration in atomic independent requests when using Declarative Topics.
+- [Enhancement] Execute the help CLI command when no command provided (similar to Rails) to improve DX.
+- [Enhancement] Remove backtrace from the CLI error for incorrect commands (similar to Rails) to improve DX.
+- [Enhancement] Provide `karafka topics help` sub-help due to nesting of Declarative Topics actions.
+- [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
+- [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
+- [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
+- [Refactor] Improve CI specs parallelization.
+- [Maintenance] Lower the `Karafka::Admin` `poll_timeout` to 50 ms to improve responsiveness of admin operations.
+- [Maintenance] Require `karafka-rdkafka` `>=` `0.19.2` due to usage of `#rd_kafka_global_init`, KIP-82 and the new producer caching engine.
+- [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
+- [Maintenance] Remove Rails `7.0` specs due to upcoming EOL.
+- [Fix] Fix Recurring Tasks and Scheduled Messages not working with Swarm (using closed producer).
+- [Fix] Fix a case where `unknown_topic_or_part` error could leak out of the consumer on consumer shutdown.
+- [Fix] Fix missing `virtual_partitions.partitioner.error` custom error logging in the `LoggerListener`.
+- [Fix] Prevent applied system filters `#timeout` from potentially interacting with user filters.
+- [Fix] Use more sane value in `Admin#seek_consumer_group` for long ago.
+- [Fix] Prevent multiplexing of 1:1 from routing.
 - [Fix] WaterDrop level aborting transaction may cause seek offset to move (Pro).
+- [Fix] Fix inconsistency in the logs where `Karafka::Server` originating logs would not have server id reference.
+- [Fix] Fix inconsistency in the logs where OS signal originating logs would not have server id reference.
+- [Fix] Post-fork WaterDrop instance looses some of the non-kafka settings.
+- [Fix] Max epoch tracking for early cleanup causes messages to be skipped until reload.
+- [Fix] optparse double parse loses ARGV.
+- [Fix] `karafka` cannot be required without Bundler.
+- [Fix] Scheduled Messages re-seek moves to `latest` on inheritance of initial offset when `0` offset is compacted.
+- [Fix] Seek to `:latest` without `topic_partition_position` (-1) will not seek at all.
+- [Change] Move to trusted-publishers and remove signing since no longer needed.
+
+## 2.4.18 (2025-04-09)
+- [Fix] Make sure `Bundler.with_unbundled_env` is not called multiple times.
 
 ## 2.4.17 (2025-01-15)
 - [Enhancement] Clean message key and headers when cleaning messages via the cleaner API (Pro).

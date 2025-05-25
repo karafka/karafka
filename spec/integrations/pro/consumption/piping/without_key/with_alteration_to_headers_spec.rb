@@ -57,19 +57,19 @@ SETS = [P1, P2].freeze
 end
 
 start_karafka_and_wait_until do
-  DT[:piped].count >= 100
+  DT[:piped].size >= 100
 end
 
 DT[:piped].each do |message|
   headers = message.headers
 
-  original_partition = headers['original_partition'].to_i
+  source_partition = headers['source_partition'].to_i
 
-  assert SETS[original_partition].include?(message.raw_payload)
-  assert [0, 1].include?(original_partition)
+  assert SETS[source_partition].include?(message.raw_payload)
+  assert [0, 1].include?(source_partition)
   assert %w[0 1].include?(message.key)
-  assert_equal headers['original_topic'], DT.topics.first
-  assert_equal headers['original_topic'], DT.topics.first
+  assert_equal headers['source_topic'], DT.topics.first
+  assert_equal headers['source_topic'], DT.topics.first
   assert_equal headers['extra_data'], '1'
   assert_equal message.raw_payload, headers['extra_test']
 end

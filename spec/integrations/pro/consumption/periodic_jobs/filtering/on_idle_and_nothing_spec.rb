@@ -64,5 +64,5 @@ start_karafka_and_wait_until do
   produce_many(DT.topic, DT.uuids(1)) unless DT.key?(:done)
 
   # This will hang if something is not working, so no assertions needed
-  DT[:ticks].count >= 2
+  DT[:ticks].size >= 2
 end

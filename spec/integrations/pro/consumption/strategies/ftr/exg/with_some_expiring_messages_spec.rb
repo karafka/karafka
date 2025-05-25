@@ -32,7 +32,7 @@ end
 start_karafka_and_wait_until do
   produce_many(DT.topic, DT.uuids(5))
 
-  DT[0].count >= 50
+  DT[0].size >= 50
 end
 
 # None of them should be older than 1 second

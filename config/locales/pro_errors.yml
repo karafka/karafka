@@ -5,6 +5,7 @@ en:
       virtual_partitions.max_partitions_format: needs to be equal or more than 1
       virtual_partitions.offset_metadata_strategy_format: needs to be either :exact or :current
       virtual_partitions.reducer_format: "needs to respond to `#call`"
+      virtual_partitions.distribution_format: "needs to be either :consistent or :balanced"
 
       long_running_job.active_format: needs to be either true or false
 
@@ -58,6 +59,8 @@ en:
       subscription_group_details_multiplexing_boot_mismatch: 'boot needs to be between min and max'
       subscription_group_details.multiplexing_boot_format: 'needs to be an integer equal or more than 1'
       subscription_group_details.multiplexing_boot_not_dynamic: 'needs to be equal to max when not in dynamic mode'
+      subscription_group_details_multiplexing_one_not_enough: 'min and max cannot equal 1'
+      subscription_group_details.multiplexing_scale_delay_format: 'needs to be an integer equal or more than 1000'
 
       swarm.active_format: needs to be true
       swarm.nodes_format: needs to be a range, array of nodes ids or a hash with direct assignments
@@ -88,7 +91,15 @@ en:
       patterns_format: must be an array with hashes
       patterns_missing: needs to be present
       patterns_regexps_not_unique: 'must be unique within consumer group'
+
       direct_assignments_homogenous: 'single consumer group cannot mix regular and direct assignments'
+
+      parallel_segments.partitioner_format: needs to be defined and needs to respond to `#call`
+      parallel_segments.partitioner_respond_to_call: needs to be defined and needs to respond to `#call`
+      parallel_segments.count_format: needs to be equal or more than 1
+      parallel_segments.active_format: needs to be boolean
+      parallel_segments.reducer_format: "needs to respond to `#call`"
+      parallel_segments.merge_key_format: "needs to be a non-empty string"
 
     pattern:
       regexp_format: must be a regular expression
@@ -113,8 +124,8 @@ en:
 
       recurring_tasks.consumer_class_format: 'needs to inherit from Karafka::BaseConsumer'
       recurring_tasks.group_id_format: 'needs to be a string with a Kafka accepted format'
-      recurring_tasks.topics.schedules_format: 'needs to be a string with a Kafka accepted format'
-      recurring_tasks.topics.logs_format: 'needs to be a string with a Kafka accepted format'
+      recurring_tasks.topics.schedules.name_format: 'needs to be a string with a Kafka accepted format'
+      recurring_tasks.topics.logs.name_format: 'needs to be a string with a Kafka accepted format'
       recurring_tasks.interval_format: 'needs to be equal or more than 1000 and an integer'
       recurring_tasks.deserializer_format: 'needs to be configured'
       recurring_tasks.logging_format: needs to be a boolean

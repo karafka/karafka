@@ -12,7 +12,7 @@ module Karafka
           # Snapshots to Kafka current schedule state
           def schedule
             produce(
-              topics.schedules,
+              topics.schedules.name,
               'state:schedule',
               serializer.schedule(::Karafka::Pro::RecurringTasks.schedule)
             )
@@ -25,7 +25,7 @@ module Karafka
           #   because in the web ui we work with the full name and it is easier. Since
           def command(name, task_id)
             produce(
-              topics.schedules,
+              topics.schedules.name,
               "command:#{name}:#{task_id}",
               serializer.command(name, task_id)
             )
@@ -35,7 +35,7 @@ module Karafka
           # @param event [Karafka::Core::Monitoring::Event]
           def log(event)
             produce(
-              topics.logs,
+              topics.logs.name,
               event[:task].id,
               serializer.log(event)
             )

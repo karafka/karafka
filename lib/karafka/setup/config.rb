@@ -73,6 +73,9 @@ module Karafka
       # Really useful when you want to ensure that all topics in routing are managed via
       # declaratives.
       setting :strict_declarative_topics, default: false
+      # Defaults to the CPU thread priority slice to -1 (50ms) to ensure that CPU intense
+      # processing does not affect other threads and prevents starvation
+      setting :worker_thread_priority, default: -1
 
       setting :oauth do
         # option [false, #call] Listener for using oauth bearer. This listener will be able to
@@ -133,6 +136,14 @@ module Karafka
         # How many times should be try. 1 000 ms x 60 => 60 seconds wait in total and then we give
         # up on pending operations
         setting :max_attempts, default: 60
+
+        # option poll_timeout [Integer] time in ms
+        # How long should a poll wait before yielding on no results (rdkafka-ruby setting)
+        # Lower value can be especially useful when working with Web UI, because it allows for
+        # increased responsiveness. Many admin operations do not take 100ms but they wait on poll
+        # until then prior to finishing, blocking the execution. Lowering to 25 ms can
+        # improve responsiveness of the Web UI. 50ms is a good trade-off for admin.
+        setting :poll_timeout, default: 50
       end
 
       # Namespace for internal settings that should not be modified directly
@@ -211,6 +222,10 @@ module Karafka
           # How long should we wait before a critical listener recovery
           # Too short may cause endless rebalance loops
           setting :reset_backoff, default: 60_000
+          # Similar to the `#worker_thread_priority`. Listener threads do not operate for long
+          # time and release GVL on polling but we provide this for API consistency and some
+          # special edge cases.
+          setting :listener_thread_priority, default: 0
 
           # Settings that are altered by our client proxy layer
           setting :proxy do
@@ -282,6 +297,9 @@ module Karafka
           setting :jobs_builder, default: Processing::JobsBuilder.new
           # option coordinator [Class] work coordinator we want to user for processing coordination
           setting :coordinator_class, default: Processing::Coordinator
+          # option errors_tracker_class [Class, nil] errors tracker that is used by the coordinator
+          #   for granular error tracking. `nil` for OSS as it is not in use.
+          setting :errors_tracker_class, default: nil
           # option partitioner_class [Class] partitioner we use against a batch of data
           setting :partitioner_class, default: Processing::Partitioner
           # option strategy_selector [Object] processing strategy selector to be used
@@ -367,7 +385,10 @@ module Karafka
           config.producer ||= ::WaterDrop::Producer.new do |producer_config|
             # In some cases WaterDrop updates the config and we don't want our consumer config to
             # be polluted by those updates, that's why we copy
-            producer_config.kafka = AttributesMap.producer(config.kafka.dup)
+            producer_kafka = AttributesMap.producer(config.kafka.dup)
+            # We inject some defaults (mostly for dev) unless user defined them
+            Setup::DefaultsInjector.producer(producer_kafka)
+            producer_config.kafka = producer_kafka
             # We also propagate same listener to the default producer to make sure, that the
             # listener for oauth is also automatically used by the producer. That way we don't
             # have to configure it manually for the default producer

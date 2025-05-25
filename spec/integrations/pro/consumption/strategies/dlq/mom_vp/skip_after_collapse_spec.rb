@@ -69,7 +69,7 @@ end
 assert(DT[:flow].none? { |row| row.first == 5 })
 
 # It should be moved to DLQ
-assert_equal 5, DT[:dlq].first.headers['original_offset'].to_i
+assert_equal 5, DT[:dlq].first.headers['source_offset'].to_i
 
 # One message should be moved
 assert_equal 1, DT[:dlq].size
@@ -82,4 +82,4 @@ uncollapsed = DT[:flow][(uncollapsed_index + 1)..100]
 assert uncollapsed.none?(&:last)
 
 # Post collapse should run in multiple threads
-assert uncollapsed.map { |row| row[1] }.uniq.count >= 2
+assert uncollapsed.map { |row| row[1] }.uniq.size >= 2

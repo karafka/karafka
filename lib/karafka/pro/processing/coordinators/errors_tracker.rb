@@ -13,25 +13,47 @@ module Karafka
         class ErrorsTracker
           include Enumerable
 
+          # @return [Karafka::Routing::Topic] topic of this error tracker
+          attr_reader :topic
+
+          # @return [Integer] partition of this error tracker
+          attr_reader :partition
+
+          # @return [Hash]
+          attr_reader :counts
+
           # Max errors we keep in memory.
           # We do not want to keep more because for DLQ-less this would cause memory-leaks.
+          # We do however count per class for granular error counting
           STORAGE_LIMIT = 100
 
           private_constant :STORAGE_LIMIT
 
-          def initialize
+          # @param topic [Karafka::Routing::Topic]
+          # @param partition [Integer]
+          # @param limit [Integer] max number of errors we want to keep for reference when
+          #   implementing custom error handling.
+          # @note `limit` does not apply to the counts. They will work beyond the number of errors
+          #   occurring
+          def initialize(topic, partition, limit: STORAGE_LIMIT)
             @errors = []
+            @counts = Hash.new { |hash, key| hash[key] = 0 }
+            @topic = topic
+            @partition = partition
+            @limit = limit
           end
 
           # Clears all the errors
           def clear
             @errors.clear
+            @counts.clear
           end
 
           # @param error [StandardError] adds the error to the tracker
           def <<(error)
-            @errors.shift if @errors.size >= STORAGE_LIMIT
+            @errors.shift if @errors.size >= @limit
             @errors << error
+            @counts[error.class] += 1
           end
 
           # @return [Boolean] is the error tracker empty
@@ -41,7 +63,9 @@ module Karafka
 
           # @return [Integer] number of elements
           def size
-            count
+            # We use counts reference of all errors and not the `@errors` array because it allows
+            # us to go beyond the whole errors storage limit
+            @counts.values.sum
           end
 
           # @return [StandardError, nil] last error that occurred or nil if no errors

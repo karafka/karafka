@@ -22,7 +22,12 @@ class Consumer < Karafka::BaseConsumer
   end
 end
 
-draw_routes(Consumer)
+draw_routes do
+  topic DT.topic do
+    consumer Consumer
+    manual_offset_management(true)
+  end
+end
 
 produce_many(DT.topic, DT.uuids(10))
 

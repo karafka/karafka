@@ -29,12 +29,16 @@ module Karafka
             end
 
             nested(:topics) do
-              required(:schedules) do |val|
-                val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
+              nested(:schedules) do
+                required(:name) do |val|
+                  val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
+                end
               end
 
-              required(:logs) do |val|
-                val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
+              nested(:logs) do
+                required(:name) do |val|
+                  val.is_a?(String) && Karafka::Contracts::TOPIC_REGEXP.match?(val)
+                end
               end
             end
           end

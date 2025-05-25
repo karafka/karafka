@@ -6,11 +6,11 @@
 setup_karafka
 
 # We need this here so we have all callbacks loaded in the parent
-Karafka::Admin.create_topic(SecureRandom.uuid, 1, 1)
+Karafka::Admin.create_topic(DT.topics[0], 1, 1)
 
 pids = Array.new(3) do
   fork do
-    name = SecureRandom.uuid
+    name = DT.topics[1]
 
     Karafka::Admin.create_topic(name, 1, 1)
 

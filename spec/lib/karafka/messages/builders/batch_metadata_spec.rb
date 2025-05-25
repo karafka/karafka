@@ -16,7 +16,7 @@ RSpec.describe_current do
     before { allow(Time).to receive(:now).and_return(now) }
 
     it { is_expected.to be_a(Karafka::Messages::BatchMetadata) }
-    it { expect(result.size).to eq kafka_batch.count }
+    it { expect(result.size).to eq kafka_batch.size }
     it { expect(result.partition).to eq partition }
     it { expect(result.first_offset).to eq kafka_batch.first.offset }
     it { expect(result.last_offset).to eq kafka_batch.last.offset }

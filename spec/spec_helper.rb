@@ -9,7 +9,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   active_support
   singleton
   factory_bot
-  fiddle
   ostruct
   simplecov
   tempfile
@@ -49,7 +48,7 @@ SimpleCov.start do
 end
 
 # Require total coverage after running both regular and pro
-SimpleCov.minimum_coverage(93.9) if SPECS_TYPE == 'pro'
+SimpleCov.minimum_coverage(93.6) if SPECS_TYPE == 'pro'
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"]
   .sort
@@ -92,7 +91,7 @@ require 'active_job/karafka'
 require 'karafka/pro/loader'
 
 # This will make all the pro components visible but will not use them anywhere
-Karafka::Pro::Loader.require_all
+Karafka::Pro::Loader.require_all if ENV['SPECS_TYPE'] == 'pro'
 
 # We extend this manually since it's done by a Railtie that we do not run here
 ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions

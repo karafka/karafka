@@ -12,12 +12,24 @@ module Karafka
     class Listener
       include Helpers::Async
 
+      include Helpers::ConfigImporter.new(
+        jobs_builder: %i[internal processing jobs_builder],
+        partitioner_class: %i[internal processing partitioner_class],
+        reset_backoff: %i[internal connection reset_backoff],
+        listener_thread_priority: %i[internal connection listener_thread_priority]
+      )
+
       # Can be useful for logging
       # @return [String] id of this listener
       attr_reader :id
 
       # @return [Karafka::Routing::SubscriptionGroup] subscription group that this listener handles
       attr_reader :subscription_group
+
+      # @return [Processing::CoordinatorsBuffer] coordinator buffers that can be used directly in
+      #   advanced cases of changes to the polling flow (like triggered seek back without messages
+      #   ahead in the topic)
+      attr_reader :coordinators
 
       # How long to wait in the initial events poll. Increases chances of having the initial events
       # immediately available
@@ -30,16 +42,13 @@ module Karafka
       # @param scheduler [Karafka::Processing::Scheduler] scheduler we want to use
       # @return [Karafka::Connection::Listener] listener instance
       def initialize(subscription_group, jobs_queue, scheduler)
-        proc_config = ::Karafka::App.config.internal.processing
-
         @id = SecureRandom.hex(6)
         @subscription_group = subscription_group
         @jobs_queue = jobs_queue
         @coordinators = Processing::CoordinatorsBuffer.new(subscription_group.topics)
         @client = Client.new(@subscription_group, -> { running? })
         @executors = Processing::ExecutorsBuffer.new(@client, subscription_group)
-        @jobs_builder = proc_config.jobs_builder
-        @partitioner = proc_config.partitioner_class.new(subscription_group)
+        @partitioner = partitioner_class.new(subscription_group)
         @scheduler = scheduler
         @events_poller = Helpers::IntervalRunner.new { @client.events_poll }
         # We keep one buffer for messages to preserve memory and not allocate extra objects
@@ -111,7 +120,10 @@ module Karafka
 
         @status.start!
 
-        async_call("karafka.listener##{@subscription_group.id}")
+        async_call(
+          "karafka.listener##{@subscription_group.id}",
+          listener_thread_priority
+        )
       end
 
       # Stops the jobs queue, triggers shutdown on all the executors (sync), commits offsets and
@@ -254,7 +266,7 @@ module Karafka
         reset
 
         # Ruby sleep is in seconds
-        sleep_time = ::Karafka::App.config.internal.connection.reset_backoff / 10_000.0
+        sleep_time = reset_backoff / 10_000.0
         sleep(sleep_time) && retry
       end
 
@@ -294,7 +306,7 @@ module Karafka
             # here. In cases like this, we do not run a revocation job
             @executors.find_all(topic, partition).each do |executor|
               executor.coordinator.increment(:revoked)
-              jobs << @jobs_builder.revoked(executor)
+              jobs << jobs_builder.revoked(executor)
             end
 
             # We need to remove all the executors of a given topic partition that we have lost, so
@@ -318,7 +330,7 @@ module Karafka
 
         @executors.each do |executor|
           executor.coordinator.increment(:shutdown)
-          job = @jobs_builder.shutdown(executor)
+          job = jobs_builder.shutdown(executor)
           jobs << job
         end
 
@@ -355,7 +367,7 @@ module Karafka
             if coordinator.topic.eofed?
               @executors.find_all_or_create(topic, partition, coordinator).each do |executor|
                 coordinator.increment(:eofed)
-                eofed_jobs << @jobs_builder.eofed(executor)
+                eofed_jobs << jobs_builder.eofed(executor)
               end
             end
 
@@ -372,7 +384,7 @@ module Karafka
             # Start work coordination for this topic partition
             coordinator.increment(:idle)
             executor = @executors.find_or_create(topic, partition, 0, coordinator)
-            idle_jobs << @jobs_builder.idle(executor)
+            idle_jobs << jobs_builder.idle(executor)
 
             next
           end
@@ -383,7 +395,7 @@ module Karafka
           @partitioner.call(topic, messages, coordinator) do |group_id, partition_messages|
             coordinator.increment(:consume)
             executor = @executors.find_or_create(topic, partition, group_id, coordinator)
-            consume_jobs << @jobs_builder.consume(executor, partition_messages)
+            consume_jobs << jobs_builder.consume(executor, partition_messages)
           end
         end
 
@@ -451,7 +463,7 @@ module Karafka
 
             @executors.find_all_or_create(topic_name, partition, coordinator).each do |executor|
               coordinator.increment(:periodic)
-              jobs << @jobs_builder.periodic(executor)
+              jobs << jobs_builder.periodic(executor)
             end
           end
         end

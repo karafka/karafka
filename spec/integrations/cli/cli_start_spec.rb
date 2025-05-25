@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Karafka CLI should work and should fail with unknown command error
+# Karafka CLI should work and should just run help without command
 
 failed = false
 
@@ -10,4 +10,4 @@ rescue Karafka::Errors::UnrecognizedCommandError
   failed = true
 end
 
-assert failed
+assert !failed

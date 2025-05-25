@@ -10,6 +10,10 @@ module Karafka
     #
     # Altering is done in the incremental way.
     module Configs
+      extend Helpers::ConfigImporter.new(
+        max_wait_time: %i[admin max_wait_time]
+      )
+
       class << self
         # Fetches given resources configurations from Kafka
         #
@@ -94,7 +98,7 @@ module Karafka
         # Makes sure that admin is closed afterwards.
         def with_admin_wait
           Admin.with_admin do |admin|
-            yield(admin).wait(max_wait_timeout: Karafka::App.config.admin.max_wait_time)
+            yield(admin).wait(max_wait_timeout: max_wait_time)
           end
         end
       end

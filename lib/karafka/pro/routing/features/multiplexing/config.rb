@@ -14,6 +14,7 @@ module Karafka
             :min,
             :max,
             :boot,
+            :scale_delay,
             keyword_init: true
           ) do
             alias_method :active?, :active

@@ -21,8 +21,8 @@ end
 
 begin
   Karafka::Cli::Topics::Create.new.call
-rescue Rdkafka::RdkafkaError => e
-  code = e.code
+rescue Karafka::Errors::CommandValidationError => e
+  code = e.cause.code
 end
 
 assert_equal code, :invalid_replication_factor

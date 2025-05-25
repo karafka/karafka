@@ -17,7 +17,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    return seek(0) if messages.count < 2
+    return seek(0) if messages.size < 2
 
     @sleep ||= 20
     @sleep -= 5
@@ -36,7 +36,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[1] << message.headers['original_offset'].to_i
+      DT[1] << message.headers['source_offset'].to_i
     end
   end
 end

@@ -38,19 +38,7 @@ module Karafka
             # reduce the whole set into one partition and emit error. This should still allow for
             # user flow but should mitigate damages by not virtualizing
             begin
-              groupings = messages.group_by do |msg|
-                # We need to reduce it to the max concurrency, so the group_id is not a direct
-                # effect of the end user action. Otherwise the persistence layer for consumers
-                # would cache it forever and it would cause memory leaks
-                #
-                # This also needs to be consistent because the aggregation here needs to warrant,
-                # that the same partitioned message will always be assigned to the same virtual
-                # partition. Otherwise in case of a window aggregation with VP spanning across
-                # several polls, the data could not be complete.
-                vps.reducer.call(
-                  vps.partitioner.call(msg)
-                )
-              end
+              groupings = vps.distributor.call(messages)
             rescue StandardError => e
               # This should not happen. If you are seeing this it means your partitioner code
               # failed and raised an error. We highly recommend mitigating partitioner level errors

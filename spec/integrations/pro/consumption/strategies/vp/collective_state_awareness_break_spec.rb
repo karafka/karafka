@@ -16,7 +16,7 @@ end
 # This eliminates the case of running a single virtual partition
 class Buffer < Karafka::Pro::Processing::Filters::Base
   def apply!(messages)
-    @applied = messages.count < 10
+    @applied = messages.size < 10
 
     return unless @applied
 

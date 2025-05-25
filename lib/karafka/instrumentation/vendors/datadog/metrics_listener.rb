@@ -131,11 +131,11 @@ module Karafka
             tags = consumer_tags(consumer)
             tags.concat(default_tags)
 
-            count('consumer.messages', messages.count, tags: tags)
+            count('consumer.messages', messages.size, tags: tags)
             count('consumer.batches', 1, tags: tags)
             gauge('consumer.offset', metadata.last_offset, tags: tags)
             histogram('consumer.consumed.time_taken', event[:time], tags: tags)
-            histogram('consumer.batch_size', messages.count, tags: tags)
+            histogram('consumer.batch_size', messages.size, tags: tags)
             histogram('consumer.processing_lag', metadata.processing_lag, tags: tags)
             histogram('consumer.consumption_lag', metadata.consumption_lag, tags: tags)
           end

@@ -21,8 +21,10 @@ module Karafka
       # - { 'topic1' => 100 } - means we run all partitions from the offset 100
       # - { 'topic1' => Time.now - 60 } - we run all partitions from the message from 60s ago
       # - { 'topic1' => { 1 => Time.now - 60 } } - partition1 from message 60s ago
-      # - { 'topic1' => { 1 => true } } - will pick first offset not consumed on this CG for p 1
-      # - { 'topic1' => true } - will pick first offset not consumed on this CG for all p
+      # - { 'topic1' => { 1 => true } } - will pick first offset on this CG for partition 1
+      # - { 'topic1' => true } - will pick first offset for all partitions
+      # - { 'topic1' => :earliest } - will pick earliest offset for all partitions
+      # - { 'topic1' => :latest } - will pick latest (high-watermark) for all partitions
       class Expander
         # Expands topics to which we want to subscribe with partitions information in case this
         # info is not provided.
@@ -80,7 +82,7 @@ module Karafka
             .find { |topic| topic.fetch(:topic_name) == name }
             .tap { |topic| topic || raise(Errors::TopicNotFoundError, name) }
             .fetch(:partitions)
-            .count
+            .size
         end
       end
     end

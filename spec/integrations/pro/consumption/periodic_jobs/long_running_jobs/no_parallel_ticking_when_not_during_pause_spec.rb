@@ -31,7 +31,7 @@ draw_routes do
 end
 
 start_karafka_and_wait_until do
-  DT[:ticks].count >= 5
+  DT[:ticks].size >= 5
 end
 
 # There should be at least one tick parallel to consumption

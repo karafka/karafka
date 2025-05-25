@@ -33,7 +33,7 @@ end
 produce_many(DT.topic, DT.uuids(200))
 
 start_karafka_and_wait_until do
-  DT[:sizes].count >= 10
+  DT[:sizes].size >= 10
 end
 
 assert DT[:sizes].max <= 3

@@ -10,11 +10,25 @@ module Karafka
   #   Cluster on which operations are performed can be changed via `admin.kafka` config, however
   #   there is no multi-cluster runtime support.
   module Admin
-    # More or less number of seconds of 1 hundred years
-    # Used for time referencing that does not have to be accurate but needs to be big
-    HUNDRED_YEARS = 100 * 365.25 * 24 * 60 * 60
+    extend Helpers::ConfigImporter.new(
+      max_wait_time: %i[admin max_wait_time],
+      poll_timeout: %i[admin poll_timeout],
+      max_attempts: %i[admin max_attempts],
+      group_id: %i[admin group_id],
+      app_kafka: %i[kafka],
+      admin_kafka: %i[admin kafka]
+    )
 
-    private_constant :HUNDRED_YEARS
+    # 2010-01-01 00:00:00 - way before Kafka was released so no messages should exist prior to
+    # this date
+    # We do not use the explicit -2 librdkafka value here because we resolve this offset without
+    # consuming data
+    LONG_TIME_AGO = Time.at(1_262_300_400)
+
+    # one day in seconds for future time reference
+    DAY_IN_SECONDS = 60 * 60 * 24
+
+    private_constant :LONG_TIME_AGO, :DAY_IN_SECONDS
 
     class << self
       # Allows us to read messages from the topic
@@ -55,7 +69,7 @@ module Karafka
           possible_range = requested_range.select { |offset| available_range.include?(offset) }
 
           start_offset = possible_range.first
-          count = possible_range.count
+          count = possible_range.size
 
           tpl.add_topic_and_partitions_with_offsets(name, partition => start_offset)
           consumer.assign(tpl)
@@ -108,7 +122,7 @@ module Karafka
           handler = admin.create_topic(name, partitions, replication_factor, topic_config)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
+            -> { handler.wait(max_wait_timeout: max_wait_time) },
             -> { topics_names.include?(name) }
           )
         end
@@ -122,7 +136,7 @@ module Karafka
           handler = admin.delete_topic(name)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
+            -> { handler.wait(max_wait_timeout: max_wait_time) },
             -> { !topics_names.include?(name) }
           )
         end
@@ -137,7 +151,7 @@ module Karafka
           handler = admin.create_partitions(name, partitions)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: app_config.admin.max_wait_time) },
+            -> { handler.wait(max_wait_timeout: max_wait_time) },
             -> { topic_info(name).fetch(:partition_count) >= partitions }
           )
         end
@@ -203,14 +217,14 @@ module Karafka
             # Earliest is not always 0. When compacting/deleting it can be much later, that's why
             # we fetch the oldest possible offset
             when 'earliest'
-              Time.now - HUNDRED_YEARS
+              LONG_TIME_AGO
             # Latest will always be the high-watermark offset and we can get it just by getting
             # a future position
             when 'latest'
-              Time.now + HUNDRED_YEARS
-            # Same as `'latest'`
+              Time.now + DAY_IN_SECONDS
+            # Same as `'earliest'`
             when false
-              Time.now - HUNDRED_YEARS
+              LONG_TIME_AGO
             # Regular offset case
             else
               position
@@ -274,27 +288,24 @@ module Karafka
         end
       end
 
-      # Takes consumer group and its topics and migrates all the offsets to a new named group
+      # Takes consumer group and its topics and copies all the offsets to a new named group
       #
       # @param previous_name [String] old consumer group name
       # @param new_name [String] new consumer group name
       # @param topics [Array<String>] topics for which we want to migrate offsets during rename
-      # @param delete_previous [Boolean] should we delete previous consumer group after rename.
-      #   Defaults to true.
+      # @return [Boolean] true if anything was migrated, otherwise false
       #
       # @note This method should **not** be executed on a running consumer group as it creates a
       #   "fake" consumer and uses it to move offsets.
       #
-      # @note After migration unless `delete_previous` is set to `false`, old group will be
-      #   removed.
-      #
       # @note If new consumer group exists, old offsets will be added to it.
-      def rename_consumer_group(previous_name, new_name, topics, delete_previous: true)
+      def copy_consumer_group(previous_name, new_name, topics)
         remap = Hash.new { |h, k| h[k] = {} }
 
         old_lags = read_lags_with_offsets({ previous_name => topics })
 
-        return if old_lags.empty?
+        return false if old_lags.empty?
+        return false if old_lags.values.all? { |topic_data| topic_data.values.all?(&:empty?) }
 
         read_lags_with_offsets({ previous_name => topics })
           .fetch(previous_name)
@@ -311,9 +322,35 @@ module Karafka
 
         seek_consumer_group(new_name, remap)
 
-        return unless delete_previous
+        true
+      end
+
+      # Takes consumer group and its topics and migrates all the offsets to a new named group
+      #
+      # @param previous_name [String] old consumer group name
+      # @param new_name [String] new consumer group name
+      # @param topics [Array<String>] topics for which we want to migrate offsets during rename
+      # @param delete_previous [Boolean] should we delete previous consumer group after rename.
+      #   Defaults to true.
+      # @return [Boolean] true if rename (and optionally removal) was ok or false if there was
+      #   nothing really to rename
+      #
+      # @note This method should **not** be executed on a running consumer group as it creates a
+      #   "fake" consumer and uses it to move offsets.
+      #
+      # @note After migration unless `delete_previous` is set to `false`, old group will be
+      #   removed.
+      #
+      # @note If new consumer group exists, old offsets will be added to it.
+      def rename_consumer_group(previous_name, new_name, topics, delete_previous: true)
+        copy_result = copy_consumer_group(previous_name, new_name, topics)
+
+        return false unless copy_result
+        return copy_result unless delete_previous
 
         delete_consumer_group(previous_name)
+
+        true
       end
 
       # Removes given consumer group (if exists)
@@ -325,7 +362,7 @@ module Karafka
       def delete_consumer_group(consumer_group_id)
         with_admin do |admin|
           handler = admin.delete_group(consumer_group_id)
-          handler.wait(max_wait_timeout: app_config.admin.max_wait_time)
+          handler.wait(max_wait_timeout: max_wait_time)
         end
       end
 
@@ -509,7 +546,11 @@ module Karafka
       def with_admin
         bind_id = SecureRandom.uuid
 
-        admin = config(:producer, {}).admin(native_kafka_auto_start: false)
+        admin = config(:producer, {}).admin(
+          native_kafka_auto_start: false,
+          native_kafka_poll_timeout_ms: poll_timeout
+        )
+
         bind_oauth(bind_id, admin)
 
         admin.start
@@ -572,7 +613,7 @@ module Karafka
       rescue Rdkafka::AbstractHandle::WaitTimeoutError, Errors::ResultNotVisibleError
         return if breaker.call
 
-        retry if attempt <= app_config.admin.max_attempts
+        retry if attempt <= max_attempts
 
         raise
       end
@@ -581,11 +622,10 @@ module Karafka
       # @param settings [Hash] extra settings for config (if needed)
       # @return [::Rdkafka::Config] rdkafka config
       def config(type, settings)
-        app_config
-          .kafka
+        app_kafka
           .then(&:dup)
-          .merge(app_config.admin.kafka)
-          .tap { |config| config[:'group.id'] = app_config.admin.group_id }
+          .merge(admin_kafka)
+          .tap { |config| config[:'group.id'] = group_id }
           # We merge after setting the group id so it can be altered if needed
           # In general in admin we only should alter it when we need to impersonate a given
           # consumer group or do something similar
@@ -618,11 +658,6 @@ module Karafka
         else
           offset
         end
-      end
-
-      # @return [Karafka::Core::Configurable::Node] root node config
-      def app_config
-        ::Karafka::App.config
       end
     end
   end

@@ -14,6 +14,7 @@ setup_karafka do |config|
   config.kafka[:'max.poll.interval.ms'] = 10_000
   config.kafka[:'session.timeout.ms'] = 10_000
   config.concurrency = 1
+  config.shutdown_timeout = 60_000
 end
 
 class Consumer < Karafka::BaseConsumer

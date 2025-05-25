@@ -33,7 +33,7 @@ RSpec.describe_current do
 
     before { built_topic }
 
-    it { expect(consumer_group.topics.count).to eq 1 }
+    it { expect(consumer_group.topics.size).to eq 1 }
     it { expect(built_topic.name).to eq :topic_name.to_s }
   end
 

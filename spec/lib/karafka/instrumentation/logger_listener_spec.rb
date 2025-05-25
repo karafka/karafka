@@ -7,6 +7,8 @@ RSpec.describe_current do
   let(:time) { rand }
   let(:topic) { build(:routing_topic, name: topic_name) }
   let(:topic_name) { rand.to_s }
+  let(:server_id) { Karafka::Server.id }
+  let(:client_id) { rand.to_s }
 
   before do
     Karafka::Server.listeners = []
@@ -202,7 +204,7 @@ RSpec.describe_current do
     subject(:trigger) { listener.on_process_notice_signal(event) }
 
     let(:payload) { { signal: :SIGTTIN } }
-    let(:message) { "Received #{event[:signal]} system signal" }
+    let(:message) { "[#{server_id}] Received #{event[:signal]} system signal" }
 
     it 'expect logger to log proper message' do
       expect(Karafka.logger).to have_received(:info).with(message)
@@ -212,8 +214,8 @@ RSpec.describe_current do
   describe '#on_app_running' do
     subject(:trigger) { listener.on_app_running(event) }
 
-    let(:payload) { {} }
-    let(:message) { "Running Karafka #{Karafka::VERSION} server" }
+    let(:payload) { { server_id: server_id } }
+    let(:message) { "[#{server_id}] Running Karafka #{Karafka::VERSION} server" }
 
     it 'expect logger to log server running' do
       # We had to add at least once as it runs in a separate thread and can interact
@@ -225,8 +227,8 @@ RSpec.describe_current do
   describe '#on_app_quieting' do
     subject(:trigger) { listener.on_app_quieting(event) }
 
-    let(:payload) { {} }
-    let(:message) { 'Switching to quiet mode. New messages will not be processed' }
+    let(:payload) { { server_id: server_id } }
+    let(:message) { "[#{server_id}] Switching to quiet mode. New messages will not be processed" }
 
     it 'expect logger to log server quiet' do
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
@@ -236,8 +238,8 @@ RSpec.describe_current do
   describe '#on_app_quiet' do
     subject(:trigger) { listener.on_app_quiet(event) }
 
-    let(:payload) { {} }
-    let(:message) { 'Reached quiet mode. No messages will be processed anymore' }
+    let(:payload) { { server_id: server_id } }
+    let(:message) { "[#{server_id}] Reached quiet mode. No messages will be processed anymore" }
 
     it 'expect logger to log server quiet' do
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
@@ -247,8 +249,8 @@ RSpec.describe_current do
   describe '#on_app_stopping' do
     subject(:trigger) { listener.on_app_stopping(event) }
 
-    let(:payload) { {} }
-    let(:message) { 'Stopping Karafka server' }
+    let(:payload) { { server_id: server_id } }
+    let(:message) { "[#{server_id}] Stopping Karafka server" }
 
     it 'expect logger to log server stop' do
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
@@ -258,8 +260,8 @@ RSpec.describe_current do
   describe '#on_app_stopped' do
     subject(:trigger) { listener.on_app_stopped(event) }
 
-    let(:payload) { {} }
-    let(:message) { 'Stopped Karafka server' }
+    let(:payload) { { server_id: server_id } }
+    let(:message) { "[#{server_id}] Stopped Karafka server" }
 
     it 'expect logger to log server stopped' do
       expect(Karafka.logger).to have_received(:info).with(message).at_least(:once)
@@ -549,11 +551,123 @@ RSpec.describe_current do
       it { expect(Karafka.logger).to have_received(:error).with(message) }
     end
 
-    context 'when it is a different error type' do
-      let(:type) { 'different.error' }
-      let(:message) { "different.error error occurred: #{error}" }
+    context 'when it is a parallel_segments.reducer.error' do
+      let(:type) { 'parallel_segments.reducer.error' }
+      let(:message) { "Parallel segments reducer error occurred: #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a parallel_segments.partitioner.error' do
+      let(:type) { 'parallel_segments.partitioner.error' }
+      let(:message) { "Parallel segments partitioner error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a virtual_partitions.partitioner.error' do
+      let(:type) { 'virtual_partitions.partitioner.error' }
+      let(:message) { "Virtual partitions partitioner error occurred: #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when it is a different error type' do
+      let(:type) { 'different.error' }
+      let(:message) { "different.error error occurred: #{error.class} - #{error}" }
+
+      it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+  end
+
+  describe '#on_rebalance_partitions_revoked' do
+    subject(:trigger) { listener.on_rebalance_partitions_revoked(event) }
+
+    let(:group_id) { 'group1' }
+    let(:group_prefix) { "Group #{group_id} rebalance" }
+
+    context 'when no partitions are revoked' do
+      let(:payload) do
+        {
+          tpl: {},
+          consumer_group_id: group_id,
+          client_id: client_id
+        }
+      end
+
+      let(:message) { "[#{client_id}] #{group_prefix}: No partitions revoked" }
+
+      it 'expect logger to log that no partitions were revoked' do
+        expect(Karafka.logger).to have_received(:info).with(message)
+      end
+    end
+
+    context 'when partitions are revoked' do
+      let(:payload) do
+        {
+          tpl: {
+            'topic1' => [OpenStruct.new(partition: 0), OpenStruct.new(partition: 1)],
+            'topic2' => [OpenStruct.new(partition: 0)]
+          },
+          consumer_group_id: group_id,
+          client_id: client_id
+        }
+      end
+
+      it 'expect logger to log revoked partitions for each topic' do
+        expect(Karafka.logger)
+          .to have_received(:info)
+          .with("[#{client_id}] #{group_prefix}: Partition(s) 0, 1 of topic1 revoked")
+        expect(Karafka.logger)
+          .to have_received(:info)
+          .with("[#{client_id}] #{group_prefix}: Partition(s) 0 of topic2 revoked")
+      end
+    end
+  end
+
+  describe '#on_rebalance_partitions_assigned' do
+    subject(:trigger) { listener.on_rebalance_partitions_assigned(event) }
+
+    let(:group_id) { 'group1' }
+    let(:group_prefix) { "Group #{group_id} rebalance" }
+
+    context 'when no partitions are assigned' do
+      let(:payload) do
+        {
+          tpl: {},
+          consumer_group_id: group_id,
+          client_id: client_id
+        }
+      end
+
+      let(:message) { "[#{client_id}] #{group_prefix}: No partitions assigned" }
+
+      it 'expect logger to log that no partitions were assigned' do
+        expect(Karafka.logger).to have_received(:info).with(message)
+      end
+    end
+
+    context 'when partitions are assigned' do
+      let(:payload) do
+        {
+          tpl: {
+            'topic1' => [OpenStruct.new(partition: 0), OpenStruct.new(partition: 1)],
+            'topic2' => [OpenStruct.new(partition: 0)]
+          },
+          consumer_group_id: group_id,
+          client_id: client_id
+        }
+      end
+
+      it 'expect logger to log assigned partitions for each topic' do
+        expect(Karafka.logger)
+          .to have_received(:info)
+          .with("[#{client_id}] #{group_prefix}: Partition(s) 0, 1 of topic1 assigned")
+
+        expect(Karafka.logger)
+          .to have_received(:info)
+          .with("[#{client_id}] #{group_prefix}: Partition(s) 0 of topic2 assigned")
+      end
     end
   end
 end

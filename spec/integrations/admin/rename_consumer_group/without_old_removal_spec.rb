@@ -34,7 +34,7 @@ Karafka::Admin.seek_consumer_group(
   }
 )
 
-Karafka::Admin.rename_consumer_group(
+assert Karafka::Admin.rename_consumer_group(
   PREVIOUS_NAME,
   NEW_NAME,
   [DT.topics[0], DT.topics[1]],

@@ -31,7 +31,7 @@ start_karafka_and_wait_until do
   DT.key?(:done)
 end
 
-topic_name = Karafka::App.config.recurring_tasks.topics.schedules
+topic_name = Karafka::App.config.recurring_tasks.topics.schedules.name
 state_message = Karafka::Admin.read_topic(topic_name, 0, 1).last
 payload = state_message.payload
 

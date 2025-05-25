@@ -12,14 +12,14 @@ module Karafka
           module Builder
             # Enabled scheduled messages operations and adds needed topics and other stuff.
             #
-            # @param group_name [String, false] name for scheduled messages topic that is also used
+            # @param topic_name [String, false] name for scheduled messages topic that is also used
             #   as a group identifier. Users can have multiple schedule topics flows to prevent key
             #   collisions, prioritize and do other stuff. `false` if not active.
             # @param block [Proc] optional reconfiguration of the topics definitions.
             # @note Namespace for topics should include the divider as it is not automatically
             #   added.
-            def scheduled_messages(group_name = false, &block)
-              return unless group_name
+            def scheduled_messages(topic_name = false, &block)
+              return unless topic_name
 
               # Load zlib only if user enables scheduled messages
               require 'zlib'
@@ -32,7 +32,7 @@ module Karafka
               consumer_group msg_cfg.group_id do
                 # Registers the primary topic that we use to control schedules execution. This is
                 # the one that we use to trigger scheduled messages.
-                messages_topic = topic(group_name) do
+                messages_topic = topic(topic_name) do
                   instance_eval(&block) if block && block.arity.zero?
 
                   consumer msg_cfg.consumer_class
@@ -54,7 +54,11 @@ module Karafka
                   consumer_persistence(true)
 
                   # This needs to be enabled for the eof to work correctly
-                  kafka('enable.partition.eof': true, inherit: true)
+                  kafka(
+                    'enable.partition.eof': true,
+                    'auto.offset.reset': 'earliest',
+                    inherit: true
+                  )
                   eofed(true)
 
                   # Since this is a topic that gets replayed because of schedule management, we do
@@ -96,7 +100,7 @@ module Karafka
                 # Holds states of scheduler per each of the partitions since they tick
                 # independently. We only hold future statistics not to have to deal with
                 # any type of state restoration
-                states_topic = topic("#{group_name}#{msg_cfg.states_postfix}") do
+                states_topic = topic("#{topic_name}#{msg_cfg.states_postfix}") do
                   active(false)
                   target.scheduled_messages(true)
                   config(

@@ -65,7 +65,7 @@ end
 start_karafka_and_wait_until do
   produce_many(DT.topic, DT.uuids(1))
 
-  DT[:lags].count >= 10
+  DT[:lags].size >= 10
 end
 
 # expect lag to grow because aside from first marking, we no longer mark and just pass

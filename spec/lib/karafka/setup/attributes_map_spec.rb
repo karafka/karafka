@@ -38,8 +38,17 @@ RSpec.describe_current do
     subject(:generated_list) { described_class.generate }
 
     it 'expect to have correct settings for both consumer and producer' do
-      expect(generated_list[:consumer]).to eq(described_class::CONSUMER)
-      expect(generated_list[:producer]).to eq(described_class::PRODUCER)
+      if Rdkafka::VERSION > '0.20'
+        expect(generated_list[:consumer]).to eq(described_class::CONSUMER)
+        expect(generated_list[:producer]).to eq(described_class::PRODUCER)
+      else
+        expect(
+          (generated_list[:consumer] + %i[metadata.recovery.strategy]).sort
+        ).to eq(described_class::CONSUMER)
+        expect(
+          (generated_list[:producer] + %i[metadata.recovery.strategy]).sort
+        ).to eq(described_class::PRODUCER)
+      end
     end
   end
 end

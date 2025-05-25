@@ -24,7 +24,8 @@ draw_routes(create_topics: false) do
 end
 
 Karafka.monitor.subscribe('error.occurred') do |event|
-  DT[:events] << event
+  # Interested only in the first one, the remaining can leak out on re-raise
+  DT[:events] << event unless DT.key?(:events)
 end
 
 start_karafka_and_wait_until do
@@ -33,6 +34,6 @@ end
 
 payload = DT[:events].last.payload
 
-assert_equal Karafka::Connection::Client, payload[:caller].class
-assert_equal 'connection.client.poll.error', payload[:type]
-assert_equal :unknown_topic_or_part, payload[:error].code
+assert_equal Karafka::Connection::Client, payload[:caller].class, payload[:caller].class
+assert_equal 'connection.client.poll.error', payload[:type], payload[:type]
+assert_equal :unknown_topic_or_part, payload[:error].code, payload[:error].code

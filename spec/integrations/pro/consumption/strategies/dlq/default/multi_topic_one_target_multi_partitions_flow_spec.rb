@@ -17,7 +17,7 @@ end
 class DlqConsumer < Karafka::BaseConsumer
   def consume
     messages.each do |message|
-      DT[0] << [message.key, message.headers['original_partition']]
+      DT[0] << [message.key, message.headers['source_partition']]
     end
   end
 end
@@ -47,11 +47,11 @@ end
 end
 
 start_karafka_and_wait_until do
-  DT[0].count >= 20
+  DT[0].size >= 20
 end
 
 DT[0].each do |key|
   assert_equal key[0], key[1]
 end
 
-assert DT[0].map(&:first).uniq.count > 1
+assert DT[0].map(&:first).uniq.size > 1

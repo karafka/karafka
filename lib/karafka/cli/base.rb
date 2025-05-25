@@ -112,7 +112,7 @@ module Karafka
                 *[names, option[2], option[1]].flatten
               ) { |value| options[option[0]] = value }
             end
-          end.parse(ARGV)
+          end.parse(ARGV.dup)
 
           options
         end
@@ -130,8 +130,14 @@ module Karafka
         #   given Cli command
         # @example for Karafka::Cli::Install
         #   name #=> 'install'
+        # @example for Karafka::Cli::TestMe
+        #   name => 'test_me'
         def name
-          to_s.split('::').last.downcase
+          to_s
+            .split('::')
+            .last
+            .gsub(/([a-z\d])([A-Z])/, '\1_\2')
+            .downcase
         end
 
         # @return [Array<String>] names and aliases for command matching
