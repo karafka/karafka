@@ -66,7 +66,7 @@ GEM
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
-    karafka-testing (2.5.0)
+    karafka-testing (2.5.1)
       karafka (>= 2.5.0.beta1, < 2.6.0)
       waterdrop (>= 2.8.0)
     karafka-web (0.11.0.beta3)
