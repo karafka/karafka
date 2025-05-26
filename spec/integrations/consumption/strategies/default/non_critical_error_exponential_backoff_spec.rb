@@ -12,8 +12,7 @@ setup_karafka(allow_errors: true) do |config|
 end
 
 class Consumer < Karafka::BaseConsumer
-  def initialize
-    super
+  def initialized
     DT[0] << Time.now.to_f
   end
 

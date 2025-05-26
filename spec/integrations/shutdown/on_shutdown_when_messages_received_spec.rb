@@ -9,8 +9,7 @@ topic2 = DT.topics[1]
 topic3 = DT.topics[2]
 
 class Consumer < Karafka::BaseConsumer
-  def initialize
-    super
+  def initialized
     @id = SecureRandom.hex(6)
   end
 

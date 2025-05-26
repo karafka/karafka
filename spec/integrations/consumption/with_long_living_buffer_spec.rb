@@ -7,8 +7,7 @@
 setup_karafka { |config| config.max_messages = 2 }
 
 class Consumer < Karafka::BaseConsumer
-  def initialize
-    super
+  def initialized
     # Karafka never uses same consumer instance for multiple partitions of the same topic, thus we
     # do not need thread safe structures here
     @buffer = []
