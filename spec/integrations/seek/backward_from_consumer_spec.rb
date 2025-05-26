@@ -8,10 +8,9 @@ setup_karafka
 produce_many(DT.topic, DT.uuids(10))
 
 class Consumer < Karafka::BaseConsumer
-  def initialize
+  def initialized
     @backwards = false
     @ignore = false
-    super
   end
 
   def consume

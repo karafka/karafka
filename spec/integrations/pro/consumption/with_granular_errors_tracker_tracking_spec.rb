@@ -15,8 +15,7 @@ E2 = Class.new(StandardError)
 E3 = Class.new(StandardError)
 
 class Consumer < Karafka::BaseConsumer
-  def initialize
-    super
+  def initialized
     @error_count = 0
   end
 
