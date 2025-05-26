@@ -18,7 +18,9 @@ module Karafka
             schema_version: ScheduledMessages::STATES_SCHEMA_VERSION,
             dispatched_at: float_now,
             state: tracker.state,
-            daily: tracker.daily
+            daily: tracker.daily,
+            low_offset: tracker.low_offset,
+            high_offset: tracker.high_offset
           }
 
           compress(

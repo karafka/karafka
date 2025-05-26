@@ -92,6 +92,8 @@ module Karafka
         # accumulator and time related per-message operations.
         # @param message [Karafka::Messages::Message]
         def process_message(message)
+          @tracker.offsets(message)
+
           # If this is a schedule message we need to check if this is for today. Tombstone events
           # are always considered immediate as they indicate, that a message with a given key
           # was already dispatched or that user decided not to dispatch and cancelled the dispatch

@@ -31,6 +31,7 @@ module Karafka
         # Updates epoch if bigger than current max
         # @param new_max [Integer] potential new max epoch
         def update(new_max)
+          return
           return unless new_max > @max
 
           @max = new_max
