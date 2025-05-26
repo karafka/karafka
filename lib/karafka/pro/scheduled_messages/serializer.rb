@@ -20,7 +20,8 @@ module Karafka
             state: tracker.state,
             daily: tracker.daily,
             low_offset: tracker.low_offset,
-            high_offset: tracker.high_offset
+            high_offset: tracker.high_offset,
+            total: tracker.total
           }
 
           compress(

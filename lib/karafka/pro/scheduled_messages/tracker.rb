@@ -16,13 +16,14 @@ module Karafka
         # @return [String] current state
         attr_accessor :state
 
-        attr_accessor :low_offset, :high_offset
+        attr_accessor :low_offset, :high_offset, :total
 
         def initialize
           @daily = Hash.new { |h, k| h[k] = 0 }
           @created_at = Time.now.to_i
           @low_offset = -1
           @high_offset = -1
+          @total = 0
         end
 
         # Accurate (because coming from daily buffer) number of things to schedule
@@ -48,6 +49,7 @@ module Karafka
         end
 
         def offsets(message)
+          @total += 1
           @low_offset = message.offset if @low_offset.negative?
           @high_offset = message.offset
         end
