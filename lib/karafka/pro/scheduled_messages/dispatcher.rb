@@ -71,7 +71,7 @@ module Karafka
             topic: "#{@topic}#{config.states_postfix}",
             payload: @serializer.state(tracker),
             # We use the state as a key, so we always have one state transition data available
-            key: "#{tracker.state}-state",
+            key: "#{tracker.state}_state",
             partition: @partition,
             headers: { 'zlib' => 'true' }
           )
