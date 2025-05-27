@@ -70,7 +70,8 @@ module Karafka
           config.producer.produce_async(
             topic: "#{@topic}#{config.states_postfix}",
             payload: @serializer.state(tracker),
-            key: 'state',
+            # We use the state as a key, so we always have one state transition data available
+            key: "#{tracker.state}_state",
             partition: @partition,
             headers: { 'zlib' => 'true' }
           )

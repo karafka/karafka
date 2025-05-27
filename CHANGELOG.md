@@ -35,6 +35,7 @@
 - [Enhancement] Execute the help CLI command when no command provided (similar to Rails) to improve DX.
 - [Enhancement] Remove backtrace from the CLI error for incorrect commands (similar to Rails) to improve DX.
 - [Enhancement] Provide `karafka topics help` sub-help due to nesting of Declarative Topics actions.
+- [Enhancement] Use independent keys for different states of reporting in scheduled messages.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
