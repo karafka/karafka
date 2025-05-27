@@ -46,7 +46,7 @@ Karafka.producer.produce_many_sync(proxies)
 class Crasher
   def call(message)
     # Don't crash on async state reporting, just proxy dispatches
-    return message if message[:key] == 'state'
+    return message if message[:key].end_with?('-state')
 
     DT[:totals] << 1
 
