@@ -1,3 +1,4 @@
+
 # frozen_string_literal: true
 
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
@@ -95,14 +96,17 @@ RSpec.describe_current do
   end
 
   describe '#state' do
-    before { allow(serializer).to receive(:state).with(tracker).and_return(serializer_result) }
+    before do
+      allow(serializer).to receive(:state).with(tracker).and_return(serializer_result)
+      tracker.state = 'loading'
+    end
 
     let(:serializer_result) { rand.to_s }
     let(:expected) do
       {
         topic: "#{topic}_states",
         payload: serializer_result,
-        key: 'state',
+        key: 'loading_state',
         partition: partition,
         headers: { 'zlib' => 'true' }
       }
