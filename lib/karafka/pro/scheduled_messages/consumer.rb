@@ -19,6 +19,7 @@ module Karafka
           # reset it at all.
           @max_epoch = MaxEpoch.new
           @state = State.new(nil)
+          @reloads = 0
         end
 
         # Processes messages and runs dispatch (via tick) if needed
@@ -27,6 +28,11 @@ module Karafka
 
           messages.each do |message|
             SchemaValidator.call(message)
+
+            # We always track offsets of messages, even if they would be later on skipped or
+            # ignored for any reason. That way we have debug info that is useful once in a while.
+            @tracker.offsets(message)
+
             process_message(message)
           end
 
@@ -104,7 +110,7 @@ module Karafka
             time = message.headers['schedule_target_epoch']
 
             # Do not track historical below today as those will be reflected in the daily buffer
-            @tracker.track(message) if time >= @today.starts_at
+            @tracker.future(message) if time >= @today.starts_at
 
             if time > @today.ends_at || time < @max_epoch.to_i
               # Clean the message immediately when not needed (won't be scheduled) to preserve
@@ -132,6 +138,7 @@ module Karafka
           # If this is a new assignment we always need to seek from beginning to load the data
           if @state.fresh?
             clear!
+            @reloads += 1
             seek(:earliest)
 
             return true
@@ -143,6 +150,7 @@ module Karafka
           # If day has ended we reload and start new day with new schedules
           if @today.ended?
             clear!
+            @reloads += 1
             seek(:earliest)
 
             return true
@@ -163,6 +171,7 @@ module Karafka
           @states_reporter = Helpers::IntervalRunner.new do
             @tracker.today = @daily_buffer.size
             @tracker.state = @state.to_s
+            @tracker.reloads = @reloads
 
             @dispatcher.state(@tracker)
           end
