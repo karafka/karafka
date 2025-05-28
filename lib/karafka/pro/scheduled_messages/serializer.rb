@@ -16,10 +16,8 @@ module Karafka
         def state(tracker)
           data = {
             schema_version: ScheduledMessages::STATES_SCHEMA_VERSION,
-            dispatched_at: float_now,
-            state: tracker.state,
-            daily: tracker.daily
-          }
+            dispatched_at: float_now
+          }.merge(tracker.to_h)
 
           compress(
             serialize(data)
