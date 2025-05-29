@@ -37,6 +37,7 @@
 - [Enhancement] Provide `karafka topics help` sub-help due to nesting of Declarative Topics actions.
 - [Enhancement] Use independent keys for different states of reporting in scheduled messages.
 - [Enhancement] Enrich scheduled messages state reporter with debug data.
+- [Enhancement] Introduce a new state called `stopped` to the scheduled messages.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
@@ -60,6 +61,7 @@
 - [Fix] `karafka` cannot be required without Bundler.
 - [Fix] Scheduled Messages re-seek moves to `latest` on inheritance of initial offset when `0` offset is compacted.
 - [Fix] Seek to `:latest` without `topic_partition_position` (-1) will not seek at all.
+- [Fix] Extremely high turn over of scheduled messages can cause them not to reach EOF/Loaded state.
 - [Change] Move to trusted-publishers and remove signing since no longer needed.
 
 ## 2.4.18 (2025-04-09)

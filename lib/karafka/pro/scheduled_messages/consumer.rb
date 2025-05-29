@@ -12,13 +12,22 @@ module Karafka
           dispatcher_class: %i[scheduled_messages dispatcher_class]
         )
 
+        # In case there is an extremely high turnover of messages, EOF may never kick in,
+        # effectively not changing status from loading to loaded. We use the time consumer instance
+        # was created + a buffer time to detect such a case (loading + messages from the time it
+        # was already running) to switch the state despite no EOF
+        # This is in seconds
+        GRACE_PERIOD = 15
+
+        private_constant :GRACE_PERIOD
+
         # Prepares the initial state of all stateful components
         def initialized
           clear!
           # Max epoch is always moving forward with the time. Never backwards, hence we do not
           # reset it at all.
           @max_epoch = MaxEpoch.new
-          @state = State.new(nil)
+          @state = State.new
           @reloads = 0
         end
 
@@ -37,6 +46,15 @@ module Karafka
           end
 
           @states_reporter.call
+
+          recent_timestamp = messages.last.timestamp.to_i
+          post_started_timestamp = @tracker.started_at + GRACE_PERIOD
+
+          # If we started getting messages that are beyond the current time, it means we have
+          # loaded enough to start scheduling. The upcoming messages are from the future looking
+          # from perspective of the current consumer start. We add a bit of grace period not to
+          # deal with edge cases
+          loaded! if @state.loading? && recent_timestamp > post_started_timestamp
 
           eofed if eofed?
 
@@ -61,11 +79,7 @@ module Karafka
           return if reload!
 
           # If end of the partition is reached, it always means all data is loaded
-          @state.loaded!
-
-          tags.add(:state, @state.to_s)
-
-          @states_reporter.call
+          loaded!
         end
 
         # Performs periodic operations when no new data is provided to the topic partition
@@ -94,6 +108,12 @@ module Karafka
           keys.each { |key| @daily_buffer.delete(key) }
 
           @states_reporter.call
+        end
+
+        # Move the state to shutdown and publish immediately
+        def shutdown
+          @state.stopped!
+          @states_reporter.call!
         end
 
         private
@@ -159,6 +179,13 @@ module Karafka
           false
         end
 
+        # Moves the state to loaded and publishes the state update
+        def loaded!
+          @state.loaded!
+          tags.add(:state, @state.to_s)
+          @states_reporter.call!
+        end
+
         # Resets all buffers and states so we can start a new day with a clean slate
         # We can fully recreate the dispatcher because any undispatched messages will be dispatched
         # with the new day dispatcher after it is reloaded.
@@ -166,7 +193,8 @@ module Karafka
           @daily_buffer = DailyBuffer.new
           @today = Day.new
           @tracker = Tracker.new
-          @state = State.new(false)
+          @state = State.new
+          @state.loading!
           @dispatcher = dispatcher_class.new(topic.name, partition)
           @states_reporter = Helpers::IntervalRunner.new do
             @tracker.today = @daily_buffer.size
