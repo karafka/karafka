@@ -15,38 +15,35 @@ module Karafka
       # - loaded - state in which we finished loading all the schedules and we can dispatch
       #   messages when the time comes and we can process real-time incoming schedules and
       #   changes to schedules as they appear in the stream.
+      # - shutdown - the states are no longer available as the consumer has shut down
       class State
-        # @param loaded [nil, false, true] is the state loaded or not yet. `nil` indicates, it is
-        #   a fresh, pre-seek state.
-        def initialize(loaded = nil)
-          @loaded = loaded
+        # Available states scheduling of messages may be in
+        STATES = %w[
+          fresh
+          loading
+          loaded
+          stopped
+        ].freeze
+
+        private_constant :STATES
+
+        def initialize
+          @state = 'fresh'
         end
 
-        # @return [Boolean] are we in a fresh, pre-bootstrap state
-        def fresh?
-          @loaded.nil?
-        end
+        STATES.each do |state|
+          define_method :"#{state}!" do
+            @state = state
+          end
 
-        # Marks the current state as fully loaded
-        def loaded!
-          @loaded = true
-        end
-
-        # @return [Boolean] are we in a loaded state
-        def loaded?
-          @loaded == true
+          define_method :"#{state}?" do
+            @state == state
+          end
         end
 
         # @return [String] current state string representation
         def to_s
-          case @loaded
-          when nil
-            'fresh'
-          when false
-            'loading'
-          when true
-            'loaded'
-          end
+          @state
         end
       end
     end

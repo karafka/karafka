@@ -15,6 +15,9 @@ module Karafka
 
         attr_writer :reloads
 
+        # @return [Integer] time epoch when this tracker was started
+        attr_reader :started_at
+
         def initialize
           @daily = Hash.new { |h, k| h[k] = 0 }
           @started_at = Time.now.to_i

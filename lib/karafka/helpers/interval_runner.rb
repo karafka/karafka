@@ -30,6 +30,14 @@ module Karafka
         @block.call
       end
 
+      # Runs the requested code bypassing any time frequencies
+      # Useful when we have certain actions that usually need to run periodically but in some
+      # cases need to run asap
+      def call!
+        @last_called_at = monotonic_now
+        @block.call
+      end
+
       # Resets the runner, so next `#call` will run the underlying code
       def reset
         @last_called_at = monotonic_now - @interval
