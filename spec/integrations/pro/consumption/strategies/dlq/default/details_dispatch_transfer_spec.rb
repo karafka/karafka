@@ -48,6 +48,7 @@ end
   dlq_message = DT[:broken][i]
   cg = Karafka::App.consumer_groups.first.id
 
+  assert_equal dlq_message.key, i.to_s
   assert_equal dlq_message.raw_payload, elements[i]
   assert_equal dlq_message.headers["test#{i}"], (i + 1).to_s
   assert_equal dlq_message.headers.fetch('source_topic'), DT.topic
@@ -55,5 +56,4 @@ end
   assert_equal dlq_message.headers.fetch('source_offset'), i.to_s
   assert_equal dlq_message.headers.fetch('source_attempts'), '1'
   assert_equal dlq_message.headers.fetch('source_consumer_group'), cg
-  assert_equal dlq_message.headers.fetch('source_key'), i.to_s
 end

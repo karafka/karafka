@@ -4,7 +4,7 @@ PATH
     karafka (2.5.0.beta2)
       base64 (~> 0.2)
       karafka-core (>= 2.5.0, < 2.6.0)
-      karafka-rdkafka (>= 0.19.2)
+      karafka-rdkafka (>= 0.19.5)
       waterdrop (>= 2.8.3, < 3.0.0)
       zeitwerk (~> 2.3)
 
@@ -62,7 +62,7 @@ GEM
     karafka-core (2.5.1)
       karafka-rdkafka (>= 0.19.2, < 0.21.0)
       logger (>= 1.6.0)
-    karafka-rdkafka (0.19.4)
+    karafka-rdkafka (0.19.5)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
@@ -81,7 +81,7 @@ GEM
     ostruct (0.6.1)
     raabro (1.4.0)
     rack (3.1.15)
-    rake (13.2.1)
+    rake (13.3.0)
     roda (3.92.0)
       rack
     rspec (3.13.1)
