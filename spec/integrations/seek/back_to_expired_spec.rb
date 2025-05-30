@@ -37,7 +37,7 @@ end
   produce_many(DT.topic, Array.new(10) { nil }, key: 'test')
 end
 
-sleep(5)
+sleep(10)
 
 start_karafka_and_wait_until do
   DT[:seeks].count { |seek| seek == -1 } >= 1
