@@ -1,6 +1,8 @@
 # Karafka Framework Changelog
 
 ## 2.5.0 (Unreleased)
+- **[Breaking]** Change how consistency of DLQ dispatches works in Pro (`partition_key` vs. direct partition id mapping).
+- **[Breaking]** Remove the headers `source_key` from the Pro DLQ dispatched messages as the original key is now fully preserved.
 - **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.
 - **[Breaking]** Rename scheduled jobs topics names in their config (Pro).
 - **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
@@ -38,12 +40,13 @@
 - [Enhancement] Use independent keys for different states of reporting in scheduled messages.
 - [Enhancement] Enrich scheduled messages state reporter with debug data.
 - [Enhancement] Introduce a new state called `stopped` to the scheduled messages.
+- [Enhancement] Do not overwrite the `key` in the Pro DLQ dispatched messages for routing reasons.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
 - [Refactor] Improve CI specs parallelization.
 - [Maintenance] Lower the `Karafka::Admin` `poll_timeout` to 50 ms to improve responsiveness of admin operations.
-- [Maintenance] Require `karafka-rdkafka` `>=` `0.19.2` due to usage of `#rd_kafka_global_init`, KIP-82 and the new producer caching engine.
+- [Maintenance] Require `karafka-rdkafka` `>=` `0.19.5` due to usage of `#rd_kafka_global_init`, KIP-82, new producer caching engine and improvements to the `partition_key` assignments.
 - [Maintenance] Add Deimos routing patch into integration suite not to break it in the future.
 - [Maintenance] Remove Rails `7.0` specs due to upcoming EOL.
 - [Fix] Fix Recurring Tasks and Scheduled Messages not working with Swarm (using closed producer).

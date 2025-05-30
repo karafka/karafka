@@ -4,7 +4,7 @@
 # See LICENSE for details.
 
 # When using single DLQ to handle errors from multiple topics, the dispatched message key should
-# match the partition of origin
+# be preserved and consistent piping should be used.
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 
@@ -42,8 +42,8 @@ end
 
 100.times do |i|
   elements = DT.uuids(10)
-  produce_many(DT.topics[0], elements, partition: i)
-  produce_many(DT.topics[1], elements, partition: i)
+  produce_many(DT.topics[0], elements, partition: i, key: i.to_s)
+  produce_many(DT.topics[1], elements, partition: i, key: i.to_s)
 end
 
 start_karafka_and_wait_until do

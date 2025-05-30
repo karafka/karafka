@@ -149,14 +149,14 @@ module Karafka
 
               dlq_message = {
                 topic: @_dispatch_to_dlq_topic || topic.dead_letter_queue.topic,
-                key: source_partition,
+                key: skippable_message.raw_key,
+                partition_key: source_partition,
                 payload: skippable_message.raw_payload,
                 headers: skippable_message.raw_headers.merge(
                   'source_topic' => topic.name,
                   'source_partition' => source_partition,
                   'source_offset' => skippable_message.offset.to_s,
                   'source_consumer_group' => topic.consumer_group.id,
-                  'source_key' => skippable_message.raw_key.to_s,
                   'source_attempts' => attempt.to_s
                 )
               }
