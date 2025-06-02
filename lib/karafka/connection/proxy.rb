@@ -44,7 +44,7 @@ module Karafka
       # clusters can handle our requests.
       #
       # @param topic [String] topic name
-      # @param partition [Partition]
+      # @param partition [Integer] partition number
       # @return [Array<Integer, Integer>] watermark offsets
       def query_watermark_offsets(topic, partition)
         l_config = @config.query_watermark_offsets
