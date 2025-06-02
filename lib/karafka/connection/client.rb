@@ -430,7 +430,7 @@ module Karafka
       # Reads watermark offsets for given topic
       #
       # @param topic [String] topic name
-      # @param partition [Partition]
+      # @param partition [Integer] partition number
       # @return [Array<Integer, Integer>] watermark offsets (low, high)
       def query_watermark_offsets(topic, partition)
         @wrapped_kafka.query_watermark_offsets(topic, partition)
