@@ -427,6 +427,15 @@ module Karafka
         @wrapped_kafka.committed(tpl)
       end
 
+      # Reads watermark offsets for given topic
+      #
+      # @param topic [String] topic name
+      # @param partition [Partition]
+      # @return [Array<Integer, Integer>] watermark offsets (low, high)
+      def query_watermark_offsets(topic, partition)
+        @wrapped_kafka.query_watermark_offsets(topic, partition)
+      end
+
       private
 
       # When we cannot store an offset, it means we no longer own the partition

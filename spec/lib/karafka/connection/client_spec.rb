@@ -61,4 +61,27 @@ RSpec.describe_current do
       expect(kafka).to have_received(:assignment_lost?)
     end
   end
+
+  describe '#query_watermark_offsets' do
+    let(:topic) { 'test_topic' }
+    let(:partition) { 0 }
+    let(:watermark_offsets) { [100, 200] }
+    let(:kafka) { instance_double(Rdkafka::Consumer) }
+
+    before do
+      allow(client).to receive(:build_consumer).and_return(kafka)
+      allow(kafka).to receive_messages(
+        start: nil,
+        name: 'test-consumer',
+        query_watermark_offsets: watermark_offsets
+      )
+
+      client.send(:kafka)
+    end
+
+    it 'expect to delegate to wrapped kafka' do
+      result = client.query_watermark_offsets(topic, partition)
+      expect(result).to eq(watermark_offsets)
+    end
+  end
 end
