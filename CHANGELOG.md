@@ -41,6 +41,7 @@
 - [Enhancement] Enrich scheduled messages state reporter with debug data.
 - [Enhancement] Introduce a new state called `stopped` to the scheduled messages.
 - [Enhancement] Do not overwrite the `key` in the Pro DLQ dispatched messages for routing reasons.
+- [Enhancement] Introduce `errors_tracker.trace_id` for distributed error details correlation with the Web UI. 
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.

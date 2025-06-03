@@ -157,7 +157,8 @@ module Karafka
                   'source_partition' => source_partition,
                   'source_offset' => skippable_message.offset.to_s,
                   'source_consumer_group' => topic.consumer_group.id,
-                  'source_attempts' => attempt.to_s
+                  'source_attempts' => attempt.to_s,
+                  'source_trace_id' => errors_tracker.trace_id
                 )
               }
 

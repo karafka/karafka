@@ -22,6 +22,9 @@ module Karafka
           # @return [Hash]
           attr_reader :counts
 
+          # @return [String]
+          attr_reader :trace_id
+
           # Max errors we keep in memory.
           # We do not want to keep more because for DLQ-less this would cause memory-leaks.
           # We do however count per class for granular error counting
@@ -41,6 +44,7 @@ module Karafka
             @topic = topic
             @partition = partition
             @limit = limit
+            @trace_id = SecureRandom.uuid
           end
 
           # Clears all the errors
@@ -54,6 +58,7 @@ module Karafka
             @errors.shift if @errors.size >= @limit
             @errors << error
             @counts[error.class] += 1
+            @trace_id = SecureRandom.uuid
           end
 
           # @return [Boolean] is the error tracker empty
