@@ -65,4 +65,62 @@ RSpec.describe_current do
       expect(tracker.size).to eq(205)
     end
   end
+
+  describe '#trace_id' do
+    it 'generates a unique trace_id on initialization' do
+      expect(tracker.trace_id).to be_a(String)
+      expect(tracker.trace_id).to match(
+        /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/
+      )
+    end
+
+    it 'generates different trace_ids for different tracker instances' do
+      tracker1 = described_class.new(topic, 0)
+      tracker2 = described_class.new(topic, 1)
+
+      expect(tracker1.trace_id).not_to eq(tracker2.trace_id)
+    end
+
+    it 'updates trace_id when an error is added' do
+      original_trace_id = tracker.trace_id
+
+      tracker << StandardError.new('test error')
+
+      expect(tracker.trace_id).not_to eq(original_trace_id)
+      expect(tracker.trace_id).to be_a(String)
+    end
+
+    it 'generates a new trace_id for each error added' do
+      tracker << StandardError.new('first error')
+      first_trace_id = tracker.trace_id
+
+      tracker << StandardError.new('second error')
+      second_trace_id = tracker.trace_id
+
+      expect(first_trace_id).not_to eq(second_trace_id)
+    end
+
+    it 'maintains trace_id when accessing other methods' do
+      tracker << StandardError.new('test error')
+      trace_id_before = tracker.trace_id
+
+      # Access various methods that shouldn't change trace_id
+      tracker.size
+      tracker.empty?
+      tracker.last
+      tracker.all
+      tracker.each { |_| }
+
+      expect(tracker.trace_id).to eq(trace_id_before)
+    end
+
+    it 'does not change trace_id when clearing errors' do
+      tracker << StandardError.new('test error')
+      trace_id_before_clear = tracker.trace_id
+
+      tracker.clear
+
+      expect(tracker.trace_id).to eq(trace_id_before_clear)
+    end
+  end
 end
