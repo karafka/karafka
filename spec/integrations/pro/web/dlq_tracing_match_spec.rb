@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# Karafka should be able to consume and web tracking should not interfere
+# This code is part of Karafka Pro, a commercial component not licensed under LGPL.
+# See LICENSE for details.
+
+# Error references should match the DLQ traces
 
 setup_karafka(allow_errors: %w[consumer.consume.error])
 setup_web
