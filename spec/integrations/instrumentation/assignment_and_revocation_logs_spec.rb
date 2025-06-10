@@ -40,5 +40,5 @@ str = strio.string
 
 group_prefix = "Group #{DT.consumer_group} rebalance"
 
-assert str.include?("#{group_prefix}: Partition(s) 0, 1, 2 of #{DT.topic} assigned")
-assert str.include?("#{group_prefix}: Partition(s) 0, 1, 2 of #{DT.topic} revoked")
+assert str.include?("#{group_prefix}: #{DT.topic}-[0,1,2] assigned")
+assert str.include?("#{group_prefix}: #{DT.topic}-[0,1,2] revoked")
