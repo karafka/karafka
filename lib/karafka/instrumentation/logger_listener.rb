@@ -76,7 +76,7 @@ module Karafka
         consumer = job.executor.topic.consumer
         topic = job.executor.topic.name
         partition = job.executor.partition
-        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic}/#{partition} started"
+        info "[#{job.id}] #{job_type} job for #{consumer} on #{topic}-#{partition} started"
       end
 
       # Prints info about the fact that a given job has finished
@@ -91,7 +91,7 @@ module Karafka
         partition = job.executor.partition
         info <<~MSG.tr("\n", ' ').strip!
           [#{job.id}] #{job_type} job for #{consumer}
-          on #{topic}/#{partition} finished in #{time} ms
+          on #{topic}-#{partition} finished in #{time} ms
         MSG
       end
 
@@ -108,7 +108,7 @@ module Karafka
 
         info <<~MSG.tr("\n", ' ').strip!
           [#{client.id}]
-          Pausing on topic #{topic}/#{partition}
+          Pausing on topic #{topic}-#{partition}
           on #{offset ? "offset #{offset}" : 'the consecutive offset'}
         MSG
       end
@@ -122,7 +122,7 @@ module Karafka
         client = event[:caller]
 
         info <<~MSG.tr("\n", ' ').strip!
-          [#{client.id}] Resuming on topic #{topic}/#{partition}
+          [#{client.id}] Resuming on topic #{topic}-#{partition}
         MSG
       end
 
@@ -138,7 +138,7 @@ module Karafka
 
         info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Retrying of #{consumer.class} after #{timeout} ms
-          on topic #{topic}/#{partition} from offset #{offset}
+          on topic #{topic}-#{partition} from offset #{offset}
         MSG
       end
 
@@ -153,7 +153,7 @@ module Karafka
 
         info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Seeking from #{consumer.class}
-          on topic #{topic}/#{partition} to offset #{seek_offset}
+          on topic #{topic}-#{partition} to offset #{seek_offset}
         MSG
       end
 
@@ -233,7 +233,7 @@ module Karafka
           info "#{group_prefix}: No partitions revoked"
         else
           revoked_partitions.each do |topic, partitions|
-            info "#{group_prefix}: Partition(s) #{partitions.join(', ')} of #{topic} revoked"
+            info "#{group_prefix}: #{topic}-[#{partitions.join(',')}] revoked"
           end
         end
       end
@@ -251,7 +251,7 @@ module Karafka
           info "#{group_prefix}: No partitions assigned"
         else
           assigned_partitions.each do |topic, partitions|
-            info "#{group_prefix}: Partition(s) #{partitions.join(', ')} of #{topic} assigned"
+            info "#{group_prefix}: #{topic}-[#{partitions.join(',')}] assigned"
           end
         end
       end
@@ -269,7 +269,7 @@ module Karafka
 
         info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Dispatched message #{offset}
-          from #{topic}/#{partition}
+          from #{topic}-#{partition}
           to DLQ topic: #{dlq_topic}
         MSG
       end
@@ -288,7 +288,7 @@ module Karafka
         info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Throttled and will resume
           from message #{offset}
-          on #{topic}/#{partition}
+          on #{topic}-#{partition}
         MSG
       end
 
@@ -303,7 +303,7 @@ module Karafka
 
         info <<~MSG.tr("\n", ' ').strip!
           [#{consumer.id}] Post-filtering seeking to message #{offset}
-          on #{topic}/#{partition}
+          on #{topic}-#{partition}
         MSG
       end
 

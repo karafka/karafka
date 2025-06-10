@@ -6,6 +6,7 @@
 - **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.
 - **[Breaking]** Rename scheduled jobs topics names in their config (Pro).
 - **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
+- [Enhancement] Normalize topic + partition logs format.
 - [Enhancement] Support KIP-82 (header values of arrays).
 - [Enhancement] Enhance errors tracker with `#counts` that contains per-error class specific counters for granular flow handling.
 - [Enhancement] Provide explicit `Karafka::Admin.copy_consumer_group` API.
