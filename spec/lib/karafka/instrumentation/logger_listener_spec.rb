@@ -103,7 +103,7 @@ RSpec.describe_current do
 
       let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
       let(:message) do
-        "[#{client.id}] Pausing on topic Topic/0 on offset 12"
+        "[#{client.id}] Pausing on topic Topic-0 on offset 12"
       end
       let(:payload) do
         {
@@ -122,7 +122,7 @@ RSpec.describe_current do
 
       let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
       let(:message) do
-        "[#{client.id}] Pausing on topic Topic/0 on the consecutive offset"
+        "[#{client.id}] Pausing on topic Topic-0 on the consecutive offset"
       end
       let(:payload) do
         {
@@ -142,7 +142,7 @@ RSpec.describe_current do
 
     let(:client) { instance_double(Karafka::Connection::Client, id: SecureRandom.hex(6)) }
     let(:message) do
-      "[#{client.id}] Resuming on topic Topic/0"
+      "[#{client.id}] Resuming on topic Topic-0"
     end
     let(:payload) do
       {
@@ -161,7 +161,7 @@ RSpec.describe_current do
     let(:consumer) { Class.new(Karafka::BaseConsumer).new }
     let(:message) do
       <<~MSG.tr("\n", ' ').strip
-        [#{consumer.id}] Retrying of #{consumer.class} after 100 ms on topic Topic/0 from offset 12
+        [#{consumer.id}] Retrying of #{consumer.class} after 100 ms on topic Topic-0 from offset 12
       MSG
     end
     let(:payload) do
@@ -185,7 +185,7 @@ RSpec.describe_current do
     let(:message) do
       <<~MSG.tr("\n", ' ').strip
         [#{consumer.id}] Seeking from #{consumer.class}
-        on topic Topic/0 to offset #{kafka_message.offset}
+        on topic Topic-0 to offset #{kafka_message.offset}
       MSG
     end
     let(:payload) do
@@ -276,7 +276,7 @@ RSpec.describe_current do
     let(:coordinator) { create(:processing_coordinator, topic: topic) }
     let(:topic) { build(:routing_topic, name: 'test') }
     let(:message) do
-      "[#{consumer.id}] Dispatched message #{kafka_message.offset} from test/0 to DLQ topic: dlq"
+      "[#{consumer.id}] Dispatched message #{kafka_message.offset} from test-0 to DLQ topic: dlq"
     end
     let(:consumer) do
       instance = Class.new(Karafka::BaseConsumer).new
@@ -297,7 +297,7 @@ RSpec.describe_current do
     let(:topic) { build(:routing_topic, name: 'test') }
     let(:message) do
       resume_offset = kafka_message.offset
-      "[#{consumer.id}] Throttled and will resume from message #{resume_offset} on test/0"
+      "[#{consumer.id}] Throttled and will resume from message #{resume_offset} on test-0"
     end
     let(:consumer) do
       instance = Class.new(Karafka::BaseConsumer).new
@@ -318,7 +318,7 @@ RSpec.describe_current do
     let(:topic) { build(:routing_topic, name: 'test') }
     let(:message) do
       seek_offset = kafka_message.offset
-      "[#{consumer.id}] Post-filtering seeking to message #{seek_offset} on test/0"
+      "[#{consumer.id}] Post-filtering seeking to message #{seek_offset} on test-0"
     end
     let(:consumer) do
       instance = Class.new(Karafka::BaseConsumer).new
@@ -617,10 +617,10 @@ RSpec.describe_current do
       it 'expect logger to log revoked partitions for each topic' do
         expect(Karafka.logger)
           .to have_received(:info)
-          .with("[#{client_id}] #{group_prefix}: Partition(s) 0, 1 of topic1 revoked")
+          .with("[#{client_id}] #{group_prefix}: topic1-[0,1] revoked")
         expect(Karafka.logger)
           .to have_received(:info)
-          .with("[#{client_id}] #{group_prefix}: Partition(s) 0 of topic2 revoked")
+          .with("[#{client_id}] #{group_prefix}: topic2-[0] revoked")
       end
     end
   end
@@ -662,11 +662,11 @@ RSpec.describe_current do
       it 'expect logger to log assigned partitions for each topic' do
         expect(Karafka.logger)
           .to have_received(:info)
-          .with("[#{client_id}] #{group_prefix}: Partition(s) 0, 1 of topic1 assigned")
+          .with("[#{client_id}] #{group_prefix}: topic1-[0,1] assigned")
 
         expect(Karafka.logger)
           .to have_received(:info)
-          .with("[#{client_id}] #{group_prefix}: Partition(s) 0 of topic2 assigned")
+          .with("[#{client_id}] #{group_prefix}: topic2-[0] assigned")
       end
     end
   end
