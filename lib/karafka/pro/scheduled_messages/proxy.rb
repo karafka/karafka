@@ -60,7 +60,11 @@ module Karafka
             # We need to ensure that the message we want to proxy is fully legit. Otherwise, since
             # we envelope details like target topic, we could end up having incorrect data to
             # schedule
-            MSG_CONTRACT.validate!(message, WaterDrop::Errors::MessageInvalidError)
+            MSG_CONTRACT.validate!(
+              message,
+              WaterDrop::Errors::MessageInvalidError,
+              scope: %w[scheduled_messages message]
+            )
 
             headers = (message[:headers] || {}).merge(
               'schedule_schema_version' => ScheduledMessages::SCHEMA_VERSION,
@@ -166,9 +170,17 @@ module Karafka
           # complies with our requirements
           # @param proxy_message [Hash] our message envelope
           def validate!(proxy_message)
-            POST_CONTRACT.validate!(proxy_message)
+            POST_CONTRACT.validate!(
+              proxy_message,
+              scope: %w[scheduled_messages message]
+            )
+
             # After proxy specific validations we also ensure, that the final form is correct
-            MSG_CONTRACT.validate!(proxy_message, WaterDrop::Errors::MessageInvalidError)
+            MSG_CONTRACT.validate!(
+              proxy_message,
+              WaterDrop::Errors::MessageInvalidError,
+              scope: %w[scheduled_messages message]
+            )
           end
         end
       end

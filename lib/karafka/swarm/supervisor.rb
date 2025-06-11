@@ -42,7 +42,10 @@ module Karafka
       # Creates needed number of forks, installs signals and starts supervision
       def run
         # Validate the CLI provided options the same way as we do for the regular server
-        cli_contract.validate!(activity_manager.to_h)
+        cli_contract.validate!(
+          activity_manager.to_h,
+          scope: %w[swarm cli]
+        )
 
         # Close producer just in case. While it should not be used, we do not want even a
         # theoretical case since librdkafka is not thread-safe.

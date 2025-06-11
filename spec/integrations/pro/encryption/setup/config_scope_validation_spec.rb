@@ -24,4 +24,7 @@ end
 
 assert guarded
 
-assert_equal error.message, { 'encryption.public_key': 'is not a valid public RSA key' }.to_s
+assert_equal(
+  error.message,
+  { 'config.encryption.public_key': 'is not a valid public RSA key' }.to_s
+)

@@ -29,7 +29,10 @@ module Karafka
           @schedule.instance_exec(&block)
 
           @schedule.each do |task|
-            Contracts::Task.new.validate!(task.to_h)
+            Contracts::Task.new.validate!(
+              task.to_h,
+              scope: ['recurring_tasks', task.id]
+            )
           end
 
           @schedule
@@ -59,7 +62,10 @@ module Karafka
 
         # @param config [Karafka::Core::Configurable::Node] root node config
         def post_setup(config)
-          RecurringTasks::Contracts::Config.new.validate!(config.to_h)
+          RecurringTasks::Contracts::Config.new.validate!(
+            config.to_h,
+            scope: %w[config]
+          )
 
           # Published after task is successfully executed
           Karafka.monitor.notifications_bus.register_event('recurring_tasks.task.executed')

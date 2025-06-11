@@ -51,7 +51,10 @@ module Karafka
         # embedded
         # We cannot validate this during the start because config needs to be populated and routes
         # need to be defined.
-        cli_contract.validate!(activity_manager.to_h)
+        cli_contract.validate!(
+          activity_manager.to_h,
+          scope: %w[cli]
+        )
 
         # We clear as we do not want parent handlers in case of working from fork
         process.clear

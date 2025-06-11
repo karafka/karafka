@@ -4,6 +4,7 @@
 # We do it after the routing, so any overwrites are also handled
 
 guarded = []
+errors = []
 
 begin
   setup_karafka do |config|
@@ -17,7 +18,8 @@ begin
       end
     end
   end
-rescue Karafka::Errors::InvalidConfigurationError
+rescue Karafka::Errors::InvalidConfigurationError => e
+  errors << e
   guarded << true
 end
 
@@ -25,8 +27,11 @@ begin
   setup_karafka do |config|
     config.kafka = { 'message.max.bytes' => 0, 'message.copy.max.bytes' => -1 }
   end
-rescue Karafka::Errors::InvalidConfigurationError
+rescue Karafka::Errors::InvalidConfigurationError => e
+  errors << e
   guarded << true
 end
 
+assert errors.first.message.include?('routes.usual.regular.kafka')
+assert errors.last.message.include?('config.kafka.message.max.bytes')
 assert_equal [true, true], guarded

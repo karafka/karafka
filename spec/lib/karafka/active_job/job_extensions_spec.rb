@@ -15,7 +15,7 @@ RSpec.describe_current do
     before do
       allow(Karafka::App.config.internal.active_job.job_options_contract)
         .to receive(:validate!)
-        .with(args)
+        .with(args, scope: %w[active_job])
     end
 
     it 'expect to run the contract and assing' do
