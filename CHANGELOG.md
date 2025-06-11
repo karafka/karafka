@@ -5,6 +5,7 @@
 - **[Breaking]** Remove the headers `source_key` from the Pro DLQ dispatched messages as the original key is now fully preserved.
 - **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.
 - **[Breaking]** Rename scheduled jobs topics names in their config (Pro).
+- **[Breaking]** Change K8s listener response from `204` to `200` and include JSON body with reasons.
 - **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
 - [Enhancement] Normalize topic + partition logs format.
 - [Enhancement] Support KIP-82 (header values of arrays).

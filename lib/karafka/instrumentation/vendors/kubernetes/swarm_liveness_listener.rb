@@ -47,6 +47,15 @@ module Karafka
           def healthy?
             (monotonic_now - @controlling) < @controlling_ttl
           end
+
+          # @return [Hash] response body status
+          def status_body
+            super.merge!(
+              errors: {
+                controlling_ttl_exceeded: !healthy?
+              }
+            )
+          end
         end
       end
     end

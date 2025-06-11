@@ -37,6 +37,7 @@ Thread.new do
     uri = URI.parse('http://127.0.0.1:9001/')
     response = Net::HTTP.get_response(uri)
     DT[:probing] << response.code
+    DT[:bodies] << response.body
   end
 end
 
@@ -61,5 +62,15 @@ start_karafka_and_wait_until do
   DT[:probing].uniq.size >= 2
 end
 
-assert DT[:probing].include?('204')
+assert DT[:probing].include?('200')
 assert DT[:probing].include?('500')
+
+last = JSON.parse(DT[:bodies].last)
+
+assert_equal 'unhealthy', last['status']
+assert last.key?('timestamp')
+assert_equal 9001, last['port']
+assert_equal Process.pid, last['process_id']
+assert_equal false, last['errors']['polling_ttl_exceeded']
+assert_equal true, last['errors']['consumption_ttl_exceeded']
+assert_equal false, last['errors']['unrecoverable']
