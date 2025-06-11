@@ -21,7 +21,10 @@ module Karafka
 
         # Make sure, that karafka options that someone wants to use are valid before assigning
         # them
-        App.config.internal.active_job.job_options_contract.validate!(new_options)
+        App.config.internal.active_job.job_options_contract.validate!(
+          new_options,
+          scope: %w[active_job]
+        )
 
         # We need to modify this hash because otherwise we would modify parent hash.
         self._karafka_options = _karafka_options.dup

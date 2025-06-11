@@ -22,7 +22,10 @@ module Karafka
 
         # @param config [Karafka::Core::Configurable::Node] root node config
         def post_setup(config)
-          Encryption::Contracts::Config.new.validate!(config.to_h)
+          Encryption::Contracts::Config.new.validate!(
+            config.to_h,
+            scope: %w[config]
+          )
 
           # Don't inject extra components if encryption is not active
           return unless config.encryption.active

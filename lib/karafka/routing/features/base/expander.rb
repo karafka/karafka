@@ -38,13 +38,19 @@ module Karafka
 
                 each do |consumer_group|
                   if scope::Contracts.const_defined?('ConsumerGroup', false)
-                    scope::Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
+                    scope::Contracts::ConsumerGroup.new.validate!(
+                      consumer_group.to_h,
+                      scope: ['routes', consumer_group.name]
+                    )
                   end
 
                   next unless scope::Contracts.const_defined?('Topic', false)
 
                   consumer_group.topics.each do |topic|
-                    scope::Contracts::Topic.new.validate!(topic.to_h)
+                    scope::Contracts::Topic.new.validate!(
+                      topic.to_h,
+                      scope: ['routes', consumer_group.name, topic.name]
+                    )
                   end
                 end
 

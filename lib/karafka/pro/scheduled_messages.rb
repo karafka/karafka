@@ -51,7 +51,10 @@ module Karafka
 
         # @param config [Karafka::Core::Configurable::Node] root node config
         def post_setup(config)
-          RecurringTasks::Contracts::Config.new.validate!(config.to_h)
+          ScheduledMessages::Contracts::Config.new.validate!(
+            config.to_h,
+            scope: %w[config]
+          )
         end
 
         # Basically since we may have custom producers configured that are not the same as the

@@ -352,7 +352,10 @@ module Karafka
 
           configure(&block)
 
-          Contracts::Config.new.validate!(config.to_h)
+          Contracts::Config.new.validate!(
+            config.to_h,
+            scope: %w[config]
+          )
 
           configure_components
 

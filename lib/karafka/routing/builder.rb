@@ -50,15 +50,24 @@ module Karafka
 
           # Ensures high-level routing details consistency
           # Contains checks that require knowledge about all the consumer groups to operate
-          Contracts::Routing.new.validate!(map(&:to_h))
+          Contracts::Routing.new.validate!(
+            map(&:to_h),
+            scope: %w[routes]
+          )
 
           each do |consumer_group|
             # Validate consumer group settings
-            Contracts::ConsumerGroup.new.validate!(consumer_group.to_h)
+            Contracts::ConsumerGroup.new.validate!(
+              consumer_group.to_h,
+              scope: ['routes', consumer_group.name]
+            )
 
             # and then its topics settings
             consumer_group.topics.each do |topic|
-              Contracts::Topic.new.validate!(topic.to_h)
+              Contracts::Topic.new.validate!(
+                topic.to_h,
+                scope: ['routes', consumer_group.name, topic.name]
+              )
             end
 
             # Initialize subscription groups after all the routing is done

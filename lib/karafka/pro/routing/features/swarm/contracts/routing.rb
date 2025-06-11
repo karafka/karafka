@@ -28,7 +28,8 @@ module Karafka
               # Validates that each node has at least one assignment.
               #
               # @param builder [Karafka::Routing::Builder]
-              def validate!(builder)
+              # @param scope [Array<String>]
+              def validate!(builder, scope: [])
                 nodes_setup = Hash.new do |h, node_id|
                   h[node_id] = { active: false, node_id: node_id }
                 end
@@ -49,7 +50,7 @@ module Karafka
                 end
 
                 nodes_setup.each_value do |details|
-                  super(details)
+                  super(details, scope: scope)
                 end
               end
 
