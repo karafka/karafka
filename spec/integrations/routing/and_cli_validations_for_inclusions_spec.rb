@@ -6,7 +6,6 @@
 setup_karafka
 
 guarded = []
-error_messages = []
 
 begin
   draw_routes(create_topics: false) do
