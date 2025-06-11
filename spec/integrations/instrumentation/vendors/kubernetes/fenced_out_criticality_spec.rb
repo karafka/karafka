@@ -57,8 +57,8 @@ Thread.new do
     sleep(1)
     uri = URI.parse('http://127.0.0.1:9013/')
     response = Net::HTTP.get_response(uri)
-    puts "Health check response: #{response.code}"
     DT[:probing] << response.code
+    DT[:bodies] << response.body
   end
 end
 
@@ -71,5 +71,15 @@ Process.wait(pid)
 
 fenced.join
 
-assert DT[:probing].include?('204')
+assert DT[:probing].include?('200')
 assert DT[:probing].include?('500')
+
+last = JSON.parse(DT[:bodies].last)
+
+assert_equal 'unhealthy', last['status']
+assert last.key?('timestamp')
+assert_equal 9013, last['port']
+assert_equal Process.pid, last['process_id']
+assert_equal false, last['errors']['polling_ttl_exceeded']
+assert_equal false, last['errors']['consumption_ttl_exceeded']
+assert_equal 'fatal', last['errors']['unrecoverable']

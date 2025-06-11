@@ -44,6 +44,10 @@ Thread.new do
     response = client.request(req)
 
     DT[:probing] << response.code
+
+    next if response.code == '200'
+
+    DT[:bodies] << response.body
   end
 end
 
@@ -58,6 +62,16 @@ start_karafka_and_wait_until do
   DT.key?(0)
 end
 
-assert DT[:probing].include?('204')
+assert DT[:probing].include?('200')
 # 500 should happen as we tuned it aggressively and it should react to "hanging" tick
 assert DT[:probing].include?('500')
+
+last = JSON.parse(DT[:bodies].last)
+
+assert_equal 'unhealthy', last['status']
+assert last.key?('timestamp')
+assert_equal 9006, last['port']
+assert_equal Process.pid, last['process_id']
+assert_equal false, last['errors']['polling_ttl_exceeded']
+assert_equal true, last['errors']['consumption_ttl_exceeded']
+assert_equal false, last['errors']['unrecoverable']

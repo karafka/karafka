@@ -53,7 +53,7 @@ module Karafka
             consuming_ttl: 5 * 60 * 1_000,
             polling_ttl: 5 * 60 * 1_000
           )
-            # If this is set to true, it indicates unrecoverable error like fencing
+            # If this is set to a symbol, it indicates unrecoverable error like fencing
             # While fencing can be partial (for one of the SGs), we still should consider this
             # as an undesired state for the whole process because it halts processing in a
             # non-recoverable manner forever
@@ -116,7 +116,7 @@ module Karafka
             # We mark as unrecoverable only on certain errors that will not be fixed by retrying
             return unless UNRECOVERABLE_RDKAFKA_ERRORS.include?(error.code)
 
-            @unrecoverable = true
+            @unrecoverable = error.code
           end
 
           # Deregister the polling tracker for given listener
@@ -142,16 +142,28 @@ module Karafka
           # Did we exceed any of the ttls
           # @return [String] 204 string if ok, 500 otherwise
           def healthy?
-            time = monotonic_now
-
             return false if @unrecoverable
-            return false if @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
-            return false if @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
+            return false if polling_ttl_exceeded?
+            return false if consuming_ttl_exceeded?
 
             true
           end
 
           private
+
+          # @return [Boolean] true if the consumer exceeded the polling ttl
+          def polling_ttl_exceeded?
+            time = monotonic_now
+
+            @pollings.values.any? { |tick| (time - tick) > @polling_ttl }
+          end
+
+          # @return [Boolean] true if the consumer exceeded the consuming ttl
+          def consuming_ttl_exceeded?
+            time = monotonic_now
+
+            @consumptions.values.any? { |tick| (time - tick) > @consuming_ttl }
+          end
 
           # Wraps the logic with a mutex
           # @param block [Proc] code we want to run in mutex
@@ -190,6 +202,17 @@ module Karafka
             synchronize do
               @consumptions.delete(thread_id)
             end
+          end
+
+          # @return [Hash] response body status
+          def status_body
+            super.merge!(
+              errors: {
+                polling_ttl_exceeded: polling_ttl_exceeded?,
+                consumption_ttl_exceeded: consuming_ttl_exceeded?,
+                unrecoverable: @unrecoverable
+              }
+            )
           end
         end
       end

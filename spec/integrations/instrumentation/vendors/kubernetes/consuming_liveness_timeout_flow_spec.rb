@@ -35,6 +35,7 @@ Thread.new do
     response = client.request(req)
 
     DT[:probing] << response.code
+    DT[:bodies] << response.body
 
     sleep(0.1)
   end
@@ -48,19 +49,29 @@ start_karafka_and_wait_until do
   DT.key?(0)
 end
 
-assert DT[:probing].include?('204')
+assert DT[:probing].include?('200')
 assert DT[:probing].include?('500')
 
 responses = raw_flows.split("\n").select { |line| line.start_with?('->') }
 
-assert_equal responses[0], '-> "HTTP/1.1 204 No Content\r\n"', responses[0]
-assert_equal responses[1], '-> "Content-Type: text/plain\r\n"', responses[1]
-assert_equal responses[2], '-> "\r\n"', responses[2]
+assert_equal responses[0], '-> "HTTP/1.1 200 OK\r\n"', responses[0]
+assert_equal responses[1], '-> "Content-Type: application/json\r\n"', responses[1]
+assert_equal responses[3], '-> "\r\n"', responses[3]
 
 position = responses.index { |line| line.include?(' 500 ') }
 
 resp500 = responses[position..]
 
 assert_equal resp500[0], '-> "HTTP/1.1 500 Internal Server Error\r\n"', resp500[0]
-assert_equal resp500[1], '-> "Content-Type: text/plain\r\n"', resp500[1]
-assert_equal resp500[2], '-> "\r\n"', resp500[2]
+assert_equal resp500[1], '-> "Content-Type: application/json\r\n"', resp500[1]
+assert_equal resp500[3], '-> "\r\n"', resp500[3]
+
+last = JSON.parse(DT[:bodies].last)
+
+assert_equal 'unhealthy', last['status']
+assert last.key?('timestamp')
+assert_equal 9002, last['port']
+assert_equal Process.pid, last['process_id']
+assert_equal false, last['errors']['polling_ttl_exceeded']
+assert_equal true, last['errors']['consumption_ttl_exceeded']
+assert_equal false, last['errors']['unrecoverable']
