@@ -53,7 +53,7 @@ module Karafka
             consuming_ttl: 5 * 60 * 1_000,
             polling_ttl: 5 * 60 * 1_000
           )
-            # If this is set to symbol, it indicates unrecoverable error like fencing
+            # If this is set to a symbol, it indicates unrecoverable error like fencing
             # While fencing can be partial (for one of the SGs), we still should consider this
             # as an undesired state for the whole process because it halts processing in a
             # non-recoverable manner forever
