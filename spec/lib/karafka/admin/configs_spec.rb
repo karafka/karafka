@@ -15,13 +15,13 @@ RSpec.describe_current do
         expect(result.first.type).to eq(:broker)
         expect(result.first.name).to eq('1')
         expect(result.first.configs.size).to be > 50
-        expect(result.first.configs.last.name).to eq('zookeeper.ssl.truststore.type')
-        expect(result.first.configs.last.value).to be_nil
+        expect(result.first.configs.last.name).to eq('unclean.leader.election.enable')
+        expect(result.first.configs.last.value).to eq('false')
         expect(result.first.configs.last.default?).to be(true)
-        expect(result.first.configs.last.read_only?).to be(true)
+        expect(result.first.configs.last.read_only?).to be(false)
         expect(result.first.configs.last.sensitive?).to be(false)
         expect(result.first.configs.last.synonym?).to be(false)
-        expect(result.first.configs.last.synonyms).to be_empty
+        expect(result.first.configs.last.synonyms).not_to be_empty
       end
     end
 
