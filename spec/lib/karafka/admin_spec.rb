@@ -23,6 +23,15 @@ RSpec.describe_current do
 
       it { expect(topics).to include(name) }
     end
+
+    # This spec is slow. We test such case to make sure that it does not timeout. It used to
+    # timeout because of a bug that would make Karafka wait not long enough and would overload
+    # Kafka with queries.
+    context 'when creating topic with many partition' do
+      before { described_class.create_topic(name, 500, 1) }
+
+      it { expect(topics).to include(name) }
+    end
   end
 
   describe '#delete_topic and #cluster_info' do

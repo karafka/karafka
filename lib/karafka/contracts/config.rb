@@ -53,7 +53,8 @@ module Karafka
         required(:kafka) { |val| val.is_a?(Hash) }
         required(:group_id) { |val| val.is_a?(String) && Contracts::TOPIC_REGEXP.match?(val) }
         required(:max_wait_time) { |val| val.is_a?(Integer) && val.positive? }
-        required(:max_attempts) { |val| val.is_a?(Integer) && val.positive? }
+        required(:retry_backoff) { |val| val.is_a?(Integer) && val >= 100 }
+        required(:max_retries_duration) { |val| val.is_a?(Integer) && val >= 1_000 }
       end
 
       # We validate internals just to be sure, that they are present and working

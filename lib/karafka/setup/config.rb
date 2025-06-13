@@ -133,9 +133,14 @@ module Karafka
         # failed using external factor.
         setting :max_wait_time, default: 1_000
 
-        # How many times should be try. 1 000 ms x 60 => 60 seconds wait in total and then we give
-        # up on pending operations
-        setting :max_attempts, default: 60
+        # How long should we wait on admin operation retrying before giving up and raising an
+        # error that result is not visible
+        setting :max_retries_duration, default: 60_000
+
+        # In case of fast-finished async work, this `retry_backoff` help us not re-query Kafka
+        # too fast after previous call to check the async operation results. Basically prevents
+        # us from spamming metadata requests to Kafka in a loop
+        setting :retry_backoff, default: 500
 
         # option poll_timeout [Integer] time in ms
         # How long should a poll wait before yielding on no results (rdkafka-ruby setting)

@@ -32,7 +32,8 @@ RSpec.describe_current do
         kafka: {},
         group_id: 'karafka_admin',
         max_wait_time: 1_000,
-        max_attempts: 10
+        retry_backoff: 100,
+        max_retries_duration: 1_000
       },
       internal: {
         supervision_sleep: 0.1,
@@ -314,20 +315,38 @@ RSpec.describe_current do
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when max_attempts is missing' do
-      before { admin_cfg.delete(:max_attempts) }
+    context 'when retry_backoff is missing' do
+      before { admin_cfg.delete(:retry_backoff) }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when max_attempts is not bigger than 0' do
-      before { admin_cfg[:max_attempts] = 0 }
+    context 'when retry_backoff is not bigger than 100' do
+      before { admin_cfg[:retry_backoff] = 99 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
 
-    context 'when max_attempts is float' do
-      before { admin_cfg[:max_attempts] = 1.1 }
+    context 'when retry_backoff is float' do
+      before { admin_cfg[:retry_backoff] = 1.1 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_retries_duration is missing' do
+      before { admin_cfg.delete(:max_retries_duration) }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_retries_duration is not bigger than 100' do
+      before { admin_cfg[:max_retries_duration] = 99 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+
+    context 'when max_retries_duration is float' do
+      before { admin_cfg[:max_retries_duration] = 1.1 }
 
       it { expect(contract.call(config)).not_to be_success }
     end
