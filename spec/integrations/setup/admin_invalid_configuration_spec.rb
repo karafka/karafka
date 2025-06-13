@@ -6,7 +6,7 @@ guarded = []
 
 begin
   setup_karafka do |config|
-    config.admin.max_attempts = -1
+    config.admin.retry_backoff = -1
   end
 
   draw_routes do

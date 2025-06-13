@@ -157,7 +157,7 @@ module Karafka
         # Run forceful kill
         manager.terminate
         # And wait until linux kills them
-        # This prevents us from existing forcefully with any dead child process still existing
+        # This prevents us from exiting forcefully with any dead child process still existing
         # Since we have sent the `KILL` signal, it must die, so we can wait until all dead
         sleep(supervision_sleep) until manager.stopped?
 

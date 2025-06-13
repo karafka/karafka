@@ -6,6 +6,7 @@
 - **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.
 - **[Breaking]** Rename scheduled jobs topics names in their config (Pro).
 - **[Breaking]** Change K8s listener response from `204` to `200` and include JSON body with reasons.
+- **[Breaking]** Replace admin config `max_attempts` with `max_retries_duration` and 
 - **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
 - [Enhancement] Normalize topic + partition logs format.
 - [Enhancement] Support KIP-82 (header values of arrays).
@@ -45,6 +46,7 @@
 - [Enhancement] Do not overwrite the `key` in the Pro DLQ dispatched messages for routing reasons.
 - [Enhancement] Introduce `errors_tracker.trace_id` for distributed error details correlation with the Web UI.
 - [Enhancement] Improve contracts validations reporting.
+- [Enhancement] Optimize topic creation and repartitioning admin operations for topics with hundreds of partitions.
 - [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Make sure all temporary topics have a `it-` prefix in their name.
@@ -69,6 +71,8 @@
 - [Fix] Scheduled Messages re-seek moves to `latest` on inheritance of initial offset when `0` offset is compacted.
 - [Fix] Seek to `:latest` without `topic_partition_position` (-1) will not seek at all.
 - [Fix] Extremely high turn over of scheduled messages can cause them not to reach EOF/Loaded state.
+- [Fix] Fix incorrectly passed `max_wait_time` to rdkafka (ms instead of seconds) causing too long wait.
+- [Fix] Remove aggresive requerying of the Kafka cluster on topic creation/removal/altering.
 - [Change] Move to trusted-publishers and remove signing since no longer needed.
 
 ## 2.4.18 (2025-04-09)

@@ -84,7 +84,8 @@ en:
       admin.kafka_format: needs to be a hash
       admin.group_id_format: 'needs to be a string with a Kafka accepted format'
       admin.max_wait_time_format: 'needs to be an integer bigger than 0'
-      admin.max_attempts_format: 'needs to be an integer bigger than 0'
+      admin.retry_backoff_format: 'needs to be an integer bigger than 100'
+      admin.max_retries_duration_format: 'needs to be an integer bigger than 1000'
 
       swarm.nodes_format: 'needs to be an integer bigger than 0'
       swarm.node_format: needs to be false or node instance
