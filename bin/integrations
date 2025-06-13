@@ -45,6 +45,7 @@ class Scenario
     'shutdown/on_hanging_on_shutdown_job_and_a_shutdown_spec.rb' => [2].freeze,
     'shutdown/on_hanging_listener_and_shutdown_spec.rb' => [2].freeze,
     'swarm/forceful_shutdown_of_hanging_spec.rb' => [2].freeze,
+    'swarm/with_blocking_at_exit_spec.rb' => [2].freeze,
     'instrumentation/post_errors_instrumentation_error_spec.rb' => [1].freeze,
     'cli/declaratives/delete/existing_with_exit_code_spec.rb' => [2].freeze,
     'cli/declaratives/create/new_with_exit_code_spec.rb' => [2].freeze,
