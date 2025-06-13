@@ -13,7 +13,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
-    thread = Thread.new do
+    DT[:thread] = Thread.new do
       Karafka::Admin.delete_topic(DT.topic)
     rescue StandardError
       nil
@@ -22,8 +22,6 @@ class Consumer < Karafka::BaseConsumer
     sleep(1)
 
     DT[:done] = true
-
-    thread.join
   end
 end
 
@@ -42,3 +40,5 @@ exit unless error
 assert(
   %i[unknown_partition unknown_topic_or_part].any? { |code| error.code == code }
 )
+
+DT[:thread].join
