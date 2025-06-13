@@ -10,10 +10,13 @@ module Karafka
   #   Cluster on which operations are performed can be changed via `admin.kafka` config, however
   #   there is no multi-cluster runtime support.
   module Admin
+    extend Core::Helpers::Time
+
     extend Helpers::ConfigImporter.new(
       max_wait_time: %i[admin max_wait_time],
       poll_timeout: %i[admin poll_timeout],
-      max_attempts: %i[admin max_attempts],
+      max_retries_duration: %i[admin max_retries_duration],
+      retry_backoff: %i[admin retry_backoff],
       group_id: %i[admin group_id],
       app_kafka: %i[kafka],
       admin_kafka: %i[admin kafka]
@@ -122,7 +125,7 @@ module Karafka
           handler = admin.create_topic(name, partitions, replication_factor, topic_config)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: max_wait_time) },
+            -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
             -> { topics_names.include?(name) }
           )
         end
@@ -136,7 +139,7 @@ module Karafka
           handler = admin.delete_topic(name)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: max_wait_time) },
+            -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
             -> { !topics_names.include?(name) }
           )
         end
@@ -151,7 +154,7 @@ module Karafka
           handler = admin.create_partitions(name, partitions)
 
           with_re_wait(
-            -> { handler.wait(max_wait_timeout: max_wait_time) },
+            -> { handler.wait(max_wait_timeout: max_wait_time_seconds) },
             -> { topic_info(name).fetch(:partition_count) >= partitions }
           )
         end
@@ -362,7 +365,7 @@ module Karafka
       def delete_consumer_group(consumer_group_id)
         with_admin do |admin|
           handler = admin.delete_group(consumer_group_id)
-          handler.wait(max_wait_timeout: max_wait_time)
+          handler.wait(max_wait_timeout: max_wait_time_seconds)
         end
       end
 
@@ -564,6 +567,12 @@ module Karafka
 
       private
 
+      # @return [Integer] number of seconds to wait. `rdkafka` requires this value
+      #   (`max_wait_time`) to be provided in seconds while we define it in ms hence the conversion
+      def max_wait_time_seconds
+        max_wait_time / 1_000.0
+      end
+
       # Adds a new callback for given rdkafka instance for oauth token refresh (if needed)
       #
       # @param id [String, Symbol] unique (for the lifetime of instance) id that we use for
@@ -602,20 +611,23 @@ module Karafka
       # @param handler [Proc] the wait handler operation
       # @param breaker [Proc] extra condition upon timeout that indicates things were finished ok
       def with_re_wait(handler, breaker)
-        attempt ||= 0
-        attempt += 1
+        start_time = monotonic_now
+        # Convert milliseconds to seconds for sleep
+        sleep_time = retry_backoff / 1000.0
 
-        handler.call
+        loop do
+          handler.call
 
-        # If breaker does not operate, it means that the requested change was applied but is still
-        # not visible and we need to wait
-        raise(Errors::ResultNotVisibleError) unless breaker.call
-      rescue Rdkafka::AbstractHandle::WaitTimeoutError, Errors::ResultNotVisibleError
-        return if breaker.call
+          sleep(sleep_time)
 
-        retry if attempt <= max_attempts
+          return if breaker.call
+        rescue Rdkafka::AbstractHandle::WaitTimeoutError
+          return if breaker.call
 
-        raise
+          next if monotonic_now - start_time < max_retries_duration
+
+          raise(Errors::ResultNotVisibleError)
+        end
       end
 
       # @param type [Symbol] type of config we want
