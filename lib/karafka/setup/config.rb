@@ -131,7 +131,11 @@ module Karafka
         # option max_wait_time [Integer] We wait only for this amount of time before raising error
         # as we intercept this error and retry after checking that the operation was finished or
         # failed using external factor.
-        setting :max_wait_time, default: 1_000
+        #
+        # For async this will finish immediately but for sync operations this will wait and we
+        # will get a confirmation. 60 seconds is ok for both cases as for async, the re-wait will
+        # kick in
+        setting :max_wait_time, default: 60 * 1_000
 
         # How long should we wait on admin operation retrying before giving up and raising an
         # error that result is not visible
