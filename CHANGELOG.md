@@ -1,6 +1,6 @@
 # Karafka Framework Changelog
 
-## 2.5.0 (Unreleased)
+## 2.5.0 (2025-06-15)
 - **[Breaking]** Change how consistency of DLQ dispatches works in Pro (`partition_key` vs. direct partition id mapping).
 - **[Breaking]** Remove the headers `source_key` from the Pro DLQ dispatched messages as the original key is now fully preserved.
 - **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.

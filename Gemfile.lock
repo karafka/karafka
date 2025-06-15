@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    karafka (2.5.0.rc2)
+    karafka (2.5.0)
       base64 (~> 0.2)
       karafka-core (>= 2.5.2, < 2.6.0)
       karafka-rdkafka (>= 0.19.5)
@@ -69,9 +69,9 @@ GEM
     karafka-testing (2.5.1)
       karafka (>= 2.5.0.beta1, < 2.6.0)
       waterdrop (>= 2.8.0)
-    karafka-web (0.11.0.rc3)
+    karafka-web (0.11.0)
       erubi (~> 1.4)
-      karafka (>= 2.5.0.rc1, < 2.6.0)
+      karafka (>= 2.5.0.rc2, < 2.6.0)
       karafka-core (>= 2.5.0, < 2.6.0)
       roda (~> 3.68, >= 3.69)
       tilt (~> 2.0)
@@ -82,7 +82,7 @@ GEM
     raabro (1.4.0)
     rack (3.1.16)
     rake (13.3.0)
-    roda (3.92.0)
+    roda (3.93.0)
       rack
     rspec (3.13.1)
       rspec-core (~> 3.13.0)
