@@ -1,5 +1,8 @@
 # Karafka Framework Changelog
 
+## 2.5.1 (Unreleased)
+- [Enhancement] Don't create not needed dirs in the non-Rails setup template.
+
 ## 2.5.0 (2025-06-15)
 - **[Breaking]** Change how consistency of DLQ dispatches works in Pro (`partition_key` vs. direct partition id mapping).
 - **[Breaking]** Remove the headers `source_key` from the Pro DLQ dispatched messages as the original key is now fully preserved.

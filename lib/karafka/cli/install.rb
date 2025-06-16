@@ -14,9 +14,7 @@ module Karafka
       # Directories created by default
       INSTALL_DIRS = %w[
         app/consumers
-        config
         log
-        lib
       ].freeze
 
       # Where should we map proper files from templates
