@@ -6,7 +6,7 @@
 - **[Breaking]** Use DLQ and Piping prefix `source_` instead of `original_` to align with naming convention of Kafka Streams and Apache Flink for future usage.
 - **[Breaking]** Rename scheduled jobs topics names in their config (Pro).
 - **[Breaking]** Change K8s listener response from `204` to `200` and include JSON body with reasons.
-- **[Breaking]** Replace admin config `max_attempts` with `max_retries_duration` and 
+- **[Breaking]** Replace admin config `max_attempts` with `max_retries_duration` and `retry_backoff`.
 - **[Feature]** Parallel Segments for concurrent processing of the same partition with more than partition count of processes (Pro).
 - [Enhancement] Normalize topic + partition logs format.
 - [Enhancement] Support KIP-82 (header values of arrays).
