@@ -172,9 +172,10 @@ module Karafka
         Thread.list.each do |thread|
           tid = (thread.object_id ^ ::Process.pid).to_s(36)
 
+          warn ''
           warn "Thread TID-#{tid} #{thread.name}"
 
-          if thread.backtrace
+          if thread.backtrace && !thread.backtrace.empty?
             warn thread.backtrace.join("\n")
           else
             warn '<no backtrace available>'
