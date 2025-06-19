@@ -3,6 +3,7 @@
 ## 2.5.1 (Unreleased)
 - [Enhancement] Don't create not needed dirs in the non-Rails setup template.
 - [Enhancement] Improve printing of TTIN to separate threads
+- [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 
 ## 2.5.0 (2025-06-15)
 - **[Breaking]** Change how consistency of DLQ dispatches works in Pro (`partition_key` vs. direct partition id mapping).
