@@ -312,6 +312,7 @@ def create_routes_topics
       # All integration tests topics names always have to start with it-
       unless name.start_with?('it-')
         puts 'All integration tests topics need to start with "it-"'
+        puts "Attempt to create topic with name: #{name}"
         raise
       end
 
