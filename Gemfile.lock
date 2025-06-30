@@ -135,7 +135,7 @@ DEPENDENCIES
   fugit
   karafka!
   karafka-testing (>= 2.5.0)
-  karafka-web (>= 0.11.0.rc2)
+  karafka-web (>= 0.11.1)
   ostruct
   rspec
   simplecov
