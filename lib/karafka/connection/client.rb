@@ -49,6 +49,7 @@ module Karafka
         :illegal_generation,
         # this will not recover as fencing is permanent
         :fenced, # -144
+        :auto_offset_reset, # -140
         # This can happen for many reasons, including issues with static membership being fenced
         :fatal # -150
       ].freeze

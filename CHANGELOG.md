@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.1 (Unreleased)
+- [Enhancement] Support immediate error raising with `auto.offset.reset` set to `error`.
 - [Enhancement] Don't create not needed dirs in the non-Rails setup template.
 - [Enhancement] Improve printing of TTIN to separate threads
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
