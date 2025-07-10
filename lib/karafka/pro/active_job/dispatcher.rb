@@ -83,6 +83,11 @@ module Karafka
         # @param job [Object] job we want to enqueue
         # @param timestamp [Time] time when job should run
         def dispatch_at(job, timestamp)
+          # If request is in the past, we can dispatch it directly without any envelope wrapping
+          # and proxy pass via scheduled messages. This improves latency and also allows for things
+          # like immediate continuation to work without having to have scheduled messages
+          return dispatch(job) if timestamp.to_f <= Time.now.to_f
+
           target_message = dispatch_details(job).merge!(
             topic: job.queue_name,
             payload: ::ActiveSupport::JSON.encode(serialize_job(job))

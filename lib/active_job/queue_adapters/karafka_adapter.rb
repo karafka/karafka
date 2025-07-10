@@ -40,6 +40,11 @@ module ActiveJob
       def enqueue_after_transaction_commit?
         true
       end
+
+      # @return [Boolean] should we stop the job. Used by the ActiveJob continuation feature
+      def stopping?
+        Karafka::App.done?
+      end
     end
   end
 end

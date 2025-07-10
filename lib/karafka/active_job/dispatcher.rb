@@ -46,17 +46,27 @@ module Karafka
         end
       end
 
-      # Raises info, that Karafka backend does not support scheduling jobs
+      # Raises info, that Karafka backend does not support scheduling jobs if someone wants to
+      # schedule jobs in the future. It works for past and present because we want to support
+      # things like continuation and `#retry_on` API with no wait and no jitter
       #
-      # @param _job [Object] job we cannot enqueue
-      # @param _timestamp [Time] time when job should run
+      # @param job [Object] job we cannot enqueue
+      # @param timestamp [Time] time when job should run
       #
-      # @note Karafka Pro supports this feature
-      def dispatch_at(_job, _timestamp)
-        raise NotImplementedError, <<~ERROR_MESSAGE
-          This queueing backend does not support scheduling jobs.
-          Consider using Karafka Pro, which supports this via the Scheduled Messages feature.
-        ERROR_MESSAGE
+      # @note Karafka Pro supports future jobs
+      #
+      # @note In order for jobs to work with this you need to set jitter to false and no wait
+      def dispatch_at(job, timestamp)
+        # Dispatch at is used by some of the ActiveJob features that actually do not back-off
+        # but things go via this API nonetheless.
+        if timestamp.to_f <= Time.now.to_f
+          dispatch(job)
+        else
+          raise NotImplementedError, <<~ERROR_MESSAGE
+            This queueing backend does not support scheduling future jobs.
+            Consider using Karafka Pro, which supports this via the Scheduled Messages feature.
+          ERROR_MESSAGE
+        end
       end
 
       private
