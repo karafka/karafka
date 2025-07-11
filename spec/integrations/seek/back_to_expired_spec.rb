@@ -11,6 +11,7 @@ end
 
 class Consumer < Karafka::BaseConsumer
   def consume
+    sleep(1)
     seek(Time.now - 60_000)
   end
 end
@@ -22,12 +23,12 @@ draw_routes do
     config(
       partitions: 1,
       'cleanup.policy': 'compact',
-      'min.cleanable.dirty.ratio': 0.001,
-      'segment.ms': 1000,
+      'min.cleanable.dirty.ratio': 0.00001,
+      'segment.ms': 500,
       'segment.bytes': 2800,
-      'delete.retention.ms': 1000,
-      'min.compaction.lag.ms': 1000,
-      'retention.ms': 1000
+      'delete.retention.ms': 500,
+      'min.compaction.lag.ms': 500,
+      'retention.ms': 500
     )
   end
 end
@@ -36,8 +37,6 @@ end
   produce_many(DT.topic, DT.uuids(10), key: 'test')
   produce_many(DT.topic, Array.new(10) { nil }, key: 'test')
 end
-
-sleep(10)
 
 start_karafka_and_wait_until do
   DT[:seeks].count { |seek| seek == -1 } >= 1
