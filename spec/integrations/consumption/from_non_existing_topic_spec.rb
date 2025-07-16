@@ -37,4 +37,5 @@ start_karafka_and_wait_until do
   DT.key?(0)
 end
 
-# No assertion needed as 5 minutes is more than we allow spec to run (3 minutes)
+topics_names = Karafka::Admin.cluster_info.topics.map { |topics| topics[:topic_name] }
+assert topics_names.include?(DT.topic)

@@ -266,7 +266,8 @@ module Karafka
         reset
 
         # Ruby sleep is in seconds
-        sleep_time = reset_backoff / 10_000.0
+        sleep_time = reset_backoff / 1_000.0
+
         sleep(sleep_time) && retry
       end
 
