@@ -124,12 +124,6 @@ jobs:
           bundler-cache: true
           bundler: 'latest'
 
-      - name: Install compatible rubygems-update for Ruby 3.1
-        if: startsWith(matrix.ruby, '3.1')
-        run: |
-          gem install rubygems-update -v '3.6.9'
-          update_rubygems
-
       - name: Wait for Kafka
         run: |
           bundle exec bin/wait_for_kafka
@@ -179,16 +173,15 @@ jobs:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
 
-      - name: Install compatible rubygems-update for Ruby 3.1
-        if: startsWith(matrix.ruby, '3.1')
-        run: |
-          gem install rubygems-update -v '3.6.9'
-          update_rubygems
-
       - name: Install latest Bundler
         run: |
           gem install bundler --no-document
-          gem update --system --no-document
+
+          if [[ "${{ matrix.ruby }}" == 3.1* ]]; then
+            gem update --system 3.6.9 --no-document
+          else
+            gem update --system
+          fi
 
           bundle config set without 'tools benchmarks docs'
 
@@ -245,16 +238,15 @@ jobs:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
 
-      - name: Install compatible rubygems-update for Ruby 3.1
-        if: startsWith(matrix.ruby, '3.1')
-        run: |
-          gem install rubygems-update -v '3.6.9'
-          update_rubygems
-
       - name: Install latest Bundler
         run: |
           gem install bundler --no-document
-          gem update --system --no-document
+
+          if [[ "${{ matrix.ruby }}" == 3.1* ]]; then
+            gem update --system 3.6.9 --no-document
+          else
+            gem update --system
+          fi
 
           bundle config set without 'tools benchmarks docs'
 
