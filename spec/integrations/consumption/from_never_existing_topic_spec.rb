@@ -20,3 +20,6 @@ start_karafka_and_wait_until do
   sleep(5)
   true
 end
+
+topics_names = Karafka::Admin.cluster_info.topics.map { |topics| topics[:topic_name] }
+assert !topics_names.include?(DT.topic)
