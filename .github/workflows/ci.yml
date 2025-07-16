@@ -124,6 +124,12 @@ jobs:
           bundler-cache: true
           bundler: 'latest'
 
+      - name: Install compatible rubygems-update for Ruby 3.1
+        if: startsWith(matrix.ruby, '3.1')
+        run: |
+          gem install rubygems-update -v '3.6.9'
+          update_rubygems
+
       - name: Wait for Kafka
         run: |
           bundle exec bin/wait_for_kafka
@@ -172,6 +178,12 @@ jobs:
           # We also want to check that librdkafka is compiling as expected on all versions of Ruby
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
+
+      - name: Install compatible rubygems-update for Ruby 3.1
+        if: startsWith(matrix.ruby, '3.1')
+        run: |
+          gem install rubygems-update -v '3.6.9'
+          update_rubygems
 
       - name: Install latest Bundler
         run: |
@@ -232,6 +244,12 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
           bundler: 'latest'
+
+      - name: Install compatible rubygems-update for Ruby 3.1
+        if: startsWith(matrix.ruby, '3.1')
+        run: |
+          gem install rubygems-update -v '3.6.9'
+          update_rubygems
 
       - name: Install latest Bundler
         run: |
