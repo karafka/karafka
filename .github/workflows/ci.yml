@@ -176,7 +176,12 @@ jobs:
       - name: Install latest Bundler
         run: |
           gem install bundler --no-document
-          gem update --system --no-document
+
+          if [[ "${{ matrix.ruby }}" == 3.1* ]]; then
+            gem update --system 3.6.9 --no-document
+          else
+            gem update --system
+          fi
 
           bundle config set without 'tools benchmarks docs'
 
@@ -236,7 +241,12 @@ jobs:
       - name: Install latest Bundler
         run: |
           gem install bundler --no-document
-          gem update --system --no-document
+
+          if [[ "${{ matrix.ruby }}" == 3.1* ]]; then
+            gem update --system 3.6.9 --no-document
+          else
+            gem update --system
+          fi
 
           bundle config set without 'tools benchmarks docs'
 
