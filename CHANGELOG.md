@@ -5,7 +5,8 @@
 - [Enhancement] Use direct topic dispatches when `dispatch_at` is used for past times to bypass Scheduled Messages flow.
 - [Enhancement] Support immediate error raising with `auto.offset.reset` set to `error`.
 - [Enhancement] Don't create not needed dirs in the non-Rails setup template.
-- [Enhancement] Improve printing of TTIN to separate threads
+- [Enhancement] Improve printing of TTIN to separate threads.
+- [Enhancement] Support transactional ID resource in the Admin ACL management.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 

@@ -30,7 +30,11 @@ RSpec.describe_current do
   end
 
   describe '#create' do
-    subject(:creation) { described_class.create(acl) }
+    subject(:creation) do
+      ref = described_class.create(acl)
+      sleep(0.2)
+      ref
+    end
 
     context 'when creating with invalid arguments' do
       it { expect { creation }.to raise_error(Rdkafka::Config::ConfigError, /Invalid/) }
@@ -54,10 +58,25 @@ RSpec.describe_current do
       it { expect(creation.last.resource_name).to eq(resource_name) }
       it { expect(creation.last.resource_type).to eq(resource_type) }
     end
+
+    context 'when creating with valid arguments on transactional id' do
+      let(:resource_type) { :transactional_id }
+      let(:permission_type) { :allow }
+
+      it { expect { creation }.not_to raise_error }
+      it { expect { creation }.to change { described_class.all.size }.by(1) }
+      it { expect(creation.last.resource_name).to eq(resource_name) }
+      it { expect(creation.last.resource_type).to eq(resource_type) }
+    end
   end
 
   describe '#delete' do
-    subject(:deletion) { described_class.delete(acl) }
+    subject(:deletion) do
+      ref = described_class.delete(acl)
+      # This is needed as those operations are async
+      sleep(0.2)
+      ref
+    end
 
     context 'when deleting with invalid arguments' do
       it { expect { deletion }.not_to raise_error }
@@ -114,6 +133,49 @@ RSpec.describe_current do
       it { expect(deletion.last.resource_type).to eq(resource_type) }
       it { expect(deletion.size).to eq(2) }
     end
+
+    context 'when deleting with valid acl created on a transactional id' do
+      let(:resource_type) { :transactional_id }
+      let(:permission_type) { :allow }
+
+      before { described_class.create(acl) }
+
+      it { expect { deletion }.not_to raise_error }
+      it { expect { deletion }.to change { described_class.all.size }.by(-1) }
+      it { expect(deletion.last.resource_name).to eq(resource_name) }
+      it { expect(deletion.last.resource_type).to eq(resource_type) }
+      it { expect(deletion.size).to eq(1) }
+    end
+
+    context 'when deleting with valid acl with multiple transactional id acls existing' do
+      let(:resource_type) { :transactional_id }
+      let(:permission_type) { :any }
+
+      let(:acl1) do
+        config = defaults.dup
+        config[:resource_type] = :transactional_id
+        config[:permission_type] = :allow
+        described_class.new(**config)
+      end
+
+      let(:acl2) do
+        config = defaults.dup
+        config[:resource_type] = :transactional_id
+        config[:permission_type] = :deny
+        described_class.new(**config)
+      end
+
+      before do
+        described_class.create(acl1)
+        described_class.create(acl2)
+      end
+
+      it { expect { deletion }.not_to raise_error }
+      it { expect { deletion }.to change { described_class.all.size }.by(-2) }
+      it { expect(deletion.last.resource_name).to eq(resource_name) }
+      it { expect(deletion.last.resource_type).to eq(resource_type) }
+      it { expect(deletion.size).to eq(2) }
+    end
   end
 
   describe '#describe' do
@@ -150,6 +212,48 @@ RSpec.describe_current do
 
       it { expect(describing.size).to eq(2) }
     end
+
+    context 'when trying to describe transactional id acl that matches one' do
+      let(:resource_type) { :transactional_id }
+      let(:acl1) do
+        config = defaults.dup
+        config[:resource_type] = :transactional_id
+        config[:permission_type] = :allow
+        described_class.new(**config)
+      end
+
+      before { described_class.create(acl1) }
+
+      it { expect(describing.size).to eq(1) }
+      it { expect(describing.first.resource_type).to eq(:transactional_id) }
+      it { expect(describing.first.resource_name).to eq(resource_name) }
+    end
+
+    context 'when trying to describe transactional id acl that matches many' do
+      let(:resource_type) { :transactional_id }
+      let(:acl1) do
+        config = defaults.dup
+        config[:resource_type] = :transactional_id
+        config[:permission_type] = :allow
+        described_class.new(**config)
+      end
+
+      let(:acl2) do
+        config = defaults.dup
+        config[:resource_type] = :transactional_id
+        config[:permission_type] = :deny
+        described_class.new(**config)
+      end
+
+      before do
+        described_class.create(acl1)
+        described_class.create(acl2)
+      end
+
+      it { expect(describing.size).to eq(2) }
+      it { expect(describing.map(&:resource_type).uniq).to eq([:transactional_id]) }
+      it { expect(describing.map(&:resource_name).uniq).to eq([resource_name]) }
+    end
   end
 
   describe '#all' do
@@ -162,5 +266,17 @@ RSpec.describe_current do
     it { expect { all }.not_to raise_error }
     it { expect(all).not_to be_empty }
     it { expect(all.map(&:resource_name)).to include(acl.resource_name) }
+
+    context 'when listing all acls including transactional id' do
+      let(:resource_type) { :transactional_id }
+      let(:permission_type) { :allow }
+
+      before { described_class.create(acl) }
+
+      it { expect { all }.not_to raise_error }
+      it { expect(all).not_to be_empty }
+      it { expect(all.map(&:resource_name)).to include(acl.resource_name) }
+      it { expect(all.map(&:resource_type)).to include(:transactional_id) }
+    end
   end
 end
