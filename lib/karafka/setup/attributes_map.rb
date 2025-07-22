@@ -57,6 +57,8 @@ module Karafka
         group.protocol.type
         group.remote.assignor
         heartbeat.interval.ms
+        https.ca.location
+        https.ca.pem
         interceptors
         internal.termination.signal
         isolation.level
@@ -73,6 +75,7 @@ module Karafka
         message.max.bytes
         metadata.broker.list
         metadata.max.age.ms
+        metadata.recovery.rebootstrap.trigger.ms
         metadata.recovery.strategy
         oauthbearer_token_refresh_cb
         offset.store.method
@@ -100,10 +103,25 @@ module Karafka
         sasl.kerberos.service.name
         sasl.mechanism
         sasl.mechanisms
+        sasl.oauthbearer.assertion.algorithm
+        sasl.oauthbearer.assertion.claim.aud
+        sasl.oauthbearer.assertion.claim.exp.seconds
+        sasl.oauthbearer.assertion.claim.iss
+        sasl.oauthbearer.assertion.claim.jti.include
+        sasl.oauthbearer.assertion.claim.nbf.seconds
+        sasl.oauthbearer.assertion.claim.sub
+        sasl.oauthbearer.assertion.file
+        sasl.oauthbearer.assertion.jwt.template.file
+        sasl.oauthbearer.assertion.private.key.file
+        sasl.oauthbearer.assertion.private.key.passphrase
+        sasl.oauthbearer.assertion.private.key.pem
+        sasl.oauthbearer.client.credentials.client.id
+        sasl.oauthbearer.client.credentials.client.secret
         sasl.oauthbearer.client.id
         sasl.oauthbearer.client.secret
         sasl.oauthbearer.config
         sasl.oauthbearer.extensions
+        sasl.oauthbearer.grant.type
         sasl.oauthbearer.method
         sasl.oauthbearer.scope
         sasl.oauthbearer.token.endpoint.url
@@ -192,6 +210,8 @@ module Karafka
         enable.ssl.certificate.verification
         enabled_events
         error_cb
+        https.ca.location
+        https.ca.pem
         interceptors
         internal.termination.signal
         linger.ms
@@ -208,6 +228,7 @@ module Karafka
         message.timeout.ms
         metadata.broker.list
         metadata.max.age.ms
+        metadata.recovery.rebootstrap.trigger.ms
         metadata.recovery.strategy
         msg_order_cmp
         oauthbearer_token_refresh_cb
@@ -239,10 +260,25 @@ module Karafka
         sasl.kerberos.service.name
         sasl.mechanism
         sasl.mechanisms
+        sasl.oauthbearer.assertion.algorithm
+        sasl.oauthbearer.assertion.claim.aud
+        sasl.oauthbearer.assertion.claim.exp.seconds
+        sasl.oauthbearer.assertion.claim.iss
+        sasl.oauthbearer.assertion.claim.jti.include
+        sasl.oauthbearer.assertion.claim.nbf.seconds
+        sasl.oauthbearer.assertion.claim.sub
+        sasl.oauthbearer.assertion.file
+        sasl.oauthbearer.assertion.jwt.template.file
+        sasl.oauthbearer.assertion.private.key.file
+        sasl.oauthbearer.assertion.private.key.passphrase
+        sasl.oauthbearer.assertion.private.key.pem
+        sasl.oauthbearer.client.credentials.client.id
+        sasl.oauthbearer.client.credentials.client.secret
         sasl.oauthbearer.client.id
         sasl.oauthbearer.client.secret
         sasl.oauthbearer.config
         sasl.oauthbearer.extensions
+        sasl.oauthbearer.grant.type
         sasl.oauthbearer.method
         sasl.oauthbearer.scope
         sasl.oauthbearer.token.endpoint.url
