@@ -85,31 +85,6 @@ RSpec.describe_current do
       end
     end
 
-    context 'when cooperative-sticky mode when client.id was not configured directly' do
-      let(:time_now) { 1_721_306_083.6994138 }
-      let(:hex) { '5708a73b9df92ee41059ab3ce6a06020' }
-      let(:client_id) { group.kafka[:'client.id'] }
-
-      let(:topic) do
-        build(
-          :routing_topic,
-          kafka: {
-            'bootstrap.servers': 'kafka://kafka:9092',
-            'partition.assignment.strategy': 'cooperative-sticky'
-          }
-        )
-      end
-
-      before do
-        allow(Time).to receive(:now).and_return(time_now)
-        allow(SecureRandom).to receive(:hex).and_return(hex)
-      end
-
-      it 'expect to use the dynamic format that mitigates librdkafka rebalance bug' do
-        expect(client_id).to eq("#{Karafka::App.config.client_id}/#{time_now}/#{hex[0..9]}")
-      end
-    end
-
     context 'when cooperative-sticky mode when client.id was configured directly' do
       let(:time_now) { 1_721_306_083.6994138 }
       let(:hex) { '5708a73b9df92ee41059ab3ce6a06020' }

@@ -15,7 +15,7 @@ RSpec.describe_current do
           "Consumer groups count: #{Karafka::App.consumer_groups.size}",
           "Subscription groups count: #{Karafka::App.subscription_groups.values.flatten.size}",
           "Workers count: #{Karafka::App.config.concurrency}",
-          "Application client id: #{Karafka::App.config.client_id}",
+          "Instance client id: #{Karafka::App.config.client_id}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
           'License: LGPL-3.0'
@@ -43,7 +43,7 @@ RSpec.describe_current do
           "Consumer groups count: #{Karafka::App.consumer_groups.size}",
           "Subscription groups count: #{Karafka::App.subscription_groups.values.flatten.size}",
           "Workers count: #{Karafka::App.config.concurrency}",
-          "Application client id: #{Karafka::App.config.client_id}",
+          "Instance client id: #{Karafka::App.config.client_id}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}",
           'License: Commercial',
