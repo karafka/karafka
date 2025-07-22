@@ -157,9 +157,6 @@ module Karafka
         end
       end
 
-      # In case we use simple style of routing, all topics will be assigned to the same consumer
-      # group that will be based on the client_id
-      #
       # @param topic_name [String, Symbol] name of a topic from which we want to consumer
       # @param block [Proc] proc we want to evaluate in the topic context
       def topic(topic_name, &block)

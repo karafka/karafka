@@ -46,7 +46,9 @@ class Scenario
     'shutdown/on_hanging_listener_and_shutdown_spec.rb' => [2].freeze,
     'swarm/forceful_shutdown_of_hanging_spec.rb' => [2].freeze,
     'swarm/with_blocking_at_exit_spec.rb' => [2].freeze,
-    'instrumentation/post_errors_instrumentation_error_spec.rb' => [1].freeze,
+    # Segfault in the below spec can be expected because we pretty much force terminate handing
+    # C stuff. This spec is still useful as it catches other things
+    'instrumentation/post_errors_instrumentation_error_spec.rb' => [1, 139].freeze,
     'cli/declaratives/delete/existing_with_exit_code_spec.rb' => [2].freeze,
     'cli/declaratives/create/new_with_exit_code_spec.rb' => [2].freeze,
     'cli/declaratives/plan/when_changes_with_detailed_exit_code_spec.rb' => [2].freeze,

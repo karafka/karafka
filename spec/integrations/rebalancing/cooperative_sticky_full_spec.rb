@@ -73,8 +73,4 @@ start_karafka_and_wait_until do
   true
 end
 
-if Rdkafka::VERSION >= '0.21'
-  assert_equal [0, 1], DT.data[:revoked].sort.uniq
-else
-  assert_equal [0, 1, 2, 3, 4], DT.data[:revoked].sort.uniq
-end
+assert_equal [0, 1], DT.data[:revoked].sort.uniq

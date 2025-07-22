@@ -44,7 +44,7 @@ module Karafka
           "Consumer groups count: #{Karafka::App.consumer_groups.size}",
           "Subscription groups count: #{Karafka::App.subscription_groups.values.flatten.size}",
           "Workers count: #{concurrency}",
-          "Application client id: #{client_id}",
+          "Instance client id: #{client_id}",
           "Boot file: #{Karafka.boot_file}",
           "Environment: #{Karafka.env}"
         ]

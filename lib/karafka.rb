@@ -11,6 +11,7 @@
   fileutils
   openssl
   optparse
+  socket
   base64
   date
   singleton

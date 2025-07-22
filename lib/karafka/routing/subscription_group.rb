@@ -148,16 +148,7 @@ module Karafka
         # end user has configured
         return if kafka.key?(:'client.id')
 
-        # This mitigates an issue for multiplexing and potentially other cases when running
-        # multiple karafka processes on one machine, where librdkafka goes into an infinite
-        # loop when using cooperative-sticky and upscaling.
-        #
-        # @see https://github.com/confluentinc/librdkafka/issues/4783
-        kafka[:'client.id'] = if kafka[:'partition.assignment.strategy'] == 'cooperative-sticky'
-                                "#{client_id}/#{Time.now.to_f}/#{SecureRandom.hex[0..9]}"
-                              else
-                                client_id
-                              end
+        kafka[:'client.id'] = client_id
       end
 
       # If we use static group memberships, there can be a case, where same instance id would
