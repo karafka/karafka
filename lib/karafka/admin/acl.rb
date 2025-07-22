@@ -31,7 +31,9 @@ module Karafka
         # use when you want to assign acl to a given consumer group
         consumer_group: Rdkafka::Bindings::RD_KAFKA_RESOURCE_GROUP,
         # use when you want to assign acl to a given broker
-        broker: Rdkafka::Bindings::RD_KAFKA_RESOURCE_BROKER
+        broker: Rdkafka::Bindings::RD_KAFKA_RESOURCE_BROKER,
+        # use when you want to assign acl to a transactional id
+        transactional_id: Rdkafka::Bindings::RD_KAFKA_RESOURCE_TRANSACTIONAL_ID
       }.freeze
 
       # Resource pattern types define how ACLs (Access Control Lists) are applied to resources,
