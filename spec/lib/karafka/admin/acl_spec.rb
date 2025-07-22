@@ -30,7 +30,11 @@ RSpec.describe_current do
   end
 
   describe '#create' do
-    subject(:creation) { described_class.create(acl) }
+    subject(:creation) do
+      ref = described_class.create(acl)
+      sleep(0.2)
+      ref
+    end
 
     context 'when creating with invalid arguments' do
       it { expect { creation }.to raise_error(Rdkafka::Config::ConfigError, /Invalid/) }
@@ -67,7 +71,12 @@ RSpec.describe_current do
   end
 
   describe '#delete' do
-    subject(:deletion) { described_class.delete(acl) }
+    subject(:deletion) do
+      ref = described_class.delete(acl)
+      # This is needed as those operations are async
+      sleep(0.2)
+      ref
+    end
 
     context 'when deleting with invalid arguments' do
       it { expect { deletion }.not_to raise_error }
