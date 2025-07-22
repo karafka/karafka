@@ -29,8 +29,8 @@ module Karafka
         setting :entity, default: ''
       end
 
-      # option client_id [String] kafka client_id - used to provide
-      #   default Kafka groups namespaces and identify that app in kafka
+      # option client_id [String] kafka client_id - used to uniquely identify given client instance
+      #   Used only for logging.
       setting :client_id, default: 'karafka'
       # option logger [Instance] logger that we want to use
       setting :logger, default: ::Karafka::Instrumentation::Logger.new

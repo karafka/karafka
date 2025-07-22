@@ -10,6 +10,7 @@
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0`.
+- [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
 
 ## 2.5.0 (2025-06-15)
 - **[Breaking]** Change how consistency of DLQ dispatches works in Pro (`partition_key` vs. direct partition id mapping).

@@ -22,10 +22,7 @@ module Karafka
       # groups
       attr_accessor :current_subscription_group_details
 
-      # @param name [String, Symbol] raw name of this consumer group. Raw means, that it does not
-      #   yet have an application client_id namespace, this will be added here by default.
-      #   We add it to make a multi-system development easier for people that don't use
-      #   kafka and don't understand the concept of consumer groups.
+      # @param name [String, Symbol] name of this consumer group.
       def initialize(name)
         @name = name.to_s
         # This used to be different when consumer mappers existed but now it is the same
