@@ -9,6 +9,7 @@
 - [Enhancement] Support transactional ID resource in the Admin ACL management.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
+- [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0`.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
 
