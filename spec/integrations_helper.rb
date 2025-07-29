@@ -16,7 +16,7 @@ unless ENV.key?('PRISTINE_MODE')
     # We redefine whole bunch of stuff to simulate various scenarios
     next if warning.include?('previous definition of') && warning.include?('/integrations/')
     next if warning.include?('method redefined') && warning.include?('/integrations/')
-
+    next if warning.include?('vendor/')
     # Multi-delegator redefining is expected
     next if warning.include?('multi_delegator.rb')
     # We redefine it on purpose
