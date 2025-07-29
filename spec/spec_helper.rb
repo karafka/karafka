@@ -10,6 +10,7 @@ Warning.process do |warning|
   next unless warning.include?(Dir.pwd)
   # Allow OpenStruct usage only in specs
   next if warning.include?('OpenStruct use') && warning.include?('/spec/')
+  next if warning.include?('vendor/')
   next if warning.include?('rspec_locator.rb')
   next if warning.include?('fixture_file')
 
