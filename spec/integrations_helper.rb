@@ -2,6 +2,28 @@
 
 # This helper content is being used only in the forked integration tests processes.
 
+unless ENV.key?('PRISTINE_MODE')
+  Warning[:performance] = true if RUBY_VERSION >= '3.3'
+  Warning[:deprecated] = true
+  $VERBOSE = true
+
+  require 'warning'
+
+  Warning.process do |warning|
+    next unless warning.include?(Dir.pwd)
+    # Allow OpenStruct usage only in specs
+    next if warning.include?('OpenStruct use') && warning.include?('_spec')
+    # We redefine whole bunch of stuff to simulate various scenarios
+    next if warning.include?('previous definition of') && warning.include?('/integrations/')
+    # Multi-delegator redefining is expected
+    next if warning.include?('multi_delegator.rb')
+    # We redefine it on purpose
+    next if warning.include?('fixture_file')
+
+    raise "Warning in your code: #{warning}"
+  end
+end
+
 ENV['KARAFKA_ENV'] = 'test'
 
 unless ENV['PRISTINE_MODE']
@@ -188,7 +210,7 @@ def become_pro!
     end
   end
 
-  Karafka.const_set('License', mod)
+  Karafka.const_set('License', mod) unless Karafka.const_defined?('License')
   require 'karafka/pro/loader'
   Karafka::Pro::Loader.require_all
   require_relative './support/vp_stabilizer'

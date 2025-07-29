@@ -10,6 +10,15 @@ module Karafka
         class PeriodicJob < Base
           # Periodic topic action flows extensions
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @periodic_job = nil
+            end
+
             # Defines topic as periodic. Periodic topics consumers will invoke `#tick` with each
             # poll where messages were not received.
             # @param active [Boolean] should ticking happen for this topic assignments.

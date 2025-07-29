@@ -23,16 +23,19 @@ module Karafka
 
       STATES.each do |state, transition|
         class_eval <<~RUBY, __FILE__, __LINE__ + 1
-          # Moves status to a different state
-          def #{transition}
-            @mutex.synchronize do
-              # Do not allow reverse state transitions (we always go one way) or transition to the
-              # same state as currently
-              return if @status && STATES.keys.index(:#{state}) <= STATES.keys.index(@status)
+          # Defined below
+          if #{transition != :stop!}
+            # Moves status to a different state
+            def #{transition}
+              @mutex.synchronize do
+                # Do not allow reverse state transitions (we always go one way) or transition to the
+                # same state as currently
+                return if @status && STATES.keys.index(:#{state}) <= STATES.keys.index(@status)
 
-              @status = :#{state}
-              conductor.signal
-              monitor.instrument("connection.listener.#{state}", caller: self)
+                @status = :#{state}
+                conductor.signal
+                monitor.instrument("connection.listener.#{state}", caller: self)
+              end
             end
           end
 

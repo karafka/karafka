@@ -125,6 +125,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     uri (1.0.3)
+    warning (1.5.0)
     waterdrop (2.8.5)
       karafka-core (>= 2.4.9, < 3.0.0)
       karafka-rdkafka (>= 0.19.2)
@@ -156,6 +157,7 @@ DEPENDENCIES
   rspec
   simplecov
   stringio
+  warning
 
 BUNDLED WITH
    2.6.9

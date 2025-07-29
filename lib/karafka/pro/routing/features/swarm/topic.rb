@@ -10,6 +10,15 @@ module Karafka
         class Swarm < Base
           # Topic swarm API extensions
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @swarm = nil
+            end
+
             # Allows defining swarm routing topic settings
             # @param nodes [Range, Array, Hash] range of nodes ids or array with nodes ids for
             #   which we should run given topic or hash with nodes expected partition assignments

@@ -98,6 +98,9 @@ module Karafka
           @status.public_send("#{state}?")
         end
 
+        # Defined below
+        next if transition == :start!
+
         # Moves listener to a given state
         define_method transition do
           @status.public_send(transition)

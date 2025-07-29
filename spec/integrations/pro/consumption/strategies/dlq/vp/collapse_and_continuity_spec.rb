@@ -113,14 +113,12 @@ assert pre_collapse.none?(&:last)
 collapsed = []
 flipped = false
 flipped_index = nil
-last_collapsed_index = nil
 
 DT[:flow].each_with_index do |row, index|
   next unless row.last
   next if row.first.is_a?(Symbol)
 
   collapsed << row
-  last_collapsed_index = index
 
   if row.last == false
     flipped = true
