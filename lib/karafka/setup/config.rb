@@ -177,6 +177,9 @@ module Karafka
         setting :supervision_sleep, default: 0.1
         # What system exit code should we use when we terminated forcefully
         setting :forceful_exit_code, default: 2
+        # How long should we wait on the listeners forceful shutdown when they are stuck beyond the
+        # shutdown timeout before forcing a bypass
+        setting :forceful_shutdown_wait, default: 5_000
 
         setting :swarm do
           # Manager for swarm nodes control
