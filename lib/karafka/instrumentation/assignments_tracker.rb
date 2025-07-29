@@ -50,6 +50,22 @@ module Karafka
         end
       end
 
+      # @return [String] thread-safe and lock-safe inspect implementation
+      def inspect
+        info = if @mutex.try_lock
+                 begin
+                   assignments = @assignments.dup.transform_keys(&:name).inspect
+                   "assignments=#{assignments}"
+                 ensure
+                   @mutex.unlock
+                 end
+               else
+                 'busy'
+               end
+
+        "#<#{self.class.name} #{info}>"
+      end
+
       # When client is under reset due to critical issues, remove all of its assignments as we will
       #   get a new set of assignments
       # @param event [Karafka::Core::Monitoring::Event]

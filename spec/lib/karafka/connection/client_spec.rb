@@ -84,4 +84,61 @@ RSpec.describe_current do
       expect(result).to eq(watermark_offsets)
     end
   end
+
+  describe '#inspect' do
+    let(:client_name) { 'test-consumer-1' }
+
+    before do
+      allow(client).to receive(:name).and_return(client_name)
+    end
+
+    context 'when client is open' do
+      it 'expect to show client details with open state' do
+        result = client.inspect
+
+        expect(result).to include(described_class.name)
+        expect(result).to include('state=open')
+      end
+    end
+
+    context 'when client is closed' do
+      before { client.instance_variable_set(:@closed, true) }
+
+      it 'expect to show client details with closed state' do
+        result = client.inspect
+
+        expect(result).to include('state=closed')
+      end
+    end
+
+    context 'when name is empty' do
+      before { allow(client).to receive(:name).and_return('') }
+
+      it 'expect to handle empty name gracefully' do
+        result = client.inspect
+
+        expect(result).to include('name=""')
+      end
+    end
+
+    it 'expect to not call inspect on complex nested objects' do
+      allow(client.instance_variable_get(:@subscription_group)).to receive(:inspect)
+      allow(client.instance_variable_get(:@buffer)).to receive(:inspect)
+      allow(client.instance_variable_get(:@rebalance_manager)).to receive(:inspect)
+
+      client.inspect
+
+      expect(client.instance_variable_get(:@subscription_group)).not_to have_received(:inspect)
+      expect(client.instance_variable_get(:@buffer)).not_to have_received(:inspect)
+      expect(client.instance_variable_get(:@rebalance_manager)).not_to have_received(:inspect)
+    end
+
+    it 'expect to be safe for logging without performance issues' do
+      start_time = Time.now
+      client.inspect
+      end_time = Time.now
+
+      expect(end_time - start_time).to be < 0.01
+    end
+  end
 end

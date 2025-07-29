@@ -499,4 +499,126 @@ RSpec.describe_current do
       it { expect { consumer.on_initialized }.not_to raise_error }
     end
   end
+
+  describe '#inspect' do
+    let(:consumer_id) { 'abc123' }
+    let(:topic_name) { 'test-topic' }
+    let(:partition_number) { 5 }
+    let(:messages_count) { 10 }
+
+    before do
+      allow(consumer).to receive_messages(
+        id: consumer_id,
+        topic: instance_double(Karafka::Routing::Topic, name: topic_name),
+        partition: partition_number
+      )
+
+      consumer.messages = messages
+
+      allow(coordinator).to receive(:revoked?).and_return(false)
+      allow(messages).to receive(:count).and_return(messages_count)
+    end
+
+    it 'expect to return formatted string with consumer details' do
+      result = consumer.inspect
+
+      expect(result).to include('topic="test-topic"')
+      expect(result).to include('partition=5')
+      expect(result).to include('used=false')
+      expect(result).to include('messages_count=10')
+      expect(result).to include('revoked=false')
+    end
+
+    it 'expect to include object id in hex format' do
+      result = consumer.inspect
+      expected_object_id = format('%#x', consumer.object_id)
+
+      expect(result).to include(expected_object_id)
+    end
+
+    context 'when topic is nil' do
+      before { allow(consumer).to receive(:topic).and_return(nil) }
+
+      it 'expect to handle nil topic gracefully' do
+        result = consumer.inspect
+
+        expect(result).to include('topic=nil')
+        expect { consumer.inspect }.not_to raise_error
+      end
+    end
+
+    context 'when messages is nil' do
+      before { consumer.messages = nil }
+
+      it 'expect to handle nil messages gracefully' do
+        result = consumer.inspect
+
+        expect(result).to include('messages_count=')
+        expect { consumer.inspect }.not_to raise_error
+      end
+    end
+
+    context 'when coordinator is nil' do
+      before { consumer.coordinator = nil }
+
+      it 'expect to handle nil coordinator gracefully' do
+        result = consumer.inspect
+
+        expect(result).to include('revoked=')
+        expect { consumer.inspect }.not_to raise_error
+      end
+    end
+
+    context 'when consumer is not used' do
+      before { allow(consumer).to receive(:used?).and_return(false) }
+
+      it 'expect to show used=false' do
+        result = consumer.inspect
+
+        expect(result).to include('used=false')
+      end
+    end
+
+    context 'when partition is revoked' do
+      before { allow(coordinator).to receive(:revoked?).and_return(true) }
+
+      it 'expect to show revoked=true' do
+        result = consumer.inspect
+
+        expect(result).to include('revoked=true')
+      end
+    end
+
+    context 'when messages collection is empty' do
+      before { allow(messages).to receive(:count).and_return(0) }
+
+      it 'expect to show messages_count=0' do
+        result = consumer.inspect
+
+        expect(result).to include('messages_count=0')
+      end
+    end
+
+    it 'expect to not call inspect on nested objects' do
+      allow(messages).to receive(:inspect)
+      allow(client).to receive(:inspect) if defined?(client)
+      allow(coordinator).to receive(:inspect)
+
+      # Ensure we don't accidentally call inspect on potentially large objects
+      consumer.inspect
+
+      expect(messages).not_to have_received(:inspect)
+      expect(client).not_to have_received(:inspect) if defined?(client)
+      expect(coordinator).not_to have_received(:inspect)
+    end
+
+    it 'expect to be safe for logging without performance issues' do
+      # This test ensures the inspect method completes quickly
+      start_time = Time.now
+      consumer.inspect
+      end_time = Time.now
+
+      expect(end_time - start_time).to be < 0.01 # Should complete in less than 10ms
+    end
+  end
 end
