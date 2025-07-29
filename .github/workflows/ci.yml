@@ -142,7 +142,7 @@ jobs:
         run: bin/verify_kafka_warnings
 
       - name: Check test topics naming convention
-        run: bin/verify_topics_naming
+        run: bundle exec bin/verify_topics_naming
 
   integrations_oss:
     timeout-minutes: 30
@@ -216,7 +216,7 @@ jobs:
         run: bin/verify_kafka_warnings
 
       - name: Check test topics naming convention
-        run: bin/verify_topics_naming
+        run: bundle exec bin/verify_topics_naming
 
   integrations_pro:
     timeout-minutes: 45

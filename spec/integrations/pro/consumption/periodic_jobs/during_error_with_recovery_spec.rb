@@ -40,6 +40,8 @@ start_karafka_and_wait_until do
   DT[:post_error].size >= 2
 end
 
-assert DT[:ticks].any? do |tick|
+any = DT[:ticks].any? do |tick|
   (tick > DT[:errored].min) && (tick < DT[:post_error].min)
 end
+
+assert any

@@ -10,6 +10,15 @@ module Karafka
         class DeadLetterQueue < Base
           # Expansions to the topic API in DLQ
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @dead_letter_queue = nil
+            end
+
             # @param strategy [#call, nil] Strategy we want to use or nil if a default strategy
             # (same as in OSS) should be applied
             # @param args [Hash] Pro DLQ arguments

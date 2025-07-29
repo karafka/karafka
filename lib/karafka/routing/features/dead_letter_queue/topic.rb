@@ -11,6 +11,15 @@ module Karafka
 
           private_constant :DEFAULT_MAX_RETRIES
 
+          # This method calls the parent class initializer and then sets up the
+          # extra instance variable to nil. The explicit initialization
+          # to nil is included as an optimization for Ruby's object shapes system,
+          # which improves memory layout and access performance.
+          def initialize(...)
+            super
+            @dead_letter_queue = nil
+          end
+
           # @param max_retries [Integer] after how many retries should we move data to dlq
           # @param topic [String, false] where the messages should be moved if failing or false
           #   if we do not want to move it anywhere and just skip

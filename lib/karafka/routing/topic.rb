@@ -40,10 +40,18 @@ module Karafka
         #   Karafka 0.6 we can handle multiple Kafka instances with the same process and we can
         #   have same topic name across multiple consumer groups
         @id = "#{consumer_group.id}_#{@name}"
+        @consumer = nil
+        @active_assigned = false
+        @subscription_group_details = nil
+
+        INHERITABLE_ATTRIBUTES.each do |attribute|
+          instance_variable_set("@#{attribute}", nil)
+        end
       end
 
       INHERITABLE_ATTRIBUTES.each do |attribute|
-        attr_writer attribute
+        # Defined below
+        attr_writer attribute unless attribute == :kafka
 
         class_eval <<~RUBY, __FILE__, __LINE__ + 1
           def #{attribute}

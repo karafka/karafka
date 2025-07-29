@@ -3,8 +3,8 @@
 # This code is part of Karafka Pro, a commercial component not licensed under LGPL.
 # See LICENSE for details.
 
-# When running on LRJ, ticking should happen alongside long processing because it is non blocking
-# on proper periods when `during_pause` is set to true.
+# When running on LRJ, ticking should not happen alongside long processing if the long running
+# job is running at the moment
 
 setup_karafka
 
@@ -24,7 +24,7 @@ end
 draw_routes do
   topic DT.topic do
     consumer Consumer
-    periodic(during_pause: true)
+    periodic(during_pause: true, interval: 1_000)
     long_running_job true
   end
 end
@@ -33,9 +33,10 @@ start_karafka_and_wait_until do
   DT[:ticks].size >= 5
 end
 
-# There should be at least one tick parallel to consumption
-assert DT[:consume].any? do |time_range|
+any = DT[:consume].any? do |time_range|
   DT[:ticks].any? do |tick_time|
     time_range.include?(tick_time)
   end
 end
+
+assert !any

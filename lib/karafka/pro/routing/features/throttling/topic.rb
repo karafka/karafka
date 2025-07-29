@@ -10,6 +10,15 @@ module Karafka
         class Throttling < Base
           # Topic throttling API extensions
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @throttling = nil
+            end
+
             # @param limit [Integer] max messages to process in an time interval
             # @param interval [Integer] time interval for processing
             def throttling(

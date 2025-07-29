@@ -25,6 +25,15 @@ module Karafka
 
           # Commit Metadata API extensions
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @offset_metadata = nil
+            end
+
             # @param cache [Boolean] should we cache the response until rebalance
             # @param deserializer [#call] deserializer that will get raw data and should return
             #   deserialized metadata
