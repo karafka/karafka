@@ -3,18 +3,13 @@
 module Karafka
   # Karafka consuming server class
   class Server
-    # How long should we wait on the listeners forceful shutdown when they are stuck beyond the
-    # shutdown timeout before forcing a bypass
-    FORCEFUL_SHUTDOWN_WAIT = 5
-
-    private_constant :FORCEFUL_SHUTDOWN_WAIT
-
     extend Helpers::ConfigImporter.new(
       cli_contract: %i[internal cli contract],
       activity_manager: %i[internal routing activity_manager],
       supervision_sleep: %i[internal supervision_sleep],
       shutdown_timeout: %i[shutdown_timeout],
       forceful_exit_code: %i[internal forceful_exit_code],
+      forceful_shutdown_wait: %i[internal forceful_shutdown_wait],
       process: %i[internal process]
     )
 
@@ -151,7 +146,7 @@ module Karafka
             error: e,
             type: 'app.forceful_stopping.error'
           )
-        end.join(FORCEFUL_SHUTDOWN_WAIT)
+        end.join(forceful_shutdown_wait / 1_000.0)
 
         # We also do not forcefully terminate everything when running in the embedded mode,
         # otherwise we would overwrite the shutdown process of the process that started Karafka
