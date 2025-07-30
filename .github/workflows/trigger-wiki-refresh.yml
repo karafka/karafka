@@ -1,6 +1,6 @@
 name: Trigger Wiki Refresh
 
-gon:
+on:
   release:
     types: [published]
   push:
