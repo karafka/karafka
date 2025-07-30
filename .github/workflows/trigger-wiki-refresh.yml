@@ -25,6 +25,6 @@ jobs:
               "release_tag": "${{ github.event.release.tag_name || '' }}",
               "release_name": "${{ github.event.release.name || '' }}",
               "commit_sha": "${{ github.sha }}",
-              "commit_message": "${{ github.event.head_commit.message || '' }}",
+              "commit_message": "Trigger Wiki Refresh",
               "triggered_by": "${{ github.actor }}"
             }
