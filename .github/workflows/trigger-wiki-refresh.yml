@@ -12,7 +12,7 @@ jobs:
     environment: wiki-trigger
     steps:
       - name: Trigger wiki refresh
-        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0
+        uses: peter-evans/repository-dispatch@5a3edc67490343006aa8cc8e4a7c69ef6094d733
         with:
           token: ${{ secrets.WIKI_REPO_TOKEN }}
           repository: karafka/wiki
