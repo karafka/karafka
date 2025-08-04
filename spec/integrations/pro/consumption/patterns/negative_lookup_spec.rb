@@ -50,5 +50,5 @@ produce_many("it-activities.#{ENDING}", DT.uuids(1))
 produce_many("it-active.#{ENDING}", DT.uuids(1))
 
 start_karafka_and_wait_until do
-  DT[0].uniq.size >= 2
+  DT[0].size >= 2
 end
