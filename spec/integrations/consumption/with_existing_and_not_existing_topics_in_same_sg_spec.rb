@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # When Karafka starts consuming in one SG existing topic and not existing topic and auto create is
-# off, it should emit an error but at the same time should consume for existing topic
+# off, it should emit an error but at the same time should consume from existing topic
 
 setup_karafka(allow_errors: true) do |config|
   config.kafka[:'allow.auto.create.topics'] = false
