@@ -8,6 +8,7 @@
 - [Enhancement] Improve printing of TTIN to separate threads.
 - [Enhancement] Support transactional ID resource in the Admin ACL management.
 - [Enhancement] Move post-forceful shutdown termination wait value to a config.
+- [Enhancement] Include consumer group, subscription group and other details in error logs for key error locations.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
