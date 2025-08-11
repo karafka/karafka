@@ -344,7 +344,7 @@ module Karafka
         error = event[:error]
         backtrace = (error.backtrace || []).join("\n")
 
-        details = [event[:error], error_details(event)].compact.join(' ')
+        details = [error.to_s, error_details(event)].compact.join(' ')
 
         case type
         when 'consumer.initialized.error'
