@@ -459,7 +459,7 @@ module Karafka
 
       # Extracts some structural location
       # @param event [Karafka::Core::Monitoring::Event] event details including payload
-      # @note It uses similar approach to the Web UI but here we collect lest info because it goes
+      # @note It uses similar approach to the Web UI but here we collect less info because it goes
       #   to the logs.
       def error_details(event)
         caller_ref = event[:caller]
