@@ -342,48 +342,50 @@ module Karafka
       def on_error_occurred(event)
         type = event[:type]
         error = event[:error]
-        details = (error.backtrace || []).join("\n")
+        backtrace = (error.backtrace || []).join("\n")
+
+        details = [error.to_s, error_details(event)].compact.join(' ')
 
         case type
         when 'consumer.initialized.error'
-          error "Consumer initialized error: #{error}"
-          error details
+          error "Consumer initialized error: #{details}"
+          error backtrace
         when 'consumer.wrap.error'
-          error "Consumer wrap failed due to an error: #{error}"
-          error details
+          error "Consumer wrap failed due to an error: #{details}"
+          error backtrace
         when 'consumer.consume.error'
-          error "Consumer consuming error: #{error}"
-          error details
+          error "Consumer consuming error: #{details}"
+          error backtrace
         when 'consumer.revoked.error'
-          error "Consumer on revoked failed due to an error: #{error}"
-          error details
+          error "Consumer on revoked failed due to an error: #{details}"
+          error backtrace
         when 'consumer.idle.error'
-          error "Consumer idle failed due to an error: #{error}"
-          error details
+          error "Consumer idle failed due to an error: #{details}"
+          error backtrace
         when 'consumer.shutdown.error'
-          error "Consumer on shutdown failed due to an error: #{error}"
-          error details
+          error "Consumer on shutdown failed due to an error: #{details}"
+          error backtrace
         when 'consumer.tick.error'
-          error "Consumer on tick failed due to an error: #{error}"
-          error details
+          error "Consumer on tick failed due to an error: #{details}"
+          error backtrace
         when 'consumer.eofed.error'
-          error "Consumer on eofed failed due to an error: #{error}"
-          error details
+          error "Consumer on eofed failed due to an error: #{details}"
+          error backtrace
         when 'consumer.after_consume.error'
-          error "Consumer on after_consume failed due to an error: #{error}"
-          error details
+          error "Consumer on after_consume failed due to an error: #{details}"
+          error backtrace
         when 'worker.process.error'
-          fatal "Worker processing failed due to an error: #{error}"
-          fatal details
+          fatal "Worker processing failed due to an error: #{details}"
+          fatal backtrace
         when 'connection.listener.fetch_loop.error'
-          error "Listener fetch loop error: #{error}"
-          error details
+          error "Listener fetch loop error: #{details}"
+          error backtrace
         when 'swarm.supervisor.error'
-          fatal "Swarm supervisor crashed due to an error: #{error}"
-          fatal details
+          fatal "Swarm supervisor crashed due to an error: #{details}"
+          fatal backtrace
         when 'runner.call.error'
-          fatal "Runner crashed due to an error: #{error}"
-          fatal details
+          fatal "Runner crashed due to an error: #{details}"
+          fatal backtrace
         when 'app.stopping.error'
           # Counts number of workers and listeners that were still active when forcing the
           # shutdown. Please note, that unless all listeners are closed, workers will not finalize
@@ -401,44 +403,44 @@ module Karafka
 
           error message
         when 'app.forceful_stopping.error'
-          error "Forceful shutdown error occurred: #{error}"
-          error details
+          error "Forceful shutdown error occurred: #{details}"
+          error backtrace
         when 'librdkafka.error'
-          error "librdkafka internal error occurred: #{error}"
-          error details
+          error "librdkafka internal error occurred: #{details}"
+          error backtrace
         # Those can occur when emitted statistics are consumed by the end user and the processing
         # of statistics fails. The statistics are emitted from librdkafka main loop thread and
         # any errors there crash the whole thread
         when 'callbacks.statistics.error'
-          error "callbacks.statistics processing failed due to an error: #{error}"
-          error details
+          error "callbacks.statistics processing failed due to an error: #{details}"
+          error backtrace
         when 'callbacks.error.error'
-          error "callbacks.error processing failed due to an error: #{error}"
-          error details
+          error "callbacks.error processing failed due to an error: #{details}"
+          error backtrace
         # Those will only occur when retries in the client fail and when they did not stop after
         # back-offs
         when 'connection.client.poll.error'
-          error "Data polling error occurred: #{error}"
-          error details
+          error "Data polling error occurred: #{details}"
+          error backtrace
         when 'connection.client.rebalance_callback.error'
-          error "Rebalance callback error occurred: #{error}"
-          error details
+          error "Rebalance callback error occurred: #{details}"
+          error backtrace
         when 'connection.client.unsubscribe.error'
-          error "Client unsubscribe error occurred: #{error}"
-          error details
+          error "Client unsubscribe error occurred: #{details}"
+          error backtrace
         when 'parallel_segments.reducer.error'
-          error "Parallel segments reducer error occurred: #{error}"
-          error details
+          error "Parallel segments reducer error occurred: #{details}"
+          error backtrace
         when 'parallel_segments.partitioner.error'
-          error "Parallel segments partitioner error occurred: #{error}"
-          error details
+          error "Parallel segments partitioner error occurred: #{details}"
+          error backtrace
         when 'virtual_partitions.partitioner.error'
-          error "Virtual partitions partitioner error occurred: #{error}"
-          error details
+          error "Virtual partitions partitioner error occurred: #{details}"
+          error backtrace
         # This handles any custom errors coming from places like Web-UI, etc
         else
-          error "#{type} error occurred: #{error.class} - #{error}"
-          error details
+          error "#{type} error occurred: #{error.class} - #{details}"
+          error backtrace
         end
       end
 
@@ -453,6 +455,62 @@ module Karafka
       # @return [Boolean] should we log polling
       def log_polling?
         @log_polling
+      end
+
+      # Extracts some structural location
+      # @param event [Karafka::Core::Monitoring::Event] event details including payload
+      # @note It uses similar approach to the Web UI but here we collect less info because it goes
+      #   to the logs.
+      def error_details(event)
+        caller_ref = event[:caller]
+
+        # Collect extra info if it was a consumer related error.
+        # Those come from user code
+        details = case caller_ref
+                  when Karafka::BaseConsumer
+                    extract_consumer_info(caller_ref)
+                  when Karafka::Connection::Client
+                    extract_client_info(caller_ref)
+                  when Karafka::Connection::Listener
+                    extract_listener_info(caller_ref)
+                  else
+                    {}
+                  end
+
+        return nil if details.empty?
+
+        "[#{details.map { |label, value| "#{label}: #{value}" }.join(', ')}]"
+      end
+
+      # @param consumer [::Karafka::BaseConsumer]
+      # @return [Hash] hash with consumer specific info for details of error
+      def extract_consumer_info(consumer)
+        {
+          consumer_group: consumer.topic.consumer_group.id,
+          subscription_group: consumer.topic.subscription_group.id,
+          topic: consumer.topic.name,
+          partition: consumer.partition,
+          first_offset: consumer.messages.metadata.first_offset,
+          last_offset: consumer.messages.metadata.last_offset
+        }
+      end
+
+      # @param client [::Karafka::Connection::Client]
+      # @return [Hash] hash with client specific info for details of error
+      def extract_client_info(client)
+        {
+          consumer_group: client.subscription_group.consumer_group.id,
+          subscription_group: client.subscription_group.id
+        }
+      end
+
+      # @param listener [::Karafka::Connection::Listener]
+      # @return [Hash] hash with listener specific info for details of error
+      def extract_listener_info(listener)
+        {
+          consumer_group: listener.subscription_group.consumer_group.id,
+          subscription_group: listener.subscription_group.id
+        }
       end
     end
   end

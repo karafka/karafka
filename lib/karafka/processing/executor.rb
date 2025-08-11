@@ -168,7 +168,6 @@ module Karafka
           topic = @coordinator.topic
 
           strategy = strategy_selector.find(topic)
-          expansions = expansions_selector.find(topic)
 
           consumer = topic.consumer_class.new
           # We use singleton class as the same consumer class may be used to process different
@@ -178,6 +177,7 @@ module Karafka
           # Specific features may expand consumer API beyond the injected strategy. The difference
           # here is that strategy impacts the flow of states while extra APIs just provide some
           # extra methods with informations, etc but do no deviate the flow behavior
+          expansions = expansions_selector.find(topic)
           expansions.each { |expansion| consumer.singleton_class.include(expansion) }
 
           consumer.client = @client
