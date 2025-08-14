@@ -11,10 +11,10 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activejob (8.0.2)
-      activesupport (= 8.0.2)
+    activejob (8.0.2.1)
+      activesupport (= 8.0.2.1)
       globalid (>= 0.3.6)
-    activesupport (8.0.2)
+    activesupport (8.0.2.1)
       base64
       benchmark (>= 0.3)
       bigdecimal
