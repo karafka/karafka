@@ -4,9 +4,33 @@
 module ActiveJob
   # ActiveJob queue adapters
   module QueueAdapters
+    # Determine the appropriate base class for the Karafka adapter.
+    #
+    # This complex inheritance logic addresses a Rails 7.1 compatibility issue where
+    # ActiveJob::QueueAdapters::AbstractAdapter is not properly autoloaded during
+    # early initialization phases, causing "uninitialized constant" errors.
+    #
+    # The issue occurs because:
+    # 1. AbstractAdapter is autoloaded, not directly required in Rails 7+
+    # 2. Rails 7.1 has specific timing issues during the boot process
+    # 3. Queue adapters may be loaded before Rails completes initialization
+    #
+    # Inheritance strategy:
+    # - Rails 7.1: Inherit from Object (avoids AbstractAdapter autoloading issues)
+    # - Other Rails versions: Inherit from AbstractAdapter (normal behavior)
+    # - No Rails: Inherit from Object (standalone ActiveJob usage)
+    #
+    # @see https://github.com/sidekiq/sidekiq/issues/6746 Similar issue in Sidekiq
+    base = if defined?(Rails) && defined?(Rails::VERSION)
+             (Rails::VERSION::MAJOR == 7 && Rails::VERSION::MINOR == 1 ? Object : AbstractAdapter)
+           else
+             # Fallback when Rails is not loaded
+             Object
+           end
+
     # Karafka adapter for enqueuing jobs
     # This is here for ease of integration with ActiveJob.
-    class KarafkaAdapter
+    class KarafkaAdapter < base
       include Karafka::Helpers::ConfigImporter.new(
         dispatcher: %i[internal active_job dispatcher]
       )
