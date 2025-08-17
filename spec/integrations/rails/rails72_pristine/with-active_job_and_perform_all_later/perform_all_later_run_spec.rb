@@ -12,6 +12,11 @@ require 'action_controller'
 require 'active_job'
 require 'active_job/karafka'
 
+assert_equal(
+  ActiveJob::QueueAdapters::AbstractAdapter,
+  ActiveJob::QueueAdapters::KarafkaAdapter.superclass
+)
+
 ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
 ActiveJob::Base.queue_adapter = :karafka
 
