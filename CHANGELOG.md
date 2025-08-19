@@ -15,6 +15,7 @@
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0`.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
+- [Change] Normalize how libs and deps are required (no functional change for the end user)
 
 ## 2.5.0 (2025-06-15)
 - **[Breaking]** Change how consistency of DLQ dispatches works in Pro (`partition_key` vs. direct partition id mapping).
