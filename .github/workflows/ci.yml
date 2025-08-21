@@ -21,7 +21,14 @@ env:
 
 jobs:
   diffend:
-    runs-on: ubuntu-latest
+    runs-on: >-
+      ${{
+        (github.event_name != 'pull_request' ||
+         github.event.pull_request.head.repo.full_name == github.repository)
+        && fromJSON('["self-hosted", "linux", "x64", "qemu"]')
+        || 'ubuntu-latest'
+      }}
+
     timeout-minutes: 5
     strategy:
       fail-fast: false
@@ -43,7 +50,14 @@ jobs:
         run: bundle secure
 
   karafka-checksum:
-    runs-on: ubuntu-latest
+    runs-on: >-
+      ${{
+        (github.event_name != 'pull_request' ||
+         github.event.pull_request.head.repo.full_name == github.repository)
+        && fromJSON('["self-hosted", "linux", "x64", "qemu"]')
+        || 'ubuntu-latest'
+      }}
+
     timeout-minutes: 5
     strategy:
       fail-fast: false
@@ -60,7 +74,14 @@ jobs:
         run: bin/verify_license_integrity
 
   coditsu:
-    runs-on: ubuntu-latest
+    runs-on: >-
+      ${{
+        (github.event_name != 'pull_request' ||
+         github.event.pull_request.head.repo.full_name == github.repository)
+        && fromJSON('["self-hosted", "linux", "x64", "qemu"]')
+        || 'ubuntu-latest'
+      }}
+
     timeout-minutes: 5
     strategy:
       fail-fast: false
