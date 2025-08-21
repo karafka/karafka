@@ -174,7 +174,14 @@ jobs:
 
   integrations_oss:
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on: >-
+      ${{
+        (github.event_name != 'pull_request' ||
+         github.event.pull_request.head.repo.full_name == github.repository)
+        && fromJSON('["self-hosted", "linux", "x64", "qemu"]')
+        || 'ubuntu-latest'
+      }}
+
     needs: diffend
     env:
       BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
