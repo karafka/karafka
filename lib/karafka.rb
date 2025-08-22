@@ -1,24 +1,22 @@
 # frozen_string_literal: true
 
-%w[
-  karafka-core
-  delegate
-  English
-  rdkafka
-  waterdrop
-  json
-  forwardable
-  fileutils
-  openssl
-  optparse
-  socket
-  base64
-  date
-  singleton
-  digest
-  zeitwerk
-  logger
-].each(&method(:require))
+require 'karafka-core'
+require 'delegate'
+require 'English'
+require 'rdkafka'
+require 'waterdrop'
+require 'json'
+require 'forwardable'
+require 'fileutils'
+require 'openssl'
+require 'optparse'
+require 'socket'
+require 'base64'
+require 'date'
+require 'singleton'
+require 'digest'
+require 'zeitwerk'
+require 'logger'
 
 # Karafka framework main namespace
 module Karafka
