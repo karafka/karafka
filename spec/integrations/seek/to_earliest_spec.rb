@@ -25,7 +25,7 @@ draw_routes(Consumer)
 elements = DT.uuids(20)
 
 Thread.new do
-  sleep(5)
+  sleep(10)
   produce_many(DT.topic, elements)
 end
 

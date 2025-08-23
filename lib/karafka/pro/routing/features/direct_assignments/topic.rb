@@ -10,6 +10,15 @@ module Karafka
         class DirectAssignments < Base
           # Topic extensions for direct assignments
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @direct_assignments = nil
+            end
+
             # Allows for direct assignment of
             # @param partitions_or_all [true, Array<Integer>] informs Karafka that we want
             #   to use direct assignments instead of automatic for this topic. It also allows us

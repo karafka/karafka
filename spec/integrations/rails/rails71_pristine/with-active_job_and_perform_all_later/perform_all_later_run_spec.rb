@@ -11,6 +11,11 @@ require 'tempfile'
 require 'active_job'
 require 'active_job/karafka'
 
+assert_equal(
+  Object,
+  ActiveJob::QueueAdapters::KarafkaAdapter.superclass
+)
+
 ActiveJob::Base.extend ::Karafka::ActiveJob::JobExtensions
 ActiveJob::Base.queue_adapter = :karafka
 

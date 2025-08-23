@@ -7,10 +7,15 @@
 - [Enhancement] Don't create not needed dirs in the non-Rails setup template.
 - [Enhancement] Improve printing of TTIN to separate threads.
 - [Enhancement] Support transactional ID resource in the Admin ACL management.
+- [Enhancement] Move post-forceful shutdown termination wait value to a config.
+- [Enhancement] Include consumer group, subscription group and other details in error logs for key error locations.
+- [Enhancement] Inherit from `ActiveJob::QueueAdapters::AbstractAdapter` when possible for ActiveJob base class.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
+- [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0`.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
+- [Change] Normalize how libs and deps are required (no functional change for the end user)
 
 ## 2.5.0 (2025-06-15)
 - **[Breaking]** Change how consistency of DLQ dispatches works in Pro (`partition_key` vs. direct partition id mapping).

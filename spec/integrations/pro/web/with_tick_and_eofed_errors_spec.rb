@@ -40,3 +40,8 @@ end
 start_karafka_and_wait_until do
   DT.key?(:eofed) && DT.key?(:tick)
 end
+
+error = Karafka::Admin.read_topic(Karafka::Web.config.topics.errors.name, 0, 1).first.payload
+
+assert_equal error[:details][:first_offset], -1001
+assert_equal error[:details][:last_offset], -1001

@@ -10,6 +10,15 @@ module Karafka
         class Expiring < Base
           # Topic expiring API extensions
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @expiring = nil
+            end
+
             # @param ttl [Integer, nil] maximum time in ms a message is considered alive
             def expiring(ttl = nil)
               # Those settings are used for validation

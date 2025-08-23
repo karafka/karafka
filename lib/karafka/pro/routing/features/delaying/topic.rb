@@ -10,6 +10,15 @@ module Karafka
         class Delaying < Base
           # Topic delaying API extensions
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @delaying = nil
+            end
+
             # @param delay [Integer, nil] minimum age of a message we want to process
             def delaying(delay = nil)
               # Those settings are used for validation

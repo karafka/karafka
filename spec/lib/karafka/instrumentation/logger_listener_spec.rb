@@ -5,10 +5,19 @@ RSpec.describe_current do
 
   let(:event) { Karafka::Core::Monitoring::Event.new(rand.to_s, payload) }
   let(:time) { rand }
-  let(:topic) { build(:routing_topic, name: topic_name) }
   let(:topic_name) { rand.to_s }
   let(:server_id) { Karafka::Server.id }
   let(:client_id) { rand.to_s }
+
+  let(:subscription_group) do
+    create(:routing_subscription_group)
+  end
+
+  let(:topic) do
+    topic = build(:routing_topic, name: topic_name)
+    topic.subscription_group = subscription_group
+    topic
+  end
 
   before do
     Karafka::Server.listeners = []
@@ -397,12 +406,49 @@ RSpec.describe_current do
 
     let(:payload) { { caller: caller, error: error, type: type } }
     let(:error) { StandardError.new }
+    let(:caller) { nil }
+    let(:con_client) { Karafka::Connection::Client.new(subscription_group, -> {}) }
+
+    let(:con_listener) do
+      subscription_group = build(:routing_subscription_group)
+      Karafka::Connection::Listener.new(
+        subscription_group,
+        Karafka::Processing::JobsQueue.new,
+        nil
+      )
+    end
+
+    let(:consumer) do
+      coordinator = create(:processing_coordinator, topic: topic, partition: 0)
+      messages_metadata = build(:messages_metadata, topic: topic.name, partition: 0)
+      messages = []
+
+      allow(messages).to receive(:metadata).and_return(messages_metadata)
+      allow(messages_metadata).to receive_messages(first_offset: 100, last_offset: 199)
+
+      instance = Class.new(Karafka::BaseConsumer).new
+      instance.coordinator = coordinator
+      allow(instance).to receive(:messages).and_return(messages)
+
+      instance
+    end
 
     context 'when it is a connection.listener.fetch_loop.error' do
       let(:message) { "Listener fetch loop error: #{error}" }
       let(:type) { 'connection.listener.fetch_loop.error' }
+      let(:caller) { con_listener }
 
-      it { expect(Karafka.logger).to have_received(:error).with(message) }
+      it 'expects to log error with details' do
+        details = ''
+
+        expect(Karafka.logger).to have_received(:error).twice do |logged_message|
+          details += logged_message
+        end
+
+        expect(details).to include(message)
+        expect(details).to include(con_listener.subscription_group.id)
+        expect(details).to include(con_listener.subscription_group.consumer_group.id)
+      end
     end
 
     context 'when it is a consumer.initialized.error' do
@@ -415,8 +461,20 @@ RSpec.describe_current do
     context 'when it is a consumer.consume.error' do
       let(:type) { 'consumer.consume.error' }
       let(:message) { "Consumer consuming error: #{error}" }
+      let(:caller) { consumer }
 
-      it { expect(Karafka.logger).to have_received(:error).with(message) }
+      it 'expects to log error with details' do
+        details = ''
+
+        expect(Karafka.logger).to have_received(:error).twice do |logged_message|
+          details += logged_message
+        end
+
+        expect(details).to include(message)
+        expect(details).to include(consumer.topic.name)
+        expect(details).to include(consumer.topic.subscription_group.id)
+        expect(details).to include(consumer.topic.subscription_group.consumer_group.id)
+      end
     end
 
     context 'when it is a consumer.revoked.error' do
@@ -484,7 +542,10 @@ RSpec.describe_current do
 
     context 'when it is an app.stopping.error' do
       let(:type) { 'app.stopping.error' }
-      let(:payload) { { type: type, error: Karafka::Errors::ForcefulShutdownError.new } }
+
+      let(:payload) do
+        { type: type, error: Karafka::Errors::ForcefulShutdownError.new, caller: nil }
+      end
 
       let(:message) do
         'Forceful Karafka server stop with: 0 active workers and 0 active listeners'
@@ -519,8 +580,19 @@ RSpec.describe_current do
     context 'when it is a connection.client.poll.error' do
       let(:type) { 'connection.client.poll.error' }
       let(:message) { "Data polling error occurred: #{error}" }
+      let(:caller) { con_client }
 
-      it { expect(Karafka.logger).to have_received(:error).with(message) }
+      it 'expects to log error with details' do
+        details = ''
+
+        expect(Karafka.logger).to have_received(:error).twice do |logged_message|
+          details += logged_message
+        end
+
+        expect(details).to include(message)
+        expect(details).to include(con_client.subscription_group.id)
+        expect(details).to include(con_client.subscription_group.consumer_group.id)
+      end
     end
 
     context 'when it is a callbacks.statistics.error' do
@@ -577,6 +649,20 @@ RSpec.describe_current do
       let(:message) { "different.error error occurred: #{error.class} - #{error}" }
 
       it { expect(Karafka.logger).to have_received(:error).with(message) }
+    end
+
+    context 'when caller provides no error details' do
+      let(:type) { 'consumer.consume.error' }
+      let(:caller) { Object.new }
+
+      before do
+        allow(listener).to receive(:error_details).with(event).and_return(nil)
+      end
+
+      it 'does not include error details in the message' do
+        expected_message = "Consumer consuming error: #{error}"
+        expect(Karafka.logger).to have_received(:error).with(expected_message)
+      end
     end
   end
 

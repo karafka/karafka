@@ -69,13 +69,12 @@ assert_equal 0, bigger.last
 assert_equal 0, smaller.last
 
 previous = nil
-continuous = true
 at_least_one_non_order = false
 
 # We check here, that we actually consume and publish metrics from both topics and that each of
 # them can put their data independently and in its own order (one does not block the other)
 DT[:overall].each do |point|
-  topic, lag = point.split('/')
+  topic, _lag = point.split('/')
 
   unless previous
     previous = topic
@@ -84,8 +83,6 @@ DT[:overall].each do |point|
   end
 
   at_least_one_non_order = true if previous != topic
-
-  continuous = false if lag.to_i == '0'
 end
 
 assert at_least_one_non_order

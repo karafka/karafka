@@ -35,8 +35,10 @@ start_karafka_and_wait_until do
 end
 
 # There should be at least one tick parallel to consumption
-assert DT[:consume].all? do |time_range|
+any = DT[:consume].all? do |time_range|
   DT[:ticks].none? do |tick_time|
     time_range.include?(tick_time)
   end
 end
+
+assert any

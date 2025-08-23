@@ -66,6 +66,7 @@ module Karafka
         required(:tick_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
         required(:supervision_sleep) { |val| val.is_a?(Numeric) && val.positive? }
         required(:forceful_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
+        required(:forceful_shutdown_wait) { |val| val.is_a?(Integer) && val >= 0 }
 
         nested(:swarm) do
           required(:manager) { |val| !val.nil? }
