@@ -18,11 +18,9 @@ acl1 = Karafka::Admin::Acl.new(
 Karafka::Admin::Acl.create(acl1)
 Karafka::Admin::Acl.delete(acl1)
 
-# Give some time for acl to sync up
-sleep(5)
-
-assert_equal [], Karafka::Admin::Acl.describe(acl1)
-assert !Karafka::Admin::Acl.all.map(&:resource_name).include?(uuid1)
+# If this hangs it means something is not working as expected
+sleep(1) until Karafka::Admin::Acl.describe(acl1).empty?
+sleep(1) while Karafka::Admin::Acl.all.map(&:resource_name).include?(uuid1)
 
 uuid2 = "it-#{SecureRandom.uuid}"
 acl2 = Karafka::Admin::Acl.new(
@@ -36,8 +34,5 @@ acl2 = Karafka::Admin::Acl.new(
 
 Karafka::Admin::Acl.create(acl2)
 
-# Give some time to create rule
-sleep(5)
-
-assert_equal 1, Karafka::Admin::Acl.describe(acl2).size
-assert Karafka::Admin::Acl.all.map(&:resource_name).include?(uuid2)
+sleep(1) until Karafka::Admin::Acl.describe(acl2).size == 1
+sleep(1) until Karafka::Admin::Acl.all.map(&:resource_name).include?(uuid2)
