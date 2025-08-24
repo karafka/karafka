@@ -150,7 +150,8 @@ ensure
 end
 
 # Loads the web UI for integration specs of tracking
-def setup_web
+# @param migrate [Boolean] should we migrate and create topics. Defaults to true
+def setup_web(migrate: true)
   require 'karafka/web'
 
   # Use new groups and topics for each spec, so we don't end up with conflicts
@@ -166,6 +167,9 @@ def setup_web
   end
 
   Karafka::Web.enable!
+
+  return unless migrate
+
   Karafka::Web::Installer.new.migrate
 end
 
