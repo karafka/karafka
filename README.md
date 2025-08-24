@@ -1,4 +1,4 @@
-![karafka logo](https://raw.githubusercontent.com/karafka/misc/master/logo/karafka_logotype_transparent2.png)
+![karafka logo](https://cdn.karafka.io/assets/misc/logo/karafka_logotype_transparent2.png)
 
 [![Build Status](https://github.com/karafka/karafka/actions/workflows/ci.yml/badge.svg)](https://github.com/karafka/karafka/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/karafka.svg)](http://badge.fury.io/rb/karafka)
@@ -39,7 +39,7 @@ Karafka **uses** threads to handle many messages simultaneously in the same proc
 
 ## Getting started
 
-![karafka web ui](https://raw.githubusercontent.com/karafka/misc/master/printscreens/web-ui.png)
+![karafka web ui](https://cdn.karafka.io/assets/misc/printscreens/web-ui.png)
 
 If you're entirely new to the subject, you can start with our "Kafka on Rails" articles series, which will get you up and running with the terminology and basic ideas behind using Kafka:
 

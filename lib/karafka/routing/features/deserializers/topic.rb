@@ -8,6 +8,15 @@ module Karafka
         # Routing topic deserializers API. It allows to configure deserializers for various
         # components of each message.
         module Topic
+          # This method calls the parent class initializer and then sets up the
+          # extra instance variable to nil. The explicit initialization
+          # to nil is included as an optimization for Ruby's object shapes system,
+          # which improves memory layout and access performance.
+          def initialize(...)
+            super
+            @deserializers = nil
+          end
+
           # Allows for setting all the deserializers with standard defaults
           # @param payload [Object] Deserializer for the message payload
           # @param key [Object] deserializer for the message key

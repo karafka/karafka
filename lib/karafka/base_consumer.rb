@@ -210,6 +210,28 @@ module Karafka
       )
     end
 
+    # Returns a string representation of the consumer instance for debugging purposes.
+    #
+    # This method provides a safe inspection that avoids walking through potentially large
+    # nested objects like messages, client connections, or coordinator state that could
+    # cause performance issues during logging or debugging.
+    #
+    # @return [String] formatted string containing essential consumer information including
+    #   consumer ID, topic name, partition number, usage status, message count, and
+    #   revocation status
+    def inspect
+      parts = [
+        "id=#{@id}",
+        "topic=#{topic&.name.inspect}",
+        "partition=#{partition}",
+        "used=#{@used}",
+        "messages_count=#{@messages&.count}",
+        "revoked=#{coordinator&.revoked?}"
+      ]
+
+      "#<#{self.class.name}:#{format('%#x', object_id)} #{parts.join(' ')}>"
+    end
+
     private
 
     # Method called post-initialization of a consumer when all basic things are assigned.

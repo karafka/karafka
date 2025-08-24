@@ -437,6 +437,13 @@ module Karafka
         @wrapped_kafka.query_watermark_offsets(topic, partition)
       end
 
+      # @return [String] safe inspection string that is causing circular dependencies and other
+      #   issues
+      def inspect
+        state = @closed ? 'closed' : 'open'
+        "#<#{self.class.name} id=#{@id.inspect} name=#{@name.inspect} state=#{state}>"
+      end
+
       private
 
       # When we cannot store an offset, it means we no longer own the partition

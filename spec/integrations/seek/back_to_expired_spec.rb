@@ -9,10 +9,12 @@ Karafka::App.monitor.subscribe('consumer.consuming.seek') do |event|
   DT[:seeks] << event[:message].offset
 end
 
+SEEK_TIME = Time.now - 600_000
+
 class Consumer < Karafka::BaseConsumer
   def consume
     sleep(1)
-    seek(Time.now - 60_000)
+    seek(SEEK_TIME)
   end
 end
 
@@ -36,6 +38,15 @@ end
 10.times do
   produce_many(DT.topic, DT.uuids(10), key: 'test')
   produce_many(DT.topic, Array.new(10) { nil }, key: 'test')
+end
+
+offset = 0
+
+# Compacting may not kick in immediately, hence we have to wait for it
+# This can happen slowly especially on CI
+while offset < 199
+  offset = Karafka::Admin.read_topic(DT.topic, 0, 1, SEEK_TIME).first.offset
+  sleep(5)
 end
 
 start_karafka_and_wait_until do

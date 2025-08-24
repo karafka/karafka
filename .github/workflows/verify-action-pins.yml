@@ -5,9 +5,16 @@ on:
       - '.github/workflows/**'
 jobs:
   verify_action_pins:
-    runs-on: ubuntu-latest
+    runs-on: >-
+      ${{
+        (github.event_name != 'pull_request' ||
+         github.event.pull_request.head.repo.full_name == github.repository)
+        && fromJSON('["self-hosted", "linux", "x64", "qemu"]')
+        || 'ubuntu-latest'
+      }}
+
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Check SHA pins
         run: |
           if grep -E -r "uses: .*/.*@(v[0-9]+|main|master)($|[[:space:]]|$)" --include="*.yml" --include="*.yaml" .github/workflows/ | grep -v "#"; then

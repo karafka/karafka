@@ -10,6 +10,15 @@ module Karafka
         class Filtering < Base
           # Filtering feature topic extensions
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @filtering = nil
+            end
+
             # @param factory [#call, nil] Callable that can produce new filters instances per
             #   assigned topic partition. nil as default so this feature is disabled
             def filter(factory = nil)

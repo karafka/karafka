@@ -1,0 +1,37 @@
+name: Trigger Wiki Refresh
+
+on:
+  release:
+    types: [published]
+  push:
+    branches: [master]
+
+jobs:
+  trigger-wiki-refresh:
+    runs-on: >-
+      ${{
+        (github.event_name != 'pull_request' ||
+         github.event.pull_request.head.repo.full_name == github.repository)
+        && fromJSON('["self-hosted", "linux", "x64", "qemu"]')
+        || 'ubuntu-latest'
+      }}
+
+    environment: wiki-trigger
+    if: github.repository_owner == 'karafka'
+    steps:
+      - name: Trigger wiki refresh
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          token: ${{ secrets.WIKI_REPO_TOKEN }}
+          repository: karafka/wiki
+          event-type: sync-trigger
+          client-payload: |
+            {
+              "repository": "${{ github.repository }}",
+              "event_name": "${{ github.event_name }}",
+              "release_tag": "${{ github.event.release.tag_name || '' }}",
+              "release_name": "${{ github.event.release.name || '' }}",
+              "commit_sha": "${{ github.sha }}",
+              "commit_message": "Trigger Wiki Refresh",
+              "triggered_by": "${{ github.actor }}"
+            }

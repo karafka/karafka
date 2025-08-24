@@ -38,6 +38,7 @@ RSpec.describe_current do
       internal: {
         supervision_sleep: 0.1,
         forceful_exit_code: 2,
+        forceful_shutdown_wait: 5_000,
         status: Karafka::Status.new,
         process: Karafka::Process.new,
         tick_interval: 5_000,
@@ -171,6 +172,32 @@ RSpec.describe_current do
 
     context 'when forceful_exit_code is less than 0' do
       before { config[:internal][:forceful_exit_code] = -1 }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+  end
+
+  context 'when validating forceful_shutdown_wait' do
+    context 'when forceful_shutdown_wait is missing' do
+      before { config[:internal].delete(:forceful_shutdown_wait) }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when forceful_shutdown_wait is not an integer' do
+      before { config[:internal][:forceful_shutdown_wait] = 'not_integer' }
+
+      it 'expects to not be successful' do
+        expect(contract.call(config)).not_to be_success
+      end
+    end
+
+    context 'when forceful_shutdown_wait is less than 0' do
+      before { config[:internal][:forceful_shutdown_wait] = -1 }
 
       it 'expects to not be successful' do
         expect(contract.call(config)).not_to be_success

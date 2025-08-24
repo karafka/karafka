@@ -10,6 +10,15 @@ module Karafka
         class AdaptiveIterator < Base
           # Topic extension allowing us to enable and configure adaptive iterator
           module Topic
+            # This method calls the parent class initializer and then sets up the
+            # extra instance variable to nil. The explicit initialization
+            # to nil is included as an optimization for Ruby's object shapes system,
+            # which improves memory layout and access performance.
+            def initialize(...)
+              super
+              @adaptive_iterator = nil
+            end
+
             # @param active [Boolean] should we use the automatic adaptive iterator
             # @param safety_margin [Integer]
             #   How big of a margin we leave ourselves so we can safely communicate back with
