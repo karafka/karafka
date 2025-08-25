@@ -257,7 +257,12 @@ RSpec.describe_current do
   end
 
   describe '#all' do
-    subject(:all) { described_class.all }
+    subject(:all) do
+      # On slow CI first fetch after ACL sync may not be immediately propagated
+      # We give it a bit of time to ensure we can sync up most recent full state
+      sleep(0.1)
+      described_class.all
+    end
 
     let(:permission_type) { :allow }
 
