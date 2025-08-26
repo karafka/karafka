@@ -58,6 +58,7 @@ RSpec.describe_current do
         'topic.metadata.refresh.interval.ms': 5_000,
         'max.poll.interval.ms': 300_000,
         'client.software.name': 'karafka',
+        'socket.nagle.disable': true,
         'client.software.version': [
           "v#{Karafka::VERSION}",
           "rdkafka-ruby-v#{Rdkafka::VERSION}",
