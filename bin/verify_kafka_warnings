@@ -10,6 +10,7 @@ allowed_patterns=(
    "Replayed PartitionRecord for"
    "Previous leader None and previous leader epoch"
    "Creating new"
+   "Unloaded transaction metadata"
 )
 
 # Get all warnings
