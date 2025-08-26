@@ -16,6 +16,7 @@ module Karafka
         # some features may use this value for computation and it is better to ensure, we do
         # always have it
         'max.poll.interval.ms': 300_000,
+        'socket.nagle.disable': true,
         'client.software.version': [
           "v#{Karafka::VERSION}",
           "rdkafka-ruby-v#{Rdkafka::VERSION}",
@@ -42,7 +43,8 @@ module Karafka
       PRODUCER_KAFKA_DEV_DEFAULTS = {
         # For all of those same reasoning as for the consumer
         'allow.auto.create.topics': 'true',
-        'topic.metadata.refresh.interval.ms': 5_000
+        'topic.metadata.refresh.interval.ms': 5_000,
+        'socket.nagle.disable': true
       }.freeze
 
       private_constant :CONSUMER_KAFKA_DEFAULTS, :CONSUMER_KAFKA_DEV_DEFAULTS,

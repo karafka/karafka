@@ -17,6 +17,7 @@ RSpec.describe_current do
           'statistics.interval.ms': 5_000,
           'client.software.name': 'karafka',
           'max.poll.interval.ms': 300_000,
+          'socket.nagle.disable': true,
           'client.software.version': [
             "v#{Karafka::VERSION}",
             "rdkafka-ruby-v#{Rdkafka::VERSION}",
@@ -44,6 +45,7 @@ RSpec.describe_current do
           'statistics.interval.ms': 5_000,
           'client.software.name': 'karafka',
           'max.poll.interval.ms': 300_000,
+          'socket.nagle.disable': true,
           'client.software.version': [
             "v#{Karafka::VERSION}",
             "rdkafka-ruby-v#{Rdkafka::VERSION}",
@@ -79,7 +81,8 @@ RSpec.describe_current do
           'max.poll.interval.ms': 200_000,
           'client.software.version': 'custom_version',
           'allow.auto.create.topics': 'false',
-          'topic.metadata.refresh.interval.ms': 10_000
+          'topic.metadata.refresh.interval.ms': 10_000,
+          'socket.nagle.disable': true
         )
       end
     end
@@ -106,7 +109,8 @@ RSpec.describe_current do
       it 'adds producer kafka dev defaults' do
         expect(kafka_config).to include(
           'allow.auto.create.topics': 'true',
-          'topic.metadata.refresh.interval.ms': 5_000
+          'topic.metadata.refresh.interval.ms': 5_000,
+          'socket.nagle.disable': true
         )
       end
     end
@@ -127,7 +131,8 @@ RSpec.describe_current do
       it 'does not overwrite existing settings' do
         expect(kafka_config).to eq(
           'allow.auto.create.topics': 'false',
-          'topic.metadata.refresh.interval.ms': 10_000
+          'topic.metadata.refresh.interval.ms': 10_000,
+          'socket.nagle.disable': true
         )
       end
     end
