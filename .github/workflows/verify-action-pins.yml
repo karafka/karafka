@@ -5,14 +5,7 @@ on:
       - '.github/workflows/**'
 jobs:
   verify_action_pins:
-    runs-on: >-
-      ${{
-        (github.event_name != 'pull_request' ||
-         github.event.pull_request.head.repo.full_name == github.repository)
-        && fromJSON('["self-hosted", "linux", "x64", "qemu"]')
-        || 'ubuntu-latest'
-      }}
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Check SHA pins

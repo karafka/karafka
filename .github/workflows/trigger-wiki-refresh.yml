@@ -8,14 +8,7 @@ on:
 
 jobs:
   trigger-wiki-refresh:
-    runs-on: >-
-      ${{
-        (github.event_name != 'pull_request' ||
-         github.event.pull_request.head.repo.full_name == github.repository)
-        && fromJSON('["self-hosted", "linux", "x64", "qemu"]')
-        || 'ubuntu-latest'
-      }}
-
+    runs-on: ubuntu-latest
     environment: wiki-trigger
     if: github.repository_owner == 'karafka'
     steps:
