@@ -10,6 +10,7 @@
 - [Enhancement] Move post-forceful shutdown termination wait value to a config.
 - [Enhancement] Include consumer group, subscription group and other details in error logs for key error locations.
 - [Enhancement] Inherit from `ActiveJob::QueueAdapters::AbstractAdapter` when possible for ActiveJob base class.
+- [Enhancement] Disable Nagle algorithm by default for improved network performance.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
