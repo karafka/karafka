@@ -179,7 +179,14 @@ RSpec.describe_current do
   end
 
   describe '#describe' do
-    let(:describing) { described_class.describe(acl) }
+    let(:describing) do
+      # We wait before describing because in most of the specs we setup some ACLs and their
+      # propagation can take a bit of time
+      # This improves stability on slow CIs
+      sleep(0.1)
+      described_class.describe(acl)
+    end
+
     let(:permission_type) { :any }
 
     let(:acl1) do
