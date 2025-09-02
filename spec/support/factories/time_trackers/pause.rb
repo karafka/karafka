@@ -2,6 +2,8 @@
 
 FactoryBot.define do
   factory :time_trackers_pause, class: 'Karafka::TimeTrackers::Pause' do
+    timeout { 500 }
+
     max_timeout { 1_000 }
     exponential_backoff { true }
 
