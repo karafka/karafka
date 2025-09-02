@@ -94,10 +94,10 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.5.0-preview1'
           - '3.4'
           - '3.3'
           - '3.2'
-          - '3.1'
         force_ruby_platform:
           - true
           - false
@@ -112,13 +112,6 @@ jobs:
       - name: Start Kafka with docker compose
         run: |
           docker compose up -d || (sleep 5 && docker compose up -d)
-
-      # Newer versions of ActiveSupport and Rails do not work with Ruby 3.1 anymore.
-      # While we use newer by default we do want to resolve older and test, thus we remove
-      # Gemfile.lock and let it resolve to the most compatible version possible
-      - name: Remove Gemfile.lock if Ruby 3.1
-        if: matrix.ruby == '3.1'
-        run: rm -f Gemfile.lock
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@efbf473cab83af4468e8606cc33eca9281bb213f # v1.256.0
@@ -152,10 +145,10 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.5.0-preview1'
           - '3.4'
           - '3.3'
           - '3.2'
-          - '3.1'
         force_ruby_platform:
           - true
           - false
@@ -184,13 +177,7 @@ jobs:
       - name: Install latest Bundler
         run: |
           gem install bundler --no-document
-
-          if [[ "${{ matrix.ruby }}" == 3.1* ]]; then
-            gem update --system 3.6.9 --no-document
-          else
-            gem update --system
-          fi
-
+          gem update --system
           bundle config set without 'tools benchmarks docs'
 
       - name: Fix directory permissions for Bundler
@@ -226,10 +213,10 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - '3.5.0-preview1'
           - '3.4'
           - '3.3'
           - '3.2'
-          - '3.1'
         force_ruby_platform:
           - true
           - false
@@ -254,13 +241,7 @@ jobs:
       - name: Install latest Bundler
         run: |
           gem install bundler --no-document
-
-          if [[ "${{ matrix.ruby }}" == 3.1* ]]; then
-            gem update --system 3.6.9 --no-document
-          else
-            gem update --system
-          fi
-
+          gem update --system
           bundle config set without 'tools benchmarks docs'
 
       - name: Bundle install

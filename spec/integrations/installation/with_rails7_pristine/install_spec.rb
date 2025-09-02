@@ -51,6 +51,7 @@ Dir.mktmpdir do |dir|
 
     # rails new has its own Gemfile to which we need to add karafka once more
     File.open("#{dir}/Gemfile", 'a') do |f|
+      f.puts 'gem "benchmark"'
       f.puts 'gem "karafka", path: ENV.fetch("KARAFKA_GEM_DIR"), require: true'
       f.puts 'gem "bigdecimal"'
       f.puts 'gem "logger"'
