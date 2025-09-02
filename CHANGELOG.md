@@ -14,7 +14,7 @@
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
-- [Change] Require `karafka-rdkafka` `>=` `0.21.0`.
+- [Change] Require `karafka-rdkafka` `>=` `0.21.0` to support new features.
 - [Change] Remove no longer needed `cooperative.sticky` rebalance patch.
 - [Change] Normalize how libs and deps are required (no functional change for the end user)
 
