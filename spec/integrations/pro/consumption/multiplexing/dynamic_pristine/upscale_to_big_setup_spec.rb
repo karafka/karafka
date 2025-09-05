@@ -99,7 +99,10 @@ high_usage = 0
 
   # We exit that way because only that way it will fully crash and not hang the process for too
   # long
-  exit!(1) if high_usage >= 3
+  if high_usage >= 6
+    puts 'Exiting due to prolonged high usage'
+    exit!(1)
+  end
 
   sleep(1)
 end
