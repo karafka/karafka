@@ -18,9 +18,9 @@ module Karafka
         )
       end
 
-      # @return [Boolean] true if fork API and pidfd OS API are available, otherwise false
+      # @return [Boolean] true if fork API is available, otherwise false
       def supported?
-        ::Process.respond_to?(:fork) && Swarm::Pidfd.supported?
+        ::Process.respond_to?(:fork)
       end
     end
   end

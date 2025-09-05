@@ -108,7 +108,6 @@ module Karafka
         # :nocov:
 
         @writer.close
-        @pidfd = Pidfd.new(@pid)
       end
 
       # Indicates that this node is doing well
@@ -147,7 +146,19 @@ module Karafka
       # @note Parent API
       # @note Keep in mind that the fact that process is alive does not mean it is healthy
       def alive?
-        @pidfd.alive?
+        # Don't try to waitpid on ourselves - just check if process exists
+        return true if @pid == ::Process.pid
+
+        # Try to reap the process without blocking. If it returns the pid,
+        # the process has exited (zombie). If it returns nil, still running.
+        result = ::Process.waitpid(@pid, ::Process::WNOHANG)
+        result.nil?
+      rescue Errno::ECHILD
+        # Process doesn't exist or already reaped
+        false
+      rescue Errno::ESRCH
+        # Process doesn't exist
+        false
       end
 
       # @return [Boolean] true if node is orphaned or false otherwise. Used for orphans detection.
@@ -176,13 +187,21 @@ module Karafka
 
       # Sends provided signal to the node
       # @param signal [String]
+      # @return [Boolean] true if signal was sent, false if process doesn't exist
       def signal(signal)
-        @pidfd.signal(signal)
+        ::Process.kill(signal, @pid)
+        true
+      rescue Errno::ESRCH
+        # Process doesn't exist
+        false
       end
 
       # Removes the dead process from the processes table
       def cleanup
-        @pidfd.cleanup
+        # WNOHANG means don't block if process hasn't exited yet
+        ::Process.waitpid(@pid, ::Process::WNOHANG)
+      rescue Errno::ECHILD
+        # Process already reaped or doesn't exist, which is fine
       end
 
       private

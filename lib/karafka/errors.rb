@@ -133,14 +133,6 @@ module Karafka
     # optional dependencies are needed but not available.
     DependencyConstraintsError = Class.new(BaseError)
 
-    # Raised when we were not able to open pidfd for given pid
-    # This should not happen. If you see it, please report.
-    PidfdOpenFailedError = Class.new(BaseError)
-
-    # Failed to send signal to a process via pidfd
-    # This should not happen. If you see it, please report.
-    PidfdSignalFailedError = Class.new(BaseError)
-
     # Raised when given option/feature is not supported on a given platform or when given option
     # is not supported in a given configuration
     UnsupportedOptionError = Class.new(BaseError)
