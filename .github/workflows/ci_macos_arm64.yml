@@ -16,6 +16,7 @@ permissions:
 env:
   BUNDLE_RETRY: 6
   BUNDLE_JOBS: 4
+  CONFLUENT_VERSION: "8.0.0"
 
 jobs:
   swarm-macos:
@@ -32,10 +33,73 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Install Homebrew dependencies
+      - name: Install Bash 4+ and Kerberos
         run: |
-          brew install kafka
-          brew services start kafka
+          brew install bash
+          brew list krb5 &>/dev/null || brew install krb5
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+      - name: Install and Start Confluent Community Kafka (KRaft)
+        run: |
+          brew install openjdk@17
+          export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+          export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
+
+          curl -O "https://packages.confluent.io/archive/8.0/confluent-community-${CONFLUENT_VERSION}.tar.gz"
+          tar -xzf "confluent-community-${CONFLUENT_VERSION}.tar.gz"
+
+          export CONFLUENT_HOME="$(pwd)/confluent-${CONFLUENT_VERSION}"
+          export PATH="$CONFLUENT_HOME/bin:$PATH"
+          cd "$CONFLUENT_HOME"
+
+          # Find the correct server config
+          KRAFT_CONFIG=""
+          for config in "etc/kafka/kraft/server.properties" "config/kraft/server.properties" "etc/kafka/server.properties"; do
+            if [ -f "$config" ]; then
+              KRAFT_CONFIG="$config"
+              echo "Found config: $KRAFT_CONFIG"
+              break
+            fi
+          done
+
+          if [ -z "$KRAFT_CONFIG" ]; then
+            echo "❌ No server config found"
+            exit 1
+          fi
+
+          # Configure KRaft for single-node setup
+          cat >> "$KRAFT_CONFIG" << 'EOF'
+
+          # KRaft mode configuration for single-node setup
+          process.roles=broker,controller
+          node.id=1
+          controller.quorum.voters=1@127.0.0.1:9093
+          listeners=PLAINTEXT://127.0.0.1:9092,CONTROLLER://127.0.0.1:9093
+          controller.listener.names=CONTROLLER
+          inter.broker.listener.name=PLAINTEXT
+          log.dirs=/tmp/kraft-combined-logs
+
+          # Enable simple ACL authorization for testing
+          authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+          super.users=User:ANONYMOUS
+          allow.everyone.if.no.acl.found=true
+          EOF
+
+          echo "Updated KRaft configuration"
+
+          CLUSTER_ID=$(bin/kafka-storage random-uuid)
+          bin/kafka-storage format -t "$CLUSTER_ID" -c "$KRAFT_CONFIG"
+          bin/kafka-server-start "$KRAFT_CONFIG" &
+
+          sleep 20
+
+          for i in {1..30}; do
+            if bin/kafka-topics --bootstrap-server 127.0.0.1:9092 --list >/dev/null 2>&1; then
+              echo "✅ Confluent Community ${CONFLUENT_VERSION} (KRaft) is ready!"
+              break
+            fi
+            [ $i -eq 30 ] && { echo "❌ Kafka failed to start"; exit 1; }
+            sleep 2
+          done
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@efbf473cab83af4468e8606cc33eca9281bb213f # v1.256.0
@@ -44,9 +108,6 @@ jobs:
           bundler-cache: true
           bundler: 'latest'
 
-      - name: Wait for Kafka to be ready
-        run: |
-          timeout 60 bash -c 'until nc -z localhost 9092; do sleep 1; done'
 
       - name: Run swarm unit specs
         run: bundle exec rspec spec/lib/karafka/swarm/ --tag mode:fork
