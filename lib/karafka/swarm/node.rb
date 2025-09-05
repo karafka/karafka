@@ -45,7 +45,7 @@ module Karafka
       # @param parent_pid [Integer] parent pid for zombie fencing
       def initialize(id, parent_pid)
         @id = id
-        @parent_pidfd = Pidfd.new(parent_pid)
+        @parent_pid = parent_pid
       end
 
       # Starts a new fork and:
@@ -153,7 +153,7 @@ module Karafka
       # @return [Boolean] true if node is orphaned or false otherwise. Used for orphans detection.
       # @note Child API
       def orphaned?
-        !@parent_pidfd.alive?
+        ::Process.ppid != @parent_pid
       end
 
       # Sends sigterm to the node
