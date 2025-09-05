@@ -197,11 +197,15 @@ module Karafka
       end
 
       # Removes the dead process from the processes table
+      # @return [Boolean] true if process was reaped, false if still running or already reaped
       def cleanup
         # WNOHANG means don't block if process hasn't exited yet
-        ::Process.waitpid(@pid, ::Process::WNOHANG)
+        result = ::Process.waitpid(@pid, ::Process::WNOHANG)
+        # If result is nil, process is still running; if it's pid, process exited and was reaped
+        !result.nil?
       rescue Errno::ECHILD
         # Process already reaped or doesn't exist, which is fine
+        false
       end
 
       private
