@@ -21,7 +21,6 @@ env:
 jobs:
   swarm-macos:
     timeout-minutes: 30
-    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
@@ -30,8 +29,19 @@ jobs:
           - '3.4'
           - '3.3'
           - '3.2'
+        macos-version:
+          - 'macos-14'
+          - 'macos-15'
+        exclude:
+          - ruby: '3.5.0-preview1'
+            macos-version: 'macos-14'
+    runs-on: ${{ matrix.macos-version }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Remove Gemfile.lock for Ruby preview versions
+        if: contains(matrix.ruby, 'preview')
+        run: rm -f Gemfile.lock
 
       - name: Install Bash 4+ and Kerberos
         run: |
@@ -123,7 +133,7 @@ jobs:
 
   ci-success-macos:
     name: CI macOS ARM64 Swarm Success
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     if: always()
     needs:
       - swarm-macos
