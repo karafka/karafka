@@ -99,7 +99,6 @@ module Karafka
           # from the daily buffer. That way we ensure the at least once delivery and in case of
           # a transactional producer, exactly once delivery.
           @daily_buffer.for_dispatch do |message|
-            puts "MOVING TO DISPATCHER #{message.offset} - #{message.raw_headers['schedule_target_key']}"
             keys << message.key
             @dispatcher << message
           end
@@ -149,8 +148,6 @@ module Karafka
           if message.headers['schedule_source_type'] == 'tombstone'
             @max_epoch.update(message.headers['schedule_target_epoch'])
           end
-
-          puts "RECEIVED DAILY: #{message.offset} - #{message.raw_headers['schedule_target_key']}"
 
           # Add to buffer all tombstones and messages for the same day
           @daily_buffer << message

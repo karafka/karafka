@@ -52,10 +52,19 @@ module Karafka
 
           selected = []
 
+
           @accu.each_value do |epoch, message|
             next unless epoch <= dispatch
 
             selected << [epoch, message]
+          end
+
+          selected.each do |epoch, message|
+            puts "PRESORT - #{epoch} - #{message.offset} - #{message.raw_headers['schedule_target_key']}"
+          end
+
+          selected.sort_by(&:first).each do |epoch, message|
+            puts "POSTSORT - #{epoch} - #{message.offset} - #{message.raw_headers['schedule_target_key']}"
           end
 
           selected

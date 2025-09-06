@@ -36,8 +36,6 @@ module Karafka
         # @note This method adds the message to the buffer, does **not** dispatch it.
         # @note It also produces needed tombstone event as well as an audit log message
         def <<(message)
-          puts "RECEIVED DISPATCHER: #{message.offset} - #{message.raw_headers['schedule_target_key']}"
-
           target_headers = message.raw_headers.merge(
             'schedule_source_topic' => @topic,
             'schedule_source_partition' => @partition.to_s,
