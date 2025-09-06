@@ -46,6 +46,8 @@ module Karafka
       def initialize(id, parent_pid)
         @id = id
         @parent_pid = parent_pid
+        @mutex = Mutex.new
+        @alive = nil
       end
 
       # Starts a new fork and:
@@ -56,6 +58,9 @@ module Karafka
       # @note Parent API
       def start
         @reader, @writer = IO.pipe
+        # Reset alive status when starting/restarting a node
+        # nil means unknown status - will check with waitpid
+        @mutex.synchronize { @alive = nil }
 
         # :nocov:
         @pid = ::Process.fork do
@@ -149,15 +154,30 @@ module Karafka
         # Don't try to waitpid on ourselves - just check if process exists
         return true if @pid == ::Process.pid
 
-        # Try to reap the process without blocking. If it returns the pid,
-        # the process has exited (zombie). If it returns nil, still running.
-        result = ::Process.waitpid(@pid, ::Process::WNOHANG)
-        result.nil?
+        @mutex.synchronize do
+          # Return cached result if we've already determined the process is dead
+          return false if @alive == false
+
+          # Try to reap the process without blocking. If it returns the pid,
+          # the process has exited (zombie). If it returns nil, still running.
+          result = ::Process.waitpid(@pid, ::Process::WNOHANG)
+
+          if result
+            # Process has exited and we've reaped it
+            @alive = false
+            false
+          else
+            # Process is still running
+            true
+          end
+        end
       rescue Errno::ECHILD
         # Process doesn't exist or already reaped
+        @mutex.synchronize { @alive = false }
         false
       rescue Errno::ESRCH
         # Process doesn't exist
+        @mutex.synchronize { @alive = false }
         false
       end
 
@@ -199,12 +219,25 @@ module Karafka
       # Removes the dead process from the processes table
       # @return [Boolean] true if process was reaped, false if still running or already reaped
       def cleanup
-        # WNOHANG means don't block if process hasn't exited yet
-        result = ::Process.waitpid(@pid, ::Process::WNOHANG)
-        # If result is nil, process is still running; if it's pid, process exited and was reaped
-        !result.nil?
+        @mutex.synchronize do
+          # If we've already marked it as dead (reaped in alive?), nothing to do
+          return false if @alive == false
+
+          # WNOHANG means don't block if process hasn't exited yet
+          result = ::Process.waitpid(@pid, ::Process::WNOHANG)
+
+          if result
+            # Process exited and was reaped
+            @alive = false
+            true
+          else
+            # Process is still running
+            false
+          end
+        end
       rescue Errno::ECHILD
         # Process already reaped or doesn't exist, which is fine
+        @mutex.synchronize { @alive = false }
         false
       end
 
