@@ -149,6 +149,8 @@ module Karafka
             @max_epoch.update(message.headers['schedule_target_epoch'])
           end
 
+          puts "RECEIVED DAILY: #{message.offset} - #{message.raw_headers['schedule_target_key']}"
+
           # Add to buffer all tombstones and messages for the same day
           @daily_buffer << message
         end
