@@ -99,6 +99,7 @@ module Karafka
           # from the daily buffer. That way we ensure the at least once delivery and in case of
           # a transactional producer, exactly once delivery.
           @daily_buffer.for_dispatch do |message|
+            puts "MOVING TO DISPATCHER #{message.offset} - #{message.raw_headers['schedule_target_key']}"
             keys << message.key
             @dispatcher << message
           end
