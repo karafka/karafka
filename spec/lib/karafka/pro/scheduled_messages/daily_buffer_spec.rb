@@ -102,6 +102,119 @@ RSpec.describe_current do
         end.not_to yield_control
       end
     end
+
+    context 'when multiple messages have the same epoch' do
+      let(:past_epoch) { Time.now.to_i - 100 }
+
+      let(:message1) do
+        instance_double(
+          Karafka::Messages::Message,
+          key: 'key1',
+          offset: 100,
+          headers: {
+            'schedule_source_type' => 'schedule',
+            'schedule_target_epoch' => past_epoch
+          }
+        )
+      end
+
+      let(:message2) do
+        instance_double(
+          Karafka::Messages::Message,
+          key: 'key2',
+          offset: 50,
+          headers: {
+            'schedule_source_type' => 'schedule',
+            'schedule_target_epoch' => past_epoch
+          }
+        )
+      end
+
+      let(:message3) do
+        instance_double(
+          Karafka::Messages::Message,
+          key: 'key3',
+          offset: 150,
+          headers: {
+            'schedule_source_type' => 'schedule',
+            'schedule_target_epoch' => past_epoch
+          }
+        )
+      end
+
+      before do
+        buffer << message1
+        buffer << message2
+        buffer << message3
+      end
+
+      it 'yields messages sorted by offset when epochs are the same' do
+        dispatched = []
+        buffer.for_dispatch { |msg| dispatched << msg }
+
+        expect(dispatched).to eq([message2, message1, message3])
+        expect(dispatched.map(&:offset)).to eq([50, 100, 150])
+      end
+    end
+
+    context 'when messages have different epochs and some have the same epoch' do
+      let(:epoch1) { Time.now.to_i - 200 }
+      let(:epoch2) { Time.now.to_i - 100 }
+
+      let(:message1) do
+        instance_double(
+          Karafka::Messages::Message,
+          key: 'key1',
+          offset: 100,
+          headers: {
+            'schedule_source_type' => 'schedule',
+            'schedule_target_epoch' => epoch2
+          }
+        )
+      end
+
+      let(:message2) do
+        instance_double(
+          Karafka::Messages::Message,
+          key: 'key2',
+          offset: 50,
+          headers: {
+            'schedule_source_type' => 'schedule',
+            'schedule_target_epoch' => epoch2
+          }
+        )
+      end
+
+      let(:message3) do
+        instance_double(
+          Karafka::Messages::Message,
+          key: 'key3',
+          offset: 75,
+          headers: {
+            'schedule_source_type' => 'schedule',
+            'schedule_target_epoch' => epoch1
+          }
+        )
+      end
+
+      before do
+        buffer << message1
+        buffer << message2
+        buffer << message3
+      end
+
+      it 'yields messages sorted by epoch first, then by offset for same epoch' do
+        dispatched = []
+        buffer.for_dispatch { |msg| dispatched << msg }
+
+        expect(dispatched).to eq([message3, message2, message1])
+        expect(dispatched[0].headers['schedule_target_epoch']).to eq(epoch1)
+        expect(dispatched[1].headers['schedule_target_epoch']).to eq(epoch2)
+        expect(dispatched[1].offset).to eq(50)
+        expect(dispatched[2].headers['schedule_target_epoch']).to eq(epoch2)
+        expect(dispatched[2].offset).to eq(100)
+      end
+    end
   end
 
   describe '#delete' do
