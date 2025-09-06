@@ -13,7 +13,7 @@ begin
     topic :topic1 do
       consumer Class.new
       eofed true
-      kafka('bootstrap.servers': '127.0.0.1:9092')
+      kafka('bootstrap.servers': kafka_bootstrap_servers)
     end
   end
 rescue Karafka::Errors::InvalidConfigurationError

@@ -151,7 +151,7 @@ RSpec.describe_current do
         builder.draw do
           consumer_group :group_name1 do
             topic :topic_name1 do
-              kafka('bootstrap.servers': 'localhost:9092')
+              kafka('bootstrap.servers': kafka_bootstrap_servers)
               consumer Class.new(Karafka::BaseConsumer)
               deserializer ->(data) { data }
             end
@@ -190,13 +190,13 @@ RSpec.describe_current do
         builder.draw do
           consumer_group :group_name1 do
             topic :topic_name1 do
-              kafka('bootstrap.servers': 'localhost:9092')
+              kafka('bootstrap.servers': kafka_bootstrap_servers)
               consumer Class.new(Karafka::BaseConsumer)
               deserializer ->(data) { data }
             end
 
             topic :topic_name2 do
-              kafka('bootstrap.servers': 'localhost:9092')
+              kafka('bootstrap.servers': kafka_bootstrap_servers)
               consumer Class.new(Karafka::BaseConsumer)
               deserializer ->(data) { data }
             end
@@ -218,7 +218,7 @@ RSpec.describe_current do
           consumer_group :group_name1 do
             subscription_group 'test1' do
               topic :topic_name1 do
-                kafka('bootstrap.servers': 'localhost:9092')
+                kafka('bootstrap.servers': kafka_bootstrap_servers)
                 consumer Class.new(Karafka::BaseConsumer)
                 deserializer ->(data) { data }
               end
@@ -228,7 +228,7 @@ RSpec.describe_current do
           consumer_group :group_name2 do
             subscription_group 'test2' do
               topic :topic_name2 do
-                kafka('bootstrap.servers': 'localhost:9092')
+                kafka('bootstrap.servers': kafka_bootstrap_servers)
                 consumer Class.new(Karafka::BaseConsumer)
                 deserializer ->(data) { data }
               end

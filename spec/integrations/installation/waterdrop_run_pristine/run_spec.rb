@@ -5,13 +5,14 @@
 # @see https://github.com/karafka/waterdrop/pull/485
 
 require 'waterdrop'
+require_relative '../../support/kafka_helper'
 
 producer = WaterDrop::Producer.new
 
 producer.setup do |config|
   config.deliver = true
   config.kafka = {
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': kafka_bootstrap_servers,
     'request.required.acks': 1
   }
 end

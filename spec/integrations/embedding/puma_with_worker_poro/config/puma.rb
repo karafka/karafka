@@ -2,6 +2,7 @@
 
 require 'karafka'
 require 'securerandom'
+require_relative '../../../support/kafka_helper'
 
 TOPIC = "it-#{SecureRandom.hex(6)}".freeze
 PID = Process.pid
@@ -18,7 +19,7 @@ class ShutdownConsumer < Karafka::BaseConsumer
 end
 
 ::Karafka::App.setup do |config|
-  config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+  config.kafka = { 'bootstrap.servers': kafka_bootstrap_servers }
   config.client_id = SecureRandom.hex(6)
 end
 

@@ -8,6 +8,7 @@ require 'bundler/setup'
 require 'sidekiq'
 require 'sidekiq/testing'
 require 'karafka'
+require_relative '../../support/kafka_helper'
 
 class Accu
   class << self
@@ -39,7 +40,7 @@ class TestConsumer < Karafka::BaseConsumer
 end
 
 ::Karafka::App.setup do |config|
-  config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
+  config.kafka = { 'bootstrap.servers': kafka_bootstrap_servers }
   config.client_id = SecureRandom.hex(6)
 end
 

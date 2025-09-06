@@ -53,7 +53,7 @@ RSpec.describe_current do
     let(:expected_defaults) do
       {
         'allow.auto.create.topics': 'true',
-        'bootstrap.servers': '127.0.0.1:9092',
+        'bootstrap.servers': kafka_bootstrap_servers,
         'statistics.interval.ms': 5_000,
         'topic.metadata.refresh.interval.ms': 5_000,
         'max.poll.interval.ms': 300_000,

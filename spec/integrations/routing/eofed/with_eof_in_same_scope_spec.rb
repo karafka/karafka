@@ -12,7 +12,7 @@ begin
       consumer Class.new
       eofed true
       kafka(
-        'bootstrap.servers': '127.0.0.1:9092',
+        'bootstrap.servers': kafka_bootstrap_servers,
         'enable.partition.eof': true
       )
     end
