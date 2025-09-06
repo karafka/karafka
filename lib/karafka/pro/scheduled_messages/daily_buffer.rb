@@ -52,7 +52,6 @@ module Karafka
 
           selected = []
 
-
           @accu.each_value do |epoch, message|
             next unless epoch <= dispatch
 
@@ -62,7 +61,7 @@ module Karafka
           selected.sort! do |pck1, pck2|
             cmp = pck1[0] <=> pck2[0]
 
-            cmp == 0 ? pck1[1].offset <=> pck2[1].offset : cmp
+            cmp.zero? ? pck1[1].offset <=> pck2[1].offset : cmp
           end
 
           selected.each { |_, message| yield(message) }
