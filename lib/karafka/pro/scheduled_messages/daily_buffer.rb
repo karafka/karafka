@@ -58,9 +58,15 @@ module Karafka
             selected << [epoch, message]
           end
 
-          selected
-            .sort_by!(&:first)
-            .each { |_, message| yield(message) }
+          # When epoch is of the same value for multiple messages to be dispatched, we also sort
+          # on the offset to make sure that earlier messages are dispatched prior to newer
+          selected.sort! do |pck1, pck2|
+            cmp = pck1[0] <=> pck2[0]
+
+            cmp.zero? ? pck1[1].offset <=> pck2[1].offset : cmp
+          end
+
+          selected.each { |_, message| yield(message) }
         end
 
         # Removes given key from the accumulator

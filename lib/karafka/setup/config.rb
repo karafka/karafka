@@ -186,10 +186,6 @@ module Karafka
           setting :manager, default: Swarm::Manager.new
           # Exit code we exit an orphaned child with to indicate something went wrong
           setting :orphaned_exit_code, default: 3
-          # syscall number for https://man7.org/linux/man-pages/man2/pidfd_open.2.html
-          setting :pidfd_open_syscall, default: 434
-          # syscall number for https://man7.org/linux/man-pages/man2/pidfd_send_signal.2.html
-          setting :pidfd_signal_syscall, default: 424
           # How often (in ms) should we control our nodes
           # This is maximum time after which we will check. This can happen more often in case of
           # system events.

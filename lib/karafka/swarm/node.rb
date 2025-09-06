@@ -46,6 +46,8 @@ module Karafka
       def initialize(id, parent_pid)
         @id = id
         @parent_pid = parent_pid
+        @mutex = Mutex.new
+        @alive = nil
       end
 
       # Starts a new fork and:
@@ -56,6 +58,9 @@ module Karafka
       # @note Parent API
       def start
         @reader, @writer = IO.pipe
+        # Reset alive status when starting/restarting a node
+        # nil means unknown status - will check with waitpid
+        @mutex.synchronize { @alive = nil }
 
         # :nocov:
         @pid = ::Process.fork do
@@ -108,7 +113,6 @@ module Karafka
         # :nocov:
 
         @writer.close
-        @pidfd = Pidfd.new(@pid)
       end
 
       # Indicates that this node is doing well
@@ -147,7 +151,36 @@ module Karafka
       # @note Parent API
       # @note Keep in mind that the fact that process is alive does not mean it is healthy
       def alive?
-        @pidfd.alive?
+        # Don't try to waitpid on ourselves - just check if process exists
+        return true if @pid == ::Process.pid
+
+        @mutex.synchronize do
+          # Return cached result if we've already determined the process is dead
+          return false if @alive == false
+
+          begin
+            # Try to reap the process without blocking. If it returns the pid,
+            # the process has exited (zombie). If it returns nil, still running.
+            result = ::Process.waitpid(@pid, ::Process::WNOHANG)
+
+            if result
+              # Process has exited and we've reaped it
+              @alive = false
+              false
+            else
+              # Process is still running
+              true
+            end
+          rescue Errno::ECHILD
+            # Process doesn't exist or already reaped
+            @alive = false
+            false
+          rescue Errno::ESRCH
+            # Process doesn't exist
+            @alive = false
+            false
+          end
+        end
       end
 
       # @return [Boolean] true if node is orphaned or false otherwise. Used for orphans detection.
@@ -176,13 +209,40 @@ module Karafka
 
       # Sends provided signal to the node
       # @param signal [String]
+      # @return [Boolean] true if signal was sent, false if process doesn't exist
       def signal(signal)
-        @pidfd.signal(signal)
+        ::Process.kill(signal, @pid)
+        true
+      rescue Errno::ESRCH
+        # Process doesn't exist
+        false
       end
 
       # Removes the dead process from the processes table
+      # @return [Boolean] true if process was reaped, false if still running or already reaped
       def cleanup
-        @pidfd.cleanup
+        @mutex.synchronize do
+          # If we've already marked it as dead (reaped in alive?), nothing to do
+          return false if @alive == false
+
+          begin
+            # WNOHANG means don't block if process hasn't exited yet
+            result = ::Process.waitpid(@pid, ::Process::WNOHANG)
+
+            if result
+              # Process exited and was reaped
+              @alive = false
+              true
+            else
+              # Process is still running
+              false
+            end
+          rescue Errno::ECHILD
+            # Process already reaped or doesn't exist, which is fine
+            @alive = false
+            false
+          end
+        end
       end
 
       private

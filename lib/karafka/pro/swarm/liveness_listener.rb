@@ -163,19 +163,34 @@ module Karafka
         end
 
         # @return [Integer] RSS in MB for the current process
-        # @note Since swarm is linux only, we do not have to worry about getting RSS on other OSes
         def rss_mb
+          RUBY_PLATFORM.include?('linux') ? rss_mb_linux : rss_mb_macos
+        end
+
+        # @return [Integer] RSS in MB for the current process on Linux
+        def rss_mb_linux
           kb_rss = 0
 
           IO.readlines("/proc/#{node.pid}/status").each do |line|
             next unless line.start_with?('VmRSS:')
 
             kb_rss = line.split[1].to_i
-
             break
           end
 
           (kb_rss / 1_024.to_i).round
+        rescue Errno::ENOENT, Errno::EACCES
+          # /proc file doesn't exist or no permission to read it
+          0
+        end
+
+        # @return [Integer] RSS in MB for the current process on macOS/BSD
+        def rss_mb_macos
+          output = `ps -o rss= -p #{node.pid}`.strip
+          output.empty? ? 0 : (output.to_i / 1_024.0).round
+        rescue Errno::ESRCH
+          # Process doesn't exist
+          0
         end
       end
     end

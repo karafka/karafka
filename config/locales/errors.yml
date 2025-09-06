@@ -74,8 +74,6 @@ en:
 
       internal.swarm.manager_format: cannot be nil
       internal.swarm.orphaned_exit_code_format: needs to be an integer bigger or equal to 0
-      internal.swarm.pidfd_open_syscall_format: needs to be an integer bigger or equal to 0
-      internal.swarm.pidfd_signal_syscall_format: needs to be an integer bigger or equal to 0
       internal.swarm.supervision_interval_format: needs to be an integer bigger or equal to 1000
       internal.swarm.liveness_interval_format: needs to be an integer bigger or equal to 1000
       internal.swarm.liveness_listener_format: cannot be nil

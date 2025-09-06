@@ -71,8 +71,6 @@ module Karafka
         nested(:swarm) do
           required(:manager) { |val| !val.nil? }
           required(:orphaned_exit_code) { |val| val.is_a?(Integer) && val >= 0 }
-          required(:pidfd_open_syscall) { |val| val.is_a?(Integer) && val >= 0 }
-          required(:pidfd_signal_syscall) { |val| val.is_a?(Integer) && val >= 0 }
           required(:supervision_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
           required(:liveness_interval) { |val| val.is_a?(Integer) && val >= 1_000 }
           required(:liveness_listener) { |val| !val.nil? }

@@ -45,8 +45,6 @@ RSpec.describe_current do
         swarm: {
           manager: Karafka::Swarm::Manager.new,
           orphaned_exit_code: 2,
-          pidfd_open_syscall: 434,
-          pidfd_signal_syscall: 424,
           supervision_interval: 30_000,
           liveness_interval: 10_000,
           liveness_listener: Class.new,
@@ -825,22 +823,6 @@ RSpec.describe_current do
 
     context 'when orphaned_exit_code is not an integer' do
       before { internal_swarm_config[:orphaned_exit_code] = 'invalid' }
-
-      it 'expects to not be successful' do
-        expect(contract.call(config)).not_to be_success
-      end
-    end
-
-    context 'when pidfd_open_syscall is below 0' do
-      before { internal_swarm_config[:pidfd_open_syscall] = -1 }
-
-      it 'expects to not be successful' do
-        expect(contract.call(config)).not_to be_success
-      end
-    end
-
-    context 'when pidfd_signal_syscall is not an integer' do
-      before { internal_swarm_config[:pidfd_signal_syscall] = 'invalid' }
 
       it 'expects to not be successful' do
         expect(contract.call(config)).not_to be_success

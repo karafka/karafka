@@ -38,8 +38,29 @@ start_karafka_and_wait_until(mode: :swarm) do
 end
 
 def zombie_process?(pid)
-  status = File.read("/proc/#{pid}/status")
-  status.include?('(zombie)')
+  if RUBY_PLATFORM.include?('linux')
+    # Linux-specific check using /proc filesystem
+    status = File.read("/proc/#{pid}/status")
+    status.include?('(zombie)')
+  else
+    # On macOS/BSD, check if process exists and can be signaled
+    # A zombie would exist but not respond to signal 0
+    begin
+      Process.kill(0, pid)
+      # If we can signal it, check if it's actually running or zombie
+      # Try to wait for it non-blocking - zombies will be reaped
+      result = Process.waitpid(pid, Process::WNOHANG)
+      # If waitpid returns the pid, it was a zombie that got reaped
+      # If it returns nil, process is still running normally
+      !result.nil?
+    rescue Errno::ESRCH
+      # Process doesn't exist at all
+      false
+    rescue Errno::ECHILD
+      # Not our child or already reaped
+      false
+    end
+  end
 rescue Errno::ENOENT
   false
 end
