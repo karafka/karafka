@@ -1,0 +1,148 @@
+name: CI macOS ARM64 Swarm
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron:  '0 2 * * *'
+
+permissions:
+  contents: read
+
+env:
+  BUNDLE_RETRY: 6
+  BUNDLE_JOBS: 4
+  CONFLUENT_VERSION: "8.0.0"
+
+jobs:
+  swarm-macos:
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '3.5.0-preview1'
+          - '3.4'
+          - '3.3'
+          - '3.2'
+        macos-version:
+          - 'macos-14'
+          - 'macos-15'
+        exclude:
+          - ruby: '3.5.0-preview1'
+            macos-version: 'macos-14'
+    runs-on: ${{ matrix.macos-version }}
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Remove Gemfile.lock for Ruby preview versions
+        if: contains(matrix.ruby, 'preview')
+        run: rm -f Gemfile.lock
+
+      - name: Install Bash 4+ and Kerberos
+        run: |
+          brew install bash
+          brew list krb5 &>/dev/null || brew install krb5
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+      - name: Install and Start Confluent Community Kafka (KRaft)
+        run: |
+          brew install openjdk@17
+          export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+          export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
+
+          curl -O "https://packages.confluent.io/archive/8.0/confluent-community-${CONFLUENT_VERSION}.tar.gz"
+          tar -xzf "confluent-community-${CONFLUENT_VERSION}.tar.gz"
+
+          export CONFLUENT_HOME="$(pwd)/confluent-${CONFLUENT_VERSION}"
+          export PATH="$CONFLUENT_HOME/bin:$PATH"
+          cd "$CONFLUENT_HOME"
+
+          # Find the correct server config
+          KRAFT_CONFIG=""
+          for config in "etc/kafka/kraft/server.properties" "config/kraft/server.properties" "etc/kafka/server.properties"; do
+            if [ -f "$config" ]; then
+              KRAFT_CONFIG="$config"
+              echo "Found config: $KRAFT_CONFIG"
+              break
+            fi
+          done
+
+          if [ -z "$KRAFT_CONFIG" ]; then
+            echo "❌ No server config found"
+            exit 1
+          fi
+
+          # Configure KRaft for single-node setup
+          cat >> "$KRAFT_CONFIG" << 'EOF'
+
+          # KRaft mode configuration for single-node setup
+          process.roles=broker,controller
+          node.id=1
+          controller.quorum.voters=1@127.0.0.1:9093
+          listeners=PLAINTEXT://0.0.0.0:9092,CONTROLLER://127.0.0.1:9093
+          advertised.listeners=PLAINTEXT://127.0.0.1:9092
+          controller.listener.names=CONTROLLER
+          inter.broker.listener.name=PLAINTEXT
+          log.dirs=/tmp/kraft-combined-logs
+
+          # Enable simple ACL authorization for testing
+          authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+          super.users=User:ANONYMOUS
+          allow.everyone.if.no.acl.found=true
+          EOF
+
+          echo "Updated KRaft configuration"
+
+          CLUSTER_ID=$(bin/kafka-storage random-uuid)
+          bin/kafka-storage format -t "$CLUSTER_ID" -c "$KRAFT_CONFIG"
+          bin/kafka-server-start "$KRAFT_CONFIG" &
+
+          sleep 20
+
+          for i in {1..30}; do
+            if bin/kafka-topics --bootstrap-server 127.0.0.1:9092 --list >/dev/null 2>&1; then
+              echo "✅ Confluent Community ${CONFLUENT_VERSION} (KRaft) is ready!"
+              break
+            fi
+            [ $i -eq 30 ] && { echo "❌ Kafka failed to start"; exit 1; }
+            sleep 2
+          done
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@efbf473cab83af4468e8606cc33eca9281bb213f # v1.256.0
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+          bundler: 'latest'
+
+
+      - name: Run swarm unit specs
+        run: bundle exec rspec spec/lib/karafka/swarm/ --tag mode:fork
+
+      - name: Run all swarm integration specs
+        env:
+          KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
+          KARAFKA_PRO_USERNAME: ${{ secrets.KARAFKA_PRO_USERNAME }}
+          KARAFKA_PRO_PASSWORD: ${{ secrets.KARAFKA_PRO_PASSWORD }}
+          KARAFKA_PRO_VERSION: ${{ secrets.KARAFKA_PRO_VERSION }}
+          KARAFKA_PRO_LICENSE_CHECKSUM: ${{ secrets.KARAFKA_PRO_LICENSE_CHECKSUM }}
+        run: bin/integrations swarm
+
+  ci-success-macos:
+    name: CI macOS ARM64 Swarm Success
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - swarm-macos
+    steps:
+      - name: Check all jobs passed
+        if: |
+          contains(needs.*.result, 'failure') ||
+          contains(needs.*.result, 'cancelled') ||
+          contains(needs.*.result, 'skipped')
+        run: exit 1
+      - run: echo "All macOS ARM64 Swarm CI checks passed!"

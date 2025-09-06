@@ -76,17 +76,26 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
   end
 
   describe '#signal' do
-    let(:signal_string) { rand.to_s }
-    let(:pidfd) { node.instance_variable_get('@pidfd') }
+    let(:signal_string) { 'TERM' }
 
     before do
-      node.instance_variable_set('@pidfd', Karafka::Swarm::Pidfd.new(Process.pid))
-      allow(pidfd).to receive(:signal)
+      node.instance_variable_set('@pid', Process.pid)
+      allow(Process).to receive(:kill)
     end
 
-    it 'expect to pass through expected signal' do
-      node.signal(signal_string)
-      expect(pidfd).to have_received(:signal).with(signal_string)
+    it 'expect to send signal using Process.kill' do
+      expect(node.signal(signal_string)).to be(true)
+      expect(Process).to have_received(:kill).with(signal_string, Process.pid)
+    end
+
+    context 'when process does not exist' do
+      before do
+        allow(Process).to receive(:kill).and_raise(Errno::ESRCH)
+      end
+
+      it 'returns false' do
+        expect(node.signal(signal_string)).to be(false)
+      end
     end
   end
 
@@ -103,7 +112,7 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
       it { expect(node.alive?).to be(true) }
     end
 
-    context 'when node pidfd could not be used' do
+    context 'when node process is dead' do
       let(:fork_pid) do
         pid = fork {}
         sleep(0.5)
@@ -115,12 +124,6 @@ RSpec.describe Karafka::Swarm::Node, mode: :fork do
   end
 
   describe '#start and #cleanup' do
-    context 'when we could not open given pidfd' do
-      before { allow(Process).to receive(:fork).and_return(0) }
-
-      it { expect { node.start }.to raise_error(Karafka::Errors::PidfdOpenFailedError) }
-    end
-
     context 'when we want to start node without stubs' do
       it 'expect to start it (it will fail as not configured)' do
         expect { node.start }.not_to raise_error

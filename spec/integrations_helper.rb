@@ -236,7 +236,7 @@ end
 # @param options [Hash] rdkafka consumer options if we need to overwrite defaults
 def setup_rdkafka_consumer(options = {})
   config = {
-    'bootstrap.servers': 'localhost:9092',
+    'bootstrap.servers': '127.0.0.1:9092',
     'group.id': Karafka::App.consumer_groups.first.id,
     'auto.offset.reset': 'earliest',
     'enable.auto.offset.store': 'false',

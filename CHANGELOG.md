@@ -1,6 +1,7 @@
 # Karafka Framework Changelog
 
 ## 2.5.1 (Unreleased)
+- **[Feature]** Support Swarm mode on MacOS.
 - [Enhancement] Support past `dispatch_at` times with `jitter: 0` in the OSS Karafka to support ActiveJob continuation.
 - [Enhancement] Use direct topic dispatches when `dispatch_at` is used for past times to bypass Scheduled Messages flow.
 - [Enhancement] Support immediate error raising with `auto.offset.reset` set to `error`.
@@ -11,8 +12,8 @@
 - [Enhancement] Include consumer group, subscription group and other details in error logs for key error locations.
 - [Enhancement] Inherit from `ActiveJob::QueueAdapters::AbstractAdapter` when possible for ActiveJob base class.
 - [Enhancement] Disable Nagle algorithm by default for improved network performance.
-- [Enhancement] Replace pidfd-based parent process check with simpler ppid check in swarm for cross-platform compatibility.
 - [Maintenance] Add basic direct DD integration spec via DD gem karafka monitoring feature.
+- [Fix] Improve same timestamp dispatch in scheduled messages on Ruby 3.2.
 - [Fix] Fix incorrect (6 seconds vs 60 seconds) reset of connections on non-recoverable errors.
 - [Fix] Introduce mutex-safe and thread-safe `#inspect` where needed.
 - [Fix] Fix too loose requirement of Ruby `3.0` when it was `3.1` via transitive dependencies.

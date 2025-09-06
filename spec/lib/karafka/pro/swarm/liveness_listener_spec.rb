@@ -72,4 +72,18 @@ RSpec.describe_current do
       expect(node).not_to have_received(:unhealthy)
     end
   end
+
+  describe '#rss_mb' do
+    it 'delegates to platform-specific method based on RUBY_PLATFORM' do
+      allow(listener).to receive_messages(rss_mb_linux: 50, rss_mb_macos: 60)
+
+      if RUBY_PLATFORM.include?('linux')
+        expect(listener.send(:rss_mb)).to eq(50)
+        expect(listener).to have_received(:rss_mb_linux)
+      else
+        expect(listener.send(:rss_mb)).to eq(60)
+        expect(listener).to have_received(:rss_mb_macos)
+      end
+    end
+  end
 end
