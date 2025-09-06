@@ -40,4 +40,8 @@ start_karafka_and_wait_until(sleep: 1, mode: :swarm) do
   dispatched.size >= 50
 end
 
-assert_equal dispatched.map(&:key), (0..49).map(&:to_s)
+assert_equal(
+  dispatched.map(&:key),
+  (0..49).map(&:to_s),
+  dispatched.map(&:key)
+)
