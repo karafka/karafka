@@ -7,10 +7,10 @@ RSpec.describe_current do
   subject(:buffer) { described_class.new }
 
   let(:message) do
-    instance_double(
-      Karafka::Messages::Message,
-      key: 'message_key',
-      headers: {
+    build(
+      :messages_message,
+      raw_key: 'message_key',
+      raw_headers: {
         'schedule_source_type' => 'schedule',
         'schedule_target_epoch' => epoch
       }
@@ -18,10 +18,10 @@ RSpec.describe_current do
   end
 
   let(:message2) do
-    instance_double(
-      Karafka::Messages::Message,
-      key: 'message_key2',
-      headers: {
+    build(
+      :messages_message,
+      raw_key: 'message_key2',
+      raw_headers: {
         'schedule_source_type' => 'schedule',
         'schedule_target_epoch' => epoch
       }
@@ -107,11 +107,11 @@ RSpec.describe_current do
       let(:past_epoch) { Time.now.to_i - 100 }
 
       let(:message1) do
-        instance_double(
-          Karafka::Messages::Message,
-          key: 'key1',
+        build(
+          :messages_message,
+          raw_key: 'key1',
           offset: 100,
-          headers: {
+          raw_headers: {
             'schedule_source_type' => 'schedule',
             'schedule_target_epoch' => past_epoch
           }
@@ -119,11 +119,11 @@ RSpec.describe_current do
       end
 
       let(:message2) do
-        instance_double(
-          Karafka::Messages::Message,
-          key: 'key2',
+        build(
+          :messages_message,
+          raw_key: 'key2',
           offset: 50,
-          headers: {
+          raw_headers: {
             'schedule_source_type' => 'schedule',
             'schedule_target_epoch' => past_epoch
           }
@@ -131,11 +131,11 @@ RSpec.describe_current do
       end
 
       let(:message3) do
-        instance_double(
-          Karafka::Messages::Message,
-          key: 'key3',
+        build(
+          :messages_message,
+          raw_key: 'key3',
           offset: 150,
-          headers: {
+          raw_headers: {
             'schedule_source_type' => 'schedule',
             'schedule_target_epoch' => past_epoch
           }
@@ -162,11 +162,11 @@ RSpec.describe_current do
       let(:epoch2) { Time.now.to_i - 100 }
 
       let(:message1) do
-        instance_double(
-          Karafka::Messages::Message,
-          key: 'key1',
+        build(
+          :messages_message,
+          raw_key: 'key1',
           offset: 100,
-          headers: {
+          raw_headers: {
             'schedule_source_type' => 'schedule',
             'schedule_target_epoch' => epoch2
           }
@@ -174,11 +174,11 @@ RSpec.describe_current do
       end
 
       let(:message2) do
-        instance_double(
-          Karafka::Messages::Message,
-          key: 'key2',
+        build(
+          :messages_message,
+          raw_key: 'key2',
           offset: 50,
-          headers: {
+          raw_headers: {
             'schedule_source_type' => 'schedule',
             'schedule_target_epoch' => epoch2
           }
@@ -186,11 +186,11 @@ RSpec.describe_current do
       end
 
       let(:message3) do
-        instance_double(
-          Karafka::Messages::Message,
-          key: 'key3',
+        build(
+          :messages_message,
+          raw_key: 'key3',
           offset: 75,
-          headers: {
+          raw_headers: {
             'schedule_source_type' => 'schedule',
             'schedule_target_epoch' => epoch1
           }
