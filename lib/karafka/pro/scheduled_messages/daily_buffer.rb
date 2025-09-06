@@ -59,17 +59,13 @@ module Karafka
             selected << [epoch, message]
           end
 
-          selected.each do |epoch, message|
-            puts "PRESORT - #{epoch} - #{message.offset} - #{message.raw_headers['schedule_target_key']}"
+          selected.sort! do |pck1, pck2|
+            cmp = pck1[0] <=> pck2[0]
+
+            cmp == 0 ? pck1[1].offset <=> pck2[1].offset : cmp
           end
 
-          selected.sort_by(&:first).each do |epoch, message|
-            puts "POSTSORT - #{epoch} - #{message.offset} - #{message.raw_headers['schedule_target_key']}"
-          end
-
-          selected
-            .sort_by!(&:first)
-            .each { |_, message| yield(message) }
+          selected.each { |_, message| yield(message) }
         end
 
         # Removes given key from the accumulator
