@@ -86,7 +86,8 @@ jobs:
           process.roles=broker,controller
           node.id=1
           controller.quorum.voters=1@127.0.0.1:9093
-          listeners=PLAINTEXT://127.0.0.1:9092,CONTROLLER://127.0.0.1:9093
+          listeners=PLAINTEXT://0.0.0.0:9092,CONTROLLER://127.0.0.1:9093
+          advertised.listeners=PLAINTEXT://127.0.0.1:9092
           controller.listener.names=CONTROLLER
           inter.broker.listener.name=PLAINTEXT
           log.dirs=/tmp/kraft-combined-logs
