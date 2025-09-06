@@ -43,5 +43,5 @@ end
 assert_equal(
   dispatched.map(&:key),
   (0..49).map(&:to_s),
-  dispatched.map(&:key)
+  dispatched.map { |msg| [msg.offset, msg.key] }
 )

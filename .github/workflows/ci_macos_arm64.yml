@@ -49,13 +49,10 @@ jobs:
           brew list krb5 &>/dev/null || brew install krb5
           echo "/opt/homebrew/bin" >> $GITHUB_PATH
       - name: Install and Start Confluent Community Kafka (KRaft)
-        env:
-          JAVA_OPTS: "-Djava.net.preferIPv4Stack=true"
         run: |
           brew install openjdk@17
           export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
           export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
-          export JAVA_OPTS="-Djava.net.preferIPv4Stack=true"
 
           curl -O "https://packages.confluent.io/archive/8.0/confluent-community-${CONFLUENT_VERSION}.tar.gz"
           tar -xzf "confluent-community-${CONFLUENT_VERSION}.tar.gz"
@@ -124,13 +121,10 @@ jobs:
 
 
       - name: Run swarm unit specs
-        env:
-          JAVA_OPTS: "-Djava.net.preferIPv4Stack=true"
         run: bundle exec rspec spec/lib/karafka/swarm/ --tag mode:fork
 
       - name: Run all swarm integration specs
         env:
-          JAVA_OPTS: "-Djava.net.preferIPv4Stack=true"
           KARAFKA_PRO_LICENSE_TOKEN: ${{ secrets.KARAFKA_PRO_LICENSE_TOKEN }}
           KARAFKA_PRO_USERNAME: ${{ secrets.KARAFKA_PRO_USERNAME }}
           KARAFKA_PRO_PASSWORD: ${{ secrets.KARAFKA_PRO_PASSWORD }}
