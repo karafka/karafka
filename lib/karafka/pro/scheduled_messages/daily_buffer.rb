@@ -58,6 +58,8 @@ module Karafka
             selected << [epoch, message]
           end
 
+          # When epoch is of the same value for multiple messages to be dispatched, we also sort
+          # on the offset to make sure that earlier messages are dispatched prior to newer
           selected.sort! do |pck1, pck2|
             cmp = pck1[0] <=> pck2[0]
 
