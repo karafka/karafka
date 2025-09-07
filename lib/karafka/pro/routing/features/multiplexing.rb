@@ -17,7 +17,7 @@ module Karafka
             # @param _config [Karafka::Core::Configurable::Node] app config node
             def pre_setup(_config)
               # Make sure we use proper unique validator for topics definitions
-              ::Karafka::Contracts::ConsumerGroup.singleton_class.prepend(
+              ::Karafka::Routing::Contracts::ConsumerGroup.singleton_class.prepend(
                 Patches::Contracts::ConsumerGroup
               )
             end

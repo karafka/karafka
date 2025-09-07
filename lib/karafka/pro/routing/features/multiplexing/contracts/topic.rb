@@ -21,7 +21,7 @@ module Karafka
                   File.read(
                     File.join(Karafka.gem_root, 'config', 'locales', 'pro_errors.yml')
                   )
-                ).fetch('en').fetch('validations').fetch('topic')
+                ).fetch('en').fetch('validations').fetch('routing').fetch('topic')
               end
 
               nested(:subscription_group_details) do
